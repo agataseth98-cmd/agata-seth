@@ -13,9 +13,9 @@
 Prover uma infraestrutura de rastro, auditoria e execução técnica agnóstica a modelos, garantindo a continuidade da governança mesmo sob troca de ferramentas ou modelos (Amnésia Ontológica).
 
 ## 🗂️ Estrutura de Navegação
-* **[GOVERNANCE_CORE.md](./GOVERNANCE_CORE.md):** Regras Inegociáveis e Protocolos (Obrigatório).
-* **[CORE_LITE.md](./CORE_LITE.md):** Resumo executivo para reidratação rápida.
-* **[MANIFESTO_AGATA.md](./MANIFESTO_AGATA.md):** Filosofia, hardware e stack tecnológica.
+* **[GOVERNANCE_CORE.md](https://github.com/agataseth98-cmd/agata-seth/blob/main/GOVERNANCE_CORE):** Regras Inegociáveis e Protocolos (Obrigatório).
+* **[CORE_LITE.md](Indisponível):** Resumo executivo para reidratação rápida.
+* **[MANIFESTO_AGATA.md](Indisponível):** Filosofia, hardware e stack tecnológica.
 * **`/memory`:** Logs de decisões (PAC), hashes e estado do sistema.
 
 ## 🧰 Ferramentas Semânticas Ativas
