@@ -1,4 +1,4 @@
-# Ágata Seth v4.0 💎
+  # Ágata Seth v4.0 💎
 **Sistema de Governança Autônoma Distribuída & Exoesqueleto de Decisão**
 
 > [!IMPORTANT]
@@ -29,4 +29,4 @@ Prover uma infraestrutura de rastro, auditoria e execução técnica agnóstica 
 ---
 **Status:** `ESTÁVEL - V4.0 ALPHA`  
 **Autoridade:** Soberano (IB)  
-**Licença:** [MIT/GPL - Definir na pasta LICENSE]
+**Licença:** [GPL]
