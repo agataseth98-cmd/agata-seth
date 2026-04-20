@@ -199,4 +199,4 @@ GOVERNANCE_CORE.md   ← Este documento. Universal. Não contém detalhes de pro
 **Assinatura:**  
 Ágata Seth — Conselho de Governança  
 Versão: 3.4 | 20/04/2026  
-Hash de referência: `sha256(conteúdo)` — gerar via `sha256sum GOVERNANCE_CORE.md` após salvar
+Hash de referência: `sha256(fbff461ecd26f0f85adc5458c85bf55ebd32dda861b0f88e13d2c5657c1bc7f8)` — gerar via `sha256sum GOVERNANCE_CORE.md` após salvar
