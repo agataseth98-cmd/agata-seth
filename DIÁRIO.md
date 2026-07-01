@@ -101,3 +101,19 @@ Pesquisa feita (3 agentes em paralelo):
 **Ainda não implementado nada da Fase 3** — nenhum arquivo criado, nenhuma config mudada além da pesquisa. Próximos passos ao retomar: responder as 2 perguntas pendentes → symlink memória + remover JSONs obsoletos → criar `.hermes.md` (se decidido) → decidir sobre reduzir toolset de skills → criar job de cron → testar tool-calling de novo (lição da Fase 2 ainda vale) → inventariar backlog de skills (só listar, não implementar).
 
 Pendente: retomar Fase 3 com as 2 decisões acima.
+
+### 2026-07-01 (4) · Fase 3 concluída
+
+Decisões 2 e 3 resolvidas pelo Humano: `.hermes.md` gerado (não copiado à mão) via hook de pre-commit; consolidação via `systemd --user timer` com `Persistent=true` em vez de cron simples, porque a Predator desliga à noite — roda na próxima ativação do dia, sem exigir mudança de rotina.
+
+Implementado e verificado:
+- **Memória nativa**: `~/.hermes/memories/{MEMORY,USER}.md` são symlinks pra `~/agata/memoria/{MEMORY,USER}.md`. Os 4 JSONs obsoletos da Fase 1 removidos.
+- **Hidratação seletiva**: `~/agata/.hermes.md` (6502 bytes) embute REGRAS.md+PROJETO.md, gerado por `~/agata/.githooks/gerar-hermes-md.sh`, chamado automaticamente pelo hook `pre-commit` (`core.hooksPath` = `.githooks`) sempre que REGRAS/PROJETO mudam.
+- **Consolidação noturna**: `agata-consolidacao.{service,timer}` em `~/agata/config/`, symlinkados em `~/.config/systemd/user/`, `OnCalendar=23:00 + Persistent=true`. Testado manualmente (`systemctl --user start`) — respondeu "Nada relevante desde a última entrada" corretamente, sem alucinar.
+- **Backlog de skills**: `~/agata/skills/BACKLOG.md` — inventário por prioridade (obsidian é alta, dado o cofre na mesma pasta), nada instalado.
+
+**Achado novo, não previsto**: o comando `carregar` (REGRAS.md) sozinho parou de ler o fim do DIÁRIO.md de verdade — `tool_call_count: 0`, respondeu no formato certo mas com "Último registro" inventado. Motivo: como REGRAS/PROJETO agora vêm pré-carregados via `.hermes.md`, o modelo trata "leia os 3 arquivos" como já satisfeito e pula a leitura do DIÁRIO. Com instrução explícita ("leia o fim do DIÁRIO.md") volta a funcionar (`tool_call_count: 1`, conteúdo real confirmado). **Não editei REGRAS.md** para corrigir isso — é arquivo canônico, precisa de autorização/segunda opinião do Humano antes de mudar a definição de `carregar`.
+
+**Nota à parte**: PROJETO.md ficou desatualizado na seção "Cérebro" (ainda cita `llama3.1:8b` como principal e só custo autorizado pra Claude — a Fase 2 na prática usa `gpt-4o-mini` pago via OpenRouter). Mesma regra: não editei, só reporto.
+
+Pendente: decidir se/como corrigir o comando `carregar` (REGRAS.md) e atualizar a seção Cérebro do PROJETO.md. Sugestão de próximo assunto: Fase 4 (Voz) — faster-whisper + Kokoro `pf_dora`, atenção ao orçamento de VRAM do RTX 4060 8GB, que já divide espaço com o `llama3.1:8b` local.
