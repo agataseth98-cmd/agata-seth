@@ -12,9 +12,10 @@ Assistente pessoal do Orusoua, **local-first e grátis por padrão**, construíd
 ## Motor: Hermes Agent
 Cobre identidade (SOUL), memória (SQLite+FTS), skills auto-criadas, roteamento de provedores + fallback, sandbox de execução, voz e browser. Substitui todo o código bespoke antigo (nada de MCP server/roteador/OpenClaw caseiros).
 
-## Cérebro (grátis-primeiro)
-- Principal local: **llama3.1:8b** (128k nativo; Hermes exige ≥64k), via Ollama `http://localhost:11434/v1`, `num_ctx 65536`.
-- Reforço/fallback: OpenRouter free. Pesado/visão: Gemini free. Pagos (Claude) só com **custo autorizado** pelo Orusoua.
+## Cérebro (grátis-primeiro em teoria; pago por decisão explícita na prática)
+- Principal: **`openai/gpt-4o-mini`** (pago — custo autorizado pelo Orusoua na Fase 2), via OpenRouter `https://openrouter.ai/api/v1`.
+- Fallback: `openai/gpt-oss-120b:free` (OpenRouter) → **`llama3.1:8b`** local (Ollama `http://localhost:11434/v1`, `num_ctx 65536`).
+- Motivo da troca: modelos locais e `:free` não fizeram tool-calling confiável nos testes da Fase 2 (detalhe da causa raiz no DIÁRIO).
 - Auxiliares (classificação, tarefas leves): modelos pequenos locais (qwen2.5:7b, llama3.2:3b, gemma2:2b...).
 
 ## Memória (formato aberto)

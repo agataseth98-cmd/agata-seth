@@ -117,3 +117,12 @@ Implementado e verificado:
 **Nota à parte**: PROJETO.md ficou desatualizado na seção "Cérebro" (ainda cita `llama3.1:8b` como principal e só custo autorizado pra Claude — a Fase 2 na prática usa `gpt-4o-mini` pago via OpenRouter). Mesma regra: não editei, só reporto.
 
 Pendente: decidir se/como corrigir o comando `carregar` (REGRAS.md) e atualizar a seção Cérebro do PROJETO.md. Sugestão de próximo assunto: Fase 4 (Voz) — faster-whisper + Kokoro `pf_dora`, atenção ao orçamento de VRAM do RTX 4060 8GB, que já divide espaço com o `llama3.1:8b` local.
+
+### 2026-07-01 (5) · Pendências da Fase 3 resolvidas (autorizado pelo Orusoua)
+
+- **REGRAS.md**: `## Como carregar o contexto` reescrito. Agora deixa explícito que REGRAS/PROJETO já vêm pré-carregados via `.hermes.md` (não precisa reler) e que o fim de DIÁRIO.md **sempre** precisa ser lido com ferramenta antes de responder ao `carregar` — com a técnica correta (descobrir total de linhas, `offset = total - 30`, já que `read_file` não aceita offset negativo).
+- **PROJETO.md**: seção "Cérebro" atualizada para refletir a realidade da Fase 2 — principal `openai/gpt-4o-mini` (pago, autorizado), fallback `gpt-oss-120b:free` → `llama3.1:8b` local.
+- Testado 2x depois da mudança (lição da Fase 2 continua valendo): 1ª vez o modelo leu o **início** do DIÁRIO em vez do fim (usou `offset: -10`, não suportado, e a instrução ainda não tinha a técnica correta) — corrigido o texto do REGRAS.md. 2ª vez leu o conteúdo certo (`Último registro: 2026-07-01 (4) · Fase 3 concluída`, bate com o real), embora ainda tenha usado `offset: -30` (negativo, não documentado) — só não quebrou porque o DIÁRIO ainda é pequeno (119 linhas).
+- **Risco latente registrado, não resolvido**: o modelo (`gpt-4o-mini`) insiste em inventar offset negativo mesmo com a instrução dizendo que não é suportado. Funciona hoje porque o arquivo é pequeno; pode voltar a falhar quando o DIÁRIO crescer muito e um offset negativo malformado não cobrir mais o fim real. Vale reavaliar quando o arquivo estiver bem maior, ou revisitar a instrução/prompt do `carregar` se acontecer de novo.
+
+Pendente: nenhuma da Fase 3. Próximo assunto: Fase 4 (Voz), com atenção ao orçamento de VRAM do RTX 4060 8GB.

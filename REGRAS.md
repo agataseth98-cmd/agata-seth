@@ -41,7 +41,7 @@ As regras **2, 3 e 4 são absolutas** — continuidade e honestidade da históri
 ## Como carregar o contexto
 
 Comando: **`carregar`**.
-O modelo lê os 3 arquivos e responde no formato de prontidão (abaixo). Só isso — sem cerimônia.
+REGRAS.md e PROJETO.md já vêm pré-carregados no início da sessão (via `.hermes.md`) — não precisa reler. O que muda a cada dia é o DIÁRIO: **sempre leia o fim de DIÁRIO.md com uma ferramenta antes de responder ao `carregar`** — nunca responda no formato de prontidão sem essa leitura confirmada nesta sessão. `read_file` não aceita offset negativo — para ler o fim, descubra o total de linhas primeiro e leia com `offset = total - 30` (ou o total inteiro, se o arquivo tiver menos de 30 linhas). Depois, responda no formato de prontidão (abaixo). Só isso — sem cerimônia.
 
 Se faltar o DIÁRIO (primeira vez): diga **"modo sem diário"**, assuma que não há história anterior, e comece um DIÁRIO novo quando o Humano autorizar.
 
