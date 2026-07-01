@@ -1,0 +1,9 @@
+sandbox/
+logs/
+backup/
+*.pyc
+__pycache__/
+.venv/
+.hermes/
+*.secret
+*.key

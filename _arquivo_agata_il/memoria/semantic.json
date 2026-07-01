@@ -1,0 +1,46 @@
+{
+  "fatos": [
+    {
+      "id": "FACT_20260603_16]3914932257",
+      "fato": "Teste direto via terminal",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T16:39:14.932264"
+    },
+    {
+      "id": "FACT_20260603_16]4155250050",
+      "fato": "** que o ágata está funcionando perfeitamente**",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T16:41:55.250068"
+    },
+    {
+      "id": "FACT_20260603_16]4618249474",
+      "fato": "** que o sistema foi reiniciado**",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T16:46:18.249493"
+    },
+    {
+      "id": "FACT_20260603_16]5350742954",
+      "fato": "que a versão 1.2 está limpando os asteriscos perfeitamente",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T16:53:50.742971"
+    },
+    {
+      "id": "FACT_20260603_17]0212283308",
+      "fato": "Serviço systemd ativo e respondendo",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T17:02:12.283361"
+    },
+    {
+      "id": "FACT_20260603_17]5354482046",
+      "fato": "Serviço systemd ativo e respondendo",
+      "confianca": 0.8,
+      "origem": "IB",
+      "timestamp": "2026-06-03T17:53:54.482064"
+    }
+  ]
+}
