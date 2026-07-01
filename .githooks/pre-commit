@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Regenera .hermes.md se REGRAS.md ou PROJETO.md mudaram, e inclui no commit.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+if git diff --cached --name-only | grep -qE '^(REGRAS\.md|PROJETO\.md)$'; then
+  bash .githooks/gerar-hermes-md.sh
+  git add .hermes.md
+fi
