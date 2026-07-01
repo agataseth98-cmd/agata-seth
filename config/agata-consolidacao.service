@@ -1,0 +1,7 @@
+[Unit]
+Description=Ágata — consolidação noturna (memória → DIÁRIO)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+ExecStart=/bin/bash -lc 'hermes chat -q "$(cat %h/agata/config/agata-consolidacao.prompt.txt)" --cli -Q --source cron'

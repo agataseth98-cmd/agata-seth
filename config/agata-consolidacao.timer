@@ -1,0 +1,9 @@
+[Unit]
+Description=Ágata — dispara a consolidação noturna diariamente (com recuperação se a máquina estava desligada)
+
+[Timer]
+OnCalendar=*-*-* 23:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
