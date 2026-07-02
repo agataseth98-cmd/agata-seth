@@ -165,3 +165,12 @@ Correção ao registro solicitado pelo Humano: o texto original dizia "restante 
 Mecanismo usado: não existe `hermes skills enable <nome>` — `hermes skills config` é só interativo (TUI, sem flags). O jeito real é editar `skills.disabled` em `~/.hermes/config.yaml` (remover os 12 nomes da lista) — mesmo mecanismo que já tinha zerado as skills builtin na Fase 3.
 
 Segurança (checagem pedida pelo Humano, antes de qualquer push): `~/agata/.gitignore` cobria `.hermes/`, `*.secret`, `*.key`, mas não cobria `.env`, `secrets.json`, `credentials.json` soltos dentro do próprio repo. A chave do Gemini está seguro (mora em `~/.hermes/.env`, fora da árvore deste repo). Adicionei ao `.gitignore`: `*.pem`, `.env`, `.env.*`, `secrets.json`, `credentials.json`, `*token*.json`. Nenhum remote configurado ainda (`git remote -v` vazio) — sem risco de push imediato, mas o gap ficaria latente assim que um remote fosse adicionado.
+
+### 2026-07-02 (5) · Hook corrigido + GitHub conectado
+
+- Hook pre-commit: corrigido (core.quotepath false + grep -z). Dispara sozinho. Commit 3e38c17.
+- GitHub: repo agataseth98-cmd/agata-seth atualizado (force push, linhagem antiga no reflog 90 dias). Auth via gh CLI + gh auth setup-git.
+- Verificação de segredos: limpa (histórico + conteúdo pós-push, grep por padrões de chave).
+- 12 skills ativas, 56 desabilitadas. Gemini 2.5 Flash grátis como principal.
+
+Estado: Fases 0-3 ✅ · hook ✅ · GitHub ✅ · Próxima: Fase 4 (voz) ou o que o Humano decidir.
