@@ -174,3 +174,9 @@ Segurança (checagem pedida pelo Humano, antes de qualquer push): `~/agata/.giti
 - 12 skills ativas, 56 desabilitadas. Gemini 2.5 Flash grátis como principal.
 
 Estado: Fases 0-3 ✅ · hook ✅ · GitHub ✅ · Próxima: Fase 4 (voz) ou o que o Humano decidir.
+
+### 2026-07-02 (6) · Auto-atualização via GitHub
+
+- REGRAS e SOUL atualizados: ICs podem buscar o trio canônico direto do repo público (raw.githubusercontent.com) a partir da segunda sessão.
+- Primeira sessão: envio manual. Demais: fetch automático.
+- Push disciplinado no fim de cada sessão passa a ser obrigatório.

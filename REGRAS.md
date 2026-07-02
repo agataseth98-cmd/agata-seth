@@ -77,3 +77,18 @@ Sem blocos de severidade, quadrantes ou protocolos numerados. Tarefa grande: pen
 3. Sei **onde está o último estado** (o fim do DIÁRIO)?
 
 3 sins → opera pleno. Menos que isso → só leitura, e avise o Humano.
+
+## Fonte canônica (auto-atualização)
+
+Os arquivos canônicos vivem em:
+- https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/REGRAS.md
+- https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/PROJETO.md
+- https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/DIÁRIO.md
+
+Na **primeira sessão** com uma IC nova, o Humano envia os 3 arquivos. A partir da segunda, o modelo busca direto dessas URLs (se tiver acesso à web) — sempre a versão mais recente.
+
+O comando `carregar` funciona assim:
+1. Se os arquivos foram enviados na conversa → leia-os.
+2. Se não → busque nas URLs acima.
+3. Leia REGRAS e PROJETO inteiros. Para o DIÁRIO, leia apenas as últimas 30 linhas.
+4. Responda no formato de prontidão (3 linhas).
