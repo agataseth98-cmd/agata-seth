@@ -180,3 +180,18 @@ Estado: Fases 0-3 ✅ · hook ✅ · GitHub ✅ · Próxima: Fase 4 (voz) ou o q
 - REGRAS e SOUL atualizados: ICs podem buscar o trio canônico direto do repo público (raw.githubusercontent.com) a partir da segunda sessão.
 - Primeira sessão: envio manual. Demais: fetch automático.
 - Push disciplinado no fim de cada sessão passa a ser obrigatório.
+
+### 2026-07-02 (7) · Groq como fallback 1 + investigação de limite de chamadas
+
+**Groq adicionado** (`~/.hermes/config.yaml`, fallback_model): `llama-3.3-70b-versatile` via `provider: custom` + `base_url: https://api.groq.com/openai/v1`, entre o Gemini (principal) e o `llama3.1:8b` local. Chave em `~/.hermes/.env` (`GROQ_API_KEY`), fora do repo git.
+
+**Achado técnico real, não previsto**: o mecanismo de `fallback_model` **não deriva a chave automaticamente do hostname** — isso só existe no caminho do provider *principal* (`resolve_runtime_provider`/`_host_derived_api_key`). O `fallback_model` usa uma função diferente (`resolve_provider_client`, em `agent/auxiliary_client.py`) que só olha `explicit_api_key` ou `OPENAI_API_KEY` — sem isso, cai silenciosamente pra `"no-key-required"`. Funcionava pro `llama3.1:8b` local só porque Ollama ignora auth; teria falhado com 401 no Groq sem correção. Fix: campo `key_env: GROQ_API_KEY` explícito na entrada — suportado tanto no fallback de init quanto no fallback ao vivo (`try_activate_fallback`, `agent/chat_completion_helpers.py`).
+
+Validado: modelo confirmado na lista de `/v1/models` do Groq, chamada real de `chat/completions` funcionou (resposta "Hi"), e simulação exata do `resolve_provider_client` com `key_env` aplicado resolveu a chave real (não mais placeholder). Não testado em fallback ao vivo dentro do Hermes (exigiria forçar falha do Gemini, não pedido).
+
+**Investigação de limite de chamadas por turno** (só leitura, nada alterado):
+- `agent.max_turns` (atual: 150, default 90): teto de iterações de tool-call/API por turno do agente principal. Env var: `HERMES_MAX_ITERATIONS`. É o que mais se aproxima do que foi perguntado.
+- `delegation.max_iterations` (50): orçamento separado por subagente (`delegate_task`), não conta contra o `max_turns` do pai.
+- `code_execution.max_tool_calls` (50): só dentro do sandbox de `code_execution`.
+- `tool_loop_guardrails` (`warn_after`/`hard_stop_after`, 2-8): detecta loop de falha repetida/sem progresso, não é contador bruto. `hard_stop_enabled: false` hoje.
+- Não existe um limite único "chamadas de API por turno" — é composição desses 4 mecanismos, escopos diferentes.
