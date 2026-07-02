@@ -30,6 +30,8 @@ DIARIO_LINHAS=30
   echo ""
   echo "# DIÁRIO.md (últimas $DIARIO_LINHAS linhas)"
   echo ""
+  echo "## DIÁRIO (últimas 30 linhas)"
+  echo ""
   tail -n "$DIARIO_LINHAS" DIÁRIO.md
 } > "$OUT"
 
