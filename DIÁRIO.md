@@ -126,3 +126,10 @@ Pendente: decidir se/como corrigir o comando `carregar` (REGRAS.md) e atualizar 
 - **Risco latente registrado, não resolvido**: o modelo (`gpt-4o-mini`) insiste em inventar offset negativo mesmo com a instrução dizendo que não é suportado. Funciona hoje porque o arquivo é pequeno; pode voltar a falhar quando o DIÁRIO crescer muito e um offset negativo malformado não cobrir mais o fim real. Vale reavaliar quando o arquivo estiver bem maior, ou revisitar a instrução/prompt do `carregar` se acontecer de novo.
 
 Pendente: nenhuma da Fase 3. Próximo assunto: Fase 4 (Voz), com atenção ao orçamento de VRAM do RTX 4060 8GB.
+
+### 2026-07-02 · Fases 0-3 fechadas + fix SOUL
+
+- Fases 0-3 completas. Principal: gpt-4o-mini (OpenRouter). Fallback: gpt-oss-120b:free → llama3.1:8b local.
+- Skills builtin: 68→0 (prompt -42%).
+- SOUL corrigido: instrução de leitura do DIÁRIO agora usa wc -l + offset (não tail nem read do início).
+- PROJETO atualizado com estado real do cérebro e fases.
