@@ -207,3 +207,13 @@ Validado: modelo confirmado na lista de `/v1/models` do Groq, chamada real de `c
 **Decisão (autorizada pelo Humano)**: Groq removido do `fallback_model`. Cadeia volta a 2 níveis: **gemini-2.5-flash** (principal) → **llama3.1:8b** local (fallback único). `GROQ_API_KEY` mantida em `~/.hermes/.env` — o campo já existia antes pra Whisper STT (voz), não como LLM de chat, então continua útil pra isso.
 
 Pendente, se algum dia for retomado: só viável com toolset drasticamente reduzido (degradando a Ágata de outra forma) ou upgrade pago do Groq (Dev Tier).
+
+### 2026-07-02 (9) · Teste local definitivamente encerrado
+
+Quatro modelos locais testados como fallback com tool-calling:
+- qwen3:8b: contexto 40k (eliminado)
+- hermes3:8b: tool-call aleatório perigoso (eliminado e removido)
+- deepseek-r1:8b: modelo de raciocínio, não suporta tools (eliminado)
+- llama3.1:8b: 0 tool-calls mas responde texto (mantido como degradado)
+
+Decisão final: não testar mais modelos locais 7-14B para tool-calling. Cadeia: gemini-2.5-flash → llama3.1:8b. Melhoria futura: reduzir payload do Hermes.
