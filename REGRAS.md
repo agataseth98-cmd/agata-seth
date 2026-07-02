@@ -41,7 +41,9 @@ As regras **2, 3 e 4 são absolutas** — continuidade e honestidade da históri
 ## Como carregar o contexto
 
 Comando: **`carregar`**.
-REGRAS.md e PROJETO.md já vêm pré-carregados no início da sessão (via `.hermes.md`) — não precisa reler. O que muda a cada dia é o DIÁRIO: **sempre leia o fim de DIÁRIO.md com uma ferramenta antes de responder ao `carregar`** — nunca responda no formato de prontidão sem essa leitura confirmada nesta sessão. `read_file` não aceita offset negativo — para ler o fim, descubra o total de linhas primeiro e leia com `offset = total - 30` (ou o total inteiro, se o arquivo tiver menos de 30 linhas). Depois, responda no formato de prontidão (abaixo). Só isso — sem cerimônia.
+REGRAS.md, PROJETO.md e as últimas 30 linhas de DIÁRIO.md já vêm pré-carregados no início da sessão (via `.hermes.md`, gerado pelo hook `pre-commit` a cada commit que toque um desses 3 arquivos) — não precisa de ferramenta nenhuma pra responder ao `carregar`. Responda direto no formato de prontidão (abaixo). Só isso — sem cerimônia.
+
+Exceção: se o Humano pedir histórico além das últimas 30 linhas do DIÁRIO, aí sim leia o arquivo com uma ferramenta (descubra o total de linhas primeiro; `read_file` não aceita offset negativo).
 
 Se faltar o DIÁRIO (primeira vez): diga **"modo sem diário"**, assuma que não há história anterior, e comece um DIÁRIO novo quando o Humano autorizar.
 
