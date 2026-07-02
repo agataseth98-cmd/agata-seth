@@ -140,3 +140,18 @@ Pendente: nenhuma da Fase 3. Próximo assunto: Fase 4 (Voz), com atenção ao or
 - Não confirmado de ponta a ponta: gpt-4o-mini retorna 402 (sem crédito); llama3.1:8b ignora o protocolo carregar (limitação de instruction-following, achado recorrente).
 - llama3.1:8b em modo degradado: não-confiável para instruções compostas. Documentado como risco conhecido.
 - Ação necessária: recarregar OpenRouter (US$5 mínimo) para destravar.
+
+### 2026-07-02 (3) · Fases 0-3 fechadas — Ágata operacional
+
+- Modelo principal trocado para **gemini-2.5-flash** (Google, API direta, grátis). Config em ~/.hermes/config.yaml + chave em ~/.hermes/.env (fora do git).
+- Motivo: OpenRouter sem crédito (402); gemini-2.0-flash sem cota (429 limit:0); llama3.1:8b não faz tool-calling.
+- Teste "carregar": **passou**. Data correta (2026-07-02), formato de prontidão ok, identidade ok.
+- Nota: modelo ainda faz tool-call extra pra confirmar o DIÁRIO em vez de confiar 100% no .hermes.md injetado. Comportamento já documentado — não é regressão, funciona.
+- Fallback: llama3.1:8b local (modo degradado, sem tool-calling).
+- Bug menor pendente: hook pre-commit não dispara automaticamente (core.hooksPath). Não bloqueante.
+
+Fases 0-3: ✅ FECHADAS.
+
+Depois: rodar .githooks/gerar-hermes-md.sh manualmente (já que o hook não dispara sozinho) e git commit -m "Fases 0-3 fechadas: Gemini 2.5 Flash grátis + DIÁRIO atualizado"
+
+NÃO avançar para Fase 4 sem instrução do Humano.
