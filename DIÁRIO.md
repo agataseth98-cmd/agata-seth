@@ -195,3 +195,15 @@ Validado: modelo confirmado na lista de `/v1/models` do Groq, chamada real de `c
 - `code_execution.max_tool_calls` (50): só dentro do sandbox de `code_execution`.
 - `tool_loop_guardrails` (`warn_after`/`hard_stop_after`, 2-8): detecta loop de falha repetida/sem progresso, não é contador bruto. `hard_stop_enabled: false` hoje.
 - Não existe um limite único "chamadas de API por turno" — é composição desses 4 mecanismos, escopos diferentes.
+
+### 2026-07-02 (8) · Groq removido do fallback — TPM incompatível
+
+**Diagnóstico do "Ágata caiu direto pro llama3.1:8b, pulando o Groq"**: o Groq não estava sendo pulado — era tentado e rejeitado com `HTTP 400: property 'options' is unsupported`. Causa raiz real: `provider: custom` sempre acopla no `CustomProfile` do Hermes, que injeta `extra_body.options.num_ctx` (mecanismo do `ollama_num_ctx`) em **qualquer** endpoint que se chame literalmente `custom` — Groq não aceita esse campo. `ollama_num_ctx` é lido só do nível raiz `model:`, nunca de uma entrada individual do `fallback_model` (confirmado no código: `agent._ollama_num_ctx` é atributo único do agente, aplicado sempre que `agent.provider == "custom"`, sem diferenciar Ollama de Groq).
+
+**Fix técnico correto, validado por código e testado ao vivo**: criar um provider **nomeado** (`providers: groq: {base_url, key_env}` no `config.yaml`) em vez de `provider: custom` — como o nome não é literalmente `"custom"`, o Hermes nunca localiza o `CustomProfile`, e a injeção de `options` é pulada. `get_provider_profile('groq')` retorna `None`; chave e URL resolvem certo via `key_env`. Esse fix funcionou.
+
+**Problema novo, mais fundamental, achado ao testar de verdade**: o Groq free tier (`service tier: on_demand`) desta conta tem **TPM (tokens por minuto) travado em 12.000** — confirmado nos headers reais da API (`x-ratelimit-limit-tokens: 12000`) e na mensagem de erro (`"Limit 12000, Requested 35038"` num teste forçado). O payload padrão do Hermes (system prompt + tool schemas) fica em ~18-27K tokens dependendo do toolset — sempre estoura o teto do Groq, com ou sem toolset reduzido (testado `-t ""` também, ainda falhou). Não é bug do Hermes nem do config — é limite estrutural do tier gratuito do Groq pra esse volume de payload.
+
+**Decisão (autorizada pelo Humano)**: Groq removido do `fallback_model`. Cadeia volta a 2 níveis: **gemini-2.5-flash** (principal) → **llama3.1:8b** local (fallback único). `GROQ_API_KEY` mantida em `~/.hermes/.env` — o campo já existia antes pra Whisper STT (voz), não como LLM de chat, então continua útil pra isso.
+
+Pendente, se algum dia for retomado: só viável com toolset drasticamente reduzido (degradando a Ágata de outra forma) ou upgrade pago do Groq (Dev Tier).
