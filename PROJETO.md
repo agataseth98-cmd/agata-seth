@@ -13,7 +13,7 @@ Assistente pessoal do Orusoua, **local-first e grátis por padrão**, construíd
 Cobre identidade (SOUL), memória (SQLite+FTS), skills auto-criadas, roteamento de provedores + fallback, sandbox de execução, voz e browser. Substitui todo o código bespoke antigo (nada de MCP server/roteador/OpenClaw caseiros).
 
 ## Cérebro (grátis a médio prazo)
-- Principal: **gemini-2.5-flash** via Google API direta (grátis). Fallback 1: gpt-oss-120b:free (OpenRouter). Fallback 2: llama3.1:8b local (modo degradado, sem tool-calling).
+- Principal: **gemini-2.5-flash** via Google API direta (grátis). Fallback 1: **llama-3.3-70b-versatile** via Groq API (grátis, tool-calling). Fallback 2: **llama3.1:8b** local via Ollama (modo degradado, sem tool-calling).
 - Skills builtin do Hermes: 68 total, 12 ativas, 56 desabilitadas.
 
 ## Memória (formato aberto)
