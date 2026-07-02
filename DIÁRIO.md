@@ -155,3 +155,13 @@ Fases 0-3: ✅ FECHADAS.
 Depois: rodar .githooks/gerar-hermes-md.sh manualmente (já que o hook não dispara sozinho) e git commit -m "Fases 0-3 fechadas: Gemini 2.5 Flash grátis + DIÁRIO atualizado"
 
 NÃO avançar para Fase 4 sem instrução do Humano.
+
+### 2026-07-02 (4) · 12 skills reativadas
+
+Skills ativas: obsidian, google-workspace, ocr-and-documents, maps, computer-use, youtube-content, plan, systematic-debugging, github-repo-management, github-pr-workflow, github-issues, github-auth. Restante (56) desabilitado.
+
+Correção ao registro solicitado pelo Humano: o texto original dizia "restante (60)". Contagem real confirmada via `hermes skills list --source all`: 68 builtin total − 12 ativas = **56** desabilitadas. Corrigido aqui antes de gravar (Regra 2 — não perpetuar número não verificado).
+
+Mecanismo usado: não existe `hermes skills enable <nome>` — `hermes skills config` é só interativo (TUI, sem flags). O jeito real é editar `skills.disabled` em `~/.hermes/config.yaml` (remover os 12 nomes da lista) — mesmo mecanismo que já tinha zerado as skills builtin na Fase 3.
+
+Segurança (checagem pedida pelo Humano, antes de qualquer push): `~/agata/.gitignore` cobria `.hermes/`, `*.secret`, `*.key`, mas não cobria `.env`, `secrets.json`, `credentials.json` soltos dentro do próprio repo. A chave do Gemini está seguro (mora em `~/.hermes/.env`, fora da árvore deste repo). Adicionei ao `.gitignore`: `*.pem`, `.env`, `.env.*`, `secrets.json`, `credentials.json`, `*token*.json`. Nenhum remote configurado ainda (`git remote -v` vazio) — sem risco de push imediato, mas o gap ficaria latente assim que um remote fosse adicionado.

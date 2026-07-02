@@ -7,3 +7,9 @@ __pycache__/
 .hermes/
 *.secret
 *.key
+*.pem
+.env
+.env.*
+secrets.json
+credentials.json
+*token*.json
