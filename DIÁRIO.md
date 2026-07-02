@@ -133,3 +133,10 @@ Pendente: nenhuma da Fase 3. Próximo assunto: Fase 4 (Voz), com atenção ao or
 - Skills builtin: 68→0 (prompt -42%).
 - SOUL corrigido: instrução de leitura do DIÁRIO agora usa wc -l + offset (não tail nem read do início).
 - PROJETO atualizado com estado real do cérebro e fases.
+
+### 2026-07-02 (2) · Bloqueio: créditos OpenRouter
+
+- Fix do DIÁRIO no .hermes.md: estruturalmente correto (injeção confirmada, 11.7KB no contexto).
+- Não confirmado de ponta a ponta: gpt-4o-mini retorna 402 (sem crédito); llama3.1:8b ignora o protocolo carregar (limitação de instruction-following, achado recorrente).
+- llama3.1:8b em modo degradado: não-confiável para instruções compostas. Documentado como risco conhecido.
+- Ação necessária: recarregar OpenRouter (US$5 mínimo) para destravar.
