@@ -347,3 +347,9 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Bug resolvido no caminho: o TTS batia em api.openai.com (401) porque a Base URL do painel estava no default da OpenAI; corrigida para http://localhost:8880/v1. Lição: ao configurar engine "OpenAI-compatible" no Open WebUI, a Base URL vem com o default da OpenAI — trocar sempre.
 - STT (Whisper local, base) configurado. Voz de entrada depende de HTTPS pra funcionar fora do localhost (Tailscale, futuro).
 - Voz confirmada pela decisão de arquitetura: no Open WebUI (borda), não no Hermes. Reverificação do turno 111 validada na prática.
+
+### 2026-07-03 (15) · Coexistência Opção A fechada 100%
+
+- Toggles aplicados no Open WebUI: capabilities do hermes-agent (web_search, image_generation, code_interpreter, terminal, builtin_tools) desligadas; qwen2.5:7b solto removido do Workspace. Open WebUI agora é frontend puro — único executor e única memória = Hermes.
+- Voz pf_dora operacional. Coexistência (memória, tools, voz, RAG) implementada e verificada.
+- Estado: Ágata operacional em terminal + web, com voz, dois cérebros, memória única, segura em localhost. Fases 0-3 + interface web + voz = fechadas.
