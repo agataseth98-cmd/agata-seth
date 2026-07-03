@@ -29,6 +29,9 @@ Cobre identidade (SOUL), memória (SQLite+FTS), skills auto-criadas, roteamento 
 ## Interface
 - **Hermes CLI/TUI** — na própria Máquina.
 - **Open WebUI** — interface de chat no navegador, apontada pro `api_server` do Hermes (`/v1`, porta 8642). É a Ágata inteira (tools rodam no lado do Hermes), não um LLM pelado.
+- **Coexistência (Opção A)**: Open WebUI é frontend puro — tools/functions nativas, memória, web search, image gen e system prompt personalizado desabilitados. Único executor e única memória = Hermes. Detalhe em `DOSSIE_COEXISTENCIA.md`.
+- **RAG** (só no Open WebUI, o Hermes não tem): ganho real, sem sobreposição. **Regra operacional**: usar RAG só em sessões servidas pelo Gemini (janela grande). No fallback qwen (32k nativo), documento grande estoura o contexto — sem enforcement automático ainda, é disciplina manual até haver trava real.
+- **Voz** (Fase 4, no Open WebUI, não no Hermes): Kokoro-FastAPI (CPU, voz `pf_dora`) + Whisper STT local. Mic fica no cliente; STT/TTS é I/O puro, não conflita com "um executor só". Voz remota (fora de localhost) depende de HTTPS via Tailscale.
 
 ## Segurança (linhas vermelhas)
 - Serviços em `127.0.0.1`; execução sempre em sandbox; scanning de injection + filtragem de credenciais (nativos do Hermes); produção só com aprovação do Orusoua.
