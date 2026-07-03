@@ -340,3 +340,10 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Nota de segurança: o recreate foi barrado pelo classificador por depender implicitamente da imagem-base pra preservar as 7 permissões; corrigido listando todas explícitas. Dependência invisível vira explícita.
 - CHECKLIST DE ROTAÇÃO DE CHAVE (vale pra sempre): ao rotacionar uma chave, atualizar TODOS os consumidores no mesmo passo. Para API_SERVER_KEY: (1) ~/.hermes/config.yaml, (2) Open WebUI env OPENAI_API_KEY, (3) Open WebUI banco config.openai.api_keys. Rotação parcial = 401 silencioso.
 - Aprendizado de método: "não carrega" raramente é arquitetura — quase sempre é um fio (chave/porta/cwd) que soltou num passo anterior. Diagnosticar de baixo pra cima (processo → auth → rede → app) achou em minutos.
+
+### 2026-07-03 (14) · Voz operacional — Kokoro pf_dora no Open WebUI
+
+- Ágata agora fala: TTS Kokoro (voz pf_dora) via Kokoro-FastAPI em CPU, localhost:8880, integrado ao Open WebUI. Grátis, local, sem VRAM.
+- Bug resolvido no caminho: o TTS batia em api.openai.com (401) porque a Base URL do painel estava no default da OpenAI; corrigida para http://localhost:8880/v1. Lição: ao configurar engine "OpenAI-compatible" no Open WebUI, a Base URL vem com o default da OpenAI — trocar sempre.
+- STT (Whisper local, base) configurado. Voz de entrada depende de HTTPS pra funcionar fora do localhost (Tailscale, futuro).
+- Voz confirmada pela decisão de arquitetura: no Open WebUI (borda), não no Hermes. Reverificação do turno 111 validada na prática.
