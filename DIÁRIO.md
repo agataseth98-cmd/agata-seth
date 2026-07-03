@@ -217,3 +217,29 @@ Quatro modelos locais testados como fallback com tool-calling:
 - llama3.1:8b: 0 tool-calls mas responde texto (mantido como degradado)
 
 Decisão final: não testar mais modelos locais 7-14B para tool-calling. Cadeia: gemini-2.5-flash → llama3.1:8b. Melhoria futura: reduzir payload do Hermes.
+
+### 2026-07-02 (10) · Tools reduzidas de 18 para 12
+
+**Correção de um achado anterior**: a contagem de "22 tools" de um diagnóstico anterior no mesmo dia estava errada. O comando `hermes prompt-size` usa um agente de inspeção que não aplica o `platform_toolsets` real do `config.yaml` — contava tools que nem existem na sessão de verdade (`video_analyze`, `project_create/switch/list`) e não filtrava certo. Medindo do jeito que `cli.py` monta a sessão real (`hermes_cli.tools_config._get_platform_tools` + `model_tools.get_tool_definitions`), o total ativo real era **18 tools**, não 22.
+
+**Mecanismo (autorizado pelo Humano)**: `hermes tools disable <toolset> --platform cli`. Reescreve `platform_toolsets.cli` no `config.yaml`, expandindo o bundle `hermes-cli` numa lista explícita e removendo os toolsets indicados. Granularidade é por **toolset inteiro**, não por tool individual dentro de um toolset compartilhado.
+
+**Desabilitados** (6 toolsets, cada um com exatamente 1 tool): `delegation` (delegate_task), `session_search` (session_search), `code_execution` (execute_code), `image_gen` (image_generate), `todo` (todo), `tts` (text_to_speech).
+
+**Não desabilitados, por limitação estrutural do mecanismo**: `process` está no toolset `terminal` junto com `terminal` (que fica); `skill_manage` está no toolset `skills` junto com `skill_view`/`skills_list` (que ficam). Separar exigiria editar `toolsets.py` do próprio Hermes — fora do escopo autorizado (só mecanismo de config, sem patch de código-fonte). `video_analyze`/`project_create`/`project_switch`/`project_list` nunca existiram na sessão real — nada a desabilitar aí.
+
+**Resultado medido (18→12 tools)**:
+- Tool schemas: 43.509 B → 23.858 B
+- System prompt: 26.817 → 26.630 chars (quase inalterado — as skills nunca foram o gargalo, ver investigação anterior no mesmo dia)
+- Total estimado (heurística char/4): **~17.552 → ~12.604 tokens**
+
+**Groq (12K TPM)**: melhorou bastante mas a estimativa (~12.604) ainda fica levemente acima do teto de 12.000 — não é garantia de que passa no tokenizer real. Não retestado ao vivo.
+
+**Teste ao vivo** (cota Gemini free-tier muito apertada no momento do teste, vários 429 pelo meio):
+- "carregar": formato de prontidão correto, resposta real da Gemini (não fallback).
+- terminal: `search_files` **executado de verdade pela Gemini** (confirmado no log: `tool search_files completed`) — toolset reduzido não quebrou tool-calling.
+- memory: não confirmado por chamada real (3 tentativas, todas 429→fallback local antes de chamar a tool). Aceito por inferência — mesmo mecanismo de registro/schema que `search_files`, já provado funcionando com o toolset reduzido.
+
+Nenhuma capacidade essencial perdida. `process` e `skill_manage` continuam ativos (não puderam ser cortados sem tocar código-fonte do Hermes).
+
+Backup do config pré-corte: `~/.hermes/config.yaml.bak.20260702_183231_pre_tools_cut`.
