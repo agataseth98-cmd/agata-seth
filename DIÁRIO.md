@@ -271,3 +271,11 @@ Cadeia final CONFIRMADA (sem mudança): gemini-2.5-flash (principal) → llama3.
 Conclusão definitiva: Gemini 2.5 Flash grátis é o único cérebro viável hoje com tool-calling. Testados e eliminados ao longo do projeto: gpt-4o-mini (pago), Groq (TPM), OpenRouter free (429/404), DeepSeek (local sem tools + API sem saldo), 6 modelos locais (contexto ou tool-calling). Não reabrir sem: (a) saldo no DeepSeek, ou (b) hardware novo, ou (c) redução real do payload do Hermes abaixo de algum tier grátis.
 
 Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes plausíveis. Só o pull na Máquina decide o que existe.
+
+### 2026-07-03 (4) · gemma2:9b eliminado — modelos locais encerrados definitivamente
+
+- gemma2:9b: existe, mas contexto 8192 (muito abaixo do mínimo 64k do Hermes). Eliminado antes do teste de tool-calling.
+- Placar final dos locais (7 testados): qwen2.5:7b (32k), qwen3:8b (40k), gemma2:9b (8k) — contexto insuficiente; deepseek-r1:8b (sem tools), hermes3:8b (tool-call aleatório), llama3.1:8b (0 tool-calls) — tool-calling falho; qwen3.6:8b e glm-4:9b — não existem no registry.
+- CONCLUSÃO DEFINITIVA: nenhum modelo local de 8-9B no 4060 8GB serve como cérebro com tool-calling + contexto ≥64k. Não reabrir o assunto "modelo local" sem hardware novo. A variável é o payload do Hermes (~12.6K), não o modelo.
+- Cadeia final: gemini-2.5-flash (principal) → llama3.1:8b (degradado, responde texto sem tools).
+- Único caminho pra robustez de fallback: reduzir payload do Hermes abaixo do TPM de um tier grátis (Groq 12k), OU DeepSeek com saldo, OU hardware novo.
