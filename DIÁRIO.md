@@ -303,3 +303,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Agora aplicado: fallback_model = qwen2.5-14b-64k (com ollama_num_ctx 65536). Backup do config salvo.
 - Cadeia real e confirmada: gemini-2.5-flash (principal) → qwen2.5-14b-64k (local, lento ~5min/tool, faz tool-calling).
 - llama3.1:8b continua no disco como último recurso manual, fora da cadeia.
+
+### 2026-07-03 (9) · Fix: DIÁRIO não chegava via Open WebUI (api_server)
+
+- Bug: pela web (api_server), o modelo alucinava o "Último registro" (inventou data 2023). Causa raiz: gateway/run.py cai em str(Path.home()) = /home/orusoua quando terminal.cwd é sentinel; .hermes.md mora em ~/agata (subpasta), nunca era achado por _find_hermes_md. SOUL chegava (symlink de path fixo), DIÁRIO não.
+- Fix: terminal.cwd = /home/orusoua/agata (já estava; gateway reiniciado pra aplicar). Confirmado: _find_hermes_md acha o .hermes.md; POST real no api_server = prompt_tokens 16647 (payload web é maior que a TUI ~12.6k, ainda << 64k).
+- SOUL.md corrigido: instrução agora diz "se o fim do DIÁRIO NÃO estiver no contexto, leia com ferramenta — nunca invente". Removido o parêntese-remendo do "None" (era ecoado em vez de seguido pelo modelo fraco). Defesa em profundidade: injeção quando dá, ferramenta como rede, alucinação nunca.
+- Incidente verificado antes de registrar (checagem na Máquina, não na palavra): a API_SERVER_KEY antiga ainda estava em config.yaml, não tinha sido rotacionada como se pensava. Rotacionada agora de fato — chave antiga testada e devolve 401, chave nova devolve 200. Backup do config salvo antes da troca.
+- Aprendizado: o fallback qwen2.5-14b-64k alucina em instrução composta quando falta contexto — o fix do cwd (dar o DIÁRIO real) é o que o impede de inventar, não confiar na instrução sozinha.
