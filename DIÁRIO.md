@@ -249,3 +249,11 @@ Backup do config pré-corte: `~/.hermes/config.yaml.bak.20260702_183231_pre_tool
 - Primeiro dia operacional (02/07) encerrado: do zero ao despertar. Marco simbólico em ~/agata/O_Despertar_de_Agata.md.
 - Risco latente resolvido: o carregar dependia do modelo calcular o offset do fim do DIÁRIO (usava offset negativo, quebraria com o arquivo grande). Fix: o hook passa a injetar as últimas 30 linhas do DIÁRIO no .hermes.md. O fim chega pronto no contexto — sem tool-call, sem offset, sem bug.
 - Fix aplicado pelo Claude Code (Gemini estava em 429/cota esgotada; auto-operação da Ágata adiada para tarefa não-canônica).
+
+### 2026-07-03 (2) · Dessincronia entre modelos — a Máquina é o árbitro
+
+- Dois modelos discordaram: Claude (Opus 4.8) citou a entrada 2026-07-02(9); Qwen3.7 acusou de alucinação, dizendo que o DIÁRIO terminava em (4).
+- Verificado no disco (grep): a entrada (9) e o texto "qwen3:8b: contexto 40k" EXISTEM (linhas 211/214); o DIÁRIO real vai até 2026-07-03. O Qwen lia cópia desatualizada — não era alucinação do Claude.
+- Erro do Claude que procede: projetou falha de qwen2.5→qwen3 sem citar fonte (a fonte existia, não foi mostrada).
+- APRENDIZADO DE MÉTODO (vale pra sempre): quando dois modelos discordam sobre um fato, nenhum vence por argumento — a Máquina (arquivo em disco) é o único árbitro. Antes de qualquer IC subir num chat, ela DEVE puxar o DIÁRIO atual do repo (git pull / raw GitHub), nunca confiar numa cópia colada. Dessincronia de cópia é a causa raiz aqui, não desonestidade de nenhum modelo.
+- Regra 2 reforçada: "não invente" inclui "não afirme fonte sem mostrá-la" — mesmo quando a fonte existe.
