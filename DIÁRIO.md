@@ -295,3 +295,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - YaRN real exigiria: (1) GGUF de terceiro com rope-scaling embutido, ou (2) trocar Ollama por llama.cpp direto. Ambos fora de escopo — projeto separado.
 - VEREDITO FINAL sobre fallback local: qwen2.5:14b-64k (extrapolação) é o melhor possível com Ollama + tags oficiais. Adotado. Risco de extrapolação baixo no uso atual (payload 12.6k << 32k nativo, margem grande).
 - Assunto "modelo local" ENCERRADO definitivamente. Reabrir só com: llama.cpp+YaRN, GGUF community com rope-scaling, ou hardware novo.
+
+### 2026-07-03 (8) · Fallback trocado de fato: llama3.1:8b → qwen2.5-14b-64k
+
+- Dessincronia corrigida: o DIÁRIO (7) registrou qwen2.5-14b-64k como "adotado", mas o config.yaml ainda apontava llama3.1:8b — a troca não tinha sido aplicada (ficou pra trás nos testes de YaRN).
+- Verificado na Máquina (grep no config) antes de agir — a Máquina é o árbitro, não o registro.
+- Agora aplicado: fallback_model = qwen2.5-14b-64k (com ollama_num_ctx 65536). Backup do config salvo.
+- Cadeia real e confirmada: gemini-2.5-flash (principal) → qwen2.5-14b-64k (local, lento ~5min/tool, faz tool-calling).
+- llama3.1:8b continua no disco como último recurso manual, fora da cadeia.
