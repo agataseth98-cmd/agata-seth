@@ -279,3 +279,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - CONCLUSÃO DEFINITIVA: nenhum modelo local de 8-9B no 4060 8GB serve como cérebro com tool-calling + contexto ≥64k. Não reabrir o assunto "modelo local" sem hardware novo. A variável é o payload do Hermes (~12.6K), não o modelo.
 - Cadeia final: gemini-2.5-flash (principal) → llama3.1:8b (degradado, responde texto sem tools).
 - Único caminho pra robustez de fallback: reduzir payload do Hermes abaixo do TPM de um tier grátis (Groq 12k), OU DeepSeek com saldo, OU hardware novo.
+
+### 2026-07-03 (6) · Mínimo de 64k do Hermes é FIXO, não derivado do payload
+
+- Investigado no código: MINIMUM_CONTEXT_LENGTH = 64_000 hardcoded (model_metadata.py:185), usado em 5 pontos como comparação direta context_length < 64000. Razão (comentário do código): modelos com janela menor não sustentam memória de trabalho pra tool-calling.
+- Payload real medido (input_tokens da API Gemini, não heurística): 12.588 tokens no "carregar". Confirma a estimativa char/4 anterior (~0,1% de erro).
+- CONCLUSÃO: reduzir payload NÃO abaixa o requisito de contexto (é constante de produto do Hermes). Fecha a pendência "reduzir payload pra viabilizar modelo pequeno" — não se aplica.
+- Reduzir payload ainda vale, mas só para: (a) velocidade do fallback local e (b) reabrir tiers grátis de nuvem (Groq 12K TPM). NÃO para contexto.
+- Modelos <64k nativo (qwen2.5, gemma2, qwen3:8b) estão definitivamente fora, exceto via num_ctx forçado (extrapolação) ou YaRN (extensão real).
