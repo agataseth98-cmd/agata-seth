@@ -257,3 +257,17 @@ Backup do config pré-corte: `~/.hermes/config.yaml.bak.20260702_183231_pre_tool
 - Erro do Claude que procede: projetou falha de qwen2.5→qwen3 sem citar fonte (a fonte existia, não foi mostrada).
 - APRENDIZADO DE MÉTODO (vale pra sempre): quando dois modelos discordam sobre um fato, nenhum vence por argumento — a Máquina (arquivo em disco) é o único árbitro. Antes de qualquer IC subir num chat, ela DEVE puxar o DIÁRIO atual do repo (git pull / raw GitHub), nunca confiar numa cópia colada. Dessincronia de cópia é a causa raiz aqui, não desonestidade de nenhum modelo.
 - Regra 2 reforçada: "não invente" inclui "não afirme fonte sem mostrá-la" — mesmo quando a fonte existe.
+
+### 2026-07-03 (3) · Auditoria de fallbacks — nenhum novo qualificou
+
+Testados na Máquina (não por documentação):
+- qwen3.6:8b e glm-4:9b: NÃO EXISTEM no registry do Ollama (pull falhou). Eram nomes de documentação, não modelos reais.
+- OpenRouter qwen/qwen3-coder:free: 429 (rate-limit upstream Venice), 2x.
+- OpenRouter deepseek-r1:free e deepseek-chat:free: 404 "unavailable for free" — viraram pagos.
+- DeepSeek API direta: chave válida (autentica), mas 402 saldo insuficiente — conta nova não veio com 5M tokens grátis. Chave preservada em ~/.hermes/.env pra reteste se houver saldo.
+
+Cadeia final CONFIRMADA (sem mudança): gemini-2.5-flash (principal) → llama3.1:8b local (degradado, último recurso).
+
+Conclusão definitiva: Gemini 2.5 Flash grátis é o único cérebro viável hoje com tool-calling. Testados e eliminados ao longo do projeto: gpt-4o-mini (pago), Groq (TPM), OpenRouter free (429/404), DeepSeek (local sem tools + API sem saldo), 6 modelos locais (contexto ou tool-calling). Não reabrir sem: (a) saldo no DeepSeek, ou (b) hardware novo, ou (c) redução real do payload do Hermes abaixo de algum tier grátis.
+
+Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes plausíveis. Só o pull na Máquina decide o que existe.
