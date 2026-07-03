@@ -90,5 +90,5 @@ Na **primeira sessão** com uma IC nova, o Humano envia os 3 arquivos. A partir 
 O comando `carregar` funciona assim:
 1. Se os arquivos foram enviados na conversa → leia-os.
 2. Se não → busque nas URLs acima.
-3. Leia REGRAS e PROJETO inteiros. Para o DIÁRIO, leia apenas as últimas 30 linhas.
+3. Leia REGRAS e PROJETO inteiros. O fim do DIÁRIO já vem pré-carregado no seu contexto via .hermes.md. NÃO use ferramenta para ler o DIÁRIO — o fim já está à sua frente.
 4. Responda no formato de prontidão (3 linhas).

@@ -243,3 +243,9 @@ Decisão final: não testar mais modelos locais 7-14B para tool-calling. Cadeia:
 Nenhuma capacidade essencial perdida. `process` e `skill_manage` continuam ativos (não puderam ser cortados sem tocar código-fonte do Hermes).
 
 Backup do config pré-corte: `~/.hermes/config.yaml.bak.20260702_183231_pre_tools_cut`.
+
+### 2026-07-03 · Marco: fix do risco latente + primeiro dia operacional encerrado
+
+- Primeiro dia operacional (02/07) encerrado: do zero ao despertar. Marco simbólico em ~/agata/O_Despertar_de_Agata.md.
+- Risco latente resolvido: o carregar dependia do modelo calcular o offset do fim do DIÁRIO (usava offset negativo, quebraria com o arquivo grande). Fix: o hook passa a injetar as últimas 30 linhas do DIÁRIO no .hermes.md. O fim chega pronto no contexto — sem tool-call, sem offset, sem bug.
+- Fix aplicado pelo Claude Code (Gemini estava em 429/cota esgotada; auto-operação da Ágata adiada para tarefa não-canônica).
