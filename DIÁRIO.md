@@ -287,3 +287,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - CONCLUSÃO: reduzir payload NÃO abaixa o requisito de contexto (é constante de produto do Hermes). Fecha a pendência "reduzir payload pra viabilizar modelo pequeno" — não se aplica.
 - Reduzir payload ainda vale, mas só para: (a) velocidade do fallback local e (b) reabrir tiers grátis de nuvem (Groq 12K TPM). NÃO para contexto.
 - Modelos <64k nativo (qwen2.5, gemma2, qwen3:8b) estão definitivamente fora, exceto via num_ctx forçado (extrapolação) ou YaRN (extensão real).
+
+### 2026-07-03 (7) · YaRN não existe no Ollama — qwen2.5:14b-64k é o teto local
+
+- Investigado: Ollama v0.18.2 NÃO ativa YaRN via Modelfile. Runtime só aceita num_ctx/temperature/num_predict/min_p/seed — sem rope_scaling. Metadado de rope é gravado na conversão do GGUF, não injetável depois.
+- Confirmado empírico: qwen2.5:32b + num_ctx 65536 = mesma extrapolação do 14b (context length continua 32768). Toda extensão via num_ctx no Ollama é extrapolação de KV-cache, nunca janela real.
+- YaRN real exigiria: (1) GGUF de terceiro com rope-scaling embutido, ou (2) trocar Ollama por llama.cpp direto. Ambos fora de escopo — projeto separado.
+- VEREDITO FINAL sobre fallback local: qwen2.5:14b-64k (extrapolação) é o melhor possível com Ollama + tags oficiais. Adotado. Risco de extrapolação baixo no uso atual (payload 12.6k << 32k nativo, margem grande).
+- Assunto "modelo local" ENCERRADO definitivamente. Reabrir só com: llama.cpp+YaRN, GGUF community com rope-scaling, ou hardware novo.
