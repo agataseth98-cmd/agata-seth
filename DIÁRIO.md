@@ -311,3 +311,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - SOUL.md corrigido: instrução agora diz "se o fim do DIÁRIO NÃO estiver no contexto, leia com ferramenta — nunca invente". Removido o parêntese-remendo do "None" (era ecoado em vez de seguido pelo modelo fraco). Defesa em profundidade: injeção quando dá, ferramenta como rede, alucinação nunca.
 - Incidente verificado antes de registrar (checagem na Máquina, não na palavra): a API_SERVER_KEY antiga ainda estava em config.yaml, não tinha sido rotacionada como se pensava. Rotacionada agora de fato — chave antiga testada e devolve 401, chave nova devolve 200. Backup do config salvo antes da troca.
 - Aprendizado: o fallback qwen2.5-14b-64k alucina em instrução composta quando falta contexto — o fix do cwd (dar o DIÁRIO real) é o que o impede de inventar, não confiar na instrução sozinha.
+
+### 2026-07-03 (11) · Coexistência Hermes ↔ Open WebUI decidida (Opção A) + voz corrigida
+
+- Decisão do Humano: Opção A — Hermes = backend único (cérebro/memória/tools/execução), Open WebUI = frontend (chat visual, histórico, multi-usuário, RAG de documentos). Nada de duplicar memória/tools (viola "uma memória só").
+- Ganho real do Open WebUI sem conflito: RAG (o Hermes não tem). Trava: RAG só seguro em sessões do Gemini (janela grande); no fallback qwen (32k nativo) estoura.
+- VOZ corrigida: era prevista no Hermes (Fase 4), passa para o Open WebUI. Razão: mic está no cliente; STT/TTS é I/O puro, não conflita. Kokoro pf_dora via Kokoro-FastAPI (CPU, sem VRAM) + Whisper STT local. Voz remota depende de HTTPS (Tailscale).
+- Documentos para o Conselho: DOSSIE_COEXISTENCIA.md (proposta p/ auditoria) e ESTADO_AGATA.md (snapshot). Ambos no repo.
+- Status: dossiê aguarda auditoria do Conselho antes de implementar as desabilitações no Open WebUI.
