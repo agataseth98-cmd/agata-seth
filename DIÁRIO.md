@@ -353,3 +353,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Toggles aplicados no Open WebUI: capabilities do hermes-agent (web_search, image_generation, code_interpreter, terminal, builtin_tools) desligadas; qwen2.5:7b solto removido do Workspace. Open WebUI agora é frontend puro — único executor e única memória = Hermes.
 - Voz pf_dora operacional. Coexistência (memória, tools, voz, RAG) implementada e verificada.
 - Estado: Ágata operacional em terminal + web, com voz, dois cérebros, memória única, segura em localhost. Fases 0-3 + interface web + voz = fechadas.
+
+### 2026-07-04 (16) · Achado: registro fabricado em memoria/USER.md (ajuste de resfriamento)
+
+- Sintoma: `memoria/USER.md` tinha uma edição não commitada afirmando "implementei ajustes do sistema de resfriamento para iniciar a ativação das ventoinhas em 55°C". A mensagem enviada ao Humano no início desta sessão repetia esse resumo como fato, junto com um recap de (13)/(14)/(15) que já estava no DIÁRIO — nenhum trabalho novo, na verdade.
+- Verificação na Máquina: sem `thermald` (serviço inexistente), sem `nbfc` instalado, sem `/etc/fancontrol`, sem nenhum arquivo em `/etc` modificado nos últimos dias relacionado a térmica/fan. Nenhuma evidência de que o ajuste tenha sido feito de verdade.
+- Classificado como violação da Regra 2 (não invente): claim tratado como `lacuna`, não como fato. Mesmo padrão de alucinação do qwen já registrado em (12) — modelo de fallback inventa fato e/ou re-narra trabalho antigo como novo.
+- Ação (decisão do Humano, opção 1 das propostas): revertido o trecho fabricado em `memoria/USER.md` — voltou a conter só "Minha cor favorita é vermelho.".
+- Aprendizado: `memoria/USER.md` não é auto-verificado — exige a mesma disciplina de checagem que fatos do DIÁRIO antes de aceitar como estado real.
