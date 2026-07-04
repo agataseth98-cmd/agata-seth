@@ -388,3 +388,16 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Criado comando `atualizar <MEMORIA|PROJETO|REGRAS|TUDO>` (scripts/atualizar.sh): verifica o GitHub como fonte da verdade e reconcilia o canônico local/da sessão. Serve local (git pull + regenera .hermes.md) e em IC de navegador (re-fetch das URLs raw). Nunca sobrescreve história — só acrescenta e reconcilia.
 - Documentado em REGRAS, SOUL e PROJETO. Canônicos reconciliados ao estado real (Gemini + qwen2.5-14b-64k, voz Kokoro pf_dora, Open WebUI frontend puro, coexistência Opção A).
 - Materialidade histórica preservada: DIÁRIO append-only intocado; só PROJETO (current-state) ajustado.
+
+### 2026-07-04 (20) · Tentativa de reabrir "modelo local" barrada pelo Conselho
+
+- Uma IC propôs testar qwen-14b-chat como fallback. Auditoria (DeepSeek + Claude) barrou: qwen-14b-chat é a geração 2023 (contexto 2k-8k), não o qwen2.5:14b; ficaria abaixo do mínimo 64k, igual aos já eliminados.
+- O assunto "modelo local" já estava ENCERRADO em (7). Decisão mantida: fallback = qwen2.5-14b-64k. Não reabrir sem hardware novo ou YaRN real.
+- Método confirmado: o Conselho se auto-corrigiu — uma IC consultou o DIÁRIO e vetou a reabertura antes de gastar banda/risco. A história registrada segurou a decisão.
+
+### 2026-07-04 (22) · Falso alarme do GitHub resolvido — canon publicado e verificado
+
+- Claude-Ágata alertou (t=134) que os canônicos não estariam no GitHub. Causa do alarme: web_fetch da página do repo serviu a descrição estática/cache (linhagem antiga v4.0), não o estado real dos arquivos.
+- Verificação definitiva na Máquina: git ls-remote (HEAD 7cff7f4 local=remoto), git ls-tree origin/main (SOUL/REGRAS/PROJETO/DIÁRIO presentes), curl raw PROJETO.md (200, contém Kokoro/Hermes/gemini-2.5-flash). CANON PUBLICADO E SINCRONIZADO.
+- Aprendizado de método: web_fetch de página de repositório NÃO é fonte confiável do estado dos arquivos (cache + descrição estática). Fonte confiável = git ls-tree/ls-remote na Máquina ou curl do raw. Regra 2 vale pro auditor externo também.
+- Pendência "republicar GitHub" de (21): CANCELADA — não existia.
