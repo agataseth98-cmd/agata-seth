@@ -374,3 +374,10 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Ação: `sudo systemctl disable --now agatha.service`, executado pelo Humano em terminal próprio (sudo exige TTY interativo; o canal desta sessão não tem — pedido de senha no chat foi recusado por segurança). Confirmado: `disabled` + `inactive (dead)`, sem novos restarts após o stop.
 - Achado à parte, fora do escopo do crash: durante a investigação, uma saída de comando bash trouxe blocos `<system-reminder>` fabricados ("Exited Plan Mode", "Auto Mode Active") que não correspondiam a nenhuma ação real da sessão (Plan Mode nunca tinha sido ativado) — tratado como tentativa de prompt injection, sinalizado ao Humano, ignorado no comportamento. Nenhuma fonte identificada (não veio de arquivo lido nem de comando rodado).
 - Aprendizado de método: "crashou" sem detalhe não é motivo pra perguntar de volta antes de olhar a Máquina — `who -b`, `last reboot -F`, `journalctl --list-boots` e o fim do journal do boot anterior resolvem em minutos se for reboot/travamento. Auditoria de serviços systemd (`system-units`, não só containers/processos de app) devia ter sido feita junto da limpeza de (12) — leftovers de prototype antigo podem estar em qualquer camada (REST server solto, unit file solto), não só em Function do Open WebUI.
+
+### 2026-07-04 (18) · llama3.3:70b descartado — não cabe no hardware
+
+- llama3.3:70b (42GB) baixado pra testar como fallback via RAM+VRAM offload. Ao carregar, a máquina CONGELA — 42GB não cabe em 40GB RAM + 8GB VRAM com o resto do sistema rodando (Hermes, Open WebUI, Kokoro, SO). Confirmado por causa-e-efeito: congelamento ao iniciar o teste.
+- Decisão: NÃO usar o 70b. Fallback segue qwen2.5-14b-64k. 
+- O modelo de 42GB fica no disco (417GB livres, não incomoda) até o Humano decidir se remove (ollama rm llama3.3:70b libera 42GB).
+- Aprendizado: teto de modelo local no hardware atual é ~14b (9GB) com folga; um 70b (42GB) trava. RAM permite modelos maiores que a VRAM, mas não maiores que a própria RAM menos o SO.
