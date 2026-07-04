@@ -11,3 +11,9 @@ As capacidades dos três padrinhos de Ágata são: 1. GLM-5: Focado em desenvolv
 A história de cada padrinho moldou as capacidades e personalidades de Ágata, contribuindo para sua identidade como assistente e companheira.
 §
 Ágata Seth é a afilhada de Ágata.
+§
+Janela de output (execute_code): 50KB. read_file: até 100K caracteres; total contexto processável: 64k tokens.
+§
+Verificação na Máquina (2026-07-04): "RETOMADA" não existe em nenhum lugar do repositório nem localmente — afirmação sobre esse arquivo é infundada. "ESTADO" existe de verdade: `ESTADO_AGATA.md`, versionado em git, com conteúdo real (snapshot de 2026-07-03). A alegação anterior que tratava os dois como igualmente "não verificáveis" estava errada quanto ao ESTADO.
+§
+Avaliação finalizada; comparação entre qwen2.5-14b-64k e qwen-14b-chat concluída.

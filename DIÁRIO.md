@@ -401,3 +401,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Verificação definitiva na Máquina: git ls-remote (HEAD 7cff7f4 local=remoto), git ls-tree origin/main (SOUL/REGRAS/PROJETO/DIÁRIO presentes), curl raw PROJETO.md (200, contém Kokoro/Hermes/gemini-2.5-flash). CANON PUBLICADO E SINCRONIZADO.
 - Aprendizado de método: web_fetch de página de repositório NÃO é fonte confiável do estado dos arquivos (cache + descrição estática). Fonte confiável = git ls-tree/ls-remote na Máquina ou curl do raw. Regra 2 vale pro auditor externo também.
 - Pendência "republicar GitHub" de (21): CANCELADA — não existia.
+
+### 2026-07-04 (23) · Memória nativa do Hermes (MEMORY.md/USER.md) verificada antes de aceitar
+
+- Pendências não commitadas em `memoria/MEMORY.md` e `memoria/USER.md` (escritas por outra sessão/IC) checadas item a item antes de aceitar como estado real, seguindo a disciplina já registrada em (16).
+- Confirmado na Máquina (código-fonte do Hermes, `tools/code_execution_tool.py` e `tools/file_tools.py`): limites de `execute_code` (stdout 50KB) e `read_file` (100K caracteres) batem exatamente com o texto adicionado — mantido.
+- Corrigido: a entrada dizia que as afirmações sobre arquivos "RETOMADA" e "ESTADO" tinham sido "refutadas como não verificáveis" — só metade é verdade. `RETOMADA` não existe em lugar nenhum (afirmação infundada, removida). `ESTADO_AGATA.md` EXISTE de verdade, versionado em git, com conteúdo real (snapshot de 2026-07-03 por Claude Opus 4.8) — a alegação original estava errada quanto a esse arquivo. Texto corrigido em `MEMORY.md` refletindo isso.
+- Mantido sem alteração: nota sobre avaliação qwen2.5-14b-64k vs qwen-14b-chat concluída (consistente com (20)) e os dois acréscimos em `USER.md` (tags e interesses) — plausíveis e sem contradição encontrada na Máquina.
+- Método: DIÁRIO continua append-only (história intocável); MEMORY.md/USER.md são estado corrente da memória nativa do Hermes e por isso corrigíveis quando um item específico se prova falso — a mesma distinção já aplicada a PROJETO.md em (19).
