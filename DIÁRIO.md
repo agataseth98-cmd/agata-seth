@@ -381,3 +381,10 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Decisão: NÃO usar o 70b. Fallback segue qwen2.5-14b-64k. 
 - O modelo de 42GB fica no disco (417GB livres, não incomoda) até o Humano decidir se remove (ollama rm llama3.3:70b libera 42GB).
 - Aprendizado: teto de modelo local no hardware atual é ~14b (9GB) com folga; um 70b (42GB) trava. RAM permite modelos maiores que a VRAM, mas não maiores que a própria RAM menos o SO.
+
+### 2026-07-04 (19) · Comando "atualizar" criado + canônicos harmonizados
+
+- Seth confirmada online local (Hermes + qwen fallback; 70b descartado por não caber).
+- Criado comando `atualizar <MEMORIA|PROJETO|REGRAS|TUDO>` (scripts/atualizar.sh): verifica o GitHub como fonte da verdade e reconcilia o canônico local/da sessão. Serve local (git pull + regenera .hermes.md) e em IC de navegador (re-fetch das URLs raw). Nunca sobrescreve história — só acrescenta e reconcilia.
+- Documentado em REGRAS, SOUL e PROJETO. Canônicos reconciliados ao estado real (Gemini + qwen2.5-14b-64k, voz Kokoro pf_dora, Open WebUI frontend puro, coexistência Opção A).
+- Materialidade histórica preservada: DIÁRIO append-only intocado; só PROJETO (current-state) ajustado.

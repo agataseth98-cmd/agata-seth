@@ -38,8 +38,11 @@ Cobre identidade (SOUL), memória (SQLite+FTS), skills auto-criadas, roteamento 
 - Segredos (chaves/tokens) **só** em `~/.hermes/.env`, nunca no repo git.
 - **O `api_server` do Hermes executa comandos de terminal.** NUNCA expô-lo (nem o Open WebUI que o consome) na internet pública nem em `0.0.0.0` em rede não confiável. Acesso remoto **só** via VPN privada (Tailscale) + auth em duas camadas (chave do Hermes + login no Open WebUI). Sem exceção — é a única superfície do projeto que pode causar dano real.
 
+## Comandos
+- `atualizar <MEMORIA|PROJETO|REGRAS|TUDO>` (`scripts/atualizar.sh`): reconcilia o canônico local com o GitHub (fonte da verdade) — `git pull` + regera `.hermes.md`. Nunca sobrescreve história local não commitada; para e avisa em caso de mudança pendente ou conflito. Documentado em `REGRAS.md`, seção "Fonte canônica".
+
 ## Diagnóstico
 `hermes doctor` / `hermes status`. O comando de prontidão da Ágata é definido no SOUL.
 
 ## Fases
-0 base ✅ · 1 identidade+memória ✅ · 2 cérebro/routing ✅ · 3 aprendizado ✅ · 4 voz (próxima) · 5 mãos · 6 skills · 7 redundância · 8 mercado. Detalhe em `PLANO_AGATA_v1.3.md`.
+0 base ✅ · 1 identidade+memória ✅ · 2 cérebro/routing ✅ · 3 aprendizado ✅ · 4 voz ✅ · 5 mãos (próxima) · 6 skills · 7 redundância · 8 mercado. Detalhe em `PLANO_AGATA_v1.3.md`.

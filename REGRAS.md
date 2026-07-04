@@ -87,6 +87,8 @@ Os arquivos canônicos vivem em:
 
 Na **primeira sessão** com uma IC nova, o Humano envia os 3 arquivos. A partir da segunda, o modelo busca direto dessas URLs (se tiver acesso à web) — sempre a versão mais recente.
 
+Comando `atualizar <MEMORIA|PROJETO|REGRAS|TUDO>`: verifica o GitHub (fonte da verdade) e reconcilia o canônico local/da sessão. Localmente = `git pull` + regenera `.hermes.md` (script `scripts/atualizar.sh`). Em IC de navegador = re-fetch das URLs raw. Nunca sobrescreve história: só acrescenta e reconcilia — se houver mudança local não commitada ou conflito, para e avisa em vez de forçar.
+
 O comando `carregar` funciona assim:
 1. Se os arquivos foram enviados na conversa → leia-os.
 2. Se não → busque nas URLs acima.
