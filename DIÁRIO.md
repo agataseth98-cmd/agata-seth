@@ -427,3 +427,10 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Peso do teste: `deepseek-r1:14b` permanece puxado localmente (9.0 GB) — não removido, mesmo critério já aplicado a `deepseek-r1:8b` (mantido no disco após eliminado).
 - Aprendizado de método: para o pedido de (24) (chain-of-thought visível + tool-calling), a família DeepSeek-R1 destilada em Qwen parece ter o mesmo problema estrutural nos dois tamanhos testados (8b e 14b) — o "thinking" nativo do Ollama não vem com capability `tools`. Próximo candidato deveria ser verificado por `ollama show` (capacidades) **antes** do pull, não depois.
 - Pendência de (24) segue aberta: ainda falta achar um candidato que combine `tools` + `thinking` visível + ≥64k de contexto + ~14b/9GB.
+
+### 2026-07-05 (26) · Fio canônico criado — consolidação da verdade verificada
+
+- Informação fragmentada entre GLM/Seth/Claude/Code + anexo quebrado. Criado FIO_CANONICO.md: separa artefato (publicado, íntegro) de estado operacional (degradado: Gemini 400, fallback vazio, carregar quebrado).
+- Hipótese de causa raiz: config não persistiu (model.default reverteu do -64k pro base 32k → fallback vazio + contexto 32k + carregar sem SOUL). A confirmar pelos 5 comandos do §6.
+- Alucinações nomeadas (não registrar): resfriamento 55°C, qwen-14b-chat, relatos degradados da Seth, alarme falso do GitHub (Claude). R1-14B: não testado (relatório não chegou).
+- Nota de numeração: o próprio FIO_CANONICO chegou rotulado "(25)" — já ocupado nesta sessão pelo teste do `deepseek-r1:14b` (2026-07-04). Corrigido para (26) na Máquina antes de gravar, conforme método §8.1 do próprio fio ("a Máquina é o árbitro").
