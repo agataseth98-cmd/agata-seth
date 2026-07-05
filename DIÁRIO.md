@@ -417,3 +417,13 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Pedido do Humano: substituir o fallback atual por um modelo similar (mesma classe de hardware, dentro do teto de ~14b/9GB estabelecido em (18), contexto ≥64k igual à barreira dura do Hermes) mas que exponha a linha de raciocínio (chain-of-thought visível), pra permitir acompanhamento em tempo real em vez de só auditoria post-hoc.
 - **Status: PROPOSTA EM ABERTO, não decisão.** Humano pediu explicitamente colaboração do Claude IC antes de prosseguir — não trocar o fallback sem esse passo. Segue o método já estabelecido em (20): não descartar/trocar por raciocínio sozinho, só depois de teste real na Máquina.
 - Próximo passo: Claude IC propõe candidato(s) nesta mesma sessão para avaliação; troca de fallback só entra em vigor após teste (mesmo protocolo de (18) e (20)).
+
+### 2026-07-04 (25) · Candidato deepseek-r1:14b testado e eliminado (sem tool-calling)
+
+- Primeiro candidato ao pedido de (24) (fallback com raciocínio visível): `deepseek-r1:14b`, testado seguindo o protocolo de (18)/(20) — pull real na Máquina, depois teste decisivo antes de qualquer troca de config.
+- `ollama show`: existe, 14.8B, arquitetura qwen2, **contexto nativo 131072** (passa folgado do mínimo 64k), capacidades listadas = `completion` + `thinking` — **sem `tools`** (compare com qwen2.5-14b-64k, que lista `completion` + `tools`).
+- Teste decisivo (`curl /v1/chat/completions` com `tools` no payload): API do Ollama recusou de cara — `"registry.ollama.ai/library/deepseek-r1:14b does not support tools"`. Não é o `<think>` poluindo a chamada (como se cogitava); o modelo nem tem o template de tool-calling registrado. Mesmo resultado prático de `deepseek-r1:8b`: **eliminado**, sem chegar a carregar/testar data ou fuso.
+- Config nunca foi alterada (`~/.hermes/config.yaml` fallback_model seguiu `qwen2.5-14b-64k` o tempo todo) — não houve o que reverter.
+- Peso do teste: `deepseek-r1:14b` permanece puxado localmente (9.0 GB) — não removido, mesmo critério já aplicado a `deepseek-r1:8b` (mantido no disco após eliminado).
+- Aprendizado de método: para o pedido de (24) (chain-of-thought visível + tool-calling), a família DeepSeek-R1 destilada em Qwen parece ter o mesmo problema estrutural nos dois tamanhos testados (8b e 14b) — o "thinking" nativo do Ollama não vem com capability `tools`. Próximo candidato deveria ser verificado por `ollama show` (capacidades) **antes** do pull, não depois.
+- Pendência de (24) segue aberta: ainda falta achar um candidato que combine `tools` + `thinking` visível + ≥64k de contexto + ~14b/9GB.
