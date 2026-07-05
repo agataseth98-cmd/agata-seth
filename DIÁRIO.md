@@ -449,3 +449,54 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   injeção funcionando no fallback).
 - lacuna: o 32768 do cache é só cosmético (TUI) ou alimenta o gate MINIMUM_CONTEXT=64000?
   A confirmar antes de tratar como inofensivo.
+
+### 2026-07-05 (28) · Cache de contexto obsoleto: NÃO cosmético — bug funcional no fallback + corrigido (Code rastreou, Opus auditou, Code corrigiu)
+
+- Lacuna de (27) fechada: 32768 preso em context_length_cache.yaml alimenta o gate
+  MINIMUM_CONTEXT=64000 — não é só a TUI, corta de fato o orçamento do fallback pela metade.
+- Cadeia confirmada lendo o código (hermes-agent, NousResearch, upstream — não este repo):
+  get_model_context_length (model_metadata.py:1779) lê o cache primeiro (linha 1869-1934,
+  sem invalidação especial pra qwen local — só Kimi/MiniMax/Grok/Codex têm guarda) →
+  chat_completion_helpers.py:1448 usa o valor puro na troca de fallback em runtime, SEM
+  o gate de mínimo 64k (esse gate, agent_init.py:1685 `if _ctx and _ctx < MINIMUM_CONTEXT_LENGTH`,
+  só roda no boot do primário — confirmado lendo o arquivo, não existe equivalente no caminho
+  de troca de fallback).
+- Efeito verificado por cálculo direto em context_compressor.py:_MIN_CTX_TRIGGER_RATIO (linha
+  ~903): com context_length=32768, threshold_percent=0.5 → floor vira max(16384, 64000)=64000,
+  que estoura a janela efetiva (32768) → cai no ramo de emergência e trigger em 85% de 32768 =
+  27852. Bate exato com o "~27.8K" já registrado em (27). Compactação prematura confirmada, não
+  suposta.
+- CAUSA RAIZ mais funda do que "cache desatualizado" — achada ao investigar por que o probe
+  geraria 32768 em primeiro lugar (curl direto em `/api/show` do Ollama local): o servidor
+  retorna DOIS campos conflitantes pro mesmo modelo — `parameters: num_ctx 65536` (override do
+  Modelfile) e `model_info.qwen2.context_length: 32768` (contexto nativo de treino, GGUF). A
+  função que POPULA o cache (`_query_ollama_api_show`, model_metadata.py:1356, chamada pra
+  QUALQUER base_url no step 5e) prefere `model_info.context_length` sobre `num_ctx` — ordem
+  correta pra Ollama Cloud hospedado (usuário não controla num_ctx lá), errada pra Ollama local
+  (onde o Modelfile É o override intencional do usuário). Existe uma segunda função,
+  `query_ollama_num_ctx` (linha 1251), com a ordem certa (num_ctx primeiro) — mas não é ela que
+  populares o cache/resolução.
+- Consequência dessa causa mais funda: mesmo com o cache corrigido agora, se essa entrada for
+  invalidada de novo (upgrade do hermes-agent, cache apagado, reinstalação) o próximo probe volta
+  a gravar 32768 — o bug de ordem de campos continua no código upstream, só o sintoma atual foi
+  corrigido.
+- CORREÇÃO APLICADA (escopo local, arquivo de estado do usuário — não código):
+  `~/.hermes/context_length_cache.yaml`, entrada `qwen2.5-14b-64k@http://localhost:11434/v1/`:
+  `32768` → `65536` (bate com o `num_ctx` real do Modelfile, confirmado via `/api/show`).
+- PROVA ANTES/DEPOIS real (chamando `get_model_context_length()` de verdade, mesmo caminho de
+  código do runtime — não só lendo o arquivo):
+  - Antes: `get_model_context_length('qwen2.5-14b-64k', base_url='http://localhost:11434/v1/')`
+    → `32768`.
+  - Depois (só a edição do yaml, sem restart do gateway — `_load_context_cache()` lê o arquivo
+    do zero a cada chamada, não há cache em memória do processo): mesma chamada → `65536`.
+  - Threshold de compactação recalculado com o novo valor: floor=max(32768,64000)=64000 <
+    janela efetiva (65536) → não estoura mais → trigger real ~64000, não mais ~27852.
+- lacuna nova, registrada e NÃO corrigida nesta sessão (código de terceiro, upstream
+  `NousResearch/hermes-agent`, fora do escopo/risco deste repo): `_query_ollama_api_show`
+  deveria preferir `num_ctx` sobre `model_info.context_length` quando o `base_url` é local
+  (localhost/127.0.0.1), espelhando a ordem já correta de `query_ollama_num_ctx`. Proposta pro
+  Humano: reportar upstream (issue no GitHub do hermes-agent) ou decidir por patch local no
+  venv — mudança em código de terceiro, não em config, exige essa decisão explícita.
+- Método: mesma disciplina de (27) — nada registrado sem rodar o código de verdade na Máquina
+  (curl no `/api/show`, chamada real a `get_model_context_length`, cálculo conferido linha a
+  linha no `context_compressor.py`). Prova antes/depois é execução, não leitura de arquivo.
