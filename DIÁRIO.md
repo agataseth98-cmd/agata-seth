@@ -434,3 +434,18 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Hipótese de causa raiz: config não persistiu (model.default reverteu do -64k pro base 32k → fallback vazio + contexto 32k + carregar sem SOUL). A confirmar pelos 5 comandos do §6.
 - Alucinações nomeadas (não registrar): resfriamento 55°C, qwen-14b-chat, relatos degradados da Seth, alarme falso do GitHub (Claude). R1-14B: não testado (relatório não chegou).
 - Nota de numeração: o próprio FIO_CANONICO chegou rotulado "(25)" — já ocupado nesta sessão pelo teste do `deepseek-r1:14b` (2026-07-04). Corrigido para (26) na Máquina antes de gravar, conforme método §8.1 do próprio fio ("a Máquina é o árbitro").
+
+### 2026-07-05 (27) · Auditoria read-only na Predator (Code executou, Opus auditou)
+
+- Hipótese de (26)/§4 ("config reverteu -64k→32k") REFUTADA na Máquina: config.yaml íntegro
+  (gemini-2.5-flash primário; fallback qwen2.5-14b-64k; contexto declarado 65536). Nada reverteu.
+- Causa real do "32.8K": entrada obsoleta em context_length_cache.yaml
+  (qwen2.5-14b-64k@localhost:11434/v1/: 32768). Modelfile correto (num_ctx 65536).
+  model_metadata.py:1869-1934 lê o cache primeiro; invalida Kimi/MiniMax/Grok/Codex mas
+  não o qwen local. Origem provável: gravado antes da correção do Modelfile (backups 03/07).
+- Presentes: SOUL.md (2394B), .hermes.md, cwd=/home/orusoua/agata; gateway ativo; canon
+  local==remoto, tree limpo.
+- EM ABERTO (não testado): Gemini 400 (não reproduzido) e carregar (arquivos presentes ≠
+  injeção funcionando no fallback).
+- lacuna: o 32768 do cache é só cosmético (TUI) ou alimenta o gate MINIMUM_CONTEXT=64000?
+  A confirmar antes de tratar como inofensivo.
