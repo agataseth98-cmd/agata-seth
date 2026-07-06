@@ -14,6 +14,13 @@ Assistente pessoal do Orusoua, **local-first e grátis por padrão**, construíd
 ## Motor: Hermes Agent
 Cobre identidade (SOUL), memória (SQLite+FTS), skills auto-criadas, roteamento de provedores + fallback, sandbox de execução, voz e browser. Substitui todo o código bespoke antigo (nada de MCP server/roteador/OpenClaw caseiros).
 
+## Serviços (boot)
+- `ollama.service` (system, enabled) — cérebro fallback.
+- Docker `open-webui` + `kokoro-tts` (`restart: unless-stopped` + `docker.service` enabled) — interface web + voz.
+- `hermes-gateway.service` (user, `hermes gateway install --start-on-login`, enabled + linger) — `api_server` na porta 8642. Sobrevive a boot e a logout. Instalado em (36); antes disso o gateway só subia manual (`hermes gateway run`).
+- `agata-consolidacao.timer` (user, enabled) — consolidação noturna.
+- Leftovers do protótipo pré-Hermes purgados em (36) — não recriar: `agata-rest.service` (`~/.agata_il/src/rest_server.py`, porta 8000, memória duplicada já sinalizada em (12)) desabilitado; `agata.service`/`agatha.service` (unit files mortos apontando pra pastas inexistentes, `agatha.service` foi o causador do travamento de (17)) removidos.
+
 ## Cérebro (grátis)
 - Principal: **gemini-2.5-flash** via Google API direta (grátis, rápido, tool-calling confiável).
 - Fallback: **qwen3-14b-64k** local via Ollama (grátis, privado, sem cota; contexto 64k por override durável em `custom_providers`, sobrevive a cache limpo — provado em (30)/(35)). Faz tool-calling — confirmado. Único modelo do projeto com raciocínio (`thinking`) visível junto com tool-calling, expondo a decisão antes da ação; custo é ~2x latência vs. qwen2.5-14b-64k/qwen2.5-32b-64k. Em avaliação de uso real desde (35).
