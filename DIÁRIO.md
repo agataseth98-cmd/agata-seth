@@ -627,3 +627,36 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   nunca suprimir o aviso de troca de provider especificamente (diferente de retry comum);
   (c) reforçar no SOUL uma instrução explícita de sempre citar o provider/modelo real ativo,
   não só "sou a Ágata", pra não depender da barra de status suprimível.
+
+### 2026-07-06 (32) · Autorização do Humano: bateria de testes overnight pro pedido de (24)
+
+- Humano autorizou explicitamente ("tem minha benção... coloco você no automático") rodar uma
+  bateria de testes pra achar um fallback melhor, enquanto descansa. Pedido original ainda em
+  aberto desde (24): tool-calling + contexto ≥64k + ~14b/9GB de teto +, se possível, raciocínio
+  visível (chain-of-thought) — o que qwen2.5-14b-64k (fallback atual) não tem.
+- Antes de gastar tempo/banda, releitura do placar real já testado (Regra 2 — não repetir o que
+  já sei): eliminados por contexto insuficiente — qwen2.5:7b (32k), qwen3:8b (40k), gemma2:9b
+  (8k); eliminados por tool-calling ruim/ausente — deepseek-r1:8b, deepseek-r1:14b (sem tools),
+  hermes3:8b (tool-call aleatório), llama3.1:8b (0 tool-calls); eliminado por hardware —
+  llama3.3:70b (42GB, trava a máquina); eliminado por geração antiga — qwen-14b-chat (2k-8k).
+  Nada disso será re-testado.
+- Achado ao inventariar o disco (`ollama list`): existe um `qwen2.5:32b` (19GB) já puxado, nunca
+  registrado nas rodadas de eliminação anteriores — candidato novo, tamanho entre o teto que
+  funciona (14b/9GB) e o que trava (70b/42GB). 19GB deixa ~29GB de folga de RAM (vs. os ~6GB de
+  folga que o 70b tinha, e travou) — hipótese: pode rodar sem travar. A confirmar na prática,
+  não assumido.
+- Confirmado via `/api/show` (sem custo, já local): `qwen2.5:32b` tem capability `tools`,
+  arquitetura qwen2, contexto nativo 32768 (mesmo caso do 14b-64k — precisa do mesmo truque de
+  Modelfile com `num_ctx` forçado pra passar de 64k).
+- Candidato novo mais alinhado ao pedido original de (24) (raciocínio visível + tools juntos):
+  família **Qwen3**, diferente da DeepSeek-R1 (que tem `thinking` mas não `tools` — eliminada
+  duas vezes por isso). Qwen3 foi treinada nativamente pra ter os dois. `qwen3:8b` já foi
+  testado e eliminado (40k de contexto), mas `qwen3:14b` e `qwen3:32b` nunca foram — confirmados
+  como reais no registry via manifest direto (`registry.ollama.ai/v2/library/qwen3/manifests/14b`
+  e `/32b`, sem precisar puxar pra confirmar que existem): 9.28GB e 20.2GB respectivamente.
+- Plano em execução (autônomo, autorizado): (1) teste decisivo de tool-calling em `qwen2.5:32b`
+  (já local); (2) pull + mesmo teste em `qwen3:14b` (rodando em background agora); (3) `qwen3:32b`
+  se houver tempo; (4) comparar tudo contra o baseline `qwen2.5-14b-64k`; (5) só aplicar como
+  fallback de verdade se houver vencedor claro, com backup + verificação real (mesmo protocolo
+  de (30)) — não trocar a config em produção sem prova, mesmo em modo automático.
+- Tasks #1-#4 criadas pra rastrear a bateria. Resultados registrados na próxima entrada.
