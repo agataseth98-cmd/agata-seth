@@ -720,3 +720,28 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   a entrada em `fallback_model:` e o `custom_providers` correspondente no `config.yaml` (mesmo
   padrão de (30)), com backup antes e prova real depois — mesmo protocolo, só troca o nome do
   modelo.
+
+### 2026-07-06 (34) · Candidatos a fallback reproduzidos COM log salvo (Code executou, Opus auditou)
+
+- Reprodução dos testes narrados em (33), agora com artefato bruto em disco (~/agata/logs/test_32b_*.json, test_qwen3_*.json) — corrige a lacuna de (33) (resultado só narrado, sem dump).
+- qwen2.5-32b-64k (19GB): tool_call limpo e correto (list_dir("/tmp")), 14.4s payload pequeno, sem thinking, sem erro.
+- qwen3-14b-64k (9.3GB): tool_call limpo e correto, 27.9s (~2x), COM raciocínio visível (<think>) antes da tool_call — sem erro. Primeiro modelo do projeto a fazer tools + thinking juntos (pedido aberto desde (24)).
+- lacuna: latência sob payload real (21.6k tokens) segue estimada de (33), não medida neste teste (curl foi payload pequeno).
+- Nenhuma mudança de config. Fallback em produção segue qwen2.5-14b-64k. Troca NÃO decidida.
+
+### 2026-07-06 (35) · Fallback trocado para qwen3-14b-64k (Humano decidiu, Code executou, Opus auditou)
+
+- Decisão do Humano: adotar qwen3-14b-64k como fallback de produção. Critério: usar em produção
+  por um período e decidir pelo uso real se a latência (~2x) compensa qualidade + raciocínio visível.
+- Base: candidatos provados com log em disco em (34). qwen3 é o 1º modelo do projeto com
+  tools + thinking juntos (pedido aberto desde (24)); mitiga o risco estrutural de (24)/(31)
+  (fabricação silenciosa) por expor o raciocínio antes da ação.
+- Trade-off aceito e explícito: ~27.9s vs 14.4s (32b) em payload pequeno; sob payload real,
+  latência maior estimada, ainda não medida (lacuna herdada de (34)).
+- Config: fallback_model.model → qwen3-14b-64k. custom_providers estendido com context_length 65536
+  para qwen3-14b-64k (entradas para os dois modelos coexistem).
+- PROVA pós-troca (mesmo protocolo de (30), pior caso): cache invalidado → get_cached_context_length=None
+  → get_model_context_length('qwen3-14b-64k') resolve 65536 (não caiu pro default). Override durável
+  cobre o modelo novo, sobrevive a cache limpo. Gateway reiniciado, PID 504822, log sem erro/warning.
+- Backup: config.yaml.bak_pre_fallback_qwen3_20260706. Rollback = restaurar backup + restart.
+- Push: origin/main de 97b4bff (27) → HEAD (35) — publica a cadeia acumulada (28)-(35).
