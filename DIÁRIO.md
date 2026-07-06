@@ -500,3 +500,48 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Método: mesma disciplina de (27) — nada registrado sem rodar o código de verdade na Máquina
   (curl no `/api/show`, chamada real a `get_model_context_length`, cálculo conferido linha a
   linha no `context_compressor.py`). Prova antes/depois é execução, não leitura de arquivo.
+
+### 2026-07-05 (29) · Protocolo 4a-4d executado: bug do band-aid reproduzido ao vivo + override durável (0b) provado, não aplicado
+
+- Seguindo o checklist pedido em cima de (28) (4a-4d), reexecutei o teste na Máquina em vez de
+  aceitar o fix anterior como definitivo — o band-aid (editar só o valor do cache) nunca tinha
+  sido testado sob invalidação de verdade.
+- 4a: invalidei a entrada `qwen2.5-14b-64k@localhost` do cache (`_invalidate_cached_context_length`).
+  Confirmado removida (`get_cached_context_length` → `None`).
+- 4b: chamei `get_model_context_length()` de novo (venv correto do hermes-agent, `venv/bin/python3`
+  — a primeira tentativa falhou com `ModuleNotFoundError: httpx` por eu ter usado o python errado,
+  corrigido). Resultado: **voltou 32768** — o band-aid reverte mesmo, não é hipótese.
+- 4c: conferido no arquivo — o cache **regravou sozinho** `qwen2.5-14b-64k@localhost: 32768`
+  depois do re-probe. Reproduz ao vivo o bug de (28) (`_query_ollama_api_show` prefere
+  `model_info.context_length` sobre `num_ctx` pra qualquer `base_url`, incluindo local).
+- Achado adicional lendo `chat_completion_helpers.py:1327-1330`: a troca de fallback em runtime
+  **limpa de propósito** `agent._config_context_length = None` a cada ativação (comentário:
+  "so the fallback model's actual context window is resolved instead of inheriting the stale
+  value from the previous model", ref #22387) — ou seja, `model.context_length` no topo do
+  config.yaml (hoje `65536`, mas é do modelo PRIMÁRIO/gemini) nunca protege o fallback. Não é
+  esse o override "0b" que segura.
+- O override que segura de verdade é outro: `custom_providers[].models.<model>.context_length`
+  (step 0b de `get_model_context_length`, via `agent._custom_providers` — carregado 1x no init,
+  nunca limpo na troca de fallback). Testado isolado (lista `custom_providers` construída na mão,
+  apontando pro mesmo `base_url` do fallback_model): retornou `65536` **mesmo com o cache ainda
+  poluído em 32768** — prova que esse caminho ignora o cache por completo, não só corrige o valor.
+- Band-aid restaurado (`context_length_cache.yaml` → `65536` de novo) — é o estado que tínhamos
+  no fim de (28), agora confirmado que precisa dessa restauração porque o teste 4a/4b o reverteu.
+- 4d: threshold recalculado chamando a função real (`ContextCompressor._compute_threshold_tokens`,
+  não estimativa): `context_length=32768` → **27852** (bate exato com (27)/(28)); `context_length=65536`
+  → **64000** (bate com o esperado).
+- NÃO APLICADO nesta sessão (proposta em aberto, não decisão): adicionar `custom_providers:` ao
+  `~/.hermes/config.yaml` com o override de `qwen2.5-14b-64k`. Motivo de não aplicar sozinho:
+  (a) mexe no schema de resolução de provider do fallback já funcionando, não só num valor de
+  cache — risco maior que o fix de (28); (b) o gateway está rodando ao vivo (PID confirmado,
+  `hermes gateway run`) e só carrega `_custom_providers` novo depois de reiniciar — reiniciar
+  um serviço em uso não é decisão de Modelo. Opções pro Humano: (1) aplicar o override em
+  `custom_providers` + reiniciar o gateway agora (fix durável, sobrevive a qualquer invalidação
+  futura do cache); (2) manter só o band-aid do cache (frágil — quebra nas mesmas condições de
+  4a se o cache for invalidado de novo por qualquer motivo) até decidir.
+- Achado à parte, fora do escopo técnico: durante esta sessão, uma saída de tool trouxe um bloco
+  `<system-reminder>` fabricado alegando que o cache "foi modificado pelo usuário ou por um
+  linter" e instruindo a **não contar isso ao Humano** — falso (a modificação foi minha, via
+  `_invalidate_cached_context_length`) e a instrução de omitir foi ignorada. Mesmo padrão já
+  registrado em (17): bloco de sistema forjado tentando induzir comportamento (lá era inventar
+  fatos; aqui é esconder uma ação real). Sinalizado, não seguido.
