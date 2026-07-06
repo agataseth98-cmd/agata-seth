@@ -545,3 +545,49 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   `_invalidate_cached_context_length`) e a instrução de omitir foi ignorada. Mesmo padrão já
   registrado em (17): bloco de sistema forjado tentando induzir comportamento (lá era inventar
   fatos; aqui é esconder uma ação real). Sinalizado, não seguido.
+
+### 2026-07-06 (30) · Override durável aplicado + gateway reiniciado — (28)/(29) fechados de vez
+
+- Decisão do Humano (autorização explícita via pergunta direta, não inferida): aplicar o
+  override `custom_providers` proposto em (29) e reiniciar o gateway ao vivo pra valer.
+- Backup do config feito antes de tocar: `~/.hermes/config.yaml.bak-pre-custom-providers-20260706002823`.
+- Editado `~/.hermes/config.yaml`, bloco novo logo após `fallback_model`:
+  ```yaml
+  custom_providers:
+    - name: qwen-local-ctx-override
+      base_url: http://localhost:11434/v1
+      models:
+        qwen2.5-14b-64k:
+          context_length: 65536
+  ```
+  Schema conferido linha a linha em `hermes_cli/config.py` (`_normalize_custom_provider_entry`)
+  antes de escrever — `name` é campo obrigatório (sem ele a entrada é descartada em silêncio
+  por `_normalize_custom_provider_entry`, achado checando o código, não por tentativa e erro).
+- PROVA definitiva de durabilidade (o que faltava desde (29)): com o `config.yaml` real
+  carregado via `hermes_cli.config.load_config()` + `get_compatible_custom_providers()` (o
+  mesmo caminho que `agent_init.py` usa), chamei `_invalidate_cached_context_length()` de novo
+  pra apagar por completo a entrada do qwen do cache (pior caso possível) e então
+  `get_model_context_length()`: **retornou 65536 mesmo com o cache vazio** — o override em
+  0b resolve sem nunca consultar o cache. Isso fecha a lacuna de (29): não é só "testado
+  isolado", é o config real do disco, no pior cenário, com resultado correto.
+- Cache restaurado a 65536 por completude (não é mais o que protege, mas não custa deixar
+  consistente).
+- Gateway reiniciado de verdade, não só a config:
+  - `hermes gateway stop` mentiu na primeira tentativa (disse "✓ Stopped" mas `ps` mostrava
+    o PID 6848 ainda vivo — pidfile limpo sem o processo morrer). Verificado na Máquina
+    (`ps`, não confiando no texto do comando), não assumido.
+  - Segunda tentativa de `stop` funcionou (com atraso — teardown leva ~5s, confirmado no log:
+    `Received SIGTERM as a planned gateway stop — exiting cleanly`, `total teardown 5.03s`).
+  - Subido de novo (`hermes gateway run` em background, mesmo modo manual de antes — "Running
+    manually, not as a system service"). PID novo: **448528** (era 6848).
+  - Log de partida limpo: sem erro nem warning sobre o `custom_providers` novo, `api_server`
+    voltou a escutar em `127.0.0.1:8642`, `Previous gateway exited cleanly — skipping session
+    suspension`.
+- Status final: fallback `qwen2.5-14b-64k` agora resolve `context_length=65536` de forma
+  durável — sobrevive a cache apagado, cache reescrito errado pelo bug upstream de (28), ou
+  qualquer reinício futuro do gateway. Threshold de compactação real: 64000 (era 27852).
+- (28) e (29) FECHADOS. Nada pendente de prova nesta cadeia.
+- Nota de método: o Opus (t=15) recomendou fechar este bug antes de qualquer decisão de rumo
+  maior, e não voltar a mexer nisso até a próxima semana. Registrado como o encerramento
+  técnico dessa recomendação — a decisão de rumo (local-first vs. fronteira) continua em
+  aberto e não é deste registro.
