@@ -774,3 +774,6 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   e `agatha.service` → não existem mais; `hermes-gateway.service` seguia `enabled`/`active`.
 - PROJETO.md atualizado: nova seção "Serviços (boot)" documentando os 4 serviços que sobrevivem a
   boot e os 3 leftovers purgados (não recriar).
+### 2026-07-06 (37) · Boot-test de (36) confirmado + inconsistência do RAG registrada (Humano confirmou boot · Opus registrou)
+- Persistência de boot de (36) VALIDADA: Humano executou reboot real e confirmou que o gateway subiu sozinho (hermes-gateway.service user unit + linger), sem start manual. Fecha a "última milha" que ficara aberta em (36) — lá só havia enabled/active/linger verificados, não um reboot de verdade. Fallback qwen3-14b-64k + override de contexto (65536) seguem em produção pós-boot.
+- Achado da reconciliação (atualizar TUDO, esta sessão): a regra operacional do RAG no PROJETO ainda justifica "RAG só em sessões Gemini" com "no fallback qwen (32k nativo) documento grande estoura o contexto". Defasado: depois de (28)/(30)/(35) o fallback não é mais 32k nativo — é qwen3 com 64k por override durável, provado no pior caso. A regra pode seguir válida (janela do Gemini é maior), mas a JUSTIFICATIVA "32k estoura" está errada. Correção do texto do PROJETO (estado-corrente, editável) PENDENTE — próxima sessão, na Máquina via Code.
