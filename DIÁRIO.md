@@ -745,3 +745,32 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   cobre o modelo novo, sobrevive a cache limpo. Gateway reiniciado, PID 504822, log sem erro/warning.
 - Backup: config.yaml.bak_pre_fallback_qwen3_20260706. Rollback = restaurar backup + restart.
 - Push: origin/main de 97b4bff (27) → HEAD (35) — publica a cadeia acumulada (28)-(35).
+
+### 2026-07-06 (36) · Serviços da Ágata configurados p/ iniciar com o sistema + leftover pré-Hermes purgado (Code executou, Humano rodou o sudo)
+
+- Pedido do Humano: deixar os serviços da Ágata subindo junto com o boot. Levantamento no sistema
+  (não por memória) antes de mexer em qualquer unit: `ollama.service` e os containers Docker
+  (`open-webui`, `kokoro-tts`, `restart: unless-stopped`) já sobreviviam a reboot; `agata-consolidacao.timer`
+  já era enabled. O único buraco real era o gateway/`api_server` do Hermes (porta 8642), que só subia
+  manual (`hermes gateway run`), sem unit file.
+- Achado não pedido, sinalizado ao Humano antes de agir: `agata-rest.service` (system, enabled,
+  rodando) autoiniciava a cada boot o `~/.agata_il/src/rest_server.py` — o mesmo servidor REST do
+  protótipo pré-Hermes já flagrado como memória duplicada em (12) (lá só o processo órfão e a Function
+  do Open WebUI tinham sido neutralizados; o unit systemd nunca foi tocado, por isso voltou sozinho).
+  Mesmo padrão estrutural do incidente de (17) (`agatha.service` órfão que travou a Máquina) — leftover
+  de unit file de protótipo antigo sobrevivendo a limpezas anteriores.
+- Decisão do Humano (as 3 perguntas feitas antes de agir): (a) desabilitar `agata-rest.service` agora;
+  (b) instalar o gateway do Hermes como serviço de usuário pra iniciar sozinho; (c) remover os unit
+  files mortos `agata.service` e `agatha.service` (ambos já disabled, apontando pra pastas inexistentes
+  — `agata-workspace`/`agatha-workspace` não existem no disco).
+- Executado: `hermes gateway install --start-now --start-on-login` (sem sudo, mecanismo nativo do
+  Hermes) — criou `hermes-gateway.service` em `~/.config/systemd/user/`, enabled, linger confirmado
+  ativo (sobrevive a logout). Verificado no disco: porta 8642 escutando, PID do processo `hermes`.
+  Os 3 comandos que exigem root (`disable --now agata-rest.service`, `rm agata.service`,
+  `rm agatha.service`) foram impressos pro Humano rodar no próprio terminal — sudo pede senha
+  interativa, canal desta sessão não oferece TTY pra isso (mesma linha vermelha de (17)).
+- Humano confirmou execução; verificado no disco antes de registrar (não só na palavra):
+  `agata-rest.service` → `disabled`/`inactive`, porta 8000 livre; `/etc/systemd/system/agata.service`
+  e `agatha.service` → não existem mais; `hermes-gateway.service` seguia `enabled`/`active`.
+- PROJETO.md atualizado: nova seção "Serviços (boot)" documentando os 4 serviços que sobrevivem a
+  boot e os 3 leftovers purgados (não recriar).
