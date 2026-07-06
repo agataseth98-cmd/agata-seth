@@ -777,3 +777,28 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 ### 2026-07-06 (37) · Boot-test de (36) confirmado + inconsistência do RAG registrada (Humano confirmou boot · Opus registrou)
 - Persistência de boot de (36) VALIDADA: Humano executou reboot real e confirmou que o gateway subiu sozinho (hermes-gateway.service user unit + linger), sem start manual. Fecha a "última milha" que ficara aberta em (36) — lá só havia enabled/active/linger verificados, não um reboot de verdade. Fallback qwen3-14b-64k + override de contexto (65536) seguem em produção pós-boot.
 - Achado da reconciliação (atualizar TUDO, esta sessão): a regra operacional do RAG no PROJETO ainda justifica "RAG só em sessões Gemini" com "no fallback qwen (32k nativo) documento grande estoura o contexto". Defasado: depois de (28)/(30)/(35) o fallback não é mais 32k nativo — é qwen3 com 64k por override durável, provado no pior caso. A regra pode seguir válida (janela do Gemini é maior), mas a JUSTIFICATIVA "32k estoura" está errada. Correção do texto do PROJETO (estado-corrente, editável) PENDENTE — próxima sessão, na Máquina via Code.
+
+### 2026-07-06 (38) · Causa raiz de "perdi a conexão" identificada — crash no handler de erro mascara 429 do Gemini (Humano reportou, Code investigou)
+
+- Humano relatou ter perdido a conexão com a Ágata. `hermes-gateway.service` segue `active (running)`
+  (PID 1057, ativo desde 16:08) — não é queda do processo/gateway.
+- Causa raiz no journal: Gemini (`gemini-2.5-flash`, provider ativo/primário) retorna HTTP 429
+  RESOURCE_EXHAUSTED — quota do free tier esgotada (limite de 20 req/dia nesse modelo,
+  levantado em `agent/gemini_native_adapter.py:976`).
+- Bug que transforma isso em "conexão perdida": ao tratar o 429, `agent/conversation_loop.py:2949`
+  chama `_summarize_api_error()`, que em `run_agent.py:2146` acessa `response.text` num
+  `httpx.Response` de streaming que nunca teve `.read()` chamado — dispara `httpx.ResponseNotRead`,
+  uma SEGUNDA exceção que mascara a primeira. Resultado: toda vez que o Gemini estoura quota, o
+  gateway não devolve um erro tratado nem aciona fallback — a chamada quebra e o stream SSE termina
+  abruptamente, sentido do lado do Humano como perda de conexão.
+- Confirmado que não é payload-dependente: reproduzido com payload mínimo ("diga ok") direto no
+  `api_server` (porta 8642, autenticado), crash em <1s.
+- Confirmado que qwen3-14b-64k (fallback configurado em (35)) funciona normalmente quando chamado
+  direto no ollama (`localhost:11434`) — o problema é que o crash no handler de erro do Gemini
+  acontece ANTES do fallback ser acionado nesse caminho de código, então o fallback configurado
+  nunca chega a ser tentado.
+- Última falha no log: 19:04. Sem novas tentativas registradas até 20:18 (hora desta entrada) —
+  gap consistente com o Humano ter desistido de tentar após as falhas repetidas.
+- Nenhuma mudança de código ou config aplicada nesta entrada — achado registrado. Fix requer patch
+  em `run_agent.py:2146` (não acessar `.text` sem `.read()` em resposta de streaming) e revisão do
+  ponto em que o fallback deveria ser acionado antes desse handler quebrar.
