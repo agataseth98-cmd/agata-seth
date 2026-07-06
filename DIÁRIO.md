@@ -660,3 +660,63 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   fallback de verdade se houver vencedor claro, com backup + verificação real (mesmo protocolo
   de (30)) — não trocar a config em produção sem prova, mesmo em modo automático.
 - Tasks #1-#4 criadas pra rastrear a bateria. Resultados registrados na próxima entrada.
+
+### 2026-07-06 (33) · Resultado da bateria: dois candidatos viáveis, nenhuma troca aplicada ainda
+
+- Dois modelos novos criados localmente (`ollama create`, mesmo truque de Modelfile do
+  `qwen2.5-14b-64k`: `FROM <base>` + `PARAMETER num_ctx 65536`), testados com o protocolo
+  decisivo de (25) — curl real com `tools` no payload — e depois com um payload realista
+  (~21.6k tokens de padding, simulando o tamanho do system prompt+tools reais do Hermes):
+
+  **`qwen2.5-32b-64k`** (base `qwen2.5:32b`, 19GB, já estava no disco sem eu saber — nunca
+  tinha sido testado nas rodadas anteriores):
+  - Tool-call: limpo e correto (`get_weather("São Paulo")`, `finish_reason=tool_calls`).
+  - `ollama ps` durante a carga: 73%/27% CPU/GPU, RSS ~20-27GB. **Não travou a máquina**
+    (memória "disponível" ficou em ~26-29GB o tempo todo — folga bem maior que o 70b, que
+    tinha só ~6GB de folga e travou em (18)).
+  - Latência com payload realista (21.6k tokens): **20.9s e 64.6s** em duas rodadas (variação
+    provavelmente por causa do pull do qwen3:14b competindo por I/O ao mesmo tempo) — igual ou
+    **mais rápido** que o baseline atual (66-130s observados em produção pro qwen2.5-14b-64k).
+  - Sem `thinking` — resposta direta, sem raciocínio visível.
+  - Qualidade da resposta: correta, fluente, sem alucinação, nos dois testes.
+
+  **`qwen3-14b-64k`** (base `qwen3:14b`, 9.3GB, confirmado real no registry antes do pull —
+  seguindo a lição de (25)):
+  - **Único candidato desta bateria (e de todo o histórico) com `tools` E `thinking` juntos**
+    (`capabilities: ['completion', 'tools', 'thinking']` via `/api/show`) — exatamente o pedido
+    em aberto desde (24). DeepSeek-R1 (8b e 14b) tinha só `thinking`, sempre eliminado por isso.
+  - Tool-call: limpo e correto, **com campo `reasoning` visível e separado** no JSON de resposta
+    (ex.: "Okay, the user is asking for the current temperature in São Paulo. Let me see what
+    tools I have available...") — texto de raciocínio real, legível, não decorativo.
+  - Qualidade excelente em teste de conhecimento real (capital da Mongólia): raciocínio correto,
+    resposta rica e precisa, sem alucinação.
+  - Custo real do `thinking`: **~198s** (3min18s) pro mesmo payload realista de 21.6k tokens —
+    bem mais lento que o baseline (66-130s) e que o qwen2.5-32b-64k (20.9-64.6s). O raciocínio
+    visível soma tokens de geração extras antes da resposta final; é o preço da transparência.
+  - `qwen3:32b` (20.2GB, confirmado no registry) **não testado** — decisão de conservar tempo/
+    recursos: o padrão já está claro (thinking custa ~2-3x de latência), testar na versão maior
+    só pioraria o trade-off sem mudar a conclusão.
+
+- **Nenhuma mudança aplicada na config de produção.** `qwen2.5-14b-64k` continua sendo o
+  fallback real no `~/.hermes/config.yaml`, intocado. Os dois candidatos existem só como
+  modelos Ollama locais, prontos pra troca, mas a troca em si não foi feita.
+- Por quê não apliquei sozinho, mesmo com "modo automático" autorizado: o Gemini está com a
+  cota estourada **agora mesmo** (429, registrado em (31)) — ou seja, qualquer coisa que eu
+  quebrasse no fallback deixaria a Ágata sem nenhum cérebro funcional a noite toda, sem ninguém
+  acordado pra notar ou reverter. O risco é assimétrico (testar não quebra nada; trocar em
+  produção sem o Humano por perto pode). Testar e documentar cabia no "automático"; substituir
+  o único fallback funcional enquanto o Humano dorme, não.
+- Recomendação pronta pra amanhã, não decisão tomada: são dois objetivos diferentes, não um
+  vencedor único —
+  1. **Se o critério for velocidade+qualidade** (sem se importar com raciocínio visível):
+     `qwen2.5-32b-64k` parece uma troca estritamente melhor que o atual (mais rápido nos testes,
+     melhor qualidade por ser maior, mesmo tool-calling limpo, não travou a máquina).
+  2. **Se o critério for o pedido original de (24)** (ver o raciocínio em tempo real pra pegar
+     fabricação antes de acontecer, não só auditar depois): `qwen3-14b-64k` é o único candidato
+     que já existiu com essa capacidade — ao custo de ~2-3x mais latência por chamada.
+  3. Ficar como está (`qwen2.5-14b-64k`) também é opção legítima — já é conhecido, já rodou
+     meses, sem surpresa.
+- Comando pronto (não executado) se o Humano escolher a opção 1 ou 2 amanhã: adicionar/trocar
+  a entrada em `fallback_model:` e o `custom_providers` correspondente no `config.yaml` (mesmo
+  padrão de (30)), com backup antes e prova real depois — mesmo protocolo, só troca o nome do
+  modelo.
