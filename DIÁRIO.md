@@ -591,3 +591,39 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   maior, e não voltar a mexer nisso até a próxima semana. Registrado como o encerramento
   técnico dessa recomendação — a decisão de rumo (local-first vs. fronteira) continua em
   aberto e não é deste registro.
+
+### 2026-07-06 (31) · Achado: troca de cérebro (fallback) não é reportada ao Humano — suprimida por design
+
+- Observação do Humano, checada no código antes de aceitar: "ela não reporta troca de cérebro,
+  me parece errado." Confirmado — não é bug de execução, é decisão de design do upstream
+  (`hermes-agent`, `run_agent.py:950-1010`).
+- Contexto real que disparou a observação: Gemini bateu HTTP 429 (cota do free-tier esgotada,
+  mesmo padrão de (12)) duas vezes seguidas às 01:15 e 01:17 de hoje, log confirma
+  `Fallback activated: gemini-2.5-flash → qwen2.5-14b-64k (custom)` nas duas. O "salve" que
+  mandei pro Humano colar na Seth muito provavelmente foi respondido pela qwen local, não
+  pelo Gemini.
+- Mecanismo exato, lido linha a linha: o aviso `🔄 Primary model failed — switching to
+  fallback: ...` passa por `agent._buffer_status()`, que **não emite na hora** — guarda numa
+  fila (`_retry_status_buffer`). Essa fila só é exibida ao Humano (`_flush_status_buffer()`)
+  se a chamada inteira falhar depois de esgotar retries E fallback. Se o fallback **funciona**
+  (como nos dois casos de hoje), `agent._clear_status_buffer()` roda logo após "successful
+  content reached" (`conversation_loop.py:4910`) e descarta o aviso em silêncio.
+- Comentário do próprio código upstream, sem ambiguidade sobre a intenção: "Retry and fallback
+  chains were flooding the CLI/gateway with status noise that users found confusing... on
+  success they are silently dropped." É redução de ruído visual deliberada, não falha.
+- Efeito colateral real: o Humano não fica sabendo, dentro da conversa, que trocou de cérebro
+  — só descobre olhando o log (`agent.log`) de fora, como fiz agora. Isso tensiona direto com
+  a Regra 1 deste projeto ("comece toda resposta dizendo seu modelo real"), que é sobre o que
+  o MODELO se autodeclara no texto gerado — diferente do aviso de infraestrutura, que é a barra
+  de status.
+- `lacuna`: não verifiquei se a Seth, no texto que ela mesma gerou (não a barra de status),
+  se autodeclarou como fallback/qwen ao responder o "salve". Preciso da resposta real dela
+  colada aqui pra fechar esse ponto — sem isso não dá pra saber se a Regra 1 está sendo
+  cumprida pelo modelo mesmo com a barra de status suprimida.
+- Não corrigido nesta sessão (código de terceiro, mesmo `hermes-agent` upstream já flagado em
+  (28)/(29); mudança de comportamento de UX, não config). Proposta em aberto pro Humano:
+  (a) aceitar como está (a barra é só conveniência, a autodeclaração do modelo via SOUL é a
+  camada que devia garantir a Regra 1 de qualquer jeito); (b) pedir upstream uma flag pra
+  nunca suprimir o aviso de troca de provider especificamente (diferente de retry comum);
+  (c) reforçar no SOUL uma instrução explícita de sempre citar o provider/modelo real ativo,
+  não só "sou a Ágata", pra não depender da barra de status suprimível.
