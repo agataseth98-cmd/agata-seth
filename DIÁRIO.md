@@ -873,3 +873,18 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   de sync é outro (cópia periódica em vez de symlink real).
 - Decisão do Humano: reverter a linha (não commitar). `git checkout -- memoria/USER.md` — arquivo
   voltou ao estado do último commit, sem a linha estranha.
+
+### 2026-07-07 (43) · Correção de (42): symlink NÃO está quebrado — engano do Code, item fechado (Code investigou de novo, direção da checagem estava invertida)
+
+- (42) registrou como achado aberto que `~/agata/memoria/USER.md` "deveria ser symlink" mas
+  `readlink -f` mostrava arquivo regular. Conclusão estava ERRADA — checagem foi feita na ponta
+  errada da relação.
+- Verificado agora: a relação real é a inversa do que (42) assumiu. O canônico
+  (`~/agata/memoria/USER.md`/`MEMORY.md`, dentro do repo git) é o arquivo REAL, fonte da verdade.
+  Quem é symlink é o lado do Hermes: `~/.hermes/memories/USER.md` → `~/agata/memoria/USER.md` e
+  `~/.hermes/memories/MEMORY.md` → `~/agata/memoria/MEMORY.md` (confirmado com `stat`, ambos
+  `lrwxrwxrwx`, criados em 2026-07-01, com `.lock` ao lado — mecanismo normal do Hermes).
+- `diff` entre nativo e canônico: idêntico nos dois arquivos (exit 0) — sem divergência, tudo
+  consistente. A frase do PROJETO ("memória nativa symlinkada em `~/agata/memoria/`") estava certa;
+  a leitura que o Code fez dela em (42) que estava errada.
+- Item fechado: não há bug, não há divergência, o link nunca quebrou. Nenhuma ação necessária.
