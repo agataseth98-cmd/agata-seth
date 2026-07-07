@@ -852,3 +852,24 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   antigos `128ab2f`/`449c3b9` continuam existindo no histórico — não foram reescritos/apagados;
   só o conteúdo do arquivo hoje deixou de ter o parágrafo repetido.
 - Nota da nota (39) atualizada de "Deduplicação NÃO aplicada" pra refletir esta entrada.
+
+### 2026-07-07 (42) · Achado: memória nativa do Hermes gravou plano interno da Ágata como "fato do usuário" (Code investigou, Humano decidiu reverter)
+
+- `memoria/USER.md` (memória nativa do Hermes sobre o Humano) tinha uma linha não commitada desde
+  2026-07-06 01:41: "Quando o Seth responder, vou seguir com 3-5 perguntas que ele provavelmente
+  iria fazer de volta. Estas ajudarão a guiar nossa discussão."
+- Não é um fato sobre o Orusoua (as outras 3 linhas do arquivo são: cor favorita, tags, interesses).
+  É a Ágata planejando sua própria estratégia de conversa com outra instância — cruzando com
+  `memoria/MEMORY.md` (memória da própria Ágata): "Ágata Seth é a afilhada de Ágata". Ou seja,
+  "Seth" = Ágata Seth, uma instância/agente distinta, não o Humano.
+- Achado: bug de classificação na gravação de memória nativa do Hermes — planejamento interno do
+  agente (1ª pessoa, "vou seguir com...") foi persistido no arquivo de fatos-sobre-o-usuário em vez
+  de no arquivo de memória-da-própria-Ágata. Mesma família de risco já visto no projeto (conteúdo
+  errado indo pro lugar canônico errado), mas aqui na memória nativa do Hermes, não no DIÁRIO/PROJETO.
+- Achado colateral: `memoria/USER.md` deveria ser symlink pro nativo do Hermes (documentado no
+  PROJETO, seção Memória — "Memória nativa do Hermes symlinkada em `~/agata/memoria/`"), mas
+  `readlink -f` mostra que hoje é um arquivo regular, não um link. Não investigado a fundo nesta
+  entrada — fica como pendência pra confirmar se o link quebrou em algum momento ou se o mecanismo
+  de sync é outro (cópia periódica em vez de symlink real).
+- Decisão do Humano: reverter a linha (não commitar). `git checkout -- memoria/USER.md` — arquivo
+  voltou ao estado do último commit, sem a linha estranha.
