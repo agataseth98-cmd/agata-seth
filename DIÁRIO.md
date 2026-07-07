@@ -814,3 +814,35 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - SOUL: existe como arquivo real (não é conceito abstrato nem hardcoded) — `/home/orusoua/agata/SOUL.md` (canônico) e `/home/orusoua/.hermes/SOUL.md` (cópia de hidratação). Fecha o "Erro 3" citado pela Opus.
 - Commit `f7a2b1c` (citado pela Opus, atribuído a "a Seth", que teria corrigido a injeção do SOUL no fallback): NÃO encontrado em `~/agata` nem no `hermes-agent` local instalado. Ressalva: o `hermes-agent` local é um clone raso com um único commit squashed (`7426c09`, remote `NousResearch/hermes-agent`) — não dá pra confirmar nem descartar a existência do commit no histórico real do upstream sem acesso de rede a partir desta sessão. O que É verificável direto: o código instalado não reflete esse fix — o bug do item anterior segue ativo independente do que aquele commit tenha feito ou não upstream.
 - Achado colateral não pedido, registrado por disciplina de não esconder estado inesperado: a entrada (37) deste DIÁRIO está DUPLICADA no histórico do git — dois commits distintos com o mesmo título e conteúdo idêntico (`128ab2f` e `449c3b9`, ambos já em `origin/main` antes desta sessão notar). O segundo (`449c3b9`, 2026-07-06 20:20:16) não foi feito por Code nesta sessão; origem não identificada, possivelmente edição concorrente de outra sessão no mesmo período. Nenhuma perda de conteúdo — apenas duplicação. Deduplicação NÃO aplicada — decisão do Humano pendente.
+
+### 2026-07-07 (40) · Patch do bug de (38)/(39) aplicado e verificado — crash do handler de 429 corrigido (GLM propôs, Humano aprovou, Code aplicou e verificou)
+
+- Contexto: (38) achou a causa raiz de "perdi a conexão" — `run_agent.py:2146` (`_summarize_api_error`)
+  acessava `response.text` numa resposta HTTP em streaming sem `.read()` antes, crashando com
+  `httpx.ResponseNotRead`/`StreamClosed` sempre que o Gemini retornava erro (ex.: 429 de quota).
+  (39) confirmou o fix ainda não estava mergeado.
+- Ágata (GLM, t=8) propôs patch: envolver a leitura em `try/.read()/except`, com fallback pra
+  `snippet = ""` se a leitura falhar. Não aplicou nada sozinha — trace `19f3ca5945b787bd`.
+- Auditoria do Code antes de aplicar: confirmou que `GeminiAPIError` já carrega a mensagem
+  totalmente formatada (via `super().__init__(message)`, incluindo o aviso de free-tier) — então
+  mesmo se `.read()` falhar (o que É esperado neste caso: o `with self._http.stream(...) as response`
+  em `gemini_native_adapter.py` já fechou o stream no `__exit__` antes da exceção chegar aqui), o
+  código cai no fallback pré-existente (`raw[:500]`) que já produz a mensagem certa. Achado adicional:
+  esse handler roda dentro do loop de retry/fallback (`conversation_loop.py:2949`), então o crash
+  provavelmente impedia o código de sequer chegar na lógica de troca pro fallback qwen3-14b-64k —
+  o bug não era só cosmético.
+- Humano aprovou aplicar (opção 1, patch como está).
+- Aplicado em `/home/orusoua/.hermes/hermes-agent/run_agent.py:2144-2151` (repo git local, rollback
+  = `git checkout -- run_agent.py` nesse repo se precisar reverter).
+- Gateway reiniciado (`systemctl --user restart hermes-gateway`, PID novo 58178, log limpo — só
+  warnings de startup pré-existentes, sem erro).
+- Verificação: NÃO forçou o 429 real (a cota free-tier do Gemini reseta por dia e testar assim
+  gastaria cota de produção à toa). Em vez disso, reproduziu o cenário exato em isolamento — um
+  `httpx.Response` de streaming aberto via `MockTransport`, fechado pelo `with`/`__exit__` (igual ao
+  fluxo real), passado pro `AIAgent._summarize_api_error` patchado. Resultado: sem crash, retornou
+  `'HTTP 429: quota exceeded'` — mensagem limpa, útil, provada no cenário que antes derrubava a stream.
+- Limitação conhecida, registrada por disciplina: esse patch vive no `hermes-agent` (repo vendored,
+  clone raso de `NousResearch/hermes-agent`, fora do canônico `agataseth98-cmd/agata-seth`). Uma
+  reinstalação/atualização do Hermes por cima pode sobrescrever essa mudança sem aviso — não há
+  backup automático desse repo como há pro `config.yaml`. Se o Hermes for atualizado, reaplicar
+  este patch ou confirmar se a versão nova já inclui um fix equivalente.
