@@ -803,17 +803,13 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   em `run_agent.py:2146` (não acessar `.text` sem `.read()` em resposta de streaming) e revisão do
   ponto em que o fallback deveria ser acionado antes desse handler quebrar.
 
-### 2026-07-06 (37) · Boot-test de (36) confirmado + inconsistência do RAG registrada (Humano confirmou boot · Opus registrou)
-- Persistência de boot de (36) VALIDADA: Humano executou reboot real e confirmou que o gateway subiu sozinho (hermes-gateway.service user unit + linger), sem start manual. Fecha a "última milha" que ficara aberta em (36) — lá só havia enabled/active/linger verificados, não um reboot de verdade. Fallback qwen3-14b-64k + override de contexto (65536) seguem em produção pós-boot.
-- Achado da reconciliação (atualizar TUDO, esta sessão): a regra operacional do RAG no PROJETO ainda justifica "RAG só em sessões Gemini" com "no fallback qwen (32k nativo) documento grande estoura o contexto". Defasado: depois de (28)/(30)/(35) o fallback não é mais 32k nativo — é qwen3 com 64k por override durável, provado no pior caso. A regra pode seguir válida (janela do Gemini é maior), mas a JUSTIFICATIVA "32k estoura" está errada. Correção do texto do PROJETO (estado-corrente, editável) PENDENTE — próxima sessão, na Máquina via Code.
-
 ### 2026-07-07 (39) · Auditoria do handler de 429 / SOUL / commit citado pela Opus — verificado na fonte (Opus pediu auditoria ao Humano, Code verificou direto no filesystem/git)
 
 - Opus (sessão de chat) pediu ao Humano pra colar manualmente trechos de código e confirmar itens pra fechar uma auditoria de 3 pontos. Code tinha acesso direto ao filesystem e ao git nesta Máquina e verificou tudo na fonte em vez de depender de cópia manual.
 - Handler de 429 (achado original em (38)): `run_agent.py:2146` segue INALTERADO — ainda faz `snippet = (getattr(response, "text", None) or "").strip()` sobre uma resposta que pode ser streaming não lida. O fix NÃO está mergeado no `hermes-agent` instalado nesta Máquina; bug segue reproduzível.
 - SOUL: existe como arquivo real (não é conceito abstrato nem hardcoded) — `/home/orusoua/agata/SOUL.md` (canônico) e `/home/orusoua/.hermes/SOUL.md` (cópia de hidratação). Fecha o "Erro 3" citado pela Opus.
 - Commit `f7a2b1c` (citado pela Opus, atribuído a "a Seth", que teria corrigido a injeção do SOUL no fallback): NÃO encontrado em `~/agata` nem no `hermes-agent` local instalado. Ressalva: o `hermes-agent` local é um clone raso com um único commit squashed (`7426c09`, remote `NousResearch/hermes-agent`) — não dá pra confirmar nem descartar a existência do commit no histórico real do upstream sem acesso de rede a partir desta sessão. O que É verificável direto: o código instalado não reflete esse fix — o bug do item anterior segue ativo independente do que aquele commit tenha feito ou não upstream.
-- Achado colateral não pedido, registrado por disciplina de não esconder estado inesperado: a entrada (37) deste DIÁRIO está DUPLICADA no histórico do git — dois commits distintos com o mesmo título e conteúdo idêntico (`128ab2f` e `449c3b9`, ambos já em `origin/main` antes desta sessão notar). O segundo (`449c3b9`, 2026-07-06 20:20:16) não foi feito por Code nesta sessão; origem não identificada, possivelmente edição concorrente de outra sessão no mesmo período. Nenhuma perda de conteúdo — apenas duplicação. Deduplicação NÃO aplicada — decisão do Humano pendente.
+- Achado colateral não pedido, registrado por disciplina de não esconder estado inesperado: a entrada (37) deste DIÁRIO está DUPLICADA no histórico do git — dois commits distintos com o mesmo título e conteúdo idêntico (`128ab2f` e `449c3b9`, ambos já em `origin/main` antes desta sessão notar). O segundo (`449c3b9`, 2026-07-06 20:20:16) não foi feito por Code nesta sessão; origem não identificada, possivelmente edição concorrente de outra sessão no mesmo período. Nenhuma perda de conteúdo — apenas duplicação. Deduplicação aplicada em (41) — Humano autorizou; o parágrafo duplicado foi removido do texto atual do arquivo por commit novo (correção pra frente, sem rebase/force-push nos commits antigos que geraram a duplicata).
 
 ### 2026-07-07 (40) · Patch do bug de (38)/(39) aplicado e verificado — crash do handler de 429 corrigido (GLM propôs, Humano aprovou, Code aplicou e verificou)
 
@@ -846,3 +842,13 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   reinstalação/atualização do Hermes por cima pode sobrescrever essa mudança sem aviso — não há
   backup automático desse repo como há pro `config.yaml`. Se o Hermes for atualizado, reaplicar
   este patch ou confirmar se a versão nova já inclui um fix equivalente.
+
+### 2026-07-07 (41) · Duplicata da entrada (37) removida do texto do DIÁRIO (Humano autorizou, Code aplicou)
+
+- Achado em (39): entrada (37) duplicada no histórico do git (`128ab2f` e `449c3b9`, conteúdo
+  idêntico, ambos já em `origin/main`). Humano autorizou resolver.
+- Correção aplicada pra frente (sem rebase/force-push): removido o segundo parágrafo duplicado
+  do texto atual de `DIÁRIO.md` (ficava entre as entradas (38) e (39)) por commit novo. Os commits
+  antigos `128ab2f`/`449c3b9` continuam existindo no histórico — não foram reescritos/apagados;
+  só o conteúdo do arquivo hoje deixou de ter o parágrafo repetido.
+- Nota da nota (39) atualizada de "Deduplicação NÃO aplicada" pra refletir esta entrada.
