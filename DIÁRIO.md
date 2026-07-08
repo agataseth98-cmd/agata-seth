@@ -896,3 +896,13 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Pivô de fase: inicia pesquisa de ferramentas de otimização/integração de memória (NotebookLM + Obsidian).
 - Fora de escopo/não-verificado: resultados de teste dos modelos ficam no Capivara; memoria/USER.md segue não-commitado.
 - Aberto (inalterado): Gemini 400/429 não reproduzido; carregar no caminho do fallback; TES-001 não rodado limpo.
+
+### 2026-07-08 (45) · Inventário read-only do stack de memória — veredito: enxuto, nenhuma otimização aplicada (Humano decidiu · Opus propôs · Code mediu)
+
+- Contexto: (44) abriu pivô de fase pra pesquisa de otimização de memória (NotebookLM + Obsidian). Antes de otimizar, mediu-se a linha de base na Máquina. Leitura pura — nada alterado.
+- Medido (Code, read-only): núcleo em ~/agata → SOUL 32L/2.394B, REGRAS 96L/5.486B, PROJETO 55L/5.554B, DIÁRIO 898L/96.289B. memoria/MEMORY.md 10L, memoria/USER.md 4L; symlinks do lado Hermes reconfirmados, diff idêntico — consistente com (43). .hermes.md 201L/14.483B.
+- Veredito do Humano: stack enxuto, sem gargalo que justifique corte agora. Não otimizar nesta rodada; (44) segue como pesquisa, não implantação.
+- Aberto (novo) — discrepância PROJETO ↔ disco: PROJETO (seção Memória) diz "repo git + cofre Obsidian na mesma pasta", mas não há `.obsidian` em ~/agata. Cofre não inicializado no disco. Pendente: inicializar o cofre OU corrigir a frase do PROJETO. Não resolvido nesta entrada.
+- Aberto (novo) — acesso ao DIÁRIO cresce sem teto por design: append-only (REGRAS #4, correto, não se mexe). Custo por turno NÃO afetado (só últimas 30 linhas entram no .hermes.md); custo aparece só em leitura integral/busca. Alvo natural do pivô de (44): índice/sumário derivado e regenerável, que nunca vira fato canônico nem reescreve o DIÁRIO.
+- Aberto (novo) — consolidação noturna escreve no canon sem humano no loop: agata-consolidacao.timer roda gemini-2.5-flash que pode dar append no DIÁRIO. Duas últimas rodadas (2026-07-07 08:07, 2026-07-08 09:34): ambas "nada relevante", não gravaram. Superfície a revisar dado histórico de fabricação ((16), (42)) — não urgente.
+- lacuna: tokens do .hermes.md (sem tiktoken no ambiente; heurística ~2,7–3,6k, não firme). lacuna: taxa de crescimento de ~/.hermes (1,2G total, sessions 420K hoje; sem snapshot histórico pra tendência).
