@@ -888,3 +888,11 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
   consistente. A frase do PROJETO ("memória nativa symlinkada em `~/agata/memoria/`") estava certa;
   a leitura que o Code fez dela em (42) que estava errada.
 - Item fechado: não há bug, não há divergência, o link nunca quebrou. Nenhuma ação necessária.
+
+### 2026-07-07 (44) · Conselho + Capivara + pivô de fase (Humano decidiu · Opus registrou)
+
+- GLM aceito como Modelo auditor ativo do consórcio (substitui GPT, fora por cota). Base: desempenho observado; detalhe comportamental é material do Capivara, não deste DIÁRIO.
+- Projeto PARALELO "Capivara das IAs" iniciado — observatório de comportamento de LLMs, projeção derivada do DIÁRIO. Rascunhados: arquitetura, ontologia+método, moldes FEN-001 e MOD-004, como artefatos SEPARADOS. Fronteira: Capivara LÊ o canon, NUNCA escreve fato de volta. Artefatos em posse do Humano, não versionados no repo.
+- Pivô de fase: inicia pesquisa de ferramentas de otimização/integração de memória (NotebookLM + Obsidian).
+- Fora de escopo/não-verificado: resultados de teste dos modelos ficam no Capivara; memoria/USER.md segue não-commitado.
+- Aberto (inalterado): Gemini 400/429 não reproduzido; carregar no caminho do fallback; TES-001 não rodado limpo.
