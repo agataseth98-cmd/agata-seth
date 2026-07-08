@@ -906,3 +906,26 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Aberto (novo) — acesso ao DIÁRIO cresce sem teto por design: append-only (REGRAS #4, correto, não se mexe). Custo por turno NÃO afetado (só últimas 30 linhas entram no .hermes.md); custo aparece só em leitura integral/busca. Alvo natural do pivô de (44): índice/sumário derivado e regenerável, que nunca vira fato canônico nem reescreve o DIÁRIO.
 - Aberto (novo) — consolidação noturna escreve no canon sem humano no loop: agata-consolidacao.timer roda gemini-2.5-flash que pode dar append no DIÁRIO. Duas últimas rodadas (2026-07-07 08:07, 2026-07-08 09:34): ambas "nada relevante", não gravaram. Superfície a revisar dado histórico de fabricação ((16), (42)) — não urgente.
 - lacuna: tokens do .hermes.md (sem tiktoken no ambiente; heurística ~2,7–3,6k, não firme). lacuna: taxa de crescimento de ~/.hermes (1,2G total, sessions 420K hoje; sem snapshot histórico pra tendência).
+
+### 2026-07-08 (46) · Cofre Obsidian versionado sobre o repo canônico — arquitetura de memória em duas camadas (Humano inicializou · Code executou · Opus propôs)
+
+- Contexto: pivô de (44) + veredito de (45) (stack enxuto, otimizar o ACESSO, não a história). Passo escolhido: iniciar o cofre Obsidian que o PROJETO já mencionava mas que (45) mostrou não existir no disco.
+- Ação do Humano (GUI, não Code): Obsidian abriu ~/agata como vault; .obsidian/ criado (core-plugins.json, app.json, appearance.json, workspace.json).
+- Code (verificação read-only): .obsidian/ untracked no repo canônico; .gitignore de 16 linhas não cobria .obsidian.
+- Code (write, Humano autorizou): append ao .gitignore da regra `.obsidian/workspace*.json` (layout por-máquina, réplica Windows planejada — não versionar). Staged: .gitignore + core-plugins/app/appearance.json. workspace.json ficou fora pela regra. Nenhum arquivo proibido tocado.
+- Fecha a discrepância PROJETO<->disco levantada em (45): a frase "repo git + cofre Obsidian na mesma pasta" agora é verdadeira no disco — resolvida pela realidade, não por editar o texto do PROJETO.
+- Arquitetura consolidada: camada local (Obsidian sobre git) = offline, privada, FATO na Máquina; camada nuvem (NotebookLM) = cruzamento de dados, RELATO/projeção alinhada ao Capivara. Só o não-sensível vai pra nuvem; segredos/chaves/canon nunca. Mão única: Capivara/NotebookLM lê, nunca escreve fato de volta.
+- Aberto (novo) — memoria/MEMORY.md aparece modificado (M) e não commitado no git status; origem investigada em (47).
+- Aberto (novo) — untracked não relacionados: hermes_docs.html, hermes_llms.txt, hermes_tools_docs.html (prováveis docs do Hermes em scratch). Não commitados. Decisão de ignorar/remover fica pro Humano.
+- lacuna: integração automática Obsidian<->NotebookLM citada por 1 fonte de busca, não verificada na Máquina. A arquitetura de duas camadas não depende dela — no pior caso, export/cola manual.
+- Abertos de (44) intocados: Gemini 400/429 não reproduzido; carregar no caminho do fallback; TES-001 não rodado limpo.
+
+### 2026-07-08 (47) · Achado: 2º mecanismo de escrita automática em memória (bg-review do Hermes Gateway) apaga história canônica sem humano no loop (Code investigou · Opus registrou)
+
+- Origem provada (não suposta): memoria/MEMORY.md modificado às 15:03:52 (mtime bate com log). Sessão c5ea4ed2 (api_server, gemini-2.5-flash). Passo "bg-review" do próprio Hermes Gateway — self-review pós-turno, distinto do agata-consolidacao.timer — tentou salvar 3 fatos; bateu no teto de 2.200 chars ("2,712/2,200"); no retry coube APAGANDO 5 entradas antigas.
+- Apagado: identidade/história (mensagem GLM-5, "Ágata Seth é afilhada de Ágata", capacidades dos padrinhos). Inserido: 3 fatos operacionais/efêmeros (web_search/web_extract indisponíveis no ambiente de execução). Trocou durável por descartável, sozinho.
+- Symlink reconfirmado por inode (11386731): ~/.hermes/memories/MEMORY.md e ~/agata/memoria/MEMORY.md são o MESMO arquivo físico. Escrita no nativo = escrita direta no canônico versionado.
+- Violação estrutural: existe processo automático, sem humano no loop e sem passar pelo DIÁRIO, que DELETA história canônica pra caber num teto. Colide com REGRA #4 (nunca apagar). Não é cosmético — é funcional (padrão de (28)).
+- Distinto de (42): lá era USER.md, plano interno gravado como fato do usuário, via janela diferente. Aqui é MEMORY.md, eviction por teto, mecanismo diferente. Família de risco comum, causa distinta.
+- lacuna: conteúdo exato das 3 operações da 1ª tentativa (log truncado em 328 bytes pelo Hermes). lacuna: sessão c5ea4ed2 não encontrada em ~/.hermes/sessions/ — conversa completa não reconstruível.
+- Aberto (A): diff de hoje em MEMORY.md — decisão do Humano (reverter recomendado). Aberto (B): reconfigurar/desligar o bg-review — MUDANÇA ESTRUTURAL, exige 2ª opinião (GLM) ou risco escrito do Humano; investigação read-only da config primeiro.
