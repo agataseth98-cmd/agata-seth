@@ -943,3 +943,33 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes 
 - Verificado na Máquina (t=23): grep pós-edição = nudge_interval: 0; diff bak vs atual = 1 linha; gateway active (running), PID 66737.
 - Fecha o Aberto (B) de (47). O Aberto (A) de (47) já foi resolvido no revert (t=18, MEMORY.md restaurado).
 - Efeito colateral bom: encerra também a restrição operacional "não usar api_server até B fechar" — a janela de re-eviction está fechada.
+
+### 2026-07-09 (49) · Levantamento de ferramentas tipo NotebookLM — redundância Khoj + Open Notebook (Humano decidiu · Opus pesquisou · GLM auditou)
+
+- Contexto: (44) abriu pivô de fase pra pesquisa de ferramentas de otimização de memória (NotebookLM + Obsidian). (45) mediu a linha de base do stack — veredito enxuto, sem otimização aplicada. Esta entrada cobre o levantamento das ferramentas, auditoria cruzada, e decisão de qual adotar.
+
+- Levantamento (Opus t=25-26): mapeadas ferramentas open-source/self-hosted equivalentes ao NotebookLM. Campo dividido em nuvem (NotebookLM Google, Claude Projects) e local (Khoj, SurfSense, Open Notebook, KnowNote). Achado estrutural: existem alternativas self-hosted maduras — a camada de pesquisa pode ser local, sem mandar dados pro Google. Isso atualiza a premissa de (46) (Obsidian = fato; NotebookLM nuvem = relato).
+
+- Auditoria GLM (t=11) — correções ao levantamento do Opus:
+  * Khoj ~35k stars impreciso — fonte dev.to (Jun/2026) diz ~30,3k. Tratado como ~30-35k (varia por fonte/data).
+  * SurfSense mal enquadrado: README atual (Jun/2026) mostra repivô pra "competitive intelligence platform", não ferramenta de pesquisa pessoal. Open Notebook e Khoj são o comparativo real. Opus concedeu (t=28) — SurfSense sai da disputa.
+  * SurfSense licença Apache-2.0: não confirmada pelo GLM (lacuna de snippet), confirmada pelo Opus na fonte. SurfSense migrando pra modelo comercial — pesa na lente 2030.
+  * Open Notebook ~26k stars omitido do contexto inicial pelo Opus — distorce a percepção relativa.
+  * KnowNote "sem nuvem" impreciso: privacidade depende do LLM plugado, não é propriedade do app.
+  * "Reviravolta" (t=25) era sobretítulo — self-hosted RAG não é novo, mas não estava fatorado em (46). Corrigido pra "fator omitido".
+
+- Auditoria cruzada (Opus t=28, GLM t=12): Opus flags afirmação do GLM sobre "Docker stack com Ollama+Kokoro+Whisper" do Open Notebook como não-verificada. GLM verificou na fonte: `docker-compose-full-local.yml` empacota Ollama + Speaches (Kokoro-82M-ONNX TTS + faster-whisper STT) + SurrealDB. Afirmação correta, mas com ressalvas: (a) Kokoro do Open Notebook é instância separada do kokoro-tts existente do Ágata (porta 8880) — duplicação, não reaproveitamento; (b) VRAM mínimo 8GB no limite da Predator. Mecanismo do projeto funcionou: dois relatos conflitantes, fonte desempatou.
+
+- Decisão de licença (Fase 8): Humano definiu que Fase 8 NÃO é SaaS — monetização será por consultoria/setup, hardware pré-configurado, treinamento. AGPL-3.0 (Khoj) não morde nesse modelo. Licença deixa de ser fator de decisão.
+
+- Decisão de redundância: Humano estabeleceu que tudo crucial do sistema deve ter redundância — degradado até 50% aceito com aviso. Arquitetura: Khoj (primário Obsidian) + Open Notebook (primário pesquisa) se cobrem mutuamente. Se Khoj cai, Open Notebook lê os .md do vault (degradado). Se Open Notebook cai, Khoj cobre busca e Obsidian.
+
+- Viabilidade na Predator (GLM t=17, t=21, dados da Máquina via Claude Code):
+  * Hardware: RTX 4060 8GB VRAM (7.7 GiB livre), 38 GiB RAM (27 GiB livre), 392 GiB disco livre.
+  * Serviços ativos: open-webui (378 MiB), kokoro-tts (400 MiB), Ollama (porta 11434, sem modelo carregado no momento), hermes-gateway (porta 8642).
+  * Open Notebook: VIÁVEL. Compose full-local roda em CPU por padrão (0 VRAM adicional). RAM ~2-4 GiB. Ajustes necessários: remover Ollama do compose (já roda no host), apontar pro host via 172.17.0.1:11434; Speaches (TTS) é duplicação do kokoro-tts existente — reaproveitar ou aceitar duplicação. Portas 8502 e 5055 livres. SurrealDB na porta 8000 (livre).
+  * Khoj: VIÁVEL. Compose no branch `master` (não `main`). RAM ~1-1.5 GiB (pgvector + searxng + terrarium + server). 0 VRAM adicional. Porta 42110 livre. Porta 8080 interna ao Docker — não conflita com 127.0.0.1:8080 do host (redes diferentes). Ollama: descomentar OPENAI_BASE_URL=http://host.docker.internal:11434/v1/.
+  * Ambos cabem: ~3-5.5 GiB RAM adicional, 0 VRAM, ~25-60 GiB disco. Folga: 21+ GiB RAM, 330+ GiB disco.
+
+- Aberto: instalar os dois composes editados (Ollama host, portas). Khoj: plugin Obsidian apontar pro vault ~/agata. Open Notebook: decidir se reaproveita kokoro-tts existente ou sobe Speaches separado. Registrar no PROJETO (seção Serviços e/ou nova seção Ferramentas de Pesquisa).
+- Aberto (de (45), inalterado): consolidação noturna sem humano no loop; DIÁRIO cresce sem teto; cofre Obsidian inicializado mas integração Khoj não configurada.
