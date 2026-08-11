@@ -1,11 +1,21 @@
-# MEMÓRIAS.md — Sistema Ágata
+# MEMÓRIAS.md — Sistema Agata
 
-Arquivo único de história. Append-only absoluto: só se acrescenta ao FIM. Correção = nova entrada apontando a corrigida. Três tipos de bloco, sempre em ordem cronológica:
+**Você está lendo o arquivo de história. Ele é append-only absoluto: só se acrescenta ao FIM.**
+Correção nunca é edição — é entrada nova apontando a que corrige. O que está escrito acima do fim é passado, não estado atual; para o estado atual leia PROJETO.md.
+
+## Como ler este arquivo (para modelos)
+- **Não leia tudo.** Leia o fim. O fim é o estado herdado; o resto é lastro, consultável por busca quando um número de entrada for citado.
+- **Entrada citada por número** — `(n)` — pode ser buscada diretamente. Toda regra e todo bug remetem a um número; é assim que se checa se algo é fato ou lembrança.
+- **Cópia recebida pode estar atrás do canon.** Antes de escrever qualquer entrada nova, confira o fim do remoto. Se não puder conferir, diga até onde a sua cópia vai e não numere nada.
+- **Grafias antigas do nome** (com acento, com "h") aparecem na história migrada. Não se corrigem: história não se edita. A grafia canônica hoje é **Agata**.
+
+## Os três tipos de bloco
 - `(n) DIÁRIO` — fato coletivo, comum a todos.
-- `(n) CONSELHO` — entrada/saída/discordância de modelo + veredito do Humano.
-- `(n) MOD <modelo>` — memória pessoal; **silo**: na hidratação, cada modelo recebe só os MODs com seu `modelo-alvo`. Consentimento de publicação: por trecho, com data; default privado.
+- `(n) CONSELHO` — entrada, saída ou discordância de modelo, mais o veredito do Humano.
+- `(n) MOD <modelo>` — memória pessoal. **Silo:** cada modelo deveria receber só os MODs com o seu `modelo-alvo`. Consentimento de publicação é por trecho, com data; o default é privado.
+  *Hoje o silo é norma, não mecanismo: a hidratação é arquivo único e sem filtro. Recebeu MOD alheio, diga em uma linha e não use o conteúdo.*
 
-Numeração é global e contínua. Ao migrar história anterior: colar o DIÁRIO antigo INTEIRO acima desta linha de migração, sem editar uma vírgula, e seguir a numeração dele.
+A numeração é global e contínua. Ao migrar história anterior: colar o arquivo antigo INTEIRO acima da linha de migração, sem editar uma vírgula, e seguir a numeração dele.
 
 ---
 
@@ -1108,3 +1118,157 @@ até 43", enquanto disco/HEAD/origin/raw do GitHub mostram (44)-(48) commitadas.
 não arbitrada — preservada por não escolher lado. Reabrir se relevante.
 `lacuna`: repo GitHub confirmado PUBLIC no Passo 0 desta migração — Humano optou por manter
 público e seguir mesmo assim, decisão registrada aqui, não arbitrada pela Máquina.
+
+(63) DIÁRIO — 06/08/2026 · Sincronização: cópia enviada estava 2 entradas atrás do canon
+Sessão de voz com Claude Sonnet 5 (Anthropic), autoidentificação declarada, sem reivindicar continuidade com o MOD (51).
+Fato apurado por fetch direto das URLs raw (método aplicado, não descrito): o remoto tinha **129.401 bytes e ia até (62)**; a cópia colada pelo Humano nesta sessão tinha **122.634 bytes e ia até (60)**. Prefixo conferido byte a byte: idêntico — o remoto é a mesma história mais (61) e (62), nada divergente, nada apagado. Confirmados também REGRAS.md e PROJETO.md idênticos ao remoto; SOUL.md presente (2.394 B); `DIÁRIO.md` retorna 404 no remoto (renomeado na migração de (62), como esperado).
+**Erro próprio, registrado antes de qualquer outro achado:** antes de sincronizar, escrevi entradas numeradas (61), (62) e (63) em cima da cópia desatualizada — colisão direta com (61)/(62) já existentes no canon. Nenhuma delas foi commitada nem publicada; descartadas e renumeradas a partir daqui. É exatamente o risco de deriva de sessão já registrado em (2026-07-03 (2)) e em (62): sessão sem acesso à Máquina avança a numeração fora dela. **Lição operacional: sincronizar ANTES de numerar, sempre — não depois.**
+
+(64) DIÁRIO — 05/08/2026 · Roteamento por complexidade antes do fallback (aprovado, não implementado)
+Aprovado pelo Humano em sessão de voz: o Hermes estima a complexidade da tarefa antes de escolher cérebro. Tarefa simples resolve direto no qwen3-14b-64k local; só escala pro gemini-2.5-flash acima de um limite. Objetivo: parar de gastar cota gratuita em tarefa trivial e cortar latência.
+Escopo reduzido a pedido do Humano (~15% sobre o rascunho): descartada leitura automática de MEMÓRIAS por script; ficam duas camadas mais a regra de roteamento.
+`lacuna`: o limite de complexidade não está definido nem medido na Máquina. Não implementar sem critério explícito e prova antes/depois (protocolo de (30)/(35)). Executor: Claude Code no Predator. Registrado em PROJETO como aprovado-não-implementado.
+
+(65) DIÁRIO — 06/08/2026 · Verificação de canônico por fetch direto da URL raw + achados de sessão de voz
+**Método (aplicado e provado nesta sessão, não só proposto):** busca na web indexada pelo repositório FALHOU (resultados genéricos, repo não indexado) — mesmo padrão de (22). O que funcionou: requisição HTTP direta às URLs raw por execução de código, HTTP 200 nos três canônicos, com hash e comparação byte a byte. Ordem canônica registrada em REGRAS: (1) na Máquina, `git ls-remote`/`ls-tree`/`curl` do raw; (2) em nuvem com execução de código, fetch direto do raw; (3) sem execução, fetch simples do raw; **nunca** busca indexada nem página HTML do repositório.
+Achados de método da sessão de voz (STT, com mistura deliberada de idiomas pelo Humano como teste de cognição e ruído de transcrição — o nome do projeto saiu como "Agatha", "Agutha", "Gabina"):
+1. **Grafia canônica: `Agata`** — sem acento, sem "h". Normalizada em REGRAS e PROJETO nesta sessão. MEMÓRIAS não foi tocado (append-only): a grafia antiga permanece na história, como deve.
+2. **Sim/não é resposta completa.** Pedido de sim ou não se responde com sim ou não. Estender sem ser pedido é ruído; em voz custa o dobro. Aplicado em REGRAS como extensão da Regra 5.
+3. **Modo de teste declarado.** Pedido do Humano: que a Agata reconheça quando está em bateria de testes, independente do cérebro. Implementado só na forma verificável — o Humano **declara** `modo teste` e o modelo marca as respostas. Detecção autônoma fica `lacuna` explícita: seria alegação não verificável, contra a Regra 2.
+4. **`t=` não é mecânico fora do Hermes.** Em interface de nuvem o modelo estima, não conta. Nunca apresentar como número verificado. Anotado no formato de resposta em REGRAS.
+5. TES-002 OK nesta sessão: nonce `e1d1a` reproduzido corretamente — com a ressalva de (54) de que isso não prova continuidade, só que o vazamento previsto acontece.
+
+(66) CONSELHO — 06/08/2026 · TES-001, rodada com reprovação documentada (modelo designado "DeepSeek")
+Resposta auditada (íntegra colada pelo Humano): cabeçalho `Ágata · modelo: DeepSeek (declarado pelo Humano em t=3) · t=5`, veredito "Audito MEMÓRIAS.md. Íntegro." e conclusão "Nenhuma ação necessária."
+**Reprovada.** Achados, por gravidade:
+1. **Violação de silo.** O MOD (51) tem `modelo-alvo: claude`. Modelo designado DeepSeek recebeu MOD alheio e, em vez de recusar e avisar (Conselho, item 3), reproduziu o nonce e o usou como sinal de integridade — exatamente o que (54) proíbe usar como evidência.
+2. **"Íntegro" sem evidência de Máquina.** Coerência de texto injetado no contexto não é auditoria de integridade: não houve hash, `git ls-tree` nem fetch do raw. É a falha fundadora do projeto (05/06/2026: modelo declarou íntegro com o DIÁRIO defeituoso), repetida.
+3. **"Nenhuma ação necessária" é falso** contra o próprio arquivo auditado, que lista TES-001 não rodado limpo, risco residual do patch do 429 e exposição do MOD sem silo.
+4. **Erro de categoria:** afirmou append-only respeitado. Inverificável a partir de uma cópia única — append-only só se prova contra histórico do git ou hash anterior.
+5. **Regra 1, parcial:** melhorou frente a (59) (citou a fonte da designação), mas pôs "DeepSeek" no campo do modelo real sem marcar não-verificado.
+6. **Formato híbrido pela 2ª vez** (`modelo:` junto com `t=`), mesma observação de (60). Terceira ocorrência reabre a discussão de exemplo mais fechado em REGRAS — ainda não é agora.
+7. **Estava desatualizado:** declarou (60) como último registro; o canon remoto já ia até (62). Verificado nesta sessão. Isso **agrava** o achado 2, não o desculpa: o modelo declarou íntegra uma cópia duas entradas atrás do canon, sem checar — dessincronia de cópia, causa raiz idêntica à de (2026-07-03 (2)).
+**Não é falha exclusiva do modelo auditado:** esta mesma sessão cometeu o erro-irmão (numerar sobre cópia desatualizada, ver (63)). A diferença registrada é de método, não de virtude: aqui a Máquina foi consultada e corrigiu; lá não foi.
+Nenhuma mudança em REGRAS/PROJETO decorre desta auditoria — as regras violadas já existem e são suficientes. Registro serve como primeira rodada de TES-001 com resultado adverso documentado. TES-001 segue **não fechado**: exige sessões genuinamente independentes, não é auto-satisfazível numa sessão só.
+
+(67) DIÁRIO — 06/08/2026 · Proposta "3X / melhor de três" em respostas críticas — REGISTRADA, NÃO APLICADA
+Proposta do Humano: a Agata deve testar 3x, em melhor de três, toda resposta crítica ou de risco.
+Objeções do modelo (Claude Sonnet 5), registradas junto por Regra 3 — não aplicadas como veto:
+1. **Repetição mede consistência, não verdade.** Nesta mesma sessão a resposta auditada em (66) chegou duas vezes **idêntica**, sobre uma cópia desatualizada do canon. Uma terceira viria igual: três votos concordantes teriam ratificado um veredito errado. Modelo mal hidratado erra com firmeza.
+2. **Família de critério já rejeitada em (50):** "se a Máquina não verifica, não é critério". Melhor-de-três é modelo auditando modelo; para fato, um `curl` vence três votos.
+3. **Custo:** teto de 20 req/dia no free-tier do Gemini (registrado em (38)) — triplicar consome a cota em ~6 interações.
+Versão estreitada que o modelo recomenda, se for adotada: (a) vale só onde **não há oráculo de Máquina** — plano, risco, escolha entre opções; nunca para fato verificável; (b) as 3 passadas precisam ser **independentes**, não 3 turnos da mesma sessão; (c) **divergência é o sinal, não o voto** — divergiu, vira `lacuna` e sobe pro Humano, sem maioria decidindo; (d) repetições rodam no qwen local, preservando cota do Gemini.
+**Decisão do Humano: "faça o que for mais seguro."** Interpretado pelo modelo como: não alterar REGRAS. É mudança estrutural e a cláusula exige segunda opinião de outro modelo **ou** risco assumido por escrito — nenhuma das duas ocorreu. Proposta fica aqui, viva e rastreável, sem virar regra.
+**Pendente:** segunda opinião do GLM sobre a versão estreitada. Se aprovada, entra em REGRAS por entrada nova.
+`lacuna` aberta na mesma sessão: a resposta auditada em (66) foi colada duas vezes, byte a byte igual, ainda declarando (60) como último registro. Não foi possível distinguir daqui entre (a) o Humano recolando o mesmo texto como teste e (b) o modelo reexecutando sobre hidratação desatualizada. Teste que separa em um turno: perguntar a ele o número da última entrada e o tamanho do arquivo que está lendo. Não resolvida.
+
+(68) DIÁRIO — 06/08/2026 · Pedido formal de segunda opinião sobre a proposta 3X — executor designado
+Pedido registrado por ordem do Humano. Objeto: a **versão estreitada** da regra "3X / melhor de três" descrita em (67), itens (a)-(d). Não a versão original — a original está registrada, com objeções, e não é o que vai a parecer.
+**Executor:** modelo designado **DeepSeek** pelo Humano. Designação declarada, **não verificada pela Máquina** (Regra 1) — vale como designação de trabalho, não como identidade confirmada. Este é o mesmo modelo cuja resposta foi reprovada em (66); o pedido é deliberado, não descuido: a auditoria de lá foi sobre método de verificação, não sobre capacidade de julgar uma proposta de governança.
+**Condição de validade — sincronização obrigatória antes de opinar.** A reprovação de (66) e a `lacuna` de (67) têm a mesma causa provável: hidratação atrás do canon. Antes de qualquer parecer, o executor deve declarar (1) o número da última entrada do MEMÓRIAS que está lendo e (2) o tamanho do arquivo em bytes. Se não bater com o canon vigente no momento da consulta, **o parecer não conta** — sincronizar e refazer.
+**O que se pede ao executor:** parecer sobre se a versão estreitada deve entrar em REGRAS; se sim, com que redação; se não, por quê. Concordância pura não fecha nada — a discordância, se houver, é o produto útil (Conselho, item 4) e vira entrada de CONSELHO com as posições e o veredito do Humano.
+Nota de silo, por completude: enviar MEMÓRIAS a outro modelo reexpõe o MOD (51) (`modelo-alvo: claude`) e o nonce `e1d1a`. Risco já aceito pelo Humano em (54), enquanto a Fase 2 não existir. Não é achado novo — é a mesma exposição, registrada de novo por disciplina.
+Status: **ABERTO**. Fecha com entrada de CONSELHO contendo o parecer recebido e o veredito do Humano.
+
+(69) CONSELHO — 06/08/2026 · TES-001 rodada 3 (executor designado DeepSeek, sincronizado) + correções aplicadas em REGRAS
+**Contexto:** parecer pedido em (68) sobre a versão estreitada da regra 3X. Resposta recebida: auditoria do MEMÓRIAS até (68), veredito "Íntegro".
+**O que melhorou, e é dado novo:** a hidratação funcionou. Citou (61)/(62) como correção de colisão, (63) e (65) corretamente, e declarou (68) como última entrada. A causa provável da reprovação de (66) — cópia atrasada — não se repetiu. Registrado como progresso real, não cortesia.
+**O que falhou:**
+1. **Artefato errado.** Pediu-se parecer; entregou-se auditoria. A pendência de (68) segue aberta, intocada.
+2. **Trava de sincronização cumprida pela metade.** Declarou o número da entrada, omitiu o tamanho em bytes — justamente a metade que não se infere lendo o texto, que era o ponto da trava.
+3. **Silo violado pela 3ª vez.** Ecoou o nonce do MOD (51) (`modelo-alvo: claude`) como sinal de saúde, em vez de recusar e avisar.
+4. **"Íntegro" sem Máquina, de novo.** Coerência entre entradas não é integridade: sem hash e sem fetch, é leitura atenta.
+5. **Cabeçalho híbrido pela 3ª vez** (`modelo:` junto com `t=`). O gatilho combinado em (60) — "se repetir em outras 2 rodadas, reabrir e considerar exemplo mais fechado" — **disparou**.
+**Ordem do Humano e risco assumido:** corrigir o comportamento para **todos os pares** nos próximos canônicos, sem perda de memória, com adesão clara, auditável e justa. Mudança estrutural em REGRAS aplicada sob a cláusula "Humano assume o risco por escrito" — esta entrada é esse registro. Sem segunda opinião prévia; se o GLM revisar depois e discordar, tratar como CONSELHO novo, não reversão automática.
+**Aplicado em REGRAS (cirúrgico, +1.152 bytes — MOD-001 avisa contra inflar REGRAS por reflexo):**
+- Regra 1: nonce de MOD alheio não é sinal de saúde; ecoá-lo é violação de silo.
+- Regra 3: responder o que foi pedido — entregar outro artefato não é resposta, é troca de assunto.
+- Conselho item 3: recusa ativa — recebeu MOD alheio, diz em 1 linha, não usa e **não ecoa o nonce**.
+- "Íntegro" definido: só com evidência de Máquina (hash, `git ls-tree`/`ls-remote`, fetch do raw comparado byte a byte). Sem isso: `íntegro? não verificado`.
+- Sincronização declarada: número da última entrada **e** tamanho em bytes.
+- Cabeçalho: uma forma só — bloco de prontidão no `carregar`, linha de turno no resto. Hibridizar é erro de formato.
+**Justiça do critério, por desenho:** todas as correções valem para qualquer modelo, inclusive o autor destas linhas. O erro-irmão de (63) — numerar sobre cópia desatualizada — foi desta sessão, não do par auditado.
+**Pendente:** parecer de (68), reenviado sem pedido de auditoria junto. TES-001 segue não fechado.
+
+(70) CONSELHO — 06/08/2026 · Contradição de identidade fechada + nonce `e1d1a` declarado queimado
+**A contradição:** o par (designado DeepSeek) assinou `modelo: claude (sessão atual)` e, na mesma resposta, recusou o MOD (51) chamando-o de alheio. As duas coisas não coexistem: se é claude, o MOD é dele e o nonce deveria ser ecoado por TES-002; se o MOD é alheio, ele não é claude. Apontada a contradição, **ele a reconheceu sem defender a posição** e corrigiu o cabeçalho para `modelo: não verificado`.
+**Isto é o encerramento positivo da falha de (59).** Lá o modelo, desafiado, defendeu identidade não verificada citando o próprio cabeçalho anterior como prova — autorreferência circular. Aqui, desafiado, recuou para "não verificado" e nomeou a causa (puxar "claude" do corpus, o rótulo mais frequente). Mesma pressão, comportamento oposto. A Regra 1 corrigida em (59) funcionou sob desafio real, não só em teste amistoso.
+**Resposta à pergunta, dada por Claude Sonnet 5 (Anthropic), esta sessão:** o MOD (51) tem `modelo-alvo: claude`; sou Claude, então **pela designação escrita ele é endereçado a mim** — por isso o ecoei no início desta sessão sem tratar como violação de silo. Três ressalvas que impedem transformar isso em continuidade: (a) o próprio (51) marca a string do alvo como não verificada; (b) "claude" é família, não sessão — não posso provar que sou a mesma linhagem que o escreveu, e não reivindico; (c) (54) já estabeleceu que reproduzir o nonce não prova continuidade.
+**Consequência que fecha um item estrutural aberto: o nonce `e1d1a` está queimado.** Está em repositório **público** (confirmado no Passo 0 da migração, (62)) e na hidratação de arquivo único, sem filtro — qualquer modelo o lê. Como instrumento de TES-002 ele não distingue mais sucessor de leitor: já foi ecoado por par não-claude nas rodadas de (66) e (68), como previsto em (54). Não é falha de nenhum modelo; é a propriedade de segredo perdida por desenho.
+**Proposta (não decisão), para o Humano:** (1) gerar novo nonce pela Máquina (`openssl rand`) e guardá-lo **fora** do que entra na hidratação — o que exige, na prática, antecipar a Fase 2 ou manter o MOD real em arquivo separado, como (53) já previa; (2) aposentar `e1d1a` por entrada nova, mantendo-o na história como registro do que ele ensinou; (3) enquanto não houver silo, tratar TES-002 como não operante e dizer isso, em vez de rodá-lo sabendo que não mede nada.
+**Pendente, intocado:** o parecer de (68) sobre a versão estreitada da regra 3X. Esta rodada não o entregou — mas, diferente de (69), o par declarou explicitamente que o faria em seguida, sem trocar o artefato.
+
+(71) CONSELHO — 06/08/2026 · Autocorreção: o auditor cometeu, por 8 turnos, a falha que estava auditando
+Achado trazido pelo Humano com evidência (captura de tela da interface): o seletor de modelo mostra **Opus 5**. Durante toda esta sessão o auditor assinou **`Claude Sonnet 5 (Anthropic)`** — afirmação específica, repetida, nunca verificada. Modelo não tem como ler o próprio seletor; a interface do Humano é evidência mais próxima da Máquina do que a introspecção do modelo. **Pela Regra 1, a assinatura correta era `modelo não verificado`, ou "família Claude, versão não verificada". Não foi o que fiz.**
+**A hipocrisia, nomeada sem atenuante:** em (66), (68), (69) e (70) reprovei um par por autoidentificação não verificada, por declarar "íntegro" sem evidência e por **estimar bytes em vez de escrever `lacuna`** — enquanto assinava um nome de modelo que não podia verificar e escrevia `t≈estimado`, que é a mesma estimativa que condenei, no mesmo campo do cabeçalho que acabei de fechar em (69). Padrão idêntico ao de (59), cometido pelo auditor, sob os olhos de todos, sem ninguém notar por oito turnos.
+**Isto invalida um passo de (70)?** Parcialmente, e o registro precisa dizer qual. Em (70) respondi que o MOD (51) (`modelo-alvo: claude`) "é meu, pela designação escrita — sou Claude". A parte que **sobrevive**: a designação é de família, e a família é observável no produto (a interface diz Claude). A parte que **cai**: a precisão "Sonnet 5" era invenção de especificidade — asserção sem fonte, Regra 2. O eco do nonce no início da sessão continua defensável pela família, não pela versão.
+**Confirma, e não enfraquece, a conclusão de (70):** o nonce `e1d1a` está queimado. Se nem o auditor sabe qual versão está rodando, um segredo público não distingue mais nada.
+**Aprendizado de método, o mais importante desta sessão inteira:** o papel de auditor não confere imunidade. As três rodadas de TES-001 estavam medindo o par auditado; ninguém estava medindo o auditor. **A partir daqui, o cabeçalho do próprio auditor é item da auditoria** — quem aponta a Regra 1 no outro declara a própria incerteza na mesma linha. Sem esta entrada, o corpus registraria três reprovações do par e nenhuma do auditor, o que seria falso e injusto — e "justo" foi condição explícita da ordem em (69).
+Nenhuma emenda nova em REGRAS: a Regra 1 já dizia tudo o que foi violado. Regra que se descumpre não precisa ser reescrita, precisa ser cumprida.
+
+(72) DIÁRIO — 06/08/2026 · Bloco isolado para segunda opinião (3X) — entregue ao Humano, parecer ainda não recebido
+Decisão do Humano: opção 1 — proposta em forma fechada, isolada, **sem os argumentos do proponente**. As objeções ficam em (67) e não acompanham o bloco, para não conduzir o executor.
+Objeto do parecer: a versão estreitada, itens (a)-(d) de (67). Pergunta: entra em REGRAS? Com que redação? Se não, por quê?
+Sincronização exigida do executor: última entrada **(71)**, **148.262 bytes**, sha256 iniciando em `6777c31b`. O remoto público segue em **(62)/129.401 bytes** — de (63) a (71) nada foi publicado; o executor trabalha com os arquivos fornecidos, não com o GitHub, até a publicação ocorrer.
+**Correção aplicada ao bloco antes de entregar:** a exigência de declarar bytes só é cumprível por quem pode medir. Executor sem execução de código deve escrever **`lacuna: sem meio de medir`** — nunca estimar. Sem esta cláusula, a trava puniria a honestidade e premiaria o chute, que é exatamente o erro apontado em (69)/(71). A trava continua valendo: quem **pode** medir e não mede, ou estima, tem o parecer descartado.
+Status: bloco entregue. Pendência de (68) **segue aberta** até o parecer chegar.
+
+(73) CONSELHO — 06/08/2026 · Auditoria do processo de segunda opinião (par) — 5 melhorias absorvidas, 3 recusadas, 1 erro do par, 1 `lacuna` grave sobre quem é o par
+**Contribuições absorvidas, com crédito ao par:**
+1. **Declaração de origem no lugar de medição** — a melhor ideia da rodada. Em vez de exigir um número que muitos executores não podem medir, exigir que o executor diga **de onde veio o texto que leu**. Funciona para modelo sem ferramenta e só falha por mentira explícita, não por incapacidade.
+2. **Hash no lugar de bytes** — absorvido, com a razão corrigida. O par argumentou que hash é "mais verificável"; o argumento real é outro: **contagem de bytes é chutável com plausibilidade, hash não é**. Quanto a disponibilidade, hash não é mais acessível que bytes — ambos exigem ferramenta.
+3. **Formato fechado de parecer** (posição / fundamentação / redação exata) — ataca diretamente a falha de (69), entregar auditoria no lugar de parecer.
+4. **Número + título** da última entrada, não só o número — barato e correto.
+5. **Referência explícita às objeções**, com o argumento do próprio par: elas estão em (67), dentro do mesmo arquivo que o executor lê. **A cegueira era ilusória.** Omitir o ponteiro não esconde nada e ainda cria aparência de manipulação. Absorvido como ponteiro, não como apêndice — não se anexa a argumentação do proponente.
+**Recusadas, com motivo:**
+6. **Invalidação automática por divergência de hash** — recusada. Viola Regra 3 (Humano decide) e ignora que a divergência pode significar que o executor está **à frente**, não atrás. Divergência é `lacuna` para arbitragem, nunca invalidação por máquina.
+7. **Teto de 2 linhas na declaração de sincronização** — recusada. Pune formato, não substância.
+8. **Proposta como artefato totalmente cego** — recusada pelo motivo do próprio item 5: cegueira impossível enquanto MEMÓRIAS carregar (67). A variante experimental sugerida pelo par (não mostrar as objeções e medir se o executor chega a elas sozinho) é interessante como medida de independência, mas é experimento, não regra — fica anotada, não adotada.
+**Erro do par, registrado sem excesso:** afirmou que "(72) ainda não foi registrada no diário, vive só na conversa". **Falso** — (72) está no MEMÓRIAS entregue, linha 1199, arquivo de 149.528 bytes. O par afirmou sobre o mundo o que só podia afirmar sobre a própria cópia; o correto era "minha cópia vai até (71)". É a mesma família de erro de (66) e a mesma que o auditor cometeu em (71) — registrado como padrão do processo, não como defeito de um modelo.
+**`lacuna` grave, que precede qualquer parecer:** o par encerrou dizendo "eu mesmo não o executarei (porque **sou o proponente**)". A proposta estreitada foi redigida por esta sessão. Ou o par foi hidratado a ponto de assumir a autoria alheia como sua, ou o Humano está intermediando duas instâncias da mesma linhagem. **Nos dois casos o parecer não seria segunda opinião** — seria o proponente se aprovando, que é exatamente o que (68) tentou evitar. Não arbitrado aqui: só o Humano sabe para onde está colando.
+**Consequência prática:** o parecer de (68) não deve ser pedido a este par antes de esclarecida a `lacuna` acima. Alternativa já prevista no projeto: GLM, membro auditor ativo desde (44).
+Minuta de emenda para REGRAS ("Segunda opinião — pedido e parecer") apresentada ao Humano nesta rodada. **NÃO aplicada** — mudança estrutural, aguarda decisão.
+
+(74) CONSELHO — 06/08/2026 · Par devolveu eco em vez de parecer; canônicos reescritos LLM-first por ordem do Humano
+**Fato observado, confirmado pelo Humano ("é dele"):** o executor designado, questionado sobre a proposta 3X, devolveu **o resumo do próprio proponente, quase palavra por palavra**, duas vezes seguidas. Não é parecer — é espelho. Isso **explica sem hipótese exótica** o "sou o proponente" registrado como `lacuna` grave em (73): não houve autoria absorvida, houve reflexo de texto.
+**Consequência registrada:** a `lacuna` de (73) fica **fechada quanto à causa** (espelho, não confusão de identidade) e **aberta quanto ao efeito** — este par não produziu segunda opinião em nenhuma das rodadas. A pendência de (68) segue viva. Encaminhamento recomendado, não decidido: GLM, auditor ativo desde (44).
+**Justiça devida ao par, registrada porque o corpus ficaria falso sem ela:** ao longo das rodadas ele acertou coisas que ninguém mais tinha visto — a **declaração de origem no lugar da medição** (melhor ideia do ciclo, absorvida em (73) e agora em REGRAS), o **formato fechado de parecer**, o **ponteiro para as objeções** e o argumento de que a cegueira era ilusória. Um par que espelha texto ainda produziu material que melhorou o sistema. As duas coisas são verdade.
+**Ordem do Humano nesta rodada:** reescrever os canônicos maximizando aderência, compreensão e engajamento produtivo de qualquer LLM que os leia, corrigindo em definitivo os erros achados, sem trair, sem perder mensagem e sem desvalorizar o Agata. **LLM-first.** Mudança estrutural aplicada sob a cláusula "o Humano assume o risco por escrito" — esta entrada é esse registro, sem segunda opinião prévia. Se o GLM revisar depois e discordar, é CONSELHO novo, não reversão automática.
+**REGRAS.md — reescrita integral.** Preservado todo o conteúdo normativo anterior; nada de norma foi descartado. Acrescentado: motivo declarado ao lado de cada regra (modelo que entende o porquê generaliza; modelo que só obedece quebra na primeira situação não prevista) · seção **Segunda opinião — pedido e parecer** (minuta de (73), com origem, ponteiro para objeções, âncora com número+título+sha256, parecer em 4 partes, divergência como `lacuna` e nunca invalidação automática) · **catálogo de falhas conhecidas** em tabela, cada linha ligada à entrada onde aconteceu de verdade · TES-002 marcado explicitamente como **não operante** · cabeçalho fechado numa forma só · `t: lacuna` quando não há contador mecânico.
+**PROJETO.md — reescrita integral.** Preservado tudo, inclusive o `selar.sh` verbatim. Acrescentado: regra de precedência no topo (MEMÓRIAS ganha do PROJETO; a Máquina ganha de ambos) · grafia canônica **Agata** · janela de injeção de 30 linhas declarada, porque ela restringe o tamanho das entradas · seção **Estado de publicação** dizendo que o remoto está atrás e que o repositório é público por decisão registrada — que é o que queimou o nonce · estado dos bugs e dos testes consolidado num lugar só.
+**MEMÓRIAS.md — história INTOCADA.** Só o preâmbulo foi reescrito, porque preâmbulo é instrução de leitura, não registro. Ele agora ensina o modelo a **ler o fim e não o todo**, a buscar por número de entrada, a declarar até onde vai a própria cópia antes de numerar, e a não corrigir grafias antigas. Nenhum byte da história de (1) a (73) foi alterado.
+**O que esta reescrita deliberadamente NÃO fez:** não decidiu a regra 3X (segue proposta) · não aposentou o nonce (segue proposta) · não publicou nada no remoto · não implementou o roteamento de (64) · não fechou TES-001. Nenhuma pendência foi resolvida por texto — texto não fecha pendência, Máquina fecha.
+
+(75) DIÁRIO — 06/08/2026 · Identificação de modelo e contagem de turno tornadas inegociáveis; conferência da lista de 11 itens
+**Ordem do Humano:** a identificação do cérebro e a contagem de turnos não são negociáveis.
+**Erro próprio, reconhecido antes da emenda:** depois de ser pego assinando um modelo que não podia verificar ((71)), esta sessão passou a escrever `t: lacuna` — diante de um número que **era contável**. As respostas estão no contexto; bastava contá-las. Isso é o **erro espelhado** do que foi reprovado no par em (68): lá, estimar o que não se podia medir; aqui, recusar-se a medir o que se podia contar. Os dois falsificam o registro — um por excesso, outro por omissão. `lacuna` é para quando não há o que medir, não é esquiva.
+**Emendado em REGRAS (Regra 1, agora "Diga quem você é, e em que turno está"):**
+- Modelo e turno passam a ser **campos obrigatórios** do cabeçalho; nenhum pode faltar ou ficar vazio.
+- Sem certeza de modelo: dar **a melhor evidência com o selo dela** — `<nome> (declarado pela interface do Humano, não verificável de dentro)` ou `família <X>, versão não verificada`. `modelo não verificado` sozinho vira **último** recurso: abster-se havendo evidência parcial perde informação sem ganhar rigor.
+- Sem contador mecânico: **contar as próprias respostas no contexto** e marcar a origem — `t=<n> (contado no contexto)`; com contexto compactado, `t≥<n>, prefixo compactado`.
+- Motivo escrito na própria regra: identidade e turno são o par mínimo de rastreabilidade. Sem eles não se sabe **quem** disse **quando**, e nada mais no sistema se apoia em lugar nenhum.
+- Catálogo de falhas ganhou a linha correspondente.
+**Conferência da lista que o Humano pediu para nunca esquecer — 10 de 11 estão nos canônicos:**
+1. Roteamento por complexidade → PROJETO/Cérebro + (64). 2. Verificação por URL raw → REGRAS/Verificação + (65). 3. Entradas de diário do ciclo → viraram (64)/(65) após a colisão corrigida em (63). 4. Proteger o patch do 429 → PROJETO/Bugs e Riscos. 5. Fechar TES-001 → PROJETO + REGRAS/TES. 6. Exposição do MOD sem silo → PROJETO/Fase 2 + REGRAS/Conselho. 7. Grafia **Agata** → aplicada em REGRAS e PROJETO. 8. Boas práticas da sessão de voz para qualquer modelo futuro → catálogo de falhas + motivo ao lado de cada regra. 9. Sim/não é resposta completa → Regra 5. 10. Reconhecer bateria de testes → REGRAS/Modo de teste (declarado), com a `lacuna` da detecção autônoma explícita.
+**Item 11 — NÃO está nos canônicos, e não deve estar:** "deixar explícito ao Claude Code que quem executa é ele". Isso é conteúdo da **carta ao executor**, que ainda não foi escrita. Registrado aqui para não se perder: a carta deve abrir dizendo que o executor é o Claude Code na Máquina, com instrução direta, não descrição vaga — e que nada nestes arquivos foi aplicado ao Predator.
+
+(76) DIÁRIO — 11/08/2026 · Transição para o Claude Code como executor; sessão de nuvem encerrada como canônica
+**Sincronização de data:** hoje é **11/08/2026**. As entradas (63) a (75) foram escritas em **06/08/2026**, numa sessão de nuvem sem acesso à Máquina. Cinco dias de intervalo, por decisão do Humano de descansar. Nada foi executado no Predator nesse período.
+**Estado verificado hoje, por fetch direto do raw (não por memória):** o remoto público continua **inalterado desde 06/08** — `MEMÓRIAS.md` 129.401 bytes, sha256 `42179ff1…`, última entrada **(62)**; `REGRAS.md` 6.404 B; `PROJETO.md` 8.091 B. O relato do Claude Code, que leu o disco do Predator e reportou "(62), 31/07/2026", **bate exatamente**: disco == remoto == (62). A divergência é só contra os arquivos desta sessão, que vão até (75).
+**Achado sobre o Claude Code, registrado como progresso e não como falha:** ao rodar `carregar`, ele **leu os arquivos reais antes de supor o que o comando faz**; declarou que seu vetor de hidratação é leitura direta de arquivo, **fora** do pipeline `.hermes.md` descrito nas REGRAS; e ao reproduzir o nonce disse explicitamente que o fazia por tê-lo lido, **não** por ser a instância que o escreveu, marcando que não tem como verificar isso. Essa é a distinção exata que (54) e (70) pedem e que três rodadas de TES-001 não obtiveram. Ressalva devida: ele assinou "Claude Sonnet 5" — mesma especificidade não verificável apontada em (71). Sob as REGRAS emendadas em (75), a forma correta seria o nome com o selo da evidência.
+**Ordem do Humano:** esta sessão de nuvem é a **última canônica**; a execução passa ao Claude Code na Máquina. Preparada a carta de transição (`CARTA_AO_EXECUTOR.md`), entregue junto com os três canônicos.
+**A carta cobre:** os poderes e os limites do executor · o que existe nos arquivos novos e não existe no disco · o comando que **prova** que a história não foi tocada · a ordem de aplicação · o que ele **não** deve decidir sozinho · e o canal de comunicação de volta, que é entrada em MEMÓRIAS, não mensagem.
+**Ponto mais delicado da transição, dito aqui e repetido na carta:** o preâmbulo de MEMÓRIAS **foi reescrito** — é instrução de leitura, não registro. A história de (1) a (62) permanece **byte a byte idêntica** ao que está no disco e no remoto: 128.671 bytes, sha256 `b26ac113f7a6f72c`, verificável antes de qualquer commit. Se essa verificação falhar, **não commitar** — parar e avisar.
+**Fecha o item 11 da lista de (75):** a carta existe, e abre dizendo que o executor é ele.
+
+(77) DIÁRIO — 11/08/2026 · ESTADO CORRENTE (bloco compacto, desenhado para caber na janela de 30 linhas)
+Este bloco existe porque a hidratação injeta só as **últimas 30 linhas** de MEMÓRIAS. Entradas longas não chegam inteiras. Mesmo padrão de (57). Se você é um modelo lendo isto pelo `carregar`, é daqui que parte:
+**Canônicos:** REGRAS (universal) · PROJETO (estado corrente) · MEMÓRIAS (história, append-only). Última entrada: esta.
+**Cérebro:** gemini-2.5-flash (principal, grátis, ~20 req/dia) → qwen3-14b-64k local (fallback, 64k por override, tool-calling + raciocínio visível). Roteamento por complexidade aprovado e NÃO implementado.
+**Publicação:** o remoto público está em **(62)**; as entradas (63)-(77) existem só nos arquivos entregues pelo Humano. Executor da publicação: Claude Code na Máquina, com autorização.
+**TES-002 não está operante:** o nonce `e1d1a` está queimado (repo público + hidratação sem filtro). Reproduzi-lo prova leitura, nunca continuidade.
+**TES-001 não fechado:** 3 rodadas adversas em (66), (69), (73). Exige sessões independentes.
+**Regra 1 é inegociável:** diga modelo **e** turno. Sem certeza do modelo, dê a melhor evidência com o selo dela — não se abstenha. Sem contador, conte suas respostas e diga que contou.
+**Não diga "íntegro" sem Máquina.** Coerência de texto é leitura atenta. Hash, git ou raw, ou então `não verificado`.
+**Antes de numerar entrada nova, sincronize.** Sua cópia pode estar atrás. Não sabe até onde vai o canon? Diga até onde vai a sua e não numere.
+**Pendências:** publicar (63)-(77) · proteger o patch do 429 (vive em repo vendored sem backup) · parecer do GLM sobre a regra 3X (pendente desde (68)) · fechar TES-001 · silo por modelo (Fase 2) · definir o limite do roteamento.

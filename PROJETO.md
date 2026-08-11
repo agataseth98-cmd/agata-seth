@@ -1,50 +1,70 @@
-# PROJETO.md — Ágata (implementação atual)
+# PROJETO.md — Agata (estado corrente)
 
-Estado de hoje. Trocável sem mexer nas REGRAS.
+Este arquivo é o **agora**. É editável e trocável sem mexer nas REGRAS.
+Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu, aqui está o que vale hoje.
+Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 ## O que é
-Assistente pessoal do Orusoua, local-first e grátis por padrão, sobre **Hermes Agent** (Nous Research). Ágata = Hermes + governança canônica (REGRAS/PROJETO/MEMÓRIAS) + Conselho Federado de modelos. Acesso multi-dispositivo via Open WebUI sobre Tailscale, nunca internet pública.
+Assistente pessoal do Orusoua, local-first e grátis por padrão, sobre **Hermes Agent** (Nous Research).
+Agata = Hermes + governança canônica (REGRAS / PROJETO / MEMÓRIAS) + Conselho Federado de modelos.
+Acesso multi-dispositivo por Open WebUI sobre Tailscale, nunca internet pública.
+
+Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada usa grafias antigas; não se corrige história.
 
 ## Máquinas
-- **Predator** (master — CachyOS, fish, i7-13650HX, 40GB, RTX 4060 8GB): Hermes, Ollama, git, Obsidian, web.
+- **Predator** (master — CachyOS, fish, i7-13650HX, 40GB RAM, RTX 4060 8GB): Hermes, Ollama, git, Obsidian, web.
 - **Orusoua** (réplica Windows 11, leitura/failover) — *planejado*.
 
 ## Cérebro
-- Principal: **gemini-2.5-flash** (Google API, grátis). Bug de 429 mascarado como "conexão perdida": causa raiz achada e patchada — ver "Estado real dos bugs" abaixo (risco residual, não bug aberto).
-- Fallback: **qwen3-14b-64k** local (Ollama; contexto 64k via `custom_providers`, durável; tool-calling + thinking; adotado por expor raciocínio, mitigando o risco abaixo). Padrão de alucinação como primário (inventa entradas/datas) é documentado do antecessor **qwen2.5-14b-64k** (fallback até a troca); qwen3 não tem incidente registrado até aqui. Suspensão de MOD é do papel "fallback", não da versão — contador de 20 sessões limpas conta a partir da troca pra qwen3, não do zero histórico do 2.5.
-- Último recurso manual: llama3.1:8b (sem tool-calling, fora da cadeia).
-- Hermes exige contexto ≥64k. Skills 12 ativas/56 off; tools 12/18 (~12.6k tokens de payload).
+- **Principal:** `gemini-2.5-flash` (Google API, grátis). Teto do free tier ~20 requisições/dia — estourar gera 429.
+- **Fallback:** `qwen3-14b-64k` local (Ollama). Contexto 64k por override durável em `custom_providers`; tool-calling **e** raciocínio visível. Adotado exatamente por expor o raciocínio, o que permite pegar fabricação antes da ação em vez de auditar depois.
+- **Roteamento por complexidade — aprovado, NÃO implementado** (MEMÓRIAS (64)): o Hermes estima a complexidade antes de escolher cérebro; tarefa simples resolve no qwen local, só escala para o Gemini acima do limite. `lacuna`: limite não definido nem medido. Executor: Claude Code na Máquina, com prova antes/depois.
+- **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
+- **Barreira dura:** o Hermes exige contexto ≥64k (constante de produto, não derivada do payload). Skills 12 ativas / 56 off; tools 12 de 18; payload ~12,6k tokens.
+- **Padrão de alucinação** documentado é do antecessor `qwen2.5-14b-64k` (inventava entradas e datas). O qwen3 não tem incidente registrado. A suspensão de MOD é do **papel** "fallback", não da versão — o contador de sessões limpas conta a partir da troca para o qwen3.
 
 ## Serviços (boot)
-`ollama.service` · Docker `open-webui`+`kokoro-tts` · `hermes-gateway.service` (user, linger, porta 8642) · `agata-consolidacao.timer`. Leftovers pré-Hermes purgados — não recriar.
+`ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
+Leftovers pré-Hermes purgados (`agata-rest`, `agata.service`, `agatha.service`) — **não recriar**.
 
 ## Memória e hidratação
-- Canônicos em `~/agata` (repo git = cofre Obsidian). Memória nativa do Hermes symlinkada em `~/agata/memoria/`.
+- Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
 - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
-- Hidratação por **silos** (Fase 2, ainda NÃO construída): hook pre-commit vai gerar `.hermes-gemini.md` e `.hermes-qwen.md` — cada um com REGRAS + PROJETO + fim de MEMÓRIAS **filtrando só o MOD do modelo-alvo**. Arquivo único foi rejeitado em auditoria: vazaria MOD entre modelos via system prompt. Hoje a hidratação real é `.hermes.md` único, sem filtro — até a Fase 2 existir, o silo é disciplina do carteiro, não mecanismo (ver REGRAS).
-- RAG só no Open WebUI e só em sessões Gemini — regra mantida por prudência (janela do Gemini é maior), mas a justificativa antiga ("qwen 32k estoura") está desatualizada: fallback é qwen3-14b-64k com override durável a 64k (ver Cérebro), não 32k nativo.
+- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit, sem filtro por modelo. Injeta REGRAS + PROJETO + fim de MEMÓRIAS.
+- **Silos por modelo (Fase 2, ainda NÃO construídos):** o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + fim de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo é disciplina do carteiro, não mecanismo.
+- **A janela de injeção é de 30 linhas** do fim de MEMÓRIAS. Entradas longas não chegam inteiras ao contexto — escreva contando com isso.
+- RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
 
 ## Interface
-Hermes CLI/TUI na Máquina; Open WebUI como frontend puro (tools/memória/search nativos desligados — executor único é o Hermes). Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT; remoto exige HTTPS via Tailscale.
+Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
+Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.
 
 ## Segurança
-Serviços em `127.0.0.1`; sandbox sempre; segredos só em `~/.hermes/.env`. **O api_server executa terminal: nunca expor** (nem Open WebUI) fora de Tailscale + dupla auth. Única superfície capaz de dano real.
+Serviços em `127.0.0.1`. Sandbox sempre. Segredos só em `~/.hermes/.env`, fora do repo.
+**O api_server executa terminal: nunca expor** — nem ele, nem o Open WebUI — fora de Tailscale com dupla autenticação. É a única superfície capaz de dano real.
+Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
 
-## Plano vigente (v1.1, ratificado — Fases 0–2 são compromisso; 3+ é bússola)
-- **Fase 0 — Saneamento (agora):** ratificar em MEMÓRIAS · revisar diff dos 3 commits → push · TES-001 · reverificar patch do 429 após qualquer `hermes update` (risco residual, não bug ativo).
-- **Fase 1 (sem. 3–6):** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados (segunda opinião GLM ou risco assumido) · rascunhos históricos → `docs/`.
-- **Fase 2 (sem. 6–10):** hook com silos por modelo · eco pós-carregar · TES-002 com nonce.
-- **Fase 3 (sem. 10–16):** GLM membro pleno (MOD-002) · válvula de discordância sintética.
-- **Fase 4 (meses 4–12):** MEMÓRIAS por período (hot/warm/cold: corrente sem compressão; 5–40 anos delta; >40 zstd+índice) · congelar a ~500 linhas → `git tag` + SHA-256 · `selar.sh --check` · Capivara com consentimento por trecho.
-- **Fase 5 (sem prazo):** IPFS espelho, curador nomeado, DAO.
+## Estado dos bugs e dos testes
+- **Gemini 429 ("perdi a conexão"):** causa raiz achada e corrigida. `_summarize_api_error` lia `.text` de uma resposta em streaming não lida, mascarando o 429 como crash de stream e impedindo o fallback de ser acionado. Patch aplicado e verificado por mock do cenário exato.
+  **Risco residual, não bug ativo:** o patch vive no `hermes-agent` vendored, fora do repo canônico, sem backup. Um `hermes update` pode descartá-lo em silêncio. **Reverificar após qualquer atualização do Hermes.**
+- **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. Se reaparecer, o protocolo é: curl na 8642 forçando fallback com `carregar`, capturar o system prompt efetivo no Ollama, e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
+- **TES-001:** não fechado. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Exige sessões genuinamente independentes.
+- **TES-002:** **não operante.** O nonce vigente está queimado — repositório público mais hidratação sem filtro tornam o segredo legível por qualquer modelo. Proposta em aberto: gerar novo nonce fora da hidratação, aposentar o antigo por entrada nova, e declarar o teste inativo enquanto não houver silo. Ver MEMÓRIAS (70).
+- **Segunda opinião sobre a regra 3X:** pendente desde MEMÓRIAS (68). O executor designado devolveu eco do texto do proponente, não parecer. Encaminhamento recomendado: GLM, auditor ativo desde (44).
 
-**Curador da sucessão:** `lacuna` — enquanto vago, Humano operador local (regras de curador nas REGRAS).
+## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
+- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · reverificar o patch do 429 após qualquer `hermes update` · resolver o nonce queimado.
+- **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+- **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
+- **Fase 3:** GLM membro pleno (MOD-002) · válvula de discordância sintética.
+- **Fase 4:** MEMÓRIAS por período (hot/warm/cold) · congelar a ~500 linhas com `git tag` + SHA-256 · `selar.sh --check` · Capivara com consentimento por trecho.
+- **Fase 5 (sem prazo):** espelho IPFS, curador nomeado, DAO.
 
-## Estado real dos bugs (corrigido nesta sessão, contra a Máquina — MEMÓRIAS (55))
-- **Gemini 429 ("perdi a conexão"):** causa raiz achada e patchada. `_summarize_api_error` lia `.text` de uma resposta em streaming não lida, mascarando o 429 como crash de stream. Patch (try/`.read()`/except) aplicado e verificado (mock do cenário exato, sem crash). **Risco residual, não bug:** o patch vive no `hermes-agent` vendored (fora do repo canônico), sem backup — um `hermes update` pode sobrescrever em silêncio. Reverificar após qualquer atualização do Hermes.
-  `lacuna` aberta pro Humano: uma entrada posterior no histórico ainda lista "Gemini 400/429 não reproduzido" como aberto, depois do patch verificado — inconsistência não resolvida sozinho (ver MEMÓRIAS (55) pra decidir se é bookkeeping desatualizado ou uma falha distinta).
-- **`carregar` no fallback:** nenhum bug confirmado por esse nome na história real. Não carregar adiante como fato — se reaparecer, protocolo: curl na 8642 forçando fallback com `carregar`, capturar system prompt efetivo no Ollama, testar em ordem (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
-- **TES-001 (bateria de 3 relatos independentes):** confirmado ainda não rodado limpo. Fase 0 segue com este item pendente.
+**Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
+
+## Estado de publicação
+O remoto público (`agataseth98-cmd/agata-seth`) está **atrás** dos arquivos em uso. Enquanto isso durar, o executor trabalha com os arquivos entregues pelo Humano, não com o GitHub — e declara a origem, como manda a seção de segunda opinião nas REGRAS.
+Repositório **é público** por decisão registrada do Humano. Isso é o que queimou o nonce; não é acidente, é consequência conhecida.
 
 ## Ferramenta embutida: selar.sh (Fase 4; salvar em `scripts/selar.sh`)
 Testado: sela, verifica (exit 0) e detecta adulteração (exit 1).
@@ -72,12 +92,19 @@ echo "selado: $1"; echo "sha256: $hash"
 echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
 ```
 
-## Memória em duas camadas (revelado na migração, MEMÓRIAS histórico)
-Camada local (Obsidian sobre o próprio repo git, iniciado): offline, privada, é FATO. Camada nuvem (NotebookLM, pesquisa em andamento): cruzamento de dados, é RELATO/projeção — mão única, nunca escreve fato de volta. Só não-sensível vai pra nuvem; segredo/chave/canon nunca.
-**bg-review do Hermes Gateway está desligado** (`nudge_interval: 0` em `~/.hermes/config.yaml`, fora do repo): mecanismo que reescrevia MEMORY.md nativo sozinho (mesmo inode do canônico) chegou a apagar história pra caber num teto de caracteres. Consequência aceita: sem auto-captura de fatos; memória muda só por edição deliberada + MEMÓRIAS, ou sob comando explícito.
+## Memória em duas camadas
+**Camada local** — Obsidian sobre o próprio repositório git: offline, privada, é **FATO**.
+**Camada nuvem** — NotebookLM e afins, pesquisa em andamento: cruzamento de dados, é **RELATO/projeção**. Mão única: lê, nunca escreve fato de volta. Só o não-sensível sobe; segredo, chave e canon nunca.
+
+**bg-review do Hermes Gateway está desligado** (`nudge_interval: 0` em `~/.hermes/config.yaml`, fora do repo). Era um mecanismo que reescrevia sozinho o MEMORY.md nativo — mesmo inode do canônico — e chegou a **apagar identidade e história** para caber num teto de caracteres, sem humano no loop. Consequência aceita: sem auto-captura de fatos; a memória muda só por edição deliberada, por MEMÓRIAS, ou sob comando explícito.
 
 ## Riscos conhecidos (limitações, não pendências)
-Gemini pode deixar de ser grátis (plano B: pesquisar DeepSeek/GLM/Grok grátis quando doer) · silo é disciplina até Fase 2 · fricções de modelos corporados são característica de 2026, registradas quando surgirem · distrust permanente tem custo — overhead é campo opcional em MEMÓRIAS, sem automação; silêncio também é dado · patch do handler de 429 vive em repo vendored sem backup — `hermes update` pode descartá-lo em silêncio, reverificar sempre após atualizar o Hermes.
+- O Gemini pode deixar de ser grátis. Plano B: pesquisar alternativas gratuitas quando doer.
+- Silo é disciplina, não mecanismo, até a Fase 2.
+- O patch do handler de 429 vive em repositório vendored sem backup — reverificar após todo `hermes update`.
+- Desconfiança permanente tem custo. O overhead é campo opcional em MEMÓRIAS, sem automação; silêncio também é dado.
+- Modelo local como classe é limitado neste hardware: o teto é ~14b/9GB. Assunto encerrado sem hardware novo.
+- Fricções entre modelos de fornecedores diferentes são característica do período; registram-se quando surgem, não se resolvem por regra.
 
 ## Diagnóstico
-`hermes doctor` / `hermes status`. Prontidão da Ágata: definida nas REGRAS.
+`hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
