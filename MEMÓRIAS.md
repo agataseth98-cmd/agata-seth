@@ -1272,3 +1272,16 @@ Este bloco existe porque a hidratação injeta só as **últimas 30 linhas** de 
 **Não diga "íntegro" sem Máquina.** Coerência de texto é leitura atenta. Hash, git ou raw, ou então `não verificado`.
 **Antes de numerar entrada nova, sincronize.** Sua cópia pode estar atrás. Não sabe até onde vai o canon? Diga até onde vai a sua e não numere.
 **Pendências:** publicar (63)-(77) · proteger o patch do 429 (vive em repo vendored sem backup) · parecer do GLM sobre a regra 3X (pendente desde (68)) · fechar TES-001 · silo por modelo (Fase 2) · definir o limite do roteamento.
+
+(78) DIÁRIO — 11/08/2026 · Sincronização aplicada ao Predator por Claude Code, sem push
+Ordem do Humano executada: sincronizar REGRAS.md/PROJETO.md/MEMÓRIAS.md/.hermes.md propostos pela sessão de nuvem, com autorização explícita. Conteúdo aplicado como recebido, sem edição/filtro por conta própria — Regras 2 e 4 não autorizam reescrita unilateral.
+Verificação de segurança (§4 da carta) rodada duas vezes antes de aplicar, contra dois arquivos independentes (o então-canônico e o recebido): ambos produziram, pra fatia de história (1)-(62), 128.671 bytes e sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Sem divergência, então prosseguido.
+Backup antes de aplicar: tag git `pre-transicao-20260811` (aponta pro commit `e6e9b11`, HEAD anterior) + cópia dos três arquivos anteriores em `~/agata_backup_20260811/`, fora do repo.
+Hashes reais medidos por mim nos arquivos aplicados (não os declarados na carta):
+- REGRAS.md: sha256 `658d704e39b3d9bee9388205ec889c49941a46c1325095cf6c5b09c71863db13`, 15.446 B.
+- PROJETO.md: sha256 `da84e5bc06007914ba99c2ad8acb3933e3bd81ebf3ff0bed7bc6da0a11c3c008`, 9.957 B.
+- MEMÓRIAS.md (antes desta entrada 78): sha256 `543ad25c945aca93c6b62ce6e33342bfd065a0d1429e7d7cd850312299b4cebb`, 165.304 B.
+- .hermes.md regenerado via `.githooks/gerar-hermes-md.sh`: 8 referências a MEMÓRIAS.md, 0 a DIÁRIO.md — sem o bug de caminho hardcoded que a carta alertou existir no passado.
+Commit local: `b83d25b`, branch `main`, 1 commit à frente de `origin/main`. **Sem push** — pendente autorização explícita separada do Humano, por ser repositório público (decisão dele, já registrada em (62)).
+Achado, não corrigido por mim: o tamanho de `CARTA_AO_EXECUTOR.md` declarado na mensagem que acompanhou os arquivos estava errado — 11.796 bytes alegados contra 12.256 bytes medidos por mim (diferença de 460 B, ~3,8%). Não afeta os três canônicos aplicados, que conferiram exatamente nos tamanhos/hashes declarados. Registrado para o Humano avaliar se importa.
+Modelo: Claude Sonnet 5 (Claude Code, leitura/escrita direta de disco — fora do pipeline `.hermes.md`/Hermes). Turno: primeira sessão deste executor no projeto; sem contador mecânico prévio.
