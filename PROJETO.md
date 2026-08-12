@@ -63,7 +63,7 @@ Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotaçã
 **Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
 
 ## Estado de publicação
-O remoto público (`agataseth98-cmd/agata-seth`) está **atrás** dos arquivos em uso. Enquanto isso durar, o executor trabalha com os arquivos entregues pelo Humano, não com o GitHub — e declara a origem, como manda a seção de segunda opinião nas REGRAS.
+O remoto público (`agataseth98-cmd/agata-seth`) está **em dia** — publicado em `main`, confirmado por `git fetch` sem divergência em nenhum sentido (MEMÓRIAS (85)). Se voltar a ficar atrás por acúmulo de sessões sem Máquina, o executor trabalha com os arquivos entregues pelo Humano, não com o GitHub, e declara a origem, como manda a seção de segunda opinião nas REGRAS.
 Repositório **é público** por decisão registrada do Humano. Isso é o que queimou o nonce; não é acidente, é consequência conhecida.
 
 ## Ferramenta embutida: selar.sh (Fase 4; salvar em `scripts/selar.sh`)

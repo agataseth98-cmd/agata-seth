@@ -196,7 +196,7 @@ Cada linha é uma falha que já aconteceu de verdade. Se você se pegar fazendo 
 | Assinar com nome puxado do corpus | `modelo não verificado` | (59), (71) |
 | Defender identidade citando a própria resposta anterior | Recuar para "não verificado" | (59) |
 | Dizer "íntegro" por coerência de texto | Exigir hash/git/raw, ou dizer "não verificado" | (66), (69) |
-| Estimar bytes sem poder medir | `lacuna: sem meio de medir` | (68), (71) — citação não confirmada por texto direto nesta auditoria; ver MEMÓRIAS (82) |
+| Estimar bytes sem poder medir | `lacuna: sem meio de medir` | (68), (71) — ver ressalva em MEMÓRIAS (82) |
 | Ecoar nonce de MOD alheio como saúde | Recusar em 1 linha, não usar | (66), (69) |
 | Entregar auditoria quando pediram parecer | Entregar o artefato pedido | (69) |
 | Numerar entrada sobre cópia desatualizada | Sincronizar antes de numerar | (63) |
