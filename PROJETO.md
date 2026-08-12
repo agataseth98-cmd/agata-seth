@@ -26,7 +26,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 
 ## Serviços (boot)
 `ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
-Leftovers pré-Hermes purgados (`agata-rest`, `agata.service`, `agatha.service`) — **não recriar**.
+Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` não foi purgado — unit ainda existe, `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Correção: não roda (disabled), mas remover a unit de verdade precisa de sudo — fila atrás do reboot que testa (101).
 
 ## Memória e hidratação
 - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
@@ -93,6 +93,7 @@ Testado nesta sessão de verdade (não só lido): `--check` sem `SELOS.txt` dá 
 - **Exposição do conteúdo do próprio DIÁRIO, não só do nonce.** A avaliação de risco do repositório público (MEMÓRIAS (62)/(70)) cobriu o nonce queimado, nunca o conteúdo do DIÁRIO coletivo em si — que já registra hábitos, hardware e rotina do Humano, e é público por decisão. Vale revisão futura sobre o que mover pra camada privada, sem editar história existente.
 - **Memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) é vetor distinto do DIÁRIO.** Já rastreada no repo público antes desta sessão, expõe dado pessoal e narrativa afetiva endereçando o Humano por nome. Diferente do item acima: este conteúdo é escrito pela Máquina (mecanismo de memória do Hermes), não por decisão deliberada do Humano ou do Modelo — o mesmo tipo de escrita automática que já apagou identidade em (47). Vetor de risco próprio, não subitem do risco do DIÁRIO.
 - **Ausência de cópia da história fora desta máquina.** As únicas menções a backup neste arquivo cobrem o patch do 429 (item acima) — o repo canônico completo e, principalmente, `memoria/missoes/` (sem remote, por desenho) não têm cópia fora do disco local. Ver MEMÓRIAS (93)/(94). HD externo `AgataBkup01` (1,9T, exFAT) já testado gravável sem sudo; reconhecimento feito, ainda não registrado em MEMÓRIAS como entrada própria — 4 decisões do Humano seguem em aberto (conteúdo, método, frequência, segredos) antes de qualquer cópia real.
+- **Alcance retroativo do bug de `grep -oE` achado em (105), não auditado.** O `grep` real desta máquina truncava matches de `-oE` com `[^\n]*`/similar em UTF-8 multibyte (português é acentuado; MEMÓRIAS inteiro é português). Não há como saber, sem auditoria manual, se alguma verificação de sessão anterior a (105) que tenha usado `grep -oE` sobre conteúdo acentuado produziu resultado incorreto registrado como confirmado. Não afirmado que algo caiu — registrado como possibilidade não descartada.
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.

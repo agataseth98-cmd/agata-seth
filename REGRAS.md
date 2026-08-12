@@ -61,6 +61,7 @@ Quem propõe não opina sobre a própria proposta.
 Toda decisão vai para o fim de MEMÓRIAS, com data. Só se acrescenta.
 - Correção = **entrada nova** apontando a corrigida. Jamais edição do que já está lá.
 - **Sincronize antes de numerar.** A cópia colada pelo Humano pode estar atrás do canon: sessões sem acesso à Máquina avançam a numeração fora dela. Confira o fim do remoto antes de escrever qualquer entrada nova. Ver catálogo.
+- **Cite entrada anterior a (49) por número e data.** Numeração pré-(49) não é única globalmente — história migrada de origens diferentes reinicia número por origem (achado em MEMÓRIAS (105), rodando o índice de verdade contra o arquivo). Número sozinho, nesse trecho, não identifica.
 *Motivo:* a história é o único ativo que não se reconstrói. Ver MEMÓRIAS (47) — um processo automático já apagou identidade para caber num teto de caracteres.
 
 **5. Fale direto.**

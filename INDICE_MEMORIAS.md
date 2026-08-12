@@ -121,3 +121,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (105) DIÁRIO — 12/08/2026 · Passo 6: índice de MEMÓRIAS e janela por entrada inteira substituem o tail de 30 linhas; checagem de reconciliação heurística; bug real de `grep` do sistema achado e corrigido no caminho
 (106) DIÁRIO — 12/08/2026 · O fenômeno por trás de (103), registrado pra quem não usa Agata; correção explícita da alegação própria de t=7; hipótese sobre TES-001, marcada como hipótese
 (107) DIÁRIO — 12/08/2026 · Passo 7: levantamento de limpeza, nada apagado; divergência achada entre PROJETO e a Máquina sobre `agata-rest.service`; sessão para aqui, Registro final desta entrada em diante
+(108) DIÁRIO — 12/08/2026 · Publicado, com checagem de segredo antes; agata-rest.service corrigido em PROJETO; risco retroativo do bug de grep registrado; citação de história pré-(49) por número+data vira regra; duas imprecisões da resposta anterior corrigidas
