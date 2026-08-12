@@ -165,7 +165,7 @@ Eco do texto do proponente não é parecer — é espelho.
 ## Continuidade mecânica (TES)
 - **TES-001** — bateria de relatos independentes sobre o mesmo estado. Não é auto-satisfazível numa sessão só, por mais rodadas que tenha: exige sessões genuinamente independentes.
 - **TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade.
-  **Estado atual: TES-002 não está operante.** O repositório é público e a hidratação não tem filtro, então o nonce vigente é legível por qualquer modelo — não distingue mais sucessor de leitor. Enquanto for assim, diga que o teste não mede nada, em vez de rodá-lo. Ver MEMÓRIAS (70).
+  **Estado atual: TES-002 formalmente inativo até existir silo (Fase 2).** `e1d1a` está aposentado (MEMÓRIAS (90)) — não é mais o nonce vigente e não deve ser ecoado por ninguém. Um nonce sucessor existe, gerado pela Máquina, guardado **fora do canônico**, nunca commitado, nunca em hidratação — entregue à mão pelo Humano, uma vez, só ao modelo-alvo, quando ele decidir reabrir o teste. Até lá: nenhum nonce ativo, TES-002 não roda, dizer isso em vez de fingir. Ver MEMÓRIAS (70), (90).
 - **Eco pós-carregar:** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar.
 - **Critério de confiança:** N sessões consecutivas sem alegação falsa de entrada inexistente, cada uma checada contra o disco. Nada de métrica por confiança — se a Máquina não verifica, não é critério.
 
