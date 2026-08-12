@@ -34,6 +34,7 @@ Leftovers pré-Hermes purgados (`agata-rest`, `agata.service`, `agatha.service`)
 - **Silos por modelo (Fase 2, ainda NÃO construídos):** o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + fim de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo é disciplina do carteiro, não mecanismo.
 - **A janela de injeção é de 30 linhas** do fim de MEMÓRIAS. Entradas longas não chegam inteiras ao contexto — escreva contando com isso.
 - RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
+- **`memoria/projetos/` é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão/projeto, mais `INDICE.md`. Gitignorado — nunca commitado, nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Ordem do Humano, MEMÓRIAS (91).
 
 ## Interface
 Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
