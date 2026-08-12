@@ -13,6 +13,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 
 ## Máquinas
 - **Predator** (master — CachyOS, fish, i7-13650HX, 40GB RAM, RTX 4060 8GB): Hermes, Ollama, git, Obsidian, web.
+  **Estabilidade, 12/08/2026:** 3 travamentos no dia. Causas apuradas e diferentes entre si — `nowatchdog` mascarando o 1º (sem rastro no journal), GPU/suspend "deep" travando no resume no 2º (MEMÓRIAS (99)); o 3º coincidiu no tempo com a 1ª tentativa de mitigação, sem causalidade provada (MEMÓRIAS (100)). Mitigações aplicadas — `nowatchdog` removido, `mem_sleep_default=s2idle` (MEMÓRIAS (101)) — **efeito só a partir do próximo boot, ainda não testado**. `/etc/default/grub.bak.20260812-155431` é a rede de segurança até esse boot acontecer; não apagar antes.
 - **Orusoua** (réplica Windows 11, leitura/failover) — *planejado*.
 
 ## Cérebro
@@ -30,11 +31,14 @@ Leftovers pré-Hermes purgados (`agata-rest`, `agata.service`, `agatha.service`)
 ## Memória e hidratação
 - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
 - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
-- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit, sem filtro por modelo. Injeta REGRAS + PROJETO + fim de MEMÓRIAS.
-- **Silos por modelo (Fase 2, ainda NÃO construídos):** o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + fim de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo é disciplina do carteiro, não mecanismo.
+- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit (`.githooks/gerar-hermes-md.sh`), sem filtro por modelo. Injeta REGRAS + PROJETO + fim de MEMÓRIAS no system prompt. Fora do Hermes (outro executor/cliente lendo o canon) não há contador mecânico de turno — conta-se a própria resposta no contexto, como manda REGRAS Regra 1.
+- **Teto de entrega do carregador do `hermes-agent`, achado e corrigido nesta sessão:** o carregador de arquivo de contexto (`agent/prompt_builder.py`) trunca `.hermes.md` antes de injetar — piso dinâmico de 20.000 caracteres, vindo de `model.context_length: 65536` em `~/.hermes/config.yaml` (a mesma variável, não distinção por provedor ativo). Cortava a partir do char ~14.000, cabeça+cauda de 20.000 — **PROJETO.md inteiro (começava no char 16.353) nunca chegava a nenhum modelo.** Corrigido com `context_file_max_chars: 100000` explícito no `config.yaml`, escopo estreito (não toca `model.context_length`, que também governa compressão de histórico de conversa — `lacuna: efeito lá, não medido`). Verificado rodando o carregador real, não só lendo a config. Ver MEMÓRIAS, entrada dedicada ao achado.
+- Silos por modelo (Fase 2, ainda NÃO construídos): o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + fim de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo do Conselho (REGRAS, "O Conselho" item 3) é **norma, não mecanismo**.
 - **A janela de injeção é de 30 linhas** do fim de MEMÓRIAS. Entradas longas não chegam inteiras ao contexto — escreva contando com isso.
+- **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento — nunca por offset fixo ou número de linha, que se deslocam a cada edição de preâmbulo (MEMÓRIAS (96) achou isso; (97) corrigiu: o offset registrado em (96) é foto, não âncora durável). Script: `scripts/achar_ancora_1_62.py`.
 - RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
-- **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal, nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
+- **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
+- **Fonte canônica (URLs) e atualização:** `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/{REGRAS,PROJETO,MEMÓRIAS}.md`. Primeira sessão: o Humano envia os 3. Depois: o modelo busca das URLs, seguindo a ordem de verificação de REGRAS.md. `atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar hidratação. Nunca sobrescreve história; conflito → para e avisa.
 
 ## Interface
 Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
@@ -46,15 +50,15 @@ Serviços em `127.0.0.1`. Sandbox sempre. Segredos só em `~/.hermes/.env`, fora
 Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
 
 ## Estado dos bugs e dos testes
-- **Gemini 429 ("perdi a conexão"):** causa raiz achada e corrigida. `_summarize_api_error` lia `.text` de uma resposta em streaming não lida, mascarando o 429 como crash de stream e impedindo o fallback de ser acionado. Patch aplicado e verificado por mock do cenário exato.
+- **Gemini 429 ("perdi a conexão"):** corrigido. Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação: MEMÓRIAS (38)-(40).
   **Risco residual, não bug ativo:** o patch vive no `hermes-agent` vendored, fora do repo canônico, sem backup. Um `hermes update` pode descartá-lo em silêncio. **Reverificar após qualquer atualização do Hermes.**
 - **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. Se reaparecer, o protocolo é: curl na 8642 forçando fallback com `carregar`, capturar o system prompt efetivo no Ollama, e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
 - **TES-001:** não fechado. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Exige sessões genuinamente independentes.
-- **TES-002:** **não operante.** O nonce vigente está queimado — repositório público mais hidratação sem filtro tornam o segredo legível por qualquer modelo. Proposta em aberto: gerar novo nonce fora da hidratação, aposentar o antigo por entrada nova, e declarar o teste inativo enquanto não houver silo. Ver MEMÓRIAS (70).
+- **TES-002:** **formalmente inativo até existir silo (Fase 2).** Nonce `e1d1a` aposentado (MEMÓRIAS (90)) — não deve ser ecoado por ninguém. Sucessor existe, gerado pela Máquina, guardado fora do canônico, nunca commitado, nunca em hidratação — entregue à mão pelo Humano, uma vez, só ao modelo-alvo, quando ele decidir reabrir o teste. Até lá: nenhum nonce ativo, dizer isso em vez de fingir. Protocolo completo em REGRAS.md, "Continuidade mecânica". Ver MEMÓRIAS (70), (90).
 - **Segunda opinião sobre a regra 3X:** pendente desde MEMÓRIAS (68). O executor designado devolveu eco do texto do proponente, não parecer. Encaminhamento recomendado: GLM, auditor ativo desde (44).
 
 ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
-- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · reverificar o patch do 429 após qualquer `hermes update` · resolver o nonce queimado.
+- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · reverificar o patch do 429 após qualquer `hermes update`.
 - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
 - **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
 - **Fase 3:** GLM membro pleno (MOD-002) · válvula de discordância sintética.
@@ -67,31 +71,8 @@ Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotaçã
 O remoto público (`agataseth98-cmd/agata-seth`) está **em dia** — publicado em `main`, confirmado por `git fetch` sem divergência em nenhum sentido (MEMÓRIAS (85)). Se voltar a ficar atrás por acúmulo de sessões sem Máquina, o executor trabalha com os arquivos entregues pelo Humano, não com o GitHub, e declara a origem, como manda a seção de segunda opinião nas REGRAS.
 Repositório **é público** por decisão registrada do Humano. Isso é o que queimou o nonce; não é acidente, é consequência conhecida.
 
-## Ferramenta embutida: selar.sh (Fase 4; salvar em `scripts/selar.sh`)
-Testado: sela, verifica (exit 0) e detecta adulteração (exit 1).
-```bash
-#!/usr/bin/env bash
-# Rodar da RAIZ do repo. Uso: bash scripts/selar.sh <arquivo> | --check
-set -euo pipefail
-SELOS="SELOS.txt"
-if [ "${1:-}" = "--check" ]; then
-    [ -f "$SELOS" ] || { echo "sem selos registrados ($SELOS ausente)"; exit 1; }
-    falha=0
-    while read -r hash arquivo data; do
-        [ -z "$hash" ] && continue
-        atual=$(sha256sum "$arquivo" 2>/dev/null | cut -d' ' -f1 || echo "ARQUIVO_AUSENTE")
-        if [ "$atual" = "$hash" ]; then echo "OK      $arquivo (selado em $data)"
-        else echo "VIOLADO $arquivo — selo $hash != atual $atual"; falha=1; fi
-    done < "$SELOS"
-    exit $falha
-fi
-[ -n "${1:-}" ] || { echo "uso: selar.sh <arquivo> | --check"; exit 1; }
-[ -f "$1" ] || { echo "arquivo não existe: $1"; exit 1; }
-hash=$(sha256sum "$1" | cut -d' ' -f1); data=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-echo "$hash $1 $data" >> "$SELOS"
-echo "selado: $1"; echo "sha256: $hash"
-echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
-```
+## Ferramenta embutida: selar.sh (Fase 4)
+Testado nesta sessão de verdade (não só lido): `--check` sem `SELOS.txt` dá exit 1 com mensagem clara; selar um arquivo e checar dá exit 0; adulterar o arquivo depois de selado dá exit 1 com "VIOLADO". Script em `scripts/selar.sh` (sha256 `154dfa55f1bfb3f571a338d2b305d60922cbb245b6a6edb4865f7f06afae4745`), não mais inline aqui — extraído por sessão de reconciliação, ver MEMÓRIAS.
 
 ## Memória em duas camadas
 **Camada local** — Obsidian sobre o próprio repositório git: offline, privada, é **FATO**.
@@ -109,6 +90,7 @@ echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
 - **Sucessão do operador Humano é ponto único de falha.** O sistema trata sucessão de modelo com cuidado (Regra 6, silos, MOD), mas não tem plano pra sucessão do operador — só aparece em Fase 5, sem prazo. Se o Humano ficar indisponível, não há segundo operador definido.
 - **Exposição do conteúdo do próprio DIÁRIO, não só do nonce.** A avaliação de risco do repositório público (MEMÓRIAS (62)/(70)) cobriu o nonce queimado, nunca o conteúdo do DIÁRIO coletivo em si — que já registra hábitos, hardware e rotina do Humano, e é público por decisão. Vale revisão futura sobre o que mover pra camada privada, sem editar história existente.
 - **Memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) é vetor distinto do DIÁRIO.** Já rastreada no repo público antes desta sessão, expõe dado pessoal e narrativa afetiva endereçando o Humano por nome. Diferente do item acima: este conteúdo é escrito pela Máquina (mecanismo de memória do Hermes), não por decisão deliberada do Humano ou do Modelo — o mesmo tipo de escrita automática que já apagou identidade em (47). Vetor de risco próprio, não subitem do risco do DIÁRIO.
+- **Ausência de cópia da história fora desta máquina.** As únicas menções a backup neste arquivo cobrem o patch do 429 (item acima) — o repo canônico completo e, principalmente, `memoria/missoes/` (sem remote, por desenho) não têm cópia fora do disco local. Ver MEMÓRIAS (93)/(94). HD externo `AgataBkup01` (1,9T, exFAT) já testado gravável sem sudo; reconhecimento feito, ainda não registrado em MEMÓRIAS como entrada própria — 4 decisões do Humano seguem em aberto (conteúdo, método, frequência, segredos) antes de qualquer cópia real.
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
