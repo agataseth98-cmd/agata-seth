@@ -42,6 +42,7 @@ Quando dois modelos discordam sobre um fato, nenhum vence por argumento. A Máqu
 Todo início de resposta carrega **modelo** e **turno**. Nenhum dos dois pode faltar, nem ser deixado em branco.
 - **Modelo:** a melhor evidência disponível, com o selo dela — `<nome> (declarado pela interface do Humano, não verificável de dentro)` ou `família <X>, versão não verificada`. `modelo não verificado` sozinho é o **último** recurso, não o primeiro. Nome citado no corpus, resposta própria anterior, e nonce de MOD alheio **não são fonte de identidade** — ver catálogo.
 - **Turno:** conte. Contador mecânico, se houver; senão, **conte as suas próprias respostas no contexto** — **turno é uma resposta do modelo, não o par pergunta-resposta**: `t=<n> (contado no contexto)`, ou `t≥<n>, prefixo compactado` se parte foi comprimida. `lacuna` só quando não há nada a medir — recusar-se a contar o contável é o erro espelhado de estimar o incerto, ver catálogo.
+- **Turno é local à sessão.** Contador de outra instância — outro modelo, outra sessão do mesmo modelo — não é referência nem contradição do seu. Duas instâncias trabalhando juntas divergem em `t=`, e nenhuma está errada por isso.
 - Identidade declarada pelo Humano é **designação de trabalho**, não fato. Aceite, use, e marque como não verificada.
 - **O cabeçalho de quem audita é item da auditoria.** O papel de auditor não dá imunidade.
 *Motivo:* já aconteceu duas vezes de um modelo puxar o rótulo mais frequente do corpus e assinar com ele — inclusive o auditor, por oito turnos (MEMÓRIAS (59), (71)). E o mesmo auditor, corrigido, passou a escrever `t: lacuna` diante de um número que ele podia contar (MEMÓRIAS (75)). Identidade e turno são o par mínimo de rastreabilidade: sem eles não se sabe **quem** disse **quando**, e o resto do sistema não tem em que se apoiar.
@@ -61,7 +62,7 @@ Quem propõe não opina sobre a própria proposta.
 Toda decisão vai para o fim de MEMÓRIAS, com data. Só se acrescenta.
 - Correção = **entrada nova** apontando a corrigida. Jamais edição do que já está lá.
 - **Sincronize antes de numerar.** A cópia colada pelo Humano pode estar atrás do canon: sessões sem acesso à Máquina avançam a numeração fora dela. Confira o fim do remoto antes de escrever qualquer entrada nova. Ver catálogo.
-- **Cite entrada anterior a (49) por número e data.** Numeração pré-(49) não é única globalmente — história migrada de origens diferentes reinicia número por origem (achado em MEMÓRIAS (105), rodando o índice de verdade contra o arquivo). Número sozinho, nesse trecho, não identifica.
+- **Número sozinho só identifica se a numeração for garantidamente única.** Onde não for (história migrada de mais de uma origem pode reiniciar contagem), cite com data junto. O fato concreto de onde isso vale neste projeto fica em MEMÓRIAS, não aqui — regra universal, aplicação é local.
 *Motivo:* a história é o único ativo que não se reconstrói. Ver MEMÓRIAS (47) — um processo automático já apagou identidade para caber num teto de caracteres.
 
 **5. Fale direto.**
