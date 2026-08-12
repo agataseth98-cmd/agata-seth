@@ -1426,3 +1426,14 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Backup externo: sem mudança de decisão.** A camada segue sem cópia fora da máquina. Continua pendente do Humano — apresentadas as opções (remote privado, disco externo, cópia manual com hash, aceitar risco), nenhuma escolhida ainda.
 Hash pós-edição: PROJETO.md 11.796 B, sha256 `1400aae70cabb6a6dc0a4e690e68a7126ce00658eaa70a26f4316836e35ec4e6`.
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(96) DIÁRIO — 12/08/2026 · Âncora (1)-(62) provada por deslizamento de janela — offset e marcadores de conteúdo, nunca mais por número de linha
+**Ordem do Humano, executada:** a âncora registrada desde (76)/(78)/(79)/(93)/(94) — 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a` — sempre foi guardada só pelo valor, nunca pelo método de extração. Isso quebrou a verificação na sessão anterior deste executor: cortar por número de entrada/linha falhou, porque o preâmbulo foi reescrito em (76) e desloca qualquer corte que comece do topo do arquivo.
+**Método, escrito em `scripts/achar_ancora_1_62.py`:** já que o comprimento é fixo, o início determina o fim. O script desliza uma janela de 128.671 bytes por todo o `MEMÓRIAS.md` atual, byte a byte, e testa o sha256 de cada janela contra o valor esperado — sem supor onde a história começa ou termina.
+**Resultado: um único offset bateu — offset 1730 (byte, não linha).**
+- marcador de início: `## Migrado de DIÁRIO.md (histórico pré-consolidação, co...`
+- marcador de fim: `...sim, decisão registrada aqui, não arbitrada pela Máquina.`
+- byte seguinte ao fim da janela: `\n\n(63) DIÁRIO — 06/08/2026 · Sincron...` — bate exatamente com o início da entrada (63).
+**Veredito: gate de integridade fechado. A história de (1) a (62) está byte a byte idêntica à âncora registrada.** A suspeita de corrupção da sessão anterior foi descartada: o problema era método de corte (linha), não conteúdo. Convenção daqui pra frente: âncoras de fatia de história se registram por marcador de conteúdo (primeiros/últimos bytes) + comprimento, nunca por número de linha — número de linha muda com qualquer edição de preâmbulo, conteúdo não.
+**Reverificado no mesmo turno, por completude:** `REGRAS.md` 16.469 B / sha256 `ce7fd0e6...` e `PROJETO.md` 11.796 B / sha256 `1400aae7...` batem exatamente com os valores registrados em (93) e (95) — nenhuma divergência nos dois canônicos editáveis.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
