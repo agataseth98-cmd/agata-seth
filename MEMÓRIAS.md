@@ -1411,3 +1411,10 @@ sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
 ```
 Isso cobre `/home` inteiro (inclusive `memoria/projetos/`) com snapshot btrfs incremental, não só essa pasta — mas resolve o problema real, que é ausência de qualquer rede de segurança no subvolume inteiro, não só ali.
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(94) DIÁRIO — 12/08/2026 · Três qualificações sobre (93): teste único não é resolução, snapper não é backup, assimetria de cópia externa
+**1. O teste da armadilha do git aninhado foi feito uma vez e não reproduziu o problema.** Não registrado como resolvido — registrado exatamente assim: testado uma vez, não reproduzido. Ausência num teste não é ausência do risco. Se `git add -A` alguma vez se comportar diferente (versão de git, config diferente, comando composto), o teste de (93) não cobre esse caso.
+**2. `snapper`, se rodado, é proteção local — não é backup desta camada.** Cobre apagar por engano. Não cobre disco morto, máquina roubada, nem ransomware: o snapshot mora no mesmo disco físico que ele protege. Nenhuma sessão futura deve ler "snapper habilitado" como "`memoria/projetos/` está coberta" — não está. Rodar `snapper` continua útil por outros motivos (histórico de sistema, não só esta camada); decisão de rodar ou não é do Humano, à parte disto.
+**3. `memoria/projetos/` é hoje a única camada do sistema Agata sem cópia fora da Predator.** O canônico inteiro (REGRAS/PROJETO/MEMÓRIAS) sobrevive à perda da máquina porque está no GitHub. Esta camada, por desenho (privada, sem remote), não sobrevive. É assimetria de desenho — consequência direta de ter tirado o remote pra manter privacidade — não descuido, mas precisa estar escrita, não implícita.
+**Convenção reforçada:** número nunca sozinho, unidade sempre colada — bytes, tokens, linhas. A ambiguidade entre bytes e tokens gerou a última divergência auditada; uma linha de disciplina evita a próxima.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
