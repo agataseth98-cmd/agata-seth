@@ -105,6 +105,8 @@ echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
 - Desconfiança permanente tem custo. O overhead é campo opcional em MEMÓRIAS, sem automação; silêncio também é dado.
 - Modelo local como classe é limitado neste hardware: o teto é ~14b/9GB. Assunto encerrado sem hardware novo.
 - Fricções entre modelos de fornecedores diferentes são característica do período; registram-se quando surgem, não se resolvem por regra.
+- **Sucessão do operador Humano é ponto único de falha.** O sistema trata sucessão de modelo com cuidado (Regra 6, silos, MOD), mas não tem plano pra sucessão do operador — só aparece em Fase 5, sem prazo. Se o Humano ficar indisponível, não há segundo operador definido.
+- **Exposição do conteúdo do próprio DIÁRIO, não só do nonce.** A avaliação de risco do repositório público (MEMÓRIAS (62)/(70)) cobriu o nonce queimado, nunca o conteúdo do DIÁRIO coletivo em si — que já registra hábitos, hardware e rotina do Humano, e é público por decisão. Vale revisão futura sobre o que mover pra camada privada, sem editar história existente.
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
