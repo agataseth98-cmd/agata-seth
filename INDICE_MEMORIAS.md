@@ -117,3 +117,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (101) DIÁRIO — 12/08/2026 · As duas mitigações de (99) reaplicadas pelo Humano e confirmadas por Máquina; efeito só no próximo boot
 (102) DIÁRIO — 12/08/2026 · Humano assume risco por escrito para mudanças em REGRAS/PROJETO (Passos 1-7 de sessão de reconciliação), dispensando segunda opinião de "Mudança estrutural"
 (103) DIÁRIO — 12/08/2026 · Passo 2 (verificação de hidratação) achou truncamento real, maior que a pergunta original; sessão parada aqui aguardando decisão do Humano — Passos 3-7 não iniciados
+(104) DIÁRIO — 12/08/2026 · Teto de hidratação corrigido (opção b, decisão do Humano); Passos 1/3/4/5 executados — PROJETO reconciliado com (96)-(101), REGRAS/PROJETO realocados sem duplicar fonte, selar.sh extraído, regras encurtadas onde o catálogo já cobre
+(105) DIÁRIO — 12/08/2026 · Passo 6: índice de MEMÓRIAS e janela por entrada inteira substituem o tail de 30 linhas; checagem de reconciliação heurística; bug real de `grep` do sistema achado e corrigido no caminho
+(106) DIÁRIO — 12/08/2026 · O fenômeno por trás de (103), registrado pra quem não usa Agata; correção explícita da alegação própria de t=7; hipótese sobre TES-001, marcada como hipótese
+(107) DIÁRIO — 12/08/2026 · Passo 7: levantamento de limpeza, nada apagado; divergência achada entre PROJETO e a Máquina sobre `agata-rest.service`; sessão para aqui, Registro final desta entrada em diante
