@@ -203,6 +203,7 @@ Cada linha é uma falha que já aconteceu de verdade. Se você se pegar fazendo 
 | Afirmar "não existe" sobre o mundo lendo só a própria cópia | "minha cópia vai até (n)" | (73) |
 | Devolver o texto do proponente como parecer | Posição própria, ou recusa | (73), (74) |
 | Escrever `lacuna` para não contar o que é contável | Contar e marcar a origem da contagem | (75) |
+| Implementar privacidade removendo verificabilidade, sem decidir isso | Privado também se versiona — git próprio, sem remote | (91)→(92) |
 | Alegar ação realizada que não aconteceu | Relato é alegação até a Máquina confirmar | (16), (24) |
 
 ## Checagem de prontidão (o modelo, para si)
