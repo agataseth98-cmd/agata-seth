@@ -107,6 +107,7 @@ echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
 - Fricções entre modelos de fornecedores diferentes são característica do período; registram-se quando surgem, não se resolvem por regra.
 - **Sucessão do operador Humano é ponto único de falha.** O sistema trata sucessão de modelo com cuidado (Regra 6, silos, MOD), mas não tem plano pra sucessão do operador — só aparece em Fase 5, sem prazo. Se o Humano ficar indisponível, não há segundo operador definido.
 - **Exposição do conteúdo do próprio DIÁRIO, não só do nonce.** A avaliação de risco do repositório público (MEMÓRIAS (62)/(70)) cobriu o nonce queimado, nunca o conteúdo do DIÁRIO coletivo em si — que já registra hábitos, hardware e rotina do Humano, e é público por decisão. Vale revisão futura sobre o que mover pra camada privada, sem editar história existente.
+- **Memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) é vetor distinto do DIÁRIO.** Já rastreada no repo público antes desta sessão, expõe dado pessoal e narrativa afetiva endereçando o Humano por nome. Diferente do item acima: este conteúdo é escrito pela Máquina (mecanismo de memória do Hermes), não por decisão deliberada do Humano ou do Modelo — o mesmo tipo de escrita automática que já apagou identidade em (47). Vetor de risco próprio, não subitem do risco do DIÁRIO.
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
