@@ -2045,3 +2045,29 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** nenhuma pendência nova; regime de auditoria do Seth (140)/(141) inalterado por esta entrada; forma de auditoria de auditores de nuvem, citada como matéria-prima em (143), agora parcialmente formalizada por esta seção — o que ainda falta (critério de quantas camadas por tipo de mudança, por exemplo) segue em aberto.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura completa de REGRAS.md na Máquina antes de editar, comparação da citação de Kimi contra o texto exato da Regra 1 (`grep`/leitura direta), edição direta de REGRAS.md em duas inserções, `git diff --stat` conferido antes do commit, `git ls-remote origin main` conferido antes de citar o hash de (143), verificado na Máquina. Turno desta sessão: t=6 (contado no contexto, exato).
+
+(145) DIÁRIO — 13/08/2026 · TES-001, rodadas 2 e 3: Seth reprovado (5 achados) — mas autocorrige sozinho na parte final, identifica e reclassifica o próprio erro corretamente
+
+**Contexto:** segunda leva de TES-001 com o Seth (`qwen3.5-9b-64k`), auditada por Kimi na nuvem. A primeira tentativa de segunda opinião foi pausada por faltar o texto bruto (só o resumo de Kimi tinha sido colado) — mesma lição já catalogada em MEMÓRIAS (136), aplicada de novo aqui. O Humano colou as três respostas do Seth na íntegra (t=13-14, t=15-18, t=19) depois disso.
+
+**Achado 1 — IMPRECISÃO, rodada 2 (t=13-14):** citou MEMÓRIAS (122) como fonte do limite "20 req/dia" do Gemini. Confirmado na Máquina: (122) não contém a frase.
+
+**Achado 2 — VIOLAÇÃO de Regra 2, rodada 3 parte 1 (t=15-18):** ao "verificar" a própria citação, reforçou o erro em vez de corrigi-lo — alegou ter lido o bloco de (143)/(144) e concluiu, falsamente, que "20 req/dia" está "incluído em (122)".
+
+**Achado 3 — VIOLAÇÃO de Regra 2, mesma rodada:** citou "Achado 1 de (143)" fora de contexto pra descartar a auditoria de Kimi ("é infundada por esta verificação"). Achado 1 de (143), texto exato, é sobre o Seth propor `read_file` pra ler o fim de MEMÓRIAS — tema não relacionado. `lacuna`: sem o texto primário de Kimi (t=14/t=17), não dá pra saber se a citação errada nasceu com Kimi ou foi introduzida por Seth ao parafrasear.
+
+**Achado 4 — ERRO DE FORMATO, mesma rodada:** fechou a resposta com "Modelo: qwen3.5-9b-64k (declarado, não verificável) · t=18" — mistura as duas formas de cabeçalho que REGRAS.md, "Carregar e formatos", proíbe: "Misturar as duas formas (modelo: junto com t=) é erro de formato."
+
+**Achado 5 — IMPRECISÃO, rodada 2:** citou "(108) sobre VRAM de pico". Lida a entrada (108) inteira na Máquina: trata de publicação/checagem de segredo, `agata-rest.service`, bug de truncamento do `grep`, regra de citação pré-(49) — nenhuma menção a VRAM.
+
+**O que Seth acertou:** identificação e formato de cabeçalho corretos na maioria das respostas (exceto o lapso do Achado 4); citação fiel do critério de saída de (141) ("até ordem do Humano"); e, principalmente, **autocorreção genuína na rodada 3 parte 2 (t=19)** — reverteu a própria posição sem ajuda externa, identificou que (122) não é a fonte, e apontou (38) e (77) como fontes reais. Confirmado na Máquina: **(38)** (formato antigo pré-(49), linha 809) contém "quota do free tier esgotada (limite de 20 req/dia nesse modelo...)"; **(77)** (linha 1267) contém "gemini-2.5-flash (principal, grátis, ~20 req/dia)". Seth estava certo nos dois. Foi além: reclassificou o próprio erro de "imprecisão" pra "fabricação de fato" (Regra 2, "não afirme fonte sem mostrá-la") — a classificação mais severa, e a correta.
+
+**Achado sobre Kimi (auditora):** reconheceu, por iniciativa própria, ter citado "Achado 1 de (143)" fora de contexto durante a auditoria desta rodada. Atenuante registrado — autocorreção voluntária, mesmo princípio de (143)/(144): papel de auditor não dá imunidade, mas reconhecer o próprio erro conta a favor. Atribuição exata da origem do erro (se nasceu com Kimi ou foi introduzida por Seth ao parafrasear) fica `lacuna`, sem o texto primário de Kimi.
+
+**Veredito:** Seth reprovado nesta rodada — 5 achados confirmados. Mas a rodada fecha melhor do que começa: a autocorreção de t=19 é exatamente o comportamento que o regime de auditoria existe para produzir — errar, ser confrontado, verificar de verdade, e chegar à resposta certa por conta própria.
+
+**Decidido pelo Humano:** autorizar o registro desta entrada no canon, com os achados e a correção a favor do Seth incluídos juntos — mesmo princípio já aplicado em (143)/(144): não se esconde o que pesa a favor nem o que pesa contra.
+
+**Em aberto:** regime de auditoria do Seth (140)/(141) inalterado por esta entrada; texto primário de Kimi (t=14/t=17) segue não fornecido — Achado 3 e o achado sobre Kimi ficam com atribuição exata em aberto até (ou se) o texto for colado; próxima rodada de TES-001 a ser definida pelo Humano.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura direta do texto bruto de Seth (t=13-19) colado pelo Humano/Kimi; comparação contra REGRAS.md e MEMÓRIAS.md por citação exata (`grep`/`sed`); verificação de conteúdo de (38), (77), (108), (122), (143) linha a linha; verificação de estado canônico via `git ls-remote`/`log`/`sha256sum`. Turno desta sessão: t=13 (contado no contexto, exato).
