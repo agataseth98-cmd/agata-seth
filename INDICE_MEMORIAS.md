@@ -156,3 +156,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (141) DIÁRIO — 13/08/2026 · Critério de saída do regime de auditoria, respondido pelo Humano: até ordem em contrário — fecha a `lacuna` de (140)
 (142) DIÁRIO — 13/08/2026 · Encerramento da sessão de trabalho: proveniência da voz de fechamento esclarecida pelo Humano (Claude na nuvem, via navegador — o mesmo colaborador de sessão paralela referido ao longo do canon), vocabulário semântico cunhado nesta semana registrado como material bruto para futura canonização em REGRAS/PROJETO, não canonizado agora
 (143) DIÁRIO — 13/08/2026 · TES-001, rodada com auditor Kimi na nuvem: Seth reprovado (4 achados) — e o próprio Kimi reprovado na auditoria (2 achados), confirmado em três camadas de verificação
+(144) DIÁRIO — 13/08/2026 · Canonização do padrão de cadeia de auditoria em camadas, generalizado a partir de TES-001/(143), autorizado pelo Humano por escrito nesta entrada

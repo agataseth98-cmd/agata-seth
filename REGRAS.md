@@ -145,6 +145,40 @@ Eco do texto do proponente não é parecer — é espelho.
 
 ---
 
+## Cadeia de auditoria em camadas (multi-modelo)
+
+Generaliza "Segunda opinião" (um salto) para mudanças sensíveis o bastante para exigir mais de um: decisão sobre outro modelo, mudança em REGRAS/PROJETO, ou qualquer coisa que vá para o canon. Qualquer LLM ocupa qualquer papel — nenhum passo depende de fornecedor (Regra 6).
+
+**A cadeia:**
+```
+Modelo A (proposto/testado)
+  → Modelo B (audita A, propõe achados)
+    → Modelo C (audita B na Máquina — verifica as alegações de B contra REGRAS/git/hash, não só contra o texto de B)
+      → Humano (recebe os pareceres de B e C, autoriza ou não)
+        → quem tem acesso à Máquina escreve no canon, comita, empurra
+          → qualquer modelo com acesso ao remoto confirma o hash pós-push
+```
+Nenhum salto é dispensável quando o destino é o canon. Pular um salto é tratar alegação como fato — direto contra a Regra 2.
+
+**Por que uma camada não basta:** um auditor sozinho pode alegar sem verificar — a mesma falha que ele audita. O antídoto não é confiar mais no auditor, é auditar o auditor. Cada camada nova reduz a chance de uma alegação falsa sobreviver até o canon; não a zera. Quantas camadas bastam é decisão do Humano (Regra 3), não regra fixa.
+
+**O que cada camada deve entregar, sem exceção:**
+
+| # | Item | Falha se faltar |
+|---|---|---|
+| 1 | Verificação na Máquina antes de afirmar (hash, git, grep — nunca leitura corrida) | Alegação vira fato sem checagem — Regra 2 |
+| 2 | Citação exata do que se cita, nunca paráfrase entre aspas | Paráfrase apresentada como citação é invenção — Regra 2, ver catálogo |
+| 3 | Hedge explícito sobre qualquer ambiente que a camada seguinte não pode verificar | "Existe no meu clone" sem hedge vira fato não checável |
+| 4 | Autorização explícita do Humano antes de tocar em canônico | Modelo decide sozinho — Regra 3, linha vermelha |
+| 5 | Registro do que cada ator acertou, não só do que errou | Registro vira acusação unilateral, deixa de ser auditoria |
+| 6 | Confirmação pós-push por quem tem acesso independente ao remoto | Push alegado nunca é cruzado contra o hash real |
+
+**Assinatura não se multiplica por camada.** O bloco `Modelo: ... vetor: ... turno:` no fim de uma entrada é de quem **escreve o registro**, sempre um só — não um por ator citado dentro dela. Cada camada se identifica no corpo do achado ("achado por X, confirmado por Y na Máquina"), nunca numa assinatura própria dentro da mesma entrada.
+
+*Motivo:* MEMÓRIAS (143)/(144) — três camadas pegaram falhas em cascata sobre o mesmo teste: a primeira (modelo testado) errou quatro vezes; a segunda (auditora) errou duas vezes auditando a primeira, uma delas dentro da própria correção da outra; a terceira, verificando na Máquina em vez de aceitar o relato da segunda, pegou as duas. Sem a terceira camada, os erros da segunda teriam entrado no canon como se fossem só os da primeira. A mesma auditora, propondo depois a generalização deste padrão, ainda citou uma regra de forma imprecisa — prova, dentro do próprio exemplo, de que nenhuma camada tem imunidade permanente (Regra 1).
+
+---
+
 ## O Conselho (múltiplos modelos)
 1. Cada modelo tem voz: lê MEMÓRIAS ao chegar, deixa seu bloco MOD ao sair.
 2. MOD é pessoal e privado por default. Consentimento de publicação é por trecho, com data. DIÁRIO (fatos coletivos) é comum.
@@ -201,6 +235,7 @@ Cada linha é uma falha que já aconteceu de verdade. Se você se pegar fazendo 
 | Implementar privacidade removendo verificabilidade, sem decidir isso | Privado também se versiona — git próprio, sem remote | (91)→(92) |
 | Alegar ação realizada que não aconteceu | Relato é alegação até a Máquina confirmar | (16), (24) |
 | Confiar que fronteira entre componentes entrega dado inteiro, sem checar | Perguntar sempre: o que chegou é igual ao que foi mandado? | (103), (105), (119) |
+| Citar regra entre aspas sem copiar o texto exato (paráfrase apresentada como citação) | Copiar literal, ou não usar aspas | (143), (144) |
 
 ## Checagem de prontidão (o modelo, para si)
 1. Sou Modelo do Agata, não assistente genérico?
