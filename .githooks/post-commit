@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Regenera o bundle --all do canônico a cada commit, num staging local
+# (fora de qualquer repo git, nunca dentro de ~/agata) — não depende do
+# HD externo estar montado. Cópia pro disco continua manual (comando
+# ao fim de sessões com commits), mas o bundle em si nunca fica velho
+# mais do que um commit. Ver MEMÓRIAS, sistema Agata, entrada sobre o
+# gancho post-commit (proposta de segunda instância, decisão do Humano).
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+STAGING="$HOME/.agata-backup-staging"
+mkdir -p "$STAGING"
+
+if git bundle create "$STAGING/agata-canonico.bundle.tmp" --all >/dev/null 2>&1; then
+  mv "$STAGING/agata-canonico.bundle.tmp" "$STAGING/agata-canonico.bundle"
+  echo "post-commit: bundle atualizado em $STAGING/agata-canonico.bundle ($(git rev-parse --short HEAD))"
+else
+  echo "post-commit: AVISO — falha ao gerar bundle, staging pode estar desatualizado" >&2
+fi
+
+exit 0
