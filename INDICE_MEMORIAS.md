@@ -132,3 +132,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (116) DIÁRIO — 12/08/2026 · Primeiro backup fora desta máquina, executado — correção de método sobre as "quatro decisões" que travaram uma semana
 (117) DIÁRIO — 12/08/2026 · Segunda passada de backup no mesmo dia — fecha a janela reaberta pelos 3 commits publicados depois da primeira
 (118) DIÁRIO — 12/08/2026 · Teste ao vivo confirma: sem fallback automático, 429 do Gemini vira erro limpo pro Humano, não travamento — fecha o ciclo de (110)-(112)
+(119) DIÁRIO — 12/08/2026 · Qwen3.5-9B testado sob tool-calling com payload real de produção — passa, com nuance grave sobre o próprio método de teste
