@@ -125,3 +125,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (109) CONSELHO — 12/08/2026 · Segunda instância (t=18, não verificável por este executor) aponta fonte real da citação que eu tinha dado como inexistente; REGRAS/MEMÓRIAS reorganizados; turno declarado local à sessão; discordância registrada sobre uma tese generalizadora
 (110) DIÁRIO — 12/08/2026 · Travamento do Predator durante teste com Seth: cadeia 429→fallback local→VRAM apertada→hang, distinta dos 3 travamentos anteriores do dia; duas correções de critério registradas
 (111) DIÁRIO — 12/08/2026 · Correção grave sobre (110): a mitigação de `num_ctx` violava a barreira dura de 64k documentada no próprio PROJETO; revertida. Duas alegações de segunda instância checadas — uma falsa, uma correta e séria.
+(112) DIÁRIO — 12/08/2026 · Fallback automático pro Qwen3 14B local desligado — ordem do Humano, prioridade sobre o resto da fila de (110)/(111)
