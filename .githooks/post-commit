@@ -1,21 +1,46 @@
 #!/usr/bin/env bash
-# Regenera o bundle --all do canônico a cada commit, num staging local
-# (fora de qualquer repo git, nunca dentro de ~/agata) — não depende do
-# HD externo estar montado. Cópia pro disco continua manual (comando
-# ao fim de sessões com commits), mas o bundle em si nunca fica velho
-# mais do que um commit. Ver MEMÓRIAS, sistema Agata, entrada sobre o
-# gancho post-commit (proposta de segunda instância, decisão do Humano).
+# A cada commit: regenera o bundle --all num staging local (sempre — não
+# depende do HD) E, se o HD externo AgataBkup01 estiver montado agora,
+# escreve uma cópia versionada lá também (últimas N gerações, nunca uma
+# só — commit ruim não deve levar junto a última cópia boa). Se o HD não
+# estiver montado, deixa um marcador de pendência visível.
+#
+# Isto NÃO substitui as passadas datadas com MANIFESTO.txt (ver MEMÓRIAS,
+# entradas (116)/(117)) — aquelas continuam sendo o ponto de restauração
+# point-in-time verificado. Isto só reduz o quanto elas precisam alcançar
+# quando alguém lembrar de fazer uma.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 STAGING="$HOME/.agata-backup-staging"
 mkdir -p "$STAGING"
+SHORT=$(git rev-parse --short HEAD)
+STAMP=$(date +%Y%m%d-%H%M%S)
 
-if git bundle create "$STAGING/agata-canonico.bundle.tmp" --all >/dev/null 2>&1; then
-  mv "$STAGING/agata-canonico.bundle.tmp" "$STAGING/agata-canonico.bundle"
-  echo "post-commit: bundle atualizado em $STAGING/agata-canonico.bundle ($(git rev-parse --short HEAD))"
+# 1. Staging local — sempre, cache descartável, uma geração só.
+if ! git bundle create "$STAGING/agata-canonico.bundle.tmp" --all >/dev/null 2>&1; then
+  echo "post-commit: AVISO — falha ao gerar bundle no staging local" >&2
+  exit 0
+fi
+mv "$STAGING/agata-canonico.bundle.tmp" "$STAGING/agata-canonico.bundle"
+
+USB="/run/media/$USER/AgataBkup01"
+if mountpoint -q "$USB" 2>/dev/null; then
+  AUTO="$USB/auto-backups"
+  mkdir -p "$AUTO"
+  DEST="$AUTO/agata-canonico-${STAMP}-${SHORT}.bundle"
+  cp "$STAGING/agata-canonico.bundle" "$DEST"
+  # Poda: mantém só as 5 gerações mais recentes deste padrão.
+  ls -1t "$AUTO"/agata-canonico-*.bundle 2>/dev/null | tail -n +6 | xargs -r rm --
+  rm -f "$STAGING/PENDENTE-HD-DESCONECTADO"
+  echo "post-commit: bundle em $STAGING E em $DEST (HD conectado)"
 else
-  echo "post-commit: AVISO — falha ao gerar bundle, staging pode estar desatualizado" >&2
+  {
+    echo "HD AgataBkup01 não estava montado no commit $SHORT ($STAMP)."
+    echo "Staging local ($STAGING/agata-canonico.bundle) está atualizado até este commit."
+    echo "Plugue o HD e rode: cp \"$STAGING/agata-canonico.bundle\" \"/run/media/\$USER/AgataBkup01/auto-backups/agata-canonico-${STAMP}-${SHORT}.bundle\""
+  } > "$STAGING/PENDENTE-HD-DESCONECTADO"
+  echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
 fi
 
 exit 0
