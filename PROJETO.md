@@ -26,7 +26,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 
 ## Serviços (boot)
 `ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
-Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` não foi purgado — unit ainda existe, `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Correção: não roda (disabled), mas remover a unit de verdade precisa de sudo — fila atrás do reboot que testa (101).
+Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).
 
 ## Memória e hidratação
 - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
