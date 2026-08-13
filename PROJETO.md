@@ -95,5 +95,18 @@ Testado nesta sessão de verdade (não só lido): `--check` sem `SELOS.txt` dá 
 - **Ausência de cópia da história fora desta máquina.** As únicas menções a backup neste arquivo cobrem o patch do 429 (item acima) — o repo canônico completo e, principalmente, `memoria/missoes/` (sem remote, por desenho) não têm cópia fora do disco local. Ver MEMÓRIAS (93)/(94). HD externo `AgataBkup01` (1,9T, exFAT) já testado gravável sem sudo; reconhecimento feito, ainda não registrado em MEMÓRIAS como entrada própria — 4 decisões do Humano seguem em aberto (conteúdo, método, frequência, segredos) antes de qualquer cópia real.
 - **Alcance retroativo do bug de `grep -oE` achado em (105), não auditado.** O `grep` real desta máquina truncava matches de `-oE` com `[^\n]*`/similar em UTF-8 multibyte (português é acentuado; MEMÓRIAS inteiro é português). Não há como saber, sem auditoria manual, se alguma verificação de sessão anterior a (105) que tenha usado `grep -oE` sobre conteúdo acentuado produziu resultado incorreto registrado como confirmado. Não afirmado que algo caiu — registrado como possibilidade não descartada.
 
+## Fronteira de recusas (propostas já decididas — não repropor)
+Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabela, cada modelo novo que lê um levantamento externo repropõe o que já foi recusado, com toda a razão de sua parte, porque o canon não carregava a objeção.
+
+| Recusado | Motivo | Onde |
+|---|---|---|
+| Descarte de fatos por valor | Regra 4, absoluta | MEMÓRIAS (113) |
+| Reconsolidação por reescrita | Já existe como entrada nova | MEMÓRIAS (113) |
+| Reflections agendadas escrevendo memória | Mecanismo do bg-review, (47)/(48) | MEMÓRIAS (113) |
+| Vector store como camada de memória | Refutado por medição nesta escala | MEMÓRIAS (115) |
+| MEMÓRIAS em repo sem remote como cópia única | (91)→(92) | — |
+| RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
+| Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
+
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
