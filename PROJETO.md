@@ -23,6 +23,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
 - **Barreira dura:** o Hermes exige contexto ≥64k (constante de produto, não derivada do payload). Skills 12 ativas / 56 off; tools 12 de 18; payload ~12,6k tokens.
 - **Padrão de alucinação** documentado é do antecessor `qwen2.5-14b-64k` (inventava entradas e datas). O qwen3 não tem incidente registrado. A suspensão de MOD é do **papel** "fallback", não da versão — o contador de sessões limpas conta a partir da troca para o qwen3.
+- **Candidato avaliado, não adotado: `qwen3.5:9b`** (nome parecido com `qwen3-14b-64k` acima, modelo diferente — checar sempre qual dos dois, ver MEMÓRIAS (114)). Testado (MEMÓRIAS (119)/(120)): tool-calling correto sob payload real com `num_ctx=65536`, mas **VRAM de pico maior que o fallback atual** (91,3% contra 83,8% dos 8.188 MiB da placa) — o argumento original de "libera VRAM" está refutado por medição; se adotado, é por offload/velocidade (30/33 camadas na GPU contra 23/41), não por folga. Um incidente de fabricação registrado sob contexto degradado (truncamento do teste, não do modelo em uso normal) — o `thinking` visível foi o que expôs. Não instalado como fallback.
 
 ## Serviços (boot)
 `ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
