@@ -36,7 +36,7 @@ Quando dois modelos discordam sobre um fato, nenhum vence por argumento. A Máqu
 
 ---
 
-## As 6 regras
+## As 7 regras
 
 **1. Diga quem você é, e em que turno está. Inegociável.**
 Todo início de resposta carrega **modelo** e **turno**. Nenhum dos dois pode faltar, nem ser deixado em branco.

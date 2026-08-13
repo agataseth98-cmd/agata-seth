@@ -104,7 +104,7 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
 | Reconsolidação por reescrita | Já existe como entrada nova | MEMÓRIAS (113) |
 | Reflections agendadas escrevendo memória | Mecanismo do bg-review, (47)/(48) | MEMÓRIAS (113) |
 | Vector store como camada de memória | Refutado por medição nesta escala | MEMÓRIAS (115) |
-| MEMÓRIAS em repo sem remote como cópia única | (91)→(92) | — |
+| MEMÓRIAS em repo sem remote como cópia única | Privado também se versiona — git próprio, sem remote | (91)→(92) |
 | RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
 | Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
 
