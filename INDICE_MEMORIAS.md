@@ -130,3 +130,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (114) DIÁRIO — 12/08/2026 · "RLM" significa duas coisas opostas no corpus; a rejeitada não é a que está em avaliação
 (115) DIÁRIO — 12/08/2026 · Tamanho medido do canon, e por que vector store não se justifica nesta escala
 (116) DIÁRIO — 12/08/2026 · Primeiro backup fora desta máquina, executado — correção de método sobre as "quatro decisões" que travaram uma semana
+(117) DIÁRIO — 12/08/2026 · Segunda passada de backup no mesmo dia — fecha a janela reaberta pelos 3 commits publicados depois da primeira
