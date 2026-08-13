@@ -135,3 +135,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (119) DIÁRIO — 12/08/2026 · Qwen3.5-9B testado sob tool-calling com payload real de produção — passa, com nuance grave sobre o próprio método de teste
 (120) DIÁRIO — 12/08/2026 · Correção grave sobre (119): o argumento de venda do Qwen3.5-9B (VRAM) é refutado pela própria medição; a fabricação de sucesso falso é achado do modelo, não só do método
 (121) DIÁRIO — 13/08/2026 · Teste de campo real via fallback de produção acha bug novo e mais grave: contexto truncado pra 4096 tokens apesar de context_length:65536 configurado — resposta ilegível não é o modelo, é o pipeline
+(122) DIÁRIO — 13/08/2026 · Retomada de sessão nova: alegação sobre scripts pendentes refutada, mecanismo do bug de (121) mapeado no código (sem fechar a causa exata), circuit breaker de cota do Gemini implementado e testado
