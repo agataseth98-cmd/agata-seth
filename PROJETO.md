@@ -47,8 +47,9 @@ Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e sea
 Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.
 
 ## Segurança
-Serviços em `127.0.0.1`. Sandbox sempre. Segredos só em `~/.hermes/.env`, fora do repo.
-**O api_server executa terminal: nunca expor** — nem ele, nem o Open WebUI — fora de Tailscale com dupla autenticação. É a única superfície capaz de dano real.
+Sandbox sempre. Segredos só em `~/.hermes/.env`, fora do repo.
+**O api_server executa terminal: nunca expor sem contenção.** Auditado em MEMÓRIAS (126) — a frase antiga desta seção descrevia Tailscale com dupla autenticação, mecanismo que **não existe nesta máquina** (achado em (125)). O mecanismo real, confirmado por `ss -tlnp`: `api_server` compartilha a porta do `hermes-gateway` (8642), e o bind é **`127.0.0.1`** — contenção de kernel, não de firewall. Open WebUI (8080, `network_mode: host`) e Kokoro TTS (8880, publicado pelo Docker) também só em loopback. Mesmo efeito de contenção do texto antigo, mecanismo diferente do descrito — corrigido aqui pra não sustentar um controle de segurança em algo que não roda.
+**Ollama (`11434`) é a exceção, achada na mesma auditoria:** escuta em todas as interfaces (`OLLAMA_HOST=0.0.0.0:11434`), sem autenticação própria. `ufw` está ativo com política padrão de entrada `DROP`, mas o conjunto de regras explícitas está vazio — vigência ao vivo do `DROP` não confirmada sem `sudo` (`nft list ruleset` exige root). **Decidido pelo Humano (MEMÓRIAS (126)): restringir `OLLAMA_HOST` a `127.0.0.1`** — pendente, no bloco de `sudo` consolidado.
 Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
 
 ## Estado dos bugs e dos testes
