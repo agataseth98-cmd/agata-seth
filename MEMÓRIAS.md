@@ -2412,3 +2412,11 @@ Modelo: Claude Sonnet 5 · vetor: edição literal de PROJETO.md (3 itens), rege
 **Em aberto:** nada da Parte B do documento original fica faltando — B-1, B-2, B-3, B-4 e as salvaguardas estão feitos. Parte C (bancada dos 3 caminhos de RLM) segue aberta, com aprovação do Humano pendente antes da primeira rodada, conforme C-1 exige.
 
 Modelo: Claude Sonnet 5 · vetor: escrita de `scripts/compactar_indice.py`, teste isolado em `/tmp` com script real copiado (nunca sobre os arquivos de produção na primeira passada), leitura do diff completo, dois bugs achados e corrigidos em `testar_preservacao.py`, aplicação real só depois de tudo validado, remedição de B-1 pra economia real. Turno desta sessão: t=27 (contado no contexto).
+
+(166) DIÁRIO — 14/08/2026 · C-4.1: GGUF do Caminho 3 baixado e verificado — sha256 e tamanho batem exatamente com o declarado pela sessão em nuvem
+
+`mitkox/rlm-qwen3-8b-v0.1-Q4_K_M-GGUF/rlm-qwen3-8b-v0.1-q4_k_m.gguf` baixado em `memoria/missoes/rlm-3caminhos/modelo/` (fora do controle de versão — `.gitignore` do repo `missoes`, arquivo binário de 5GB não pertence a histórico git). Antes de baixar, conferido por `HEAD` na URL de resolve: `x-linked-size: 5027779648` e `x-linked-etag` (sha256 do LFS/Xet) `c3b6bfbc3a9d36d62f871232aae75de3a6996eee5fd50b2982167773df6e262b` — os dois batendo com o que a sessão em nuvem declarou antes mesmo de baixar. Depois do download completo, `sha256sum` local confirma o mesmo valor. **Nenhuma divergência em nenhuma das duas alegações que o documento original marcava como só dele até a Máquina conferir** (tamanho e hash do GGUF).
+
+**Estado do arquivo:** presente em disco, íntegro, **ainda não usado** — Modelfile, tag, smoke test e medição de VRAM (C-4.2-C-4.4) não fazem parte desta entrada. Fica para quando a bancada C-1 for aprovada e a rodada do Caminho 3 começar.
+
+Modelo: Claude Sonnet 5 · vetor: `curl -I` na URL de resolve antes do download (conferência de tamanho/hash sem baixar), download em background, `sha256sum` local depois. Turno desta sessão: t=28 (contado no contexto).
