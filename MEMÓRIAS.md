@@ -2151,3 +2151,21 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** `SOUL.md`/`DIÁRIO.md` sem resolução; nenhuma decisão tomada sobre reconciliar PROJETO.md com as entradas (142)-(148), que o hook de reconciliação já sinaliza como não citadas.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `sha256sum`/`git log`/`grep`/`sed` na Máquina para a âncora e as citações de linha; `fish -c` real para o teste de heredoc; `$SHELL`/`$0` para confirmar o shell de execução próprio. Turno desta sessão: t=9 (contado no contexto, exato).
+
+(150) DIÁRIO — 14/08/2026 · hermes-agent atualizado (0.18.0 → 0.20.1, 78 commits) via `hermes update --backup --yes`; patch do 429 reaplicado e reverificado após conflito real
+
+**Contexto:** PROJETO.md já registrava o risco — patch do bug 429 vive fora do canon, num repositório vendored, e um `hermes update` podia descartá-lo em silêncio. Hoje o update foi executado de propósito, com esse risco em mente.
+
+**Achado prévio, relevante para o método:** `git status` no vendored mostrava divergência com origin/main, mas `git merge origin/main` retornou `fatal: refusing to merge unrelated histories` — a história local do vendoring está desconectada da de origin desde o início (não é uma divergência normal de commits). Abandonada a ideia de resolver isso manualmente com `git reset --hard`; usado o comando oficial `hermes update` em vez de cirurgia de git.
+
+**Execução:** `hermes update --backup --yes`. Backup pré-update salvo em `~/.hermes/backups/pre-update-2026-08-14-085757.zip` (70,3MB, comando de restore documentado na própria saída). O update fez fast-forward impossível por história divergente, resetou pro remoto, e tentou restaurar as mudanças locais via stash automático — **conflito real em `run_agent.py`**, não hipotético. O próprio `hermes update` preservou o stash em vez de descartar (`Stash ref: 09f82eebbfef5f30f2cec6c02509a32b519ca884`, mensagem explícita "nothing is lost").
+
+**Causa do conflito, verificada:** o upstream, entre a versão antiga e 0.20.1, adicionou seu próprio `try/except` ao redor de `snippet = (getattr(response, "text", None) or "").strip()` — mudança parecida mas não idêntica à nossa, sem a chamada `.read()` que é a correção real do bug (resposta HTTP em streaming precisa ser lida antes de `.text` funcionar, causa raiz documentada em MEMÓRIAS (38)-(40)). Mesclado manualmente: mantido o `try/except` do upstream, inserida a chamada `.read()` dentro dele. `ast.parse` confirma sintaxe válida. `git diff` confere: 2 linhas adicionadas, nada mais tocado.
+
+**Verificação pós-update:** `hermes-gateway.service` reiniciado (`systemctl --user restart`), `active (running)` confirmado, `hermes doctor` sem nenhum item crítico (só avisos de integrações não usadas pelo Agata — Discord, xAI, Nous Portal). `agata-consolidacao.timer` seguiu ativo sem interrupção.
+
+**Decidido pelo Humano:** executar o update como parte do lote autorizado ("faça tudo na ordem mais segura").
+
+**Em aberto:** o patch continua só no working tree, não commitado no vendored (mesmo risco residual de sempre — reverificar no próximo `hermes update`). Teste funcional do fluxo de erro 429 em si não foi refeito nesta entrada — só a reaplicação do patch e a saúde do serviço foram confirmadas, não um 429 real reproduzido.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `git`/`hermes update`/`systemctl --user`/`hermes doctor` rodados diretamente na Máquina, diff e sintaxe conferidos antes e depois. Turno desta sessão: t=10 (contado no contexto, exato).
