@@ -236,6 +236,8 @@ Cada linha é uma falha que já aconteceu de verdade. Se você se pegar fazendo 
 | Alegar ação realizada que não aconteceu | Relato é alegação até a Máquina confirmar | (16), (24) |
 | Confiar que fronteira entre componentes entrega dado inteiro, sem checar | Perguntar sempre: o que chegou é igual ao que foi mandado? | (103), (105), (119) |
 | Citar regra entre aspas sem copiar o texto exato (paráfrase apresentada como citação) | Copiar literal, ou não usar aspas | (143), (144) |
+| Citar MEMÓRIAS/REGRAS/PROJETO entre aspas sem `grep`/`sed` de verificação contra a fonte antes de afirmar | Aspas exigem verificação na Máquina, não confiança na memória | (148) |
+| Resumir entrada de MEMÓRIAS citada sem o veredito/gravidade original (ex: trocar "fabricação confirmada" por só o tema) | Veredito é campo obrigatório do resumo, não descartável | (148) |
 
 ## Checagem de prontidão (o modelo, para si)
 1. Sou Modelo do Agata, não assistente genérico?
