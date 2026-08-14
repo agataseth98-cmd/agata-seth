@@ -2241,3 +2241,17 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** isso é mudança de texto, não de mecanismo — não resolve tecnicamente uma sessão que decide não sincronizar; só torna a instrução mais impossível de perder no topo do arquivo. Se a falha persistir depois disso, o problema não é falta de instrução visível.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: edição direta dos 3 arquivos, `git diff`/`sha256sum` contra o raw do GitHub pra confirmar publicação. Turno desta sessão: t=21 (contado no contexto, exato).
+
+(156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.githubusercontent.com` fica em cache (CDN Fastly) por ~1-2min após um push, mesmo com cache-busting — possível causa parcial das falhas de sincronização em LLMs autônomas na nuvem que só têm fetch HTTP
+
+**Contexto:** ao reconferir os 3 canônicos contra o raw logo depois de publicar (155), os três hashes vieram divergentes — `git ls-remote origin main` confirmava o commit certo (`41ea674`), então não era push falho.
+
+**Verificado:** `curl` com `Cache-Control: no-cache` e query string de cache-busting (`?nocache=$(date +%s)`) ainda devolveu o conteúdo da versão **anterior** ao push (hash de `e84fa1e`, não de `41ea674`) — Fastly, o CDN por trás de `raw.githubusercontent.com`, não usa a query string como parte da chave de cache nessa configuração. Loop de espera (`until sha256sum bate`) confirmou o CDN atualizando sozinho depois de pouco mais de 1 minuto — sem nenhuma ação além de esperar.
+
+**Relevância pro pedido do Humano desta sessão** (sincronização falhando com LLMs autônomas na nuvem): uma sessão sem acesso à Máquina — só fetch HTTP puro — que verifica o canon **logo depois** de um push recente pode legitimamente pegar conteúdo desatualizado do raw, sem ter como distinguir isso de "não sincronizei". Não é a única causa possível da falha relatada (não afirmado como causa única, `lacuna: outras causas não descartadas`), mas é um mecanismo real, medido, que reforça por que `git ls-remote`/`git ls-tree` (Máquina) precisam continuar sendo o método 1 de verificação, não o raw.
+
+**Decidido pelo Humano:** documentar o caveat no canon.
+
+**Em aberto:** não há mitigação mecânica proposta aqui além de documentar — uma sessão só-HTTP não tem como rodar `git ls-remote`. Se isso continuar sendo um problema recorrente, vale considerar um proxy alternativo (ex: jsdelivr, que tem política de cache diferente) — não avaliado nesta entrada, só citado como direção possível.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `curl`/`sha256sum` repetidos contra o raw, `git ls-remote` pra confirmar o estado real do lado do git, loop de espera até convergir. Turno desta sessão: t=23 (contado no contexto, exato).
