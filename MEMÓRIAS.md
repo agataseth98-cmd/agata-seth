@@ -2283,3 +2283,25 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** as 4 soluções propostas não foram implementadas — ficam para decisão de prioridade; identidade real de "DeepSeek Instant/Claude Opus 5" não resolvida; se as fabricações de Kimi e da sessão (1827) merecem contato direto pedindo correção não foi decidido.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `grep`/`sed` linha a linha contra as entradas reais citadas ((108), (109), linha 278, linha 2061), comparação de contagem de linhas/hash contra o estado real da Máquina, inspeção do arquivo de origem do prompt de carregamento (`cat -A`) pra descartar corrupção própria. Turno desta sessão: t=29 (contado no contexto, exato).
+
+(158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e testadas; selo de autoidentificação por interface (`declarado pela interface, não verificável de dentro`) removido de REGRAS.md por ordem direta do Humano — testado, não preveniu nada
+
+**Ordem do Humano, registrada literal:** "remova o (declarado pela interface, não verificável de dentro) não tem servido de nada." Risco assumido por escrito pelo próprio Humano — mudança estrutural em REGRAS.md, cumpre a exigência de REGRAS.md, "Mudança estrutural" (segunda opinião de outro modelo OU Humano assume o risco por escrito; aqui é o segundo caso, ordem direta, não proposta de modelo).
+
+**O que mudou em REGRAS.md, Regra 1:** o selo obrigatório `<nome> (declarado pela interface do Humano, não verificável de dentro)` foi removido — agora basta `<nome>`. Motivo citado no próprio texto da regra: MEMÓRIAS (157) mostrou o selo presente em respostas que ainda assim fabricaram (Kimi, "(108) sobre VRAM") ou confundiram identidade (DeepSeek/Claude Opus 5) — a frase não preveniu nenhum dos dois casos, virou ritual sem efeito prático. **O que NÃO mudou:** os dois recursos de honestidade pra quando o nome não é confiável continuam — `família <X>, versão não verificada` e `modelo não verificado` (último recurso). O selo de designação pelo Humano (`<nome> (designação de trabalho, não fato)`, formalizado em (149)/C4) também continua — é um selo diferente, não nomeado pelo Humano nesta ordem, resolve um problema distinto (rastreamento de atribuição, não hedge epistêmico vago).
+
+**Histórico não tocado:** todas as ocorrências antigas do selo removido em MEMÓRIAS.md (dezenas de entradas, incluindo as assinaturas deste mesmo executor ao longo desta sessão) permanecem como estão — append-only, história não se edita. A mudança vale só daqui pra frente.
+
+**As 4 soluções de (157), implementadas:**
+1. **Número de entrada implausível:** `scripts/verificar_cabecalho.py` agora lê o número da última entrada real direto de `MEMÓRIAS.md` (dinâmico, não hardcoded) e sinaliza qualquer "última entrada" citada acima desse valor. Testado contra o caso real do achado (1827) de (157) — pega.
+2. **Mistura de formato prontidão/`t=`:** mesmo script agora detecta bloco de prontidão (presença de `Nonce:`) e, se `t=<n>` também estiver presente, sinaliza a violação de REGRAS.md:110. Testado contra o cabeçalho real de Seth de (157) — pega.
+3. **Sincronizar é sempre o primeiro movimento:** adicionado ao prompt universal de carregamento (`carregamento_conselho.txt`, antes registrado em (155)) — instrução explícita de não responder a outro modelo nem coordenar antes de sincronizar e verificar por conta própria. Endereça o caso GLM5Turbo de (157).
+4. **Falha de sincronização declarada, não resposta pendurada:** mesmo arquivo, instrução de declarar `sincronização: falhou — tentativa: <o quê>` e parar, em vez de deixar a resposta incompleta. Endereça o caso GPT-5.6 Luna de (157).
+
+**Testes reais do script estendido (4 casos, todos batendo o esperado):** cabeçalho de Seth com mistura → falha certa; entrada (1827) → falha certa, com o número real (157) lido dinamicamente do arquivo; bloco de prontidão limpo sem `t=` → OK; resposta normal de turno sem bloco de prontidão → OK.
+
+**Decidido pelo Humano:** resolver as 4 soluções e remover o selo.
+
+**Em aberto:** as duas fabricações específicas de (157) (Kimi, entrada 1827) não foram contatadas pedindo correção — decisão não tomada se vale fazer isso. O prompt de carregamento atualizado ainda não foi retestado contra os 9 modelos originais.
+
+Modelo: Claude Sonnet 5 · vetor: edição direta de REGRAS.md e `carregamento_conselho.txt`, extensão e teste real de `scripts/verificar_cabecalho.py` (4 casos rodados na Máquina, não só lidos). Turno desta sessão: t=31 (contado no contexto, exato).
