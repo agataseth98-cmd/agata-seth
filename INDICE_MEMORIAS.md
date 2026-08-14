@@ -150,7 +150,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (134) CORREÇÃO — 13/08/2026 · Formal: a hipótese do merge raso em `chat_completi …
 (135) DIÁRIO — 13/08/2026 · Conserto testado antes do Passo 5: Modelfile customi …
 (136) DIÁRIO — 13/08/2026 · Tentativa de fechar o Achado 1 de (132): a mensagem …
-(137) DIÁRIO — 13/08/2026 · Achado 1 de (132) fechado: o texto bruto chegou desta vez, análise direta em vez de resumo — confirma o núcleo do achado, mas a caracterização de "decidiu corretamente" era otimista demais; a fabricação é seccionada, não da resposta inteira
+(137) DIÁRIO — 13/08/2026 · Achado 1 de (132) fechado: o texto bruto chegou dest …
 (138) DIÁRIO — 13/08/2026 · Passo 5 dos pareceres do Conselho: tool-calling com ferramentas de produção e fabricação deliberada, medidos com a tag corrigida. Nenhuma decisão de adoção. Achado extra, não previsto no desenho: uma chamada de ferramenta real que "completou" sem escrever nada, com narrativa fabricada por cima
 (139) DIÁRIO — 13/08/2026 · Trava 1 da promoção: a ferramenta `memory` testada isolada, sem o modelo — retorna erro honesto, não sucesso falso. A anomalia de (138) fecha: é o modelo que fabricou, não o mecanismo. Primeiro caso capturado sob o desenho do regime de auditoria, antes mesmo dele começar
 (140) DIÁRIO — 13/08/2026 · Decisão do Humano: `qwen3.5-9b-64k` promovido a cérebro principal sob regime de auditoria, Gemini rebaixado a alívio. Risco assumido por escrito. Trava 2 confirmada pelo caminho default, sem override manual. Monitoramento contínuo em curso
@@ -180,3 +180,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (164) DIÁRIO — 14/08/2026 · PROJETO.md condensado para `[FECHADO]`/`[PARCIAL]` + veredito nos três itens restantes (teto de entrega do carregador, bug de `num_ctx`, backup externo) — ordem de sessão em nuvem
 (165) DIÁRIO — 14/08/2026 · Índice de duas resoluções (`scripts/compactar_indice.py`, N=30/M=80) habilitado no gerador, com salvaguarda completa em `/tmp` antes de tocar o real — economia medida 8,5% bytes / 7,1% tokens no `.hermes.md` inteiro
 (166) DIÁRIO — 14/08/2026 · C-4.1: GGUF do Caminho 3 baixado e verificado — sha256 e tamanho batem exatamente com o declarado pela sessão em nuvem
+(167) DIÁRIO — 14/08/2026 · C-1: bancada de 16 perguntas escrita, verificada contra o corpus congelado, com correção de 3 números defasados e um campo novo (`alcance`) proposto por conteúdo relayado, verificado antes de aceitar
