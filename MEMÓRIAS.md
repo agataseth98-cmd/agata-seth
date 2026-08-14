@@ -2213,3 +2213,19 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** decisão sobre remover `presence_penalty` da tag de produção `qwen3.5-9b-64k` ainda pendente — evidência mais forte agora (3/3 vs 0/2), mas ainda proposta, não executada. Reteste do lado `1.5` (repetir com o parâmetro original, pra confirmar que o corte ainda acontece sob o Ollama novo, 0.32.11) não foi feito — seria o controle que falta pra fechar o experimento.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `ollama create`/`rm`, `hermes chat -q -Q` reais na Máquina (duas novas sessões, `20260814_093211_bed70c` e `20260814_093425_331497`), `checkupdates`/`ollama --version`/`systemctl status` pra confirmar A e B. Turno desta sessão: t=15 (contado no contexto, exato).
+
+(154) DIÁRIO — 14/08/2026 · CORREÇÃO de (151)-(153): controle com `presence_penalty=1.5` sob Ollama 0.32.11 NÃO reproduziu o corte — hipótese do presence_penalty como causa isolada não se sustenta; variável real ainda não isolada
+
+**Pedido do Humano:** rodar o controle que faltava — repetir com `presence_penalty=1.5` (valor original de produção, mesmo do incidente de (147)) antes de decidir remover o parâmetro.
+
+**Execução:** tag temporária `qwen3.5-9b-64k-control` (idêntica à de produção, `presence_penalty 1.5` explícito), mesmo prompt exato de (147), 3 rodadas sob Ollama **0.32.11** (atualizado nesta sessão, ver (150)/(153)). Primeira rodada teve o cliente `hermes chat` morto pelo timeout do meu Bash (2min) antes de eu capturar o texto — mas o `journalctl -u ollama.service` confirma a geração real: **969 tokens decodificados, HTTP 200, `truncated=0`**, ~1m58s, terminou sozinha depois do cliente cair. Segunda e terceira rodadas, com timeout adequado (280s), capturadas por completo: **as duas terminaram em conclusão coerente, sem corte no meio de palavra.**
+
+**Resultado do controle: 3/3 sem corte, incluindo com o parâmetro suspeito no valor original do incidente.** Isso invalida a leitura de (152)/(153) — não é que `presence_penalty=1.5` cause o corte de forma consistente; sob o Ollama atual (0.32.11), nem o valor original reproduz o problema.
+
+**Releitura honesta:** a variável que genuinamente mudou entre 13/08 (incidente original, Ollama 0.18.2) e agora (Ollama 0.32.11) não foi isolada. O candidato mais forte agora é a própria versão do Ollama — 78 versões de distância, o `/v1/chat/completions` teve mudança documentada de formato de streaming (ver (152)) — não o `presence_penalty`, que segue sendo um parâmetro incomum (único entre os modelos locais) mas sem evidência de causar o sintoma específico deste caso. **Não descartado por completo** — só não confirmado como causa isolada; pode ainda contribuir em combinação com outra condição não identificada (carga de GPU, VRAM disponível no momento exato, etc., nenhuma medida no incidente original).
+
+**Decidido pelo Humano:** rodar o controle antes de decidir sobre remover o parâmetro.
+
+**Em aberto:** causa real do corte de (147) permanece não identificada — o update do Ollama pode ter corrigido um bug relacionado (não confirmado, é especulação) ou o incidente pode ter sido condição transitória não reproduzível. `presence_penalty=1.5` continua incomum e sem justificativa documentada além de "herdado do Modelfile oficial do Qwen" — vale considerar remover por higiene/parcimônia (evitar parâmetro não avaliado em produção), mas **não mais como correção de um bug confirmado**, só como limpeza de configuração. Decisão fica com o Humano.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `ollama create`/`rm`, `hermes chat -q -Q` com `timeout` explícito, `journalctl -u ollama.service` pra recuperar o resultado da rodada que o cliente perdeu. Turno desta sessão: t=17 (contado no contexto, exato).
