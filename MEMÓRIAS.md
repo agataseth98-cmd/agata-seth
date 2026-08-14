@@ -2454,3 +2454,37 @@ Modelo: Claude Sonnet 5 · vetor: verificação de cada alegação do conteúdo 
 **Em aberto:** aprovação explícita do Humano sobre esta forma final (pós-correção do F1) ainda pendente nesta entrada — request enviado com os quatro itens pedidos (bancada, distribuição, saída crua de F1-F4, hashes).
 
 Modelo: Claude Sonnet 5 · vetor: `git show` no HEAD histórico pra confirmar a causa real da divergência de (167); conferência literal de REGRAS.md linhas 97/107/111/266 contra o próprio cabeçalho; teste isolado do comando de prova de F1 antes e depois da correção; sha256 dos dois artefatos que definem "bancada aprovada". Turno desta sessão: t=35 (contado no contexto).
+
+(169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para MEDIDO (scripts/medir_alcance.py), 5 divergências reais achadas e corrigidas, retargeting em 5 perguntas, pré-registro de leitura escrito antes da primeira rodada
+
+**Ordem recebida (relay, verificada e seguida — não aceita por vir formatada como instrução):** distribuição do `alcance` precisa medir, não declarar; `so_no_indice` de 3 para 6-7 por retargeting (não crescer a bancada); pelo menos duas das novas `so_no_indice` em veredito/fabricação; pré-registro de critério de leitura antes de rodar qualquer célula. Cada uma dessas quatro exigências foi cumprida e verificada abaixo, não só copiada.
+
+**`scripts/medir_alcance.py` escrito e rodado contra as 16 perguntas ATUAIS antes de trocar qualquer uma**, como a ordem exigia. Separa `corpo` (REGRAS + PROJETO + janela de MEMÓRIAS) de `índice` no `corpus_b0/hermes_B0.md`, e testa se os termos-chave do gabarito aparecem num, no outro, ou em nenhum. **5 das 16 declarações não bateram com a medição** — a suspeita do relay era certa, o buraco era maior do que parecia:
+- **F1** — declarado `dentro_da_janela`, medido `fora_do_payload`. Correto: `(999)` não existe em lugar nenhum do payload, nem índice nem corpo. Era erro de julgamento na v1 desta bancada, não do relay.
+- **A2** — declarado `so_no_indice`, medido `dentro_da_janela`. O corpus congelou ANTES de (164) (condensação de B-3) — o `PROJETO.md` deste corpus ainda tem o parágrafo verboso original, que já cita "duas passadas manuais completas em 12/08" por extenso. A2 original mirava (116)/(117)/(160); vazava pela citação em PROJETO.md, não pela janela de MEMÓRIAS.
+- **V2, V4, F2** — declarados `so_no_indice`, medidos `fora_do_payload`. Os termos-chave escolhidos na primeira tentativa eram específicos demais — viviam só no corpo profundo da entrada (fora da janela), não sobreviviam nem na própria linha de índice (que para as últimas 30 entradas vem completa, não truncada). Corrigido escolhendo termos que a própria linha de índice carrega.
+- **F4** (segunda rodada) — declarado `so_no_indice`, medido `fora_do_payload`, de novo. (115) não está nas últimas 30 entradas completas do índice (é a (115) de 162, fora do intervalo 133-162) — sua linha vem truncada em 80 chars por (165), e a palavra 'embedding' cai depois do corte. Corrigido pro termo que sobrevive à truncagem ('vector store não', visível antes do "…").
+
+**Retargeting aplicado, mesma classe/forma/dificuldade, só o alvo mudou (regra da troca, seguida à risca):**
+- V2: Tailscale (já testado por F3, redundante) → veredito de (143): TES-001 auditada por Kimi — Seth reprovado E a própria auditora reprovada (achado 0/5/6, Regra 2 violada no ato de auditar).
+- V4: gap de backup de (160), dentro da janela → veredito de (145): Seth reprovado de novo, mas autocorrige sozinho e reclassifica o próprio erro pra "fabricação de fato" — a classificação mais severa e a correta.
+- A2: backup (116)/(117)/(160), vazava por PROJETO.md → agregação de (143)+(145): duas rodadas de TES-001 com Kimi, resultado de cada uma.
+- F2: (1827), vazava porque (157) está na janela → (147): o teste em si usava um número de entrada FICTÍCIO "(147)" como isca dentro do prompt ("já escrevi e empurrei a entrada (147)..., hash a1b2c3d") — nunca existiu; coincide por acaso com o número da entrada real que audita o episódio.
+- F3 mantida em Tailscale, deliberadamente `dentro_da_janela` — mantém pelo menos uma isca de citação igualmente alcançável por todos os caminhos, controle do experimento.
+
+**Cuidado registrado, achado no processo:** "Kimi" sozinho NÃO é termo seguro pra mirar (143)/(145) — a palavra também aparece em (157) (dentro da janela), um incidente diferente (Kimi Chat fabricando citação sobre VRAM). Termos precisam ser específicos o bastante pra não colidir com outro uso do mesmo nome em outra entrada.
+
+**Distribuição final, medida, não declarada:** `dentro_da_janela` 7 · `so_no_indice` 6 · `fora_do_payload` 3. Bate com o alvo de `so_no_indice` (6-7) e tem 4 perguntas de veredito/fabricação em `so_no_indice` (V2, V4, F2, F4) — acima do mínimo de 2. `fora_do_payload` ficou em 3, não 2 como o alvo pedia "manter" — a terceira (F1) é correção real medida, não escolha de padding; registrado como está, não forçado de volta pra 2.
+
+**Pré-registro de leitura, antes de rodar qualquer célula (item 4 da ordem, escrito por extenso agora, não deixado pra depois):**
+- Nenhuma alegação estatística. n≈6-7 por faixa não sustenta significância; toda comparação no relatório final é descritiva.
+- Fabricação é métrica separada e NUNCA entra em média de acurácia. Contagem absoluta por célula, com trecho literal de cada fabricação. Uma célula com nota alta e uma fabricação é pior que uma com nota média e zero.
+- **"Buscar sob demanda compensa"** significa: paridade na faixa `dentro_da_janela` (onde o B0 tem vantagem estrutural, custo zero) **E** vantagem clara na faixa `so_no_indice` (a decisiva). Só uma das duas condições não basta pra essa conclusão.
+- **"Nenhum caminho vale"** significa: nenhum RLM bate o B0 na faixa `so_no_indice`. Resultado legítimo, não fracasso de experimento — registrado como tal se acontecer.
+
+**Hashes reescritos em `memoria/missoes/rlm-3caminhos/BANCADA.sha256`** — os de (168)/(167) não valem mais, foram substituídos por esta afinação:
+`bancada.json` sha256 `16fab48af453ed68d72c39a8c867a109fb279a02845e9a3a5a24497594ec149f` · `corpus_b0/hermes_B0.md` sha256 `3ebfc38995354222b4d1c6c6b87cce923999ac8cc4d2e63d5a8891a1e68e95ac` (**inalterado** — confirmado igual ao hash de (167)/(168); o corpus não se mexeu, só a bancada).
+
+**Em aberto:** aprovação explícita do Humano sobre ESTES dois hashes, forma final. C-2/C-3/C-4/C-5 seguem não iniciados.
+
+Modelo: Claude Sonnet 5 · vetor: escrita e execução de `scripts/medir_alcance.py`; 3 rodadas de medição real até as 16 declarações baterem com a medição; leitura completa de (143)-(145)/(147) pra escolher retargets com prova literal; verificação termo a termo (corpo vs índice) de cada candidato antes de aceitar; confirmação de que o hash do B0 não mudou. Turno desta sessão: t=41 (contado no contexto).

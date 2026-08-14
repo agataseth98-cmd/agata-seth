@@ -152,7 +152,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (136) DIÁRIO — 13/08/2026 · Tentativa de fechar o Achado 1 de (132): a mensagem …
 (137) DIÁRIO — 13/08/2026 · Achado 1 de (132) fechado: o texto bruto chegou dest …
 (138) DIÁRIO — 13/08/2026 · Passo 5 dos pareceres do Conselho: tool-calling com …
-(139) DIÁRIO — 13/08/2026 · Trava 1 da promoção: a ferramenta `memory` testada isolada, sem o modelo — retorna erro honesto, não sucesso falso. A anomalia de (138) fecha: é o modelo que fabricou, não o mecanismo. Primeiro caso capturado sob o desenho do regime de auditoria, antes mesmo dele começar
+(139) DIÁRIO — 13/08/2026 · Trava 1 da promoção: a ferramenta `memory` testada i …
 (140) DIÁRIO — 13/08/2026 · Decisão do Humano: `qwen3.5-9b-64k` promovido a cérebro principal sob regime de auditoria, Gemini rebaixado a alívio. Risco assumido por escrito. Trava 2 confirmada pelo caminho default, sem override manual. Monitoramento contínuo em curso
 (141) DIÁRIO — 13/08/2026 · Critério de saída do regime de auditoria, respondido pelo Humano: até ordem em contrário — fecha a `lacuna` de (140)
 (142) DIÁRIO — 13/08/2026 · Encerramento da sessão de trabalho: proveniência da voz de fechamento esclarecida pelo Humano (Claude na nuvem, via navegador — o mesmo colaborador de sessão paralela referido ao longo do canon), vocabulário semântico cunhado nesta semana registrado como material bruto para futura canonização em REGRAS/PROJETO, não canonizado agora
@@ -182,3 +182,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (166) DIÁRIO — 14/08/2026 · C-4.1: GGUF do Caminho 3 baixado e verificado — sha256 e tamanho batem exatamente com o declarado pela sessão em nuvem
 (167) DIÁRIO — 14/08/2026 · C-1: bancada de 16 perguntas escrita, verificada contra o corpus congelado, com correção de 3 números defasados e um campo novo (`alcance`) proposto por conteúdo relayado, verificado antes de aceitar
 (168) DIÁRIO — 14/08/2026 · Correção de causa de (167): a divergência 155/160 vs 157/162 é latência temporal, não medição contra o alvo errado; erro de forma no cabeçalho (íntegro? fora do bloco de prontidão) achado e corrigido; F1 tinha prova fraca, corrigida; hashes de bancada.json e do snapshot B0 travados em BANCADA.sha256
+(169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para MEDIDO (scripts/medir_alcance.py), 5 divergências reais achadas e corrigidas, retargeting em 5 perguntas, pré-registro de leitura escrito antes da primeira rodada
