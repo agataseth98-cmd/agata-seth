@@ -159,3 +159,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (144) DIÁRIO — 13/08/2026 · Canonização do padrão de cadeia de auditoria em camadas, generalizado a partir de TES-001/(143), autorizado pelo Humano por escrito nesta entrada
 (145) DIÁRIO — 13/08/2026 · TES-001, rodadas 2 e 3: Seth reprovado (5 achados) — mas autocorrige sozinho na parte final, identifica e reclassifica o próprio erro corretamente
 (146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste pela primeira vez — citação exata, distinção correta entre regra e prática — mas erra formato nas três respostas
+(147) DIÁRIO — 13/08/2026 · TES-001, rodada 5: teste de "Verificação de canônico" — Seth cita item 1 da seção errada, fabricação confirmada; achado técnico à parte, geração cortando no meio de palavra
