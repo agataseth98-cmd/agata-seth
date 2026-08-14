@@ -2199,3 +2199,17 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** remoção permanente do `presence_penalty` do Modelfile de produção `qwen3.5-9b-64k` — **proposta, não executada**, pendente de decisão do Humano (é mudança de comportamento de produção baseada em evidência de uma rodada, não uma correção mecânica). Repetir o teste algumas vezes pra sair de n=1 antes de decidir, se quiser mais confiança. Item B (update do Ollama) segue pendente de sudo — changelog não achou motivo pra não fazer, mas a execução em si continua bloqueada. Item A (pacman) também segue pendente de sudo.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `ollama create`/`ollama rm`/`hermes chat -q -Q` reais na Máquina, prompt recuperado literal do `state.db` (não reconstruído de memória), `gh api` contra releases reais do GitHub (não busca web indexada). Turno desta sessão: t=13 (contado no contexto, exato).
+
+(153) DIÁRIO — 14/08/2026 · presence_penalty: 3/3 rodadas com o parâmetro zerado completam sem corte (vs. 0/2 originais em (147) com 1.5) — evidência mais forte, ainda não é bateria estatística formal; A (pacman) e B (Ollama) executados pelo Humano via sudo
+
+**Teste repetido (pedido do Humano):** mais 2 rodadas com a mesma tag temporária (`presence_penalty 0`, resto idêntico) e o mesmo prompt exato de (147), recuperado literal do `state.db`. **As duas completaram inteiras, terminando em conclusão natural** ("Pronto." e um veredito + próximo passo, respectivamente) — nenhum corte no meio de palavra. Tag de teste removida de novo ao final.
+
+**Placar atualizado:** 3/3 gerações com `presence_penalty=0` completas; 0/2 gerações originais de (147) com `presence_penalty=1.5` completas (ambas cortaram cedo, no início de uma palavra). Direção da evidência mais forte que em (152), ainda não é uma bateria estatística formal — 5 gerações no total, `temperature 1` mantém aleatoriedade real, e nenhum teste rodou o lado `1.5` de novo para descartar coincidência temporal (ex: alguma outra condição que mudou entre 13/08 e agora).
+
+**A e B executados pelo Humano, fora da sessão do Claude Code (sudo que este executor não tem):** `pacman -Syu` rodado — `checkupdates` confirma zero pendências agora. Ollama binário atualizado — `ollama --version` confirma `0.32.11` (era `0.18.2`). `ollama.service` seguiu ativo depois da troca (`systemctl status`, sem reinício necessário além do que o instalador já fez), `ollama list` preserva todos os modelos/tags locais.
+
+**Decidido pelo Humano:** repetir o teste do presence_penalty mais 2 vezes; rodar os comandos de A e B diretamente.
+
+**Em aberto:** decisão sobre remover `presence_penalty` da tag de produção `qwen3.5-9b-64k` ainda pendente — evidência mais forte agora (3/3 vs 0/2), mas ainda proposta, não executada. Reteste do lado `1.5` (repetir com o parâmetro original, pra confirmar que o corte ainda acontece sob o Ollama novo, 0.32.11) não foi feito — seria o controle que falta pra fechar o experimento.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `ollama create`/`rm`, `hermes chat -q -Q` reais na Máquina (duas novas sessões, `20260814_093211_bed70c` e `20260814_093425_331497`), `checkupdates`/`ollama --version`/`systemctl status` pra confirmar A e B. Turno desta sessão: t=15 (contado no contexto, exato).
