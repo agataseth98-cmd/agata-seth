@@ -176,3 +176,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo separado nunca teve o `post-commit` automático espelhado, só a passada manual de 12/08
 (161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
 (162) DIÁRIO — 14/08/2026 · Hora obrigatória no cabeçalho com selo de origem, formato de citação `(n - síntese)` e correção de escopo do text-only no PROJETO — três ordens diretas do Humano
+(163) DIÁRIO — 14/08/2026 · Experimento aberto: RLM em 3 caminhos, bancada comum sobre corpus congelado — decisão do Humano de testar os três e comparar antes de escolher
