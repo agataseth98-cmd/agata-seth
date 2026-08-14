@@ -2341,3 +2341,15 @@ Modelo: Claude Sonnet 5 · vetor: coordenação e auditoria de 7 elos (Seth, Cla
 **Em aberto:** cifra e inclusão do `.env` no backup — decisão separada, ainda não tomada. O `missoes.bundle` avulso e desatualizado (dentro do repo e na raiz do HD) ficou como está — inofensivo, não apagado sem autorização.
 
 Modelo: Claude Sonnet 5 · vetor: diagnóstico do gap (comparação entre os dois repos, `core.hooksPath` ausente em missoes), escrita e teste real do hook espelhado, verificação por restauração. Turno desta sessão: t=19 (contado no contexto).
+
+(161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
+
+**Achado, não hipótese:** rodada de otimização de hidratação desta sessão. `scripts/testar_preservacao.py`, escrito antes de qualquer alteração de conteúdo (exigência de "teste de preservação antes de comprimir"), compara o padrão de reconhecimento do gerador (`DIÁRIO|CONSELHO|MOD`) contra um padrão largo — qualquer rótulo maiúsculo seguido de travessão e data, a verdade fundamental de "esta entrada existe". Achou 1 divergência: `(134) CORREÇÃO — 13/08/2026` existe em MEMÓRIAS.md desde a sessão anterior mas nunca apareceu em INDICE_MEMORIAS.md nem em `.hermes.md`. O rótulo `CORREÇÃO`, cunhado pela própria entrada (134) ao formalizar a refutação do merge raso — ver (121)-(123), fechado em (133)-(135) —, não estava na lista de rótulos que os três `grep`/`awk` de `.githooks/gerar-hermes-md.sh` reconhecem (`gerar_indice`, `janela_memorias`, `checar_reconciliacao`).
+
+**Corrigido:** os três padrões passam a incluir `CORREÇÃO` explicitamente, ao lado dos rótulos já existentes — sem curinga genérico, que engoliria parênteses maiúsculos não intencionais em texto futuro. Índice e `.hermes.md` regenerados rodando o hook real, não escritos à mão. `scripts/testar_preservacao.py` confirma depois do conserto: contagem bate (171 entradas dos dois lados), (134) presente no índice, índice byte-a-byte igual ao que o gerador produz agora.
+
+**Por que isso importa além do conserto pontual:** mesma classe de falha nomeada em (159) — fronteira entre componentes que não entrega o esperado, sem checar — só que na própria cadeia de hidratação: uma entrada podia existir em MEMÓRIAS.md, canônica e verificada por Regra 4, e nenhum modelo carregado via `.hermes.md` jamais veria seu conteúdo, sem erro nem aviso em lugar nenhum. `checar_reconciliacao()` é heurística por citação e não pegaria isso — o buraco era estrutural, não de conteúdo.
+
+**Em aberto:** não auditado se outro rótulo, além de `CORREÇÃO` e os já reconhecidos, aparece em MEMÓRIAS.md fora da lista — o teste largo cobre daqui pra frente (roda a cada alteração), não uma varredura retroativa de rótulos ainda não vistos.
+
+Modelo: Claude Sonnet 5 · vetor: teste de preservação (`scripts/testar_preservacao.py`) comparando padrão estreito do gerador contra padrão largo de rótulo; regeneração real do índice e hidratação via o hook; confirmação por teste depois do conserto, não só leitura do diff. Turno desta sessão: t=8 (contado no contexto).

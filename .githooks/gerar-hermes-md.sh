@@ -29,13 +29,19 @@ gerar_indice() {
     # ferramenta), não presença teórica. -o nunca foi necessário aqui: os
     # padrões ancoram em ^ e a linha inteira é o que se quer mesmo.
     grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
-    grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+    # Rótulos reconhecidos: DIÁRIO, CONSELHO, MOD<qualquer coisa>, CORREÇÃO.
+    # Achado real (rodada de otimização de hidratação, 14/08/2026): CORREÇÃO
+    # não estava nesta lista -- a entrada (134) CORREÇÃO existia em
+    # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
+    # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
+    # curinga genérico que engoliria parênteses maiúsculos não intencionais.
+    grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
   } > "$INDICE"
 }
 
 janela_memorias() {
   awk -v budget="$JANELA_ORCAMENTO_CHARS" '
-    /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD)/ { hdr[++n]=NR }
+    /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
     { line[NR]=$0 }
     END {
       total=NR
@@ -68,7 +74,7 @@ checar_reconciliacao() {
       echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
       avisos=$((avisos + 1))
     fi
-  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | tail -n "$n_checar")
+  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | tail -n "$n_checar")
   if [ "$avisos" -gt 0 ]; then
     echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
   fi
