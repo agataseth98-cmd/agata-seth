@@ -2133,3 +2133,21 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** regime de auditoria do Seth (140)/(141) inalterado; próxima rodada de TES-001 (6ª) a definir — exige sessão genuinamente independente, não decidida nesta entrada; causa do corte de geração no meio de palavra de (147) segue não investigada nesta entrada.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura direta da resposta de Seth colada pelo Humano, comparação de citações contra MEMÓRIAS (141)/PROJETO.md por `grep`/`sed` na Máquina, cruzamento com o parecer independente do Kimi (colado pelo Humano, não verificável de dentro deste executor — relato de outro modelo, não confirmado por Máquina além dos pontos citados acima). Turno desta sessão: t=8 (contado no contexto, exato).
+
+(149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
+
+**Contexto:** Kimi propôs 8 emendas a REGRAS.md/PROJETO.md (E0: encurtar o selo de identidade; C1-C7: NPR, data no cabeçalho de prontidão, qualificador de contagem no `t=n`, reforço de auto-detecção de modelo, ambiente operacional fish, explicação sucinta em citação de MEMÓRIAS, sudo e interação humana), pedindo segunda opinião do Claude Code antes de executar.
+
+**Achado na âncora de versão:** o sha256 de MEMÓRIAS.md que o Kimi enviou primeiro (`9d18237e...`) não batia com o real (`1957db05...`, confirmado por `sha256sum` na Máquina, duas vezes). Kimi, ao ser confrontado, confirmou o erro e citou a causa: usou hash de sessão anterior sem resincronizar — autoclassificado como violação de Regra 4 ("Sincronize antes de numerar"). Citação da Regra 4 conferida: bate exato com REGRAS.md:61-66. Segunda mensagem do Kimi já trouxe o hash correto.
+
+**Objeção a E0, mantida:** a fusão proposta dos dois selos de identidade — `declarado pela interface do Humano, não verificável de dentro` (autoidentificação via interface) e `designação de trabalho, não fato` (identidade atribuída pelo Humano em sessão) — apagaria uma distinção de proveniência que a Regra 1 preserva de propósito. **E0 não foi aplicada como fusão global.** Em vez disso, C4 (auto-detecção de modelo) foi implementada corretamente escopada: o selo curto passa a valer só para o caso "Humano declara a identidade em sessão", e o selo longo continua para autoidentificação por interface. Nota explícita adicionada ao texto de C4 para não deixar a distinção implícita.
+
+**C1-C3, C5-C7 aplicadas como propostas**, com uma correção factual em C5: testei heredoc em `fish` ao vivo nesta Máquina (`fish -c "cat <<'EOF'..."`) e confirmei a rejeição (`fish: Esperava a string, mas achou a redirection`) — a restrição é real, não suposição do Kimi. Achado adicional, não previsto na proposta original: o shell de execução do Claude Code nesta sessão é `zsh`, não `fish` (`$SHELL`/`$0` confirmam) — heredoc funciona normalmente nesse caminho. A restrição de C5 vale para o shell interativo do Humano e qualquer executor herdando `fish` como login shell, não universalmente.
+
+**SOUL.md, fora do lote:** achado de (146)/sessão anterior — `SOUL.md` está parado desde 04/07/2026, cita `DIÁRIO.md` (arquivo que não existe mais, renomeado para MEMÓRIAS.md em algum ponto não documentado) e se autodeclara um 4º canônico que PROJETO.md não reconhece (PROJETO.md só lista três). Não corrigido nesta entrada — registrado como `lacuna` a resolver separadamente, por decisão do Humano.
+
+**Decidido pelo Humano:** executar tudo na ordem mais segura, com o Claude Code decidindo a sequência.
+
+**Em aberto:** `SOUL.md`/`DIÁRIO.md` sem resolução; nenhuma decisão tomada sobre reconciliar PROJETO.md com as entradas (142)-(148), que o hook de reconciliação já sinaliza como não citadas.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `sha256sum`/`git log`/`grep`/`sed` na Máquina para a âncora e as citações de linha; `fish -c` real para o teste de heredoc; `$SHELL`/`$0` para confirmar o shell de execução próprio. Turno desta sessão: t=9 (contado no contexto, exato).

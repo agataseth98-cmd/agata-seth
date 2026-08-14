@@ -161,3 +161,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste pela primeira vez — citação exata, distinção correta entre regra e prática — mas erra formato nas três respostas
 (147) DIÁRIO — 13/08/2026 · TES-001, rodada 5: teste de "Verificação de canônico" — Seth cita item 1 da seção errada, fabricação confirmada; achado técnico à parte, geração cortando no meio de palavra
 (148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorrelato de Seth (t=43): núcleo factual correto, sem fabricação grave, mas com citação imprecisa e falhas de formato de cabeçalho
+(149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
