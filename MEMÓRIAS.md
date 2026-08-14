@@ -2229,3 +2229,15 @@ Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) 
 **Em aberto:** causa real do corte de (147) permanece não identificada — o update do Ollama pode ter corrigido um bug relacionado (não confirmado, é especulação) ou o incidente pode ter sido condição transitória não reproduzível. `presence_penalty=1.5` continua incomum e sem justificativa documentada além de "herdado do Modelfile oficial do Qwen" — vale considerar remover por higiene/parcimônia (evitar parâmetro não avaliado em produção), mas **não mais como correção de um bug confirmado**, só como limpeza de configuração. Decisão fica com o Humano.
 
 Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: `ollama create`/`rm`, `hermes chat -q -Q` com `timeout` explícito, `journalctl -u ollama.service` pra recuperar o resultado da rodada que o cliente perdeu. Turno desta sessão: t=17 (contado no contexto, exato).
+
+(155) DIÁRIO — 14/08/2026 · Repositório oficial (`github.com/agataseth98-cmd/agata-seth`) tornado explícito em 3 pontos de entrada — REGRAS.md (preâmbulo), PROJETO.md ("Fonte canônica") e SOUL.md ("Ao iniciar uma sessão") — resposta a falha recorrente de sincronização em sessões autônomas na nuvem
+
+**Contexto:** o Humano relatou que a sincronização contra o canon "tem falhado bastante com as LLMs autônomas na nuvem" — sessões sem Humano revisando cada resposta, presumindo a cópia em contexto já atualizada em vez de verificar.
+
+**Mudança:** o link do repositório (não só o padrão de URLs raw, que já existia) foi adicionado explicitamente em três lugares lidos no início de qualquer sessão: o comentário HTML de abertura de REGRAS.md (confirmado em MEMÓRIAS (98)/(1494 antiga numeração de linha) que sobrevive ao hook de hidratação sem filtro), a seção "Fonte canônica" de PROJETO.md, e "Ao iniciar uma sessão" de SOUL.md. Os três agora nomeiam explicitamente que sessões autônomas são o caso que mais falha nisso, sem inventar mecanismo de detecção automática (proibido por REGRAS.md, "Modo de teste" — só instrução declarada, não `lacuna` disfarçada de regra).
+
+**Decidido pelo Humano:** adicionar o repositório oficial como sincronização obrigatória no início de cada conversa.
+
+**Em aberto:** isso é mudança de texto, não de mecanismo — não resolve tecnicamente uma sessão que decide não sincronizar; só torna a instrução mais impossível de perder no topo do arquivo. Se a falha persistir depois disso, o problema não é falta de instrução visível.
+
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: edição direta dos 3 arquivos, `git diff`/`sha256sum` contra o raw do GitHub pra confirmar publicação. Turno desta sessão: t=21 (contado no contexto, exato).
