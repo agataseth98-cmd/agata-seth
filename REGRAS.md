@@ -245,6 +245,7 @@ Cada linha é uma falha que já aconteceu de verdade. Se você se pegar fazendo 
 | Citar regra entre aspas sem copiar o texto exato (paráfrase apresentada como citação) | Copiar literal, ou não usar aspas | (143), (144) |
 | Citar MEMÓRIAS/REGRAS/PROJETO entre aspas sem `grep`/`sed` de verificação contra a fonte antes de afirmar | Aspas exigem verificação na Máquina, não confiança na memória | (148) |
 | Resumir entrada de MEMÓRIAS citada sem o veredito/gravidade original (ex: trocar "fabricação confirmada" por só o tema) | Veredito é campo obrigatório do resumo, não descartável | (148) |
+| Perceber que a evidência citada não sustenta a conclusão e deixar a conclusão passar mesmo assim | Se a prova não serve, a conclusão volta a "não verificado" — não "corroborada por evidência mais fraca" | (159) |
 
 ## Citação de MEMÓRIAS — primeira referência
 Ao citar uma entrada de MEMÓRIAS pela primeira vez numa resposta, acompanhe o número com uma explicação sucinta do ocorrido — uma frase, não um parágrafo. Isso vale para todas as abreviações, anacronismos e referências internas. O sistema é transparente com todos os envolvidos em qualquer tarefa; explicar o que se cita é inegociável.
