@@ -15,6 +15,8 @@ INDICE="INDICE_MEMORIAS.md"
 # Uniforme hoje (um .hermes.md só, sem silo por modelo — Fase 2 ainda não
 # construída); calibração por modelo de verdade depende dessa fase existir.
 JANELA_ORCAMENTO_CHARS=25000
+INDICE_RECENTES_COMPLETAS=30
+INDICE_TETO_ANTIGAS=80
 
 gerar_indice() {
   {
@@ -28,14 +30,16 @@ gerar_indice() {
     # multibyte — bug achado rodando o hook de verdade (fora do wrapper de
     # ferramenta), não presença teórica. -o nunca foi necessário aqui: os
     # padrões ancoram em ^ e a linha inteira é o que se quer mesmo.
-    grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
-    # Rótulos reconhecidos: DIÁRIO, CONSELHO, MOD<qualquer coisa>, CORREÇÃO.
-    # Achado real (rodada de otimização de hidratação, 14/08/2026): CORREÇÃO
-    # não estava nesta lista -- a entrada (134) CORREÇÃO existia em
-    # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
-    # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
-    # curinga genérico que engoliria parênteses maiúsculos não intencionais.
-    grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+    {
+      grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+      # Rótulos reconhecidos: DIÁRIO, CONSELHO, MOD<qualquer coisa>, CORREÇÃO.
+      # Achado real (rodada de otimização de hidratação, 14/08/2026): CORREÇÃO
+      # não estava nesta lista -- a entrada (134) CORREÇÃO existia em
+      # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
+      # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
+      # curinga genérico que engoliria parênteses maiúsculos não intencionais.
+      grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+    } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
   } > "$INDICE"
 }
 

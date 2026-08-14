@@ -165,13 +165,18 @@ def testar_indice(indice_path: Path, memorias_path: Path) -> tuple[bool, list[st
         # via cópia do repo inteiro é caro -- usa symlinks pros arquivos-fonte fixos e
         # escreve o índice gerado em tmp, comparando só o índice.
         script_text = gerador.read_text(encoding="utf-8")
-        # extrai só a função gerar_indice + chamada, rodando num subshell com INDICE
-        # apontando pro tmp e cwd = repo (mesma leitura de MEMÓRIAS.md)
+        # Extrai da primeira variável de configuração (JANELA_ORCAMENTO_CHARS) até
+        # a função gerar_indice + chamada -- não só a função. Achado real (rodada
+        # B-4, 14/08/2026): a extração antiga começava direto em 'gerar_indice() {'
+        # e por isso não carregava INDICE_RECENTES_COMPLETAS/INDICE_TETO_ANTIGAS,
+        # que o gerador real passou a definir ANTES da função quando o índice de
+        # duas resoluções entrou. Roda num subshell com INDICE apontando pro tmp e
+        # cwd = repo (mesma leitura de MEMÓRIAS.md).
         sh = f'''
 set -euo pipefail
 cd "{REPO}"
 INDICE="{tmp}/indice_regenerado.md"
-{script_text[script_text.index('gerar_indice() {'):script_text.index('janela_memorias()')]}
+{script_text[script_text.index('JANELA_ORCAMENTO_CHARS'):script_text.index('janela_memorias()')]}
 gerar_indice
 '''
         proc = subprocess.run(["bash", "-c", sh], capture_output=True, text=True)
