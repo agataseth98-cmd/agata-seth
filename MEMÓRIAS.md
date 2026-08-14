@@ -2383,3 +2383,18 @@ Modelo: Claude Sonnet 5 · vetor: edição literal de REGRAS.md (bloco de pronti
 **Em aberto:** todo o experimento — bancada, as três células, relatório. Licença do `alphaXiv` segue não resolvida — não baixar. Download do Caminho 3 (`mitkox/rlm-qwen3-8b-v0.1-Q4_K_M-GGUF`, sha256 a conferir contra o valor declarado pela sessão em nuvem) despachado em background nesta mesma rodada — resultado e conferência de hash em entrada própria, não aqui.
 
 Modelo: Claude Sonnet 5 · vetor: criação da missão e congelamento do corpus (hash real, arquivos travados), verificação por Máquina dos três `config.json` do Hugging Face e da alegação de licença/model card. Turno desta sessão: t=17 (contado no contexto).
+
+(164) DIÁRIO — 14/08/2026 · PROJETO.md condensado para `[FECHADO]`/`[PARCIAL]` + veredito nos três itens restantes (teto de entrega do carregador, bug de `num_ctx`, backup externo) — ordem de sessão em nuvem
+
+**O que mudou:** os três itens verbosos identificados pela sessão em nuvem foram reescritos no formato `[FECHADO]`/`[PARCIAL]` + "Veredito:" já usado em (159)/(160) e aplicado à linha 30 em (162) — ponteiro pra história completa em MEMÓRIAS, não repetição dela em PROJETO. Conteúdo condensado, não apagado: cada item mantém o veredito, a causa real, o conserto e o que ficou em aberto; a única coisa cortada foi prosa repetida ou histórico já coberto por outra entrada.
+- Teto de entrega do carregador (`agent/prompt_builder.py`) — histórico ganhou (105), que não estava citado antes.
+- Bug de `num_ctx` do Ollama — sem mudança de veredito, só de forma.
+- **Achado real durante a condensação, não do documento original:** o item de backup do HD dizia "Frequência agora: automática... por commit, não timer" como se o gap estivesse plenamente fechado. Reescrito como `[PARCIAL]` — **o gap está fechado, a dependência não**: o HD só grava quando fisicamente conectado, e a cobertura é por commit, não por mudança de arquivo. As duas condições já eram verdade antes desta sessão, só não estavam nomeadas como risco residual no PROJETO — ficavam implícitas dentro de "Em aberto: cifra do `.env`".
+
+**Salvaguarda aplicada (B-5, adaptada):** a edição é conteúdo direto de PROJETO.md, não muda o gerador — risco menor que B-4 (que altera `.githooks/gerar-hermes-md.sh`). Mesmo assim, `.hermes.md`/`INDICE_MEMORIAS.md` foram regenerados pelo hook real e `scripts/testar_preservacao.py` rodou depois da edição, não só antes: ÍNDICE e PROJETO **PASSOU** nos dois casos — 174 entradas batendo, todo ponteiro histórico válido, todo item fechado com veredito substantivo.
+
+**Medido, não estimado:** `PROJETO.md` — 27.359 → 25.992 bytes (economia 1.367, 5,0%); tokens reais via tokenizador do `qwen3.5-9b-64k` (`prompt_eval_count`, mesmo mecanismo de B-1) — 7.988 → 7.565 (economia 423, 5,3%). Economia modesta e esperada: o objetivo era remover verbosidade repetida, não cortar fato.
+
+**O que NÃO foi feito, e por quê:** não toquei nos outros itens de PROJETO.md fora dos quatro nomeados pela sessão em nuvem (linha 30 em (162), mais estas três) — mudar mais do que o pedido, por iniciativa própria, seria decisão não pedida (Regra 3). B-4 (compactação de duas resoluções do índice, que altera o gerador) fica para entrada separada, com a salvaguarda completa de `/tmp` antes de habilitar.
+
+Modelo: Claude Sonnet 5 · vetor: edição literal de PROJETO.md (3 itens), regeneração real via hook, teste de invariantes depois da edição, medição real de bytes/tokens antes/depois via tokenizador do Ollama. Turno desta sessão: t=21 (contado no contexto).
