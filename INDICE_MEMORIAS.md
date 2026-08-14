@@ -175,3 +175,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos) — Trace Diffing viável via `state.db`, crença falsa sobre `pre_api_request` circulou por 3 participantes, harness A1 destravado
 (160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo separado nunca teve o `post-commit` automático espelhado, só a passada manual de 12/08
 (161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
+(162) DIÁRIO — 14/08/2026 · Hora obrigatória no cabeçalho com selo de origem, formato de citação `(n - síntese)` e correção de escopo do text-only no PROJETO — três ordens diretas do Humano
