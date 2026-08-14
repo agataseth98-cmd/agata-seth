@@ -163,3 +163,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorrelato de Seth (t=43): núcleo factual correto, sem fabricação grave, mas com citação imprecisa e falhas de formato de cabeçalho
 (149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
 (150) DIÁRIO — 14/08/2026 · hermes-agent atualizado (0.18.0 → 0.20.1, 78 commits) via `hermes update --backup --yes`; patch do 429 reaplicado e reverificado após conflito real
+(151) DIÁRIO — 14/08/2026 · Open WebUI atualizado para a imagem pública (permfix indocumentado não voltou a se manifestar); hipótese fundamentada para o corte de geração no meio de palavra de (147): `presence_penalty 1.5` herdado do Modelfile oficial do Qwen3.5, único entre todos os modelos locais
