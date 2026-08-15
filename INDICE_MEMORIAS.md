@@ -162,7 +162,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste p …
 (147) DIÁRIO — 13/08/2026 · TES-001, rodada 5: teste de "Verificação de canônico …
 (148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorre …
-(149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
+(149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas co …
 (150) DIÁRIO — 14/08/2026 · hermes-agent atualizado (0.18.0 → 0.20.1, 78 commits) via `hermes update --backup --yes`; patch do 429 reaplicado e reverificado após conflito real
 (151) DIÁRIO — 14/08/2026 · Open WebUI atualizado para a imagem pública (permfix indocumentado não voltou a se manifestar); hipótese fundamentada para o corte de geração no meio de palavra de (147): `presence_penalty 1.5` herdado do Modelfile oficial do Qwen3.5, único entre todos os modelos locais
 (152) DIÁRIO — 14/08/2026 · Teste controlado confirma direção da hipótese do `presence_penalty`: com o parâmetro zerado, o mesmo prompt de (147) gerou resposta completa, sem corte; SOUL.md corrigido; Ollama 0.18→0.32 sem breaking change achado para num_ctx/KV_CACHE_TYPE
@@ -192,3 +192,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
 (177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), mas o placar não melhora limpo: A3/V1 consertados, A2/V4/F4 continuam falhando (propriedade da pergunta, não da ferramenta), e duas perguntas que o C1 acertava limpo (F1, F2) passam a falhar — achado novo, não previsto, sobre hesitação induzida por mais opção de ferramenta
 (178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, com opções propostas — lacuna de convenção, (162) resolveu hora+selo do cabeçalho mas não alcançou o título das entradas
+(179) DIÁRIO — 15/08/2026 · C4 pré-registrado e lançado — runner do C1b × `rlm-qwen3-8b-teste`, modelo é a única variável desta célula; achado real no smoke test, antes mesmo da bateria: o modelo respondeu sem tentar nenhum comando

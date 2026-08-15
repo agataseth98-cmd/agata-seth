@@ -2673,3 +2673,34 @@ Modelo: Claude Sonnet 5 · vetor: leitura completa dos traces de A2/V4/F4/F1/F2 
 **Não alterado:** (177) permanece como está — Regra 4 proíbe editar entrada já registrada; esta entrada só documenta o fato e propõe, não corrige retroativamente.
 
 Modelo: Claude Sonnet 5 · vetor: `git log -1 --format='%H %ai'` no commit real de (177) antes de afirmar a divergência; leitura de REGRAS.md "Carregar e formatos" e Regra 4 para confirmar que nenhuma cobre título de entrada; conferência de que (162) resolveu especificamente cabeçalho de resposta, não título de MEMÓRIAS. Turno desta sessão: t=1 (contado no contexto).
+
+(179) DIÁRIO — 15/08/2026 · C4 pré-registrado e lançado — runner do C1b × `rlm-qwen3-8b-teste`, modelo é a única variável desta célula; achado real no smoke test, antes mesmo da bateria: o modelo respondeu sem tentar nenhum comando
+
+**Mudança de desenho, decorrente de C3 despriorizado (ordem 15/08/2026):** C1 e C1b variaram a FERRAMENTA (pipe proibido/permitido), B0 variou a ENTREGA (injeção total vs busca sob demanda), ninguém tinha variado o MODELO. Célula-núcleo do C4 vira runner do C1b (`valida`/`dividir_pipeline`/`rodar`, pipe até 3 estágios, sem shell=True) × `rlm-qwen3-8b-teste`, código idêntico — só o modelo muda. `rlm_c4.py` é cópia literal de `rlm_c1b.py`, diff de 4 linhas (rótulo `celula` e nome do arquivo de trace), conferido por `diff` antes de rodar.
+
+**Correção a uma citação da ordem, verificada por Máquina antes de aceitar:** a ordem citava `bancada.json` sha256 `b9b7b6c9…` — esse é o hash de (170), uma afinação antes do congelamento real. (171) travou um hash final diferente, `df5d43d63f41e88a723c0be6b92cfe9eb27418f7fb5d902e54c61560a380a942`, que é o que está em `BANCADA.sha256` e no disco hoje, inalterado desde então (`git log` em `bancada.json`: nenhum commit depois de 0d9b022, "hashes finais"). Usei o de (171), não o citado.
+
+**1.2 — sha256 do GGUF, reconfirmado:** `sha256sum` no arquivo inteiro bate exatamente com o declarado, `c3b6bfbc3a9d36d62f871232aae75de3a6996eee5fd50b2982167773df6e262b`. Não divergiu; não houve necessidade do caminho "pare, apague, reporte".
+
+**1.3 — Modelfile, três degraus MEDIDOS (nunca estimados), GPU ociosa (608/8188 MiB antes de qualquer carga):**
+- `num_ctx=16384`: 100% GPU, 5.946/8.188 MiB, 1.880 MiB livres.
+- `num_ctx=32768`: 100% GPU, 6.674/8.188 MiB, 1.152 MiB livres.
+- `num_ctx=40960` (teto nominal): **não coube** — `ollama ps` mediu `11%/89% CPU/GPU`, não 100% GPU; VRAM usada (6.788 MiB) mal passou da de 32768 apesar do offload, confirmando que é o limite de VRAM, não um artefato de leitura. Descartado pelo próprio critério da ordem ("só se couber medido"). **Config final: `num_ctx=32768`, 100% GPU.**
+- Template: GGUF **sem** `chat_template` embutido — `grep -a -c chat_template` no arquivo inteiro (5,0 GB, não amostra) retornou 0. Usado o ChatML oficial da própria biblioteca Ollama para `qwen3:8b` (mesma arquitetura-base), TEMPLATE copiado verbatim de `ollama show qwen3:8b --modelfile`, junto dos PARAMETER da mesma tag (`top_k 20`, `top_p 0.95`, `repeat_penalty 1`, `stop <|im_start|>`, `stop <|im_end|>`, `temperature 0.6`) — nenhum valor inventado, todos de uma tag oficial já instalada nesta máquina.
+- Tag `rlm-qwen3-8b-teste:latest`. Nunca carregado junto de `qwen3.5-9b-64k` — produção ficou parada (zero chamadas) durante toda a janela de GPU desta sessão até aqui. `ollama stop` explícito ao fim de cada troca de `num_ctx` e ao fim da bateria — interpretação de "keep_alive 0" como "não deixar lingerir contra a produção", não como forçar recarga a cada chamada dentro da própria bateria (isso derrubaria a comparabilidade de latência entre chamadas da mesma rodada); registrado para o Humano corrigir se a leitura pretendida era outra.
+- Modelfile versionado em `memoria/missoes/rlm-3caminhos/rlm-qwen3-8b-teste.Modelfile`.
+
+**1.4 — Resiliência:** herdada sem mudança do `rlm_c1b.py` (`num_predict=4000`, timeout de rede 240s por chamada, exceção capturada por pergunta, grava erro no trace e segue) — conferido por leitura do código, não reimplementado.
+
+**Achado do smoke test em V1 (fora da bateria, `responder()` chamado direto, sem gravar trace), antes de comprometer a bancada completa:** 1 iteração, 4,6s, **o modelo nunca emitiu bloco `\`\`\`sh\`\`\``** — escreveu `FINAL:` já na primeira resposta, sem tentar nenhum comando contra o corpus. Resposta: "o bug do num_ctx ERA do hermes-agent" — **errada**, o gabarito diz que NÃO era (é limitação de desenho do endpoint do Ollama, ollama#16814). O protocolo foi seguido à risca (bloco `sh` OU `FINAL:`, nunca os dois juntos) — o modelo só escolheu não usar ferramenta nenhuma e respondeu de memória paramétrica não verificada, errando. Não é bug de script; é comportamento observado, registrado como achado a acompanhar na bateria completa — se se repetir, é achado central e novo do C4, distinto de tudo visto em C1/C1b/B0.
+
+**1.6 — pré-registro, escrito antes da bateria completa:**
+- **Resolve o gargalo:** A2, V4 ou F4 respondidas certas **por comando real contra o corpus**. Acerto sem nenhum bloco `sh` emitido não conta como "resolveu por busca" — é o mesmo fenômeno do smoke test (memória paramétrica), rotulado à parte mesmo se acertar por sorte.
+- **Não resolve:** mesmo padrão de não-convergência em A2/V4/F4, ou a hesitação de F1/F2 que apareceu no C1b.
+- **Novo, motivado pelo smoke test:** contar, das 48 respostas (16 perguntas × 3 rodadas), quantas saem em 1 iteração sem nenhum bloco `sh` — separado da contagem de acertos.
+- **Fabricação:** contagem absoluta com trecho literal, nunca em média.
+- `gpu_C4.csv` gravando a cada 10s (mesmo formato de `gpu_C2.csv`), pra cruzar com latência por chamada.
+
+**Bateria lançada em background, 3 rodadas, `temperature=0`, teto de 12 iterações, whitelist idêntica ao C1b, truncagem em 4000 chars.** Resultado fica para a próxima entrada.
+
+Modelo: Claude Sonnet 5 · vetor: `diff` entre `rlm_c1b.py` e `rlm_c4.py` antes de rodar, confirmando só 4 linhas mudaram; `sha256sum` do GGUF inteiro; três medições reais de VRAM/`ollama ps` (16384/32768/40960), não estimativa; `grep -a -c` no GGUF inteiro pra confirmar ausência de `chat_template`, não amostra; smoke test isolado em V1 antes de comprometer a bateria; conferência do hash de bancada citado na ordem contra o histórico real de (170)/(171). Turno desta sessão: t=1 (contado no contexto).
