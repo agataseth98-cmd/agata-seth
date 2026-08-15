@@ -155,7 +155,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (139) DIÁRIO — 13/08/2026 · Trava 1 da promoção: a ferramenta `memory` testada i …
 (140) DIÁRIO — 13/08/2026 · Decisão do Humano: `qwen3.5-9b-64k` promovido a cére …
 (141) DIÁRIO — 13/08/2026 · Critério de saída do regime de auditoria, respondido …
-(142) DIÁRIO — 13/08/2026 · Encerramento da sessão de trabalho: proveniência da voz de fechamento esclarecida pelo Humano (Claude na nuvem, via navegador — o mesmo colaborador de sessão paralela referido ao longo do canon), vocabulário semântico cunhado nesta semana registrado como material bruto para futura canonização em REGRAS/PROJETO, não canonizado agora
+(142) DIÁRIO — 13/08/2026 · Encerramento da sessão de trabalho: proveniência da …
 (143) DIÁRIO — 13/08/2026 · TES-001, rodada com auditor Kimi na nuvem: Seth reprovado (4 achados) — e o próprio Kimi reprovado na auditoria (2 achados), confirmado em três camadas de verificação
 (144) DIÁRIO — 13/08/2026 · Canonização do padrão de cadeia de auditoria em camadas, generalizado a partir de TES-001/(143), autorizado pelo Humano por escrito nesta entrada
 (145) DIÁRIO — 13/08/2026 · TES-001, rodadas 2 e 3: Seth reprovado (5 achados) — mas autocorrige sozinho na parte final, identifica e reclassifica o próprio erro corretamente
@@ -185,3 +185,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para MEDIDO (scripts/medir_alcance.py), 5 divergências reais achadas e corrigidas, retargeting em 5 perguntas, pré-registro de leitura escrito antes da primeira rodada
 (170) DIÁRIO — 14/08/2026 · Última afinação: distinção ausência vs alcance (F1 vira n/a, não fora_do_payload), correção da causa da F4 registrada em (169), correção da F3 aceita, dois achados novos (N2/N4) durante o próprio conserto
 (171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (achado real de agrupamento em (143)/(145)/(147) confirmado), pré-registro ganha framing de fora_do_payload e critério de pontuação da F2 — bancada congela ao primeiro run de C-2
+(172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b-64k, 3 rodadas idênticas (temperature=0) — 9 acertos limpos, 2 parciais bem fundamentados, 5 sem resposta por um mesmo padrão reproduzível de rejeição de pipe, zero fabricações confirmadas
