@@ -173,7 +173,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (157) DIÁRIO — 14/08/2026 · Primeiro teste real do prompt universal de carregame …
 (158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e tes …
 (159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos …
-(160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo separado nunca teve o `post-commit` automático espelhado, só a passada manual de 12/08
+(160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo s …
 (161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
 (162) DIÁRIO — 14/08/2026 · Hora obrigatória no cabeçalho com selo de origem, formato de citação `(n - síntese)` e correção de escopo do text-only no PROJETO — três ordens diretas do Humano
 (163) DIÁRIO — 14/08/2026 · Experimento aberto: RLM em 3 caminhos, bancada comum sobre corpus congelado — decisão do Humano de testar os três e comparar antes de escolher
@@ -203,3 +203,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrada nova, (186) não editada. Linha do B0 refeita com granularidade real, denominador exato (240, não "~80"), variável do C4 redescrita com honestidade (não isola treino), 12 falhas do C4 decompostas, ressalva da exclusão de C4/V1 movida pra dentro da mesma frase do número de fabricação
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
 (189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
+(190) DIÁRIO — 15/08/2026 · Passo 3 (saneamento): varredura de segredo testada contra 20 commits reais (zero falso positivo) e checagem de sudoers acrescentada à mesma varredura — achado real ao testar: um falso positivo próprio (secure_path lido como caminho) corrigido antes de aceitar, e a checagem de sudoers, correta, bloquearia TODO commit a partir de agora até o Passo 4 decidir — não habilitado no pre-commit ainda, pergunta ao Humano no fim desta entrada; diff do patch do 429 versionado fora do vendorizado

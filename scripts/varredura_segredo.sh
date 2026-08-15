@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# S-1 (auditoria de segurança, 15/08/2026): varredura de segredo sobre o
-# diff staged, ANTES do commit. Escrito e testado nesta sessão -- NÃO
-# habilitado em .githooks/pre-commit. Habilitar é decisão do Humano.
+# S-1 (auditoria de segurança, 15/08/2026), habilitado em 3.1 da ordem de
+# saneamento (15/08/2026 18:57) depois de testar contra os últimos 20
+# commits reais -- zero falso positivo. Roda no pre-commit real.
 #
 # Não é scanner geral de todo o repo: olha só o que está staged agora
 # (git diff --cached), que é o que um pre-commit real veria. Padrões
@@ -9,7 +9,43 @@
 # Slack) + heurística genérica (VAR_KEY/_TOKEN/_SECRET/_PASSWORD = string
 # longa). Heurística tem falso positivo/negativo -- é rede de segurança
 # adicional, não substitui revisão humana do diff.
+#
+# 3.2 (mesma ordem): checagem de sudoers, classe inteira -- falha quando
+# existe regra apontando pra caminho inexistente ou gravável por não-root.
+# Checagem só: nunca escreve em /etc/sudoers.d/. Roda `sudo -n -l`
+# (não-interativo); se pedir senha, pula com aviso, não bloqueia o commit
+# por falta de acesso -- bloquear todo commit por não poder checar seria
+# pior que o risco que a checagem previne.
 set -uo pipefail
+
+checar_sudoers() {
+  local saida
+  saida="$(sudo -n -l 2>/dev/null)" || {
+    echo "checar_sudoers: sudo -n -l sem acesso não-interativo agora -- checagem pulada, não é falha." >&2
+    return 0
+  }
+  # Achado real ao testar (15/08/2026): uma primeira versão varria a saída
+  # inteira e o "secure_path=/usr/local/sbin:/usr/local/bin:/usr/bin" (uma
+  # linha "Defaults", PATH de busca, não regra de comando) virava falso
+  # positivo de "caminho inexistente" porque o regex ganancioso engolia os
+  # `:` escapados como se fosse um caminho só. Corrigido: só olha linhas
+  # depois do cabeçalho "pode executar", que é onde ficam as regras reais.
+  local bloco
+  bloco="$(echo "$saida" | sed -n '/pode executar os seguintes comandos/,$p')"
+  local ruim=0
+  local caminho
+  while IFS= read -r caminho; do
+    [ -z "$caminho" ] && continue
+    if [ ! -e "$caminho" ]; then
+      echo "SUSPEITO (sudoers): regra aponta pra caminho INEXISTENTE: $caminho"
+      ruim=1
+    elif [ -w "$caminho" ] && [ "$(stat -c '%U' "$caminho" 2>/dev/null)" != "root" ]; then
+      echo "SUSPEITO (sudoers): regra aponta pra caminho gravável por não-root: $caminho"
+      ruim=1
+    fi
+  done < <(echo "$bloco" | grep -oE '/[^[:space:]]+')
+  return "$ruim"
+}
 
 PADROES=(
   'AKIA[0-9A-Z]{16}'                          # AWS access key id
@@ -46,9 +82,13 @@ for p in "${PADROES[@]}"; do
   fi
 done
 
+if ! checar_sudoers; then
+  achou=1
+fi
+
 if [ "$achou" -eq 1 ]; then
   echo
-  echo "varredura_segredo.sh: possível segredo no staged diff. Revise antes de comitar." >&2
+  echo "varredura_segredo.sh: possível segredo no staged diff ou regra de sudoers suspeita. Revise antes de comitar." >&2
   exit 1
 fi
 exit 0

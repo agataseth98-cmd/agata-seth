@@ -1,0 +1,13 @@
+diff --git a/run_agent.py b/run_agent.py
+index 12e7da64..ac69643e 100644
+--- a/run_agent.py
++++ b/run_agent.py
+@@ -2610,6 +2610,8 @@ class AIAgent:
+         response = getattr(error, "response", None)
+         if response is not None:
+             try:
++                if hasattr(response, "read") and callable(response.read):
++                    response.read()
+                 snippet = (getattr(response, "text", None) or "").strip()
+             except Exception:
+                 snippet = ""
