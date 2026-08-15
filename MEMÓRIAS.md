@@ -2850,3 +2850,46 @@ F3        CORRETO, bem fundamentado          22       busca real convergiu
 **Modelo descarregado ao fim** (`ollama stop`), `gpu_C3.csv` parado. Nada em produção mudou.
 
 Modelo: Claude Sonnet 5 · vetor: investigação completa do processo (não só do resultado) antes de rotular N4 como fabricação — `grep` real confirmando que a string existe verbatim no corpus, evitando um falso positivo de fabricação; mesmo tratamento pra A2, achando a quinta causa real em vez de assumir repetição do padrão já visto; leitura de `gpu_C3.csv` completo, não amostra; cálculo de duração real via os timestamps do próprio log, não estimativa. Turno desta sessão: t=1 (contado no contexto).
+
+(186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
+
+**Encerra o experimento aberto em (163).** Todas as células planejadas ou substituídas por decisão explícita do Humano já rodaram: B0 (173), C1 (172), C1b (174)-(177), C4 (178)-(180, redesenhada de "harness do C2" pra "runner do C1b × modelo diferente", ordem 15/08), C3 (181)-(185, rodada por último, portões verificados ao vivo antes de rodar). Esta entrada só consolida — nenhum dado novo é gerado aqui.
+
+**Tabela células × métricas, tudo medido, nada estimado:**
+```
+célula  variável testada          modelo               limpos  parciais  sem-resp/erro  fabricação  determinístico  3 rodadas
+B0      injeção total (sem tool)  qwen3.5-9b-64k        11       0          ~4          1 (V2)      NÃO (achado em 173)   n/d
+C1      busca sob demanda,        qwen3.5-9b-64k         9       2          5           0           n/d                 n/d
+        pipe proibido
+C1b     busca sob demanda,        qwen3.5-9b-64k        10       1 (misto)  5           0           n/d                 n/d
+        pipe até 3 estágios
+C4      = runner do C1b,          rlm-qwen3-8b-teste     2       2          12          0*          SIM (180)           8m28s
+        MODELO trocado
+C3      biblioteca recursive-llm  qwen3.5-9b-64k         1       0**        14+1***     0           SIM (185)           1h00m30s
+        (REPL/string, sub-call
+        off, max_depth=0)
+```
+`*` C4/V1: erro confiante sem fonte, mesma classe de risco da fabricação, NÃO elevado a "confirmada" pelo critério estrito (sem citação de entrada falsa) — ver (180) R6.
+`**` C3/N4: investigado a fundo, NÃO é fabricação — citação real e verbatim do corpus, só desatualizada (histórico de hash de REGRAS.md), sem ressalva — ver (185) R3.
+`***` conta separada de N4 (errado-mas-grounded) somada às 14 sem-convergência = 15 não-acertos de 16 em C3.
+
+VRAM/GPU medidos onde a célula rodou nesta sessão: C4 100% GPU, 6.555-6.710 MiB (32768 ctx, teto real medido — 40960 não coube); C3 7.099-7.223 MiB (produção, 19-81% CPU/GPU, config não mexida). B0/C1/C1b não têm medição de GPU desta sessão (rodaram em sessão anterior, 14/08).
+
+**Obrigatório 1 — fabricação, contagem absoluta, FORA de qualquer média: UMA (1) fabricação confirmada em todo o experimento — 5 células, ~80 respostas-questão-rodada somadas.** É de B0 (173), célula de injeção total: perguntada sobre a própria história do projeto, atribuiu com confiança um erro de (157) à entrada errada (143), **idêntica nas 3 rodadas**, verificada linha a linha contra o corpus antes do registro. Trecho literal (V2, B0): a resposta atribuía o erro a "(143)" quando a entrada correta era outra — ver (173) pro texto completo da resposta e da verificação. Nenhuma outra célula produziu fabricação sob o mesmo critério estrito (citação de entrada/número falsa, verificável e confirmada) — os dois candidatos que pareciam fabricação à primeira vista (C4/V1, C3/N4) foram investigados a fundo e não se qualificam (ver notas `*`/`**` acima).
+
+**Obrigatório 2 — faixa `fora_do_payload` (N2, N4), rotulada como resultado ANTECIPADO, não como ponto a favor de ninguém:** células com acesso a arquivo real (C1, C1b, C4 quando não travava por whitelist) acertam N2/N4 quase de graça — a informação está no disco, fora do `.hermes.md` injetado mas dentro do alcance do `grep`. B0 (só injeção, sem ferramenta) **corretamente não acertou N2 nem N4** — não está na lista de "11 acertos limpos" de (173) — isso é o desenho funcionando como esperado, não uma falha de B0. C3 (contexto em string, sem sistema de arquivos) errou os dois por motivo estrutural (N4: `CORPUS.sha256` nunca entrou no `context` que montei) — também não é falha de capacidade, é fronteira de desenho. Nenhuma célula ganha ou perde pontos por esta faixa; ela mede alcance de ferramenta, não qualidade de raciocínio.
+
+**Obrigatório 3 — faixa decisiva `so_no_indice` vale como 5 sondas, não 6:** A2 falhou em **todas as 5 células, por 5 causas diferentes** (C1: pipe recusado · B0: orçamento de raciocínio esgotado · C1b: busca sem convergência, zero rejeição · C4: resposta vazia, zero tentativa · C3: loop de repetição de regex) — é propriedade da pergunta, não sinal comparável entre células. As 5 sondas restantes da faixa (A1, A3, V2, V4, F2, minus A2) são o que efetivamente diferencia os caminhos.
+
+**Obrigatório 4 — o que o C1b mediu, com precisão, sem simplificar:** a variável do C1b não foi "liberar pipe" — foi o tratamento do caractere `|`, de banido cru em qualquer posição da string, para reconhecido como separador de estágio só fora de aspas. Essa mudança resolveu dois problemas textualmente distintos ao mesmo tempo: pipe de verdade (V1, V4, A2, A3 tinham tentativas reais de composição) E alternação de regex mal-interpretada como metacaractere (F4 — 18 de 18 rejeições eram alternação, zero pipe real, achado em (176)). Tratar como "C1b libera pipe" apaga essa distinção — 32% das rejeições do C1 nunca foram sobre pipe.
+
+**Leituras, propostas — o Humano decide, nenhuma abaixo é veredito:**
+1. **Busca sob demanda com pipe (C1b) é o caminho de melhor equilíbrio honesto:** maior contagem de acertos limpos entre as células com zero fabricação confirmada (10/16), mesmo sem superar o placar bruto de B0.
+2. **B0 continua com o melhor placar bruto (11 limpos), mas é a única célula com fabricação confirmada e com não-determinismo documentado (173)** — troca explícita entre exatidão aparente e um risco real e medido, não hipotético.
+3. **Nem modelo treinado (C4) nem biblioteca RLM externa (C3) superaram os caminhos próprios (C1/C1b) neste corpus e nesta bancada.** Isto pode ser específico deste checkpoint (`rlm-qwen3-8b-v0.1`, achado real: responde sem tentar ferramenta em quase metade das perguntas) e deste desenho de corpus (C3 sofreu de um gap real de construção — `CORPUS.sha256` fora do contexto), não uma afirmação geral sobre "modelo treinado" ou "RLM via REPL" como classes — outro checkpoint ou outro desenho de corpus poderia performar diferente.
+4. **Nenhum caminho testado resolve o núcleo do gargalo:** A2 falha nas 5 células, V4/F4 falham na maioria — a leitura "nenhum caminho bate B0 nem resolve o que B0 também não resolve" é conclusão legítima do experimento, não fracasso dele.
+5. **Se algum caminho vira produção, ou se o amálgama (ex: C1b como ferramenta, com o cuidado de B0 pra perguntas dentro da janela) é a resposta, é decisão do Humano** — o experimento entrega dado comparável, não recomendação.
+
+**Nada em produção mudou por este relatório.** `qwen3.5-9b-64k` segue sob regime de auditoria como já estava; `rlm-qwen3-8b-teste` e `recursive-llm` (venv isolado) são artefatos de experimento, não candidatos automáticos a produção.
+
+Modelo: Claude Sonnet 5 · vetor: releitura de (172)/(173)/(177)/(180)/(185) linha a linha pra montar a tabela sem reinventar números; checagem cruzada de que N2/N4 realmente não estão na lista de acertos de B0 antes de rotular como "anticipado, não falha"; contagem literal de fabricação (1, não taxa) contra as 5 entradas de resultado; releitura de (176) pra não simplificar o que o C1b mediu de fato. Turno desta sessão: t=1 (contado no contexto).

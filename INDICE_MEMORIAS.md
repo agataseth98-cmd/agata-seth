@@ -169,7 +169,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (153) DIÁRIO — 14/08/2026 · presence_penalty: 3/3 rodadas com o parâmetro zerado …
 (154) DIÁRIO — 14/08/2026 · CORREÇÃO de (151)-(153): controle com `presence_pena …
 (155) DIÁRIO — 14/08/2026 · Repositório oficial (`github.com/agataseth98-cmd/aga …
-(156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.githubusercontent.com` fica em cache (CDN Fastly) por ~1-2min após um push, mesmo com cache-busting — possível causa parcial das falhas de sincronização em LLMs autônomas na nuvem que só têm fetch HTTP
+(156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.gi …
 (157) DIÁRIO — 14/08/2026 · Primeiro teste real do prompt universal de carregamento (155/carregamento_conselho.txt): 9 modelos em nuvem sincronizando de uma vez — achados de fabricação disfarçada de rigor, falha em cascata sem verificação própria, e desatualização honesta
 (158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e testadas; selo de autoidentificação por interface (`declarado pela interface, não verificável de dentro`) removido de REGRAS.md por ordem direta do Humano — testado, não preveniu nada
 (159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos) — Trace Diffing viável via `state.db`, crença falsa sobre `pre_api_request` circulou por 3 participantes, harness A1 destravado
@@ -199,3 +199,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — bloqueio de permissão na instalação da biblioteca, não decisão de conteúdo; achado por leitura de documentação (não verificado ao vivo ainda): os dois portões parecem satisfazíveis
 (184) DIÁRIO — 15/08/2026 · C3, portões confirmados AO VIVO (não só lidos) — os dois liberam a célula; 2 smoke tests rodados, achado real de bug de corpus corrigido no processo, bateria completa de 3×16 NÃO lançada — custo estimado de horas pra uma célula que a própria ordem já tratava como menor valor esperado, decisão de continuar ou fechar aqui é do Humano
 (185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
+(186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
