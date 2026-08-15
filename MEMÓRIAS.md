@@ -2916,3 +2916,34 @@ Modelo: Claude Sonnet 5 · vetor: releitura de (172)/(173)/(177)/(180)/(185) lin
 **C — confirmado, nada mudou:** os 5 pontos de leitura de (186) seguem válidos, seguem PROPOSTA. Nenhuma célula nova rodada. Bancada seguiu congelada — todas as correções acima são de texto/rótulo, os números-fonte em (173)/(180)/(185) não mudaram.
 
 Modelo: Claude Sonnet 5 · vetor: releitura completa de (173) antes de reescrever a linha do B0, conferindo a soma bate 16; recontagem das 12 falhas do C4 direto da tabela R1 de (180), campo "1ª chamada sem comando?" cruzado com o placar categórico; verificação aritmética de 240 = 5×16×3 antes de trocar o denominador. Turno desta sessão: t=1 (contado no contexto).
+
+(188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
+
+**HD detectado mas não montado sozinho:** `lsblk` achou `/dev/sda1` (exFAT, label `AgataBkup01`) fisicamente conectado, mas sem ponto de montagem automático. Montado via `udisksctl mount -b /dev/sda1` (mídia removível do próprio usuário, sem sudo).
+
+**1.1 — comando dos marcadores, rodado:**
+- `cp agata-canonico.bundle → auto-backups/agata-canonico-20260815-162634-8fb285c.bundle`
+- `cp agata-missoes.bundle → auto-backups/agata-missoes-20260815-152618-07b6fd1.bundle`
+Confirmado antes de copiar: `07b6fd1` era de fato o HEAD atual de `memoria/missoes` (nenhum commit novo lá desde a última passada).
+
+**1.2/1.3 — verificação por restauração, não listagem:**
+- `git bundle verify` nos dois: **"is okay"**, **"records a complete history"**, canônico com 7 refs (main + origin/HEAD + origin/main + 3 tags históricas), missões com 2 refs (master + HEAD).
+- Clone real em `/tmp/restaura-canonico` e `/tmp/restaura-missoes` (apagados depois de conferir).
+- **Checagem decisiva:** `grep -c '^(187) DIÁRIO' MEMÓRIAS.md` no clone restaurado → **1**. `git log -1 --format=%H` → **`8fb285c11792f91c0f3ee20252d0c878243a4899`**, bate exato com o canon. Missões: `git log -1 --format=%H` no clone → **`07b6fd1af5655066f5a5890800b02b18ea557166`**, bate exato.
+- Contagem total de entradas DIÁRIO/CONSELHO no MEMÓRIAS restaurado: **137**.
+
+**1.4 — relatório:**
+```
+agata-canonico-20260815-162634-8fb285c.bundle
+  1.490.599 bytes · sha256 e734a7790dc391c9be78bbdf877ee5c2f1ce573c986de07bdb271e46721088f3
+  HEAD restaurado: 8fb285c11792f91c0f3ee20252d0c878243a4899
+  entradas DIÁRIO/CONSELHO no MEMÓRIAS restaurado: 137
+
+agata-missoes-20260815-152618-07b6fd1.bundle
+  341.551 bytes · sha256 6550b1f10ed35fa0d66d46ebb02ad3138540020f188113a3ebcbbb666fdbd59d
+  HEAD restaurado: 07b6fd1af5655066f5a5890800b02b18ea557166
+```
+
+**1.5 — marcadores removidos**, só depois de 1.3 passar: `~/.agata-backup-staging/PENDENTE-HD-DESCONECTADO` e `PENDENTE-HD-DESCONECTADO-MISSOES` apagados. A expedição inteira (161)-(187) agora tem cópia externa confirmada por restauração real, não só por commit local + GitHub.
+
+Modelo: Claude Sonnet 5 · vetor: `git bundle verify` real nos dois arquivos antes de qualquer outra coisa; clone de teste de verdade em `/tmp`, não confiança na cópia; checagem decisiva rodada e conferida (grep + hash), não assumida; verificação prévia de que o HEAD de missões usado na cópia era o atual, não um stale. Turno desta sessão: t=1 (contado no contexto).

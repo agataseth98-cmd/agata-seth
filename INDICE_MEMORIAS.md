@@ -171,7 +171,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (155) DIÁRIO — 14/08/2026 · Repositório oficial (`github.com/agataseth98-cmd/aga …
 (156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.gi …
 (157) DIÁRIO — 14/08/2026 · Primeiro teste real do prompt universal de carregame …
-(158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e testadas; selo de autoidentificação por interface (`declarado pela interface, não verificável de dentro`) removido de REGRAS.md por ordem direta do Humano — testado, não preveniu nada
+(158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e tes …
 (159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos) — Trace Diffing viável via `state.db`, crença falsa sobre `pre_api_request` circulou por 3 participantes, harness A1 destravado
 (160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo separado nunca teve o `post-commit` automático espelhado, só a passada manual de 12/08
 (161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
@@ -201,3 +201,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrada nova, (186) não editada. Linha do B0 refeita com granularidade real, denominador exato (240, não "~80"), variável do C4 redescrita com honestidade (não isola treino), 12 falhas do C4 decompostas, ressalva da exclusão de C4/V1 movida pra dentro da mesma frase do número de fabricação
+(188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
