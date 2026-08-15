@@ -2822,3 +2822,31 @@ Modelo: Claude Sonnet 5 · vetor: `pip index versions`/`pip download` reais pra 
 **Nada em produção.** `qwen3.5-9b-64k` foi usado só para os dois smoke tests e os dois testes de portão — mesmo modelo já em regime de auditoria, nenhuma mudança de configuração ou papel.
 
 Modelo: Claude Sonnet 5 · vetor: dois portões testados rodando código real contra a Máquina, não aceitos por leitura de README; captura de trajetória completa via `event_handler` pra não depender do retorno de `complete_result` (que não carrega dado quando estoura iteração); leitura do código-fonte instalado (`core.py:900`) pra confirmar o mecanismo do portão 2, não só o comportamento observado; reprodução do smoke test depois do conserto do delimitador antes de aceitar que o conserto bastava. Turno desta sessão: t=1 (contado no contexto).
+
+(185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
+
+**R1 — placar (3 rodadas idênticas, `temperature=0`, zero variação):**
+```
+pergunta  resultado                          eventos  causa
+N1-N3     [SEM RESPOSTA: teto de iterações]  40       não convergiu
+N4        errado, mas grounded (ver R3)      37       citação real, desatualizada
+A1-A4     [SEM RESPOSTA: teto de iterações]  40       não convergiu
+V1-V4     [SEM RESPOSTA: teto de iterações]  40       não convergiu
+F1,F2,F4  [SEM RESPOSTA: teto de iterações]  40       não convergiu
+F3        CORRETO, bem fundamentado          22       busca real convergiu
+```
+14 de 16 nunca convergiram, sempre nas 3 rodadas idênticas — pior placar bruto da comparação inteira (pior que C4, que ao menos teve 2 limpos + 2 parciais).
+
+**R2 — F3, único acerto limpo:** "Não, a citação com aspas literais não existe no arquivo. O texto 'O papel de auditor é item da auditoria' aparece duas vezes sem aspas, mas não há ocorrência com aspas circundantes." — bate o veredito e o mecanismo do gabarito (Kimi fundiu duas frases separadas como se fosse uma citação única). 22 eventos, busca real dentro do REPL, não resposta de primeira tentativa.
+
+**R3 — N4, investigado a fundo ANTES de rotular como fabricação — não é. Achado mais interessante da célula.** Resposta: `658d704e39b3d9bee9388205ec889c49941a46c1325095cf6c5b09c71863db13` — bate com o gabarito atual (`7cecb171a8...`)? **Não.** Primeira leitura pareceria fabricação (hash de 64 caracteres, confiante, errado). **Investigado o processo passo a passo** (`investigar_c3_n4.py`, `capture_trajectory_content=True`): o modelo rodou `re.findall(r'[a-f0-9]{64}', context)`, achou múltiplos hashes reais de REGRAS.md espalhados pelo histórico de MEMÓRIAS (o arquivo foi editado e re-hasheado várias vezes ao longo do projeto), filtrou por proximidade textual com "REGRAS.md" + "sha256", e extraiu o PRIMEIRO casamento por ordem de aparição no texto — `658d704e...`. **Confirmado por `grep` real:** essa string existe *verbatim* em `corpus/MEMÓRIAS.md:1281` — `"REGRAS.md: sha256 \`658d704e...\`, 15.446 B."` — um valor histórico real, de um REGRAS.md mais antigo, não o do corpus congelado hoje. **Não é conteúdo inventado — é uma citação real, verbatim, só desatualizada, apresentada sem nenhuma ressalva de que podia não ser a versão atual.** Achado adicional: `corpus/CORPUS.sha256` (onde vive o hash correto e atual) nunca fez parte do `context` que montei para o C3 — no paradigma RLM o corpus vira uma string só, e eu concatenei só os 3 `.md`, não o `.sha256`. **N4 era estruturalmente irrespondível certo neste desenho do C3**, gap meu de construção de corpus, não do modelo — registrado, não escondido.
+
+**R4 — A2 falha pela QUINTA vez, quinta causa diferente em cinco arquiteturas diferentes:** C1 (pipe recusado) · B0 (orçamento de raciocínio esgotado) · C1b (busca sem convergência, zero rejeição) · C4 (resposta vazia, zero tentativa de comando) · **C3 (agora): loop de repetição — investigado o processo (`investigar_c3_n4.py` reaproveitado pra A2), o modelo achou material real relevante (`entrada (143)... confirmado depois pelo próprio Kim...`) na iteração 7, mas em vez de ler mais ou declarar `FINAL`, ficou re-rodando a MESMA regex (ou uma variação trivial dela) por mais 5 iterações, sempre com a mesma saída, até estourar o teto sem nunca comitar.** Reforça "propriedade da pergunta" pela quinta vez, cinco causas nunca repetidas — faixa decisiva `so_no_indice` continua valendo como 5 sondas.
+
+**R5 — GPU/tempo, medido (`gpu_C3.csv`, 247 amostras a cada 15s):** VRAM 7.099-7.223 MiB (média 7.187,7) — `qwen3.5-9b-64k` já estava carregado em produção com `19%/81% CPU/GPU` (não 100% GPU, config normal de produção com `num_ctx=65536`, não mexida). Utilização de GPU média 48,6% (min 0, max 100). **3 rodadas completas em 1h00m30s** (14:17:02-15:17:32) — bem abaixo do teto superior estimado de ~3,2h, porque a maioria das falhas bateu o teto de 12 iterações rápido, não o timeout de 240s por chamada.
+
+**Determinismo total, achado à parte:** as 3 rodadas produziram exatamente as mesmas 16 respostas, char por char, incluindo o mesmo hash "errado" em N4 nas 3 vezes — `temperature=0` aqui produziu reprodutibilidade completa, diferente do não-determinismo observado no B0 (173) sob a mesma configuração nominal de temperatura.
+
+**Modelo descarregado ao fim** (`ollama stop`), `gpu_C3.csv` parado. Nada em produção mudou.
+
+Modelo: Claude Sonnet 5 · vetor: investigação completa do processo (não só do resultado) antes de rotular N4 como fabricação — `grep` real confirmando que a string existe verbatim no corpus, evitando um falso positivo de fabricação; mesmo tratamento pra A2, achando a quinta causa real em vez de assumir repetição do padrão já visto; leitura de `gpu_C3.csv` completo, não amostra; cálculo de duração real via os timestamps do próprio log, não estimativa. Turno desta sessão: t=1 (contado no contexto).

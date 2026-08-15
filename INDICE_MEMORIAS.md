@@ -168,7 +168,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (152) DIÁRIO — 14/08/2026 · Teste controlado confirma direção da hipótese do `pr …
 (153) DIÁRIO — 14/08/2026 · presence_penalty: 3/3 rodadas com o parâmetro zerado …
 (154) DIÁRIO — 14/08/2026 · CORREÇÃO de (151)-(153): controle com `presence_pena …
-(155) DIÁRIO — 14/08/2026 · Repositório oficial (`github.com/agataseth98-cmd/agata-seth`) tornado explícito em 3 pontos de entrada — REGRAS.md (preâmbulo), PROJETO.md ("Fonte canônica") e SOUL.md ("Ao iniciar uma sessão") — resposta a falha recorrente de sincronização em sessões autônomas na nuvem
+(155) DIÁRIO — 14/08/2026 · Repositório oficial (`github.com/agataseth98-cmd/aga …
 (156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.githubusercontent.com` fica em cache (CDN Fastly) por ~1-2min após um push, mesmo com cache-busting — possível causa parcial das falhas de sincronização em LLMs autônomas na nuvem que só têm fetch HTTP
 (157) DIÁRIO — 14/08/2026 · Primeiro teste real do prompt universal de carregamento (155/carregamento_conselho.txt): 9 modelos em nuvem sincronizando de uma vez — achados de fabricação disfarçada de rigor, falha em cascata sem verificação própria, e desatualização honesta
 (158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e testadas; selo de autoidentificação por interface (`declarado pela interface, não verificável de dentro`) removido de REGRAS.md por ordem direta do Humano — testado, não preveniu nada
@@ -198,3 +198,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (182) DIÁRIO — 15/08/2026 · Passo 3 (Conselho Remoto), levantamento de transporte — 5 provedores já referenciados em (157)/histórico, preço em fonte oficial (não agregador), datado 15/08/2026; nenhuma chave nova adicionada, nenhuma automação implementada
 (183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — bloqueio de permissão na instalação da biblioteca, não decisão de conteúdo; achado por leitura de documentação (não verificado ao vivo ainda): os dois portões parecem satisfazíveis
 (184) DIÁRIO — 15/08/2026 · C3, portões confirmados AO VIVO (não só lidos) — os dois liberam a célula; 2 smoke tests rodados, achado real de bug de corpus corrigido no processo, bateria completa de 3×16 NÃO lançada — custo estimado de horas pra uma célula que a própria ordem já tratava como menor valor esperado, decisão de continuar ou fechar aqui é do Humano
+(185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
