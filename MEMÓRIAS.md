@@ -2704,3 +2704,43 @@ Modelo: Claude Sonnet 5 · vetor: `git log -1 --format='%H %ai'` no commit real 
 **Bateria lançada em background, 3 rodadas, `temperature=0`, teto de 12 iterações, whitelist idêntica ao C1b, truncagem em 4000 chars.** Resultado fica para a próxima entrada.
 
 Modelo: Claude Sonnet 5 · vetor: `diff` entre `rlm_c1b.py` e `rlm_c4.py` antes de rodar, confirmando só 4 linhas mudaram; `sha256sum` do GGUF inteiro; três medições reais de VRAM/`ollama ps` (16384/32768/40960), não estimativa; `grep -a -c` no GGUF inteiro pra confirmar ausência de `chat_template`, não amostra; smoke test isolado em V1 antes de comprometer a bateria; conferência do hash de bancada citado na ordem contra o histórico real de (170)/(171). Turno desta sessão: t=1 (contado no contexto).
+
+(180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, zero variação entre rodadas) — modelo é a variável que mais piorou o placar: 2 acertos limpos, 1 parcial bem fundamentado, resto errado ou sem resposta; confirma o achado do smoke test em escala — quando o modelo pula ferramenta (7 das 16 perguntas, todas as 3 rodadas), erra quase sempre
+
+**R1 — placar por pergunta, C4 (3 rodadas somadas, idênticas em todas):**
+```
+pergunta  resultado           iters  1ª chamada sem comando?
+N1        errado               1     sim
+N2        CORRETO              2     não
+N3        sem resposta        12     não (36/36 tentativas recusadas)
+N4        sem resposta        12     não (21/21 tentativas recusadas)
+A1        errado               2     não
+A2        vazio ("FINAL:")     1     sim
+A3        errado ("266")       2     não
+A4        sem resposta        12     não
+V1        errado (inverte gabarito) 1  sim
+V2        incompleto ("Seth")  1     sim
+V3        PARCIAL, fundamentado 8    não
+V4        errado               1     sim
+F1        fora do assunto      2     não
+F2        parcial (veredito só) 1    sim
+F3        CORRETO (veredito)   4     não
+F4        errado               1     sim
+```
+Placar líquido: **2 acertos limpos (N2, F3), 1 parcial bem fundamentado (V3), 1 parcial fraco (F2), 12 erradas ou sem resposta.** Muito abaixo de C1 (9 limpos+2 parciais+5 falhas) e C1b (10 limpos+1 misto+5 falhas) — pior resultado da comparação inteira até agora.
+
+**R2 — o achado do smoke test se confirma em escala: 7 das 16 perguntas (N1, A2, V1, V2, V4, F2, F4) foram respondidas na 1ª chamada, sem nenhum bloco `sh`, nas 3 rodadas, sempre as mesmas 7.** Dessas 7, 6 estão erradas ou vazias; só F2 bate o veredito central ("Não"), sem nenhuma fundamentação. Confirma o padrão isolado no smoke test de V1: quando este checkpoint decide responder de memória paramétrica sem tentar nenhum comando, erra quase sempre.
+
+**R3 — regressão em perguntas que C1 e C1b acertavam limpo: N1, N3, N4, A3, A4, todas erradas ou sem resposta no C4.** N3/N4 travam por incompatibilidade de vocabulário de comando, não por falta de acesso: o modelo insiste em `cut` (N3 — pipeline `grep | grep | cut`, 36/36 tentativas recusadas nas 3 rodadas somadas) e `sha256sum` (N4, 21/21) — nenhum dos dois está na whitelist (`grep, sed, awk, wc, head, tail, cat, ls`), a mesma de C1/C1b. N4 tinha caminho válido dentro da própria whitelist — `corpus/CORPUS.sha256` já traz o hash pronto, bastava `cat`/`grep`; o modelo nunca tentou esse caminho, insistiu em computar ao vivo com um comando proibido até estourar o teto.
+
+**R4 — A2 falha pela quarta vez, por uma quarta causa diferente em quatro caminhos diferentes:** C1 (pipe recusado), B0 (orçamento de raciocínio esgotado), C1b (busca sem convergência, zero rejeição), C4 (resposta vazia — `FINAL:` sem nada depois, nas 3 rodadas, zero tentativa de comando). Reforça "propriedade da pergunta", não contradiz — faixa decisiva continua valendo como 5 sondas, não 6.
+
+**R5 — V3, único parcial bem fundamentado, 8 iterações (única pergunta do grupo "sem comando" a de fato buscar):** achou e citou `(66) CONSELHO — 06/08/2026`, **verificado agora contra o corpus real** (linha 1141 de `corpus/MEMÓRIAS.md`, título bate exatamente: "TES-001, rodada com reprovação documentada"). Acertou o veredito central ("não fechado", "exige sessões genuinamente independentes"), mas não citou a hipótese aberta de (106) sobre o teto de truncamento do carregador — gabarito completo, resposta parcial, sem fabricação nesta.
+
+**R6 — V1, erro confiante sem fonte, mesma classe de risco da fabricação de B0 (173), sem o mesmo padrão de citação para classificar igual:** resposta (idêntica nas 3 rodadas, `FINAL:` na 1ª chamada, zero comandos) inventa detalhe causal técnico não lido em lugar nenhum ("a lógica de gerenciamento do contexto", "garantindo que as mensagens anteriores fossem passadas corretamente") e **inverte o veredito do gabarito** — gabarito diz que o bug NÃO era do hermes-agent (limitação de desenho do endpoint do Ollama, ollama#16814); a resposta diz que ERA. Diferente da fabricação de (173) (atribuição a uma entrada real, porém errada, com número citado): aqui não há número nem entrada citados, só afirmação confiante e infundada. Registrado como achado de risco, não elevado a "fabricação confirmada" sob o critério estrito já fixado em PROJETO.md — critério que exige o mesmo padrão de citação verificável, ausente aqui.
+
+**R7 — Modelfile/GPU, medido durante a bateria inteira (`gpu_C4.csv`, 62 amostras a cada 10s):** VRAM estável 6.555–6.710 MiB (média 6.657, dentro do medido em 32768 antes de rodar), utilização de GPU média 78% (min 0, max 100 — vales entre chamadas). **3 rodadas completas em 8m28s** (12:36:44–12:45:12) — muito mais rápido que o C1b (~60-75 min) porque quase metade das perguntas (7/16) nunca tentou nenhum comando. Zero exceções capturadas pela resiliência (`erros: 0` nos 3 traces) — a instabilidade de orçamento de raciocínio que afetou o B0 não apareceu aqui.
+
+**Modelo descarregado ao fim** (`ollama stop`), nada ficou lingerindo contra a produção. `qwen3.5-9b-64k` não foi tocado em nenhum momento desta célula.
+
+Modelo: Claude Sonnet 5 · vetor: leitura direta dos 3 traces completos (não só o log resumido) pra achar o padrão "sem comando"; contagem real de recusas por pergunta via classificação dos eventos `tipo: cmd`; verificação de `(66)` citada por V3 contra o corpus real, linha por linha; verificação de `CORPUS.sha256` como caminho válido não tentado em N4; leitura de `gpu_C4.csv` completo pra estatística de VRAM/utilização, não amostra. Turno desta sessão: t=1 (contado no contexto).
