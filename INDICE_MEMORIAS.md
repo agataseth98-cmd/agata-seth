@@ -172,7 +172,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (156) DIÁRIO — 14/08/2026 · Achado, ao reconferir a publicação de (155): `raw.gi …
 (157) DIÁRIO — 14/08/2026 · Primeiro teste real do prompt universal de carregame …
 (158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e tes …
-(159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos) — Trace Diffing viável via `state.db`, crença falsa sobre `pre_api_request` circulou por 3 participantes, harness A1 destravado
+(159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos …
 (160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo separado nunca teve o `post-commit` automático espelhado, só a passada manual de 12/08
 (161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
 (162) DIÁRIO — 14/08/2026 · Hora obrigatória no cabeçalho com selo de origem, formato de citação `(n - síntese)` e correção de escopo do text-only no PROJETO — três ordens diretas do Humano
@@ -202,3 +202,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrada nova, (186) não editada. Linha do B0 refeita com granularidade real, denominador exato (240, não "~80"), variável do C4 redescrita com honestidade (não isola treino), 12 falhas do C4 decompostas, ressalva da exclusão de C4/V1 movida pra dentro da mesma frase do número de fabricação
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
+(189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API

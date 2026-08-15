@@ -2947,3 +2947,28 @@ agata-missoes-20260815-152618-07b6fd1.bundle
 **1.5 — marcadores removidos**, só depois de 1.3 passar: `~/.agata-backup-staging/PENDENTE-HD-DESCONECTADO` e `PENDENTE-HD-DESCONECTADO-MISSOES` apagados. A expedição inteira (161)-(187) agora tem cópia externa confirmada por restauração real, não só por commit local + GitHub.
 
 Modelo: Claude Sonnet 5 · vetor: `git bundle verify` real nos dois arquivos antes de qualquer outra coisa; clone de teste de verdade em `/tmp`, não confiança na cópia; checagem decisiva rodada e conferida (grep + hash), não assumida; verificação prévia de que o HEAD de missões usado na cópia era o atual, não um stale. Turno desta sessão: t=1 (contado no contexto).
+
+(189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
+
+**Fato confirmado antes de agir:** `git ls-tree -r HEAD --name-only | grep '^memoria/'` — só dois arquivos rastreados sob `memoria/` fora de `memoria/missoes/` (já gitignorado à parte): `memoria/MEMORY.md` e `memoria/USER.md`. Bate exato com o alegado pela sessão de nuvem.
+
+**Reclassificação, não novo achado:** PROJETO.md item 108 já descrevia este vetor (memória nativa do Hermes, escrita por mecanismo automático, distinta do DIÁRIO coletivo). O que muda aqui é a classificação: não é mais "risco de fundo" registrado — é **bypass de controle confirmado**. O controle declarado do projeto é que publicação em MEMÓRIAS é deliberada, por trecho, com data e consentimento (REGRAS, "O Conselho", item 2). Estes dois arquivos nunca passaram por esse controle nenhuma vez — são escritos automaticamente pelo mecanismo de memória do Hermes e publicavam por padrão, sem decisão. Mesma classe de (47): escrita automática operando fora do controle que deveria governá-la.
+
+**2.1 — `git rm --cached memoria/USER.md memoria/MEMORY.md`:** os dois saem do índice, permanecem no disco (`memoria/USER.md` 541 B, `memoria/MEMORY.md` 2.506 B, confirmados presentes depois do comando). O Hermes continua escrevendo neles normalmente; só deixam de ser publicados a partir daqui.
+
+**2.2 — `.gitignore`, glob em vez dos dois nomes:**
+```
+# Memória nativa do Hermes — escrita automática pela Máquina, não por
+# decisão deliberada; nunca pública (achado em 15/08/2026, PROJETO item 108)
+memoria/*.md
+```
+Mesma lição da regra de `memoria/missoes/` (achado em (97)/(98)): protege a classe, não o caso — se o mecanismo do Hermes criar um terceiro arquivo amanhã, nasce protegido sem exigir edição nova aqui.
+
+**2.3 — conferido antes de comitar:** `git status --short` mostrou só `.gitignore` modificado + os dois arquivos removidos do índice — nada mais saiu. `memoria/missoes/` confirmado ainda ignorado (`git check-ignore -v`), pela regra própria dele, sem depender da nova.
+
+**2.4 — registrado sem suavizar, como pedido:**
+- **A proteção vale daqui pra frente. A exposição passada NÃO desaparece.** O histórico git é público e permanente — `git rm --cached` remove rastreamento futuro, não desfaz commits antigos que já publicaram o conteúdo. Reescrever a história (rebase, filter-branch, force-push) para apagar isso do passado é a linha vermelha da Regra 4 — não cogitado, não proposto.
+- **Forks, verificado via API do GitHub (`api.github.com/repos/agataseth98-cmd/agata-seth`), agora:** `forks_count: 0`, `network_count: 0`. Zero forks confirmados no momento desta checagem — mas isto é uma foto de agora, não uma garantia permanente; um fork feito a qualquer momento antes desta entrada já teria cópia do histórico, e isto não seria detectável por esta checagem.
+- **O que fazer sobre a exposição já ocorrida — se algo — é decisão do Humano.** Não proposta aqui, por ordem explícita. Registrado o fato (o quê, desde quando prático de checar, quanto do histórico) e a fronteira (o que este passo alcança e o que não alcança), nada além disso.
+
+Modelo: Claude Sonnet 5 · vetor: `git ls-tree` real antes de aceitar o fato alegado pela sessão de nuvem; `git status`/`git check-ignore` depois da mudança, não antes, pra confirmar que nada além do pedido saiu do índice; chamada real à API do GitHub pro número de forks, não estimativa; disciplina de registrar sem propor ação sobre o passado, seguindo a ordem à risca. Turno desta sessão: t=1 (contado no contexto).
