@@ -174,7 +174,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (158) DIÁRIO — 14/08/2026 · As 4 soluções propostas em (157) implementadas e tes …
 (159) DIÁRIO — 14/08/2026 · Dinâmica do Conselho "afinação" (Tentativa 2, 7 elos …
 (160) DIÁRIO — 14/08/2026 · Gap de backup de `memoria/missoes/` fechado — repo s …
-(161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador — entrada (134) nunca chegou ao índice nem à hidratação
+(161) DIÁRIO — 14/08/2026 · Rótulo `CORREÇÃO` ausente do reconhecedor do gerador …
 (162) DIÁRIO — 14/08/2026 · Hora obrigatória no cabeçalho com selo de origem, formato de citação `(n - síntese)` e correção de escopo do text-only no PROJETO — três ordens diretas do Humano
 (163) DIÁRIO — 14/08/2026 · Experimento aberto: RLM em 3 caminhos, bancada comum sobre corpus congelado — decisão do Humano de testar os três e comparar antes de escolher
 (164) DIÁRIO — 14/08/2026 · PROJETO.md condensado para `[FECHADO]`/`[PARCIAL]` + veredito nos três itens restantes (teto de entrega do carregador, bug de `num_ctx`, backup externo) — ordem de sessão em nuvem
@@ -204,3 +204,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
 (189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
 (190) DIÁRIO — 15/08/2026 · Passo 3 (saneamento): varredura de segredo testada contra 20 commits reais (zero falso positivo) e checagem de sudoers acrescentada à mesma varredura — achado real ao testar: um falso positivo próprio (secure_path lido como caminho) corrigido antes de aceitar, e a checagem de sudoers, correta, bloquearia TODO commit a partir de agora até o Passo 4 decidir — não habilitado no pre-commit ainda, pergunta ao Humano no fim desta entrada; diff do patch do 429 versionado fora do vendorizado
+(191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 controles declarados, cada um testado com caso positivo e negativo em repo isolado — 2 bugs reais achados e corrigidos no processo (ARG_MAX estourado, `trap RETURN` vazando pra função seguinte). Primeira execução completa: 5 OK, 1 FALHOU (P-2, esperado — Passo 4 ainda não concluído pelo Humano)

@@ -2986,3 +2986,34 @@ Modelo: Claude Sonnet 5 · vetor: `git ls-tree` real antes de aceitar o fato ale
 **Pergunta ao Humano, decisão real, não retórica:** habilito a checagem de sudoers no pre-commit agora — aceitando que nenhum commit passa até o Passo 4 decidir — ou espero o Passo 4 primeiro e habilito as duas checagens juntas depois? A varredura de segredo (3.1) sozinha já pode ser habilitada sem esse efeito colateral, se preferir separar as duas.
 
 Modelo: Claude Sonnet 5 · vetor: script de teste real contra os 20 commits, não amostra nem alegação; inspeção manual do conteúdo de pelo menos um commit pra confirmar que o teste não estava vazio por bug; teste isolado de `checar_sudoers()` antes de integrar ao script principal, achando o próprio falso positivo antes que virasse achado aceito; reconfirmação do estado do patch do 429 (commit, versão, diff) imediatamente antes de salvar a cópia, não reaproveitando a leitura de (181) sem checar de novo. Turno desta sessão: t=1 (contado no contexto).
+
+(191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 controles declarados, cada um testado com caso positivo e negativo em repo isolado — 2 bugs reais achados e corrigidos no processo (ARG_MAX estourado, `trap RETURN` vazando pra função seguinte). Primeira execução completa: 5 OK, 1 FALHOU (P-2, esperado — Passo 4 ainda não concluído pelo Humano)
+
+**Desenho:** um script só, `scripts/perimetro.sh`, sourceável sem executar (mesmo padrão `BASH_SOURCE` guard de `varredura_segredo.sh`) — P-1 e P-2 importados de lá (`checar_segredo`, `checar_sudoers`, já testados em (190)), P-3 a P-6 novos. Cada checagem imprime o controle que defende e a fonte, como pedido. P-1 a P-5 falham (exit≠0); P-6 só avisa.
+
+**Bug 1, achado ao rodar contra o repo real, não a bancada de teste:** `p5_append_only` passava o conteúdo inteiro do `MEMÓRIAS.md` (500 KB+) como argumento de linha de comando pro `python3` — estourou `ARG_MAX` ("Lista de argumentos muito longa"). Corrigido: escreve os dois lados em arquivo temporário, python lê do arquivo, só o caminho (curto) vira `argv`.
+
+**Bug 2, achado na mesma rodada de correção:** `trap ... RETURN` dentro de `p5_append_only` não fica escopado só a ela — bash não limita isso por chamada de função, e o trap disparava de novo no retorno da função SEGUINTE (`cabecalho`, `p6_backup_pendente`), quando as variáveis temporárias já tinham saído de escopo, estourando "variável não associada" sob `set -u`. Corrigido: limpeza explícita em cada ponto de saída da função, sem `trap`.
+
+**Testes isolados, positivo e negativo, cada controle novo (repo `/tmp` descartável, apagado depois):**
+- **P-3:** negativo (`.gitignore` correto, nada rastreado) → OK. Positivo (`git add -f memoria/USER.md`) → FALHOU, aponta o arquivo exato.
+- **P-4:** negativo (linhas `ss` sintéticas com hermes/ollama em `127.0.0.1`) → OK. Positivo (mesma linha, hermes em `0.0.0.0`) → FALHOU, aponta a linha exata.
+- **P-5:** negativo (só append) → OK. Positivo 1 (byte antigo mudou) → FALHOU, aponta o offset e os dois trechos. Positivo 2 (arquivo encolheu) → FALHOU, aponta os dois tamanhos.
+- **P-6:** negativo (marcador com timestamp de agora, 0 commits de distância) → sem aviso. Positivo A (marcador de 5h atrás) → avisa. Positivo B (marcador a 5 commits de distância, timestamp recente) → avisa. Limiar usado, sem número já declarado no canon pra isto: **mais de 3 commits OU mais de 2 horas**, documentado no próprio script — decisão de implementação desta sessão, não ordem explícita de número.
+
+**Primeira execução completa, contra o repositório real, agora:**
+```
+P-1  Segredos só em ~/.hermes/.env, fora do repo — OK
+P-2  O executor pausa e pede sudo ao Humano — FALHOU
+     (regra órfã de (181)/(190), Passo 4 ainda não concluído pelo Humano
+      no momento desta execução — esperado, não é achado novo)
+P-3  Publicação é decisão deliberada, consentimento por trecho — OK
+P-4  api_server contido · Ollama restrito a 127.0.0.1 — OK
+P-5  Registre e nunca apague — OK
+P-6  Cópia da história fora desta máquina — AVISO SÓ (nada pendente agora)
+RESULTADO GERAL: FALHOU (por causa só de P-2)
+```
+
+**Não habilitado no pre-commit ainda — mesma tensão já registrada em (190):** como P-2 está DE VERDADE falhando agora (não é falso positivo), ligar `perimetro.sh` no `.githooks/pre-commit` neste exato momento bloquearia todo commit, incluindo o que registra esta entrada. Falta a palavra do Humano sobre quando ligar (depois do Passo 4 fechar, ou agora mesmo aceitando a trava) — mesma pergunta de (190), agora valendo pros 6 controles juntos, não só sudoers.
+
+Modelo: Claude Sonnet 5 · vetor: rodar contra o repositório real ANTES de aceitar qualquer coisa, achando os 2 bugs de verdade rodando, não lendo o script; testes isolados positivo/negativo pra cada um dos 4 controles novos, em repo `/tmp` descartável, mesmo método de (181)/(190); verificação de que P-2 ainda falha de verdade (não fechado pelo Passo 4) antes de escrever esta entrada, não assumido. Turno desta sessão: t=1 (contado no contexto).
