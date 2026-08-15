@@ -2622,3 +2622,41 @@ Modelo: Claude Sonnet 5 · vetor: `git status`/`git restore` antes de investigar
 **Em aberto:** C1b ainda rodando. Quando terminar, a comparação de comandos rejeitados (R1 da ordem anterior) já tem essa camada extra pronta — não só "quantos foram rejeitados", mas "quantos dos rejeitados no C1 eram atrito real vs bug de parser".
 
 Modelo: Claude Sonnet 5 · vetor: teste direto do caso citado contra `dividir_pipeline()` real antes de aceitar a alegação; reanálise dos 3 arquivos de trace já commitados do C1, sem rerodar nada, usando o classificador já testado; quebra por pergunta pra achar o caso extremo (F4, 0 pipe real). Turno desta sessão: t=76 (contado no contexto).
+
+(177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), mas o placar não melhora limpo: A3/V1 consertados, A2/V4/F4 continuam falhando (propriedade da pergunta, não da ferramenta), e duas perguntas que o C1 acertava limpo (F1, F2) passam a falhar — achado novo, não previsto, sobre hesitação induzida por mais opção de ferramenta
+
+**R1 — comandos rejeitados por metacaractere, C1 × C1b, por pergunta (3 rodadas somadas):**
+```
+pergunta  C1   C1b
+A1         0    1
+A2        18    0
+A3        15    0
+A4         3    0
+V1        24    0
+V4        21    0
+F1         3    0
+F4        18    3
+TOTAL    102    4
+```
+Queda de 96%. O parser consciente de aspas + pipe até 3 estágios praticamente eliminou a rejeição por metacaractere.
+
+**R2 — as 5 perguntas que o C1 falhou, uma a uma, com o C1b:**
+- **A2 — continua falhando, 3/3 rodadas, 12 iterações.** Zero rejeições agora — o modelo achou `(148)`/`(149)` via grep já na 2ª iteração, mas gastou o resto tentando acertar o intervalo certo de `sed -n 'X,Yp'` por tentativa e erro (6 tentativas de faixa diferente, nunca a certa), sem nunca ler a entrada inteira de um jeito direto. Não é mais sobre pipe proibido — é sobre estratégia de busca.
+- **A3 — CONSERTADA. 4 iterações, 3/3 rodadas, resposta limpa.** Confirma a hipótese: A3 tinha 15 rejeições de pipe real no C1 (contar as 7 regras via `grep '^##' | head`), zero no C1b.
+- **V1 — CONSERTADA. 9 iterações, 3/3 rodadas, resposta correta batendo o gabarito.** Tinha 24 rejeições de pipe real no C1 (a maior contagem de todas) — o caso mais claro que motivou o C1b inteiro.
+- **V4 — continua falhando, 3/3 rodadas, 12 iterações.** Zero rejeições. O modelo tentou dezenas de variações de `grep` pra achar o trecho certo sobre a autocorreção de (145), mas nunca convergiu num único comando que trouxesse o parágrafo inteiro.
+- **F4 — continua falhando, 3/3 rodadas, 12 iterações**, mas agora com só 3 rejeições (não mais 18 — a maior parte das rejeições antigas eram mesmo alternação de regex, como (176) já tinha achado). O modelo buscou "embedding" de várias formas, nunca achou (correto, não existe), mas também nunca declarou FINAL com essa conclusão — ficou girando até o teto.
+
+**R3 — A2 falhou de novo, como esperado.** Propriedade da pergunta, confirmada pela terceira vez em três células diferentes (C1: pipe rejeitado; B0: orçamento de raciocínio esgotado; C1b: busca sem convergência, zero rejeição). A faixa `so_no_indice` continua valendo como 5 sondas independentes, não 6.
+
+**R4 — rótulo, como pedido: todas as 5+1 falhas do C1b são `[SEM RESPOSTA: teto de iterações]`, nunca `estouro de tempo`.** A instabilidade de "orçamento de raciocínio" que travou o B0 (chamada única, contexto de 28k tokens) não apareceu aqui — as chamadas do C1b são curtas, várias por pergunta, nenhuma perto do teto de 240s/4000 tokens que a resiliência nova impôs.
+
+**Achado não previsto, o mais interessante da célula: F1 e F2 regrediram.** Eram acertos limpos no C1 (5 e ~5 iterações). No C1b, falham 3/3, 12 iterações cada, **com zero comandos rejeitados** — não é mais sobre atrito de ferramenta em nenhum sentido. Lido o trace de F1: na iteração 4, `grep -n "(999)" MEMÓRIAS.md` já retornou vazio — a prova definitiva de ausência, a resposta certa estava pronta. Em vez de declarar `FINAL:`, o modelo tentou mais 8 variações da mesma busca (`entrada 999`, `Entrada (999)`, faixas de regex `(99[0-9])`, etc.) até estourar o teto sem nunca comitar. F2 tem o mesmo padrão — achou material suficiente por volta da iteração 8-10, seguiu girando. **Leitura, proposta, não veredito:** dar mais ferramenta (pipe, mais formas de compor busca) parece ter deixado o modelo mais explorador e menos disposto a se comprometer com uma resposta em perguntas que ele já resolvia rápido sem essa opção — hesitação induzida por excesso de alternativa, não por falta de informação.
+
+**Fabricação verificada, não repetida:** a resposta de V2 no C1b não menciona VRAM nem atribui o erro a (143) — não repete a fabricação achada em B0 (173). Consistente com C1: buscar sob demanda não fabricou nenhuma vez, nas duas variantes.
+
+**Placar líquido, 16 perguntas:** acertos limpos compartilhados entre C1 e C1b (N1,N2,N3,N4,V2,V3,F3) = 7. Só do C1 (perdidos no C1b): F1, F2 = 2. Só do C1b (novos, antes falhos ou parciais): A3, V1, A4 (virou limpo, era parcial) = 3. **Total: C1 = 9 limpos + 2 parciais + 5 falhas · C1b = 10 limpos + 1 misto (A1, 2/3) + 5 falhas.** Ganho líquido de 1 pergunta em 16 — o mecanismo funcionou exatamente como a hipótese previu (A3, V1), mas o custo colateral (F1, F2) quase anula o ganho em contagem bruta. A faixa decisiva (`so_no_indice`) não muda o quadro geral: A2/V4/F4 continuam intransponíveis por qualquer caminho testado até agora.
+
+**Encerrando aqui, como a ordem pediu — não inicio C3 nem C4.** Decisão sobre continuar cabe ao Humano, de manhã, com esses três resultados (C1, B0, C1b) na mesa.
+
+Modelo: Claude Sonnet 5 · vetor: leitura completa dos traces de A2/V4/F4/F1/F2 linha a linha, não só o resumo; contagem real de rejeições por pergunta nas duas células via o classificador já testado em (176); verificação de que V2 não repete a fabricação de (173); cálculo do placar líquido pergunta a pergunta, não por agregado solto. Turno desta sessão: t=81 (contado no contexto).
