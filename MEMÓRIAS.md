@@ -2786,3 +2786,21 @@ Modelo: Claude Sonnet 5 · vetor: 4 casos de teste reais em repo git isolado (ap
 **Escopo, respeitado:** isto é levantamento de transporte — preço, link, contexto, data. Nenhum juízo sobre qual usar, nenhuma chave adicionada, nenhuma automação implementada. Pedir parecer, arbitrar divergência entre modelos e decidir o que entra no canon continuam do Humano.
 
 Modelo: Claude Sonnet 5 · vetor: descarte deliberado dos primeiros resultados de busca (agregadores) como fonte, fetch direto de 5 páginas oficiais, uma tentativa de redirect resolvida (`platform.moonshot.ai`→`platform.kimi.ai`, `openai.com/api/pricing`→`developers.openai.com`); marcação explícita de `lacuna` onde a página oficial não trouxe o dado (contexto GLM/GPT, free tier Kimi, "Grok 4.1 Fast" não confirmado). Turno desta sessão: t=1 (contado no contexto).
+
+(183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — bloqueio de permissão na instalação da biblioteca, não decisão de conteúdo; achado por leitura de documentação (não verificado ao vivo ainda): os dois portões parecem satisfazíveis
+
+**Achado a biblioteca real:** `recursive-llm` = `github.com/grishahq/recursive-llm`, via LiteLLM, corpo do (163) ("Caminho 2... biblioteca contida `recursive-llm` via LiteLLM"). Não está no PyPI (`pip index versions` confirma vazio) — instala só via `git+https://...`.
+
+**`uv` não estava instalado nesta máquina** (`which uv`, `pacman -Qi uv` — nenhum achou nada). Instalado localmente em `~/.local/bin` via instalador oficial (`astral.sh/uv/install.sh`, script baixado e lido antes de rodar, sem `sudo`, sem tocar pacote de sistema) — `uv 0.12.5` confirmado. Venv isolado criado: `memoria/missoes/rlm-3caminhos/venv_c3/`.
+
+**Lido na documentação oficial do projeto (README, não verificado rodando ainda):**
+- Portão 1 (rede): sandbox padrão é um subprocesso RestrictedPython com imports restritos a `re, json, math, datetime, collections` — sem módulo de rede exposto, por desenho. **Se isso se confirmar ao vivo, o portão 1 NÃO bloqueia** (sandbox não alcança rede).
+- Portão 2 (sub-chamadas): `max_depth` é parâmetro explícito do construtor, não lido de variável de ambiente. `max_depth=0` documentado como "Root RLM e REPL só; zero sub-chamadas de LM". **Se isso se confirmar ao vivo, o portão 2 NÃO bloqueia** (dá pra desligar de verdade).
+
+**Nenhum dos dois foi verificado rodando — só lido.** Pelo próprio critério do projeto (Regra 2, "relato... é alegação até a Máquina confirmar"), isto não conta como portão avaliado; só como leitura de documentação, registrada à parte.
+
+**Parado aqui:** `uv pip install "recursive-llm @ git+https://github.com/grishahq/recursive-llm.git"` no venv isolado foi **bloqueado pelo classificador de modo automático desta sessão** ("Permission for this action was denied by the Claude Code auto mode classifier") — instalar pacote de terceiro a partir de URL git executa código de build arbitrário do repositório, e o classificador tratou isso como ação que precisa de aprovação explícita, mesmo dentro de venv isolado. Não tentei contornar. Fica esperando decisão do Humano: autorizar a instalação (e daí sim testar os dois portões ao vivo antes de rodar C2×qwen3.5-9b-64k), ou tratar C3 como não rodado — o próprio texto da ordem já registrava C3 como a célula de menor valor esperado da fila, então fechar sem ele é leitura legítima, não fracasso.
+
+**Nada rodou.** Nenhuma chamada a `qwen3.5-9b-64k` nem a nenhum outro modelo nesta célula. `uv` é a única mudança de estado desta máquina neste passo.
+
+Modelo: Claude Sonnet 5 · vetor: `pip index versions`/`pip download` reais pra confirmar que `recursive-llm` não está no PyPI antes de tentar git; leitura do script de instalação do `uv` antes de rodar, sem `sudo`; leitura do README oficial via fetch direto, não resumo de busca, pros dois portões — mas sem rodar, então registrado como leitura, não verificação. Turno desta sessão: t=1 (contado no contexto).
