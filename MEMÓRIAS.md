@@ -2660,3 +2660,16 @@ Queda de 96%. O parser consciente de aspas + pipe até 3 estágios praticamente 
 **Encerrando aqui, como a ordem pediu — não inicio C3 nem C4.** Decisão sobre continuar cabe ao Humano, de manhã, com esses três resultados (C1, B0, C1b) na mesa.
 
 Modelo: Claude Sonnet 5 · vetor: leitura completa dos traces de A2/V4/F4/F1/F2 linha a linha, não só o resumo; contagem real de rejeições por pergunta nas duas células via o classificador já testado em (176); verificação de que V2 não repete a fabricação de (173); cálculo do placar líquido pergunta a pergunta, não por agregado solto. Turno desta sessão: t=81 (contado no contexto).
+
+(178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, com opções propostas — lacuna de convenção, (162) resolveu hora+selo do cabeçalho mas não alcançou o título das entradas
+
+**Fato, verificado por Máquina, não por leitura de texto:** (177) tem título datado "14/08/2026", mas `git log -1 --format='%H %ai' c4e915f` mostra o commit real em `2026-08-15 00:11:24 -0300` — a sessão que escreveu (177) atravessou a meia-noite entre início da resposta e o commit. Não é erro de quem escreveu: REGRAS.md (formato de cabeçalho, "Carregar e formatos") exige data+hora+selo de origem no **cabeçalho** de cada resposta desde (162), mas nada rege o campo de data no **título** de uma entrada de MEMÓRIAS quando as duas datas (escrita, commit) caem em lados opostos da meia-noite. Não é a primeira vez que a numeração/data de entradas pode divergir do momento real — Regra 4 já cobre numeração fora de sincronia ("sincronize antes de numerar"), mas o título de uma entrada individual é caso distinto: aqui a entrada já está numerada certa, só a data do título é ambígua.
+
+**Opções, numeradas, decisão do Humano — não escolhida aqui:**
+1. Título usa a data de **início da escrita** (quando a resposta que virou a entrada começou), mesmo que o commit caia do outro lado da meia-noite. Vantagem: estável, não depende de quando o `git commit` de fato rodou (que pode atrasar por revisão do Humano). Desvantagem: não é verificável por Máquina depois do fato — só o modelo sabe quando começou a escrever.
+2. Título usa a data do **commit** (quando a entrada de fato entra no canon, verificável via `git log`). Vantagem: sempre confirmável por Máquina, sem depender de relato do modelo. Desvantagem: uma sessão longa que começa às 23h e termina às 2h data como se fosse do dia seguinte, o que pode confundir quem lê em ordem cronológica de trabalho, não de commit.
+3. Título registra as duas quando divergirem: `(n) DIÁRIO — DD/MM/AAAA (escrita) / DD/MM/AAAA (commit) · síntese`. Vantagem: não perde nenhuma das duas informações. Desvantagem: mais verboso, e exige que o modelo saiba (ou marque `lacuna`) a hora de início da própria escrita — nem sempre medível.
+
+**Não alterado:** (177) permanece como está — Regra 4 proíbe editar entrada já registrada; esta entrada só documenta o fato e propõe, não corrige retroativamente.
+
+Modelo: Claude Sonnet 5 · vetor: `git log -1 --format='%H %ai'` no commit real de (177) antes de afirmar a divergência; leitura de REGRAS.md "Carregar e formatos" e Regra 4 para confirmar que nenhuma cobre título de entrada; conferência de que (162) resolveu especificamente cabeçalho de resposta, não título de MEMÓRIAS. Turno desta sessão: t=1 (contado no contexto).

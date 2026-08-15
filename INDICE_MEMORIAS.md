@@ -161,7 +161,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (145) DIÁRIO — 13/08/2026 · TES-001, rodadas 2 e 3: Seth reprovado (5 achados) — …
 (146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste p …
 (147) DIÁRIO — 13/08/2026 · TES-001, rodada 5: teste de "Verificação de canônico …
-(148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorrelato de Seth (t=43): núcleo factual correto, sem fabricação grave, mas com citação imprecisa e falhas de formato de cabeçalho
+(148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorre …
 (149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
 (150) DIÁRIO — 14/08/2026 · hermes-agent atualizado (0.18.0 → 0.20.1, 78 commits) via `hermes update --backup --yes`; patch do 429 reaplicado e reverificado após conflito real
 (151) DIÁRIO — 14/08/2026 · Open WebUI atualizado para a imagem pública (permfix indocumentado não voltou a se manifestar); hipótese fundamentada para o corte de geração no meio de palavra de (147): `presence_penalty 1.5` herdado do Modelfile oficial do Qwen3.5, único entre todos os modelos locais
@@ -191,3 +191,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com código desta vez — três achados no processo: colisão de nome que apagou trace do C1 (restaurado do git), e um bug real de parsing de pipe que penalizaria o modelo por sintaxe comum de grep, sem relação com a variável do experimento
 (176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
 (177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), mas o placar não melhora limpo: A3/V1 consertados, A2/V4/F4 continuam falhando (propriedade da pergunta, não da ferramenta), e duas perguntas que o C1 acertava limpo (F1, F2) passam a falhar — achado novo, não previsto, sobre hesitação induzida por mais opção de ferramenta
+(178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, com opções propostas — lacuna de convenção, (162) resolveu hora+selo do cabeçalho mas não alcançou o título das entradas
