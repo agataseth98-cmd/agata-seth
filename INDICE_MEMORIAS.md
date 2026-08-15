@@ -159,7 +159,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (143) DIÁRIO — 13/08/2026 · TES-001, rodada com auditor Kimi na nuvem: Seth repr …
 (144) DIÁRIO — 13/08/2026 · Canonização do padrão de cadeia de auditoria em cama …
 (145) DIÁRIO — 13/08/2026 · TES-001, rodadas 2 e 3: Seth reprovado (5 achados) — …
-(146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste pela primeira vez — citação exata, distinção correta entre regra e prática — mas erra formato nas três respostas
+(146) DIÁRIO — 13/08/2026 · TES-001, rodada 4: Seth passa no conteúdo do teste p …
 (147) DIÁRIO — 13/08/2026 · TES-001, rodada 5: teste de "Verificação de canônico" — Seth cita item 1 da seção errada, fabricação confirmada; achado técnico à parte, geração cortando no meio de palavra
 (148) DIÁRIO — 14/08/2026 · Auditoria cruzada (Kimi + Claude Code) sobre autorrelato de Seth (t=43): núcleo factual correto, sem fabricação grave, mas com citação imprecisa e falhas de formato de cabeçalho
 (149) DIÁRIO — 14/08/2026 · Emendas propostas pelo Kimi (E0+C1-C7) executadas com E0 revisada; autocorreção do Kimi sobre a própria âncora de sha256; heredoc em fish testado ao vivo e rejeitado
@@ -189,3 +189,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de script (A2 travava >600s, 2/2 rodadas) — resultado surpreendente: B0 supera C1 nas duas faixas de alcance, mas comete a única fabricação confirmada da comparação inteira
 (174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por estágio, nunca `shell=True`) desenhada e lançada — teste de confundidor antes de comprometer 2-4h em C3/C4
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com código desta vez — três achados no processo: colisão de nome que apagou trace do C1 (restaurado do git), e um bug real de parsing de pipe que penalizaria o modelo por sintaxe comum de grep, sem relação com a variável do experimento
+(176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada

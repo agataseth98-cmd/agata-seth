@@ -2601,3 +2601,24 @@ Modelo: Claude Sonnet 5 · vetor: verificação da alegação de 3/5 fracassos n
 **Em aberto:** resultado do C1b. Ao terminar: comparar comandos rejeitados por pergunta (C1 vs C1b), resolver as 5 perguntas que o C1 falhou uma a uma, esperar A2 falhar de novo (propriedade da pergunta, faixa decisiva vale como 5 não 6), rotular `sem resposta` e `estouro de tempo` como coisas diferentes. Depois disso, parar e reportar — decisão sobre C3/C4 é do Humano.
 
 Modelo: Claude Sonnet 5 · vetor: `git status`/`git restore` antes de investigar qualquer outra coisa, ao notar a colisão de nome; leitura do trace do segundo smoke test linha a linha pra achar a causa real (não assumir que era o cap só porque a ordem falou de resiliência); teste isolado de 4 casos do `dividir_pipeline()` antes de aceitar o conserto; terceiro smoke test antes de comprometer a bancada de novo. Turno desta sessão: t=74 (contado no contexto).
+
+(176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
+
+**Proposta recebida, verificada antes de agir, parcialmente confirmada:** alegava que meu `dividir_pipeline()` (consciente de aspas) quebraria também no caso `grep -nE "a|b" arquivo` — testado direto: **não quebra**, 1 estágio, correto, porque a aspa dupla já protege o `|` de dentro. A alegação específica não se confirmou para o que está rodando; não parei o C1b por ela. **Mas a parte de análise proposta era boa e barata — dados que já existem, sem rerodar nada — e essa sim rendeu.**
+
+**Medido, contra os 3 traces já commitados do C1 original (`dividir_pipeline()` usado só como classificador, não pra mudar nada retroativo):** das **102 rejeições** por "metacaractere de shell recusado" nas 5 perguntas que o C1 falhou, **33 (32%) eram comando único com `\|` de alternação dentro de aspas — nunca tentativa de compor pipe — rejeitadas pela proibição cega de qualquer `|` na string inteira, que o `rlm_c1.py` original tinha.**
+
+**Por pergunta, o quadro muda bastante:**
+- A2: 12 pipe real / 6 alternação-à-toa
+- A3: 12 pipe real / 3 alternação-à-toa
+- V1: 21 pipe real / 3 alternação-à-toa
+- V4: 21 pipe real / 0 alternação-à-toa — aqui o atrito era mesmo sobre compor pipe
+- **F4: 0 pipe real / 18 alternação-à-toa — o modelo NUNCA tentou compor um pipe nesta pergunta. Toda rejeição foi um `grep` de uma alternação só, rejeitado por engano.**
+
+**Correção à leitura de (172):** "o modelo tentando compor pipe, apesar da proibição" descrevia bem V4 e razoavelmente A2/A3/V1, mas não descreve F4 — ali o atrito nunca foi sobre composição, foi sobre o parser confundir sintaxe comum de regex com metacaractere de shell. Não editada (172); esta entrada complementa, não substitui.
+
+**Nomeação da variável do C1b, ajustada por sugestão aceita depois de checar que fazia sentido:** descrever como "C1b libera pipe" simplifica demais. Mais preciso: **o tratamento do caractere `|` passa de "banido cru, em qualquer posição da string" para "reconhecido como separador de estágio só fora de aspas"** — a mesma mudança resolve dois problemas diferentes (pipe de verdade E alternação de regex), e o relatório final deve descrever os dois efeitos separadamente quando comparar C1 × C1b, não só "pipe liberado".
+
+**Em aberto:** C1b ainda rodando. Quando terminar, a comparação de comandos rejeitados (R1 da ordem anterior) já tem essa camada extra pronta — não só "quantos foram rejeitados", mas "quantos dos rejeitados no C1 eram atrito real vs bug de parser".
+
+Modelo: Claude Sonnet 5 · vetor: teste direto do caso citado contra `dividir_pipeline()` real antes de aceitar a alegação; reanálise dos 3 arquivos de trace já commitados do C1, sem rerodar nada, usando o classificador já testado; quebra por pergunta pra achar o caso extremo (F4, 0 pipe real). Turno desta sessão: t=76 (contado no contexto).
