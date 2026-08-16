@@ -1,0 +1,26 @@
+# Agata -- hook de pacman pro P-2 (MEMÓRIAS (194)). Dispara
+# checar-sudoers-root.sh sempre que uma operação de pacote tocar
+# /etc/sudoers.d/*, que é o vetor mais provável de como a regra órfã
+# `facer` apareceu (mtime 25/mai/2026, sem pacote dono confirmado via
+# `pacman -Qo` em MEMÓRIAS (192) -- mas o vetor mais plausível pra um
+# arquivo desses continua ser instalação/atualização de pacote, e é
+# exatamente isso que este hook cobre daqui pra frente).
+#
+# NÃO cobre edição manual por `visudo` -- isso não passa pelo pacman.
+# Cobertura runbook: PROJETO.md, "Sudo e interação humana".
+#
+# Instalado pelo Humano, com sudo, em:
+#   /etc/pacman.d/hooks/agata-sudoers.hook
+# Este arquivo em scripts/ é só o material de origem, versionado pra
+# revisão e diff.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Path
+Target = etc/sudoers.d/*
+
+[Action]
+Description = Agata: verificando /etc/sudoers.d após operação de pacote
+When = PostTransaction
+Exec = /usr/local/lib/agata/checar-sudoers-root.sh

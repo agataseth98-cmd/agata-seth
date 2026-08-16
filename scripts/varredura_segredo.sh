@@ -64,40 +64,56 @@ checar_segredo() {
 }
 
 # P-2 -- "O executor pausa e pede sudo ao Humano" (PROJETO, Sudo e
-# interação humana). Falha quando existe regra sudoers apontando pra
-# caminho inexistente OU gravável por não-root. Checagem só: nunca
-# escreve em /etc/sudoers.d/. Roda `sudo -n -l` (não-interativo); se
-# pedir senha, pula com aviso, não bloqueia o commit por falta de acesso
-# -- bloquear todo commit por não poder checar seria pior que o risco
-# que a checagem previne.
+# interação humana). MEMÓRIAS (194): deixou de chamar `sudo -n -l`
+# diretamente -- isso era SKIP estrutural sempre, porque o executor nunca
+# tem sudo não-interativo (é o controle funcionando, não uma falha).
+# Passou a LER o status escrito por um mecanismo root separado
+# (scripts/checar-sudoers-root.sh, disparado por
+# /etc/pacman.d/hooks/agata-sudoers.hook ou manualmente após `visudo`).
+# Três estados, não dois:
+#   - status ausente (mecanismo root nunca rodou) -> SKIP, não FALHOU.
+#     Bloquear todo commit até o Humano instalar o hook seria o mesmo
+#     erro que motivou o desenho original de SKIP.
+#   - status presente, veredito negativo -> FALHOU, sempre, com o
+#     conteúdo literal do achado.
+#   - status presente, veredito positivo -> OK, com a data da última
+#     verificação. IDADE não é alarme (ordem do Humano, MEMÓRIAS (194)):
+#     se nada tocou sudoers.d desde a última checagem, o resultado
+#     continua válido -- não implementar alerta por idade aqui.
 checar_sudoers() {
-  local saida
-  saida="$(sudo -n -l 2>/dev/null)" || {
-    echo "checar_sudoers: sudo -n -l sem acesso não-interativo agora -- checagem pulada, não é falha." >&2
+  local status_file="${AGATA_P2_STATUS_FILE:-/var/lib/agata/p2-status.json}"
+  if [ ! -e "$status_file" ]; then
+    echo "checar_sudoers: $status_file ausente -- mecanismo root (checar-sudoers-root.sh) nunca rodou, sem verificação real ainda." >&2
     PERIMETRO_ESTADO="SKIP"
     return 0
-  }
-  # Achado real ao testar (15/08/2026): uma primeira versão varria a saída
-  # inteira e o "secure_path=/usr/local/sbin:/usr/local/bin:/usr/bin" (uma
-  # linha "Defaults", PATH de busca, não regra de comando) virava falso
-  # positivo de "caminho inexistente" porque o regex ganancioso engolia os
-  # `:` escapados como se fosse um caminho só. Corrigido: só olha linhas
-  # depois do cabeçalho "pode executar", que é onde ficam as regras reais.
-  local bloco
-  bloco="$(echo "$saida" | sed -n '/pode executar os seguintes comandos/,$p')"
-  local ruim=0
-  local caminho
-  while IFS= read -r caminho; do
-    [ -z "$caminho" ] && continue
-    if [ ! -e "$caminho" ]; then
-      echo "SUSPEITO (sudoers): regra aponta pra caminho INEXISTENTE: $caminho"
-      ruim=1
-    elif [ -w "$caminho" ] && [ "$(stat -c '%U' "$caminho" 2>/dev/null)" != "root" ]; then
-      echo "SUSPEITO (sudoers): regra aponta pra caminho gravável por não-root: $caminho"
-      ruim=1
-    fi
-  done < <(echo "$bloco" | grep -oE '/[^[:space:]]+')
-  return "$ruim"
+  fi
+  local veredito timestamp detalhe
+  veredito="$(python3 -c "import json,sys
+try:
+    print(json.load(open(sys.argv[1])).get('veredito',''))
+except Exception:
+    pass" "$status_file" 2>/dev/null)"
+  timestamp="$(python3 -c "import json,sys
+try:
+    print(json.load(open(sys.argv[1])).get('timestamp',''))
+except Exception:
+    pass" "$status_file" 2>/dev/null)"
+  detalhe="$(python3 -c "import json,sys
+try:
+    print(json.load(open(sys.argv[1])).get('detalhe',''))
+except Exception:
+    pass" "$status_file" 2>/dev/null)"
+  if [ -z "$veredito" ]; then
+    echo "checar_sudoers: $status_file existe mas não deu pra ler o campo 'veredito' -- tratando como SKIP, não FALHOU (pode estar sendo escrito agora)." >&2
+    PERIMETRO_ESTADO="SKIP"
+    return 0
+  fi
+  echo "checar_sudoers: última verificação root em $timestamp -- veredito $veredito"
+  if [ "$veredito" != "OK" ]; then
+    echo "SUSPEITO (sudoers, verificação root): $detalhe"
+    return 1
+  fi
+  return 0
 }
 
 # Só executa como script principal quando chamado direto -- sourced (por

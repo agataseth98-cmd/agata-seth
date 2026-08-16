@@ -3080,3 +3080,39 @@ Modelo: Claude Sonnet 5 · vetor: diagnóstico só-leitura antes de qualquer con
 - **Aceite mecânico, rodado de verdade:** `bash .githooks/gerar-hermes-md.sh` → **0 avisos de reconciliação** (era 10). Medida antes/depois: `.hermes.md` 96.302 B → **98.100 B** (+1.798) · `PROJETO.md` 26.949 B → **28.994 B** (+2.045, ~7,6%) · itens `[FECHADO]` 3 → **6** (uma variante `[FECHADO — EXPERIMENTO]`) · `[PARCIAL]` 1 → **2**. Crescimento vem só dos ponteiros novos exigidos pela reconciliação, não de detalhe histórico reinserido — cada item aponta pra MEMÓRIAS em vez de recontar.
 
 Modelo: Claude Sonnet 5 · vetor: `ss -tulpn` rodado ao vivo, comparando a linha do hermes (mesmo uid, completa) contra a do ollama (uid diferente, sem processo) antes de aceitar a hipótese do Humano como achado, não só concordando com o texto da ordem; `find` real por donos ≠ orusoua antes de declarar "nenhum irmão"; `gerar-hermes-md.sh` rodado depois de cada edição em PROJETO.md, não só uma vez no fim, pra saber exatamente qual edição zerava qual aviso. Turno desta sessão: t=9 (contado no contexto).
+
+(194) DIÁRIO — 16/08/2026 · Parte A: P-2 do `perimetro.sh` deixa de tentar `sudo -n -l` (SKIP estrutural sempre) e passa a ler status escrito por mecanismo root separado, orientado a evento (opção D do Humano — hook de pacman); dois artefatos preparados e testados isolados, instalação pendente do Humano (exige root); `--` reportado de novo, ainda não removido
+
+**Decisão do Humano: opção D, hook de pacman.** B descartada (reabre a classe de (192); NOPASSWD sobre o próprio `/usr/bin/sudo` é primitivo de escalação desaconselhado pela documentação do sudo). A descartada por desproporção (timer permanente com privilégio pra vigiar condição que só muda quando um humano roda sudo).
+
+**A.1(a) — `scripts/checar-sudoers-root.sh`, material de origem, testado isolado (positivo e negativo, mock de `sudo -l`, mesmo método de (181)/(190)/(191)):**
+```
+TESTE POSITIVO (sudo -l limpo, só "(ALL) ALL"):
+  veredito OK, exit 0, status.json: {"veredito":"OK","detalhe":"","inspecionado":[]}
+TESTE NEGATIVO (regra órfã mockada, mesmo padrão de (181)/(192)):
+  veredito FALHOU, exit 1
+  status.json: {"veredito":"FALHOU",
+    "detalhe":"regra aponta pra caminho INEXISTENTE: /home/orusoua/acer-predator-turbo-and-rgb-keyboard-linux-module/keyboard.py",
+    "inspecionado":["/usr/bin/python","/home/orusoua/..."]}
+```
+JSON validado com `json.load` real, não inspeção visual. **AUTOCONTIDO de propósito** — não faz `source` de nada em `~/agata`: um script que roda como root não pode depender de arquivo gravável por `orusoua`, seria recriar a classe fechada em (192). A lógica de inspeção é cópia pequena (~15 linhas) da mesma de `checar_sudoers` — duplicação deliberada pela fronteira de segurança, não descuido. SÓ LÊ E REPORTA, nunca edita sudoers. Destino final, instalação do Humano: `/usr/local/lib/agata/checar-sudoers-root.sh` (root:root, 0755).
+
+**A.1(b) — `scripts/agata-sudoers.hook`, material de origem:** `[Trigger] Type = Path, Target = etc/sudoers.d/*, Operation = Install/Upgrade/Remove` · `[Action] When = PostTransaction, Exec = /usr/local/lib/agata/checar-sudoers-root.sh`. Destino final: `/etc/pacman.d/hooks/agata-sudoers.hook`.
+
+**A.1(c) — `/var/lib/agata/p2-status.json`:** escrito pelo script acima a cada disparo — `timestamp` (ISO 8601), `veredito`, `detalhe`, `inspecionado`. Dono root, legível por `orusoua`, não gravável por ele (`chmod 0644`, `chown root:root` na escrita real como root).
+
+**A.2 — `checar_sudoers` (P-2) reescrita, testada nos três estados possíveis, isolado, antes de rodar contra o repositório real:**
+```
+status ausente          -> SKIP, exit 0, PERIMETRO_ESTADO=SKIP
+status presente, OK     -> OK,   exit 0, PERIMETRO_ESTADO="" (OK de verdade, não skip)
+status presente, FALHOU -> FALHOU, exit 1, imprime o "detalhe" literal
+```
+**Semântica de idade, aplicada como pedido:** veredito positivo conta como OK **independente de quando foi escrito** — se nada tocou `sudoers.d` desde a última checagem, o resultado continua válido. Nenhum alerta por idade implementado. `perimetro.sh` rodado contra o repositório real, agora, sem o mecanismo instalado ainda: `4 OK · 1 SKIP · 1 PARCIAL · 0 FALHA` (P-2 ainda SKIP — `/var/lib/agata/p2-status.json` não existe nesta máquina até o Humano instalar).
+
+**A.3 — cobertura que o hook não tem, registrada como runbook em PROJETO.md, "Sudo e interação humana":** edição manual via `visudo` não dispara pacman — `sudo /usr/local/lib/agata/checar-sudoers-root.sh` depois de qualquer `visudo`, sem maquinário novo.
+
+**A.4 — `~/agata/--`, reportado de novo (mesmo achado de (193), ainda não resolvido):** `sudo rm ./--` (barra obrigatória), de dentro de `~/agata`. Nenhum irmão (já confirmado em (193), não re-testado agora — nada mudou na árvore desde então que justificasse repetir).
+
+**A.5 — ACEITE, honestamente parcial nesta entrada:** instalação exige root, que o executor não tem — os dois artefatos estão prontos e testados isolados, não instalados. **Não afirmado como fechado.** Pendente do Humano: `sudo mkdir -p /usr/local/lib/agata && sudo install -o root -g root -m 0755 ~/agata/scripts/checar-sudoers-root.sh /usr/local/lib/agata/checar-sudoers-root.sh` · `sudo install -o root -g root -m 0644 ~/agata/scripts/agata-sudoers.hook /etc/pacman.d/hooks/agata-sudoers.hook` · rodar `sudo /usr/local/lib/agata/checar-sudoers-root.sh` uma vez pra semear o status.json (mesmo comando do runbook A.3) · disparo real do hook por pacman fica pendente de confirmação numa próxima operação de pacote (`pacman -Syu` de rotina serve, não é garantido que toque `sudoers.d` nesta rodada especificamente) — **isto não foi verificado nesta entrada porque não pode ser, sem root.**
+
+Modelo: Claude Sonnet 5 · vetor: teste isolado positivo/negativo do script root ANTES de instalar no repo, com JSON validado por `json.load` real, não leitura visual; teste isolado dos três estados de `checar_sudoers` (ausente/OK/FALHOU) contra arquivos `.json` reais em `/tmp`, não assumido pela leitura do código; `perimetro.sh` rodado contra o repositório real depois da troca, confirmando SKIP continua (mecanismo não instalado), não alegado OK por engano. Turno desta sessão: t=11 (contado no contexto).
