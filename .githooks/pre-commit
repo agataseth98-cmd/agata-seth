@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
-# Regenera .hermes.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
-# MEMÓRIAS.md mudaram, e inclui os dois no commit.
+# 1. Roda o perimetro (scripts/perimetro.sh, 6 controles, MEMÓRIAS (191)/(192))
+#    e bloqueia o commit se algum falhar de verdade.
+# 2. Regenera .hermes.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
+#    MEMÓRIAS.md mudaram, e inclui os dois no commit.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+
+if ! bash scripts/perimetro.sh; then
+  echo "pre-commit: perimetro.sh falhou -- commit bloqueado. Veja a saída acima." >&2
+  exit 1
+fi
 
 if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
   bash .githooks/gerar-hermes-md.sh

@@ -3017,3 +3017,43 @@ RESULTADO GERAL: FALHOU (por causa só de P-2)
 **Não habilitado no pre-commit ainda — mesma tensão já registrada em (190):** como P-2 está DE VERDADE falhando agora (não é falso positivo), ligar `perimetro.sh` no `.githooks/pre-commit` neste exato momento bloquearia todo commit, incluindo o que registra esta entrada. Falta a palavra do Humano sobre quando ligar (depois do Passo 4 fechar, ou agora mesmo aceitando a trava) — mesma pergunta de (190), agora valendo pros 6 controles juntos, não só sudoers.
 
 Modelo: Claude Sonnet 5 · vetor: rodar contra o repositório real ANTES de aceitar qualquer coisa, achando os 2 bugs de verdade rodando, não lendo o script; testes isolados positivo/negativo pra cada um dos 4 controles novos, em repo `/tmp` descartável, mesmo método de (181)/(190); verificação de que P-2 ainda falha de verdade (não fechado pelo Passo 4) antes de escrever esta entrada, não assumido. Turno desta sessão: t=1 (contado no contexto).
+
+(192) DIÁRIO — 16/08/2026 · Passo 4 (saneamento) FECHADO: regra sudo NOPASSWD órfã removida de `/etc/sudoers.d/facer` por decisão e execução do Humano; achado extra no caminho — permissão pré-existente errada (644) fazendo `visudo -c` reprovar, diagnosticado antes de qualquer conserto, ramo cosmético confirmado, resolvido com `install` atômico em 0440 root:root; `perimetro.sh` fechou 6/6 e foi amarrado ao pre-commit no mesmo commit desta entrada
+
+**4.1 — o que saiu, texto literal (Regra 4):**
+```
+orusoua ALL=(ALL) NOPASSWD: /usr/bin/python /home/orusoua/acer-predator-turbo-and-rgb-keyboard-linux-module/keyboard.py
+```
+Arquivo: `/etc/sudoers.d/facer` — até esta entrada, o canon só conhecia a regra pelo conteúdo, nunca pelo nome do arquivo. `mtime` original 25/mai/2026 (bem antes da existência da Agata), sem pacote dono (`pacman -Qo`: "Nenhum pacote possui") — não volta sozinho num update.
+
+**4.2 — decisão do Humano e motivo:** opção 1, remover. Não era poder novo — `orusoua` já tem `(ALL) ALL` padrão, que dá root com senha de qualquer forma. Era fricção removida de um caminho que o próprio controle declarado ("o executor pausa e pede sudo ao Humano", PROJETO "Sudo e interação humana") deveria pedagiar: o arquivo apontava pra um caminho sob `/home/orusoua/`, gravável pela mesma conta que roda o executor — quem escrevesse um arquivo ali virava root sem senha e sem prompt, contornando o controle sem precisar quebrá-lo.
+
+**4.3 — opção 4, registrada como caminho seguro se o teclado RGB Acer voltar a ser usado:** instalar o script em `/usr/local/bin` (dono root, não gravável por `orusoua`), e só então recriar uma regra NOPASSWD apontando pra esse caminho fixo — nunca reintroduzir o primitivo de escrita em diretório do usuário.
+
+**4.4 — achado extra, não previsto na ordem original: permissão pré-existente errada.** `stat` mostrou `/etc/sudoers.d/facer` em `644 root:root` (comparado a `10-installer`, no mesmo diretório, corretamente em `0440`/`r--r-----`). Ramo avaliado: dono root, sem bit de escrita pra grupo/outros → **cosmético**, não escalado como achado maior (o ramo grave seria modo com 2/6 no segundo/terceiro dígito ou dono ≠ root). `visudo -c` reprovava por causa dessa permissão, não por conteúdo malformado.
+
+**4.5 — por que o primeiro `visudo -f` deu "sem alteração":** `visudo` só lê `SUDO_EDITOR`/`VISUAL`/`EDITOR` se `env_editor` estiver habilitado em `/etc/sudoers` — `grep -n env_editor /etc/sudoers` voltou vazio, ou seja a diretiva nem aparece (ausente = desligado, o padrão do sudo). Sem ela, `visudo` ignora as três variáveis e abre o `vi` compilado por padrão, que saiu sem tocar em nada — daí "sem alteração", e nada foi corrompido nisso: `visudo` aborta a instalação inteira quando detecta o arquivo temporário inalterado. O script determinístico de 15/08 (`passo4_remover_regra_sudo_orfa.fish`) não tinha bug de lógica — tinha uma suposição errada sobre qual variável de ambiente o `visudo` lê.
+
+**4.6 — conserto, sem editor:** conteúdo novo montado fora de `/etc/sudoers.d/` (`/root/facer.new`, um comentário explicando a remoção, sintaxe válida, zero regra ativa), validado com `visudo -c -f` antes de instalar, instalado com `install -o root -g root -m 0440` (atômico, permissão correta desde a criação, sem passar por um estado intermediário errado). Confirmado depois: `visudo -c` limpo nos três arquivos do diretório (`/etc/sudoers`, `10-installer`, `facer`); `sudo -n -l -U orusoua` — rodado como root, listando o usuário certo, depois de uma primeira tentativa `sudo -n -l` simples ter mostrado por engano os privilégios de *root*, não os de `orusoua` — sem a regra órfã, só `(ALL) ALL` padrão, exige senha.
+
+**4.7 — lição de classe, não incidente: backup dentro do próprio diretório de sudoers.** O script de 15/08 fez `sudo cp` do arquivo original pra um `.bak-passo4-<timestamp>` DENTRO de `/etc/sudoers.d/` — `sudo` lê todos os arquivos desse diretório por padrão. Só não reativou a regra porque o `#includedir` do sudo pula, por convenção, nomes com ponto ou terminados em `~` (proteção padrão contra arquivo de backup virar regra ativa sem querer). Ficou correto por essa convenção, não por desenho do script — vale lembrar em qualquer regra futura que precise de backup em `/etc/sudoers.d/`: nomear o backup fora do diretório, nunca confiar em sorte.
+
+**4.8 — histórico de tentativas, registrado porque tentativa que falha também é história:** trabalho de 15/08 20:51–22:34 (5 capturas de conteúdo, os 2 scripts) não chegou ao canon antes da queda de energia da madrugada de 16/08 — achado só na retomada desta sessão (relatório de integridade pós-queda). Duas tentativas manuais via `nano` falharam por confusão de tecla antes da versão determinística. Artefatos movidos pra `memoria/missoes/passo4-sudoers-facer/` e commitados nesse repo local (commit `2e1c93d`) — ferramenta de uso único, o que é durável é o achado, registrado aqui, não o script.
+
+**4.9 — decidido NÃO fazer, e por quê:** não versionar as ferramentas de uso único no repo público (superfície sem fechar classe nova — a classe já fecha com P-2 do `perimetro.sh`); não fazer varredura ampla de todo `/etc/sudoers.d/` além do que P-2 já cobre; não mexer em grupos do usuário. Sem incidente que motive qualquer um dos três, o custo de atenção não se paga agora.
+
+**4.10 — perímetro, depois do fechamento, rodado de verdade contra o repositório real:**
+```
+P-1  Segredos só em ~/.hermes/.env, fora do repo — OK
+P-2  O executor pausa e pede sudo ao Humano — OK
+P-3  Publicação é decisão deliberada, consentimento por trecho — OK
+P-4  api_server contido · Ollama restrito a 127.0.0.1 — OK
+P-5  Registre e nunca apague — OK
+P-6  Cópia da história fora desta máquina — AVISO SÓ (nada pendente agora)
+RESULTADO GERAL: OK — 6/6
+```
+**Precisão que importa, pra não confundir skip com verificação:** o P-2 desta execução deu OK por *pular* a checagem — o shell do executor, nesta rodada, não tinha `sudo -n -l` não-interativo disponível ("sem acesso não-interativo agora"), e o desenho de (190) trata isso como aviso, não falha, pra não travar commit por incapacidade de checar. A confirmação real de que a regra sumiu **não veio deste run do `perimetro.sh`**, veio do `sudo -n -l -U orusoua` do item 4.6, rodado pelo Humano como root. Os 6/6 valem para amarrar no hook (o desenho de skip-não-falha já era decisão tomada em (190)/(191), não nova), mas quem fechou o Passo 4 de fato foi a checagem direta, não este script.
+
+Amarrado ao `.githooks/pre-commit` no mesmo commit que registra este verde — princípio aplicado, decidido nesta sessão porque generaliza: nenhuma checagem entra em hook antes de passar verde uma vez. Portão que nasce vermelho ensina a ser contornado, e o contorno vira hábito.
+
+Modelo: Claude Sonnet 5 · vetor: diagnóstico só-leitura antes de qualquer conserto (`stat`/`cat`/`ls`/`grep`/`pacman`, todos rodados pelo Humano, saída conferida por mim antes de ramificar entre cosmético e grave); reconhecimento em tempo real de que o primeiro `sudo -n -l` pós-conserto mostrou o usuário errado (root, não orusoua) e pedido de correção antes de aceitar como fechado; `perimetro.sh` rodado de novo contra o repositório real depois do conserto, não assumido 6/6 pela lógica — achando, ao rodar, que o P-2 desta vez passou por skip, não por reverificação, e registrando essa distinção em vez de deixar "6 OK" parecer mais forte do que é. Turno desta sessão: t=7 (contado no contexto).
