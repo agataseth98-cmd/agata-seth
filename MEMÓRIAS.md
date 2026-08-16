@@ -3146,3 +3146,23 @@ Modelo: Claude Sonnet 5 · vetor: schema de cada trace lido linha a linha antes 
 **T7 (post-commit real, HD conectado):** avaliado no próprio commit desta entrada — saída literal registrada abaixo, no rodapé operacional, não neste corpo (a saída só existe depois que o commit acontece).
 
 Modelo: Claude Sonnet 5 · vetor: T1-T3/T6 disparados de verdade em clone descartável, restaurado entre cada item (`git reset --hard` + remoção do arquivo de teste), nunca no repositório real; T4/T5 confirmados no repositório real só-leitura, sem desligar nenhum controle pra testar; identidade git local (`user.email`/`user.name`) configurada só dentro do clone, nunca `--global`, pra não tocar configuração do Humano; recusa de fabricar os vereditos item-por-item quando o Humano deu resposta global em vez disso — registrado como o achado é, não encaixado à força na tabela original. Turno desta sessão: t=16 (contado no contexto).
+
+(197) DIÁRIO — 16/08/2026 · `ONDE_ESTAMOS.md` criado, aprovado pelo Humano na primeira versão ("Perfeito", sem pergunta) e oficializado no canon — nome adotado: "Onde Estamos"; Regra 4 (REGRAS) e "Memória e hidratação" (PROJETO) passam a exigir que ele seja atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado
+
+**Origem, direto do achado de (196):** a bateria de legibilidade não conseguiu veredito por controle porque faltava uma página que devolvesse contexto ao Humano em menos de um minuto. Este arquivo é a resposta a esse achado — não implementado por conta própria, o Humano pediu depois de ver o achado.
+
+**Teste de aceite, como definido pelo Humano — ele lê, não o modelo:** primeira versão mostrada em texto, direto na conversa, antes de qualquer commit. Resposta: "Perfeito." Nenhuma pergunta de volta — passou de primeira, sem precisar de segunda rodada de redação.
+
+**Nome oficial: "Onde Estamos"** — o Humano pediu pra eu escolher como chamar a página; adotado o próprio título do arquivo (`# Onde estamos`), sem inventar apelido novo — mais fácil de lembrar e de dizer em voz do que qualquer nome adicional teria sido.
+
+**Regras de redação, como o Humano pediu, cumpridas na primeira versão:** português simples, frases curtas, uma tela, sem hash, sem caminho de arquivo, sem "conforme registrado em"/"verificado por"/"veredito", sem número de entrada como referência principal. Estrutura fixa: O que é isto · Onde estamos agora · Esperando você · Rodando agora · Quebrado · Última atualização.
+
+**Oficializado no canon, dois lugares:**
+- REGRAS.md, Regra 4: novo sub-item — toda entrada que muda o estado atualiza `ONDE_ESTAMOS.md` no mesmo commit, não como tarefa separada.
+- PROJETO.md, "Memória e hidratação": registrado como quarto arquivo na raiz, explicitamente fora da hidratação (`.hermes.md` continua lendo só REGRAS + PROJETO + MEMÓRIAS, nenhuma mudança de código necessária — confirmado lendo `gerar-hermes-md.sh` antes de escrever isto, ele só cita os três arquivos por nome, não faz glob).
+
+**Conteúdo desta primeira versão, resumido em si mesmo — não repetido aqui em detalhe pra não duplicar o arquivo:** limpeza de segurança concluída, regra sudo removida, expedição RLM concluída sem decisão de produção, teste de legibilidade concluído com o achado que gerou esta própria página. Três itens esperando o Humano: caminho de produção da expedição, as três propostas de redação de alarme de (196), e a decisão sobre a exposição antiga de `memoria/*.md`.
+
+**Pergunta separada do Humano, respondida fora do canon, não uma decisão de projeto:** "Humanos são LLMs?" — musing genuíno, não pedido de pesquisa; ligado ao próprio achado desta entrada (o Humano perdendo contexto depois de dias de trabalho é o mesmo problema estrutural que hidratação/janela de contexto tentam resolver para um modelo). Não afirmado nem investigado aqui — comentário do executor na resposta à parte, não registro de fato do canon.
+
+Modelo: Claude Sonnet 5 · vetor: `gerar-hermes-md.sh` lido de novo antes de escrever "nenhuma mudança de código necessária", não assumido; conteúdo da primeira versão mostrado ao Humano ANTES do commit, não commitado e apresentado depois como fato consumado — a ordem do próprio pedido ("mostre a ele" antes de "oficialize") seguida à risca. Turno desta sessão: t=19 (contado no contexto).

@@ -66,6 +66,7 @@ Toda decisão vai para o fim de MEMÓRIAS, com data. Só se acrescenta.
 - Correção = **entrada nova** apontando a corrigida. Jamais edição do que já está lá.
 - **Sincronize antes de numerar.** A cópia colada pelo Humano pode estar atrás do canon: sessões sem acesso à Máquina avançam a numeração fora dela. Confira o fim do remoto antes de escrever qualquer entrada nova. Ver catálogo.
 - **Número sozinho só identifica se a numeração for garantidamente única.** Onde não for (história migrada de mais de uma origem pode reiniciar contagem), cite com data junto. O fato concreto de onde isso vale neste projeto fica em MEMÓRIAS, não aqui — regra universal, aplicação é local.
+- **Toda entrada que muda o estado atualiza `ONDE_ESTAMOS.md` no mesmo commit.** Não é tarefa separada, é parte do fechamento — mesmo espírito de manter `.hermes.md` sincronizado, só que para o Humano, não para o modelo. `ONDE_ESTAMOS.md` não entra na hidratação; é escrito em português simples, sem hash, sem caminho de arquivo, sem jargão de canon, com teto de uma tela. O teste de aceite de qualquer redação nele é o Humano lendo, não o modelo. Ver MEMÓRIAS (196)/(197).
 *Motivo:* a história é o único ativo que não se reconstrói. Ver MEMÓRIAS (47) — um processo automático já apagou identidade para caber num teto de caracteres.
 
 **5. Fale direto.**

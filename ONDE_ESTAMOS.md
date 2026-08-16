@@ -1,0 +1,30 @@
+# Onde estamos
+
+## O que é isto
+Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
+Modelos de IA trabalham nele seguindo o que está escrito aqui.
+Esta página é só para você — não para os modelos.
+
+## Onde estamos agora
+A limpeza de segurança que estava em aberto terminou.
+Uma regra antiga e perigosa foi removida do sistema.
+Um teste grande com IA terminou. Deu resultado, mas ninguém escolheu
+ainda o que fazer com ele.
+Testamos como o sistema avisa você quando algo quebra — e o teste
+mostrou que faltava justamente esta página.
+
+## Esperando você
+- Escolher o que fazer com o resultado do teste grande de IA.
+- Aprovar ou reescrever três avisos do sistema que ficaram confusos.
+- Decidir o que fazer com uma informação pessoal sua que vazou no
+  passado (o vazamento novo já foi fechado; o que já saiu, continua
+  fora).
+
+## Rodando agora
+Nada rodando.
+
+## Quebrado
+Nada quebrado.
+
+## Última atualização
+16/08/2026, 12:11.
