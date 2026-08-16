@@ -7,6 +7,15 @@
 # duplicar a lógica já testada.
 set -uo pipefail
 
+# Estado extra que uma checagem pode declarar além do exit code (0/1), pra
+# quem chama (perimetro.sh) não confundir "rodou e não achou nada" com
+# "não rodou de verdade". Setado por checar_sudoers quando pula por falta
+# de sudo não-interativo -- achado em MEMÓRIAS (192)/(193): sem isso, um
+# SKIP estrutural (nunca vai deixar de acontecer, é o controle do PROJETO
+# funcionando) entrava no canon como "OK" indistinguível de verificação
+# real. Vazio = sem ressalva (OK de verdade se o exit code for 0).
+PERIMETRO_ESTADO=""
+
 PADROES_SEGREDO=(
   'AKIA[0-9A-Z]{16}'                          # AWS access key id
   'AIza[0-9A-Za-z_-]{35}'                     # Google API key
@@ -65,6 +74,7 @@ checar_sudoers() {
   local saida
   saida="$(sudo -n -l 2>/dev/null)" || {
     echo "checar_sudoers: sudo -n -l sem acesso não-interativo agora -- checagem pulada, não é falha." >&2
+    PERIMETRO_ESTADO="SKIP"
     return 0
   }
   # Achado real ao testar (15/08/2026): uma primeira versão varria a saída

@@ -12,6 +12,16 @@
 # Nada de correção automática: o script ACHA E PARA. Quem corrige o
 # controle é o Humano, por decisão.
 #
+# SKIP e PARCIAL (MEMÓRIAS (193)): terceiro e quarto estado, nunca somados
+# a OK no placar -- "verde que ninguém questiona é pior que checagem
+# ausente" (ordem do Humano). SKIP = a checagem não rodou de verdade (ex.
+# P-2 sem sudo não-interativo). PARCIAL = rodou, mas com visibilidade
+# estruturalmente incompleta sem root (ex. P-4: `ss -tulpn` sem root só
+# atribui processo a sockets do próprio UID -- ollama roda como usuário de
+# sistema `ollama`, diferente de `orusoua`, e sai invisível pro grep sem
+# nenhum erro). Nenhum dos dois falha o hook -- exigir root pra todo
+# commit seria pior que a lacuna que eles sinalizam.
+#
 # Sourceável sem executar (BASH_SOURCE guard no fim) -- pra testar cada
 # função isolada, mesmo método usado em varredura_segredo.sh.
 set -uo pipefail
@@ -62,6 +72,18 @@ p3_publicacao() {
 p4_bind() {
   local saida="${1:-}"
   [ -z "$saida" ] && saida="$(ss -tulpn 2>/dev/null)"
+  # Achado real ao testar (16/08/2026, MEMÓRIAS (193)): sem root, `ss -p`
+  # só atribui processo a sockets do PRÓPRIO uid -- confirmado rodando de
+  # verdade: a linha do ollama (uid `ollama`, systemd system service)
+  # aparece com endereço e porta, mas ZERO texto de processo, enquanto a
+  # do hermes-gateway (uid `orusoua`, mesmo uid do check) aparece completa.
+  # O grep "hermes|ollama" contra a linha inteira nunca acha a de ollama
+  # nesse caso -- não é falha, é ausência silenciosa. Marca PARCIAL sempre
+  # que não-root, incondicional: não dá pra provar que nenhuma linha
+  # oculta era hermes/ollama sem o privilégio pra ver.
+  if [ "$(id -u)" -ne 0 ]; then
+    PERIMETRO_ESTADO="PARCIAL"
+  fi
   local ruim=0
   local linha
   while IFS= read -r linha; do
@@ -169,36 +191,69 @@ p6_backup_pendente() {
   return 0
 }
 
+# Imprime o veredito de uma checagem e soma no placar -- único ponto que
+# decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
+# arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
+# (193)). $1 = exit code da checagem; usa PERIMETRO_ESTADO, que a própria
+# checagem deixa setado quando não é um OK de verdade.
+_perimetro_veredito() {
+  local codigo="$1"
+  if [ "$codigo" -ne 0 ]; then
+    echo "veredito: FALHOU"
+    FALHOU=1
+    CONT_FALHA=$((CONT_FALHA + 1))
+  elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
+    echo "veredito: SKIP"
+    CONT_SKIP=$((CONT_SKIP + 1))
+  elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
+    echo "veredito: PARCIAL"
+    CONT_PARCIAL=$((CONT_PARCIAL + 1))
+  else
+    echo "veredito: OK"
+    CONT_OK=$((CONT_OK + 1))
+  fi
+}
+
 main() {
   cd "$(git rev-parse --show-toplevel)"
-  local FALHOU=0
+  FALHOU=0
+  CONT_OK=0
+  CONT_SKIP=0
+  CONT_PARCIAL=0
+  CONT_FALHA=0
 
   cabecalho "P-1" "Segredos só em ~/.hermes/.env, fora do repo" "PROJETO, Segurança"
-  if checar_segredo; then echo "veredito: OK"; else echo "veredito: FALHOU"; FALHOU=1; fi
+  PERIMETRO_ESTADO=""
+  checar_segredo; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-2" "O executor pausa e pede sudo ao Humano" "PROJETO, Sudo e interação humana"
-  if checar_sudoers; then echo "veredito: OK"; else echo "veredito: FALHOU"; FALHOU=1; fi
+  PERIMETRO_ESTADO=""
+  checar_sudoers; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-3" "Publicação é decisão deliberada; consentimento por trecho, com data" "REGRAS, Conselho · PROJETO, Estado de publicação"
-  if p3_publicacao; then echo "veredito: OK"; else echo "veredito: FALHOU"; FALHOU=1; fi
+  PERIMETRO_ESTADO=""
+  p3_publicacao; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-4" "api_server executa terminal, nunca expor sem contenção · Ollama restrito a 127.0.0.1" "PROJETO, Segurança"
-  if p4_bind; then echo "veredito: OK"; else echo "veredito: FALHOU"; FALHOU=1; fi
+  PERIMETRO_ESTADO=""
+  p4_bind; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-5" "Registre e nunca apague" "REGRAS, Regra 4 (linha vermelha)"
-  if p5_append_only; then echo "veredito: OK"; else echo "veredito: FALHOU"; FALHOU=1; fi
+  PERIMETRO_ESTADO=""
+  p5_append_only; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
   p6_backup_pendente
   echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
   echo
 
-  echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) ==="
+  echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
   return "$FALHOU"
 }
 
