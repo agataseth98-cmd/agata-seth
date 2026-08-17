@@ -18,10 +18,11 @@ As chaves não vão mais para o backup do HD externo, por decisão sua.
 A informação pessoal sua que vazou no passado (45 dias, 0 cópias feitas)
 fica como está — você decidiu não mexer, com o motivo registrado.
 O robô que leva um pedido de parecer a outro modelo de IA já foi usado
-duas vezes de verdade. Achou e consertou um bug real (o outro modelo
+três vezes de verdade. Achou e consertou um bug real (o outro modelo
 gastava toda a resposta "pensando" em vez de responder). O outro lado
-(Zhipu/GLM) segue instável — ainda não deu pra completar um parecer.
-Pode tentar de novo quando quiser, o pedido já está pronto.
+(Zhipu/GLM) recusou a maioria das tentativas de hoje (6 de 8) por
+sobrecarga. Sugestão: deixar quieto por um tempo antes de tentar de
+novo — o pedido já está pronto e corrigido, esperando você.
 
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -33,4 +34,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 10:40.
+17/08/2026, 10:50.

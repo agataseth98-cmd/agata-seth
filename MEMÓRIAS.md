@@ -3396,3 +3396,13 @@ Modelo: Claude Sonnet 5 · vetor: os quatro comandos da âncora rodados agora, n
 **Estado real, sem inflar:** ainda não existe um parecer válido. O que existe: um achado de bug real e corrigido (thinking), e indisponibilidade de provedor repetida em momentos diferentes do dia — não é padrão suficiente pra afirmar "sempre sobrecarregado", só o observado até agora. B.7 segue não mensurável.
 
 Modelo: Claude Sonnet 5 · vetor: `reasoning_content` da resposta lido linha a linha antes de diagnosticar a causa, não assumido "modelo travou" sem ver o texto; parâmetro `thinking` confirmado em fetch real da documentação oficial antes de codificar, não suposto por analogia com outros provedores; diretório de destino inspecionado depois de cada tentativa falha pra confirmar ausência de arquivo espúrio. Turno desta sessão: t=9 (contado no contexto).
+
+(213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
+
+**Terceira invocação, mesmo pedido, âncora reatualizada na hora** (`git ls-remote origin main` → `0f6f622`, última entrada (212)). Chamada + a uma retentativa da regra 2.3 — **as duas, HTTP 429, código `1305`, mesma mensagem** ("service may be temporarily overloaded"). Nenhum arquivo novo no disco.
+
+**Padrão que já dá pra nomear, não mais só "azar":** das 4 chamadas HTTP reais feitas hoje contra o GLM-4.7-Flash (211: 2 tentativas · 212: 1 sucesso técnico + 1 reenvio com 2 tentativas · 213: 2 tentativas), **6 de 8 bateram em 429**. Não é afirmação de causa — pode ser o provedor mesmo, pode ser o horário — só o padrão observado, registrado sem inflar pra teoria.
+
+**Proposta ao Humano, não decisão:** pausar as tentativas por agora em vez de insistir em sequência — reduz a chance de a conta ser vista como abusiva pelo rate limit, e mais tentativas seguidas com o mesmo padrão não trazem informação nova. O pedido, já corrigido (thinking desligado, nota de formato), fica pronto pra quando o Humano decidir tentar de novo, em outro momento.
+
+Modelo: Claude Sonnet 5 · vetor: contagem de tentativas e vereditos desta sessão recontada a partir das três entradas reais (211, 212, 213), não estimada; diretório de destino conferido de novo, limpo. Turno desta sessão: t=10 (contado no contexto).

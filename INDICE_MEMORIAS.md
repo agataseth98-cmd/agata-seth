@@ -196,7 +196,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, ze …
 (181) DIÁRIO — 15/08/2026 · Passo 2 (segurança, S-1 a S-5): auditoria e proposta …
 (182) DIÁRIO — 15/08/2026 · Passo 3 (Conselho Remoto), levantamento de transport …
-(183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — bloqueio de permissão na instalação da biblioteca, não decisão de conteúdo; achado por leitura de documentação (não verificado ao vivo ainda): os dois portões parecem satisfazíveis
+(183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — …
 (184) DIÁRIO — 15/08/2026 · C3, portões confirmados AO VIVO (não só lidos) — os dois liberam a célula; 2 smoke tests rodados, achado real de bug de corpus corrigido no processo, bateria completa de 3×16 NÃO lançada — custo estimado de horas pra uma célula que a própria ordem já tratava como menor valor esperado, decisão de continuar ou fechar aqui é do Humano
 (185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
@@ -226,3 +226,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/MEMORY.md` — decisão do Humano: NÃO FAZER NADA, registrada com os fatos que sustentam, não como pendência esquecida
 (211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — âncora medida na hora, pedido enviado, GLM-4.7-Flash devolveu HTTP 429 (sobrecarga temporária) nas duas tentativas permitidas; nenhum parecer recebido, B.7 não mensurável nesta rodada
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem 429) mas gastou o orçamento inteiro tentando calcular hash de cabeça — achado real de bug, corrigido (thinking desligado); reenvio único com formato junto, ordenado por REGRAS, bateu em 429 de novo duas vezes — ainda sem parecer válido
+(213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
