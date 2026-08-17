@@ -21,6 +21,9 @@ aprovação.
   passado. Já levantado: ficou pública 45 dias, ninguém copiou o
   repositório até agora (0 forks). O vazamento novo já foi fechado; o
   que já saiu, continua fora.
+- Decidir se liga a checagem nova que pega citação errada. Testada, taxa
+  de erro medida (1 em 5), a única falha entendida e explicada — ainda
+  não está ligada.
 
 ## Rodando agora
 Nada rodando.
@@ -29,4 +32,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 08:45.
+17/08/2026, 09:00.

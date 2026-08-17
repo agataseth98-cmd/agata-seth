@@ -186,7 +186,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (170) DIÁRIO — 14/08/2026 · Última afinação: distinção ausência vs alcance (F1 v …
 (171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (acha …
 (172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b- …
-(173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de script (A2 travava >600s, 2/2 rodadas) — resultado surpreendente: B0 supera C1 nas duas faixas de alcance, mas comete a única fabricação confirmada da comparação inteira
+(173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de sc …
 (174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por estágio, nunca `shell=True`) desenhada e lançada — teste de confundidor antes de comprometer 2-4h em C3/C4
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com código desta vez — três achados no processo: colisão de nome que apagou trace do C1 (restaurado do git), e um bug real de parsing de pipe que penalizaria o modelo por sintaxe comum de grep, sem relação com a variável do experimento
 (176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
@@ -216,3 +216,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — data do COMMIT, não de escrita; lacuna aberta em (178) fechada por decisão do Humano
 (201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
 (202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
+(203) DIÁRIO — 17/08/2026 · P-7 (checagem de citação) implementado e testado, NÃO habilitado no hook — taxa de falso positivo medida contra o corpus real: 1 em 5 citações no formato `(n - síntese)`, achado explicado, não é defeito do canon
