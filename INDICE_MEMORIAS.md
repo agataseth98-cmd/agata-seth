@@ -185,7 +185,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para …
 (170) DIÁRIO — 14/08/2026 · Última afinação: distinção ausência vs alcance (F1 v …
 (171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (acha …
-(172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b-64k, 3 rodadas idênticas (temperature=0) — 9 acertos limpos, 2 parciais bem fundamentados, 5 sem resposta por um mesmo padrão reproduzível de rejeição de pipe, zero fabricações confirmadas
+(172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b- …
 (173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de script (A2 travava >600s, 2/2 rodadas) — resultado surpreendente: B0 supera C1 nas duas faixas de alcance, mas comete a única fabricação confirmada da comparação inteira
 (174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por estágio, nunca `shell=True`) desenhada e lançada — teste de confundidor antes de comprometer 2-4h em C3/C4
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com código desta vez — três achados no processo: colisão de nome que apagou trace do C1 (restaurado do git), e um bug real de parsing de pipe que penalizaria o modelo por sintaxe comum de grep, sem relação com a variável do experimento
@@ -215,3 +215,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md`/`memoria/MEMORY.md` (só leitura, sem proposta de ação) — 0 forks agora, rastreado publicamente 01/07 a 15/08/2026 (45 dias), conteúdo descrito em uma linha por arquivo
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — data do COMMIT, não de escrita; lacuna aberta em (178) fechada por decisão do Humano
 (201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
+(202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer

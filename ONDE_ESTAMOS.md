@@ -12,10 +12,11 @@ Um teste grande com IA terminou. Deu resultado, mas ninguém escolheu
 ainda o que fazer com ele.
 Testamos como o sistema avisa você quando algo quebra — e o teste
 mostrou que faltava justamente esta página.
+Os três avisos confusos que o teste achou já foram corrigidos, com sua
+aprovação.
 
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
-- Aprovar ou reescrever três avisos do sistema que ficaram confusos.
 - Decidir o que fazer com uma informação pessoal sua que vazou no
   passado. Já levantado: ficou pública 45 dias, ninguém copiou o
   repositório até agora (0 forks). O vazamento novo já foi fechado; o
@@ -28,4 +29,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 08:30.
+17/08/2026, 08:45.

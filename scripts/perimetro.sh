@@ -24,6 +24,11 @@
 #
 # Sourceável sem executar (BASH_SOURCE guard no fim) -- pra testar cada
 # função isolada, mesmo método usado em varredura_segredo.sh.
+#
+# Todo alarme (SUSPEITO/PARCIAL/AVISO) diz três coisas, nesta ordem:
+# o que aconteceu, por que importa, o que fazer. Ordem do Humano,
+# MEMÓRIAS (202) -- a prova de legibilidade de (196)/(197) achou alarmes
+# que só diziam as duas primeiras.
 set -uo pipefail
 
 _PERIMETRO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -83,6 +88,9 @@ p4_bind() {
   # oculta era hermes/ollama sem o privilégio pra ver.
   if [ "$(id -u)" -ne 0 ]; then
     PERIMETRO_ESTADO="PARCIAL"
+    # MEMÓRIAS (202): PARCIAL sozinho não dizia por quê nem o que fazer --
+    # os outros vereditos explicam antes do veredito, este não explicava.
+    echo "PARCIAL: rodando sem privilégio de administrador, não enxergo todos os processos -- não é falha, é o controle enxergando menos do que deveria. Para ver completo: rode de novo com sudo."
   fi
   local ruim=0
   local linha
@@ -140,12 +148,12 @@ with open(sys.argv[1], 'rb') as f:
 with open(sys.argv[2], 'rb') as f:
     novo = f.read()
 if len(novo) < len(antigo):
-    print(f"SUSPEITO (P-5): MEMÓRIAS.md ENCOLHEU -- {len(antigo)} bytes no commit anterior, {len(novo)} agora.")
+    print(f"SUSPEITO (P-5, nunca se apaga história): MEMÓRIAS.md ENCOLHEU -- {len(antigo)} bytes no commit anterior, {len(novo)} agora. Alguma linha foi removida. Restaure o arquivo antes de comitar.")
     sys.exit(1)
 if novo[:len(antigo)] != antigo:
     for i, (a, b) in enumerate(zip(antigo, novo)):
         if a != b:
-            print(f"SUSPEITO (P-5): byte mudou no offset {i} -- MEMÓRIAS.md não é mais append-only.")
+            print(f"SUSPEITO (P-5, nunca se apaga história): byte mudou no offset {i} -- MEMÓRIAS.md não é mais append-only. Um trecho antigo foi alterado. Restaure o arquivo antes de comitar.")
             print(f"  antigo: ...{antigo[max(0,i-40):i+40]!r}...")
             print(f"  novo:   ...{novo[max(0,i-40):i+40]!r}...")
             break

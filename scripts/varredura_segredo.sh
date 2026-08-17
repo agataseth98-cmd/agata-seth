@@ -47,18 +47,22 @@ checar_segredo() {
     echo "$env_staged" | sed 's/^/  /'
   fi
 
-  local diff
-  diff="$(git diff --cached -U0)"
-
-  local p linhas
-  for p in "${PADROES_SEGREDO[@]}"; do
-    linhas="$(echo "$diff" | grep -nE '^\+' | grep -vE '^\+\+\+' | grep -E -- "$p")"
-    if [ -n "$linhas" ]; then
-      achou=1
-      echo "SUSPEITO (padrão: $p):"
-      echo "$linhas" | sed 's/^/  /'
-    fi
-  done
+  # Por arquivo, não pelo diff inteiro concatenado -- MEMÓRIAS (202): com
+  # mais de um arquivo staged, o alarme antigo não dizia qual deles tinha
+  # o achado (achado na prova de legibilidade, MEMÓRIAS (196)/(197)).
+  local arquivo diff_arquivo p linhas
+  while IFS= read -r arquivo; do
+    [ -z "$arquivo" ] && continue
+    diff_arquivo="$(git diff --cached -U0 -- "$arquivo")"
+    for p in "${PADROES_SEGREDO[@]}"; do
+      linhas="$(echo "$diff_arquivo" | grep -nE '^\+' | grep -vE '^\+\+\+' | grep -E -- "$p")"
+      if [ -n "$linhas" ]; then
+        achou=1
+        echo "SUSPEITO (padrão: $p) em $arquivo:"
+        echo "$linhas" | sed 's/^/  /'
+      fi
+    done
+  done < <(git diff --cached --name-only)
 
   return "$achou"
 }

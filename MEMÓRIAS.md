@@ -3220,3 +3220,19 @@ Modelo: Claude Sonnet 5 · vetor: REGRAS.md lido inteiro antes de editar, pra co
 **Explicitamente NÃO decidido aqui:** o formato de "pedido de decisão" (a estrutura desta própria conversa — itens numerados, marcador de aguardando, ordem de execução) não é canonizado. Roda informalmente mais algumas vezes; canoniza-se a versão que sobreviver ao uso, não a que foi inventada agora.
 
 Modelo: Claude Sonnet 5 · vetor: PROJETO.md lido inteiro antes de escolher onde inserir (não REGRAS, por instrução direta); conferido que (194)/(196) descrevem de fato uma escolha por desproporção antes de citá-las como precedente, não citação decorativa. Turno desta sessão: t=2 (contado no contexto).
+
+(202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
+
+**As três, aprovadas, testadas positivo/negativo em repositório descartável antes de tocar no real, depois checadas ao vivo contra o repositório de verdade (só leitura, nenhum controle desligado pra testar):**
+
+1. **Alarme de segredo (P-1) passa a nomear o arquivo.** Antes processava o diff staged inteiro concatenado; agora itera arquivo por arquivo (`git diff --cached --name-only`), então cada `SUSPEITO (padrão: ...)` carrega `em <arquivo>`. Teste positivo (dois arquivos staged, só um com chave falsa): nomeou o arquivo certo, não confundiu com o limpo. Teste negativo (nenhum segredo staged): silencioso, exit 0.
+
+2. **PARCIAL do P-4 ganha explicação e ação, acréscimo do Humano.** Antes só imprimia a palavra `PARCIAL`. Agora, sempre que roda sem root: `PARCIAL: rodando sem privilégio de administrador, não enxergo todos os processos -- não é falha, é o controle enxergando menos do que deveria. Para ver completo: rode de novo com sudo.` Testado isolado (positivo, sem root) e ao vivo contra o repositório real — apareceu antes de `veredito: PARCIAL`, na ordem certa.
+
+3. **SUSPEITO do P-5 repete o motivo e ganha ação, acréscimo do Humano.** As duas variantes (arquivo encolheu, byte mudou) agora dizem `(P-5, nunca se apaga história)` na própria linha, e terminam com o que fazer — `Alguma linha foi removida. Restaure o arquivo antes de comitar.` (encolheu) ou `Um trecho antigo foi alterado. Restaure o arquivo antes de comitar.` (byte mudou, texto de ação não estava no pedido original, estendido aqui pra cobrir a segunda variante do mesmo controle, mesma lógica). Testado isolado, as duas variantes, mais o caso negativo (append real, só acrescenta) — silencioso, exit 0.
+
+**Princípio do Humano, registrado como comentário no topo de `perimetro.sh`, junto às outras convenções de desenho do arquivo (SKIP/PARCIAL, sem correção automática):** todo alarme diz três coisas, nesta ordem — o que aconteceu, por que importa, o que fazer. As três propostas originais de (196) consertavam as duas primeiras; nenhuma trazia a terceira — é essa lacuna que o acréscimo do Humano fecha nas três, e que o comentário deixa como regra pra qualquer alarme futuro no mesmo arquivo.
+
+**Fecha um dos três itens que `ONDE_ESTAMOS.md` (197) registrou como esperando o Humano.** Atualizado no mesmo commit.
+
+Modelo: Claude Sonnet 5 · vetor: mensagem literal de cada alarme lida no código-fonte antes de propor qualquer redação (não hipotetizada); as três mudanças testadas positivo e negativo num repositório git descartável (`/tmp`, git próprio, apagado ao fim), nunca no repositório real; depois disso, `perimetro.sh` rodado contra o repositório de verdade em modo só-leitura (nenhum `git add`/commit alterando estado antes da checagem) pra confirmar que P-4 mostra a explicação nova sem quebrar nada — resultado 5 OK/1 PARCIAL/0 FALHA, igual ao estado conhecido antes da mudança. Turno desta sessão: t=2 (contado no contexto).
