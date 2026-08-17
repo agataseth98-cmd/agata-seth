@@ -3277,3 +3277,15 @@ Modelo: Claude Sonnet 5 · vetor: cada match do regex conferido contra o texto-f
 **O "verde uma vez" exigido antes de ligar é esta própria entrada:** ela mesma carrega citação real de (162) e (203), com síntese, fora de crase — o par que P-7 tem de validar contra o conteúdo de verdade de cada entrada, não contra texto sintético — mais os exemplos de formato entre crases (`(194 - ...; 196 - ...)`) que P-7 tem de pular. Comitar esta entrada com P-7 já ativo, e passar limpo nas duas coisas ao mesmo tempo, é o teste verde exigido antes de ligar.
 
 Modelo: Claude Sonnet 5 · vetor: (162) relido linha a linha antes de afirmar se tem ou não crase — não assumido pela lembrança da entrada (203); os dois testes (crase protege/crase não é escudo universal, multi-citação com número inexistente) rodados isolados antes de tocar em `perimetro.sh`; `perimetro.sh` rodado contra o repositório real sem nada staged pra confirmar que P-7 não quebra com `MEMÓRIAS.md` vazio de diff (retorna OK, `total_citacoes=0`); contagem de 11 citações exercitadas recontada a partir dos dois arquivos de teste reais, não estimada. Turno desta sessão: t=2 (contado no contexto).
+
+(205) DIÁRIO — 17/08/2026 · Decisão do Humano sobre `.env` registrada — NÃO entra no backup do HD externo, risco assumido por escrito; item aberto desde (160) fecha
+
+**Decisão do Humano, registrada literal:** "O `.env` NÃO entra no backup do HD externo [...] o HD é exFAT e não carrega permissão de arquivo — qualquer segredo copiado para lá fica legível por quem plugar o disco. E o backup existe para o que não se reconstrói: chave se refaz em minutos, história não." Consequência, também nas palavras do Humano: "Se a máquina morrer, as chaves se refazem — isso é decisão consciente, não esquecimento."
+
+**Fecha o item aberto desde (160 - gap de backup de memoria/missoes fechado, deixou em aberto "cifra e inclusão do .env no backup" como decisão separada).** Chaves vivem só em `~/.hermes/.env`, protegidas pelo `.gitignore` e pela varredura P-1 (checagem de segredo). Nenhuma cópia — cifrada ou não — entra no fluxo automático de backup.
+
+**O que isso deixa parado, sem apagar:** `scripts/cifrar_env.sh` — mecanismo manual, já testado (S-3), que cifra `.env` com GPG simétrico AES256 e copia o `.gpg` pro HD externo se montado — segue existindo no repositório, mas **não é mais o caminho recomendado**. A decisão de hoje é não fazer cópia nenhuma, cifrada ou não, não trocar cifra por confiança em permissão de arquivo de disco exFAT. O script fica como ferramenta disponível, não como parte do fluxo padrão.
+
+**PROJETO.md atualizado no mesmo commit:** "Riscos conhecidos", item sobre cópia da história fora da máquina — "Em aberto: cifra e inclusão do `.env`" vira fato fechado, com o motivo.
+
+Modelo: Claude Sonnet 5 · vetor: texto de (160) relido antes de declarar o que ficava em aberto, não citado de memória; `scripts/cifrar_env.sh` relido antes de descrever o que ele faz (cifra AES256 + copia condicional ao HD montado), pra não confundir com cópia crua. Turno desta sessão: t=3 (contado no contexto).
