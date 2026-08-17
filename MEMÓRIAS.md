@@ -3203,3 +3203,20 @@ Modelo: Claude Sonnet 5 · vetor: `gh api repos/.../forks_count` cruzado com `gh
 **Aplicado:** REGRAS.md, "Carregar e formatos", uma linha nova logo após o bloco de formato de cabeçalho — título de entrada de MEMÓRIAS usa a data do commit que a introduz no canon (`git log`), nunca a data de início da escrita. **Vale a partir da próxima entrada em diante** — a numeração desta mesma sessão, (198)/(199), já foi escrita hoje e comitada hoje, então não diverge; (200) é a primeira formalmente sob a regra escrita. **Título de entrada antiga não se reescreve** — (177) permanece como está, Regra 4 proíbe editar.
 
 Modelo: Claude Sonnet 5 · vetor: REGRAS.md lido inteiro antes de editar, pra confirmar onde a lacuna vivia (nenhuma linha cobria título de entrada, só cabeçalho de resposta — (162) resolveu um problema adjacente, não este); edição direta de "Carregar e formatos"; verificação pós-push de hash de REGRAS.md, ver rodapé desta resposta. Turno desta sessão: t=2 (contado no contexto).
+
+(201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
+
+**Decisão do Humano:** adotar a doutrina, cinco frases, em PROJETO.md — não em REGRAS.md, por ser critério de julgamento situacional (Regra 3: Humano decide), não regra universal de identidade/registro/hidratação como as sete regras existentes.
+
+**Texto adotado, literal, PROJETO.md, nova seção "Doutrina de defesa proporcional":**
+- Incidente é o que passa ao lado de um controle que o sistema declarou. O resto é risco de fundo: registra e segue.
+- Defesa só entra se for mecânica e no limite. Vigilância humana permanente decai; mecanismo instalado não.
+- Risco residual declarado é mais seguro que estado "seguro" não declarado.
+- Fecha a classe, não o caso.
+- Nenhuma checagem entra em hook antes de passar verde uma vez.
+
+**Precedente concreto que já seguia esta doutrina antes dela existir por escrito:** a escolha da opção D sobre a A no mecanismo root de sudoers (194 - Parte A: P-2 lê status root em vez de tentar sudo -n -l; 196 - Fase 1 instalada e confirmada real) — recusou timer systemd permanente por desproporção, preferiu mecanismo orientado a evento. A doutrina nomeia agora o critério que já orientou aquela escolha.
+
+**Explicitamente NÃO decidido aqui:** o formato de "pedido de decisão" (a estrutura desta própria conversa — itens numerados, marcador de aguardando, ordem de execução) não é canonizado. Roda informalmente mais algumas vezes; canoniza-se a versão que sobreviver ao uso, não a que foi inventada agora.
+
+Modelo: Claude Sonnet 5 · vetor: PROJETO.md lido inteiro antes de escolher onde inserir (não REGRAS, por instrução direta); conferido que (194)/(196) descrevem de fato uma escolha por desproporção antes de citá-las como precedente, não citação decorativa. Turno desta sessão: t=2 (contado no contexto).

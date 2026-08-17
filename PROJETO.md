@@ -68,6 +68,16 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
 
 **Cobertura que o hook não tem, coberta por runbook, não por maquinário:** edição manual via `visudo` não dispara pacman. **Depois de qualquer `visudo`, rodar `sudo /usr/local/lib/agata/checar-sudoers-root.sh`** pra atualizar o status manualmente. Material de origem dos dois artefatos (script + hook), versionado: `scripts/checar-sudoers-root.sh`, `scripts/agata-sudoers.hook`. MEMÓRIAS (194).
 
+## Doutrina de defesa proporcional
+Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra decidir se e como reagir a um achado de segurança/robustez — não regra universal de REGRAS.md, é ferramenta de decisão situacional do Humano (Regra 3).
+- Incidente é o que passa ao lado de um controle que o sistema declarou. O resto é risco de fundo: registra e segue.
+- Defesa só entra se for mecânica e no limite. Vigilância humana permanente decai; mecanismo instalado não.
+- Risco residual declarado é mais seguro que estado "seguro" não declarado.
+- Fecha a classe, não o caso.
+- Nenhuma checagem entra em hook antes de passar verde uma vez.
+
+**Formato de "pedido de decisão" (itens numerados, marcador de aguardando, ordem de execução) não é canonizado.** Roda informalmente mais algumas vezes; canoniza-se a versão que sobreviver ao uso.
+
 ## Estado dos bugs e dos testes
 - **Gemini 429 ("perdi a conexão"):** corrigido. Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação: MEMÓRIAS (38)-(40).
   **Risco residual, não bug ativo:** o patch vive no `hermes-agent` vendored, fora do repo canônico, sem backup. Um `hermes update` pode descartá-lo em silêncio. **Reverificar após qualquer atualização do Hermes.**

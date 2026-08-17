@@ -184,7 +184,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (168) DIÁRIO — 14/08/2026 · Correção de causa de (167): a divergência 155/160 vs …
 (169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para …
 (170) DIÁRIO — 14/08/2026 · Última afinação: distinção ausência vs alcance (F1 v …
-(171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (achado real de agrupamento em (143)/(145)/(147) confirmado), pré-registro ganha framing de fora_do_payload e critério de pontuação da F2 — bancada congela ao primeiro run de C-2
+(171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (acha …
 (172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b-64k, 3 rodadas idênticas (temperature=0) — 9 acertos limpos, 2 parciais bem fundamentados, 5 sem resposta por um mesmo padrão reproduzível de rejeição de pipe, zero fabricações confirmadas
 (173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de script (A2 travava >600s, 2/2 rodadas) — resultado surpreendente: B0 supera C1 nas duas faixas de alcance, mas comete a única fabricação confirmada da comparação inteira
 (174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por estágio, nunca `shell=True`) desenhada e lançada — teste de confundidor antes de comprometer 2-4h em C3/C4
@@ -214,3 +214,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo Humano: absorve correção de forma/complexidade, não absorve correção de fato nem de formato do pedido — quatro respostas seguidas em produção, 16/08/2026
 (199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md`/`memoria/MEMORY.md` (só leitura, sem proposta de ação) — 0 forks agora, rastreado publicamente 01/07 a 15/08/2026 (45 dias), conteúdo descrito em uma linha por arquivo
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — data do COMMIT, não de escrita; lacuna aberta em (178) fechada por decisão do Humano
+(201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
