@@ -17,8 +17,9 @@ mostrou que faltava justamente esta página.
 - Escolher o que fazer com o resultado do teste grande de IA.
 - Aprovar ou reescrever três avisos do sistema que ficaram confusos.
 - Decidir o que fazer com uma informação pessoal sua que vazou no
-  passado (o vazamento novo já foi fechado; o que já saiu, continua
-  fora).
+  passado. Já levantado: ficou pública 45 dias, ninguém copiou o
+  repositório até agora (0 forks). O vazamento novo já foi fechado; o
+  que já saiu, continua fora.
 
 ## Rodando agora
 Nada rodando.
@@ -27,4 +28,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-16/08/2026, 12:11.
+17/08/2026, 08:30.

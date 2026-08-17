@@ -182,7 +182,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (166) DIÁRIO — 14/08/2026 · C-4.1: GGUF do Caminho 3 baixado e verificado — sha2 …
 (167) DIÁRIO — 14/08/2026 · C-1: bancada de 16 perguntas escrita, verificada con …
 (168) DIÁRIO — 14/08/2026 · Correção de causa de (167): a divergência 155/160 vs …
-(169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para MEDIDO (scripts/medir_alcance.py), 5 divergências reais achadas e corrigidas, retargeting em 5 perguntas, pré-registro de leitura escrito antes da primeira rodada
+(169) DIÁRIO — 14/08/2026 · Afinação da bancada: alcance passa de declarado para …
 (170) DIÁRIO — 14/08/2026 · Última afinação: distinção ausência vs alcance (F1 vira n/a, não fora_do_payload), correção da causa da F4 registrada em (169), correção da F3 aceita, dois achados novos (N2/N4) durante o próprio conserto
 (171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (achado real de agrupamento em (143)/(145)/(147) confirmado), pré-registro ganha framing de fora_do_payload e critério de pontuação da F2 — bancada congela ao primeiro run de C-2
 (172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b-64k, 3 rodadas idênticas (temperature=0) — 9 acertos limpos, 2 parciais bem fundamentados, 5 sem resposta por um mesmo padrão reproduzível de rejeição de pipe, zero fabricações confirmadas
@@ -212,3 +212,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (196) DIÁRIO — 16/08/2026 · Fase 1 instalada pelo Humano (mecanismo root do P-2 ativo, `--` removido); Fase 2 (prova de legibilidade dos controles, Humano como instrumento) rodada — 6 de 8 itens dispararam de verdade, mas o achado não é por controle: o Humano não conseguiu dar veredito item por item depois de ler os seis blocos em sequência, achado maior que qualquer redação individual
 (197) DIÁRIO — 16/08/2026 · `ONDE_ESTAMOS.md` criado, aprovado pelo Humano na primeira versão ("Perfeito", sem pergunta) e oficializado no canon — nome adotado: "Onde Estamos"; Regra 4 (REGRAS) e "Memória e hidratação" (PROJETO) passam a exigir que ele seja atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado
 (198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo Humano: absorve correção de forma/complexidade, não absorve correção de fato nem de formato do pedido — quatro respostas seguidas em produção, 16/08/2026
+(199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md`/`memoria/MEMORY.md` (só leitura, sem proposta de ação) — 0 forks agora, rastreado publicamente 01/07 a 15/08/2026 (45 dias), conteúdo descrito em uma linha por arquivo

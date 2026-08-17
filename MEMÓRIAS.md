@@ -3179,3 +3179,19 @@ Modelo: Claude Sonnet 5 · vetor: `gerar-hermes-md.sh` lido de novo antes de esc
 **Leitura proposta pelo Humano, não veredito:** correção de FORMA é absorvida; correção de FATO e de FORMATO DO PEDIDO, não. Consequência prática para delegação: pedir simplificação funciona; corrigir uma crença dela, não. Parente do achado B.3(a) da expedição (195 - análise pós-expedição RLM) — achar a prova e não concluir; aqui é receber a resposta e não usar.
 
 Modelo: Claude Sonnet 5 · vetor: busca em `~/agata` (repositório e `memoria/missoes/`) e em `/home/orusoua/Área de trabalho/` por transcrição da sessão citada, nenhuma achada — achado registrado como relato do Humano, não como verificação própria; nenhum comando testado de novo nem repetido. Turno desta sessão: t=2 (contado no contexto).
+
+(199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md`/`memoria/MEMORY.md` (só leitura, sem proposta de ação) — 0 forks agora, rastreado publicamente 01/07 a 15/08/2026 (45 dias), conteúdo descrito em uma linha por arquivo
+
+**Ordem do Humano: levantar e reportar, sem propor ação — ele decide.**
+
+**Forks, via API do GitHub, agora:** `gh api repos/agataseth98-cmd/agata-seth` → `forks_count: 0`, `network_count: 0`, lista de forks vazia (os dois números batem). Repositório público desde a criação (`created_at: 2026-04-20T13:41:37Z`).
+
+**Janela de rastreamento público, via `git log --follow` cruzado com `git show --stat`:** `memoria/USER.md` e `memoria/MEMORY.md` entraram no rastreamento no commit `dcdbc9c` ("Fase 3 (parte 1): memória nativa do Hermes via symlink + .hermes.md auto-gerado"), 2026-07-01 20:32:39 -03. Saíram no commit `ec99a0b` (189 - Passo 2 do saneamento: memória nativa do Hermes sai do rastreamento público), 2026-08-15 19:02:19 -03 — diff do próprio commit confirma remoção real, não edição: `memoria/MEMORY.md | 19 -`, `memoria/USER.md | 9 -`, `.gitignore | 4 +`. **45 dias públicos.** Hoje, `git ls-files` confirma os dois fora do rastreamento atual.
+
+**Conteúdo, uma linha cada, sem colar o texto — dado pessoal do Humano, ele já sabe o que é:**
+- `memoria/USER.md` (9 linhas na última versão rastreada): preferências pessoais triviais, interesses técnicos ligados a modelos de IA, e uma nota de configuração sobre o formato de cabeçalho do Seth.
+- `memoria/MEMORY.md` (19 linhas na última versão rastreada): trocas de boas-vindas entre GLM-5 e a identidade Ágata sobre a criação do sistema, mais anotações técnicas de verificação (achado real vs. alegação sobre "RETOMADA"/"ESTADO") e uma nota de avaliação de modelo.
+
+**Sem proposta de ação, como pedido.** Fato registrado; 0 forks é foto de agora, não garantia permanente (mesma ressalva já em PROJETO.md, "Riscos conhecidos"). PROJETO.md e `ONDE_ESTAMOS.md` atualizados no mesmo commit com estes números.
+
+Modelo: Claude Sonnet 5 · vetor: `gh api repos/.../forks_count` cruzado com `gh api .../forks` (lista vazia, bate com o contador); `git log --all --oneline --follow` para os dois caminhos, cruzado contra `git show --stat` do commit de saída pra confirmar remoção real; `git ls-files` hoje confirma ausência atual; conteúdo lido do commit pai de `ec99a0b` só pra escrever a descrição de uma linha, nunca colado nem persistido fora do disco local. Turno desta sessão: t=2 (contado no contexto).
