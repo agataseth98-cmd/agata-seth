@@ -14,6 +14,9 @@ Testamos como o sistema avisa você quando algo quebra — e o teste
 mostrou que faltava justamente esta página.
 Os três avisos confusos que o teste achou já foram corrigidos, com sua
 aprovação. A checagem nova que pega citação errada já está ligada.
+As chaves não vão mais para o backup do HD externo, por decisão sua.
+O robô que leva um pedido de parecer a outro modelo de IA está pronto e
+testado — só falta você criar a conta e trazer a chave.
 
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -21,6 +24,9 @@ aprovação. A checagem nova que pega citação errada já está ligada.
   passado. Já levantado: ficou pública 45 dias, ninguém copiou o
   repositório até agora (0 forks). O vazamento novo já foi fechado; o
   que já saiu, continua fora.
+- Criar a conta na Zhipu (GLM) e trazer a chave da API, pra ligar o
+  primeiro modelo remoto. Isto só você pode fazer — exige cadastro,
+  e-mail, talvez verificação.
 
 ## Rodando agora
 Nada rodando.
@@ -29,4 +35,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 09:15.
+17/08/2026, 09:30.

@@ -189,8 +189,8 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de sc …
 (174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por …
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com códig …
-(176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
-(177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), mas o placar não melhora limpo: A3/V1 consertados, A2/V4/F4 continuam falhando (propriedade da pergunta, não da ferramenta), e duas perguntas que o C1 acertava limpo (F1, F2) passam a falhar — achado novo, não previsto, sobre hesitação induzida por mais opção de ferramenta
+(176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram a …
+(177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), …
 (178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, com opções propostas — lacuna de convenção, (162) resolveu hora+selo do cabeçalho mas não alcançou o título das entradas
 (179) DIÁRIO — 15/08/2026 · C4 pré-registrado e lançado — runner do C1b × `rlm-qwen3-8b-teste`, modelo é a única variável desta célula; achado real no smoke test, antes mesmo da bateria: o modelo respondeu sem tentar nenhum comando
 (180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, zero variação entre rodadas) — modelo é a variável que mais piorou o placar: 2 acertos limpos, 1 parcial bem fundamentado, resto errado ou sem resposta; confirma o achado do smoke test em escala — quando o modelo pula ferramenta (7 das 16 perguntas, todas as 3 rodadas), erra quase sempre
@@ -219,3 +219,5 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (203) DIÁRIO — 17/08/2026 · P-7 (checagem de citação) implementado e testado, NÃO habilitado no hook — taxa de falso positivo medida contra o corpus real: 1 em 5 citações no formato `(n - síntese)`, achado explicado, não é defeito do canon
 (204) DIÁRIO — 17/08/2026 · P-7 HABILITADO no pre-commit — crase vira exemplo protegido, segundo número no mesmo parêntese passa a ser validado, taxa de (203) recontextualizada como amostra pequena; esta própria entrada é o "verde uma vez" exigido antes de ligar
 (205) DIÁRIO — 17/08/2026 · Decisão do Humano sobre `.env` registrada — NÃO entra no backup do HD externo, risco assumido por escrito; item aberto desde (160) fecha
+(206) DIÁRIO — 17/08/2026 · GLM-4.7-Flash (Zhipu) APROVADO pelo Humano para a Fase 1 do Conselho Remoto — duas condições registradas, B.7 completo, termos de treino da Zhipu NÃO confirmados em fonte primária
+(207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e testado ponta a ponta com resposta simulada — bloqueado na chave real, que este executor não pode obter sozinho

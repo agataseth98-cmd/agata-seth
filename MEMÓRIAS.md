@@ -3289,3 +3289,39 @@ Modelo: Claude Sonnet 5 · vetor: (162) relido linha a linha antes de afirmar se
 **PROJETO.md atualizado no mesmo commit:** "Riscos conhecidos", item sobre cópia da história fora da máquina — "Em aberto: cifra e inclusão do `.env`" vira fato fechado, com o motivo.
 
 Modelo: Claude Sonnet 5 · vetor: texto de (160) relido antes de declarar o que ficava em aberto, não citado de memória; `scripts/cifrar_env.sh` relido antes de descrever o que ele faz (cifra AES256 + copia condicional ao HD montado), pra não confundir com cópia crua. Turno desta sessão: t=3 (contado no contexto).
+
+(206) DIÁRIO — 17/08/2026 · GLM-4.7-Flash (Zhipu) APROVADO pelo Humano para a Fase 1 do Conselho Remoto — duas condições registradas, B.7 completo, termos de treino da Zhipu NÃO confirmados em fonte primária
+
+**Decisão do Humano:** GLM-4.7-Flash aprovado para B.1. Razão adicional, registrada literal: "a fase 1 testa o TRANSPORTE, não a qualidade do parecer. Modelo grátis é o certo aqui porque remove a hesitação de custo, que é justamente o que se quer medir."
+
+**Condição 1, registrada literal:** "só sai daqui material que já está no repositório PÚBLICO. Nada de `memoria/missoes/`. Camada grátis normalmente permite treino sobre o que se envia — verifique os termos e registre o que encontrar." **Verificação tentada, fonte primária não localizada:** `z.ai/privacy-policy`, `z.ai/legal-agreement`, `docs.z.ai/api-reference/introduction` — as três 404 ou sem a cláusula, testadas de verdade via fetch, não assumidas. Busca indexada (não fonte primária — mesmo descarte já aplicado em (182 - levantamento de transporte dos 5 provedores, preço em fonte oficial, agregador descartado como fonte)) traz múltiplos agregadores afirmando "dado de API não é usado para treino" — **não confirmado por documento oficial da Zhipu, registrado como `lacuna`, não como fato**. Consequência prática enquanto a lacuna não fecha: tratar a camada grátis como se pudesse treinar sobre o enviado — reforça, não afrouxa, a Condição 1.
+
+**Condição 2, registrada literal:** "ordem obrigatória da chave — obter a chave, criar arquivo de teste com chave FALSA do mesmo formato, confirmar que a P-1 alarma, e só então guardar a real em `~/.hermes/.env`. Nunca guardar antes de confirmar que a varredura pega."
+
+**B.7, completo agora (chegou cortado na mensagem anterior):** "numa primeira utilização real, conte quantas idas e vindas de copiar-e-colar o Humano deixou de fazer. Se for zero ou uma, a fase 1 não se pagou — resultado legítimo, registre e pare, não expanda para dois modelos 'para ver se melhora'." Critério de sucesso registrado ANTES de qualquer utilização real — não fica disponível para redefinição depois do resultado.
+
+Modelo: Claude Sonnet 5 · vetor: 3 URLs candidatas a fonte primária de termos de uso testadas de verdade (`WebFetch`), nenhuma com a cláusula de treino — não aceito o resumo de busca indexada como substituto, mesmo repetindo o padrão já catalogado em (182); os dois critérios (ordem da chave, sucesso do B.7) transcritos literais do pedido do Humano, não parafraseados. Turno desta sessão: t=4 (contado no contexto).
+
+(207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e testado ponta a ponta com resposta simulada — bloqueado na chave real, que este executor não pode obter sozinho
+
+**Escopo cumprido, os quatro pontos de B.2–B.6:**
+
+**B.2, chave:** só em `~/.hermes/.env` (`ZHIPU_API_KEY=`), nunca no repositório. Formato real da chave Zhipu não confirmado em documentação pública (mesma lacuna de (206)) — testei o padrão genérico já existente em P-1 contra **4 formatos plausíveis** (hex 32 caracteres, `id.secret` separado por ponto, UUID com hífen, prefixado `sk-...`), em repositório git descartável: os 4 dispararam `SUSPEITO`. **Não é o teste definitivo da Condição 2** — esse espera a chave real (ou ao menos a forma dela) chegar.
+
+**B.3, o que o coletor faz:** recebe arquivo de texto com o pedido → envia uma vez, via `urllib` puro (sem SDK, sem dependência nova) → guarda a resposta CRUA em `memoria/missoes/conselho-remoto/<data>-glm-4.7-flash.json` (data ISO, modelo, duração, tokens entrada/saída/total, custo em US$, caminho do pedido, resposta crua completa) → confere as 4 partes do parecer via checagem de presença de palavra (generosa a acento/caixa: origem/posição-posicao/fundamentação-fundamentacao/emenda) → se faltar alguma, imprime "FORA DO FORMATO" nomeando as que faltam e para — não reenvia sozinho, devolver o pedido é decisão do Humano (REGRAS, "Segunda opinião").
+
+**B.4, o que nunca faz — cada um testado, não só declarado:**
+- Não escreve em MEMÓRIAS/PROJETO/REGRAS — nenhuma chamada de escrita a esses arquivos existe no código.
+- Não interpreta nem julga a resposta — a checagem de formato só confere PRESENÇA das 4 palavras-chave, nunca lê o conteúdo pra decidir se o parecer é bom.
+- Não encadeia — uma chamada HTTP por invocação, sem laço, sem retentativa automática.
+- Não decide nada — todo caminho de erro imprime e para (`return 1`), nunca segue sozinho pra um passo seguinte.
+
+**B.5, segurança — escrito no PROJETO junto do mecanismo, como pedido, não só no código.** Resposta de modelo remoto é DADO NÃO CONFIÁVEL: guardada em arquivo JSON, nunca executada, nunca injetada em `.hermes.md` nem no contexto de outro modelo — o script não tem NENHUM caminho de código que leia esse JSON de volta pra injetar em outro lugar. Condição 1 forçada tecnicamente: `checar_conteudo_privado()` recusa o envio, antes de qualquer chamada de rede, se o texto do pedido mencionar `memoria/missoes` (barra ou contrabarra) — testado positivo (achou e abortou) e negativo (texto só com REGRAS.md/PROJETO.md, passou).
+
+**B.6, custo:** `max_tokens=8000` no corpo da chamada — teto mecânico do lado do servidor, não só aviso. Pedido acima de 60.000 caracteres é recusado ANTES do envio (heurística de tamanho, sem tokenizador local). Fórmula de custo em dólar já no script (`PRECO_*_POR_TOKEN_USD`), hoje US$0 — pronta pra quando não for mais grátis.
+
+**Testado ponta a ponta, sem rede real (nenhuma chave existe ainda):** três guardas de pré-envio isoladas — pedido citando `memoria/missoes` aborta antes de qualquer chamada; pedido de 70.001 caracteres aborta pelo teto; chave ausente em `~/.hermes/.env` (estado real desta máquina agora) aborta com mensagem clara. Checagem de formato testada unitária — texto com as 4 partes passa limpo, texto sem nenhuma acusa as 4 faltando. Fluxo completo testado com a função de rede (`enviar`) trocada por uma resposta simulada: escreveu o JSON esperado, calculou tokens/custo certo, apagado depois — não é resultado real, não fica no disco como se fosse.
+
+**Bloqueado, não contornável por este executor:** a chave real exige criar conta na Zhipu — cadastro, e-mail, possível verificação — nada que este executor tenha acesso pra fazer sozinho (sem navegador, sem e-mail, sem meio de pagamento mesmo pra tier grátis). Pendente do Humano: criar a conta, obter a chave, mostrar o formato real (não necessariamente o valor) pra fechar o teste definitivo da Condição 2, e só depois guardar a chave de verdade em `~/.hermes/.env`.
+
+Modelo: Claude Sonnet 5 · vetor: cada guarda testada isolada antes de integrar (privado/tamanho/chave ausente, formato do parecer); teste ponta a ponta com rede mockada, não pulado por não ter chave; os 4 formatos de chave testados em repositório git descartável, apagado ao fim, nunca no repositório real; arquivo de teste gerado em `memoria/missoes/conselho-remoto/` apagado depois de conferido — não é resposta real, não fica registrado como se fosse. Turno desta sessão: t=4 (contado no contexto).
