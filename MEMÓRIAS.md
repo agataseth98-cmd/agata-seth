@@ -3342,3 +3342,15 @@ Modelo: Claude Sonnet 5 · vetor: cada guarda testada isolada antes de integrar 
 **Fase 1 pronta para a primeira invocação real** — script testado, chave no lugar. Falta só o Humano escrever o primeiro texto de pedido e rodar `python3 scripts/conselho_remoto.py <arquivo>`. O critério de sucesso (B.7, MEMÓRIAS (206)) já está registrado antes desse primeiro uso acontecer.
 
 Modelo: Claude Sonnet 5 · vetor: chave FALSA gerada com a forma exata confirmada agora (não reaproveitando os 4 testes plausíveis de (207) sem reconferir), testada isolada, repositório apagado depois; permissão e conteúdo do `.env` real conferidos por tamanho e posição do ponto, nunca por impressão do valor; carregamento pelo script confirmado do mesmo jeito, sem expor o segredo em nenhuma saída de comando desta sessão. Turno desta sessão: t=5 (contado no contexto).
+
+(209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto no arquivo — risco residual de (208) fechado, sem passar pela conversa desta vez
+
+**O que aconteceu:** o Humano rotacionou a chave no painel da Zhipu e editou `~/.hermes/.env` diretamente, sem colar o novo valor aqui — a opção mais segura entre as duas que ofereci, e a que ele escolheu.
+
+**Fecha o risco residual declarado em (208 - chave real recebida e guardada, exposição em texto puro pela conversa registrada como risco não escondido).** A chave antiga — a que passou pela conversa — está invalidada pela troca, virou lixo, não segredo válido. A nova nunca passou por aqui.
+
+**Verificado, sem ler o valor:** uma linha `ZHIPU_API_KEY=` em `~/.hermes/.env`, 49 caracteres, permissão `600`, formato bate por regex com o padrão confirmado em (208) (32 hex + ponto + 16 alfanumérico) — checado contra o arquivo real, nunca impresso. Mesmo formato já testado contra P-1 em (208); não repeti o teste isolado porque a FORMA não mudou, só o valor.
+
+**PROJETO.md e `ONDE_ESTAMOS.md` atualizados no mesmo commit** — o item opcional sobre trocar a chave sai da lista de pendências, cumprido.
+
+Modelo: Claude Sonnet 5 · vetor: `grep`/`wc -c`/regex contra o arquivo real, nunca contra alegação; permissão conferida por `stat`, não assumida mantida. Turno desta sessão: t=7 (contado no contexto).
