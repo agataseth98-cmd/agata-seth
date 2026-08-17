@@ -34,7 +34,15 @@ DESTINO_DIR = os.path.join(
 # Custo em US$ e 0 nesta camada (grátis, GLM-4.7-Flash) -- a formula fica
 # pronta pra quando não for.
 TETO_CHARS_PEDIDO = 60_000   # heurística pré-envio -- não há tokenizador local
-TETO_TOKENS_SAIDA = 8_000    # vira max_tokens no pedido -- teto mecânico, não só aviso
+TETO_TOKENS_SAIDA = 4_000    # vira max_tokens no pedido -- teto mecânico, não só aviso
+
+# Achado real na primeira invocação (MEMÓRIAS (212)): com "thinking"
+# habilitado (padrão do modelo), o GLM-4.7-Flash gastou os 8.000 tokens
+# de saída inteiros tentando CALCULAR um hash SHA256 de cabeça, em loop
+# repetitivo, e nunca produziu o parecer (`content` vazio, `finish_reason:
+# length`). Desligado explicitamente -- confirmado no OpenAPI oficial
+# (`docs.z.ai/api-reference/llm/chat-completion`) que o parâmetro existe.
+DESABILITAR_THINKING = True
 PRECO_ENTRADA_POR_TOKEN_USD = 0.0
 PRECO_SAIDA_POR_TOKEN_USD = 0.0
 
@@ -89,11 +97,14 @@ def checar_formato_parecer(texto):
 
 
 def enviar(pedido_texto, chave):
-    corpo = json.dumps({
+    payload = {
         "model": MODELO,
         "messages": [{"role": "user", "content": pedido_texto}],
         "max_tokens": TETO_TOKENS_SAIDA,
-    }).encode("utf-8")
+    }
+    if DESABILITAR_THINKING:
+        payload["thinking"] = {"type": "disabled"}
+    corpo = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         ENDPOINT,
         data=corpo,

@@ -17,9 +17,11 @@ aprovação. A checagem nova que pega citação errada já está ligada.
 As chaves não vão mais para o backup do HD externo, por decisão sua.
 A informação pessoal sua que vazou no passado (45 dias, 0 cópias feitas)
 fica como está — você decidiu não mexer, com o motivo registrado.
-O robô que leva um pedido de parecer a outro modelo de IA foi usado pela
-primeira vez de verdade — o outro lado (Zhipu/GLM) estava sobrecarregado
-e não respondeu. Não é problema daqui. Pode tentar de novo quando quiser.
+O robô que leva um pedido de parecer a outro modelo de IA já foi usado
+duas vezes de verdade. Achou e consertou um bug real (o outro modelo
+gastava toda a resposta "pensando" em vez de responder). O outro lado
+(Zhipu/GLM) segue instável — ainda não deu pra completar um parecer.
+Pode tentar de novo quando quiser, o pedido já está pronto.
 
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -31,4 +33,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 10:30.
+17/08/2026, 10:40.
