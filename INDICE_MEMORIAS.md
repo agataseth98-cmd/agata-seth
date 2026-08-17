@@ -191,7 +191,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com códig …
 (176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram a …
 (177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), …
-(178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, com opções propostas — lacuna de convenção, (162) resolveu hora+selo do cabeçalho mas não alcançou o título das entradas
+(178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, c …
 (179) DIÁRIO — 15/08/2026 · C4 pré-registrado e lançado — runner do C1b × `rlm-qwen3-8b-teste`, modelo é a única variável desta célula; achado real no smoke test, antes mesmo da bateria: o modelo respondeu sem tentar nenhum comando
 (180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, zero variação entre rodadas) — modelo é a variável que mais piorou o placar: 2 acertos limpos, 1 parcial bem fundamentado, resto errado ou sem resposta; confirma o achado do smoke test em escala — quando o modelo pula ferramenta (7 das 16 perguntas, todas as 3 rodadas), erra quase sempre
 (181) DIÁRIO — 15/08/2026 · Passo 2 (segurança, S-1 a S-5): auditoria e proposta escrita, nada habilitado nem alterado em produção — achado real em S-5 (regra sudo NOPASSWD órfã, caminho não existe mais) e confirmação com evidência nova em S-4 (patch do 429 ainda vivo, ainda sem backup, ainda 1 arquivo/2 linhas)
@@ -221,3 +221,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (205) DIÁRIO — 17/08/2026 · Decisão do Humano sobre `.env` registrada — NÃO entra no backup do HD externo, risco assumido por escrito; item aberto desde (160) fecha
 (206) DIÁRIO — 17/08/2026 · GLM-4.7-Flash (Zhipu) APROVADO pelo Humano para a Fase 1 do Conselho Remoto — duas condições registradas, B.7 completo, termos de treino da Zhipu NÃO confirmados em fonte primária
 (207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e testado ponta a ponta com resposta simulada — bloqueado na chave real, que este executor não pode obter sozinho
+(208) DIÁRIO — 17/08/2026 · Chave real da Zhipu recebida do Humano, Condição 2 fechada de verdade — formato confirmado (32 hex + ponto + 16 alfanumérico misto, 49 caracteres), testada com chave FALSA da mesma forma, P-1 alarmou, só então guardada; Fase 1 do Conselho Remoto pronta para a primeira invocação real
