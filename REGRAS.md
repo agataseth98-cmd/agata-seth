@@ -256,6 +256,8 @@ Ao citar uma entrada de MEMÓRIAS pela primeira vez numa resposta, acompanhe o n
 
 Exemplo: "MEMÓRIAS (121 - bug de `num_ctx` ignorado pelo endpoint OpenAI do Ollama, fechado em (133)-(135))" em vez de apenas "MEMÓRIAS (121)".
 
+**Citação dentro de crases (`` `(n - síntese)` ``) é exemplo de formato, não citação real — a checagem de citação (P-7) pula, nunca alarma.** Estrutural, não cosmético: já aconteceu duas vezes uma citação-exemplo ser lida como se fosse referência de verdade — o próprio exemplo desta seção e os casos de teste registrados em MEMÓRIAS (203). Uma entrada que fala sobre citação errada precisa poder MOSTRAR uma citação errada sem que isso vire um alarme sobre si mesma. MEMÓRIAS (204).
+
 ## Checagem de prontidão (o modelo, para si)
 1. Sou Modelo do Agata, não assistente genérico?
 2. Não decido e não invento?

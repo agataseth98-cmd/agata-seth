@@ -187,7 +187,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (171) DIÁRIO — 14/08/2026 · Última troca: A2 retargetada pela terceira vez (acha …
 (172) DIÁRIO — 14/08/2026 · C-2 rodado: célula C1 (runner próprio) × qwen3.5-9b- …
 (173) DIÁRIO — 14/08/2026 · B0 (baseline por injeção) rodado após bug real de sc …
-(174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por estágio, nunca `shell=True`) desenhada e lançada — teste de confundidor antes de comprometer 2-4h em C3/C4
+(174) DIÁRIO — 14/08/2026 · Célula extra C1b (pipe até 3 estágios, validado por …
 (175) DIÁRIO — 14/08/2026 · Ordem detalhada do C1b recebida e aplicada com código desta vez — três achados no processo: colisão de nome que apagou trace do C1 (restaurado do git), e um bug real de parsing de pipe que penalizaria o modelo por sintaxe comum de grep, sem relação com a variável do experimento
 (176) DIÁRIO — 14/08/2026 · Refinamento de (172): 1/3 das rejeições do C1 eram alternação de grep dentro de aspas, rejeitada à toa pela proibição cega de `|` — F4 nunca tentou pipe nenhuma vez, achado sem rerodar nada
 (177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), mas o placar não melhora limpo: A3/V1 consertados, A2/V4/F4 continuam falhando (propriedade da pergunta, não da ferramenta), e duas perguntas que o C1 acertava limpo (F1, F2) passam a falhar — achado novo, não previsto, sobre hesitação induzida por mais opção de ferramenta
@@ -217,3 +217,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
 (202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
 (203) DIÁRIO — 17/08/2026 · P-7 (checagem de citação) implementado e testado, NÃO habilitado no hook — taxa de falso positivo medida contra o corpus real: 1 em 5 citações no formato `(n - síntese)`, achado explicado, não é defeito do canon
+(204) DIÁRIO — 17/08/2026 · P-7 HABILITADO no pre-commit — crase vira exemplo protegido, segundo número no mesmo parêntese passa a ser validado, taxa de (203) recontextualizada como amostra pequena; esta própria entrada é o "verde uma vez" exigido antes de ligar

@@ -33,6 +33,7 @@ set -uo pipefail
 
 _PERIMETRO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_PERIMETRO_DIR/varredura_segredo.sh"
+source "$_PERIMETRO_DIR/checar_citacao.sh"
 
 cabecalho() {
   echo "=== $1 ==="
@@ -199,6 +200,33 @@ p6_backup_pendente() {
   return 0
 }
 
+# --- P-7 -----------------------------------------------------------------
+# Citação de MEMÓRIAS aponta pra entrada real, não fabricada (REGRAS,
+# "Citação de MEMÓRIAS -- primeira referência"). Checa só o que esta
+# staged ACRESCENTOU a MEMÓRIAS.md, nunca o arquivo inteiro -- P-7 valida
+# entrada NOVA a cada commit, não reaudita a história toda toda vez.
+# Consequência direta: uma citação-exemplo já commitada no passado (ex.:
+# (162), que cita "(101 - ...)" como transcrição literal de uma ordem,
+# sem crases) nunca é rescaneada por este mecanismo -- só citações que
+# entram DAQUI PRA FRENTE. checar_citacao.sh, função própria: MEMÓRIAS
+# (203)/(204).
+p7_citacao() {
+  if ! git rev-parse HEAD >/dev/null 2>&1; then
+    return 0
+  fi
+  local tmp_novo tmp_diff codigo
+  tmp_novo="$(mktemp)"
+  tmp_diff="$(mktemp)"
+  if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
+    cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
+  fi
+  git diff --cached -U0 -- MEMÓRIAS.md 2>/dev/null | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^\+//' > "$tmp_diff"
+  checar_citacao "$tmp_diff" "$tmp_novo"
+  codigo=$?
+  rm -f "$tmp_novo" "$tmp_diff"
+  return "$codigo"
+}
+
 # Imprime o veredito de uma checagem e soma no placar -- único ponto que
 # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
 # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
@@ -253,6 +281,11 @@ main() {
   cabecalho "P-5" "Registre e nunca apague" "REGRAS, Regra 4 (linha vermelha)"
   PERIMETRO_ESTADO=""
   p5_append_only; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-7" "Citação de MEMÓRIAS aponta pra entrada real, não fabricada" "REGRAS, Citação de MEMÓRIAS — primeira referência"
+  PERIMETRO_ESTADO=""
+  p7_citacao; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
