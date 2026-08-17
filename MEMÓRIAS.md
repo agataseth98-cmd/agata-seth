@@ -3195,3 +3195,11 @@ Modelo: Claude Sonnet 5 · vetor: busca em `~/agata` (repositório e `memoria/mi
 **Sem proposta de ação, como pedido.** Fato registrado; 0 forks é foto de agora, não garantia permanente (mesma ressalva já em PROJETO.md, "Riscos conhecidos"). PROJETO.md e `ONDE_ESTAMOS.md` atualizados no mesmo commit com estes números.
 
 Modelo: Claude Sonnet 5 · vetor: `gh api repos/.../forks_count` cruzado com `gh api .../forks` (lista vazia, bate com o contador); `git log --all --oneline --follow` para os dois caminhos, cruzado contra `git show --stat` do commit de saída pra confirmar remoção real; `git ls-files` hoje confirma ausência atual; conteúdo lido do commit pai de `ec99a0b` só pra escrever a descrição de uma linha, nunca colado nem persistido fora do disco local. Turno desta sessão: t=2 (contado no contexto).
+
+(200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — data do COMMIT, não de escrita; lacuna aberta em (178) fechada por decisão do Humano
+
+**Decisão do Humano, registrada literal:** "o título de entrada usa a DATA DO COMMIT, não a data de escrita [...] é a única data que a Máquina prova; a de escrita é o que alguém digitou. E não exige julgamento quando a sessão vira a meia-noite." Escolhe a opção 2 das três propostas em (178 - divergência de data no título de (177), lacuna de convenção aberta, três opções sem escolha).
+
+**Aplicado:** REGRAS.md, "Carregar e formatos", uma linha nova logo após o bloco de formato de cabeçalho — título de entrada de MEMÓRIAS usa a data do commit que a introduz no canon (`git log`), nunca a data de início da escrita. **Vale a partir da próxima entrada em diante** — a numeração desta mesma sessão, (198)/(199), já foi escrita hoje e comitada hoje, então não diverge; (200) é a primeira formalmente sob a regra escrita. **Título de entrada antiga não se reescreve** — (177) permanece como está, Regra 4 proíbe editar.
+
+Modelo: Claude Sonnet 5 · vetor: REGRAS.md lido inteiro antes de editar, pra confirmar onde a lacuna vivia (nenhuma linha cobria título de entrada, só cabeçalho de resposta — (162) resolveu um problema adjacente, não este); edição direta de "Carregar e formatos"; verificação pós-push de hash de REGRAS.md, ver rodapé desta resposta. Turno desta sessão: t=2 (contado no contexto).

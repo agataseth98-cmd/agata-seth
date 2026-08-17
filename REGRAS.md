@@ -111,6 +111,8 @@ Contagem de turno, incluindo o caso sem contador mecânico: ver Regra 1.
 
 Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
 
+**Título de entrada de MEMÓRIAS: data do COMMIT, nunca a de escrita.** Resolve a lacuna aberta em MEMÓRIAS (178 - divergência de data no título de (177), três opções propostas sem escolha): é a única data que a Máquina prova (`git log`); a de escrita é o que alguém digitou, e não exige julgamento quando a sessão atravessa a meia-noite. Vale a partir da entrada seguinte à decisão (MEMÓRIAS (200)); título de entrada antiga não se reescreve (Regra 4).
+
 ---
 
 ## "Íntegro" tem preço
