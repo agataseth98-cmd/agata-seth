@@ -193,7 +193,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (177) DIÁRIO — 14/08/2026 · C1b completo, 3 rodadas — rejeição cai 96% (102→4), …
 (178) DIÁRIO — 15/08/2026 · Divergência de data no título de (177) registrada, c …
 (179) DIÁRIO — 15/08/2026 · C4 pré-registrado e lançado — runner do C1b × `rlm-q …
-(180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, zero variação entre rodadas) — modelo é a variável que mais piorou o placar: 2 acertos limpos, 1 parcial bem fundamentado, resto errado ou sem resposta; confirma o achado do smoke test em escala — quando o modelo pula ferramenta (7 das 16 perguntas, todas as 3 rodadas), erra quase sempre
+(180) DIÁRIO — 15/08/2026 · C4 completo, 3 rodadas idênticas (determinístico, ze …
 (181) DIÁRIO — 15/08/2026 · Passo 2 (segurança, S-1 a S-5): auditoria e proposta escrita, nada habilitado nem alterado em produção — achado real em S-5 (regra sudo NOPASSWD órfã, caminho não existe mais) e confirmação com evidência nova em S-4 (patch do 429 ainda vivo, ainda sem backup, ainda 1 arquivo/2 linhas)
 (182) DIÁRIO — 15/08/2026 · Passo 3 (Conselho Remoto), levantamento de transporte — 5 provedores já referenciados em (157)/histórico, preço em fonte oficial (não agregador), datado 15/08/2026; nenhuma chave nova adicionada, nenhuma automação implementada
 (183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — bloqueio de permissão na instalação da biblioteca, não decisão de conteúdo; achado por leitura de documentação (não verificado ao vivo ainda): os dois portões parecem satisfazíveis
@@ -223,3 +223,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e testado ponta a ponta com resposta simulada — bloqueado na chave real, que este executor não pode obter sozinho
 (208) DIÁRIO — 17/08/2026 · Chave real da Zhipu recebida do Humano, Condição 2 fechada de verdade — formato confirmado (32 hex + ponto + 16 alfanumérico misto, 49 caracteres), testada com chave FALSA da mesma forma, P-1 alarmou, só então guardada; Fase 1 do Conselho Remoto pronta para a primeira invocação real
 (209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto no arquivo — risco residual de (208) fechado, sem passar pela conversa desta vez
+(210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/MEMORY.md` — decisão do Humano: NÃO FAZER NADA, registrada com os fatos que sustentam, não como pendência esquecida

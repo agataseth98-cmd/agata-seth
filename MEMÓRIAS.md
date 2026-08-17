@@ -3354,3 +3354,17 @@ Modelo: Claude Sonnet 5 · vetor: chave FALSA gerada com a forma exata confirmad
 **PROJETO.md e `ONDE_ESTAMOS.md` atualizados no mesmo commit** — o item opcional sobre trocar a chave sai da lista de pendências, cumprido.
 
 Modelo: Claude Sonnet 5 · vetor: `grep`/`wc -c`/regex contra o arquivo real, nunca contra alegação; permissão conferida por `stat`, não assumida mantida. Turno desta sessão: t=7 (contado no contexto).
+
+(210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/MEMORY.md` — decisão do Humano: NÃO FAZER NADA, registrada com os fatos que sustentam, não como pendência esquecida
+
+**Decisão do Humano, registrada literal:** "NÃO FAZER NADA." Sustentada em quatro fatos, já levantados em (199 - levantamento do vazamento antigo: 0 forks, 45 dias públicos, conteúdo em uma linha):
+- zero forks — ninguém copiou o repositório no período.
+- o conteúdo é dado pessoal do Humano, não credencial — não há o que rotacionar.
+- a exposição futura já está fechada desde 15/08 (189 - memória nativa do Hermes sai do rastreamento público).
+- reescrever história é linha vermelha (Regra 4) e nunca esteve em discussão.
+
+**Por que isto entra no canon, palavras do próprio pedido:** "este item entra no registro do que foi decidido NÃO fazer, e por quê — a parte que MEMÓRIAS historicamente não guardava." Registrado como decisão consciente, não como item que morreu por esquecimento.
+
+**PROJETO.md, item correspondente, fechado no mesmo commit:** de `[PARCIAL]` para `[FECHADO]`. `ONDE_ESTAMOS.md` atualizado — o item sai da lista de pendências, entra em "onde estamos agora" como decidido.
+
+Modelo: Claude Sonnet 5 · vetor: os quatro fatos conferidos contra (189)/(199) antes de aceitar como já estabelecidos — a ordem pedia registro da decisão, não nova pesquisa, e não tratei isso como licença pra reafirmar sem checar a fonte de novo. Turno desta sessão: t=8 (contado no contexto).

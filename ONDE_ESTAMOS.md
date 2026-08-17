@@ -15,15 +15,13 @@ mostrou que faltava justamente esta página.
 Os três avisos confusos que o teste achou já foram corrigidos, com sua
 aprovação. A checagem nova que pega citação errada já está ligada.
 As chaves não vão mais para o backup do HD externo, por decisão sua.
+A informação pessoal sua que vazou no passado (45 dias, 0 cópias feitas)
+fica como está — você decidiu não mexer, com o motivo registrado.
 O robô que leva um pedido de parecer a outro modelo de IA está pronto,
 testado e com a chave no lugar — falta só a primeira vez de verdade.
 
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
-- Decidir o que fazer com uma informação pessoal sua que vazou no
-  passado. Já levantado: ficou pública 45 dias, ninguém copiou o
-  repositório até agora (0 forks). O vazamento novo já foi fechado; o
-  que já saiu, continua fora.
 
 ## Rodando agora
 Nada rodando.
@@ -32,4 +30,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 09:50.
+17/08/2026, 10:20.
