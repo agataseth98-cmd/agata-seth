@@ -3368,3 +3368,19 @@ Modelo: Claude Sonnet 5 · vetor: `grep`/`wc -c`/regex contra o arquivo real, nu
 **PROJETO.md, item correspondente, fechado no mesmo commit:** de `[PARCIAL]` para `[FECHADO]`. `ONDE_ESTAMOS.md` atualizado — o item sai da lista de pendências, entra em "onde estamos agora" como decidido.
 
 Modelo: Claude Sonnet 5 · vetor: os quatro fatos conferidos contra (189)/(199) antes de aceitar como já estabelecidos — a ordem pedia registro da decisão, não nova pesquisa, e não tratei isso como licença pra reafirmar sem checar a fonte de novo. Turno desta sessão: t=8 (contado no contexto).
+
+(211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — âncora medida na hora, pedido enviado, GLM-4.7-Flash devolveu HTTP 429 (sobrecarga temporária) nas duas tentativas permitidas; nenhum parecer recebido, B.7 não mensurável nesta rodada
+
+**Âncora, medida agora, não copiada de lugar nenhum:** `git ls-remote origin main` → `6a50d1d`. `git show origin/main:REGRAS.md | sha256sum` → `63d7a298...` (hash completo de 64 caracteres no arquivo do pedido). `git show origin/main:MEMÓRIAS.md | sha256sum` → `9d62603e...`. Última entrada: (210 - exposição passada, decisão de não fazer nada). Os quatro campos preenchidos no pedido com esses valores, nenhum reaproveitado de resposta anterior.
+
+**Pedido enviado, texto completo aprovado pelo Humano sem alteração:** salvo em `memoria/missoes/conselho-remoto/pedido_01_p7-citacao.txt` (camada privada, apropriado — é material de trabalho da missão, não o pedido em si que é público em conteúdo). Conferido antes do envio: o texto do pedido não menciona `memoria/missoes` em nenhum ponto — Condição 1 respeitada, guarda técnica do script não precisou nem disparar.
+
+**Chave confirmada carregando a nova (trocada em (209)), sem imprimir o valor:** `carregar_chave()` retornou 49 caracteres, mesma checagem estrutural de sempre.
+
+**Resultado: FALHOU, duas vezes, dado externo:** primeira chamada, HTTP 429, corpo `{"error":{"code":"1305","message":"The service may be temporarily overloaded, please try again later"}}`. Segunda chamada — a UMA retentativa que a regra 2.3 permite, não mais — mesmo erro, mesmo código. **Parei aí, como a regra manda** ("sem retentativa automática além de uma") — nenhuma terceira tentativa. Conferido depois: nenhum arquivo de resposta foi escrito em `memoria/missoes/conselho-remoto/` (o script só grava depois de uma chamada bem-sucedida; as duas falhas pararam antes desse ponto, nada de arquivo parcial ou malformado no disco).
+
+**B.7 (a medida que importa) não mensurável nesta rodada:** sem parecer recebido, não há o que comparar contra o fluxo manual de copiar-colar. Não é o resultado "zero ou uma idas-e-vindas" que fecharia a fase — é ausência de dado, categoria diferente.
+
+**Não é falha do mecanismo, é indisponibilidade do provedor no momento.** Nenhum código mudou por causa disto. Decisão de tentar de novo agora, mais tarde, ou noutro momento é do Humano — não decidida aqui.
+
+Modelo: Claude Sonnet 5 · vetor: os quatro comandos da âncora rodados agora, na Máquina, valores usados vieram direto da saída desses comandos, não de memória da sessão; conteúdo do pedido conferido contra a Condição 1 antes do envio; diretório de destino inspecionado depois das duas falhas pra confirmar ausência de arquivo espúrio, não assumido limpo. Turno desta sessão: t=8 (contado no contexto).

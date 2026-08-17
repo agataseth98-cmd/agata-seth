@@ -76,7 +76,7 @@ Aprovado em princípio, escopo pequeno de propósito: UM modelo, UMA tarefa — 
 
 **Como saber se valeu (B.7, MEMÓRIAS (206)):** na primeira utilização real, contar quantas idas e vindas de copiar-colar o Humano deixou de fazer. Zero ou uma = fase 1 não se pagou — resultado legítimo, registra e para, não expande pra dois modelos.
 
-**Estado:** script escrito, testado ponta a ponta com resposta simulada, chave real no lugar desde 17/08/2026. **Pronto para a primeira invocação real** — falta só o Humano escrever o texto do pedido e rodar `python3 scripts/conselho_remoto.py <arquivo>`. Ainda não chamado contra a API de verdade. Ver MEMÓRIAS (206), (207), (208).
+**Estado:** primeira invocação real tentada 17/08/2026 — pedido sobre a proposta de P-7 (âncora fresca, `6a50d1d`), GLM-4.7-Flash devolveu HTTP 429 (sobrecarga do provedor) nas duas tentativas permitidas (uma chamada + uma retentativa, regra 2.3). Nenhum parecer recebido ainda, B.7 não mensurável nesta rodada. Mecanismo funcionou como desenhado — parou depois da retentativa, sem arquivo espúrio no disco. Tentar de novo é decisão do Humano. Ver MEMÓRIAS (206)-(208), (211).
 
 ## Sudo e interação humana
 Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou similar) pausa o processo em curso e pede ao Humano para rodar o comando (ex: via prefixo `!` no Claude Code). Não armazenar senha, não simular autenticação, não tentar contornar. Confirmado na prática em MEMÓRIAS (110): sudo sem sessão interativa já foi um bloqueio real, não hipotético.
