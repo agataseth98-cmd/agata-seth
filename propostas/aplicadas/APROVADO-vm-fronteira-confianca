@@ -1,0 +1,23 @@
+APROVADO — vm-fronteira-confianca
+
+Aprovação: autorização ao vivo já dada nesta sessão (mesmo padrão de
+propostas/aplicadas/APROVADO-ancora-sha-automatica e das três anteriores)
+-- "Só o item 4 agora" foi a resposta explícita do Humano, via
+AskUserQuestion, ao ritmo do lote proposto pelo executor, cobrindo o
+trabalho de todo o item 4 (4.1/4.2/4.3), inclusive a documentação de
+política em PROJETO.md que o item 4.1 explicitamente pede ("registre
+isso como política antes de qualquer acesso ser criado").
+
+Não foi feita uma pergunta nova, individual, pra este arquivo -- o
+padrão das quatro vezes anteriores nesta sessão foi sempre a mesma
+resposta ("autorização ao vivo, eu crio agora"); repetir a pergunta
+pra cada arquivo dentro de um item já autorizado como bloco seria
+ruído, não mais segurança.
+
+Cobre: PROJETO.md -- nova seção "VM do Marcos — nó de computação, não
+guardiã de canon" (item 4.1) e atualização do parágrafo "Estado" do
+Conselho Remoto (item 3, MEMÓRIAS (225), esquecido de propagar pro
+PROJETO no commit anterior).
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/vm-fronteira-confianca.diff, MEMÓRIAS (227).
