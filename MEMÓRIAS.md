@@ -3648,3 +3648,13 @@ Modelo: Claude Sonnet 5 · vetor: dois `curl` reais contra `razionshefa.com.br` 
 **Lição que já estava certa e segue valendo:** disco local arbitra fato físico. Isto não virou "aceitar a narrativa que veio junto" — as duas partes do mesmo bloco tiveram destinos diferentes porque só uma tinha onde checar.
 
 Modelo: Claude Sonnet 5 · vetor: leitura direta de `~/.hermes/config.yaml` e do backup `.bak.personalities_remove`, comparados linha a linha; `cd ~/.hermes && git status` real (não presumido) pra confirmar ausência de repositório; leitura do log inteiro, não só do resumo; `fish -c "history search"` real pra achar os comandos originais; busca por `gemini-1.5-pro`/`Qwen3.7`/`auditoria cruzada` em todo `~/agata` sem achar nada que corrobore a narrativa. Turno desta sessão: t=3 (contado no contexto).
+
+(230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
+
+**Confirmado pelo Humano, nesta conversa, pergunta direta e resposta direta:** a conversa entre modelos sobre a edição de `~/.hermes/config.yaml` (uma instância remota questionando, resolvida a favor da edição) aconteceu de verdade. Sem rastro em disco (229) porque não deixou — não porque não existiu.
+
+**O que isso fecha:** a parte de (229) marcada "não confirmado, sem evidência de Máquina" passa a "confirmada pelo Humano, sem evidência de Máquina" — fontes diferentes, as duas válidas. Regra 1 não exige rastro em disco pra tudo; exige não inventar rastro que não existe.
+
+**O que continua em aberto:** a proposta do "novo portão de segurança" (três perguntas antes de mudança estrutural) — a confirmação de hoje foi sobre o fato da conversa ter acontecido, não sobre adotar a regra. Perguntado à parte.
+
+Modelo: Claude Sonnet 5 · vetor: resposta direta do Humano nesta conversa, à pergunta feita em (229). Turno desta sessão: t=4 (contado no contexto).
