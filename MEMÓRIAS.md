@@ -3554,3 +3554,15 @@ A consolidação noturna (`agata-consolidacao.timer`) NÃO foi a autora — conf
 **Decisão do Humano, registrada sem suavizar:** deixar como está. `lacuna` fechada por decisão, não por explicação encontrada — não investigar mais.
 
 Modelo: Claude Sonnet 5 · vetor: `git show --stat 564a50d` e `git log -1 --format` na Máquina pra autor/data reais; `journalctl --user -u agata-consolidacao.service --since/--until` na janela do commit, sem resultado — confirma a lacuna, não a inventa. Turno desta sessão: t=2 (contado no contexto).
+
+(225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 desta vez, parecer recebido sobre P-7
+
+**Motivo:** pausado desde (213), 6 de 8 chamadas do dia em 429. O backoff de (216) — duas falhas 429 seguidas travam 15 min — já estava no lugar, nunca exercitado numa chamada de sucesso.
+
+Backoff conferido antes de chamar: sem arquivo de estado (`.backoff-estado.json` ausente), portanto livre. Âncora do pedido pendente (`pedido_01_p7-citacao.txt`) estava desatualizada — apontava pra (212) e hashes antigos de REGRAS/MEMÓRIAS; atualizada pra (222) e os hashes reais antes de enviar, texto da proposta em si preservado (arquivo fora de MEMÓRIAS, camada privada, sem remote — Regra 4 não se aplica).
+
+**Resultado: sem 429.** GLM-4.7-Flash respondeu em 41,8 s, formato OK (as quatro partes apareceram), 831 tokens de entrada + 373 de saída, custo US$0,00 (camada grátis). Posição: condicional — aprova o desenho do P-7 (checagem só do que cada commit acrescenta, nunca reaudita histórico) mas pede um mecanismo explícito de override/whitelist manual para falsos positivos, ausente do desenho atual. Resposta completa em `memoria/missoes/conselho-remoto/20260820-151331-glm-4.7-flash.json`.
+
+**A medida que importa:** uma invocação, um parecer completo, zero idas e vindas de copiar-e-colar do Humano — o script fez a chamada, salvou a resposta crua e validou o formato sozinho, do pedido escrito ao arquivo final.
+
+Modelo: Claude Sonnet 5 · vetor: `python3 scripts/conselho_remoto.py` rodado de verdade contra a API real, não simulado; `sha256sum` de REGRAS.md/MEMÓRIAS.md calculado na Máquina antes de atualizar a âncora do pedido; conteúdo do JSON de resposta lido direto do arquivo salvo, não do stdout do script. Turno desta sessão: t=3 (contado no contexto).

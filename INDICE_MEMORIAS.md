@@ -208,7 +208,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (192) DIÁRIO — 16/08/2026 · Passo 4 (saneamento) FECHADO: regra sudo NOPASSWD ór …
 (193) DIÁRIO — 16/08/2026 · Três correções pós-saneamento, ordem do Humano: SKIP …
 (194) DIÁRIO — 16/08/2026 · Parte A: P-2 do `perimetro.sh` deixa de tentar `sudo …
-(195) DIÁRIO — 16/08/2026 · Parte B: análise pós-expedição sobre os traces já no disco (nenhuma célula rodada de novo) — documento em `memoria/missoes/rlm-3caminhos/ANALISE_POS_EXPEDICAO.md`, commit `a83bfaa` do repo local; achados de fato registrados aqui, leituras propostas ficam só no documento
+(195) DIÁRIO — 16/08/2026 · Parte B: análise pós-expedição sobre os traces já no …
 (196) DIÁRIO — 16/08/2026 · Fase 1 instalada pelo Humano (mecanismo root do P-2 ativo, `--` removido); Fase 2 (prova de legibilidade dos controles, Humano como instrumento) rodada — 6 de 8 itens dispararam de verdade, mas o achado não é por controle: o Humano não conseguiu dar veredito item por item depois de ler os seis blocos em sequência, achado maior que qualquer redação individual
 (197) DIÁRIO — 16/08/2026 · `ONDE_ESTAMOS.md` criado, aprovado pelo Humano na primeira versão ("Perfeito", sem pergunta) e oficializado no canon — nome adotado: "Onde Estamos"; Regra 4 (REGRAS) e "Memória e hidratação" (PROJETO) passam a exigir que ele seja atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado
 (198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo Humano: absorve correção de forma/complexidade, não absorve correção de fato nem de formato do pedido — quatro respostas seguidas em produção, 16/08/2026
@@ -238,3 +238,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
 (223) DIÁRIO — 20/08/2026 · Autorização em bloco do Humano — quatro pendentes fechados; ACB inteiro fica de fora, por escopo
 (224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do Humano, não investigada mais
+(225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 desta vez, parecer recebido sobre P-7
