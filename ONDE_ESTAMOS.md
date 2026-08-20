@@ -38,10 +38,15 @@ O robô do Conselho Remoto agora se protege sozinho: se o outro lado
 recusar duas vezes seguidas por sobrecarga, ele espera 15 minutos antes
 de tentar de novo, em vez de insistir sem parar.
 
-O texto que você cola numa IA na nuvem pra ela entrar no sistema (na Área
-de trabalho) estava com trechos embaralhados — reescrito do zero, e agora
-também avisa a IA qual era o commit mais recente quando o texto foi
-escrito, pra ela perceber se está lendo uma cópia desatualizada.
+O texto que você cola numa IA na nuvem pra ela entrar no sistema mudou de
+lugar: agora mora dentro do próprio sistema (`PROMPT_CARREGAMENTO.md`), não
+mais solto na Área de trabalho (que ficou só com um bilhete apontando pro
+lugar novo). O motivo: agora o commit atualiza sozinho qual era o commit
+mais recente quando o texto foi escrito — sempre com um atraso pequeno e
+conhecido (no máximo 1 commit), porque um commit não consegue avisar o
+próprio número antes de existir. Achado no caminho: o texto também dizia
+uma coisa errada há dias (que só as últimas 30 linhas da história chegam
+pra IA) — corrigido junto.
 
 Uma trava nova foi criada e ligada: daqui pra frente, mudança que MUDA
 COMO O SISTEMA SE COMPORTA (regras, scripts) só entra depois de você
@@ -85,12 +90,21 @@ Um commit automático de 18/08 (`564a50d`) entrou no histórico do
 sistema sem passar por uma entrada de história, e não se descobriu
 quem fez — você decidiu deixar assim, sem investigar mais.
 
+O terreno pra máquina virtual que o Marcos ofereceu está pronto: as
+regras de confiança dela (o que pode ir pra lá, o que nunca vai) estão
+escritas; um erro real foi achado e corrigido nos scripts de teste (um
+deles só funcionaria no seu computador, não em outro); um comando único
+foi testado de verdade rodando fora daqui, funcionou; e um pedido de
+recursos pro Marcos foi escrito com números medidos na sua máquina (não
+chutados) — VRAM, disco, tempo de GPU.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
-- Decidir onde deve morar a âncora automática do texto de entrada (Área
-  de trabalho, mesmo lugar de hoje, ou outro) — proposta a caminho.
-- Confirmar quem cria o marcador de aprovação das próximas mudanças de
-  comportamento desta sessão (mesma pergunta das últimas vezes).
+- Revisar e mandar (ou não) o pedido de recursos pro Marcos —
+  `memoria/missoes/rlm-3caminhos/PEDIDO_RECURSOS_VM_MARCOS.md`.
+- Marcar uma sessão só pra rodar o teste grande com os modelos
+  candidatos — leva umas 6 horas de GPU, por isso ficou de fora de
+  hoje.
 
 ## Rodando agora
 Nada rodando.
@@ -99,4 +113,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 15:20.
+20/08/2026, 15:45.
