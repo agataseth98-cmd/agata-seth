@@ -24,6 +24,12 @@ gastava toda a resposta "pensando" em vez de responder). O outro lado
 sobrecarga. Sugestão: deixar quieto por um tempo antes de tentar de
 novo — o pedido já está pronto e corrigido, esperando você.
 
+O script que checa se o sistema está em dia com a nuvem publicava
+sozinho — comitava e empurrava mudanças pra fora sem te avisar antes,
+mesmo o comentário dele dizendo que não fazia isso. Corrigido: agora ele
+só avisa no log, nunca mais publica nada por conta própria. Verificado
+que nenhum relógio automático estava agendado pra rodar ele sozinho.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 
@@ -34,4 +40,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-17/08/2026, 10:50.
+20/08/2026, 09:20.
