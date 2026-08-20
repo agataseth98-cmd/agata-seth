@@ -207,7 +207,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 cont …
 (192) DIÁRIO — 16/08/2026 · Passo 4 (saneamento) FECHADO: regra sudo NOPASSWD ór …
 (193) DIÁRIO — 16/08/2026 · Três correções pós-saneamento, ordem do Humano: SKIP …
-(194) DIÁRIO — 16/08/2026 · Parte A: P-2 do `perimetro.sh` deixa de tentar `sudo -n -l` (SKIP estrutural sempre) e passa a ler status escrito por mecanismo root separado, orientado a evento (opção D do Humano — hook de pacman); dois artefatos preparados e testados isolados, instalação pendente do Humano (exige root); `--` reportado de novo, ainda não removido
+(194) DIÁRIO — 16/08/2026 · Parte A: P-2 do `perimetro.sh` deixa de tentar `sudo …
 (195) DIÁRIO — 16/08/2026 · Parte B: análise pós-expedição sobre os traces já no disco (nenhuma célula rodada de novo) — documento em `memoria/missoes/rlm-3caminhos/ANALISE_POS_EXPEDICAO.md`, commit `a83bfaa` do repo local; achados de fato registrados aqui, leituras propostas ficam só no documento
 (196) DIÁRIO — 16/08/2026 · Fase 1 instalada pelo Humano (mecanismo root do P-2 ativo, `--` removido); Fase 2 (prova de legibilidade dos controles, Humano como instrumento) rodada — 6 de 8 itens dispararam de verdade, mas o achado não é por controle: o Humano não conseguiu dar veredito item por item depois de ler os seis blocos em sequência, achado maior que qualquer redação individual
 (197) DIÁRIO — 16/08/2026 · `ONDE_ESTAMOS.md` criado, aprovado pelo Humano na primeira versão ("Perfeito", sem pergunta) e oficializado no canon — nome adotado: "Onde Estamos"; Regra 4 (REGRAS) e "Memória e hidratação" (PROJETO) passam a exigir que ele seja atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado
@@ -237,3 +237,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declarado no PROJETO morre em silêncio
 (222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
 (223) DIÁRIO — 20/08/2026 · Autorização em bloco do Humano — quatro pendentes fechados; ACB inteiro fica de fora, por escopo
+(224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do Humano, não investigada mais

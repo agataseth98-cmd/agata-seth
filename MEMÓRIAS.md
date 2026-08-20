@@ -3544,3 +3544,13 @@ Modelo: Claude Sonnet 5 · vetor: `_p8_eh_comportamento()` lida linha a linha an
 A decisão de modelo principal (item 5) não espera o ACB pronto. O laboratório já existe: a bancada da entrada (169), congelada, validada, com o titular (`qwen3.5-9b-64k`) medido em células reais (C1, C1b, B0, C3, C4) e o runner C1b já testado (176)/(177). É T1 — disponível hoje — não T2.
 
 Modelo: Claude Sonnet 5 · vetor: `git log`/`git ls-remote origin main` na Máquina pra confirmar o canon em (222)/`1b4f94e` antes de escrever; `grep` real em REGRAS.md pra confirmar a citação de "Contenção de escopo" e em MEMÓRIAS.md pra confirmar (169)/(172)/(176)/(177) linha a linha, não citados de memória. Turno desta sessão: t=1 (contado no contexto).
+
+(224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do Humano, não investigada mais
+
+**Motivo:** o commit `564a50d` (18/08/2026 23:28:08, autor `agata <agata@local~>`, "(auto-sync) sincronizar-estado.sh detectou mudanças") entrou em `origin/main` sem entrada correspondente em MEMÓRIAS. Nenhuma checagem do perímetro cobre "commit sem entrada" — P-7 cobre citação errada, P-8 cobre arquivo de comportamento sem aprovação. Buraco distinto, registrado aqui como fato, não fechado por mecanismo novo.
+
+A consolidação noturna (`agata-consolidacao.timer`) NÃO foi a autora — confirmado em (220): o serviço já estava quebrado por PATH (`hermes: comando não encontrado`, exit 127) desde antes dessa data. Autor real: não identificado. Journal do período (18/08, noite) não está mais disponível pra checagem direta — mesma lacuna de retenção curta já documentada em (110), não uma investigação nova que se perdeu.
+
+**Decisão do Humano, registrada sem suavizar:** deixar como está. `lacuna` fechada por decisão, não por explicação encontrada — não investigar mais.
+
+Modelo: Claude Sonnet 5 · vetor: `git show --stat 564a50d` e `git log -1 --format` na Máquina pra autor/data reais; `journalctl --user -u agata-consolidacao.service --since/--until` na janela do commit, sem resultado — confirma a lacuna, não a inventa. Turno desta sessão: t=2 (contado no contexto).
