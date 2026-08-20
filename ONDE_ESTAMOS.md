@@ -18,11 +18,10 @@ As chaves não vão mais para o backup do HD externo, por decisão sua.
 A informação pessoal sua que vazou no passado (45 dias, 0 cópias feitas)
 fica como está — você decidiu não mexer, com o motivo registrado.
 O robô que leva um pedido de parecer a outro modelo de IA já foi usado
-três vezes de verdade. Achou e consertou um bug real (o outro modelo
-gastava toda a resposta "pensando" em vez de responder). O outro lado
-(Zhipu/GLM) recusou a maioria das tentativas de hoje (6 de 8) por
-sobrecarga. Sugestão: deixar quieto por um tempo antes de tentar de
-novo — o pedido já está pronto e corrigido, esperando você.
+quatro vezes de verdade. Na quarta, sem recusa por sobrecarga: o outro
+modelo respondeu de verdade, de graça, sobre a checagem que pega
+citação errada (P-7) — aprova com ressalva, pede um jeito de destravar
+manualmente um caso que o robô marque errado por engano.
 
 O script que checa se o sistema está em dia com a nuvem publicava
 sozinho — comitava e empurrava mudanças pra fora sem te avisar antes,
@@ -75,9 +74,23 @@ A trava do item acima (que exige sua aprovação pra mudança de
 comportamento) agora também cobre os arquivos de configuração dos
 robôs automáticos — antes só cobria regras e scripts.
 
+Você autorizou hoje, de uma vez, um lote de trabalho: fechar os quatro
+pendentes acima, escolher o modelo principal usando o teste grande que
+já existe, adotar três regras gerais novas, e preparar o terreno pra
+uma máquina virtual que o Marcos ofereceu. Deixou de fora, por
+enquanto, o projeto inteiro de assistente com Google/mensageiros — fica
+só como referência de rumo, não como lista de tarefa.
+
+Um commit automático de 18/08 (`564a50d`) entrou no histórico do
+sistema sem passar por uma entrada de história, e não se descobriu
+quem fez — você decidiu deixar assim, sem investigar mais.
+
 ## Esperando você
-- Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
+- Decidir onde deve morar a âncora automática do texto de entrada (Área
+  de trabalho, mesmo lugar de hoje, ou outro) — proposta a caminho.
+- Confirmar quem cria o marcador de aprovação das próximas mudanças de
+  comportamento desta sessão (mesma pergunta das últimas vezes).
 
 ## Rodando agora
 Nada rodando.
@@ -86,4 +99,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 10:42.
+20/08/2026, 15:20.
