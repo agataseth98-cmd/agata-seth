@@ -44,7 +44,16 @@ de trabalho) estava com trechos embaralhados — reescrito do zero, e agora
 também avisa a IA qual era o commit mais recente quando o texto foi
 escrito, pra ela perceber se está lendo uma cópia desatualizada.
 
+Uma trava nova foi criada e ligada: daqui pra frente, mudança que MUDA
+COMO O SISTEMA SE COMPORTA (regras, scripts) só entra depois de você
+aprovar de propósito, criando um arquivo marcador. Mudança que só
+REGISTRA o que já aconteceu (entrada de história) continua livre, como
+sempre foi. Essa mudança de agora foi a primeira e única vez que a trava
+foi ligada sem passar por você — porque a trava não existia ainda pra
+aprovar a si mesma. Registrado por escrito; não vai se repetir.
+
 ## Esperando você
+- Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
 
 ## Rodando agora
@@ -54,4 +63,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 09:38.
+20/08/2026, 09:50.

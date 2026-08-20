@@ -201,7 +201,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idênti …
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminh …
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrad …
-(188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
+(188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição in …
 (189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
 (190) DIÁRIO — 15/08/2026 · Passo 3 (saneamento): varredura de segredo testada contra 20 commits reais (zero falso positivo) e checagem de sudoers acrescentada à mesma varredura — achado real ao testar: um falso positivo próprio (secure_path lido como caminho) corrigido antes de aceitar, e a checagem de sudoers, correta, bloquearia TODO commit a partir de agora até o Passo 4 decidir — não habilitado no pre-commit ainda, pergunta ao Humano no fim desta entrada; diff do patch do 429 versionado fora do vendorizado
 (191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 controles declarados, cada um testado com caso positivo e negativo em repo isolado — 2 bugs reais achados e corrigidos no processo (ARG_MAX estourado, `trap RETURN` vazando pra função seguinte). Primeira execução completa: 5 OK, 1 FALHOU (P-2, esperado — Passo 4 ainda não concluído pelo Humano)
@@ -231,3 +231,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min
 (217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só-HTTP ganha jeito de detectar versão velha
+(218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige propostas/APROVADO-<nome> antes de canon mudar comportamento

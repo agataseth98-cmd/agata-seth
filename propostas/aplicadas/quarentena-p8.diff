@@ -1,0 +1,116 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 0024364..3ee54d4 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -90,6 +90,19 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
+ 
+ **Cobertura que o hook não tem, coberta por runbook, não por maquinário:** edição manual via `visudo` não dispara pacman. **Depois de qualquer `visudo`, rodar `sudo /usr/local/lib/agata/checar-sudoers-root.sh`** pra atualizar o status manualmente. Material de origem dos dois artefatos (script + hook), versionado: `scripts/checar-sudoers-root.sh`, `scripts/agata-sudoers.hook`. MEMÓRIAS (194).
+ 
++## Quarentena estrutural (P-8)
++**O buraco, 20/08/2026 (item 6 do documento do Humano, proposta do Marcos, MEMÓRIAS (218)).** Até aqui, o executor escreve em canon, comita e empurra — o Humano fica sabendo depois. Nenhuma das sete checagens do perímetro cobria isso, e é a mesma classe do incidente registrado em MEMÓRIAS (214) (`sincronizar-estado.sh` publicando sozinho apesar do próprio cabeçalho dizer que não).
++
++**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`. SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não.
++
++**Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova criando `propostas/APROVADO-<nome>`. `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
++
++**Testado, positivo e negativo, taxa de falso positivo relatada antes de habilitar (MEMÓRIAS (218)):** 6 casos rodados contra um clone descartável antes do commit real — arquivo de comportamento staged sem aprovação (falha), com aprovação cobrindo o caminho (passa), arquivo de registro (MEMÓRIAS/ONDE_ESTAMOS) sem aprovação nenhuma (passa, nunca deveria travar), mistura de um aprovado + um não aprovado no mesmo commit (falha citando só o não aprovado), aprovação já movida pra `aplicadas/` no mesmo commit que ela autoriza (passa), e o caso negativo básico repetido depois da correção (falha). Zero falsos positivos e zero falsos negativos nos 6 casos.
++
++**Bootstrap, registrado sem suavizar.** Esta própria mudança toca `scripts/perimetro.sh` e `PROJETO.md` — ordem do Humano, ela é a primeira candidata a passar pela própria quarentena, depois de P-8 existir, aplicada antes de ligar P-8 (não havia como pedir aprovação a um mecanismo que ainda não existia). O par `propostas/aplicadas/quarentena-p8.diff` / `propostas/aplicadas/APROVADO-quarentena-p8` deste commit foi criado pelo próprio executor, sob ordem escrita direta e datada do Humano no documento de 20/08/2026 — não é o executor se autoaprovando por conta própria; a aprovação já existia em texto, este é só o registro mecânico dela. **A partir do próximo commit que toque REGRAS/PROJETO/scripts/.githooks, o marcador precisa ser criado pelo Humano — esta exceção não se repete.**
++
++**Risco residual, não suavizado.** O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Se um dia for preciso mais, o caminho é assinatura que o executor não possa produzir, com o custo de o Humano digitar uma senha a cada mudança estrutural.
++
+ ## Doutrina de defesa proporcional
+ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra decidir se e como reagir a um achado de segurança/robustez — não regra universal de REGRAS.md, é ferramenta de decisão situacional do Humano (Regra 3).
+ - Incidente é o que passa ao lado de um controle que o sistema declarou. O resto é risco de fundo: registra e segue.
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 04bcfdc..38631bd 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -227,6 +227,75 @@ p7_citacao() {
+   return "$codigo"
+ }
+ 
++# --- P-8 -----------------------------------------------------------------
++# Quarentena de mudança estrutural (item 6, documento do Humano
++# 20/08/2026, proposta do Marcos, MEMÓRIAS (218)). O BURACO que isto
++# fecha: até aqui, o executor escreve em canon, comita e empurra -- o
++# Humano fica sabendo DEPOIS. Nenhuma checagem P-1 a P-7 cobria isso;
++# mesma classe do incidente de MEMÓRIAS (214) (sincronizar-estado.sh
++# publicando sozinho apesar do próprio cabeçalho dizer que não).
++#
++# Escopo, proporcional de propósito (ordem do Humano):
++#   QUARENTENA OBRIGATÓRIA -- muda COMPORTAMENTO: REGRAS.md, PROJETO.md,
++#   scripts/*, .githooks/*
++#   SEM quarentena -- só REGISTRA o que já aconteceu: MEMÓRIAS.md,
++#   ONDE_ESTAMOS.md, INDICE_MEMORIAS.md, .hermes.md (gerado)
++# Motivo da linha: registro errado se corrige com entrada nova -- é pra
++# isso que append-only existe. Comportamento errado, não.
++#
++# Mecanismo: propostas/<nome>.diff (a mudança, cabeçalhos `--- a/` /
++# `+++ b/` de verdade) + propostas/APROVADO-<nome> (criado pelo Humano
++# == aprovação). Sem o par cobrindo o caminho staged, o commit FALHA.
++# Ver propostas/README.md pro mecanismo completo, incluindo o risco
++# residual registrado sem suavizar: o marcador é um arquivo que o
++# próprio executor tem permissão técnica de criar -- P-8 impede
++# automação agindo sem ninguém perceber, não impede contorno deliberado.
++_p8_eh_comportamento() {
++  case "$1" in
++    REGRAS.md|PROJETO.md|scripts/*|.githooks/*) return 0 ;;
++    *) return 1 ;;
++  esac
++}
++
++_p8_caminhos_aprovados() {
++  # Acha o par diff/APROVADO em propostas/ (pendente) OU em
++  # propostas/aplicadas/ (já consumido). Precisa cobrir os dois: a
++  # aprovação consumida no MESMO commit que aplica a mudança já não está
++  # mais em propostas/ quando este check roda -- foi movida pra
++  # aplicadas/ como parte do próprio commit staged (achado testando
++  # antes de comitar de verdade: sem isso, todo commit que consome uma
++  # aprovação reprovaria a própria aprovação que o autoriza).
++  local diretorio aprovado nome diff_path
++  for diretorio in propostas propostas/aplicadas; do
++    [ -d "$diretorio" ] || continue
++    for aprovado in "$diretorio"/APROVADO-*; do
++      [ -e "$aprovado" ] || continue
++      nome="$(basename "$aprovado")"
++      nome="${nome#APROVADO-}"
++      diff_path="$diretorio/${nome}.diff"
++      [ -f "$diff_path" ] || continue
++      grep -E '^(\+\+\+ b/|--- a/)' "$diff_path" 2>/dev/null | sed -E 's#^(\+\+\+ b/|--- a/)##' | grep -v '^/dev/null$'
++    done
++  done
++}
++
++p8_quarentena() {
++  local staged f ruim=0 aprovados
++  staged="$(git diff --cached --name-only)"
++  [ -z "$staged" ] && return 0
++  aprovados="$(_p8_caminhos_aprovados)"
++  while IFS= read -r f; do
++    [ -z "$f" ] && continue
++    if _p8_eh_comportamento "$f"; then
++      if ! printf '%s\n' "$aprovados" | grep -qxF "$f"; then
++        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente (o .diff em propostas/ precisa citar este caminho nos cabeçalhos). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
++        ruim=1
++      fi
++    fi
++  done <<< "$staged"
++  return "$ruim"
++}
++
+ # Imprime o veredito de uma checagem e soma no placar -- único ponto que
+ # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
+ # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
+@@ -288,6 +357,11 @@ main() {
+   p7_citacao; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-8" "Quarentena: mudança de comportamento exige propostas/APROVADO-<nome> antes de entrar no canon" "PROJETO, Quarentena estrutural (item 6, 20/08/2026) · propostas/README.md"
++  PERIMETRO_ESTADO=""
++  p8_quarentena; _perimetro_veredito "$?"
++  echo
++
+   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
+   p6_backup_pendente
+   echo "veredito: AVISO SÓ (nunca falha)"

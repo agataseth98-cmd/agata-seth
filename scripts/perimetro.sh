@@ -227,6 +227,75 @@ p7_citacao() {
   return "$codigo"
 }
 
+# --- P-8 -----------------------------------------------------------------
+# Quarentena de mudança estrutural (item 6, documento do Humano
+# 20/08/2026, proposta do Marcos, MEMÓRIAS (218)). O BURACO que isto
+# fecha: até aqui, o executor escreve em canon, comita e empurra -- o
+# Humano fica sabendo DEPOIS. Nenhuma checagem P-1 a P-7 cobria isso;
+# mesma classe do incidente de MEMÓRIAS (214) (sincronizar-estado.sh
+# publicando sozinho apesar do próprio cabeçalho dizer que não).
+#
+# Escopo, proporcional de propósito (ordem do Humano):
+#   QUARENTENA OBRIGATÓRIA -- muda COMPORTAMENTO: REGRAS.md, PROJETO.md,
+#   scripts/*, .githooks/*
+#   SEM quarentena -- só REGISTRA o que já aconteceu: MEMÓRIAS.md,
+#   ONDE_ESTAMOS.md, INDICE_MEMORIAS.md, .hermes.md (gerado)
+# Motivo da linha: registro errado se corrige com entrada nova -- é pra
+# isso que append-only existe. Comportamento errado, não.
+#
+# Mecanismo: propostas/<nome>.diff (a mudança, cabeçalhos `--- a/` /
+# `+++ b/` de verdade) + propostas/APROVADO-<nome> (criado pelo Humano
+# == aprovação). Sem o par cobrindo o caminho staged, o commit FALHA.
+# Ver propostas/README.md pro mecanismo completo, incluindo o risco
+# residual registrado sem suavizar: o marcador é um arquivo que o
+# próprio executor tem permissão técnica de criar -- P-8 impede
+# automação agindo sem ninguém perceber, não impede contorno deliberado.
+_p8_eh_comportamento() {
+  case "$1" in
+    REGRAS.md|PROJETO.md|scripts/*|.githooks/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_p8_caminhos_aprovados() {
+  # Acha o par diff/APROVADO em propostas/ (pendente) OU em
+  # propostas/aplicadas/ (já consumido). Precisa cobrir os dois: a
+  # aprovação consumida no MESMO commit que aplica a mudança já não está
+  # mais em propostas/ quando este check roda -- foi movida pra
+  # aplicadas/ como parte do próprio commit staged (achado testando
+  # antes de comitar de verdade: sem isso, todo commit que consome uma
+  # aprovação reprovaria a própria aprovação que o autoriza).
+  local diretorio aprovado nome diff_path
+  for diretorio in propostas propostas/aplicadas; do
+    [ -d "$diretorio" ] || continue
+    for aprovado in "$diretorio"/APROVADO-*; do
+      [ -e "$aprovado" ] || continue
+      nome="$(basename "$aprovado")"
+      nome="${nome#APROVADO-}"
+      diff_path="$diretorio/${nome}.diff"
+      [ -f "$diff_path" ] || continue
+      grep -E '^(\+\+\+ b/|--- a/)' "$diff_path" 2>/dev/null | sed -E 's#^(\+\+\+ b/|--- a/)##' | grep -v '^/dev/null$'
+    done
+  done
+}
+
+p8_quarentena() {
+  local staged f ruim=0 aprovados
+  staged="$(git diff --cached --name-only)"
+  [ -z "$staged" ] && return 0
+  aprovados="$(_p8_caminhos_aprovados)"
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    if _p8_eh_comportamento "$f"; then
+      if ! printf '%s\n' "$aprovados" | grep -qxF "$f"; then
+        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente (o .diff em propostas/ precisa citar este caminho nos cabeçalhos). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
+        ruim=1
+      fi
+    fi
+  done <<< "$staged"
+  return "$ruim"
+}
+
 # Imprime o veredito de uma checagem e soma no placar -- único ponto que
 # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
 # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
@@ -286,6 +355,11 @@ main() {
   cabecalho "P-7" "Citação de MEMÓRIAS aponta pra entrada real, não fabricada" "REGRAS, Citação de MEMÓRIAS — primeira referência"
   PERIMETRO_ESTADO=""
   p7_citacao; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-8" "Quarentena: mudança de comportamento exige propostas/APROVADO-<nome> antes de entrar no canon" "PROJETO, Quarentena estrutural (item 6, 20/08/2026) · propostas/README.md"
+  PERIMETRO_ESTADO=""
+  p8_quarentena; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"

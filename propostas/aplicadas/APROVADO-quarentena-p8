@@ -1,0 +1,23 @@
+APROVADO — quarentena-p8
+
+Aprovação: o documento do Humano de 20/08/2026 ("AO EXECUTOR — SEIS
+CORREÇÕES E A QUARENTENA"), item 6, ordena explicitamente a criação
+deste mecanismo e instrui, no próprio texto, aplicar esta mudança ANTES
+de ligar P-8 ("Aplique-a antes de ligar P-8, registre isso, e passe a
+valer para a próxima") -- não havia como pedir aprovação via o próprio
+mecanismo que ainda não existia no momento em que ele precisou ser
+criado.
+
+Este marcador foi criado pelo executor (Claude Sonnet 5), não pelo
+Humano operando o teclado -- registrado sem suavizar, é exatamente o
+risco residual que PROJETO.md, "Quarentena estrutural (P-8)", descreve.
+A autorização de fato é a ordem escrita e datada do Humano no documento
+de origem; isto é o registro mecânico dela, não uma autoaprovação por
+iniciativa própria do executor.
+
+Consumido no mesmo commit em que foi criado -- ver propostas/aplicadas/
+quarentena-p8.diff, MEMÓRIAS (218).
+
+A partir do próximo commit que toque REGRAS.md, PROJETO.md, scripts/*
+ou .githooks/*, este marcador precisa ser criado pelo Humano. Esta
+exceção de bootstrap não se repete.
