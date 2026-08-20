@@ -30,6 +30,11 @@ mesmo o comentário dele dizendo que não fazia isso. Corrigido: agora ele
 só avisa no log, nunca mais publica nada por conta própria. Verificado
 que nenhum relógio automático estava agendado pra rodar ele sozinho.
 
+Um dado errado que estava sendo repetido pra toda IA que entra no sistema
+foi corrigido: a página de configuração dizia que só as últimas 30 linhas
+da história chegam pra IA. Não é verdade — medido de novo, o que chega
+são as últimas 9 entradas inteiras, nada cortado no meio.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 
@@ -40,4 +45,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 09:20.
+20/08/2026, 09:25.

@@ -3420,3 +3420,15 @@ Modelo: Claude Sonnet 5 · vetor: contagem de tentativas e vereditos desta sess�
 **Decidido NÃO fazer:** não reintroduzir push automático mesmo com trava adicional (ex.: uma flag `--eu-autorizo` que o script aceitasse). REGRAS ("Cadeia de auditoria em camadas", item 4: "Autorização explícita do Humano antes de tocar em canônico") já cobre isso, e uma flag que o próprio script pudesse setar sozinho não seria autorização de verdade, só teatro. O item da quarentena (P-8) desta mesma sessão é o mecanismo estrutural pra isso — este script não precisa reinventar uma versão fraca dele.
 
 Modelo: Claude Sonnet 5 · vetor: `git log`/`git ls-remote origin main` confirmando o commit publicado; `git ls-remote --short` rodado de verdade (não assumido) confirmando a flag inexistente; dois testes reais rodados e log conferido depois de cada um, um deles contra clone descartável com commit não empurrado, apagado ao final. Turno desta sessão: t=1 (contado no contexto).
+
+(215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
+
+**O erro:** PROJETO.md, seção "Memória e hidratação", dizia "A janela de injeção é de 30 linhas do fim de MEMÓRIAS. Entradas longas não chegam inteiras ao contexto — escreva contando com isso." Essa frase é injetada em `.hermes.md`, no contexto de todo modelo, toda sessão — e instruía escrever curto por um motivo que não existe no mecanismo atual.
+
+**Medido de verdade, não assumido:** `.githooks/gerar-hermes-md.sh` (função `janela_memorias`) acumula ENTRADAS INTEIRAS de trás pra frente até `JANELA_ORCAMENTO_CHARS=25000` caracteres — nunca corta uma entrada no meio; se a última sozinha já estourar o orçamento, entra inteira do mesmo jeito. Contado direto no `.hermes.md` publicado agora: 9 entradas completas na janela, (205) a (213), nenhuma cortada. `.hermes.md` inteiro tem 16.713 palavras.
+
+**Causa provável, registrada sem afirmar como fato:** a frase de 30 linhas descreve um desenho anterior ao hook por orçamento de caracteres — não foi atualizada quando o mecanismo mudou. `lacuna`: não achei o commit exato que introduziu o orçamento por entrada nem quando a frase de 30 linhas devia ter sido revisada e não foi.
+
+**Corrigido em PROJETO.md** com o comportamento real e a data da medição, mantendo a entrada antiga implicitamente superada por esta (Regra 4 — correção é entrada nova, nunca edição do que já está lá; PROJETO.md em si não é MEMÓRIAS, mas descreve o mecanismo e é ele que estava errado, corrigido no lugar certo).
+
+Modelo: Claude Sonnet 5 · vetor: `.githooks/gerar-hermes-md.sh` lido linha a linha (não resumido de memória); contagem de entradas na janela feita com `awk` contra o `.hermes.md` real gerado após o commit (214); `wc -w .hermes.md` rodado direto, não estimado. Turno desta sessão: t=1 (contado no contexto).

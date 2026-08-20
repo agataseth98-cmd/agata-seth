@@ -198,7 +198,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (182) DIÁRIO — 15/08/2026 · Passo 3 (Conselho Remoto), levantamento de transport …
 (183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — …
 (184) DIÁRIO — 15/08/2026 · C3, portões confirmados AO VIVO (não só lidos) — os …
-(185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idêntico nas 3), placar 1 acerto bem fundamentado, 1 erro real (não fabricação — investigado a fundo antes de rotular), 14 sem convergência; A2 falha pela QUINTA vez, quinta causa diferente
+(185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idênti …
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrada nova, (186) não editada. Linha do B0 refeita com granularidade real, denominador exato (240, não "~80"), variável do C4 redescrita com honestidade (não isola treino), 12 falhas do C4 decompostas, ressalva da exclusão de C4/V1 movida pra dentro da mesma frase do número de fabricação
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
@@ -228,3 +228,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem 429) mas gastou o orçamento inteiro tentando calcular hash de cabeça — achado real de bug, corrigido (thinking desligado); reenvio único com formato junto, ordenado por REGRAS, bateu em 429 de novo duas vezes — ainda sem parecer válido
 (213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do próprio cabeçalho dizer que não — auto-push removido, script virou só leitura
+(215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
