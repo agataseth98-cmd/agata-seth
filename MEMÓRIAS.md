@@ -3444,3 +3444,15 @@ Modelo: Claude Sonnet 5 · vetor: `.githooks/gerar-hermes-md.sh` lido linha a li
 **Testado antes de comitar, três casos, contra o módulo importado (sem chamada de rede real):** (1) estado limpo → `checar_backoff()` = 0, chamada liberada. (2) uma falha 429 → ainda 0, abaixo do limiar de 2. (3) segunda falha 429 seguida → `checar_backoff()` = 899s (~15 min), backoff ativo, log escrito. (4) uma chamada sem 429 depois disso → contador zera, `checar_backoff()` volta a 0. Os quatro passaram. Artefatos do teste (`.backoff-estado.json`, `backoff.log`) apagados depois — não eram eventos reais, não deviam sujar o histórico do mecanismo.
 
 Modelo: Claude Sonnet 5 · vetor: `ast.parse` confirmando sintaxe antes de rodar; os 4 casos de teste rodados de verdade importando o módulo real (`importlib`), asserts checados, não só lidos; estado de teste conferido no disco (`cat .backoff-estado.json`) antes de apagar. Turno desta sessão: t=1 (contado no contexto).
+
+(217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só-HTTP ganha jeito de detectar versão velha
+
+**Problema, MEMÓRIAS (156):** `raw.githubusercontent.com` fica em cache de CDN 1-2 min depois de um push. Uma sessão sem a Máquina (sem `git ls-remote`) não tinha como saber se o que acabou de buscar era o conteúdo novo ou o cache velho.
+
+**Mecanismo adicionado, item 4 do documento do Humano, sugestão do Marcos:** o prompt de carregamento (arquivo à parte, fora deste repositório, mantido pelo Humano — `PROMPT DE CARREGAMENTO — Sistema Agata` na Área de trabalho) passa a carregar o SHA de commit esperado no momento em que foi escrito, mais a instrução de conferir `https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main` (API do GitHub, endpoint diferente do raw, não sofre o mesmo cache medido em (156)) e comparar o campo `sha`. Testado ao vivo: o endpoint respondeu com o SHA correto do HEAD no momento da checagem — confirmado, não assumido.
+
+**Limite, registrado sem suavizar:** o SHA impresso é uma foto do momento em que o prompt foi escrito — fica velho a cada push seguinte, e nada atualiza esse arquivo sozinho (ele vive fora do git, mantido manualmente). Não substitui `git ls-remote`/`git ls-tree` onde a Máquina existe — cobre só quem não a tem, exatamente o caso do documento do Humano.
+
+**Achado à parte, fora do pedido original mas teve que ser resolvido pra editar o arquivo:** o prompt na Área de trabalho estava com o texto embaralhado/duplicado a partir de certo ponto — provavelmente o mesmo tipo de corrupção de copiar-colar já visto antes com acentuação em português. Reescrito do zero, preservando o conteúdo e a intenção do original (comparado contra REGRAS.md e a seção "Fonte canônica" de PROJETO.md pra manter consistência), verificado como UTF-8 válido com acentos intactos (`file` + grep de caracteres acentuados) depois de escrito.
+
+Modelo: Claude Sonnet 5 · vetor: `curl` real contra a API do GitHub, SHA comparado contra `git ls-remote origin main` na Máquina, não assumido igual; arquivo reescrito conferido com `file` e contagem de caracteres acentuados depois de salvar. Turno desta sessão: t=1 (contado no contexto).

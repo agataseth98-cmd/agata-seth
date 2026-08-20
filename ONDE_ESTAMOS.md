@@ -39,6 +39,11 @@ O robô do Conselho Remoto agora se protege sozinho: se o outro lado
 recusar duas vezes seguidas por sobrecarga, ele espera 15 minutos antes
 de tentar de novo, em vez de insistir sem parar.
 
+O texto que você cola numa IA na nuvem pra ela entrar no sistema (na Área
+de trabalho) estava com trechos embaralhados — reescrito do zero, e agora
+também avisa a IA qual era o commit mais recente quando o texto foi
+escrito, pra ela perceber se está lendo uma cópia desatualizada.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 
@@ -49,4 +54,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 09:30.
+20/08/2026, 09:38.
