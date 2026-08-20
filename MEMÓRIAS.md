@@ -3566,3 +3566,23 @@ Backoff conferido antes de chamar: sem arquivo de estado (`.backoff-estado.json`
 **A medida que importa:** uma invocação, um parecer completo, zero idas e vindas de copiar-e-colar do Humano — o script fez a chamada, salvou a resposta crua e validou o formato sozinho, do pedido escrito ao arquivo final.
 
 Modelo: Claude Sonnet 5 · vetor: `python3 scripts/conselho_remoto.py` rodado de verdade contra a API real, não simulado; `sha256sum` de REGRAS.md/MEMÓRIAS.md calculado na Máquina antes de atualizar a âncora do pedido; conteúdo do JSON de resposta lido direto do arquivo salvo, não do stdout do script. Turno desta sessão: t=3 (contado no contexto).
+
+(226) DIÁRIO — 20/08/2026 · Âncora de SHA passa a ser gerada automaticamente — prompt de carregamento movido pra dentro do repo, achado real de auto-referência resolvido com atraso de 1 commit aceito
+
+**Motivo:** a âncora de SHA de (217) era atualizada à mão e apodrecia — mesma doença que a linha 44 de PROJETO.md já teve em (215). Item 2 do documento do Humano pediu o hook gerar a âncora sozinho, como já gera `.hermes.md` e o índice.
+
+**Decisão tomada ao vivo, mudou o desenho no meio do trabalho:** a primeira versão manteve o prompt fora do repo (Área de trabalho), com `.githooks/post-commit` escrevendo nele por caminho absoluto — implementada e testada (positivo e negativo, contra o arquivo real com backup). Perguntado, o Humano preferiu mover o prompt pra dentro do repositório. Isso abriu um problema técnico real, não previsto na proposta original: **um commit não pode embutir o próprio SHA** — a hash de um commit depende do seu conteúdo, então um arquivo dentro da árvore não pode conter corretamente o SHA do commit que o inclui. Duas saídas honestas foram levadas ao Humano; escolhida: **ficar sempre até 1 commit atrasada**, 100% automática, em vez de exigir um commit manual extra pra fechar o loop.
+
+**O que existe agora:** `PROMPT_CARREGAMENTO.md`, canônico na raiz do repo (movido da Área de trabalho, que ficou com um bilhete apontando pro novo lugar). `.githooks/pre-commit` ganhou um passo novo: antes de cada commit, `scripts/atualizar_ancora_prompt.py` reescreve só as duas linhas entre os marcadores `ANCORA-SHA` com o SHA do HEAD anterior — nunca toca o resto do arquivo (documento editado à mão), aborta sem escrever se os marcadores sumirem. Falha aqui só avisa, nunca bloqueia o commit.
+
+**Classificação de quarentena, decidida e registrada:** `PROMPT_CARREGAMENTO.md` fica SEM quarentena (grupo do `ONDE_ESTAMOS.md`), apesar de "dirigir" um modelo — ao contrário de `config/agata-consolidacao.prompt.txt` (que dirige um processo desatendido, sem Humano revisando antes de agir), este prompt é sempre lido por um Humano que cola o texto numa sessão nova e audita cada resposta. `.githooks/pre-commit`, `scripts/atualizar_ancora_prompt.py` e `PROJETO.md` (documentação do mecanismo) SÃO quarentenados — cobertos por este commit.
+
+**Achado extra, corrigido no caminho, não escondido:** o texto do prompt ainda dizia "últimas 30 linhas de MEMÓRIAS.md" — a mesma frase errada que (215) já tinha corrigido em PROJETO.md, nunca propagada pro prompt externo. Corrigida junto, mesma classe de decadência que motivou este item inteiro.
+
+**Testado antes do commit:** positivo (marcadores presentes → âncora atualizada, resto do arquivo intocado, conferido linha a linha) e negativo (arquivo sem marcadores → aborta, `exit 1`, nada escrito) — contra o arquivo real, com backup feito antes de qualquer edição. Sintaxe do hook checada (`bash -n`). Não testado contra clone descartável — mudança pequena, um único arquivo-alvo, sem side-effect em canon.
+
+**Fluxo de quarentena, quarto uso real:** três perguntas feitas ao vivo nesta sessão (quem cria o marcador; onde o prompt vive; como resolver a auto-referência), respostas registradas em `propostas/aplicadas/APROVADO-ancora-sha-automatica`.
+
+Modelo: Claude Sonnet 5 · vetor: teste real (positivo/negativo) do script contra o arquivo em disco antes de integrar ao hook; `bash -n` no hook; `git diff --cached` real gerou o `.diff`; leitura de `.githooks/pre-commit`/`post-commit` linha a linha antes de decidir onde o passo entra. Turno desta sessão: t=1 (contado no contexto — nota de correção abaixo).
+
+**Correção sobre (223)-(225):** aquelas três entradas foram escritas antes da minha primeira resposta ao Humano nesta conversa e cada uma levou um `t=` diferente (1, 2, 3) — errado; "turno" conta respostas ao Humano, e nenhuma resposta tinha sido enviada ainda. As quatro entradas (223)-(226) pertencem todas ao mesmo t=1. Conteúdo e vetores de verificação de (223)-(225) continuam corretos — só o rótulo de turno errou. Registrado aqui como correção nova, Regra 4 — as entradas antigas não foram editadas.

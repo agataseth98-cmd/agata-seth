@@ -1,0 +1,120 @@
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index 16358a9..33af8c9 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -15,3 +15,21 @@ if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓR
+   bash .githooks/gerar-hermes-md.sh
+   git add .hermes.md INDICE_MEMORIAS.md
+ fi
++
++# Âncora de SHA em PROMPT_CARREGAMENTO.md (item 2, 20/08/2026, ordem do
++# Humano). Sempre o SHA do HEAD ANTES deste commit -- um commit não pode
++# embutir o próprio SHA (auto-referência), então fica até 1 commit
++# atrasado, nunca mais, e isso está documentado no próprio arquivo.
++# Falha aqui só avisa, nunca bloqueia o commit -- não é um controle de
++# segurança, é conveniência pra sessões só-HTTP.
++if [ -f PROMPT_CARREGAMENTO.md ]; then
++  HEAD_ANTERIOR=$(git rev-parse HEAD 2>/dev/null || echo "")
++  if [ -n "$HEAD_ANTERIOR" ]; then
++    AGORA=$(date '+%d/%m/%Y %H:%M %z' | sed -E 's/([+-][0-9]{2})00$/\1/')
++    if python3 scripts/atualizar_ancora_prompt.py PROMPT_CARREGAMENTO.md "$HEAD_ANTERIOR" "$AGORA"; then
++      git add PROMPT_CARREGAMENTO.md
++    else
++      echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em PROMPT_CARREGAMENTO.md" >&2
++    fi
++  fi
++fi
+diff --git a/PROJETO.md b/PROJETO.md
+index ac85fb3..6000e0a 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -53,7 +53,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`) — sincronizar contra ele no início de toda sessão, não só na primeira. Achado recorrente com sessões autônomas na nuvem (sem Humano revisando cada resposta): a sincronização falha silenciosamente com frequência — não presuma feita, verifique.
+ - **Fonte canônica (URLs) e atualização:** `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/{REGRAS,PROJETO,MEMÓRIAS}.md`. Primeira sessão: o Humano envia os 3. Depois: o modelo busca das URLs, seguindo a ordem de verificação de REGRAS.md. `atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar hidratação. Nunca sobrescreve história; conflito → para e avisa.
+   **Caveat medido, MEMÓRIAS (156):** `raw.githubusercontent.com` é servido por CDN (Fastly) e pode ficar em cache por alguns minutos após um push, mesmo com cache-busting na query string — confirmado ao vivo, ~1-2 min de defasagem. `git ls-remote`/`git ls-tree` (na Máquina) não sofrem disso, por isso são o método 1 em "Verificação de canônico", superior ao raw. Uma sessão só-HTTP (sem Máquina) verificando *logo depois* de um push pode pegar conteúdo stale sem ter como saber — não é falha de sincronização do modelo, é da fonte.
+-  **Âncora de SHA no prompt de carregamento, 20/08/2026 (item 4 do documento do Humano, sugestão do Marcos, MEMÓRIAS (217)).** O prompt de carregamento usado por sessões só-HTTP (sem Máquina, fora deste repositório — hoje um arquivo à parte, mantido pelo Humano) passa a carregar o SHA de commit esperado no momento em que foi escrito. Uma sessão só-HTTP pode consultar `https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main` (endpoint da API do GitHub, não o CDN do raw) e comparar o campo `sha` contra o valor impresso no prompt — divergência é sinal de que o prompt está desatualizado ou o raw pode estar em cache, não prova sozinha de nenhum dos dois. Testado ao vivo em 20/08/2026: o endpoint respondeu com o SHA correto do HEAD no momento da checagem. **Não substitui `git ls-remote`/`git ls-tree` onde a Máquina existe** — esses continuam método 1, superior. O SHA impresso no prompt precisa ser atualizado manualmente a cada revisão relevante do prompt; não há mecanismo automático que o mantenha em dia (o arquivo vive fora deste git).
++  **Âncora de SHA no prompt de carregamento, 20/08/2026 (item 4 do documento do Humano, sugestão do Marcos, MEMÓRIAS (217); geração automática item 2, 20/08/2026, MEMÓRIAS (226)).** O prompt de carregamento usado por sessões só-HTTP (sem Máquina) carrega o SHA de commit esperado no momento em que foi escrito. Uma sessão só-HTTP pode consultar `https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main` (endpoint da API do GitHub, não o CDN do raw) e comparar o campo `sha` contra o valor impresso no prompt — divergência é sinal de que o prompt está desatualizado ou o raw pode estar em cache, não prova sozinha de nenhum dos dois. Testado ao vivo em 20/08/2026: o endpoint respondeu com o SHA correto do HEAD no momento da checagem. **Não substitui `git ls-remote`/`git ls-tree` onde a Máquina existe** — esses continuam método 1, superior.
++  **Mecanismo, desde 20/08/2026:** o prompt agora é canônico dentro do repo (`PROMPT_CARREGAMENTO.md`, movido da Área de trabalho — ver "Quarentena estrutural" pra classificação SEM quarentena). `.githooks/pre-commit` reescreve as duas linhas entre os marcadores `ANCORA-SHA` a cada commit, via `scripts/atualizar_ancora_prompt.py` — nunca toca o resto do arquivo, aborta sem escrever se os marcadores sumirem. **Limite conhecido, não escondido:** um commit não pode embutir o próprio SHA (auto-referência) — o valor escrito é sempre o do HEAD ANTERIOR ao commit, então fica até 1 commit atrasado, nunca mais. Decisão do Humano: aceitar esse atraso pequeno e documentado em troca de 100% automático, em vez de exigir um commit manual extra pra fechar o loop.
+ 
+ ## Interface
+ Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
+@@ -98,7 +99,7 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
+ ## Quarentena estrutural (P-8)
+ **O buraco, 20/08/2026 (item 6 do documento do Humano, proposta do Marcos, MEMÓRIAS (218)).** Até aqui, o executor escreve em canon, comita e empurra — o Humano fica sabendo depois. Nenhuma das sete checagens do perímetro cobria isso, e é a mesma classe do incidente registrado em MEMÓRIAS (214) (`sincronizar-estado.sh` publicando sozinho apesar do próprio cabeçalho dizer que não).
+ 
+-**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não.
++**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado), `PROMPT_CARREGAMENTO.md` (movido pra dentro do repo em 20/08/2026, item 2 do documento do Humano). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não. `PROMPT_CARREGAMENTO.md` fica fora da quarentena apesar de "dirigir" um modelo, ao contrário de `config/agata-consolidacao.prompt.txt`: a diferença é que este último dirige um processo DESATENDIDO (systemd timer, sem Humano revisando antes de agir), e o prompt de carregamento é sempre lido por um Humano que cola o texto numa sessão nova e revisa cada resposta — mais perto de `ONDE_ESTAMOS.md` (registro pro Humano) do que de um script autônomo.
+ 
+ **Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova criando `propostas/APROVADO-<nome>`. `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
+ 
+diff --git a/scripts/atualizar_ancora_prompt.py b/scripts/atualizar_ancora_prompt.py
+new file mode 100755
+index 0000000..f2f986f
+--- /dev/null
++++ b/scripts/atualizar_ancora_prompt.py
+@@ -0,0 +1,65 @@
++#!/usr/bin/env python3
++"""Atualiza só o bloco delimitado ANCORA-SHA em PROMPT_CARREGAMENTO.md
++-- item 2, 20/08/2026, ordem do Humano. Chamado por .githooks/pre-commit,
++antes do commit existir.
++
++Limite conhecido, aceito por decisão do Humano: um commit não pode
++embutir o próprio SHA (problema de auto-referência). O valor escrito
++aqui é sempre o SHA do HEAD ANTES deste commit -- fica até 1 commit
++atrasado, nunca mais, e o próprio texto do arquivo diz isso.
++
++Nunca toca o resto do arquivo (documento editado à mão pelo Humano).
++Se os marcadores não existirem, ABORTA sem escrever nada -- silêncio
++alto (stderr + exit != 0), nunca corrompe silenciosamente um arquivo
++que não reconhece.
++
++Uso: atualizar_ancora_prompt.py <caminho-do-prompt> <sha-do-head-anterior> <data-hora-local>
++"""
++import re
++import sys
++
++INICIO = "<!-- ANCORA-SHA:INICIO"
++FIM = "<!-- ANCORA-SHA:FIM -->"
++
++
++def main():
++    if len(sys.argv) != 4:
++        print(f"uso: {sys.argv[0]} <caminho> <sha-anterior> <data-hora>", file=sys.stderr)
++        return 2
++
++    caminho, sha, data_hora = sys.argv[1], sys.argv[2], sys.argv[3]
++
++    with open(caminho, encoding="utf-8") as f:
++        texto = f.read()
++
++    padrao = re.compile(
++        re.escape(INICIO) + r".*?" + re.escape(FIM),
++        re.DOTALL,
++    )
++    if not padrao.search(texto):
++        print(f"ABORTADO: marcadores ANCORA-SHA não encontrados em {caminho} -- nada escrito.", file=sys.stderr)
++        return 1
++
++    novo_bloco = (
++        f"{INICIO} (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, "
++        f"o resto do arquivo é livre) -->\n"
++        f"  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit "
++        f"atrasado, nunca mais -- ver PROJETO.md, \"Memória e hidratação\"): {sha}\n"
++        f"  Escrito em: {data_hora}\n"
++        f"{FIM}"
++    )
++    texto_novo = padrao.sub(novo_bloco, texto, count=1)
++
++    if texto_novo == texto:
++        print("pre-commit: âncora já estava atualizada, nada mudou.")
++        return 0
++
++    with open(caminho, "w", encoding="utf-8") as f:
++        f.write(texto_novo)
++
++    print(f"pre-commit: âncora de SHA atualizada em {caminho} -- {sha[:7]}, {data_hora}")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())

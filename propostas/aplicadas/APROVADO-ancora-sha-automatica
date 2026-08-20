@@ -1,0 +1,34 @@
+APROVADO — ancora-sha-automatica
+
+Aprovação: confirmada pelo Humano ao vivo, em tempo real, nesta sessão
+(20/08/2026), via AskUserQuestion -- mesmo padrão de
+propostas/aplicadas/APROVADO-regra-estilo,
+propostas/aplicadas/APROVADO-p9-servico-declarado e
+propostas/aplicadas/APROVADO-p8-escopo-config.
+
+Três perguntas feitas em sequência, porque o desenho mudou no meio da
+conversa (o Humano preferiu mover o prompt pra dentro do repo, o que
+abriu um problema técnico real de auto-referência não previsto na
+primeira proposta):
+1. "Quem cria o marcador?" -- resposta: "Autorização ao vivo, eu crio
+   agora" (o executor, ou seja, este arquivo).
+2. "O prompt fica onde está (Área de trabalho) ou entra no repo?" --
+   resposta: "Mover o prompt para dentro do repositório."
+3. "Um commit não pode embutir o próprio SHA -- sempre atrasado 1
+   commit, ou exige commit manual extra?" -- resposta: "Fica sempre 1
+   commit atrasada", 100% automático via .githooks/pre-commit.
+
+Item 2 do documento do Humano de 20/08/2026 ("AO EXECUTOR — LOTE
+AUTORIZADO 20/08"). Cobre: PROMPT_CARREGAMENTO.md criado (movido da
+Área de trabalho, classificado SEM quarentena -- ver PROJETO.md),
+.githooks/pre-commit (novo passo), scripts/atualizar_ancora_prompt.py
+(novo), PROJETO.md (documentação do mecanismo e da classificação).
+
+Testado antes deste commit: positivo (marcadores presentes, âncora
+atualizada, resto do arquivo intocado) e negativo (arquivo sem
+marcadores, aborta sem escrever) -- contra arquivo real com backup
+prévio, não contra clone descartável (mudança pequena, sem
+side-effect fora do único arquivo-alvo).
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/ancora-sha-automatica.diff, MEMÓRIAS (226).
