@@ -225,6 +225,16 @@ Só a fase atual e a seguinte têm gates e prazo. O resto é bússola, não back
 
 ## Mudança estrutural
 REGRAS, ou algo grande do PROJETO → **segunda opinião de outro modelo** ou **o Humano assume o risco por escrito em MEMÓRIAS**. Ajuste pequeno → faça e registre.
+
+**Portão das três perguntas, antes de pedir autorização** (origem: (228)-(230), 20/08/2026, confirmado pelo Humano). Quem propõe pergunta ao Humano, sempre as três, sempre nesta ordem, uma de cada vez:
+1. Desfaço sozinho, ou preciso de alguém de fora? — *reversibilidade.*
+2. O que mais isto toca, além do que pretendo mudar? — *alcance.*
+3. Eu saberia se quebrasse, ou só descubro quando for tarde? — *silêncio.*
+
+Não são genéricas: cada uma já custou caro uma vez neste projeto. A primeira é por que existe quarentena e backup. A segunda é por que a P-8 existe (218). A terceira é por que a P-9 existe (221). Perguntar de novo, sempre as mesmas três, é mais barato que reaprender cada uma na marra outra vez.
+
+Não é checklist pra marcar rápido — é pausa de verdade antes da autorização, nunca substituto dela.
+
 Não infle as REGRAS por reflexo: regra que se descumpre não precisa ser reescrita, precisa ser cumprida.
 
 ---

@@ -3658,3 +3658,23 @@ Modelo: Claude Sonnet 5 · vetor: leitura direta de `~/.hermes/config.yaml` e do
 **O que continua em aberto:** a proposta do "novo portão de segurança" (três perguntas antes de mudança estrutural) — a confirmação de hoje foi sobre o fato da conversa ter acontecido, não sobre adotar a regra. Perguntado à parte.
 
 Modelo: Claude Sonnet 5 · vetor: resposta direta do Humano nesta conversa, à pergunta feita em (229). Turno desta sessão: t=4 (contado no contexto).
+
+(231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenhado a partir de incidentes reais deste projeto, não copiado da proposta que chegou de fora
+
+**Motivo:** (229)/(230) confirmaram que a proposta de um "portão de segurança" (três perguntas antes de o Humano autorizar mudança estrutural) era real, vinda de uma sessão remota. O Humano pediu, nesta conversa, pra não adotar como veio — "melhore, leve ao estado da arte... elegante, refinada, prazerosa e musical."
+
+**Desenho:** as três perguntas do bloco original não vinham com conteúdo específico ("três perguntas de segurança por arquitetura"). Escritas do zero, cada uma ancorada num incidente que este projeto já pagou caro, não em teoria genérica de arquitetura:
+1. **Reversibilidade** — "desfaço sozinho, ou preciso de alguém de fora?" — a mesma pergunta que justifica ter quarentena e backup.
+2. **Alcance** — "o que mais isto toca, além do que pretendo mudar?" — a pergunta que a P-8 existe pra forçar (218): executor mudando canon sem o Humano perceber o alcance.
+3. **Silêncio** — "eu saberia se quebrasse, ou só descubro quando for tarde?" — a pergunta que a P-9 existe pra forçar (221): `agata-consolidacao.timer` morto dias sem ninguém notar.
+
+**Mecanismo:** quem PROPÕE pergunta ao Humano, uma de cada vez, sempre as três, sempre nesta ordem, antes de pedir autorização — não é o Humano respondendo sozinho um formulário, é diálogo. Registrado em REGRAS.md, "Mudança estrutural".
+
+**O portão aplicado a si mesmo, antes de escrever isto em canon:**
+1. Desfaço sozinho? Sim — é entrada nova em REGRAS.md; revogar é outra entrada nova (Regra 4), não mexe em nada mecânico do sistema.
+2. O que mais toca? Só a seção "Mudança estrutural" — nenhum script, hook ou comportamento automático muda.
+3. Eu saberia se quebrasse? Sim — vira ritual vazio do jeito que o hedge de (157)/(158) virou; o sinal seria uma proposta chegando sem as três perguntas, ou respostas em piloto automático.
+
+**Fluxo de quarentena, sétimo uso real:** autorização ao vivo nesta conversa, a mesma mensagem que pediu a elevação do desenho. `propostas/aplicadas/APROVADO-portao-tres-perguntas`.
+
+Modelo: Claude Sonnet 5 · vetor: `grep` real em REGRAS.md pra confirmar a seção "Mudança estrutural" antes de editar; citações de (218)/(221) conferidas contra o texto real dessas entradas, não de memória. Turno desta sessão: t=5 (contado no contexto).

@@ -214,7 +214,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo …
 (199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md …
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — …
-(201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
+(201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto cur …
 (202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
 (203) DIÁRIO — 17/08/2026 · P-7 (checagem de citação) implementado e testado, NÃO habilitado no hook — taxa de falso positivo medida contra o corpus real: 1 em 5 citações no formato `(n - síntese)`, achado explicado, não é defeito do canon
 (204) DIÁRIO — 17/08/2026 · P-7 HABILITADO no pre-commit — crase vira exemplo protegido, segundo número no mesmo parêntese passa a ser validado, taxa de (203) recontextualizada como amostra pequena; esta própria entrada é o "verde uma vez" exigido antes de ligar
@@ -244,3 +244,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
 (229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
 (230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
+(231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenhado a partir de incidentes reais deste projeto, não copiado da proposta que chegou de fora

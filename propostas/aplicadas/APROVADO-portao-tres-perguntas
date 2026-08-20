@@ -1,0 +1,25 @@
+APROVADO — portao-tres-perguntas
+
+Aprovação: autorização ao vivo nesta conversa. O Humano confirmou em
+(230) que a disputa entre modelos por trás da proposta original era
+real, e a esta mensagem seguinte pediu explicitamente a adoção,
+elevada: "Melhore, leve ao estado da arte, guie o humano e faça de
+maneira elegante refinada, prazerosa e musical" — mesmo padrão de
+autorização ao vivo já usado seis vezes nesta sessão, desta vez com
+instrução explícita de não apenas copiar a proposta recebida, mas
+refiná-la.
+
+Cobre: REGRAS.md, seção "Mudança estrutural" — "Portão das três
+perguntas" acrescentado.
+
+Desenho, não cópia literal do que veio no bloco "Qwen3.7": as três
+perguntas originais ("três perguntas de segurança por arquitetura",
+sem conteúdo especificado) foram substituídas por três perguntas
+concretas, cada uma ancorada num incidente já registrado neste projeto
+-- reversibilidade (quarentena/backup), alcance (P-8, MEMÓRIAS (218)),
+silêncio (P-9, MEMÓRIAS (221)). Portão de três perguntas ao vivo, não
+checklist de três aprovações passivas -- quem propõe pergunta, o
+Humano responde, uma de cada vez.
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/portao-tres-perguntas.diff, MEMÓRIAS (231).
