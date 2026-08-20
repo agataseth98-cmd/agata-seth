@@ -204,7 +204,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição in …
 (189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`mem …
 (190) DIÁRIO — 15/08/2026 · Passo 3 (saneamento): varredura de segredo testada c …
-(191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 controles declarados, cada um testado com caso positivo e negativo em repo isolado — 2 bugs reais achados e corrigidos no processo (ARG_MAX estourado, `trap RETURN` vazando pra função seguinte). Primeira execução completa: 5 OK, 1 FALHOU (P-2, esperado — Passo 4 ainda não concluído pelo Humano)
+(191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 cont …
 (192) DIÁRIO — 16/08/2026 · Passo 4 (saneamento) FECHADO: regra sudo NOPASSWD órfã removida de `/etc/sudoers.d/facer` por decisão e execução do Humano; achado extra no caminho — permissão pré-existente errada (644) fazendo `visudo -c` reprovar, diagnosticado antes de qualquer conserto, ramo cosmético confirmado, resolvido com `install` atômico em 0440 root:root; `perimetro.sh` fechou 6/6 e foi amarrado ao pre-commit no mesmo commit desta entrada
 (193) DIÁRIO — 16/08/2026 · Três correções pós-saneamento, ordem do Humano: SKIP/PARCIAL vira terceiro/quarto estado no `perimetro.sh` (nunca somado a OK), auditoria dos 6 controles achou um segundo caso real (P-4 cego pra processos de UID alheio sem root); arquivo de dono root `~/agata/--` achado e reportado, não removido; PROJETO.md reconciliado com (183)-(192), zero aviso de reconciliação
 (194) DIÁRIO — 16/08/2026 · Parte A: P-2 do `perimetro.sh` deixa de tentar `sudo -n -l` (SKIP estrutural sempre) e passa a ler status escrito por mecanismo root separado, orientado a evento (opção D do Humano — hook de pacman); dois artefatos preparados e testados isolados, instalação pendente do Humano (exige root); `--` reportado de novo, ainda não removido
@@ -234,3 +234,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige propostas/APROVADO-<nome> antes de canon mudar comportamento
 (219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do quê, uma ideia por frase, nunca retroativo
 (220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prompt novo, sandbox de kernel, PATH absoluto, testada de verdade
+(221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declarado no PROJETO morre em silêncio

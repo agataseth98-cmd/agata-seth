@@ -3506,3 +3506,17 @@ Modelo: Claude Sonnet 5 · vetor: proposta escrita e mantida fora do índice do 
 Timer mascarado no início desta sessão como rede de segurança (ordem do documento), desmascarado só depois de todo o acima confirmado — religado com `systemctl --user link` + `enable` + `start`, verificado ativo, próximo disparo 23h hoje.
 
 Modelo: Claude Sonnet 5 · vetor: sete execuções reais da unidade sandboxed (`journalctl --user -u agata-consolidacao.service`), duas delas com falha real reproduzida de propósito; teste direto de escrita via `systemd-run` com os mesmos parâmetros de sandbox, positivo (propostas/) e negativo (MEMÓRIAS.md, erro real de filesystem); `PRAGMA integrity_check` no `state.db` depois das falhas; hash dos quatro canônicos conferido igual antes e depois de toda a sequência; a alegação falsa do modelo sobre o arquivo escrito foi verificada com `ls`/`cat`, não aceita por confiança. Turno desta sessão: t=4 (contado no contexto).
+
+(221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declarado no PROJETO morre em silêncio
+
+**Motivo direto:** `agata-consolidacao.timer` (219) estava falhando havia dias sem que nenhuma das oito checagens do perímetro percebesse — PROJETO.md listava a unidade entre os serviços da máquina como se funcionasse. Controle que não avisa quando falha é pior que controle nenhum, doutrina já adotada esta semana.
+
+**O que P-9 checa, escopo fechado à mão (mesma doutrina de P-3/P-4):** unidades de sistema (`ollama.service`), unidades de usuário (`hermes-gateway.service`, `agata-consolidacao.timer`) e containers Docker (`open-webui`, `kokoro-tts`) — a lista exata de "Serviços (boot)" em PROJETO.md. Avisa se uma unidade está `failed` ou `disabled`/`masked`; avisa se um container declarado não aparece em `docker ps`. **Fica de propósito FORA:** `agata-consolidacao.service` (o oneshot em si) — seu repouso normal depois de rodar com sucesso é `inactive`, checar isso daria falso alarme a cada execução; o que importa é o TIMER que agenda, não o resultado da última corrida isolada.
+
+**AVISA, nunca falha** — mesma lógica de P-6: serviço caído não é motivo pra travar a escrita do canon.
+
+**Testado, positivo e negativo, taxa de falso positivo relatada:** contra o estado real da máquina (achou o timer mascarado — verdade, eu tinha mascarado como rede de segurança no início da sessão; nada mais). Unidade de sistema inexistente forçada → avisou. Container real rodando (`open-webui`) → não avisou, zero falso positivo. Container inexistente forçado → avisou. `ollama.service` e `hermes-gateway.service` reais, saudáveis, confirmados fora do output — checado explicitamente com `systemctl is-active`/`is-enabled` direto, não só pela ausência de aviso.
+
+**Fluxo de quarentena, segundo uso real (depois do bootstrap de (218) e do primeiro uso de (219)):** proposta escrita (`propostas/p9-servico-declarado.diff`), deixada sem stage, Humano perguntado ao vivo nesta conversa sobre quem cria o marcador, resposta a mesma do item anterior — autorização ao vivo, criada pelo executor só depois da confirmação.
+
+Modelo: Claude Sonnet 5 · vetor: quatro casos de teste rodados de verdade contra o estado real e contra listas forçadas, não apenas lidos; `systemctl is-active`/`is-enabled` conferido diretamente pra `ollama.service` e `hermes-gateway.service`, não presumido pela ausência de aviso. Turno desta sessão: t=5 (contado no contexto).

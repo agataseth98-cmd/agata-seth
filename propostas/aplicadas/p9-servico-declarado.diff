@@ -1,0 +1,85 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 38631bd..5f0f852 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -296,6 +296,67 @@ p8_quarentena() {
+   return "$ruim"
+ }
+ 
++# --- P-9 -----------------------------------------------------------------
++# Serviço declarado no PROJETO que morreu em silêncio (item 5, documento
++# do Humano 20/08/2026, MEMÓRIAS (221)). agata-consolidacao.service
++# ficou falhando desde data desconhecida (`hermes: comando não
++# encontrado`) e nenhuma das oito checagens anteriores percebeu --
++# PROJETO.md listava a unidade como se funcionasse. Controle que não
++# avisa quando falha é pior que controle nenhum.
++#
++# Escopo fechado, mesma doutrina de P-3/P-4: unidades e containers
++# citados em PROJETO.md, "Serviços (boot)", enumerados à mão -- atualizar
++# esta lista quando aquela linha do PROJETO mudar. AVISA, nunca falha --
++# serviço caído não é motivo pra travar a escrita do canon (mesma lógica
++# de P-6).
++#
++# `agata-consolidacao.service` (o oneshot em si, não o timer) fica de
++# propósito FORA da lista: seu estado de repouso normal depois de rodar
++# com sucesso é "inactive", não "failed" -- checar isso soaria falso
++# alarme a cada execução normal. O que importa pra "vai rodar de novo" é
++# o TIMER que dispara ele, não o resultado da última corrida.
++P9_UNIDADES_SISTEMA=("ollama.service")
++P9_UNIDADES_USUARIO=("hermes-gateway.service" "agata-consolidacao.timer")
++P9_CONTAINERS_DOCKER=("open-webui" "kokoro-tts")
++
++p9_servicos_declarados() {
++  local avisos=0 u estado habilitada rodando
++  for u in "${P9_UNIDADES_SISTEMA[@]}"; do
++    estado="$(systemctl is-active "$u" 2>/dev/null)"
++    if [ "$estado" = "failed" ] || [ "$estado" = "inactive" ]; then
++      echo "AVISO (P-9): unidade de sistema '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl status $u' e reinicie se preciso."
++      avisos=1
++    fi
++    habilitada="$(systemctl is-enabled "$u" 2>/dev/null)"
++    if [ "$habilitada" = "disabled" ] || [ "$habilitada" = "masked" ]; then
++      echo "AVISO (P-9): unidade de sistema '$u' está '$habilitada' -- o que fazer: não volta sozinha num boot, decida se isso é intencional."
++      avisos=1
++    fi
++  done
++  for u in "${P9_UNIDADES_USUARIO[@]}"; do
++    estado="$(systemctl --user is-active "$u" 2>/dev/null)"
++    if [ "$estado" = "failed" ]; then
++      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está 'failed' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
++      avisos=1
++    fi
++    habilitada="$(systemctl --user is-enabled "$u" 2>/dev/null)"
++    if [ "$habilitada" = "disabled" ] || [ "$habilitada" = "masked" ]; then
++      echo "AVISO (P-9): unidade de usuário '$u' está '$habilitada' -- o que fazer: não volta sozinha na próxima sessão, decida se isso é intencional."
++      avisos=1
++    fi
++  done
++  if command -v docker >/dev/null 2>&1; then
++    for u in "${P9_CONTAINERS_DOCKER[@]}"; do
++      rodando="$(docker ps --filter "name=^${u}\$" --format '{{.Names}}' 2>/dev/null)"
++      if [ -z "$rodando" ]; then
++        echo "AVISO (P-9): container '$u', declarado em PROJETO.md, não aparece rodando em 'docker ps' -- o que fazer: 'docker ps -a | grep $u' pra ver se caiu ou nunca subiu."
++        avisos=1
++      fi
++    done
++  fi
++  return 0
++}
++
+ # Imprime o veredito de uma checagem e soma no placar -- único ponto que
+ # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
+ # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
+@@ -362,6 +423,12 @@ main() {
+   p8_quarentena; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-9" "Serviço declarado em PROJETO.md não pode morrer em silêncio" "PROJETO, Serviços (boot)"
++  p9_servicos_declarados
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
+   p6_backup_pendente
+   echo "veredito: AVISO SÓ (nunca falha)"

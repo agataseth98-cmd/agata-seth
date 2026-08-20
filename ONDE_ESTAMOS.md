@@ -66,6 +66,11 @@ sentidos. Achado no caminho: ele já disse "escrevi o arquivo" uma vez
 sem ter escrito nada — sempre confira a pasta, não confie só no que ele
 diz que fez.
 
+Uma checagem nova avisa se algum serviço importante (o robô de
+consolidação, o Ollama, o gateway do Hermes, os containers de voz/
+interface) parar sem ninguém notar — foi exatamente isso que aconteceu
+com a consolidação antes de hoje.
+
 ## Esperando você
 - Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -77,4 +82,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 10:25.
+20/08/2026, 10:35.
