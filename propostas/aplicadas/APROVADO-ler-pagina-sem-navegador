@@ -1,0 +1,25 @@
+APROVADO — ler-pagina-sem-navegador
+
+Aprovação: ordem escrita e datada do Humano, documento "AO EXECUTOR —
+ENSINAR ISTO AO SISTEMA" (20/08/2026, 16:18 -03), que já autorizou o
+conteúdo exato desta mudança: o princípio pro PROJETO com as quatro
+ocorrências nomeadas, a técnica exata de `scripts/ler_pagina.sh` (os
+cinco casos, a regra de nunca confundir casca vazia com ausência de
+conteúdo), e o teste positivo/negativo antes de comitar -- mesmo padrão
+do bootstrap de (218): a autorização já existia em texto, este é o
+registro mecânico dela, não uma autoaprovação por iniciativa própria.
+
+Cobre: PROJETO.md (seção ACB — princípio + descrição do script + os
+dois testes) e scripts/ler_pagina.sh (novo).
+
+Testado antes deste commit: positivo (razionshefa.com.br/pt, CASO 3,
+texto real do site extraído do pacote JS) e negativo (fixture sintética
+local, API sem texto embutido, CASO 4, endereço reportado sem ser
+chamado) -- os dois resultados exatos exigidos pelo documento do
+Humano, registrados na entrada de MEMÓRIAS.
+
+Explicitamente NÃO instalado: Playwright, Puppeteer, Selenium,
+Chromium headless. Fase L do ACB não aberta.
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/ler-pagina-sem-navegador.diff.

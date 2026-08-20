@@ -211,8 +211,8 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (195) DIÁRIO — 16/08/2026 · Parte B: análise pós-expedição sobre os traces já no …
 (196) DIÁRIO — 16/08/2026 · Fase 1 instalada pelo Humano (mecanismo root do P-2 …
 (197) DIÁRIO — 16/08/2026 · `ONDE_ESTAMOS.md` criado, aprovado pelo Humano na pr …
-(198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo Humano: absorve correção de forma/complexidade, não absorve correção de fato nem de formato do pedido — quatro respostas seguidas em produção, 16/08/2026
-(199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md`/`memoria/MEMORY.md` (só leitura, sem proposta de ação) — 0 forks agora, rastreado publicamente 01/07 a 15/08/2026 (45 dias), conteúdo descrito em uma linha por arquivo
+(198) DIÁRIO — 17/08/2026 · Achado sobre o Seth (qwen3.5-9b-64k), relatado pelo …
+(199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md …
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — data do COMMIT, não de escrita; lacuna aberta em (178) fechada por decisão do Humano
 (201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto curto no PROJETO (não em REGRAS); formato de pedido de decisão explicitamente NÃO canonizado ainda
 (202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
@@ -241,3 +241,5 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 desta vez, parecer recebido sobre P-7
 (226) DIÁRIO — 20/08/2026 · Âncora de SHA passa a ser gerada automaticamente — prompt de carregamento movido pra dentro do repo, achado real de auto-referência resolvido com atraso de 1 commit aceito
 (227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronteira escrita, um bug real de portabilidade achado e corrigido, comando único testado de verdade fora do repo, pedido de recursos com números medidos
+(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
+(229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não

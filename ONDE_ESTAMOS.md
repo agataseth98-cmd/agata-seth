@@ -98,6 +98,22 @@ foi testado de verdade rodando fora daqui, funcionou; e um pedido de
 recursos pro Marcos foi escrito com números medidos na sua máquina (não
 chutados) — VRAM, disco, tempo de GPU.
 
+O sistema aprendeu a ler página de site moderno sem abrir navegador —
+testado de verdade em dois casos (um site real, uma página fabricada
+só pra testar). Junto veio uma regra geral, já registrada: antes de
+instalar ferramenta nova, esgotar o que já dá pra fazer com o que
+existe.
+
+Chegou um bloco dizendo vir de outra sessão de IA ("Qwen3.7"),
+contando que você tinha editado um arquivo de configuração (removendo
+personas extras do robô) e que outro modelo tinha questionado isso. A
+parte do arquivo editado é verdade — conferido direto no disco. A
+parte da conversa entre modelos não tem como conferir daqui — pode ter
+acontecido em outro lugar, mas não ficou rastro. E o bloco também
+sugeria uma regra nova (você responder três perguntas antes de
+autorizar mudança estrutural) — isso NÃO foi adotado sozinho, fica
+esperando você decidir.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 - Revisar e mandar (ou não) o pedido de recursos pro Marcos —
@@ -105,6 +121,9 @@ chutados) — VRAM, disco, tempo de GPU.
 - Marcar uma sessão só pra rodar o teste grande com os modelos
   candidatos — leva umas 6 horas de GPU, por isso ficou de fora de
   hoje.
+- Confirmar se a conversa entre modelos sobre a edição do
+  `config.yaml` foi real, e se quer adotar a regra das três perguntas
+  antes de mudança estrutural.
 
 ## Rodando agora
 Nada rodando.
@@ -113,4 +132,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 15:45.
+20/08/2026, 19:59.

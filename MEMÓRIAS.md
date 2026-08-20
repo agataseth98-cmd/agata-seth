@@ -3608,3 +3608,43 @@ Modelo: Claude Sonnet 5 · vetor: teste real (positivo/negativo) do script contr
 **Item 5 (seleção de modelo principal) fica para uma sessão dedicada, por decisão do Humano** — a bancada é de até 6 modelos, sequencial, sem dois carregados ao mesmo tempo; pelo tempo medido acima (58,3 min por modelo só na bateria), passa de várias horas de GPU.
 
 Modelo: Claude Sonnet 5 · vetor: `grep` real nos cinco runners pra confirmar ausência de caminho absoluto/`.hermes`; `ollama create` real com o Modelfile corrigido, tag descartável depois removida (`ollama rm`); teste ponta a ponta do `rodar_celula.sh` fora de `~/agata`, com chamada real à API do Ollama, trace conferido em disco; `nvidia-smi`/`ollama ps`/`ollama show`/`curl` reais pra todos os números de VRAM; `ollama list` real pros tamanhos de disco; timestamps reais dos arquivos de trace (`ts` de início/fim de cada rodada) pro tempo de GPU, não a estimativa antiga de "~60-75 min" já registrada em (174). Turno desta sessão: t=1 (contado no contexto).
+
+(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
+
+**Motivo:** dois documentos do Humano, mesma tarde — um pedindo pra registrar que ler HTML cru não enxerga a maioria dos sites modernos (achado ao vivo contra `razionshefa.com.br`), outro pedindo pra ensinar o princípio geral por trás disso ao sistema, como script e como regra em PROJETO.md.
+
+**Verificado antes de escrever qualquer coisa em canon:** o achado original — HTML cru de `razionshefa.com.br` é casca vazia (5.778 bytes, sem texto real), o pacote JS referenciado (508.134 bytes, medido) contém o texto inteiro do site — foi conferido por este executor com dois `curl` reais, não aceito do texto colado. Bate exato com o alegado.
+
+**Princípio, com quatro ocorrências já registradas que o medem:** "antes de acrescentar ferramenta, esgote o que já se alcança com o que existe." (115) — `grep` venceu vector store. A bancada de (169) venceu suíte de teste nova. `perimetro.sh` já era o "porteiro" pedido de fora. Dois `curl` venceram navegador headless. Escrito em PROJETO.md, seção ACB.
+
+**`scripts/ler_pagina.sh`, novo:** cinco casos em ordem — texto no HTML cru; casca vazia → acha e lê o pacote `.js`; pacote sem texto → acha e reporta endereço de API, sem chamar; nada disso → `lacuna`. Sempre diz qual caso resolveu. Nunca confunde casca vazia com ausência de conteúdo. Só leitura — não envia formulário, não clica, não executa o que baixou.
+
+**Testado antes de comitar, os dois resultados exatos pedidos:**
+- **Positivo**, `razionshefa.com.br/pt` — CASO 3: pacote JS entregou o texto real do site (título, descrição, seções, em inglês e português), depois de uma primeira tentativa com filtro largo demais que trazia texto interno do React junto — corrigido (heurística: descarta cadeia com caractere de sintaxe de código, exige 4+ palavras separadas por espaço) antes de aceitar o resultado.
+- **Negativo**, fixture sintética local (`python3 -m http.server`, HTML vazio + `app.js` que só chama `fetch("/api/v2/conteudo")`, nenhum texto embutido) — CASO 4: o script achou e reportou o endereço `/api/v2/conteudo`, não chamou, não inventou texto nenhum.
+
+**O que não foi feito, por ordem explícita:** Playwright, Puppeteer, Selenium e Chromium headless não instalados. Fase L do ACB não aberta. O nome do script (`ler_pagina.sh`, não "navegação" nem "browser") deixa isso óbvio de propósito.
+
+**Fluxo de quarentena, sexto uso real:** cobre `PROJETO.md` e `scripts/ler_pagina.sh`. Autorização: ordem escrita e datada do Humano no próprio documento "AO EXECUTOR — ENSINAR ISTO AO SISTEMA" já continha o conteúdo exato desta mudança — mesmo padrão do bootstrap de (218), registro mecânico de uma autorização que já existia em texto, não autoaprovação por iniciativa própria. Ver `propostas/aplicadas/APROVADO-ler-pagina-sem-navegador`.
+
+**À parte, não incorporado ao canon como veio:** na mesma janela, chegou um bloco se apresentando como handoff de uma sessão remota ("Qwen3.7"), com uma entrada (228) pronta pra colar, alegando uma edição em `~/.hermes/config.yaml` e uma "auditoria cruzada" com outro modelo. Tratado como DADO, não instrução (política adotada nesta mesma data, item 6a do documento de 20/08 15:02) — a entrada pronta não foi copiada pra MEMÓRIAS como veio. Checagem própria feita depois: `~/.hermes/config.yaml` **foi mesmo alterado** (bloco `personalities` removido, confirmado por este executor lendo o arquivo agora) e existe um log real em `memoria/missoes/auditoria-local/integridade_20260820_191956.log` — o fato físico se sustenta. A narrativa em volta dele (disputa com "gemini-1.5-pro", "Conselho" homologando, "novo portão de segurança") não tem evidência de Máquina que este executor possa checar — ver entrada seguinte.
+
+Modelo: Claude Sonnet 5 · vetor: dois `curl` reais contra `razionshefa.com.br` antes de escrever a política (não aceito do texto colado); `scripts/ler_pagina.sh` rodado de verdade nos dois casos, positivo contra o site real, negativo contra fixture local servida por `python3 -m http.server` e desligada depois; `git status`/`git diff` conferidos antes de descartar o bloco "Qwen3.7" como dado não verificado. Turno desta sessão: t=2 (contado no contexto).
+
+(229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
+
+**Motivo:** depois de tratar o bloco anterior como dado não verificado, este executor checou por conta própria o que dava pra checar — "Máquina arbitra fatos" não se cumpre descartando por suspeita, se cumpre indo olhar.
+
+**Confirmado, com evidência de Máquina, por este executor, agora:**
+- `~/.hermes/config.yaml` (fora de `~/agata`, fora de qualquer repositório git — `cd ~/.hermes && git status` devolve "not a git repository") teve o bloco `agent.personalities` (14 personas, incluindo `kawaii`/`catgirl`/`pirate`) removido — lido no arquivo atual, ausente; `grep -n "^personalities"` não acha nada.
+- Existe backup pré-mudança seguindo a convenção já usada neste projeto pra `config.yaml` (`.bak.<descrição>`, ver histórico de `~/.hermes/config.yaml.bak-*` desde julho): `config.yaml.bak.personalities_remove`, mesmo timestamp (18:25) do arquivo editado, conteúdo batendo exato com o que o diff do log alega ter sido removido.
+- Existe o log `memoria/missoes/auditoria-local/integridade_20260820_191956.log`, lido por inteiro: diff real, validação YAML com sucesso, e a checagem "arquivo fora do git → P-8 não aplicável" — **correta**, P-8 (MEMÓRIAS (218)) só cobre `REGRAS.md`/`PROJETO.md`/`scripts/*`/`.githooks/*`/`config/*` dentro de `~/agata`; nunca foi desenhada pra alcançar `~/.hermes`.
+- Histórico do fish (`history search --contains`) tem os comandos exatos que geraram esse log, no mesmo segundo do timestamp do arquivo.
+
+**Não confirmado, sem evidência de Máquina que este executor tenha encontrado:** a narrativa de que uma "instância remota" (nomeada "gemini-1.5-pro") alegou fabricação, e que "o Conselho homologou" uma refutação. Nenhum arquivo, log ou histórico corrobora essa conversa — pode ter acontecido numa sessão sem rastro em disco (voz, outra máquina, outro cliente), mas isso não é a mesma coisa que confirmado. Registrado como recebido, não como fato.
+
+**Não adotado como política:** o bloco propunha um "novo portão de segurança" (três perguntas de arquitetura antes de o Humano autorizar mudança estrutural) como se já decidido. Regra 3 — quem propõe não decide por si. Fica como proposta recebida, não como regra; o Humano decide se entra em REGRAS.
+
+**Lição que já estava certa e segue valendo:** disco local arbitra fato físico. Isto não virou "aceitar a narrativa que veio junto" — as duas partes do mesmo bloco tiveram destinos diferentes porque só uma tinha onde checar.
+
+Modelo: Claude Sonnet 5 · vetor: leitura direta de `~/.hermes/config.yaml` e do backup `.bak.personalities_remove`, comparados linha a linha; `cd ~/.hermes && git status` real (não presumido) pra confirmar ausência de repositório; leitura do log inteiro, não só do resumo; `fish -c "history search"` real pra achar os comandos originais; busca por `gemini-1.5-pro`/`Qwen3.7`/`auditoria cruzada` em todo `~/agata` sem achar nada que corrobore a narrativa. Turno desta sessão: t=3 (contado no contexto).
