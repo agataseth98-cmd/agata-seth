@@ -1,0 +1,16 @@
+APROVADO — regra-estilo
+
+Aprovação: confirmada pelo Humano ao vivo, em tempo real, nesta sessão
+(20/08/2026), respondendo a uma pergunta explícita do executor sobre
+quem deveria criar este marcador -- não é reuso da ordem original do
+documento de 20/08/2026 nem autoaprovação do executor. É o primeiro uso
+real do fluxo pretendido: o executor propôs (propostas/regra-estilo.diff,
+escrito e deixado sem stage antes de perguntar), o Humano decidiu, o
+marcador registra a decisão.
+
+Pergunta feita e resposta escolhida: "Crie você mesmo, autorizo agora"
+(entre três opções -- criar o executor com autorização ao vivo, o
+Humano criar via comando, ou adiar o item).
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/regra-estilo.diff, MEMÓRIAS (219).

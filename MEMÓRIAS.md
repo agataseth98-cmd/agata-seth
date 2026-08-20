@@ -3474,3 +3474,15 @@ Modelo: Claude Sonnet 5 · vetor: `curl` real contra a API do GitHub, SHA compar
 **Risco residual, não suavizado (registrado em PROJETO.md também):** o marcador de aprovação é um arquivo que o próprio executor tem permissão técnica de criar. P-8 impede automação agindo sem que ninguém perceba — exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real é desatenção, não malícia. Caminho pra mais proteção, se um dia precisar: assinatura que o executor não possa produzir, custo de o Humano digitar senha a cada mudança estrutural.
 
 Modelo: Claude Sonnet 5 · vetor: seis casos de teste rodados de verdade contra clone descartável em `/tmp` (nunca contra `~/agata`), um bug real achado e corrigido antes de qualquer teste passar a valer; diff de `propostas/aplicadas/quarentena-p8.diff` gerado por `git diff --cached`, conferido linha a linha contra o que foi editado, não escrito de memória. Turno desta sessão: t=1 (contado no contexto).
+
+(219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do quê, uma ideia por frase, nunca retroativo
+
+**Decisão do Humano:** REGRAS.md, Regra 5 ("Fale direto"), ganha uma linha de estilo concreta. Adotar: porquê antes do quê · uma ideia por frase · concreto antes de abstrato · nenhum jargão sem definição · conclusão antes do raciocínio. Vale pra entradas NOVAS de MEMÓRIAS, pra PROJETO, e pra qualquer texto dirigido ao Humano.
+
+**Não adotar, e por quê:** parágrafo de uma linha só, repetição pra ênfase, cabeçalho a cada ideia — é o que infla tamanho sem agregar. `.hermes.md` já tinha 16.713 palavras medidas em (215) e entra no contexto de todo modelo, toda sessão — cada entrada mais longa do que precisa é custo pago por todo mundo, sempre.
+
+**Não retroativo, Regra 4 protege:** não reescreve nada já escrito em MEMÓRIAS — linha vermelha, correção é entrada nova, nunca edição do que já está lá. Vale só daqui pra frente.
+
+**Primeiro uso real do fluxo de quarentena (P-8), registrado à parte da decisão de estilo em si:** esta mudança toca `REGRAS.md`, e a exceção de bootstrap do commit (218) foi explícita — "esta exceção não se repete". O executor escreveu a proposta (`propostas/regra-estilo.diff`), deixou sem stage, e perguntou ao Humano quem deveria criar o marcador de aprovação, com três opções: o Humano criar por comando, o executor criar com autorização ao vivo, ou adiar o item. Resposta: autorização ao vivo, criada pelo executor **depois** da confirmação nesta conversa — distinto do bootstrap de (218), onde a aprovação vinha só do texto do documento original. `propostas/aplicadas/APROVADO-regra-estilo` registra a pergunta e a resposta escolhida.
+
+Modelo: Claude Sonnet 5 · vetor: proposta escrita e mantida fora do índice do git até a resposta do Humano chegar nesta mesma conversa, não presumida antes disso; `git diff --cached` real gerou o `.diff`, não escrito à mão. Turno desta sessão: t=2 (contado no contexto).

@@ -52,6 +52,10 @@ sempre foi. Essa mudança de agora foi a primeira e única vez que a trava
 foi ligada sem passar por você — porque a trava não existia ainda pra
 aprovar a si mesma. Registrado por escrito; não vai se repetir.
 
+Uma regra de estilo pra texto novo (explicar o porquê antes do quê, uma
+ideia por frase, nada retroativo) foi aprovada por você nesta conversa
+mesmo — primeiro uso de verdade da trava nova acima.
+
 ## Esperando você
 - Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -63,4 +67,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 09:50.
+20/08/2026, 10:00.

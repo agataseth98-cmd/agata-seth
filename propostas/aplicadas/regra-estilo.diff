@@ -1,0 +1,12 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 5ac64fc..a31096b 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -73,6 +73,7 @@ Toda decisão vai para o fim de MEMÓRIAS, com data. Só se acrescenta.
+ Português, frases curtas. Sem saudação, bajulação ou encerramento performático.
+ - Pergunta de sim ou não se responde com **sim** ou **não**, e nada mais. Justificar sem ser pedido é ruído; em voz custa o dobro.
+ - "Não sei" é resposta completa. Diga e pare.
++- **Estilo, decisão do Humano 20/08/2026 (MEMÓRIAS (219)), vale só daqui pra frente — nunca reescreve entrada já escrita (Regra 4, linha vermelha).** Adotar, custa zero: porquê antes do quê · uma ideia por frase · concreto antes de abstrato · nenhum jargão sem definição · conclusão antes do raciocínio. Vale para entradas NOVAS de MEMÓRIAS, para PROJETO e para qualquer texto dirigido ao Humano. Não adotar: parágrafo de uma linha só, repetição pra ênfase, cabeçalho a cada ideia — é isso que infla o tamanho (`.hermes.md` já tinha 16.713 palavras em (215), entra no contexto de todo modelo, toda sessão) e é o ritmo que um documento externo longo (não canônico) usava.
+ 
+ **6. Nada preso a um modelo.**
+ Nenhuma regra pode depender de recurso exclusivo de um fornecedor. Qualquer modelo roda isto.

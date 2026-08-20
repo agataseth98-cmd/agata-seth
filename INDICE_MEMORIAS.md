@@ -202,7 +202,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminh …
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrad …
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição in …
-(189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
+(189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`mem …
 (190) DIÁRIO — 15/08/2026 · Passo 3 (saneamento): varredura de segredo testada contra 20 commits reais (zero falso positivo) e checagem de sudoers acrescentada à mesma varredura — achado real ao testar: um falso positivo próprio (secure_path lido como caminho) corrigido antes de aceitar, e a checagem de sudoers, correta, bloquearia TODO commit a partir de agora até o Passo 4 decidir — não habilitado no pre-commit ainda, pergunta ao Humano no fim desta entrada; diff do patch do 429 versionado fora do vendorizado
 (191) DIÁRIO — 15/08/2026 · Passo 5 (saneamento): `scripts/perimetro.sh`, 6 controles declarados, cada um testado com caso positivo e negativo em repo isolado — 2 bugs reais achados e corrigidos no processo (ARG_MAX estourado, `trap RETURN` vazando pra função seguinte). Primeira execução completa: 5 OK, 1 FALHOU (P-2, esperado — Passo 4 ainda não concluído pelo Humano)
 (192) DIÁRIO — 16/08/2026 · Passo 4 (saneamento) FECHADO: regra sudo NOPASSWD órfã removida de `/etc/sudoers.d/facer` por decisão e execução do Humano; achado extra no caminho — permissão pré-existente errada (644) fazendo `visudo -c` reprovar, diagnosticado antes de qualquer conserto, ramo cosmético confirmado, resolvido com `install` atômico em 0440 root:root; `perimetro.sh` fechou 6/6 e foi amarrado ao pre-commit no mesmo commit desta entrada
@@ -232,3 +232,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min
 (217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só-HTTP ganha jeito de detectar versão velha
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige propostas/APROVADO-<nome> antes de canon mudar comportamento
+(219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do quê, uma ideia por frase, nunca retroativo
