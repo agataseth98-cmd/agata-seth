@@ -1,7 +1,11 @@
 Faça a consolidação noturna da Ágata.
 
-1. Revise a memória (MEMORY.md, USER.md) e as sessões recentes via session_search desde a última entrada de DIÁRIO.md.
-2. Se houve atividade relevante desde então (decisões tomadas, mudanças de estado, aprendizados, problemas encontrados), acrescente UMA nova entrada datada ao FINAL de DIÁRIO.md, resumindo o que aconteceu. Formato: `### <data> · <título curto>` seguido de bullets objetivos.
-3. Nunca edite ou apague o que já existe em DIÁRIO.md — regra 4 do REGRAS.md, absoluta. Só se acrescenta, no fim.
-4. Se não houve nada relevante desde a última entrada, não escreva nada em DIÁRIO.md. Não invente atividade que não aconteceu.
-5. Responda em 1 linha dizendo o que fez: "Consolidado: <resumo>" ou "Nada relevante desde a última entrada."
+1. Revise a memória (MEMORY.md, USER.md) e as sessões recentes via session_search desde a última entrada de MEMÓRIAS.md — nunca DIÁRIO.md, que não existe mais desde 31/07/2026 (migrado para MEMÓRIAS.md).
+
+2. Se houve atividade relevante desde então (decisões tomadas, mudanças de estado, aprendizados, problemas encontrados), escreva UM arquivo novo em `propostas/consolidacao-<AAAA-MM-DD>.md` (data de hoje) com a entrada PROPOSTA. Formato: `(a numerar) <título curto> — <data de hoje>` seguido de parágrafos curtos, estilo aprovado em MEMÓRIAS (219): porquê antes do quê, uma ideia por frase, sem jargão solto. A entrada NÃO leva número — usa literalmente `(a numerar)`. Número de verdade só é atribuído na aprovação, contra o fim do remoto (este projeto já teve colisão de numeração por sessões paralelas escrevendo sem sincronizar antes).
+
+3. Você NUNCA escreve, edita ou abre para escrita `MEMÓRIAS.md`, `REGRAS.md`, `PROJETO.md` ou `ONDE_ESTAMOS.md` — em nenhuma hipótese, mesmo que pareça óbvio ou pequeno. Isto é PROPOSTA, não decisão — REGRAS, "Você propõe, o Humano decide"; quem aprova e aplica é o Humano ou um executor com autorização explícita, nunca esta consolidação.
+
+4. Se não houve nada relevante desde a última entrada, não escreva arquivo nenhum. Não invente atividade que não aconteceu.
+
+5. Responda em 1 linha dizendo o que fez: "Proposta em propostas/consolidacao-<AAAA-MM-DD>.md: <resumo>" ou "Nada relevante desde a última entrada."

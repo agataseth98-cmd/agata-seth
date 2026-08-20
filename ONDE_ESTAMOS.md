@@ -56,6 +56,16 @@ Uma regra de estilo pra texto novo (explicar o porquê antes do quê, uma
 ideia por frase, nada retroativo) foi aprovada por você nesta conversa
 mesmo — primeiro uso de verdade da trava nova acima.
 
+O robô que resume a memória toda noite estava quebrado — parava sem
+avisar, e o texto que ele seguia mandava escrever num arquivo que não
+existe mais há três semanas. Consertado: agora ele só PROPÕE uma entrada
+(você aprova depois, nunca escreve direto na história), e mesmo que o
+texto dele falhasse em obedecer isso, o sistema operacional já bloqueia
+fisicamente ele de tocar na história — testado de verdade, nos dois
+sentidos. Achado no caminho: ele já disse "escrevi o arquivo" uma vez
+sem ter escrito nada — sempre confira a pasta, não confie só no que ele
+diz que fez.
+
 ## Esperando você
 - Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -67,4 +77,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 10:00.
+20/08/2026, 10:25.

@@ -1,7 +1,12 @@
 [Unit]
-Description=Ágata — consolidação noturna (memória → DIÁRIO)
+Description=Ágata — consolidação noturna (memória → proposta em propostas/, nunca canon direto)
 
 [Service]
 Type=oneshot
 WorkingDirectory=%h/agata
-ExecStart=/bin/bash -lc 'hermes chat -q "$(cat %h/agata/config/agata-consolidacao.prompt.txt)" --cli -Q --source cron'
+ExecStart=/bin/bash -c '/home/orusoua/.local/bin/hermes chat -q "$(cat /home/orusoua/agata/config/agata-consolidacao.prompt.txt)" --cli -Q --source cron'
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/agata/propostas %h/.hermes
+Restart=on-failure
+RestartSec=30

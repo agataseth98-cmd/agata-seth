@@ -32,6 +32,11 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 
 ## Serviços (boot)
 `ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
+
+**`agata-consolidacao.timer`, restaurado em quarentena 20/08/2026 (MEMÓRIAS (220)).** Ficou falhando em silêncio (PATH, prompt apontando pro `DIÁRIO.md` extinto) desde data não determinada — nenhum controle percebeu, motivo de P-9 existir (ver abaixo). Hoje: `ExecStart` usa caminho absoluto do binário, sem depender de PATH/shell de login; roda sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` restrito a `propostas/` e `~/.hermes` — nunca escreve em canon, isso é imposto pelo kernel, não só pelo texto do prompt; `Restart=on-failure`/`RestartSec=30` cobre uma falha intermitente real e reproduzida (contenção de SQLite no `state.db` do Hermes, provável concorrência com `hermes-gateway.service`). O prompt (`config/agata-consolidacao.prompt.txt`) só propõe: escreve `propostas/consolidacao-<data>.md` com entrada `(a numerar)`, nunca toca MEMÓRIAS/REGRAS/PROJETO/ONDE_ESTAMOS. **`lacuna` registrada:** o resumo de 1 linha que a corrida imprime no log já mostrou, ao vivo, alegar sucesso sem o arquivo existir — confira sempre `propostas/`, nunca só o log.
+
+**P-9 (MEMÓRIAS (221)):** `scripts/perimetro.sh` avisa (nunca falha) se `ollama.service`, `hermes-gateway.service`, `agata-consolidacao.timer` ou os containers Docker `open-webui`/`kokoro-tts` — as unidades listadas acima — estiverem `failed`, `disabled`/`masked`, ou (containers) fora do ar. Motivo: foi exatamente a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
+
 Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).
 
 ## Memória e hidratação
