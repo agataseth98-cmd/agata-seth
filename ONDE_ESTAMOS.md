@@ -35,6 +35,10 @@ foi corrigido: a página de configuração dizia que só as últimas 30 linhas
 da história chegam pra IA. Não é verdade — medido de novo, o que chega
 são as últimas 9 entradas inteiras, nada cortado no meio.
 
+O robô do Conselho Remoto agora se protege sozinho: se o outro lado
+recusar duas vezes seguidas por sobrecarga, ele espera 15 minutos antes
+de tentar de novo, em vez de insistir sem parar.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 
@@ -45,4 +49,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 09:25.
+20/08/2026, 09:30.

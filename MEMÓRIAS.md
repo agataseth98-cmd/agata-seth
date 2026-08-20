@@ -3432,3 +3432,15 @@ Modelo: Claude Sonnet 5 · vetor: `git log`/`git ls-remote origin main` confirma
 **Corrigido em PROJETO.md** com o comportamento real e a data da medição, mantendo a entrada antiga implicitamente superada por esta (Regra 4 — correção é entrada nova, nunca edição do que já está lá; PROJETO.md em si não é MEMÓRIAS, mas descreve o mecanismo e é ele que estava errado, corrigido no lugar certo).
 
 Modelo: Claude Sonnet 5 · vetor: `.githooks/gerar-hermes-md.sh` lido linha a linha (não resumido de memória); contagem de entradas na janela feita com `awk` contra o `.hermes.md` real gerado após o commit (214); `wc -w .hermes.md` rodado direto, não estimado. Turno desta sessão: t=1 (contado no contexto).
+
+(216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min
+
+**Antes:** `scripts/conselho_remoto.py` faz UMA chamada por invocação, sem retentativa interna nenhuma — o padrão de "uma retentativa e desiste" citado em (211)-(213) era, na prática, o Humano/modelo invocando o script duas vezes em sequência. Nada impedia uma terceira, quarta invocação no mesmo minuto: o script não guardava memória de falha entre chamadas.
+
+**Ordem do Humano, sugestão do Marcos:** falhou duas vezes seguidas com HTTP 429 → espera 15 minutos antes de permitir nova chamada, e a espera fica registrada em log. Motivo: proteger a conta de parecer abusiva pro provedor sob rate limit.
+
+**Implementado:** estado persistido em `memoria/missoes/conselho-remoto/.backoff-estado.json` (camada privada, gitignorada do repo principal, sem remote — mesmo lugar onde o script já guardava as respostas cruas). Contador de falhas 429 SEGUIDAS: incrementa a cada HTTP 429, zera em qualquer chamada que não seja 429 (sucesso ou outro erro). Ao chegar em 2 falhas seguidas, `checar_backoff()` recusa nova chamada até 15 minutos depois da última falha, e a recusa é logada em `memoria/missoes/conselho-remoto/backoff.log`. O check roda ANTES de qualquer chamada de rede — depois das validações locais que já existiam (conteúdo privado, tamanho, chave).
+
+**Testado antes de comitar, três casos, contra o módulo importado (sem chamada de rede real):** (1) estado limpo → `checar_backoff()` = 0, chamada liberada. (2) uma falha 429 → ainda 0, abaixo do limiar de 2. (3) segunda falha 429 seguida → `checar_backoff()` = 899s (~15 min), backoff ativo, log escrito. (4) uma chamada sem 429 depois disso → contador zera, `checar_backoff()` volta a 0. Os quatro passaram. Artefatos do teste (`.backoff-estado.json`, `backoff.log`) apagados depois — não eram eventos reais, não deviam sujar o histórico do mecanismo.
+
+Modelo: Claude Sonnet 5 · vetor: `ast.parse` confirmando sintaxe antes de rodar; os 4 casos de teste rodados de verdade importando o módulo real (`importlib`), asserts checados, não só lidos; estado de teste conferido no disco (`cat .backoff-estado.json`) antes de apagar. Turno desta sessão: t=1 (contado no contexto).

@@ -199,7 +199,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (183) DIÁRIO — 15/08/2026 · Passo 4 (C3) parado antes dos portões condicionais — …
 (184) DIÁRIO — 15/08/2026 · C3, portões confirmados AO VIVO (não só lidos) — os …
 (185) DIÁRIO — 15/08/2026 · C3 completo, 3 rodadas — 100% determinístico (idênti …
-(186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminhos" — 5 células rodadas (B0, C1, C1b, C4, C3), UMA fabricação confirmada no experimento inteiro, leituras propostas sem veredito — decisão do Humano
+(186) DIÁRIO — 15/08/2026 · C-5, RELATÓRIO FINAL do experimento "RLM em 3 caminh …
 (187) DIÁRIO — 15/08/2026 · Correções ao C-5 (186), por ordem do Humano — entrada nova, (186) não editada. Linha do B0 refeita com granularidade real, denominador exato (240, não "~80"), variável do C4 redescrita com honestidade (não isola treino), 12 falhas do C4 decompostas, ressalva da exclusão de C4/V1 movida pra dentro da mesma frase do número de fabricação
 (188) DIÁRIO — 15/08/2026 · Passo 1 (saneamento): backup externo da expedição inteira (161)-(187) confirmado por RESTAURAÇÃO real, não listagem — clone dos dois bundles, HEAD bate exato, marcadores de pendência removidos
 (189) DIÁRIO — 15/08/2026 · Passo 2 (saneamento): memória nativa do Hermes (`memoria/USER.md`, `memoria/MEMORY.md`) sai do rastreamento do repositório público — bypass de controle, não risco de fundo; exposição passada permanece, 0 forks confirmados via API
@@ -229,3 +229,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do próprio cabeçalho dizer que não — auto-push removido, script virou só leitura
 (215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
+(216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min

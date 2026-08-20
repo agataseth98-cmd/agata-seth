@@ -55,6 +55,74 @@ PADRAO_CONTEUDO_PRIVADO = re.compile(r"memoria[/\\]missoes", re.IGNORECASE)
 
 PARTES_PARECER = ["origem", "posição", "posicao", "fundamentação", "fundamentacao", "emenda"]
 
+# Backoff de 429 (item 3, ordem do Humano 20/08/2026, sugestão do Marcos).
+# Antes: uma retentativa (a segunda chamada era outra invocação manual do
+# script) e desiste, sem memória entre invocações -- nada impedia uma
+# terceira, quarta... tentativa em sequência no mesmo minuto. Passa a:
+# duas falhas 429 SEGUIDAS (entre invocações, não dentro de uma) travam
+# nova chamada por 15 min, e a espera fica registrada em log -- protege a
+# conta de parecer abusiva pro provedor. Estado persiste em arquivo na
+# camada privada (memoria/missoes/, sem remote, gitignorada do repo
+# principal) porque o script não mantém processo vivo entre chamadas.
+BACKOFF_ESTADO_PATH = os.path.join(DESTINO_DIR, ".backoff-estado.json")
+BACKOFF_LOG_PATH = os.path.join(DESTINO_DIR, "backoff.log")
+BACKOFF_LIMIAR_FALHAS_SEGUIDAS = 2
+BACKOFF_ESPERA_S = 15 * 60
+
+
+def _backoff_log(linha):
+    os.makedirs(DESTINO_DIR, exist_ok=True)
+    carimbo = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%dT%H:%M:%S")
+    with open(BACKOFF_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(f"[{carimbo}] {linha}\n")
+
+
+def _carregar_estado_backoff():
+    if not os.path.exists(BACKOFF_ESTADO_PATH):
+        return {"falhas_429_seguidas": 0, "ultima_falha_429": None}
+    try:
+        with open(BACKOFF_ESTADO_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {"falhas_429_seguidas": 0, "ultima_falha_429": None}
+
+
+def _salvar_estado_backoff(estado):
+    os.makedirs(DESTINO_DIR, exist_ok=True)
+    with open(BACKOFF_ESTADO_PATH, "w", encoding="utf-8") as f:
+        json.dump(estado, f, ensure_ascii=False, indent=2)
+
+
+def checar_backoff():
+    """Retorna segundos restantes de espera (0 = pode chamar agora)."""
+    estado = _carregar_estado_backoff()
+    if estado.get("falhas_429_seguidas", 0) < BACKOFF_LIMIAR_FALHAS_SEGUIDAS:
+        return 0
+    ultima = estado.get("ultima_falha_429")
+    if not ultima:
+        return 0
+    decorrido = (datetime.now(timezone.utc) - datetime.fromisoformat(ultima)).total_seconds()
+    faltam = BACKOFF_ESPERA_S - decorrido
+    return max(0, int(faltam))
+
+
+def registrar_falha_429():
+    estado = _carregar_estado_backoff()
+    estado["falhas_429_seguidas"] = estado.get("falhas_429_seguidas", 0) + 1
+    estado["ultima_falha_429"] = datetime.now(timezone.utc).isoformat()
+    _salvar_estado_backoff(estado)
+    if estado["falhas_429_seguidas"] >= BACKOFF_LIMIAR_FALHAS_SEGUIDAS:
+        _backoff_log(
+            f"BACKOFF ATIVADO: {estado['falhas_429_seguidas']} falhas 429 seguidas -- "
+            f"próxima chamada liberada em {BACKOFF_ESPERA_S // 60} min."
+        )
+
+
+def registrar_chamada_sem_429():
+    estado = _carregar_estado_backoff()
+    if estado.get("falhas_429_seguidas", 0) > 0:
+        _salvar_estado_backoff({"falhas_429_seguidas": 0, "ultima_falha_429": None})
+
 
 def carregar_chave():
     if not os.path.exists(ENV_PATH):
@@ -141,17 +209,28 @@ def main():
         print(f"ABORTADO: ZHIPU_API_KEY ausente em {ENV_PATH}. Nada foi enviado. Ver PROJETO, 'Conselho Remoto', ordem da chave (Condição 2).")
         return 1
 
+    espera_restante = checar_backoff()
+    if espera_restante > 0:
+        minutos = espera_restante // 60 + (1 if espera_restante % 60 else 0)
+        msg = f"ABORTADO: backoff ativo -- 2+ falhas 429 seguidas nas últimas chamadas. Aguarde ~{minutos} min antes de tentar de novo."
+        print(msg)
+        _backoff_log(f"Chamada recusada por backoff -- {espera_restante}s restantes.")
+        return 1
+
     inicio = time.time()
     try:
         resposta = enviar(pedido_texto, chave)
     except urllib.error.HTTPError as e:
         corpo_erro = e.read().decode("utf-8", errors="replace")
+        if e.code == 429:
+            registrar_falha_429()
         print(f"ABORTADO: chamada falhou, HTTP {e.code}. Corpo: {corpo_erro[:2000]}")
         return 1
     except Exception as e:
         print(f"ABORTADO: chamada falhou -- {type(e).__name__}: {e}")
         return 1
     duracao_s = round(time.time() - inicio, 1)
+    registrar_chamada_sem_429()
 
     conteudo = resposta.get("choices", [{}])[0].get("message", {}).get("content", "")
     uso = resposta.get("usage", {})
