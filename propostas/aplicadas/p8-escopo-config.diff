@@ -1,0 +1,38 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 9987834..ac85fb3 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -98,7 +98,7 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
+ ## Quarentena estrutural (P-8)
+ **O buraco, 20/08/2026 (item 6 do documento do Humano, proposta do Marcos, MEMÓRIAS (218)).** Até aqui, o executor escreve em canon, comita e empurra — o Humano fica sabendo depois. Nenhuma das sete checagens do perímetro cobria isso, e é a mesma classe do incidente registrado em MEMÓRIAS (214) (`sincronizar-estado.sh` publicando sozinho apesar do próprio cabeçalho dizer que não).
+ 
+-**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`. SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não.
++**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não.
+ 
+ **Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova criando `propostas/APROVADO-<nome>`. `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
+ 
+diff --git a/propostas/README.md b/propostas/README.md
+index e4467e2..8a9113b 100644
+--- a/propostas/README.md
++++ b/propostas/README.md
+@@ -9,6 +9,7 @@ Mecanismo criado em 20/08/2026 (item 6 do documento do Humano, proposta do Marco
+ - `PROJETO.md`
+ - `scripts/*`
+ - `.githooks/*`
++- `config/*` (incluído 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script)
+ 
+ **SEM quarentena** — arquivos que só REGISTRAM o que já aconteceu:
+ - entradas de `MEMÓRIAS.md`
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 5f0f852..bafe65d 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -252,7 +252,7 @@ p7_citacao() {
+ # automação agindo sem ninguém perceber, não impede contorno deliberado.
+ _p8_eh_comportamento() {
+   case "$1" in
+-    REGRAS.md|PROJETO.md|scripts/*|.githooks/*) return 0 ;;
++    REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }

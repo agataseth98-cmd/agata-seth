@@ -1,0 +1,19 @@
+APROVADO — p8-escopo-config
+
+Aprovação: confirmada pelo Humano ao vivo, em tempo real, nesta sessão
+(20/08/2026), respondendo a pergunta explícita do executor -- mesmo
+padrão de propostas/aplicadas/APROVADO-regra-estilo e
+propostas/aplicadas/APROVADO-p9-servico-declarado.
+
+Pergunta feita e resposta escolhida: "Crie você mesmo, autorizo agora"
+(entre três opções -- criar o executor com autorização ao vivo, o
+Humano criar via comando, ou adiar o item).
+
+Última mudança candidata a passar pela quarentena que a própria mudança
+cria (item 6, documento do Humano 20/08/2026): expandir o escopo da P-8
+pra incluir config/ é, ela mesma, uma alteração em scripts/perimetro.sh,
+já protegido -- daqui em diante, config/ também passa a exigir o mesmo
+fluxo pra qualquer mudança futura.
+
+Consumido no mesmo commit em que foi criado -- ver
+propostas/aplicadas/p8-escopo-config.diff, MEMÓRIAS (222).

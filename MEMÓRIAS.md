@@ -3520,3 +3520,15 @@ Modelo: Claude Sonnet 5 · vetor: sete execuções reais da unidade sandboxed (`
 **Fluxo de quarentena, segundo uso real (depois do bootstrap de (218) e do primeiro uso de (219)):** proposta escrita (`propostas/p9-servico-declarado.diff`), deixada sem stage, Humano perguntado ao vivo nesta conversa sobre quem cria o marcador, resposta a mesma do item anterior — autorização ao vivo, criada pelo executor só depois da confirmação.
 
 Modelo: Claude Sonnet 5 · vetor: quatro casos de teste rodados de verdade contra o estado real e contra listas forçadas, não apenas lidos; `systemctl is-active`/`is-enabled` conferido diretamente pra `ollama.service` e `hermes-gateway.service`, não presumido pela ausência de aviso. Turno desta sessão: t=5 (contado no contexto).
+
+(222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
+
+**Motivo:** `config/agata-consolidacao.prompt.txt` é um arquivo que dirige um modelo autônomo contra o canon — muda comportamento tanto quanto um script, mas ficou fora da quarentena criada em (218). O prompt quebrado que rodou sem ninguém perceber (220) é prova concreta do que um `config/` sem controle pode custar.
+
+**Mudança:** `_p8_eh_comportamento()` em `scripts/perimetro.sh` passa a incluir `config/*` no grupo protegido, junto de `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`. Documentado em PROJETO.md ("Quarentena estrutural") e `propostas/README.md`.
+
+**Recursão, de propósito, ordem do documento do Humano:** esta própria mudança toca `scripts/perimetro.sh`, já protegido desde (218) — é a última candidata a precisar do fluxo de aprovação ANTES de config/ entrar no grupo; a partir deste commit, qualquer mudança futura em `config/` (inclusive uma nova versão do prompt de consolidação) passa a exigir o mesmo par diff/APROVADO que REGRAS/PROJETO/scripts/.githooks já exigem.
+
+**Terceiro uso real do fluxo de quarentena:** proposta escrita (`propostas/p8-escopo-config.diff`), deixada sem stage, Humano perguntado ao vivo, mesma resposta dos dois itens anteriores desta sessão — autorização ao vivo, marcador criado pelo executor só depois da confirmação.
+
+Modelo: Claude Sonnet 5 · vetor: `_p8_eh_comportamento()` lida linha a linha antes de editar, não alterada de memória; diff gerado por `git diff --cached` real. Turno desta sessão: t=6 (contado no contexto).

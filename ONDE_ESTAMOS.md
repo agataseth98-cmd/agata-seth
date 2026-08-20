@@ -71,6 +71,10 @@ consolidação, o Ollama, o gateway do Hermes, os containers de voz/
 interface) parar sem ninguém notar — foi exatamente isso que aconteceu
 com a consolidação antes de hoje.
 
+A trava do item acima (que exige sua aprovação pra mudança de
+comportamento) agora também cobre os arquivos de configuração dos
+robôs automáticos — antes só cobria regras e scripts.
+
 ## Esperando você
 - Me mandar o documento do GPT-5.6 quando puder — ainda não recebi (item 5).
 - Escolher o que fazer com o resultado do teste grande de IA.
@@ -82,4 +86,4 @@ Nada rodando.
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 10:35.
+20/08/2026, 10:42.

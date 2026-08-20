@@ -252,7 +252,7 @@ p7_citacao() {
 # automação agindo sem ninguém perceber, não impede contorno deliberado.
 _p8_eh_comportamento() {
   case "$1" in
-    REGRAS.md|PROJETO.md|scripts/*|.githooks/*) return 0 ;;
+    REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
     *) return 1 ;;
   esac
 }

@@ -9,6 +9,7 @@ Mecanismo criado em 20/08/2026 (item 6 do documento do Humano, proposta do Marco
 - `PROJETO.md`
 - `scripts/*`
 - `.githooks/*`
+- `config/*` (incluído 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script)
 
 **SEM quarentena** — arquivos que só REGISTRAM o que já aconteceu:
 - entradas de `MEMÓRIAS.md`
