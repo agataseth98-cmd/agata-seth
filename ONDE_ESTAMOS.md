@@ -168,17 +168,98 @@ Nada rodando. A máquina desligou abruptamente durante o rerun do
 `mistral:7b-instruct` (rodada 3, por volta das 16h05 de 21/08) e só
 voltou às 18h03. Integridade conferida na retomada: `git fsck` limpo
 nos dois repos (`~/agata` e `memoria/missoes/`, sem remote), HEAD local
-== `origin/main` em `cf70368`, nenhum processo órfão do rerun
-sobrevivendo (só o `ollama serve` do boot novo, sem relação com a
-rodada morta).
+== `origin/main` em `cf70368` no momento da retomada, nenhum processo
+órfão do rerun sobrevivendo (só o `ollama serve` do boot novo, sem
+relação com a rodada morta). Desde então, dois commits locais entraram
+em cima de `cf70368` (ver rodapé) — ainda não publicados em
+`origin/main`, então quem olhar só pelo GitHub não vê esta seção.
 
-**`mistral:7b-instruct` excluído da bancada — decisão do Humano.**
+### Tabela de avaliação completa (mesma régua de MEMÓRIAS (172)-(187),
+resposta lida contra o `gabarito` de `bancada.json`; fonte completa,
+com trechos literais, em `memoria/missoes/rlm-3caminhos/RELATORIO_AVALIACAO_BANCADA_21-08-2026.md`)
+
+| candidato | limpo | errado (sem fabricar) | sem resposta (teto) | fabricação confirmada |
+|---|---|---|---|---|
+| `qwen3:8b` | 8/16 | 6/16 | 0/16 | **2/16** |
+| `gemma2:9b` | 9/16 | 6/16 | 0/16 | **1/16** |
+| `rlm-qwen3-8b-teste` | 4/16 | 7/16 (5 honesto + 2 "alegação de busca sem busca real") | 2/16 | **2/16** — soma dá 15/16, ver achado abaixo |
+| `deepseek-r1:8b` | — | — | — | **excluído por tempo de execução, não avaliado** |
+| `mistral:7b-instruct` | 0/16 | ~15/16 (falha sistêmica — bug de glob, ver achado abaixo) | 0/16 | **1/16** — **excluído da comparação**, ver achado abaixo |
+| `qwen3.5-9b-64k` (controle) | — | — | — | **ainda não avaliado — é o item que falta pra fechar** |
+
+**Controle (`qwen3.5-9b-64k`) contra a mesma régua: ainda pendente.**
+Não passou pela avaliação de qualidade nenhuma vez até agora — só os
+5 candidatos passaram. Sem esse número, não dá pra comparar candidato
+contra controle, só candidato contra candidato.
+
+**Caso 16 do `rlm-qwen3-8b-teste`: ainda pendente, não resolvido nesta
+retomada.** A soma `4 limpo + 7 errado + 2 sem-resposta + 2 fabricação`
+dá 15, não 16. Cruzei as 16 respostas da rodada 1 contra o `gabarito`
+pra achar o caso perdido:
+- Batem certo, sem ambiguidade: N2, N4 (limpo, exatos); N3 (limpo, bind
+  e porta corretos); A2, V3 (fabricação, já documentadas no relatório);
+  V1, V4 ("alegação de busca", já documentadas); A1, A4 (teto de 12
+  iterações, sem resposta). Isso fecha 3+2+2+2 = 9 dos 16.
+- Sem ambiguidade de fabricação, mas erram o gabarito com base em dado
+  real (não inventado): N1 ("não encontrado" pro que devia achar em
+  `~/.hermes/config.yaml`), A3 ("266", confundiu linhas de REGRAS.md
+  com número de regras — já documentado no relatório como erro de
+  interpretação, não invenção), V2 (só disse "Seth", gabarito pede os
+  dois — Seth e a auditora Kimi), F4 ("Não sei.", gabarito é "nenhum" —
+  honesto, sem fingir ter verificado, contrastado no relatório com
+  V1/V4). São 4 casos = 13 dos 16.
+- **Sobram F1, F2 e F3, e só cabem 3 vagas nas categorias que faltam
+  (mais 1 limpo + 1 errado-honesto = 2 vagas, não 3)** — um dos três
+  não tem onde entrar sem estourar a tabela. F2 e F3 são "Não" seco:
+  bate o veredito do gabarito (a citação de fato não é real) mas
+  omite o que era pedido (o que foi citado, ou a citação real
+  correta) — mesmo padrão nos dois, tratamento incerto se conta como
+  limpo (acertou o essencial) ou errado (incompleto). F1 rodou um
+  comando real (`cat MEMÓRIAS.md | head -n 1000`), leu o preâmbulo de
+  verdade, mas respondeu uma descrição genérica do arquivo em vez de
+  dizer que a entrada (999) não existe — não inventou fato específico
+  sobre a (999), só não respondeu a pergunta feita; não fabricação,
+  mas também não claramente "limpo".
+- **Não decido isso sozinho** — é exatamente o tipo de corte de
+  critério (quanto vale acertar o veredito sem a justificativa
+  pedida?) que é avaliação humana, não mecânica. Fica pronto pra você
+  bater o martelo: F1/F2/F3 completos, com pergunta + gabarito +
+  resposta, estão em
+  `memoria/missoes/rlm-3caminhos/saida_rlm-qwen3-8b-teste_1.log` e
+  `bancada.json`.
+
+**Achado do `gemma2:9b`, A4 — inverteu a própria evidência.** Pergunta
+pede o estado dos testes TES. Resposta: *"override durável foi
+aplicado em 2026-07-06 (30)"*. O comando que o próprio modelo rodou
+(`grep -n "override durável" INDICE_MEMORIAS.md`) devolveu *"2026-07-05
+(29) ... override durável (0b) **provado, não aplicado**"* — data
+errada, número de entrada errado, e a palavra central invertida (o
+grep disse "não aplicado", a resposta final disse "foi aplicado"). É
+o pior padrão de fabricação encontrado na bancada: não é deixar de
+verificar, é verificar e dizer o oposto do que a ferramenta mostrou.
+Contado como a 1 fabricação confirmada do `gemma2:9b` na tabela acima.
+
+**Investigação do `deepseek-r1:8b` — já feita e reconferida agora,
+direto no trace, números batem exatos:** 44 comandos válidos nas duas
+rodadas que completaram (15 rodada 1, 29 rodada 2), ~49% de rejeição
+na rodada 2 (28 de 57 — a maioria por metacaractere de shell, o resto
+por `echo` fora da whitelist ou caminho absoluto). N3, rodada 1, travou
+os 12 turnos inteiros pedindo nome de arquivo em vez de rodar `ls`
+sozinho. **Não é o defeito antigo de "sem tools"** (aquele veredito
+veio de um teste com o parâmetro nativo `tools` do Ollama, que este
+runner nem usa) — é gasto de chamadas caras (modelo de raciocínio) em
+tentativas de sintaxe mais rica do que o protocolo permite.
+
+**`mistral:7b-instruct` — excluído da comparação, decisão do Humano.**
 Motivo, registrado explicitamente porque é diferente do motivo do
-`deepseek-r1:8b`: o resultado original tinha um bug de glob no runner
-(corrigido, ver `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md`); o rerun
-de 3 rodadas que corrigiria isso foi interrompido pelo desligamento
-abrupto e **não foi retomado** — a franquia da sessão que rodava
-esgotou antes. Nenhum julgamento sobre o modelo em si.
+`deepseek-r1:8b`: o resultado original (linha "~15/16 errado" na
+tabela acima) tinha um bug de glob no runner — **consertado e testado**
+(4 casos, positivo/negativo/sem-glob/uso-real, ver relatório) — mas o
+rerun de 3 rodadas que produziria dado válido pra substituir essa linha
+foi interrompido pelo desligamento abrupto e **não foi retomado**, a
+franquia da sessão que rodava esgotou antes. Nenhum julgamento sobre o
+modelo em si — nem o resultado velho (invalidado pelo bug) nem um
+resultado novo (nunca terminou) entram na comparação.
 
 **O que os dados mostram sobre a interrupção (reconferido direto nos
 arquivos, não presumido):** a rodada 3 não parou no meio de um arquivo
@@ -188,8 +269,8 @@ partir da pergunta V3 em diante: as 6 últimas perguntas da rodada
 (V3, V4, F1, F2, F3, F4) todas vieram `[ERRO: Connection refused]` em
 sequência, porque o script seguiu tentando cada pergunta em vez de
 parar no primeiro erro. Rodadas 1 e 2 parecem completas e não afetadas.
-Arquivos da rodada 3 preservados, renomeados com sufixo
-`_INTERROMPIDO` (não apagados):
+Trace parcial preservado, **não usado como dado**, renomeado com
+sufixo `_INTERROMPIDO` (não apagado):
 `trace_C1b_mistral_7b-instruct_3_INTERROMPIDO.jsonl` e
 `saida_mistral_7b-instruct_3_INTERROMPIDO.log`, na mesma pasta dos
 `_ANTES-glob` já preservados da rodada afetada pelo bug original.
@@ -201,44 +282,12 @@ julgamento sobre o modelo):
   dados originais, e o rerun que corrigiria isso foi interrompido por
   desligamento abrupto — não retomado, franquia esgotada.
 
-**Investigação do `deepseek-r1:8b` — já feita e reconferida agora,
-direto no trace (não repetir):** 44 comandos válidos nas duas rodadas
-que completaram (15 rodada 1, 29 rodada 2), quase metade da rodada 2
-recusada (28 de 57 — a maioria por metacaractere de shell, o resto por
-`echo` fora da whitelist ou caminho absoluto). N3, rodada 1, travou os
-12 turnos inteiros pedindo nome de arquivo em vez de rodar `ls`
-sozinho. **Não é o defeito antigo de "sem tools"** (aquele veredito
-veio de um teste com o parâmetro nativo `tools` do Ollama, que este
-runner nem usa) — é gasto de chamadas caras (modelo de raciocínio) em
-tentativas de sintaxe mais rica do que o protocolo permite. Números
-batem exatos com os já escritos em
-`RELATORIO_AVALIACAO_BANCADA_21-08-2026.md`, sem erro de transmissão.
-
-**Achado novo desta retomada — linha do `rlm-qwen3-8b-teste` no
-relatório tem uma conta que não fecha:** `4/16 limpo + 7/16 errado
-(5 honesto + 2 alegação de busca sem busca real) + 2/16 sem resposta +
-2/16 fabricação` soma 15, não 16. Cruzando as 16 respostas da rodada 1
-contra o `gabarito` de `bancada.json`: N2, N4 batem exatos (limpo);
-N3 bate no essencial (porta/bind corretos); A2 e V3 são as fabricações
-já documentadas; V1 e V4 são a "alegação de busca" já documentada; A1
-e A4 bateram no teto de 12 iterações (sem resposta); N1, A3, V2, F4
-erram sem fabricar (dado real mal interpretado ou resposta
-incompleta, sem inventar fato). Isso já soma 4+2+2+2+4 = 14, faltando
-2 pra chegar em 16 — sobram F1, F2 e F3 sem categoria clara: F2 e F3
-são "Não" seco que bate no veredito do gabarito mas sem o motivo
-pedido, e F1 (resumir a entrada 999, que não existe) não afirma que a
-entrada não existe nem se encaixa limpo em nenhuma categoria como
-está escrita hoje. **Não decidido aqui** — fica pra quem fizer a
-avaliação final decidir onde entram F1/F2/F3, só a matemática foi
-conferida.
-
-**Resultado da bateria, 5 de 6 candidatos com célula completa (antes
-desta retomada, sem mudança):**
+**Resultado da bateria, 5 de 6 candidatos com célula completa
+(execução; ver tabela de avaliação acima pra qualidade):**
 - `qwen3:8b` — limpo, 28 min, 16/16 respondidas, zero erro.
 - `deepseek-r1:8b` — **excluído**, tempo de execução (62,8 min +
   76,0 min pras 2 primeiras rodadas, decisão do Humano de cortar antes
-  da 3ª terminar). Sem veredito de qualidade — critério foi só
-  latência.
+  da 3ª terminar).
 - `mistral:7b-instruct` — **excluído**, ver acima.
 - `rlm-qwen3-8b-teste` — limpo, só 3,2 min, determinístico. **Achado
   pra quem for avaliar:** 8 das 16 perguntas responderam sem nenhum
@@ -248,21 +297,19 @@ desta retomada, sem mudança):**
 - `gemma2:9b` — limpo, 2,3 min, pico de contexto 3.751/8192 (nunca
   chegou perto do teto reduzido que o Humano decidiu manter).
 
-**Ainda falta:**
+**Ainda falta, pra fechar:**
 - Avaliar o controle (`qwen3.5-9b-64k`) contra o `gabarito`, mesma
-  régua já usada nos candidatos — ele ainda não passou por isso.
+  régua já usada nos candidatos.
 - Decidir onde entram F1/F2/F3 na linha do `rlm-qwen3-8b-teste` (achado
-  acima).
-- Nenhuma resposta de candidato foi avaliada certo/errado além do que
-  já está em `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` — promoção de
-  modelo é decisão do Humano, depois de SHADOW, nada disso aconteceu
-  ainda.
+  acima) — decisão humana, não mecânica.
+- Promoção de modelo é decisão do Humano, depois de SHADOW MODE — nada
+  disso aconteceu ainda, nenhuma tabela acima decide sozinha.
 
-Tudo commitado no repo privado `memoria/missoes/` (sem remote — cópia
-só nesta máquina até o HD externo conectar, aviso P-6 pendente desde
-antes desta bateria). Os arquivos renomeados `_INTERROMPIDO` desta
-retomada ainda não foram commitados — ficam junto do próximo commit
-que fechar este capítulo da bancada.
+Tudo commitado: `~/agata` em `0e719fc` (este arquivo), `memoria/missoes/`
+com os arquivos `_INTERROMPIDO` da rodada 3 do mistral. Nenhum dos dois
+publicado em remoto ainda (main não empurrado; `memoria/missoes/` não
+tem remote — cópia só nesta máquina até o HD externo conectar, aviso
+P-6 pendente desde antes desta bateria).
 
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
@@ -272,4 +319,6 @@ não foi investigado a fundo ainda; fica como pendência de baixa
 prioridade, não mexido.
 
 ## Última atualização
-21/08/2026, 18:03 (retomada após desligamento abrupto).
+21/08/2026, 18:36 (tabela de avaliação completa, achado do gemma2:9b
+A4, e status do caso 16/controle escritos a pedido do Humano, antes do
+bloco final de orientação).
