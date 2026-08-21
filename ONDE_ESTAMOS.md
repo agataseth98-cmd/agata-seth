@@ -164,16 +164,35 @@ sobrescreve, não duplica.
   antes de mudança estrutural.
 
 ## Rodando agora
-Pré-registro fechado (`memoria/missoes/rlm-3caminhos/PRE_REGISTRO_BANCADA_MODELOS_21-08-2026.md`,
-commit `c3dcf8e` no repo privado). `agata-consolidacao.timer` MASCARADO
-agora (21/08, ~09:35) pra máquina dedicada durante a bateria — pra
-desfazer: `systemctl --user unmask agata-consolidacao.timer && systemctl --user enable --now agata-consolidacao.timer`.
-Rodando as células de candidato, uma por vez, checagem com o Humano
-entre cada uma. Progresso: `qwen3:8b` (1/6) completo e limpo, 28 min.
-`deepseek-r1:8b` (2/6) excluído — tempo de execução (62,8 min a
-rodada 1, 76,0 min a rodada 2), decisão do Humano ao vivo, não
-esperou a rodada 3 terminar. Faltam: `mistral:7b-instruct`,
-`rlm-qwen3-8b-teste`, `gemma2:9b`.
+Nada rodando — a bateria de execução da bancada (Frente 4) terminou.
+`agata-consolidacao.timer` já foi remascarado e restaurado (ativo,
+habilitado, mesmo link de antes) — máquina não está mais dedicada.
+
+**Resultado da bateria, 5 de 6 candidatos com célula completa:**
+- `qwen3:8b` — limpo, 28 min, 16/16 respondidas, zero erro.
+- `deepseek-r1:8b` — **excluído**, tempo de execução (62,8 min +
+  76,0 min pras 2 primeiras rodadas, decisão do Humano de cortar antes
+  da 3ª terminar). Sem veredito de qualidade — critério foi só
+  latência.
+- `mistral:7b-instruct` — limpo, 53 min, 16/16, pico de contexto
+  12.900/16384 (mais perto do teto que os outros, mas dentro).
+- `rlm-qwen3-8b-teste` — limpo, só 3,2 min, determinístico. **Achado
+  pra quem for avaliar:** 8 das 16 perguntas responderam sem nenhum
+  comando de shell emitido (sem tocar o corpus) — pode ser
+  conhecimento do próprio ajuste do modelo, pode ser fabricação; não
+  julgado aqui, registrado no trace.
+- `gemma2:9b` — limpo, 2,3 min, pico de contexto 3.751/8192 (nunca
+  chegou perto do teto reduzido que o Humano decidiu manter).
+
+**Não julgado ainda:** nenhuma resposta foi avaliada certo/errado —
+isso é revisão humana/Conselho contra o `gabarito` de `bancada.json`,
+mesma régua de MEMÓRIAS (172)-(187), o próximo passo depois deste
+checkpoint. A bancada produz números; promoção de modelo é decisão do
+Humano, depois de SHADOW — nada disso aconteceu ainda.
+
+Tudo commitado no repo privado `memoria/missoes/` (sem remote — cópia
+só nesta máquina até o HD externo conectar, aviso P-6 pendente desde
+antes desta bateria).
 
 ## Quebrado
 Nada quebrado.
