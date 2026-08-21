@@ -114,6 +114,44 @@ sugeria uma regra nova (você responder três perguntas antes de
 autorizar mudança estrutural) — isso NÃO foi adotado sozinho, fica
 esperando você decidir.
 
+## Bancada de modelos em andamento (Frente 4, iniciada 21/08/2026)
+
+**Candidatos, os mesmos 6 já baixados de (227)** (confirmado agora por
+`ollama list`, soma de tamanho em disco bate exato com o medido lá —
+31,8GB): `qwen3.5-9b-64k` (controle), `qwen3:8b`, `deepseek-r1:8b`,
+`gemma2:9b`, `mistral:7b-instruct`, `rlm-qwen3-8b-teste`.
+
+**Decisão tomada ao vivo hoje, com você, depois de achar um problema
+real:** o script que roda a bancada (`rlm_c1b.py`) não fixava o tamanho
+de contexto na chamada — sem isso, o Ollama usa um padrão pequeno (medido:
+4096, um quarto do que o controle usa em produção). Corrigido: agora fixa
+`num_ctx=16384` pros cinco candidatos maiores, e `8192` só pro
+`gemma2:9b` (teto do próprio modelo — ele não alcança 16384). Você decidiu
+manter o `gemma2:9b` na bateria mesmo assim, no teto dele, sabendo que
+corre em desvantagem medida — registrado, não escondido.
+
+**Rodando agora, antes de qualquer candidato:** o controle
+(`qwen3.5-9b-64k`) está sendo rerodado 3 vezes com a lista de comandos
+permitidos estendida (`cut`, `sha256sum`, `sort`, `uniq`, `nl`, que
+antes não existiam) — pra confirmar que o pico de uso de contexto
+(medido antes, sem os comandos novos: 12.409 tokens, folga dentro dos
+16384) ainda cabe com os comandos novos disponíveis. Só depois disso a
+primeira célula de candidato começa.
+
+**Onde ficam os arquivos:** tudo em
+`memoria/missoes/rlm-3caminhos/` — traces em
+`trace_C1b_<modelo>_<rodada>.jsonl`, log de GPU em
+`gpu_controle_whitelist_estendida.csv` (e um por candidato quando
+começar), script do rerun em `rerun_controle_whitelist_estendida.sh`.
+
+**Para retomar se a sessão cair:** confira se
+`trace_C1b_qwen3.5-9b-64k_wl-ext-{1,2,3}.jsonl` existem e têm conteúdo
+completo (última linha de cada é a resposta da última pergunta da
+bancada de 16). Se sim, meça o pico de `tokens_in` neles e siga pras
+células de candidato. Se não, rode
+`bash rerun_controle_whitelist_estendida.sh` nesta pasta de novo — ele
+sobrescreve, não duplica.
+
 ## Esperando você
 - Escolher o que fazer com o resultado do teste grande de IA.
 - Revisar e mandar (ou não) o pedido de recursos pro Marcos —
@@ -126,10 +164,11 @@ esperando você decidir.
   antes de mudança estrutural.
 
 ## Rodando agora
-Nada rodando.
+Rerun do modelo controle (3 rodadas), pra confirmar contexto antes da
+bancada de candidatos começar — ver seção acima.
 
 ## Quebrado
 Nada quebrado.
 
 ## Última atualização
-20/08/2026, 19:59.
+21/08/2026, 08:56.
