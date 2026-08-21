@@ -185,12 +185,14 @@ com trechos literais, em `memoria/missoes/rlm-3caminhos/RELATORIO_AVALIACAO_BANC
 | `rlm-qwen3-8b-teste` | 4/16 | 7/16 (5 honesto + 2 "alegação de busca sem busca real") | 2/16 | **2/16** — soma dá 15/16, ver achado abaixo |
 | `deepseek-r1:8b` | — | — | — | **excluído por tempo de execução, não avaliado** |
 | `mistral:7b-instruct` | 0/16 | ~15/16 (falha sistêmica — bug de glob, ver achado abaixo) | 0/16 | **1/16** — **excluído da comparação**, ver achado abaixo |
-| `qwen3.5-9b-64k` (controle) | — | — | — | **ainda não avaliado — é o item que falta pra fechar** |
+| `qwen3.5-9b-64k` (controle) | **12/16** | 2/16 (V3, F3 — parcial, grounded) | 2/16 | **0/16** |
 
-**Controle (`qwen3.5-9b-64k`) contra a mesma régua: ainda pendente.**
-Não passou pela avaliação de qualidade nenhuma vez até agora — só os
-5 candidatos passaram. Sem esse número, não dá pra comparar candidato
-contra controle, só candidato contra candidato.
+**Controle (`qwen3.5-9b-64k`) avaliado — bancada fecha.** Zero
+fabricação confirmada na rodada de referência, 12/16 limpo — o dobro
+do melhor candidato (`gemma2:9b`, 9/16). **Resposta à pergunta que
+faltava: nenhum candidato bateu o titular nesta bancada.** Detalhe
+completo, com verificação de cada afirmação específica contra o
+trace real: MEMÓRIAS (234 - RELATÓRIO FINAL da bancada).
 
 **Caso 16 do `rlm-qwen3-8b-teste`: ainda pendente, não resolvido nesta
 retomada.** A soma `4 limpo + 7 errado + 2 sem-resposta + 2 fabricação`
@@ -297,19 +299,32 @@ julgamento sobre o modelo):
 - `gemma2:9b` — limpo, 2,3 min, pico de contexto 3.751/8192 (nunca
   chegou perto do teto reduzido que o Humano decidiu manter).
 
-**Ainda falta, pra fechar:**
-- Avaliar o controle (`qwen3.5-9b-64k`) contra o `gabarito`, mesma
-  régua já usada nos candidatos.
+**Bancada fechada nesta entrada.** Relatório final, no formato de
+MEMÓRIAS (186)-(187), registrado em MEMÓRIAS (234 - RELATÓRIO FINAL
+da bancada, controle avaliado, exclusões explicadas). Achado de
+`credential.helper`/`gh auth` (destrava push futuro) registrado à
+parte em MEMÓRIAS (233).
+
+**Ainda falta, não fecha sozinho:**
 - Decidir onde entram F1/F2/F3 na linha do `rlm-qwen3-8b-teste` (achado
-  acima) — decisão humana, não mecânica.
+  acima, também em MEMÓRIAS 234) — decisão humana, não mecânica.
 - Promoção de modelo é decisão do Humano, depois de SHADOW MODE — nada
   disso aconteceu ainda, nenhuma tabela acima decide sozinha.
+- Registrar o corte de `mistral`/`deepseek-r1:8b` como entradas
+  separadas na história — condicionado à autorização do Humano,
+  perguntado, ainda sem resposta nesta sessão.
+- "Camada 3 da Parte 1" — próximo passo depois da bancada fechar, mas
+  o conteúdo dessa referência não foi localizado em nenhum arquivo do
+  repo nesta sessão; perguntado ao Humano, ainda sem resposta.
 
-Tudo commitado: `~/agata` em `0e719fc` (este arquivo), `memoria/missoes/`
-com os arquivos `_INTERROMPIDO` da rodada 3 do mistral. Nenhum dos dois
-publicado em remoto ainda (main não empurrado; `memoria/missoes/` não
-tem remote — cópia só nesta máquina até o HD externo conectar, aviso
-P-6 pendente desde antes desta bateria).
+Tudo commitado: `~/agata` em `7760726` (ONDE_ESTAMOS.md, publicado em
+origin/main) + entradas (233)/(234) desta rodada em MEMÓRIAS.md (a
+publicar); `memoria/missoes/` com os arquivos `_INTERROMPIDO` da
+rodada 3 do mistral e a atualização do
+`RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` com a linha do controle
+(a commitar). `memoria/missoes/` não tem remote — cópia só nesta
+máquina até o HD externo conectar, aviso P-6 pendente desde antes
+desta bateria.
 
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
@@ -319,6 +334,7 @@ não foi investigado a fundo ainda; fica como pendência de baixa
 prioridade, não mexido.
 
 ## Última atualização
-21/08/2026, 18:36 (tabela de avaliação completa, achado do gemma2:9b
-A4, e status do caso 16/controle escritos a pedido do Humano, antes do
-bloco final de orientação).
+21/08/2026, 19:20 (bancada fechada: controle avaliado, RELATÓRIO FINAL
+em MEMÓRIAS (234), achado de credential.helper em MEMÓRIAS (233);
+caso 16, corte de mistral/deepseek e "Camada 3 da Parte 1" seguem
+pendentes de resposta do Humano).
