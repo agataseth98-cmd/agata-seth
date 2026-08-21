@@ -164,8 +164,16 @@ sobrescreve, não duplica.
   antes de mudança estrutural.
 
 ## Rodando agora
-Rerun do modelo controle (3 rodadas), pra confirmar contexto antes da
-bancada de candidatos começar — ver seção acima.
+Pré-registro fechado (`memoria/missoes/rlm-3caminhos/PRE_REGISTRO_BANCADA_MODELOS_21-08-2026.md`,
+commit `c3dcf8e` no repo privado). `agata-consolidacao.timer` MASCARADO
+agora (21/08, ~09:35) pra máquina dedicada durante a bateria — pra
+desfazer: `systemctl --user unmask agata-consolidacao.timer && systemctl --user enable --now agata-consolidacao.timer`.
+Rodando as células de candidato, uma por vez, checagem com o Humano
+entre cada uma. Progresso: `qwen3:8b` (1/6) completo e limpo, 28 min.
+`deepseek-r1:8b` (2/6) excluído — tempo de execução (62,8 min a
+rodada 1, 76,0 min a rodada 2), decisão do Humano ao vivo, não
+esperou a rodada 3 terminar. Faltam: `mistral:7b-instruct`,
+`rlm-qwen3-8b-teste`, `gemma2:9b`.
 
 ## Quebrado
 Nada quebrado.
