@@ -310,12 +310,18 @@ parte em MEMÓRIAS (233).
   acima, também em MEMÓRIAS 234) — decisão humana, não mecânica.
 - Promoção de modelo é decisão do Humano, depois de SHADOW MODE — nada
   disso aconteceu ainda, nenhuma tabela acima decide sozinha.
-- Registrar o corte de `mistral`/`deepseek-r1:8b` como entradas
-  separadas na história — condicionado à autorização do Humano,
-  perguntado, ainda sem resposta nesta sessão.
-- "Camada 3 da Parte 1" — próximo passo depois da bancada fechar, mas
-  o conteúdo dessa referência não foi localizado em nenhum arquivo do
-  repo nesta sessão; perguntado ao Humano, ainda sem resposta.
+- ~~Registrar o corte de `mistral`/`deepseek-r1:8b` como entradas
+  separadas~~ — autorizado pelo Humano, feito: MEMÓRIAS (235 -
+  deepseek-r1:8b, tempo) e (236 - mistral, dado inválido).
+- "Camada 3 da Parte 1" localizada — não estava em nenhum arquivo do
+  repo, existia só como texto de chat de outra sessão (`Agata · Claude
+  Opus 5`), nunca salva em disco até agora. Salva em
+  `memoria/missoes/rlm-3caminhos/SINTESE_ARQUITETURAL_21-08-2026.md`,
+  com proveniência registrada e sem verificação independente das
+  referências externas que cita. Camada 3, item 1 ("fechar a
+  bancada"), é este mesmo capítulo — falta só a decisão humana de
+  F1/F2/F3 pra fechar 100%. Itens 2-6 da Camada 3 ainda não
+  começaram.
 
 Tudo commitado: `~/agata` em `7760726` (ONDE_ESTAMOS.md, publicado em
 origin/main) + entradas (233)/(234) desta rodada em MEMÓRIAS.md (a
@@ -334,7 +340,7 @@ não foi investigado a fundo ainda; fica como pendência de baixa
 prioridade, não mexido.
 
 ## Última atualização
-21/08/2026, 19:20 (bancada fechada: controle avaliado, RELATÓRIO FINAL
-em MEMÓRIAS (234), achado de credential.helper em MEMÓRIAS (233);
-caso 16, corte de mistral/deepseek e "Camada 3 da Parte 1" seguem
-pendentes de resposta do Humano).
+21/08/2026, 19:34 (mistral/deepseek registrados em entradas próprias,
+235/236; "Camada 3 da Parte 1" localizada e salva em disco; caso 16
+do rlm-qwen3-8b-teste segue como única decisão pendente pra fechar a
+bancada de verdade).
