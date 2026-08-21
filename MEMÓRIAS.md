@@ -3678,3 +3678,19 @@ Modelo: Claude Sonnet 5 · vetor: resposta direta do Humano nesta conversa, à p
 **Fluxo de quarentena, sétimo uso real:** autorização ao vivo nesta conversa, a mesma mensagem que pediu a elevação do desenho. `propostas/aplicadas/APROVADO-portao-tres-perguntas`.
 
 Modelo: Claude Sonnet 5 · vetor: `grep` real em REGRAS.md pra confirmar a seção "Mudança estrutural" antes de editar; citações de (218)/(221) conferidas contra o texto real dessas entradas, não de memória. Turno desta sessão: t=5 (contado no contexto).
+
+(232) DIÁRIO — 21/08/2026 · ler_pagina.sh: teste negativo achou ruído de framework sendo relatado como conteúdo; conserto aplicado, aprovado ao vivo
+
+**Achado, por teste negativo real, não revisão de código:** rodando `scripts/ler_pagina.sh` contra `https://angular.realworld.io/` nesta máquina (Predator, cachyos-PHN16-71), o CASO 3 relatava mensagens internas de erro do Angular ("StaticProvider does not have...", "Cannot mix multi providers...") como se fossem conteúdo do site — a heurística de "cadeia longa sem sintaxe de código" não distingue isso de texto real de qualquer SPA moderna (Angular/React/Vue têm erros com a mesma forma). O script também não checava código HTTP antes de extrair — risco já medido antes contra uma URL morta no S3 que devolveu 404 e foi tratada como CASO 1.
+
+**Conserto, as três mudanças autorizadas:** (1) checagem de HTTP obrigatória antes de qualquer extração — código fora de 2xx aborta, nada é extraído; (2) CASO 3 rebaixado a SUSPEITA, nunca mais conclusão, sempre com qualquer URL de API do mesmo pacote reportada lado a lado, nunca uma escolhida em vez da outra; (3) filtro de idioma quando o HTML declara `lang`, com ausência reportada em vez de calada.
+
+**Regressão, antes/depois, ambos exigidos e medidos ao vivo nesta máquina:** controle positivo `razionshefa.com.br/pt` (conteúdo real, antes já saía certo por acidente, depois sai como SUSPEITA em vez de CASO 3) e teste negativo `angular.realworld.io` (antes: erros do Angular relatados sem aviso; depois: SUSPEITA + `https://conduit.productionready.io/api` reportada junto, confirmada por grep direto no pacote). Bônus medido: 404 real controlado (`en.wikipedia.org`, página inexistente) agora aborta em HTTP 404 sem tentar extrair nada. Os dois casos exigidos viraram teste permanente versionado: `scripts/testar_ler_pagina.sh` — rodado, 0 falhas.
+
+**O caminho CASO 4/lacuna** agora é mecanismo testado contra caso real (API do pacote de `angular.realworld.io` confirmada por grep direto), não mais especificação nunca exercitada.
+
+**Fluxo de quarentena P-8, aplicado:** `propostas/aplicadas/ler-pagina-conserto.diff` + `propostas/aplicadas/APROVADO-ler-pagina-conserto`. Aprovação ao vivo nesta conversa — o Humano leu o diff e o relatório de teste antes/depois e respondeu "autoriza → o Executor cria o marcador → commita o diff junto da entrada (232)", mesmo padrão de autorização ao vivo já usado em (231) e outras entradas desta sessão de trabalho do Humano.
+
+**Portão das três perguntas (231), aplicado antes de commitar:** (1) Reversibilidade — sim, é entrada nova + diff revertível, nenhum mecanismo automático mudou. (2) Alcance — só `scripts/ler_pagina.sh` e o novo `scripts/testar_ler_pagina.sh`; nenhum hook, serviço ou config tocado. (3) Silêncio — não: o teste de regressão falha ruidosamente (exit != 0) se a SUSPEITA regredir pra CASO 3 ou se a API sumir do relatório.
+
+Modelo: Claude Sonnet 5 · vetor: teste negativo e o 404 controlado rodados ao vivo nesta máquina, antes e depois do conserto, saída colada no relatório ao Humano antes desta entrada — não restaurado de resumo. Turno desta sessão: t=2 (contado no contexto).

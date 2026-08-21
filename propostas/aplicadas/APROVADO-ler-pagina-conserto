@@ -1,0 +1,22 @@
+APROVADO — ler-pagina-conserto
+
+Aprovação: autorização ao vivo nesta conversa. O Humano recebeu o
+relatório completo (diff, saída de teste antes/depois, minuta da
+entrada de canon) e respondeu: "autoriza → o Executor cria o marcador
+→ commita o diff junto da entrada (232) → só depois disso a Frente 4
+começa" — mesmo padrão de autorização ao vivo já usado em
+propostas/aplicadas/APROVADO-portao-tres-perguntas (231) e outras
+entradas desta sessão de trabalho do Humano.
+
+Cobre: scripts/ler_pagina.sh (as três mudanças: checagem de HTTP antes
+de extrair, CASO 3 rebaixado a SUSPEITA sempre com API lado a lado,
+filtro de idioma quando `lang` declarado) e scripts/testar_ler_pagina.sh
+(novo — regressão permanente, controle positivo + teste negativo).
+
+Achado que motivou o conserto: teste negativo real contra
+https://angular.realworld.io/, rodado nesta máquina antes de qualquer
+edição — o CASO 3 antigo relatava mensagens internas de erro do
+Angular como conteúdo do site, sem checar código HTTP.
+
+Consumido no mesmo commit em que foi criado — ver
+propostas/aplicadas/ler-pagina-conserto.diff, MEMÓRIAS (232).

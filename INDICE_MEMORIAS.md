@@ -215,7 +215,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (199) DIÁRIO — 17/08/2026 · Levantamento do vazamento antigo de `memoria/USER.md …
 (200) DIÁRIO — 17/08/2026 · Convenção de data no título de entrada, resolvida — …
 (201) DIÁRIO — 17/08/2026 · Doutrina de defesa proporcional, ADOTADA — texto cur …
-(202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três propostas apresentadas ao Humano nesta sessão, aprovadas com acréscimo dele; princípio novo registrado — todo alarme diz o que aconteceu, por que importa, o que fazer
+(202) DIÁRIO — 17/08/2026 · Três avisos confusos de (196) corrigidos — as três p …
 (203) DIÁRIO — 17/08/2026 · P-7 (checagem de citação) implementado e testado, NÃO habilitado no hook — taxa de falso positivo medida contra o corpus real: 1 em 5 citações no formato `(n - síntese)`, achado explicado, não é defeito do canon
 (204) DIÁRIO — 17/08/2026 · P-7 HABILITADO no pre-commit — crase vira exemplo protegido, segundo número no mesmo parêntese passa a ser validado, taxa de (203) recontextualizada como amostra pequena; esta própria entrada é o "verde uma vez" exigido antes de ligar
 (205) DIÁRIO — 17/08/2026 · Decisão do Humano sobre `.env` registrada — NÃO entra no backup do HD externo, risco assumido por escrito; item aberto desde (160) fecha
@@ -245,3 +245,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
 (230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
 (231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenhado a partir de incidentes reais deste projeto, não copiado da proposta que chegou de fora
+(232) DIÁRIO — 21/08/2026 · ler_pagina.sh: teste negativo achou ruído de framework sendo relatado como conteúdo; conserto aplicado, aprovado ao vivo

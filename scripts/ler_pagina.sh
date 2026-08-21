@@ -7,6 +7,15 @@
 # baixou. Sempre diz QUAL dos 4 casos resolveu. NUNCA relata "casca
 # vazia" como "o site não tem conteúdo" -- são coisas diferentes.
 #
+# Conserto 21/08/2026 (autorizado pelo Humano, MEMÓRIAS (232)): checagem
+# de HTTP antes de extrair (página de erro nunca é conteúdo -- caso
+# medido: URL morta no S3 devolvendo "404 Not Found" que o CASO 1 velho
+# tratava como conteúdo real); CASO 3 rebaixado de conclusão pra
+# suspeita, sempre reportando junto qualquer URL de API achada no mesmo
+# pacote (caso medido: erros internos do Angular/React/Vue são frases
+# longas sem sintaxe de código -- a heurística velha não distinguia
+# isso de conteúdo); filtro de idioma quando o HTML declara `lang`.
+#
 # Uso: ler_pagina.sh <url>
 set -uo pipefail
 
@@ -19,10 +28,31 @@ UA="Mozilla/5.0"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-# 1. HTML cru.
-if ! curl -sSL -A "$UA" "$URL" -o "$TMP/pg.html"; then
-  echo "lacuna: não consegui baixar $URL (rede ou URL inválida)"
+# 1. HTML cru + código HTTP -- checagem obrigatória ANTES de qualquer
+# extração. Página de erro (404 etc.) nunca é conteúdo.
+HTTP_CODE=$(curl -sSL -A "$UA" -o "$TMP/pg.html" -w "%{http_code}" "$URL")
+CURL_RC=$?
+if [ $CURL_RC -ne 0 ]; then
+  echo "lacuna: não consegui baixar $URL (rede ou URL inválida, curl saiu com código $CURL_RC)"
   exit 1
+fi
+case "$HTTP_CODE" in
+  2[0-9][0-9]) ;;
+  *)
+    echo "abortado: HTTP $HTTP_CODE em $URL -- página de erro nunca é conteúdo, nenhuma extração foi tentada."
+    exit 4
+    ;;
+esac
+
+# 1b. Idioma declarado no HTML, pra guiar a extração (recomendado, não
+# obrigatório). Sem `lang`, reporta a ausência em vez de calar.
+LANG_ATTR=$(grep -ioE '<html[^>]*\blang="?[a-zA-Z-]*"?' "$TMP/pg.html" | head -1)
+LANG_PT=0
+if echo "$LANG_ATTR" | grep -qiE 'lang="?pt(-br)?"?'; then
+  LANG_PT=1
+  echo "idioma declarado no HTML: pt -- priorizando trechos em português na extração." >&2
+else
+  echo "idioma não declarado no HTML (sem atributo lang reconhecido) -- filtro de idioma NÃO aplicado." >&2
 fi
 
 # 2. Texto visível no HTML cru -- tira <script>/<style>/tags, mede o que sobra.
@@ -60,7 +90,9 @@ if [ -n "$PACOTES" ]; then
     if curl -sSL -A "$UA" "$URL_JS" -o "$TMP/pacote.js" 2>/dev/null; then
       # Heurística: cadeia longa, sem caractere de sintaxe de código
       # ({}();=$), com pelo menos 4 palavras de 2+ letras separadas por
-      # espaço -- descarta source code minificado, fica com frase.
+      # espaço -- descarta source code minificado, fica com frase. Isto
+      # NÃO distingue conteúdo real de mensagem de erro de framework
+      # (Angular/React/Vue) -- ver rebaixamento pra SUSPEITA abaixo.
       STRINGS_LONGAS=$(grep -oE '"[^"\\]{40,}"' "$TMP/pacote.js" 2>/dev/null \
         | grep -avE '[(){};=$<>]' \
         | grep -aE '([[:alpha:]]{2,}[[:space:]]+){3,}[[:alpha:]]{2,}')
@@ -68,24 +100,48 @@ if [ -n "$PACOTES" ]; then
         TEXTO_PACOTE="${TEXTO_PACOTE}${STRINGS_LONGAS}
 "
       fi
-      # 4. Procura chamada de API no pacote, sem chamar -- guarda pra reportar
-      # se o passo 3 não render texto suficiente.
+      # Procura chamada de API no pacote, sem chamar -- SEMPRE reportada
+      # junto do texto achado, nunca escolhida em vez dele.
       APIS=$(grep -oE '"(https?://[a-zA-Z0-9.\-]+)?/[a-zA-Z0-9_/.\-]*api[a-zA-Z0-9_/.\-]*"' "$TMP/pacote.js" 2>/dev/null | sort -u | head -5)
       [ -n "$APIS" ] && ENDERECOS_API="${ENDERECOS_API}${APIS}
 "
     fi
   done <<< "$PACOTES"
+  ENDERECOS_API=$(echo "$ENDERECOS_API" | sort -u | sed '/^$/d')
 
   if [ "$(echo "$TEXTO_PACOTE" | tr -d '[:space:]' | wc -c)" -ge 100 ]; then
-    echo "CASO 3 (texto estava embutido no pacote JS):"
+    if [ "$LANG_PT" -eq 1 ]; then
+      TEXTO_PACOTE=$(echo "$TEXTO_PACOTE" | python3 -c "
+import sys
+linhas = [l for l in sys.stdin.read().split(chr(10)) if l.strip()]
+acentos = set('áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ')
+comuns = (' de ', ' para ', ' com ', ' não ', ' que ', ' você ', ' está ', ' são ', ' uma ', ' pelo ', ' pela ')
+def eh_pt(l):
+    return any(c in acentos for c in l) or any(p in l.lower() for p in comuns)
+pt = [l for l in linhas if eh_pt(l)]
+resto = [l for l in linhas if not eh_pt(l)]
+print(chr(10).join(pt + resto))
+")
+    fi
+    echo "SUSPEITA (possível conteúdo, com ruído de framework provável -- cadeia longa sem sintaxe de código, não é conclusão. Mensagens de erro do Angular/React/Vue têm a mesma forma que conteúdo real e não são distinguidas por esta heurística; revisão humana recomendada):"
+    if [ "$LANG_PT" -eq 1 ]; then
+      echo "(idioma pt detectado -- trechos com acentuação/palavras comuns em português priorizados no topo)"
+    fi
     echo "$TEXTO_PACOTE"
+    echo
+    if [ -n "$ENDERECOS_API" ]; then
+      echo "Endereço(s) de API encontrado(s) no mesmo pacote, NÃO CHAMADO(S) -- mostrado lado a lado com o texto acima, não em vez dele:"
+      echo "$ENDERECOS_API"
+    else
+      echo "Nenhum endereço de API encontrado no mesmo pacote."
+    fi
     exit 0
   fi
 
-  # 4. Nada de texto no pacote -- reporta endereço de API achado, sem chamar.
+  # Texto no pacote insuficiente -- reporta endereço de API achado, sem chamar.
   if [ -n "$ENDERECOS_API" ]; then
-    echo "CASO 4 (pacote JS não tem o texto -- provavelmente vem de API em tempo de execução). Endereço(s) de API encontrado(s) no pacote, NÃO CHAMADO(S):"
-    echo "$ENDERECOS_API" | sort -u
+    echo "CASO 4 (pacote JS não tem texto suficiente -- provavelmente vem de API em tempo de execução). Endereço(s) de API encontrado(s) no pacote, NÃO CHAMADO(S):"
+    echo "$ENDERECOS_API"
     exit 0
   fi
 fi
