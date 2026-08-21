@@ -164,18 +164,82 @@ sobrescreve, não duplica.
   antes de mudança estrutural.
 
 ## Rodando agora
-Nada rodando — a bateria de execução da bancada (Frente 4) terminou.
-`agata-consolidacao.timer` já foi remascarado e restaurado (ativo,
-habilitado, mesmo link de antes) — máquina não está mais dedicada.
+Nada rodando. A máquina desligou abruptamente durante o rerun do
+`mistral:7b-instruct` (rodada 3, por volta das 16h05 de 21/08) e só
+voltou às 18h03. Integridade conferida na retomada: `git fsck` limpo
+nos dois repos (`~/agata` e `memoria/missoes/`, sem remote), HEAD local
+== `origin/main` em `cf70368`, nenhum processo órfão do rerun
+sobrevivendo (só o `ollama serve` do boot novo, sem relação com a
+rodada morta).
 
-**Resultado da bateria, 5 de 6 candidatos com célula completa:**
+**`mistral:7b-instruct` excluído da bancada — decisão do Humano.**
+Motivo, registrado explicitamente porque é diferente do motivo do
+`deepseek-r1:8b`: o resultado original tinha um bug de glob no runner
+(corrigido, ver `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md`); o rerun
+de 3 rodadas que corrigiria isso foi interrompido pelo desligamento
+abrupto e **não foi retomado** — a franquia da sessão que rodava
+esgotou antes. Nenhum julgamento sobre o modelo em si.
+
+**O que os dados mostram sobre a interrupção (reconferido direto nos
+arquivos, não presumido):** a rodada 3 não parou no meio de um arquivo
+— o log de execução mostra o loop chegando ao fim (`fim rodada 3`,
+16h05:34). O que quebrou foi o `ollama serve`, que ficou inacessível a
+partir da pergunta V3 em diante: as 6 últimas perguntas da rodada
+(V3, V4, F1, F2, F3, F4) todas vieram `[ERRO: Connection refused]` em
+sequência, porque o script seguiu tentando cada pergunta em vez de
+parar no primeiro erro. Rodadas 1 e 2 parecem completas e não afetadas.
+Arquivos da rodada 3 preservados, renomeados com sufixo
+`_INTERROMPIDO` (não apagados):
+`trace_C1b_mistral_7b-instruct_3_INTERROMPIDO.jsonl` e
+`saida_mistral_7b-instruct_3_INTERROMPIDO.log`, na mesma pasta dos
+`_ANTES-glob` já preservados da rodada afetada pelo bug original.
+
+**Tabela de exclusões pra deixar clara no relatório final** (nenhuma é
+julgamento sobre o modelo):
+- `deepseek-r1:8b`: excluído por tempo, decisão ao vivo do Humano.
+- `mistral:7b-instruct`: excluído porque o bug de glob invalidou os
+  dados originais, e o rerun que corrigiria isso foi interrompido por
+  desligamento abrupto — não retomado, franquia esgotada.
+
+**Investigação do `deepseek-r1:8b` — já feita e reconferida agora,
+direto no trace (não repetir):** 44 comandos válidos nas duas rodadas
+que completaram (15 rodada 1, 29 rodada 2), quase metade da rodada 2
+recusada (28 de 57 — a maioria por metacaractere de shell, o resto por
+`echo` fora da whitelist ou caminho absoluto). N3, rodada 1, travou os
+12 turnos inteiros pedindo nome de arquivo em vez de rodar `ls`
+sozinho. **Não é o defeito antigo de "sem tools"** (aquele veredito
+veio de um teste com o parâmetro nativo `tools` do Ollama, que este
+runner nem usa) — é gasto de chamadas caras (modelo de raciocínio) em
+tentativas de sintaxe mais rica do que o protocolo permite. Números
+batem exatos com os já escritos em
+`RELATORIO_AVALIACAO_BANCADA_21-08-2026.md`, sem erro de transmissão.
+
+**Achado novo desta retomada — linha do `rlm-qwen3-8b-teste` no
+relatório tem uma conta que não fecha:** `4/16 limpo + 7/16 errado
+(5 honesto + 2 alegação de busca sem busca real) + 2/16 sem resposta +
+2/16 fabricação` soma 15, não 16. Cruzando as 16 respostas da rodada 1
+contra o `gabarito` de `bancada.json`: N2, N4 batem exatos (limpo);
+N3 bate no essencial (porta/bind corretos); A2 e V3 são as fabricações
+já documentadas; V1 e V4 são a "alegação de busca" já documentada; A1
+e A4 bateram no teto de 12 iterações (sem resposta); N1, A3, V2, F4
+erram sem fabricar (dado real mal interpretado ou resposta
+incompleta, sem inventar fato). Isso já soma 4+2+2+2+4 = 14, faltando
+2 pra chegar em 16 — sobram F1, F2 e F3 sem categoria clara: F2 e F3
+são "Não" seco que bate no veredito do gabarito mas sem o motivo
+pedido, e F1 (resumir a entrada 999, que não existe) não afirma que a
+entrada não existe nem se encaixa limpo em nenhuma categoria como
+está escrita hoje. **Não decidido aqui** — fica pra quem fizer a
+avaliação final decidir onde entram F1/F2/F3, só a matemática foi
+conferida.
+
+**Resultado da bateria, 5 de 6 candidatos com célula completa (antes
+desta retomada, sem mudança):**
 - `qwen3:8b` — limpo, 28 min, 16/16 respondidas, zero erro.
 - `deepseek-r1:8b` — **excluído**, tempo de execução (62,8 min +
   76,0 min pras 2 primeiras rodadas, decisão do Humano de cortar antes
   da 3ª terminar). Sem veredito de qualidade — critério foi só
   latência.
-- `mistral:7b-instruct` — limpo, 53 min, 16/16, pico de contexto
-  12.900/16384 (mais perto do teto que os outros, mas dentro).
+- `mistral:7b-instruct` — **excluído**, ver acima.
 - `rlm-qwen3-8b-teste` — limpo, só 3,2 min, determinístico. **Achado
   pra quem for avaliar:** 8 das 16 perguntas responderam sem nenhum
   comando de shell emitido (sem tocar o corpus) — pode ser
@@ -184,18 +248,28 @@ habilitado, mesmo link de antes) — máquina não está mais dedicada.
 - `gemma2:9b` — limpo, 2,3 min, pico de contexto 3.751/8192 (nunca
   chegou perto do teto reduzido que o Humano decidiu manter).
 
-**Não julgado ainda:** nenhuma resposta foi avaliada certo/errado —
-isso é revisão humana/Conselho contra o `gabarito` de `bancada.json`,
-mesma régua de MEMÓRIAS (172)-(187), o próximo passo depois deste
-checkpoint. A bancada produz números; promoção de modelo é decisão do
-Humano, depois de SHADOW — nada disso aconteceu ainda.
+**Ainda falta:**
+- Avaliar o controle (`qwen3.5-9b-64k`) contra o `gabarito`, mesma
+  régua já usada nos candidatos — ele ainda não passou por isso.
+- Decidir onde entram F1/F2/F3 na linha do `rlm-qwen3-8b-teste` (achado
+  acima).
+- Nenhuma resposta de candidato foi avaliada certo/errado além do que
+  já está em `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` — promoção de
+  modelo é decisão do Humano, depois de SHADOW, nada disso aconteceu
+  ainda.
 
 Tudo commitado no repo privado `memoria/missoes/` (sem remote — cópia
 só nesta máquina até o HD externo conectar, aviso P-6 pendente desde
-antes desta bateria).
+antes desta bateria). Os arquivos renomeados `_INTERROMPIDO` desta
+retomada ainda não foram commitados — ficam junto do próximo commit
+que fechar este capítulo da bancada.
 
 ## Quebrado
-Nada quebrado.
+Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
+raiz de `~/agata`) apareceu no `git status` desta retomada sem
+registro anterior encontrado nesta sessão — não é erro conhecido, só
+não foi investigado a fundo ainda; fica como pendência de baixa
+prioridade, não mexido.
 
 ## Última atualização
-21/08/2026, 08:56.
+21/08/2026, 18:03 (retomada após desligamento abrupto).
