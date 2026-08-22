@@ -456,18 +456,33 @@ próprio diff: a primeira rodada dos testes 2/3 reaproveitou clone
 sujo entre casos e deu falso negativo — refeito com clone novo por
 caso antes de aceitar como testado. Desempenho: `perimetro.sh`
 completo em 0,31s com o conserto, 9 aprovações históricas no repo
-real hoje — custo irrelevante. **Esta proposta revisa primeiro,
-antes das outras cinco** (ordem pedida pelo Humano) — as cinco
-seguem válidas e testadas, só a ordem de revisão muda.
+real hoje — custo irrelevante.
+
+**Ordem de revisão do Humano, registrada em 22/08/2026, pra sobreviver
+a queda de sessão:**
+1. `propostas/p8-hash-nao-path.diff` — primeiro, corrige o mecanismo
+   que deveria ter protegido os outros cinco.
+2. `propostas/ab1-projeto.diff` — já conferido linha a linha pelo
+   Humano antes de mandar o texto.
+3. `propostas/sync-unificado.diff`
+4. `propostas/harness-a1-trace.diff`
+5. `propostas/glossario-quatro-termos.diff`
+6. `propostas/indice-palavras-chave.diff`
+
+Mecanismo pra cada um: o Humano lê o diff, cria
+`propostas/APROVADO-<nome>` se aceitar (arquivo vazio ou com nota —
+conteúdo não importa pra P-8, só a presença). Isso é ação do Humano,
+não do Executor — nenhum `APROVADO-` foi criado por conta própria.
+Até o item 1 ser aprovado e aplicado, os outros cinco continuam sendo
+revisados pelo Humano diretamente, não pelo mecanismo automático de
+P-8 (que segue com o buraco, ver acima).
 
 Um arquivo não rastreado (`policy-execution.yaml`, na raiz de
 `~/agata`) segue sem investigação a fundo — pendência de baixa
 prioridade, não mexido, ver retomada de 21/08.
 
 ## Última atualização
-22/08/2026, 13:05 (conserto de P-8 proposto e testado —
-`propostas/p8-hash-nao-path.diff`, 6ª proposta, revisa PRIMEIRO por
-ordem do Humano. "Quebrado" continua ativo até aprovação real, não é
-cosmético. As outras cinco propostas seguem válidas, só a ordem
-mudou. Sessão retoma sozinha só se o Humano voltar e autorizar seguir
-pra Camada 3, itens 2-6, ou revisar as propostas).
+22/08/2026, 13:12 (ordem de revisão do Humano registrada, 1-6, ver
+"Quebrado". Nenhum `APROVADO-` criado ainda — essa parte é do Humano,
+não do Executor. Sessão retoma sozinha só se o Humano voltar e
+autorizar seguir pra Camada 3, itens 2-6, ou revisar as propostas).
