@@ -1,0 +1,113 @@
+diff --git a/REGRAS.md b/REGRAS.md
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -86,6 +86,49 @@
+
+ ---
+
++## Glossário: sincronizar · carregar · hidratação · atualizar
++
++Quatro palavras deste projeto que soam parecido e não são a mesma
++coisa -- usadas soltas na história (`PROJETO.md`, "Memória e
++hidratação"), reunidas aqui numa entrada só pra nunca mais confundir
++uma com a outra. Nenhuma definição nova -- só a distinção que já
++existia espalhada, explícita.
++
++**Sincronizar** -- conferir (ou trazer) a cópia local/em contexto
++contra `origin/main`, no início de toda sessão, não só na primeira.
++É sobre ATUALIDADE da cópia -- sozinho, não muda o que está injetado
++no contexto de nenhum modelo, só o que está no disco/repo.
++
++**Hidratação** -- o ESTADO de ter REGRAS + PROJETO + fim de MEMÓRIAS
++presentes no contexto de um modelo. Mecanismo real hoje: `.hermes.md`
++único, gerado pelo hook pre-commit (`.githooks/gerar-hermes-md.sh`),
++injetado automaticamente no system prompt de sessões dentro do
++Hermes. Fora do Hermes, não há injeção automática -- a sessão precisa
++`carregar` (abaixo) pra chegar lá.
++
++**`carregar`** -- o COMANDO/PROCEDIMENTO que uma sessão fora do Hermes
++segue pra chegar ao estado de hidratação: buscar REGRAS/PROJETO/
++MEMÓRIAS pela Fonte canônica ("Verificação de canônico" nesta seção),
++e abrir com o bloco de prontidão de 4 linhas (abaixo). Mecanismo
++(arquivo, hook, contador de turno fora do Hermes) é deste projeto,
++não universal.
++
++**`atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>`** -- comando que combina
++`sincronizar` + regenerar hidratação: `git pull` do alvo, depois
++regenera a hidratação (`.hermes.md` pra sessões no Hermes, releitura
++pra sessões que já `carregar`am). Nunca sobrescreve história; conflito
++-> para e avisa. Diferença de `sincronizar` sozinho: `sincronizar` só
++confere/traz o repo, `atualizar` também refaz a hidratação a partir do
++que trouxe.
++
++Ordem de dependência, resumida: sincronizar (repo em dia) -> hidratação
++(estado de ter o canon no contexto) -> carregar (como uma sessão fora
++do Hermes chega lá) -> atualizar (comando que refaz sincronizar +
++hidratação juntos, quando o canon já mudou depois que a sessão
++começou).
++
++---
++
+ ## Carregar e formatos
+
+ **`carregar`** — mecanismo de hidratação (arquivo, hook, contador de turno fora do Hermes) é deste projeto, não universal. Ver PROJETO.md, "Memória e hidratação".
+
+## Motivo
+
+Quatro palavras usadas há semanas na história deste projeto sem nunca
+terem sido postas lado a lado: `sincronizar`, `carregar`, `hidratação`,
+`atualizar`. Cada uma já tinha uma definição real em algum lugar
+(`PROJETO.md` "Memória e hidratação", `REGRAS.md` "Carregar e
+formatos"), mas espalhada — nada impedia confundir uma com a outra
+(ex: "sincronizei" quando na verdade só hidratou, ou vice-versa).
+Nenhuma distinção nova foi inventada aqui — só consolidada.
+
+**Fonte de cada definição, conferida antes de escrever (não presumida):**
+- `sincronizar`: `PROJETO.md` linha 53 ("sincronizar contra ele no
+  início de toda sessão, não só na primeira").
+- `hidratação`: `PROJETO.md` linha 45 ("Hidratação real hoje: `.hermes.md`
+  único... Injeta REGRAS + PROJETO + fim de MEMÓRIAS no system prompt").
+- `carregar`: `REGRAS.md` linha 91 (definição já existente, preservada
+  aqui igual, só posicionada ao lado das outras três) + os "cinco
+  primeiros movimentos" do preâmbulo de `REGRAS.md`.
+- `atualizar`: `PROJETO.md` linha 54 (definição já existente, exata:
+  "`atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar
+  hidratação. Nunca sobrescreve história; conflito → para e avisa").
+
+## Testes — proposta é só texto/definição, não código; os quatro casos
+aqui verificam consistência e compatibilidade, não execução
+
+**1. Positivo — o diff aplica limpo contra o `REGRAS.md` real desta
+máquina:**
+```
+$ git apply --check propostas/glossario-quatro-termos.diff
+(exit 0, sem erro)
+```
+
+**2. Negativo — checagem de que nenhuma definição nova contradiz a
+já existente no arquivo** (a checagem P-7 do próprio repo, que roda
+no `pre-commit`, cobre citação de MEMÓRIAS — não glossário; esta
+verificação foi manual, grep-a-grep, contra as quatro fontes listadas
+acima em "Motivo", uma a uma, antes de escrever a redação final).
+Nenhuma divergência encontrada entre a definição nova e o texto fonte
+já canônico.
+
+**3. Ausência — compatibilidade com a OUTRA proposta desta mesma
+rodada que também toca `REGRAS.md`** (`sync-unificado.diff`, que
+substitui `íntegro?` por `sync:` no bloco de prontidão, seção
+adjacente). Testado que os dois diffs se aplicam em qualquer ordem,
+num scratch limpo (`git init` + `git apply` sequencial, os dois
+sentidos), sem conflito de hunk — as duas mudanças ficam em regiões
+diferentes do arquivo:
+```
+$ git apply glossario-quatro-termos.diff && git apply sync-unificado.diff
+(ambos aplicam OK, nesta ordem)
+```
+
+**4. Caso realista — o glossário responde a uma pergunta real que
+apareceria numa auditoria:** "essa sessão disse que sincronizou, isso
+quer dizer que hidratou de novo?" Resposta, com o glossário em canon:
+não necessariamente — `sincronizar` só atualiza a cópia em disco;
+sem rodar `atualizar` (ou re-`carregar`), o contexto já injetado no
+modelo continua sendo o de antes. Essa é exatamente a distinção que
+faltava explícita antes desta proposta.

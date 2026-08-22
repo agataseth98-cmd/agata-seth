@@ -378,6 +378,49 @@ real. Extensão de `~/.hermes/config.yaml` (fora deste repo, config de
 produção) documentada mas NÃO aplicada. `git apply --check` confirma
 que o diff aplica limpo.
 
+**Item 3e (glossário + palavras-chave): PRONTO, testado, dois diffs
+separados como pedido.**
+- `propostas/glossario-quatro-termos.diff` — define `sincronizar`,
+  `hidratação`, `carregar`, `atualizar` lado a lado em REGRAS.md, sem
+  inventar distinção nova (cada definição rastreada até a linha exata
+  de PROJETO.md/REGRAS.md onde já existia, espalhada). Testado que
+  coexiste sem conflito com `sync-unificado.diff` (os dois tocam
+  REGRAS.md, em regiões diferentes) — `git apply` dos dois em
+  qualquer ordem, num scratch limpo, confirmado.
+- `propostas/indice-palavras-chave.diff` — script novo
+  `scripts/extrair_palavras_chave.py` (tokeniza, tira stopword,
+  deduplica — grep, nunca embedding, decisão (115)) + hook
+  `.githooks/gerar-hermes-md.sh` gerando um índice PARALELO
+  (`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`) pra busca por assunto.
+  **Achado real medindo antes de propor:** o índice com palavras-chave
+  pesa 73% a mais que o puro (24K→41,5K chars) — embutir isso em
+  `.hermes.md` pioraria o mesmo problema de truncamento que este
+  projeto já brigou pra resolver (103-105, 220). Redesenhado pra ficar
+  DE FORA da hidratação, só em disco pra `grep` sob demanda —
+  confirmado que `.hermes.md` fica no MESMO tamanho de antes (125.298
+  bytes, idêntico) rodando o hook de ponta a ponta numa cópia isolada.
+  **Segundo achado, também corrigido antes de propor:** sem tratamento
+  de erro, um `extrair_palavras_chave.py` ausente/quebrado travava o
+  hook INTEIRO (nem `.hermes.md` era gerado — bloquearia todo commit).
+  Corrigido pra fail-soft: o extra pode falhar sozinho, o caminho
+  crítico de hidratação nunca é afetado. **Achado colateral, fora de
+  escopo, não corrigido:** `MEMÓRIAS.md` sem nenhuma entrada já
+  quebrava o hook ANTES desta proposta (bug pré-existente, confirmado
+  rodando a versão em produção sem minha mudança) — registrado na
+  proposta, risco baixo (história é append-only, "zero entradas" não
+  é estado alcançável), decisão de abrir proposta própria fica pro
+  Humano.
+
+**Lote grande FECHADO.** Itens 1 e 2 aplicados de verdade (F1/F2/F3
+decidido e publicado, Ollama limpo). Item 3: a, b, c documentados
+(a bloqueado, b e c consequentemente parado/pronto conforme a
+dependência), d e e prontos e testados — total de 4 propostas em
+`propostas/` esperando `APROVADO-<nome>` do Humano
+(`sync-unificado.diff`, `harness-a1-trace.diff`,
+`glossario-quatro-termos.diff`, `indice-palavras-chave.diff`), mais
+o bloqueio registrado do item 3a. Nenhuma célula de bancada rodou de
+novo. Nenhum push de canon além do que fechou o item 1, como pedido.
+
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
 raiz de `~/agata`) apareceu no `git status` desta retomada sem
@@ -386,7 +429,8 @@ não foi investigado a fundo ainda; fica como pendência de baixa
 prioridade, não mexido.
 
 ## Última atualização
-21/08/2026, 19:34 (mistral/deepseek registrados em entradas próprias,
-235/236; "Camada 3 da Parte 1" localizada e salva em disco; caso 16
-do rlm-qwen3-8b-teste segue como única decisão pendente pra fechar a
-bancada de verdade).
+22/08/2026, 10:15 (lote grande autorizado em bloco: caso 16 fechado
+(237), Ollama limpo (~9,6 GB), 4 propostas prontas e testadas em
+`propostas/` esperando aprovação, item 3a bloqueado por falta de
+texto-fonte — registrado, não inventado. Sessão retoma sozinha só se
+o Humano voltar e autorizar seguir pra Camada 3, itens 2-6).

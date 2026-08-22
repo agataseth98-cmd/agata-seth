@@ -1,0 +1,223 @@
+diff --git a/scripts/extrair_palavras_chave.py b/scripts/extrair_palavras_chave.py
+new file mode 100755
+index 0000000..86d5faf
+--- /dev/null
++++ b/scripts/extrair_palavras_chave.py
+@@ -0,0 +1,72 @@
++#!/usr/bin/env python3
++"""Extrai palavras-chave de cada linha de título de INDICE_MEMORIAS.md.
++
++Puramente mecânico: tokeniza, tira stopword e palavra curta, deduplica,
++preserva ordem de primeira aparição. NUNCA embedding, NUNCA modelo de
++linguagem julgando relevância — decisão (115): grep vence embedding em
++precisão, custo e auditabilidade, pra este corpus. As palavras-chave
++existem pra `grep -i` achar entrada por assunto sem reler o índice
++inteiro, não pra "entender" nada.
++
++Uso: uma linha de título por vez no stdin, devolve a mesma linha
++seguida de uma linha "  palavras-chave: a, b, c" (2 espaços de indent,
++igual ao padrão de nota que INDICE_MEMORIAS.md já usa).
++"""
++from __future__ import annotations
++
++import re
++import sys
++
++STOPWORDS = {
++    "a", "o", "as", "os", "de", "da", "do", "das", "dos", "e", "ou",
++    "em", "no", "na", "nos", "nas", "um", "uma", "uns", "umas", "por",
++    "para", "com", "sem", "que", "se", "não", "já", "só", "mais",
++    "menos", "muito", "pouco", "ao", "aos", "à", "às", "é", "foi",
++    "ser", "está", "são", "seu", "sua", "seus", "suas", "este", "esta",
++    "esse", "essa", "isso", "isto", "num", "numa", "entre", "sobre",
++    "até", "quando", "onde", "como", "mas", "também", "vez", "vezes",
++    "ver", "ainda", "depois", "antes", "cada", "todo", "toda", "todos",
++    "todas", "outro", "outra", "outros", "outras", "diário", "conselho",
++    "nenhum", "nenhuma", "nesta", "neste", "nessa", "nesse", "naquela",
++    "naquele", "duas", "dois", "via", "algum", "alguma", "alguns",
++    "algumas", "qualquer", "quaisquer", "pelo", "pela", "pelos", "pelas",
++}
++
++
++def extrair(titulo: str, minimo_letras: int = 3) -> list[str]:
++    # Remove o prefixo de data/número/rótulo (ex: "21/08/2026 (234) DIÁRIO — ")
++    # antes de tokenizar -- não é palavra-chave, é metadado que já está em
++    # campo próprio no índice.
++    sem_prefixo = re.sub(
++        r"^\d{4}-\d{2}-\d{2}\s*\(\d+\)\s*|^\(\d+\)\s*",
++        "",
++        titulo,
++    )
++    sem_prefixo = re.sub(r"^(DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO)\s*—\s*", "", sem_prefixo)
++    sem_prefixo = re.sub(r"^\d{2}/\d{2}/\d{4}\s*·\s*", "", sem_prefixo)
++
++    palavras = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ]+", sem_prefixo.lower())
++    vistas: dict[str, None] = {}
++    for p in palavras:
++        if len(p) < minimo_letras:
++            continue
++        if p in STOPWORDS:
++            continue
++        vistas.setdefault(p, None)
++    return list(vistas.keys())
++
++
++def main() -> int:
++    for linha in sys.stdin:
++        linha = linha.rstrip("\n")
++        if not linha.strip():
++            continue
++        print(linha)
++        chaves = extrair(linha)
++        if chaves:
++            print("  palavras-chave: " + ", ".join(chaves))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/.githooks/gerar-hermes-md.sh b/.githooks/gerar-hermes-md.sh
+--- a/.githooks/gerar-hermes-md.sh
++++ b/.githooks/gerar-hermes-md.sh
+@@ -7,6 +7,15 @@
+
+ OUT=".hermes.md"
+ INDICE="INDICE_MEMORIAS.md"
++# Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
++# decisão (115)). Fica DE FORA de $OUT de propósito: medido rodando os dois
++# lados antes de propor isto -- o índice com palavras-chave inteiro pesa 73%
++# a mais que o índice puro (24K -> 41,5K chars nesta base). Embutir isso em
++# .hermes.md pioraria exatamente o problema que este projeto já brigou pra
++# resolver (MEMÓRIAS 103-105, 220: carregador cortando contexto em
++# silêncio) -- então este arquivo fica só em disco, pra `grep` sob demanda
++# de qualquer sessão com Máquina, nunca auto-injetado.
++INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
+
+ # Janela de MEMÓRIAS: por ENTRADA INTEIRA, não por linha crua (linha corta
+ # no meio da frase). Acumula entradas completas de trás pra frente até um
+@@ -84,7 +93,36 @@
+   fi
+ }
+
++gerar_indice_palavras_chave() {
++  {
++    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
++    echo "# Índice de MEMÓRIAS.md, com palavras-chave por entrada"
++    echo
++    echo "Mesmas entradas de INDICE_MEMORIAS.md, uma linha \"  palavras-chave: ...\" logo"
++    echo "abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,"
++    echo "deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)."
++    echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
++    echo "inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima."
++    echo
++    {
++      grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++      grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++    } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
++      | python3 scripts/extrair_palavras_chave.py
++  } > "$INDICE_CHAVES"
++}
++
+ gerar_indice
++# Fail-soft de propósito: índice de palavras-chave é um extra "nível 0",
++# best-effort -- se quebrar (script ausente, bug, MEMÓRIAS.md sem entrada
++# nenhuma), NÃO pode derrubar a geração de .hermes.md/INDICE_MEMORIAS.md,
++# que são o caminho crítico de hidratação. Achado testando de propósito
++# antes de propor: sem o `|| ...` abaixo, um `scripts/extrair_palavras_chave.py`
++# ausente ou quebrado travava o hook inteiro (nenhum commit passaria).
++if ! gerar_indice_palavras_chave; then
++  echo "AVISO: geração de $INDICE_CHAVES falhou -- .hermes.md/$INDICE seguem normais, só o índice de palavras-chave (extra, não crítico) ficou de fora desta rodada." >&2
++  rm -f "$INDICE_CHAVES"
++fi
+
+ {
+   echo "<!--"
+@@ -116,4 +154,8 @@
+
+ checar_reconciliacao || true
+
+-echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes)"
++if [ -f "$INDICE_CHAVES" ]; then
++  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hermes.md)"
++else
++  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES: FALHOU nesta rodada, ver aviso acima"
++fi
+
+## Motivo
+
+`grep` sobre um índice de MEMÓRIAS não achava entrada por assunto, só
+por número/data — quem quisesse achar "todas as entradas sobre
+truncamento" precisava ler o índice inteiro ou grepar `MEMÓRIAS.md`
+direto (mais lento, mais chars). Palavras-chave por entrada, extraídas
+mecanicamente do próprio título (sem embedding, decisão (115) já
+canônica), resolvem isso com `grep -i <termo>
+INDICE_MEMORIAS_PALAVRAS-CHAVE.md`.
+
+## Testes — quatro casos, saída real, rodados nesta máquina em 22/08/2026,
+## em cópias isoladas do repo (nunca sobre `~/agata` de verdade)
+
+**1. Positivo/realista — hook completo, dados reais do repo, numa
+cópia isolada (`REGRAS.md`+`PROJETO.md`+`MEMÓRIAS.md` reais, scripts
+reais):**
+```
+$ bash .githooks/gerar-hermes-md.sh
+[...]
+gerado: .hermes.md (125298 bytes), INDICE_MEMORIAS.md (24290 bytes), INDICE_MEMORIAS_PALAVRAS-CHAVE.md (42109 bytes, fora de .hermes.md)
+```
+`.hermes.md` fica **exatamente do mesmo tamanho** de antes da mudança
+(125298 bytes nos dois casos) — confirma que o índice novo não pesa
+na hidratação. Amostra de saída do índice novo:
+```
+(237) DIÁRIO — 22/08/2026 · Fecha o caso 16 do `rlm-qwen3-8b-teste` (234) — F1 errado, F2/F3 limpo, [...]
+  palavras-chave: fecha, caso, rlm, qwen, teste, errado, limpo, decisão, humano, leitura, opus, insumo, linha, final, recalculada, transcrita
+```
+
+**2. Negativo (achado real, fora de escopo, não corrigido aqui) —
+`MEMÓRIAS.md` sem nenhuma entrada casando o padrão de título:**
+```
+$ bash .githooks/gerar-hermes-md.sh
+exit: 1
+```
+Reproduzido também contra a **versão atual, sem esta proposta**, do
+script já em produção: mesmo `exit 1`, mesmo ponto de falha (`grep`
+sem match sob `set -euo pipefail`). **Bug pré-existente, não
+introduzido por esta proposta** — registrado aqui porque foi achado
+testando, mas fora do escopo pedido (glossário + palavras-chave); fica
+pra quem for revisar decidir se abre proposta própria. Na prática o
+risco é baixo: `MEMÓRIAS.md` é append-only e já tem 237+ entradas,
+"zero entradas" não é um estado alcançável sem apagar história.
+
+**3. Ausência (achado real, corrigido antes de propor) —
+`scripts/extrair_palavras_chave.py` ausente/quebrado.** Primeira
+versão do hook **não sobrevivia** a isso: o hook inteiro abortava
+(`set -e` propagando a falha do `python3` pra fora do pipe), e nem
+`.hermes.md` nem `INDICE_MEMORIAS.md` eram gerados — bloquearia todo
+commit no repo até alguém notar e consertar o script novo. Corrigido:
+chamada de `gerar_indice_palavras_chave` envolta em `if ! ...; then`
+(um dos poucos contextos em que `set -e` não propaga), com aviso em
+stderr e o índice de palavras-chave simplesmente ausente daquela
+rodada. Depois do conserto:
+```
+$ bash .githooks/gerar-hermes-md.sh
+/usr/sbin/python3: can't open file '.../scripts/extrair_palavras_chave.py': [Errno 2] No such file or directory
+AVISO: geração de INDICE_MEMORIAS_PALAVRAS-CHAVE.md falhou -- .hermes.md/INDICE_MEMORIAS.md seguem normais, só o índice de palavras-chave (extra, não crítico) ficou de fora desta rodada.
+[...]
+gerado: .hermes.md (125298 bytes), INDICE_MEMORIAS.md (24290 bytes), INDICE_MEMORIAS_PALAVRAS-CHAVE.md: FALHOU nesta rodada, ver aviso acima
+$ echo $?
+0
+```
+`.hermes.md` gerado normal, hook não trava mais nenhum commit por
+causa deste extra.
+
+**4. Caso realista, dentro do próprio script — checagem de "linha só
+com stopword" contra o corpus real inteiro (248 títulos, incluindo os
+mais antigos e mais curtos):**
+```
+$ python3 scripts/extrair_palavras_chave.py < <(títulos reais das 248 entradas)
+```
+Nenhuma linha de `palavras-chave:` ficou vazia — mesmo o título mais
+minimalista do corpus ("Orusoua decidiu · Claude executou") produziu
+`orusoua, decidiu, claude, executou`. Achado no caminho, corrigido
+antes de aceitar como pronto: a primeira lista de stopwords deixava
+passar `nenhum`, `nesta`, `duas`, `via` como se fossem palavra-chave —
+ampliada a lista, reconferido depois.
