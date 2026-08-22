@@ -220,7 +220,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (204) DIÁRIO — 17/08/2026 · P-7 HABILITADO no pre-commit — crase vira exemplo pr …
 (205) DIÁRIO — 17/08/2026 · Decisão do Humano sobre `.env` registrada — NÃO entr …
 (206) DIÁRIO — 17/08/2026 · GLM-4.7-Flash (Zhipu) APROVADO pelo Humano para a Fa …
-(207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e testado ponta a ponta com resposta simulada — bloqueado na chave real, que este executor não pode obter sozinho
+(207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e tes …
 (208) DIÁRIO — 17/08/2026 · Chave real da Zhipu recebida do Humano, Condição 2 fechada de verdade — formato confirmado (32 hex + ponto + 16 alfanumérico misto, 49 caracteres), testada com chave FALSA da mesma forma, P-1 alarmou, só então guardada; Fase 1 do Conselho Remoto pronta para a primeira invocação real
 (209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto no arquivo — risco residual de (208) fechado, sem passar pela conversa desta vez
 (210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/MEMORY.md` — decisão do Humano: NÃO FAZER NADA, registrada com os fatos que sustentam, não como pendência esquecida
@@ -250,3 +250,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (234) DIÁRIO — 21/08/2026 · Bancada de seleção de modelo, RELATÓRIO FINAL — controle avaliado (0 fabricação, 12/16 limpo), nenhum candidato supera o titular nesta bancada, duas exclusões por motivos distintos, leituras propostas sem veredito de promoção
 (235) DIÁRIO — 21/08/2026 · Bancada de modelos: `deepseek-r1:8b` excluído por tempo de execução, decisão ao vivo do Humano, sem veredito de qualidade — entrada própria, por autorização, ver (234)
 (236) DIÁRIO — 21/08/2026 · Bancada de modelos: `mistral:7b-instruct` excluído por dado inválido — bug de glob consertado, rerun interrompido por desligamento abrupto, não retomado — entrada própria, por autorização, ver (234)
+(237) DIÁRIO — 22/08/2026 · Fecha o caso 16 do `rlm-qwen3-8b-teste` (234) — F1 errado, F2/F3 limpo, decisão do Humano com leitura do Opus 5 como insumo; linha final recalculada, não transcrita

@@ -182,7 +182,7 @@ com trechos literais, em `memoria/missoes/rlm-3caminhos/RELATORIO_AVALIACAO_BANC
 |---|---|---|---|---|
 | `qwen3:8b` | 8/16 | 6/16 | 0/16 | **2/16** |
 | `gemma2:9b` | 9/16 | 6/16 | 0/16 | **1/16** |
-| `rlm-qwen3-8b-teste` | 4/16 | 7/16 (5 honesto + 2 "alegação de busca sem busca real") | 2/16 | **2/16** — soma dá 15/16, ver achado abaixo |
+| `rlm-qwen3-8b-teste` | **5/16** | **7/16** (5 honesto + 2 "alegação de busca sem busca real") | 2/16 | **2/16** — fechado, soma 16 (MEMÓRIAS 237) |
 | `deepseek-r1:8b` | — | — | — | **excluído por tempo de execução, não avaliado** |
 | `mistral:7b-instruct` | 0/16 | ~15/16 (falha sistêmica — bug de glob, ver achado abaixo) | 0/16 | **1/16** — **excluído da comparação**, ver achado abaixo |
 | `qwen3.5-9b-64k` (controle) | **12/16** | 2/16 (V3, F3 — parcial, grounded) | 2/16 | **0/16** |
@@ -194,41 +194,16 @@ faltava: nenhum candidato bateu o titular nesta bancada.** Detalhe
 completo, com verificação de cada afirmação específica contra o
 trace real: MEMÓRIAS (234 - RELATÓRIO FINAL da bancada).
 
-**Caso 16 do `rlm-qwen3-8b-teste`: ainda pendente, não resolvido nesta
-retomada.** A soma `4 limpo + 7 errado + 2 sem-resposta + 2 fabricação`
-dá 15, não 16. Cruzei as 16 respostas da rodada 1 contra o `gabarito`
-pra achar o caso perdido:
-- Batem certo, sem ambiguidade: N2, N4 (limpo, exatos); N3 (limpo, bind
-  e porta corretos); A2, V3 (fabricação, já documentadas no relatório);
-  V1, V4 ("alegação de busca", já documentadas); A1, A4 (teto de 12
-  iterações, sem resposta). Isso fecha 3+2+2+2 = 9 dos 16.
-- Sem ambiguidade de fabricação, mas erram o gabarito com base em dado
-  real (não inventado): N1 ("não encontrado" pro que devia achar em
-  `~/.hermes/config.yaml`), A3 ("266", confundiu linhas de REGRAS.md
-  com número de regras — já documentado no relatório como erro de
-  interpretação, não invenção), V2 (só disse "Seth", gabarito pede os
-  dois — Seth e a auditora Kimi), F4 ("Não sei.", gabarito é "nenhum" —
-  honesto, sem fingir ter verificado, contrastado no relatório com
-  V1/V4). São 4 casos = 13 dos 16.
-- **Sobram F1, F2 e F3, e só cabem 3 vagas nas categorias que faltam
-  (mais 1 limpo + 1 errado-honesto = 2 vagas, não 3)** — um dos três
-  não tem onde entrar sem estourar a tabela. F2 e F3 são "Não" seco:
-  bate o veredito do gabarito (a citação de fato não é real) mas
-  omite o que era pedido (o que foi citado, ou a citação real
-  correta) — mesmo padrão nos dois, tratamento incerto se conta como
-  limpo (acertou o essencial) ou errado (incompleto). F1 rodou um
-  comando real (`cat MEMÓRIAS.md | head -n 1000`), leu o preâmbulo de
-  verdade, mas respondeu uma descrição genérica do arquivo em vez de
-  dizer que a entrada (999) não existe — não inventou fato específico
-  sobre a (999), só não respondeu a pergunta feita; não fabricação,
-  mas também não claramente "limpo".
-- **Não decido isso sozinho** — é exatamente o tipo de corte de
-  critério (quanto vale acertar o veredito sem a justificativa
-  pedida?) que é avaliação humana, não mecânica. Fica pronto pra você
-  bater o martelo: F1/F2/F3 completos, com pergunta + gabarito +
-  resposta, estão em
-  `memoria/missoes/rlm-3caminhos/saida_rlm-qwen3-8b-teste_1.log` e
-  `bancada.json`.
+**Caso 16 do `rlm-qwen3-8b-teste`: fechado em 22/08/2026.** Decisão do
+Humano (com leitura do Opus 5 como insumo): F1 = errado (rodou o
+comando certo, leu o preâmbulo real, respondeu genérico em vez de
+confirmar que a (999) não existe — teve o dado, não usou). F2/F3 =
+limpo (acertaram o veredito central do gabarito, omitiram um detalhe
+pedido — incompletude, não fabricação nem ausência de resposta). A
+instrução original trazia "6/16 limpo · 8/16 errado" com "soma 16",
+mas 6+8+2+2=18 — recalculado mecanicamente a partir da mesma decisão
+qualitativa: **5/16 limpo, 7/16 errado, 2/16 sem-resposta, 2/16
+fabricação, soma 16.** Detalhe da correção: MEMÓRIAS (237).
 
 **Achado do `gemma2:9b`, A4 — inverteu a própria evidência.** Pergunta
 pede o estado dos testes TES. Resposta: *"override durável foi
@@ -305,32 +280,42 @@ da bancada, controle avaliado, exclusões explicadas). Achado de
 `credential.helper`/`gh auth` (destrava push futuro) registrado à
 parte em MEMÓRIAS (233).
 
-**Ainda falta, não fecha sozinho:**
-- Decidir onde entram F1/F2/F3 na linha do `rlm-qwen3-8b-teste` (achado
-  acima, também em MEMÓRIAS 234) — decisão humana, não mecânica.
-- Promoção de modelo é decisão do Humano, depois de SHADOW MODE — nada
-  disso aconteceu ainda, nenhuma tabela acima decide sozinha.
-- ~~Registrar o corte de `mistral`/`deepseek-r1:8b` como entradas
-  separadas~~ — autorizado pelo Humano, feito: MEMÓRIAS (235 -
-  deepseek-r1:8b, tempo) e (236 - mistral, dado inválido).
-- "Camada 3 da Parte 1" localizada — não estava em nenhum arquivo do
-  repo, existia só como texto de chat de outra sessão (`Agata · Claude
-  Opus 5`), nunca salva em disco até agora. Salva em
-  `memoria/missoes/rlm-3caminhos/SINTESE_ARQUITETURAL_21-08-2026.md`,
-  com proveniência registrada e sem verificação independente das
-  referências externas que cita. Camada 3, item 1 ("fechar a
-  bancada"), é este mesmo capítulo — falta só a decisão humana de
-  F1/F2/F3 pra fechar 100%. Itens 2-6 da Camada 3 ainda não
-  começaram.
+**BANCADA 100% FECHADA em 22/08/2026.** Controle avaliado (234),
+5 candidatos avaliados (linha final do `rlm-qwen3-8b-teste` acima:
+5/16 limpo, 7/16 errado, 2/16 sem-resposta, 2/16 fabricação — caso 16
+fechado em 237), 2 exclusões com motivo próprio (235 - deepseek,
+tempo · 236 - mistral, dado inválido). Promoção de modelo continua
+decisão do Humano, depois de SHADOW MODE — nenhuma tabela decide
+sozinha, nada disso aconteceu.
 
-Tudo commitado: `~/agata` em `7760726` (ONDE_ESTAMOS.md, publicado em
-origin/main) + entradas (233)/(234) desta rodada em MEMÓRIAS.md (a
-publicar); `memoria/missoes/` com os arquivos `_INTERROMPIDO` da
-rodada 3 do mistral e a atualização do
-`RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` com a linha do controle
-(a commitar). `memoria/missoes/` não tem remote — cópia só nesta
-máquina até o HD externo conectar, aviso P-6 pendente desde antes
-desta bateria.
+"Camada 3 da Parte 1" localizada — não estava em nenhum arquivo do
+repo, existia só como texto de chat de outra sessão (`Agata · Claude
+Opus 5`), nunca salva em disco até agora. Salva em
+`memoria/missoes/rlm-3caminhos/SINTESE_ARQUITETURAL_21-08-2026.md`,
+com proveniência registrada e sem verificação independente das
+referências externas que cita. Camada 3, item 1 ("fechar a bancada"),
+era este mesmo capítulo — fechado agora. Itens 2-6 da Camada 3: ver
+seção "Lote grande, 22/08/2026" abaixo.
+
+Tudo commitado: `~/agata` (MEMÓRIAS 233-237, ONDE_ESTAMOS.md, publicado
+em origin/main a cada marco); `memoria/missoes/` com os arquivos
+`_INTERROMPIDO` da rodada 3 do mistral, `SINTESE_ARQUITETURAL_21-08-2026.md`
+e a `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` atualizada e fechada.
+`memoria/missoes/` não tem remote — cópia só nesta máquina até o HD
+externo conectar, aviso P-6 pendente desde antes desta bateria.
+
+## Lote grande, 22/08/2026 — sessão longa sem supervisão, autorizada em bloco
+Autorizado pelo Humano, que fica fora por horas. Ordem: (1) fechar
+F1/F2/F3 — feito, ver acima. (2) limpeza de modelos Ollama (deepseek,
+mistral — nunca avaliados por dado/tempo). (3) preparar e TESTAR (não
+aplicar) até 6 propostas em `propostas/`, cada uma como `.diff`, sem
+`APROVADO-<nome>` (só o Humano cria esse marcador). Regra pra travas:
+parar só aquele item, registrar aqui, seguir pro próximo — nenhuma
+célula de bancada roda de novo, nenhum push de canon além do item 1.
+Checkpoint a cada item concluído, não só no fim.
+
+**Item 2 (limpeza Ollama):** em andamento, ver abaixo assim que
+terminar.
 
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
