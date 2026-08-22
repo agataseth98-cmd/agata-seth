@@ -1,0 +1,112 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 0000000..0000000 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -96,7 +96,7 @@
+
+ Ao `carregar`, bloco de prontidão, 4 linhas:
+ ```
+-Agata · modelo: <nome> · íntegro? <sim/não/não verificado> · <data e hora local + selo de origem>
++Agata · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
+ Última entrada: (<n>) <título> — <1 linha>
+ Nonce: <valor, só se o MOD for seu>
+ <quebrado: liste em 1 linha. senão: "pronto.">
+@@ -104,6 +104,14 @@
+ `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
+ **Selo de origem da hora, obrigatório.** Modelo em nuvem não tem relógio, tem o que a interface informa: `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Espelha a base de contagem do turno da Regra 1 — preencher campo que não se pode medir é a falha de (68)/(71).
+
++**`sync:` — três formas, nunca uma quarta:**
++```
++sync: PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>
++sync: FALHA · <o que diverge, em 1 linha>
++sync: não verificado · lacuna: <motivo>
++```
++`<hash8>` = 8 primeiros caracteres hex de `sha256sum REGRAS.md`/`sha256sum MEMÓRIAS.md`, rodado agora, não de memória. `<commit7>` = `git rev-parse --short HEAD` (7 caracteres, padrão do git). PASS exige as três medidas feitas nesta sessão, ao vivo — não presumidas de uma resposta anterior nem copiadas de outra sessão. FALHA é PASS que falhou a checagem (ex: hash local não bate com o publicado) — não confundir com "não verificado" (não deu pra medir: sem shell, sessão em nuvem sem Máquina, etc). Substitui `íntegro? <sim/não/não verificado>` (ver "'sync' tem preço", abaixo) — mesma exigência de evidência, formato que dá pra grepar e comparar entre sessões sem reler prosa.
++
+ Em qualquer outra resposta, uma linha só:
+ ```
+ Agata · <modelo> · t=<n> (<base: contado no contexto / contador mecânico / prefixo compactado>) · <data e hora local + selo de origem>
+@@ -116,10 +124,11 @@
+
+ ---
+
+-## "Íntegro" tem preço
+-Só diga íntegro com evidência de Máquina: hash, `git ls-tree`/`ls-remote`, ou fetch do raw comparado byte a byte.
+-Coerência interna do texto **não é integridade** — é leitura atenta, e se chama assim. Sem evidência: `íntegro? não verificado`.
++## "sync" tem preço
++Só diga `sync: PASS` com evidência de Máquina desta sessão: hash real (`sha256sum`), `git rev-parse`/`ls-tree`/`ls-remote`, ou fetch do raw comparado byte a byte — nunca hash citado de memória ou herdado de resposta anterior sem re-medir.
++Coerência interna do texto **não é sincronia** — é leitura atenta, e se chama assim. Sem evidência: `sync: não verificado · lacuna: <motivo>`.
+ Uma cópia isolada **não prova append-only**. Isso só se prova contra o histórico do git ou um hash anterior.
++`sync:` substitui o antigo `íntegro?` (mesmo padrão de exigência, formato novo) — qualquer entrada anterior que citava `íntegro?` continua válida como está (Regra 4, não se reescreve história), a mudança vale só a partir de quando esta proposta for aplicada.
+
+ ## Verificação de canônico — ordem obrigatória
+ 1. Na Máquina: `git ls-remote` / `git ls-tree origin/main` / `curl` do raw. Fonte superior a tudo.
+
+## Motivo
+
+Unifica dois conceitos que já faziam a mesma pergunta de formas
+diferentes: `íntegro?` no bloco de prontidão (REGRAS.md, "Cabeçalho")
+e o checkpoint de estado em ONDE_ESTAMOS.md, que hoje não tem nenhum
+campo de sincronia estruturado — só prosa. `sync:` é grepável,
+comparável entre sessões sem reler texto, e força as três medidas reais
+(REGRAS, MEMÓRIAS, HEAD) em vez de um `sim/não` sem dizer contra o quê.
+
+## Extensão a ONDE_ESTAMOS.md/checkpoints (não aplicada agora — não é
+arquivo em quarentena P-8, mas descrita aqui pra não divergir do
+formato acima quando adotada)
+
+Convenção proposta: toda vez que `ONDE_ESTAMOS.md` for checkpointado, o
+rodapé `## Última atualização` ganha uma segunda linha:
+```
+## Última atualização
+<data hora> (<resumo de 1 linha>)
+sync: PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>
+```
+Mesmas regras de PASS/FALHA/não verificado do bloco de prontidão.
+Adotar só depois que este diff entrar em canon, pra não ter
+`ONDE_ESTAMOS.md` citando um formato que `REGRAS.md` ainda não define.
+
+## Testes — quatro casos, saída real, rodados nesta máquina em 22/08/2026
+
+**1. Positivo (PASS) — medido ao vivo, HEAD real desta sessão:**
+```
+$ sha256sum REGRAS.md | cut -c1-8
+49af770c
+$ sha256sum MEMÓRIAS.md | cut -c1-8
+3e317291
+$ git rev-parse --short HEAD
+5c46530
+```
+Linha resultante: `sync: PASS · REGRAS=49af770c · MEMÓRIAS=3e317291 · HEAD=5c46530`
+
+**2. Negativo (FALHA) — divergência real, não simulada por invenção.**
+Comparando o hash de `MEMÓRIAS.md` no commit `784aaca` (antes da
+entrada 237 desta sessão) contra o hash agora:
+```
+$ git show 784aaca:MEMÓRIAS.md | sha256sum | cut -c1-8
+bd822970
+$ git show HEAD:MEMÓRIAS.md | sha256sum | cut -c1-8
+3e317291
+```
+Uma sessão que tivesse cacheado `MEMÓRIAS=bd822970` de uma resposta
+anterior e re-medisse agora produziria: `sync: FALHA · MEMÓRIAS local
+(3e317291) diverge do valor citado antes (bd822970) — history avançou,
+recarregar` — exatamente o caso real que este formato existe pra
+pegar (citar hash de memória em vez de re-medir).
+
+**3. Ausência (não verificado) — sem acesso a Máquina.**
+Uma sessão em nuvem sem shell/execução de comando (ex: resposta gerada
+só com o corpus injetado no prompt, sem ferramenta) não tem como rodar
+`sha256sum` nem `git rev-parse`. Saída correta nesse caso:
+`sync: não verificado · lacuna: sem acesso a shell/Máquina nesta
+sessão`. Não simulável por execução real (é ausência de capacidade,
+não de dado) — validado por leitura da regra, não por comando.
+
+**4. Caso realista — o bloco de prontidão que este Executor produziria
+agora mesmo, se esta proposta já estivesse em canon:**
+```
+Agata · modelo: Claude Sonnet 5 · sync: PASS · REGRAS=49af770c · MEMÓRIAS=3e317291 · HEAD=5c46530 · 2026-08-22 09:52 -03 (relógio da Máquina)
+Última entrada: (237) Fecha o caso 16 do rlm-qwen3-8b-teste (234)
+Nonce: —
+pronto.
+```

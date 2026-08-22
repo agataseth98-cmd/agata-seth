@@ -327,6 +327,38 @@ alvos foi tocado — a biblioteca maior desta máquina (llama3.3:70b,
 qwen2.5-32b, etc., não relacionados a esta bancada) ficou intocada.
 Disco após: 394 GB livres de ~950 GB.
 
+**Item 3a (A/B1 no PROJETO): BLOQUEADO, não inventado.** A instrução
+dizia "texto já pronto de sessões anteriores — só falta o commit", mas
+não achei esse texto em nenhum arquivo deste repositório (REGRAS.md,
+PROJETO.md, MEMÓRIAS.md, `propostas/`) nem no paste-cache desta
+sessão — mesma situação da "Camada 3 da Parte 1" antes de ser
+localizada, só que desta vez a busca não achou nada em lugar nenhum.
+Escrever eu mesmo o texto de "limite do princípio 'ferramenta nova é
+decisão'" seria inventar redação de canon que o Humano talvez já
+tenha escrito diferente em outro lugar — exatamente o tipo de decisão
+que não é minha pra tomar sozinho. **Parado aqui, seguindo pro
+próximo item**, como a instrução mandou fazer quando algo trava.
+
+**Item 3b (sync: unificado): PRONTO, testado, aguardando aprovação.**
+`propostas/sync-unificado.diff` — substitui `íntegro? <sim/não/não
+verificado>` por `sync: PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> ·
+HEAD=<commit7>` (ou `FALHA`/`não verificado · lacuna:`) no bloco de
+prontidão de REGRAS.md, com a extensão equivalente documentada pra
+`ONDE_ESTAMOS.md`/checkpoints (não aplicada ainda, pra não divergir do
+que REGRAS.md ainda não define). `git apply --check` confirma que o
+diff aplica limpo contra o REGRAS.md atual. Quatro testes dentro do
+próprio arquivo da proposta: PASS medido ao vivo (hash real de
+REGRAS.md/MEMÓRIAS.md, HEAD real), FALHA com divergência REAL (hash de
+MEMÓRIAS.md no commit 784aaca vs agora — não simulado), "não
+verificado" justificado por ausência de capacidade (sessão em nuvem
+sem Máquina), e um caso realista com o bloco de prontidão que este
+Executor produziria agora se a proposta já estivesse em canon.
+
+**Item 3c (verificador de leitura do config.yaml): BLOQUEADO por
+dependência do item 3a**, exatamente como a instrução mandou ("só
+depois do item (a) estar no diff, não antes") — 3a não entrou no diff,
+então 3c não começa.
+
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
 raiz de `~/agata`) apareceu no `git status` desta retomada sem
