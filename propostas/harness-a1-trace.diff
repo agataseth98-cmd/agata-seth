@@ -1,0 +1,239 @@
+diff --git a/scripts/harness_a1_system_prompt.py b/scripts/harness_a1_system_prompt.py
+new file mode 100755
+index 0000000..ff438c9
+--- /dev/null
++++ b/scripts/harness_a1_system_prompt.py
+@@ -0,0 +1,119 @@
++#!/usr/bin/env python3
++"""Harness A1, nível 0 — hook pre_api_request do Hermes.
++
++Le o payload JSON do pre_api_request (stdin, protocolo documentado em
++agent/shell_hooks.py do hermes-agent) e compara o `system_prompt`
++REALMENTE enviado contra o conteúdo REAL de `.hermes.md` no disco
++agora -- não contra um valor lembrado ou presumido. Detecta o mesmo
++tipo de bug já visto neste projeto (MEMÓRIAS 103-105, 220): o
++carregador cortando o arquivo de contexto antes de injetar, em
++silêncio.
++
++Nível 0: heurística de contenção + maior prefixo contido (busca
++binária, não presume que o conteúdo comece na posição 0 do prompt),
++não diff completo.
++Observacional só -- nunca bloqueia a chamada (pre_api_request não
++suporta decisão de bloqueio no protocolo do Hermes).
++
++Saída: nada em stdout (silent no-op, protocolo do Hermes). Efeito:
++uma linha JSONL por chamada em TRACE_PATH.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import sys
++import time
++from pathlib import Path
++
++TRACE_PATH = Path.home() / "agata" / "memoria" / "harness_a1_trace.jsonl"
++CONTEXT_FILE = Path.home() / "agata" / ".hermes.md"
++
++
++def _hash8(texto: str) -> str:
++    return hashlib.sha256(texto.encode("utf-8")).hexdigest()[:8]
++
++
++def _maior_prefixo_contido(contexto: str, system_prompt: str) -> int:
++    """Maior L tal que contexto[:L] aparece (em qualquer posição, não só
++    no início) dentro de system_prompt -- busca binária sobre L, já que
++    "contido" é monotônico: se um prefixo de tamanho L está contido, todo
++    prefixo menor também está. Não presume que o wrapper do Hermes
++    injeta o arquivo bem no início do system prompt (achado no teste 2,
++    ver PROPOSTA/testes: um wrapper de texto antes do conteúdo derrubava
++    a checagem ingênua de prefixo posição-a-posição para 0)."""
++    lo, hi = 0, len(contexto)
++    while lo < hi:
++        mid = (lo + hi + 1) // 2
++        if contexto[:mid] in system_prompt:
++            lo = mid
++        else:
++            hi = mid - 1
++    return lo
++
++
++def avaliar(system_prompt: str, context_content: str) -> dict:
++    context_chars = len(context_content)
++    hash_esperado = _hash8(context_content)
++
++    if context_content and context_content in system_prompt:
++        return {
++            "context_file_chars": context_chars,
++            "hash_esperado": hash_esperado,
++            "hash_enviado": hash_esperado,
++            "enviado_chars": context_chars,
++            "truncado": False,
++        }
++
++    prefixo = _maior_prefixo_contido(context_content, system_prompt)
++    return {
++        "context_file_chars": context_chars,
++        "hash_esperado": hash_esperado,
++        "hash_enviado": _hash8(context_content[:prefixo]) if prefixo else "-",
++        "enviado_chars": prefixo,
++        "truncado": True,
++    }
++
++
++def main() -> int:
++    raw = sys.stdin.read()
++    try:
++        payload = json.loads(raw) if raw.strip() else {}
++    except json.JSONDecodeError as exc:
++        _trace({"erro": f"JSON inválido no stdin: {exc}"})
++        return 0  # fail open -- evento observacional, nunca derruba a chamada real
++
++    extra = payload.get("extra") or {}
++    system_prompt = extra.get("system_prompt")
++    if not isinstance(system_prompt, str):
++        _trace({"erro": "extra.system_prompt ausente ou não é string neste payload"})
++        return 0
++
++    try:
++        context_content = CONTEXT_FILE.read_text(encoding="utf-8")
++    except OSError as exc:
++        _trace({"erro": f"não consegui ler {CONTEXT_FILE}: {exc}"})
++        return 0
++
++    resultado = avaliar(system_prompt, context_content)
++    resultado.update(
++        {
++            "session_id": payload.get("session_id", ""),
++            "api_call_count": extra.get("api_call_count"),
++            "model": extra.get("model"),
++        }
++    )
++    _trace(resultado)
++    return 0
++
++
++def _trace(campos: dict) -> None:
++    linha = {"ts": time.time(), "harness": "A1", "nivel": 0}
++    linha.update(campos)
++    TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
++    with TRACE_PATH.open("a", encoding="utf-8") as fh:
++        fh.write(json.dumps(linha, ensure_ascii=False) + "\n")
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+
+## Motivo
+
+Formato pedido (do relay do Qwen3.7): hash esperado vs enviado do
+system prompt, `context_file_chars`, `truncado: bool`. Investigação
+direta no código-fonte do `hermes-agent` (não achado por leitura
+casual — conferido lendo `agent/conversation_loop.py` linha ~2645-2696
+e `agent/shell_hooks.py`) confirma que o hook `pre_api_request` recebe
+o `system_prompt` REAL enviado à API (campo `system_prompt_for_hooks`,
+passado explicitamente porque Anthropic/Responses tiram o system
+prompt de dentro de `messages`) — não só metadados agregados
+(`request_char_count`, `approx_input_tokens`). Isso torna possível
+comparar o que foi enviado contra o arquivo real no disco, não só
+contra um número.
+
+**Por que hook shell em vez de editar o código-fonte do hermes-agent:**
+o `hermes-agent` já tem um mecanismo de hook via `hooks:` em
+`~/.hermes/config.yaml`, documentado no protocolo de wire em
+`agent/shell_hooks.py`. Um script externo registrado ali roda em
+`subprocess.Popen(shell=False)` a cada `pre_api_request`, recebe o
+payload real por stdin — zero edição no código do Hermes, zero risco
+de quebrar o agente em produção. `scripts/*` já é escopo de quarentena
+P-8, então o script em si segue a mesma disciplina de qualquer outro
+script deste repositório.
+
+## Extensão em `~/.hermes/config.yaml` — documentada, NÃO aplicada
+
+`~/.hermes/config.yaml` fica fora deste repositório git (é config de
+produção do Hermes, não canon do Agata) — não existe um `.diff` de
+repo pra ele, e esta proposta não o edita. Pra ativar o harness depois
+que este script for aprovado e aplicado, a entrada abaixo precisa ser
+adicionada manualmente ao bloco `hooks:` (chaves `command`/`matcher`/
+`timeout` confirmadas lendo `_parse_single_entry` em
+`agent/shell_hooks.py` — não presumidas):
+```yaml
+hooks:
+  pre_api_request:
+    - command: "~/agata/scripts/harness_a1_system_prompt.py"
+      timeout: 5
+```
+Sem `matcher` (o campo só é honrado em `pre_tool_call`/`post_tool_call`
+— confirmado no mesmo trecho do parser; declarar um aqui seria
+ignorado com aviso). Ativação real exige também consentimento de
+primeiro uso (`~/.hermes/shell-hooks-allowlist.json`) ou
+`hooks_auto_accept: true` — mecanismo do próprio Hermes, não deste
+projeto.
+
+## Testes — quatro casos, saída real, rodados nesta máquina em 22/08/2026
+
+Todos os quatro testes chamam o script real via `subprocess`, com
+stdin no formato exato do wire protocol do `pre_api_request`
+confirmado no código-fonte (`{"hook_event_name", "session_id", "cwd",
+"extra": {...}}`).
+
+**1. Positivo — `.hermes.md` inteiro presente no `system_prompt`, com
+texto de wrapper antes e depois (formato realista — o Hermes não
+injeta o arquivo cru sem nada em volta):**
+```
+system_prompt = "Você é o assistente Hermes.\n\n" + <.hermes.md real, 120.099 chars> + "\n\nFim do contexto."
+```
+Trace resultante:
+```json
+{"harness": "A1", "nivel": 0, "context_file_chars": 120099, "hash_esperado": "730ee558", "hash_enviado": "730ee558", "enviado_chars": 120099, "truncado": false, "model": "custom:qwen-local-ctx-override"}
+```
+`truncado: false`, hashes idênticos — correto.
+
+**2. Negativo (achado real durante o teste, não passou de primeira) —
+`system_prompt` com só os primeiros 20.000 chars do `.hermes.md`,
+mesmo wrapper antes:**
+Primeira versão do script (prefixo posição-a-posição direto entre
+`context_content` e `system_prompt`) **falhou** este teste — devolveu
+`enviado_chars: 0` porque o texto de wrapper ("Você é o assistente
+Hermes.\n\n") não é o `.hermes.md`, então a comparação byte-a-byte
+começando na posição 0 diverge imediatamente, mesmo com 20.000 chars
+corretos logo depois. Corrigido: `_maior_prefixo_contido` faz busca
+binária por "este prefixo do arquivo aparece em QUALQUER posição do
+prompt", não só na posição 0. Depois do conserto:
+```json
+{"harness": "A1", "nivel": 0, "context_file_chars": 120099, "hash_esperado": "730ee558", "hash_enviado": "e54e0fec", "enviado_chars": 20000, "truncado": true, "model": "custom:qwen-local-ctx-override"}
+```
+`truncado: true` **acende corretamente**, `enviado_chars: 20000` bate
+exato com o corte introduzido de propósito, hash diverge do esperado
+como devia.
+
+**3. Ausência — payload sem `extra.system_prompt` (ex: hook recebendo
+evento errado, ou campo renomeado numa versão futura do hermes-agent):**
+```json
+{"harness": "A1", "nivel": 0, "erro": "extra.system_prompt ausente ou não é string neste payload"}
+```
+Não crasha, não bloqueia a chamada real (fail-open, `exit 0`),
+registra a lacuna no trace em vez de calar.
+
+**4. Caso realista de falha de transporte — stdin malformado (ex:
+processo pai interrompido na metade da escrita, hook chamado fora do
+protocolo):**
+```
+stdin: "{not valid json"
+```
+```json
+{"harness": "A1", "nivel": 0, "erro": "JSON inválido no stdin: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"}
+```
+Mesmo comportamento: registra e sai limpo, `exit 0`, nunca derruba a
+chamada de API real que o hook está observando.
+
+**Limitação registrada, não escondida:** os quatro testes acima
+chamam o script com stdin sintético — não existe ainda uma captura de
+um `pre_api_request` disparado de verdade pelo `hermes-agent` rodando
+(isso exigiria registrar o hook em `~/.hermes/config.yaml`, que é
+config de produção viva, fora do escopo de "preparar e testar, não
+aplicar" desta rodada). O formato do stdin sintético foi conferido
+contra o código-fonte real do `hermes-agent` (`_serialize_payload` em
+`agent/shell_hooks.py`), não inventado — mas a validação "de ponta a
+ponta com o Hermes de verdade rodando" fica pra quando o Humano
+aprovar e decidir ativar.

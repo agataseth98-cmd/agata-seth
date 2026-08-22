@@ -359,6 +359,25 @@ dependência do item 3a**, exatamente como a instrução mandou ("só
 depois do item (a) estar no diff, não antes") — 3a não entrou no diff,
 então 3c não começa.
 
+**Item 3d (Harness A1, hook `pre_api_request`): PRONTO, testado,
+aguardando aprovação.** `propostas/harness-a1-trace.diff` — script
+novo `scripts/harness_a1_system_prompt.py`, hook shell (mecanismo já
+nativo do hermes-agent, `hooks:` em `~/.hermes/config.yaml`, zero
+edição no código-fonte do Hermes). Compara o `system_prompt`
+REALMENTE enviado (confirmado no código-fonte que o hook recebe esse
+campo) contra o `.hermes.md` real no disco — hash esperado/enviado,
+`context_file_chars`, `truncado: bool`. **Achado durante o teste:** a
+primeira versão do script falhou o caso negativo (prefixo
+posição-a-posição não aguenta texto de wrapper antes do conteúdo
+injetado, devolveu `enviado_chars: 0` quando devia ser 20.000) —
+corrigido pra busca binária de "maior prefixo contido em qualquer
+posição" antes de aceitar a proposta como testada. Quatro testes
+documentados dentro da própria proposta (positivo, negativo real com
+o achado acima, ausência de campo, stdin malformado), todos com saída
+real. Extensão de `~/.hermes/config.yaml` (fora deste repo, config de
+produção) documentada mas NÃO aplicada. `git apply --check` confirma
+que o diff aplica limpo.
+
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
 raiz de `~/agata`) apareceu no `git status` desta retomada sem
