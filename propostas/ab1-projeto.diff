@@ -1,0 +1,99 @@
+diff --git a/PROJETO.md b/PROJETO.md
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -168,6 +168,8 @@
+ **bg-review do Hermes Gateway está desligado** (`nudge_interval: 0` em `~/.hermes/config.yaml`, fora do repo). Era um mecanismo que reescrevia sozinho o MEMORY.md nativo — mesmo inode do canônico — e chegou a **apagar identidade e história** para caber num teto de caracteres, sem humano no loop. Consequência aceita: sem auto-captura de fatos; a memória muda só por edição deliberada, por MEMÓRIAS, ou sob comando explícito.
+
+ ## Riscos conhecidos (limitações, não pendências)
++- **Limite do princípio "ferramenta nova é decisão, não conserto" (228 - registrado com quatro provas, `scripts/ler_pagina.sh`).** Esgotar o que existe não é recusar o novo; o teste é se a ferramenta nova resolve uma classe que a atual não alcança.
++- **Risco do `config.yaml`, fora do alcance da P-8.** `~/.hermes/config.yaml` guarda configuração de produção crítica, é editado por modelos e está fora do alcance da P-8 por morar fora do repositório. Já causou bug silencioso em (103)-(105 - teto de entrega do carregador truncando `.hermes.md` em silêncio). Mitigação atual é disciplina manual. Decisão pendente do Humano: criar mecanismo ou aceitar o risco declarado.
+ - **[FECHADO] P-7, checagem de citação, HABILITADO em `perimetro.sh` desde 17/08/2026.** `scripts/checar_citacao.sh`, testado positivo/negativo isolado e contra o corpus real. Checa só o que cada commit ACRESCENTA a MEMÓRIAS.md, nunca reaudita a história toda. Citação dentro de crases é exemplo de formato, pulada sem alarme (REGRAS, "Citação de MEMÓRIAS"); síntese composta com mais de um número no mesmo parêntese valida cada um. Limite conhecido, aceito por decisão do Humano: uma palavra genérica compartilhada pode deixar passar citação de assunto errado — generoso é a escolha certa, travar commit honesto é pior. Fecha a lacuna que a expedição RLM achou (fabricação por citação errada, não por entrada inexistente). MEMÓRIAS (203), (204).
+ - **[FECHADO] Saneamento de segurança em 5 passos, 15-16/08/2026.** Backup externo confirmado por restauração real, não listagem (188) · memória nativa do Hermes fora do rastreamento público, bypass de controle fechado (189, ver item próprio abaixo) · varredura de segredo ativa contra staged diff, 0 falso positivo em 20 commits reais (190) · diff do patch 429 versionado fora do vendorizado (190) · perímetro de 6 controles (`scripts/perimetro.sh`) amarrado ao `.githooks/pre-commit`, só depois de passar verde uma vez (191)/(192)/(193).
+ - O Gemini pode deixar de ser grátis. Plano B: pesquisar alternativas gratuitas quando doer.
+
+## Motivo
+
+Os dois parágrafos vieram prontos do Humano nesta sessão (22/08/2026),
+texto exato, sem parafrasear. Só a localização foi decidida aqui —
+seção "Riscos conhecidos (limitações, não pendências)" de PROJETO.md,
+logo no topo da lista, por ser o registro central de riscos declarados
+e aceitos por decisão do Humano (mesmo padrão de todo item já ali:
+"Gemini pode deixar de ser grátis", "modelo local como classe é
+limitado", etc.).
+
+## Testes — quatro casos, rodados nesta máquina em 22/08/2026, num
+## clone descartável (`git clone ~/agata`, nunca sobre o repo real)
+
+**1. Positivo — o diff aplica limpo contra o `PROJETO.md` real:**
+```
+$ git apply --check propostas/ab1-projeto.diff
+(exit 0, sem erro)
+```
+
+**2. Negativo/baseline — `perimetro.sh` rodado no clone ANTES de
+aplicar qualquer coisa, pra ter o estado limpo de referência:**
+```
+=== RESULTADO GERAL: OK -- 8 OK · 0 SKIP · 1 PARCIAL · 0 FALHA ===
+```
+Mesmo placar de sempre (P-4 PARCIAL por falta de root, P-9/P-6 aviso
+só — nada nesta rodada muda esses dois).
+
+**3. Realista — diff aplicado, `PROJETO.md` staged, `perimetro.sh`
+rodado de novo:**
+```
+$ git apply propostas/ab1-projeto.diff && git add PROJETO.md
+$ bash scripts/perimetro.sh
+[...]
+=== RESULTADO GERAL: OK -- 8 OK · 0 SKIP · 1 PARCIAL · 0 FALHA ===
+```
+Continua verde, placar idêntico. **Pedido cumprido** (perimetro.sh
+segue verde depois de aplicado).
+
+**4. Achado grave, fora do escopo desta proposta, registrado com
+prioridade — P-8 NÃO bloqueou o `PROJETO.md` staged mesmo sem
+`propostas/APROVADO-ab1-projeto` existir em lugar nenhum.** Isso não
+deveria acontecer — é exatamente o cenário que P-8 existe pra pegar
+(mudança de comportamento staged sem aprovação). Investigado até a
+causa, não só observado:
+
+`_p8_caminhos_aprovados()` (`scripts/perimetro.sh`) varre
+`propostas/APROVADO-*` (pendente) **e também `propostas/aplicadas/
+APROVADO-*`** (já consumido) e devolve como "aprovado" todo caminho
+citado no cabeçalho de QUALQUER `.diff` correspondente — sem checar se
+essa aprovação é da MUDANÇA ATUAL ou de uma mudança antiga, já
+aplicada há dias, que só por acaso tocou o mesmo arquivo. Testado
+isolando a função:
+```
+$ _p8_caminhos_aprovados
+.githooks/pre-commit
+PROJETO.md          <- de ancora-sha-automatica (aplicada, 20/08)
+PROJETO.md          <- de vm-fronteira-confianca (aplicada, 20/08)
+PROJETO.md          <- de p8-escopo-config (aplicada, 20/08)
+[... PROJETO.md aparece 8 vezes no total, todas de propostas JÁ
+     aplicadas há dias, nenhuma relacionada a esta ...]
+```
+Confirmado que o bug é geral, não específico deste diff — uma edição
+TRIVIAL e não relacionada a `PROJETO.md` (`echo "teste" >> PROJETO.md`,
+sem nenhuma proposta correspondente) também passa por `p8_quarentena`
+com retorno 0, no mesmo clone descartável:
+```
+$ echo "teste trivial" >> PROJETO.md && git add PROJETO.md
+$ p8_quarentena; echo $?
+0
+```
+**Leitura, proposta, não veredito:** qualquer arquivo que já tenha
+sido objeto de UMA aprovação estrutural, alguma vez na história deste
+projeto, fica permanentemente isento de P-8 daqui pra frente — porque
+`propostas/aplicadas/` nunca é limpo (é o registro histórico, por
+desenho) e a função não distingue "aprovado uma vez, há dias" de
+"aprovado para ESTA mudança, agora". `PROJETO.md`, `REGRAS.md` e
+`scripts/perimetro.sh` já passaram por aprovação pelo menos uma vez
+cada — os três arquivos mais sensíveis da quarentena já estão,
+efetivamente, fora dela. **Isto reabre exatamente o buraco que P-8 foi
+criada para fechar (MEMÓRIAS 218) — não decidido nem consertado aqui,
+só achado, isolado e registrado com a maior prioridade que uma nota
+de teste permite.** Consertar `_p8_caminhos_aprovados()` (ex: só
+considerar aprovações de `propostas/aplicadas/` que tenham entrado no
+MESMO commit staged agora, não qualquer uma histórica) é mudança em
+`scripts/perimetro.sh` — quarentenada ela mesma, merece proposta e
+teste próprios, não um conserto de passagem dentro desta.

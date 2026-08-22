@@ -327,17 +327,15 @@ alvos foi tocado — a biblioteca maior desta máquina (llama3.3:70b,
 qwen2.5-32b, etc., não relacionados a esta bancada) ficou intocada.
 Disco após: 394 GB livres de ~950 GB.
 
-**Item 3a (A/B1 no PROJETO): BLOQUEADO, não inventado.** A instrução
-dizia "texto já pronto de sessões anteriores — só falta o commit", mas
-não achei esse texto em nenhum arquivo deste repositório (REGRAS.md,
-PROJETO.md, MEMÓRIAS.md, `propostas/`) nem no paste-cache desta
-sessão — mesma situação da "Camada 3 da Parte 1" antes de ser
-localizada, só que desta vez a busca não achou nada em lugar nenhum.
-Escrever eu mesmo o texto de "limite do princípio 'ferramenta nova é
-decisão'" seria inventar redação de canon que o Humano talvez já
-tenha escrito diferente em outro lugar — exatamente o tipo de decisão
-que não é minha pra tomar sozinho. **Parado aqui, seguindo pro
-próximo item**, como a instrução mandou fazer quando algo trava.
+**Item 3a (A/B1 no PROJETO): PRONTO, testado, aguardando aprovação.**
+Texto recebido do Humano em 22/08/2026, exato, sem parafrasear.
+`propostas/ab1-projeto.diff` — os dois parágrafos ("limite do
+princípio 'ferramenta nova é decisão'" + "risco do config.yaml") na
+seção "Riscos conhecidos" de PROJETO.md. `git apply --check` confirma
+que aplica limpo. **Achado grave testando o pedido "perimetro.sh
+continua verde depois de aplicado":** fica verde, mas por um bug real
+de P-8, não porque a proposta foi corretamente barrada até aprovação
+— ver "Quebrado" abaixo, detalhe completo em `propostas/ab1-projeto.diff`.
 
 **Item 3b (sync: unificado): PRONTO, testado, aguardando aprovação.**
 `propostas/sync-unificado.diff` — substitui `íntegro? <sim/não/não
@@ -354,10 +352,10 @@ verificado" justificado por ausência de capacidade (sessão em nuvem
 sem Máquina), e um caso realista com o bloco de prontidão que este
 Executor produziria agora se a proposta já estivesse em canon.
 
-**Item 3c (verificador de leitura do config.yaml): BLOQUEADO por
-dependência do item 3a**, exatamente como a instrução mandou ("só
-depois do item (a) estar no diff, não antes") — 3a não entrou no diff,
-então 3c não começa.
+**Item 3c (verificador de leitura do config.yaml): DESBLOQUEADO, não
+iniciado.** 3a agora está no diff (acima), então a dependência que
+travava 3c não existe mais — mas 3c não foi pedido nesta rodada, só
+3a. Fica pronto pra começar quando o Humano pedir.
 
 **Item 3d (Harness A1, hook `pre_api_request`): PRONTO, testado,
 aguardando aprovação.** `propostas/harness-a1-trace.diff` — script
@@ -411,26 +409,45 @@ separados como pedido.**
   é estado alcançável), decisão de abrir proposta própria fica pro
   Humano.
 
-**Lote grande FECHADO.** Itens 1 e 2 aplicados de verdade (F1/F2/F3
-decidido e publicado, Ollama limpo). Item 3: a, b, c documentados
-(a bloqueado, b e c consequentemente parado/pronto conforme a
-dependência), d e e prontos e testados — total de 4 propostas em
-`propostas/` esperando `APROVADO-<nome>` do Humano
-(`sync-unificado.diff`, `harness-a1-trace.diff`,
-`glossario-quatro-termos.diff`, `indice-palavras-chave.diff`), mais
-o bloqueio registrado do item 3a. Nenhuma célula de bancada rodou de
+**Lote grande FECHADO, depois atualizado com o item 3a (texto recebido
+em 22/08/2026).** Itens 1 e 2 aplicados de verdade (F1/F2/F3 decidido
+e publicado, Ollama limpo). Item 3: a, b, d, e prontos e testados —
+**5 propostas** em `propostas/` esperando `APROVADO-<nome>` do Humano
+(`ab1-projeto.diff`, `sync-unificado.diff`, `harness-a1-trace.diff`,
+`glossario-quatro-termos.diff`, `indice-palavras-chave.diff`); c
+desbloqueado, não iniciado (não pedido ainda). Nenhuma célula de
+bancada rodou de
 novo. Nenhum push de canon além do que fechou o item 1, como pedido.
 
 ## Quebrado
-Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
-raiz de `~/agata`) apareceu no `git status` desta retomada sem
-registro anterior encontrado nesta sessão — não é erro conhecido, só
-não foi investigado a fundo ainda; fica como pendência de baixa
-prioridade, não mexido.
+**P-8 (quarentena de mudança estrutural) tem um buraco real, achado
+hoje testando `propostas/ab1-projeto.diff` — não é o `PROJETO.md`
+desta proposta, é a checagem em si.** `_p8_caminhos_aprovados()`
+(`scripts/perimetro.sh`) trata QUALQUER arquivo que já tenha sido
+aprovado uma vez, alguma vez na história do projeto, como
+permanentemente isento — porque varre `propostas/aplicadas/` (o
+arquivo histórico, nunca limpo) sem checar se a aprovação encontrada
+é da mudança de AGORA ou de uma mudança antiga que só por coincidência
+tocou o mesmo caminho. Confirmado com um teste trivial, sem relação
+com nenhuma proposta: uma linha qualquer acrescentada a `PROJETO.md`
+passa por `p8_quarentena` com retorno 0, sem nenhum marcador de
+aprovação em lugar nenhum. `PROJETO.md`, `REGRAS.md` e o próprio
+`scripts/perimetro.sh` já foram objeto de aprovação pelo menos uma vez
+cada — na prática, os três arquivos mais sensíveis da quarentena já
+não estão mais protegidos por ela. Detalhe completo, com os comandos
+que reproduzem, em `propostas/ab1-projeto.diff`, seção "Testes",
+achado 4. **Não consertado aqui** — é mudança em `scripts/perimetro.sh`
+(ele mesmo quarentenado), merece proposta e teste próprios, decisão do
+Humano sobre prioridade.
+
+Um arquivo não rastreado (`policy-execution.yaml`, na raiz de
+`~/agata`) segue sem investigação a fundo — pendência de baixa
+prioridade, não mexido, ver retomada de 21/08.
 
 ## Última atualização
-22/08/2026, 10:15 (lote grande autorizado em bloco: caso 16 fechado
-(237), Ollama limpo (~9,6 GB), 4 propostas prontas e testadas em
-`propostas/` esperando aprovação, item 3a bloqueado por falta de
-texto-fonte — registrado, não inventado. Sessão retoma sozinha só se
-o Humano voltar e autorizar seguir pra Camada 3, itens 2-6).
+22/08/2026, 10:32 (item 3a recebido e fechado: `ab1-projeto.diff`,
+5ª proposta pronta. Achado sério no caminho: P-8 tem um buraco real
+— arquivo já aprovado uma vez fica isento pra sempre, não só
+naquela mudança — ver "Quebrado". Sessão retoma sozinha só se o
+Humano voltar e autorizar seguir pra Camada 3, itens 2-6, ou decidir
+prioridade do conserto de P-8).
