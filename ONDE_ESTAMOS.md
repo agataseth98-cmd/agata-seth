@@ -314,8 +314,18 @@ parar só aquele item, registrar aqui, seguir pro próximo — nenhuma
 célula de bancada roda de novo, nenhum push de canon além do item 1.
 Checkpoint a cada item concluído, não só no fim.
 
-**Item 2 (limpeza Ollama):** em andamento, ver abaixo assim que
-terminar.
+**Item 2 (limpeza Ollama): FECHADO.** `ollama rm deepseek-r1:8b`
+(5,2 GB) e `ollama rm mistral:7b-instruct` (4,4 GB) — os dois nunca
+avaliados (excluídos por tempo/dado inválido, sem dado de qualidade
+nenhum). ~9,6 GB liberados (medido pelo próprio `ollama list`, tamanho
+reportado antes de remover — `df` do disco não deu delta limpo pra
+comparar por unidade/cache, não usado como número aqui). Confirmado
+por `ollama list` antes/depois: os 21 modelos da máquina viraram 19,
+os 4 que a bancada pediu pra manter (`qwen3.5-9b-64k`, `qwen3:8b`,
+`gemma2:9b`, `rlm-qwen3-8b-teste`) seguem presentes, nada além dos dois
+alvos foi tocado — a biblioteca maior desta máquina (llama3.3:70b,
+qwen2.5-32b, etc., não relacionados a esta bancada) ficou intocada.
+Disco após: 394 GB livres de ~950 GB.
 
 ## Quebrado
 Nada quebrado. Um arquivo não rastreado (`policy-execution.yaml`, na
