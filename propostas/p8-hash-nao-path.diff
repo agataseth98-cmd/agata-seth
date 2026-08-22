@@ -1,0 +1,194 @@
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -257,15 +257,28 @@
+   esac
+ }
+
+-_p8_caminhos_aprovados() {
+-  # Acha o par diff/APROVADO em propostas/ (pendente) OU em
+-  # propostas/aplicadas/ (já consumido). Precisa cobrir os dois: a
+-  # aprovação consumida no MESMO commit que aplica a mudança já não está
+-  # mais em propostas/ quando este check roda -- foi movida pra
+-  # aplicadas/ como parte do próprio commit staged (achado testando
+-  # antes de comitar de verdade: sem isso, todo commit que consome uma
+-  # aprovação reprovaria a própria aprovação que o autoriza).
+-  local diretorio aprovado nome diff_path
++_p8_arquivo_aprovado() {
++  # Conserto de 22/08/2026 (achado testando `ab1-projeto.diff`, ver
++  # MEMÓRIAS -- "aprovado" deixava de expirar: qualquer arquivo já
++  # citado no cabeçalho de QUALQUER .diff aprovado, alguma vez na
++  # história, ficava isento de P-8 pra sempre, porque `propostas/
++  # aplicadas/` nunca é limpo (é o registro histórico, por desenho) e a
++  # checagem antiga só olhava PATH, nunca CONTEÚDO. Confirmado com uma
++  # edição trivial e sem relação nenhuma passando pela quarentena.
++  #
++  # Novo critério: "aprovado" só conta se aplicar o .diff candidato à
++  # versão HEAD (pai) deste arquivo reproduz, byte a byte (hash do
++  # blob), o que está staged agora. Path não decide mais nada sozinho
++  # -- só entra na lista de candidatos a testar. Um .diff antigo, já
++  # consumido, só vai bater essa checagem se o arquivo staged agora for
++  # EXATAMENTE o resultado daquela mudança antiga -- o que não acontece
++  # numa edição nova e diferente, mesmo no mesmo caminho.
++  local f="$1" staged_blob diretorio aprovado nome diff_path
++  local tmp resultado_blob diff_abs repo_raiz
++
++  staged_blob="$(git rev-parse ":$f" 2>/dev/null)" || return 1
++  repo_raiz="$(pwd)"
++
+   for diretorio in propostas propostas/aplicadas; do
+     [ -d "$diretorio" ] || continue
+     for aprovado in "$diretorio"/APROVADO-*; do
+@@ -274,21 +287,41 @@
+       nome="${nome#APROVADO-}"
+       diff_path="$diretorio/${nome}.diff"
+       [ -f "$diff_path" ] || continue
+-      grep -E '^(\+\+\+ b/|--- a/)' "$diff_path" 2>/dev/null | sed -E 's#^(\+\+\+ b/|--- a/)##' | grep -v '^/dev/null$'
++      # Filtro barato antes do caro: só tenta aplicar diffs que sequer
++      # mencionam este caminho no cabeçalho.
++      grep -qE "^(\+\+\+ b/|--- a/)$(printf '%s' "$f" | sed 's/[.[\*^$/]/\\&/g')\$" "$diff_path" 2>/dev/null || continue
++
++      diff_abs="$repo_raiz/$diff_path"
++      tmp="$(mktemp -d)" || continue
++      mkdir -p "$tmp/$(dirname "$f")"
++      if git cat-file -e "HEAD:$f" 2>/dev/null; then
++        git show "HEAD:$f" > "$tmp/$f" 2>/dev/null
++      else
++        : > "$tmp/$f"
++      fi
++
++      if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
++        resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
++        if [ "$resultado_blob" = "$staged_blob" ]; then
++          rm -rf "$tmp"
++          return 0
++        fi
++      fi
++      rm -rf "$tmp"
+     done
+   done
++  return 1
+ }
+
+ p8_quarentena() {
+-  local staged f ruim=0 aprovados
++  local staged f ruim=0
+   staged="$(git diff --cached --name-only)"
+   [ -z "$staged" ] && return 0
+-  aprovados="$(_p8_caminhos_aprovados)"
+   while IFS= read -r f; do
+     [ -z "$f" ] && continue
+     if _p8_eh_comportamento "$f"; then
+-      if ! printf '%s\n' "$aprovados" | grep -qxF "$f"; then
+-        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente (o .diff em propostas/ precisa citar este caminho nos cabeçalhos). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
++      if ! _p8_arquivo_aprovado "$f"; then
++        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente cujo diff, aplicado ao HEAD deste arquivo, reproduza exatamente o conteúdo staged (o .diff em propostas/ precisa citar este caminho nos cabeçalhos E bater byte a byte). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
+         ruim=1
+       fi
+     fi
+
+## Motivo
+
+Achado testando `propostas/ab1-projeto.diff` (22/08/2026): `perimetro.sh`
+ficava verde depois de aplicar aquela proposta, mas não porque a
+quarentena validou corretamente — `_p8_caminhos_aprovados()` juntava
+todo caminho citado no cabeçalho de QUALQUER `.diff` aprovado, em
+`propostas/` (pendente) OU `propostas/aplicadas/` (histórico, nunca
+limpo), e `p8_quarentena()` só checava se o PATH staged batia com
+algum desses — nunca se o CONTEÚDO staged tinha relação com a
+aprovação. Resultado: qualquer arquivo aprovado uma vez, alguma vez,
+ficava isento pra sempre. Confirmado com edição trivial e sem relação
+nenhuma passando pela checagem.
+
+Ordem pedida pelo Humano: esta proposta revisa ANTES das outras cinco
+já prontas (`ab1-projeto.diff`, `sync-unificado.diff`,
+`harness-a1-trace.diff`, `glossario-quatro-termos.diff`,
+`indice-palavras-chave.diff`) — todas continuam válidas e testadas,
+só a ordem de revisão muda.
+
+## Desenho do conserto
+
+"Aprovado" passa a significar: existe um par diff/APROVADO (pendente
+ou já aplicado) tal que aplicar aquele `.diff` à versão HEAD (pai)
+deste arquivo reproduz, byte a byte (comparação de hash de blob git),
+o conteúdo que está staged agora. Path deixa de decidir sozinho — só
+funciona como filtro barato pra saber quais `.diff` vale a pena tentar
+aplicar de verdade antes do teste caro (hash). Um `.diff` antigo,
+já consumido, só vai bater esse teste se o arquivo staged for
+EXATAMENTE o resultado daquela mudança antiga — o que uma edição nova
+e diferente, mesmo no mesmo caminho, não produz.
+
+**Por que isto NÃO reintroduz o "buraco" que o comentário antigo
+alertava** (aprovação consumida no MESMO commit que a aplica): o
+teste 4 abaixo confirma que mover `diff`+`APROVADO` pra
+`propostas/aplicadas/` DENTRO do mesmo commit que aplica a mudança
+continua funcionando — a lógica de busca em `propostas/` E
+`propostas/aplicadas/` foi preservada, só o CRITÉRIO de "bate" mudou
+de path pra conteúdo.
+
+## Testes — quatro casos, saída real, rodados em clones descartáveis
+## separados (nunca sobre `~/agata`; um clone novo por caso, evitando
+## contaminação entre testes — achado no caminho, ver nota no final)
+
+**1. O bug original — edição trivial, sem relação com nenhuma
+proposta:**
+```
+$ echo "teste trivial sem relação com nenhuma proposta" >> PROJETO.md
+$ git add PROJETO.md
+$ p8_quarentena; echo $?
+SUSPEITO (P-8): 'PROJETO.md' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente [...]
+1
+```
+Antes do conserto: `0` (bug). Depois: `1` (correto).
+
+**2. Aprovação genuína, conteúdo staged bate exato com o diff
+aprovado (`ab1-projeto.diff` + `APROVADO-ab1-projeto`, pendente em
+`propostas/`):**
+```
+$ git apply propostas/ab1-projeto.diff && git add PROJETO.md
+$ touch propostas/APROVADO-ab1-projeto
+$ p8_quarentena; echo $?
+0
+```
+Fluxo legítimo continua funcionando.
+
+**3. Aprovação existe, mas o conteúdo staged é DIFERENTE do
+aprovado** (simula alguém aproveitando uma aprovação real pra colar
+algo a mais, ou reusar o nome pra outra coisa):
+```
+$ git apply propostas/ab1-projeto.diff && echo "linha extra não aprovada por ninguém" >> PROJETO.md
+$ git add PROJETO.md
+$ touch propostas/APROVADO-ab1-projeto
+$ p8_quarentena; echo $?
+SUSPEITO (P-8): [...]
+1
+```
+Rigor a mais que o mecanismo original nunca teve — isto também
+passaria batido na versão antiga (que só olhava path).
+
+**4. Fluxo real de consumo — `diff`+`APROVADO` movidos pra
+`propostas/aplicadas/` NO MESMO commit que aplica a mudança (o caso
+que o comentário original do código foi escrito pra proteger):**
+```
+$ git apply propostas/ab1-projeto.diff && git add PROJETO.md
+$ touch propostas/APROVADO-ab1-projeto && git add propostas/APROVADO-ab1-projeto
+$ git mv propostas/ab1-projeto.diff propostas/aplicadas/ab1-projeto.diff
+$ git mv propostas/APROVADO-ab1-projeto propostas/aplicadas/APROVADO-ab1-projeto
+$ p8_quarentena; echo $?
+0
+```
+Continua funcionando — o conserto não regride o caso que o desenho
+original resolvia corretamente.
+
+**Achado de disciplina de teste, registrado porque quase virou falso
+negativo:** a primeira rodada dos testes 2 e 3 reaproveitou o MESMO
+clone descartável entre casos, sem reset completo (`git checkout --`
+restaura da ÁREA DE STAGING, não do HEAD — não é `git reset --hard`).
+Isso deixou um "teste trivial" de um caso anterior contaminando o
+seguinte, produzindo um falso negativo no teste 2. Refeito com um
+clone novo (`git clone`) por caso, sem reuso de estado — os quatro
+resultados acima são dessa segunda rodada, limpa.
+
+**Desempenho:** `perimetro.sh` completo, com o conserto, rodou em
+0,31s reais nesta máquina (9 pares aprovados em
+`propostas/aplicadas/` no repo real hoje) — custo adicional
+irrelevante frente ao que já existia.

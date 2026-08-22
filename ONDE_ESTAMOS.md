@@ -436,18 +436,38 @@ aprovação em lugar nenhum. `PROJETO.md`, `REGRAS.md` e o próprio
 cada — na prática, os três arquivos mais sensíveis da quarentena já
 não estão mais protegidos por ela. Detalhe completo, com os comandos
 que reproduzem, em `propostas/ab1-projeto.diff`, seção "Testes",
-achado 4. **Não consertado aqui** — é mudança em `scripts/perimetro.sh`
-(ele mesmo quarentenado), merece proposta e teste próprios, decisão do
-Humano sobre prioridade.
+achado 4.
+
+**Conserto proposto, testado, aguardando aprovação —
+`propostas/p8-hash-nao-path.diff`.** Continua QUEBRADO até o Humano
+aprovar e aplicar — proposta pronta não é conserto aplicado.
+Critério novo: "aprovado" deixa de ser "path apareceu em algum diff,
+alguma vez" e passa a ser "aplicar o `.diff` candidato ao HEAD deste
+arquivo reproduz, byte a byte, o que está staged agora" — path só
+filtra candidatos, conteúdo decide. Quatro casos testados em clones
+descartáveis: (1) o bug original, edição trivial sem relação → volta
+a dar SUSPEITO; (2) aprovação genuína, conteúdo bate exato → continua
+aprovando; (3) aprovação existe mas conteúdo staged é diferente
+(adulterado) → SUSPEITO, rigor que o mecanismo original nunca teve;
+(4) fluxo real de consumo (diff+APROVADO movidos pra `aplicadas/` no
+mesmo commit) → continua aprovando, não regride o caso que o desenho
+original resolvia certo. Achado de disciplina de teste registrado no
+próprio diff: a primeira rodada dos testes 2/3 reaproveitou clone
+sujo entre casos e deu falso negativo — refeito com clone novo por
+caso antes de aceitar como testado. Desempenho: `perimetro.sh`
+completo em 0,31s com o conserto, 9 aprovações históricas no repo
+real hoje — custo irrelevante. **Esta proposta revisa primeiro,
+antes das outras cinco** (ordem pedida pelo Humano) — as cinco
+seguem válidas e testadas, só a ordem de revisão muda.
 
 Um arquivo não rastreado (`policy-execution.yaml`, na raiz de
 `~/agata`) segue sem investigação a fundo — pendência de baixa
 prioridade, não mexido, ver retomada de 21/08.
 
 ## Última atualização
-22/08/2026, 10:32 (item 3a recebido e fechado: `ab1-projeto.diff`,
-5ª proposta pronta. Achado sério no caminho: P-8 tem um buraco real
-— arquivo já aprovado uma vez fica isento pra sempre, não só
-naquela mudança — ver "Quebrado". Sessão retoma sozinha só se o
-Humano voltar e autorizar seguir pra Camada 3, itens 2-6, ou decidir
-prioridade do conserto de P-8).
+22/08/2026, 13:05 (conserto de P-8 proposto e testado —
+`propostas/p8-hash-nao-path.diff`, 6ª proposta, revisa PRIMEIRO por
+ordem do Humano. "Quebrado" continua ativo até aprovação real, não é
+cosmético. As outras cinco propostas seguem válidas, só a ordem
+mudou. Sessão retoma sozinha só se o Humano voltar e autorizar seguir
+pra Camada 3, itens 2-6, ou revisar as propostas).
