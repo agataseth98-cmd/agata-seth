@@ -7,6 +7,15 @@ cd "$(dirname "$0")/.."
 
 OUT=".hermes.md"
 INDICE="INDICE_MEMORIAS.md"
+# Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
+# decisão (115)). Fica DE FORA de $OUT de propósito: medido rodando os dois
+# lados antes de propor isto -- o índice com palavras-chave inteiro pesa 73%
+# a mais que o índice puro (24K -> 41,5K chars nesta base). Embutir isso em
+# .hermes.md pioraria exatamente o problema que este projeto já brigou pra
+# resolver (MEMÓRIAS 103-105, 220: carregador cortando contexto em
+# silêncio) -- então este arquivo fica só em disco, pra `grep` sob demanda
+# de qualquer sessão com Máquina, nunca auto-injetado.
+INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
 
 # Janela de MEMÓRIAS: por ENTRADA INTEIRA, não por linha crua (linha corta
 # no meio da frase). Acumula entradas completas de trás pra frente até um
@@ -84,7 +93,36 @@ checar_reconciliacao() {
   fi
 }
 
+gerar_indice_palavras_chave() {
+  {
+    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
+    echo "# Índice de MEMÓRIAS.md, com palavras-chave por entrada"
+    echo
+    echo "Mesmas entradas de INDICE_MEMORIAS.md, uma linha \"  palavras-chave: ...\" logo"
+    echo "abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,"
+    echo "deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)."
+    echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
+    echo "inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima."
+    echo
+    {
+      grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+      grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+    } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+      | python3 scripts/extrair_palavras_chave.py
+  } > "$INDICE_CHAVES"
+}
+
 gerar_indice
+# Fail-soft de propósito: índice de palavras-chave é um extra "nível 0",
+# best-effort -- se quebrar (script ausente, bug, MEMÓRIAS.md sem entrada
+# nenhuma), NÃO pode derrubar a geração de .hermes.md/INDICE_MEMORIAS.md,
+# que são o caminho crítico de hidratação. Achado testando de propósito
+# antes de propor: sem o `|| ...` abaixo, um `scripts/extrair_palavras_chave.py`
+# ausente ou quebrado travava o hook inteiro (nenhum commit passaria).
+if ! gerar_indice_palavras_chave; then
+  echo "AVISO: geração de $INDICE_CHAVES falhou -- .hermes.md/$INDICE seguem normais, só o índice de palavras-chave (extra, não crítico) ficou de fora desta rodada." >&2
+  rm -f "$INDICE_CHAVES"
+fi
 
 {
   echo "<!--"
@@ -116,4 +154,8 @@ gerar_indice
 
 checar_reconciliacao || true
 
-echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes)"
+if [ -f "$INDICE_CHAVES" ]; then
+  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hermes.md)"
+else
+  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES: FALHOU nesta rodada, ver aviso acima"
+fi
