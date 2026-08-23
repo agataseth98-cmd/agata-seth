@@ -1,0 +1,119 @@
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -294,10 +294,15 @@ _p8_arquivo_aprovado() {
+       diff_abs="$repo_raiz/$diff_path"
+       tmp="$(mktemp -d)" || continue
+       mkdir -p "$tmp/$(dirname "$f")"
++      # Conserto de 23/08/2026 (achado testando `harness-a1-trace.diff`,
++      # arquivo NOVO): criar um placeholder vazio aqui fazia `git apply`
++      # recusar diffs de "novo arquivo" (`--- /dev/null`) com "already
++      # exists in working directory" -- esse tipo de diff exige que o
++      # caminho NÃO exista pra aplicar. Não criar nada quando o arquivo
++      # não existe em HEAD deixa o próprio `git apply` criar o arquivo,
++      # igual faria num `git apply` real contra o repositório.
+       if git cat-file -e "HEAD:$f" 2>/dev/null; then
+         git show "HEAD:$f" > "$tmp/$f" 2>/dev/null
+-      else
+-        : > "$tmp/$f"
+       fi
+
+       if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
+
+## Motivo
+
+Achado tentando aplicar `harness-a1-trace.diff` (item 4 da ordem de
+revisão de 22/08/2026), depois de `p8-hash-nao-path.diff` (item 1,
+commit `1374d0d`) já estar no canon: `_p8_arquivo_aprovado()` sempre
+cria um arquivo em `$tmp/$f` antes de tentar `git apply` -- vazio,
+quando o arquivo não existe em `HEAD`. `harness-a1-trace.diff` cria um
+arquivo NOVO (`--- /dev/null` / `new file mode`), e `git apply` recusa
+aplicar esse tipo de diff contra um caminho que já existe, mesmo
+vazio:
+
+```
+$ git apply --include="scripts/harness_a1_system_prompt.py" harness-a1-trace.diff
+error: scripts/harness_a1_system_prompt.py: already exists in working directory
+```
+
+Resultado: todo arquivo NOVO aprovado batia SUSPEITO por engano --
+`p8_quarentena` FALHAVA mesmo com aprovação genuína e conteúdo
+idêntico ao staged. Os 4 casos de teste de `p8-hash-nao-path.diff`
+não cobriam esse caminho (todos usavam `ab1-projeto.diff`, que edita
+um arquivo já existente).
+
+`indice-palavras-chave.diff` (item 6 da mesma ordem, cria
+`scripts/extrair_palavras_chave.py`) tem a mesma característica e
+bateria no mesmo bug.
+
+## Desenho do conserto
+
+Não criar o placeholder vazio quando o arquivo não existe em `HEAD` --
+só copia o conteúdo de `HEAD:$f` quando ele existe; caso contrário,
+não cria nada em `$tmp/$f`, e deixa o próprio `git apply` criar o
+arquivo, igual faria contra o repositório real. Um `.diff` que NÃO
+seja de arquivo novo (ex.: um diff de modificação, mas o arquivo
+staged não existe em HEAD por algum outro motivo) continua falhando
+`git apply` como já falhava antes -- essa parte do comportamento não
+muda, só o caso de "novo arquivo genuíno" para de ser punido por um
+placeholder que ninguém pediu.
+
+## Testes -- cinco casos, saída real, clones descartáveis novos, um
+## por caso (nunca sobre `~/agata`), rodados com o conserto aplicado
+## por cima do canon atual (`p8-hash-nao-path.diff` já mesclado)
+
+**1. Regressão -- edição trivial sem relação com nenhuma proposta,
+continua batendo SUSPEITO:**
+```
+$ echo "teste trivial sem relação com nenhuma proposta" >> PROJETO.md
+$ git add PROJETO.md
+$ p8_quarentena; echo $?
+SUSPEITO (P-8): 'PROJETO.md' [...]
+1
+```
+
+**2. Regressão -- arquivo EXISTENTE, aprovação genuína
+(`glossario-quatro-termos.diff` + `APROVADO-glossario-quatro-termos`),
+continua passando:**
+```
+$ git apply propostas/glossario-quatro-termos.diff && git add REGRAS.md
+$ touch propostas/APROVADO-glossario-quatro-termos
+$ p8_quarentena; echo $?
+0
+```
+
+**3. O bug em si -- arquivo NOVO (`harness-a1-trace.diff` +
+`APROVADO-harness-a1-trace`), aprovação genuína, conteúdo staged bate
+exato. Antes do conserto: SUSPEITO/FALHOU (o bug). Depois:**
+```
+$ git apply propostas/harness-a1-trace.diff && git add scripts/harness_a1_system_prompt.py
+$ touch propostas/APROVADO-harness-a1-trace
+$ p8_quarentena; echo $?
+0
+```
+
+**4. Arquivo NOVO, aprovação existe mas conteúdo staged é diferente
+do aprovado -- continua SUSPEITO (rigor do hash preservado também
+para arquivo novo):**
+```
+$ git apply propostas/harness-a1-trace.diff && echo "# linha extra não aprovada por ninguém" >> scripts/harness_a1_system_prompt.py
+$ git add scripts/harness_a1_system_prompt.py
+$ touch propostas/APROVADO-harness-a1-trace
+$ p8_quarentena; echo $?
+SUSPEITO (P-8): [...]
+1
+```
+
+**5. Arquivo NOVO, fluxo real de consumo -- diff+APROVADO movidos pra
+`propostas/aplicadas/` NO MESMO commit que aplica a mudança --
+continua passando:**
+```
+$ git apply propostas/harness-a1-trace.diff && git add scripts/harness_a1_system_prompt.py
+$ touch propostas/APROVADO-harness-a1-trace && git add propostas/APROVADO-harness-a1-trace
+$ git mv propostas/harness-a1-trace.diff propostas/aplicadas/harness-a1-trace.diff
+$ git mv propostas/APROVADO-harness-a1-trace propostas/aplicadas/APROVADO-harness-a1-trace
+$ p8_quarentena; echo $?
+0
+```
+
+Confirmado também: `git apply --check` deste `.diff` contra o
+`scripts/perimetro.sh` real do canon atual aplica limpo, sem erro.
