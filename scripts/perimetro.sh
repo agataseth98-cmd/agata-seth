@@ -257,15 +257,28 @@ _p8_eh_comportamento() {
   esac
 }
 
-_p8_caminhos_aprovados() {
-  # Acha o par diff/APROVADO em propostas/ (pendente) OU em
-  # propostas/aplicadas/ (já consumido). Precisa cobrir os dois: a
-  # aprovação consumida no MESMO commit que aplica a mudança já não está
-  # mais em propostas/ quando este check roda -- foi movida pra
-  # aplicadas/ como parte do próprio commit staged (achado testando
-  # antes de comitar de verdade: sem isso, todo commit que consome uma
-  # aprovação reprovaria a própria aprovação que o autoriza).
-  local diretorio aprovado nome diff_path
+_p8_arquivo_aprovado() {
+  # Conserto de 22/08/2026 (achado testando `ab1-projeto.diff`, ver
+  # MEMÓRIAS -- "aprovado" deixava de expirar: qualquer arquivo já
+  # citado no cabeçalho de QUALQUER .diff aprovado, alguma vez na
+  # história, ficava isento de P-8 pra sempre, porque `propostas/
+  # aplicadas/` nunca é limpo (é o registro histórico, por desenho) e a
+  # checagem antiga só olhava PATH, nunca CONTEÚDO. Confirmado com uma
+  # edição trivial e sem relação nenhuma passando pela quarentena.
+  #
+  # Novo critério: "aprovado" só conta se aplicar o .diff candidato à
+  # versão HEAD (pai) deste arquivo reproduz, byte a byte (hash do
+  # blob), o que está staged agora. Path não decide mais nada sozinho
+  # -- só entra na lista de candidatos a testar. Um .diff antigo, já
+  # consumido, só vai bater essa checagem se o arquivo staged agora for
+  # EXATAMENTE o resultado daquela mudança antiga -- o que não acontece
+  # numa edição nova e diferente, mesmo no mesmo caminho.
+  local f="$1" staged_blob diretorio aprovado nome diff_path
+  local tmp resultado_blob diff_abs repo_raiz
+
+  staged_blob="$(git rev-parse ":$f" 2>/dev/null)" || return 1
+  repo_raiz="$(pwd)"
+
   for diretorio in propostas propostas/aplicadas; do
     [ -d "$diretorio" ] || continue
     for aprovado in "$diretorio"/APROVADO-*; do
@@ -274,21 +287,41 @@ _p8_caminhos_aprovados() {
       nome="${nome#APROVADO-}"
       diff_path="$diretorio/${nome}.diff"
       [ -f "$diff_path" ] || continue
-      grep -E '^(\+\+\+ b/|--- a/)' "$diff_path" 2>/dev/null | sed -E 's#^(\+\+\+ b/|--- a/)##' | grep -v '^/dev/null$'
+      # Filtro barato antes do caro: só tenta aplicar diffs que sequer
+      # mencionam este caminho no cabeçalho.
+      grep -qE "^(\+\+\+ b/|--- a/)$(printf '%s' "$f" | sed 's/[.[\*^$/]/\\&/g')\$" "$diff_path" 2>/dev/null || continue
+
+      diff_abs="$repo_raiz/$diff_path"
+      tmp="$(mktemp -d)" || continue
+      mkdir -p "$tmp/$(dirname "$f")"
+      if git cat-file -e "HEAD:$f" 2>/dev/null; then
+        git show "HEAD:$f" > "$tmp/$f" 2>/dev/null
+      else
+        : > "$tmp/$f"
+      fi
+
+      if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
+        resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
+        if [ "$resultado_blob" = "$staged_blob" ]; then
+          rm -rf "$tmp"
+          return 0
+        fi
+      fi
+      rm -rf "$tmp"
     done
   done
+  return 1
 }
 
 p8_quarentena() {
-  local staged f ruim=0 aprovados
+  local staged f ruim=0
   staged="$(git diff --cached --name-only)"
   [ -z "$staged" ] && return 0
-  aprovados="$(_p8_caminhos_aprovados)"
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     if _p8_eh_comportamento "$f"; then
-      if ! printf '%s\n' "$aprovados" | grep -qxF "$f"; then
-        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente (o .diff em propostas/ precisa citar este caminho nos cabeçalhos). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
+      if ! _p8_arquivo_aprovado "$f"; then
+        echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente cujo diff, aplicado ao HEAD deste arquivo, reproduza exatamente o conteúdo staged (o .diff em propostas/ precisa citar este caminho nos cabeçalhos E bater byte a byte). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."
         ruim=1
       fi
     fi
