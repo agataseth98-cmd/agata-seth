@@ -1,0 +1,62 @@
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -146,6 +146,7 @@ Nonce: <valor, só se o MOD for seu>
+ ```
+ `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
+ **Selo de origem da hora, obrigatório.** Modelo em nuvem não tem relógio, tem o que a interface informa: `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Espelha a base de contagem do turno da Regra 1 — preencher campo que não se pode medir é a falha de (68)/(71).
++**Hora não herdada.** A hora tem que ser medida de novo a cada resposta — nunca copiada do cabeçalho anterior da mesma sessão. Hora repetida sem nova medição é a mesma falha que hora sem fonte, mesmo tendo fonte. Achado com incidente real, relatado por outra sessão (GPT-5.6 "Luna") em 23/08/2026: repetiu `18:52` numa resposta depois que o horário real já tinha passado — o selo de origem acima resolve DE ONDE vem a hora, não SE ela foi medida de novo nesta resposta.
+
+ **`sync:` — três formas, nunca uma quarta:**
+ ```
+
+## Motivo
+
+Achado relatado por outra sessão (GPT-5.6 "Luna"), incidente real:
+repetiu `18:52` numa resposta depois que o horário real já tinha
+passado. O selo de origem da hora (`(relógio da Máquina)` /
+`(informado pela interface)` / `lacuna: sem relógio`, linha acima)
+resolve DE ONDE vem a hora — mas não SE ela foi medida de novo nesta
+resposta especificamente, ou só copiada do cabeçalho anterior da
+mesma sessão. As duas falhas são independentes: dá pra ter selo
+correto (`relógio da Máquina`) e ainda assim reportar uma hora velha,
+só porque ninguém mediu de novo.
+
+## Desenho
+
+Regra textual, não checagem mecânica — não existe hoje um script que
+meça "esta resposta tem hora nova" (diferente de P-7, que audita
+citação de MEMÓRIAS por regex contra o texto staged; hora em texto
+solto não tem como distinguir mecanicamente "medida agora" de "copiada
+de duas respostas atrás" sem acesso a um relógio de verdade fora da
+sessão, que é exatamente a limitação que o selo de origem já existe
+pra declarar). Fica registrada ao lado do selo de origem, mesmo
+parágrafo de contexto, pra não duplicar a explicação de por que a
+hora é frágil neste projeto.
+
+## Testes
+
+**Positivo — `git apply --check` aplica limpo contra o `REGRAS.md`
+real do canon atual, num clone descartável, nunca sobre `~/agata`:**
+```
+$ git apply --check propostas/hora-nao-herdada.diff
+(exit 0, sem erro)
+```
+
+**Negativo — não há checagem mecânica pra testar (regra textual, não
+script; ver "Desenho" acima). O teste aqui é `perimetro.sh` continuar
+verde nas outras 7 checagens depois de aplicar, sem regressão --
+confirmado em clone descartável, staged sem `APROVADO-` (proposital,
+esta proposta não está aprovada ainda):**
+```
+$ git apply propostas/hora-nao-herdada.diff && git add REGRAS.md
+$ bash scripts/perimetro.sh
+P-1 OK · P-2 OK · P-3 OK · P-4 PARCIAL (sem sudo, esperado) · P-5 OK ·
+P-7 OK (total_citacoes=0 -- a adição não cita nenhuma entrada de
+MEMÓRIAS) · P-8 SUSPEITO (esperado -- sem APROVADO-hora-nao-herdada
+ainda, é exatamente o que P-8 deveria fazer aqui) · P-9/P-6 AVISO só.
+RESULTADO GERAL: FALHOU só por causa do P-8 esperado, nada mais
+regrediu.
+```
+
+Baixo custo, sem urgência (registrado pelo próprio pedido) — fica em
+`propostas/` sem `APROVADO-`, pronta pra quando o Humano priorizar.
