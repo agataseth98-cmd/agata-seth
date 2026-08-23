@@ -294,10 +294,15 @@ _p8_arquivo_aprovado() {
       diff_abs="$repo_raiz/$diff_path"
       tmp="$(mktemp -d)" || continue
       mkdir -p "$tmp/$(dirname "$f")"
+      # Conserto de 23/08/2026 (achado testando `harness-a1-trace.diff`,
+      # arquivo NOVO): criar um placeholder vazio aqui fazia `git apply`
+      # recusar diffs de "novo arquivo" (`--- /dev/null`) com "already
+      # exists in working directory" -- esse tipo de diff exige que o
+      # caminho NÃO exista pra aplicar. Não criar nada quando o arquivo
+      # não existe em HEAD deixa o próprio `git apply` criar o arquivo,
+      # igual faria num `git apply` real contra o repositório.
       if git cat-file -e "HEAD:$f" 2>/dev/null; then
         git show "HEAD:$f" > "$tmp/$f" 2>/dev/null
-      else
-        : > "$tmp/$f"
       fi
 
       if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
