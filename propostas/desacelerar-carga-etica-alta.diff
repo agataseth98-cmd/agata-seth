@@ -84,13 +84,20 @@ prática que as demais regras já seguem para citações de motivo.
 
 `(239)` — número medido ao vivo nesta sessão (`grep -oE '^\([0-9]+\)'
 MEMÓRIAS.md | tail -1` → `(238)`, portanto próximo = 239), não presumido.
-**Pendência que não é deste Executor decidir:** existe uma segunda
-proposta candidata a `(239)`, ainda só em texto de chat (não escrita em
-nenhum arquivo, não commitada) — sobre o achado de `execute_code`/PTC no
-Hermes, discutida com o Humano nesta mesma sessão antes desta tarefa.
-Só uma pode ser (239) de verdade; a outra, se e quando for escrita, tem
-que renumerar para (240) — Regra 4, "sincronize antes de numerar", vale
-igual aqui. Sinalizado, não resolvido por este Executor.
+
+**Colisão de numeração, resolvida nesta mesma sessão (ordem do Humano,
+depois de eu sinalizar o risco acima).** Existia uma segunda candidata a
+`(239)` — sobre o achado de `execute_code`/PTC no Hermes, discutida com o
+Humano antes desta tarefa — mas essa nunca foi escrita em arquivo nem
+commitada, só existia em texto de chat. Resolução, mecânica e sem juízo
+de valor sobre qual achado importa mais (Regra 4, "sincronize antes de
+numerar" — quem chega ao disco primeiro reserva o número): `(239)` fica
+com este `.diff`, que é o primeiro a existir de verdade, commitado e
+publicado (`4b3df36`, confirmado contra `origin/main` antes desta edição).
+A candidata do `execute_code`/PTC, se e quando o Humano autorizar
+escrevê-la, é `(240)` — nunca `(239)`. Nada em `REGRAS.md`/`MEMÓRIAS.md`
+reais mudou com esta resolução; ela só evita que uma sessão futura tente
+escrever duas entradas `(239)` diferentes.
 
 Data do título da entrada (239): usei 24/08/2026 (data de hoje, quando
 este `.diff` é escrito) porque REGRAS.md exige data do COMMIT, não da
