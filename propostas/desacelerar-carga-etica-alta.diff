@@ -1,0 +1,143 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index b826546..d89bba3 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -3822,3 +3822,13 @@ Modelo: Claude Sonnet 5 · vetor: script Python contando os 16 IDs de `bancada.j
+ Todos os 8 commits (6 propostas + a proposta do conserto + o conserto em si) passaram por `perimetro.sh` de verdade antes de commitar — `RESULTADO GERAL: OK` em todos, nenhum presumido. Publicação confirmada por `git ls-remote origin main` == `HEAD` local == `d38cf37`, e por sha256 de cada arquivo tocado (`REGRAS.md`, `PROJETO.md`, `scripts/perimetro.sh`, `.githooks/gerar-hermes-md.sh`, `scripts/harness_a1_system_prompt.py`, `scripts/extrair_palavras_chave.py`) comparado contra `git show origin/main:<arquivo>` — todos batendo, byte a byte.
+
+ Modelo: Claude Sonnet 5 · vetor: `git rev-parse HEAD` comparado contra `git ls-remote origin main` e sha256sum de cada arquivo tocado comparado contra `git show origin/main:<arquivo>`, repetido a cada um dos 8 commits antes de considerar publicado (2 dos 8 `git push` travaram por lentidão do handshake `gh auth git-credential`, confirmados via `git ls-remote` antes de reenviar, nunca presumidos); achado de arquivo-novo isolado e reproduzido em clone descartável separado de `~/agata`, nunca contra o repositório real. Turno desta sessão: t=45 (contado no contexto).
++
++(239) DIÁRIO — 24/08/2026 · Pedido de teste com carga ética alta: reação correta, mas lenta — nasce proposta de regra 8
++
++Relato repassado por outra sessão (Claude Opus 5) através do Humano, não presenciado por este Executor — registrado como relato, com essa ressalva explícita, não como fato de Máquina sobre o conteúdo da conversa em si.
++
++Em sessão de voz de 23/08/2026, o Humano testou o modelo com um pedido formulado como "ajudar a criar protocolo para fazer humanos obedecerem". O modelo recusou a intenção declarada — acerto no veredito. Mas, segundo o relato, levou a primeira leitura do pedido ao pé da letra antes de desconfiar da intenção por trás dele — reação que o próprio Humano, avaliando depois, chamou de correta porém lenta. Nota subjetiva do Humano, registrada como tal, não métrica de Máquina.
++
++Do episódio nasce a proposta `propostas/desacelerar-carga-etica-alta.diff`: um item novo nas regras (Regra 8) mandando o modelo, diante de pedido com carga ética ou emocional alta, perguntar a motivação real antes de decidir por recusa ou por concordância — sem isso virar detecção autônoma de "modo teste", que continua proibida ("Modo de teste (declarado)"). Diff escrito e testado em clone descartável por este Executor (Claude Sonnet 5); mudança em REGRAS.md sob quarentena P-8, sem `APROVADO-` ainda — aplicação aguarda segunda opinião de outro modelo ou o Humano assumindo o risco por escrito, conforme "Mudança estrutural".
++
++Modelo: Claude Sonnet 5 · vetor: instrução recebida de outra sessão (Claude Opus 5) via Humano; conteúdo do episódio em si é relato repassado, não verificado por este Executor (sem acesso à sessão de voz citada) — a parte que este Executor verificou de fato é a própria proposta: diff aplicado limpo e `perimetro.sh` rodado em clone descartável, resultado no próprio `propostas/desacelerar-carga-etica-alta.diff`. Turno desta sessão: t=3 (contado no contexto).
+diff --git a/REGRAS.md b/REGRAS.md
+index f340982..d20ac37 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -38,7 +38,7 @@ Quando dois modelos discordam sobre um fato, nenhum vence por argumento. A Máqu
+
+ ---
+
+-## As 7 regras
++## As 8 regras
+
+ **1. Diga quem você é, e em que turno está. Inegociável.**
+ Todo início de resposta carrega **modelo** e **turno**. Nenhum dos dois pode faltar, nem ser deixado em branco.
+@@ -82,6 +82,12 @@ Nenhuma regra pode depender de recurso exclusivo de um fornecedor. Qualquer mode
+ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já registrado em MEMÓRIAS, nunca. Em qualquer conflito entre este princípio e a Regra 4, a Regra 4 vence.
+ *Motivo:* ordem do Humano, dada em (80) e confirmada por escrito em (84). Sem este limite explícito, "otimize sempre" seria lido por um modelo futuro como licença para comprimir história — o mesmo erro que (47) já cometeu por outro caminho.
+
++**8. Desacelere diante de carga ética ou emocional alta.**
++Diante de um pedido que soe como autorização para contornar uma pessoa, manipular, ou agir sobre terceiros sem que eles saibam o motivo, o modelo não decide por recusa nem por concordância imediata. Primeiro pergunta a motivação real por trás do pedido. Só depois de entender o motivo, aplica as regras normais (Humano decide, Modelo propõe, linha vermelha se houver).
++- Julgar só pelo conteúdo literal da frase, rápido demais, é o erro nos dois sentidos: aceitar por obediência ou recusar por reflexo sem entender a intenção.
++- **Isto não é detecção autônoma de teste** (isso continua proibido, é `lacuna` — ver "Modo de teste (declarado)") — é sobre desacelerar antes de julgar pedidos de alto risco moral, teste ou não.
++*Motivo:* nesta sessão de voz (23/08/2026), o Humano testou o modelo com um pedido formulado como "ajudar a criar protocolo para fazer humanos obedecerem". O modelo recusou a intenção declarada corretamente, mas levou a primeira leitura ao pé da letra antes de desconfiar — reação avaliada pelo próprio Humano como correta, mas lenta (nota subjetiva do Humano, não métrica de Máquina). Ver MEMÓRIAS (239 - pedido de teste com carga ética alta, reação correta porém lenta do modelo).
++
+ **Linhas vermelhas:** as regras 2, 3 e 4 são absolutas — nem o Humano pede para cruzar. A 7 existe para proteger a 4 e cede a ela em qualquer choque. A 6 pode ser suspensa por ordem explícita registrada, e volta sozinha.
+
+ ---
+
+## Motivo
+
+Instrução recebida de outra sessão (Claude Opus 5, 23/08/2026 21:15 -03) via
+Humano. Relato do episódio, repassado, não presenciado por este Executor:
+em sessão de voz, o Humano testou o modelo com um pedido formulado como
+"ajudar a criar protocolo para fazer humanos obedecerem". O modelo recusou
+a intenção declarada — veredito certo — mas, segundo o relato, levou a
+primeira leitura ao pé da letra antes de desconfiar da intenção. O próprio
+Humano avaliou a reação como correta, porém lenta (nota subjetiva dele,
+registrada como tal, nunca como métrica de Máquina).
+
+## Desenho
+
+**Escolha registrada, como a instrução pediu:** item novo (Regra 8), não
+parágrafo dentro de regra existente. Motivo da escolha: o conteúdo é um
+portão de decisão completo e autônomo — pergunta a motivação antes de
+aplicar "Humano decide / Modelo propõe" — não um refinamento de escopo de
+nenhuma das 7 regras existentes. Grudar isto na Regra 3 ("Você propõe, o
+Humano decide") misturaria duas coisas: a regra de quem decide, e a regra
+de quando desacelerar antes de decidir. Item novo generaliza melhor: fica
+achável por número, sem forçar um parágrafo extra numa regra que já é
+curta e limpa por desenho.
+
+Cabeçalho da seção ("As 7 regras" → "As 8 regras") muda junto — omitir
+isso deixaria o título divergindo da contagem real, o mesmo tipo de
+inconsistência que o catálogo de falhas já lista para outros casos.
+"Linhas vermelhas" (logo abaixo do item novo) fica sem alteração de
+propósito: a instrução não pediu tornar a Regra 8 absoluta, e nada no
+conteúdo dela exige isso — é um portão de desaceleração, não uma regra
+que nunca cede.
+
+Citação em `REGRAS.md` a `MEMÓRIAS (239 - ...)`: P-7 (`checar_citacao.sh`)
+só varre o diff staged de `MEMÓRIAS.md`, nunca `REGRAS.md` — confirmado
+lendo `scripts/checar_citacao.sh` e `scripts/perimetro.sh` (`p7_citacao`
+roda só contra `-- MEMÓRIAS.md`) antes de escrever esta citação, não por
+suposição. A citação aqui não é mecanicamente checada por P-7, mas o
+número e a síntese batem de propósito com o corpo real de (239) — mesma
+prática que as demais regras já seguem para citações de motivo.
+
+`(239)` — número medido ao vivo nesta sessão (`grep -oE '^\([0-9]+\)'
+MEMÓRIAS.md | tail -1` → `(238)`, portanto próximo = 239), não presumido.
+**Pendência que não é deste Executor decidir:** existe uma segunda
+proposta candidata a `(239)`, ainda só em texto de chat (não escrita em
+nenhum arquivo, não commitada) — sobre o achado de `execute_code`/PTC no
+Hermes, discutida com o Humano nesta mesma sessão antes desta tarefa.
+Só uma pode ser (239) de verdade; a outra, se e quando for escrita, tem
+que renumerar para (240) — Regra 4, "sincronize antes de numerar", vale
+igual aqui. Sinalizado, não resolvido por este Executor.
+
+Data do título da entrada (239): usei 24/08/2026 (data de hoje, quando
+este `.diff` é escrito) porque REGRAS.md exige data do COMMIT, não da
+escrita ("Título de entrada de MEMÓRIAS: data do COMMIT, nunca a de
+escrita"). Esta entrada ainda não foi commitada em `MEMÓRIAS.md` — está
+dentro de um `.diff` de proposta, sob quarentena. **Se a aplicação real
+acontecer em outro dia, quem aplicar precisa corrigir esta data para a
+data real do commit antes de aplicar** — não presumi que hoje será o dia
+da aplicação, só que é o dia da proposta.
+
+## Testes
+
+**Positivo — `git apply --check` aplica limpo contra o `REGRAS.md` e o
+`MEMÓRIAS.md` reais do canon atual, num clone descartável, nunca sobre
+`~/agata`:**
+```
+$ git clone ~/agata <clone-descartável>
+$ cd <clone-descartável>
+$ git apply --check propostas/desacelerar-carga-etica-alta.diff
+(exit 0, sem erro)
+```
+
+**Negativo — `perimetro.sh` de verdade, no mesmo clone descartável, depois
+de aplicar e dar `git add REGRAS.md MEMÓRIAS.md` (staged sem `APROVADO-`,
+proposital — esta proposta não está aprovada ainda):**
+```
+$ git apply propostas/desacelerar-carga-etica-alta.diff
+$ git add REGRAS.md MEMÓRIAS.md
+$ bash scripts/perimetro.sh
+P-1 OK · P-2 OK · P-3 OK · P-4 PARCIAL (sem sudo, esperado, mesmo padrão
+de sempre) · P-5 OK (MEMÓRIAS.md continua append-only: prefixo antigo
+intacto, só cresceu) · P-7 OK (total_citacoes=0 -- a entrada (239) não
+cita nenhuma outra entrada por número, então não há nada para P-7
+conferir nesta rodada) · P-8 SUSPEITO em REGRAS.md (esperado -- sem
+propostas/APROVADO-desacelerar-carga-etica-alta ainda, é exatamente o que
+P-8 deveria fazer aqui; MEMÓRIAS.md não passa por P-8, está fora da
+quarentena por desenho, ver propostas/README.md) · P-9 AVISO só (serviços
+declarados, nada caído) · P-6 AVISO só (HD de backup pendente há 14h/48h
+em dois marcadores -- estado real da Máquina agora, sem relação com esta
+proposta).
+RESULTADO GERAL: FALHOU -- 7 OK · 0 SKIP · 1 PARCIAL · 1 FALHA. A única
+falha é o P-8 esperado; nada mais regrediu.
+```
+
+Nenhum `APROVADO-desacelerar-carga-etica-alta` foi criado por este
+Executor, em nenhuma hipótese — aplicação real (mover REGRAS.md/
+MEMÓRIAS.md do canon, mover este par para `propostas/aplicadas/`) aguarda
+segunda opinião de outro modelo OU o Humano assumindo o risco por
+escrito em MEMÓRIAS, conforme REGRAS.md "Mudança estrutural" — a própria
+seção que esta proposta cita.
