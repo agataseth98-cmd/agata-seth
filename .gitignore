@@ -27,3 +27,4 @@ memoria/*.md
 # Artefatos derivados de qualquer camada privada — protege por nome, não só por pasta
 # (achado em MEMÓRIAS (97): um artefato escrito um nível acima de memoria/missoes/ escapa do ignore por pasta)
 *.bundle
+*.bak.*
