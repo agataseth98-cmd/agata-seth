@@ -4117,3 +4117,21 @@ Modelo: Claude Sonnet 5 · vetor: `scripts/checar_citacao.sh` lido inteiro, linh
 **Não aplicado.** Regra 3: parecer informa, Humano decide. Se aprovado, a emenda entra como `## Regra 9 — Carimbo de frescor`, mesmo padrão estrutural da Regra 8, com a redação de conteúdo do GLM preservada.
 
 Modelo: Claude Sonnet 5 · vetor: JSON bruto lido por inteiro (`finish_reason`, contagem de tokens, conteúdo completo) antes de resumir, não confiado ao "Formato OK" do script sozinho; cada um dos dois itens conferido contra as objeções originais de "Ágata Opus" pra separar fundamentação própria de eco; `grep` em REGRAS.md confirmando ausência de qualquer numeração decimal existente antes de recomendar a forma "Regra 9" em vez de "7.5" literal. Turno desta sessão: t=27 (contado no contexto).
+
+(257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
+
+**Decisão do Humano:** não adotar o carimbo de frescor (item 3) nem a quarta pergunta de prontidão (item 4). REGRAS.md não muda — nenhuma Regra 9 entra.
+
+**Motivo, substantivo, não desistência:** a URL pinada em SHA (253) cobre o caminho automático de fetch. O único caminho que o carimbo protegeria é o de conteúdo colado à mão numa conversa — exatamente o caminho que o sistema quer reduzir, não reforçar. Investir regra nova nesse trilho seria o lado errado do problema.
+
+**Registro explícito, por pedido direto:** o parecer do GLM em (256) foi **favorável** ao item 3 ("SIM", com fundamentação própria). O Humano decidiu **contra**, mesmo assim. Isso não é contradição nem parecer ignorado — é o próprio desenho do protocolo: "Segunda opinião — pedido e parecer" é consultivo, quem decide é sempre o Humano (Regra 3, Os 3 papéis). Uma leitura futura que encontre (256) com "SIM" e o canon sem a regra correspondente encontra aqui o porquê.
+
+**Ressalva de proveniência, também por pedido direto:** a redação exata da emenda proposta pelo GLM nunca foi lida pelo Humano — chegou resumida, na resposta deste executor em chat, não o texto bruto do parecer. A decisão de não adotar não é uma avaliação de mérito do texto exato da emenda; é uma decisão sobre a proposta em substância, tomada a partir do resumo. Registrado pra não constar, num histórico futuro, que a proposta foi lida em detalhe e recusada no mérito da redação — não foi isso que aconteceu.
+
+**Com isso, fecha a proposta inteira que "Ágata Opus" trouxe nesta troca: dos sete itens originais, zero adotados.** Dois aplicados como consertos de documentação já publicados sob nomes próprios (URLs pinadas em SHA, três linhas de catálogo, dois ajustes em PROJETO.md — todos derivados dos achados, não do plano de otimização em si, que a própria proponente retirou). Registro honesto do resultado, não fracasso: a sessão rendeu descobertas reais (248-256) sem precisar adotar a proposta original.
+
+**Item aberto, sem proposta em cima, registrado como risco conhecido:** nenhum controle mecânico verifica hoje que um commit em MEMÓRIAS.md é puramente aditivo (só acrescenta, nunca edita linha já publicada). O quase-erro desta mesma sessão (entrada (255), "cold" quase virou "cento" no meio de uma edição de (256), pego por disciplina antes de comitar — ver texto de (256), nota à parte) foi pego por atenção manual, não por máquina. Fase corrente é 0; isto fica registrado, não vira tarefa.
+
+**Fase 0, estado real:** publicar entradas acumuladas — feito, `HEAD == origin/main` confirmado repetidamente ao longo desta sessão. Fechar TES-001 — não fechado; rodada 4 (243) foi o primeiro dado positivo depois de três adversos, não o critério cumprido (REGRAS exige N sessões consecutivas). Reverificar o patch do 429 — pendente do próximo `hermes update`, nada a fazer até lá.
+
+Modelo: Claude Sonnet 5 · vetor: transcrição direta da ordem do Humano, sem parafrasear os pontos que ele pediu explicitamente pra constar; releitura de (253)/(256) antes de escrever "fecha a proposta inteira" pra confirmar a contagem de sete itens, zero adotados, contra o que foi de fato aplicado (consertos derivados, não o plano). Turno desta sessão: t=28 (contado no contexto).
