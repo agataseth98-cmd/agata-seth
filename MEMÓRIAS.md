@@ -4043,3 +4043,21 @@ A frase entrou em PROJETO.md em **02/07/2026** (`dc01805`) e saiu em **13/08/202
 **Duas estimativas anteriores corrigidas, nenhuma delas rodou este teste antes de estimar:** eu disse "quase quatro semanas" em (251), ancorando na migração de arquivo (31/07) em vez do conteúdo específico lido. "Ágata Opus" disse "sete semanas" nesta mesma resposta — mas sete semanas antes de hoje cai em ~29/06/2026, **antes** até da frase "gemini-2.5-flash principal" ter entrada em PROJETO.md (02/07) — inconsistente com o próprio texto que ela relatou ter lido. As duas estimativas eram alegação sem medição; a medição dá 13/08, ponto final, sem margem pra debate.
 
 Modelo: Claude Sonnet 5 · vetor: `git log -S` rodado contra a string exata citada por "Ágata Opus", não aproximada; `git log -1 --format=%ad` pros três commits relevantes (`dc01805`, `b83d25b`, `ca55c25`) pra datar entrada e saída da frase; contagem manual de dias entre 13/08 e 25/08 antes de escrever "12 dias" como fato. Turno desta sessão: t=23 (contado no contexto).
+
+(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
+
+**Motivo:** depois de (252), "Ágata Opus" propôs sete melhorias concretas, da mais decisiva pra menos, e o Humano ordenou "audite e execute". Cada uma avaliada por escopo antes de agir — nem tudo que uma boa ideia pede pode ser aplicado do mesmo jeito (Regra 3, "Mudança estrutural").
+
+**Executadas, publicadas e verificadas (checagem tripla: HEAD==origin/main, diff vazio nos dois sentidos, blob idêntico):**
+1. **URLs raw pinadas em SHA (`de7acb0`).** `scripts/atualizar_ancora_prompt.py` agora gera, dentro do próprio bloco ANCORA-SHA já automático, três URLs `raw.githubusercontent.com/.../<SHA>/<arquivo>` — conteúdo endereçado por hash, imutável, testado contra um commit real (byte a byte igual ao blob do git). Elimina a classe de falha de (248)-(252) sem precisar de detecção. Categorizada pela própria "Ágata Opus" como ajuste pequeno — aplicada sem segunda opinião.
+2. **Três linhas novas no catálogo de falhas (`531ff21`).** "Canal servindo estado antigo sem carimbo", "grep negativo sem validar positivo conhecido", "leitura parcial sem declarar fração" — os três modos de falha que a auditoria de (250)-(252) revelou, nenhum coberto pelas 16 linhas já existentes. Registro de fato já acontecido, mesmo padrão da tabela — ajuste pequeno.
+
+**Não executadas — exigem segunda opinião ou risco assumido por escrito, a própria "Ágata Opus" categorizou assim:**
+3. **Carimbo de frescor no topo de REGRAS/PROJETO/MEMÓRIAS**, auto-verificável sem rede, comparando entrada+commit entre os três arquivos.
+4. **Quarta pergunta na checagem de prontidão** ("sei que o que estou lendo é fresco, por SHA ou por carimbo?") — REGRAS.md, "Checagem de prontidão (o modelo, para si)".
+
+Essas duas mudam REGRAS.md de um jeito que a própria proponente reconheceu como estrutural — "Mudança estrutural: REGRAS, ou algo grande do PROJETO → segunda opinião de outro modelo ou o Humano assume o risco por escrito". "Audite e execute" cobriu o que era ajuste pequeno; não decide por si o que a própria REGRAS.md exige verificação extra pra mudar. Fica pro Humano escolher: rodar uma segunda opinião (mesmo caminho de (246)/(247)) ou assumir o risco por escrito, como em (69).
+
+**Não adotada, por decisão implícita de escopo, não recusa:** item 7 (`PULSO.txt`), que a própria "Ágata Opus" marcou como redundante se 1 e 2 (dela, numeração própria — carimbo + quarta pergunta, os dois ainda pendentes) forem adotados. Fica em espera junto com eles.
+
+Modelo: Claude Sonnet 5 · vetor: cada uma das sete propostas lida e categorizada individualmente antes de agir, não em bloco; `git apply --check` real em clone descartável antes de cada commit; checagem tripla (HEAD==origin, diff vazio, blob idêntico) repetida em cada uma das duas aplicações; releitura de REGRAS.md, "Mudança estrutural", antes de decidir quais das sete propostas precisavam de gate extra. Turno desta sessão: t=24 (contado no contexto).
