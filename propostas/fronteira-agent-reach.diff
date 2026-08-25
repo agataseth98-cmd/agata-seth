@@ -1,0 +1,50 @@
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -218,6 +218,7 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
+ | MEMÓRIAS em repo sem remote como cópia única | Privado também se versiona — git próprio, sem remote | (91)→(92) |
+ | RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
+ | Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
++| Agent Reach (CLI multi-plataforma, github.com/Panniantong/agent-reach) | Não fecha lacuna que a Agata tenha (ler_pagina.sh já cobre a metade zero-config); antecipa fase do ACB sem ordem; soma risco de config fora do repo, já declarado e pendente | MEMÓRIAS (241) |
+
+ ## Diagnóstico
+ `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
+
+## Motivo
+
+O Humano trouxe um link (github.com/Panniantong/agent-reach) pedindo
+para avaliar se acrescenta ao sistema e, em caso positivo, implementar.
+Análise ao vivo (WebFetch real contra o repositório) achou três motivos
+pra recusar, todos ancorados no próprio canon — não julgamento externo:
+`scripts/ler_pagina.sh` (228) já cobre a metade zero-config do que a
+ferramenta oferece; o resto (redes sociais autenticadas, YouTube, RSS)
+não corresponde a nenhuma necessidade registrada da Agata e cai na fase
+futura do ACB, contida por "Contenção de escopo"; e adotar somaria um
+segundo arquivo de configuração com credenciais fora do repositório, em
+cima de um risco da mesma classe já declarado e ainda pendente de
+decisão (`~/.hermes/config.yaml`, "Riscos conhecidos"). O Humano
+confirmou a recusa ao vivo na mesma conversa ("Perfeito, registre essa
+ferramenta") e pediu o registro. MEMÓRIAS (241) tem a análise completa;
+esta proposta só move o resultado pra a tabela que existe justamente
+pra impedir reproposta ("Fronteira de recusas").
+
+## Desenho
+
+Uma linha nova na tabela existente, mesmo formato das outras seis:
+nome da ferramenta recusada, motivo resumido em 1 frase, onde está o
+detalhe (MEMÓRIAS (241)). Nenhuma outra mudança.
+
+## Testes
+
+**`git apply --check` aplica limpo contra o `PROJETO.md` real do canon
+atual, num clone descartável, nunca sobre `~/agata`:**
+```
+$ rm -rf /tmp/agata-teste-fronteira && git clone -q ~/agata /tmp/agata-teste-fronteira
+$ cd /tmp/agata-teste-fronteira && git apply --check ~/agata/propostas/fronteira-agent-reach.diff && echo OK
+OK
+$ git apply ~/agata/propostas/fronteira-agent-reach.diff && grep -n "Agent Reach" PROJETO.md
+221:| Agent Reach (CLI multi-plataforma, github.com/Panniantong/agent-reach) | Não fecha lacuna que a Agata tenha (ler_pagina.sh já cobre a metade zero-config); antecipa fase do ACB sem ordem; soma risco de config fora do repo, já declarado e pendente | MEMÓRIAS (241) |
+$ cd ~/agata && rm -rf /tmp/agata-teste-fronteira
+```
+Resultado do blob após aplicar bate, byte a byte, com o que `_p8_arquivo_aprovado()` vai exigir quando `propostas/APROVADO-fronteira-agent-reach` existir.
+
+**Aguardando:** `propostas/APROVADO-fronteira-agent-reach` do Humano antes de aplicar de verdade em `~/agata`.
