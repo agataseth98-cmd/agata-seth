@@ -222,7 +222,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (206) DIÁRIO — 17/08/2026 · GLM-4.7-Flash (Zhipu) APROVADO pelo Humano para a Fa …
 (207) DIÁRIO — 17/08/2026 · `scripts/conselho_remoto.py` (B.2–B.6) escrito e tes …
 (208) DIÁRIO — 17/08/2026 · Chave real da Zhipu recebida do Humano, Condição 2 f …
-(209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto no arquivo — risco residual de (208) fechado, sem passar pela conversa desta vez
+(209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto n …
 (210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/MEMORY.md` — decisão do Humano: NÃO FAZER NADA, registrada com os fatos que sustentam, não como pendência esquecida
 (211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — âncora medida na hora, pedido enviado, GLM-4.7-Flash devolveu HTTP 429 (sobrecarga temporária) nas duas tentativas permitidas; nenhum parecer recebido, B.7 não mensurável nesta rodada
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem 429) mas gastou o orçamento inteiro tentando calcular hash de cabeça — achado real de bug, corrigido (thinking desligado); reenvio único com formato junto, ordenado por REGRAS, bateu em 429 de novo duas vezes — ainda sem parecer válido
@@ -252,3 +252,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (236) DIÁRIO — 21/08/2026 · Bancada de modelos: `mistral:7b-instruct` excluído por dado inválido — bug de glob consertado, rerun interrompido por desligamento abrupto, não retomado — entrada própria, por autorização, ver (234)
 (237) DIÁRIO — 22/08/2026 · Fecha o caso 16 do `rlm-qwen3-8b-teste` (234) — F1 errado, F2/F3 limpo, decisão do Humano com leitura do Opus 5 como insumo; linha final recalculada, não transcrita
 (238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/2026 (P-8 hash, PROJETO riscos, sync unificado, Harness A1, glossário, índice por palavra-chave) + achado de arquivo novo consertado no caminho
+(241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Panniantong/agent-reach) proposta pelo Humano, analisada e recusada — não fecha lacuna que a Agata tenha, antecipa fase do ACB, soma risco de config fora do repositório ainda pendente

@@ -3822,3 +3822,20 @@ Modelo: Claude Sonnet 5 · vetor: script Python contando os 16 IDs de `bancada.j
 Todos os 8 commits (6 propostas + a proposta do conserto + o conserto em si) passaram por `perimetro.sh` de verdade antes de commitar — `RESULTADO GERAL: OK` em todos, nenhum presumido. Publicação confirmada por `git ls-remote origin main` == `HEAD` local == `d38cf37`, e por sha256 de cada arquivo tocado (`REGRAS.md`, `PROJETO.md`, `scripts/perimetro.sh`, `.githooks/gerar-hermes-md.sh`, `scripts/harness_a1_system_prompt.py`, `scripts/extrair_palavras_chave.py`) comparado contra `git show origin/main:<arquivo>` — todos batendo, byte a byte.
 
 Modelo: Claude Sonnet 5 · vetor: `git rev-parse HEAD` comparado contra `git ls-remote origin main` e sha256sum de cada arquivo tocado comparado contra `git show origin/main:<arquivo>`, repetido a cada um dos 8 commits antes de considerar publicado (2 dos 8 `git push` travaram por lentidão do handshake `gh auth git-credential`, confirmados via `git ls-remote` antes de reenviar, nunca presumidos); achado de arquivo-novo isolado e reproduzido em clone descartável separado de `~/agata`, nunca contra o repositório real. Turno desta sessão: t=45 (contado no contexto).
+
+(241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Panniantong/agent-reach) proposta pelo Humano, analisada e recusada — não fecha lacuna que a Agata tenha, antecipa fase do ACB, soma risco de config fora do repositório ainda pendente
+
+**Motivo:** o Humano trouxe um link de repositório GitHub pedindo para verificar se acrescenta ao sistema e, em caso positivo, implementar.
+
+**O que é, lido ao vivo (`WebFetch` real contra o repositório, não descrição de memória):** CLI em Python que dá a agentes acesso unificado a várias plataformas — páginas web, YouTube (transcrição), RSS, GitHub público, B站 sem login; Twitter/X, Reddit, Facebook, Instagram, XiaoHongShu, LinkedIn com login, roteamento primário+backup por plataforma, config em `~/.agent-reach/config.yaml` (permissão 600, fora de qualquer repositório git).
+
+**Três motivos para recusar, achados no próprio canon, não inventados:**
+1. `scripts/ler_pagina.sh` (228 - lê página web sem navegador, JS-rendered incluso, princípio "ferramenta nova é decisão, não conserto") já cobre metade do que Agent Reach oferece sem login (páginas web, GitHub público). O teste do próprio princípio (228) é se a ferramenta nova resolve uma classe que a atual não alcança — essa metade não resolve nada novo.
+2. O que sobra (redes sociais autenticadas, YouTube, RSS) não corresponde a nenhuma necessidade registrada da Agata — busca em REGRAS.md, PROJETO.md e MEMÓRIAS.md não encontrou nenhuma menção a precisar disso. Cai dentro do ACB ("bússola, não backlog", PROJETO.md) como fase futura de acesso a plataformas externas; "Contenção de escopo" nega antecipar fase sem ordem do Humano.
+3. Compraria um segundo arquivo de configuração com credenciais fora do repositório (`~/.agent-reach/config.yaml`), mesma classe de risco já declarada e ainda pendente de decisão em PROJETO.md ("Risco do `config.yaml`, fora do alcance da P-8") — sem o primeiro estar resolvido.
+
+**Decisão do Humano, ao vivo nesta conversa:** confirmou a recusa ("Perfeito, registre essa ferramenta") — não adotar agora.
+
+**Pendente, não aplicado ainda:** linha nova em PROJETO.md, "Fronteira de recusas", é mudança de comportamento (P-8 cobre `PROJETO.md`) — deixada em `propostas/fronteira-agent-reach.diff`, aguardando `propostas/APROVADO-fronteira-agent-reach` do Humano antes de entrar no canon.
+
+Modelo: Claude Sonnet 5 · vetor: `WebFetch` real contra o repositório do GitHub (não aceito de descrição colada); grep em REGRAS.md/PROJETO.md/MEMÓRIAS.md por menção a redes sociais/YouTube/RSS (zero resultado); leitura de `scripts/ler_pagina.sh` e de PROJETO.md ("ACB", "Riscos conhecidos") para fundamentar a recusa; `grep -oE '^\([0-9]+\)' MEMÓRIAS.md | tail` para confirmar que (241) não colide com (239)/(240), já reservados por `propostas/desacelerar-carga-etica-alta.diff` (pendente de aprovação, não aplicado). Turno desta sessão: t=2 (contado no contexto).
