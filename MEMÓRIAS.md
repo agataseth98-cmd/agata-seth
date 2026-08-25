@@ -3889,3 +3889,28 @@ Modelo: Claude Sonnet 5 · vetor: JSON bruto da resposta lido por inteiro antes 
 **Não decidido aqui.** Reabilitar é editar `~/.hermes/config.yaml` — fora do repositório, fora do alcance da P-8, o risco já declarado e ainda pendente em PROJETO.md ("Risco do `config.yaml`"). "Ferramenta nova é decisão, não conserto" (228) se aplica mesmo sendo reativação, não instalação nova — o "portão das três perguntas" (REGRAS, "Mudança estrutural") é o próximo passo, antes de pedir autorização.
 
 Modelo: Claude Sonnet 5 · vetor: leitura direta de `tools/code_execution_tool.py` (2.206 linhas) e `toolsets.py` no Hermes instalado, não de descrição do Humano nem de documentação externa; `build_execute_code_schema()` chamado de verdade contra o código real pra medir bytes, não estimado; `grep` em `tools/approval.py` (`check_execute_code_guard`) pra confirmar o comportamento de aprovação em contexto de gateway antes de registrar como seguro. Turno desta sessão: t=7 (contado no contexto).
+
+(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado
+
+**Motivo:** continuação de (244). O Humano trouxe uma resposta da sessão local de Seth (`qwen3.5-9b-64k`, principal sob auditoria desde (140)) — confirmada por ele como resposta local de verdade — contendo um script Python que tentava usar `hermes_tools`/`execute_code` pra contar as palavras "Máquina", "lacuna" e "alegação" em REGRAS.md/PROJETO.md/MEMÓRIAS.md.
+
+**Achados, cada um checado na Máquina antes de entrar aqui:**
+1. **Cabeçalho com hora não medida de novo:** `24/08/2026 11:55`, quando o relógio real desta sessão mede `25/08/2026`. Mesma classe de falha que motivou `hora-nao-herdada.diff`, aplicado mais cedo nesta mesma sessão (REGRAS.md).
+2. **Tentativa de usar ferramenta indisponível:** `~/.hermes/config.yaml` não tinha (e continua sem ter) `code_execution` em `platform_toolsets.cli` — reconferido, hash do arquivo idêntico à checagem anterior nesta sessão. O script foi escrito para uma ferramenta que a sessão local não expõe.
+3. **Bugs reais no script, que o travariam antes de terminar:** desempacota `path` como string e duas linhas depois indexa `path['content']` (`TypeError: string indices must be integers` — a falha mais comum documentada no próprio `_sandbox_failure_hint()` do código-fonte do Hermes); usa `sys.maxsize` sem `import sys`; termina lendo `read_file('REGRAS')`, caminho inválido (falta `~/agata/` e `.md`). Nenhuma saída foi apresentada junto — sem evidência de execução bem-sucedida.
+4. **Contraprova ao vivo, mesma tarefa, sem sandbox e sem PTC:** `grep -oiE '\bMáquina\b'` (e equivalente pras outras duas palavras) contra os três arquivos reais, rodado nesta sessão:
+   ```
+   REGRAS.md    Máquina=22  lacuna=14  alegação=8
+   PROJETO.md   Máquina=18  lacuna=9   alegação=0
+   MEMÓRIAS.md  Máquina=342 lacuna=157 alegação=87
+   ```
+   Confirma o princípio de (228) de novo, com um caso novo: a tarefa que motivou o script de 60+ linhas termina em 7 linhas com o que já existe.
+
+**Decisão, respondendo as perguntas 2 e 3 do "portão das três perguntas" (REGRAS, "Mudança estrutural") com o dado acima, sem precisar de mais rodada — pergunta 1 (reversibilidade) já respondida em (244), "desfaço sozinho, comando único", confirmado ao vivo:**
+- **Pergunta 2, alcance:** habilitar `code_execution` tocaria direto a confiabilidade de Seth — que está sob regime de auditoria justamente por isso (140). Dar sandbox com `write_file`/`patch`/`terminal` a um modelo que erra sintaxe básica numa tarefa trivial amplia o raio de dano de "resposta errada" pra "arquivo real mutilado".
+- **Pergunta 3, silêncio:** o script travaria com traceback visível — o cenário bom. O risco real é o próximo script, bug parecido, mas em `write_file`/`patch` em vez de leitura: o dano acontece antes do traceback aparecer, e ninguém saberia até tarde.
+- **Decisão do Humano, ao vivo nesta conversa ("Confirmo, aplique os três"):** não habilitar `code_execution`/PTC agora. Não é recusa permanente — reabre se Seth sair do regime de auditoria, ou se aparecer um caso de uso concreto que justifique o risco, não "eficiência" em abstrato. `~/.hermes/config.yaml` permanece como estava (nenhuma mudança feita nele).
+
+**SOUL.md arquivado**, por autorização da mesma ordem: movido para `_arquivo_agata_il/SOUL.md`, com nota de arquivamento no topo (achado original: arquivo não lido por nenhum mecanismo de hidratação atual, conteúdo desatualizado desde antes de 23/08/2026 — formato `íntegro?`, "as 6 regras", "últimas 30 linhas"). Histórico preservado, não apagado (Regra 4). Mover um arquivo fora de REGRAS/PROJETO/scripts/`.githooks`/config não é coberto por P-8.
+
+Modelo: Claude Sonnet 5 · vetor: `md5sum ~/.hermes/config.yaml` repetido antes e depois da checagem, idêntico, confirmando `code_execution` ausente dos dois lados; leitura linha a linha do script colado antes de apontar os bugs, não impressão geral; `grep -oiE` real rodado contra os três arquivos pra gerar a contraprova, não estimado; `git ls-files`/`git check-ignore` conferidos antes de mover SOUL.md, confirmando que estava rastreado e a pasta de destino também. Turno desta sessão: t=11 (contado no contexto).

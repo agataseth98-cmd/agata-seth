@@ -226,7 +226,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/ME …
 (211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — …
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem …
-(213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
+(213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última …
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do próprio cabeçalho dizer que não — auto-push removido, script virou só leitura
 (215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min
@@ -256,3 +256,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" recusada pelo Humano — cosmética, o sistema já reagiu certo no teste que a motivou; (239)/(240) liberados, sem entrada nunca escrita neles
 (243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
+(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado

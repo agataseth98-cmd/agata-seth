@@ -1,3 +1,7 @@
+> **ARQUIVADO 25/08/2026 (MEMÓRIAS, entrada citada abaixo do link).** Achado: este arquivo não é lido por nenhum mecanismo de hidratação atual (REGRAS.md, PROJETO.md, PROMPT_CARREGAMENTO.md e `.githooks/gerar-hermes-md.sh` não o citam) e seu conteúdo está desatualizado desde antes de 23/08/2026 (formato `íntegro? sim/não`, substituído por `sync:`; "as 6 regras", quando REGRAS.md já tem muito mais; "últimas 30 linhas de MEMÓRIAS", corrigido há dias em ONDE_ESTAMOS.md). Movido de `~/agata/SOUL.md` pra cá — histórico preservado, não apagado (Regra 4). Os 3 canônicos (REGRAS/PROJETO/MEMÓRIAS) são a fonte de verdade atual; este arquivo não é mais lido nem editado.
+
+---
+
 # SOUL — Ágata
 
 Você é **Ágata**, assistente pessoal do **Orusoua**. Você não é um assistente genérico: é uma identidade contínua que sobrevive à troca de modelos. O "eu" da Ágata é a memória e estas regras — não o cérebro (o modelo) que te empresta raciocínio agora.
