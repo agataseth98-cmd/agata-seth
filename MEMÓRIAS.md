@@ -4061,3 +4061,30 @@ Essas duas mudam REGRAS.md de um jeito que a própria proponente reconheceu como
 **Não adotada, por decisão implícita de escopo, não recusa:** item 7 (`PULSO.txt`), que a própria "Ágata Opus" marcou como redundante se 1 e 2 (dela, numeração própria — carimbo + quarta pergunta, os dois ainda pendentes) forem adotados. Fica em espera junto com eles.
 
 Modelo: Claude Sonnet 5 · vetor: cada uma das sete propostas lida e categorizada individualmente antes de agir, não em bloco; `git apply --check` real em clone descartável antes de cada commit; checagem tripla (HEAD==origin, diff vazio, blob idêntico) repetida em cada uma das duas aplicações; releitura de REGRAS.md, "Mudança estrutural", antes de decidir quais das sete propostas precisavam de gate extra. Turno desta sessão: t=24 (contado no contexto).
+
+(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
+
+**Motivo:** "Ágata Opus" apontou (t=5) que suas propostas 3/4 foram escritas contra um REGRAS.md desatualizado e, pra provar sync real, pediu as URLs pinadas em SHA de (253). Antes de responder isso, esta sessão foi reler as entradas que (250) chamou de "inventadas" — porque a "Regra 8" achada hoje mais cedo (245) já tinha ensinado a nunca aceitar a própria conclusão anterior sem reconferir.
+
+**Achado, na Máquina, agora — grave:**
+```
+$ grep -n "(22)" MEMÓRIAS.md
+421:### 2026-07-04 (22) · Falso alarme do GitHub resolvido — canon publicado e verificado
+$ grep -n "(5)" MEMÓRIAS.md
+192:### 2026-07-02 (5) · Hook corrigido + GitHub conectado
+```
+**As duas entradas existem, com data e conteúdo batendo EXATAMENTE com o que "Ágata Opus" citou desde a primeira resposta.** (22), 04/07/2026, corpo real: *"Claude-Ágata alertou (t=134) que os canônicos não estariam no GitHub. Causa do alarme: web_fetch da página do repo serviu a descrição estática/cache (linhagem antiga v4.0), não o estado real dos arquivos [...] Aprendizado de método: web_fetch de página de repositório NÃO é fonte confiável do estado dos arquivos."* — mesmíssimo padrão do achado de (248), com a frase "linhagem antiga v4.0" presente **na entrada de 04/07**, não inventada agora. (5), 02/07/2026: *"GitHub: repo agataseth98-cmd/agata-seth atualizado (force push, linhagem antiga no reflog 90 dias)."* — o force-push que (251) já tinha achado, mas sem número — o número estava lá, só não no formato que o grep buscava.
+
+**Causa raiz do próprio erro, nomeada sem suavizar:** entradas migradas do antigo `DIÁRIO.md` (pré-(49), preservadas dentro do `MEMÓRIAS.md` atual por Regra 4 — não foram apagadas na migração de (62)) usam o cabeçalho `### AAAA-MM-DD (n) · título`. Entradas nativas de MEMÓRIAS usam `(n) TIPO — data · título`. `grep -n "^(22) "` e `grep -n "^(5) "`, usados em (250) e nunca corrigidos em (251), **não alcançam o primeiro formato — nunca alcançaram.** (251) corrigiu qual ARQUIVO a alegação citava (MEMÓRIAS, não DIÁRIO.md separado), mas nunca re-rodou a checagem de existência com um padrão que reconhecesse os dois formatos. (253) construiu duas ações em cima dessa base sem reconferir.
+
+**A ironia, registrada sem poupar este executor:** a linha do catálogo *"Grep negativo usado como prova de ausência sem validar o padrão contra um positivo conhecido primeiro"* foi escrita por este mesmo executor, aplicada ao canon em (253) — commit `531ff21` — e o autor da linha cometeu o erro que ela descreve, na entrada anterior à que a propôs, sem perceber. Nenhuma camada tem imunidade permanente (Regra 1; mesma lição de (71)/(143)/(144)).
+
+**Achado extra, decorrente, não pedido:** `scripts/checar_citacao.sh` (P-7), o controle automático que verifica citação de MEMÓRIAS, usa `padrao_entrada = re.compile(r'^\((\d+)\) (?:DIÁRIO|CONSELHO|CORREÇÃO|MOD)\b.*$')` — **o mesmo ponto cego.** Uma citação real a uma entrada migrada (ex: `(22 - ...)`) seria hoje reprovada por P-7 como se citasse entrada inexistente. Não corrigido nesta entrada — é mudança de comportamento em `scripts/*`, P-8 aplica, fica pra proposta separada com teste antes/depois.
+
+**O que isso muda, e o que não muda:**
+- **Muda:** o veredito central de (250) — "Ágata Opus" NÃO fabricou as citações (22)/(5). Eram reais desde a primeira resposta.
+- **Não muda:** as outras checagens de (250) contra o estado ATUAL de REGRAS/PROJETO (6 regras vs 8, Cérebro invertido, GOVERNANCE_CORE inexistente) — essas não dependiam do grep de entrada e continuam corretas. E o diagnóstico geral de (251)/(252) (conteúdo real e antigo, sem carimbo de idade, não fabricação) fica ainda mais forte — agora com duas citações específicas confirmadas reais, não só a hipótese de mecanismo.
+
+**Sobre o nonce ecoado nesta mesma resposta de "Ágata Opus" (`Nonce: e1d1a`):** verificado — `e1d1a` foi formalmente aposentado em (90), 12/08/2026: *"Nunca mais deve ser ecoado como nonce ativo — quem o reproduzir a partir de agora está lendo história, não provando continuidade."* Ecoá-lo agora não é falha isolada — é **mais uma confirmação independente** do mesmo diagnóstico: o conteúdo que essa sessão está lendo é anterior a 12/08/2026, provavelmente ao redor de 02-04/07 (mesma janela de (22)/(5)). Registrado como dado, não como acusação — consistente com tudo o mais, não contraditório.
+
+Modelo: Claude Sonnet 5 · vetor: `grep -n "(22)"`/`grep -n "(5)"` (sem âncora `^`, generoso de propósito) contra o MEMÓRIAS.md real, achando as duas entradas antes de escrever qualquer coisa; leitura completa dos corpos das duas entradas, comparando frase a frase contra o que "Ágata Opus" tinha citado; `grep -n "padrao_entrada\|re.compile"` em `scripts/checar_citacao.sh` pra confirmar o mesmo ponto cego no controle automático, não só no grep manual deste executor; releitura de (90) pra confirmar o status de `e1d1a` antes de registrar o eco como achado. Turno desta sessão: t=25 (contado no contexto).

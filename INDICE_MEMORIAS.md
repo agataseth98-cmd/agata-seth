@@ -235,7 +235,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do …
 (220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prom …
 (221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declara …
-(222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
+(222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de …
 (223) DIÁRIO — 20/08/2026 · Autorização em bloco do Humano — quatro pendentes fechados; ACB inteiro fica de fora, por escopo
 (224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do Humano, não investigada mais
 (225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 desta vez, parecer recebido sobre P-7
@@ -265,3 +265,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
 (252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 (140), não 31/07 nem "sete semanas" — nem eu nem "Ágata Opus" tínhamos rodado o teste certo ainda
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
+(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
