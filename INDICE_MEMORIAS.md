@@ -228,7 +228,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem …
 (213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última …
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do …
-(215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 linhas" não existe, medida real é por entrada inteira
+(215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 l …
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas seguidas travam nova chamada por 15 min
 (217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só-HTTP ganha jeito de detectar versão velha
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige propostas/APROVADO-<nome> antes de canon mudar comportamento
@@ -258,3 +258,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
 (245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado
 (246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
+(247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máquina: hoje é 25/08/2026, não 26/08/2026 — "Qwen3.7" errou com confiança, exatamente o padrão que o próprio parecer de (246) descreveu
