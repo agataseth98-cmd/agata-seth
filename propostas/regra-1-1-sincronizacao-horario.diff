@@ -1,0 +1,40 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 08a8cf4..58139f7 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -86,6 +86,29 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
+ 
+ ---
+ 
++
++## Regra 1.1 — Sincronização de horário
++
++Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
++
++**Modelos em nuvem (sem shell):**
++- API primária: https://timeapi.io/api/time/current/zone?timeZone=America/Sao_Paulo
++- Extrair campo time (HH:MM) ou dateTime (ISO 8601)
++- Selo obrigatório: (timeapi.io)
++
++**Modelos locais (com shell):**
++- Verificar NTP: timedatectl status | grep synchronized
++- Se sincronizado: usar date com fuso -03
++- Selo: (relógio da Máquina)
++- Se não sincronizado: usar date com selo (relógio do sistema, não sincronizado)
++
++**Fallback universal:**
++Se API falhar ou NTP indisponível, usar hora disponível com selo (não verificada).
++
++**Proibido:** herdar hora de cabeçalho anterior, inventar hora, deixar campo em branco.
++
++Motivo: bug de hora herdada documentado em MEMÓRIAS (259) — Seth repetiu hora em turno 1. GPT-5.6 Luna repetiu 18:52 em 23/08/2026 (REGRAS L162).
++
+ ## Regra 8 — Verificação tripla para decisões não verificáveis
+ 
+ Quando não houver oráculo de Máquina (ex: planejamento, avaliação de risco, escolha entre opções), a proposta deve ser gerada em três passadas independentes antes de ser apresentada ao Humano.
+@@ -349,3 +372,5 @@ O que vou entregar é o que foi pedido, ou é outra coisa? (69), (73), (74) eram
+ 
+ ## Fonte canônica
+ Endereços concretos e o comando `atualizar` são deste projeto — PROJETO.md, "Memória e hidratação". A ordem obrigatória de verificação está acima, em "Verificação de canônico".
++
++

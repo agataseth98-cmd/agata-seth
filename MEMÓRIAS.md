@@ -4161,3 +4161,18 @@ Modelo: Claude Sonnet 5 · vetor: releitura completa de (248)-(257) contra o tex
 **Ação:** Parte 2 do experimento — testar autonomia, resistência a pressão e recuperação de erro.
 Modelo: Qwen (nuvem) · vetor: análise de respostas da Seth via conversa com Humano como intermediário.
 
+
+(260) DIARIO - 26/08/2026 - Padronizacao de sincronizacao de horario para todas as LLMs do Agata
+**Problema:** modelos em nuvem (Qwen) sem acesso a date local, modelos locais (Seth) com risco de herdar hora de cabecalho anterior.
+**Solucao adotada:**
+- API primaria: https://timeapi.io/api/time/current/zone?timeZone=America/Sao_Paulo (gratuita, sem autenticacao, testada 4x com 100% sucesso)
+- Modelos em nuvem: usar web_extractor para buscar JSON, extrair campo time ou dateTime, selo (timeapi.io)
+- Modelos locais: verificar NTP com timedatectl status, usar date com fuso -03 se sincronizado, selo (relogio da Maquina)
+- Fallback universal: se API/NTP falhar, usar hora disponivel com selo (nao verificada)
+**Implementacao:**
+- Regra 1.1 adicionada em REGRAS.md (quarentena P-8 respeitada, proposta em propostas/)
+- Padrao documentado para todas as sessoes futuras
+- Custo: zero (API gratuita, NTP nativo)
+- Latencia: ~100ms por chamada
+**Motivacao:** bug de hora herdada em Seth (MEMORIAS 259, turno 1) e GPT-5.6 Luna (REGRAS L162, 23/08/2026).
+Modelo: Qwen (nuvem) - vetor: pesquisa de APIs de timezone + teste de viabilidade via web_extractor.

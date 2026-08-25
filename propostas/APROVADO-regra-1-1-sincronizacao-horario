@@ -1,0 +1,4 @@
+Autorizado pelo Humano em 26/08/2026.
+Escopo: adicionar Regra 1.1 em REGRAS.md para padronizar sincronização de horário.
+API: https://timeapi.io/api/time/current/zone?timeZone=America/Sao_Paulo
+Posição: após regra 7, antes de Regra 8.
