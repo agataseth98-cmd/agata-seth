@@ -8,6 +8,13 @@ embutir o próprio SHA (problema de auto-referência). O valor escrito
 aqui é sempre o SHA do HEAD ANTES deste commit -- fica até 1 commit
 atrasado, nunca mais, e o próprio texto do arquivo diz isso.
 
+URLs raw pinadas no SHA (achado de "Ágata Opus", MEMÓRIAS (248)-(252)):
+conteúdo endereçado por hash é imutável -- qualquer cache que sirva
+essas URLs está servindo os bytes certos, elimina a classe inteira de
+falha de "canal servindo estado antigo sem carimbo" sem precisar de
+detecção nem heurística. Mesmo limite de defasagem que o SHA em si
+(até 1 commit atrasado, nunca mais).
+
 Nunca toca o resto do arquivo (documento editado à mão pelo Humano).
 Se os marcadores não existirem, ABORTA sem escrever nada -- silêncio
 alto (stderr + exit != 0), nunca corrompe silenciosamente um arquivo
@@ -18,6 +25,8 @@ Uso: atualizar_ancora_prompt.py <caminho-do-prompt> <sha-do-head-anterior> <data
 import re
 import sys
 
+REPO = "agataseth98-cmd/agata-seth"
+ARQUIVOS = ["REGRAS.md", "PROJETO.md", "MEMÓRIAS.md"]
 INICIO = "<!-- ANCORA-SHA:INICIO"
 FIM = "<!-- ANCORA-SHA:FIM -->"
 
@@ -40,12 +49,18 @@ def main():
         print(f"ABORTADO: marcadores ANCORA-SHA não encontrados em {caminho} -- nada escrito.", file=sys.stderr)
         return 1
 
+    urls_pinadas = "\n".join(
+        f"    https://raw.githubusercontent.com/{REPO}/{sha}/{arq}" for arq in ARQUIVOS
+    )
     novo_bloco = (
-        f"{INICIO} (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, "
+        f"{INICIO} (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, "
         f"o resto do arquivo é livre) -->\n"
         f"  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit "
         f"atrasado, nunca mais -- ver PROJETO.md, \"Memória e hidratação\"): {sha}\n"
         f"  Escrito em: {data_hora}\n"
+        f"  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; "
+        f"mesma defasagem máxima do SHA acima):\n"
+        f"{urls_pinadas}\n"
         f"{FIM}"
     )
     texto_novo = padrao.sub(novo_bloco, texto, count=1)

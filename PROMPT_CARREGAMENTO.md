@@ -9,7 +9,11 @@ SINCRONIZE ANTES DE TUDO — sua cópia em contexto pode estar atrás do canon r
 
 Repositório oficial: https://github.com/agataseth98-cmd/agata-seth (branch main)
 
-Com execução de código: requisição HTTP direta às URLs abaixo, hash e comparação byte a byte.
+PREFIRA as URLs pinadas em SHA logo abaixo da âncora (mesma seção) — conteúdo endereçado por hash é
+imutável, elimina risco de cache velho sem precisar detectar nada. Só use as URLs em `/main/` abaixo se
+as pinadas não estiverem disponíveis por algum motivo.
+
+Com execução de código: requisição HTTP direta às URLs, hash e comparação byte a byte.
 Sem execução de código: fetch das mesmas URLs.
 Nunca busca web indexada, nunca a página HTML do repositório — servem cache e descrição estática, não o estado real.
 
@@ -17,12 +21,20 @@ Nunca busca web indexada, nunca a página HTML do repositório — servem cache 
   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/PROJETO.md
   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/MEMÓRIAS.md
 
-Caveat: o raw fica em cache de CDN (Fastly) por 1-2 min após um push — se você acabou de sincronizar e o conteúdo parece velho, pode ser isso, não presuma erro seu.
+Caveat destas URLs em `/main/` (não se aplica às pinadas abaixo): o raw fica em cache de CDN (Fastly) por
+1-2 min após um push — se você acabou de sincronizar e o conteúdo parece velho, pode ser isso. Um canal de
+fetch que cacheie por muito mais que isso (proxy próprio, snapshot antigo) não se anuncia — achado real,
+MEMÓRIAS (248)-(252): uma sessão recebeu conteúdo real do projeto, mas de 12+ dias atrás, sem sinal nenhum
+de que estava velho. As URLs pinadas abaixo não têm essa classe de risco.
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
-<!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 2e34a4c22c31eac72d5ddf7d354f2ae0a3bc4d80
+<!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 74026d6352cbc7bfbefd86588149e3acb488cb48
   Escrito em: 25/08/2026 14:38 -03
+  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/74026d6352cbc7bfbefd86588149e3acb488cb48/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/74026d6352cbc7bfbefd86588149e3acb488cb48/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/74026d6352cbc7bfbefd86588149e3acb488cb48/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch
