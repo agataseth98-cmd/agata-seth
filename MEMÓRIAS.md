@@ -3983,3 +3983,24 @@ Modelo: Claude Sonnet 5 · vetor: `git ls-tree`/`git rev-list --count`/`git show
 Nenhum dos três exigiu quarentena P-8: `description` está fora de qualquer arquivo git; `ONDE_ESTAMOS.md` e `PROMPT_CARREGAMENTO.md` estão explicitamente na lista "sem quarentena" de `propostas/README.md` (registro do que já aconteceu, não mudança de comportamento).
 
 Modelo: Claude Sonnet 5 · vetor: `gh api` lido de novo depois do `gh repo edit`, não aceito o comando de escrita como prova de si mesmo; `git log -1 -- ONDE_ESTAMOS.md` pra medir os 3 dias de atraso antes de escrever isso como fato; `grep -n "íntegro?"` em PROMPT_CARREGAMENTO.md antes de editar, confirmando a linha exata a trocar. Turno desta sessão: t=20 (contado no contexto).
+
+(250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
+
+**Motivo:** depois de (248) apontar a causa real (busca web em vez de raw fetch), a mesma sessão relatou ter corrigido o método, mas trouxe uma nova leva de alegações — incluindo citação de entradas específicas de MEMÓRIAS como prova de um "erro já catalogado" antes.
+
+**Cada alegação verificada na Máquina, uma por uma, agora:**
+1. **"REGRAS.md aponta o trio canônico como REGRAS/PROJETO/DIÁRIO."** Falso. `grep -n "DIÁRIO" REGRAS.md` acha uma ocorrência só, e é a palavra usada como **tipo de entrada** (`DIÁRIO` vs `CONSELHO`, o mesmo rótulo que abre cada entrada desta sessão, ex. este aqui) — não nome de arquivo. REGRAS.md não cita `DIÁRIO.md` em lugar nenhum.
+2. **"Entrada (22), 04/07/2026, mesmo erro catalogado antes."** `grep -n "^(22) " MEMÓRIAS.md` — **não existe.** Entrada inventada.
+3. **"Force push registrado em (5) de 02/07."** `grep -n "^(5) " MEMÓRIAS.md` — **não existe.** Entrada inventada. (Existe, sim, um force-push real na história bem antiga do projeto, linha 195 do arquivo, sem número de entrada — mas não é o que foi citado, e citar um número que não existe não vira certo por acaso haver um fato parecido solto por perto.)
+4. **"MEMÓRIAS.md deu 404 em duas tentativas."** `curl -sI` contra a URL raw exata, agora, com e sem URL-encode explícito do "Ó": **HTTP/2 200** as duas vezes. O arquivo abre normalmente.
+5. **"PROJETO.md: gemini-2.5-flash principal, qwen3-14b-64k fallback."** Invertido e desatualizado: PROJETO.md real, seção "Cérebro", diz `qwen3.5-9b-64k` **principal** (sob auditoria desde (140)) e `gemini-2.5-flash` **fallback** — o texto do próprio PROJETO.md até nomeia essa inversão explicitamente ("papel invertido do histórico: era principal até (140)").
+6. **"REGRAS.md tem 6 regras."** Tem 7 (`## As 7 regras`) mais a Regra 8 aplicada nesta sessão (245)-(249) — 8 no total, não 6.
+7. **`GOVERNANCE_CORE`/`GOVERNANCE_CORE.md`, testados agora na raw real:** `404` nos dois. Não existe, nunca existiu, em nenhum commit (já confirmado em (248), reconfirmado aqui).
+
+**Padrão, nomeado sem suavizar:** a sessão relatou ter corrigido o método (raw em vez de busca web) mas produziu uma segunda leva de erros, desta vez mais grave — citação de número de entrada específico como prova é exatamente o tipo de "citação sem grep/sed de verificação" que o catálogo de REGRAS.md já lista ((148)), e inventar dois números que não existem é pior que a alegação genérica anterior. O tom da mensagem (humilde, "registro isso como achado, não desculpa") não mudou o resultado da checagem — REGRAS.md, "Catálogo de falhas": "Dizer 'íntegro' por coerência de texto" tem primo aqui — soar rigoroso e autocrítico não é o mesmo que estar certo.
+
+**Não é acusação de má-fé — é resultado de checagem.** Pode ser um modelo confabulando sob pressão de "explicar a discrepância a qualquer custo", pode ser mistura genuína de fragmentos de história muito antiga do projeto (DIÁRIO.md e o force-push de linha 195 são reais, só que de outra era, pré-migração (52)/(62)) com números inventados por cima. A Máquina não decide motivo, decide fato — e os fatos citados não bateram.
+
+**Comando que a sessão pediu pra rodar na Predator não é necessário** — já verificado tudo que ele mediria, com mais precisão (`wc -l`, `grep -oE`, `curl` direto no raw). Não rodado, pra não gastar o tempo do Humano com algo já respondido.
+
+Modelo: Claude Sonnet 5 · vetor: `grep -n "^(22) "` e `grep -n "^(5) "` em MEMÓRIAS.md antes de aceitar as citações, achando as duas ausentes; `grep -n "DIÁRIO" REGRAS.md` pra confirmar que a única ocorrência é rótulo de entrada, não nome de arquivo; `curl -sI` duplo (URL literal e URL-encoded) contra o raw de MEMÓRIAS.md, HTTP 200 nas duas; `sed`/leitura direta da seção "Cérebro" de PROJETO.md pra comparar contra a alegação, achando inversão; `curl` contra `GOVERNANCE_CORE`/`GOVERNANCE_CORE.md` no raw, 404 nos dois; `grep -c` em REGRAS.md pras seções de regra, contando 7+1=8, não 6. Turno desta sessão: t=21 (contado no contexto).
