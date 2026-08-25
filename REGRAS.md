@@ -146,6 +146,7 @@ Nonce: <valor, só se o MOD for seu>
 ```
 `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
 **Selo de origem da hora, obrigatório.** Modelo em nuvem não tem relógio, tem o que a interface informa: `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Espelha a base de contagem do turno da Regra 1 — preencher campo que não se pode medir é a falha de (68)/(71).
+**Hora não herdada.** A hora tem que ser medida de novo a cada resposta — nunca copiada do cabeçalho anterior da mesma sessão. Hora repetida sem nova medição é a mesma falha que hora sem fonte, mesmo tendo fonte. Achado com incidente real, relatado por outra sessão (GPT-5.6 "Luna") em 23/08/2026: repetiu `18:52` numa resposta depois que o horário real já tinha passado — o selo de origem acima resolve DE ONDE vem a hora, não SE ela foi medida de novo nesta resposta.
 
 **`sync:` — três formas, nunca uma quarta:**
 ```

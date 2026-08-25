@@ -21,8 +21,8 @@ Caveat: o raw fica em cache de CDN (Fastly) por 1-2 min após um push — se voc
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 479d447bc7e4c52b704a1a1f3d07b604577f6852
-  Escrito em: 25/08/2026 11:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): b370b4c2521b46bed8c42b63ad474b5f616019e7
+  Escrito em: 25/08/2026 11:31 -03
 <!-- ANCORA-SHA:FIM -->
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch

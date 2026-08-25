@@ -218,6 +218,7 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
 | MEMÓRIAS em repo sem remote como cópia única | Privado também se versiona — git próprio, sem remote | (91)→(92) |
 | RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
 | Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
+| Agent Reach (CLI multi-plataforma, github.com/Panniantong/agent-reach) | Não fecha lacuna que a Agata tenha (ler_pagina.sh já cobre a metade zero-config); antecipa fase do ACB sem ordem; soma risco de config fora do repo, já declarado e pendente | MEMÓRIAS (241) |
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
