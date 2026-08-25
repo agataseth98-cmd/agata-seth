@@ -232,7 +232,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas segui …
 (217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só- …
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige pr …
-(219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do quê, uma ideia por frase, nunca retroativo
+(219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do …
 (220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prompt novo, sandbox de kernel, PATH absoluto, testada de verdade
 (221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declarado no PROJETO morre em silêncio
 (222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
@@ -262,3 +262,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (metadado, fora de qualquer arquivo/commit) é relíquia de 20/04/2026, de antes do sistema atual existir — confunde qualquer sessão que faça busca web em vez de fetch de arquivo real
 (249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
 (250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
+(251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
