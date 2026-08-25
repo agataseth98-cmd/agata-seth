@@ -240,7 +240,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do …
 (225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 de …
 (226) DIÁRIO — 20/08/2026 · Âncora de SHA passa a ser gerada automaticamente — p …
-(227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronteira escrita, um bug real de portabilidade achado e corrigido, comando único testado de verdade fora do repo, pedido de recursos com números medidos
+(227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronte …
 (228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
 (229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
 (230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
@@ -270,3 +270,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
 (258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
+(259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco

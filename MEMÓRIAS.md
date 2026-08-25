@@ -4149,3 +4149,15 @@ Modelo: Claude Sonnet 5 · vetor: transcrição direta da ordem do Humano, sem p
 **PROJETO.md, "Estado dos bugs e dos testes" — pendência da 3X marcada [FECHADO] (`5d2c322`):** achado A1 de "Ágata Opus", verificado por este executor antes de propor (grep confirmando as duas menções, `git log` confirmando que a pendência nunca foi revisitada depois de (245)/(246)/(247)). Autorização: resposta direta do Humano delegando a criação do `APROVADO` de volta ao executor.
 
 Modelo: Claude Sonnet 5 · vetor: releitura completa de (248)-(257) contra o texto exato do critério de "Continuidade mecânica" antes de classificar a rodada, não por impressão; separação deliberada entre "passa o critério escrito" e "sem erro nenhum" pra não inflar o resultado; checagem tripla (HEAD==origin, diff vazio, blob idêntico) na aplicação de PROJETO.md. Turno desta sessão: t=29 (contado no contexto).
+
+(259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
+**Contexto:** Sessão de treinamento após correção do bug de truncamento do .hermes.md (130.720 → 117.251 chars, teto 100K → 150K).
+**Achados:**
+- Turno 1: hora herdada (17:47 vs 15:45 real), citou (257) em vez de (258), tentou SSH para si mesma
+- Turno 2: hora correta, identificou (258), mas citou seção errada de PROJETO.md
+- Turno 3: citou REGRAS.md corretamente, mas contagem de turno ainda errada
+- Turno 4: acertou t=4 quando instruída explicitamente
+**Conclusão:** hidratação funcional após correção do teto; modelo melhora com feedback direto mas não demonstra compreensão autônoma de regras estruturais (turno).
+**Ação:** Parte 2 do experimento — testar autonomia, resistência a pressão e recuperação de erro.
+Modelo: Qwen (nuvem) · vetor: análise de respostas da Seth via conversa com Humano como intermediário.
+
