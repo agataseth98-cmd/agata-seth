@@ -224,7 +224,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (208) DIÁRIO — 17/08/2026 · Chave real da Zhipu recebida do Humano, Condição 2 f …
 (209) DIÁRIO — 17/08/2026 · Chave da Zhipu trocada pelo próprio Humano, direto n …
 (210) DIÁRIO — 17/08/2026 · Exposição passada de `memoria/USER.md` e `memoria/ME …
-(211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — âncora medida na hora, pedido enviado, GLM-4.7-Flash devolveu HTTP 429 (sobrecarga temporária) nas duas tentativas permitidas; nenhum parecer recebido, B.7 não mensurável nesta rodada
+(211) DIÁRIO — 17/08/2026 · Primeira invocação real do Conselho Remoto tentada — …
 (212) DIÁRIO — 17/08/2026 · Segunda invocação real: GLM-4.7-Flash respondeu (sem 429) mas gastou o orçamento inteiro tentando calcular hash de cabeça — achado real de bug, corrigido (thinking desligado); reenvio único com formato junto, ordenado por REGRAS, bateu em 429 de novo duas vezes — ainda sem parecer válido
 (213) DIÁRIO — 17/08/2026 · Terceira invocação real, âncora reatualizada (última entrada (212)) — HTTP 429 de novo, nas duas tentativas permitidas; três das quatro tentativas do dia bateram nesse mesmo erro, proposta ao Humano: pausar em vez de insistir agora
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do próprio cabeçalho dizer que não — auto-push removido, script virou só leitura
@@ -254,3 +254,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/2026 (P-8 hash, PROJETO riscos, sync unificado, Harness A1, glossário, índice por palavra-chave) + achado de arquivo novo consertado no caminho
 (241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Panniantong/agent-reach) proposta pelo Humano, analisada e recusada — não fecha lacuna que a Agata tenha, antecipa fase do ACB, soma risco de config fora do repositório ainda pendente
 (242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" recusada pelo Humano — cosmética, o sistema já reagiu certo no teste que a motivou; (239)/(240) liberados, sem entrada nunca escrita neles
+(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
