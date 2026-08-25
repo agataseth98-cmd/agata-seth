@@ -237,7 +237,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declara …
 (222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de …
 (223) DIÁRIO — 20/08/2026 · Autorização em bloco do Humano — quatro pendentes fe …
-(224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do Humano, não investigada mais
+(224) DIÁRIO — 20/08/2026 · (auto-sync) 564a50d — lacuna fechada por decisão do …
 (225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 desta vez, parecer recebido sobre P-7
 (226) DIÁRIO — 20/08/2026 · Âncora de SHA passa a ser gerada automaticamente — prompt de carregamento movido pra dentro do repo, achado real de auto-referência resolvido com atraso de 1 commit aceito
 (227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronteira escrita, um bug real de portabilidade achado e corrigido, comando único testado de verdade fora do repo, pedido de recursos com números medidos
@@ -267,3 +267,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — é limite documentado, deliberado, por boa razão. Dois consertos reais de PROJETO.md aplicados
+(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
