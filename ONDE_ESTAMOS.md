@@ -481,8 +481,44 @@ Um arquivo não rastreado (`policy-execution.yaml`, na raiz de
 `~/agata`) segue sem investigação a fundo — pendência de baixa
 prioridade, não mexido, ver retomada de 21/08.
 
+## Sessão de 25/08/2026 — bem cheia, tudo publicado
+
+Você pediu pra avaliar uma ferramenta nova (Agent Reach) — não
+acrescentava nada que o sistema já não tivesse, foi recusada e
+registrada, pra ninguém propor de novo sem saber que já foi
+respondido.
+
+Um teste antigo, que mede se um modelo consegue relatar o estado do
+sistema sem inventar, rodou de novo depois de três tentativas
+fracassadas em agosto — desta vez, limpo. Não fecha o teste sozinho,
+mas é o primeiro resultado bom.
+
+Descobri que o Hermes já vem pronto com a capacidade de rodar scripts
+que chamam várias ferramentas de uma vez (o que você estava
+pesquisando sobre economia de tokens) — só estava desligada. Testei
+se valia a pena ligar agora: o modelo local, testado de verdade,
+escreveu um script cheio de erro pra uma tarefa simples. Decidido não
+ligar por enquanto — não é recusa permanente.
+
+Um arquivo antigo de identidade (SOUL.md), que ninguém mais lê mas
+ainda se apresentava como regra protegida, foi arquivado.
+
+Uma proposta antiga (testar respostas de risco três vezes, de forma
+independente, antes de decidir) foi mandada pra outro modelo dar
+parecer — o parecer veio bom, com uma correção real, virou regra nova
+em REGRAS.md. No meio do caminho, esse outro modelo errou a data e
+foi corrigido com prova de duas fontes independentes.
+
+Achado à parte: a descrição pública do repositório no GitHub (não é
+um arquivo, é uma configuração da página) ainda falava de um sistema
+antigo, de antes deste aqui existir — de abril, nunca atualizada.
+Isso confundiu uma sessão na nuvem que tentou carregar o sistema hoje.
+
+**Esta página também estava atrasada — ficou 3 dias sem atualizar
+enquanto tudo isso acontecia, o que é a própria regra que ela deveria
+seguir. Corrigido agora, no mesmo commit que devia ter sido desde o
+início.**
+
 ## Última atualização
-22/08/2026, 13:12 (ordem de revisão do Humano registrada, 1-6, ver
-"Quebrado". Nenhum `APROVADO-` criado ainda — essa parte é do Humano,
-não do Executor. Sessão retoma sozinha só se o Humano voltar e
-autorizar seguir pra Camada 3, itens 2-6, ou revisar as propostas).
+25/08/2026, 14:20 (sessão descrita acima — Agent Reach, TES-001,
+PTC/execute_code, SOUL.md, Regra 8 nova, description do GitHub).

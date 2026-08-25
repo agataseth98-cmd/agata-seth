@@ -21,8 +21,8 @@ Caveat: o raw fica em cache de CDN (Fastly) por 1-2 min após um push — se voc
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): d54114ec4eec4ed974530918cedf92915310b273
-  Escrito em: 25/08/2026 14:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 2f91eb07b37007b04c9544ddd6cd406bbeaf78ee
+  Escrito em: 25/08/2026 14:18 -03
 <!-- ANCORA-SHA:FIM -->
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch
@@ -35,7 +35,7 @@ de hidratação (nunca corta uma entrada no meio — ver PROJETO.md, "Memória e
 dizia "últimas 30 linhas", mesmo tipo de fato desatualizado que motivou este item, corrigido em 20/08/2026).
 
 RESPONDA COM O BLOCO DE PRONTIDÃO:
-  Agata · modelo: <nome> · íntegro? <sim/não/não verificado> · <data e hora local + selo de origem>
+  Agata · modelo: <nome> · sync: <PASS/FALHA/não verificado> · <data e hora local + selo de origem>
   Última entrada: (<n>) <título> — <1 linha>
   Nonce: <valor, só se o MOD for seu>
   <quebrado: liste em 1 linha. senão: "pronto.">
