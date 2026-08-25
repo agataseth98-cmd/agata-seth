@@ -230,7 +230,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (214) DIÁRIO — 20/08/2026 · `sincronizar-estado.sh` publicava sozinho apesar do …
 (215) CORREÇÃO — 20/08/2026 · PROJETO.md linha 44 estava errada: "janela de 30 l …
 (216) DIÁRIO — 20/08/2026 · Backoff de 429 no Conselho Remoto: duas falhas segui …
-(217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só-HTTP ganha jeito de detectar versão velha
+(217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só- …
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige propostas/APROVADO-<nome> antes de canon mudar comportamento
 (219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do quê, uma ideia por frase, nunca retroativo
 (220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prompt novo, sandbox de kernel, PATH absoluto, testada de verdade
@@ -260,3 +260,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
 (247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máquina: hoje é 25/08/2026, não 26/08/2026 — "Qwen3.7" errou com confiança, exatamente o padrão que o próprio parecer de (246) descreveu
 (248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (metadado, fora de qualquer arquivo/commit) é relíquia de 20/04/2026, de antes do sistema atual existir — confunde qualquer sessão que faça busca web em vez de fetch de arquivo real
+(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md

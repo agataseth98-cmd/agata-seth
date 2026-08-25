@@ -3969,3 +3969,17 @@ Modelo: Claude Sonnet 5 · vetor: `date`/`timedatectl status` rodados de novo, a
 **Não corrigido ainda — pendente de autorização.** Editar a `description` do repositório é `gh repo edit --description "..."`, fora de qualquer arquivo do git, não coberto por P-8 (não é REGRAS/PROJETO/scripts/`.githooks`/config), mas é mudança pública visível — decisão do Humano antes de tocar.
 
 Modelo: Claude Sonnet 5 · vetor: `git ls-tree`/`git rev-list --count`/`git show` contra `origin/main` de verdade, não contra memória de sessão; `gh api repos/.../` pro campo `description` e `createdAt`, comparado com o texto relatado pela sessão na nuvem, achando correspondência literal; `git clone` real do `.wiki.git` pra descartar conteúdo de wiki como fonte alternativa; `gh api .../events` pra checar ausência de ator externo antes de descartar hipótese de adulteração deliberada. Turno desta sessão: t=18 (contado no contexto).
+
+(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
+
+**Motivo:** achado de (248) (description do repositório desatualizada desde a criação) ficou pendente de autorização; o Humano autorizou de forma geral, para qualquer coisa quebrada encontrada nesta sessão.
+
+**1. `description` do repositório GitHub, corrigida.** `gh repo edit --description "Ágata: sistema de governança pessoal multi-modelo. Canon em REGRAS.md/PROJETO.md/MEMÓRIAS.md. Protocolo de carregamento em PROMPT_CARREGAMENTO.md."` — confirmado com uma leitura nova de `gh api repos/agataseth98-cmd/agata-seth --jq '.description'`, não presumido do comando de escrita. Não é arquivo, não é coberto por P-8, mas é mudança pública — só aplicada com autorização explícita.
+
+**2. `ONDE_ESTAMOS.md`, achado no caminho, não presumido: 3 dias sem atualizar.** Regra 4 exige "toda entrada que muda o estado atualiza ONDE_ESTAMOS.md no mesmo commit" — nenhuma das entradas desta sessão (241)-(248) tinha feito isso até agora. Falha própria deste executor, registrada sem suavizar, mesma disciplina que o projeto pede de qualquer modelo. Corrigido com um resumo em português simples do que mudou hoje, sem jargão, sem hash — mesmo padrão do resto do arquivo.
+
+**3. `PROMPT_CARREGAMENTO.md`, achado ao montar o texto de carregamento pra outra sessão nesta mesma conversa: ainda tinha `íntegro? <sim/não/não verificado>` no exemplo do bloco de prontidão.** Formato substituído por `sync:` desde (232), 23/08/2026 — o exemplo no arquivo nunca tinha sido atualizado. Corrigido.
+
+Nenhum dos três exigiu quarentena P-8: `description` está fora de qualquer arquivo git; `ONDE_ESTAMOS.md` e `PROMPT_CARREGAMENTO.md` estão explicitamente na lista "sem quarentena" de `propostas/README.md` (registro do que já aconteceu, não mudança de comportamento).
+
+Modelo: Claude Sonnet 5 · vetor: `gh api` lido de novo depois do `gh repo edit`, não aceito o comando de escrita como prova de si mesmo; `git log -1 -- ONDE_ESTAMOS.md` pra medir os 3 dias de atraso antes de escrever isso como fato; `grep -n "íntegro?"` em PROMPT_CARREGAMENTO.md antes de editar, confirmando a linha exata a trocar. Turno desta sessão: t=20 (contado no contexto).
