@@ -519,6 +519,28 @@ enquanto tudo isso acontecia, o que é a própria regra que ela deveria
 seguir. Corrigido agora, no mesmo commit que devia ter sido desde o
 início.**
 
+## Continuação da sessão de 25/08/2026 — uma sessão na nuvem, três rodadas de erro e correção
+
+Uma sessão de IA na nuvem ("Ágata Opus") tentou carregar o sistema e
+recebeu conteúdo velho, de mais de um mês atrás — sem saber que
+estava velho. Ela mesma descobriu a causa (busca errada em vez de
+pegar o arquivo direto) e trouxe sete ideias pra evitar isso de novo.
+
+No meio do caminho, este executor errou também: acusou a sessão de
+inventar duas citações que, na verdade, eram reais — só estavam
+escritas num formato antigo que a busca não alcançava. Corrigido
+assim que achado, com prova.
+
+Resultado: nenhuma das sete ideias originais virou regra nova — a
+maioria já existia de outro jeito. O que ficou de verdade: um jeito
+de buscar os arquivos que não pode vir desatualizado (endereço fixo
+por versão, não por "o mais recente"), três linhas novas explicando
+erros parecidos pra não repetir, e duas correções pequenas de texto.
+Uma última proposta (um "carimbo" de data nos arquivos) teve parecer
+favorável de outro modelo consultado, mas você decidiu não adotar —
+registrado por quê, pra não parecer contradição depois.
+
 ## Última atualização
-25/08/2026, 14:20 (sessão descrita acima — Agent Reach, TES-001,
-PTC/execute_code, SOUL.md, Regra 8 nova, description do GitHub).
+25/08/2026, 15:16 (sessão da IA na nuvem — achados reais, dois erros
+deste executor corrigidos ao vivo, sete propostas fechadas em zero
+adotadas, motivo registrado).
