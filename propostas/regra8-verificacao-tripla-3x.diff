@@ -1,0 +1,64 @@
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -86,6 +86,19 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
+
+ ---
+
++## Regra 8 — Verificação tripla para decisões não verificáveis
++
++Quando não houver oráculo de Máquina (ex: planejamento, avaliação de risco, escolha entre opções), a proposta deve ser gerada em três passadas independentes antes de ser apresentada ao Humano.
++- **Independência:** as três passadas devem ocorrer em sessões de hidratação distintas, sem compartilhamento de histórico de turno ou contexto de resposta anterior.
++- **Divergência:** se houver divergência entre as três passadas, o resultado é `lacuna: divergência em avaliação não verificável` e a decisão sobe diretamente para o Humano. Não existe maioria decidindo por votação.
++- **Execução:** as repetições devem rodar no modelo local para preservar a cota de requisições de modelos em nuvem.
++
++*Motivo:* mitiga alucinação consistente em domínios subjetivos sem violar a primazia da Máquina em fatos verificáveis, transformando a fricção entre modelos em sinal de alerta, não em ruído. Nasce da proposta "3X" registrada em MEMÓRIAS (67), estreitada por objeção do modelo proponente, e da segunda opinião pedida no protocolo "Segunda opinião" — parecer recebido e auditado em MEMÓRIAS (246)/(247).
++
++Não é linha vermelha (parágrafo acima) — é portão de verificação, não regra que nunca cede.
++
++---
++
+ ## Glossário: sincronizar · carregar · hidratação · atualizar
+
+ Quatro palavras deste projeto que soam parecido e não são a mesma
+
+## Motivo
+
+Segunda opinião pedida em REGRAS.md, protocolo "Segunda opinião —
+pedido e parecer": versão estreitada da proposta "3X" (MEMÓRIAS (67))
+enviada a outro membro do Conselho ("Qwen3.7", identidade não
+verificada por esta Máquina), parecer recebido em (246), auditado
+item a item — quatro achados de formato/identidade confirmados, mas a
+substância avaliada como posição própria e fundamentada, não eco. Uma
+disputa de data à parte foi arbitrada por Máquina em (247) (duas
+fontes externas confirmaram 25/08/2026), sem afetar o restante do
+parecer. Humano autorizou seguir ("Pode prosseguir.") depois de ver o
+resumo da auditoria.
+
+## Desenho
+
+A redação da emenda, como veio no parecer, praticamente sem edição —
+só a forma mudou: em vez de um item "**8.**" dentro da lista "As 7
+regras" (o que criaria uma seção intitulada "7" contendo 8 itens),
+virou seção própria, `## Regra 8`, logo depois do parágrafo "Linhas
+vermelhas" que fecha "As 7 regras". Resolve a ambiguidade de
+posicionamento que o parecer original deixou em aberto (apontada em
+(246)) sem tocar no bloco "As 7 regras" existente. Acrescentada uma
+frase final deixando explícito que a Regra 8 não é linha vermelha —
+mesma distinção que a proposta de Regra 8 rejeitada em (242) já tinha
+(nomes coincidem, conteúdo é outro, nenhum conflito real).
+
+## Testes
+
+**`git apply --check` aplica limpo contra o `REGRAS.md` real do canon
+atual, num clone descartável, nunca sobre `~/agata`:**
+```
+$ rm -rf /tmp/agata-teste-regra8 && git clone -q ~/agata /tmp/agata-teste-regra8
+$ cd /tmp/agata-teste-regra8 && git apply --check ~/agata/propostas/regra8-verificacao-tripla-3x.diff && echo OK
+OK
+$ git apply ~/agata/propostas/regra8-verificacao-tripla-3x.diff && grep -n "^## Regra 8" REGRAS.md
+89:## Regra 8 — Verificação tripla para decisões não verificáveis
+$ cd ~/agata && rm -rf /tmp/agata-teste-regra8
+```
+
+**Aguardando:** `propostas/APROVADO-regra8-verificacao-tripla-3x` do
+Humano antes de aplicar de verdade em `~/agata`.
