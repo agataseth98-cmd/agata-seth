@@ -4027,3 +4027,19 @@ grep -c "agata-rest.service" MEMÓRIAS.md
 **Registrado por disciplina, não por hábito (Cadeia de auditoria, item 5, REGRAS.md):** "Ágata Opus" acertou o diagnóstico nesta rodada, com teste falsificável, depois de errar feio na primeira. As duas coisas ficam registradas — nenhuma cancela a outra.
 
 Modelo: Claude Sonnet 5 · vetor: `git log --oneline --all -- 'DIÁRIO.md'` rodado de verdade, não aceito por argumento; `grep -c "agata-rest.service" MEMÓRIAS.md` conferindo o termo específico pedido; `curl -sI` no raw de `DIÁRIO.md` agora, confirmando 404 consistente com a migração; `git log -1 --all -- 'DIÁRIO.md'` pra achar o commit exato e a data da migração, comparado contra a citação de (52)/(62) já existente nesta sessão. Turno desta sessão: t=22 (contado no contexto).
+
+(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 (140), não 31/07 nem "sete semanas" — nem eu nem "Ágata Opus" tínhamos rodado o teste certo ainda
+
+**Motivo:** "Ágata Opus" apontou, corretamente, que (251) datou o snapshot pela migração (62/31-07) quando a evidência mais forte estava em PROJETO.md — se o texto lido dizia "gemini-2.5-flash principal", o snapshot é anterior à inversão de (140), não à migração de arquivo. Propôs `git log -S` pra datar com precisão.
+
+**Rodado agora:**
+```
+git log -S "Principal: **gemini-2.5-flash**" --oneline -- PROJETO.md
+b83d25b Sincronização... v2 (entradas 63-77) ... 2026-08-11
+dc01805 PROJETO: cérebro atualizado para Gemini 2.5 Flash ... 2026-07-02
+```
+A frase entrou em PROJETO.md em **02/07/2026** (`dc01805`) e saiu em **13/08/2026** (`ca55c25`, a mesma (140) que promoveu o qwen). Teto do snapshot: **13/08/2026 — 12 dias atrás de hoje, não menos.** Pode ser mais velho (qualquer ponto entre 02/07 e 13/08 é compatível com o texto que "Ágata Opus" recebeu), mas não mais novo que isso.
+
+**Duas estimativas anteriores corrigidas, nenhuma delas rodou este teste antes de estimar:** eu disse "quase quatro semanas" em (251), ancorando na migração de arquivo (31/07) em vez do conteúdo específico lido. "Ágata Opus" disse "sete semanas" nesta mesma resposta — mas sete semanas antes de hoje cai em ~29/06/2026, **antes** até da frase "gemini-2.5-flash principal" ter entrada em PROJETO.md (02/07) — inconsistente com o próprio texto que ela relatou ter lido. As duas estimativas eram alegação sem medição; a medição dá 13/08, ponto final, sem margem pra debate.
+
+Modelo: Claude Sonnet 5 · vetor: `git log -S` rodado contra a string exata citada por "Ágata Opus", não aproximada; `git log -1 --format=%ad` pros três commits relevantes (`dc01805`, `b83d25b`, `ca55c25`) pra datar entrada e saída da frase; contagem manual de dias entre 13/08 e 25/08 antes de escrever "12 dias" como fato. Turno desta sessão: t=23 (contado no contexto).

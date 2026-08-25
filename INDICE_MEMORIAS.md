@@ -233,7 +233,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (217) DIÁRIO — 20/08/2026 · Âncora de SHA no prompt de carregamento — sessão só- …
 (218) DIÁRIO — 20/08/2026 · Quarentena estrutural criada e ligada — P-8 exige pr …
 (219) DIÁRIO — 20/08/2026 · Convenção de estilo pra texto novo — porquê antes do …
-(220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prompt novo, sandbox de kernel, PATH absoluto, testada de verdade
+(220) DIÁRIO — 20/08/2026 · Consolidação noturna restaurada em quarentena — prom …
 (221) DIÁRIO — 20/08/2026 · P-9 — controle novo, avisa quando um serviço declarado no PROJETO morre em silêncio
 (222) DIÁRIO — 20/08/2026 · Escopo da P-8 passa a incluir config/ — recursão de propósito, fechando o buraco que a própria consolidação usava
 (223) DIÁRIO — 20/08/2026 · Autorização em bloco do Humano — quatro pendentes fechados; ACB inteiro fica de fora, por escopo
@@ -263,3 +263,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
 (250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
 (251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
+(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 (140), não 31/07 nem "sete semanas" — nem eu nem "Ágata Opus" tínhamos rodado o teste certo ainda
