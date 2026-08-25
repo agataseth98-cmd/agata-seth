@@ -1,0 +1,108 @@
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 39f10e5..0b8995e 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -9,7 +9,11 @@ SINCRONIZE ANTES DE TUDO — sua cópia em contexto pode estar atrás do canon r
+ 
+ Repositório oficial: https://github.com/agataseth98-cmd/agata-seth (branch main)
+ 
+-Com execução de código: requisição HTTP direta às URLs abaixo, hash e comparação byte a byte.
++PREFIRA as URLs pinadas em SHA logo abaixo da âncora (mesma seção) — conteúdo endereçado por hash é
++imutável, elimina risco de cache velho sem precisar detectar nada. Só use as URLs em `/main/` abaixo se
++as pinadas não estiverem disponíveis por algum motivo.
++
++Com execução de código: requisição HTTP direta às URLs, hash e comparação byte a byte.
+ Sem execução de código: fetch das mesmas URLs.
+ Nunca busca web indexada, nunca a página HTML do repositório — servem cache e descrição estática, não o estado real.
+ 
+@@ -17,7 +21,11 @@ Nunca busca web indexada, nunca a página HTML do repositório — servem cache
+   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/PROJETO.md
+   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/MEMÓRIAS.md
+ 
+-Caveat: o raw fica em cache de CDN (Fastly) por 1-2 min após um push — se você acabou de sincronizar e o conteúdo parece velho, pode ser isso, não presuma erro seu.
++Caveat destas URLs em `/main/` (não se aplica às pinadas abaixo): o raw fica em cache de CDN (Fastly) por
++1-2 min após um push — se você acabou de sincronizar e o conteúdo parece velho, pode ser isso. Um canal de
++fetch que cacheie por muito mais que isso (proxy próprio, snapshot antigo) não se anuncia — achado real,
++MEMÓRIAS (248)-(252): uma sessão recebeu conteúdo real do projeto, mas de 12+ dias atrás, sem sinal nenhum
++de que estava velho. As URLs pinadas abaixo não têm essa classe de risco.
+ 
+ ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, o resto do arquivo é livre) -->
+diff --git a/scripts/atualizar_ancora_prompt.py b/scripts/atualizar_ancora_prompt.py
+index f2f986f..560f75d 100755
+--- a/scripts/atualizar_ancora_prompt.py
++++ b/scripts/atualizar_ancora_prompt.py
+@@ -8,6 +8,13 @@ embutir o próprio SHA (problema de auto-referência). O valor escrito
+ aqui é sempre o SHA do HEAD ANTES deste commit -- fica até 1 commit
+ atrasado, nunca mais, e o próprio texto do arquivo diz isso.
+ 
++URLs raw pinadas no SHA (achado de "Ágata Opus", MEMÓRIAS (248)-(252)):
++conteúdo endereçado por hash é imutável -- qualquer cache que sirva
++essas URLs está servindo os bytes certos, elimina a classe inteira de
++falha de "canal servindo estado antigo sem carimbo" sem precisar de
++detecção nem heurística. Mesmo limite de defasagem que o SHA em si
++(até 1 commit atrasado, nunca mais).
++
+ Nunca toca o resto do arquivo (documento editado à mão pelo Humano).
+ Se os marcadores não existirem, ABORTA sem escrever nada -- silêncio
+ alto (stderr + exit != 0), nunca corrompe silenciosamente um arquivo
+@@ -18,6 +25,8 @@ Uso: atualizar_ancora_prompt.py <caminho-do-prompt> <sha-do-head-anterior> <data
+ import re
+ import sys
+ 
++REPO = "agataseth98-cmd/agata-seth"
++ARQUIVOS = ["REGRAS.md", "PROJETO.md", "MEMÓRIAS.md"]
+ INICIO = "<!-- ANCORA-SHA:INICIO"
+ FIM = "<!-- ANCORA-SHA:FIM -->"
+ 
+@@ -40,12 +49,18 @@ def main():
+         print(f"ABORTADO: marcadores ANCORA-SHA não encontrados em {caminho} -- nada escrito.", file=sys.stderr)
+         return 1
+ 
++    urls_pinadas = "\n".join(
++        f"    https://raw.githubusercontent.com/{REPO}/{sha}/{arq}" for arq in ARQUIVOS
++    )
+     novo_bloco = (
+-        f"{INICIO} (gerado por .githooks/pre-commit -- não editar as duas linhas abaixo à mão, "
++        f"{INICIO} (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, "
+         f"o resto do arquivo é livre) -->\n"
+         f"  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit "
+         f"atrasado, nunca mais -- ver PROJETO.md, \"Memória e hidratação\"): {sha}\n"
+         f"  Escrito em: {data_hora}\n"
++        f"  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; "
++        f"mesma defasagem máxima do SHA acima):\n"
++        f"{urls_pinadas}\n"
+         f"{FIM}"
+     )
+     texto_novo = padrao.sub(novo_bloco, texto, count=1)
+
+## Motivo
+
+"Ágata Opus" propôs (t=4 desta troca): hidratar por URL pinada em SHA
+em vez de por branch `main`. Conteúdo endereçado por hash no GitHub é
+imutável — testado agora contra um commit real
+(raw.githubusercontent.com/.../2e34a4c/REGRAS.md), byte a byte
+idêntico ao blob do git (git show 2e34a4c:REGRAS.md). Elimina a
+classe de falha nomeada em (248)-(252): um canal de fetch cacheando
+conteúdo real, mas velho, sem nenhum sinal de que está desatualizado.
+Categorizado pela própria "Ágata Opus" como ajuste pequeno (mudança
+no PROMPT_CARREGAMENTO, não em REGRAS) — não exige segunda opinião.
+
+## Desenho
+
+O bloco ANCORA-SHA, já auto-gerado a cada commit que toca
+REGRAS/PROJETO/MEMÓRIAS, ganha três linhas novas com as URLs raw
+pinadas no mesmo SHA que ele já calcula — mesma fonte de verdade, sem
+duplicar lógica. As URLs em /main/ na seção de cima continuam
+existindo, como alternativa/fallback, com o caveat de cache
+explicitamente restrito a elas.
+
+## Testes
+
+Rodado de verdade contra o script modificado, num clone descartável:
+git apply --check passou limpo; python3 scripts/atualizar_ancora_prompt.py
+rodado com SHA de teste gerou as três URLs pinadas corretamente,
+formato conferido linha a linha.
+
+Aguardando: propostas/APROVADO-url-pinada-sha do Humano antes de
+aplicar de verdade em ~/agata.
