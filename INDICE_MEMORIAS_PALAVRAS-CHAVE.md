@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
+  palavras-chave: diario, code, interpreter, fonte, canonica, horario, modelos, nuvem
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
   palavras-chave: diario, script, universal, consulta, horario, multiplas, apis
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: portão, três, perguntas, fecha, agora, pra, code, execution, ptc, evidência, real, seth, qwen, tentando, ferramenta, indisponível, travando, soul, arquivado
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
   palavras-chave: achado, execute, code, ptc, hermes, instalado, tem, programmatic, tool, calling, pronto, desligado, desde, razão, nada, motivo, pesquisa, humano
-(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
-  palavras-chave: tes, rodada, primeira, passagem, limpa, história, teste, executor, glm, flash, remoto
+(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da hist …
+  palavras-chave: tes, rodada, primeira, passagem, limpa, hist
 (242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" rec …
   palavras-chave: regra, desacelerar, diante, carga, ética, alta, rec
 (241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Pannian …

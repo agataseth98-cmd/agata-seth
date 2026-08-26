@@ -23,6 +23,16 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
+**Descoberta:** code_interpreter executa Python puro com urllib.request e faz requisicao HTTP direta sem cache intermediario. web_extractor cacheia respostas (confirmado com timeapi.io retornando timestamp de ~6h atras).
+**Solucao canonica:** Modelos em nuvem (Qwen, GPT, Gemini, Claude API) usam code_interpreter + scripts/consultar_horario.py para medir horario. Selo: (API externa via script).
+**Proibido para nuvem:** web_extractor (cacheia), herdar hora de resposta anterior, inventar.
+**Aplicado em:** Regra 1.1 (REGRAS.md) + scripts/consultar_horario.py (commit d3060cd).
+Modelo: Qwen (nuvem) - vetor: descoberta empirica via tentativa e erro.
+
+
+
+
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
 **Problema:** web_extractor cacheia respostas da API timeapi.io, retornando timestamp desatualizado.
 **Solucao:** Script scripts/consultar_horario.py que consulta multiplas APIs com cache-busting e fallback automatico.

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
 (270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no teste de Regra 1.1
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
 (245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
-(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
+(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da hist …
 (242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" rec …
 (241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Pannian …
 (238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/202 …
