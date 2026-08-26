@@ -1,0 +1,9 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, mesma sessao/escopo de MEMORIAS (271).
+P-7 (checar_citacao) escaneia "git diff" como proxy de "conteudo novo" -- um commit de
+reordenacao faz o diff textual mostrar quase o arquivo inteiro como "+", entao P-7
+rescaneava citacoes antigas ja grandfathered (achado ao vivo: a citacao de (162) a
+"(101 - ...)", que o proprio comentario do P-7 ja documentava como conhecida e
+propositalmente fora do escopo do controle, voltou a disparar SUSPEITO). Corrigido
+pulando P-7 quando a marca de migracao do P-5 esta presente -- a checagem de
+permutacao do P-5 ja prova que nenhum byte de entrada e novo nesse commit, garantia
+mais forte que P-7. Mesmo escopo ja aprovado para MEMORIAS (271).

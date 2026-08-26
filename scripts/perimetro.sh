@@ -294,6 +294,21 @@ p7_citacao() {
   if ! git rev-parse HEAD >/dev/null 2>&1; then
     return 0
   fi
+  # Marca de migração presente (P-5 já rodou a checagem de permutação e
+  # confirmou: nenhum byte de entrada mudou, só a posição física) -- um
+  # commit de reordenação faz `git diff` enxergar praticamente o arquivo
+  # inteiro como "+" (a posição mudou, o texto não), e P-7 rescanearia
+  # citações antigas já grandfathered como se fossem novas (foi assim que
+  # a citação de (162) a "(101 - ...)", já tratada como não-issue no
+  # comentário acima, voltou a disparar SUSPEITO testando MEMÓRIAS (271)).
+  # Pular aqui não abre brecha: a garantia real é a permutação byte-exata
+  # do P-5, mais forte que P-7 -- se nenhum byte é novo, não há citação
+  # nova pra checar.
+  if _p5_migracao_pendente >/dev/null; then
+    echo "P-7: marca de migração presente -- pulado (P-5 já provou, por permutação, que nenhum byte de entrada é novo nesta commit; nada a citar que já não estivesse no canon)."
+    PERIMETRO_ESTADO="SKIP"
+    return 0
+  fi
   local tmp_novo tmp_diff codigo
   tmp_novo="$(mktemp)"
   tmp_diff="$(mktemp)"
