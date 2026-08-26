@@ -1,0 +1,15 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 58139f7..ef27e8f 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -92,8 +92,8 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
+ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
+ 
+ **Modelos em nuvem (sem shell):**
+-- API primária: https://timeapi.io/api/time/current/zone?timeZone=America/Sao_Paulo
+-- Extrair campo time (HH:MM) ou dateTime (ISO 8601)
++- API primária: https://timeapi.io/api/v1/time/current/unix
++- Extrair campo unix_timestamp do JSON, converter usando scripts/timeapi_to_brasilia.py
+ - Selo obrigatório: (timeapi.io)
+ 
+ **Modelos locais (com shell):**

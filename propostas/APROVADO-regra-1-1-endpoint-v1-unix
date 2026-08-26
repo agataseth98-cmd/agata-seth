@@ -1,0 +1,2 @@
+Autorizado pelo Humano em 26/08/2026.
+Escopo: atualizar Regra 1.1 para usar endpoint /api/v1/time/current/unix (sem cache) e instruir conversão via scripts/timeapi_to_brasilia.py.
