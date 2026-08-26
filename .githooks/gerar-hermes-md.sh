@@ -57,6 +57,11 @@ gerar_indice() {
     # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
     # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
     # curinga genérico que engoliria parênteses maiúsculos não intencionais.
+    # Grafia sem acento ("DIARIO") e separador "-" (hífen) tolerados desde
+    # MEMÓRIAS (271): sessões sem UTF-8 correto (Qwen, entradas (260)-(270))
+    # escreveram assim -- achado testando a migração contra o arquivo
+    # inteiro, um regex só-acentuado engolia essas entradas inteiras dentro
+    # da anterior que batia o padrão.
     #
     # Ordem dos dois `grep`: desde MEMÓRIAS (271) o corpo (49)+ vem primeiro
     # no arquivo físico (mais recente primeiro) e o bloco migrado (mais
@@ -64,13 +69,13 @@ gerar_indice() {
     # ao marcador existir. Antes da migração, ordem original preservada.
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     else
       {
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     fi
   } > "$INDICE"
@@ -87,7 +92,7 @@ janela_memorias() {
     # senão a última entrada "engoliria" o bloco inteiro na medição.
     awk -v budget="$JANELA_ORCAMENTO_CHARS" '
       /^## Migrado de DIÁRIO\.md/ { migrado=NR }
-      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
+      /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
       { line[NR]=$0 }
       END {
         total=NR
@@ -111,7 +116,7 @@ janela_memorias() {
     # Formato antigo: mais recente no fim físico. Acumula de trás pra
     # frente até o orçamento -- comportamento original, MEMÓRIAS (191)/(192).
     awk -v budget="$JANELA_ORCAMENTO_CHARS" '
-      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
+      /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
       { line[NR]=$0 }
       END {
         total=NR
@@ -149,7 +154,7 @@ checar_reconciliacao() {
       echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
       avisos=$((avisos + 1))
     fi
-  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
+  done < <(grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
   if [ "$avisos" -gt 0 ]; then
     echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
   fi
@@ -168,14 +173,14 @@ gerar_indice_palavras_chave() {
     echo
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py
     else
       {
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py
     fi

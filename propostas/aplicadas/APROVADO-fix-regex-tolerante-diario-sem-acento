@@ -1,0 +1,8 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, mesma sessao/escopo de MEMORIAS (271).
+Bug pre-existente achado testando a migracao contra o arquivo real: entradas escritas
+sem acentuacao correta e com hifen simples (ex. "(267) DIARIO - 26/08/2026 -", sessoes
+Qwen, entradas (260)-(270) e outras) nao batiam o regex estrito (so "DIARIO" acentuado
+e travessao "-") usado tanto no meu parser de migracao quanto no gerar-hermes-md.sh
+ja existente (janela_memorias, gerar_indice, checar_reconciliacao) -- essas entradas
+ficavam invisiveis para indice e hidratacao mesmo ANTES desta sessao. Corrigido para
+aceitar as duas grafias nos tres arquivos. Mesmo escopo ja aprovado para MEMORIAS (271).

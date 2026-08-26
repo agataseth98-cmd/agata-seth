@@ -1,0 +1,182 @@
+diff --git a/.githooks/gerar-hermes-md.sh b/.githooks/gerar-hermes-md.sh
+index 6b54ada..00de309 100755
+--- a/.githooks/gerar-hermes-md.sh
++++ b/.githooks/gerar-hermes-md.sh
+@@ -57,6 +57,11 @@ gerar_indice() {
+     # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
+     # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
+     # curinga genérico que engoliria parênteses maiúsculos não intencionais.
++    # Grafia sem acento ("DIARIO") e separador "-" (hífen) tolerados desde
++    # MEMÓRIAS (271): sessões sem UTF-8 correto (Qwen, entradas (260)-(270))
++    # escreveram assim -- achado testando a migração contra o arquivo
++    # inteiro, um regex só-acentuado engolia essas entradas inteiras dentro
++    # da anterior que batia o padrão.
+     #
+     # Ordem dos dois `grep`: desde MEMÓRIAS (271) o corpo (49)+ vem primeiro
+     # no arquivo físico (mais recente primeiro) e o bloco migrado (mais
+@@ -64,13 +69,13 @@ gerar_indice() {
+     # ao marcador existir. Antes da migração, ordem original preservada.
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
+     else
+       {
+         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
+     fi
+   } > "$INDICE"
+@@ -87,7 +92,7 @@ janela_memorias() {
+     # senão a última entrada "engoliria" o bloco inteiro na medição.
+     awk -v budget="$JANELA_ORCAMENTO_CHARS" '
+       /^## Migrado de DIÁRIO\.md/ { migrado=NR }
+-      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
++      /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
+       { line[NR]=$0 }
+       END {
+         total=NR
+@@ -111,7 +116,7 @@ janela_memorias() {
+     # Formato antigo: mais recente no fim físico. Acumula de trás pra
+     # frente até o orçamento -- comportamento original, MEMÓRIAS (191)/(192).
+     awk -v budget="$JANELA_ORCAMENTO_CHARS" '
+-      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
++      /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
+       { line[NR]=$0 }
+       END {
+         total=NR
+@@ -149,7 +154,7 @@ checar_reconciliacao() {
+       echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
+       avisos=$((avisos + 1))
+     fi
+-  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
++  done < <(grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
+   if [ "$avisos" -gt 0 ]; then
+     echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
+   fi
+@@ -168,14 +173,14 @@ gerar_indice_palavras_chave() {
+     echo
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+         | python3 scripts/extrair_palavras_chave.py
+     else
+       {
+         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+-        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+         | python3 scripts/extrair_palavras_chave.py
+     fi
+diff --git a/scripts/inverter_memorias.py b/scripts/inverter_memorias.py
+index 249f2fd..3070dbd 100644
+--- a/scripts/inverter_memorias.py
++++ b/scripts/inverter_memorias.py
+@@ -24,10 +24,13 @@ import re
+ import sys
+ from pathlib import Path
+ 
+-MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
++PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
+ MARCADOR_ENTRADAS = "<!-- ENTRADAS-NOVAS:AQUI"
++# Ver mesmo comentário em scripts/verificar_migracao_memorias.py -- tipo e
++# separador toleram grafia sem acento ("DIARIO") e hífen simples ("-"),
++# achado real testando contra o arquivo inteiro (entradas (260)-(270)).
+ PADRAO_ENTRADA = re.compile(
+-    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
++    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
+     re.MULTILINE,
+ )
+ 
+@@ -65,9 +68,16 @@ def dividir(texto: str):
+     matches = list(PADRAO_ENTRADA.finditer(texto))
+     if not matches:
+         raise SystemExit("nenhuma entrada '(n) TIPO — data' encontrada -- formato inesperado, abortando")
+-    idx_migrado = texto.find(MARCADOR_MIGRADO)
+-    if idx_migrado == -1:
+-        raise SystemExit("bloco 'Migrado de DIÁRIO.md' não encontrado -- abortando")
++    # Heading real é sempre início de linha -- ver mesmo achado documentado
++    # em scripts/verificar_migracao_memorias.py (entrada (97) cita o texto
++    # do heading em prosa, no meio de uma linha; find() simples pegaria
++    # essa citação por engano).
++    migrados = list(PADRAO_MIGRADO.finditer(texto))
++    if len(migrados) != 1:
++        raise SystemExit(
++            f"{len(migrados)} linhas batem com o heading do bloco migrado (esperado exatamente 1) -- abortando"
++        )
++    idx_migrado = migrados[0].start()
+     cortes = sorted({m.start() for m in matches} | {idx_migrado}) + [len(texto)]
+     bloco_migrado = None
+     entradas = []
+@@ -105,12 +115,18 @@ def main():
+         f"scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->"
+     )
+ 
++    # Sem separador "---" aqui: qualquer texto entre o fim da última entrada
++    # e o início do bloco migrado é atribuído À ÚLTIMA ENTRADA por
++    # dividir() (ela vai até o próximo corte, que é o início do bloco
++    # migrado) -- um "---" inserido aqui ficaria grudado no conteúdo da
++    # entrada (49) e sobreviveria à normalização de espaço (rstrip() não
++    # remove traço). Achado testando a reordenação real antes do commit.
+     novo = (
+         NOVO_CABECALHO
+         + marcador_linha
+         + "\n\n"
+         + corpo
+-        + "\n---\n\n"
++        + "\n"
+         + bloco_migrado
+     )
+ 
+diff --git a/scripts/verificar_migracao_memorias.py b/scripts/verificar_migracao_memorias.py
+index f192c74..b6331d7 100644
+--- a/scripts/verificar_migracao_memorias.py
++++ b/scripts/verificar_migracao_memorias.py
+@@ -19,9 +19,17 @@ Saída: PASS ou FALHA com diagnóstico. Exit 0 = PASS, 1 = FALHA.
+ import re
+ import sys
+ 
+-MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
++PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
++# Tipo e separador toleram as duas grafias reais do arquivo: sessões sem
++# acentuação correta (Qwen, várias vezes) escreveram "DIARIO" sem acento e
++# "-" (hífen) em vez de "—" (travessão) no lugar de "DIÁRIO"/"—". Um regex
++# estrito demais (só a forma acentuada) engolia essas entradas inteiras
++# dentro da entrada anterior que SIM batia o padrão -- achado real,
++# rodando a migração contra o arquivo inteiro: entradas (260)-(270)
++# viraram texto de dentro de (259) e saíram na ordem errada depois de
++# invertidas (bloco inteiro tratado como uma entrada só).
+ PADRAO_ENTRADA = re.compile(
+-    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
++    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
+     re.MULTILINE,
+ )
+ 
+@@ -46,7 +54,20 @@ def dividir(texto: str):
+     meio, incorretamente).
+     """
+     matches = list(PADRAO_ENTRADA.finditer(texto))
+-    idx_migrado = texto.find(MARCADOR_MIGRADO)
++    # Achado real testando contra o arquivo já reordenado: a entrada (97)
++    # CITA "## Migrado de DIÁRIO.md" verbatim, no meio de uma linha de
++    # prosa, como exemplo de âncora -- um `str.find()` simples pegava essa
++    # citação em vez do heading real assim que a ordem física mudou e a
++    # citação passou a vir ANTES do heading verdadeiro no arquivo. Heading
++    # de verdade é sempre INÍCIO DE LINHA -- regex ancorado em `^` resolve;
++    # mais de um match assim seria ambiguidade real, não presume qual usar.
++    migrados = list(PADRAO_MIGRADO.finditer(texto))
++    if len(migrados) > 1:
++        raise SystemExit(
++            f"{len(migrados)} linhas batem com o heading do bloco migrado (esperado 0 ou 1) -- "
++            "ambíguo, não presumo qual é o real. Abortando."
++        )
++    idx_migrado = migrados[0].start() if migrados else -1
+     if not matches:
+         if idx_migrado == -1:
+             return None, []

@@ -24,10 +24,13 @@ import re
 import sys
 from pathlib import Path
 
-MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
+PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
 MARCADOR_ENTRADAS = "<!-- ENTRADAS-NOVAS:AQUI"
+# Ver mesmo comentário em scripts/verificar_migracao_memorias.py -- tipo e
+# separador toleram grafia sem acento ("DIARIO") e hífen simples ("-"),
+# achado real testando contra o arquivo inteiro (entradas (260)-(270)).
 PADRAO_ENTRADA = re.compile(
-    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
+    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
     re.MULTILINE,
 )
 
@@ -65,9 +68,16 @@ def dividir(texto: str):
     matches = list(PADRAO_ENTRADA.finditer(texto))
     if not matches:
         raise SystemExit("nenhuma entrada '(n) TIPO — data' encontrada -- formato inesperado, abortando")
-    idx_migrado = texto.find(MARCADOR_MIGRADO)
-    if idx_migrado == -1:
-        raise SystemExit("bloco 'Migrado de DIÁRIO.md' não encontrado -- abortando")
+    # Heading real é sempre início de linha -- ver mesmo achado documentado
+    # em scripts/verificar_migracao_memorias.py (entrada (97) cita o texto
+    # do heading em prosa, no meio de uma linha; find() simples pegaria
+    # essa citação por engano).
+    migrados = list(PADRAO_MIGRADO.finditer(texto))
+    if len(migrados) != 1:
+        raise SystemExit(
+            f"{len(migrados)} linhas batem com o heading do bloco migrado (esperado exatamente 1) -- abortando"
+        )
+    idx_migrado = migrados[0].start()
     cortes = sorted({m.start() for m in matches} | {idx_migrado}) + [len(texto)]
     bloco_migrado = None
     entradas = []
@@ -105,12 +115,18 @@ def main():
         f"scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->"
     )
 
+    # Sem separador "---" aqui: qualquer texto entre o fim da última entrada
+    # e o início do bloco migrado é atribuído À ÚLTIMA ENTRADA por
+    # dividir() (ela vai até o próximo corte, que é o início do bloco
+    # migrado) -- um "---" inserido aqui ficaria grudado no conteúdo da
+    # entrada (49) e sobreviveria à normalização de espaço (rstrip() não
+    # remove traço). Achado testando a reordenação real antes do commit.
     novo = (
         NOVO_CABECALHO
         + marcador_linha
         + "\n\n"
         + corpo
-        + "\n---\n\n"
+        + "\n"
         + bloco_migrado
     )
 

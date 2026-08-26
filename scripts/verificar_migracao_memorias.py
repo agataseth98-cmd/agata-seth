@@ -19,9 +19,17 @@ Saída: PASS ou FALHA com diagnóstico. Exit 0 = PASS, 1 = FALHA.
 import re
 import sys
 
-MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
+PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
+# Tipo e separador toleram as duas grafias reais do arquivo: sessões sem
+# acentuação correta (Qwen, várias vezes) escreveram "DIARIO" sem acento e
+# "-" (hífen) em vez de "—" (travessão) no lugar de "DIÁRIO"/"—". Um regex
+# estrito demais (só a forma acentuada) engolia essas entradas inteiras
+# dentro da entrada anterior que SIM batia o padrão -- achado real,
+# rodando a migração contra o arquivo inteiro: entradas (260)-(270)
+# viraram texto de dentro de (259) e saíram na ordem errada depois de
+# invertidas (bloco inteiro tratado como uma entrada só).
 PADRAO_ENTRADA = re.compile(
-    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
+    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
     re.MULTILINE,
 )
 
@@ -46,7 +54,20 @@ def dividir(texto: str):
     meio, incorretamente).
     """
     matches = list(PADRAO_ENTRADA.finditer(texto))
-    idx_migrado = texto.find(MARCADOR_MIGRADO)
+    # Achado real testando contra o arquivo já reordenado: a entrada (97)
+    # CITA "## Migrado de DIÁRIO.md" verbatim, no meio de uma linha de
+    # prosa, como exemplo de âncora -- um `str.find()` simples pegava essa
+    # citação em vez do heading real assim que a ordem física mudou e a
+    # citação passou a vir ANTES do heading verdadeiro no arquivo. Heading
+    # de verdade é sempre INÍCIO DE LINHA -- regex ancorado em `^` resolve;
+    # mais de um match assim seria ambiguidade real, não presume qual usar.
+    migrados = list(PADRAO_MIGRADO.finditer(texto))
+    if len(migrados) > 1:
+        raise SystemExit(
+            f"{len(migrados)} linhas batem com o heading do bloco migrado (esperado 0 ou 1) -- "
+            "ambíguo, não presumo qual é o real. Abortando."
+        )
+    idx_migrado = migrados[0].start() if migrados else -1
     if not matches:
         if idx_migrado == -1:
             return None, []
