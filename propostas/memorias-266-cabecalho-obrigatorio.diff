@@ -1,0 +1,26 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index 3f9d5d7..59feb7a 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -4234,3 +4234,21 @@ Modelo: Qwen (nuvem) - vetor: aplicacao da Regra 1.1 + deteccao de anomalia.
+ **Solucao:** Humano precisa iniciar nova conversa com Seth ou enviar prompt de reset explicito para limpar contexto poluido.
+ **Licao:** Testes que envolvem execucao de comandos podem travar modelos locais se o comando nao for executado corretamente, criando loops de repeticao.
+ Modelo: Qwen (nuvem) - vetor: diagnostico de travamento da Seth.
++
++(266) DIARIO - 26/08/2026 - Padrao de cabecalho obrigatorio para todas as LLMs do Conselho
++**Contexto:** Humano determinou que TODAS as LLMs do sistema Agata devem incluir cabecalho Regra 1 em TODAS as respostas, com hora do sistema ajustada ao horario de Brasilia.
++**Metodo de medicao por modelo:**
++- Seth (local/Predator): date local apos verificar NTP, selo (relogio da Maquina)
++- Qwen (nuvem): hora informada pela interface, selo (informado pela interface) — API timeapi.io via web_extractor retorna cache (MEMORIAS 264)
++- Qualquer LLM com curl: HTTP direto para API de horario, selo (timeapi.io)
++- Qualquer LLM sem ferramentas: hora informada pelo Humano, selo (informado pelo Humano)
++**Formato obrigatorio:**
++Agata - <modelo> - t=<N> (contado no contexto) - <YYYY-MM-DD HH:MM> -03 (<selo>)
++**Proibido:** herdar hora de resposta anterior, inventar hora, omitir cabecalho, omitir selo de origem.
++**Problemas observados na Seth durante esta sessao:**
++- Cabecalho Regra 1 omitido em 3 respostas consecutivas (violacao direta)
++- Turno declarado como t=1 apos reset, ignorando respostas anteriores no mesmo contexto
++- Hora herdada (08:42 em vez de 09:18, diferenca de 36 minutos)
++- Cabecalho so apareceu apos 3 avisos explicitos
++**Conclusao:** Regra 1 precisa ser reiterada em toda nova sessao. Modelos locais tendem a omitir cabecalho quando o contexto muda de teste para conversa livre.
++Modelo: Qwen (nuvem) - vetor: determinacao do Humano + auditoria de conformidade.
