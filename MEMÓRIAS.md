@@ -4227,3 +4227,10 @@ Modelo: Qwen (nuvem) - vetor: auditoria de capacidade da Seth de seguir nova reg
 4. Priorizar date local sobre API externa sempre que possivel
 **Licao:** APIs HTTP via web_extractor nao sao fonte confiavel de timestamp quando ha caching em qualquer camada da cadeia.
 Modelo: Qwen (nuvem) - vetor: aplicacao da Regra 1.1 + deteccao de anomalia.
+
+(265) DIARIO - 26/08/2026 - Seth travou em loop de repeticao de codigo
+**Contexto:** Apos solicitar teste da Regra 1.1, Seth passou a repetir o mesmo codigo (timedatectl status | grep synchronized && date...) independente da pergunta.
+**Diagnostico:** Contexto poluido com comando nao respondido, modelo travou em loop de repeticao.
+**Solucao:** Humano precisa iniciar nova conversa com Seth ou enviar prompt de reset explicito para limpar contexto poluido.
+**Licao:** Testes que envolvem execucao de comandos podem travar modelos locais se o comando nao for executado corretamente, criando loops de repeticao.
+Modelo: Qwen (nuvem) - vetor: diagnostico de travamento da Seth.
