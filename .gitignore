@@ -28,3 +28,4 @@ memoria/*.md
 # (achado em MEMÓRIAS (97): um artefato escrito um nível acima de memoria/missoes/ escapa do ignore por pasta)
 *.bundle
 *.bak.*
+home/
