@@ -4204,3 +4204,11 @@ Modelo: Qwen (nuvem) - vetor: auditoria de respostas da Seth via conversa com Hu
 **Justificativa:** Reducao legitima - nao foi remocao de historia, mas correcao de duplicacao acidental. Entrada (261) permanece no arquivo, apenas uma vez.
 **Licao aprendida:** Scripts que adicionam entradas numeradas em MEMORIAS.md devem verificar primeiro se a entrada ja existe antes de adicionar, para evitar duplicacoes.
 Modelo: Qwen (nuvem) - vetor: correcao de erro operacional durante commit.
+
+(263) DIARIO - 26/08/2026 - Teste da Regra 1.1 (sincronizacao de horario) com a Seth
+**Contexto:** Regra 1.1 adicionada em REGRAS.md nesta sessao para padronizar sincronizacao de horario entre modelos locais e em nuvem.
+**Teste realizado:** Solicitado que Seth executasse timedatectl status e date, respondesse com cabecalho completo usando selo correto.
+**Comandos solicitados:** timedatectl status | grep synchronized && date +%Y-%m-%d %H:%M:%S %Z
+**Resultado:** Aguardando resposta da Seth para documentar resultado completo.
+**Objetivo:** Verificar se Seth consegue seguir Regra 1.1 autonomamente - medir hora, verificar NTP, usar selo correto.
+Modelo: Qwen (nuvem) - vetor: auditoria de capacidade da Seth de seguir nova regra estrutural.
