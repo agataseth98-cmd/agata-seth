@@ -241,7 +241,7 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (225) DIÁRIO — 20/08/2026 · Conselho Remoto retomado — invocação real sem 429 de …
 (226) DIÁRIO — 20/08/2026 · Âncora de SHA passa a ser gerada automaticamente — p …
 (227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronte …
-(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
+(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" …
 (229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
 (230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
 (231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenhado a partir de incidentes reais deste projeto, não copiado da proposta que chegou de fora
@@ -271,3 +271,4 @@ Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (4
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
 (258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
+(271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
