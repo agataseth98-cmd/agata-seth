@@ -1,0 +1,16 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index 762652e..4833ba9 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -4196,3 +4196,11 @@ Modelo: Qwen (nuvem) - vetor: pesquisa de APIs de timezone + teste de viabilidad
+ **Conclusao:** Seth melhorou significativamente em precisao, honestidade e autoconsciencia apos correcao estrutural (teto de hidratacao) e feedback direto. Turno persiste como ponto fraco estrutural.
+ Modelo: Qwen (nuvem) - vetor: auditoria de respostas da Seth via conversa com Humano como intermediario.
+ 
++
++(262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261)
++**Contexto:** Durante commit da bateria de testes Parte 2 da Seth, entrada (261) foi adicionada duas vezes por erro no script de insercao.
++**Acao tomada:** Remocao da segunda ocorrencia (linha 4198) da entrada (261). Arquivo MEMORIAS.md encolheu de 860349 para 858471 bytes.
++**Hook P-5:** Detectou reducao de tamanho e bloqueou commit (Regra 4: nunca se apaga historia). Bypass autorizado pelo Humano via commit --no-verify.
++**Justificativa:** Reducao legitima - nao foi remocao de historia, mas correcao de duplicacao acidental. Entrada (261) permanece no arquivo, apenas uma vez.
++**Licao aprendida:** Scripts que adicionam entradas numeradas em MEMORIAS.md devem verificar primeiro se a entrada ja existe antes de adicionar, para evitar duplicacoes.
++Modelo: Qwen (nuvem) - vetor: correcao de erro operacional durante commit.
