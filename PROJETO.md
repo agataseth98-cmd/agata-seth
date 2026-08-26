@@ -57,6 +57,24 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   **URLs raw pinadas em SHA, 25/08/2026 (MEMÓRIAS (253), achado de "Ágata Opus").** Preferir estas sobre as URLs em `/main/` acima: `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/<SHA>/{REGRAS,PROJETO,MEMÓRIAS}.md`, geradas automaticamente dentro do próprio bloco ANCORA-SHA (mesmo SHA, mesma defasagem máxima de 1 commit). Conteúdo endereçado por hash é imutável — elimina o risco de cache velho sem precisar do endpoint da API, que pode estar bloqueado (ver limite acima). As URLs em `/main/` continuam como alternativa/fallback.
   **Mecanismo, desde 20/08/2026:** o prompt agora é canônico dentro do repo (`PROMPT_CARREGAMENTO.md`, movido da Área de trabalho — ver "Quarentena estrutural" pra classificação SEM quarentena). `.githooks/pre-commit` reescreve as duas linhas entre os marcadores `ANCORA-SHA` a cada commit, via `scripts/atualizar_ancora_prompt.py` — nunca toca o resto do arquivo, aborta sem escrever se os marcadores sumirem. **Limite conhecido, não escondido:** um commit não pode embutir o próprio SHA (auto-referência) — o valor escrito é sempre o do HEAD ANTERIOR ao commit, então fica até 1 commit atrasado, nunca mais. Decisão do Humano: aceitar esse atraso pequeno e documentado em troca de 100% automático, em vez de exigir um commit manual extra pra fechar o loop.
 
+### Medição de horário para modelos em nuvem (adicionado 26/08/2026)
+
+**Problema:** Modelos em nuvem (GPT, Claude, Gemini via API) não têm acesso a `date` do shell local e não podem medir horário de forma confiável usando `web_extractor` (cacheia respostas — confirmado com timeapi.io retornando timestamp de ~6h atrás, MEMÓRIAS (273)).
+
+**Solução canônica:** Usar `code_interpreter` para executar Python puro via `urllib.request`, que faz requisição HTTP direta sem cache intermediário. Script disponível em `scripts/consultar_horario.py`:
+- Consulta timeapi.io com cache-busting (`?cachebust=<timestamp>`) pra forçar nova requisição
+- Converte timestamp Unix para horário de Brasília (-03)
+- **Sem fallback automático de segunda API.** worldtimeapi.org foi cotado originalmente, mas o serviço foi descontinuado pelo mantenedor e, mesmo no ar, devolvia o timestamp numa chave diferente da esperada — o fallback nunca teria funcionado. Corrigido em MEMÓRIAS (275). Sem um segundo provedor testado e vivo, o fallback real é o item 3 da hierarquia abaixo, não uma segunda API automática.
+
+**Hierarquia de fontes de horário (Regra 1.1 em REGRAS.md):**
+1. Modelos com shell local → `date` (fonte primária)
+2. Modelos sem shell (nuvem) → `code_interpreter` + `scripts/consultar_horario.py`
+3. Fallback → horário informado pelo Humano (apenas se script falhar)
+
+**Proibido:** `web_extractor` para medição de horário, herdar hora de resposta anterior, inventar horário.
+
+**Selo de auditoria:** `(API externa via script)` quando usar code_interpreter + script.
+
 ## Interface
 Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
 Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.

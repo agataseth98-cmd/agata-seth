@@ -1,0 +1,112 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index ac94d91..aed381d 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -57,6 +57,24 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   **URLs raw pinadas em SHA, 25/08/2026 (MEMÓRIAS (253), achado de "Ágata Opus").** Preferir estas sobre as URLs em `/main/` acima: `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/<SHA>/{REGRAS,PROJETO,MEMÓRIAS}.md`, geradas automaticamente dentro do próprio bloco ANCORA-SHA (mesmo SHA, mesma defasagem máxima de 1 commit). Conteúdo endereçado por hash é imutável — elimina o risco de cache velho sem precisar do endpoint da API, que pode estar bloqueado (ver limite acima). As URLs em `/main/` continuam como alternativa/fallback.
+   **Mecanismo, desde 20/08/2026:** o prompt agora é canônico dentro do repo (`PROMPT_CARREGAMENTO.md`, movido da Área de trabalho — ver "Quarentena estrutural" pra classificação SEM quarentena). `.githooks/pre-commit` reescreve as duas linhas entre os marcadores `ANCORA-SHA` a cada commit, via `scripts/atualizar_ancora_prompt.py` — nunca toca o resto do arquivo, aborta sem escrever se os marcadores sumirem. **Limite conhecido, não escondido:** um commit não pode embutir o próprio SHA (auto-referência) — o valor escrito é sempre o do HEAD ANTERIOR ao commit, então fica até 1 commit atrasado, nunca mais. Decisão do Humano: aceitar esse atraso pequeno e documentado em troca de 100% automático, em vez de exigir um commit manual extra pra fechar o loop.
+ 
++### Medição de horário para modelos em nuvem (adicionado 26/08/2026)
++
++**Problema:** Modelos em nuvem (GPT, Claude, Gemini via API) não têm acesso a `date` do shell local e não podem medir horário de forma confiável usando `web_extractor` (cacheia respostas — confirmado com timeapi.io retornando timestamp de ~6h atrás, MEMÓRIAS (273)).
++
++**Solução canônica:** Usar `code_interpreter` para executar Python puro via `urllib.request`, que faz requisição HTTP direta sem cache intermediário. Script disponível em `scripts/consultar_horario.py`:
++- Consulta timeapi.io com cache-busting (`?cachebust=<timestamp>`) pra forçar nova requisição
++- Converte timestamp Unix para horário de Brasília (-03)
++- **Sem fallback automático de segunda API.** worldtimeapi.org foi cotado originalmente, mas o serviço foi descontinuado pelo mantenedor e, mesmo no ar, devolvia o timestamp numa chave diferente da esperada — o fallback nunca teria funcionado. Corrigido em MEMÓRIAS (275). Sem um segundo provedor testado e vivo, o fallback real é o item 3 da hierarquia abaixo, não uma segunda API automática.
++
++**Hierarquia de fontes de horário (Regra 1.1 em REGRAS.md):**
++1. Modelos com shell local → `date` (fonte primária)
++2. Modelos sem shell (nuvem) → `code_interpreter` + `scripts/consultar_horario.py`
++3. Fallback → horário informado pelo Humano (apenas se script falhar)
++
++**Proibido:** `web_extractor` para medição de horário, herdar hora de resposta anterior, inventar horário.
++
++**Selo de auditoria:** `(API externa via script)` quando usar code_interpreter + script.
++
+ ## Interface
+ Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
+ Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.
+diff --git a/REGRAS.md b/REGRAS.md
+index 6ed3e58..b04b7d3 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -93,7 +93,7 @@ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeç
+ 
+ **Modelos em nuvem (sem shell):**
+ - Usar `scripts/consultar_horario.py` para obter horário de Brasília
+-- Script consulta múltiplas APIs com cache-busting e fallback
++- Script consulta timeapi.io com cache-busting (parâmetro força nova requisição, contorna cache de ferramenta tipo web_extractor — MEMÓRIAS (264)/(272)/(273)). Sem fallback automático de segunda API: a única cotada (worldtimeapi.org) foi descontinuada pelo mantenedor e nunca teria funcionado mesmo no ar — chave de resposta errada no script original. Corrigido em MEMÓRIAS (275); não reintroduzir sem antes testar viva a API candidata.
+ - Selo: `(API externa via script)`
+ - Se script falhar, usar horário informado pelo Humano
+ **Modelos locais (com shell):**
+diff --git a/scripts/consultar_horario.py b/scripts/consultar_horario.py
+index a4d6732..c5c64d3 100755
+--- a/scripts/consultar_horario.py
++++ b/scripts/consultar_horario.py
+@@ -1,28 +1,44 @@
+ #!/usr/bin/env python3
+-import urllib.request, json, time
++"""Horário de Brasília para modelos em nuvem, sem depender de `date` local.
++
++Fonte única hoje: timeapi.io, com cache-busting (parâmetro `cachebust` na
++URL força nova requisição, contorna cache de ferramentas tipo
++web_extractor -- achado real em MEMÓRIAS (264)/(272)/(273)). Sem
++fallback automático de segunda API: worldtimeapi.org (cotado
++originalmente) foi descontinuado pelo mantenedor ("WorldTimeAPI has been
++sunset") e, além disso, devolvia o timestamp na chave `unixtime`, não
++`unix_timestamp` -- o fallback nunca teria funcionado mesmo com o
++serviço no ar. Corrigido em MEMÓRIAS (275): sem um segundo provedor
++testado e vivo pra por no lugar, o fallback real é o que REGRAS.md já
++documenta (Regra 1.1, "Fallback universal"): horário informado pelo
++Humano, selo `(não verificada)` -- não finge redundância que não existe.
++
++Uso: python3 scripts/consultar_horario.py
++Saída: uma linha, "AAAA-MM-DD HH:MM:SS -03 (timeapi.io)". Exit 1 e
++mensagem em stderr se a API falhar -- quem chama decide o fallback.
++"""
++import sys
++import time
++import urllib.request
++import json
+ from datetime import datetime, timezone, timedelta
+ 
+-apis = [
+-    ("timeapi.io", "https://timeapi.io/api/v1/time/current/unix"),
+-    ("worldtimeapi.org", "http://worldtimeapi.org/api/timezone/America/Sao_Paulo"),
+-]
++URL = "https://timeapi.io/api/v1/time/current/unix"
++BRASILIA = timezone(timedelta(hours=-3))
++
+ 
+-brasilia_tz = timezone(timedelta(hours=-3))
++def consultar() -> str:
++    cachebust = int(time.time())
++    resposta = urllib.request.urlopen(f"{URL}?cachebust={cachebust}", timeout=5)
++    dados = json.loads(resposta.read())
++    ts = dados["unix_timestamp"]
++    dt_brasilia = datetime.fromtimestamp(ts, tz=timezone.utc).astimezone(BRASILIA)
++    return dt_brasilia.strftime("%Y-%m-%d %H:%M:%S") + " -03 (timeapi.io)"
+ 
+-for nome, url in apis:
++
++if __name__ == "__main__":
+     try:
+-        cachebust = int(time.time())
+-        url_final = f"{url}?cachebust={cachebust}"
+-        response = urllib.request.urlopen(url_final, timeout=5)
+-        data = json.loads(response.read())
+-        if "unix_timestamp" in data:
+-            ts = data["unix_timestamp"]
+-            dt_utc = datetime.fromtimestamp(ts, tz=timezone.utc)
+-            dt_brasilia = dt_utc.astimezone(brasilia_tz)
+-            print(f"{dt_brasilia.strftime(chr(37)+chr(89)+chr(45)+chr(37)+chr(109)+chr(45)+chr(37)+chr(100)+chr(32)+chr(37)+chr(72)+chr(58)+chr(37)+chr(77)+chr(58)+chr(37)+chr(83))} -03 ({nome})")
+-            exit(0)
++        print(consultar())
+     except Exception as e:
+-        continue
+-
+-print("Nenhuma API disponível")
+-exit(1)
++        print(f"FALHA consultando timeapi.io: {e}", file=sys.stderr)
++        sys.exit(1)

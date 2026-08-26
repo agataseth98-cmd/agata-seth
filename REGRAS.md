@@ -93,7 +93,7 @@ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeç
 
 **Modelos em nuvem (sem shell):**
 - Usar `scripts/consultar_horario.py` para obter horário de Brasília
-- Script consulta múltiplas APIs com cache-busting e fallback
+- Script consulta timeapi.io com cache-busting (parâmetro força nova requisição, contorna cache de ferramenta tipo web_extractor — MEMÓRIAS (264)/(272)/(273)). Sem fallback automático de segunda API: a única cotada (worldtimeapi.org) foi descontinuada pelo mantenedor e nunca teria funcionado mesmo no ar — chave de resposta errada no script original. Corrigido em MEMÓRIAS (275); não reintroduzir sem antes testar viva a API candidata.
 - Selo: `(API externa via script)`
 - Se script falhar, usar horário informado pelo Humano
 **Modelos locais (com shell):**

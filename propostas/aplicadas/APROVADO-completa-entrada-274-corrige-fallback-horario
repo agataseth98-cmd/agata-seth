@@ -1,0 +1,12 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, sessao de continuidade/auditoria
+(outra sessao/LLM do Conselho havia deixado o commit da entrada 274 bloqueado por
+P-8 -- PROJETO.md staged sem proposta). Antes de so destravar, auditei o conteudo:
+scripts/consultar_horario.py (commit d3060cd, entrada 272) cotava worldtimeapi.org
+como fallback, mas o servico foi descontinuado pelo mantenedor e, mesmo no ar,
+o script checava a chave errada (unix_timestamp em vez de unixtime) -- o fallback
+nunca teria funcionado. Confirmado por curl direto (recusado) e busca web (schema
+real documentado). Corrigido: script reescrito (so timeapi.io, sem fallback falso,
+sem obscurecimento de format string), REGRAS.md e PROJETO.md atualizados pra nao
+afirmar redundancia que nao existe, MEMORIAS (275) registra o achado e a correcao
+(272 nao foi editada, Regra 4). Autorizado a mesma sessao que pediu pra continuar
+o trabalho da sessao anterior e auditar as melhorias antes de aceitar.

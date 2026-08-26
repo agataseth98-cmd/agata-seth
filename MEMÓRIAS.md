@@ -23,6 +23,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
+
+**O que a entrada (272), já commitada e publicada, alega que não se sustenta:** "Script scripts/consultar_horario.py que consulta multiplas APIs com cache-busting e fallback automatico. APIs consultadas: timeapi.io, worldtimeapi.org (fallback)." A entrada (272) não é editada — Regra 4 — este é o apontamento novo que a corrige.
+
+**Verificado nesta sessão, antes de aceitar a alegação:**
+1. `curl` direto contra `worldtimeapi.org` (http e https): conexão recusada/fechada. Busca web confirma: o mantenedor descontinuou o serviço ("WorldTimeAPI has been sunset").
+2. Mesmo com o serviço no ar, o script (`consultar_horario.py` como commitado em d3060cd) checava `data["unix_timestamp"]` — a chave real do WorldTimeAPI sempre foi `unixtime` (confirmado por busca: campos documentados são `unixtime`, `datetime`, `utc_datetime`, etc., nunca `unix_timestamp`, que é specífico do schema do timeapi.io). O ramo de fallback nunca teria disparado, nem quando o serviço existia.
+3. `timeapi.io` sozinho, testado ao vivo com cache-busting: responde 200, timestamp fresco, conversão para -03 confere.
+
+**Achado de processo:** a entrada (264), já no canon antes desta sessão, já registrava "worldtimeapi.org: Connection lost (indisponivel no momento do teste)" — o fallback nunca foi visto funcionando, nem na sessão que o propôs. Reivindicar "múltiplas APIs com fallback" sem ter visto o fallback funcionar uma vez sequer é o tipo de alegação que a Regra 2 pede pra marcar `lacuna`, não como fato resolvido.
+
+**Corrigido, antes de qualquer commit que citasse a alegação errada como solução pronta:**
+- `scripts/consultar_horario.py` reescrito: só timeapi.io, sem fallback de segunda API fingido; format string obscurecido por `chr()` trocado por literal direto.
+- REGRAS.md (Regra 1.1) e PROJETO.md (subseção "Medição de horário para modelos em nuvem") — ambos ainda não commitados quando este achado apareceu — corrigidos para não afirmar redundância que não existe. Fallback real continua sendo o já documentado: horário informado pelo Humano, selo `(não verificada)`.
+- Entrada (274) abaixo (ainda não commitada quando isto foi achado) mantida como estava — a alegação errada estava em (272)/no código, não no texto dela.
+
+**Se um segundo provedor for adicionado no futuro:** testar vivo, com o schema real da resposta, antes de documentar como fallback — não repetir o padrão desta entrada.
+
+Modelo: Claude Sonnet 5 · vetor: `curl` direto contra worldtimeapi.org (recusado) + busca web confirmando descontinuação e schema real (`unixtime`) + leitura do código commitado em d3060cd + teste ao vivo de timeapi.io antes e depois da correção.
+
+(274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
+**O que foi feito:** Inserida nova subseção "### Medição de horário para modelos em nuvem" em PROJETO.md (antes da seção "## Interface", linha 60).
+**Conteúdo:** Problema (web_extractor cacheia), solução canônica (code_interpreter + scripts/consultar_horario.py), hierarquia de fontes (Regra 1.1), proibições e selo de auditoria.
+**Por que antes de Interface:** Tópico é operacional (como modelos em nuvem medem tempo), pertence a "Ambiente Operacional" mais que a "Interface" ou "Segurança".
+**Nota (Claude Code, ao finalizar o commit bloqueado por P-8):** o conteúdo da subseção citada aqui foi corrigido antes de commitar — ver (275), logo acima — para não afirmar o fallback de worldtimeapi.org que nunca funcionou. Este resumo continua válido em alto nível (tópico, seção, motivo do posicionamento).
+Modelo: Qwen (nuvem) - vetor: documentação de decisão técnica.
+
+
+
+
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
 **Descoberta:** code_interpreter executa Python puro com urllib.request e faz requisicao HTTP direta sem cache intermediario. web_extractor cacheia respostas (confirmado com timeapi.io retornando timestamp de ~6h atras).
 **Solucao canonica:** Modelos em nuvem (Qwen, GPT, Gemini, Claude API) usam code_interpreter + scripts/consultar_horario.py para medir horario. Selo: (API externa via script).

@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
+  palavras-chave: worldtimeapi, org, cotado, fallback, scripts, consultar, horario, descontinuado, nunca, teria, funcionado, corrigido, entrar, canon
+(274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
+  palavras-chave: diario, documentação, medição, horário, nuvem, projeto
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
   palavras-chave: diario, code, interpreter, fonte, canonica, horario, modelos, nuvem
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
@@ -63,10 +67,10 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: disputa, data, modelos, arbitrada, máquina, hoje, qwen, errou, confiança, exatamente, padrão, próprio, parecer, descreveu
 (246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
   palavras-chave: segunda, opinião, regra, proposta, pendente, desde, recebida, parecer, real, eco, defeitos, formato, identidade, verificada, decisão, fica, humano
-(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado
-  palavras-chave: portão, três, perguntas, fecha, agora, pra, code, execution, ptc, evidência, real, seth, qwen, tentando, ferramenta, indisponível, travando, soul, arquivado
-(244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
-  palavras-chave: achado, execute, code, ptc, hermes, instalado, tem, programmatic, tool, calling, pronto, desligado, desde, razão, nada, motivo, pesquisa, humano
+(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra …
+  palavras-chave: portão, três, perguntas, fecha, agora, pra
+(244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM " …
+  palavras-chave: achado, execute, code, ptc, hermes, instalado, tem
 (243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da hist …
   palavras-chave: tes, rodada, primeira, passagem, limpa, hist
 (242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" rec …
