@@ -1,0 +1,9 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, mesma sessao/escopo de MEMORIAS (271).
+Bug CRITICO achado apos o commit real de reordenacao: janela_memorias() no ramo novo
+media o tamanho de CADA entrada isoladamente, sem acumular do topo -- nunca estourava
+o orcamento por entradas pequenas sozinhas, entao .hermes.md saiu com quase o arquivo
+inteiro (868KB em vez de ~25KB), quebrando o proposito da hidratacao (mesma classe de
+risco que MEMORIAS (47), que a Regra 7 cita por nome). Corrigido para acumular do topo
+fixo (hdr[1]) ate o candidato, espelhando a logica original (que acumulava do candidato
+ate o fim fixo). Testado manualmente: janela volta a ~23.5KB, dentro do orcamento.
+Mesmo escopo ja aprovado para MEMORIAS (271).

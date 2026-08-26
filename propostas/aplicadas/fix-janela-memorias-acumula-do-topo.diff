@@ -1,0 +1,24 @@
+diff --git a/.githooks/gerar-hermes-md.sh b/.githooks/gerar-hermes-md.sh
+index 00de309..80ce6dd 100755
+--- a/.githooks/gerar-hermes-md.sh
++++ b/.githooks/gerar-hermes-md.sh
+@@ -100,11 +100,18 @@ janela_memorias() {
+         if (n == 0) {
+           for (j=1; j<=total; j++) print line[j]
+         } else {
++          # seglen acumula do TOPO fixo (hdr[1]) até o candidato `prox` --
++          # espelha o original (que acumulava do candidato até o FIM fixo,
++          # caminhando pra trás). Bug real, achado depois de commitar:
++          # somar só o tamanho de CADA entrada isolada (sem acumular)
++          # nunca estoura o orçamento por entradas pequenas sozinhas --
++          # .hermes.md saiu com o arquivo quase inteiro (868KB em vez de
++          # ~25KB) na primeira rodada real.
+           fim=hdr[1]-1
+           for (i=1; i<=n; i++) {
+             prox = (i < n) ? hdr[i+1]-1 : fim_corpo
+             seglen = 0
+-            for (j=hdr[i]; j<=prox; j++) seglen += length(line[j]) + 1
++            for (j=hdr[1]; j<=prox; j++) seglen += length(line[j]) + 1
+             if (seglen > budget && i != 1) break
+             fim = prox
+           }
