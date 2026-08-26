@@ -1,0 +1,7 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, mesma sessao/escopo de MEMORIAS (271).
+Bug achado testando scripts/inverter_memorias.py contra MEMORIAS.md real antes do
+commit de reordenacao: dividir() assumia bloco migrado sempre ANTES das entradas;
+apos a migracao ele fica DEPOIS, e a ultima entrada engolia o bloco inteiro na
+comparacao. Corrigido para posicao-agnostico nos dois scripts, mais normalizacao
+de espaco em branco no fim de cada entrada na comparacao (separador, nao conteudo).
+Ainda dentro do escopo ja aprovado em propostas/aplicadas/APROVADO-inversao-cronologica-memorias.

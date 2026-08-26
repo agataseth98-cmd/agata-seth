@@ -29,25 +29,52 @@ PADRAO_ENTRADA = re.compile(
 def dividir(texto: str):
     """Retorna (bloco_migrado_ou_None, lista_de_entradas_completas).
 
+    Posição-agnóstico de propósito: o bloco migrado pode vir ANTES de todas
+    as entradas (formato anterior a MEMÓRIAS (271)) ou DEPOIS de todas elas
+    (formato novo -- fica no fim físico). Os pontos de corte são só os
+    inícios de entrada mais o início do bloco migrado, ordenados; cada
+    trecho vai até o próximo corte (ou EOF). Sem isso, o bloco migrado
+    posicionado DEPOIS das entradas seria engolido pela última entrada
+    física (bug real, achado rodando contra o arquivo já migrado -- a
+    versão anterior deste script assumia migrado-sempre-antes e reportava
+    "bloco sumiu" + "entrada alterada" como falso positivo).
+
     Cada entrada vai do início do seu cabeçalho "(n) TIPO — data" até o
-    início da próxima ocorrência do mesmo padrão (ou fim do arquivo) --
-    nunca resplitada por um "#"/"##"/"###" interno (entrada (61) contém um
-    heading do formato antigo colado dentro dela, verbatim; um parser que
-    quebrasse por heading fatiaria essa entrada ao meio, incorretamente).
+    próximo corte -- nunca resplitada por um "#"/"##"/"###" interno
+    (entrada (61) contém um heading do formato antigo colado dentro dela,
+    verbatim; um parser que quebrasse por heading fatiaria essa entrada ao
+    meio, incorretamente).
     """
     matches = list(PADRAO_ENTRADA.finditer(texto))
-    if not matches:
-        return None, []
-    inicio_entradas = matches[0].start()
     idx_migrado = texto.find(MARCADOR_MIGRADO)
+    if not matches:
+        if idx_migrado == -1:
+            return None, []
+        return texto[idx_migrado:], []
+    cortes_set = {m.start() for m in matches}
+    if idx_migrado != -1:
+        cortes_set.add(idx_migrado)
+    cortes = sorted(cortes_set) + [len(texto)]
     bloco_migrado = None
-    if idx_migrado != -1 and idx_migrado < inicio_entradas:
-        bloco_migrado = texto[idx_migrado:inicio_entradas]
     entradas = []
-    for i, m in enumerate(matches):
-        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto)
-        entradas.append(texto[m.start():fim])
+    for inicio, fim in zip(cortes, cortes[1:]):
+        pedaco = texto[inicio:fim]
+        if inicio == idx_migrado:
+            bloco_migrado = pedaco
+        else:
+            entradas.append(pedaco)
     return bloco_migrado, entradas
+
+
+def normalizar(entrada: str) -> str:
+    """Espaço em branco no FIM de uma entrada é separador entre entradas
+    (apresentação, Regra 7 -- livre pra otimizar), não conteúdo. Reconstrução
+    (inverter_memorias.py) rejunta entradas com separador canônico único; sem
+    normalizar aqui, a comparação bateria falso-negativo por causa disso, não
+    por perda ou alteração real de conteúdo. Início da entrada nunca muda
+    (é sempre "(n) TIPO — data", ancorado pelo próprio regex) -- só o fim é
+    normalizado."""
+    return entrada.rstrip()
 
 
 def verificar(antigo: str, novo: str) -> list[str]:
@@ -65,9 +92,11 @@ def verificar(antigo: str, novo: str) -> list[str]:
 
     contagem_antigo: dict[str, int] = {}
     for e in entradas_antigo:
+        e = normalizar(e)
         contagem_antigo[e] = contagem_antigo.get(e, 0) + 1
     contagem_novo: dict[str, int] = {}
     for e in entradas_novo:
+        e = normalizar(e)
         contagem_novo[e] = contagem_novo.get(e, 0) + 1
 
     for e, c in contagem_antigo.items():

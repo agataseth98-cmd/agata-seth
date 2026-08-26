@@ -57,18 +57,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 
 def dividir(texto: str):
+    """Mesma lógica de scripts/verificar_migracao_memorias.py -- posição-
+    agnóstica de propósito, pra ler tanto o formato antigo (migrado antes
+    das entradas) quanto o novo (migrado depois). Aqui só roda contra o
+    arquivo AINDA no formato antigo (é o que esta migração consome), mas
+    fica consistente com o verificador em vez de assumir a posição."""
     matches = list(PADRAO_ENTRADA.finditer(texto))
     if not matches:
         raise SystemExit("nenhuma entrada '(n) TIPO — data' encontrada -- formato inesperado, abortando")
-    inicio_entradas = matches[0].start()
     idx_migrado = texto.find(MARCADOR_MIGRADO)
-    if idx_migrado == -1 or idx_migrado >= inicio_entradas:
-        raise SystemExit("bloco 'Migrado de DIÁRIO.md' não encontrado antes da primeira entrada -- abortando")
-    bloco_migrado = texto[idx_migrado:inicio_entradas]
+    if idx_migrado == -1:
+        raise SystemExit("bloco 'Migrado de DIÁRIO.md' não encontrado -- abortando")
+    cortes = sorted({m.start() for m in matches} | {idx_migrado}) + [len(texto)]
+    bloco_migrado = None
     entradas = []
-    for i, m in enumerate(matches):
-        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto)
-        entradas.append(texto[m.start():fim].rstrip("\n"))
+    for inicio, fim in zip(cortes, cortes[1:]):
+        pedaco = texto[inicio:fim]
+        if inicio == idx_migrado:
+            bloco_migrado = pedaco
+        else:
+            entradas.append(pedaco.rstrip("\n"))
+    if bloco_migrado is None:
+        raise SystemExit("bloco migrado não isolado corretamente -- abortando")
     return bloco_migrado, entradas
 
 
