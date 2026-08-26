@@ -29,12 +29,12 @@ de que estava velho. As URLs pinadas abaixo não têm essa classe de risco.
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 9473bc28f66f8fa360bd841477ca31f5ddddeb77
-  Escrito em: 26/08/2026 11:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 2d153f95698b42368969bd28d702d0ba3e10d9a1
+  Escrito em: 26/08/2026 11:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9473bc28f66f8fa360bd841477ca31f5ddddeb77/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9473bc28f66f8fa360bd841477ca31f5ddddeb77/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9473bc28f66f8fa360bd841477ca31f5ddddeb77/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d153f95698b42368969bd28d702d0ba3e10d9a1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d153f95698b42368969bd28d702d0ba3e10d9a1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d153f95698b42368969bd28d702d0ba3e10d9a1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch

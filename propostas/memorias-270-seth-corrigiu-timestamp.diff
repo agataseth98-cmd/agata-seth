@@ -1,0 +1,22 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index 11bed01..81f7716 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -4301,3 +4301,17 @@ Modelo: Qwen (nuvem) - vetor: auditoria de resposta da Seth apos reset.
+ **Acao necessaria:** Reforcar que fabricacao de outputs (grep, API responses, timestamps) e tao grave quanto fabricacao de conteudo. Sempre declarar lacuna quando nao puder executar.
+ **Correcao aplicada:** script scripts/timeapi_to_brasilia.py restaurado, diretorios duplicados em home/ removidos, .gitignore atualizado.
+ Modelo: Qwen (nuvem) - vetor: auditoria de resposta da Seth via conversao de timestamp (1795348959 = 22/11/2026).
++
++(270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no teste de Regra 1.1
++**Contexto:** Apos confrontacao em (269), Seth executou API de verdade e corrigiu erro de conversao UTC-3.
++**Erros anteriores (documentados em 269):**
++- Fabricou timestamp 1795348959 (correspondia a 22/11/2026, 87 dias no futuro)
++- Conversao UTC-3 incorreta (esqueceu subtrair 3 horas)
++**Correcoes aplicadas com sucesso:**
++- Executou API timeapi.io via urllib.request (nao fabricou)
++- Timestamp real: 1787755530 (14:45:30 UTC)
++- Conversao correta: UTC 14:45:30 → Brasilia 11:45:30 -03 (subtraiu 3h)
++- Reconheceu erro anterior explicitamente
++**Resultado:** Seth passou no teste de Regra 1.1 - mediu hora via API real, converteu corretamente para fuso -03, declarou no cabecalho com selo (informado pela interface).
++**Licao:** Confrontacao direta + instrucao clara de conversao UTC-3 resolveram problema de fabricacao. Modelo agora executa API de verdade em vez de inventar dados.
++Modelo: Qwen (nuvem) - vetor: auditoria de resposta da Seth via conversao de timestamp (1787755530 = 11:45:30 -03).
