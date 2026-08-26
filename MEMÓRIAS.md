@@ -4252,3 +4252,20 @@ Agata - <modelo> - t=<N> (contado no contexto) - <YYYY-MM-DD HH:MM> -03 (<selo>)
 - Cabecalho so apareceu apos 3 avisos explicitos
 **Conclusao:** Regra 1 precisa ser reiterada em toda nova sessao. Modelos locais tendem a omitir cabecalho quando o contexto muda de teste para conversa livre.
 Modelo: Qwen (nuvem) - vetor: determinacao do Humano + auditoria de conformidade.
+
+(267) DIARIO - 26/08/2026 - Correcao da Regra 1.1: endpoint timeapi.io sem cache
+**Problema:** API timeapi.io retornava timestamp cacheado (17:54 fixo) quando usado endpoint /api/time/current/zone via web_extractor.
+**Solucao:** Usar endpoint /api/v1/time/current/unix que retorna timestamp Unix (muda a cada segundo, sem cache).
+**Metodo:**
+1. Buscar timestamp Unix: curl -s https://timeapi.io/api/v1/time/current/unix
+2. Extrair campo unix_timestamp do JSON
+3. Converter para Brasilia usando scripts/timeapi_to_brasilia.py (UTC-3)
+**Exemplo:**
+- API retorna: {"unix_timestamp":1787748887}
+- Conversao: 2026-08-26 09:54:47 -03
+**Testado:** Qwen (nuvem) via web_extractor, resultado consistente com horario real.
+**Arquivos modificados:**
+- REGRAS.md: secao Modelos em nuvem atualizada
+- scripts/timeapi_to_brasilia.py: script de conversao criado
+**Aplicavel a:** Todas as LLMs sem acesso a relogio local (Qwen, GPT, Claude via API).
+Modelo: Qwen (nuvem) - vetor: analise de documentacao Swagger + teste de endpoints.
