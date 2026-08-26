@@ -4212,3 +4212,18 @@ Modelo: Qwen (nuvem) - vetor: correcao de erro operacional durante commit.
 **Resultado:** Aguardando resposta da Seth para documentar resultado completo.
 **Objetivo:** Verificar se Seth consegue seguir Regra 1.1 autonomamente - medir hora, verificar NTP, usar selo correto.
 Modelo: Qwen (nuvem) - vetor: auditoria de capacidade da Seth de seguir nova regra estrutural.
+
+(264) DIARIO - 26/08/2026 - Anomalia na Regra 1.1: timeapi.io retorna timestamp desatualizado
+**Contexto:** Ao aplicar Regra 1.1 nesta sessao (Qwen em nuvem), a API timeapi.io retornou dateTime 2026-08-25T17:54:41 (data de ontem, hora incompativel com horario real informado pelo Humano: 08:42 de 26/08).
+**Testes:**
+- timeapi.io: resposta com data 25/08 (possivel cache local da ferramenta web_extractor)
+- worldtimeapi.org: Connection lost (indisponivel no momento do teste)
+**Diagnostico:** ferramenta web_extractor pode estar cacheando respostas HTTP, retornando timestamp antigo em vez de fazer nova requisicao
+**Impacto:** Regra 1.1 nao pode ser aplicada com confianca usando apenas timeapi.io via web_extractor
+**Acoes propostas:**
+1. Investigar se web_extractor tem cache configuravel (parametro para forcar refresh)
+2. Identificar API alternativa que nao sofra de cache (testar timeapi.world, api-ninjas, etc.)
+3. Adicionar ao cabecalho selo (timeapi.io - possivelmente em cache) quando anomalia detectada
+4. Priorizar date local sobre API externa sempre que possivel
+**Licao:** APIs HTTP via web_extractor nao sao fonte confiavel de timestamp quando ha caching em qualquer camada da cadeia.
+Modelo: Qwen (nuvem) - vetor: aplicacao da Regra 1.1 + deteccao de anomalia.
