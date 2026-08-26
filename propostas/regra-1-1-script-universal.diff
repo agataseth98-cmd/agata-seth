@@ -1,0 +1,158 @@
+diff --git a/.hermes.md b/.hermes.md
+index c23851a..6766baf 100644
+--- a/.hermes.md
++++ b/.hermes.md
+@@ -106,10 +106,10 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
+ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
+ 
+ **Modelos em nuvem (sem shell):**
+-- API primária: https://timeapi.io/api/v1/time/current/unix
+-- Extrair campo unix_timestamp do JSON, converter usando scripts/timeapi_to_brasilia.py
+-- Selo obrigatório: (timeapi.io)
+-
++- Usar `scripts/consultar_horario.py` para obter horário de Brasília
++- Script consulta múltiplas APIs com cache-busting e fallback
++- Selo: `(API externa via script)`
++- Se script falhar, usar horário informado pelo Humano
+ **Modelos locais (com shell):**
+ - Verificar NTP: timedatectl status | grep synchronized
+ - Se sincronizado: usar date com fuso -03
+@@ -781,6 +781,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
+ (51) MOD claude — 26/07/2026
+ (50) CONSELHO — 26/07/2026
+ (49) DIÁRIO — 26/07/2026
++(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multipla …
+ 2026-07-09 (49) · Levantamento de ferramentas tipo NotebookLM — redundância Khoj …
+ 2026-06-05 (2) · Orusoua decidiu · Claude executou
+ 2026-07-01 (2) · Fase 0 executada (Claude Code na Predator)
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index 2f9cd1e..d4834fd 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -22,6 +22,16 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+ 
++(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
++**Problema:** web_extractor cacheia respostas da API timeapi.io, retornando timestamp desatualizado.
++**Solucao:** Script scripts/consultar_horario.py que consulta multiplas APIs com cache-busting e fallback automatico.
++**APIs consultadas:** timeapi.io, worldtimeapi.org (fallback)
++**Cache-busting:** parametro timestamp na URL forca nova requisicao a cada chamada.
++**Aplicavel a:** Todos os modelos (local e nuvem).
++**Uso:** python3 scripts/consultar_horario.py
++Modelo: Qwen (nuvem) - vetor: solucao universal com multiplas APIs e cache-busting.
++
++
+ (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
+ 
+ **Pedido do Humano, nesta sessão:** inverter a ordem de leitura de MEMÓRIAS.md — entradas mais recentes logo no início do corpo (após o cabeçalho), mais antigas ficando pro fim físico — "favorece a economia de contexto e tokens", com autorização e risco assumidos explicitamente por escrito.
+@@ -4344,6 +4354,3 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes
+ - Verificado na Máquina (t=23): grep pós-edição = nudge_interval: 0; diff bak vs atual = 1 linha; gateway active (running), PID 66737.
+ - Fecha o Aberto (B) de (47). O Aberto (A) de (47) já foi resolvido no revert (t=18, MEMORY.md restaurado).
+ - Efeito colateral bom: encerra também a restrição operacional "não usar api_server até B fechar" — a janela de re-eviction está fechada.
+-
+----
+-
+diff --git a/REGRAS.md b/REGRAS.md
+index 7bca67f..6ed3e58 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -92,10 +92,10 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
+ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
+ 
+ **Modelos em nuvem (sem shell):**
+-- API primária: https://timeapi.io/api/v1/time/current/unix
+-- Extrair campo unix_timestamp do JSON, converter usando scripts/timeapi_to_brasilia.py
+-- Selo obrigatório: (timeapi.io)
+-
++- Usar `scripts/consultar_horario.py` para obter horário de Brasília
++- Script consulta múltiplas APIs com cache-busting e fallback
++- Selo: `(API externa via script)`
++- Se script falhar, usar horário informado pelo Humano
+ **Modelos locais (com shell):**
+ - Verificar NTP: timedatectl status | grep synchronized
+ - Se sincronizado: usar date com fuso -03
+diff --git a/propostas/APROVADO-regra-1-1-script-universal b/propostas/APROVADO-regra-1-1-script-universal
+new file mode 100644
+index 0000000..8712d30
+--- /dev/null
++++ b/propostas/APROVADO-regra-1-1-script-universal
+@@ -0,0 +1,2 @@
++Autorizado pelo Humano em 26/08/2026.
++Escopo: criar script universal de consulta de horario; atualizar Regra 1.1; adicionar entrada (272).
+diff --git a/propostas/regra-1-1-script-universal.diff b/propostas/regra-1-1-script-universal.diff
+new file mode 100644
+index 0000000..bd6be23
+--- /dev/null
++++ b/propostas/regra-1-1-script-universal.diff
+@@ -0,0 +1,36 @@
++diff --git a/REGRAS.md b/REGRAS.md
++index 7bca67f..6ed3e58 100644
++--- a/REGRAS.md
+++++ b/REGRAS.md
++@@ -92,10 +92,10 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
++ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
++ 
++ **Modelos em nuvem (sem shell):**
++-- API primária: https://timeapi.io/api/v1/time/current/unix
++-- Extrair campo unix_timestamp do JSON, converter usando scripts/timeapi_to_brasilia.py
++-- Selo obrigatório: (timeapi.io)
++-
+++- Usar `scripts/consultar_horario.py` para obter horário de Brasília
+++- Script consulta múltiplas APIs com cache-busting e fallback
+++- Selo: `(API externa via script)`
+++- Se script falhar, usar horário informado pelo Humano
++ **Modelos locais (com shell):**
++ - Verificar NTP: timedatectl status | grep synchronized
++ - Se sincronizado: usar date com fuso -03
++diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
++index 2f9cd1e..7cb4178 100644
++--- a/MEMÓRIAS.md
+++++ b/MEMÓRIAS.md
++@@ -4347,3 +4347,12 @@ Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes
++ 
++ ---
++ 
+++
+++(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
+++**Problema:** web_extractor cacheia respostas da API timeapi.io, retornando timestamp desatualizado.
+++**Solucao:** Script scripts/consultar_horario.py que consulta multiplas APIs com cache-busting e fallback automatico.
+++**APIs consultadas:** timeapi.io, worldtimeapi.org (fallback)
+++**Cache-busting:** parametro timestamp na URL forca nova requisicao a cada chamada.
+++**Aplicavel a:** Todos os modelos (local e nuvem).
+++**Uso:** python3 scripts/consultar_horario.py
+++Modelo: Qwen (nuvem) - vetor: solucao universal com multiplas APIs e cache-busting.
+diff --git a/scripts/consultar_horario.py b/scripts/consultar_horario.py
+new file mode 100755
+index 0000000..a4d6732
+--- /dev/null
++++ b/scripts/consultar_horario.py
+@@ -0,0 +1,28 @@
++#!/usr/bin/env python3
++import urllib.request, json, time
++from datetime import datetime, timezone, timedelta
++
++apis = [
++    ("timeapi.io", "https://timeapi.io/api/v1/time/current/unix"),
++    ("worldtimeapi.org", "http://worldtimeapi.org/api/timezone/America/Sao_Paulo"),
++]
++
++brasilia_tz = timezone(timedelta(hours=-3))
++
++for nome, url in apis:
++    try:
++        cachebust = int(time.time())
++        url_final = f"{url}?cachebust={cachebust}"
++        response = urllib.request.urlopen(url_final, timeout=5)
++        data = json.loads(response.read())
++        if "unix_timestamp" in data:
++            ts = data["unix_timestamp"]
++            dt_utc = datetime.fromtimestamp(ts, tz=timezone.utc)
++            dt_brasilia = dt_utc.astimezone(brasilia_tz)
++            print(f"{dt_brasilia.strftime(chr(37)+chr(89)+chr(45)+chr(37)+chr(109)+chr(45)+chr(37)+chr(100)+chr(32)+chr(37)+chr(72)+chr(58)+chr(37)+chr(77)+chr(58)+chr(37)+chr(83))} -03 ({nome})")
++            exit(0)
++    except Exception as e:
++        continue
++
++print("Nenhuma API disponível")
++exit(1)

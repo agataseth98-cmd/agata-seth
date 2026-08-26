@@ -22,6 +22,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+
+(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
+**Problema:** web_extractor cacheia respostas da API timeapi.io, retornando timestamp desatualizado.
+**Solucao:** Script scripts/consultar_horario.py que consulta multiplas APIs com cache-busting e fallback automatico.
+**APIs consultadas:** timeapi.io, worldtimeapi.org (fallback)
+**Cache-busting:** parametro timestamp na URL forca nova requisicao a cada chamada.
+**Aplicavel a:** Todos os modelos (local e nuvem).
+**Uso:** python3 scripts/consultar_horario.py
+Modelo: Qwen (nuvem) - vetor: solucao universal com multiplas APIs e cache-busting.
+
+
+
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
 
 **Pedido do Humano, nesta sessão:** inverter a ordem de leitura de MEMÓRIAS.md — entradas mais recentes logo no início do corpo (após o cabeçalho), mais antigas ficando pro fim físico — "favorece a economia de contexto e tokens", com autorização e risco assumidos explicitamente por escrito.

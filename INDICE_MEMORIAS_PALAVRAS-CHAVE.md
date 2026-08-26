@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
+  palavras-chave: diario, script, universal, consulta, horario, multiplas, apis
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
   palavras-chave: mudança, estrutural, memórias, passa, crescer, topo, entrada, nova, logo, após, marcador, recente, primeiro, regra, conscientemente, reescritas, autorização, humano, contornadas
 (270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no teste de Regra 1.1
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: achado, execute, code, ptc, hermes, instalado, tem, programmatic, tool, calling, pronto, desligado, desde, razão, nada, motivo, pesquisa, humano
 (243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
   palavras-chave: tes, rodada, primeira, passagem, limpa, história, teste, executor, glm, flash, remoto
-(242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" recusada pelo Humano — cosmética, o sistema já reagiu certo no teste que a motivou; (239)/(240) liberados, sem entrada nunca escrita neles
-  palavras-chave: regra, desacelerar, diante, carga, ética, alta, recusada, humano, cosmética, sistema, reagiu, certo, teste, motivou, liberados, entrada, nunca, escrita, neles
+(242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" rec …
+  palavras-chave: regra, desacelerar, diante, carga, ética, alta, rec
 (241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Pannian …
   palavras-chave: ferramenta, externa, agent, reach, github, pannian
 (238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/202 …

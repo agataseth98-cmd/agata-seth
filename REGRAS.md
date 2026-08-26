@@ -92,10 +92,10 @@ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já
 Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeçalho, não herdar de resposta anterior.
 
 **Modelos em nuvem (sem shell):**
-- API primária: https://timeapi.io/api/v1/time/current/unix
-- Extrair campo unix_timestamp do JSON, converter usando scripts/timeapi_to_brasilia.py
-- Selo obrigatório: (timeapi.io)
-
+- Usar `scripts/consultar_horario.py` para obter horário de Brasília
+- Script consulta múltiplas APIs com cache-busting e fallback
+- Selo: `(API externa via script)`
+- Se script falhar, usar horário informado pelo Humano
 **Modelos locais (com shell):**
 - Verificar NTP: timedatectl status | grep synchronized
 - Se sincronizado: usar date com fuso -03
