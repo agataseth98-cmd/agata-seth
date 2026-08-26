@@ -540,7 +540,35 @@ Uma última proposta (um "carimbo" de data nos arquivos) teve parecer
 favorável de outro modelo consultado, mas você decidiu não adotar —
 registrado por quê, pra não parecer contradição depois.
 
+## Sessão de 26/08/2026 — a ordem da história virou, do avesso pra frente
+
+Você pediu pra história ficar na ordem contrária: a parte mais recente
+lá no topo do arquivo, logo depois da explicação de como ler, e a mais
+antiga lá no fim — pra economizar espaço quando a IA lê. Isso ia contra
+uma regra que você mesmo tinha escrito dizendo que nem você podia mudar
+isso sem processo formal. Foi avisado disso antes de qualquer mudança, e
+você escolheu seguir o processo formal em vez de pular ele.
+
+O processo: três perguntas respondidas por você (dá pra desfazer sozinho
+— sim; o que mais isso toca — bastante coisa, você topou; dava pra saber
+se quebrasse — sim, prometi checar tudo no fim, e checei). Nada foi
+apagado nem editado — só mudou de lugar, e isso foi conferido por
+computador antes de qualquer coisa entrar, não só por eu dizer que
+conferi.
+
+No caminho, achei e consertei quatro problemas reais que só apareceram
+testando com o arquivo inteiro (não em pedaços pequenos): um trecho de
+história ficaria grudado errado num outro; onze pedaços da história
+(escritos por outra IA sem acento correto) quase ficaram invisíveis pro
+sistema de busca; uma checagem de citação ia soar alarme falso numa
+coisa antiga e já conhecida; e o pior — a primeira versão saiu com o
+arquivo inteiro (868 mil caracteres) sendo entregue pra IA de uma vez só,
+em vez do resumo pequeno de sempre (25 mil). Esse último eu vi na hora
+e corrigi antes de fechar, exatamente o tipo de erro que a regra que
+você escreveu tenta evitar.
+
 ## Última atualização
-25/08/2026, 15:16 (sessão da IA na nuvem — achados reais, dois erros
-deste executor corrigidos ao vivo, sete propostas fechadas em zero
-adotadas, motivo registrado).
+26/08/2026, 13:28 (a ordem de MEMÓRIAS.md foi invertida — mais recente
+no topo — com sua autorização passo a passo; quatro erros achados
+testando foram corrigidos antes de fechar; nada de história foi
+apagado ou editado, só reordenado, conferido por computador).
