@@ -29,12 +29,12 @@ de que estava velho. As URLs pinadas abaixo não têm essa classe de risco.
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 6837585969dd6b52e771de585a8721571428d6bb
-  Escrito em: 26/08/2026 13:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 2d3ca3f400a47d4e44a67411d58d10151ec0dd1f
+  Escrito em: 26/08/2026 13:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6837585969dd6b52e771de585a8721571428d6bb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6837585969dd6b52e771de585a8721571428d6bb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6837585969dd6b52e771de585a8721571428d6bb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d3ca3f400a47d4e44a67411d58d10151ec0dd1f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d3ca3f400a47d4e44a67411d58d10151ec0dd1f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d3ca3f400a47d4e44a67411d58d10151ec0dd1f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch
@@ -42,9 +42,11 @@ de que estava velho. As URLs pinadas abaixo não têm essa classe de risco.
   o fetch antes de confiar no conteúdo. Isto não substitui `git ls-remote`/`git ls-tree` onde a Máquina existe
   — cobre só quem não a tem.
 
-LEIA, NESTA ORDEM: REGRAS.md inteiro · últimas entradas completas de MEMÓRIAS.md dentro do orçamento do hook
-de hidratação (nunca corta uma entrada no meio — ver PROJETO.md, "Memória e hidratação"; a frase antiga aqui
-dizia "últimas 30 linhas", mesmo tipo de fato desatualizado que motivou este item, corrigido em 20/08/2026).
+LEIA, NESTA ORDEM: REGRAS.md inteiro · entradas mais recentes de MEMÓRIAS.md (desde a entrada (271), logo
+após o marcador `ENTRADAS-NOVAS`, não mais no fim do arquivo) dentro do orçamento do hook de hidratação
+(nunca corta uma entrada no meio — ver PROJETO.md, "Memória e hidratação"; a frase antiga aqui dizia
+"últimas 30 linhas", mesmo tipo de fato desatualizado que motivou este item, corrigido em 20/08/2026 e de
+novo em 26/08/2026 quando a ordem de MEMÓRIAS.md se inverteu — ver MEMÓRIAS (271)).
 
 RESPONDA COM O BLOCO DE PRONTIDÃO:
   Agata · modelo: <nome> · sync: <PASS/FALHA/não verificado> · <data e hora local + selo de origem>

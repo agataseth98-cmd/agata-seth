@@ -1,0 +1,6 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, nesta sessao.
+Uso unico: troca a checagem de sufixo do P-5 pela verificacao de permutacao
+(scripts/verificar_migracao_memorias.py) so para o commit que reordena
+fisicamente MEMORIAS.md (insercao do marcador ENTRADAS-NOVAS + entradas
+(49)-(271) invertidas). Ver MEMORIAS (271) para motivo e processo completo.
+Consumido (movido para propostas/aplicadas/) no mesmo commit que aplica a mudanca.

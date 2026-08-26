@@ -15,7 +15,10 @@ def ultima_entrada_local() -> int | None:
     if not caminho.exists():
         return None
     numeros = re.findall(r"^\((\d+)\)", caminho.read_text(encoding="utf-8"), re.MULTILINE)
-    return int(numeros[-1]) if numeros else None
+    # max(), não numeros[-1]: desde MEMÓRIAS (271) o arquivo cresce pelo
+    # topo, então o último match físico passou a ser a entrada mais ANTIGA,
+    # não a mais recente. max() é correto nos dois sentidos de leitura.
+    return max((int(n) for n in numeros), default=None)
 
 def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]:
     falhas = []

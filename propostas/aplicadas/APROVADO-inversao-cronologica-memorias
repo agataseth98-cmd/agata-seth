@@ -1,0 +1,9 @@
+Autorizado pelo Humano (Orusoua) em 26/08/2026, nesta sessão.
+Escopo: REGRAS.md, PROJETO.md, .githooks/gerar-hermes-md.sh, .githooks/pre-commit,
+scripts/perimetro.sh, scripts/compactar_indice.py, scripts/verificar_cabecalho.py,
+scripts/atualizar.sh, scripts/timeapi_to_brasilia.py, scripts/inverter_memorias.py (novo),
+scripts/verificar_migracao_memorias.py (novo).
+Mudanca estrutural MEMORIAS (271): mecanismo de dupla leitura (formato antigo/novo) +
+verificacao de migracao por permutacao para o redesenho de P-5 + duas correcoes menores
+(timeapi_to_brasilia.py valor 0 tratado como falsy; atualizar.sh referencia morta a DIARIO.md).
+Processo: portao das tres perguntas cumprido, ver MEMORIAS (271).

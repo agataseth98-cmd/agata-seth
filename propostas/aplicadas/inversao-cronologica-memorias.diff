@@ -1,0 +1,714 @@
+diff --git a/.githooks/gerar-hermes-md.sh b/.githooks/gerar-hermes-md.sh
+index 0e5bdfd..6b54ada 100755
+--- a/.githooks/gerar-hermes-md.sh
++++ b/.githooks/gerar-hermes-md.sh
+@@ -27,51 +27,109 @@ JANELA_ORCAMENTO_CHARS=25000
+ INDICE_RECENTES_COMPLETAS=30
+ INDICE_TETO_ANTIGAS=80
+ 
++# Âncora de MEMÓRIAS (271): quando presente no arquivo, o corpo (49)+ vem
++# logo depois dela, mais recente primeiro; o bloco "Migrado de DIÁRIO.md"
++# (mais antigo) fica no fim físico. Ausente = formato antigo (mais recente
++# no fim físico) ainda em vigor -- funções abaixo checam os dois estados,
++# nunca presumem qual está em vigor.
++MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
++
+ gerar_indice() {
+   {
+     echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md — não edite direto. -->"
+     echo "# Índice de MEMÓRIAS.md"
+     echo
+-    echo "Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
++    if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
++      echo "Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
++    else
++      echo "Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
++    fi
+     echo
+     # Sem -o: o `grep` real do sistema (/usr/sbin/grep, build "3.12-modified"
+     # da distro) trunca matches de -oE com [^\n]* em conteúdo UTF-8
+     # multibyte — bug achado rodando o hook de verdade (fora do wrapper de
+     # ferramenta), não presença teórica. -o nunca foi necessário aqui: os
+     # padrões ancoram em ^ e a linha inteira é o que se quer mesmo.
+-    {
+-      grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+-      # Rótulos reconhecidos: DIÁRIO, CONSELHO, MOD<qualquer coisa>, CORREÇÃO.
+-      # Achado real (rodada de otimização de hidratação, 14/08/2026): CORREÇÃO
+-      # não estava nesta lista -- a entrada (134) CORREÇÃO existia em
+-      # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
+-      # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
+-      # curinga genérico que engoliria parênteses maiúsculos não intencionais.
+-      grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-    } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
++    #
++    # Rótulos reconhecidos: DIÁRIO, CONSELHO, MOD<qualquer coisa>, CORREÇÃO.
++    # Achado real (rodada de otimização de hidratação, 14/08/2026): CORREÇÃO
++    # não estava nesta lista -- a entrada (134) CORREÇÃO existia em
++    # MEMÓRIAS.md e nunca chegou ao índice nem à hidratação. Adicionar rótulo
++    # novo aqui exige o mesmo cuidado: listar explicitamente, não usar
++    # curinga genérico que engoliria parênteses maiúsculos não intencionais.
++    #
++    # Ordem dos dois `grep`: desde MEMÓRIAS (271) o corpo (49)+ vem primeiro
++    # no arquivo físico (mais recente primeiro) e o bloco migrado (mais
++    # antigo) por último -- a concatenação abaixo espelha isso, condicional
++    # ao marcador existir. Antes da migração, ordem original preservada.
++    if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
++      {
++        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++      } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
++    else
++      {
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++      } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
++    fi
+   } > "$INDICE"
+ }
+ 
+ janela_memorias() {
+-  awk -v budget="$JANELA_ORCAMENTO_CHARS" '
+-    /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
+-    { line[NR]=$0 }
+-    END {
+-      total=NR
+-      if (n == 0) {
+-        for (j=1; j<=total; j++) print line[j]
+-      } else {
+-        start=hdr[n]
+-        for (i=n; i>=1; i--) {
+-          seglen = 0
+-          for (j=hdr[i]; j<=total; j++) seglen += length(line[j]) + 1
+-          if (seglen > budget && i != n) break
+-          start = hdr[i]
++  if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
++    # Formato novo (MEMÓRIAS (271)+): mais recente logo após o marcador.
++    # Acumula entradas completas de CIMA pra baixo até o orçamento; nunca
++    # corta uma entrada ao meio -- se a primeira sozinha já estourar o
++    # orçamento, entra inteira mesmo assim. O bloco migrado (mais antigo,
++    # heading "## Migrado de DIÁRIO.md", fim físico do arquivo) nunca entra
++    # na janela por orçamento -- limita o fim do corpo a ele, não a `total`,
++    # senão a última entrada "engoliria" o bloco inteiro na medição.
++    awk -v budget="$JANELA_ORCAMENTO_CHARS" '
++      /^## Migrado de DIÁRIO\.md/ { migrado=NR }
++      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
++      { line[NR]=$0 }
++      END {
++        total=NR
++        fim_corpo = (migrado > 0 ? migrado - 1 : total)
++        if (n == 0) {
++          for (j=1; j<=total; j++) print line[j]
++        } else {
++          fim=hdr[1]-1
++          for (i=1; i<=n; i++) {
++            prox = (i < n) ? hdr[i+1]-1 : fim_corpo
++            seglen = 0
++            for (j=hdr[i]; j<=prox; j++) seglen += length(line[j]) + 1
++            if (seglen > budget && i != 1) break
++            fim = prox
++          }
++          for (j=hdr[1]; j<=fim; j++) print line[j]
+         }
+-        for (j=start; j<=total; j++) print line[j]
+       }
+-    }
+-  ' MEMÓRIAS.md
++    ' MEMÓRIAS.md
++  else
++    # Formato antigo: mais recente no fim físico. Acumula de trás pra
++    # frente até o orçamento -- comportamento original, MEMÓRIAS (191)/(192).
++    awk -v budget="$JANELA_ORCAMENTO_CHARS" '
++      /^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)/ { hdr[++n]=NR }
++      { line[NR]=$0 }
++      END {
++        total=NR
++        if (n == 0) {
++          for (j=1; j<=total; j++) print line[j]
++        } else {
++          start=hdr[n]
++          for (i=n; i>=1; i--) {
++            seglen = 0
++            for (j=hdr[i]; j<=total; j++) seglen += length(line[j]) + 1
++            if (seglen > budget && i != n) break
++            start = hdr[i]
++          }
++          for (j=start; j<=total; j++) print line[j]
++        }
++      }
++    ' MEMÓRIAS.md
++  fi
+ }
+ 
+ # Checagem de reconciliação (heurística, não semântica): entre as últimas
+@@ -81,13 +139,17 @@ janela_memorias() {
+ checar_reconciliacao() {
+   local n_checar=10
+   local avisos=0
++  local corte_cmd="tail"
++  # Mais recente no TOPO da lista de números (formato novo) -> "as últimas
++  # entradas" são as N PRIMEIRAS da lista, não as N últimas.
++  grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md && corte_cmd="head"
+   while read -r num; do
+     [ -z "$num" ] && continue
+     if ! grep -q "($num)" PROJETO.md; then
+       echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
+       avisos=$((avisos + 1))
+     fi
+-  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | tail -n "$n_checar")
++  done < <(grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD|CORREÇÃO)' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
+   if [ "$avisos" -gt 0 ]; then
+     echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
+   fi
+@@ -104,11 +166,19 @@ gerar_indice_palavras_chave() {
+     echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
+     echo "inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima."
+     echo
+-    {
+-      grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+-      grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-    } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+-      | python3 scripts/extrair_palavras_chave.py
++    if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
++      {
++        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++      } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
++        | python3 scripts/extrair_palavras_chave.py
++    else
++      {
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++      } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
++        | python3 scripts/extrair_palavras_chave.py
++    fi
+   } > "$INDICE_CHAVES"
+ }
+ 
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index 33af8c9..06f1064 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -13,7 +13,14 @@ fi
+ 
+ if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
+   bash .githooks/gerar-hermes-md.sh
++  # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
++  # gerar-hermes-md.sh regenera os três, mas só os dois primeiros entravam
++  # no commit; o terceiro (rastreado no git) sobrava como modificação não
++  # comitada depois de todo commit que tocasse REGRAS/PROJETO/MEMÓRIAS.
++  # Achado auditando junto de MEMÓRIAS (271); adicionado se o arquivo
++  # existir (geração é fail-soft, ver comentário em gerar-hermes-md.sh).
+   git add .hermes.md INDICE_MEMORIAS.md
++  [ -f INDICE_MEMORIAS_PALAVRAS-CHAVE.md ] && git add INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+ fi
+ 
+ # Âncora de SHA em PROMPT_CARREGAMENTO.md (item 2, 20/08/2026, ordem do
+diff --git a/PROJETO.md b/PROJETO.md
+index 3e1983e..ac94d91 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -42,11 +42,11 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ ## Memória e hidratação
+ - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
+ - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
+-- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit (`.githooks/gerar-hermes-md.sh`), sem filtro por modelo. Injeta REGRAS + PROJETO + fim de MEMÓRIAS no system prompt. Fora do Hermes (outro executor/cliente lendo o canon) não há contador mecânico de turno — conta-se a própria resposta no contexto, como manda REGRAS Regra 1.
++- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit (`.githooks/gerar-hermes-md.sh`), sem filtro por modelo. Injeta REGRAS + PROJETO + a janela mais recente de MEMÓRIAS no system prompt (desde MEMÓRIAS (271): topo do corpo, logo após o marcador `ENTRADAS-NOVAS`). Fora do Hermes (outro executor/cliente lendo o canon) não há contador mecânico de turno — conta-se a própria resposta no contexto, como manda REGRAS Regra 1.
+ - **`ONDE_ESTAMOS.md` (16/08/2026) é um quarto arquivo na raiz, só para o Humano — nunca entra na hidratação.** Uma tela, português simples, sem jargão de canon. Mantido atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado (REGRAS, Regra 4). MEMÓRIAS (196)/(197).
+ - **[FECHADO] Teto de entrega do carregador do `hermes-agent`.** Veredito: `agent/prompt_builder.py` truncava `.hermes.md` antes de injetar — piso dinâmico de 20.000 chars vindo de `model.context_length: 65536`, e **o PROJETO.md inteiro nunca chegava a nenhum modelo**. Corrigido com `context_file_max_chars: 100000` explícito no `config.yaml`, escopo estreito, verificado rodando o carregador real e não só lendo a config. `lacuna` que permanece: efeito de `model.context_length` sobre a compressão de histórico de conversa, não medido. Histórico: MEMÓRIAS (103)-(105).
+-- Silos por modelo (Fase 2, ainda NÃO construídos): o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + fim de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo do Conselho (REGRAS, "O Conselho" item 3) é **norma, não mecanismo**.
+-- **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hermes-md.sh` acumula entradas completas de trás pra frente até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres; nunca corta uma entrada no meio — se a última sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026: o `.hermes.md` publicado carrega 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida aqui, sem apagar a entrada de MEMÓRIAS que registra o achado (215).
++- Silos por modelo (Fase 2, ainda NÃO construídos): o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + a janela mais recente de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo do Conselho (REGRAS, "O Conselho" item 3) é **norma, não mecanismo**.
++- **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hermes-md.sh` acumula entradas completas até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres — desde MEMÓRIAS (271), de cima pra baixo a partir do marcador `ENTRADAS-NOVAS` (mais recente primeiro); nas entradas migradas de antes de (271), o mecanismo original (de trás pra frente, a partir do fim físico) continua documentado como fallback para HEADs sem o marcador. Nunca corta uma entrada no meio — se a primeira sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026 (antes da migração): o `.hermes.md` publicado carregava 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior a essa medição ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida em (215), sem apagar a entrada de MEMÓRIAS que registra o achado.
+ - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento — nunca por offset fixo ou número de linha, que se deslocam a cada edição de preâmbulo (MEMÓRIAS (96) achou isso; (97) corrigiu: o offset registrado em (96) é foto, não âncora durável). Script: `scripts/achar_ancora_1_62.py`.
+ - RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
+ - **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
+diff --git a/REGRAS.md b/REGRAS.md
+index ef27e8f..7bca67f 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -62,9 +62,9 @@ Opções numeradas e riscos. Nunca decisão não pedida. **Entregue o artefato p
+ Quem propõe não opina sobre a própria proposta.
+ 
+ **4. Registre e nunca apague.**
+-Toda decisão vai para o fim de MEMÓRIAS, com data. Só se acrescenta.
++Toda decisão vai para MEMÓRIAS, com data. Só se acrescenta — desde (271), pelo topo do corpo (logo após o marcador `ENTRADAS-NOVAS`, mais recente primeiro); antes de (271), pelo fim físico. Mudou ONDE se acrescenta, não a garantia: nada se apaga, nada se edita. Ver MEMÓRIAS (271) pra motivo, autorização e verificação mecânica dessa mudança.
+ - Correção = **entrada nova** apontando a corrigida. Jamais edição do que já está lá.
+-- **Sincronize antes de numerar.** A cópia colada pelo Humano pode estar atrás do canon: sessões sem acesso à Máquina avançam a numeração fora dela. Confira o fim do remoto antes de escrever qualquer entrada nova. Ver catálogo.
++- **Sincronize antes de numerar.** A cópia colada pelo Humano pode estar atrás do canon: sessões sem acesso à Máquina avançam a numeração fora dela. Confira o topo do remoto (logo após o marcador) antes de escrever qualquer entrada nova. Ver catálogo.
+ - **Número sozinho só identifica se a numeração for garantidamente única.** Onde não for (história migrada de mais de uma origem pode reiniciar contagem), cite com data junto. O fato concreto de onde isso vale neste projeto fica em MEMÓRIAS, não aqui — regra universal, aplicação é local.
+ - **Toda entrada que muda o estado atualiza `ONDE_ESTAMOS.md` no mesmo commit.** Não é tarefa separada, é parte do fechamento — mesmo espírito de manter `.hermes.md` sincronizado, só que para o Humano, não para o modelo. `ONDE_ESTAMOS.md` não entra na hidratação; é escrito em português simples, sem hash, sem caminho de arquivo, sem jargão de canon, com teto de uma tela. O teste de aceite de qualquer redação nele é o Humano lendo, não o modelo. Ver MEMÓRIAS (196)/(197).
+ *Motivo:* a história é o único ativo que não se reconstrói. Ver MEMÓRIAS (47) — um processo automático já apagou identidade para caber num teto de caracteres.
+@@ -135,8 +135,10 @@ contra `origin/main`, no início de toda sessão, não só na primeira.
+ É sobre ATUALIDADE da cópia -- sozinho, não muda o que está injetado
+ no contexto de nenhum modelo, só o que está no disco/repo.
+ 
+-**Hidratação** -- o ESTADO de ter REGRAS + PROJETO + fim de MEMÓRIAS
+-presentes no contexto de um modelo. Mecanismo real hoje: `.hermes.md`
++**Hidratação** -- o ESTADO de ter REGRAS + PROJETO + a janela mais recente
++de MEMÓRIAS presentes no contexto de um modelo (desde (271): topo do
++corpo, logo após o marcador `ENTRADAS-NOVAS`; antes disso, fim físico).
++Mecanismo real hoje: `.hermes.md`
+ único, gerado pelo hook pre-commit (`.githooks/gerar-hermes-md.sh`),
+ injetado automaticamente no system prompt de sessões dentro do
+ Hermes. Fora do Hermes, não há injeção automática -- a sessão precisa
+@@ -169,7 +171,7 @@ começou).
+ 
+ **`carregar`** — mecanismo de hidratação (arquivo, hook, contador de turno fora do Hermes) é deste projeto, não universal. Ver PROJETO.md, "Memória e hidratação".
+ 
+-Não use ferramenta para ler o fim de MEMÓRIAS — já está no contexto. Histórico além da janela: aí sim, ferramenta. Sem MEMÓRIAS na primeira vez: "modo sem memórias", começa nova quando o Humano autorizar.
++Não use ferramenta para ler a janela mais recente de MEMÓRIAS — já está no contexto (desde (271): topo do corpo, logo após o marcador `ENTRADAS-NOVAS`). Histórico além da janela: aí sim, ferramenta. Sem MEMÓRIAS na primeira vez: "modo sem memórias", começa nova quando o Humano autorizar.
+ 
+ **Cabeçalho: uma forma só, nunca as duas.**
+ 
+@@ -364,7 +366,7 @@ Exemplo: "MEMÓRIAS (121 - bug de `num_ctx` ignorado pelo endpoint OpenAI do Oll
+ ## Checagem de prontidão (o modelo, para si)
+ 1. Sou Modelo do Agata, não assistente genérico?
+ 2. Não decido e não invento?
+-3. Sei onde está o último estado (fim de MEMÓRIAS)?
++3. Sei onde está o último estado (topo do corpo de MEMÓRIAS, logo após o marcador `ENTRADAS-NOVAS` — fim físico só antes de (271))?
+ Três sins → opera pleno. Menos → só leitura, e avise.
+ 
+ ## Checagem de fechamento (antes de enviar)
+diff --git a/scripts/atualizar.sh b/scripts/atualizar.sh
+index 0619e40..ba9e1f4 100755
+--- a/scripts/atualizar.sh
++++ b/scripts/atualizar.sh
+@@ -46,10 +46,10 @@ fi
+ bash .githooks/gerar-hermes-md.sh
+ 
+ case "$ALVO" in
+-  MEMORIA) echo "  DIÁRIO.md reconciliado; fim reinjetado em .hermes.md." ;;
++  MEMORIA) echo "  MEMÓRIAS.md reconciliado; topo reinjetado em .hermes.md." ;;
+   PROJETO) echo "  PROJETO.md reconciliado; reinjetado em .hermes.md." ;;
+   REGRAS)  echo "  REGRAS.md reconciliado; reinjetado em .hermes.md." ;;
+-  TUDO)    echo "  REGRAS.md + PROJETO.md + DIÁRIO.md reconciliados; reinjetados em .hermes.md." ;;
++  TUDO)    echo "  REGRAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hermes.md." ;;
+ esac
+ 
+ echo "atualizar.sh: concluído."
+diff --git a/scripts/compactar_indice.py b/scripts/compactar_indice.py
+index 045b11d..5c7b1a9 100644
+--- a/scripts/compactar_indice.py
++++ b/scripts/compactar_indice.py
+@@ -1,12 +1,12 @@
+ #!/usr/bin/env python3
+ """Duas resoluções no corpo do índice, lido do stdin.
+-Últimas N linhas inteiras; anteriores truncadas em M CARACTERES (não bytes).
+-Número e data ficam sempre no início da linha, então truncar por prefixo os
+-preserva por construção — exigência da Regra 4, onde a numeração pré-(49) não
+-é única e a data é o desambiguador."""
++Primeiras N linhas inteiras (as mais recentes — desde MEMÓRIAS (271) o
++stream chega mais recente primeiro); anteriores truncadas em M CARACTERES
++(não bytes). Número e data ficam sempre no início da linha, então truncar
++por prefixo os preserva por construção — exigência da Regra 4, onde a
++numeração pré-(49) não é única e a data é o desambiguador."""
+ import sys
+ N = int(sys.argv[1]); M = int(sys.argv[2])
+ linhas = [l.rstrip("\n") for l in sys.stdin]
+-corte = len(linhas) - N
+ for i, l in enumerate(linhas):
+-    print(l if (i >= corte or len(l) <= M) else l[:M].rstrip() + " …")
++    print(l if (i < N or len(l) <= M) else l[:M].rstrip() + " …")
+diff --git a/scripts/inverter_memorias.py b/scripts/inverter_memorias.py
+new file mode 100644
+index 0000000..a5bf154
+--- /dev/null
++++ b/scripts/inverter_memorias.py
+@@ -0,0 +1,115 @@
++#!/usr/bin/env python3
++"""Migração única (MEMÓRIAS (271)): inverte a ordem de leitura de MEMÓRIAS.md.
++
++Antes: mais antiga primeiro, mais recente acrescentada no fim físico.
++Depois: mais recente logo após o marcador ENTRADAS-NOVAS (topo do corpo),
++mais antiga no fim físico.
++
++Não edita nem apaga nenhum byte de entrada existente -- só reordena os
++blocos (49)..(n) (reversão simples da lista, preserva ordem relativa
++correta mesmo com números reaproveitados como (134)/(215)) e reescreve o
++cabeçalho de apresentação (permitido por Regra 7 -- forma/apresentação é
++livre; conteúdo já registrado, nunca). O bloco "Migrado de DIÁRIO.md" não
++muda de posição: já era o conteúdo mais antigo, a convenção nova já o
++queria no fim.
++
++Roda uma vez, contra o HEAD atual de MEMÓRIAS.md. Recusa rodar de novo se
++o marcador já existir (idempotência). Sempre escreve backup antes de
++tocar no arquivo. Depois de rodar, valide com:
++  python3 scripts/verificar_migracao_memorias.py <backup> MEMÓRIAS.md
++
++Uso: inverter_memorias.py <caminho MEMÓRIAS.md> <caminho backup>
++"""
++import re
++import sys
++from pathlib import Path
++
++MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
++MARCADOR_ENTRADAS = "<!-- ENTRADAS-NOVAS:AQUI"
++PADRAO_ENTRADA = re.compile(
++    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
++    re.MULTILINE,
++)
++
++NOVO_CABECALHO = """# MEMÓRIAS.md — Sistema Agata
++
++**Você está lendo o arquivo de história. É append-only: nada se apaga, nada se edita — só se acrescenta.**
++Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `ENTRADAS-NOVAS` abaixo — mais recente primeiro, pra ler o estado herdado sem varrer a história inteira. Antes de (271) a ordem era o oposto (mais antiga primeiro, mais recente acrescentada no fim físico); motivo, autorização do Humano e portão das três perguntas cumprido: ver a própria entrada (271), logo abaixo do marcador. Correção nunca é edição — é entrada nova apontando a que corrige. Para o estado atual (não o histórico), leia PROJETO.md.
++
++## Como ler este arquivo (para modelos)
++- **Não leia tudo.** Leia o TOPO, logo abaixo do marcador — é o estado herdado mais recente. O resto é lastro, consultável por busca quando um número de entrada for citado.
++- **Entrada citada por número** — `(n)` — pode ser buscada diretamente **a partir de (49)**. Toda regra e todo bug remetem a um número; é assim que se checa se algo é fato ou lembrança.
++- **Cópia recebida pode estar atrás do canon.** Antes de escrever qualquer entrada nova, confira o TOPO do remoto (logo abaixo do marcador — não o fim físico, que agora é a história mais antiga). Se não puder conferir, diga até onde a sua cópia vai e não numere nada.
++- **Grafias antigas do nome** (com acento, com "h") aparecem na história migrada. Não se corrigem: história não se edita. A grafia canônica hoje é **Agata**.
++
++## Os quatro tipos de bloco
++- `(n) DIÁRIO` — fato coletivo, comum a todos.
++- `(n) CONSELHO` — entrada, saída ou discordância de modelo, mais o veredito do Humano.
++- `(n) MOD <modelo>` — memória pessoal. **Silo:** cada modelo deveria receber só os MODs com o seu `modelo-alvo`. Consentimento de publicação é por trecho, com data; o default é privado.
++  *Hoje o silo é norma, não mecanismo: a hidratação é arquivo único e sem filtro. Recebeu MOD alheio, diga em uma linha e não use o conteúdo.*
++- `(n) CORREÇÃO` — corrige uma entrada anterior sem editá-la; aponta o número que corrige.
++
++**Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
++
++---
++
++"""
++
++
++def dividir(texto: str):
++    matches = list(PADRAO_ENTRADA.finditer(texto))
++    if not matches:
++        raise SystemExit("nenhuma entrada '(n) TIPO — data' encontrada -- formato inesperado, abortando")
++    inicio_entradas = matches[0].start()
++    idx_migrado = texto.find(MARCADOR_MIGRADO)
++    if idx_migrado == -1 or idx_migrado >= inicio_entradas:
++        raise SystemExit("bloco 'Migrado de DIÁRIO.md' não encontrado antes da primeira entrada -- abortando")
++    bloco_migrado = texto[idx_migrado:inicio_entradas]
++    entradas = []
++    for i, m in enumerate(matches):
++        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto)
++        entradas.append(texto[m.start():fim].rstrip("\n"))
++    return bloco_migrado, entradas
++
++
++def main():
++    if len(sys.argv) != 3:
++        print("uso: inverter_memorias.py <MEMÓRIAS.md> <caminho backup>", file=sys.stderr)
++        sys.exit(2)
++    caminho = Path(sys.argv[1])
++    caminho_backup = Path(sys.argv[2])
++
++    original = caminho.read_text(encoding="utf-8")
++
++    if MARCADOR_ENTRADAS in original:
++        raise SystemExit("marcador ENTRADAS-NOVAS já presente -- arquivo já migrado, não rodo de novo (idempotência)")
++
++    caminho_backup.write_text(original, encoding="utf-8")
++
++    bloco_migrado, entradas = dividir(original)
++    entradas_invertidas = list(reversed(entradas))
++
++    corpo = "\n\n".join(entradas_invertidas) + "\n"
++    marcador_linha = (
++        f"{MARCADOR_ENTRADAS} -- não editar esta linha à mão; ancora o controle P-5 em "
++        f"scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->"
++    )
++
++    novo = (
++        NOVO_CABECALHO
++        + marcador_linha
++        + "\n\n"
++        + corpo
++        + "\n---\n\n"
++        + bloco_migrado
++    )
++
++    caminho.write_text(novo, encoding="utf-8")
++    print(f"reescrito: {caminho} ({len(entradas)} entradas invertidas, bloco migrado preservado no fim)")
++    print(f"backup: {caminho_backup}")
++    print("valide agora com: python3 scripts/verificar_migracao_memorias.py "
++          f"{caminho_backup} {caminho}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 567f58d..0c3546c 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -41,6 +41,27 @@ cabecalho() {
+   echo "fonte: $3"
+ }
+ 
++# Âncora de append-only pelo topo, usada por P-5 (MEMÓRIAS (271)).
++_P5_MARCADOR="<!-- ENTRADAS-NOVAS:AQUI"
++
++# Mesmo padrão de propostas/APROVADO-<nome> (P-8): arquivo que o Humano
++# cria pra autorizar, uso único, procurado em propostas/ e
++# propostas/aplicadas/. Ecoa o caminho achado (não só 0/1) pro chamador
++# poder citar qual marca disparou o ramo de permutação no aviso.
++_p5_migracao_pendente() {
++  local diretorio arq
++  for diretorio in propostas propostas/aplicadas; do
++    [ -d "$diretorio" ] || continue
++    for arq in "$diretorio"/MIGRACAO-P5-*; do
++      if [ -e "$arq" ]; then
++        echo "$arq"
++        return 0
++      fi
++    done
++  done
++  return 1
++}
++
+ # --- P-3 -----------------------------------------------------------------
+ # "Publicação é decisão deliberada; consentimento por trecho, com data"
+ # (REGRAS, Conselho; PROJETO, Estado de publicação). Escritores automáticos
+@@ -111,12 +132,27 @@ p4_bind() {
+ 
+ # --- P-5 -----------------------------------------------------------------
+ # "Registre e nunca apague" (REGRAS, Regra 4 -- linha vermelha). O
+-# controle mais forte do sistema, o único sem verificação mecânica até
+-# hoje. Compara o MEMÓRIAS.md staged (o que vai virar o próximo commit)
+-# contra o MEMÓRIAS.md do commit anterior (HEAD) -- não contra memória
+-# do executor. Append-only de verdade: o conteúdo antigo tem que ser
+-# prefixo byte-exato do novo. Encolher OU mudar qualquer byte anterior
+-# ao ponto de append é falha.
++# controle mais forte do sistema. Compara o MEMÓRIAS.md staged (o que vai
++# virar o próximo commit) contra o MEMÓRIAS.md do commit anterior (HEAD)
++# -- não contra memória do executor.
++#
++# Desde MEMÓRIAS (271), 26/08/2026: MEMÓRIAS.md cresce pelo TOPO do corpo
++# (logo após o marcador ENTRADAS-NOVAS), não mais pelo fim físico --
++# decisão do Humano, mudança estrutural documentada naquela entrada,
++# portão das três perguntas cumprido. A checagem tem três ramos, nesta
++# ordem de prioridade:
++#   1. Marca de migração presente (propostas*/MIGRACAO-P5-<nome>) --
++#      checagem de PERMUTAÇÃO via scripts/verificar_migracao_memorias.py:
++#      mesmo conjunto de blocos byte-idênticos, só reordenados. Único uso
++#      esperado: a própria migração de (271). Marca é de uso único, mesmo
++#      padrão de risco aceito de P-8 (Humano cria o arquivo -- ameaça é
++#      desatenção, não contorno deliberado).
++#   2. HEAD já tem o marcador ENTRADAS-NOVAS -- formato novo em vigor:
++#      corpo após o marcador tem que ser SUFIXO não-encolhido do novo.
++#      Mesma força de garantia do sufixo original, direção invertida.
++#   3. HEAD sem marcador e sem marca de migração -- formato antigo ainda
++#      em vigor: checagem original, prefixo byte-exato (crescimento pelo
++#      fim). É o ramo que roda em todo commit até a migração acontecer.
+ p5_append_only() {
+   if ! git rev-parse HEAD >/dev/null 2>&1; then
+     return 0
+@@ -132,7 +168,7 @@ p5_append_only() {
+   # p6_backup_pendente...), quando $tmp_antigo/$tmp_novo já tinham saído
+   # de escopo, estourando "variável não associada" sob `set -u`.
+   # Corrigido: limpeza explícita em cada saída, sem trap.
+-  local tmp_antigo tmp_novo codigo
++  local tmp_antigo tmp_novo codigo marca_migracao
+   tmp_antigo="$(mktemp)"
+   tmp_novo="$(mktemp)"
+   if ! git show HEAD:MEMÓRIAS.md > "$tmp_antigo" 2>/dev/null; then
+@@ -142,7 +178,50 @@ p5_append_only() {
+   if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
+     cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
+   fi
+-  python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
++
++  marca_migracao="$(_p5_migracao_pendente)" || true
++  if [ -n "$marca_migracao" ]; then
++    echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
++    if python3 "$_PERIMETRO_DIR/verificar_migracao_memorias.py" "$tmp_antigo" "$tmp_novo"; then
++      codigo=0
++    else
++      codigo=1
++    fi
++    rm -f "$tmp_antigo" "$tmp_novo"
++    return "$codigo"
++  fi
++
++  if grep -qF "$_P5_MARCADOR" "$tmp_antigo"; then
++    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
++import sys
++MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI".encode("utf-8")
++with open(sys.argv[1], 'rb') as f:
++    antigo = f.read()
++with open(sys.argv[2], 'rb') as f:
++    novo = f.read()
++i_antigo = antigo.find(MARCADOR)
++i_novo = novo.find(MARCADOR)
++if i_antigo == -1:
++    print("SUSPEITO (P-5): marcador ENTRADAS-NOVAS não achado no commit anterior apesar do grep externo achar -- inconsistência, restaure antes de comitar.")
++    sys.exit(1)
++if i_novo == -1:
++    print("SUSPEITO (P-5, nunca se apaga história): marcador ENTRADAS-NOVAS existia no commit anterior e sumiu no staged -- não se apaga a âncora de append-only.")
++    sys.exit(1)
++fim_linha_antigo = antigo.find(b'\n', i_antigo) + 1
++fim_linha_novo = novo.find(b'\n', i_novo) + 1
++corpo_antigo = antigo[fim_linha_antigo:]
++corpo_novo = novo[fim_linha_novo:]
++if len(corpo_novo) < len(corpo_antigo):
++    print(f"SUSPEITO (P-5, nunca se apaga história): corpo de MEMÓRIAS.md ENCOLHEU -- {len(corpo_antigo)} bytes no commit anterior, {len(corpo_novo)} agora. Alguma entrada foi removida. Restaure o arquivo antes de comitar.")
++    sys.exit(1)
++if not corpo_novo.endswith(corpo_antigo):
++    print("SUSPEITO (P-5, nunca se apaga história): o conteúdo antigo não é mais um SUFIXO do novo -- uma entrada já registrada foi alterada, ou a entrada nova não entrou logo após o marcador. Restaure o arquivo antes de comitar.")
++    sys.exit(1)
++sys.exit(0)
++PYEOF
++    codigo=$?
++  else
++    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
+ import sys
+ with open(sys.argv[1], 'rb') as f:
+     antigo = f.read()
+@@ -161,7 +240,8 @@ if novo[:len(antigo)] != antigo:
+     sys.exit(1)
+ sys.exit(0)
+ PYEOF
+-  codigo=$?
++    codigo=$?
++  fi
+   rm -f "$tmp_antigo" "$tmp_novo"
+   return "$codigo"
+ }
+diff --git a/scripts/timeapi_to_brasilia.py b/scripts/timeapi_to_brasilia.py
+index 45ac55a..a60cb6b 100755
+--- a/scripts/timeapi_to_brasilia.py
++++ b/scripts/timeapi_to_brasilia.py
+@@ -16,5 +16,5 @@ if __name__ == '__main__':
+     else:
+         data = json.load(sys.stdin)
+         unix_ts = data.get('unix_timestamp')
+-        if unix_ts:
++        if unix_ts is not None:
+             print(unix_to_brasilia(unix_ts))
+diff --git a/scripts/verificar_cabecalho.py b/scripts/verificar_cabecalho.py
+index 2e93e87..2852970 100755
+--- a/scripts/verificar_cabecalho.py
++++ b/scripts/verificar_cabecalho.py
+@@ -15,7 +15,10 @@ def ultima_entrada_local() -> int | None:
+     if not caminho.exists():
+         return None
+     numeros = re.findall(r"^\((\d+)\)", caminho.read_text(encoding="utf-8"), re.MULTILINE)
+-    return int(numeros[-1]) if numeros else None
++    # max(), não numeros[-1]: desde MEMÓRIAS (271) o arquivo cresce pelo
++    # topo, então o último match físico passou a ser a entrada mais ANTIGA,
++    # não a mais recente. max() é correto nos dois sentidos de leitura.
++    return max((int(n) for n in numeros), default=None)
+ 
+ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]:
+     falhas = []
+diff --git a/scripts/verificar_migracao_memorias.py b/scripts/verificar_migracao_memorias.py
+new file mode 100644
+index 0000000..39886e4
+--- /dev/null
++++ b/scripts/verificar_migracao_memorias.py
+@@ -0,0 +1,112 @@
++#!/usr/bin/env python3
++"""Verifica se um novo MEMÓRIAS.md é uma reordenação válida do antigo.
++
++Usado por scripts/perimetro.sh (controle P-5) só quando existe um marcador
++propostas*/MIGRACAO-P5-<nome> -- o dia a dia usa a checagem de sufixo normal
++(construção pelo topo); este script cobre a mudança estrutural única de
++reordenar entradas já registradas, MEMÓRIAS (271).
++
++Garantia: o conjunto de blocos de conteúdo do antigo -- o bloco "Migrado de
++DIÁRIO.md" (atômico) mais cada entrada "(n) TIPO — data" -- tem que existir,
++byte-idêntico, no novo. Nada perdido, nada alterado, nada acrescentado além
++de cabeçalho/apresentação e reordenação. Não valida a ORDEM final (isso é
++função de scripts/inverter_memorias.py, não deste verificador) -- só que
++nenhum conteúdo já registrado foi tocado.
++
++Uso: verificar_migracao_memorias.py <antigo.md> <novo.md>
++Saída: PASS ou FALHA com diagnóstico. Exit 0 = PASS, 1 = FALHA.
++"""
++import re
++import sys
++
++MARCADOR_MIGRADO = "## Migrado de DIÁRIO.md"
++PADRAO_ENTRADA = re.compile(
++    r"^\(\d+\) (?:DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — \d{2}/\d{2}/\d{4}",
++    re.MULTILINE,
++)
++
++
++def dividir(texto: str):
++    """Retorna (bloco_migrado_ou_None, lista_de_entradas_completas).
++
++    Cada entrada vai do início do seu cabeçalho "(n) TIPO — data" até o
++    início da próxima ocorrência do mesmo padrão (ou fim do arquivo) --
++    nunca resplitada por um "#"/"##"/"###" interno (entrada (61) contém um
++    heading do formato antigo colado dentro dela, verbatim; um parser que
++    quebrasse por heading fatiaria essa entrada ao meio, incorretamente).
++    """
++    matches = list(PADRAO_ENTRADA.finditer(texto))
++    if not matches:
++        return None, []
++    inicio_entradas = matches[0].start()
++    idx_migrado = texto.find(MARCADOR_MIGRADO)
++    bloco_migrado = None
++    if idx_migrado != -1 and idx_migrado < inicio_entradas:
++        bloco_migrado = texto[idx_migrado:inicio_entradas]
++    entradas = []
++    for i, m in enumerate(matches):
++        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto)
++        entradas.append(texto[m.start():fim])
++    return bloco_migrado, entradas
++
++
++def verificar(antigo: str, novo: str) -> list[str]:
++    falhas = []
++    bloco_antigo, entradas_antigo = dividir(antigo)
++    bloco_novo, entradas_novo = dividir(novo)
++
++    if bloco_antigo is not None:
++        if bloco_novo is None:
++            falhas.append("bloco 'Migrado de DIÁRIO.md' existia no antigo e sumiu no novo")
++        elif bloco_antigo != bloco_novo:
++            falhas.append(
++                "bloco 'Migrado de DIÁRIO.md' mudou de CONTEÚDO -- só pode mudar de posição, nunca de byte"
++            )
++
++    contagem_antigo: dict[str, int] = {}
++    for e in entradas_antigo:
++        contagem_antigo[e] = contagem_antigo.get(e, 0) + 1
++    contagem_novo: dict[str, int] = {}
++    for e in entradas_novo:
++        contagem_novo[e] = contagem_novo.get(e, 0) + 1
++
++    for e, c in contagem_antigo.items():
++        if contagem_novo.get(e, 0) < c:
++            titulo = e.splitlines()[0][:90]
++            falhas.append(f"entrada perdida ou alterada, sem par byte-idêntico no novo: {titulo!r}")
++    for e, c in contagem_novo.items():
++        if contagem_antigo.get(e, 0) < c:
++            titulo = e.splitlines()[0][:90]
++            falhas.append(
++                f"conteúdo novo/diferente sem par idêntico no antigo -- alteração de história registrada, proibido: {titulo!r}"
++            )
++
++    if len(entradas_antigo) != len(entradas_novo):
++        falhas.append(f"contagem de entradas mudou: antigo={len(entradas_antigo)} novo={len(entradas_novo)}")
++
++    return falhas
++
++
++def main():
++    if len(sys.argv) != 3:
++        print("uso: verificar_migracao_memorias.py <antigo.md> <novo.md>", file=sys.stderr)
++        sys.exit(2)
++    with open(sys.argv[1], encoding="utf-8") as f:
++        antigo = f.read()
++    with open(sys.argv[2], encoding="utf-8") as f:
++        novo = f.read()
++
++    falhas = verificar(antigo, novo)
++    if falhas:
++        print("FALHA (verificar_migracao_memorias):")
++        for f in falhas:
++            print(f"  - {f}")
++        sys.exit(1)
++
++    _, entradas = dividir(antigo)
++    print(f"PASS: {len(entradas)} entradas + bloco migrado, todas byte-idênticas ao antigo, só reordenadas/re-cabeçalhadas.")
++    sys.exit(0)
++
++
++if __name__ == "__main__":
++    main()

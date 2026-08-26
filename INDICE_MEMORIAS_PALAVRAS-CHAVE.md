@@ -11,8 +11,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: orusoua, decidiu, claude, executou
 2026-07-01 (2) · Fase 0 executada (Claude Code na Predator)
   palavras-chave: fase, executada, claude, code, predator
-2026-07-01 (3) · Fase 1 e Fase 2 concluídas; Fase 3 iniciada (checkpoint — franq …
-  palavras-chave: fase, concluídas, iniciada, checkpoint, franq
+2026-07-01 (3) · Fase 1 e Fase 2 concluídas; Fase 3 iniciada (checkpoint — franquia esgotada)
+  palavras-chave: fase, concluídas, iniciada, checkpoint, franquia, esgotada
 2026-07-01 (4) · Fase 3 concluída
   palavras-chave: fase, concluída
 2026-07-01 (5) · Pendências da Fase 3 resolvidas (autorizado pelo Orusoua)
@@ -49,8 +49,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: fallback, trocado, fato, llama, qwen
 2026-07-03 (9) · Fix: DIÁRIO não chegava via Open WebUI (api_server)
   palavras-chave: fix, chegava, open, webui, api, server
-2026-07-03 (11) · Coexistência Hermes ↔ Open WebUI decidida (Opção A) + voz corr …
-  palavras-chave: coexistência, hermes, open, webui, decidida, opção, voz, corr
+2026-07-03 (11) · Coexistência Hermes ↔ Open WebUI decidida (Opção A) + voz corrigida
+  palavras-chave: coexistência, hermes, open, webui, decidida, opção, voz, corrigida
 2026-07-03 (12) · Coexistência implementada (Opção A) + divergência registrada
   palavras-chave: coexistência, implementada, opção, divergência, registrada
 2026-07-03 (13) · Chave rotacionada não propagada — Open WebUI dava 401
@@ -59,10 +59,10 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: voz, operacional, kokoro, dora, open, webui
 2026-07-03 (15) · Coexistência Opção A fechada 100%
   palavras-chave: coexistência, opção, fechada
-2026-07-04 (16) · Achado: registro fabricado em memoria/USER.md (ajuste de resfr …
-  palavras-chave: achado, registro, fabricado, memoria, user, ajuste, resfr
-2026-07-04 (17) · Máquina travando em loop — causa real: `agatha.service` órfão, …
-  palavras-chave: máquina, travando, loop, causa, real, agatha, service, órfão
+2026-07-04 (16) · Achado: registro fabricado em memoria/USER.md (ajuste de resfriamento)
+  palavras-chave: achado, registro, fabricado, memoria, user, ajuste, resfriamento
+2026-07-04 (17) · Máquina travando em loop — causa real: `agatha.service` órfão, não Docker/Hermes
+  palavras-chave: máquina, travando, loop, causa, real, agatha, service, órfão, docker, hermes
 2026-07-04 (18) · llama3.3:70b descartado — não cabe no hardware
   palavras-chave: llama, descartado, cabe, hardware
 2026-07-04 (19) · Comando "atualizar" criado + canônicos harmonizados
@@ -474,63 +474,65 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: âncora, sha, passa, gerada, automaticamente
 (227) DIÁRIO — 20/08/2026 · VM do Marcos, terreno preparado — política de fronte …
   palavras-chave: marcos, terreno, preparado, política, fronte
-(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" registrado com quatro provas; scripts/ler_pagina.sh lê página montada por JavaScript sem navegador, testado positivo e negativo
-  palavras-chave: princípio, ferramenta, nova, decisão, conserto, registrado, quatro, provas, scripts, ler, pagina, página, montada, javascript, navegador, testado, positivo, negativo
-(229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato físico confirmado por este executor, narrativa em volta não
-  palavras-chave: bloco, recebido, handoff, sessão, fato, físico, confirmado, executor, narrativa, volta
-(230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sobre `config.yaml` (229) foi real
-  palavras-chave: humano, confirma, vivo, disputa, modelos, config, yaml, real
-(231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenhado a partir de incidentes reais deste projeto, não copiado da proposta que chegou de fora
-  palavras-chave: portão, três, perguntas, adotado, regras, desenhado, partir, incidentes, reais, deste, projeto, copiado, proposta, chegou, fora
-(232) DIÁRIO — 21/08/2026 · ler_pagina.sh: teste negativo achou ruído de framework sendo relatado como conteúdo; conserto aplicado, aprovado ao vivo
-  palavras-chave: ler, pagina, teste, negativo, achou, ruído, framework, sendo, relatado, conteúdo, conserto, aplicado, aprovado, vivo
-(233) DIÁRIO — 21/08/2026 · git push travava por credencial expirada, não rede — `gh auth setup-git` destrava, confirma suspeita antiga do sincronizador
-  palavras-chave: git, push, travava, credencial, expirada, rede, auth, setup, destrava, confirma, suspeita, antiga, sincronizador
-(234) DIÁRIO — 21/08/2026 · Bancada de seleção de modelo, RELATÓRIO FINAL — controle avaliado (0 fabricação, 12/16 limpo), nenhum candidato supera o titular nesta bancada, duas exclusões por motivos distintos, leituras propostas sem veredito de promoção
-  palavras-chave: bancada, seleção, modelo, relatório, final, controle, avaliado, fabricação, limpo, candidato, supera, titular, exclusões, motivos, distintos, leituras, propostas, veredito, promoção
-(235) DIÁRIO — 21/08/2026 · Bancada de modelos: `deepseek-r1:8b` excluído por tempo de execução, decisão ao vivo do Humano, sem veredito de qualidade — entrada própria, por autorização, ver (234)
-  palavras-chave: bancada, modelos, deepseek, excluído, tempo, execução, decisão, vivo, humano, veredito, qualidade, entrada, própria, autorização
-(236) DIÁRIO — 21/08/2026 · Bancada de modelos: `mistral:7b-instruct` excluído por dado inválido — bug de glob consertado, rerun interrompido por desligamento abrupto, não retomado — entrada própria, por autorização, ver (234)
-  palavras-chave: bancada, modelos, mistral, instruct, excluído, dado, inválido, bug, glob, consertado, rerun, interrompido, desligamento, abrupto, retomado, entrada, própria, autorização
-(237) DIÁRIO — 22/08/2026 · Fecha o caso 16 do `rlm-qwen3-8b-teste` (234) — F1 errado, F2/F3 limpo, decisão do Humano com leitura do Opus 5 como insumo; linha final recalculada, não transcrita
-  palavras-chave: fecha, caso, rlm, qwen, teste, errado, limpo, decisão, humano, leitura, opus, insumo, linha, final, recalculada, transcrita
-(238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/2026 (P-8 hash, PROJETO riscos, sync unificado, Harness A1, glossário, índice por palavra-chave) + achado de arquivo novo consertado no caminho
-  palavras-chave: fecha, lote, seis, propostas, ordem, hash, projeto, riscos, sync, unificado, harness, glossário, índice, palavra, chave, achado, arquivo, novo, consertado, caminho
-(241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Panniantong/agent-reach) proposta pelo Humano, analisada e recusada — não fecha lacuna que a Agata tenha, antecipa fase do ACB, soma risco de config fora do repositório ainda pendente
-  palavras-chave: ferramenta, externa, agent, reach, github, panniantong, proposta, humano, analisada, recusada, fecha, lacuna, agata, tenha, antecipa, fase, acb, soma, risco, config, fora, repositório, pendente
-(242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" recusada pelo Humano — cosmética, o sistema já reagiu certo no teste que a motivou; (239)/(240) liberados, sem entrada nunca escrita neles
-  palavras-chave: regra, desacelerar, diante, carga, ética, alta, recusada, humano, cosmética, sistema, reagiu, certo, teste, motivou, liberados, entrada, nunca, escrita, neles
-(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da história do teste, executor GLM-4.7-Flash via `conselho_remoto.py`
-  palavras-chave: tes, rodada, primeira, passagem, limpa, história, teste, executor, glm, flash, remoto
-(244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM "Programmatic Tool Calling" pronto, desligado desde 02/07/2026 por razão que não tem nada a ver com o motivo da pesquisa do Humano
-  palavras-chave: achado, execute, code, ptc, hermes, instalado, tem, programmatic, tool, calling, pronto, desligado, desde, razão, nada, motivo, pesquisa, humano
-(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra `code_execution`/PTC — evidência real de Seth (`qwen3.5-9b-64k`) tentando a ferramenta indisponível e travando; SOUL.md arquivado
-  palavras-chave: portão, três, perguntas, fecha, agora, pra, code, execution, ptc, evidência, real, seth, qwen, tentando, ferramenta, indisponível, travando, soul, arquivado
-(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
-  palavras-chave: segunda, opinião, regra, proposta, pendente, desde, recebida, parecer, real, eco, defeitos, formato, identidade, verificada, decisão, fica, humano
-(247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máquina: hoje é 25/08/2026, não 26/08/2026 — "Qwen3.7" errou com confiança, exatamente o padrão que o próprio parecer de (246) descreveu
-  palavras-chave: disputa, data, modelos, arbitrada, máquina, hoje, qwen, errou, confiança, exatamente, padrão, próprio, parecer, descreveu
-(248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (metadado, fora de qualquer arquivo/commit) é relíquia de 20/04/2026, de antes do sistema atual existir — confunde qualquer sessão que faça busca web em vez de fetch de arquivo real
-  palavras-chave: achado, real, descrição, repositório, github, metadado, fora, arquivo, commit, relíquia, sistema, atual, existir, confunde, sessão, faça, busca, web, fetch
-(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
-  palavras-chave: três, consertos, aplicados, autorização, geral, humano, pode, consertar, tudo, você, encontrar, quebrado, description, github, estamos, atrasado, dias, formato, velho, prompt, carregamento
-(250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
-  palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata, opus, piora, corrige, cita, entradas, memórias, existem, inverte, fatos, reais, canon, alegação, nova, sustentou
-(251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
-  palavras-chave: correção, auditor, errou, teste, ágata, opus, existiu, verdade, diagnóstico, certo, cache, velho, fabricação
-(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 (140), não 31/07 nem "sete semanas" — nem eu nem "Ágata Opus" tínhamos rodado o teste certo ainda
-  palavras-chave: teto, snapshot, datado, precisão, nem, sete, semanas, ágata, opus, tínhamos, rodado, teste, certo
-(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
-  palavras-chave: audite, execute, melhorias, ágata, opus, aplicadas, url, pinada, sha, três, linhas, catálogo, ficam, pendentes, exigirem, segunda, opinião
-(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
-  palavras-chave: correção, grave, entradas, existem, verdade, auditor, cometeu, três, seguidas, próprio, erro, acabou, catalogar
-(255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — é limite documentado, deliberado, por boa razão. Dois consertos reais de PROJETO.md aplicados
-  palavras-chave: segunda, correção, mesmo, achado, tem, bug, limite, documentado, deliberado, boa, razão, consertos, reais, projeto, aplicados
-(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
-  palavras-chave: segunda, opinião, itens, carimbo, quarta, pergunta, recebida, glm, sim, pro, pra, aplicado, decisão, fica, humano
-(257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
-  palavras-chave: decisão, final, humano, itens, carimbo, frescor, quarta, pergunta, adotados, parecer, favorável, glm, muda, veredito, regra, fecha, proposta, ágata, opus
-(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
-  palavras-chave: tes, rodada, humano, decide, sessão, ágata, opus, conta, passa, critério, escrito, apesar, erros, reais, categorias, projeto, marcado, fechado
-(259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
-  palavras-chave: auditoria, seth, qwen, turnos, progresso, hora, precisão, turno, persiste, ponto, fraco
+(228) DIÁRIO — 20/08/2026 · Princípio "ferramenta nova é decisão, não conserto" …
+  palavras-chave: princípio, ferramenta, nova, decisão, conserto
+(229) DIÁRIO — 20/08/2026 · Bloco recebido como "handoff" de outra sessão — fato …
+  palavras-chave: bloco, recebido, handoff, sessão, fato
+(230) DIÁRIO — 20/08/2026 · Humano confirma ao vivo: a disputa entre modelos sob …
+  palavras-chave: humano, confirma, vivo, disputa, modelos, sob
+(231) DIÁRIO — 20/08/2026 · Portão das três perguntas adotado em REGRAS — desenh …
+  palavras-chave: portão, três, perguntas, adotado, regras, desenh
+(232) DIÁRIO — 21/08/2026 · ler_pagina.sh: teste negativo achou ruído de framewo …
+  palavras-chave: ler, pagina, teste, negativo, achou, ruído, framewo
+(233) DIÁRIO — 21/08/2026 · git push travava por credencial expirada, não rede — …
+  palavras-chave: git, push, travava, credencial, expirada, rede
+(234) DIÁRIO — 21/08/2026 · Bancada de seleção de modelo, RELATÓRIO FINAL — cont …
+  palavras-chave: bancada, seleção, modelo, relatório, final, cont
+(235) DIÁRIO — 21/08/2026 · Bancada de modelos: `deepseek-r1:8b` excluído por te …
+  palavras-chave: bancada, modelos, deepseek, excluído
+(236) DIÁRIO — 21/08/2026 · Bancada de modelos: `mistral:7b-instruct` excluído p …
+  palavras-chave: bancada, modelos, mistral, instruct, excluído
+(237) DIÁRIO — 22/08/2026 · Fecha o caso 16 do `rlm-qwen3-8b-teste` (234) — F1 e …
+  palavras-chave: fecha, caso, rlm, qwen, teste
+(238) DIÁRIO — 23/08/2026 · Fecha o lote de seis propostas da ordem de 22/08/202 …
+  palavras-chave: fecha, lote, seis, propostas, ordem
+(241) DIÁRIO — 25/08/2026 · Ferramenta externa "Agent Reach" (github.com/Pannian …
+  palavras-chave: ferramenta, externa, agent, reach, github, pannian
+(242) DIÁRIO — 25/08/2026 · Regra 8 "desacelerar diante de carga ética alta" rec …
+  palavras-chave: regra, desacelerar, diante, carga, ética, alta, rec
+(243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da hist …
+  palavras-chave: tes, rodada, primeira, passagem, limpa, hist
+(244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM " …
+  palavras-chave: achado, execute, code, ptc, hermes, instalado, tem
+(245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra …
+  palavras-chave: portão, três, perguntas, fecha, agora, pra
+(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendent …
+  palavras-chave: segunda, opinião, regra, proposta, pendent
+(247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máqui …
+  palavras-chave: disputa, data, modelos, arbitrada, máqui
+(248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (m …
+  palavras-chave: achado, real, descrição, repositório, github
+(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Hu …
+  palavras-chave: três, consertos, aplicados, autorização, geral
+(250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata O …
+  palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata
+(251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ág …
+  palavras-chave: correção, auditor, errou, teste
+(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 ( …
+  palavras-chave: teto, snapshot, datado, precisão
+(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …
+  palavras-chave: audite, execute, melhorias, ágata, opus
+(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (2 …
+  palavras-chave: correção, grave, entradas
+(255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — …
+  palavras-chave: segunda, correção, mesmo, achado, tem, bug
+(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quart …
+  palavras-chave: segunda, opinião, itens, carimbo, quart
+(257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de fre …
+  palavras-chave: decisão, final, humano, itens, carimbo, fre
+(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágat …
+  palavras-chave: tes, rodada, humano, decide, sessão, ágat
+(259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progre …
+  palavras-chave: auditoria, seth, qwen, turnos, progre
+(271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pe …
+  palavras-chave: mudança, estrutural, memórias, passa, crescer

@@ -41,6 +41,27 @@ cabecalho() {
   echo "fonte: $3"
 }
 
+# Âncora de append-only pelo topo, usada por P-5 (MEMÓRIAS (271)).
+_P5_MARCADOR="<!-- ENTRADAS-NOVAS:AQUI"
+
+# Mesmo padrão de propostas/APROVADO-<nome> (P-8): arquivo que o Humano
+# cria pra autorizar, uso único, procurado em propostas/ e
+# propostas/aplicadas/. Ecoa o caminho achado (não só 0/1) pro chamador
+# poder citar qual marca disparou o ramo de permutação no aviso.
+_p5_migracao_pendente() {
+  local diretorio arq
+  for diretorio in propostas propostas/aplicadas; do
+    [ -d "$diretorio" ] || continue
+    for arq in "$diretorio"/MIGRACAO-P5-*; do
+      if [ -e "$arq" ]; then
+        echo "$arq"
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+
 # --- P-3 -----------------------------------------------------------------
 # "Publicação é decisão deliberada; consentimento por trecho, com data"
 # (REGRAS, Conselho; PROJETO, Estado de publicação). Escritores automáticos
@@ -111,12 +132,27 @@ p4_bind() {
 
 # --- P-5 -----------------------------------------------------------------
 # "Registre e nunca apague" (REGRAS, Regra 4 -- linha vermelha). O
-# controle mais forte do sistema, o único sem verificação mecânica até
-# hoje. Compara o MEMÓRIAS.md staged (o que vai virar o próximo commit)
-# contra o MEMÓRIAS.md do commit anterior (HEAD) -- não contra memória
-# do executor. Append-only de verdade: o conteúdo antigo tem que ser
-# prefixo byte-exato do novo. Encolher OU mudar qualquer byte anterior
-# ao ponto de append é falha.
+# controle mais forte do sistema. Compara o MEMÓRIAS.md staged (o que vai
+# virar o próximo commit) contra o MEMÓRIAS.md do commit anterior (HEAD)
+# -- não contra memória do executor.
+#
+# Desde MEMÓRIAS (271), 26/08/2026: MEMÓRIAS.md cresce pelo TOPO do corpo
+# (logo após o marcador ENTRADAS-NOVAS), não mais pelo fim físico --
+# decisão do Humano, mudança estrutural documentada naquela entrada,
+# portão das três perguntas cumprido. A checagem tem três ramos, nesta
+# ordem de prioridade:
+#   1. Marca de migração presente (propostas*/MIGRACAO-P5-<nome>) --
+#      checagem de PERMUTAÇÃO via scripts/verificar_migracao_memorias.py:
+#      mesmo conjunto de blocos byte-idênticos, só reordenados. Único uso
+#      esperado: a própria migração de (271). Marca é de uso único, mesmo
+#      padrão de risco aceito de P-8 (Humano cria o arquivo -- ameaça é
+#      desatenção, não contorno deliberado).
+#   2. HEAD já tem o marcador ENTRADAS-NOVAS -- formato novo em vigor:
+#      corpo após o marcador tem que ser SUFIXO não-encolhido do novo.
+#      Mesma força de garantia do sufixo original, direção invertida.
+#   3. HEAD sem marcador e sem marca de migração -- formato antigo ainda
+#      em vigor: checagem original, prefixo byte-exato (crescimento pelo
+#      fim). É o ramo que roda em todo commit até a migração acontecer.
 p5_append_only() {
   if ! git rev-parse HEAD >/dev/null 2>&1; then
     return 0
@@ -132,7 +168,7 @@ p5_append_only() {
   # p6_backup_pendente...), quando $tmp_antigo/$tmp_novo já tinham saído
   # de escopo, estourando "variável não associada" sob `set -u`.
   # Corrigido: limpeza explícita em cada saída, sem trap.
-  local tmp_antigo tmp_novo codigo
+  local tmp_antigo tmp_novo codigo marca_migracao
   tmp_antigo="$(mktemp)"
   tmp_novo="$(mktemp)"
   if ! git show HEAD:MEMÓRIAS.md > "$tmp_antigo" 2>/dev/null; then
@@ -142,7 +178,50 @@ p5_append_only() {
   if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
     cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
   fi
-  python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
+
+  marca_migracao="$(_p5_migracao_pendente)" || true
+  if [ -n "$marca_migracao" ]; then
+    echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
+    if python3 "$_PERIMETRO_DIR/verificar_migracao_memorias.py" "$tmp_antigo" "$tmp_novo"; then
+      codigo=0
+    else
+      codigo=1
+    fi
+    rm -f "$tmp_antigo" "$tmp_novo"
+    return "$codigo"
+  fi
+
+  if grep -qF "$_P5_MARCADOR" "$tmp_antigo"; then
+    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
+import sys
+MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI".encode("utf-8")
+with open(sys.argv[1], 'rb') as f:
+    antigo = f.read()
+with open(sys.argv[2], 'rb') as f:
+    novo = f.read()
+i_antigo = antigo.find(MARCADOR)
+i_novo = novo.find(MARCADOR)
+if i_antigo == -1:
+    print("SUSPEITO (P-5): marcador ENTRADAS-NOVAS não achado no commit anterior apesar do grep externo achar -- inconsistência, restaure antes de comitar.")
+    sys.exit(1)
+if i_novo == -1:
+    print("SUSPEITO (P-5, nunca se apaga história): marcador ENTRADAS-NOVAS existia no commit anterior e sumiu no staged -- não se apaga a âncora de append-only.")
+    sys.exit(1)
+fim_linha_antigo = antigo.find(b'\n', i_antigo) + 1
+fim_linha_novo = novo.find(b'\n', i_novo) + 1
+corpo_antigo = antigo[fim_linha_antigo:]
+corpo_novo = novo[fim_linha_novo:]
+if len(corpo_novo) < len(corpo_antigo):
+    print(f"SUSPEITO (P-5, nunca se apaga história): corpo de MEMÓRIAS.md ENCOLHEU -- {len(corpo_antigo)} bytes no commit anterior, {len(corpo_novo)} agora. Alguma entrada foi removida. Restaure o arquivo antes de comitar.")
+    sys.exit(1)
+if not corpo_novo.endswith(corpo_antigo):
+    print("SUSPEITO (P-5, nunca se apaga história): o conteúdo antigo não é mais um SUFIXO do novo -- uma entrada já registrada foi alterada, ou a entrada nova não entrou logo após o marcador. Restaure o arquivo antes de comitar.")
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+    codigo=$?
+  else
+    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
 import sys
 with open(sys.argv[1], 'rb') as f:
     antigo = f.read()
@@ -161,7 +240,8 @@ if novo[:len(antigo)] != antigo:
     sys.exit(1)
 sys.exit(0)
 PYEOF
-  codigo=$?
+    codigo=$?
+  fi
   rm -f "$tmp_antigo" "$tmp_novo"
   return "$codigo"
 }

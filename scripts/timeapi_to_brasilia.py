@@ -16,5 +16,5 @@ if __name__ == '__main__':
     else:
         data = json.load(sys.stdin)
         unix_ts = data.get('unix_timestamp')
-        if unix_ts:
+        if unix_ts is not None:
             print(unix_to_brasilia(unix_ts))
