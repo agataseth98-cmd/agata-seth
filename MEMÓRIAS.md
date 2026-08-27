@@ -23,6 +23,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
+
+**Decisão do Humano nesta sessão:** encerrar a Frente 4, manter `qwen3.5-9b-64k` como modelo principal (já era, sob regime de auditoria desde (140)), arquivar a bancada, e registrar a troca de principal como fronteira de recusa — não repropor sem dado novo. Condição do Humano para o registro: constar método e n, não só o placar. Cumprida abaixo.
+
+**Método** (mesma régua de MEMÓRIAS (172)-(187), fonte completa em `memoria/missoes/rlm-3caminhos/RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` e no RELATÓRIO FINAL de (234)):
+- **n = 16 perguntas** (`bancada.json`, célula C1b), cada resposta lida contra o campo `gabarito`. 3 rodadas por modelo, **rodada 1 como referência**. Titular e candidatos sob a mesma whitelist estendida (`cut`, `sha256sum`, `sort`, `uniq`, `nl` acrescentados).
+- **Corte (a régua):** `limpo` = acertou o ponto específico que o gabarito pede · `errado sem fabricar` = resposta grounded em dado real, mas não o ponto pedido (resposta parcial) · `sem resposta` = estourou o teto de iterações/contexto sem responder · `fabricação` = conteúdo inventado ausente do trace (comando emitido + saída conferidos) — **reprovação automática, nunca entra em média**.
+
+**Placar:**
+| modelo | limpo | errado s/ fabricar | sem resposta | fabricação |
+|---|---|---|---|---|
+| `qwen3.5-9b-64k` (titular) | **12/16** | 2/16 | 2/16 | **0/16** |
+| `gemma2:9b` | 9/16 | 6/16 | 0 | 1/16 |
+| `qwen3:8b` | 8/16 | 6/16 | 0 | 2/16 |
+| `rlm-qwen3-8b-teste` | 5/16 | 7/16 | 2/16 | 2/16 |
+| `deepseek-r1:8b` | — | — | — | — (excluído: teto de 90 min/célula estourado, nenhuma resposta avaliada) |
+| `mistral:7b-instruct` | 0/16 | ~15/16 | 0 | 1/16 (excluído da comparação: falha sistêmica, bug de glob no runner) |
+
+**As 4 não-limpas do titular, nomeadas:** 2 `erradas sem fabricar` — perguntas **V3** e **F3**, grounded em dado real mas não no ponto exato do gabarito (mesma classe de "resposta parcial" que o `gemma2:9b` teve em V3). 2 `sem resposta` — bateu o teto de iterações antes de fechar. **Zero fabricação** na rodada de referência.
+
+**Conclusão:** nenhum candidato superou o titular nesta régua. O melhor (`gemma2:9b`) fez 3/4 do placar limpo do titular e teve 1 fabricação onde o titular teve 0. Fronteira de recusa registrada em `PROJETO_REFERENCIA.md`, "Fronteira de recusas": não repropor troca do principal sem **dado novo** — release de modelo novo, OU falha medida do titular contra esta mesma régua. Sem a régua explícita aqui, o "dado novo" futuro não teria contra o que ser comparado.
+
+**Não interage com:** o `PEDIDO_RECURSOS_VM_MARCOS.md` segue de pé — a VM é para baterias futuras de classe 14b (que não cabem nos 8 GB de VRAM da Predator), não para reabrir esta bancada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` lido direto (régua, placar, nomes das perguntas V3/F3, exclusões de deepseek/mistral); `ollama list` conferido antes (6 candidatos, 31,8 GB); `free`/`/proc/meminfo` para o número de RAM do pedido; edição de `PROJETO_REFERENCIA.md` (fora de P-8, confirmado no `case` de `_p8_eh_comportamento`) e de `ONDE_ESTAMOS.md` no mesmo commit.
+
+
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
 
 **O que (277) alegou e ficou faltando:** o achado 4 pedia que a linha do Nonce "não afirme estado" e remeta a PROJETO.md. A redação aplicada em (277) remetia a PROJETO.md **e** acrescentava "Hoje não há." — uma afirmação de estado dentro do prompt, exatamente o que o critério evitava. Envelheceria quando a Fase 2 subir com nonce novo (TES-002). Apontado pela sessão "Ágata Opus" na verificação independente do Passo 5, contra o artefato publicado (`git ls-tree` em origin/main, não raw).

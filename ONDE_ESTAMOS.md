@@ -166,15 +166,21 @@ células de candidato. Se não, rode
 sobrescreve, não duplica.
 
 ## Esperando você
-- Escolher o que fazer com o resultado do teste grande de IA.
 - Revisar e mandar (ou não) o pedido de recursos pro Marcos —
-  `memoria/missoes/rlm-3caminhos/PEDIDO_RECURSOS_VM_MARCOS.md`.
-- Marcar uma sessão só pra rodar o teste grande com os modelos
-  candidatos — leva umas 6 horas de GPU, por isso ficou de fora de
-  hoje.
+  `memoria/missoes/rlm-3caminhos/PEDIDO_RECURSOS_VM_MARCOS.md` (número
+  de RAM ajustado em 27/08: 40 GB instalada / ~38 GiB utilizáveis).
+- Aprovar (ou não) a proposta P-8
+  `propostas/ancora-defasagem-honesta.diff` — último ponto do conserto
+  do prompt de carregamento (tira "nunca mais" do bloco gerado da
+  âncora).
 - Confirmar se a conversa entre modelos sobre a edição do
-  `config.yaml` foi real, e se quer adotar a regra das três perguntas
-  antes de mudança estrutural.
+  `config.yaml` foi real. (A regra das três perguntas já é canon
+  desde (228)-(230); isso não está mais em aberto.)
+
+O teste grande de IA (bancada Frente 4) está **decidido e fechado**: os
+6 candidatos rodaram, nenhum superou o modelo atual (`qwen3.5-9b-64k`),
+e a troca virou fronteira de recusa — não se repropõe sem dado novo.
+Registrado em MEMÓRIAS (280).
 
 ## Rodando agora
 Nada rodando. A máquina desligou abruptamente durante o rerun do

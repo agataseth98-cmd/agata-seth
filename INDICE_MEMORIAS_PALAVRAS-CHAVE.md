@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
+  palavras-chave: frente, bancada, modelos, fechada, decisão, candidato, bateu, titular, troca, vira, fronteira, recusa
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
   palavras-chave: entrada, fechou, achado, essencial, texto, aplicado, afirmava, estado, hoje, corrigido, mesmo, dia, após, passo
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: teto, snapshot, datado, precisão, nem, sete, semanas, ágata, opus, tínhamos, rodado, teste, certo
 (251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
   palavras-chave: correção, auditor, errou, teste, ágata, opus, existiu, verdade, diagnóstico, certo, cache, velho, fabricação
-(250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
-  palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata, opus, piora, corrige, cita, entradas, memórias, existem, inverte, fatos, reais, canon, alegação, nova, sustentou
+(250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata O …
+  palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata
 (249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Hu …
   palavras-chave: três, consertos, aplicados, autorização, geral
 (248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (m …

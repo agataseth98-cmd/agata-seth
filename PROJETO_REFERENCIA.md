@@ -68,6 +68,7 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
 | RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
 | Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
 | Agent Reach (CLI multi-plataforma, github.com/Panniantong/agent-reach) | Não fecha lacuna que a Agata tenha (ler_pagina.sh já cobre a metade zero-config); antecipa fase do ACB sem ordem; soma risco de config fora do repo, já declarado e pendente | MEMÓRIAS (241) |
+| Trocar o modelo principal por um candidato da bancada Frente 4 | Bancada de 6 fechada 21-22/08 na régua de (172)-(187): nenhum bateu o titular. `qwen3.5-9b-64k` 12/16 limpo, 0/16 fabricação; melhor candidato `gemma2:9b` 9/16 limpo, 1/16 fabricação. Só reabre com dado novo — release de modelo novo, OU falha medida do titular contra a mesma régua | MEMÓRIAS (234), (280); `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` |
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.
