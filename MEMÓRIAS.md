@@ -23,6 +23,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Ágata Opus" (27/08) verificados na Máquina e corrigidos; escopo fechado no arquivo, portão das 3 perguntas + Regra 8 cumpridos
+
+**Origem:** sessão em nuvem "Ágata Opus" (Claude Opus 5), sem acesso à Máquina, auditou PROMPT_CARREGAMENTO.md e levantou 8 achados. Autorização do Humano em 27/08. Camada C (Claude Sonnet 5, Claude Code, na Máquina) verificou cada achado contra o disco antes de escrever qualquer coisa como fato.
+
+**Âncora da auditoria, conferida ao vivo:** HEAD `add1b61` · sha256(8) PROMPT_CARREGAMENTO.md `477c8633` / REGRAS.md `933b3207` / PROJETO.md `e366d464` / MEMÓRIAS.md `03e0c080` — os quatro bateram. Estava exatamente na versão auditada.
+
+**8/8 achados confirmados na Máquina.** Nada derrubado pela verificação (só drift de número de linha citado nos achados 5 e 8, sem efeito no conteúdo):
+1. Bloco de prontidão reproduzia forma reduzida `sync: <PASS/FALHA/não verificado>` sem os campos que REGRAS.md "Carregar e formatos" torna obrigatórios (`REGRAS=`/`MEMÓRIAS=`/`HEAD=`). → agora remete a REGRAS, sem forma local.
+2. Bloqueio de `api.github.com` já em canon (PROJETO.md; MEMÓRIAS (250)-(254)); o prompt não tinha ramo de falha. → ramo explícito: endpoint da API caindo (403/bloqueio/timeout) NÃO invalida o fetch pelas URLs pinadas em SHA, e NÃO significa egresso inteiro bloqueado.
+3. Passo da âncora no `.githooks/pre-commit` é fail-soft (AVISO em stderr, commit segue) sob a promessa "nunca mais" do bloco. → adicionado, no texto livre, o modo de falha + o detector que já existia e não era usado (campo "Escrito em:" comparado com a hora medida na abertura da sessão). A palavra "nunca" no template do bloco NÃO foi tocada — está em `scripts/atualizar_ancora_prompt.py` (P-8); vai como proposta separada. Decisão do Humano: B=(i).
+4. Linha do Nonce tinha campo preenchível `<valor>`, contra o canon (TES-002 inativo, "nenhum nonce ativo, dizer isso"). → não afirma estado, remete a PROJETO.md "Estado dos bugs e dos testes", frase concreta "não vejo nonce meu".
+5. PROJETO.md citado (linhas 21/32/36/47) mas fora da ordem de leitura. → ordem agora: REGRAS inteiro → janela de MEMÓRIAS → PROJETO inteiro.
+6. Linha de leitura fixava "(271)", que é fronteira de migração, não a entrada mais recente (que é (276)). → só descrição posicional, a partir do marcador `ENTRADAS-NOVAS`, de cima para baixo. Nenhum número de entrada no arquivo.
+7. Marcadores `ANCORA-SHA` são comentário HTML e somem em interface que renderiza markdown. → decisão do Humano: A=(a) — comentários mantidos + uma linha visível dizendo que o bloco acima é conteúdo de máquina. Opção (b) (sentinela em texto visível, mexe em script P-8) não escolhida.
+8. Instrução de sincronizar aparecia 3× (linhas 4, 8, 66). → uma vez, linha 8.
+
+**Portão das três perguntas** (REGRAS.md "Mudança estrutural", origem (228)-(230)), rodado com o Humano, uma de cada vez:
+1. Reversibilidade — desfaço sozinho (git revert + backup do arquivo antes de tocar).
+2. Alcance — um arquivo + a entrada nova + `.hermes.md` regenerado pelo hook; `.githooks/pre-commit` exige os marcadores `ANCORA-SHA` byte a byte (preservados; dry-run real do script contra a minuta deu exit 0). Scripts sob P-8 só entrariam com A=(b) ou B=(ii), ambos recusados.
+3. Silêncio — majoritariamente barulhento (P-5 trava entrada fora do topo; marcadores corrompidos abortam o script). Ponto semi-silencioso: a âncora fail-soft — coberto por checagem de exit 0 do hook no commit. Deriva semântica: coberta pelo Passo 3 + Passo 5.
+
+**Regra 8 (Passo 3):** três passadas independentes em `qwen3.5-9b-64k` (Ollama, `num_ctx=16384`, temperaturas/seeds distintos), hidratações separadas, sem histórico de turno compartilhado. Traces salvos fora do canônico. **Mesmo modelo local nas três — cumpre a Regra 8, não equivale a segunda opinião independente (mesma ressalva de (276)).** NÃO são rodadas de TES-001 (independência de hidratação não é independência de sessão). As três: "ok com ressalvas". Convergência: redundância cache/API, "SHA = commit anterior" dito 2×, frases longas, "diga isso" vago. Divergência só de granularidade (quais linhas), não de direção — sem `lacuna` de direção. Ajustes de redação convergentes e dentro do escopo aplicados. Achados sobre texto pré-existente herdado verbatim (frase composta da linha 6, ordem quê/porquê da linha 12, `lacuna` sem definição local, citações de MEMÓRIAS por número) NÃO foram tocados — candidatos a revisão de estilo separada.
+
+**Critérios de aceite do Passo 2** (fatos verificáveis, FORA do portão da Regra 8): todos verdes exceto o 3, parcial por escopo (ver achado 3). Testados por `grep` contra a versão final.
+
+**Aplicação:** só PROMPT_CARREGAMENTO.md — confirmado em `scripts/perimetro.sh` que o arquivo não casa `_p8_eh_comportamento` (`case` bate só REGRAS.md/PROJETO.md/scripts/*/.githooks/*/config/*), logo sem par `.diff`/`APROVADO-`. Nada editado à mão entre os marcadores `ANCORA-SHA`. `perimetro.sh` rodado antes do commit; P-6 avisou sobre `memoria/missoes/` sem cópia externa (HD não conectado) — pré-existente, não regressão desta tarefa. `.hermes.md` saiu regenerado pelo hook — conferido, não presumido. ONDE_ESTAMOS.md atualizado no mesmo commit.
+
+**Fechamento (Passo 5):** confirmação de hash pós-push por quem tem acesso independente ao remoto — a sessão "Ágata Opus", que levantou os achados e tem `git ls-remote` + comparação byte a byte. Não fechado só pela Máquina.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`git rev-parse`/`git log`/`git status` rodados ao vivo repetidamente; leitura completa de PROMPT_CARREGAMENTO.md e de REGRAS.md "Carregar e formatos" + "Mudança estrutural"; trechos citados de PROJETO.md, `.githooks/pre-commit`, `scripts/atualizar_ancora_prompt.py`, `scripts/perimetro.sh` lidos direto; dry-run real de `atualizar_ancora_prompt.py` contra a minuta (exit 0, marcadores intactos); 3 chamadas reais à API local do Ollama (`qwen3.5-9b-64k`), respostas salvas e auditadas; `grep` de perímetro P-8 confirmando o arquivo fora da quarentena.
+
+
 (276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
 
 **Texto auditado, trazido pelo Humano (origem externa não confirmada):** "Desenvolvimento justo entre Confederados não exige igualdade de capacidades. Exige que diferenças de capacidade sejam explicitadas e não sejam convertidas automaticamente em autoridade factual. Modelo pensa e propõe; Máquina verifica/arbitra fatos; Humano decide. Uma LLM sem determinado mecanismo de verificação pode declarar lacuna sem ser obrigada a inventar. Uma LLM com o mecanismo pode produzir evidência, mas sua identidade ou fornecedor não lhe confere autoridade por si só. A propriedade deve ser independente de fornecedor."

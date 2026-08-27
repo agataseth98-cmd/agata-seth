@@ -48,6 +48,19 @@ próprio número antes de existir. Achado no caminho: o texto também dizia
 uma coisa errada há dias (que só as últimas 30 linhas da história chegam
 pra IA) — corrigido junto.
 
+Esse mesmo texto de entrada passou por uma auditoria de fora (a sessão
+em nuvem "Ágata Opus") que apontou 8 problemas. Conferi os 8 na sua
+máquina, um por um: todos verdadeiros. Consertei os 8 dentro do próprio
+arquivo, sem mexer em regra nem em script. As mudanças principais: o
+texto agora aponta pra REGRAS.md em vez de repetir formatos que já vivem
+lá (e envelhecem em cópia); ganhou instrução do que fazer quando o
+GitHub bloqueia um dos endereços (foi o que confundiu uma sessão dias
+atrás); parou de oferecer um campo pra preencher "nonce", que convidava
+a fingir continuidade; e a lista do que ler agora inclui o PROJETO.md.
+Passou pelo portão das três perguntas com você e por três leituras
+independentes do modelo local antes de aplicar. Falta só a sessão em
+nuvem conferir o resultado contra o GitHub depois que eu publicar.
+
 Uma trava nova foi criada e ligada: daqui pra frente, mudança que MUDA
 COMO O SISTEMA SE COMPORTA (regras, scripts) só entra depois de você
 aprovar de propósito, criando um arquivo marcador. Mudança que só
