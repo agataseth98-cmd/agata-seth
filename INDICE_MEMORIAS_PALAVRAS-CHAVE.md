@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
+  palavras-chave: limpeza, par, esferas, movido, propostas, aplicadas, rodapé, estamos, ponteiro, acb, projeto, referencia, atualizados
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
   palavras-chave: esferas, memória, pessoal, projeto, reversão, parcial, assunto, sistema, decisão, humano, seção, camadas, reescrita
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: segunda, opinião, itens, carimbo, quarta, pergunta, recebida, glm, sim, pro, pra, aplicado, decisão, fica, humano
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — é limite documentado, deliberado, por boa razão. Dois consertos reais de PROJETO.md aplicados
   palavras-chave: segunda, correção, mesmo, achado, tem, bug, limite, documentado, deliberado, boa, razão, consertos, reais, projeto, aplicados
-(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
-  palavras-chave: correção, grave, entradas, existem, verdade, auditor, cometeu, três, seguidas, próprio, erro, acabou, catalogar
+(254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (2 …
+  palavras-chave: correção, grave, entradas
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …
   palavras-chave: audite, execute, melhorias, ágata, opus
 (252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 ( …

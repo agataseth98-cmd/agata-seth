@@ -23,6 +23,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
+
+Três pendentes de higiene, apontados pela Ágata Opus, fechados num commit só:
+- `propostas/duas-esferas.diff` + `propostas/APROVADO-duas-esferas` → `propostas/aplicadas/` (README passo 4 — aprovação consumida move o par; ficou de fora do commit de (283) por engano).
+- `ONDE_ESTAMOS.md`, "Última atualização": marcava 26/08; agora reflete a sessão de 27/08 (entradas 277–283).
+- `PROJETO_REFERENCIA.md`, "## ACB — bússola, não backlog": acrescentado o ponteiro de que a decisão de (223) ("ACB inteiro fora de escopo") foi parcialmente revertida em (283) para assunto de sistema.
+
+Nenhuma mudança de comportamento. `PROJETO_REFERENCIA.md` e `ONDE_ESTAMOS.md` estão fora da quarentena P-8 (`_p8_eh_comportamento` casa só REGRAS.md/PROJETO.md/scripts/*/.githooks/*/config/*).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git mv` do par; `grep` do rodapé de data em ONDE_ESTAMOS.md; leitura das linhas 37–38 de PROJETO_REFERENCIA.md; `case` de `_p8_eh_comportamento` conferido.
+
+
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
 
 **Decisão autorizadora:** o Humano autorizou, nesta sessão, reestruturar a política de memória do sistema em duas esferas e reverter parcialmente (223). O pacote foi consolidado pela auditoria em nuvem "Ágata Opus" a partir de desenho do Qwen3.7 e parecer do GPT-5.6 "Luna" — as três camadas ficam nomeadas aqui; a aplicação se comprova pelo commit desta entrada, não por afirmação.

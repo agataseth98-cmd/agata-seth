@@ -607,7 +607,10 @@ e corrigi antes de fechar, exatamente o tipo de erro que a regra que
 você escreveu tenta evitar.
 
 ## Última atualização
-26/08/2026, 13:28 (a ordem de MEMÓRIAS.md foi invertida — mais recente
-no topo — com sua autorização passo a passo; quatro erros achados
-testando foram corrigidos antes de fechar; nada de história foi
-apagado ou editado, só reordenado, conferido por computador).
+27/08/2026 (sessão longa após o reboot): prompt de carregamento
+auditado e consertado (8 achados, MEMÓRIAS 277–281); SOUL.md ignorado
+(278); bancada de modelos fechada, nenhum candidato bateu o atual
+(280); duas esferas de memória escritas no PROJETO.md + reversão
+parcial da (223) (283); conversa do config.yaml confirmada real (282).
+Em andamento: credencial Google da conta do projeto (OAuth drive.file).
+Backup no HD religado — pendências de bundle drenadas.
