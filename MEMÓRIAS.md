@@ -23,6 +23,21 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
+
+**Ordem do Humano:** "e deve ser acessada pela Seth a priori."
+
+**Achado, não presumido:** o acesso da Seth ao vault **já estava disponível**, sem configurar nada:
+- `~/.hermes/config.yaml` → `cwd: /home/orusoua/agata` — a Seth já opera na raiz do repo e lê `memoria/obsidian/` com as ferramentas normais de arquivo.
+- `config.yaml` → `skills:` tem uma lista `disabled:`, não `enabled:` — skills são ligadas por padrão. `note-taking/obsidian` (existe em `~/.hermes/hermes-agent/skills/note-taking/obsidian/`) **não está em `disabled`** → já disponível para navegação nativa de vault.
+
+**O que faltava — feito nesta entrada:** uma linha em PROJETO.md, "Memória e hidratação", registrando o vault e dizendo que a Seth navega a partir de `memoria/obsidian/INICIO.md`. Como PROJETO.md entra na hidratação (`.hermes.md`), a existência do vault agora chega à Seth a cada carregamento — "a priori" de fato. `propostas/seth-vault-ponteiro.diff` congelado (sha256 `47191522c79b`) sob P-8, risco assumido pelo Humano; par em `propostas/aplicadas/`.
+
+**Escrita no vault pela Seth:** desencorajada e auto-corretiva — a geração no `post-commit` apaga `memoria/obsidian/` e reescreve, então qualquer edição some no commit seguinte. `_LEIA.md` e `INICIO.md` avisam. Escrita de fato segue o fluxo normal: proposta → decisão do Humano → verificação → entrada em MEMÓRIAS → regeneração.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `ls ~/.hermes/hermes-agent/skills/note-taking/` (obsidian presente); `sed` da seção `skills:` do `config.yaml` (é `disabled:`, e `note-taking`/`obsidian` não está lá); `grep cwd` no `config.yaml` (= repo); `.diff` de PROJETO.md por `git diff`, `sha256sum`, `git checkout`; `perimetro.sh` P-8 após aplicar.
+
+
 (290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
 
 **Ordem do Humano:** "absolutamente tudo que fizemos e que fizermos incluindo o canon, deve ter sua representação canônica lá, sincronizado para melhorar a visualização do Humano … siga as melhores práticas … preveja problemas e solucione os antes de acontecerem … e deve ser acessada pela Seth a priori." Risco assumido por escrito.

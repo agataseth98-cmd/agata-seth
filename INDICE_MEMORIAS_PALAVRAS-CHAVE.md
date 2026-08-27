@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
+  palavras-chave: seth, passa, navegar, vault, obsidian, priori, ponteiro, projeto, memória, hidratação, acesso, disponível, skill, desabilitada, cwd, repo
 (290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
   palavras-chave: vault, obsidian, completo, sistema, entradas, regras, projeto, canônicos, scripts, controles, propostas, representado, religado, regenerado, post, commit
 (289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidian derivada de MEMÓRIAS.md (nota atômica por entrada, wikilinks, MOC, timeline). Aplicado sob P-8
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, teste, regra, sincronizacao, horario, seth
 (262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261)
   palavras-chave: diario, correcao, duplicacao, acidental, memorias
-(261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em precisao e autoconsciencia, turno off-by-one persiste
-  palavras-chave: diario, bateria, testes, parte, seth, progresso, precisao, autoconsciencia, turno, off, one, persiste
+(261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em prec …
+  palavras-chave: diario, bateria, testes, parte, seth, progresso, prec
 (260) DIARIO - 26/08/2026 - Padronizacao de sincronizacao de horario para todas …
   palavras-chave: diario, padronizacao, sincronizacao, horario
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progre …
