@@ -24,6 +24,12 @@ memoria/missoes/
 # decisão deliberada; nunca pública (achado em 15/08/2026, PROJETO item 108)
 memoria/*.md
 
+# SOUL.md — persona do hermes-agent, reescrita automática no boot (default
+# genérico "Nous Research"). Arquivada em MEMÓRIAS (245): não é lida por
+# nenhum mecanismo de hidratação do canon. Fora do índice pra não voltar
+# como ruído não-rastreado a cada reinício.
+SOUL.md
+
 # Artefatos derivados de qualquer camada privada — protege por nome, não só por pasta
 # (achado em MEMÓRIAS (97): um artefato escrito um nível acima de memoria/missoes/ escapa do ignore por pasta)
 *.bundle

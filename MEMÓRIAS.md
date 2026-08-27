@@ -23,6 +23,15 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
+
+**Contexto:** depois do reboot de 27/08, `git status` em `~/agata` mostrava `SOUL.md` não-rastreado, com data do minuto do boot. Conteúdo: persona default do hermes-agent ("You are Hermes Agent … created by Nous Research"), diferente da versão arquivada. Verificado: `agent/prompt_builder.py` do hermes-agent lê `SOUL.md` de `HERMES_HOME` e `utils.py` fala em symlink automático de `config.yaml`/`SOUL.md`/`auth.json` — a Máquina reescreve o arquivo sozinha na inicialização.
+
+**Decisão (autorização geral do Humano nesta sessão):** `SOUL.md` adicionado ao `.gitignore`, ao lado da regra `memoria/*.md` — mesma classe (escrita automática pela Máquina, não decisão deliberada). Já fora do canon desde MEMÓRIAS (245): nenhum mecanismo de hidratação (REGRAS/PROJETO/MEMÓRIAS/`gerar-hermes-md.sh`) o lê. `.gitignore` não é P-8 (`_p8_eh_comportamento` casa só REGRAS.md/PROJETO.md/scripts/*/.githooks/*/config/*). Reversível: apagar a regra. A cópia arquivada em `_arquivo_agata_il/SOUL.md` segue no índice, intacta.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum SOUL.md` + `cat` ao vivo; `grep` recursivo em `~/.hermes/hermes-agent/` achando os pontos que leem/symlinkam SOUL.md; `diff` contra `_arquivo_agata_il/SOUL.md`; leitura do `case` de `_p8_eh_comportamento` em `scripts/perimetro.sh`.
+
+
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Ágata Opus" (27/08) verificados na Máquina e corrigidos; escopo fechado no arquivo, portão das 3 perguntas + Regra 8 cumpridos
 
 **Origem:** sessão em nuvem "Ágata Opus" (Claude Opus 5), sem acesso à Máquina, auditou PROMPT_CARREGAMENTO.md e levantou 8 achados. Autorização do Humano em 27/08. Camada C (Claude Sonnet 5, Claude Code, na Máquina) verificou cada achado contra o disco antes de escrever qualquer coisa como fato.
