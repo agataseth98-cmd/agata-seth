@@ -1,0 +1,53 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index aed381d..503f110 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -54,8 +54,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ - **Fonte canônica (URLs) e atualização:** `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/{REGRAS,PROJETO,MEMÓRIAS}.md`. Primeira sessão: o Humano envia os 3. Depois: o modelo busca das URLs, seguindo a ordem de verificação de REGRAS.md. `atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar hidratação. Nunca sobrescreve história; conflito → para e avisa.
+   **Caveat medido, MEMÓRIAS (156):** `raw.githubusercontent.com` é servido por CDN (Fastly) e pode ficar em cache por alguns minutos após um push, mesmo com cache-busting na query string — confirmado ao vivo, ~1-2 min de defasagem. `git ls-remote`/`git ls-tree` (na Máquina) não sofrem disso, por isso são o método 1 em "Verificação de canônico", superior ao raw. Uma sessão só-HTTP (sem Máquina) verificando *logo depois* de um push pode pegar conteúdo stale sem ter como saber — não é falha de sincronização do modelo, é da fonte.
+   **Âncora de SHA no prompt de carregamento, 20/08/2026 (item 4 do documento do Humano, sugestão do Marcos, MEMÓRIAS (217); geração automática item 2, 20/08/2026, MEMÓRIAS (226)).** O prompt de carregamento usado por sessões só-HTTP (sem Máquina) carrega o SHA de commit esperado no momento em que foi escrito. Uma sessão só-HTTP pode consultar `https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main` (endpoint da API do GitHub, não o CDN do raw) e comparar o campo `sha` contra o valor impresso no prompt — divergência é sinal de que o prompt está desatualizado ou o raw pode estar em cache, não prova sozinha de nenhum dos dois. Testado ao vivo em 20/08/2026: o endpoint respondeu com o SHA correto do HEAD no momento da checagem. **Não substitui `git ls-remote`/`git ls-tree` onde a Máquina existe** — esses continuam método 1, superior. **Limite achado em 25/08/2026 (MEMÓRIAS (250)-(254)):** `api.github.com` bloqueia por bot-detection em pelo menos uma interface de nuvem real testada — essa sessão não teve como rodar esta comparação. Não é universal.
+-  **URLs raw pinadas em SHA, 25/08/2026 (MEMÓRIAS (253), achado de "Ágata Opus").** Preferir estas sobre as URLs em `/main/` acima: `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/<SHA>/{REGRAS,PROJETO,MEMÓRIAS}.md`, geradas automaticamente dentro do próprio bloco ANCORA-SHA (mesmo SHA, mesma defasagem máxima de 1 commit). Conteúdo endereçado por hash é imutável — elimina o risco de cache velho sem precisar do endpoint da API, que pode estar bloqueado (ver limite acima). As URLs em `/main/` continuam como alternativa/fallback.
+-  **Mecanismo, desde 20/08/2026:** o prompt agora é canônico dentro do repo (`PROMPT_CARREGAMENTO.md`, movido da Área de trabalho — ver "Quarentena estrutural" pra classificação SEM quarentena). `.githooks/pre-commit` reescreve as duas linhas entre os marcadores `ANCORA-SHA` a cada commit, via `scripts/atualizar_ancora_prompt.py` — nunca toca o resto do arquivo, aborta sem escrever se os marcadores sumirem. **Limite conhecido, não escondido:** um commit não pode embutir o próprio SHA (auto-referência) — o valor escrito é sempre o do HEAD ANTERIOR ao commit, então fica até 1 commit atrasado, nunca mais. Decisão do Humano: aceitar esse atraso pequeno e documentado em troca de 100% automático, em vez de exigir um commit manual extra pra fechar o loop.
++  **URLs raw pinadas em SHA, 25/08/2026 (MEMÓRIAS (253), achado de "Ágata Opus").** Preferir estas sobre as URLs em `/main/` acima: `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/<SHA>/{REGRAS,PROJETO,MEMÓRIAS}.md`, geradas automaticamente dentro do próprio bloco ANCORA-SHA (mesmo SHA, mesma defasagem: normalmente 1 commit, mais se o hook de âncora falhar). Conteúdo endereçado por hash é imutável — elimina o risco de cache velho sem precisar do endpoint da API, que pode estar bloqueado (ver limite acima). As URLs em `/main/` continuam como alternativa/fallback.
++  **Mecanismo, desde 20/08/2026:** o prompt agora é canônico dentro do repo (`PROMPT_CARREGAMENTO.md`, movido da Área de trabalho — ver "Quarentena estrutural" pra classificação SEM quarentena). `.githooks/pre-commit` reescreve as duas linhas entre os marcadores `ANCORA-SHA` a cada commit, via `scripts/atualizar_ancora_prompt.py` — nunca toca o resto do arquivo, aborta sem escrever se os marcadores sumirem. **Limite conhecido, não escondido:** um commit não pode embutir o próprio SHA (auto-referência) — o valor escrito é sempre o do HEAD ANTERIOR ao commit, então fica normalmente 1 commit atrasado. O passo que grava a âncora no `pre-commit` é fail-soft: se falhar, imprime um AVISO em stderr e o commit segue mesmo assim, e a defasagem pode ficar maior que 1 commit sem que quem lê o prompt seja avisado (achado MEMÓRIAS (277)). Mitigação sem custo, já no arquivo: o campo `Escrito em:` do bloco, comparável com a hora medida na abertura da sessão. Decisão do Humano: aceitar esse atraso em troca de 100% automático, em vez de exigir um commit manual extra pra fechar o loop.
+ 
+ ### Medição de horário para modelos em nuvem (adicionado 26/08/2026)
+ 
+diff --git a/scripts/atualizar_ancora_prompt.py b/scripts/atualizar_ancora_prompt.py
+index 560f75d..62dfd61 100755
+--- a/scripts/atualizar_ancora_prompt.py
++++ b/scripts/atualizar_ancora_prompt.py
+@@ -5,15 +5,18 @@ antes do commit existir.
+ 
+ Limite conhecido, aceito por decisão do Humano: um commit não pode
+ embutir o próprio SHA (problema de auto-referência). O valor escrito
+-aqui é sempre o SHA do HEAD ANTES deste commit -- fica até 1 commit
+-atrasado, nunca mais, e o próprio texto do arquivo diz isso.
++aqui é sempre o SHA do HEAD ANTES deste commit -- normalmente 1 commit
++atrasado. Este passo é fail-soft no pre-commit: se falhar, o commit
++segue e a âncora pode ficar mais velha que isso sem aviso (achado
++MEMÓRIAS (277)). O próprio texto do arquivo diz isso e aponta o
++detector: o campo "Escrito em:".
+ 
+ URLs raw pinadas no SHA (achado de "Ágata Opus", MEMÓRIAS (248)-(252)):
+ conteúdo endereçado por hash é imutável -- qualquer cache que sirva
+ essas URLs está servindo os bytes certos, elimina a classe inteira de
+ falha de "canal servindo estado antigo sem carimbo" sem precisar de
+ detecção nem heurística. Mesmo limite de defasagem que o SHA em si
+-(até 1 commit atrasado, nunca mais).
++(normalmente 1 commit; mais se este passo falhar no pre-commit).
+ 
+ Nunca toca o resto do arquivo (documento editado à mão pelo Humano).
+ Se os marcadores não existirem, ABORTA sem escrever nada -- silêncio
+@@ -55,8 +58,9 @@ def main():
+     novo_bloco = (
+         f"{INICIO} (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, "
+         f"o resto do arquivo é livre) -->\n"
+-        f"  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit "
+-        f"atrasado, nunca mais -- ver PROJETO.md, \"Memória e hidratação\"): {sha}\n"
++        f"  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit "
++        f"atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo "
++        f"abaixo deste bloco, e PROJETO.md, \"Memória e hidratação\"): {sha}\n"
+         f"  Escrito em: {data_hora}\n"
+         f"  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; "
+         f"mesma defasagem máxima do SHA acima):\n"

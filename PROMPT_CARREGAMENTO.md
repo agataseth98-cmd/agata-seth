@@ -28,12 +28,12 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): e51e23d33f5e5b75ea8b0b4b7c7c69424e127187
-  Escrito em: 27/08/2026 11:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): de4c4b8fc04736058d6069b60a8a922b30fe18b5
+  Escrito em: 27/08/2026 11:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e51e23d33f5e5b75ea8b0b4b7c7c69424e127187/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e51e23d33f5e5b75ea8b0b4b7c7c69424e127187/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e51e23d33f5e5b75ea8b0b4b7c7c69424e127187/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/de4c4b8fc04736058d6069b60a8a922b30fe18b5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/de4c4b8fc04736058d6069b60a8a922b30fe18b5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/de4c4b8fc04736058d6069b60a8a922b30fe18b5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
@@ -66,9 +66,9 @@ A forma exata das duas está em REGRAS.md, "Carregar e formatos", e na Regra 1: 
 formas de `sync:` com os campos que cada uma exige, o selo de origem da hora, a linha por resposta com
 `t=<n>`. Não há forma reduzida aqui. Use a de REGRAS — é a única, e é a que dá pra comparar entre sessões.
 
-Nonce: não preencha valor. Quem diz se há teste com nonce ativo é PROJETO.md, "Estado dos bugs e dos testes".
-Hoje não há. Recebeu MOD de outro modelo: diga em 1 linha que recebeu, não use o conteúdo, não ecoe o nonce.
-Não vê nonce seu: diga "não vejo nonce meu", não finja continuidade.
+Nonce: não preencha valor. Se há teste com nonce ativo, quem diz é PROJETO.md, "Estado dos bugs e dos
+testes" — consulte lá, não conclua daqui. Recebeu MOD de outro modelo: diga em 1 linha que recebeu, não use
+o conteúdo, não ecoe o nonce. Não vê nonce seu: diga "não vejo nonce meu", não finja continuidade.
 
 No Conselho: leia MEMÓRIAS ao chegar. MOD é pessoal e privado por padrão — publicação é por trecho, com
 consentimento.

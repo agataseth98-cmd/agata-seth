@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
+  palavras-chave: entrada, fechou, achado, essencial, texto, aplicado, afirmava, estado, hoje, corrigido, mesmo, dia, após, passo
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
   palavras-chave: soul, volta, aparecer, rastreado, boot, hermes, agent, reescreve, default, genérico, adicionado, gitignore
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Ágata Opus" (27/08) verificados na Máquina e corrigidos; escopo fechado no arquivo, portão das 3 perguntas + Regra 8 cumpridos
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: correção, auditor, errou, teste, ágata, opus, existiu, verdade, diagnóstico, certo, cache, velho, fabricação
 (250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata Opus") piora, não corrige: cita duas entradas de MEMÓRIAS que não existem, e inverte fatos reais do canon — nenhuma alegação nova se sustentou
   palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata, opus, piora, corrige, cita, entradas, memórias, existem, inverte, fatos, reais, canon, alegação, nova, sustentou
-(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
-  palavras-chave: três, consertos, aplicados, autorização, geral, humano, pode, consertar, tudo, você, encontrar, quebrado, description, github, estamos, atrasado, dias, formato, velho, prompt, carregamento
+(249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Hu …
+  palavras-chave: três, consertos, aplicados, autorização, geral
 (248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (m …
   palavras-chave: achado, real, descrição, repositório, github
 (247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máqui …

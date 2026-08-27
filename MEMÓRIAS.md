@@ -23,6 +23,17 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
+
+**O que (277) alegou e ficou faltando:** o achado 4 pedia que a linha do Nonce "não afirme estado" e remeta a PROJETO.md. A redação aplicada em (277) remetia a PROJETO.md **e** acrescentava "Hoje não há." — uma afirmação de estado dentro do prompt, exatamente o que o critério evitava. Envelheceria quando a Fase 2 subir com nonce novo (TES-002). Apontado pela sessão "Ágata Opus" na verificação independente do Passo 5, contra o artefato publicado (`git ls-tree` em origin/main, não raw).
+
+**Corrigido:** linha 70 de PROMPT_CARREGAMENTO.md — "Hoje não há." removido. Agora: "Se há teste com nonce ativo, quem diz é PROJETO.md, 'Estado dos bugs e dos testes' — consulte lá, não conclua daqui." Sem afirmação de estado, sem número. Uma linha, fora de P-8 (mesma classificação de (277)). (277) não é editada — Regra 4 — este é o apontamento novo que a corrige.
+
+**Registrado junto:** a proposta P-8 `propostas/ancora-defasagem-honesta.diff` (fecho de fundo do achado 3 de (277) — tira "nunca mais" do template da âncora em `scripts/atualizar_ancora_prompt.py` + `PROJETO.md`) foi versionada em `propostas/` nesta mesma leva, aguardando `APROVADO-` do Humano. Até lá, "nunca mais" segue no bloco gerado (linha 31); o texto livre (linha 40) já o cita para corrigi-lo, uso honesto.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: relato do Passo 5 da sessão "Ágata Opus" (grep contra o artefato em origin/main); edição direta da linha 70; `git diff` da proposta P-8 capturado e working tree revertida antes de commitar.
+
+
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
 
 **Contexto:** depois do reboot de 27/08, `git status` em `~/agata` mostrava `SOUL.md` não-rastreado, com data do minuto do boot. Conteúdo: persona default do hermes-agent ("You are Hermes Agent … created by Nous Research"), diferente da versão arquivada. Verificado: `agent/prompt_builder.py` do hermes-agent lê `SOUL.md` de `HERMES_HOME` e `utils.py` fala em symlink automático de `config.yaml`/`SOUL.md`/`auth.json` — a Máquina reescreve o arquivo sozinha na inicialização.
