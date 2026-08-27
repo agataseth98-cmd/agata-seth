@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
 (258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
-(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
+(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quart …
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — …
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (2 …
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …

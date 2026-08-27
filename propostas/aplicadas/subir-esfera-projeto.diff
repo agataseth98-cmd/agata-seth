@@ -1,0 +1,191 @@
+diff --git a/scripts/subir_esfera_projeto.py b/scripts/subir_esfera_projeto.py
+new file mode 100644
+index 0000000..34776b7
+--- /dev/null
++++ b/scripts/subir_esfera_projeto.py
+@@ -0,0 +1,185 @@
++#!/usr/bin/env python3
++"""Sobe UM arquivo da esfera do projeto para o Google Drive da conta do projeto.
++
++Esfera do projeto = memoria/missoes/agata-sistema/ (ver PROJETO.md, "Memória em
++duas camadas"). Este é o único cano de código entre o sistema e o Drive.
++
++O QUE NUNCA FAZ, por desenho:
++  - não sobe nada de fora de memoria/missoes/agata-sistema/
++  - não sobe a esfera pessoal (memoria/missoes/segunda-camada/)
++  - não sobe REGRAS/PROJETO/MEMÓRIAS (nem como cópia — canon não sobe "como canon")
++  - não sobe se achar padrão de segredo no conteúdo
++  - não encadeia — um arquivo por invocação
++  - não escreve em canon nem decide nada
++
++Credencial: ~/.config/agata/google-project/token.json (fora de todo repo),
++escopo drive.file (só arquivos criados por este app). Pasta de destino criada
++na primeira execução, id gravado em ~/.config/agata/google-project/drive_folder.json.
++
++Uso: python3 scripts/subir_esfera_projeto.py <caminho-dentro-de-agata-sistema>
++"""
++import json
++import os
++import re
++import sys
++import urllib.parse
++import urllib.request
++import urllib.error
++from datetime import datetime, timezone
++
++REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++ESFERA = os.path.join(REPO, "memoria", "missoes", "agata-sistema")
++PESSOAL = os.path.join(REPO, "memoria", "missoes", "segunda-camada")
++CRED_DIR = os.path.expanduser("~/.config/agata/google-project")
++TOKEN_PATH = os.path.join(CRED_DIR, "token.json")
++FOLDER_PATH = os.path.join(CRED_DIR, "drive_folder.json")
++LOG_PATH = os.path.join(ESFERA, "upload.log")
++
++TETO_BYTES = 10 * 1024 * 1024
++EXT_PERMITIDAS = {".md", ".txt", ".csv", ".json", ".yaml", ".yml", ".log"}
++
++# Fronteira de segredo: aborta na primeira suspeita. Conservador de propósito.
++PADROES_SEGREDO = [
++    (r"GOCSPX-[A-Za-z0-9_\-]{10,}", "client_secret do Google"),
++    (r"1//[A-Za-z0-9_\-]{30,}", "refresh token OAuth"),
++    (r"ya29\.[A-Za-z0-9_\-]{20,}", "access token OAuth"),
++    (r"-----BEGIN [A-Z ]*PRIVATE KEY-----", "chave privada PEM"),
++    (r"AKIA[0-9A-Z]{16}", "AWS access key id"),
++    (r"(?i)aws_secret_access_key", "nome de variável de secret da AWS"),
++    (r"\bsk-[A-Za-z0-9]{20,}", "chave estilo OpenAI/Anthropic"),
++    (r"\b(ghp|gho|ghs|ghu|ghr)_[A-Za-z0-9]{36}\b", "token do GitHub"),
++    (r"\bgithub_pat_[A-Za-z0-9_]{22,}\b", "GitHub fine-grained PAT"),
++    (r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b", "token do Slack"),
++    (r"(?i)(AccountKey|SharedAccessKey|Pwd|Password)=[^;\s]{12,}", "connection string com segredo (Azure/DB)"),
++    (r"(?i)Authorization:\s*(Bearer|Basic)\s+[A-Za-z0-9._~+/=\-]{16,}", "header Authorization com credencial"),
++    (r"(?i)(api[_-]?key|secret|token|senha|password|client[_-]?secret)\s*[:=]\s*['\"]?[A-Za-z0-9_\-./+]{16,}", "par chave/valor com segredo"),
++    (r"(?i)\b(ZHIPU|GOOGLE|GEMINI|GROQ|DEEPSEEK|OPENROUTER|OPENAI|ANTHROPIC)_API_KEY\b", "nome de variável de chave conhecida"),
++    (r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b", "CPF"),
++    (r"\b\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}\b", "CNPJ"),
++]
++
++CANON = {"REGRAS.md", "PROJETO.md", "MEMÓRIAS.md", "PROJETO_REFERENCIA.md"}
++
++
++def abortar(msg):
++    print(f"ABORTADO: {msg}")
++    sys.exit(1)
++
++
++def carregar_token():
++    with open(TOKEN_PATH) as f:
++        return json.load(f)
++
++
++def access_token(t):
++    data = urllib.parse.urlencode({
++        "client_id": t["client_id"], "client_secret": t["client_secret"],
++        "refresh_token": t["refresh_token"], "grant_type": "refresh_token",
++    }).encode()
++    req = urllib.request.Request(t["token_uri"], data=data,
++                                 headers={"Content-Type": "application/x-www-form-urlencoded"})
++    try:
++        r = json.load(urllib.request.urlopen(req, timeout=30))
++    except urllib.error.HTTPError as e:
++        body = e.read().decode()
++        if "invalid_grant" in body:
++            abortar("invalid_grant no refresh — token expirou (app em Testing?). "
++                    "Rode memoria/missoes/agata-sistema/scripts/oauth_consent.py.")
++        abortar(f"refresh falhou HTTP {e.code}: {body[:200]}")
++    return r["access_token"]
++
++
++def pasta_destino(tok):
++    if os.path.exists(FOLDER_PATH):
++        with open(FOLDER_PATH) as f:
++            return json.load(f)["id"]
++    meta = json.dumps({"name": "agata-sistema",
++                       "mimeType": "application/vnd.google-apps.folder"}).encode()
++    req = urllib.request.Request(
++        "https://www.googleapis.com/drive/v3/files?fields=id",
++        data=meta, method="POST",
++        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"})
++    try:
++        fid = json.load(urllib.request.urlopen(req, timeout=30))["id"]
++    except urllib.error.HTTPError as e:
++        abortar(f"criar pasta falhou HTTP {e.code}: {e.read().decode()[:200]}")
++    old = os.umask(0o077)
++    try:
++        with open(FOLDER_PATH, "w") as f:
++            json.dump({"id": fid, "criada": datetime.now(timezone.utc).astimezone().isoformat()}, f, indent=2)
++    finally:
++        os.umask(old)
++    os.chmod(FOLDER_PATH, 0o600)
++    return fid
++
++
++def main():
++    if len(sys.argv) != 2:
++        print(f"uso: {sys.argv[0]} <caminho-dentro-de-agata-sistema>", file=sys.stderr)
++        return 2
++
++    alvo = os.path.abspath(sys.argv[1])
++    esfera = os.path.realpath(ESFERA)
++    alvo_real = os.path.realpath(alvo)
++
++    # --- fronteira, na ordem: caminho, pessoal, canon, existência, extensão, tamanho, segredo
++    if not (alvo_real == esfera or alvo_real.startswith(esfera + os.sep)):
++        abortar(f"fora da esfera do projeto. Só sobe de {ESFERA}/ ; recebido: {alvo}")
++    if os.path.realpath(PESSOAL) in alvo_real:
++        abortar("caminho toca a esfera pessoal (segunda-camada) — nunca sobe.")
++    if os.path.basename(alvo_real) in CANON:
++        abortar("arquivo canônico não sobe, nem cópia. Canon não sobe 'como canon'.")
++    if not os.path.isfile(alvo_real):
++        abortar(f"não é arquivo: {alvo}")
++    ext = os.path.splitext(alvo_real)[1].lower()
++    if ext not in EXT_PERMITIDAS:
++        abortar(f"extensão {ext or '(nenhuma)'} não permitida. Permitidas: {sorted(EXT_PERMITIDAS)}")
++    tam = os.path.getsize(alvo_real)
++    if tam > TETO_BYTES:
++        abortar(f"{tam} bytes acima do teto de {TETO_BYTES}.")
++    if tam == 0:
++        abortar("arquivo vazio.")
++
++    with open(alvo_real, "rb") as f:
++        raw = f.read()
++    try:
++        texto = raw.decode("utf-8")
++    except UnicodeDecodeError:
++        abortar("não é UTF-8 legível — só texto sobe por enquanto.")
++    for padrao, oque in PADROES_SEGREDO:
++        m = re.search(padrao, texto)
++        if m:
++            abortar(f"padrão de segredo no conteúdo ({oque}). Nada foi enviado.")
++
++    tok = access_token(carregar_token())
++    fid = pasta_destino(tok)
++
++    nome = os.path.basename(alvo_real)
++    boundary = "----agata" + datetime.now().strftime("%s%f")
++    meta = json.dumps({"name": nome, "parents": [fid]})
++    corpo = (
++        f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{meta}\r\n"
++        f"--{boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n"
++    ).encode() + raw + f"\r\n--{boundary}--\r\n".encode()
++    req = urllib.request.Request(
++        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size",
++        data=corpo, method="POST",
++        headers={"Authorization": f"Bearer {tok}",
++                 "Content-Type": f"multipart/related; boundary={boundary}"})
++    try:
++        r = json.load(urllib.request.urlopen(req, timeout=120))
++    except urllib.error.HTTPError as e:
++        abortar(f"upload falhou HTTP {e.code}: {e.read().decode()[:200]}")
++
++    carimbo = datetime.now(timezone.utc).astimezone().isoformat()
++    os.makedirs(ESFERA, exist_ok=True)
++    with open(LOG_PATH, "a", encoding="utf-8") as f:
++        f.write(f"[{carimbo}] {nome}  drive_id={r['id']}  {tam}B  <- {alvo_real}\n")
++
++    print(f"SUBIU: {nome}  drive_id={r['id']}  ({tam} bytes)  pasta agata-sistema ({fid})")
++    print(f"registrado em {LOG_PATH}")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())

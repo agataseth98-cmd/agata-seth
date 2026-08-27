@@ -1,0 +1,4 @@
+Autorizado pelo Humano em 27/08/2026, verbalmente nesta sessão: "faz vc assumo o risco".
+Risco assumido por escrito pelo Humano (REGRAS.md "Mudança estrutural" — alternativa à segunda opinião). Marcador criado pelo executor a pedido do Humano.
+Escopo: aplicar propostas/subir-esfera-projeto.diff — novo scripts/subir_esfera_projeto.py, cano único e manual entre a esfera do projeto (memoria/missoes/agata-sistema/) e o Drive da conta do projeto (escopo drive.file). Fronteira: caminho + esfera pessoal + canon + extensão/tamanho/UTF-8 + varredura de segredo (reforçada após Regra 8: GitHub/AWS/Slack/Azure/CPF/CNPJ). Regra 8: 3 passadas qwen local, furos da sub-checagem de segredo consertados antes deste APROVADO.
+sha256 do .diff congelado: 5eb68b54af97 (12 primeiros).

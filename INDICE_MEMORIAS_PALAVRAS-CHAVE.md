@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
+  palavras-chave: cano, esfera, projeto, scripts, subir, sobe, arquivo, memoria, missoes, agata, sistema, drive, file, aplicado, sob, risco, assumido, humano, escrito
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
   palavras-chave: sincronização, contas, arquitetura, esferas, credencial, google, conta, projeto, configurada, oauth, escopo, drive, file
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: tes, rodada, humano, decide, sessão, ágata, opus, conta, passa, critério, escrito, apesar, erros, reais, categorias, projeto, marcado, fechado
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de frescor, quarta pergunta) não adotados — parecer favorável do GLM não muda o veredito, Regra 3 fecha a proposta de "Ágata Opus"
   palavras-chave: decisão, final, humano, itens, carimbo, frescor, quarta, pergunta, adotados, parecer, favorável, glm, muda, veredito, regra, fecha, proposta, ágata, opus
-(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
-  palavras-chave: segunda, opinião, itens, carimbo, quarta, pergunta, recebida, glm, sim, pro, pra, aplicado, decisão, fica, humano
+(256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quart …
+  palavras-chave: segunda, opinião, itens, carimbo, quart
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — …
   palavras-chave: segunda, correção, mesmo, achado, tem, bug
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (2 …

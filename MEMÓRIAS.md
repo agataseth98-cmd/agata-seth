@@ -23,6 +23,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
+
+**Contexto:** a (285) configurou a credencial mas não havia código chamando o Drive — o Opus mediu e disse com todas as letras: "esfera do projeto" era um parágrafo até existir um script que escrevesse no Drive. Este é esse script, o único, manual, um arquivo por invocação, sem hook nem timer.
+
+**Autorização:** Humano, verbal nesta sessão — "faz vc assumo o risco". Risco assumido por escrito (REGRAS.md "Mudança estrutural", alternativa à segunda opinião). `propostas/APROVADO-subir-esfera-projeto` criado pelo executor a pedido do Humano; par movido para `propostas/aplicadas/` no mesmo commit. `.diff` congelado antes do APROVADO (sha256 `5eb68b54af97…`), P-8 validou por conteúdo.
+
+**Fronteira do script, na ordem (aborta na primeira que falhar):**
+1. caminho dentro de `memoria/missoes/agata-sistema/` (`realpath`, pega symlink apontando pra fora)
+2. não toca `segunda-camada/` (esfera pessoal)
+3. não é arquivo canônico (`REGRAS/PROJETO/MEMÓRIAS/PROJETO_REFERENCIA`) — nem cópia
+4. extensão de texto (`.md .txt .csv .json .yaml .yml .log`), UTF-8, ≤10 MB, não-vazio
+5. varredura de segredo no conteúdo → aborta, nada enviado
+6. sobe via `drive.file` para a pasta fixa `agata-sistema` (id em `~/.config/agata/google-project/drive_folder.json`, 600); registra `drive_id` + caminho + tamanho em `memoria/missoes/agata-sistema/upload.log`
+
+**Regra 8** (3 passadas `qwen3.5-9b-64k`, hidratações separadas, sobre a fronteira): passada 1 abstenção (saída vazia); passada 2 "furo possível" (CPF/CNPJ; nome de variável de chave novo); passada 3 "furo certo" (GitHub PAT `ghp_…`, AWS Secret Access Key, connection string Azure). Convergem em direção — a sub-checagem de segredo é heurística e tinha buracos. **Consertado ANTES do APROVADO:** padrões acrescentados para tokens GitHub, `aws_secret_access_key`, Slack `xox…`, `AccountKey=/Password=`, header `Authorization: Bearer/Basic`, CPF, CNPJ; lista de `*_API_KEY` conhecidos ampliada. Testado: todos os casos das passadas 2 e 3 bloqueiam agora; texto limpo passa.
+
+**Limitação conhecida, não escondida:** formato de segredo desconhecido, num arquivo que alguém pôs em `agata-sistema/` de propósito e rodou o script — regex não fecha. Fecham: a colocação deliberada (nada sobe sozinho), o `upload.log` auditável, a revisão do Humano. A varredura é rede contra acidente, não classificador.
+
+**Verificação empírica (smoke test ao vivo):**
+- caminho OK: `teste-cano.md` (157 B) subiu, pasta `agata-sistema` criada no Drive, linha no `upload.log`. Arquivo de teste depois apagado do Drive (via `drive.file` delete) e o `upload.log` de teste removido — o primeiro registro real será o primeiro uso real.
+- rejeições confirmadas: `PROJETO.md` (fora da esfera), `ONDE_ESTAMOS.md` (fora da esfera), arquivo com `ghp_…` no conteúdo ("token do GitHub — nada foi enviado").
+
+**Portão das três perguntas** (com o Humano): reversível sozinho (`git revert`; `drive_id` no log permite apagar do Drive); alcance = 1 script P-8 + `token.json`/`drive_folder.json` em `~/.config` + `upload.log` no repo missoes, zero canon/hook/timer; silêncio = falha barulhenta (manual, um por vez, `ABORTADO` com motivo), um resíduo semi-silencioso coberto pela colocação deliberada + log.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `.diff` gerado por `git diff` de arquivo novo, congelado e conferido por `sha256sum` + `git apply` numa árvore temporária + `py_compile`; 3 chamadas reais ao Ollama (`qwen3.5-9b-64k`) para a Regra 8, respostas salvas; teste unitário das regras de segredo (6 casos sensíveis bloqueiam, 1 limpo passa); smoke test real contra a API do Drive (upload + 3 rejeições + delete do artefato de teste); `perimetro.sh` P-8 verde após aplicar.
+
+
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
 
 Protocolo de sincronização desenhado pelo Qwen3.7 (nuvem), com a URL de consentimento e os parâmetros conferidos pelo Claude Opus 5 (nuvem) e a lembrança do teste de 8 dias. Execução na Máquina.
