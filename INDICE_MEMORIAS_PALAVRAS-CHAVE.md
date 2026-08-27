@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
+  palavras-chave: ordem, permanente, humano, princípios, guiam, sistema, regras, convenção, extras, essencial, docs, mortos, jul, arquivados
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
   palavras-chave: remoto, ganha, fallback, glm, gemini, indisponível, tenta, flash, falharam, aborta, cai, pro, local
 (286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, padronizacao, sincronizacao, horario, llms, agata
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
   palavras-chave: auditoria, seth, qwen, turnos, progresso, hora, precisão, turno, persiste, ponto, fraco
-(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
-  palavras-chave: tes, rodada, humano, decide, sessão, ágata, opus, conta, passa, critério, escrito, apesar, erros, reais, categorias, projeto, marcado, fechado
+(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágat …
+  palavras-chave: tes, rodada, humano, decide, sessão, ágat
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de fre …
   palavras-chave: decisão, final, humano, itens, carimbo, fre
 (256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quart …

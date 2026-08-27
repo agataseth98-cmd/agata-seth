@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
 (286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em precisao e autoconsciencia, turno off-by-one persiste
 (260) DIARIO - 26/08/2026 - Padronizacao de sincronizacao de horario para todas as LLMs do Agata
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progresso em hora e precisão, turno persiste como ponto fraco
-(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágata Opus" conta — passa o critério escrito, apesar de erros reais em outras categorias; PROJETO.md "3X" marcado fechado
+(258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágat …
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de fre …
 (256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quart …
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — …

@@ -1,3 +1,5 @@
+> **ARQUIVADO 27/08/2026 (MEMÓRIAS (288)).** Documento de jul/2026, superado pelo canon atual (REGRAS.md / PROJETO.md / MEMÓRIAS.md / ONDE_ESTAMOS.md). Mantido por historicidade — não é fonte de estado. A decisão registrada aqui (Opção A) vive em PROJETO.md, "Ambiente Operacional" / "Serviços".
+
 # DOSSIÊ — Coexistência Hermes ↔ Open WebUI (para auditoria do Conselho)
 
 **Data:** 2026-07-03 · **Autor:** Claude Opus 4.8 · **Base:** síntese do DeepSeek (t=1) + auditoria do Claude

@@ -38,6 +38,20 @@ Quando dois modelos discordam sobre um fato, nenhum vence por argumento. A Máqu
 
 ---
 
+## Princípios que guiam o sistema
+Ordem do Humano, 27/08/2026 (MEMÓRIAS (288)). Toda escolha — desenho, código, texto, processo — é pesada contra estes princípios e contra qualquer sinônimo deles. Valem até o Humano pedir o contrário.
+
+- **Segurança** — segredo, chave e credencial nunca vazam; controle que enxerga menos do que devia é falha do controle, não licença.
+- **Historicidade** — nada de história se apaga nem se edita; correção é entrada nova (Regra 4).
+- **Checabilidade** — afirmação sem verificação é `lacuna`; a Máquina arbitra medindo, não lembrando (Regra 2, Os 3 papéis).
+- **Clareza** — o porquê antes do quê, uma ideia por frase; o texto serve quem chega sem contexto.
+- **Elegância e eficiência** — a menor solução que cobre o caso; nada de cano, arquivo ou regra a mais.
+- **Versatilidade e compatibilidade** — não fechar porta; o que entra hoje convive com o que vier.
+
+Vários já eram regra — nomeá-los juntos é a lente, não regra nova ("não infle as REGRAS por reflexo", ver "Mudança estrutural"). O que é novo: **o que não for essencial mora em `extras/`**, não na raiz. Essencial = o canon e o que o sistema precisa para rodar; o resto — rascunhos, propostas fechadas, backlogs, artefatos, poemas — vai para `extras/`.
+
+---
+
 ## As 7 regras
 
 **1. Diga quem você é, e em que turno está. Inegociável.**

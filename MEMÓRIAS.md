@@ -23,6 +23,29 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
+
+**Ordem do Humano, textual nesta sessão:** "O que não for essencial vai para a pasta extras, a partir de agora até que orusoua diga o contrário. Segurança, elegância, versatilidade, eficiência, historicidade, checabilidade, clareza, elegância, compatibilidade e tudo que houver de sinônimo para essas palavras deve guiar o sistema a partir de agora até que orusoua peça o contrário." E, ao autorizar a aplicação: "eu assumo o risco, deixe registrado."
+
+**Autorização:** Humano, verbal — "eu assumo o risco". Risco assumido por escrito (REGRAS.md "Mudança estrutural"). `propostas/principios-guia.diff` congelado (sha256 `b7a9cf963d26`) antes do `APROVADO-`; P-8 validou por conteúdo; par em `propostas/aplicadas/`.
+
+**REGRAS.md — seção nova "## Princípios que guiam o sistema"** (logo após "Os 3 papéis"): Segurança · Elegância · Versatilidade · Eficiência · Historicidade · Checabilidade · Clareza · Compatibilidade, mais qualquer sinônimo. Vários já eram regra (Historicidade = Regra 4; Checabilidade = Regra 2; Clareza = estilo) — nomeá-los juntos é a lente, não regra nova ("não infle as REGRAS por reflexo"). O novo é a convenção `extras/`.
+
+**Convenção `extras/`:** essencial = o canon (`REGRAS`/`PROJETO`/`MEMÓRIAS`) + o que o sistema precisa para rodar (`scripts/`, `.githooks/`, `PROMPT_CARREGAMENTO.md`, `ONDE_ESTAMOS.md`, índices, `PROCEDIMENTO_LOGIN.md`, `CHAVES.md`). Não-essencial → `extras/`.
+
+**Movido nesta leva** (tudo `git mv`, histórico preservado; nenhum era referenciado no canon ou em código — `git grep` confirmou):
+- `DOSSIE_COEXISTENCIA.md`, `ESTADO_AGATA.md`, `FIO_CANONICO.md` → `extras/arquivo/` — propostas/snapshots de jul/2026 superados pelo canon atual; cada um ganhou um cabeçalho "ARQUIVADO 27/08" apontando o que os substituiu. O `ESTADO_AGATA.md` estava ativamente errado (dizia Gemini principal, "6 regras", etc.).
+- `O_Despertar_de_Agata.md` (poema fundador) → `extras/`.
+- `skills/BACKLOG.md` → `extras/BACKLOG-skills.md`; pasta `skills/` (só tinha ele) removida.
+- `_arquivo_agata_il/` (12 arquivos, código bespoke pré-Hermes de jun/2026) → `extras/arquivo_agata_il/`.
+
+**`CHAVES.md` atualizado:** acrescentada a linha da credencial OAuth da conta do projeto (`~/.config/agata/google-project/`, escopo `drive.file`, consumidores `subir_esfera_projeto.py` + os scripts de consentimento) e o procedimento de refazer o consentimento. Rodapé de data ajustado.
+
+**Portão das três perguntas** (com o Humano): reversível sozinho (`git revert` da seção, `git mv` de volta dos arquivos — nada apagado); alcance = `REGRAS.md` (P-8) + ~17 arquivos movidos não-referenciados + `extras/` criado + `CHAVES.md` + esta entrada + ONDE_ESTAMOS.md, zero código/hook; silêncio = barulhento (P-8 sem APROVADO trava, P-5 trava entrada fora do topo, `git grep` final feito).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -rn` em REGRAS/PROJETO/PROJETO_REFERENCIA/PROMPT_CARREGAMENTO/ONDE_ESTAMOS/.githooks/scripts pelos nomes dos 3 docs (zero); `git ls-files` para confirmar o que era rastreado antes de mover; `git mv` para preservar histórico; `.diff` de REGRAS.md gerado por `git diff`, congelado por `sha256sum`, restaurado com `git checkout`; `perimetro.sh` após aplicar.
+
+
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
 
 **Ordem do Humano nesta sessão:** pôr o Gemini (que já é fallback do Hermes) também como fallback do Conselho autônomo, já que o GLM-4.7-Flash está em backoff 429 e na (276) o papel de Modelo B teve que ser suprido à mão pelo qwen local.

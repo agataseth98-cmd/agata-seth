@@ -1,3 +1,5 @@
+> **ARQUIVADO 27/08/2026 (MEMÓRIAS (288)).** "Fio único" de um período (jul/2026) em que o canal de anexo estava quebrado e a informação chegava fragmentada entre instâncias. Superado por todo o canon atual + PROMPT_CARREGAMENTO.md. Mantido por historicidade.
+
 # FIO CANÔNICO — Ágata Seth (thread único de verdade)
 
 **Data:** 2026-07-05 · **Autor:** Claude Opus 4.8 (Claude-Ágata, nuvem) · **Motivo:** a informação vem fragmentada entre instâncias (GLM, Seth, Claude Code, Claude) e o canal de anexo está quebrado. Este documento é o **fio único** — só o que foi verificado na Máquina, com o que é hipótese e o que é alucinação claramente separados.

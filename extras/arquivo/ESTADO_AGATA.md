@@ -1,3 +1,5 @@
+> **ARQUIVADO 27/08/2026 (MEMÓRIAS (288)).** Snapshot de jul/2026, hoje **desatualizado em quase tudo** (dizia Gemini principal, qwen2.5-14b fallback, Hermes 0.17, "30 linhas do DIÁRIO", "6 regras", SOUL como identidade — nada disso vale). O estado atual está em PROJETO.md + ONDE_ESTAMOS.md + PROMPT_CARREGAMENTO.md. Mantido só por historicidade.
+
 # ESTADO — Ágata Seth (snapshot para o Conselho)
 
 **Data:** 2026-07-03 · **Autor:** Claude Opus 4.8 (condução da implementação com o Orusoua)

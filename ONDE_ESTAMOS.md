@@ -612,7 +612,18 @@ auditado e consertado (8 achados, MEMÓRIAS 277–281); SOUL.md ignorado
 (278); bancada de modelos fechada, nenhum candidato bateu o atual
 (280); duas esferas de memória escritas no PROJETO.md + reversão
 parcial da (223) (283); conversa do config.yaml confirmada real (282);
-limpeza de três pendentes (284).
+limpeza de três pendentes (284); credencial Google da conta do projeto
++ cano manual pro Drive (285/286); Gemini virou fallback do Conselho
+autônomo (287).
+
+Você deu uma ordem permanente (288): o não-essencial mora em `extras/`,
+e um conjunto de princípios — segurança, elegância, versatilidade,
+eficiência, historicidade, checabilidade, clareza, compatibilidade —
+passa a guiar cada escolha, escrito no REGRAS.md, até você pedir o
+contrário. Nessa leva: três documentos velhos de julho (dossiê,
+snapshot, "fio canônico"), o poema, o backlog de skills e o código
+antigo pré-Hermes saíram da raiz pra `extras/`. Nenhum era usado pelo
+sistema — só ocupavam espaço e um deles ("estado") enganava quem lesse.
 
 A credencial Google da conta do projeto está configurada (285): conta
 `agata.seth98@gmail.com` (só do projeto, você confirmou), login OAuth

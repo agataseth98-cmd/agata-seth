@@ -18,6 +18,7 @@ Não contém nenhum valor de chave, senha ou token — só nomes de variável, o
 | Variável | Serviço | Consumidor | Ao rotacionar |
 |---|---|---|---|
 | `OPENAI_API_KEY` (env do container Docker) | Autenticação local Open WebUI ↔ hermes-gateway | Só o container `open-webui` — usa `OPENAI_API_BASE_URL=http://localhost:8642/v1` pra falar com o endpoint OpenAI-compatible do `hermes-gateway`. **Não está em `.env`**, não achado em nenhum `docker-compose`/script/unit systemd rastreado nesta máquina — a criação original do container não é reproduzível a partir de arquivo versionado. | Imagem atual: `open-webui-snapshot:pre-owui-permfix`. Volume a preservar: `open-webui` → `/app/backend/data`. Rotação exige `docker rm` + recriar com env novo (sem compose, é manual). **Lado do `hermes-gateway`, achado nesta sessão (não em `authz_mixin.py`/`gateway_state.json`/`auth.json` — no próprio `config.yaml`, campo `API_SERVER_KEY`, perto do fim do arquivo, junto de `API_SERVER_ENABLED: true`):** rotacionar exige trocar o valor nos dois lugares no mesmo passo — `API_SERVER_KEY` em `config.yaml` + o `OPENAI_API_KEY` do container — e reiniciar `hermes-gateway.service` depois. Valor não repetido aqui de propósito. |
+| `client_id` + `client_secret` + `refresh_token` (OAuth Desktop, conta Google do projeto `agata.seth98@gmail.com`) em `~/.config/agata/google-project/{client_credentials.json,token.json}`, `600` | Google Drive (escopo único `drive.file`) — esfera do projeto | `scripts/subir_esfera_projeto.py` (cano manual esfera→Drive, MEMÓRIAS (286)); `memoria/missoes/agata-sistema/scripts/{oauth_consent.py,verificar_token.py}` (consentimento e teste dos 8 dias). **Fora de todo repo e do bundle do HD** — por desenho. | Refeito com `python3 memoria/missoes/agata-sistema/scripts/oauth_consent.py` (novo consentimento no navegador). `invalid_grant` no refresh = app ficou em Testing → republicar no Google Cloud Console e refazer. Não há serviço a reiniciar. Ver MEMÓRIAS (285). |
 
 ## Fora de escopo deste inventário
 
@@ -25,4 +26,4 @@ TES-002 (nonce de identidade do projeto, MEMÓRIAS (90)) não é credencial de s
 
 ## Como manter isto vivo
 
-Este arquivo descreve o estado em 12/08/2026. Se um consumidor novo passar a ler uma chave do `.env`, ou se a chave do Open WebUI for encontrada/documentada, atualizar aqui — é o tipo de arquivo que fica errado sozinho se ninguém tocar.
+Estado em 12/08/2026, com a credencial OAuth da conta do projeto acrescentada em 27/08/2026 (MEMÓRIAS (285)/(286)). Se um consumidor novo passar a ler uma chave do `.env`, ou se a chave do Open WebUI for encontrada/documentada, atualizar aqui — é o tipo de arquivo que fica errado sozinho se ninguém tocar.
