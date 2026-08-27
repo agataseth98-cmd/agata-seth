@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Humano ("pode consertar tudo que você encontrar quebrado") — description do GitHub, ONDE_ESTAMOS.md atrasado 3 dias, formato velho em PROMPT_CARREGAMENTO.md
 (248) DIÁRIO — 25/08/2026 · Achado real: a descrição do repositório no GitHub (metadado, fora de qualquer arquivo/commit) é relíquia de 20/04/2026, de antes do sistema atual existir — confunde qualquer sessão que faça busca web em vez de fetch de arquivo real
 (247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máquina: hoje é 25/08/2026, não 26/08/2026 — "Qwen3.7" errou com confiança, exatamente o padrão que o próprio parecer de (246) descreveu
-(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
+(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendent …
 (245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra …
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM " …
 (243) CONSELHO — 25/08/2026 · TES-001 rodada 4 — primeira PASSAGEM LIMPA da hist …

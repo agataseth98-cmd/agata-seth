@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
+  palavras-chave: auditoria, descoberta, externa, desenvolvimento, justo, confederados, determinação, síntese, fiel, mudança, canônica, convergência, registrada, ordem, humano
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
   palavras-chave: worldtimeapi, org, cotado, fallback, scripts, consultar, horario, descontinuado, nunca, teria, funcionado, corrigido, entrar, canon
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: achado, real, descrição, repositório, github, metadado, fora, arquivo, commit, relíquia, sistema, atual, existir, confunde, sessão, faça, busca, web, fetch
 (247) CONSELHO — 25/08/2026 · Disputa de data entre modelos, arbitrada por Máquina: hoje é 25/08/2026, não 26/08/2026 — "Qwen3.7" errou com confiança, exatamente o padrão que o próprio parecer de (246) descreveu
   palavras-chave: disputa, data, modelos, arbitrada, máquina, hoje, qwen, errou, confiança, exatamente, padrão, próprio, parecer, descreveu
-(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendente desde (68)) recebida — parecer real, não eco, mas com defeitos de formato e identidade não verificada; decisão fica com o Humano
-  palavras-chave: segunda, opinião, regra, proposta, pendente, desde, recebida, parecer, real, eco, defeitos, formato, identidade, verificada, decisão, fica, humano
+(246) CONSELHO — 25/08/2026 · Segunda opinião sobre a regra 3X (proposta pendent …
+  palavras-chave: segunda, opinião, regra, proposta, pendent
 (245) DIÁRIO — 25/08/2026 · Portão das três perguntas fecha "não, não agora" pra …
   palavras-chave: portão, três, perguntas, fecha, agora, pra
 (244) DIÁRIO — 25/08/2026 · Achado execute_code/PTC: o Hermes instalado JÁ TEM " …
