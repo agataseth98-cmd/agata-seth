@@ -43,4 +43,15 @@ else
   echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
 fi
 
+# 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
+# ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra
+# no commit. Fail-soft: nunca atrapalha o commit (MEMÓRIAS (290)).
+if [ -f scripts/gerar_obsidian.py ]; then
+  if python3 scripts/gerar_obsidian.py >/dev/null 2>&1; then
+    echo "post-commit: vault Obsidian regenerado (memoria/obsidian/)"
+  else
+    echo "post-commit: AVISO — gerar_obsidian.py falhou; vault pode estar desatualizado" >&2
+  fi
+fi
+
 exit 0

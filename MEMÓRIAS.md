@@ -23,6 +23,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
+
+**Ordem do Humano:** "absolutamente tudo que fizemos e que fizermos incluindo o canon, deve ter sua representação canônica lá, sincronizado para melhorar a visualização do Humano … siga as melhores práticas … preveja problemas e solucione os antes de acontecerem … e deve ser acessada pela Seth a priori." Risco assumido por escrito.
+
+**Autorização:** verbal. `propostas/obsidian-completo.diff` congelado (sha256 `5f042dd42104`) antes do `APROVADO-`; P-8 validou por conteúdo (reescreve `scripts/gerar_obsidian.py` + acrescenta passo ao `.githooks/post-commit` — os dois são P-8); par em `propostas/aplicadas/`.
+
+**O que o vault passa a ter** (`memoria/obsidian/`, gitignorado, **385 notas** nesta geração), tudo religado por wikilinks e com frontmatter/tags:
+- `entradas/NNNN.md` — 239 entradas de MEMÓRIAS, cada `(n)` / `Regra N` / `P-N` / `nome-de-script` no corpo virou link; seção "Citada por".
+- `regras/` — 25 notas, uma por seção de REGRAS.md (Regra 1–8, 1.1, "Mudança estrutural", "Cadeia de auditoria", etc.).
+- `projeto/` — seções de PROJETO.md + PROJETO_REFERENCIA.md.
+- `canon/` — `ONDE_ESTAMOS.md`, `PROMPT_CARREGAMENTO.md`, `CHAVES.md`, `PROCEDIMENTO_LOGIN.md` inteiros, como espelho de leitura.
+- `scripts/` — 33 notas, uma por script/hook, com o que faz (extraído da docstring) + as entradas que o citam.
+- `controles/` — P-1 a P-9, cada um com o que checa e as entradas que o mencionam.
+- `propostas/` — 41 propostas aplicadas, ligadas à entrada de MEMÓRIAS pelo número no nome quando há.
+- `moc-*.md` (7 hubs), `INICIO.md` (porta de entrada), `estado.md` (painel: HEAD/última entrada/contagens + "Última atualização" de ONDE_ESTAMOS), `timeline.md`, `_LEIA.md`.
+
+**Sincronização:** `.githooks/post-commit` ganhou um passo **fail-soft** que roda `gerar_obsidian.py` a cada commit — o vault nunca fica atrás do canon, e uma falha na geração nunca atrapalha o commit (só AVISO em stderr). A pasta é gitignorada: não entra em commit, não polui histórico.
+
+**Para a Seth:** as notas são markdown plano, com a informação legível sem depender de nenhum plugin (os MOCs pré-renderizam as listas). A leitura nativa pela Seth via a skill `note-taking/obsidian` do Hermes (listada em `extras/BACKLOG-skills.md` como prioridade) é o próximo passo — precisa de config no Hermes + escopo **só-leitura** (escrever no vault é perda na regeneração, e escrita de "fato" vai pelo fluxo normal). Não feito nesta entrada.
+
+**Problemas previstos e resolvidos no desenho:**
+- **Colisão de nome de nota** → tudo namespaced por pasta + basename globalmente único por construção (`0283`, `regra-8`, `script-perimetro-sh`, `p-8`, `prop-...`).
+- **Wikilink órfão** → `religar()` só emite `[[x]]` se a nota `x` foi gerada; o resto fica texto puro. (Os 2 `[[...]]` não resolvidos que sobram — `[[NNNN]]` entre crases e `[[feedback-verify-dont-speculate]]` — são **texto verbatim de entradas antigas**, não links que este script criou; historicidade manda não alterá-los.)
+- **Corte errado da varredura** → o limite do bloco migrado é âncora de linha `^## Migrado de DIÁRIO.md`, não substring (a frase aparece entre crases dentro de (96)/(97)).
+- **TIPO acentuado** → classe de caractere inclui maiúsculas acentuadas (`DIÁRIO`).
+- **Ruído em `cita`** → filtra `(1)/(2)/(3)` de portões (só refs que resolvem para entrada).
+- **Edição acidental no vault** → geração apaga `memoria/obsidian/` inteiro e reconstrói; `_LEIA.md` avisa; nada hand-authored sobrevive lá por desenho.
+- **Slug ilegível** → `.py`/`.sh` viram `-py`/`-sh`, não somem.
+- **Escala** → 385 notas = rebuild instantâneo; O(n) numa passada; incremental previsto para 5k+ mas rebuild total resolve.
+- **Idempotência** → rodar 2× produz bytes idênticos (verificado por `md5sum`).
+- **Hook lento/quebrado** → passo fail-soft, roda depois do bundle (que é o crítico), `|| AVISO`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: script reescrito e rodado contra o canon real; `find | wc` = 385 notas; verificador de wikilink órfão rodado sobre todo o vault (só os 2 verbatim, esperados); idempotência por `md5sum` de 2 gerações; `py_compile` + `bash -n .githooks/post-commit`; `.diff` por `git diff` dos 2 arquivos, `sha256sum`, restaurado com `git checkout`; `perimetro.sh` P-8 verde após aplicar.
+
+
 (289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidian derivada de MEMÓRIAS.md (nota atômica por entrada, wikilinks, MOC, timeline). Aplicado sob P-8
 
 **Ordem do Humano:** "criar mecanismo que sincronize toda a base de conhecimento do agata com o obsidian" + "aplique as melhores práticas em 2026 quando o assunto é obsidian, deixe pronto para escalar insanamente" + "vá até o final … eu assumo o risco, deixe registrado".

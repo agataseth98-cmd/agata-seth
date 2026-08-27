@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
 (289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidian derivada de MEMÓRIAS.md (nota atômica por entrada, wikilinks, MOC, timeline). Aplicado sob P-8
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (263) DIARIO - 26/08/2026 - Teste da Regra 1.1 (sincronizacao de horario) com a Seth
 (262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261)
 (261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em precisao e autoconsciencia, turno off-by-one persiste
-(260) DIARIO - 26/08/2026 - Padronizacao de sincronizacao de horario para todas as LLMs do Agata
+(260) DIARIO - 26/08/2026 - Padronizacao de sincronizacao de horario para todas …
 (259) DIÁRIO — 26/08/2026 · Auditoria da Seth (qwen3.5-9b-64k): 4 turnos, progre …
 (258) CONSELHO — 25/08/2026 · TES-001 rodada 5: Humano decide que a sessão "Ágat …
 (257) DIÁRIO — 25/08/2026 · Decisão final do Humano: itens 3 e 4 (carimbo de fre …
