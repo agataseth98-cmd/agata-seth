@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
+  palavras-chave: sincronização, contas, arquitetura, esferas, credencial, google, conta, projeto, configurada, oauth, escopo, drive, file
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
   palavras-chave: limpeza, par, esferas, movido, propostas, aplicadas, rodapé, estamos, ponteiro, acb, projeto, referencia, atualizados
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: decisão, final, humano, itens, carimbo, frescor, quarta, pergunta, adotados, parecer, favorável, glm, muda, veredito, regra, fecha, proposta, ágata, opus
 (256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
   palavras-chave: segunda, opinião, itens, carimbo, quarta, pergunta, recebida, glm, sim, pro, pra, aplicado, decisão, fica, humano
-(255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — é limite documentado, deliberado, por boa razão. Dois consertos reais de PROJETO.md aplicados
-  palavras-chave: segunda, correção, mesmo, achado, tem, bug, limite, documentado, deliberado, boa, razão, consertos, reais, projeto, aplicados
+(255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — …
+  palavras-chave: segunda, correção, mesmo, achado, tem, bug
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (2 …
   palavras-chave: correção, grave, entradas
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …

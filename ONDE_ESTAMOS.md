@@ -611,6 +611,19 @@ você escreveu tenta evitar.
 auditado e consertado (8 achados, MEMÓRIAS 277–281); SOUL.md ignorado
 (278); bancada de modelos fechada, nenhum candidato bateu o atual
 (280); duas esferas de memória escritas no PROJETO.md + reversão
-parcial da (223) (283); conversa do config.yaml confirmada real (282).
-Em andamento: credencial Google da conta do projeto (OAuth drive.file).
+parcial da (223) (283); conversa do config.yaml confirmada real (282);
+limpeza de três pendentes (284).
+
+A credencial Google da conta do projeto está configurada (285): conta
+`agata.seth98@gmail.com` (só do projeto, você confirmou), login OAuth
+com escopo mínimo — o app só enxerga os arquivos que ele mesmo criar no
+Drive, nada além. Guardada em `~/.config/agata/google-project/`, fora de
+todo repositório e do backup do HD. Testada de verdade: criou e apagou
+um arquivo no Drive, funcionou. Falta um teste: reconferir o login em
+2026-09-04 — se ainda funcionar, o app estava mesmo publicado; se
+falhar, ficou em modo de teste e a gente republica. NotebookLM não tem
+API; a ponte pra nuvem é esse Drive. Escopo maior (Docs, Gmail, Drive
+inteiro) exige verificação do Google — se um dia precisar, é a hora de
+decidir se paga o Workspace.
+
 Backup no HD religado — pendências de bundle drenadas.

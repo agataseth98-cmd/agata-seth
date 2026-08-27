@@ -23,6 +23,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
+
+Protocolo de sincronização desenhado pelo Qwen3.7 (nuvem), com a URL de consentimento e os parâmetros conferidos pelo Claude Opus 5 (nuvem) e a lembrança do teste de 8 dias. Execução na Máquina.
+
+**Inventário (PASSO 1–2), só existência e permissões, nenhum valor lido:**
+- `~/.hermes/.env` existe, `600`, dono `orusoua`. Chaves presentes (nomes): `GOOGLE_API_KEY` (é o Gemini/fallback — não há `GEMINI_API_KEY` separada, não precisa), `ZHIPU_API_KEY` (Conselho Remoto), `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`.
+- **Conta 2 (Google API / Gemini):** já existia. Não tocada.
+- **Conta 3 (GitHub):** já existia — remote `origin` https + `gh` logado como `agataseth98-cmd` (keyring), scopes `gist, read:org, repo`. Não tocada.
+- **Conta 1 (Google da conta do projeto):** faltava. `~/.config/agata/` não existia.
+
+**Configuração feita (Conta 1):**
+- Confirmado pelo Humano: `agata.seth98@gmail.com` é conta usada só para o projeto, **não é a conta pessoal** do Humano.
+- Credencial: **OAuth 2.0 client, tipo App para computador** (escolha do executor a pedido do Humano — é o caminho limpo para conta comum em máquina sem tela dedicada). JSON baixado pelo Humano, conferido (`jq`: só a chave `installed`, sem `type: service_account`, `client_id` termina em `.apps.googleusercontent.com`).
+- Instalado em `~/.config/agata/google-project/` — diretório `700`, `client_credentials.json` `600`, `token.json` `600`, dono `orusoua`. **O caminho pode ser registrado; o conteúdo não.** Sem `client_id`, sem `client_secret`, sem trecho do JSON nesta entrada.
+- Cópia do Desktop apagada com `shred -u`. Segredo não fica em dois lugares.
+- **Escopo único: `https://www.googleapis.com/auth/drive.file`** — só arquivos criados pelo próprio app, **não o Drive inteiro**. A tela de consentimento pediu exatamente isso; o escopo concedido no retorno do token bate byte a byte com o esperado.
+- `access_type=offline` + `prompt=consent` → refresh token obtido e guardado em `token.json`.
+- **Data/hora do consentimento: `2026-08-27T16:02:44-03:00`** (retorno da troca de código, campo `obtained` do `token.json`). Âncora do teste abaixo.
+
+**Segurança (PASSO 3), verificado:** `~/.config/agata/` está fora da worktree de `~/agata`, não é repo git, e `git bundle --all` só empacota objetos de repositório. A credencial **não é alcançada** pelo repo público, pelo repo `missoes`, nem pelo bundle do HD. Chaves já estavam fora do backup por decisão do Humano; isto mantém.
+
+**Verificação empírica (PASSO 5), não o rótulo:** ciclo `refresh_token → criar arquivo no Drive → apagar` rodado ao vivo — os três passos retornaram 200. A credencial funciona agora, com o escopo `drive.file`.
+
+**Teste dos 8 dias — pendente, com âncora:** o app foi "publicado em produção" no Console, mas isso é alegação até a Máquina medir. Se o app tiver ficado em *Testing*, o refresh token expira em 7 dias e a próxima chamada dá `invalid_grant`. **Reconferir em 2026-09-04** rodando `python3 ~/.config/agata/google-project/verificar_token.py`: sucesso = estava mesmo em produção; `invalid_grant` = ficou em Testing, republicar e refazer o consentimento.
+
+**Fronteira registrada:** escopo sensível (Docs, Sheets, Drive inteiro, Gmail) exige verificação do Google. O dia em que o sistema precisar de um é o dia de reabrir a decisão de pagar Google Workspace. NotebookLM não tem API pública — a ponte para a nuvem é o Drive da conta do projeto.
+
+**Esqueleto:** `memoria/missoes/agata-sistema/` criado (README + `inbox/ saida/ arquivo/` com `.gitkeep`), commitado no repo local `missoes` (`0206aa2`, sem remote, com backup no HD). ONDE_ESTAMOS.md atualizado no mesmo commit desta entrada.
+
+**Nenhum segredo nesta entrada. Nada de credencial commitado em git.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `jq keys`/`jq has("installed")`/`jq .type` no JSON antes de mover; `stat -c %a` conferindo `700`/`600` após instalar; `cmp` byte a byte da cópia; `shred -u` da origem; fluxo OAuth loopback rodado (script `oauth_consent.py`, listener em `127.0.0.1:8765`), escopo concedido comparado com o esperado no retorno do token; `verificar_token.py` rodado ao vivo (refresh + create + delete, 3× HTTP 200); `git rev-parse`/`git bundle` conferindo que `~/.config/agata/` está fora de todo repo e bundle.
+
+
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
 
 Três pendentes de higiene, apontados pela Ágata Opus, fechados num commit só:
