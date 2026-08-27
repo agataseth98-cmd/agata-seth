@@ -23,6 +23,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
+
+**Ordem do Humano nesta sessão:** pôr o Gemini (que já é fallback do Hermes) também como fallback do Conselho autônomo, já que o GLM-4.7-Flash está em backoff 429 e na (276) o papel de Modelo B teve que ser suprido à mão pelo qwen local.
+
+**Autorização:** Humano, verbal — "ok" à apresentação da proposta C. Risco assumido pelo Humano. `.diff` congelado (sha256 `bb537b26c032`) antes do `APROVADO-`; P-8 validou por conteúdo; par em `propostas/aplicadas/`.
+
+**Duas decisões do Humano, tomadas na apresentação:**
+1. **Fim da cadeia = abortar.** GLM → Gemini → `ABORTADO` com motivo. Cair pro `qwen3.5-9b-64k` local continua sendo decisão do Humano caso a caso, como foi na (276) — o Conselho Remoto é sobre segunda opinião EXTERNA; automatizar a queda pro local mudaria o que ele é.
+2. **Contador local + aviso** para a quota do Gemini. O free tier (~20/dia) é compartilhado com o fallback do Hermes, e o circuit breaker `gemini_quota_guard` (processo separado) não enxerga as chamadas deste script. `conselho_remoto.py` conta as próprias chamadas Gemini do dia em `memoria/missoes/conselho-remoto/.gemini-contador.json`, avisa a partir da 15ª, não bloqueia.
+
+**O que mudou no script:**
+- `carregar_chave(nome="ZHIPU_API_KEY")` — genérico, default retrocompatível; passa a ler também `GOOGLE_API_KEY`.
+- `enviar()` → `enviar_glm()` + `enviar_gemini()` (endpoint `generativelanguage.googleapis.com`, formato `contents/parts`). `_normalizar(provedor, resposta)` traz os dois formatos crus (`choices/usage` e `candidates/usageMetadata`) para uma forma comum — sem julgar conteúdo.
+- Dispatch em `main()`: GLM em backoff ou sem chave → direto pro Gemini. Senão tenta GLM; 429/5xx no GLM → cai pro Gemini. Os dois falharam → `ABORTADO` (nunca as duas de propósito, nunca o local automático).
+- JSON salvo ganha campo `"provedor"` (`glm`/`gemini`); nome do arquivo usa o modelo real. Campo aditivo — não quebra quem lê os JSON antigos.
+- Backoff de 429 e checagens de conteúdo privado / formato / teto continuam iguais, aplicados a qualquer provedor.
+
+**Regra 8 — não aplicada, por proporção:** o que mudou são regras de fallback verificáveis ("GLM indisponível → Gemini → aborta"), não juízo não-verificável (que é o caso da Regra 8). Registrado como escolha, não omissão.
+
+**Verificação (teste com mock, sem rede, sem API real):** `enviar_glm` forçado a 429 → o dispatch cai pro `enviar_gemini` mockado → `return code 0`, JSON salvo com `provedor: gemini` / `modelo: gemini-2.5-flash`, contador do dia em 1, checagem de formato rodou sobre o conteúdo normalizado. Nenhuma chamada externa gasta.
+
+**Portão das três perguntas** (com o Humano): reversível sozinho (`git revert`, apagar `.gemini-contador.json`); alcance = só `scripts/conselho_remoto.py` (P-8) + o contador privado gitignorado + campo `provedor` aditivo nos JSON, zero hook/timer/canon; silêncio = barulhento (manual, imprime o provedor, `AVISO` no backoff e na 15ª, `ABORTADO` com motivo), resíduo semi-silencioso (free tier esgotado por uso do Conselho) coberto pelo aviso de teto compartilhado + o `gemini_quota_guard` próprio do Hermes.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: edições cirúrgicas numa cópia, `py_compile`, dry-run de `_normalizar` nos dois formatos, teste de dispatch com `unittest.mock` forçando 429 no GLM (sem rede), `.diff` gerado por `git diff` + `sha256sum` + restaurado com `git checkout`, `perimetro.sh` P-8 verde após aplicar.
+
+
 (286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
 
 **Contexto:** a (285) configurou a credencial mas não havia código chamando o Drive — o Opus mediu e disse com todas as letras: "esfera do projeto" era um parágrafo até existir um script que escrevesse no Drive. Este é esse script, o único, manual, um arquivo por invocação, sem hook nem timer.

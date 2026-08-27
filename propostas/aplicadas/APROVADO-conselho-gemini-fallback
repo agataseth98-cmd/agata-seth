@@ -1,0 +1,2 @@
+Autorizado pelo Humano em 27/08/2026, verbal nesta sessão: "ok" (respondendo à apresentação da proposta C). Risco assumido pelo Humano. Marcador criado pelo executor a pedido do Humano.
+Escopo: aplicar propostas/conselho-gemini-fallback.diff — conselho_remoto.py ganha fallback GLM->Gemini (aborta se os dois falharem, não cai pro local), contador local de chamadas Gemini/dia com aviso na 15a, campo "provedor" no JSON salvo. sha256 do .diff congelado: bb537b26c032.

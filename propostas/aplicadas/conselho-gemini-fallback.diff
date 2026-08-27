@@ -1,0 +1,261 @@
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 13930a8..9f0d1f4 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -1,9 +1,15 @@
+ #!/usr/bin/env python3
+ """Coletor do Conselho Remoto -- Fase 1 (MEMÓRIAS (206)/(207)).
+ 
+-UM modelo (GLM-4.7-Flash, Zhipu), UMA tarefa: enviar um pedido de parecer
+-ja escrito pelo Humano a UM modelo remoto, guardar a resposta crua. Nada
+-alem disso -- ver REGRAS "Segunda opiniao" e PROJETO "Conselho Remoto".
++UMA tarefa: enviar um pedido de parecer ja escrito pelo Humano a UM modelo
++remoto, guardar a resposta crua. Nada alem disso -- ver REGRAS "Segunda
++opiniao" e PROJETO "Conselho Remoto".
++
++Provedor: GLM-4.7-Flash (Zhipu) por padrao. GLM indisponivel (backoff
++ativo, ou 429/5xx nesta chamada) -> tenta gemini-2.5-flash (Google) UMA
++vez como fallback (MEMÓRIAS (287)). Os dois externos falharam -> ABORTA;
++cair pro modelo local segue sendo decisao do Humano caso a caso (276).
++Uma unica chamada externa por invocacao -- nunca as duas de proposito.
+ 
+ O QUE ESTE SCRIPT NUNCA FAZ, por desenho (ordem do Humano):
+   - nao escreve em MEMORIAS, PROJETO ou REGRAS
+@@ -25,6 +31,26 @@ from datetime import datetime, timezone
+ MODELO = "glm-4.7-flash"
+ ENDPOINT = "https://api.z.ai/api/paas/v4/chat/completions"
+ ENV_PATH = os.path.expanduser("~/.hermes/.env")
++
++# Fallback do Conselho (ordem do Humano, 27/08/2026, MEMÓRIAS (287)):
++# GLM indisponível (backoff ativo, ou 429/5xx nesta chamada) -> tenta Gemini
++# uma vez. Os dois externos falharam -> ABORTA. Cair pro qwen local segue
++# sendo decisão do Humano caso a caso, como na (276) -- o Conselho Remoto
++# é sobre segunda opinião EXTERNA; automatizar a queda pro local mudaria o
++# que ele é.
++GEMINI_MODELO = "gemini-2.5-flash"
++GEMINI_ENDPOINT = (
++    "https://generativelanguage.googleapis.com/v1beta/models/"
++    f"{GEMINI_MODELO}:generateContent"
++)
++# O free tier do Gemini (~20/dia) é COMPARTILHADO com o fallback do Hermes,
++# e o circuit breaker gemini_quota_guard NÃO enxerga as chamadas deste
++# script (processo separado). Contador local próprio, só aviso, não bloqueia.
++GEMINI_CONTADOR_PATH = os.path.join(
++    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
++    "memoria", "missoes", "conselho-remoto", ".gemini-contador.json",
++)
++GEMINI_AVISO_LIMIAR = 15
+ DESTINO_DIR = os.path.join(
+     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+     "memoria", "missoes", "conselho-remoto",
+@@ -124,18 +150,40 @@ def registrar_chamada_sem_429():
+         _salvar_estado_backoff({"falhas_429_seguidas": 0, "ultima_falha_429": None})
+ 
+ 
+-def carregar_chave():
++def carregar_chave(nome="ZHIPU_API_KEY"):
+     if not os.path.exists(ENV_PATH):
+         return None
++    padrao = re.compile(r"^" + re.escape(nome) + r"=(.*)$")
+     with open(ENV_PATH, encoding="utf-8") as f:
+         for linha in f:
+-            m = re.match(r"^ZHIPU_API_KEY=(.*)$", linha.strip())
++            m = padrao.match(linha.strip())
+             if m:
+-                valor = m.group(1).strip()
++                valor = m.group(1).strip().strip('"').strip("'")
+                 return valor or None
+     return None
+ 
+ 
++def _gemini_contador_hoje():
++    hoje = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
++    try:
++        with open(GEMINI_CONTADOR_PATH, encoding="utf-8") as f:
++            est = json.load(f)
++    except (FileNotFoundError, json.JSONDecodeError, OSError):
++        est = {}
++    if est.get("data") != hoje:
++        est = {"data": hoje, "chamadas": 0}
++    return est
++
++
++def _gemini_contador_incrementar():
++    est = _gemini_contador_hoje()
++    est["chamadas"] = est.get("chamadas", 0) + 1
++    os.makedirs(os.path.dirname(GEMINI_CONTADOR_PATH), exist_ok=True)
++    with open(GEMINI_CONTADOR_PATH, "w", encoding="utf-8") as f:
++        json.dump(est, f, ensure_ascii=False, indent=2)
++    return est["chamadas"]
++
++
+ def checar_conteudo_privado(texto):
+     m = PADRAO_CONTEUDO_PRIVADO.search(texto)
+     if m:
+@@ -164,7 +212,7 @@ def checar_formato_parecer(texto):
+     return faltando
+ 
+ 
+-def enviar(pedido_texto, chave):
++def enviar_glm(pedido_texto, chave):
+     payload = {
+         "model": MODELO,
+         "messages": [{"role": "user", "content": pedido_texto}],
+@@ -174,18 +222,48 @@ def enviar(pedido_texto, chave):
+         payload["thinking"] = {"type": "disabled"}
+     corpo = json.dumps(payload).encode("utf-8")
+     req = urllib.request.Request(
+-        ENDPOINT,
+-        data=corpo,
+-        method="POST",
+-        headers={
+-            "Authorization": f"Bearer {chave}",
+-            "Content-Type": "application/json",
+-        },
++        ENDPOINT, data=corpo, method="POST",
++        headers={"Authorization": f"Bearer {chave}", "Content-Type": "application/json"},
+     )
+     with urllib.request.urlopen(req, timeout=120) as resp:
+         return json.loads(resp.read().decode("utf-8"))
+ 
+ 
++def enviar_gemini(pedido_texto, chave):
++    payload = {
++        "contents": [{"role": "user", "parts": [{"text": pedido_texto}]}],
++        "generationConfig": {"maxOutputTokens": TETO_TOKENS_SAIDA},
++    }
++    corpo = json.dumps(payload).encode("utf-8")
++    req = urllib.request.Request(
++        f"{GEMINI_ENDPOINT}?key={chave}", data=corpo, method="POST",
++        headers={"Content-Type": "application/json"},
++    )
++    with urllib.request.urlopen(req, timeout=120) as resp:
++        return json.loads(resp.read().decode("utf-8"))
++
++
++def _normalizar(provedor, resposta):
++    """Devolve (conteudo, tokens_entrada, tokens_saida, tokens_total) do
++    formato cru de cada provedor. Não julga nada."""
++    if provedor == "gemini":
++        cands = resposta.get("candidates", [{}])
++        partes = cands[0].get("content", {}).get("parts", []) if cands else []
++        conteudo = "".join(p.get("text", "") for p in partes)
++        um = resposta.get("usageMetadata", {})
++        te = um.get("promptTokenCount", 0)
++        ts = um.get("candidatesTokenCount", 0)
++        tt = um.get("totalTokenCount", te + ts)
++        return conteudo, te, ts, tt
++    # glm / openai-compatível
++    conteudo = resposta.get("choices", [{}])[0].get("message", {}).get("content", "")
++    uso = resposta.get("usage", {})
++    te = uso.get("prompt_tokens", 0)
++    ts = uso.get("completion_tokens", 0)
++    tt = uso.get("total_tokens", te + ts)
++    return conteudo, te, ts, tt
++
++
+ def main():
+     if len(sys.argv) != 2:
+         print(f"uso: {sys.argv[0]} <arquivo-com-o-pedido.txt>", file=sys.stderr)
+@@ -204,39 +282,61 @@ def main():
+         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
+         return 1
+ 
+-    chave = carregar_chave()
+-    if not chave:
+-        print(f"ABORTADO: ZHIPU_API_KEY ausente em {ENV_PATH}. Nada foi enviado. Ver PROJETO, 'Conselho Remoto', ordem da chave (Condição 2).")
++    chave_glm = carregar_chave("ZHIPU_API_KEY")
++    chave_gemini = carregar_chave("GOOGLE_API_KEY")
++    if not chave_glm and not chave_gemini:
++        print(f"ABORTADO: nem ZHIPU_API_KEY nem GOOGLE_API_KEY em {ENV_PATH}. Nada foi enviado. Ver PROJETO, 'Conselho Remoto'.")
+         return 1
+ 
+-    espera_restante = checar_backoff()
++    espera_restante = checar_backoff() if chave_glm else 0
++    glm_pulavel = (not chave_glm) or espera_restante > 0
+     if espera_restante > 0:
+         minutos = espera_restante // 60 + (1 if espera_restante % 60 else 0)
+-        msg = f"ABORTADO: backoff ativo -- 2+ falhas 429 seguidas nas últimas chamadas. Aguarde ~{minutos} min antes de tentar de novo."
+-        print(msg)
+-        _backoff_log(f"Chamada recusada por backoff -- {espera_restante}s restantes.")
+-        return 1
++        print(f"AVISO: GLM em backoff (~{minutos} min restantes) -- tentando Gemini como fallback.")
++        _backoff_log(f"GLM em backoff ({espera_restante}s) -- fallback para Gemini.")
+ 
++    provedor = modelo_usado = resposta = None
++    erro_glm = None
+     inicio = time.time()
+-    try:
+-        resposta = enviar(pedido_texto, chave)
+-    except urllib.error.HTTPError as e:
+-        corpo_erro = e.read().decode("utf-8", errors="replace")
+-        if e.code == 429:
+-            registrar_falha_429()
+-        print(f"ABORTADO: chamada falhou, HTTP {e.code}. Corpo: {corpo_erro[:2000]}")
+-        return 1
+-    except Exception as e:
+-        print(f"ABORTADO: chamada falhou -- {type(e).__name__}: {e}")
+-        return 1
++
++    if not glm_pulavel:
++        try:
++            resposta = enviar_glm(pedido_texto, chave_glm)
++            provedor, modelo_usado = "glm", MODELO
++        except urllib.error.HTTPError as e:
++            corpo_erro = e.read().decode("utf-8", errors="replace")
++            if e.code == 429:
++                registrar_falha_429()
++            erro_glm = f"HTTP {e.code}: {corpo_erro[:500]}"
++        except Exception as e:
++            erro_glm = f"{type(e).__name__}: {e}"
++
++    if resposta is None:
++        if not chave_gemini:
++            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) e GOOGLE_API_KEY ausente. Nada foi enviado.")
++            return 1
++        n_hoje = _gemini_contador_hoje().get("chamadas", 0)
++        if n_hoje >= GEMINI_AVISO_LIMIAR:
++            print(f"AVISO: {n_hoje} chamadas Gemini deste script hoje -- o teto free (~20/dia) é COMPARTILHADO com o fallback do Hermes e o gemini_quota_guard não enxerga estas. Seguindo mesmo assim.")
++        inicio = time.time()
++        try:
++            resposta = enviar_gemini(pedido_texto, chave_gemini)
++            provedor, modelo_usado = "gemini", GEMINI_MODELO
++            usadas = _gemini_contador_incrementar()
++            print(f"Gemini usado como fallback (chamada {usadas} do dia neste script).")
++        except urllib.error.HTTPError as e:
++            corpo_erro = e.read().decode("utf-8", errors="replace")
++            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) E Gemini falhou HTTP {e.code}: {corpo_erro[:500]}. Nada foi enviado -- cair pro modelo local é decisão do Humano (ver (276)).")
++            return 1
++        except Exception as e:
++            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) E Gemini falhou -- {type(e).__name__}: {e}. Nada foi enviado.")
++            return 1
++
+     duracao_s = round(time.time() - inicio, 1)
+-    registrar_chamada_sem_429()
++    if provedor == "glm":
++        registrar_chamada_sem_429()
+ 
+-    conteudo = resposta.get("choices", [{}])[0].get("message", {}).get("content", "")
+-    uso = resposta.get("usage", {})
+-    tokens_entrada = uso.get("prompt_tokens", 0)
+-    tokens_saida = uso.get("completion_tokens", 0)
+-    tokens_total = uso.get("total_tokens", tokens_entrada + tokens_saida)
++    conteudo, tokens_entrada, tokens_saida, tokens_total = _normalizar(provedor, resposta)
+     custo_usd = round(
+         tokens_entrada * PRECO_ENTRADA_POR_TOKEN_USD
+         + tokens_saida * PRECO_SAIDA_POR_TOKEN_USD,
+@@ -245,11 +345,12 @@ def main():
+ 
+     os.makedirs(DESTINO_DIR, exist_ok=True)
+     agora = datetime.now(timezone.utc).astimezone()
+-    nome_arquivo = agora.strftime("%Y%m%d-%H%M%S") + f"-{MODELO}.json"
++    nome_arquivo = agora.strftime("%Y%m%d-%H%M%S") + f"-{modelo_usado}.json"
+     destino = os.path.join(DESTINO_DIR, nome_arquivo)
+     registro = {
+         "data": agora.isoformat(),
+-        "modelo": MODELO,
++        "provedor": provedor,
++        "modelo": modelo_usado,
+         "duracao_s": duracao_s,
+         "tokens_entrada": tokens_entrada,
+         "tokens_saida": tokens_saida,
