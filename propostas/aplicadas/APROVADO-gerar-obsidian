@@ -1,0 +1,2 @@
+Autorizado pelo Humano em 27/08/2026, verbal nesta sessão: "vá até o final com isso em mente, eu assumo o risco, deixe registrado". Marcador criado pelo executor a pedido do Humano.
+Escopo: aplicar propostas/gerar-obsidian.diff — novo scripts/gerar_obsidian.py, gera memoria/obsidian/ (camada de leitura Obsidian derivada de MEMÓRIAS.md: uma nota atômica por entrada, frontmatter, wikilinks/backlinks, MOC, timeline). Determinístico, idempotente, pasta gitignorada. sha256 do .diff congelado: 8534a797578b. Regra 8 não aplicada — geração determinística e verificável, não juízo.

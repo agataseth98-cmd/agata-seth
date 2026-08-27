@@ -23,6 +23,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidian derivada de MEMÓRIAS.md (nota atômica por entrada, wikilinks, MOC, timeline). Aplicado sob P-8
+
+**Ordem do Humano:** "criar mecanismo que sincronize toda a base de conhecimento do agata com o obsidian" + "aplique as melhores práticas em 2026 quando o assunto é obsidian, deixe pronto para escalar insanamente" + "vá até o final … eu assumo o risco, deixe registrado".
+
+**Autorização:** Humano, verbal — risco assumido por escrito. `.diff` congelado (sha256 `8534a797578b`) antes do `APROVADO-`; P-8 validou por conteúdo; par em `propostas/aplicadas/`.
+
+**Princípio:** `MEMÓRIAS.md` continua a fonte da verdade (append-only, o que os modelos leem). O Obsidian ganha uma **camada de leitura derivada**, nunca editada à mão, regenerada pelo script. Mesma relação que `.hermes.md` tem com o canon.
+
+**O que `gerar_obsidian.py` produz em `memoria/obsidian/`** (pasta gitignorada — `.gitignore` ganhou `memoria/obsidian/`):
+- `entradas/NNNN.md` — **uma nota atômica por entrada**, nome zero-padded (ordena até 9999+). Frontmatter/Properties: `entrada`, `tipo`, `data`, `titulo`, `cita: [...]`, `citada_por: [...]`, `gerado`. Corpo verbatim, com todo `(n)` que resolve para uma entrada virando `[[NNNN]]` → grafo de backlinks. Seção "Citada por" no fim quando aplicável.
+- `timeline.md` — todas as entradas, mais recente primeiro, `[[NNNN]]` + tipo + data + título.
+- `MOC.md` — mapa: links pro canon, navegação, contagem por tipo com todos os links.
+- `_LEIA.md` — "gerado, não edite; corrija pela história; abrir a raiz do repo como vault".
+
+**Determinístico e idempotente:** apaga `entradas/` e reconstrói; rodar 2× só muda o campo `gerado:`. **Escala:** 238 entradas (49–288) = rebuild instantâneo; o desenho já prevê modo incremental (só entradas novas — o único delta num arquivo append-only) para quando passar de ~2000, não implementado porque o rebuild total resolve.
+
+**Parser, achados corrigidos ao construir:** (1) a classe de caracteres do TIPO precisava das maiúsculas acentuadas (`DIÁRIO` tem Á e Í) — sem isso pegava só 42 de 238; (2) o limite do bloco moderno é uma **âncora de linha** `^## Migrado de DIÁRIO.md`, não substring — a mesma frase aparece entre crases dentro do corpo de (96)/(97) e cortava a varredura ali; (3) `cita` filtra refs que não resolvem para entrada gerada — tira o ruído de "(1) reversibilidade / (2) alcance / (3) silêncio" dos portões.
+
+**Regra 8 — não aplicada, por proporção:** geração determinística e verificável (roda e compara), não juízo não-verificável. Registrado como escolha.
+
+**Verificação:** `python3 scripts/gerar_obsidian.py` gera 238 notas, range (0049)–(0288); `(0283)` sai com `cita: [115, 223]` e `citada_por: [284]` (bate com o texto); idempotência conferida (2ª rodada só mexe em `gerado:`); `py_compile` OK; `perimetro.sh` P-8 verde.
+
+**Portão das três perguntas** (com o Humano): reversível sozinho (`git revert` do script; `rm -rf memoria/obsidian/`); alcance = `scripts/gerar_obsidian.py` novo (P-8) + `memoria/obsidian/` gerado e gitignorado + linha no `.gitignore`, zero canon/hook/timer (pode entrar no `post-commit` junto do `.hermes.md` numa proposta P-8 futura); silêncio = barulhento (manual, imprime o que gerou, `py_compile` e `perimetro` no caminho).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: script escrito e testado contra o `MEMÓRIAS.md` real em 3 iterações (regex de TIPO, âncora do bloco migrado, filtro de `cita`); contagem cruzada `grep -oE "^\([0-9]+\) [TIPO]"` = 196 DIÁRIO + 14 DIARIO + 23 CONSELHO + 4 CORREÇÃO + 1 MOD = 238, casou com as notas geradas; idempotência verificada rodando 2×; `.diff` por `git diff` de arquivo novo, `sha256sum`, `git apply` em árvore temporária + `py_compile`.
+
+
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
 
 **Ordem do Humano, textual nesta sessão:** "O que não for essencial vai para a pasta extras, a partir de agora até que orusoua diga o contrário. Segurança, elegância, versatilidade, eficiência, historicidade, checabilidade, clareza, elegância, compatibilidade e tudo que houver de sinônimo para essas palavras deve guiar o sistema a partir de agora até que orusoua peça o contrário." E, ao autorizar a aplicação: "eu assumo o risco, deixe registrado."

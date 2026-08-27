@@ -1,0 +1,185 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+new file mode 100644
+index 0000000..db7d68b
+--- /dev/null
++++ b/scripts/gerar_obsidian.py
+@@ -0,0 +1,179 @@
++#!/usr/bin/env python3
++"""Camada de leitura Obsidian derivada de MEMÓRIAS.md.
++
++MEMÓRIAS.md continua a fonte da verdade (append-only, o que os modelos leem).
++Isto gera memoria/obsidian/ -- uma nota atômica por entrada, com frontmatter
++e wikilinks, para navegar a história no grafo do Obsidian. Nunca editado à
++mão; regenerado por este script. Mesma relação que .hermes.md tem com o canon.
++
++Determinístico e idempotente: apaga memoria/obsidian/entradas/ e reconstrói.
++Escala: 287 entradas = rebuild instantâneo. Para 2000+, dá pra fazer
++incremental (só entradas novas -- o único delta num arquivo append-only);
++não implementado ainda, o rebuild total resolve.
++
++Uso: python3 scripts/gerar_obsidian.py
++"""
++import os
++import re
++import shutil
++import sys
++from datetime import datetime, timezone
++
++REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++FONTE = os.path.join(REPO, "MEMÓRIAS.md")
++SAIDA = os.path.join(REPO, "memoria", "obsidian")
++MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
++# início do bloco migrado (numeração pré-(49) não-única) -- para de processar aqui.
++# Âncora de LINHA (^## ...), não substring: o texto "## Migrado de DIÁRIO.md" também
++# aparece dentro do corpo de uma entrada, entre crases, como referência.
++FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
++
++CAB_ENTRADA = re.compile(
++    r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+(.*)$"
++)
++REF = re.compile(r"\((\d{1,3})\)")
++
++
++def parse_entradas(texto):
++    ini = texto.find(MARCADOR)
++    if ini == -1:
++        print("ERRO: marcador ENTRADAS-NOVAS não achado.", file=sys.stderr)
++        sys.exit(1)
++    corpo = texto[texto.find("\n", ini) + 1:]
++    mfim = FIM_MODERNO.search(corpo)
++    if mfim:
++        corpo = corpo[:mfim.start()]
++
++    linhas = corpo.split("\n")
++    entradas = []
++    atual = None
++    for ln in linhas:
++        m = CAB_ENTRADA.match(ln)
++        if m:
++            if atual:
++                entradas.append(atual)
++            num = int(m.group(1))
++            tipo = m.group(2).strip()
++            resto = m.group(3).strip()
++            data, titulo = "", resto
++            pm = re.match(r"(\d{2}/\d{2}/\d{4})\s*(?:·\s*(.*))?$", resto)
++            if pm:
++                data = pm.group(1)
++                titulo = (pm.group(2) or "").strip()
++            atual = {"num": num, "tipo": tipo, "data": data,
++                     "titulo": titulo, "linhas": []}
++        elif atual is not None:
++            atual["linhas"].append(ln)
++    if atual:
++        entradas.append(atual)
++    return entradas
++
++
++def yaml_lista(nums):
++    return "[" + ", ".join(str(n) for n in sorted(set(nums))) + "]"
++
++
++def main():
++    with open(FONTE, encoding="utf-8") as f:
++        texto = f.read()
++    entradas = parse_entradas(texto)
++    if not entradas:
++        print("Nenhuma entrada moderna encontrada.", file=sys.stderr)
++        return 1
++    nums_gerados = {e["num"] for e in entradas}
++
++    # índice reverso: quem cita quem
++    citada_por = {e["num"]: set() for e in entradas}
++    for e in entradas:
++        corpo = "\n".join(e["linhas"])
++        # só refs que resolvem para uma entrada gerada -- filtra ruído de
++        # "(1) reversibilidade / (2) alcance / (3) silêncio" e afins
++        e["cita"] = sorted(
++            (n for n in {int(x) for x in REF.findall(corpo)}
++             if n != e["num"] and n in nums_gerados)
++        )
++        for alvo in e["cita"]:
++            citada_por[alvo].add(e["num"])
++
++    ent_dir = os.path.join(SAIDA, "entradas")
++    if os.path.isdir(ent_dir):
++        shutil.rmtree(ent_dir)
++    os.makedirs(ent_dir, exist_ok=True)
++
++    agora = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
++
++    for e in entradas:
++        corpo = "\n".join(e["linhas"]).strip("\n")
++        # (n) -> [[NNNN]] (só para entradas que existem como nota)
++        def liga(m):
++            n = int(m.group(1))
++            return f"[[{n:04d}]]" if n in nums_gerados else m.group(0)
++        corpo_links = REF.sub(liga, corpo)
++
++        fm = [
++            "---",
++            f"entrada: {e['num']}",
++            f"tipo: {e['tipo']}",
++            f"data: {e['data']}" if e["data"] else "data:",
++            f"titulo: \"{e['titulo'].replace(chr(34), chr(39))}\"",
++            f"cita: {yaml_lista(e['cita'])}",
++            f"citada_por: {yaml_lista(citada_por[e['num']])}",
++            f"gerado: {agora}",
++            "---",
++            "",
++            f"# ({e['num']}) {e['tipo']} — {e['data']} · {e['titulo']}",
++            "",
++            corpo_links,
++            "",
++        ]
++        if citada_por[e["num"]]:
++            fm.append("## Citada por")
++            fm += [f"- [[{n:04d}]]" for n in sorted(citada_por[e["num"]])]
++            fm.append("")
++        with open(os.path.join(ent_dir, f"{e['num']:04d}.md"), "w", encoding="utf-8") as f:
++            f.write("\n".join(fm))
++
++    # timeline (mais recente primeiro -- a ordem em que já vêm)
++    tl = ["---", "gerado: " + agora, "---", "", "# Linha do tempo — MEMÓRIAS", "",
++          "Mais recente primeiro. Fonte: `MEMÓRIAS.md` (não editar aqui).", ""]
++    for e in entradas:
++        tl.append(f"- [[{e['num']:04d}]] **{e['tipo']}** {e['data']} — {e['titulo']}")
++    with open(os.path.join(SAIDA, "timeline.md"), "w", encoding="utf-8") as f:
++        f.write("\n".join(tl) + "\n")
++
++    # MOC
++    por_tipo = {}
++    for e in entradas:
++        por_tipo.setdefault(e["tipo"], []).append(e["num"])
++    moc = ["---", "gerado: " + agora, "---", "", "# MOC — mapa da memória do Agata", "",
++           "Camada de leitura derivada de `MEMÓRIAS.md`. **Gerada, não editar.**",
++           "Reconstruir: `python3 scripts/gerar_obsidian.py`.", "",
++           "## Canon (a fonte)",
++           "- `../../REGRAS.md` · `../../PROJETO.md` · `../../MEMÓRIAS.md`",
++           "- `../../ONDE_ESTAMOS.md` · `../../PROJETO_REFERENCIA.md`", "",
++           "## Navegação", "- [[timeline]] — todas as entradas, mais recente primeiro", "",
++           f"## Entradas: {len(entradas)} (de ({min(nums_gerados)}) a ({max(nums_gerados)}))", ""]
++    for tipo in sorted(por_tipo):
++        ns = sorted(por_tipo[tipo])
++        moc.append(f"### {tipo} ({len(ns)})")
++        moc.append(" · ".join(f"[[{n:04d}]]" for n in sorted(ns, reverse=True)))
++        moc.append("")
++    with open(os.path.join(SAIDA, "MOC.md"), "w", encoding="utf-8") as f:
++        f.write("\n".join(moc))
++
++    with open(os.path.join(SAIDA, "_LEIA.md"), "w", encoding="utf-8") as f:
++        f.write(
++            "# _LEIA\n\nEsta pasta é **gerada** por `scripts/gerar_obsidian.py` a "
++            "partir de `MEMÓRIAS.md`.\n\n- Não edite nada aqui — a próxima geração "
++            "sobrescreve.\n- Corrija a história pelo caminho normal: entrada nova em "
++            "`MEMÓRIAS.md`.\n- Reconstruir: `python3 scripts/gerar_obsidian.py`.\n\n"
++            "Abrir `../` (a raiz do repo) como vault do Obsidian; começar por "
++            "`obsidian/MOC.md`.\n"
++        )
++
++    print(f"gerado: memoria/obsidian/ — {len(entradas)} entradas + MOC + timeline + _LEIA")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())

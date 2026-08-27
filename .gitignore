@@ -35,3 +35,7 @@ SOUL.md
 *.bundle
 *.bak.*
 home/
+
+# Camada de leitura Obsidian -- gerada por scripts/gerar_obsidian.py a partir de
+# MEMÓRIAS.md, nunca editada à mão. Regenerável, não versionada (MEMÓRIAS (289)).
+memoria/obsidian/
