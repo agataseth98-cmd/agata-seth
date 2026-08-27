@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
+  palavras-chave: humano, confirmou, conversa, modelos, edição, config, yaml, real
+(281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nunca mais" sai do template da âncora (fecho do achado 3 de (277))
+  palavras-chave: proposta, ancora, defasagem, honesta, aplicada, nunca, sai, template, âncora, fecho, achado
 (280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
   palavras-chave: frente, bancada, modelos, fechada, decisão, candidato, bateu, titular, troca, vira, fronteira, recusa
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
@@ -63,10 +67,10 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: correção, grave, entradas, existem, verdade, auditor, cometeu, três, seguidas, próprio, erro, acabou, catalogar
 (253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
   palavras-chave: audite, execute, melhorias, ágata, opus, aplicadas, url, pinada, sha, três, linhas, catálogo, ficam, pendentes, exigirem, segunda, opinião
-(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 (140), não 31/07 nem "sete semanas" — nem eu nem "Ágata Opus" tínhamos rodado o teste certo ainda
-  palavras-chave: teto, snapshot, datado, precisão, nem, sete, semanas, ágata, opus, tínhamos, rodado, teste, certo
-(251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ágata Opus" — DIÁRIO.md existiu de verdade, o diagnóstico certo é cache velho, não fabricação
-  palavras-chave: correção, auditor, errou, teste, ágata, opus, existiu, verdade, diagnóstico, certo, cache, velho, fabricação
+(252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 ( …
+  palavras-chave: teto, snapshot, datado, precisão
+(251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ág …
+  palavras-chave: correção, auditor, errou, teste
 (250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata O …
   palavras-chave: segunda, tentativa, mesma, sessão, nuvem, ágata
 (249) DIÁRIO — 25/08/2026 · Três consertos aplicados por autorização geral do Hu …

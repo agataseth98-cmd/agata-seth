@@ -23,6 +23,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
+
+**Pendência que se fecha:** ONDE_ESTAMOS.md registrava um bloco vindo de outra sessão ("Qwen3.7") relatando que o Humano tinha editado `config.yaml` (removendo personas extras do robô) e que outro modelo tinha questionado isso. A edição do arquivo foi confirmada na Máquina à época; **a conversa entre modelos, não** — sem rastro verificável de dentro, ficou marcada como alegação (Regra 2). Nesta sessão o Humano confirmou, direto: "a conversa foi real". Fonte: Humano (não verificável pela Máquina, mas é quem decide e quem a presenciou). Não muda REGRAS nem PROJETO — só tira o ponto da lista de aberto.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: confirmação verbal do Humano nesta sessão; sem medição de Máquina possível para o conteúdo da conversa.
+
+
+(281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nunca mais" sai do template da âncora (fecho do achado 3 de (277))
+
+**Autorização:** Humano, nesta sessão ("1-sim"). Marcador `propostas/APROVADO-ancora-defasagem-honesta` criado; proposta movida para `propostas/aplicadas/`.
+
+**O que mudou** (`git apply` limpo, `git apply --check` antes):
+- `scripts/atualizar_ancora_prompt.py` — no template do bloco gerado (e na docstring): `pode estar até 1 commit atrasado, nunca mais` → `normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco`. A garantia absoluta falsa (o passo é fail-soft) vira descrição honesta + ponteiro pro detector.
+- `PROJETO.md` — os dois espelhos da frase ("Memória e hidratação"): mesma troca, mais a menção explícita ao modo de falha fail-soft e ao detector `Escrito em:`.
+- `PROMPT_CARREGAMENTO.md` (fora de P-8, mesma leva) — o parágrafo de texto livre que citava a redação antiga verbatim foi reescrito pra casar com a nova; `grep -c "nunca mais"` no arquivo vai a 0 (bloco gerado + texto livre, os dois).
+
+**Verificado:** dry-run de `atualizar_ancora_prompt.py` pós-mudança — exit 0, linha de SHA gerada com o texto novo. O bloco `ANCORA-SHA` real deste arquivo é regenerado pelo `pre-commit` deste commit, já com a redação nova. Encerra o único critério do Passo 2 de (277) que estava parcial por escopo.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` + `git apply`; `grep -n "nunca mais"` nos três arquivos antes e depois; `python3 scripts/atualizar_ancora_prompt.py` rodado contra cópia do prompt (exit 0); leitura do `case` de `_p8_eh_comportamento` confirmando PROMPT_CARREGAMENTO.md fora de P-8 e os outros dois dentro.
+
+
 (280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
 
 **Decisão do Humano nesta sessão:** encerrar a Frente 4, manter `qwen3.5-9b-64k` como modelo principal (já era, sob regime de auditoria desde (140)), arquivar a bancada, e registrar a troca de principal como fronteira de recusa — não repropor sem dado novo. Condição do Humano para o registro: constar método e n, não só o placar. Cumprida abaixo.

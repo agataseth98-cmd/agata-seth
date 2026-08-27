@@ -1,0 +1,2 @@
+Autorizado pelo Humano em 27/08/2026 ("1-sim", nesta sessão).
+Escopo: aplicar propostas/ancora-defasagem-honesta.diff — trocar "nunca mais" por "normalmente 1 commit; mais se o hook falhar" no template de scripts/atualizar_ancora_prompt.py (docstring + bloco gerado) e no espelho em PROJETO.md. Fecho do achado 3 de MEMORIAS (277).

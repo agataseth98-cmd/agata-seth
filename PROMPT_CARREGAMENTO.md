@@ -28,21 +28,21 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: pode estar até 1 commit atrasado, nunca mais -- ver PROJETO.md, "Memória e hidratação"): 1f79ccb7d80b9e1c57e83b8c8c60fc07b3a973e3
-  Escrito em: 27/08/2026 11:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 337296803be041ae3b1191cc86db6fe26643b156
+  Escrito em: 27/08/2026 11:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f79ccb7d80b9e1c57e83b8c8c60fc07b3a973e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f79ccb7d80b9e1c57e83b8c8c60fc07b3a973e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f79ccb7d80b9e1c57e83b8c8c60fc07b3a973e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/337296803be041ae3b1191cc86db6fe26643b156/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/337296803be041ae3b1191cc86db6fe26643b156/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/337296803be041ae3b1191cc86db6fe26643b156/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
-  A linha do bloco diz que o SHA fica "até 1 commit atrasado, nunca mais". Isso vale só quando o hook roda
-  certo. O passo que reescreve a âncora (`.githooks/pre-commit`) é fail-soft: se falhar, imprime um AVISO em
-  stderr e o commit segue mesmo assim. Aí a âncora pode ficar bem mais velha que 1 commit, e quem lê este
-  arquivo não é avisado. Detector barato, sem depender de api.github.com: compare o campo "Escrito em:" acima
-  com a hora que você mediu ao abrir a sessão. Diferença de horas ou dias significa âncora velha — trate o SHA
-  e as URLs pinadas como suspeitos, e caia nas URLs em `/main/`.
+  A linha do bloco diz "normalmente 1 commit atrasado". O "normalmente" carrega um modo de falha: o passo que
+  reescreve a âncora (`.githooks/pre-commit`) é fail-soft — se falhar, imprime um AVISO em stderr e o commit
+  segue mesmo assim. Aí a âncora fica mais velha que 1 commit, e quem lê este arquivo não é avisado. Detector
+  barato, sem depender de api.github.com: compare o campo "Escrito em:" acima com a hora que você mediu ao
+  abrir a sessão. Diferença de horas ou dias significa âncora velha — trate o SHA e as URLs pinadas como
+  suspeitos, e caia nas URLs em `/main/`.
 
   Se você conseguir requisição HTTP: confira https://api.github.com/repos/agataseth98-cmd/agata-seth/commits/main
   e compare o campo "sha" com o valor acima OU com o commit logo depois dele. Igual a um dos dois: seu fetch
