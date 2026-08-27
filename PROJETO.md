@@ -169,8 +169,34 @@ Repositório **é público** por decisão registrada do Humano. Isso é o que qu
 Testado nesta sessão de verdade (não só lido): `--check` sem `SELOS.txt` dá exit 1 com mensagem clara; selar um arquivo e checar dá exit 0; adulterar o arquivo depois de selado dá exit 1 com "VIOLADO". Script em `scripts/selar.sh` (sha256 `154dfa55f1bfb3f571a338d2b305d60922cbb245b6a6edb4865f7f06afae4745`), não mais inline aqui — extraído por sessão de reconciliação, ver MEMÓRIAS.
 
 ## Memória em duas camadas
+
 **Camada local** — Obsidian sobre o próprio repositório git: offline, privada, é **FATO**.
-**Camada nuvem** — NotebookLM e afins, pesquisa em andamento: cruzamento de dados, é **RELATO/projeção**. Mão única: lê, nunca escreve fato de volta. Só o não-sensível sobe; segredo, chave e canon nunca.
+**Camada nuvem** — NotebookLM e afins: processamento de fonte bruta, é **RELATO/projeção**. Nunca recebe canon e nunca vira cérebro do sistema.
+
+### Esfera pessoal
+`memoria/missoes/segunda-camada/` é a esfera local e privada do Humano. Sem remote, não sobe para serviço externo nenhum. Pode conter o que só existe nesta Máquina: hardware, rotina, configuração local, assunto pessoal. Modelos locais consultam sob demanda; modelos em nuvem não veem.
+
+### Esfera do projeto
+`memoria/missoes/agata-sistema/` é a esfera de trabalho do sistema, vinculada a uma conta Google Workspace **dedicada ao projeto** — nunca a conta pessoal do Humano. Recebe material do sistema que o Humano autorize, e pode ser consultada por modelos externos sob autorização.
+
+### Fronteira
+Só o não-sensível sobe. Conteúdo público sobre o sistema pode ser usado na esfera do projeto; os arquivos canônicos (`REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md`) não sobem como canon. Dado que só existe nesta Máquina, ou que pertence ao domínio pessoal, fica na esfera pessoal. Segredo, chave e credencial nunca sobem para esfera externa nenhuma.
+
+**Por que "canon nunca sobe" não é contradição com o repositório ser público:** o canon já está no GitHub, aberto. A proibição não é sobre sigilo do texto — é sobre duas outras coisas. Primeira: nenhuma esfera externa adquire autoridade para escrever fato no canon. Segunda: material derivado do canon que ainda não é público não sobe. Sem esse motivo escrito, a regra parece absurda na primeira leitura e é ignorada em silêncio.
+
+### Mão única refinada
+A política deixa de ser "lê, nunca escreve fato de volta" e passa a ser: **nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta. Nada disso é escrita de fato. Nenhum resultado retorna automaticamente a `REGRAS.md`, `PROJETO.md` ou `MEMÓRIAS.md`.
+
+Resultado processado só influencia o canon pelo fluxo normal: proposta explícita, decisão do Humano, verificação pela Máquina quando aplicável, registro em MEMÓRIAS, commit. A autorização do Humano permite a incorporação; não dispensa verificação nem registro.
+
+### Postura sobre uso dos dados pelo Google
+O Humano autoriza o uso dos dados da esfera do projeto nos serviços Google escolhidos, incluindo eventual uso para melhoria ou treinamento **quando os termos daquele serviço assim previrem**. Isto é postura declarada do Humano, não alegação sobre o que a Google faz — o comportamento do fornecedor não foi medido aqui. Dados da esfera pessoal nunca são usados para isso, porque nunca sobem.
+
+### ACB — reversão parcial de (223)
+(223) manteve o ACB inteiro fora de escopo. A partir de 27/08/2026, essa decisão fica limitada aos assuntos pessoais e às partes do ACB desnecessárias ao sistema. Assunto do próprio sistema pode voltar ao escopo mediante autorização explícita do Humano e o mesmo controle de proposta, verificação e registro das demais mudanças.
+
+### Limitação conhecida — Conselho Remoto
+A esfera do projeto mora em `memoria/missoes/`, que casa com o regex da Condição 1 em `scripts/conselho_remoto.py`. Por mecanismo, ela não pode ser discutida com o Conselho Remoto hoje. Não é defeito: é a proteção funcionando. Mudar isso exige allowlist explícita ou mover a esfera para fora de `memoria/missoes/`, e qualquer das duas é decisão do Humano.
 
 **bg-review do Hermes Gateway está desligado** (`nudge_interval: 0` em `~/.hermes/config.yaml`, fora do repo). Era um mecanismo que reescrevia sozinho o MEMORY.md nativo — mesmo inode do canônico — e chegou a **apagar identidade e história** para caber num teto de caracteres, sem humano no loop. Consequência aceita: sem auto-captura de fatos; a memória muda só por edição deliberada, por MEMÓRIAS, ou sob comando explícito.
 

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
 (281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nunca mais" sai do template da âncora (fecho do achado 3 de (277))
 (280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (256) CONSELHO — 25/08/2026 · Segunda opinião sobre os itens 3/4 (carimbo, quarta pergunta) recebida do GLM — sim pro carimbo, não pra pergunta; não aplicado, decisão fica com o Humano
 (255) DIÁRIO — 25/08/2026 · Segunda correção no mesmo achado: P-7 NÃO tem bug — é limite documentado, deliberado, por boa razão. Dois consertos reais de PROJETO.md aplicados
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
-(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
+(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …
 (252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 ( …
 (251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ág …
 (250) DIÁRIO — 25/08/2026 · Segunda tentativa da mesma sessão na nuvem ("Ágata O …

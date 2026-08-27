@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
+  palavras-chave: esferas, memória, pessoal, projeto, reversão, parcial, assunto, sistema, decisão, humano, seção, camadas, reescrita
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
   palavras-chave: humano, confirmou, conversa, modelos, edição, config, yaml, real
 (281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nunca mais" sai do template da âncora (fecho do achado 3 de (277))
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: segunda, correção, mesmo, achado, tem, bug, limite, documentado, deliberado, boa, razão, consertos, reais, projeto, aplicados
 (254) CONSELHO — 25/08/2026 · Correção grave a (250)/(251)/(253): as entradas (22) e (5) EXISTEM de verdade — o auditor cometeu, três vezes seguidas, o próprio erro que acabou de catalogar
   palavras-chave: correção, grave, entradas, existem, verdade, auditor, cometeu, três, seguidas, próprio, erro, acabou, catalogar
-(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" aplicadas (URL pinada em SHA, três linhas no catálogo); duas ficam pendentes por exigirem segunda opinião
-  palavras-chave: audite, execute, melhorias, ágata, opus, aplicadas, url, pinada, sha, três, linhas, catálogo, ficam, pendentes, exigirem, segunda, opinião
+(253) CONSELHO — 25/08/2026 · "Audite e execute": duas melhorias de "Ágata Opus" …
+  palavras-chave: audite, execute, melhorias, ágata, opus
 (252) CONSELHO — 25/08/2026 · Teto do snapshot datado com precisão: 13/08/2026 ( …
   palavras-chave: teto, snapshot, datado, precisão
 (251) CONSELHO — 25/08/2026 · Correção a (250): o auditor errou o teste, não "Ág …

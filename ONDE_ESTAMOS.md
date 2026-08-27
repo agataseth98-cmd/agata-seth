@@ -8,8 +8,9 @@ Esta página é só para você — não para os modelos.
 ## Onde estamos agora
 A limpeza de segurança que estava em aberto terminou.
 Uma regra antiga e perigosa foi removida do sistema.
-Um teste grande com IA terminou. Deu resultado, mas ninguém escolheu
-ainda o que fazer com ele.
+Um teste grande com IA terminou: nenhum dos 6 modelos candidatos foi
+melhor que o modelo atual, e ficou decidido manter o de hoje. Trocar
+virou "não repropor sem dado novo".
 Testamos como o sistema avisa você quando algo quebra — e o teste
 mostrou que faltava justamente esta página.
 Os três avisos confusos que o teste achou já foram corrigidos, com sua
@@ -60,6 +61,25 @@ a fingir continuidade; e a lista do que ler agora inclui o PROJETO.md.
 Passou pelo portão das três perguntas com você e por três leituras
 independentes do modelo local antes de aplicar. Falta só a sessão em
 nuvem conferir o resultado contra o GitHub depois que eu publicar.
+
+A memória do sistema agora tem duas esferas, escritas no PROJETO.md.
+A **esfera pessoal** (`memoria/missoes/segunda-camada/`) é sua, local,
+sem remote: hardware, rotina, config, assunto pessoal. Modelo em nuvem
+não vê. A **esfera do projeto** (`memoria/missoes/agata-sistema/`) fica
+ligada a uma conta Google separada, só do projeto — nunca a sua conta
+pessoal — e recebe material do sistema que você autorizar. A regra que
+antes era "a nuvem lê e nunca escreve de volta" virou uma mais precisa:
+nenhum resultado de fora tem autoridade automática pra escrever no
+canon; ele pode propor, e aí segue o caminho normal (proposta, sua
+decisão, verificação, registro, commit). Junto veio uma reversão
+parcial da decisão (223): o ACB volta ao escopo só para assunto do
+próprio sistema, e só com sua autorização caso a caso. Os canônicos
+(REGRAS/PROJETO/MEMÓRIAS) nunca sobem "como canon" pra esfera externa —
+o porquê disso não ser contradição com o repo ser público está escrito
+lá. O esqueleto de pastas da esfera pessoal já existe, versionado no
+repo local `missoes` (com backup no HD). Passou pelo portão das três
+perguntas e por três leituras do modelo local — que aprovaram com
+ressalvas de estilo, sem contradição.
 
 Uma trava nova foi criada e ligada: daqui pra frente, mudança que MUDA
 COMO O SISTEMA SE COMPORTA (regras, scripts) só entra depois de você

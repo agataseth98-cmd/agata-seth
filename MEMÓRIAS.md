@@ -23,6 +23,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
+
+**Decisão autorizadora:** o Humano autorizou, nesta sessão, reestruturar a política de memória do sistema em duas esferas e reverter parcialmente (223). O pacote foi consolidado pela auditoria em nuvem "Ágata Opus" a partir de desenho do Qwen3.7 e parecer do GPT-5.6 "Luna" — as três camadas ficam nomeadas aqui; a aplicação se comprova pelo commit desta entrada, não por afirmação.
+
+**O que muda na seção "## Memória em duas camadas" do PROJETO.md:**
+- **Esfera pessoal** — `memoria/missoes/segunda-camada/`: local, privada, sem remote. Hardware, rotina, config local, assunto pessoal. Modelos locais consultam sob demanda; modelos em nuvem não veem.
+- **Esfera do projeto** — `memoria/missoes/agata-sistema/`: vinculada a uma conta Google Workspace **dedicada ao projeto**, nunca a pessoal do Humano. Material do sistema que o Humano autorize; consultável por modelos externos sob autorização.
+- **Fronteira:** só o não-sensível sobe; os canônicos não sobem *como canon*; segredo/chave/credencial nunca. Registrado por escrito o porquê de "canon nunca sobe" não contradizer o repo ser público (não é sigilo do texto — é que nenhuma esfera externa ganha autoridade de escrever fato no canon, e derivado ainda-não-público não sobe).
+- **Mão única refinada:** a linha antiga "**Camada nuvem** … Mão única: lê, nunca escreve fato de volta" foi **reescrita**; o conteúdo sobre mão única migrou para as subseções "Mão única refinada" e "Fronteira". A política passa de "lê, nunca escreve" para "nenhum resultado externo tem autoridade automática para escrever no canon" — síntese/análise/proposta são permitidas, escrita de fato só pelo fluxo normal (proposta → decisão do Humano → verificação da Máquina quando aplicável → registro em MEMÓRIAS → commit).
+- **Postura sobre uso dos dados pelo Google:** o Humano autoriza uso dos dados da esfera do projeto nos serviços Google escolhidos, inclusive melhoria/treinamento quando os termos do serviço previrem — postura declarada do Humano, não alegação sobre o que a Google faz (não medido). Esfera pessoal nunca é usada para isso porque nunca sobe.
+- **ACB — reversão parcial de (223):** (223) tinha deixado o ACB inteiro fora de escopo. A partir de 27/08/2026 isso fica limitado aos assuntos pessoais e às partes do ACB desnecessárias ao sistema. Assunto do próprio sistema pode voltar ao escopo com autorização explícita do Humano e o mesmo controle de proposta/verificação/registro.
+- **Limitação conhecida:** `memoria/missoes/agata-sistema/` casa com o regex da Condição 1 de `scripts/conselho_remoto.py` (`memoria[/\\]missoes`) — por mecanismo, não pode ser discutida com o Conselho Remoto hoje. É a proteção funcionando, não defeito. Mudar exige allowlist explícita ou mover a esfera, decisão do Humano.
+
+**Parágrafo do bg-review preservado byte a byte** (extraído pelo script, `assert` no lugar esperado, não redigitado).
+
+**Não reabre a questão do vector store.** (115) refutou "vector store / GraphRAG" — as duas — com o motivo "grep vence e não tem índice para ficar obsoleto"; o gatilho declarado foi "revisitar se MEMÓRIAS crescer uma ordem de grandeza". Eram ~118 entradas; medi **232** em a34bdcd — ainda longe do 10×. "Segunda camada" aqui é organização de fonte bruta em esfera externa, não índice sobre o canon. Fica em stand-by como estava.
+
+**Portão das três perguntas** (REGRAS.md "Mudança estrutural"), rodado com o Humano, uma de cada vez: (1) reversibilidade — `git revert` sozinho, `.diff`/`APROVADO-` como registro; (2) alcance — 1 seção P-8 + esta entrada + ONDE_ESTAMOS.md + o esqueleto da esfera pessoal no repo `missoes`; `PROJETO_REFERENCIA.md:38` (ACB) fica parcialmente superado, follow-up fora desta missão; (3) silêncio — P-8/P-5 travam alto, `sha256` conferido antes de escrever (`cad6be32…`), dois pontos semi-silenciosos no esqueleto (versionar em algum lugar; pastas vazias não sobrevivem ao git) mitigados por commit no repo `missoes` + `.gitkeep`.
+
+**Regra 8:** três passadas em `qwen3.5-9b-64k`, hidratações separadas, sobre a redação da seção nova. Todas "ok com ressalvas", **nenhuma achou contradição interna**. Convergência só em estilo: ponto-e-vírgula unindo duas ideias (2/3), "não-sensível"/"público" sem definição local (2/3). Divergência apenas de granularidade — sem `lacuna` de direção. Texto hash-locked pelo desenho da missão; o Humano optou por aplicar como está, ressalvas registradas aqui.
+
+**Esqueleto criado:** `memoria/missoes/segunda-camada/` com `README.md`, `templates/insight.md` e as pastas `inbox/ projetos/ areas/ recursos/ arquivo/` (cada uma com `.gitkeep`). Versionado no repo local `memoria/missoes/` (sem remote, com hook de backup para bundle no staging + HD) — decisão do PASSO 7, tomada por recomendação do executor e autorização do Humano. `memoria/missoes/agata-sistema/` não foi criada agora; nasce quando for usada.
+
+**Sobre o marcador de aprovação:** o Humano autorizou verbalmente ("Autorizo vc a fazer tudo") respondendo ao PASSO 4; `propostas/APROVADO-duas-esferas` foi criado pelo executor a pedido do Humano, não por conta própria. Registrado para não haver dúvida sobre a origem da aprovação (a P-8 valida por conteúdo do `.diff`, não pela autoria do marcador).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git fetch`/`rev-parse` confirmando base a34bdcd; `python3 scripts_tmp/aplicar_duas_esferas.py` rodado, `sha256sum PROJETO.md` = `cad6be32…085e68` conferido antes e depois de `git apply`; `git apply --check` contra árvore limpa; `grep` no canon confirmando que só a linha 173 citava a redação antiga; leitura de `scripts/conselho_remoto.py` (regex da Condição 1) e de `PROJETO_REFERENCIA.md` (ACB, (223)); 3 chamadas reais à API do Ollama (`qwen3.5-9b-64k`), respostas salvas e auditadas; `grep -c` de entradas de MEMÓRIAS = 232.
+
+
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
 
 **Pendência que se fecha:** ONDE_ESTAMOS.md registrava um bloco vindo de outra sessão ("Qwen3.7") relatando que o Humano tinha editado `config.yaml` (removendo personas extras do robô) e que outro modelo tinha questionado isso. A edição do arquivo foi confirmada na Máquina à época; **a conversa entre modelos, não** — sem rastro verificável de dentro, ficou marcada como alegação (Regra 2). Nesta sessão o Humano confirmou, direto: "a conversa foi real". Fonte: Humano (não verificável pela Máquina, mas é quem decide e quem a presenciou). Não muda REGRAS nem PROJETO — só tira o ponto da lista de aberto.
