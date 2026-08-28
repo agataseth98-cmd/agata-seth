@@ -23,6 +23,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
+
+**Contexto:** o plano de 6 fases (auditor Qwen3.7, nuvem) chegou com 8 defeitos — auditados e reconhecidos nesta sessão. A FASE 3 pede a decisão das 3 questões abertas da Proposta 001, sem implementar.
+
+**Regra 8 cumprida:** 3 passadas independentes de `qwen3.5-9b-64k` (invocações separadas de `ollama run`, contexto novo a cada uma, sem histórico compartilhado), sobre o texto das 3 questões com a recomendação embutida removida (a original violava a Regra 3 — quem propõe não opina). **Convergência total, sem divergência:** Q1=(b), Q2=(b), Q3=(a) nas três. Saídas salvas no scratch da sessão.
+
+**Decisão do Humano:**
+- **Q1 — índice na hidratação: (b) consulta sob demanda.** Não injeta no `.hermes.md` (orçamento de 25 000 chars; a camada de leitura do vault já opera assim).
+- **Q2 — acesso de modelos em nuvem: MODIFICADO pelo Humano.** Não é "só locais". É: o índice é gerado SOMENTE do canon público (`REGRAS.md`/`PROJETO.md`/`MEMÓRIAS.md`), NUNCA lê de `memoria/missoes/` (nenhuma das duas esferas), e modelos em nuvem acessam por consulta dirigida mediada pelo executor local. A esfera pessoal nunca é exposta — garantido por construção (não está no conjunto de entrada do gerador).
+- **Q3 — subir pro Drive da conta do projeto: (a) sim,** via `subir_esfera_projeto.py` (varredura de segredo + fronteira de caminho já no script). Ponte pro NotebookLM.
+
+**Reconciliação de nome:** o Q3 original falava em "índice DA esfera do projeto". Com o Q2 modificado, existe UM índice só, derivado do canon público — é esse que sobe pro Drive. Não há índice separado da esfera do projeto.
+
+**Sem nova superfície de exposição:** o canon já é público no GitHub. Um índice derivado só de `REGRAS/PROJETO/MEMÓRIAS` não revela nada que já não esteja aberto. A validação "índice não contém referência à esfera pessoal" (pedida pelo Humano para a FASE 5) entra como asserção dura de defesa em profundidade, não porque haja caminho de vazamento no desenho.
+
+**O que destrava:** FASE 4.2 (documentar a fronteira real do script — a allowlist do plano do Qwen não existe no código), FASE 5 (`gerar_indice_derivado.py`), FASE 5.5 (`consultar_indice.py`), FASE 6 (export pro Drive + doc do NotebookLM). Cada uma entra como P-8 própria, uma a uma.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: 3 invocações reais de `ollama run qwen3.5-9b-64k:latest` com o mesmo prompt e contexto limpo, saídas salvas e comparadas item a item (Q1/Q2/Q3 idênticos nas três); leitura de `scripts/subir_esfera_projeto.py` confirmando ausência de `allowlist` e a ordem real de checagem (realpath dentro de `agata-sistema/`, fora de `segunda-camada/`, fora do conjunto CANON); `JANELA_ORCAMENTO_CHARS=25000` conferido em `.githooks/gerar-hermes-md.sh`.
+
+
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
 
 **O que faltava:** (293) criou o controle P-10 em `scripts/perimetro.sh` mas não atualizou `scripts/gerar_obsidian.py` — a lista `controles` do gerador estava fixa em `P-1..P-9`. Efeito: `memoria/obsidian/controles/p-10.md` não existia e qualquer `[[p-10]]` no vault ficava órfão. Contradiz (290), que fixou "todo controle P-N representado no vault".

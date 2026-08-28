@@ -622,6 +622,17 @@ número. Tudo em MEMÓRIAS (293). Um segundo ajuste em seguida
 (MEMÓRIAS (295)): o próprio P-10 não tinha página no vault — o gerador
 listava só P-1 a P-9 —, agora tem.
 
+28/08/2026 (MEMÓRIAS (296)): você decidiu as 3 questões que estavam
+abertas sobre a "camada de índice". Ela vai existir, mas: só é
+consultada quando um modelo pede (não entra na carga automática); é
+gerada só a partir do canon público (REGRAS/PROJETO/MEMÓRIAS) e nunca
+lê nada da pasta de missões (esfera pessoal nem de projeto); modelos na
+nuvem chegam a ela por um trecho que o executor local separa e entrega.
+E o índice pode subir pro Drive da conta do projeto pra usar no
+NotebookLM. Antes de decidir, rodei a verificação tripla no modelo
+local — as três passadas concordaram. Falta construir: o gerador do
+índice, o script de consulta pra nuvem, e a documentação do envio.
+
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
 277–281); SOUL.md ignorado (278); bancada de modelos fechada, nenhum

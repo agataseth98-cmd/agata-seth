@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
+  palavras-chave: fase, decidida, proposta, avança, camada, consulta, sob, demanda, canon, público, ponte, pro, drive
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
   palavras-chave: gerador, vault, ganha, nota, gap, aplicado, sob
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
@@ -65,7 +67,7 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, anomalia, identidade, seth, declarou, claude, sonnet
 (267) DIARIO - 26/08/2026 - Correcao da Regra 1.1: endpoint timeapi.io sem cache
   palavras-chave: diario, correcao, regra, endpoint, timeapi, cache
-(266) DIARIO - 26/08/2026 - Padrao de cabecalho obrigatorio para todas as LLMs do Conselho
+(266) DIARIO - 26/08/2026 - Padrao de cabecalho obrigatorio para todas as LLMs d …
   palavras-chave: diario, padrao, cabecalho, obrigatorio, llms
 (265) DIARIO - 26/08/2026 - Seth travou em loop de repeticao de codigo
   palavras-chave: diario, seth, travou, loop, repeticao, codigo
