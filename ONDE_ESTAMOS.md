@@ -639,6 +639,14 @@ de mandar qualquer coisa (caminho certo, não é canon, não tem cara de
 segredo, etc.). O plano da IA da nuvem falava numa "lista de permissão"
 que nunca existiu no código; foi corrigido pra descrever o que existe.
 
+28/08/2026 (MEMÓRIAS (298)): o gerador do índice está pronto
+(`gerar_indice_derivado.py`). Ele lê só os três arquivos públicos
+(regras, estado atual, memória) e monta um arquivo único de 134 KB:
+regras e estado inteiros, mais a lista de títulos das 247 entradas.
+Nunca toca a pasta de missões. Antes de salvar, ele remonta o arquivo
+peça por peça e confere que não sobrou nada que não venha do canon.
+Falta o script de consulta pra nuvem e a documentação do envio.
+
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
 277–281); SOUL.md ignorado (278); bancada de modelos fechada, nenhum

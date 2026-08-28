@@ -23,6 +23,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
+
+**O que é:** um gerador que lê SÓ `REGRAS.md` + `PROJETO.md` + `MEMÓRIAS.md` (do topo do repo) e escreve `memoria/missoes/agata-sistema/derivado/{indice.md, manifesto.md}`. Nunca lê de `memoria/missoes/`. É a "Opção A" que o Humano escolheu: REGRAS íntegro + PROJETO íntegro + as 247 linhas de título das entradas de MEMÓRIAS (nº + tipo + data + título), mais recente primeiro, sem corpo de entrada. `indice.md` mede 134 KB.
+
+**Por que não é o vault (290) de novo:** entrada diferente (3 arquivos públicos, não o sistema inteiro), forma diferente (1 arquivo plano, não 398 notas religadas), fim diferente (processamento externo no NotebookLM, não navegação local da Seth), lugar diferente (repo `missoes`, não o principal). Overlap só no verbo "derivar do canon".
+
+**Q2 modificado do Humano, atendido por construção:** o conjunto de entrada é fixo (`FONTES = REGRAS/PROJETO/MEMÓRIAS`); não há caminho de código que abra outra coisa. A "validação que o índice não contém referência à esfera pessoal" (instrução 5) foi implementada como algo mais forte que um `grep` proibido — que daria falso positivo, porque o próprio PROJETO.md documenta os caminhos `memoria/missoes/segunda-camada/` e `agata-sistema/` como política pública. Em vez disso: reconstrução byte a byte antes de gravar (`indice == HEADER + REGRAS + SEP + PROJETO + SEP + títulos`), e cada linha de título conferida como verbatim de MEMÓRIAS.md. Se sobrar um byte fora do boilerplate fixo + canon, aborta sem escrever.
+
+**Determinístico:** carimbo de commit (`git rev-parse HEAD` / `git log -1 --format=%cI`), não relógio; override por `AGATA_CANON_SHA`/`AGATA_CANON_DATA`. 2ª geração byte-idêntica verificada. `manifesto.md` traz sha256 das 3 fontes + do `indice.md`.
+
+**Sem hook.** Regenera sob demanda, antes de um export. `memoria/missoes/` já é gitignorado do repo principal (`.gitignore:22`) — a saída não polui o canon.
+
+**Autorização:** Humano, "implemente" + escolha "A". `.diff` congelado `f41765ab…`, P-8; `propostas/APROVADO-indice-derivado` criado a pedido; par em `propostas/aplicadas/`.
+
+**Verificado:** `py_compile`; rodado contra o canon real (`indice.md` 134 KB, 247 títulos, `manifesto.md` com hashes que batem com `sha256sum` das 3 fontes); determinismo por `sha256sum` de 2 gerações; `.diff` de arquivo novo por `git diff` após `git add -N`, aplicado em árvore temporária + `py_compile` do aplicado; `perimetro.sh` após aplicar.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: script escrito e rodado contra REGRAS/PROJETO/MEMÓRIAS reais; conferência dos hashes do `manifesto.md` contra `sha256sum`; teste de determinismo (2 gerações, hash igual); o parse de título reusa a regex `CAB_ENTRADA` de `gerar_obsidian.py`; `.diff` congelado por `sha256sum` antes do APROVADO e após o move; aplicação testada em `mktemp -d` como o P-8 faz.
+
+
 (297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
 
 **O que o plano do Qwen (FASE 4.2) queria:** documentar um fluxo de upload com `allowlist.txt` — "Humano adiciona caminho na allowlist; script valida contra ela". **Esse arquivo e essa checagem não existem no código** (defeito 2 da auditoria). Instrução do Humano nesta sessão: documentar a fronteira REAL, não criar allowlist.
