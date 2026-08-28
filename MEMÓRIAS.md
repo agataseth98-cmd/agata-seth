@@ -23,6 +23,21 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
+
+**O que faltava:** (293) criou o controle P-10 em `scripts/perimetro.sh` mas não atualizou `scripts/gerar_obsidian.py` — a lista `controles` do gerador estava fixa em `P-1..P-9`. Efeito: `memoria/obsidian/controles/p-10.md` não existia e qualquer `[[p-10]]` no vault ficava órfão. Contradiz (290), que fixou "todo controle P-N representado no vault".
+
+**Correção** (`.diff` congelado `fc945f255c19…ffa7b0`, P-8): duas linhas — `"P-10"` na lista `controles` + `"P-10": "Vault derivado confere byte a byte com a regeneração do HEAD"` em `CTRL_DESC`. Nenhuma outra mudança. `\bP-1\b` não casa `P-10` (o `0` é caractere de palavra), sem colisão na contagem de menções por entrada.
+
+**Autorização:** Humano, nesta sessão — "APROVADO". `propostas/APROVADO-vault-p10-nota` criado a pedido; par movido para `propostas/aplicadas/` neste commit.
+
+**Verificado:** `git apply --check` limpo contra HEAD `c0c54e6`; `py_compile` OK; a regeneração produz `controles/p-10.md` com "Entradas que mencionam P-10 → [[0293]], [[0294]]"; idempotente (2ª geração byte-idêntica por `find -print0 | sort -z | xargs -0 sha256sum | sha256sum`); `perimetro.sh` — P-10 SKIP no pre-commit (gerador muda neste commit, conferência adiada, `perimetro.sh:504`), P-8 OK, RESULTADO GERAL OK (P-4 PARCIAL de sempre, sem sudo). Vault regenerado do HEAD novo pelo `post-commit`.
+
+**Portão das três perguntas** (com o Humano): reversível sozinho (`git revert` de 2 linhas, nada apagado); alcance = só `scripts/gerar_obsidian.py` (P-8) + `controles/p-10.md` gerado e gitignorado + esta entrada + ONDE_ESTAMOS.md, zero hook/timer/canon-texto; silêncio = barulhento (P-8 trava sem APROVADO, `perimetro.sh` no caminho, teste de idempotência).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `_p8_arquivo_aprovado` de `perimetro.sh` lido (varre `propostas/` e `propostas/aplicadas/`, valida por hash de blob, não por path); `p10_vault_derivado` lido (`perimetro.sh:504`, SKIP quando `gerar_obsidian.py` staged); `.diff` gerado por `git diff`, congelado por `sha256sum` antes do APROVADO e reconferido após o move; `git apply --check` + `git apply`; idempotência por hash de árvore em 2 gerações; `perimetro.sh` rodado antes (baseline) e depois.
+
+
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
 
 **O que (293) implementou errado:** em `_canon()` de `scripts/gerar_obsidian.py`, a marca `-arvore-suja` vinha de `git status --porcelain`, que lista **também arquivos não rastreados**. O Obsidian larga `Sem título.canvas` / `moc-regras.md` na raiz do repo quando o Humano explora — não rastreados, não mudam o que o gerador lê, mas sujavam o carimbo. Resultado achado no teste de aceite de (293): o `post-commit` gerava o vault com `canon: <sha>-arvore-suja`, o **P-10** regenerava do `git archive HEAD` limpo → `canon: <sha>` → hashes diferentes → **P-10 reprovava todo commit** enquanto houvesse qualquer arquivo solto na raiz. O detector se auto-disparava.

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
 (293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
 (292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md

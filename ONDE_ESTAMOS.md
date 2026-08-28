@@ -618,7 +618,9 @@ arquivo solto que o Obsidian deixa na pasta fazia o P-10 reclamar à toa.) O scr
 (`verificar_token.py`) foi trazido pro repositório público (estava só
 no repo local). E ficou decidido: o vault não fere a recusa (115) de
 "vector store" — não tem busca por embedding, é markdown com links por
-número. Tudo em MEMÓRIAS (293).
+número. Tudo em MEMÓRIAS (293). Um segundo ajuste em seguida
+(MEMÓRIAS (295)): o próprio P-10 não tinha página no vault — o gerador
+listava só P-1 a P-9 —, agora tem.
 
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS

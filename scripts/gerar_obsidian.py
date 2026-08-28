@@ -241,7 +241,7 @@ def main():
     prop_base = {p: slug(p, "prop-") for p in props}
     NOTAS.update(prop_base.values())
 
-    controles = ["P-1", "P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9"]
+    controles = ["P-1", "P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9", "P-10"]
     ctrl_base = {c: c.lower() for c in controles}
     NOTAS.update(ctrl_base.values())
 
@@ -392,6 +392,7 @@ def main():
         "P-7": "Citação de MEMÓRIAS aponta pra entrada real, não fabricada",
         "P-8": "Quarentena: mudança de comportamento exige proposta + APROVADO-",
         "P-9": "Serviço declarado em PROJETO.md não pode morrer em silêncio",
+        "P-10": "Vault derivado confere byte a byte com a regeneração do HEAD",
     }
     for c in controles:
         ents = sorted(e["num"] for e in entradas
