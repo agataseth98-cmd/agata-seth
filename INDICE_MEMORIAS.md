@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
 (297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
 (270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no teste de Regra 1.1
-(269) DIARIO - 26/08/2026 - Seth fabricou timestamp Unix em resposta a teste de Regra 1.1
+(269) DIARIO - 26/08/2026 - Seth fabricou timestamp Unix em resposta a teste de …
 (268) DIARIO - 26/08/2026 - Anomalia de identidade: Seth declarou-se como Claude …
 (267) DIARIO - 26/08/2026 - Correcao da Regra 1.1: endpoint timeapi.io sem cache
 (266) DIARIO - 26/08/2026 - Padrao de cabecalho obrigatorio para todas as LLMs d …

@@ -23,6 +23,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
+
+**O que é:** o executor local roda, pega a saída em texto plano, cola no contexto de trabalho de um modelo em nuvem. Não chama LLM, não acessa rede, não escreve nada. Recebe palavras-chave, devolve: as seções de REGRAS/PROJETO cujo heading ou corpo casam, e as linhas de título de MEMÓRIAS que casam. Corpo de entrada de MEMÓRIAS não sai — o número aponta pra abrir o arquivo.
+
+**Fonte:** `memoria/missoes/agata-sistema/derivado/indice.md` (o mesmo artefato que sobe pro Drive — o que o executor consulta é o que o modelo em nuvem tem). Ausente → instrui a rodar `gerar_indice_derivado.py`; `--rebuild` regenera antes. `--all` exige todas as palavras (default é qualquer uma). Tetos: 15 seções, 50 títulos, com "+N não mostrados".
+
+**Isto é o caminho do Q2 modificado:** modelo em nuvem não lê `memoria/missoes/` nem o índice direto — recebe um recorte que o executor local separou. A esfera pessoal continua fora por construção (o índice nunca a contém — (298)).
+
+**Regra 8 não se aplica:** é grep estruturado sobre texto, saída determinística, sem juízo (precedente (289)/(293)).
+
+**Autorização:** Humano, "implemente" + instrução 6. `.diff` congelado `569cc747…`, P-8; `propostas/APROVADO-consulta-indice-nuvem` a pedido; par em `propostas/aplicadas/`.
+
+**Verificado:** `py_compile`; 4 testes ao vivo — `P-10` (3 títulos), `--all vault determinístico` (1 título), índice ausente (mensagem certa, sai 1), `--rebuild segredo` (regenerou + achou a seção Segurança de REGRAS); `.diff` de arquivo novo aplicado em `mktemp -d` + `py_compile`; `perimetro.sh` após aplicar.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: script escrito e rodado nos 4 casos acima; parse de seção por `^## ` dentro dos blocos PARTE 1/PARTE 2 do `indice.md`; `.diff` congelado por `sha256sum` antes do APROVADO e após o move; aplicação testada em árvore temporária.
+
+
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
 
 **O que é:** um gerador que lê SÓ `REGRAS.md` + `PROJETO.md` + `MEMÓRIAS.md` (do topo do repo) e escreve `memoria/missoes/agata-sistema/derivado/{indice.md, manifesto.md}`. Nunca lê de `memoria/missoes/`. É a "Opção A" que o Humano escolheu: REGRAS íntegro + PROJETO íntegro + as 247 linhas de título das entradas de MEMÓRIAS (nº + tipo + data + título), mais recente primeiro, sem corpo de entrada. `indice.md` mede 134 KB.

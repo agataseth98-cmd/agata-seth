@@ -642,10 +642,15 @@ que nunca existiu no código; foi corrigido pra descrever o que existe.
 28/08/2026 (MEMÓRIAS (298)): o gerador do índice está pronto
 (`gerar_indice_derivado.py`). Ele lê só os três arquivos públicos
 (regras, estado atual, memória) e monta um arquivo único de 134 KB:
-regras e estado inteiros, mais a lista de títulos das 247 entradas.
+regras e estado inteiros, mais a lista de títulos das entradas.
 Nunca toca a pasta de missões. Antes de salvar, ele remonta o arquivo
 peça por peça e confere que não sobrou nada que não venha do canon.
-Falta o script de consulta pra nuvem e a documentação do envio.
+
+28/08/2026 (MEMÓRIAS (299)): o script de consulta pra nuvem está pronto
+(`consultar_indice.py`). Você dá palavras-chave, ele devolve as seções
+das regras/estado e os títulos de memória que batem, em texto plano,
+pra colar no contexto de um modelo na nuvem. Não chama IA, não usa
+rede. Falta só a documentação do envio pro Drive.
 
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
