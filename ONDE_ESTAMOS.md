@@ -6,6 +6,18 @@ Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
 ## Onde estamos agora
+O texto que uma IA na nuvem cola para entrar no sistema tinha um aviso
+que disparava à toa. Ele comparava a hora do último commit com a hora
+atual e, se passasse umas horas sem ninguém mexer no sistema, mandava a
+IA desconfiar da fonte boa e usar a pior. Aconteceu duas vezes hoje —
+uma IA reclamou sem motivo, outra entrou com a história um passo atrás.
+Reescrevi esse texto: agora ele confere de verdade se está atrasado, em
+três tentativas da mais barata para a mais cara, e só troca de fonte se
+estiver mesmo desatualizado. Falta um teste: colar o texto novo numa IA
+na nuvem e ver se ela chega sozinha na última entrada.
+O relógio da máquina estava sem sincronizar logo depois do reboot; já
+sincronizou sozinho, não há nada a consertar.
+
 A limpeza de segurança que estava em aberto terminou.
 Uma regra antiga e perigosa foi removida do sistema.
 Um teste grande com IA terminou: nenhum dos 6 modelos candidatos foi

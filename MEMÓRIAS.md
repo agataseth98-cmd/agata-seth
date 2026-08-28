@@ -23,6 +23,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
+
+**O defeito:** o texto mandava comparar o campo "Escrito em:" da âncora com a hora medida na abertura e, se divergir por horas, tratar o SHA pinado como suspeito e cair nas URLs `/main/` (CDN). Isso mede silêncio do repositório, não idade da âncora — e troca a fonte imutável pela pior (classe de risco de (248 - fetch servindo conteúdo real mas de 12+ dias atrás, sem carimbo de idade)-(252)).
+
+**Duas ocorrências reais hoje, independentes** (relatadas pela auditoria em nuvem; não verificáveis da Máquina, `lacuna`): uma sessão em nuvem alarmou com a âncora exatamente 1 commit atrás — `018b40a` filho de `810a3b6`, hook funcionando; outra sessão (GPT-5.6 Luna) seguiu o prompt como escrito, buscou só as pinadas e reportou (300) como última entrada quando o canon já estava em (301).
+
+**v1 descartada antes de aplicar:** a primeira correção da auditoria consertava o detector mas mandava buscar as 3 fontes em duplicata — com MEMÓRIAS.md em 961.512 B, ~2 MB por carregamento, custo caindo justo sobre o modelo só-fetch, que é quem mais precisa do prompt. Motivou a v2.
+
+**O que a v2 faz:** pinadas continuam a fonte; `/main/` vira alternativa e último degrau. Checagem de defasagem em 3 degraus, o primeiro que funcionar encerra — (a) feed `commits/main.atom`, não passa por api.github.com (medido pela auditoria hoje: HTTP 200, ~29 KB, HEAD/pai/avô na ordem); (b) `git ls-remote`, ou Range HTTP nos ~3.000 B do topo de MEMÓRIAS.md em `/main/` (medido: HTTP 206, 3.001 B); (c) último recurso, as duas URLs comparadas, declarado como caro. "Escrito em:" proibido como detector, com o caso de hoje anexo no próprio arquivo. api.github.com rebaixado a extra, com `parents[0].sha`.
+
+**Aplicação:** `PROMPT_CARREGAMENTO.md` está FORA da quarentena P-8 (não muda comportamento de código — PROJETO.md, "Quarentena estrutural") — sem par `.diff`/`APROVADO-`. Reconstruído a partir do texto integral da ORIENTAÇÃO v2 (autorizada pelo Humano nesta sessão). `sha256` do resultado = `13372e8677e55374…`, 8.404 B — bate exato com o alvo da orientação. Bloco entre marcadores `ANCORA-SHA` byte-a-byte igual ao HEAD antes do commit (`cmp` limpo); o `pre-commit` reescreve esse bloco no commit — esperado, é conteúdo de máquina. `.diff` congelado no scratch da sessão; `sha256` local difere do alvo da orientação por artefato de geração de diff — o teste que vale é o hash do arquivo-resultado, e esse bateu.
+
+**Item P fechado (NTP da Predator):** `timedatectl status` 28/08 14:38 — `System clock synchronized: yes`, `NTP active`. O `no` das 13:46 era o `systemd-timesyncd` subindo pós-reboot acidental. Sem trabalho estrutural. Lição de Regra 1.1 que fica: medir o selo de hora a cada resposta, nunca herdar do cabeçalho anterior — o executor herdou `(relógio do sistema, não sincronizado)` num cabeçalho sem re-medir, e a escalada de prioridade que a auditoria tinha posto sobre P caiu junto.
+
+**Tarefa 0.5 (pré-requisito de proposta futura, não desta):** `.githooks/pre-commit` lido — confirma que regenera `.hermes.md`/`INDICE_MEMORIAS.md` e faz `git add` deles no mesmo commit que estagia REGRAS/PROJETO/MEMÓRIAS. `.hermes.md` não fica atrás do canon dentro de um commit. Verificado no código, não na descrição de PROJETO.md.
+
+**Pendente, obrigatório antes de fechar:** teste de aceite 2.8 — colar o prompt v2 numa sessão de nuvem limpa (dois fornecedores, se der) e confirmar que ela chega sozinha à entrada do topo do canon. Não executável da Máquina; fica pro Humano ou uma sessão de nuvem.
+
+**Portão das três perguntas:** reversível sozinho (`git revert` de 2 hunks, nada apagado); alcance = só `PROMPT_CARREGAMENTO.md` (fora de P-8) + esta entrada + ONDE_ESTAMOS.md + os derivados que o `pre-commit` regenera; zero REGRAS/PROJETO/scripts, zero rede no ato do commit; silêncio = barulhento (`perimetro.sh` no caminho, `.diff` congelado e lido, hash do resultado conferido contra alvo).
+
+**Verificado:** `sha256sum` + `wc -c` do resultado contra os dois alvos da orientação (bateram: `13372e8677e55374`, 8.404 B); `cmp` do bloco `ANCORA-SHA` contra `git show HEAD:PROMPT_CARREGAMENTO.md` (igual); `git diff` lido inteiro antes do commit — 2 hunks, só a seção "COMO BUSCAR" e a nota da âncora, nada mais tocado; `perimetro.sh` RESULTADO GERAL OK (9 OK · 0 SKIP · 1 PARCIAL · 0 FALHA — o PARCIAL é o P-4 lado-sudo de sempre, sem sudo).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: reconstrução do arquivo a partir do texto integral da ORIENTAÇÃO v2, conferida por `sha256` (13372e8677e55374) e byte-count (8.404) contra os alvos dados; `.githooks/pre-commit` lido para a tarefa 0.5; as medições de `commits/main.atom` e do Range HTTP são da auditoria em nuvem, não refeitas aqui (`lacuna` de reverificação local); `.diff` gerado por `git diff`, congelado por `sha256sum`, lido antes de aplicar. Achado e desenho: auditoria em nuvem (Claude Opus 5); reconstrução e verificação na Máquina: este executor; autorização: Humano, nesta sessão.
+
+
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
 
 **Pendente de (300):** o `indice.md`/`manifesto.md` eram regenerados só à mão antes de um export. Este passo os mantém em dia com o canon a cada commit, igual ao vault Obsidian (passo 2 do mesmo hook).

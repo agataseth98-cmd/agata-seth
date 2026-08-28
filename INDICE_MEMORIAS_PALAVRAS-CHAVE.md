@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
+  palavras-chave: prompt, carregamento, detector, âncora, velha, era, falso, positivo, trocado, checagem, defasagem, degraus
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
   palavras-chave: passo, post, commit, regenera, índice, derivado, fail, soft, sob
 (300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, documentação, medição, horário, nuvem, projeto
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
   palavras-chave: diario, code, interpreter, fonte, canonica, horario, modelos, nuvem
-(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
-  palavras-chave: diario, script, universal, consulta, horario, multiplas, apis
+(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multipla …
+  palavras-chave: diario, script, universal, consulta, horario, multipla
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pe …
   palavras-chave: mudança, estrutural, memórias, passa, crescer
 (270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no te …

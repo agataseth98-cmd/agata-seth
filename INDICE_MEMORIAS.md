@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
 (300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para modelos em nuvem
-(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multiplas APIs
+(272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multipla …
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pe …
 (270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no te …
 (269) DIARIO - 26/08/2026 - Seth fabricou timestamp Unix em resposta a teste de …
