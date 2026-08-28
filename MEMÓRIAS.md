@@ -23,6 +23,19 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
+
+**O que (293) implementou errado:** em `_canon()` de `scripts/gerar_obsidian.py`, a marca `-arvore-suja` vinha de `git status --porcelain`, que lista **também arquivos não rastreados**. O Obsidian larga `Sem título.canvas` / `moc-regras.md` na raiz do repo quando o Humano explora — não rastreados, não mudam o que o gerador lê, mas sujavam o carimbo. Resultado achado no teste de aceite de (293): o `post-commit` gerava o vault com `canon: <sha>-arvore-suja`, o **P-10** regenerava do `git archive HEAD` limpo → `canon: <sha>` → hashes diferentes → **P-10 reprovava todo commit** enquanto houvesse qualquer arquivo solto na raiz. O detector se auto-disparava.
+
+**Corrigido:** `suja = git diff --quiet HEAD` (returncode ≠ 0) — só arquivo **rastreado** diferente de HEAD suja o carimbo. Arquivo não rastreado é ignorado. `.diff` congelado `2e84bb1c0e0b`, P-8. (293) não é editada — Regra 4.
+
+**Testado depois da correção (aceite de (293) refeito):** `bash scripts/perimetro.sh` → P-10 OK no caminho feliz; `rm` de uma nota do vault → P-10 FALHOU com a mensagem certa; `python3 scripts/gerar_obsidian.py` → P-10 OK de novo. `canon:` do `INICIO.md` == HEAD, sem sufixo, com a árvore rastreada limpa.
+
+**Os arquivos soltos na raiz** (`Sem título.canvas` 2 B, `moc-regras.md` 0 B) seguem não rastreados e não commitados — são acidentes do Obsidian do Humano, não do sistema. Recomendado apagar o `moc-regras.md` vazio (confunde com o real em `memoria/obsidian/`).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: teste de aceite de (293) que expôs a falha (P-10 reprovando com strays na raiz); `git diff --quiet HEAD` confirmado ignorando não rastreados e pegando `scripts/gerar_obsidian.py` modificado (rc=1); `.diff` congelado por `sha256sum` antes do `APROVADO-`; re-teste dos 3 casos de aceite do P-10 depois da correção.
+
+
 (293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
 
 **Origem:** auditoria de 28/08, ordem do Humano ("Audite e se estiver tudo certo execute"), risco assumido. Quatro conjuntos num commit só. Não rodei o portão das três perguntas — ajuste pequeno (REGRAS "Mudança estrutural"), e cerimônia contra o princípio de elegância de (288).

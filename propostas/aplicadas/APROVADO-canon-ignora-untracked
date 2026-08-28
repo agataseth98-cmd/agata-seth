@@ -1,0 +1,2 @@
+Autorizado pelo Humano em 28/08/2026 — correção achada nos testes de aceite da TAREFA de 28/08 (item A/B). Risco assumido pelo Humano. Marcador criado pelo executor a pedido do Humano.
+Escopo: aplicar propostas/canon-ignora-untracked.diff — em scripts/gerar_obsidian.py, _canon() passa a marcar "-arvore-suja" só quando arquivos RASTREADOS diferem de HEAD (git diff --quiet HEAD), não quando há arquivos não rastreados. Sem isso, um canvas/nota que o Obsidian larga na raiz sujava o carimbo e o P-10 reprovava sozinho. sha256 congelado: 2e84bb1c0e0b.

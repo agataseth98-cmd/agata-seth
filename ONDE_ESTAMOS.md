@@ -612,7 +612,9 @@ o commit de que foi gerado (`canon:` no INICIO.md), não a hora do
 relógio. Com isso deu pra criar o controle P-10: a cada commit o
 sistema regenera o vault a partir do que está publicado e confere que
 o vault no disco bate — se alguém editou uma nota à mão ou o gerador
-falhou calado, o próximo commit acusa. O script do teste dos 8 dias
+falhou calado, o próximo commit acusa. (Um ajuste logo em seguida,
+MEMÓRIAS (294): o carimbo só considera arquivo versionado, senão um
+arquivo solto que o Obsidian deixa na pasta fazia o P-10 reclamar à toa.) O script do teste dos 8 dias
 (`verificar_token.py`) foi trazido pro repositório público (estava só
 no repo local). E ficou decidido: o vault não fere a recusa (115) de
 "vector store" — não tem busca por embedding, é markdown com links por

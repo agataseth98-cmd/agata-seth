@@ -37,7 +37,12 @@ def _canon():
                                       text=True, check=True).stdout.strip()
         sha = g("rev-parse", "HEAD")
         data = g("log", "-1", "--format=%cI")
-        if g("status", "--porcelain"):
+        # árvore suja = arquivos RASTREADOS diferentes de HEAD. Arquivo não
+        # rastreado (canvas/nota que o Obsidian larga na raiz) não muda o que o
+        # gerador lê e não pode sujar o carimbo -- senão o P-10 reprova sozinho.
+        suja = subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD"],
+                              capture_output=True).returncode != 0
+        if suja:
             sha += "-arvore-suja"
         return sha, data
     except Exception:
