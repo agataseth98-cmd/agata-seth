@@ -1,0 +1,26 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index b01b1a2..9542b38 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -186,6 +186,21 @@ Só o não-sensível sobe. Conteúdo público sobre o sistema pode ser usado na
+ 
+ **Por que "canon nunca sobe" não é contradição com o repositório ser público:** o canon já está no GitHub, aberto. A proibição não é sobre sigilo do texto — é sobre duas outras coisas. Primeira: nenhuma esfera externa adquire autoridade para escrever fato no canon. Segunda: material derivado do canon que ainda não é público não sobe. Sem esse motivo escrito, a regra parece absurda na primeira leitura e é ignorada em silêncio.
+ 
++### Fronteira mecânica — `subir_esfera_projeto.py`
++O único cano de código entre o sistema e o Drive. Um arquivo por invocação, não encadeia, não escreve em canon, não decide nada. Aborta na primeira checagem que falhar, nesta ordem:
++1. **Caminho** — `realpath` do alvo tem que estar dentro de `memoria/missoes/agata-sistema/` (o próprio diretório ou abaixo dele). Symlink apontando pra fora é resolvido e barrado.
++2. **Esfera pessoal** — se o `realpath` tocar `memoria/missoes/segunda-camada/`, aborta.
++3. **Canon** — basename em `{REGRAS.md, PROJETO.md, MEMÓRIAS.md, PROJETO_REFERENCIA.md}` aborta, mesmo que seja cópia.
++4. **É arquivo** — não diretório.
++5. **Extensão** — só `.md .txt .csv .json .yaml .yml .log`.
++6. **Tamanho** — acima de 10 MiB aborta; 0 byte aborta.
++7. **UTF-8** — o conteúdo tem que decodificar como UTF-8; binário aborta.
++8. **Varredura de segredo** — ~16 padrões (client_secret Google, refresh/access token OAuth, chave PEM, AWS key id, `sk-…`, token GitHub/Slack, connection string com senha, header `Authorization`, par chave/valor genérico, nomes de `*_API_KEY` conhecidos, CPF, CNPJ). Um match aborta — **nada é enviado**.
++
++Só depois das 8: `refresh_token` → access token → cria ou reusa a pasta `agata-sistema` no Drive (escopo `drive.file`) → upload multipart → registra `[carimbo] nome drive_id=… tamanho <- caminho` em `memoria/missoes/agata-sistema/upload.log`.
++
++**Não é allowlist.** Não há arquivo de permissão por caminho — a fronteira é a lista de checagens acima. Se um dia for preciso liberar só certos arquivos de `agata-sistema/`, isso entra como P-8 separada; não existe hoje. Limitação assumida (MEMÓRIAS (286)): formato de segredo que nenhum padrão pega, num arquivo posto em `agata-sistema/` de propósito e com o script rodado à mão — fecham a colocação deliberada, o `upload.log` auditável e a revisão do Humano. A varredura é rede contra acidente, não classificador.
++
+ ### Mão única refinada
+ A política deixa de ser "lê, nunca escreve fato de volta" e passa a ser: **nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta. Nada disso é escrita de fato. Nenhum resultado retorna automaticamente a `REGRAS.md`, `PROJETO.md` ou `MEMÓRIAS.md`.
+ 

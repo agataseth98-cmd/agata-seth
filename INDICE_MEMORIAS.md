@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado

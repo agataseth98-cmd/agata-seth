@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
+  palavras-chave: fase, projeto, documenta, fronteira, real, subir, esfera, allowlist, plano, qwen, existe
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
   palavras-chave: fase, decidida, proposta, avança, camada, consulta, sob, demanda, canon, público, ponte, pro, drive
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8

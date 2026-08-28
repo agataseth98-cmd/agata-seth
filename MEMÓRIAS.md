@@ -23,6 +23,19 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
+
+**O que o plano do Qwen (FASE 4.2) queria:** documentar um fluxo de upload com `allowlist.txt` — "Humano adiciona caminho na allowlist; script valida contra ela". **Esse arquivo e essa checagem não existem no código** (defeito 2 da auditoria). Instrução do Humano nesta sessão: documentar a fronteira REAL, não criar allowlist.
+
+**O que entrou** (`.diff` congelado `96d5963d…`, P-8, subseção nova em "## Memória em duas camadas"): a ordem exata de 8 checagens de `scripts/subir_esfera_projeto.py`, lida direto do código — caminho (`realpath` dentro de `agata-sistema/`), esfera pessoal, canon (conjunto de 4 basenames), é-arquivo, extensão (7 permitidas), tamanho (10 MiB / não-vazio), UTF-8, varredura de segredo (~16 padrões). Mais o que roda depois (refresh → pasta → upload multipart → `upload.log`) e a frase "não é allowlist; se um dia precisar, é P-8 separada".
+
+**Autorização:** Humano, "Audite e se estiver tudo certo implemente" + instrução 8. `propostas/APROVADO-fluxo-upload-fronteira` criado a pedido; par em `propostas/aplicadas/`.
+
+**Verificado:** `scripts/subir_esfera_projeto.py` lido linha a linha (checagens 121–152); `grep -i allowlist` no script = 0; `git apply --check` limpo contra HEAD `c927e17`; `perimetro.sh` P-8 OK após aplicar.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa de `subir_esfera_projeto.py`; conferência das 8 abortagens e da ordem contra o texto da subseção; `.diff` por `git diff` de PROJETO.md, `sha256sum` antes do APROVADO e após o move, `git checkout` pra reverter antes de congelar; `perimetro.sh` rodado após aplicar.
+
+
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
 
 **Contexto:** o plano de 6 fases (auditor Qwen3.7, nuvem) chegou com 8 defeitos — auditados e reconhecidos nesta sessão. A FASE 3 pede a decisão das 3 questões abertas da Proposta 001, sem implementar.

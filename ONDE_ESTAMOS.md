@@ -633,6 +633,12 @@ NotebookLM. Antes de decidir, rodei a verificação tripla no modelo
 local — as três passadas concordaram. Falta construir: o gerador do
 índice, o script de consulta pra nuvem, e a documentação do envio.
 
+28/08/2026 (MEMÓRIAS (297)): o PROJETO.md agora descreve como o envio
+pro Drive funciona de verdade — as 8 checagens que o script faz antes
+de mandar qualquer coisa (caminho certo, não é canon, não tem cara de
+segredo, etc.). O plano da IA da nuvem falava numa "lista de permissão"
+que nunca existiu no código; foi corrigido pra descrever o que existe.
+
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
 277–281); SOUL.md ignorado (278); bancada de modelos fechada, nenhum
