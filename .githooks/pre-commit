@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 1. Roda o perimetro (scripts/perimetro.sh, 6 controles, MEMÓRIAS (191)/(192))
+# 1. Roda o perimetro (scripts/perimetro.sh, 10 controles P-1..P-10, MEMÓRIAS (191)/(192))
 #    e bloqueia o commit se algum falhar de verdade.
 # 2. Regenera .hermes.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
 #    MEMÓRIAS.md mudaram, e inclui os dois no commit.

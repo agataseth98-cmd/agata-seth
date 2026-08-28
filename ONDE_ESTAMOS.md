@@ -607,14 +607,25 @@ e corrigi antes de fechar, exatamente o tipo de erro que a regra que
 você escreveu tenta evitar.
 
 ## Última atualização
-27/08/2026 (sessão longa após o reboot): prompt de carregamento
-auditado e consertado (8 achados, MEMÓRIAS 277–281); SOUL.md ignorado
-(278); bancada de modelos fechada, nenhum candidato bateu o atual
-(280); duas esferas de memória escritas no PROJETO.md + reversão
-parcial da (223) (283); conversa do config.yaml confirmada real (282);
-limpeza de três pendentes (284); credencial Google da conta do projeto
-+ cano manual pro Drive (285/286); Gemini virou fallback do Conselho
-autônomo (287).
+28/08/2026: o gerador do vault Obsidian virou determinístico — carimba
+o commit de que foi gerado (`canon:` no INICIO.md), não a hora do
+relógio. Com isso deu pra criar o controle P-10: a cada commit o
+sistema regenera o vault a partir do que está publicado e confere que
+o vault no disco bate — se alguém editou uma nota à mão ou o gerador
+falhou calado, o próximo commit acusa. O script do teste dos 8 dias
+(`verificar_token.py`) foi trazido pro repositório público (estava só
+no repo local). E ficou decidido: o vault não fere a recusa (115) de
+"vector store" — não tem busca por embedding, é markdown com links por
+número. Tudo em MEMÓRIAS (293).
+
+--- da sessão de 27/08 (longa, após o reboot) ---
+Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
+277–281); SOUL.md ignorado (278); bancada de modelos fechada, nenhum
+candidato bateu o atual (280); duas esferas de memória escritas no
+PROJETO.md + reversão parcial da (223) (283); conversa do config.yaml
+confirmada real (282); limpeza de três pendentes (284); credencial
+Google da conta do projeto + cano manual pro Drive (285/286); Gemini
+virou fallback do Conselho autônomo (287).
 
 Você deu uma ordem permanente (288): o não-essencial mora em `extras/`,
 e um conjunto de princípios — segurança, elegância, versatilidade,

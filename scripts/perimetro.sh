@@ -490,6 +490,53 @@ p9_servicos_declarados() {
   return 0
 }
 
+p10_vault_derivado() {
+  # P-10 (MEMÓRIAS (293)): memoria/obsidian/ é o único derivado gerado FORA do
+  # commit (post-commit, gitignorado) -- .hermes.md e os índices entram no
+  # commit pelo pre-commit e não têm como divergir. Aqui: regenera o vault a
+  # partir do conteúdo de HEAD num sandbox e confere byte a byte contra o disco.
+  # HEAD dos DOIS lados -- comparar contra o disco staged reprovaria todo commit
+  # que toca canon (o vault no disco foi gerado do commit anterior).
+  local vault="memoria/obsidian"
+
+  # Bootstrap: se o próprio gerador muda neste commit, HEAD tem a versão antiga
+  # -- a conferência não faz sentido, adia pro próximo commit.
+  if ! git diff --cached --quiet -- scripts/gerar_obsidian.py 2>/dev/null; then
+    echo "P-10: scripts/gerar_obsidian.py muda neste commit -- conferência adiada pro próximo."
+    PERIMETRO_ESTADO="SKIP"; return 0
+  fi
+  if [ ! -d "$vault" ]; then
+    echo "P-10: $vault/ ainda não existe (clone fresco?) -- o post-commit cria no 1º commit."
+    PERIMETRO_ESTADO="SKIP"; return 0
+  fi
+
+  local tmp sha data hreal hesp
+  tmp="$(mktemp -d)" || { echo "P-10: mktemp falhou -- pulado."; PERIMETRO_ESTADO="SKIP"; return 0; }
+  sha="$(git rev-parse HEAD)"
+  data="$(git log -1 --format=%cI)"
+  if ! git archive HEAD | tar -x -C "$tmp" 2>/dev/null; then
+    rm -rf "$tmp"
+    echo "SUSPEITO (P-10): git archive HEAD falhou -- não dá pra conferir o vault."
+    return 1
+  fi
+  if ! ( cd "$tmp" && AGATA_CANON_SHA="$sha" AGATA_CANON_DATA="$data" \
+         python3 scripts/gerar_obsidian.py >/dev/null 2>&1 ); then
+    rm -rf "$tmp"
+    echo "SUSPEITO (P-10): gerar_obsidian.py falhou ao rodar sobre HEAD -- gerador quebrado."
+    return 1
+  fi
+  hreal="$( cd "$vault" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum )"
+  hesp="$(  cd "$tmp/$vault" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum )"
+  rm -rf "$tmp"
+  if [ "$hreal" != "$hesp" ]; then
+    echo "SUSPEITO (P-10): $vault/ não bate com o que gerar_obsidian.py produz de HEAD."
+    echo "  o que fazer: rode 'python3 scripts/gerar_obsidian.py' -- e se você editou uma nota à mão, desfaça: correção é entrada nova em MEMÓRIAS, não edição do vault."
+    echo "  fonte: MEMÓRIAS (293)"
+    return 1
+  fi
+  return 0
+}
+
 # Imprime o veredito de uma checagem e soma no placar -- único ponto que
 # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
 # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
@@ -554,6 +601,11 @@ main() {
   cabecalho "P-8" "Quarentena: mudança de comportamento exige propostas/APROVADO-<nome> antes de entrar no canon" "PROJETO, Quarentena estrutural (item 6, 20/08/2026) · propostas/README.md"
   PERIMETRO_ESTADO=""
   p8_quarentena; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-10" "Vault derivado (memoria/obsidian/) confere com a fonte em HEAD" "MEMÓRIAS (293)"
+  PERIMETRO_ESTADO=""
+  p10_vault_derivado; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-9" "Serviço declarado em PROJETO.md não pode morrer em silêncio" "PROJETO, Serviços (boot)"

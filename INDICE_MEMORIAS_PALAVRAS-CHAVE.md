@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
+  palavras-chave: gerador, vault, vira, determinístico, carimbo, commit, lugar, relógio, controle, derivado, confere, fonte, verificar, token, versionado, fronteira, decidida
 (292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md
   palavras-chave: uso, vault, seth, passa, disponível, estimulado, cirúrgico, linha, projeto, item, checagem, prontidão, regras
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, seth, travou, loop, repeticao, codigo
 (264) DIARIO - 26/08/2026 - Anomalia na Regra 1.1: timeapi.io retorna timestamp desatualizado
   palavras-chave: diario, anomalia, regra, timeapi, retorna, timestamp, desatualizado
-(263) DIARIO - 26/08/2026 - Teste da Regra 1.1 (sincronizacao de horario) com a Seth
-  palavras-chave: diario, teste, regra, sincronizacao, horario, seth
+(263) DIARIO - 26/08/2026 - Teste da Regra 1.1 (sincronizacao de horario) com a …
+  palavras-chave: diario, teste, regra, sincronizacao, horario
 (262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261 …
   palavras-chave: diario, correcao, duplicacao, acidental, memorias
 (261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em prec …

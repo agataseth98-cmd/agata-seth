@@ -65,12 +65,14 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
 | Descarte de fatos por valor | Regra 4, absoluta | MEMÓRIAS (113) |
 | Reconsolidação por reescrita | Já existe como entrada nova | MEMÓRIAS (113) |
 | Reflections agendadas escrevendo memória | Mecanismo do bg-review, (47)/(48) | MEMÓRIAS (113) |
-| Vector store como camada de memória | Refutado por medição nesta escala | MEMÓRIAS (115) |
+| Vector store / GraphRAG como camada de memória | Refutado por medição nesta escala | MEMÓRIAS (115) |
 | MEMÓRIAS em repo sem remote como cópia única | Privado também se versiona — git próprio, sem remote | (91)→(92) |
 | RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |
 | Conformidade com EU AI Act | Fora de escopo: pessoal, operador único, Brasil | — |
 | Agent Reach (CLI multi-plataforma, github.com/Panniantong/agent-reach) | Não fecha lacuna que a Agata tenha (ler_pagina.sh já cobre a metade zero-config); antecipa fase do ACB sem ordem; soma risco de config fora do repo, já declarado e pendente | MEMÓRIAS (241) |
 | Trocar o modelo principal por um candidato da bancada Frente 4 | Bancada de 6 fechada 21-22/08 na régua de (172)-(187): nenhum bateu o titular. `qwen3.5-9b-64k` 12/16 limpo, 0/16 fabricação; melhor candidato `gemma2:9b` 9/16 limpo, 1/16 fabricação. Só reabre com dado novo — release de modelo novo, OU falha medida do titular contra a mesma régua | MEMÓRIAS (234), (280); `RELATORIO_AVALIACAO_BANCADA_21-08-2026.md` |
+
+**Nota — o vault Obsidian e a linha "vector store / GraphRAG" (decisão do Humano, MEMÓRIAS (293)):** O vault Obsidian não atravessa a recusa de (115). (115) recusou busca semântica por embedding; o vault não tem embedding nem busca semântica — é markdown determinístico com ligações por número de entrada, e a busca continua sendo texto. O primeiro motivo de (115) — grep vence embedding nesta escala — não se aplica a algo que não compete com grep. O segundo motivo — "não tem índice para ficar obsoleto" — se aplica sim, e é atendido pelo carimbo `canon:` no INICIO.md mais o controle P-10. O gatilho de reabertura de (115) (uma ordem de grandeza; 2x medido) permanece não atingido e continua valendo para vector store. Da Proposta 001, a camada de leitura foi construída em (289)-(291); o que segue em stand-by é o resto: manifesto de consulta e política de acesso por modelo.
 
 ## Diagnóstico
 `hermes doctor` / `hermes status`. Prontidão da Agata: definida nas REGRAS.

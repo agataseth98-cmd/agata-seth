@@ -16,13 +16,35 @@ Uso: python3 scripts/gerar_obsidian.py
 import os
 import re
 import shutil
+import subprocess
 import sys
 import unicodedata
-from datetime import datetime, timezone
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAIDA = os.path.join(REPO, "memoria", "obsidian")
-AGORA = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def _canon():
+    """Proveniência determinística: o commit de que o vault foi gerado, não o
+    relógio. AGATA_CANON_SHA/DATA no ambiente vencem (o controle P-10 os passa
+    ao rodar num extract sem .git); senão, git. Árvore suja sufixa o SHA."""
+    sha = os.environ.get("AGATA_CANON_SHA")
+    data = os.environ.get("AGATA_CANON_DATA")
+    if sha and data:
+        return sha, data
+    try:
+        g = lambda *a: subprocess.run(["git", "-C", REPO, *a], capture_output=True,
+                                      text=True, check=True).stdout.strip()
+        sha = g("rev-parse", "HEAD")
+        data = g("log", "-1", "--format=%cI")
+        if g("status", "--porcelain"):
+            sha += "-arvore-suja"
+        return sha, data
+    except Exception:
+        return "desconhecido", "desconhecido"
+
+
+CANON, DATA = _canon()
 
 MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
@@ -269,7 +291,6 @@ def main():
             "cita": ylist(e["cita"]),
             "citada_por": ylist(sorted(citada_por[e["num"]])),
             "tags": "[memoria/entrada]",
-            "gerado": yq(AGORA),
         }
         linhas = fm(campos)
         linhas.append(f"# ({e['num']}) {e['tipo']} — {e['data']} · {e['titulo']}")
@@ -286,7 +307,7 @@ def main():
     for t, corpo in regsec:
         b = regra_base[t]
         linhas = fm({"tipo-nota": "regra", "secao": yq(t), "fonte": "REGRAS.md",
-                     "tags": "[canon/regra]", "gerado": yq(AGORA)})
+                     "tags": "[canon/regra]"})
         linhas += [f"# {t}", "", religar(corpo), "",
                    "---", f"< {link('moc-regras','MOC regras')} · fonte: `../../REGRAS.md` >"]
         escrever(f"regras/{b}.md", linhas)
@@ -295,15 +316,14 @@ def main():
     for t, corpo in secoes(proj_txt):
         b = proj_base[t]
         linhas = fm({"tipo-nota": "projeto", "secao": yq(t), "fonte": "PROJETO.md",
-                     "tags": "[canon/projeto]", "gerado": yq(AGORA)})
+                     "tags": "[canon/projeto]"})
         linhas += [f"# {t}", "", religar(corpo), "",
                    "---", f"< {link('moc-projeto','MOC projeto')} · fonte: `../../PROJETO.md` >"]
         escrever(f"projeto/{b}.md", linhas)
     for t, corpo in secoes(ref_txt):
         b = ref_base[t]
         linhas = fm({"tipo-nota": "referencia", "secao": yq(t),
-                     "fonte": "PROJETO_REFERENCIA.md", "tags": "[canon/referencia]",
-                     "gerado": yq(AGORA)})
+                     "fonte": "PROJETO_REFERENCIA.md", "tags": "[canon/referencia]"})
         linhas += [f"# {t}", "", religar(corpo), "",
                    "---", f"< {link('moc-projeto','MOC projeto')} · fonte: `../../PROJETO_REFERENCIA.md` >"]
         escrever(f"projeto/{b}.md", linhas)
@@ -316,7 +336,7 @@ def main():
         b = slug(arq, "canon-")
         NOTAS.add(b)
         linhas = fm({"tipo-nota": "canon", "arquivo": arq, "resumo": yq(desc),
-                     "tags": "[canon/arquivo]", "gerado": yq(AGORA)})
+                     "tags": "[canon/arquivo]"})
         linhas += [f"# {arq} — {desc}", "",
                    "> [!info] Espelho de leitura. Fonte: `../../" + arq + "`. Não editar aqui.",
                    "", religar(txt)]
@@ -333,7 +353,7 @@ def main():
         b = script_base[nome]
         ents = sorted(entradas_por_script.get(nome, []))
         linhas = fm({"tipo-nota": "script", "arquivo": rel,
-                     "tags": "[sistema/script]", "gerado": yq(AGORA)})
+                     "tags": "[sistema/script]"})
         linhas += [f"# `{rel}`", "", "> [!abstract] O que faz",
                    "> " + cabecalho_arquivo(os.path.join(REPO, rel)), ""]
         if ents:
@@ -348,7 +368,7 @@ def main():
         b = prop_base[p]
         mnum = re.search(r"memorias?-(\d{2,3})", p)
         linhas = fm({"tipo-nota": "proposta", "nome": yq(p), "estado": "aplicada",
-                     "tags": "[sistema/proposta]", "gerado": yq(AGORA)})
+                     "tags": "[sistema/proposta]"})
         linhas += [f"# proposta `{p}` — aplicada", ""]
         if mnum and int(mnum.group(1)) in ent_base:
             linhas += [f"Entrada relacionada: {link(ent_base[int(mnum.group(1))])}", ""]
@@ -372,7 +392,7 @@ def main():
         ents = sorted(e["num"] for e in entradas
                       if re.search(rf"\b{c}\b", "\n".join(e["linhas"])))
         linhas = fm({"tipo-nota": "controle", "controle": c,
-                     "tags": "[sistema/perimetro]", "gerado": yq(AGORA)})
+                     "tags": "[sistema/perimetro]"})
         linhas += [f"# {c} — {CTRL_DESC[c]}", "",
                    "Implementado em `../../scripts/perimetro.sh`. "
                    f"Ver {link('script-perimetro-sh','perimetro.sh')}.", ""]
@@ -387,7 +407,7 @@ def main():
     por_tipo = {}
     for e in entradas:
         por_tipo.setdefault(e["tipo"], []).append(e["num"])
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += [f"# MOC — memória ({len(entradas)} entradas, ({min(nums)})–({max(nums)}))", ""]
     for tp in sorted(por_tipo):
         L.append(f"## {tp} ({len(por_tipo[tp])})")
@@ -395,36 +415,36 @@ def main():
         L.append("")
     escrever("moc-memoria.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += ["# MOC — regras", "", "Fonte: `../REGRAS.md`.", ""]
     L += [f"- {link(b, t)}" for t, b in regra_base.items()]
     escrever("moc-regras.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += ["# MOC — projeto e referência", "", "## PROJETO.md"]
     L += [f"- {link(b, t)}" for t, b in proj_base.items()]
     L += ["", "## PROJETO_REFERENCIA.md"]
     L += [f"- {link(b, t)}" for t, b in ref_base.items()]
     escrever("moc-projeto.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += ["# MOC — scripts e hooks", ""]
     L += [f"- {link(script_base[nome], rel)}" for rel, nome in scripts]
     escrever("moc-scripts.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += ["# MOC — controles do perímetro", "",
           f"Rodam em `../scripts/perimetro.sh` a cada commit. Ver {link('script-perimetro-sh','perimetro.sh')}.", ""]
     L += [f"- {link(c.lower(), c)} — {CTRL_DESC[c]}" for c in controles]
     escrever("moc-controles.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += [f"# MOC — propostas aplicadas ({len(props)})", "",
           "Cada uma: `.diff` congelado + `APROVADO-` em `../propostas/aplicadas/`.", ""]
     L += [f"- {link(prop_base[p], p)}" for p in props]
     escrever("moc-propostas.md", L)
 
-    L = fm({"tipo-nota": "moc", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     L += ["# MOC — memória em duas esferas", "",
           "Arquitetura aprovada em " + link("0283") + " (reversão parcial de (223)).", "",
           "- **Esfera pessoal** — `memoria/missoes/segunda-camada/` — local, privada, sem remote.",
@@ -438,7 +458,7 @@ def main():
     onde = ler(os.path.join(REPO, "ONDE_ESTAMOS.md")) or ""
     m_ult = re.search(r"## Última atualização\n(.+?)(?:\n##|\Z)", onde, re.S)
     ult = entradas[0]
-    L = fm({"tipo-nota": "estado", "gerado": yq(AGORA),
+    L = fm({"tipo-nota": "estado",
             "ultima_entrada": ult["num"], "tags": "[painel]"})
     L += ["# Estado do sistema (derivado)", "",
           "> [!warning] Instantâneo da geração. A verdade viva é o canon + `git`.", "",
@@ -451,14 +471,14 @@ def main():
     escrever("estado.md", L)
 
     # -------- timeline
-    L = fm({"tipo-nota": "timeline", "tags": "[moc]", "gerado": yq(AGORA)})
+    L = fm({"tipo-nota": "timeline", "tags": "[moc]"})
     L += ["# Linha do tempo — mais recente primeiro", ""]
     L += [f"- {link(ent_base[e['num']])} **{e['tipo']}** {e['data']} — {e['titulo']}"
           for e in entradas]
     escrever("timeline.md", L)
 
     # -------- INICIO + _LEIA
-    escrever("INICIO.md", fm({"tipo-nota": "inicio", "gerado": yq(AGORA)}) + [
+    escrever("INICIO.md", fm({"tipo-nota": "inicio", "canon": yq(CANON), "data": yq(DATA)}) + [
         "# Agata — vault", "",
         "> [!tip] Comece aqui. Tudo abaixo é **gerado** de `MEMÓRIAS.md` + canon; "
         "para corrigir, entrada nova na história, nunca edite aqui.", "",
