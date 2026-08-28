@@ -201,6 +201,13 @@ Só depois das 8: `refresh_token` → access token → cria ou reusa a pasta `ag
 
 **Não é allowlist.** Não há arquivo de permissão por caminho — a fronteira é a lista de checagens acima. Se um dia for preciso liberar só certos arquivos de `agata-sistema/`, isso entra como P-8 separada; não existe hoje. Limitação assumida (MEMÓRIAS (286)): formato de segredo que nenhum padrão pega, num arquivo posto em `agata-sistema/` de propósito e com o script rodado à mão — fecham a colocação deliberada, o `upload.log` auditável e a revisão do Humano. A varredura é rede contra acidente, não classificador.
 
+### Índice derivado do canon público e export pro Drive
+MEMÓRIAS (296)/(298)/(299)/(300). Camada de consulta sobre o canon, separada do vault Obsidian: gerada só de `REGRAS.md` + `PROJETO.md` + `MEMÓRIAS.md`, nunca de `memoria/missoes/`.
+- `scripts/gerar_indice_derivado.py` → `memoria/missoes/agata-sistema/derivado/{indice.md, manifesto.md}`. `indice.md` = REGRAS + PROJETO na íntegra + os títulos das entradas de MEMÓRIAS (sem corpo), mais recente primeiro. Reconstrução byte a byte antes de gravar — se sobrar um byte fora do boilerplate fixo + canon, aborta. `manifesto.md` traz o sha256 das 3 fontes. Determinístico (carimbo de commit).
+- `scripts/consultar_indice.py <palavras>` extrai trechos do `indice.md` em texto plano. É como o executor local entrega recorte pra um modelo em nuvem — o modelo não lê o índice nem `memoria/missoes/` direto.
+- **Export pro Drive:** o `indice.md` não sobe pelo cano — contém o PROJETO.md verbatim, que nomeia variáveis de ambiente (`ZHIPU_API_KEY` etc.), e a varredura de segredo aborta no nome pelado (falso positivo; o scanner não se afrouxa). `scripts/preparar_export_indice.py` lê o `indice.md` e escreve `indice_export.md` com esses nomes mascarados como `[variável de ambiente]`; o original fica intacto, e o script só grava se o resultado passar em todos os padrões de `PADROES_SEGREDO`. Fluxo: `gerar_indice_derivado.py` → `preparar_export_indice.py` → `subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/indice_export.md`. No NotebookLM, usa-se o `indice_export.md` baixado do Drive; `manifesto.md` também sobe, como carimbo de proveniência.
+- Sem hook: regenera sob demanda antes de um export. Um passo no `post-commit` fica como P-8 futura, se o Humano quiser.
+
 ### Mão única refinada
 A política deixa de ser "lê, nunca escreve fato de volta" e passa a ser: **nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta. Nada disso é escrita de fato. Nenhum resultado retorna automaticamente a `REGRAS.md`, `PROJETO.md` ou `MEMÓRIAS.md`.
 

@@ -23,6 +23,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
+
+**O problema, achado na FASE 6:** `subir_esfera_projeto.py` aborta no `indice.md` — ele carrega o PROJETO.md verbatim, que NOMEIA `ZHIPU_API_KEY` (nota `[FECHADO]`, sem valor), e o padrão 56 do scanner casa o nome pelado. Falso positivo: nome de variável de ambiente não é segredo.
+
+**Decisão do Humano:** não afrouxar o scanner (exigiria 2ª opinião), não copiar à mão (não automatiza), não mascarar no gerador (quebraria a reconstrução byte a byte de (298)). Um script de exportação dedicado.
+
+**`preparar_export_indice.py`** (P-8, `.diff` congelado `4c3db973…`): lê `indice.md`, troca nome de variável de ambiente pelado (`(ZHIPU|GOOGLE|…)_API_KEY`, `aws_secret_access_key`) por `[variável de ambiente]`, escreve `indice_export.md` com um comentário de marca. O `indice.md` original não é tocado. Importa `PADROES_SEGREDO` do próprio `subir_esfera_projeto.py` (fonte única) e **só grava se o resultado passar nos 16 padrões** — senão aborta sem escrever. O scanner não muda.
+
+**PROJETO.md:** subseção nova "### Índice derivado do canon público e export pro Drive" — os 3 scripts (`gerar_indice_derivado`, `consultar_indice`, `preparar_export_indice`), o fluxo `gerar → preparar → subir_esfera no indice_export.md`, "no NotebookLM usa-se o `indice_export.md` do Drive". Hook `post-commit` fica anotado como P-8 futura opcional.
+
+**Autorização:** Humano, "APROVADO — propostas/APROVADO-preparar-export-indice". Par em `propostas/aplicadas/`.
+
+**Teste end-to-end real (upload de verdade, FASE 6 autoriza):** `gerar_indice_derivado.py` → `indice.md` 249 títulos; `preparar_export_indice.py` → mascara 2 ocorrências de `ZHIPU_API_KEY` (linha 101 + a subseção nova), `indice_export.md` passa nos 16 padrões de `PADROES_SEGREDO` (0 match); `subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/indice_export.md` → **SUBIU**, `drive_id=1XIwk6o2Ihvmjf9PcOZpjIkpsyJ39UMKr` (136 618 B), registrado em `memoria/missoes/agata-sistema/upload.log`. `manifesto.md` já estava lá (`drive_id=1nAmXBTVGuIoSt9O3DiN_Gx591O-XUiaO`, mantido por decisão do Humano).
+
+**Fecha o plano de 6 fases** (auditor Qwen3.7): FASE 0 higiene, 1 infra read-only, 2 vault (rodado pelo executor), 3 decisão + Regra 8, 4.2 fronteira real, 5 gerador, 5.5 consulta nuvem, 6 export. Entradas (295)–(300).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `import PADROES_SEGREDO` de `subir_esfera_projeto.py` confirmado (módulo só define, guard `__main__`); contagem de match antes/depois no `indice_export.md` (padrões de segredo: 1→0, depois 2→0 com a subseção nova); `.diff` congelado por `sha256sum` antes e depois do APROVADO/move; `perimetro.sh` P-8 verde após aplicar; os 3 scripts rodados em sequência com upload real ao Drive, `drive_id` conferido no `upload.log`.
+
+
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
 
 **O que é:** o executor local roda, pega a saída em texto plano, cola no contexto de trabalho de um modelo em nuvem. Não chama LLM, não acessa rede, não escreve nada. Recebe palavras-chave, devolve: as seções de REGRAS/PROJETO cujo heading ou corpo casam, e as linhas de título de MEMÓRIAS que casam. Corpo de entrada de MEMÓRIAS não sai — o número aponta pra abrir o arquivo.

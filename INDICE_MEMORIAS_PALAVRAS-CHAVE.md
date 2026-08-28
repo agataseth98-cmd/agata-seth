@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
+  palavras-chave: fase, scripts, preparar, export, indice, versão, exportação, sanitizada, índice, cano, drive, sob, fecha, plano, fases
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
   palavras-chave: fase, scripts, consultar, indice, extrator, trechos, índice, dar, modelo, nuvem, sob
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, script, universal, consulta, horario, multiplas, apis
 (271) CONSELHO — 26/08/2026 · Mudança estrutural: MEMÓRIAS.md passa a crescer pelo topo (entrada nova logo após o marcador, mais recente primeiro); Regra 4/7 conscientemente reescritas por autorização do Humano, não contornadas
   palavras-chave: mudança, estrutural, memórias, passa, crescer, topo, entrada, nova, logo, após, marcador, recente, primeiro, regra, conscientemente, reescritas, autorização, humano, contornadas
-(270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no teste de Regra 1.1
-  palavras-chave: diario, seth, corrigiu, fabricacao, timestamp, passou, teste, regra
+(270) DIARIO - 26/08/2026 - Seth corrigiu fabricacao de timestamp e passou no te …
+  palavras-chave: diario, seth, corrigiu, fabricacao, timestamp, passou
 (269) DIARIO - 26/08/2026 - Seth fabricou timestamp Unix em resposta a teste de …
   palavras-chave: diario, seth, fabricou, timestamp, unix, resposta, teste
 (268) DIARIO - 26/08/2026 - Anomalia de identidade: Seth declarou-se como Claude …

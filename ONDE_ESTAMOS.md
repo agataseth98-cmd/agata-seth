@@ -650,7 +650,19 @@ peça por peça e confere que não sobrou nada que não venha do canon.
 (`consultar_indice.py`). Você dá palavras-chave, ele devolve as seções
 das regras/estado e os títulos de memória que batem, em texto plano,
 pra colar no contexto de um modelo na nuvem. Não chama IA, não usa
-rede. Falta só a documentação do envio pro Drive.
+rede.
+
+28/08/2026 (MEMÓRIAS (300)): o plano de 6 fases fechou. O último passo
+era o envio pro Drive. Achado no caminho: o índice não passava na
+varredura de segredo — porque o PROJETO.md cita o *nome* de uma
+variável de ambiente, e a varredura, que é conservadora, barra o nome
+solto. Você decidiu não mexer na varredura. Solução: um script novo
+(`preparar_export_indice.py`) faz uma cópia do índice com esses nomes
+trocados por "[variável de ambiente]" — o índice original fica intacto,
+a varredura não muda. Testado de ponta a ponta: gerou, sanitizou,
+passou na varredura e subiu de verdade pro Drive da conta do projeto
+(junto com o manifesto de proveniência). Daqui você baixa o
+`indice_export.md` do Drive e usa no NotebookLM.
 
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
