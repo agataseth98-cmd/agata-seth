@@ -383,6 +383,8 @@ Exemplo: "MEMÓRIAS (121 - bug de `num_ctx` ignorado pelo endpoint OpenAI do Oll
 3. Sei onde está o último estado (topo do corpo de MEMÓRIAS, logo após o marcador `ENTRADAS-NOVAS` — fim físico só antes de (271))?
 Três sins → opera pleno. Menos → só leitura, e avise.
 
+Com acesso à Máquina, mais uma: `memoria/obsidian/INICIO.md` é o índice de consulta pontual — entrada antiga fora da janela, backlinks de uma regra/proposta, o que faz um script — sem varrer o vault nem o `MEMÓRIAS.md` cru (MEMÓRIAS (292)).
+
 ## Checagem de fechamento (antes de enviar)
 O que vou entregar é o que foi pedido, ou é outra coisa? (69), (73), (74) eram isto.
 

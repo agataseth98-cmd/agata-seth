@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md
+  palavras-chave: uso, vault, seth, passa, disponível, estimulado, cirúrgico, linha, projeto, item, checagem, prontidão, regras
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
   palavras-chave: seth, passa, navegar, vault, obsidian, priori, ponteiro, projeto, memória, hidratação, acesso, disponível, skill, desabilitada, cwd, repo
 (290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
@@ -65,7 +67,7 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: diario, anomalia, regra, timeapi, retorna, timestamp, desatualizado
 (263) DIARIO - 26/08/2026 - Teste da Regra 1.1 (sincronizacao de horario) com a Seth
   palavras-chave: diario, teste, regra, sincronizacao, horario, seth
-(262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261)
+(262) DIARIO - 26/08/2026 - Correcao de duplicacao acidental em MEMORIAS.md (261 …
   palavras-chave: diario, correcao, duplicacao, acidental, memorias
 (261) DIARIO - 26/08/2026 - Bateria de testes Parte 2 da Seth: progresso em prec …
   palavras-chave: diario, bateria, testes, parte, seth, progresso, prec

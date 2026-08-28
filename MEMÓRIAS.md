@@ -23,6 +23,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md
+
+**Pergunta do Humano:** "Seth tem acesso facilitado e estimulado?" — resposta medida: facilitado sim (cwd = repo, skill `note-taking/obsidian` não desabilitada, ponteiro em PROJETO.md desde (291)), estimulado não — nada sugeria *usar* o vault, e usar errado (varrer as centenas de notas a cada tarefa) seria bloat de contexto. Ordem: "Deixe isso perfeito, não cometa erros."
+
+**Autorização:** Humano, verbal, risco assumido. `propostas/seth-vault-estimulo.diff` congelado (sha256 `f3e45d388043`) antes do `APROVADO-`; P-8 validou por conteúdo (toca `PROJETO.md` + `REGRAS.md`, os dois P-8); par em `propostas/aplicadas/`.
+
+**O que entrou:**
+- **PROJETO.md, "Memória e hidratação"** — linha "**Quando a Seth usa o vault**": consulta dirigida, nunca varredura. Serve para história além da janela do `.hermes.md`, backlinks de uma entrada/regra/proposta, ou "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/` (via `INICIO.md` ou `moc-*`). São centenas de notas; não varrer o vault nem o `MEMÓRIAS.md` cru.
+- **REGRAS.md, "Checagem de prontidão"** — frase abaixo dos três sins (não é 4º gate, porque depende de ter Máquina): com acesso à Máquina, `memoria/obsidian/INICIO.md` é o índice de consulta pontual. Como REGRAS entra na hidratação, isso agora chega à Seth a cada carregamento.
+
+**Higiene junto:** `.obsidian/graph.json` (config de grafo por-máquina que o Obsidian reescreve) adicionado ao `.gitignore`, ao lado de `.obsidian/workspace*.json`. `.obsidian/{app,appearance,core-plugins}.json` seguem versionados (config portável). Não é P-8.
+
+**Contenção pensada:** o estímulo é *cirúrgico* de propósito — "consulta dirigida, nunca varredura" nos dois textos. Escrever no vault segue desencorajado e auto-corretivo (a regeneração no `post-commit` apaga e reescreve).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura exata de "Checagem de prontidão" (REGRAS) e da seção "Memória e hidratação" (PROJETO) antes de editar; `git ls-files .obsidian/` para não gitignorar o que é config portável; `.diff` dos dois canônicos por `git diff`, `sha256sum` (`f3e45d388043`), `git apply --check` PASS, restaurado com `git checkout`; `perimetro.sh` P-8 verde após aplicar de verdade.
+
+
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
 
 **Ordem do Humano:** "e deve ser acessada pela Seth a priori."
