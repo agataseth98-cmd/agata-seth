@@ -664,6 +664,11 @@ passou na varredura e subiu de verdade pro Drive da conta do projeto
 (junto com o manifesto de proveniência). Daqui você baixa o
 `indice_export.md` do Drive e usa no NotebookLM.
 
+28/08/2026 (MEMÓRIAS (301)): agora o índice se regenera sozinho a cada
+commit — o mesmo gancho que já refazia o vault Obsidian passou a refazer
+o índice também. Se falhar, só avisa e não atrapalha o commit. O envio
+pro Drive continua manual (nunca é automático).
+
 --- da sessão de 27/08 (longa, após o reboot) ---
 Prompt de carregamento auditado e consertado (8 achados, MEMÓRIAS
 277–281); SOUL.md ignorado (278); bancada de modelos fechada, nenhum

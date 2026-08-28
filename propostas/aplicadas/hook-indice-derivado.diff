@@ -1,0 +1,22 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index 72b61fc..596e47f 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -54,4 +54,17 @@ if [ -f scripts/gerar_obsidian.py ]; then
+   fi
+ fi
+ 
++# 3. Índice derivado do canon público — refaz indice.md + manifesto.md em
++# memoria/missoes/agata-sistema/derivado/ (repo missoes, gitignorado do
++# principal) para ficar em dia com o canon. NÃO sobe pro Drive: isso exige
++# preparar_export_indice.py + subir_esfera_projeto.py + chamada real, sempre
++# manual. Fail-soft (MEMÓRIAS (298)/(301)).
++if [ -f scripts/gerar_indice_derivado.py ]; then
++  if python3 scripts/gerar_indice_derivado.py >/dev/null 2>&1; then
++    echo "post-commit: índice derivado regenerado (memoria/missoes/agata-sistema/derivado/)"
++  else
++    echo "post-commit: AVISO — gerar_indice_derivado.py falhou; índice pode estar desatualizado" >&2
++  fi
++fi
++
+ exit 0

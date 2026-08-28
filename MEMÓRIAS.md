@@ -23,6 +23,21 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
+
+**Pendente de (300):** o `indice.md`/`manifesto.md` eram regenerados só à mão antes de um export. Este passo os mantém em dia com o canon a cada commit, igual ao vault Obsidian (passo 2 do mesmo hook).
+
+**O que entrou** (`.githooks/post-commit`, P-8, `.diff` congelado `4a388736…`): bloco 3, espelho do bloco 2 — se `scripts/gerar_indice_derivado.py` existe, roda; sucesso imprime a linha "regenerado", falha imprime AVISO em stderr e **o commit segue** (fail-soft). **Não sobe pro Drive** — export continua sendo `preparar_export_indice.py` + `subir_esfera_projeto.py` + chamada real, sempre manual.
+
+**Autorização:** Humano, "pode fazer o pendente". `propostas/APROVADO-hook-indice-derivado` criado a pedido; par em `propostas/aplicadas/`.
+
+**Portão das três perguntas:** reversível sozinho (`git revert` de 13 linhas, nada apagado); alcance = só `.githooks/post-commit` (P-8) + o `indice.md`/`manifesto.md` gerado no repo `missoes` (gitignorado do principal, mesma classe do vault) + esta entrada + ONDE_ESTAMOS, zero canon-texto, zero rede; silêncio = barulhento (linha no output em sucesso, AVISO em stderr na falha, `perimetro.sh` no caminho).
+
+**Verificado:** `bash -n` antes e depois; `.diff` por `git diff`, congelado por `sha256sum`, aplicado em `mktemp -d` + `bash -n`; `git checkout` pra reverter antes de congelar; o próprio commit desta entrada exercita o hook — a linha "índice derivado regenerado" aparece no output do commit.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura do `post-commit` inteiro (bloco 2 = molde); edição por âncora única verificada (`assert count == 1`); `bash -n` nas duas pontas; `.diff` congelado por `sha256sum` antes do APROVADO e após o move; aplicação testada em árvore temporária.
+
+
 (300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
 
 **O problema, achado na FASE 6:** `subir_esfera_projeto.py` aborta no `indice.md` — ele carrega o PROJETO.md verbatim, que NOMEIA `ZHIPU_API_KEY` (nota `[FECHADO]`, sem valor), e o padrão 56 do scanner casa o nome pelado. Falso positivo: nome de variável de ambiente não é segredo.
