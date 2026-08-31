@@ -821,7 +821,17 @@ isso continua seu.
 Fiz a parte de "propor e testar": rodei a decisão de desenho 3 vezes no
 modelo local (Regra 8) — duas das três perguntas fecharam, uma ficou em
 aberto pra você (se o eco cita um código de conferência, escreve uma frase
-explicando, ou os dois). Testei o script num clone descartável, todos os
-casos passaram. Está em `propostas/bloco-3.2-eco-mecanizado.diff`, sem sua
-aprovação. Falta a revisão de duas outras sessões de IA (uma audita, outra
-confere na máquina) antes de virar regra.
+explicando, ou os dois). Você decidiu: os dois. Testei o script num clone
+descartável, todos os casos passaram. Está em
+`propostas/bloco-3.2-eco-mecanizado.diff`, sem sua aprovação.
+
+A segunda revisão (Camada B) rodou — outra sessão de IA, contexto zerado,
+auditou na máquina. Veredito: **CONDICIONAL**. Achou um problema real que
+precisa de conserto antes de virar regra: se a árvore de trabalho tem
+edição não salva nos arquivos de canon, o script diz "sincronizado" e não
+devia — ele só compara o número do commit, não o conteúdo dos arquivos.
+Mais duas ressalvas menores (o rótulo que o script imprime não é exatamente
+o formato da regra; e o corte de texto depende do idioma do sistema). Cinco
+notas de detalhe. Nada bloqueia de vez — é uma rodada de conserto na
+proposta e depois a terceira revisão (Camada C) e você. Parecer completo em
+`propostas/bloco-3.2-camada-b-parecer.md`.
