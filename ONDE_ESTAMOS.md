@@ -851,7 +851,17 @@ rodadas do teste de desenho tinha ficado cortada no meio, e o resumo dela
 usava aspas em trechos que eram paráfrase. Já corrigi as duas no arquivo de
 apoio. O parecer está em `propostas/bloco-3.2-camada-c-parecer.md`.
 
-**Agora é com você:** aprovar a proposta criando
-`propostas/APROVADO-bloco-3.2-eco-mecanizado`, ou não. Se quiser, dá pra
-re-rodar a rodada 1 do teste de desenho antes, pra fechar aquele buraco —
-mas a Camada C disse que a decisão não depende disso.
+Você aprovou. O Bloco 3.2 entrou no canon (MEMÓRIAS (308)): o script
+`scripts/estado_para_eco.sh` e o mecanismo do eco pós-carregar em REGRAS.md.
+A proposta e todo o material das três camadas foram pra `propostas/aplicadas/`;
+a versão 1 ficou em `propostas/rejeitadas/`. A trava P-8 conferiu que o que
+entrou é exatamente o que estava aprovado, byte a byte.
+
+Falta a confirmação de fora (uma IA na nuvem conferindo direto no GitHub) —
+localmente o repositório está em dia com o remoto.
+
+Da Fase 2: o Bloco 3.1 (silos) está aplicado desde antes, mas com a peça da
+"seleção por modelo" ainda em aberto (levantamento em
+`propostas/dossie-selecao-silo-gateway.md`); o Bloco 3.2 fechou agora; o
+Bloco 3.3 (reativar o teste de continuidade com nonce novo) depende da
+seleção de silo funcionar.

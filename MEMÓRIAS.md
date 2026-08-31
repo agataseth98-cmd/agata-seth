@@ -23,6 +23,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
+
+**O que mudou:** `scripts/estado_para_eco.sh` (novo, read-only, determinístico) imprime os fatos de estado herdado — HEAD, topo de MEMÓRIAS (após o marcador `ENTRADAS-NOVAS`), `sync:` na forma canônica de REGRAS ("três formas"), nº de propostas estruturais abertas, linha de estado do TES-002, e um `HASH-ESTADO` derivado (sha256 de HEAD + topo + hashes de REGRAS/MEMÓRIAS/PROJETO, 12 hex). REGRAS.md, bullet "Eco pós-carregar", ganha o mecanismo: **com shell**, rodar o script e fundamentar o eco nele — citar o `HASH-ESTADO` e dizer em 1 linha por que o estado está coerente; **sem shell**, declarar `sync: não verificado` e não preencher o que não mediu. O script imprime fatos — não escreve o eco nem julga se a hidratação passou; a conferência é do Humano.
+
+**Por quê:** hidratação falha (história atrasada ou incompleta) não aparece na própria cópia — quem carregou dias atrás lê um estado coerente e velho (MEMÓRIAS (248)-(252)). O eco pós-carregar era só texto em REGRAS; agora se apoia num fato de Máquina.
+
+**Regra 8 (3 passadas `qwen3.5-9b-64k` local, `ollama run`, independentes):** Q1 (script só imprime, não valida o eco) e Q3 (obrigar quando há shell) convergiram; Q2 (forma da prova anti-cópia) divergiu 2/1 e foi **decidida pelo Humano — "hash + frase", as duas**. Evidência em `memoria/missoes/fase2-eco-camada-a/` (git local). A Camada C achou depois que `passada_1.txt` ficou truncada (sem resposta final) — a convergência Q1/Q3 se sustenta pelas outras duas + todo o `thinking` da 1, e o arquivo de evidência foi anotado.
+
+**Cadeia de auditoria em camadas:** A (Claude Sonnet 5, na Máquina — proposta v1 + testes em clone) → B (Claude Sonnet 5, hidratação independente, na Máquina — **CONDICIONAL** contra o v1: 1 condição + 2 ressalvas + 5 notas) → A revisora (mesma linhagem, autorização ao vivo do Humano "faz a emenda nesta sessão, achados 1 a 4" — emenda v1→v2) → C (Claude Sonnet 5, hidratação independente, na Máquina — **PRONTO PARA O HUMANO**; reproduziu os 4 achados da B no v1 e a resolução no v2 em 8 clones descartáveis; teste do Achado 1 da B reproduzido bit a bit) → Humano: **"aprovado"**, 31/08/2026. Cada camada identificada no corpo; assinatura única, do executor.
+
+**Achados da Camada B, todos tratados no v2:**
+1. (condição) v1 dava `sync: PASS` + exit 0 com árvore de trabalho suja — `git ls-remote` só compara o SHA do commit. v2: detecta canônico editado e não commitado (`git -c core.quotepath=false diff --name-only HEAD --`, cobre staged + não-staged) e emite `sync: FALHA` + exit 1.
+2. (ressalva) rótulo `SYNC:` / `não-verificado` → forma canônica `sync:` / `não verificado`.
+3. (ressalva) `cut -c` sob `LC_ALL=C` cortava multibyte → `export LC_ALL=C.UTF-8` no topo; `\s` → `[[:space:]]`.
+4. (nota) campo TES-002 ecoava o nonce aposentado `e1d1a` → corta na 1ª frase, larga o nonce.
+Achados 5-8 eram notas de concordância/documentação — sem mudança de código; o 8 (paráfrase entre aspas no arquivo de evidência de Regra 8) foi corrigido no `regra8-3-passadas.md` (git local).
+
+**Verificação do executor antes do commit** (não substitui S7): `git apply --check` do v2 limpo contra o HEAD; `bash -n` limpo; o `.diff` v2 aplicado ao working tree bate byte a byte com o par `APROVADO-` (P-8 passa com o par, falha sem); script roda e reporta `sync: FALHA · árvore suja` enquanto o próprio apply deixa REGRAS.md sujo — a checagem nova funcionando ao vivo; perímetro verde (11 controles).
+
+**Par consumido:** `propostas/aplicadas/bloco-3.2-eco-mecanizado.diff` (v2, sha256 `4ac5c14a…`) + `APROVADO-bloco-3.2-eco-mecanizado`, mais os documentos de cadeia (`.md`, briefings e pareceres B/C) → `propostas/aplicadas/`. v1 em `propostas/rejeitadas/bloco-3.2-eco-mecanizado-v1.diff` (sha256 `090c64e1…`).
+
+**Falta:** S7 — confirmação pós-push por sessão independente do executor. Localmente `HEAD == origin/main` no momento do push.
+
+**Fase 2, estado:** Bloco 3.1 (silos) aplicado em (305) com LACUNA da seleção pelo gateway ainda aberta (dossiê em `propostas/dossie-selecao-silo-gateway.md`); Bloco 3.2 fechado aqui; Bloco 3.3 (TES-002 com nonce novo) depende da seleção de silo funcionando.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply` do v2 no working tree + `chmod +x`; criação do `APROVADO-` pelo executor (risco residual registrado, propostas/README.md); `git mv` do par e da cadeia para `propostas/aplicadas/`; `bash scripts/perimetro.sh` verde antes do commit; `git rev-parse HEAD`/`git ls-remote` para a linha de S7. Aprovação: Humano, nesta sessão, "aprovado".
+
+
 (307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): zero fabricação, silos não regridem, as falhas de (138) não reproduziram
 
 **Por que rodou:** o roteiro da Fase 2 pede reteste de tool-calling depois de 3.1 — mudança no que chega ao modelo pode regredir chamada de ferramenta (dossiê S1, Achado 5). Os silos entraram em (305); esta é a medição.

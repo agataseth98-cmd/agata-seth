@@ -312,6 +312,7 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
 - **TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade.
   **Estado atual (ativo/inativo, nonce vigente):** não duplicar aqui — protocolo é universal, estado muda. Ver PROJETO.md, "Estado dos bugs e dos testes".
 - **Eco pós-carregar:** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar.
+  Hidratação falha não aparece na própria cópia. Quem carregou dias atrás lê um estado coerente e velho (MEMÓRIAS (248)-(252)). Por isso o eco se fundamenta nos fatos da Máquina, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída dele. O eco cita o `HASH-ESTADO` impresso e diz, em 1 linha, por que o estado está coerente (ex: topo bate com o `SYNC`). Sem shell: o eco declara `sync: não verificado`, diz que não pôde rodar o script, e não preenche o que não mediu. O script imprime fatos — não escreve o eco nem julga se a hidratação passou. Conferir o eco contra os fatos é do Humano. O `HASH-ESTADO` é derivado e público: não é o nonce do TES-002 e não substitui a linha `Nonce:` do bloco de prontidão.
 - **Critério de confiança:** N sessões consecutivas sem alegação falsa de entrada inexistente, cada uma checada contra o disco. Nada de métrica por confiança — se a Máquina não verifica, não é critério.
 
 ## Modo de teste (declarado)

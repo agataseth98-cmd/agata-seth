@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
+  palavras-chave: bloco, eco, pós, carregar, mecanizado, aplicado, cadeia, completa
 (307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): zero fabricação, silos não regridem, as falhas de (138) não reproduziram
   palavras-chave: reteste, tool, calling, pós, lição, fase, zero, fabricação, silos, regridem, falhas, reproduziram
 (306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: frente, bancada, modelos, fechada, decisão, candidato, bateu, titular, troca, vira, fronteira, recusa
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
   palavras-chave: entrada, fechou, achado, essencial, texto, aplicado, afirmava, estado, hoje, corrigido, mesmo, dia, após, passo
-(278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
-  palavras-chave: soul, volta, aparecer, rastreado, boot, hermes, agent, reescreve, default, genérico, adicionado, gitignore
+(278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot ( …
+  palavras-chave: soul, volta, aparecer, rastreado, boot
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Á …
   palavras-chave: prompt, carregamento, achados, auditoria
 (276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvime …

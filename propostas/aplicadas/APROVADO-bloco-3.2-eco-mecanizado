@@ -1,0 +1,35 @@
+APROVADO — bloco-3.2-eco-mecanizado
+
+Aprovação: o Humano, nesta sessão, 31/08/2026, por ordem direta — "aprovado" —
+depois de receber o parecer da Camada C (posição PRONTO PARA O HUMANO).
+
+Marcador criado pelo executor (Claude Sonnet 5, Claude Code, na Máquina), não
+pelo Humano operando o teclado — risco residual registrado sem suavizar
+(propostas/README.md). A autorização de fato é a ordem "aprovado" acima.
+
+Par: bloco-3.2-eco-mecanizado.diff (v2, sha256
+4ac5c14aa8026c45ad0c1ad07ae758965089970f67888ea8b6cae233f90dcfe7, 145 linhas).
+Toca REGRAS.md (bullet "Eco pós-carregar") e scripts/estado_para_eco.sh (novo) —
+ambos sob P-8.
+
+Cadeia: A (proposta v1) → B (CONDICIONAL, 1 condição + 2 ressalvas + 5 notas
+contra o v1) → A revisora (emenda v1→v2, Achados 1-4, autorização ao vivo do
+Humano "faz a emenda nesta sessão, achados 1 a 4") → C (PRONTO PARA O HUMANO;
+reproduziu tudo em 8 clones; as 2 ressalvas dela são do rastro de evidência
+gitignored, já corrigidas). Q2 da Regra 8 decidida pelo Humano em 31/08:
+"hash + frase".
+
+O que entra no canon:
+- scripts/estado_para_eco.sh — read-only, determinístico. Imprime os fatos de
+  estado herdado (HEAD, topo de MEMÓRIAS, sync: na forma canônica, propostas
+  abertas, TES-002 sem o nonce aposentado, HASH-ESTADO derivado). Não escreve
+  nem julga o eco. Detecta árvore de trabalho suja num canônico e não emite
+  sync: PASS nesse caso. Exit 0/1/2.
+- REGRAS.md, "Eco pós-carregar": com shell, rodar o script e fundamentar o eco
+  nele (citar HASH-ESTADO + 1 linha de porquê); sem shell, declarar
+  sync: não verificado e não preencher o que não mediu.
+
+Consumido no mesmo commit que aplica a mudança: este arquivo, o .diff e os
+documentos de cadeia (.md, briefings e pareceres B/C) vão para
+propostas/aplicadas/ (propostas/README.md item 4). O v1 já está em
+propostas/rejeitadas/.
