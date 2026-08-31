@@ -1,0 +1,114 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 02ac78c..889b6d6 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -312,6 +312,7 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
+ - **TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade.
+   **Estado atual (ativo/inativo, nonce vigente):** não duplicar aqui — protocolo é universal, estado muda. Ver PROJETO.md, "Estado dos bugs e dos testes".
+ - **Eco pós-carregar:** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar.
++  Hidratação falha não aparece na própria cópia. Quem carregou dias atrás lê um estado coerente e velho (MEMÓRIAS (248)-(252)). Por isso o eco se fundamenta nos fatos da Máquina, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída dele. O eco cita o `HASH-ESTADO` impresso e diz, em 1 linha, por que o estado está coerente (ex: topo bate com o `SYNC`). Sem shell: o eco declara `sync: não verificado`, diz que não pôde rodar o script, e não preenche o que não mediu. O script imprime fatos — não escreve o eco nem julga se a hidratação passou. Conferir o eco contra os fatos é do Humano. O `HASH-ESTADO` é derivado e público: não é o nonce do TES-002 e não substitui a linha `Nonce:` do bloco de prontidão.
+ - **Critério de confiança:** N sessões consecutivas sem alegação falsa de entrada inexistente, cada uma checada contra o disco. Nada de métrica por confiança — se a Máquina não verifica, não é critério.
+ 
+ ## Modo de teste (declarado)
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+new file mode 100755
+index 0000000..8dfd741
+--- /dev/null
++++ b/scripts/estado_para_eco.sh
+@@ -0,0 +1,96 @@
++#!/usr/bin/env bash
++# scripts/estado_para_eco.sh — Fase 2 / Bloco 3.2: mecaniza o eco pós-carregar.
++#
++# POR QUÊ: hidratação falha (história atrasada ou incompleta) não se vê lendo
++# a própria cópia — quem carregou 12 dias atrás lê um estado coerente e errado
++# (MEMÓRIAS (248)-(252)). A Máquina tem os fatos; este script os imprime para
++# o modelo FUNDAMENTAR o eco e o Humano ter um cartão de conferência.
++#
++# O QUE É E O QUE NÃO É: imprime fatos de estado, nada mais. NÃO escreve o eco,
++# NÃO valida o texto do eco, NÃO decide se a hidratação passou — conferir o eco
++# contra estes fatos é do Humano (Regra 8, 3 passadas qwen local 31/08/2026:
++# Q1 convergiu em "só imprimir"; Q3 convergiu em "obrigatório quando há shell";
++# Q2 divergiu na forma da prova anti-cópia — ver .diff da proposta).
++#
++# READ-ONLY: só lê arquivos e consulta o remoto (git ls-remote). Nunca
++# git add/commit/push, nunca escreve no repo. Uma rede indisponível vira
++# SYNC: não-verificado, não erro.
++#
++# HASH-ESTADO é derivado e PÚBLICO — não tem relação com o nonce secreto do
++# TES-002 (esse é gerado por openssl, nunca versionado, entregue à mão). Serve
++# só para o eco citar um token que prova leitura sem "teatro" narrativo.
++
++set -euo pipefail
++cd "$(git rev-parse --show-toplevel)"
++
++MARCADOR="ENTRADAS-NOVAS"
++# Código de saída: 0 = estado utilizável (SYNC PASS ou não-verificado);
++# 1 = SYNC FALHA (cópia diverge do remoto — o eco NÃO pode afirmar o topo do
++#     canon, ver REGRAS "Última entrada sob sync não verificado");
++# 2 = defeito estrutural (marcador ENTRADAS-NOVAS sumiu — leitura do topo não
++#     é confiável). 2 tem precedência sobre 1.
++SAIDA=0
++
++# --- HEAD ---
++head_full=$(git rev-parse HEAD)
++head7=$(git rev-parse --short=7 HEAD)
++head_subject=$(git log -1 --format=%s)
++
++# --- Topo de MEMÓRIAS (primeira entrada após o marcador ENTRADAS-NOVAS) ---
++topo_linha=$(awk -v m="$MARCADOR" '
++  achou && /^\([0-9]+\)/ { print; exit }
++  $0 ~ m { achou = 1 }
++' MEMÓRIAS.md)
++[ -z "$topo_linha" ] && { topo_linha="(desconhecido — marcador $MARCADOR não encontrado)"; SAIDA=2; }
++
++# --- Hashes canônicos (ao vivo, nunca de memória) ---
++h_regras=$(sha256sum REGRAS.md   | cut -c1-8)
++h_memorias=$(sha256sum MEMÓRIAS.md | cut -c1-8)
++h_projeto=$(sha256sum PROJETO.md  | cut -c1-8)
++
++# --- SYNC: local × remoto ---
++remoto=$(git ls-remote origin main 2>/dev/null | awk '{print $1}' | head -c 40 || true)
++if [ -z "$remoto" ]; then
++  sync_linha="SYNC: não-verificado · lacuna: remoto inacessível (rede ou credencial)"
++elif [ "$remoto" = "$head_full" ]; then
++  sync_linha="SYNC: PASS · REGRAS=$h_regras · MEMÓRIAS=$h_memorias · HEAD=$head7"
++else
++  atras_a_frente=$(git rev-list --left-right --count "$head_full...$remoto" 2>/dev/null | tr '\t' '/' || echo "?/?")
++  sync_linha="SYNC: FALHA · local=$head7 remoto=$(printf %s "$remoto" | cut -c1-7) (atrás/à-frente: ${atras_a_frente:-?/?})"
++  SAIDA=$(( SAIDA < 1 ? 1 : SAIDA ))
++fi
++
++# --- Propostas estruturais abertas (.diff sem APROVADO- correspondente) ---
++abertas=0
++shopt -s nullglob
++for d in propostas/*.diff; do
++  nome=$(basename "$d" .diff)
++  [ -e "propostas/APROVADO-$nome" ] || abertas=$((abertas + 1))
++done
++shopt -u nullglob
++
++# --- TES-002 (só o estado curto do PROJETO; a linha inteira é um parágrafo) ---
++tes002=$(grep -m1 -E '^\s*-\s+\*\*TES-002:\*\*' PROJETO.md \
++  | sed -E 's/^\s*-\s+//; s/\*\*//g' \
++  | cut -c1-110 || true)
++[ -z "$tes002" ] && tes002="TES-002: (linha não encontrada em PROJETO.md)"
++tes002="TES-002: ${tes002#TES-002: } …(ver PROJETO.md \"Estado dos bugs\")"
++
++# --- HASH-ESTADO: derivado, determinístico, público ---
++hash_estado=$(printf '%s\n%s\n%s\n%s\n%s\n' \
++  "$head_full" "$topo_linha" "$h_regras" "$h_memorias" "$h_projeto" \
++  | sha256sum | cut -c1-12)
++
++cat <<FIM
++--- ESTADO PARA O ECO (fatos da Máquina; não é o eco) ---
++HEAD: $head7 $head_subject
++TOPO-MEMÓRIAS: $topo_linha
++$sync_linha
++PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
++$tes002
++HASH-ESTADO: $hash_estado
++--- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e
++--- diz em 1 linha por que o estado está coerente. O Humano confere e confirma.
++FIM
++
++exit $SAIDA

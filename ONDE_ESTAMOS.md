@@ -808,3 +808,20 @@ do passo que ficou faltando: fazer o sistema entregar a cada modelo de IA
 o arquivo de memória dele, não o comum. Achei onde exatamente o mecanismo
 atual não faz isso e listei três caminhos possíveis — a escolha entre eles
 precisa de outra sessão de IA independente, não desta.
+
+Abri o próximo pedaço da Fase 2: o "eco pós-carregar". Hoje é só uma regra
+escrita — a IA que entra resume em poucas linhas o estado que herdou e você
+confirma antes dela trabalhar. O problema: hidratação velha não aparece pra
+quem a lê, então o resumo pode estar coerente e errado. A proposta é um
+script que só lê e imprime os fatos da máquina (qual o commit, qual a última
+entrada do diário, se está sincronizado com o GitHub, quantas propostas
+abertas) — a IA escreve o resumo em cima disso, não da própria memória, e
+você tem um cartão pra conferir. O script nunca escreve nem julga o resumo;
+isso continua seu.
+Fiz a parte de "propor e testar": rodei a decisão de desenho 3 vezes no
+modelo local (Regra 8) — duas das três perguntas fecharam, uma ficou em
+aberto pra você (se o eco cita um código de conferência, escreve uma frase
+explicando, ou os dois). Testei o script num clone descartável, todos os
+casos passaram. Está em `propostas/bloco-3.2-eco-mecanizado.diff`, sem sua
+aprovação. Falta a revisão de duas outras sessões de IA (uma audita, outra
+confere na máquina) antes de virar regra.
