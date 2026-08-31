@@ -40,9 +40,13 @@
   **quando há shell**"; o caso sem-shell (nuvem) não estava no prompt e é tratado
   pelo `sync: não verificado` que já existe.
 - **Q2 (prova anti-cópia): CONVERGE no risco, DIVERGE na forma.** 2/3 "hash que o
-  eco cita"; 1/3 "exigir frase explicando a consistência". **`lacuna` que sobe pro
-  Humano:** a proposta implementa **as duas juntas** (cita o `HASH-ESTADO` E dá 1
-  linha de porquê). O Humano decide se mantém as duas, ou corta para uma.
+  eco cita"; 1/3 "exigir frase explicando a consistência". A proposta implementa
+  **as duas juntas** (cita o `HASH-ESTADO` E dá 1 linha de porquê).
+  **`lacuna` RESOLVIDA — Humano, 31/08/2026: "hash + frase", mantém as duas.**
+  O `.diff` já implementa exatamente isso (sha256 inalterado); nada muda no par.
+  Racional das duas: o hash prova que o script foi lido no estado atual (cópia
+  cega de saída velha erra o hash); a frase prova que o modelo entendeu o que
+  leu (cópia cega não conecta topo × SYNC). Uma sem a outra deixa meio buraco.
 
 ## Testes (clone descartável — `memoria/missoes/fase2-eco-camada-a/bateria-clone.md`)
 
