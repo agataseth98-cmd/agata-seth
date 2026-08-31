@@ -1,7 +1,45 @@
 # Bloco 3.2 — Eco pós-carregar mecanizado — Camada A
 
-**Par:** `bloco-3.2-eco-mecanizado.diff` (sha256 `090c64e1b848caa2a3ba80535009bf45f5d5d6a1face6a5d750475aebe0ef4ae`).
-**SEM `APROVADO-`.** Falta Camada B (sessão separada), Camada C (Máquina), decisão do Humano.
+**Par (v2):** `bloco-3.2-eco-mecanizado.diff` (sha256
+`4ac5c14aa8026c45ad0c1ad07ae758965089970f67888ea8b6cae233f90dcfe7`, 145 linhas).
+**SEM `APROVADO-`.** Falta Camada C (Máquina) e decisão do Humano. Camada B já rodou
+(parecer `bloco-3.2-camada-b-parecer.md`, posição CONDICIONAL contra o v1).
+
+## Emenda v1 → v2 (31/08/2026, autorização do Humano "faz a emenda nesta sessão, achados 1 a 4")
+
+v1 (`propostas/rejeitadas/bloco-3.2-eco-mecanizado-v1.diff`, sha256
+`090c64e1b848caa2a3ba80535009bf45f5d5d6a1face6a5d750475aebe0ef4ae`) tratado pelos
+achados da Camada B:
+
+- **Achado 1 (condição da posição CONDICIONAL) — resolvido.** O script agora
+  detecta árvore de trabalho suja num canônico (`git -c core.quotepath=false diff
+  --name-only HEAD -- REGRAS.md MEMÓRIAS.md PROJETO.md`, que cobre staged +
+  não-staged) e, se houver, emite `sync: FALHA · árvore de trabalho com edição não
+  commitada em: <arquivos>` + exit 1 — não mais `PASS`. Testes A2/A3 da bateria v2.
+- **Achado 2 (ressalva) — resolvido.** O rótulo saiu de `SYNC:` / `não-verificado`
+  para a forma canônica de REGRAS: `sync:` minúsculo, `não verificado` com espaço.
+  Testes A1/A5.
+- **Achado 3 (ressalva) — resolvido.** `export LC_ALL="${LC_ALL_ECO:-C.UTF-8}"` no
+  topo — `cut -c` volta a contar caractere mesmo sob `LC_ALL=C`. `\s` de `grep`/`sed`
+  trocado por `[[:space:]]` (POSIX). Teste A8 (campo TES-002 íntegro sob `LC_ALL=C`).
+- **Achado 4 (nota) — resolvido.** O campo TES-002 agora corta na 1ª frase
+  (`sed -E 's/^(TES-002:[^.]*\.).*/\1/'`), que deixa o status e larga o nonce
+  aposentado `e1d1a`; se mesmo assim sobrar uma crase no trecho, o campo vira
+  "(status não extraído da forma esperada)". Teste A7 (nonce ausente).
+
+Achados 5–8 da Camada B eram notas de concordância / documentação (separação
+`HASH-ESTADO`×nonce ok; âncora do `grep` frágil mas aceitável; exit 1 sem caller;
+paráfrase entre aspas no arquivo de evidência de Regra 8) — sem mudança de código.
+O item "paráfrase entre aspas" (Achado 8) fica para a Camada C ou o Humano decidir
+se o `regra8-3-passadas.md` precisa reescrever as citações.
+
+Bateria v2 completa (10 casos): `memoria/missoes/fase2-eco-camada-a/bateria-v2.md`.
+`git apply --check` do v2 contra HEAD `1c99d05`: limpo.
+
+---
+_O texto abaixo é do registro original do v1; vale como histórico. Onde diverge do
+v2 (sha256 do par, "Falta Camada B"), vale o cabeçalho acima._
+
 
 - Camada A: Claude Sonnet 5, na Máquina, 31/08/2026. Continuação de (307).
 - Base de canon: HEAD `8678a46`.

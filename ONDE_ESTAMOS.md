@@ -826,12 +826,19 @@ descartável, todos os casos passaram. Está em
 `propostas/bloco-3.2-eco-mecanizado.diff`, sem sua aprovação.
 
 A segunda revisão (Camada B) rodou — outra sessão de IA, contexto zerado,
-auditou na máquina. Veredito: **CONDICIONAL**. Achou um problema real que
-precisa de conserto antes de virar regra: se a árvore de trabalho tem
-edição não salva nos arquivos de canon, o script diz "sincronizado" e não
-devia — ele só compara o número do commit, não o conteúdo dos arquivos.
-Mais duas ressalvas menores (o rótulo que o script imprime não é exatamente
-o formato da regra; e o corte de texto depende do idioma do sistema). Cinco
-notas de detalhe. Nada bloqueia de vez — é uma rodada de conserto na
-proposta e depois a terceira revisão (Camada C) e você. Parecer completo em
+auditou na máquina. Veredito: **CONDICIONAL**. Achou um problema real: se a
+árvore de trabalho tem edição não salva nos arquivos de canon, o script
+dizia "sincronizado" e não devia — só comparava o número do commit, não o
+conteúdo. Mais duas ressalvas (o rótulo impresso não batia com o formato da
+regra; o corte de texto dependia do idioma do sistema) e uma nota (o campo
+de um teste antigo ecoava um código aposentado). Parecer completo em
 `propostas/bloco-3.2-camada-b-parecer.md`.
+
+Você mandou emendar. Consertei os quatro nesta sessão: o script agora
+detecta árvore suja e responde "FALHA" em vez de "sincronizado"; o rótulo
+saiu na forma exata da regra; travei o idioma interno do script; e o campo
+do teste antigo não carrega mais o código aposentado. Testei os quatro num
+clone, 10 casos, todos passaram. A versão 1 foi pra `propostas/rejeitadas/`,
+a versão 2 é a que vale (`propostas/bloco-3.2-eco-mecanizado.diff`), ainda
+sem sua aprovação. Falta a terceira revisão (Camada C, confere na máquina) e
+você.
