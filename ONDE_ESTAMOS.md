@@ -798,3 +798,13 @@ trocar.
 
 Nada de memória de verdade foi alterado — o teste mexeu em dois arquivos
 locais e devolvi os dois ao estado exato de antes, conferido por hash.
+
+--- 31/08/2026, continuação (retomada) ---
+Você mandou continuar. Confiro na máquina que o que subiu nos passos 305
+e 306 bate com o que ficou decidido — bate; falta só a conferência de
+fora, por uma IA na nuvem, direto no GitHub.
+Preparei um levantamento só de leitura (`propostas/dossie-selecao-silo-gateway.md`)
+do passo que ficou faltando: fazer o sistema entregar a cada modelo de IA
+o arquivo de memória dele, não o comum. Achei onde exatamente o mecanismo
+atual não faz isso e listei três caminhos possíveis — a escolha entre eles
+precisa de outra sessão de IA independente, não desta.
