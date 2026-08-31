@@ -840,5 +840,18 @@ saiu na forma exata da regra; travei o idioma interno do script; e o campo
 do teste antigo não carrega mais o código aposentado. Testei os quatro num
 clone, 10 casos, todos passaram. A versão 1 foi pra `propostas/rejeitadas/`,
 a versão 2 é a que vale (`propostas/bloco-3.2-eco-mecanizado.diff`), ainda
-sem sua aprovação. Falta a terceira revisão (Camada C, confere na máquina) e
-você.
+sem sua aprovação.
+
+A terceira revisão (Camada C) rodou — outra sessão de IA, contexto zerado,
+na máquina, refez todos os testes das camadas A e B em clones. Veredito:
+**PRONTO PARA O HUMANO**. Nada bloqueia. Confirmou que os quatro problemas
+que a Camada B achou eram reais e que a versão 2 conserta os quatro. As duas
+ressalvas dela são no material de apoio, não no que vira regra: uma das três
+rodadas do teste de desenho tinha ficado cortada no meio, e o resumo dela
+usava aspas em trechos que eram paráfrase. Já corrigi as duas no arquivo de
+apoio. O parecer está em `propostas/bloco-3.2-camada-c-parecer.md`.
+
+**Agora é com você:** aprovar a proposta criando
+`propostas/APROVADO-bloco-3.2-eco-mecanizado`, ou não. Se quiser, dá pra
+re-rodar a rodada 1 do teste de desenho antes, pra fechar aquele buraco —
+mas a Camada C disse que a decisão não depende disso.
