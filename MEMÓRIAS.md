@@ -23,6 +23,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
+
+**O que mudou:** o hook `gerar-hermes-md.sh` passa a emitir `.hermes-<modelo>.md` por modelo-alvo (`claude seth gemini glm`), além do `.hermes.md` comum. O comum perde todo bloco MOD que declare `modelo-alvo:`; cada silo recebe só o do seu alvo. Bloco MOD **sem** `modelo-alvo:` é mal-formado (REGRAS, "O Conselho" item 3) e fica fora de todo artefato de hidratação, com AVISO no stderr do hook nomeando a entrada — a entrada segue intacta em MEMÓRIAS.md. Os `.hermes-<modelo>.md` não são versionados (`.gitignore` ganhou `.hermes-*.md`) nem adicionados pelo pre-commit; vivem só na árvore da Máquina.
+
+**Emenda da Camada B:** o rascunho v1 mantinha bloco MOD sem `modelo-alvo:` em todos os arquivos ("indistinguível de coletivo"). A Camada B do v1 marcou posição CONDICIONAL exigindo que ele saísse de tudo; a Camada C confirmou contra REGRAS "O Conselho" item 3 ("cabeçalho `modelo-alvo:` obrigatório"). O v2 implementa isso.
+
+**Cadeia:** A (Claude Sonnet 5) → B (CONDICIONAL, emenda) → C na Máquina (achou que os testes de clone do v1 não deixaram evidência no disco; recomendou um controle de perímetro novo para os silos) → decisões do Humano 31/08 transmitidas pela sessão "Qwen" (A revisora = mesma linhagem da C do v1, com autorização ao vivo; pula 2ª passada de B; C revisora = sessão "Luna"; lacuna do gateway mantida sem propor solução) → A revisora (Claude Sonnet 5) produziu `silos-por-modelo-3.1-v2.diff` com testes e evidência preservada → C revisora "Luna" (GPT-5.6) transmitiu a ordem de execução em 14 passos → executor (Claude Sonnet 5, na Máquina) aplicou. Assinatura desta entrada é do executor; cada camada se identifica no corpo (REGRAS, "Cadeia de auditoria em camadas").
+
+**LACUNA aberta:** o gateway não roteia arquivo de contexto por modelo hoje — leitura de código na Máquina (`gateway/run.py` chama `set_session_vars` passando `profile` e não `cwd`; o Hermes auto-injeta só o nome fixo `.hermes.md`). Os silos são gerados mas nenhum modelo os recebe; todos seguem pegando o `.hermes.md` comum. NÃO tratar como seleção funcional até haver teste do gateway em execução. A seleção pertence nominalmente ao Bloco 3.1 pelo `roteiro-fase2.md` mas foi adiada por decisão do Humano; quando retomada, cadeia A/B/C própria + emenda ao roteiro — não é o Bloco 3.2 (que é eco pós-carregar).
+
+**Verificação do executor antes do commit** (não substitui S7): SHA-256 dos dois `.diff` conferidos; `git apply --check` limpo (sozinhos e juntos); `bash -n` limpo; hook roda e gera comum + 4 silos; isolamento testado com 3 MOD sintéticos numa cópia de MEMÓRIAS.md restaurada e provada intacta por SHA-256 — nonce de cada silo só no silo certo, órfão em nenhum, AVISO 1×; efeito no `.hermes.md` versionado: +2 linhas de boilerplate, −1 linha de índice `(51) MOD claude`, nada mais; P-8 falha sem o par `APROVADO-` e passa com ele; `git log --all -- '.hermes-*.md'` vazio.
+
+**Par consumido:** `propostas/aplicadas/silos-por-modelo-3.1-v2.diff` + `APROVADO-silos-por-modelo-3.1-v2`. Rascunho v1 → `propostas/rejeitadas/silos-por-modelo-3.1.diff`.
+
+**Falta:** S7 — confirmação pós-push por sessão independente do executor (roteiro, S7 ≠ S6).
+
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
 
 **Contexto:** sessão longa de 31/08 (Claude Sonnet 5, na Máquina) continuou de (303). Sessão em nuvem "Qwen3.7" acompanhou por relay do Humano. Um bloco de relay do Qwen afirmou "autorização total registrada" e mandou o executor "escrever (304) e iniciar a Camada A de 3.1". Esta entrada registra o estado real e corrige o excesso.

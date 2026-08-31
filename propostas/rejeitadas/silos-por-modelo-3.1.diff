@@ -1,0 +1,633 @@
+diff --git a/.githooks/gerar-hermes-md.sh b/.githooks/gerar-hermes-md.sh
+index 80ce6dd..b349f3f 100755
+--- a/.githooks/gerar-hermes-md.sh
++++ b/.githooks/gerar-hermes-md.sh
+@@ -27,6 +27,78 @@ JANELA_ORCAMENTO_CHARS=25000
+ INDICE_RECENTES_COMPLETAS=30
+ INDICE_TETO_ANTIGAS=80
+ 
++# --- Fase 2 / Bloco 3.1: silos por modelo ------------------------------
++# Modelos-alvo que ganham um .hermes-<modelo>.md PRÓPRIO: a janela de
++# MEMÓRIAS e as linhas de índice desse arquivo não trazem bloco MOD de
++# OUTRO modelo-alvo. Todo modelo fora desta lista usa o .hermes.md COMUM,
++# que não traz NENHUM bloco MOD que declare `modelo-alvo:`.
++# Hoje só `claude` tem bloco MOD no canon ((51)); `seth`/`gemini`/`glm`
++# são alvos previsíveis de Fase 3 -- listados para o arquivo já existir
++# com a fronteira certa antes do primeiro MOD sensível ser escrito.
++# Efeito de tamanho hoje ≈ nulo (dossiê S1, Achado 4); o valor é a
++# fronteira de confidencialidade, não economia de token.
++# Os .hermes-<modelo>.md NÃO são versionados (ver .gitignore) nem
++# adicionados pelo pre-commit -- vivem só na árvore da Máquina, o único
++# lugar onde MOD sensível pode aparecer. O .hermes.md comum continua
++# versionado e é o único artefato de hidratação público.
++ALVOS_SILO=(claude seth gemini glm)
++
++# Orçamento de janela por modelo (Regra 8, 3 passadas qwen local 31/08/2026:
++# convergência em "calibrar por janela de contexto do modelo", não valor
++# fixo). Sem entrada aqui -> usa JANELA_ORCAMENTO_CHARS. Hoje todos os
++# alvos têm >= 64k de contexto e 25000 cabe em todos; o mapa existe pra
++# calibrar sem novo patch quando um alvo de janela menor entrar.
++declare -A JANELA_POR_MODELO=()
++
++# Emite MEMÓRIAS.md sem os blocos MOD que não pertencem a $1.
++#   $1 vazio -> arquivo comum: remove TODO bloco MOD que declara `modelo-alvo:`.
++#   $1 = X   -> silo de X: remove bloco MOD cujo `modelo-alvo:` (primeiro
++#              token, ignorando parênteses/comentário) seja != X.
++# Bloco MOD SEM linha `modelo-alvo:` fica em todos (comum e silos) -- é
++# indistinguível de coletivo; decisão de Regra 8 registrada no .diff.
++# DIÁRIO / CONSELHO / CORREÇÃO nunca são tocados: comuns a todos por
++# definição. O bloco migrado ("## Migrado de DIÁRIO.md" até o fim físico)
++# passa verbatim.
++filtrar_mod_por_alvo() {
++  local alvo="${1:-}"
++  awk -v alvo="$alvo" '
++    function flush(   k) {
++      if (n > 0 && !pular) for (k = 1; k <= n; k++) print buf[k]
++      n = 0; pular = 0; em_mod = 0
++    }
++    migrado { print; next }
++    /^## Migrado de DIÁRIO\.md/ { flush(); print; migrado = 1; next }
++    /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ {
++      flush()
++      em_mod = ($0 ~ /^\([0-9]+\) MOD([ (]|$)/)
++      buf[++n] = $0
++      next
++    }
++    {
++      buf[++n] = $0
++      if (em_mod && $0 ~ /^modelo-alvo:[ \t]*[^ \t]/) {
++        ab = $0
++        sub(/^modelo-alvo:[ \t]*/, "", ab)
++        sub(/[ \t(].*$/, "", ab)
++        if (alvo == "" || ab != alvo) pular = 1
++      }
++    }
++    END { flush() }
++  ' MEMÓRIAS.md
++}
++
++# Filtra as linhas de índice (título só, sem corpo) por modelo-alvo,
++# lendo o token do próprio cabeçalho "(n) MOD <modelo>". $1 vazio =
++# arquivo comum (nenhuma linha MOD com modelo nomeado). Roda só na
++# montagem do .hermes*, o INDICE_MEMORIAS*.md em disco fica completo.
++filtrar_indice_por_alvo() {
++  local alvo="${1:-}"
++  awk -v alvo="$alvo" '
++    /^\([0-9]+\) MOD / { if (alvo == "" || $3 != alvo) next }
++    { print }
++  '
++}
++
+ # Âncora de MEMÓRIAS (271): quando presente no arquivo, o corpo (49)+ vem
+ # logo depois dela, mais recente primeiro; o bloco "Migrado de DIÁRIO.md"
+ # (mais antigo) fica no fim físico. Ausente = formato antigo (mais recente
+@@ -82,6 +154,17 @@ gerar_indice() {
+ }
+ 
+ janela_memorias() {
++  local modelo="${1:-}"
++  local budget="$JANELA_ORCAMENTO_CHARS"
++  # `${arr[$k]}` com $k vazio é "subscrito incorreto" sob `set -u` -- só
++  # consulta o mapa quando há modelo.
++  [ -n "$modelo" ] && budget="${JANELA_POR_MODELO[$modelo]:-$JANELA_ORCAMENTO_CHARS}"
++  local mem
++  mem="$(filtrar_mod_por_alvo "$modelo")"
++  # O marcador vive no preâmbulo, nunca dentro de um bloco MOD -- o filtro
++  # nunca o remove. Checa direto no arquivo: pipar o stream de ~1 MB de
++  # $mem em `grep -q` fecha o pipe cedo e, sob `pipefail`, faz a condição
++  # inteira "falhar" (SIGPIPE no printf de cima) -- caía no ramo errado.
+   if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+     # Formato novo (MEMÓRIAS (271)+): mais recente logo após o marcador.
+     # Acumula entradas completas de CIMA pra baixo até o orçamento; nunca
+@@ -90,7 +173,7 @@ janela_memorias() {
+     # heading "## Migrado de DIÁRIO.md", fim físico do arquivo) nunca entra
+     # na janela por orçamento -- limita o fim do corpo a ele, não a `total`,
+     # senão a última entrada "engoliria" o bloco inteiro na medição.
+-    awk -v budget="$JANELA_ORCAMENTO_CHARS" '
++    printf '%s\n' "$mem" | awk -v budget="$budget" '
+       /^## Migrado de DIÁRIO\.md/ { migrado=NR }
+       /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
+       { line[NR]=$0 }
+@@ -118,11 +201,11 @@ janela_memorias() {
+           for (j=hdr[1]; j<=fim; j++) print line[j]
+         }
+       }
+-    ' MEMÓRIAS.md
++    '
+   else
+     # Formato antigo: mais recente no fim físico. Acumula de trás pra
+     # frente até o orçamento -- comportamento original, MEMÓRIAS (191)/(192).
+-    awk -v budget="$JANELA_ORCAMENTO_CHARS" '
++    printf '%s\n' "$mem" | awk -v budget="$budget" '
+       /^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { hdr[++n]=NR }
+       { line[NR]=$0 }
+       END {
+@@ -140,7 +223,7 @@ janela_memorias() {
+           for (j=start; j<=total; j++) print line[j]
+         }
+       }
+-    ' MEMÓRIAS.md
++    '
+   fi
+ }
+ 
+@@ -206,38 +289,68 @@ if ! gerar_indice_palavras_chave; then
+   rm -f "$INDICE_CHAVES"
+ fi
+ 
+-{
+-  echo "<!--"
+-  echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
+-  echo "Gerado por .githooks/gerar-hermes-md.sh a partir de REGRAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+-  echo "Para mudar o conteúdo, edite REGRAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
+-  echo "o hook pre-commit regenera este arquivo sozinho."
+-  echo ""
+-  echo "Motivo de existir: o Hermes só auto-injeta um de"
+-  echo ".hermes.md / AGENTS.md / CLAUDE.md / .cursorrules no prompt de sistema"
+-  echo "(nunca REGRAS.md/PROJETO.md/MEMÓRIAS.md diretamente). Embutir aqui evita depender"
+-  echo "de tool-call (e do modelo acertar offset/wc -l) no início da sessão."
+-  echo "-->"
+-  echo ""
+-  echo "# REGRAS.md"
+-  echo ""
+-  cat REGRAS.md
+-  echo ""
+-  echo "# PROJETO.md"
+-  echo ""
+-  cat PROJETO.md
+-  echo ""
+-  cat "$INDICE"
+-  echo ""
+-  echo "# MEMÓRIAS.md (janela por entrada inteira, orçamento ${JANELA_ORCAMENTO_CHARS} chars)"
+-  echo ""
+-  janela_memorias
+-} > "$OUT"
++# Monta um arquivo de hidratação. $1 = modelo-alvo (vazio = arquivo comum),
++# $2 = caminho de saída. REGRAS/PROJETO são idênticos em todos; só a janela
++# de MEMÓRIAS e as linhas de índice MOD mudam por silo.
++montar_hermes() {
++  local modelo="${1:-}" out="$2"
++  local _budget="$JANELA_ORCAMENTO_CHARS"
++  [ -n "$modelo" ] && _budget="${JANELA_POR_MODELO[$modelo]:-$JANELA_ORCAMENTO_CHARS}"
++  {
++    echo "<!--"
++    echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
++    echo "Gerado por .githooks/gerar-hermes-md.sh a partir de REGRAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
++    echo "Para mudar o conteúdo, edite REGRAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
++    echo "o hook pre-commit regenera este arquivo sozinho."
++    if [ -n "$modelo" ]; then
++      echo ""
++      echo "SILO: $modelo. Esta variante NÃO traz bloco MOD de outro modelo-alvo."
++      echo "Não é versionada (.gitignore) nem adicionada pelo pre-commit -- só existe"
++      echo "na árvore da Máquina. A seleção de qual arquivo o Hermes injeta por sessão"
++      echo "NÃO está construída neste .diff (ver seção 'lacuna' da proposta)."
++    else
++      echo ""
++      echo "ARQUIVO COMUM: nenhum bloco MOD que declare 'modelo-alvo:'. É o fallback"
++      echo "para todo modelo sem silo próprio, e o único artefato de hidratação público."
++    fi
++    echo ""
++    echo "Motivo de existir: o Hermes só auto-injeta um de"
++    echo ".hermes.md / AGENTS.md / CLAUDE.md / .cursorrules no prompt de sistema"
++    echo "(nunca REGRAS.md/PROJETO.md/MEMÓRIAS.md diretamente). Embutir aqui evita depender"
++    echo "de tool-call (e do modelo acertar offset/wc -l) no início da sessão."
++    echo "-->"
++    echo ""
++    echo "# REGRAS.md"
++    echo ""
++    cat REGRAS.md
++    echo ""
++    echo "# PROJETO.md"
++    echo ""
++    cat PROJETO.md
++    echo ""
++    filtrar_indice_por_alvo "$modelo" < "$INDICE"
++    echo ""
++    echo "# MEMÓRIAS.md (janela por entrada inteira, orçamento ${_budget} chars${modelo:+, silo: $modelo})"
++    echo ""
++    janela_memorias "$modelo"
++  } > "$out"
++}
++
++montar_hermes "" "$OUT"
++SILO_FILES=()
++for _m in "${ALVOS_SILO[@]}"; do
++  montar_hermes "$_m" ".hermes-${_m}.md"
++  SILO_FILES+=(".hermes-${_m}.md")
++done
+ 
+ checar_reconciliacao || true
+ 
++_silos_txt=""
++for _f in "${SILO_FILES[@]}"; do
++  _silos_txt="${_silos_txt}, ${_f} ($(wc -c < "$_f") bytes)"
++done
+ if [ -f "$INDICE_CHAVES" ]; then
+-  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hermes.md)"
++  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hermes.md)${_silos_txt}"
+ else
+-  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES: FALHOU nesta rodada, ver aviso acima"
++  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES: FALHOU nesta rodada, ver aviso acima${_silos_txt}"
+ fi
+diff --git a/.gitignore b/.gitignore
+index 31f2e59..5638172 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -25,6 +25,12 @@ memoria/missoes/
+ # decisão deliberada; nunca pública (achado em 15/08/2026, PROJETO item 108)
+ memoria/*.md
+ 
++# Silos por modelo (Fase 2 / Bloco 3.1): .hermes-<modelo>.md são gerados
++# pelo hook gerar-hermes-md.sh, um por modelo-alvo, e podem conter bloco
++# MOD sensível (nonce TES-002). NUNCA versionados -- repo é público. Só
++# .hermes.md (o comum, sem MOD com modelo-alvo) entra no canon.
++.hermes-*.md
++
+ # SOUL.md — persona do hermes-agent, reescrita automática no boot (default
+ # genérico "Nous Research"). Arquivada em MEMÓRIAS (245): não é lida por
+ # nenhum mecanismo de hidratação do canon. Fora do índice pra não voltar
+
+================================================================================
+CAMADA A — Bloco 3.1 (silos por modelo) — Fase 2
+================================================================================
+
+Rascunho da Camada A. SEM `APROVADO-`. NÃO aplicar. NÃO commitar.
+Produto vai para a Camada B (auditoria, sessão separada) -> Camada C
+(verificação na Máquina) -> Humano.
+
+Sessão: Claude Sonnet 5 (Claude Code, na Máquina), 31/08/2026.
+Hidratação independente da sessão S1 (não reaproveitou contexto do dossiê).
+
+ÂNCORA DE VERSÃO (conferida nesta sessão)
+  HEAD ................................. 695d10a41be6e89deaca28371f66028542d4ce16
+  HEAD == origin/main ................. sim (`git ls-remote`)
+  MEMÓRIAS.md topo ................... (304) DIÁRIO — 31/08/2026
+  propostas/dossie-s1-dimensionamento-fase2.md  sha256 ef5f96cebb5038d8809f5d6981c30ac82bb15c5f6b49ab937baf43ec7fcc56dc
+  propostas/roteiro-fase2.md                    sha256 06756b8fe7eee20bb89d6a6f3a527fc340598a77dd3ce5cc9879e5f61f07fc34
+  .githooks/gerar-hermes-md.sh (antes do patch) sha256 75aaa93f1e590423543bbe4a8b55a8951c1110c1e7541c7ef91444e627aea894
+  ambos os sha256 acima batem com os prefixos citados no BRIEFING.
+
+
+--------------------------------------------------------------------------------
+1. O QUE MUDA
+--------------------------------------------------------------------------------
+
+`.githooks/gerar-hermes-md.sh` passa a emitir, além do `.hermes.md` de
+sempre:
+
+  - `.hermes.md`  (COMUM)  — versionado, público, `git add`ado pelo
+    pre-commit como hoje. Agora NÃO contém nenhum bloco MOD que declare
+    `modelo-alvo:` (nem no corpo da janela, nem como linha de índice).
+    É o fallback de todo modelo sem silo próprio.
+
+  - `.hermes-<modelo>.md`  (SILO)  — um por item de `ALVOS_SILO`
+    (`claude seth gemini glm`). Igual ao comum MAIS os blocos MOD cujo
+    `modelo-alvo:` == `<modelo>`. NÃO versionado (`.gitignore` ganha
+    `.hermes-*.md`), NÃO `git add`ado pelo pre-commit — vive só na
+    árvore da Máquina, que é o único lugar onde MOD sensível (nonce
+    TES-002 de 3.3) pode aparecer sem vazar num repositório público.
+
+Mecânica do filtro (função nova `filtrar_mod_por_alvo`):
+  - percorre MEMÓRIAS.md bloco a bloco (cabeçalho `^(n) TIPO` a
+    cabeçalho);
+  - ao ver um bloco `MOD`, entra no corpo e lê a primeira linha
+    `^modelo-alvo:` — pega o primeiro token (ignora `(string não
+    verificada)` e o resto);
+  - `alvo` vazio (arquivo comum): descarta TODO bloco MOD que tenha
+    linha `modelo-alvo:`;
+  - `alvo` = X: descarta bloco MOD cujo token != X;
+  - bloco MOD SEM `modelo-alvo:` fica em todos (comum e silos) — ver
+    Regra 8, Q2;
+  - DIÁRIO / CONSELHO / CORREÇÃO passam intactos;
+  - bloco migrado (`## Migrado de DIÁRIO.md` até o fim físico) passa
+    verbatim.
+A saída filtrada alimenta o `janela_memorias()` EXISTENTE (mesma
+lógica de orçamento por entrada inteira, MEMÓRIAS (191)/(192)); só a
+fonte mudou de `MEMÓRIAS.md` (arquivo) para stdin.
+
+Linha de índice (função nova `filtrar_indice_por_alvo`): dropa a linha
+`(n) MOD <outro>` do índice EMBUTIDO no `.hermes*`. O
+`INDICE_MEMORIAS.md` / `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` EM DISCO
+seguem completos e versionados sem mudança — são aid de `grep` de
+sessão com Máquina, e o título de um MOD já é público em dezenas de
+DIÁRIOs.
+
+Orçamento de janela: mapa `JANELA_POR_MODELO` (assoc-array, vazio por
+default -> usa `JANELA_ORCAMENTO_CHARS=25000` para todos). Existe para
+calibrar por modelo sem novo patch — ver Regra 8, Q3.
+
+Também no `.diff`: `.gitignore` ganha `.hermes-*.md` (com comentário do
+porquê). `.gitignore` está FORA do conjunto "muda comportamento" da
+P-8 (REGRAS/PROJETO/scripts/.githooks) mas entra no mesmo par por ser
+parte inseparável da mudança — sem ele os silos vazariam no push.
+
+O `.diff` NÃO toca `.githooks/pre-commit`: a linha de `git add` de lá é
+`git add .hermes.md INDICE_MEMORIAS.md` (explícita, não glob) — não
+captura `.hermes-*.md`. Verificado.
+
+
+--------------------------------------------------------------------------------
+2. MECANISMO DE SELEÇÃO (qual arquivo o Hermes injeta por sessão) —  `lacuna`
+--------------------------------------------------------------------------------
+
+O dossiê S1 (Achado 1) levanta a hipótese: o gateway roteia a sessão
+de cada modelo para um cwd próprio, e o Hermes injeta o `.hermes.md`
+daquele diretório via `resolve_context_cwd()` / `_SESSION_CWD`, sem
+patch no vendored.
+
+Nesta sessão eu LI o vendored (`~/.hermes/hermes-agent/`, presente na
+Máquina, sem backup — hedge de S1 vale). O que encontrei:
+
+  - `agent/runtime_cwd.py`: `_SESSION_CWD` (ContextVar) +
+    `set_session_cwd()` + `resolve_context_cwd()` existem e checam
+    `_SESSION_CWD` antes de `TERMINAL_CWD`. Confere com S1.
+  - `gateway/session_context.py`: `set_session_vars(..., cwd="")` chama
+    `set_session_cwd(cwd)`. O parâmetro `cwd` EXISTE.
+  - `gateway/run.py`, `_set_session_env()` (o handler de mensagem do
+    gateway): chama `set_session_vars(platform=..., chat_id=...,
+    profile=..., ...)` e **NÃO passa `cwd`**. Passa `profile`, mas
+    nada mapeia `profile` -> cwd. Todas as outras leituras de cwd no
+    `run.py` são `os.environ.get("TERMINAL_CWD", ...)` — valor único de
+    processo, pontuado uma vez de `config.yaml` `terminal.cwd`.
+  - `~/.hermes/config.yaml`: `terminal.cwd: /home/orusoua/agata`
+    (único). Sem `gateway.profile_routes`. `model.default:
+    qwen3.5-9b-64k`, `fallback_model: gemini-2.5-flash`. `claude` nem
+    aparece — sessões Claude são "na Máquina" (Claude Code), não do
+    gateway.
+
+CONCLUSÃO: **o gateway NÃO roteia context-file discovery por modelo
+hoje.** A infra (`_SESSION_CWD`, `cwd=` em `set_session_vars`) existe
+mas não está ligada. Para um silo de verdade funcionar, é preciso UMA
+de:
+  (a) uma instância/profile de gateway por modelo, cada uma com seu
+      `terminal.cwd` (ex: `~/agata/silos/<modelo>/`, com um symlink
+      `.hermes.md -> ../../.hermes-<modelo>.md`) — sem patch vendored,
+      mas é mudança de deployment do gateway, FORA do repo;
+  (b) um patch no vendored `gateway/run.py` `_set_session_env()` para
+      derivar `cwd` do `profile`/modelo — patch vendored, a classe que
+      S1 queria evitar;
+  (c) troca de symlink `.hermes.md` antes de cada sessão — stateful,
+      corrida entre sessões concorrentes do gateway (o próprio
+      `session_context.py` existe por causa dessa classe de corrida).
+
+A Regra 8 (abaixo, Q1) convergiu em "(a) rota por cwd" como DIREÇÃO de
+design. Mas se ela já FUNCIONA: **`lacuna`** — depende de config do
+gateway que não está no repo e que eu não alterei nem testei ao vivo.
+Camada C / Humano decidem e verificam. Não afirmo que existe.
+
+
+--------------------------------------------------------------------------------
+3. TESTES — clone descartável
+--------------------------------------------------------------------------------
+
+Ambiente: `git clone ~/agata /tmp/.../agata-clone` (HEAD 695d10a).
+NUNCA sobre o repo real. Clones apagados no fim da sessão.
+Patch aplicado no clone; `bash -n` limpo; `git apply --check` do
+`.diff` (só as seções `gerar-hermes-md.sh` + `.gitignore`) sobre um
+2º clone PRISTINO de HEAD 695d10a: **aplica limpo** (exit 0).
+`sha256` do bloco diff deste arquivo (linhas 1–248):
+77e921c5e5e66075b4a9ee434a10b97d73c97b5da8b27876416219d9d9e1f466
+
+--- 3a. Baseline (clone, antes do patch) ---
+  `bash .githooks/gerar-hermes-md.sh`
+  -> `.hermes.md` = 142418 bytes, 1 ocorrência de `^(51) MOD claude`
+     (só a LINHA de índice; o corpo de (51) é antigo demais e nunca
+     entrou na janela de 25.000 chars — hoje o filtro só muda a linha
+     de índice).
+
+--- 3b. Positivo — silo exclui MOD alheio, mantém o próprio ---
+Como só há um bloco MOD no canon ((51), antigo, fora da janela),
+injetei 3 blocos MOD SINTÉTICOS logo abaixo do marcador
+`ENTRADAS-NOVAS` numa CÓPIA de MEMÓRIAS.md do clone (nunca commitada,
+restaurada no fim):
+  (305) MOD claude   modelo-alvo: claude   nonce fake CLAUDE-NONCE-7a7a7a
+  (306) MOD seth     modelo-alvo: seth     nonce fake SETH-NONCE-9z9z9z
+  (307) MOD orfao    (sem linha modelo-alvo) nonce fake ORPHAN-NONCE-0b0b0b
+
+`bash .githooks/gerar-hermes-md.sh` -> `grep -c` do CORPO (nonce) em
+cada arquivo:
+
+  arquivo             CLAUDE-NONCE  SETH-NONCE  ORPHAN-NONCE
+  .hermes.md (comum)       0            0            1
+  .hermes-claude.md        1            0            1
+  .hermes-seth.md          0            1            1
+  .hermes-gemini.md        0            0            1
+  .hermes-glm.md           0            0            1
+
+  -> silo de claude tem o MOD de claude, NÃO o de seth. Silo de seth,
+     o inverso. Comum não tem nenhum dos dois com alvo. Bloco sem
+     alvo ((307)) fica em todos.
+
+Linha de índice `(30N) MOD <x>` por arquivo:
+  .hermes.md          -> só (307) MOD orfao
+  .hermes-claude.md   -> (305) MOD claude + (307) MOD orfao
+  .hermes-seth.md     -> (306) MOD seth  + (307) MOD orfao
+  .hermes-gemini.md   -> só (307) MOD orfao
+
+--- 3c. Negativo — modelo sem silo recebe o comum, comum não vaza ---
+Um modelo fora de `ALVOS_SILO` (ex: `gpt`, `qwen-cloud`) não tem
+`.hermes-<modelo>.md`. O Hermes auto-injeta pelo nome fixo `.hermes.md`
+(`agent/prompt_builder.py`, `_HERMES_MD_NAMES = (".hermes.md",
+"HERMES.md")`) — ou seja, recebe o COMUM por construção. No teste 3b o
+comum tem CLAUDE-NONCE=0, SETH-NONCE=0: nenhum MOD com alvo vaza para
+quem cai no fallback.
+
+--- 3d. Efeito no `.hermes.md` versionado (canon real, sem synthéticos) ---
+`git diff .hermes.md` após o patch (regeneração):
+  + 2 linhas de boilerplate ("ARQUIVO COMUM: ...")
+  - 1 linha de índice: `(51) MOD claude — 26/07/2026`
+Nada mais. O título de (51) continua em `MEMÓRIAS.md` e
+`INDICE_MEMORIAS.md` (ambos versionados) — não é apagar história
+(Regra 4/7): `.hermes.md` é derivado e regenerado a cada commit.
+Bloco diff completo desse efeito no fim deste arquivo (seção 6).
+
+--- 3e. perimetro.sh no 2º clone, pós-apply ---
+  `=== RESULTADO GERAL: OK -- 8 OK · 1 SKIP · 1 PARCIAL · 0 FALHA ===`
+  SKIP = P-10 (clone fresco sem vault). PARCIAL = P-4 (sem sudo, de
+  sempre). Nenhuma FALHA nova. P-8 não dispara fora de `git commit`
+  real — ver hedge 4c.
+
+--- 3f. Bug encontrado e corrigido DURANTE o teste (registro, Regra 8 item 5
+        "o que cada ator acertou/errou" aplicado a mim mesmo) ---
+1ª versão do patch checava o marcador com
+`printf '%s\n' "$mem" | grep -qF ...`. Sob `set -o pipefail` (linha 5
+do script), `grep -q` fecha o pipe ao 1º match, o `printf` do stream
+de ~940 KB toma SIGPIPE e sai != 0, e a condição INTEIRA "falha" ->
+caía no ramo de formato ANTIGO -> janela saía com ~106 KB em vez de
+~25 KB. Achado medindo o tamanho do `.hermes.md` gerado (223 KB, não
+142 KB). Corrigido: o marcador é lido direto de `MEMÓRIAS.md` (o filtro
+nunca o remove — não está em bloco MOD). Testado: janela volta a
+25.167 bytes, idêntica à baseline.
+
+
+--------------------------------------------------------------------------------
+4. REGRA 8 — decisões sem oráculo de Máquina
+--------------------------------------------------------------------------------
+
+Dossiê S1, "Perguntas sem oráculo de Máquina" / roteiro, "Decisões de
+desenho sem oráculo". 4 perguntas com opções. 3 passadas INDEPENDENTES
+em `qwen3.5-9b-64k:latest` via `ollama run` (contexto novo a cada
+invocação, sem histórico compartilhado — precedente MEMÓRIAS (296)).
+Prompt neutro, sem recomendação embutida (Regra 3). Prompt e saídas
+cruas salvas no scratch da sessão (`r8-prompt.txt`, `r8-pass{1,2,3}`).
+
+  Passada 1: Q1=a  Q2=a  Q3=b  Q4=a
+  Passada 2: Q1=a  Q2=a  Q3=b  Q4=a
+  Passada 3: Q1=a  Q2=a  Q3=b  Q4=a
+
+CONVERGÊNCIA TOTAL, sem divergência -> resolvidas (não sobe como
+`lacuna` de divergência). Resultado:
+
+  Q1 (mecanismo do silo) = (a) rota por cwd de sessão no gateway, sem
+     patch vendored.
+     -> É a DIREÇÃO. O estado "já funciona" é `lacuna` (seção 2): o
+        gateway não roteia por modelo hoje.
+
+  Q2 (o que o filtro exclui) = (a) só MOD com `modelo-alvo` != X; MOD
+     sem `modelo-alvo` fica em todos; CONSELHO comum a todos.
+     -> É o que o `.diff` implementa. Nota de risco para Camada B: "MOD
+        sem modelo-alvo fica em todos" significa que um MOD mal-formado
+        (sem a linha) vaza para todo silo. Mitigação possível (não
+        neste .diff): o `checar_reconciliacao` ou um controle P-novo
+        avisando bloco MOD sem `modelo-alvo:`. Decisão do Humano.
+
+  Q3 (orçamento de janela por modelo) = (b) calibrado pela janela de
+     contexto de cada modelo, NÃO fixo em 25.000.
+     -> Diverge do default implementado (25.000 para todos). O `.diff`
+        atende a INTENÇÃO com o mapa `JANELA_POR_MODELO` (vazio hoje;
+        todos os alvos têm >= 64k de contexto e 25.000 cabe em todos —
+        dossiê S1 Achado 4). Preencher o mapa com valores por modelo é
+        trabalho de quando um alvo de janela pequena entrar; a Camada
+        B/Humano decidem se querem os valores já agora.
+
+  Q4 (fallback) = (a) modelo sem silo recebe o arquivo comum, que não
+     tem nenhum MOD com `modelo-alvo`.
+     -> É o que o `.diff` implementa (teste 3c).
+
+5ª pergunta do dossiê S1 (não está no roteiro, por isso fora das 4):
+"teto de 150000 — subir ou cortar janela quando MOD sensível entrar?".
+Não passei pela Regra 8: é decisão de 3.3 (quando o nonce entrar), não
+de 3.1, e o dossiê S1 Achado 4 já a enquadra. Fica `lacuna` para o
+Humano no momento de 3.3. Hoje `.hermes.md` = 142.544 bytes vs teto
+`context_file_max_chars: 150000` (~95%) — remedição confere com S1.
+
+
+--------------------------------------------------------------------------------
+5. HEDGE — o que a Camada B / C não podem verificar sozinhas
+--------------------------------------------------------------------------------
+
+5a. COMPORTAMENTO DO GATEWAY (seção 2). Li o vendored nesta Máquina e
+    concluí que o gateway NÃO roteia context-file por modelo. Mas:
+    (i) o vendored não tem backup e pode divergir do que roda de fato;
+    (ii) não reiniciei o gateway nem observei uma sessão real de dois
+    modelos distintos pegando arquivos distintos; (iii) não abri
+    `hermes_cli/profiles.py` inteiro — há um `cwd=str(project_root)` em
+    profiles.py:1249 que NÃO investiguei a fundo. Então: "o gateway não
+    roteia por modelo" é minha leitura de código, não fato verificado
+    em execução. Camada C: confirmar na Máquina com o gateway rodando.
+
+5b. `.hermes-<modelo>.md` são INERTES sem o mecanismo de seleção. O
+    Hermes só auto-injeta o nome `.hermes.md` (`_HERMES_MD_NAMES`).
+    Enquanto a seleção (seção 2) não existir, gerar os silos não muda o
+    que modelo nenhum recebe — o `.diff` prepara o terreno de 3.3, não
+    entrega silo funcionando. Isso é de propósito (o roteiro separa
+    3.1 "a espinha" do mecanismo), mas a Camada B deve confirmar que o
+    Humano entende que 3.1 sozinho não fecha o silo.
+
+5c. P-8 não foi exercida. `perimetro.sh` fora de `git commit` não roda
+    a checagem P-8 (ela olha arquivos STAGED). Não commitei (proibido).
+    Camada C: fazer um `git commit` de teste no clone tocando
+    `.githooks/gerar-hermes-md.sh` SEM `APROVADO-silos-por-modelo-3.1`
+    e confirmar que P-8 FALHA o commit; e que com o par
+    `.diff`+`APROVADO-` (Humano cria) ele passa.
+
+5d. `filtrar_mod_por_alvo` foi testada contra o formato NOVO de
+    MEMÓRIAS.md (com marcador `ENTRADAS-NOVAS`) e com blocos
+    sintéticos. NÃO testei contra o formato antigo (sem marcador) nem
+    contra um MEMÓRIAS.md real que tenha muitos blocos MOD recentes
+    concorrendo pelo orçamento. A lógica de orçamento é a original
+    intacta, mas a interação "muitos MOD filtrados + orçamento
+    apertado" não tem caso de teste real.
+
+5e. Token count exato dos silos não medido em tokens (só bytes).
+    `.hermes-claude.md` = 142.731 bytes ~ mesma ordem do `.hermes.md`.
+    A "lição da Fase 2" (reteste de tool-calling pós-3.1, dossiê S1
+    Achado 5) NÃO foi desenhada em detalhe aqui — é passo explícito de
+    "depois de 3.1" no roteiro, fora do escopo da Camada A de 3.1.
+
+5f. `seth` vs `qwen`: usei `seth` em `ALVOS_SILO` (o dossiê lista
+    `seth`/`qwen` como o mesmo alvo — o modelo local `qwen3.5-9b-64k`,
+    persona "Seth"). Se algum MOD futuro usar `modelo-alvo: qwen`, ele
+    NÃO cairá no silo `seth`. Alias (`seth|qwen` -> mesmo arquivo) é
+    decisão de nomenclatura para o Humano — não resolvi.
+
+
+--------------------------------------------------------------------------------
+6. OS 6 ITENS DA CADEIA (REGRAS, "O que cada camada deve entregar")
+--------------------------------------------------------------------------------
+
+1. Verificação na Máquina antes de afirmar — sha256/`git ls-remote`/
+   `git apply --check`/`bash -n`/`grep -c` em clone; leitura do
+   vendored; `ollama run` real x3. Onde não deu para verificar:
+   marcado `lacuna` (seção 2, 5a–5f).
+2. Citação exata — os trechos de REGRAS/PROJETO/vendored citados são
+   verbatim (ex: `_HERMES_MD_NAMES = (".hermes.md", "HERMES.md")`,
+   `terminal.cwd: /home/orusoua/agata`). Nada entre aspas é paráfrase.
+3. Hedge do que a camada seguinte não verifica — seção 5 inteira.
+4. Autorização do Humano antes de tocar canônico — NÃO tocado. Sem
+   `APROVADO-`. `.diff` não commitado. O par `.diff`+`APROVADO-` é a
+   Camada C/Humano quem move.
+5. Registro do que cada ator acertou, não só errou — dossiê S1 acertou
+   o ponto do filtro (`janela_memorias`/`gerar_indice`), o Achado 3/4
+   (um só MOD, efeito ~nulo, 95% do teto) e a existência de
+   `_SESSION_CWD`. Errou por otimismo em "mecanismo NATIVO ... sem
+   patch no vendored" como fato: a infra existe mas o gateway não a
+   liga (seção 2). Eu errei a 1ª versão do patch (pipefail/SIGPIPE,
+   3f). qwen local: convergiu nas 3 passadas sem divergência.
+6. Confirmação pós-push por acesso independente ao remoto — N/A nesta
+   camada (nada foi empurrado). É item de S6/S7 do roteiro.
+
+
+--------------------------------------------------------------------------------
+7. O QUE A CAMADA A NÃO FEZ (de propósito)
+--------------------------------------------------------------------------------
+
+- Não criou `propostas/APROVADO-*`.
+- Não aplicou o `.diff`, não commitou, não empurrou, não editou
+  REGRAS/PROJETO/MEMÓRIAS/scripts/.githooks no repo real.
+- Não alterou config do gateway nem o vendored; só leu.
+- Não fechou o bloco. Vai para a Camada B.
+- Não decidiu a 5ª pergunta do dossiê (teto 150000) — é de 3.3.
+- Não desenhou o reteste de tool-calling — é passo "depois de 3.1".
+
+
+================================================================================
+EFEITO EM `.hermes.md` (regeneração pelo hook — informativo)
+================================================================================
+
+NÃO faz parte do patch a aplicar (as linhas abaixo estão recuadas de
+propósito, para `git apply` ignorá-las). O pre-commit regenera
+`.hermes.md` sozinho quando o `.diff` de comportamento entrar. Mostrado
+aqui só para a Camada B/C saberem o efeito exato no arquivo versionado:
+
+    --- a/.hermes.md
+    +++ b/.hermes.md
+    @@ -4,6 +4,9 @@
+     Para mudar o conteúdo, edite REGRAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —
+     o hook pre-commit regenera este arquivo sozinho.
+
+    +ARQUIVO COMUM: nenhum bloco MOD que declare 'modelo-alvo:'. É o fallback
+    +para todo modelo sem silo próprio, e o único artefato de hidratação público.
+    +
+     Motivo de existir: o Hermes só auto-injeta um de
+     .hermes.md / AGENTS.md / CLAUDE.md / .cursorrules no prompt de sistema
+     (nunca REGRAS.md/PROJETO.md/MEMÓRIAS.md diretamente). Embutir aqui evita depender
+    @@ -897,7 +900,6 @@
+     (54) DIÁRIO — 26/07/2026
+     (53) DIÁRIO — 26/07/2026
+     (52) DIÁRIO — 26/07/2026
+    -(51) MOD claude — 26/07/2026
+     (50) CONSELHO — 26/07/2026
+     (49) DIÁRIO — 26/07/2026
+
+Fim do rascunho da Camada A.

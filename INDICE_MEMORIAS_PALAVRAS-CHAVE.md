@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
+  palavras-chave: bloco, silos, modelo, aplicado, emenda, camada
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
   palavras-chave: fase, preparada, roteiro, dossiê, item, religado, backup, drenado, correção, autorização, total, risco, assumido
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: prompt, carregamento, achados, auditoria, ágata, opus, verificados, máquina, corrigidos, escopo, fechado, arquivo, portão, perguntas, regra, cumpridos
 (276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
   palavras-chave: auditoria, descoberta, externa, desenvolvimento, justo, confederados, determinação, síntese, fiel, mudança, canônica, convergência, registrada, ordem, humano
-(275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
-  palavras-chave: worldtimeapi, org, cotado, fallback, scripts, consultar, horario, descontinuado, nunca, teria, funcionado, corrigido, entrar, canon
+(275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de …
+  palavras-chave: worldtimeapi, org, cotado, fallback
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PRO …
   palavras-chave: diario, documentação, medição, horário, nuvem, pro
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para …

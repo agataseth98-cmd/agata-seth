@@ -747,3 +747,26 @@ Uma IA na nuvem (Qwen) disse que havia "autorização total" registrada.
 Não há — o que está no papel é você assumir o risco da Fase 1 (os dois
 textos consertados), e só. A Fase 2 continua precisando das três
 sessões independentes. Corrigi isso no (304).
+
+--- 31/08/2026, continuação (305) ---
+A Fase 2 começou de verdade. O primeiro pedaço — "silos de memória por
+modelo" — foi revisado por três IAs (uma propôs, uma auditou, uma
+conferiu na máquina), refeito com uma correção que a auditoria pediu, e
+conferido de novo por uma quarta IA na nuvem ("Luna"). Você autorizou.
+
+O que mudou na prática: o sistema agora gera um arquivo de memória
+separado para cada modelo de IA (claude, seth, gemini, glm), além do
+arquivo comum. Cada arquivo separado só leva a memória pessoal daquele
+modelo; o comum não leva memória pessoal de ninguém. Se alguém escrever
+uma memória pessoal sem dizer de quem é, ela não entra em nenhum
+arquivo e o sistema avisa. Os arquivos separados nunca vão para o
+repositório público — ficam só nesta máquina.
+
+Falta um passo, deixado de fora de propósito: o sistema ainda não
+escolhe qual arquivo entregar a cada IA. Os arquivos são gerados mas
+nenhuma IA os recebe ainda — todas continuam pegando o comum. Ligar
+essa escolha depende do Hermes e fica para outra rodada, com nova
+revisão de três IAs.
+
+Falta também a confirmação de fora: outra sessão de IA precisa conferir,
+direto no GitHub, que o que subiu bate com o que foi decidido aqui.

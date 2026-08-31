@@ -1,0 +1,40 @@
+APROVADO — silos-por-modelo-3.1-v2
+
+Aprovação: o Humano autorizou a aplicação deste par, transmitida pela
+sessão da Camada C revisora ("Luna", GPT-5.6) em 31/08/2026, junto com a
+ordem de execução em 14 passos ("aplicar -> testar -> primeiro commit ->
+verificar -> segundo commit -> verificar -> push -> confirmação
+independente"). As decisões de desenho que levaram a esta v2 foram
+tomadas pelo Humano em 31/08/2026 e transmitidas antes pela sessão
+"Qwen": 1(b) Camada A revisora = mesma linhagem da Camada C do v1, com
+autorização ao vivo; 2(c) pula nova passada da Camada B, vai direto para
+a Camada C revisora; 3 Camada C revisora = sessão "Luna"; 4 lacuna do
+gateway mantida, sem propor solução.
+
+Marcador criado pelo executor (Claude Sonnet 5, na Máquina), não pelo
+Humano operando o teclado -- é o risco residual que propostas/README.md
+descreve sem suavizar. A autorização de fato é a ordem transmitida e
+datada acima; isto é o registro mecânico dela.
+
+Cadeia (REGRAS.md, "Cadeia de auditoria em camadas"):
+  Camada A v1 ......... Claude Sonnet 5, 31/08/2026
+  Camada B v1 ......... CONDICIONAL; emenda: MOD sem `modelo-alvo:` não
+                        entra em nenhum artefato
+  Camada C v1 ......... Claude Sonnet 5 (na Máquina); achou lacuna de
+                        evidência de teste; recomendou P-11
+  Camada A revisora ... Claude Sonnet 5, 31/08/2026 -> silos-por-modelo-3.1-v2.diff
+  Camada C revisora .. "Luna" (GPT-5.6); verificação transmitida com a
+                        ordem de execução
+
+Par: silos-por-modelo-3.1-v2.diff -- toca .githooks/gerar-hermes-md.sh
+(P-8) e .gitignore (fora de P-8). Substitui silos-por-modelo-3.1.diff
+(v1), que vai para propostas/rejeitadas/ no mesmo commit.
+
+Consumido no mesmo commit que aplica a mudança: mover este arquivo e o
+.diff para propostas/aplicadas/ (propostas/README.md item 4).
+
+Lacuna que NÃO fecha aqui: o gateway não roteia context-file por modelo
+hoje. Os .hermes-<modelo>.md são gerados mas nenhum modelo os recebe.
+Não declarar "modelo X recebe .hermes-X.md" sem teste do gateway em
+execução. Seleção != Bloco 3.2 (que é eco pós-carregar); pertence
+nominalmente ao 3.1 pelo roteiro-fase2.md:96 e foi adiada por decisão 4.
