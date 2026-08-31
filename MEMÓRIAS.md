@@ -23,6 +23,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
+
+**Ordem do Humano, nesta sessão:** "Resolva todas as pendências, eu assumo o risco apenas registre." É o caminho "risco assumido por escrito" da Mudança estrutural (REGRAS), no lugar de segunda opinião de outro modelo. Esta entrada é o registro.
+
+**"Todas as pendências" não cabe numa passada — e parte não cabe em nenhuma passada de Máquina solo.** O que foi feito, e o que não foi com o motivo de cada não.
+
+**Feito agora (Fase 1 — "REGRAS/PROJETO atualizados com risco assumido"):**
+- **Item K** — PROJETO.md, "Índice derivado": a linha dizia "Um passo no `post-commit` fica como P-8 futura, se o Humano quiser". Fato velho — (301) já implementou (passo 3 do `.githooks/post-commit`, conferido no código, `git show 018b40a`). Corrigido para descrever o que existe.
+- **Item O(a)** — costura de selo de hora: "Carregar e formatos" oferecia `(informado pela interface)` como selo; a Regra 1.1 nunca nomeava esse selo. A Regra 1.1 ganhou o caso explícito (sem script e sem hora do Humano → `(informado pela interface)`); "Carregar e formatos" ganhou "em divergência vale a Regra 1.1".
+- **Item O(b)** — "Última entrada" era afirmação seca mesmo sob `sync: não verificado`, encostando na falha de (73 - afirmar sobre o mundo lendo só a própria cópia). Agora: só sob `sync: PASS` afirma o topo do canon; sob não verificado/FALHA é "até onde a minha cópia alcança".
+- Só acréscimos, nenhuma regra removida. Congelado em `propostas/costuras-fase1-KO.diff` (`sha256 c0dc6b55`, `git apply --check` limpo), `APROVADO-costuras-fase1-KO` citando a ordem, par movido para `propostas/aplicadas/` neste commit.
+
+**Registrado, não fechado — aceite 2.8 de (302):** a sessão Qwen3.7 (nuvem) desta conversa carregou pelo prompt v2 e chegou sozinha a (302), título byte a byte — conferido na Máquina contra `MEMÓRIAS.md`. É **1 de 2 fornecedores**; 2.8 pede um segundo. Continua aberto.
+
+**NÃO fechado por "assumo o risco" — e o porquê de cada um (é a arquitetura do próprio projeto, não recusa por cautela):**
+- **TES-001:** critério empírico — N sessões consecutivas independentes sem alegação falsa, N nem definido. Risco assumido decide mudança estrutural, não faz resultado empírico existir. Definir N + harness é decisão de Regra 8 (três passadas independentes) — trabalho próprio.
+- **Fase 2 (silos por modelo · eco pós-carregar mecanizado · TES-002 restaurado):** o plano exige cadeia de auditoria em camadas (A propõe → B audita → C verifica na Máquina → Humano). "Pular um salto é tratar alegação como fato — direto contra a Regra 2", que é linha vermelha ("nem o Humano pede para cruzar"). Risco assumido abre o portão de mudança estrutural; não abre este. Precisa de sessão dedicada com as camadas de verdade.
+- **Fase 3+ (GLM membro pleno · discordância sintética · IPFS · curador · DAO):** Contenção de escopo — antecipação de fase futura negada por default, salvo ordem explícita item a item. "Resolva todas" não é ordem específica pra essas.
+- **P-6 / backup `memoria/missoes` → HD:** `AgataBkup01` desconectado; bundle de staging local em dia. Conserto = plugar o HD. Hardware, não decisão.
+- Itens E/F/G/H/I do plano (hook harness A1 · roteamento por complexidade · destravar P-7 · Proposta 001 resto · skills): Fase 4 / fracamente acoplados, cada um sob gate próprio, vários exigindo Regra 8. Trabalho futuro com portão, não pendência a limpar.
+
+**Portão das três perguntas (costuras K+O):**
+1. *Reversível sozinho?* — sim: `git revert` de 1 commit, só acréscimos, nada apagado.
+2. *O que mais toca?* — `.hermes.md`/`INDICE_MEMORIAS*` regenerados pelo pre-commit (derivados); `ONDE_ESTAMOS.md`; zero scripts, zero `.githooks`, zero rede.
+3. *Saberia se quebrasse?* — sim: `perimetro.sh` no caminho do commit; `.diff` congelado e conferido contra o staged; redação inteira colada na resposta ao Humano pra ele reverter se a palavra estiver errada.
+
+**Verificado:** `git show 018b40a` confirma o passo 3 do post-commit (item K é fato velho); `grep` em REGRAS.md confirmou as duas costuras antes de editar; `sha256sum` do `.diff` (`c0dc6b55`) + `git apply --check` limpo contra a árvore restaurada; carga da Qwen3.7 conferida contra `MEMÓRIAS.md` (título de (302) idêntico) e `git ls-remote` (`origin/main` em `6d7bdfc` antes deste commit).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: edição por âncora única em PROJETO.md e REGRAS.md (3 pontos, só acréscimo); `git diff` congelado por `sha256sum` e reconferido por `git apply --check` contra a árvore limpa; inventário de pendências cruzado contra PROJETO.md "Plano vigente"/"Estado dos bugs e dos testes" e `propostas/plano-execucao-backlog.md`; aceite 2.8 conferido contra o canon real. Ordem e risco assumido: Humano, nesta sessão.
+
+
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
 
 **O defeito:** o texto mandava comparar o campo "Escrito em:" da âncora com a hora medida na abertura e, se divergir por horas, tratar o SHA pinado como suspeito e cair nas URLs `/main/` (CDN). Isso mede silêncio do repositório, não idade da âncora — e troca a fonte imutável pela pior (classe de risco de (248 - fetch servindo conteúdo real mas de 12+ dias atrás, sem carimbo de idade)-(252)).

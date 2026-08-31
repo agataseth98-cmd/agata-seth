@@ -712,3 +712,25 @@ inteiro) exige verificação do Google — se um dia precisar, é a hora de
 decidir se paga o Workspace.
 
 Backup no HD religado — pendências de bundle drenadas.
+
+--- 31/08/2026 ---
+Você mandou resolver todas as pendências e assumiu o risco por escrito.
+Fiz o que dava com segurança nesta passada e registrei em MEMÓRIAS (303):
+
+Feito: dois textos velhos consertados. Um no PROJETO.md (dizia que um
+passo automático "ficava pra depois" — já tinha sido feito na (301)). Dois
+no REGRAS.md: o "selo" de horário das IAs na nuvem agora bate entre as
+duas seções que falavam dele; e a linha "última entrada" deixa claro que,
+quando a IA não conseguiu verificar o sistema, ela diz "até onde a minha
+cópia vai", não "o sistema está em tal ponto". Só acréscimos, reversível
+com um comando.
+
+Registrado mas não fechado: o teste de carga do prompt novo passou numa
+IA na nuvem (Qwen) nesta conversa — falta uma segunda.
+
+Não dá pra fechar só assumindo o risco, e o (303) explica cada porquê:
+o TES-001 (precisa de várias sessões independentes ao longo de dias); a
+Fase 2 inteira (silos de memória por modelo — exige a cadeia de auditoria
+de vários modelos, pular isso fere a regra 2); a Fase 3 pra frente (fora
+do escopo até você pedir item a item); e o backup no HD externo (está
+desconectado, é ligar o cabo).

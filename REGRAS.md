@@ -110,6 +110,7 @@ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeç
 - Script consulta timeapi.io com cache-busting (parâmetro força nova requisição, contorna cache de ferramenta tipo web_extractor — MEMÓRIAS (264)/(272)/(273)). Sem fallback automático de segunda API: a única cotada (worldtimeapi.org) foi descontinuada pelo mantenedor e nunca teria funcionado mesmo no ar — chave de resposta errada no script original. Corrigido em MEMÓRIAS (275); não reintroduzir sem antes testar viva a API candidata.
 - Selo: `(API externa via script)`
 - Se script falhar, usar horário informado pelo Humano
+- Sem script executável e sem hora do Humano: usar a hora que a interface mostra, selo `(informado pela interface)` — mesmo selo de "Carregar e formatos"
 **Modelos locais (com shell):**
 - Verificar NTP: timedatectl status | grep synchronized
 - Se sincronizado: usar date com fuso -03
@@ -197,7 +198,8 @@ Nonce: <valor, só se o MOD for seu>
 <quebrado: liste em 1 linha. senão: "pronto.">
 ```
 `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
-**Selo de origem da hora, obrigatório.** Modelo em nuvem não tem relógio, tem o que a interface informa: `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Espelha a base de contagem do turno da Regra 1 — preencher campo que não se pode medir é a falha de (68)/(71).
+**Selo de origem da hora, obrigatório.** Modelo em nuvem não tem relógio, tem o que a interface informa: `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Espelha a base de contagem do turno da Regra 1 — preencher campo que não se pode medir é a falha de (68)/(71). O procedimento completo e o conjunto de selos são os da Regra 1.1; esta linha é resumo, e em divergência vale a Regra 1.1.
+**"Última entrada" sob `sync` não verificado.** Só sob `sync: PASS` essa linha afirma o topo do canon. Sob `sync: não verificado` ou `sync: FALHA`, ela é "até onde a minha cópia alcança", não afirmação sobre o canon — mesma disciplina da Regra 2 ("minha cópia vai até (n)", nunca "o canon está em (n)"; catálogo, falha de (73)). Se a leitura não for óbvia pelo `sync:`, diga qual das duas vale.
 **Hora não herdada.** A hora tem que ser medida de novo a cada resposta — nunca copiada do cabeçalho anterior da mesma sessão. Hora repetida sem nova medição é a mesma falha que hora sem fonte, mesmo tendo fonte. Achado com incidente real, relatado por outra sessão (GPT-5.6 "Luna") em 23/08/2026: repetiu `18:52` numa resposta depois que o horário real já tinha passado — o selo de origem acima resolve DE ONDE vem a hora, não SE ela foi medida de novo nesta resposta.
 
 **`sync:` — três formas, nunca uma quarta:**
