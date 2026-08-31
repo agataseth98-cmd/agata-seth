@@ -429,6 +429,42 @@ p8_quarentena() {
   return "$ruim"
 }
 
+# --- P-11 ----------------------------------------------------------------
+# Silos por modelo (.hermes-<modelo>.md) nunca entram no canon. Vêm do
+# hook gerar-hermes-md.sh (Fase 2 / Bloco 3.1), um por modelo-alvo, e
+# podem conter bloco MOD sensível -- nonce TES-002 de 3.3 -- num
+# repositório PÚBLICO. A defesa de primeira linha é o `.gitignore`
+# (`.hermes-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
+# o backstop pro caso que nenhum dos dois cobre: `git add -f` manual.
+# Achado da cadeia de auditoria de 3.1 (Camada C, 31/08/2026): `.gitignore`
+# sozinho não é garantia -- `-f` fura, é comportamento padrão do git.
+# Só `.hermes.md` (o comum, sem bloco MOD que declare `modelo-alvo:`) é
+# artefato público. FALHA o commit -- mesma severidade de P-8.
+# Fonte: REGRAS.md, "Princípios" (Segurança) · REGRAS.md, "O Conselho"
+# item 3 · PROJETO.md, "Memória e hidratação" (silos Fase 2).
+_p11_eh_silo() {
+  # `.hermes-<algo>.md` casa; `.hermes.md` (o comum, versionado) NÃO --
+  # não há `-` depois de `.hermes`.
+  case "$1" in
+    .hermes-*.md) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+p11_silos_nao_versionados() {
+  local staged f ruim=0
+  staged="$(git diff --cached --name-only)"
+  [ -z "$staged" ] && return 0
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    if _p11_eh_silo "$f"; then
+      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hermes.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hermes-md.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+      ruim=1
+    fi
+  done <<< "$staged"
+  return "$ruim"
+}
+
 # --- P-9 -----------------------------------------------------------------
 # Serviço declarado no PROJETO que morreu em silêncio (item 5, documento
 # do Humano 20/08/2026, MEMÓRIAS (221)). agata-consolidacao.service
@@ -601,6 +637,11 @@ main() {
   cabecalho "P-8" "Quarentena: mudança de comportamento exige propostas/APROVADO-<nome> antes de entrar no canon" "PROJETO, Quarentena estrutural (item 6, 20/08/2026) · propostas/README.md"
   PERIMETRO_ESTADO=""
   p8_quarentena; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-11" "Silo por modelo (.hermes-<modelo>.md) nunca entra no canon -- backstop do git add -f" "REGRAS, Princípios (Segurança) · REGRAS, O Conselho item 3 · PROJETO, Memória e hidratação"
+  PERIMETRO_ESTADO=""
+  p11_silos_nao_versionados; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-10" "Vault derivado (memoria/obsidian/) confere com a fonte em HEAD" "MEMÓRIAS (293)"

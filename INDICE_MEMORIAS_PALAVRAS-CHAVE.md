@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
+  palavras-chave: silo, modelo, nunca, entra, canon
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
   palavras-chave: bloco, silos, modelo, aplicado, emenda, camada
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: soul, volta, aparecer, rastreado, boot, hermes, agent, reescreve, default, genérico, adicionado, gitignore
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Ágata Opus" (27/08) verificados na Máquina e corrigidos; escopo fechado no arquivo, portão das 3 perguntas + Regra 8 cumpridos
   palavras-chave: prompt, carregamento, achados, auditoria, ágata, opus, verificados, máquina, corrigidos, escopo, fechado, arquivo, portão, perguntas, regra, cumpridos
-(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
-  palavras-chave: auditoria, descoberta, externa, desenvolvimento, justo, confederados, determinação, síntese, fiel, mudança, canônica, convergência, registrada, ordem, humano
+(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvime …
+  palavras-chave: auditoria, descoberta, externa, desenvolvime
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de …
   palavras-chave: worldtimeapi, org, cotado, fallback
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PRO …

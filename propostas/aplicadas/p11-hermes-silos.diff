@@ -1,0 +1,152 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 41cdc13..70387a9 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -429,6 +429,42 @@ p8_quarentena() {
+   return "$ruim"
+ }
+ 
++# --- P-11 ----------------------------------------------------------------
++# Silos por modelo (.hermes-<modelo>.md) nunca entram no canon. Vêm do
++# hook gerar-hermes-md.sh (Fase 2 / Bloco 3.1), um por modelo-alvo, e
++# podem conter bloco MOD sensível -- nonce TES-002 de 3.3 -- num
++# repositório PÚBLICO. A defesa de primeira linha é o `.gitignore`
++# (`.hermes-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
++# o backstop pro caso que nenhum dos dois cobre: `git add -f` manual.
++# Achado da cadeia de auditoria de 3.1 (Camada C, 31/08/2026): `.gitignore`
++# sozinho não é garantia -- `-f` fura, é comportamento padrão do git.
++# Só `.hermes.md` (o comum, sem bloco MOD que declare `modelo-alvo:`) é
++# artefato público. FALHA o commit -- mesma severidade de P-8.
++# Fonte: REGRAS.md, "Princípios" (Segurança) · REGRAS.md, "O Conselho"
++# item 3 · PROJETO.md, "Memória e hidratação" (silos Fase 2).
++_p11_eh_silo() {
++  # `.hermes-<algo>.md` casa; `.hermes.md` (o comum, versionado) NÃO --
++  # não há `-` depois de `.hermes`.
++  case "$1" in
++    .hermes-*.md) return 0 ;;
++    *) return 1 ;;
++  esac
++}
++
++p11_silos_nao_versionados() {
++  local staged f ruim=0
++  staged="$(git diff --cached --name-only)"
++  [ -z "$staged" ] && return 0
++  while IFS= read -r f; do
++    [ -z "$f" ] && continue
++    if _p11_eh_silo "$f"; then
++      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hermes.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hermes-md.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
++      ruim=1
++    fi
++  done <<< "$staged"
++  return "$ruim"
++}
++
+ # --- P-9 -----------------------------------------------------------------
+ # Serviço declarado no PROJETO que morreu em silêncio (item 5, documento
+ # do Humano 20/08/2026, MEMÓRIAS (221)). agata-consolidacao.service
+@@ -603,6 +639,11 @@ main() {
+   p8_quarentena; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-11" "Silo por modelo (.hermes-<modelo>.md) nunca entra no canon -- backstop do git add -f" "REGRAS, Princípios (Segurança) · REGRAS, O Conselho item 3 · PROJETO, Memória e hidratação"
++  PERIMETRO_ESTADO=""
++  p11_silos_nao_versionados; _perimetro_veredito "$?"
++  echo
++
+   cabecalho "P-10" "Vault derivado (memoria/obsidian/) confere com a fonte em HEAD" "MEMÓRIAS (293)"
+   PERIMETRO_ESTADO=""
+   p10_vault_derivado; _perimetro_veredito "$?"
+
+================================================================================
+CAMADA A REVISORA — P-11 (silos por modelo nunca entram no canon) — Fase 2
+================================================================================
+
+Par SEPARADO do silos-por-modelo-3.1-v2.diff, mesmo ciclo de auditoria.
+SEM `APROVADO-`. NÃO aplicar. NÃO commitar. Vai para a Camada C revisora
+(Luna) -> Humano.
+
+Origem: recomendação da Camada C do v1 (31/08/2026), autorizada pelo
+Humano (decisão 3). O `.gitignore` `.hermes-*.md` (que o
+silos-...-v2.diff adiciona) barra a inclusão ACIDENTAL dos silos; o
+`git add` de nomes literais no `.githooks/pre-commit`
+(`git add .hermes.md INDICE_MEMORIAS.md`) barra a AUTOMÁTICA. Nenhum dos
+dois barra `git add -f` manual. P-11 é esse backstop.
+
+ÂNCORA
+  HEAD ................... 695d10a41be6e89deaca28371f66028542d4ce16
+  scripts/perimetro.sh   blob HEAD 41cdc13f68a2573cbea8758f8329eed1549e4f16
+
+--------------------------------------------------------------------------------
+1. O QUE MUDA
+--------------------------------------------------------------------------------
+
+`scripts/perimetro.sh` ganha um controle novo, P-11, no modelo de P-8
+(FALHA o commit, `exit != 0`):
+
+  - `_p11_eh_silo(f)`: `case "$f" in .hermes-*.md) return 0`. O glob
+    `.hermes-*.md` NÃO casa `.hermes.md` (não há `-` depois de
+    `.hermes`) -- o comum, versionado, segue livre.
+  - `p11_silos_nao_versionados()`: varre `git diff --cached --name-only`;
+    para cada arquivo que casa, imprime um `SUSPEITO (P-11)` (três
+    partes: o que aconteceu / por que importa / o que fazer, ordem do
+    Humano, MEMÓRIAS (202)) e retorna 1.
+  - `main()`: chamada de P-11 logo depois de P-8, mesmo padrão
+    `cabecalho` + `PERIMETRO_ESTADO=""` + `_perimetro_veredito "$?"`.
+
+Placar: passa de "10 controles" para "11". Rodada limpa no repo real
+hoje: `10 OK · 1 PARCIAL` (era `9 OK · 1 PARCIAL`). No clone dá
+`9 OK · 1 SKIP · 1 PARCIAL` -- o SKIP é P-10 (clone sem vault
+`memoria/obsidian/`), não tem relação com P-11.
+
+O comentário do topo do arquivo ("P-1 a P-5 falham") NÃO foi tocado --
+já estava defasado antes (P-7/P-8/P-10 falham e não estão nele); mexer
+nele aqui só alargaria o diff. Fica como `lacuna` de texto para o
+Humano, separada desta mudança.
+
+--------------------------------------------------------------------------------
+2. TESTES -- clone /tmp/agata-clone-A (preservado)
+--------------------------------------------------------------------------------
+
+Logs: /tmp/teste-p11-negativo.log, /tmp/teste-p11-positivo.log.
+
+2a. NEGATIVO -- nada de silo staged: P-11 roda, `veredito: OK`.
+    `RESULTADO GERAL: OK`.
+
+2b. POSITIVO -- `git add -f .hermes-claude.md` (gerado pelo hook v2, 142731
+    bytes) e roda `bash scripts/perimetro.sh`:
+      === P-11 ===
+      SUSPEITO (P-11): '.hermes-claude.md' é um silo por modelo e está
+      staged. Por que importa: silo pode conter bloco MOD sensível
+      (nonce TES-002) e o repositório é público -- só '.hermes.md' (o
+      comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git
+      restore --staged .hermes-claude.md' -- o hook gerar-hermes-md.sh
+      regenera o silo na árvore da Máquina quando preciso; se veio de
+      'git add -f', não force silo pro commit.
+      veredito: FALHOU
+      === RESULTADO GERAL: FALHOU -- ... 1 FALHA ===
+    `exit=1` do script inteiro. `git restore --staged` limpa e a rodada
+    volta a `OK`.
+
+2c. `bash -n scripts/perimetro.sh`: limpo. `git apply --check` do hunk
+    abaixo contra HEAD 695d10a limpo: exit 0 (sozinho e junto com
+    silos-por-modelo-3.1-v2.diff -- não há sobreposição de caminho).
+
+--------------------------------------------------------------------------------
+3. HEDGE
+--------------------------------------------------------------------------------
+
+3a. P-11 vê o que está STAGED. Um silo commitado num commit ANTERIOR
+    (antes de P-11 existir) não é pego -- P-11 é prevenção, não
+    varredura histórica. Hoje não há `.hermes-*.md` no histórico
+    (`git log --all -- '.hermes-*.md'` vazio -- Luna: confirmar).
+3b. `scripts/perimetro.sh` é P-8. Este `.diff` + `APROVADO-p11-hermes-silos`
+    é o par que a P-8 exige para o commit que aplicar P-11. Luna: testar
+    no clone que sem o par o commit falha, com o par passa.
+3c. P-11 e o hunk de `.gitignore` do silos-...-v2.diff são
+    complementares e independentes: um pode entrar sem o outro. Se só
+    P-11 entrar, ele ainda funciona (não depende do `.gitignore`). Se só
+    o `.gitignore` entrar, falta o backstop do `-f`. O Humano decide se
+    vão no mesmo commit ou em commits separados (decisão B abaixo).
+
+Fim do rascunho da Camada A revisora (P-11).

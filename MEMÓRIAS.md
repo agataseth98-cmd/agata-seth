@@ -23,6 +23,20 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
 
+(306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
+
+**O que muda:** `scripts/perimetro.sh` ganha o controle P-11, que **falha o commit** (mesma severidade de P-8) se qualquer `.hermes-<modelo>.md` aparecer staged — inclusive via `git add -f`. O `.hermes.md` comum (versionado) não dispara: o glob `.hermes-*.md` não casa `.hermes.md`. Placar do perímetro: 10 controles → 11.
+
+**Por que:** o `.gitignore` `.hermes-*.md` (do (305)) barra a inclusão acidental dos silos; o `git add` de nomes literais no pre-commit barra a automática. Nenhum dos dois barra `git add -f` manual. P-11 é esse backstop — importa porque os silos vão conter nonce TES-002 real na Fase 2 / Bloco 3.3, e o repositório é público.
+
+**Origem:** recomendação da Camada C do v1 de silos-por-modelo-3.1 (31/08/2026), autorizada pelo Humano (decisão 3, transmitida pela sessão "Qwen"). Escrito pela Camada A revisora, verificado pelo executor, ambos Claude Sonnet 5 na Máquina; ordem de execução transmitida pela Camada C revisora "Luna".
+
+**Verificação do executor antes do commit:** `bash -n` limpo; `git apply --check` limpo; `git add -f .hermes-claude.md` → P-11 FALHOU o perímetro; sem silo staged → P-11 OK. Commit separado do (305) por instrução do Humano.
+
+**Par consumido:** `propostas/aplicadas/p11-hermes-silos.diff` + `APROVADO-p11-hermes-silos`.
+
+**Hedge:** P-11 vê o que está staged — não varre o histórico. Não há `.hermes-*.md` no histórico hoje (`git log --all` vazio, verificado). Falta S7 (confirmação pós-push independente do executor).
+
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
 
 **O que mudou:** o hook `gerar-hermes-md.sh` passa a emitir `.hermes-<modelo>.md` por modelo-alvo (`claude seth gemini glm`), além do `.hermes.md` comum. O comum perde todo bloco MOD que declare `modelo-alvo:`; cada silo recebe só o do seu alvo. Bloco MOD **sem** `modelo-alvo:` é mal-formado (REGRAS, "O Conselho" item 3) e fica fora de todo artefato de hidratação, com AVISO no stderr do hook nomeando a entrada — a entrada segue intacta em MEMÓRIAS.md. Os `.hermes-<modelo>.md` não são versionados (`.gitignore` ganhou `.hermes-*.md`) nem adicionados pelo pre-commit; vivem só na árvore da Máquina.

@@ -770,3 +770,10 @@ revisão de três IAs.
 
 Falta também a confirmação de fora: outra sessão de IA precisa conferir,
 direto no GitHub, que o que subiu bate com o que foi decidido aqui.
+
+--- 31/08/2026, continuação (306) ---
+Liguei uma trava nova (P-11). Se alguém tentar, de propósito ou por
+engano, colocar um dos arquivos de memória separados por modelo no
+repositório, o commit falha. É rede de segurança: esses arquivos já são
+ignorados pelo git, mas dava para forçar a inclusão com um comando — e
+agora não dá mais. O sistema de checagem passou de 10 para 11 travas.

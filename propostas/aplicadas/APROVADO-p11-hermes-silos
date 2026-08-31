@@ -1,0 +1,24 @@
+APROVADO — p11-hermes-silos
+
+Aprovação: o Humano autorizou a aplicação deste par, transmitida pela
+sessão da Camada C revisora ("Luna", GPT-5.6) em 31/08/2026, junto com a
+ordem de execução em 14 passos e a instrução explícita de fazer DOIS
+commits separados (primeiro o par do Bloco 3.1 v2, depois este). A
+origem de P-11 é a recomendação da Camada C do v1 de
+silos-por-modelo-3.1 (31/08/2026); autorizada pelo Humano na decisão 3,
+transmitida antes pela sessão "Qwen".
+
+Marcador criado pelo executor (Claude Sonnet 5, na Máquina), não pelo
+Humano operando o teclado -- risco residual registrado sem suavizar
+(propostas/README.md). A autorização de fato é a ordem transmitida e
+datada acima.
+
+Par: p11-hermes-silos.diff -- toca scripts/perimetro.sh (P-8).
+
+O que P-11 faz: FALHA o commit se qualquer .hermes-<modelo>.md aparecer
+staged (inclusive via `git add -f`). Backstop do `.gitignore .hermes-*.md`
+e do `git add` de nomes literais do pre-commit -- nenhum dos dois barra
+`-f` manual. `.hermes.md` (o comum, versionado) não dispara.
+
+Consumido no mesmo commit que aplica a mudança: mover este arquivo e o
+.diff para propostas/aplicadas/ (propostas/README.md item 4).

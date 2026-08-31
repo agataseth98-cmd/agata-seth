@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot (hermes-agent reescreve o default genérico); adicionado ao .gitignore
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Ágata Opus" (27/08) verificados na Máquina e corrigidos; escopo fechado no arquivo, portão das 3 perguntas + Regra 8 cumpridos
-(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvimento justo entre "Confederados" — determinação (B) síntese fiel, nenhuma mudança canônica; convergência registrada por ordem do Humano
+(276) CONSELHO — 27/08/2026 · Auditoria de descoberta externa sobre desenvolvime …
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de …
 (274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PRO …
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para …
