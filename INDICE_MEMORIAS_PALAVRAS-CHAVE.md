@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
+  palavras-chave: fase, preparada, roteiro, dossiê, item, religado, backup, drenado, correção, autorização, total, risco, assumido
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
   palavras-chave: fase, sob, risco, assumido, costuras, projeto, regras, ledger, assumo, fecha
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: auditoria, descoberta, externa, desenvolvimento, justo, confederados, determinação, síntese, fiel, mudança, canônica, convergência, registrada, ordem, humano
 (275) CORREÇÃO — 26/08/2026 · worldtimeapi.org, cotado em (272) como fallback de scripts/consultar_horario.py, está descontinuado e nunca teria funcionado — corrigido antes de entrar no canon
   palavras-chave: worldtimeapi, org, cotado, fallback, scripts, consultar, horario, descontinuado, nunca, teria, funcionado, corrigido, entrar, canon
-(274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PROJETO.md
-  palavras-chave: diario, documentação, medição, horário, nuvem, projeto
+(274) DIARIO - 26/08/2026 - Documentação de medição de horário para nuvem em PRO …
+  palavras-chave: diario, documentação, medição, horário, nuvem, pro
 (273) DIARIO - 26/08/2026 - code_interpreter como fonte canonica de horario para …
   palavras-chave: diario, code, interpreter, fonte, canonica, horario
 (272) DIARIO - 26/08/2026 - Script universal de consulta de horario com multipla …

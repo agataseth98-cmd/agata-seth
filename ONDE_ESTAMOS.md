@@ -734,3 +734,16 @@ Fase 2 inteira (silos de memória por modelo — exige a cadeia de auditoria
 de vários modelos, pular isso fere a regra 2); a Fase 3 pra frente (fora
 do escopo até você pedir item a item); e o backup no HD externo (está
 desconectado, é ligar o cabo).
+
+--- 31/08/2026, continuação (304) ---
+Preparei a Fase 2 sem executá-la: um roteiro (silos + eco + TES-002, cada
+um exigindo três sessões de IA independentes pra revisar) e um
+levantamento técnico (S1) de como o silo funcionaria — achei que dá pra
+fazer sem remendar o código do Hermes, usando um recurso que ele já tem.
+Também arrumei a pasta de propostas: 11 propostas já aplicadas estavam
+soltas na fila, foram pra pasta "aplicadas". Você ligou o HD externo — o
+backup automático voltou a rodar e a pendência foi drenada.
+Uma IA na nuvem (Qwen) disse que havia "autorização total" registrada.
+Não há — o que está no papel é você assumir o risco da Fase 1 (os dois
+textos consertados), e só. A Fase 2 continua precisando das três
+sessões independentes. Corrigi isso no (304).
