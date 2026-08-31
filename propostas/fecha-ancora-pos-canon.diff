@@ -1,0 +1,98 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index 596e47f..1f6c988 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -67,4 +67,41 @@ if [ -f scripts/gerar_indice_derivado.py ]; then
+   fi
+ fi
+ 
++# 4. Fecha a âncora do PROMPT_CARREGAMENTO.md (opção 2, forma A -- MEMÓRIAS
++# (303)). Se ESTE commit tocou canon (REGRAS/PROJETO/MEMÓRIAS), o pre-commit
++# gravou na âncora o SHA do commit ANTERIOR -- defasagem de 1 commit em canon.
++# Aqui, num commit de follow-up que toca só PROMPT_CARREGAMENTO.md, a âncora
++# passa a apontar ESTE commit de conteúdo: defasagem de canon = 0, defasagem
++# de commits = 1 por desenho (o próprio commit de âncora).
++#
++# Guarda de recursão: o commit de âncora toca só PROMPT_CARREGAMENTO.md, então
++# na segunda passada `canon_tocado` é vazio e para aqui -- sem laço.
++# `core.quotePath=false` é obrigatório: sem ele o git imprime MEMÓRIAS.md como
++# "MEM\303\223RIAS.md" e o guard nunca casa pro arquivo de canon mais comum
++# (achado testando em clone descartável, 28/08/2026).
++# Passos explícitos (não dependem de efeito colateral do pre-commit); cada
++# falha é AVISO alto em stderr nomeando o passo, nunca silêncio, e o commit
++# de conteúdo já está feito e intacto de qualquer jeito.
++canon_tocado=$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD \
++                 | grep -xE 'REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md' || true)
++if [ -n "$canon_tocado" ]; then
++  unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_EDITOR GIT_AUTHOR_DATE GIT_COMMITTER_DATE
++  sha7=$(git rev-parse --short HEAD)
++  dh=$(date '+%d/%m/%Y %H:%M %z' | sed -E 's/([+-][0-9]{2})00$/\1/')
++  passo4_ok=1
++  if ! python3 scripts/atualizar_ancora_prompt.py PROMPT_CARREGAMENTO.md "$(git rev-parse HEAD)" "$dh"; then
++    echo "post-commit: AVISO (passo 4) -- atualizar_ancora_prompt.py falhou; a âncora seguirá 1 commit atrás" >&2
++    passo4_ok=0
++  fi
++  if [ "$passo4_ok" = 1 ] && ! git add PROMPT_CARREGAMENTO.md; then
++    echo "post-commit: AVISO (passo 4) -- 'git add PROMPT_CARREGAMENTO.md' falhou; a âncora seguirá 1 commit atrás" >&2
++    passo4_ok=0
++  fi
++  if [ "$passo4_ok" = 1 ] && ! git commit -m "âncora: aponta $sha7" >/dev/null; then
++    echo "post-commit: AVISO (passo 4) -- 'git commit' da âncora falhou; a âncora seguirá 1 commit atrás" >&2
++    passo4_ok=0
++  fi
++  [ "$passo4_ok" = 1 ] && echo "post-commit: âncora fechada -- aponta $sha7 (defasagem de canon = 0)"
++fi
++
+ exit 0
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 41cdc13..d498d8d 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -537,6 +537,34 @@ p10_vault_derivado() {
+   return 0
+ }
+ 
++# --- P-11 --------------------------------------------------------------
++# Âncora fechada (opção 2, forma A -- MEMÓRIAS (303)). O post-commit passo 4
++# faz um commit de follow-up que aponta a âncora do PROMPT_CARREGAMENTO.md
++# pro commit de canon recém-criado, zerando a defasagem de canon. Se esse
++# passo NÃO rodou ou falhou, a defasagem volta a >0 sem ninguém avisar --
++# a mesma falha-silenciosa que fez a forma B ser descartada. Aqui: se o HEAD
++# toca canon e não é seguido do commit de âncora, AVISA (nunca falha, mesma
++# doutrina de P-9).
++#
++# `core.quotePath=false`: sem ele MEMÓRIAS.md sai como "MEM\303\223RIAS.md" e
++# a checagem nunca casa pro arquivo de canon mais comum (mesmo achado do
++# post-commit passo 4).
++# Exceção: durante o pre-commit do PRÓPRIO commit de âncora, o HEAD ainda é
++# o commit de canon e o único arquivo staged é PROMPT_CARREGAMENTO.md -- isso
++# não é âncora pulada, é âncora sendo fechada agora. Não alarma.
++p11_ancora_fechada() {
++  local canon staged
++  canon="$(git -c core.quotePath=false diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null \
++             | grep -xE 'REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md' || true)"
++  [ -z "$canon" ] && return 0
++  staged="$(git -c core.quotePath=false diff --cached --name-only 2>/dev/null)"
++  [ "$staged" = "PROMPT_CARREGAMENTO.md" ] && return 0
++  echo "AVISO (P-11): HEAD ($(git rev-parse --short HEAD)) toca canon mas não há commit de âncora depois dele -- o post-commit passo 4 não rodou ou falhou."
++  echo "  o que fazer: python3 scripts/atualizar_ancora_prompt.py PROMPT_CARREGAMENTO.md \"\$(git rev-parse HEAD)\" \"\$(date '+%d/%m/%Y %H:%M %z' | sed -E 's/([+-][0-9]{2})00\$/\\1/')\" && git add PROMPT_CARREGAMENTO.md && git commit -m \"âncora: aponta \$(git rev-parse --short HEAD)\""
++  echo "  motivo: sem isto a forma A herda a falha-silenciosa que fez a forma B ser descartada (MEMÓRIAS (303))."
++  return 0
++}
++
+ # Imprime o veredito de uma checagem e soma no placar -- único ponto que
+ # decide OK vs SKIP vs PARCIAL vs FALHOU, pra nenhuma chamada em main()
+ # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
+@@ -614,6 +642,12 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-11" "Âncora do PROMPT_CARREGAMENTO fechada após commit de canon" "MEMÓRIAS (303)"
++  p11_ancora_fechada
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
+   p6_backup_pendente
+   echo "veredito: AVISO SÓ (nunca falha)"
