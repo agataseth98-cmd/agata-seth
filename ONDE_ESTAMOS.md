@@ -777,3 +777,24 @@ engano, colocar um dos arquivos de memória separados por modelo no
 repositório, o commit falha. É rede de segurança: esses arquivos já são
 ignorados pelo git, mas dava para forçar a inclusão com um comando — e
 agora não dá mais. O sistema de checagem passou de 10 para 11 travas.
+
+--- 31/08/2026, continuação (307) ---
+Rodei o reteste de tool-calling que o roteiro da Fase 2 pedia depois dos
+silos: 30 execuções no modelo local, com as ferramentas de verdade.
+
+Em nenhuma das 30 o modelo inventou resultado. As duas falhas que o teste
+de 13/08 achou — mentir o número de linhas de um arquivo, e dizer que
+limpou a memória sem ter limpado — não voltaram. Os arquivos de memória
+por modelo se comportam igual ao comum: não quebraram nada.
+
+Falha nova, mais branda: quando a memória do modelo enche, ele erra os
+comandos para liberar espaço e a resposta fica sem concluir. Não mente —
+só não termina. Você escolheu a opção 3: o próprio comando de adicionar
+passa a cortar a entrada mais antiga sozinho. Entra na fila de
+implementação.
+
+Decisão sua: manter o qwen como principal. O teste não deu motivo para
+trocar.
+
+Nada de memória de verdade foi alterado — o teste mexeu em dois arquivos
+locais e devolvi os dois ao estado exato de antes, conferido por hash.
