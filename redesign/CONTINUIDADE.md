@@ -50,7 +50,7 @@ git pull --ff-only origin redesign
 echo "=== HEAD ==="; git rev-parse --short HEAD
 echo "=== STATUS.md ==="; cat redesign/STATUS.md
 echo "=== LOG.md (últimas 50 linhas) ==="; tail -n 50 redesign/LOG.md
-echo "=== git log redesign (12) ==="; git log --oneline -12 redesign
+echo "=== git log (12) ==="; git log --oneline -12 HEAD --
 echo "=== tarefas ==="; ls -1 redesign/tasks/
 echo "=== MEMÓRIAS: topo (estado herdado) ==="; sed -n '24,90p' "MEMÓRIAS.md"
 ```

@@ -28,6 +28,15 @@ sem cuidado — é remoção da cerimônia, não das proteções abaixo.
 - `main` só muda na **Fase 8**, pelo processo normal. Todo o resto é no branch `redesign`.
 - Hermes, Ollama e o `.hermes.md` de produção não são tocados até a Fase 8 (rodam em paralelo).
 
+## Efeito automático esperado nos commits deste branch
+
+Todo commit no `redesign` dispara `.githooks/pre-commit`, que **reescreve o bloco
+`ANCORA-SHA` em `PROMPT_CARREGAMENTO.md`** (SHA do commit anterior + data + URLs pinadas).
+É conteúdo de máquina, não edição livre — por isso `git diff main..redesign` mostra
+`PROMPT_CARREGAMENTO.md` alterado mesmo sem ninguém ter mexido nele. Esperado. Não
+reverter. O `post-commit` também regenera `.hermes*.md`, `INDICE_MEMORIAS*.md` e o vault
+`memoria/obsidian/` (todos gitignorados ou fora da árvore) — também esperado.
+
 ## Arquivos
 
 | Arquivo | O que é |

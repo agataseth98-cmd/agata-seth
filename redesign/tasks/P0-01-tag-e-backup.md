@@ -33,34 +33,52 @@ Desfazer: `git tag -d pre-redesign; git push origin :refs/tags/pre-redesign`.
 
 ### 2. Gerar o manifesto de modelos
 
-O que faz: registra nome, tamanho, digest e Modelfile de cada modelo Ollama, para
-reconstrução sem depender do blob.
+O que faz: registra, por modelo Ollama, o `blob_sha256` (do arquivo de pesos), a origem
+e o **Modelfile completo** — o suficiente para reconstruir sem depender do blob backupeado.
+
+> **Correção P0-00:** o gerador antigo só guardava o `id` do Ollama e as 6 primeiras
+> linhas do Modelfile. Isso não sustenta o aceite de "reconstrução". O gerador abaixo
+> captura `blob_sha256` (64 hex, da linha `FROM .../blobs/sha256-...`), `blob_path`,
+> `origem` e o Modelfile inteiro.
 
 ```fish
 cd $HOME/agata
 git switch redesign
 python3 - <<'PY'
-import json, subprocess
-out = subprocess.run(["ollama","list"], capture_output=True, text=True).stdout
+import json, subprocess, re, datetime
+def sh(*a): return subprocess.run(a, capture_output=True, text=True).stdout
 rows = []
-for line in out.splitlines()[1:]:
+for line in sh("ollama","list").splitlines()[1:]:
     p = line.split()
     if len(p) < 3: continue
     name = p[0]
-    mf = subprocess.run(["ollama","show","--modelfile",name], capture_output=True, text=True).stdout
-    rows.append({"name": name, "id": p[1], "size": p[2],
-                 "modelfile_first_lines": mf.splitlines()[:6]})
-json.dump({"gerado": "P0-01", "modelos": rows}, open("models/manifest.json","w"),
-          ensure_ascii=False, indent=2)
-print(len(rows), "modelos registrados")
+    mf = sh("ollama","show","--modelfile",name)
+    m = re.search(r"blobs/sha256-([0-9a-f]{64})", mf)
+    blob_path = next((ln[5:].strip() for ln in mf.splitlines()
+                      if ln.startswith("FROM ") and "/blobs/" in ln), None)
+    base = name.split(":")[0]
+    if base in ("qwen3.5","qwen2.5","qwen3","llama3.1","llama3.2","llama3.3",
+                "gemma2","phi3","deepseek-r1"):
+        origem = f"ollama registry: library/{base}"
+    else:
+        origem = "build local / tag custom -- reconstruir pelo modelfile + blob base"
+    rows.append({"name": name, "ollama_id": p[1], "size_gb": p[2],
+                 "blob_sha256": m.group(1) if m else None,
+                 "blob_path": blob_path, "origem": origem, "modelfile": mf})
+json.dump({"gerado_por": "P0-01",
+           "gerado_em": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+           "n_modelos": len(rows), "modelos": rows},
+          open("models/manifest.json","w"), ensure_ascii=False, indent=2)
+print(len(rows), "modelos; sha256 em",
+      sum(1 for r in rows if r["blob_sha256"]), "de", len(rows))
 PY
 git add models/manifest.json
 git status -s
 ```
 
-Colar de volta: a contagem de modelos e o `git status -s`.
-Sucesso: `models/manifest.json` existe e lista os modelos de `ollama list`.
-Desfazer: `git checkout -- models/manifest.json` (ou `rm` se novo).
+Colar de volta: a linha de contagem (`N modelos; sha256 em N de N`) e o `git status -s`.
+Sucesso: `sha256 em N de N` (todos), e `models/manifest.json` staged.
+Desfazer (não destrutivo): `git checkout -- models/manifest.json`.
 
 ### 3. **INSTALA SOFTWARE** — restic + repo de backup no HD externo
 
@@ -99,22 +117,30 @@ e `restic snapshots`.
 Sucesso: `restic snapshots` mostra 1 snapshot.
 **Guarde o arquivo `$HOME/.config/agata/restic.pass` — sem ele o backup não abre.** Ele
 NÃO vai para o git (é segredo).
-Desfazer: não precisa — repo restic novo, isolado. Se quiser zerar: `rm -rf <MNT>/restic-agata-local`.
 
 ---
 
 ## Aceite
 
 - `git tag --list pre-redesign` retorna `pre-redesign` (local e no remoto).
-- `models/manifest.json` existe no branch `redesign` e lista os modelos.
+- `models/manifest.json` existe no branch `redesign`, tem `blob_sha256` para **todos** os
+  modelos e o Modelfile completo de cada um.
 - `restic snapshots` mostra pelo menos 1 snapshot **OU** P0-01 está marcado como bloqueado
   em `STATUS.md` com o motivo "HD AgataBkup01 não montado".
 
 ## Rollback
 
-- `git tag -d pre-redesign; git push origin :refs/tags/pre-redesign`
+Não destrutivo:
+- `git tag -d pre-redesign` e depois `git push origin :refs/tags/pre-redesign`
 - `git checkout -- models/manifest.json`
-- repo restic é isolado; apagar a pasta se necessário.
+
+O repo restic é novo e isolado; normalmente não precisa desfazer. **Só se for
+explicitamente necessário zerá-lo**, e como passo isolado com o Humano ciente:
+
+> ⚠️ **DESTRUTIVO — apaga o repositório de backup. Rode sozinho, confirmando o caminho.**
+> ```fish
+> rm -rf <MNT>/restic-agata-local
+> ```
 
 ## Registro
 
