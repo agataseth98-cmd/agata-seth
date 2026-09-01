@@ -865,3 +865,32 @@ Da Fase 2: o Bloco 3.1 (silos) está aplicado desde antes, mas com a peça da
 `propostas/dossie-selecao-silo-gateway.md`); o Bloco 3.2 fechou agora; o
 Bloco 3.3 (reativar o teste de continuidade com nonce novo) depende da
 seleção de silo funcionar.
+
+O texto que uma IA na nuvem cola para entrar no sistema ganhou cinco
+avisos novos, todos pedidos por uma auditoria de fora. O motivo: várias
+sessões diziam "não tenho como abrir um endereço" sem nem tentar (duas
+tinham a ferramenta e usaram no minuto seguinte); a ferramenta às vezes
+devolve um resumo do arquivo em vez do arquivo inteiro, e a IA não
+percebia; o carimbo de "qual resposta é esta" sumia quando a IA
+entregava um documento; e uma sessão disse "está tudo certo" com
+problema ainda aberto na lista. Agora o texto: começa com um bloco
+curto de "não minta" (a proibição existia, mas lá no fim, tarde demais);
+explica as duas pegadinhas da ferramenta de abrir endereço; ensina a
+pedir os arquivos para você quando nada abre; e manda conferir a lista
+de problemas abertos antes de escrever "pronto".
+
+Uma parte da auditoria ficou de fora de propósito: ela também sugeria
+uma correção nas REGRAS, e mexer em REGRAS exige uma segunda opinião de
+outro modelo — fica para depois.
+
+Antes de aplicar, rodei o teste de três leituras independentes do modelo
+local. As três não bateram: uma aprovou, uma ficou em cima do muro, uma
+foi contra. Conferi as objeções da que foi contra na máquina — duas
+estavam erradas contra o que o próprio sistema já diz. O que sobrou de
+real foi "está um pouco longo demais", e eu cortei um trecho por causa
+disso. Como o teste não fechou sozinho, a decisão subiu para você, e
+você aprovou.
+
+Falta o teste que vale: colar o texto novo numa IA na nuvem sem ajuda
+nenhuma e ver se ela chega sozinha na entrada mais recente da história,
+com quem confere segurando o gabarito.

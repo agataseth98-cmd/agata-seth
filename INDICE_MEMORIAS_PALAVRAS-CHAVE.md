@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
 
+(309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem de trabalho da auditoria em nuvem (anti-fabricação no carregamento) — 5 acréscimos; §4.2 (REGRAS) fica fora
+  palavras-chave: prompt, carregamento, aplicada, seção, ordem, trabalho, auditoria, nuvem, anti, fabricação, acréscimos, regras, fica, fora
 (308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
   palavras-chave: bloco, eco, pós, carregar, mecanizado, aplicado, cadeia, completa
 (307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): zero fabricação, silos não regridem, as falhas de (138) não reproduziram
@@ -65,8 +67,8 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: proposta, ancora, defasagem, honesta, aplicada, nunca, sai, template, âncora, fecho, achado
 (280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
   palavras-chave: frente, bancada, modelos, fechada, decisão, candidato, bateu, titular, troca, vira, fronteira, recusa
-(279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, mas o texto aplicado ainda afirmava estado ("Hoje não há."); corrigido no mesmo dia após o Passo 5
-  palavras-chave: entrada, fechou, achado, essencial, texto, aplicado, afirmava, estado, hoje, corrigido, mesmo, dia, após, passo
+(279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, ma …
+  palavras-chave: entrada, fechou, achado, essencial
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot ( …
   palavras-chave: soul, volta, aparecer, rastreado, boot
 (277) DIÁRIO — 27/08/2026 · PROMPT_CARREGAMENTO.md: 8 achados da auditoria de "Á …
