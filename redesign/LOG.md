@@ -1163,3 +1163,36 @@ apagado, nada instalado.
 **Falta / próximo:** aprovação do Humano → **P3-02** (prune, um `ollama rm` por bloco).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~10:40 -03 · sessão Claude (na Máquina) — P3-02: 16 modelos removidos (espaço pende de restart)
+
+Humano: "1 sim" (aprova a lista), "2 o que for melhor pro sistema", "3 explique melhor".
+
+**#2 decidido:** a base do LoRA (Fase 5) fica `qwen3:4b` — coerente com o zoo (tudo Qwen:
+fallback `qwen3.5:9b`, Regra 8, MoE futuro Qwen3-30B-A3B). `qwen3:4b` (4,0 B, 262k ctx,
+Q4_K_M) baixado. `llama3.2:3b` (Llama, tokenizer/template diferente) entrou na lista de
+remover no lugar dele.
+
+**P3-02 feito:** 16 `ollama rm` (todos ok) — `llama3.3:70b`, `qwen2.5:32b`+`-64k`,
+`qwen3:14b`+`-64k`, `qwen2.5:14b`+`-64k`, `deepseek-r1:14b`, `gemma2:9b`, `qwen3:8b`,
+`llama3.1:8b`, `qwen2.5:7b`+`-instruct-q4`, `phi3:mini`, `gemma2:2b`, `llama3.2:3b`.
+`ollama list` = keep-list de **5**: `qwen3.5:9b`, `qwen3.5-9b-64k`, `qwen3:4b`,
+`rlm-qwen3-8b-teste`, `nomic-embed-text`.
+
+**Verificação:** API `/api/generate` — `qwen3.5:9b`/`qwen3:4b`/`rlm-qwen3-8b-teste`
+respondem "ok"; `nomic-embed-text` é embedding. `models/manifest.json` regenerado:
+5 modelos, sha256 5/5.
+
+**Bloqueio:** Ollama 0.32.11 faz GC de blob **lazy** — `df /` segue 362 GB livres. Reclamar
+os ~112 GB precisa de **`sudo systemctl restart ollama`** (senha do Humano). O dir de
+blobs é `ollama:700` — `du`/`ls` do executor dá permissão negada; conferência de GB só com sudo.
+
+**Não tocado:** `main`, canon, Hermes, hooks, `servidor.py`. `scripts/` só o manifesto de
+`models/`. Sem instalação de pacote.
+
+**Falta / próximo:** Humano roda `sudo systemctl restart ollama`; conferir `df` / `sudo du`;
+então P3-02 fecha e vai P3-03 (llama.cpp + MoE, INSTALA SOFTWARE — também sudo).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

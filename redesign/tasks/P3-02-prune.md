@@ -3,6 +3,21 @@
 **Objetivo:** remover do Ollama os modelos que `models/PRUNE.md` marca `REMOVER` e o
 Humano aprovou item a item. Libera ~100–180 GB conforme a lista.
 
+**Status:** ⏳ **REMOÇÃO FEITA, ESPAÇO PENDENTE DE RESTART — 2026-09-02 ~10:40.**
+Humano aprovou ("1 sim") a lista + `llama3.2:3b` (trocado por `qwen3:4b`, a base do LoRA
+mais coerente com o zoo Qwen — decisão de "o que for melhor pro sistema").
+- **16 modelos removidos** via `ollama rm` (todos com `ok`). `ollama list` agora = a
+  keep-list de 5: `qwen3.5:9b`, `qwen3.5-9b-64k`, `qwen3:4b`, `rlm-qwen3-8b-teste`,
+  `nomic-embed-text`.
+- Keep-list **verificada** pela API `/api/generate`: `qwen3.5:9b`, `qwen3:4b`,
+  `rlm-qwen3-8b-teste` respondem "ok"; `nomic-embed-text` é embedding (não faz generate,
+  ok). `models/manifest.json` regenerado: **5 modelos, sha256 5/5**.
+- ⏳ **Espaço não reclamado ainda:** Ollama 0.32.11 faz GC de blob **lazy** — `df /` segue
+  em 362 GB livres. Reclamar precisa de **`sudo systemctl restart ollama`** (senha do
+  Humano). Depois: `sudo du -sh /usr/share/ollama/.ollama/models` p/ conferir os ~112 GB.
+- O dir de blobs é `ollama:700` — `du`/`ls` do executor dá "permissão negada"; a
+  conferência de GB exige sudo.
+
 **Pré-requisitos:** P3-00 FEITO (reconstrutibilidade provada) · P3-01 FEITO (`PRUNE.md`) ·
 **aprovação explícita do Humano, item a item, do `PRUNE.md`** · manifesto commitado e
 empurrado no branch (o registro de como reconstruir).

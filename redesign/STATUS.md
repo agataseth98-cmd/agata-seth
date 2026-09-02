@@ -9,7 +9,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — P3-00 e P3-01 FEITO. P3-02 (prune destrutivo) aguarda aprovação item a item do Humano.
+EM ANDAMENTO: P3-02 — 16 modelos removidos (ollama rm); falta `sudo systemctl restart ollama` p/ reclamar ~112 GB.
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
