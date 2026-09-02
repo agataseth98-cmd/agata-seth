@@ -44,6 +44,10 @@ Servidor MCP em stdio (local):
 redesign/mcp/.venv/bin/python redesign/mcp/servidor.py
 ```
 
+`git_sync` faz um `git fetch` de rede — pode levar dezenas de segundos conforme a
+latência do GitHub. Um cliente MCP não deve pôr timeout agressivo nessa tool; as outras
+quatro são locais e respondem rápido.
+
 Um cliente MCP (Claude Code, Goose, Cursor, …) aponta para esse comando como servidor
 stdio. Exemplo de entrada no `mcp.json` / config equivalente do cliente:
 
