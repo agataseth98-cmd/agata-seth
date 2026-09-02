@@ -12,6 +12,7 @@
 | **P4-03** GBNF só no envelope | ✅ `envelope.gbnf` + `envelope.py` (2 fases); `trabalhar --com-envelope` |
 | **P4-04** `agata` CLI | ✅ `cli.py` — `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs` |
 | **P4-05** evals | ✅ `evals/fabricacao.py` (3/3) + `evals/hidratacao.py`; `evals/run_all.py` |
+| **P4-06** adapter dsh dormente | ✅ `adapters/dsh.md` + `dsh.py` (`ENABLED=False`) — **FASE 4 FECHADA** |
 | P4-03 GBNF só no envelope | ⏳ |
 | P4-04 `agata` CLI | ⏳ |
 | P4-05 evals | ⏳ |
@@ -180,6 +181,30 @@ divisor de fração foi bug do 1º script de teste (mascarou o TTR real, que pas
 **Nota:** `omniroute.service` vai para estado `failed` no `stop` (o filho `serve` sai 143 no
 SIGTERM). `agata up` recupera sozinho (`start` limpa `failed`). Um `SuccessExitStatus=SIGTERM`
 na unit do OmniRoute resolveria — tweak de Fase 1, não feito aqui.
+
+## `adapters/dsh.py` — adapter DeepSeek Harness, DORMENTE (P4-06)
+
+`dsh` está em `0.1.0-rc.5` ("THERE WILL BE COMPATIBILITY-BREAKING CHANGES"). O adapter é
+**doc + stub**, **não instala** o preview.
+
+- **`adapters/dsh.md`** — mapa nó↔seam (`models`/`tools`/`skills`/`sessions`/`sandboxes`/
+  `storage`/`loops`/`scheduling`/`UI`). O que o `dsh` ganha (session log append-only nativo
+  → menos WAL caseiro; `sandboxes` como seam de 1ª classe), o que perde hoje (instável,
+  Node 24). Gatilho de reavaliação: tag estável do `dsh` **E** motivo concreto pós-Fase 8.
+- **`adapters/dsh.py`** — `ENABLED = False`; `run()`/`resume()` levantam `NotImplementedError`;
+  interface **idêntica** à de `grafo.py` (swap futuro mecânico). Não é importado pelo loop.
+- `adapters/teste_dormente.py` — confirma `ENABLED is False`, que levanta, e que as
+  assinaturas batem com `grafo.py`. **PASS.**
+- `PESQUISA.md` (linha do `dsh`) registra o gatilho.
+
+## Trava de segurança — `tools._exige_raiz_git` (2026-09-02)
+
+`commit_entry` e `grafo.registrar_e_commitar` **exigem que `repo` seja a raiz de um worktree
+git** (`git rev-parse --show-toplevel` == o caminho). Sem isso, `git -C <caminho-ruim>` sobe
+a árvore e acha o `.git` de `~/agata` — foi assim que um teste de aceite com **args em ordem
+errada** (`repo="onep"`) commitou um arquivo-lixo no branch `redesign` (local, não empurrado;
+revertido com `git reset --soft` + `gerar_obsidian.py`; ver `LOG.md` 2026-09-02 ~14:00).
+Repo inválido → `RepoInvalido` / `registrar:abortado:repo_invalido`, nada é commitado.
 
 ## O que a P4-01 deixa para as próximas
 

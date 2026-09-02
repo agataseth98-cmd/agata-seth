@@ -1980,3 +1980,85 @@ idêntica à do `grafo.py`). **Não instala** o preview `0.1.0-rc.5`. Nota em `P
 o gatilho de reavaliação. **Fecha a Fase 4.**
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 14:30 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P4-06 FEITO — adapter dsh dormente — FASE 4 FECHADA (com incidente registrado)
+
+### P4-06 — adapter dsh, DORMENTE
+
+Auto-revisão (doc + stub): PRONTO. **Não instala** o `dsh` (preview `0.1.0-rc.5`).
+- `redesign/grafo/adapters/dsh.md` — mapa dos 6 nós ↔ seams do `dsh` (`models`/`tools`/
+  `skills`/`sessions`/`sandboxes`/`storage`/`loops`/`scheduling`/`UI`); o que ganha (session
+  log append-only nativo → menos WAL caseiro; `sandboxes` como seam); o que perde (instável,
+  Node 24); gatilho de reavaliação = tag estável **E** motivo concreto pós-Fase 8.
+- `redesign/grafo/adapters/dsh.py` — `ENABLED = False`; `run`/`resume` levantam
+  `NotImplementedError`; interface **idêntica** à de `grafo.py`.
+- `redesign/grafo/adapters/teste_dormente.py` — **PASS**: `ENABLED is False`, levanta se
+  chamado, assinaturas `run`/`resume` == as de `grafo.py`, `dsh` não importado pelo loop.
+- `redesign/PESQUISA.md` (linha do `dsh`) — gatilho de reavaliação registrado.
+
+### INCIDENTE — commit acidental no branch `redesign` (revertido)
+
+**O que aconteceu:** ao re-rodar o aceite da Fase 4, um teste de debug chamou
+`estado_inicial("t", "<clone>", "onep", "trabalho")` com os args **em ordem errada** →
+`repo="onep"`. O nó `registrar_e_commitar` rodou `git -C onep add/commit`; como `onep` não
+é raiz de repo, o `git` **subiu a árvore e achou o `.git` de `~/agata`** e commitou um
+arquivo-lixo (`onep/redesign/grafo/loop.log`) no branch `redesign`. O `pre-commit`
+(perímetro) e o `post-commit` (bundle, vault) rodaram. Commit `9d015bb`.
+
+**Contenção:** o commit era **local, NÃO empurrado** (`origin/redesign` seguia `81b2aea`).
+
+**Reversão (feita — comando não-destrutivo `git reset --soft`, não `--hard`):**
+1. `git reset --soft HEAD~1` → HEAD volta a `81b2aea`; nada no working tree destruído.
+2. `git restore --staged onep/... PROMPT_CARREGAMENTO.md` + `git checkout -- PROMPT_CARREGAMENTO.md`
+   (desfaz o rewrite do hook) + `rm -rf onep`.
+3. Perímetro acusou **P-10 FALHOU** (o vault `memoria/obsidian/` fora gerado a partir de
+   `9d015bb` pelo post-commit). Regenerado com os env do P-10:
+   `AGATA_CANON_SHA=$(git rev-parse HEAD) AGATA_CANON_DATA=$(git log -1 --format=%cI)
+   python3 scripts/gerar_obsidian.py` → **perímetro 10 OK · 0 SKIP · 1 PARCIAL · 0 FALHA**.
+4. `9d015bb` fica no reflog (recuperável 90 dias), mas é lixo.
+
+**Estado após reversão:** `HEAD` = `81b2aea` = `origin/redesign`. `git status` só com o
+trabalho legítimo do P4-06 + a trava abaixo. Nada empurrado de errado; nada perdido.
+
+**Causa-raiz e correção:** `git -C <caminho-que-não-é-repo>` sobe a árvore até achar
+qualquer `.git`. **Trava adicionada** — `tools._exige_raiz_git(repo)`: exige
+`git rev-parse --show-toplevel == repo`; `commit_entry` e `grafo.registrar_e_commitar`
+**abortam** (`RepoInvalido` / `registrar:abortado:repo_invalido`) se `repo` não for raiz de
+worktree git. Testado: `"onep"` e `/tmp` rejeitados; `~/agata` e clones válidos passam;
+loop ponta a ponta segue normal.
+
+**Bug secundário achado e corrigido:** `cli.py::cmd_run` ignorava `--thread` (gerava
+`agata-<ts>`), então `agata run --thread X` + `agata resume --thread X` não casavam →
+`resume` reiniciava do `hidratar` sem estado (`KeyError: repo`). `cmd_run` agora passa o
+`--thread`.
+
+### Aceite da FASE 4 (S7, re-check limpo após as correções)
+
+- **loop ponta a ponta num clone:** `cli.py run --thread f4v2 --com-envelope` → pausa no
+  portão; `resume --thread f4v2` → `registrar_e_commitar:novo`, commit `bccba88` **no
+  clone**; `cli.py logs --thread f4v2` → WAL `intent`+`done`. ✅
+- **verify + commit-entry model-free:** omniroute/sanitizer/whisper/embeddings/llamacpp
+  **todos parados** → `agata verify` exit 0 (perímetro `10 OK`); `agata commit-entry` →
+  `estado:novo` no clone. ✅
+- **portão pausa e retoma:** `run` → `pausado_no_portao: true`; `resume --recusar` →
+  `registrar:pulado(nao aprovado)`. ✅
+- **grammar rejeita cabeçalho malformado sem distorcer o corpo:** P4-03 re-confirmado —
+  adversário → envelope válido (3 linhas, `verificar_cabecalho` exit 0), corpo livre 997 ch
+  coerente. ✅
+- **P4-06 stub:** `teste_dormente.py` PASS. ✅
+- **`~/agata` intacto:** `HEAD 81b2aea`, `git status` só com os arquivos legítimos.
+
+**→ FASE 4 (Grafo) FECHADA.** Aceite do ROADMAP cumprido.
+
+**Não tocado por engano no fim:** `main`, canon, Hermes, Ollama de produção. O `redesign`
+teve o commit acidental `9d015bb` **revertido antes de qualquer push**; `origin/redesign`
+nunca o viu.
+
+**Falta / próximo:** **Fase 5 (Spike RLM)** — ordem do ROADMAP `…→4→5→6→7→8`. Pede o "vai"
+do Humano + arquivos-tarefa (P0-03 cobriu Fases 1-2; P4 os escreveu para a Fase 4; a Fase 5
+precisa dos seus). O ROADMAP manda **conferir a Fronteira de recusas antes** (a entrada "RLM
+self-training" é outra coisa — isto é padrão de inferência, não treino).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

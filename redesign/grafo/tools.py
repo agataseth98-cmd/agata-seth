@@ -25,6 +25,25 @@ AGATA = Path(os.path.expanduser("~/agata"))
 SCRIPTS = AGATA / "scripts"
 
 
+class RepoInvalido(ValueError):
+    pass
+
+
+def _exige_raiz_git(repo: str) -> str:
+    """`repo` TEM que ser a raiz de um worktree git. Sem isto, `git -C <caminho-ruim>`
+    sobe a arvore e acha o .git de ~/agata -- foi assim que um teste com args trocados
+    commitou lixo no branch redesign (2026-09-02). Rejeita antes de qualquer `git -C`."""
+    p = Path(repo).resolve()
+    if not p.is_dir():
+        raise RepoInvalido(f"repo nao e' diretorio: {repo}")
+    r = subprocess.run(["git", "-C", str(p), "rev-parse", "--show-toplevel"],
+                       capture_output=True, text=True)
+    if r.returncode != 0 or Path(r.stdout.strip()).resolve() != p:
+        raise RepoInvalido(f"repo nao e' raiz de worktree git: {repo} "
+                           f"(toplevel={r.stdout.strip() or r.stderr.strip()})")
+    return str(p)
+
+
 def _run(cmd, cwd=None, stdin=None, timeout=120) -> dict:
     try:
         r = subprocess.run(cmd, cwd=str(cwd or AGATA), input=stdin,
@@ -127,6 +146,7 @@ def commit_entry(repo: str, alvo: str, entrada: str, idem: str, *,
     - Idempotente: se `git log --grep=idem:<idem>` ja acha, nao escreve nem commita.
     - Garante que o arquivo SO CRESCEU (assert de tamanho).
     """
+    repo = _exige_raiz_git(repo)          # trava contra git -C <caminho-ruim> subindo a arvore
     repo_p = Path(repo)
     alvo_p = repo_p / alvo
     # idempotencia

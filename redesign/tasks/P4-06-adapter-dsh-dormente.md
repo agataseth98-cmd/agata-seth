@@ -1,5 +1,19 @@
 # P4-06 — adapter dsh escrito, `enabled: false` (armado, dormente)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~14:30 (relógio da máquina). FASE 4 FECHADA.**
+`adapters/dsh.md` (mapa 6 nós↔seams do `dsh`, o que ganha/perde, gatilho de reavaliação) +
+`adapters/dsh.py` (`ENABLED=False`, `run`/`resume` levantam `NotImplementedError`, interface
+idêntica à de `grafo.py`) + `adapters/teste_dormente.py` (**PASS** — `ENABLED is False`,
+levanta, assinaturas batem, não importado pelo loop). `PESQUISA.md` linha do `dsh` com o
+gatilho. **Não instalou** o preview. Ver `redesign/grafo/README.md`.
+
+**Incidente no aceite da fase (registrado):** um teste com args em ordem errada
+(`repo="onep"`) fez `git -C onep commit` subir a árvore e commitar lixo no branch
+`redesign` (local, **não empurrado**). Revertido: `git reset --soft HEAD~1` + restore do
+`PROMPT_CARREGAMENTO.md` + `gerar_obsidian.py` (P-10) + `rm -rf onep`. HEAD de volta em
+`81b2aea` = `origin/redesign`. **Trava adicionada:** `tools._exige_raiz_git` — `commit_entry`
+e `registrar_e_commitar` abortam se `repo` não for raiz de worktree git. Ver `LOG.md`.
+
 **Objetivo:** deixar escrito — e testado no que dá sem instalar o preview instável — um
 adapter que trocaria o LangGraph pelo DeepSeek Harness (`dsh`) como executor do loop, com
 a flag desligada. Reavaliar só quando o `dsh` tiver tag estável.

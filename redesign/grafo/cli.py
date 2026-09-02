@@ -147,9 +147,10 @@ def cmd_commit_entry(arquivo, alvo="redesign/LOG.md", posicao="fim", repo=None):
 
 
 # --------------------------------------------------------------------------- run / resume / logs
-def cmd_run(pedido, tipo="trabalho", com_envelope=False, repo=None):
+def cmd_run(pedido, tipo="trabalho", com_envelope=False, repo=None, thread=None):
     import grafo
-    grafo.run(pedido, repo or str(AGATA), f"agata-{int(time.time())}", tipo, com_envelope)
+    thread = thread or f"agata-{int(time.time())}"
+    grafo.run(pedido, repo or str(AGATA), thread, tipo, com_envelope)
     return 0
 
 
@@ -192,7 +193,8 @@ def main(argv):
         return cmd_commit_entry(rest[0], g("--alvo", "redesign/LOG.md"),
                                 g("--posicao", "fim"), g("--repo"))
     if cmd == "run":
-        return cmd_run(rest[0], g("--tipo", "trabalho"), "--com-envelope" in rest, g("--repo"))
+        return cmd_run(rest[0], g("--tipo", "trabalho"), "--com-envelope" in rest,
+                       g("--repo"), g("--thread"))
     if cmd == "resume":
         return cmd_resume(g("--thread"), "--recusar" in rest, g("--repo"))
     if cmd == "logs":

@@ -170,6 +170,11 @@ def registrar_e_commitar(s: Estado) -> dict:
     if not s.get("portao", {}).get("aprovado"):
         return {"eventos": ["registrar:pulado(nao aprovado)"],
                 "decisao_log": ["nada registrado -- portao recusou"]}
+    try:
+        tools._exige_raiz_git(s["repo"])   # trava: repo tem que ser raiz de worktree git
+    except tools.RepoInvalido as e:
+        return {"eventos": [f"registrar:abortado:repo_invalido"],
+                "decisao_log": [f"registrar_e_commitar ABORTADO -- {e}"]}
     repo = Path(s["repo"])
     wal = WAL(DIR_ESTADO)
     passo = 1

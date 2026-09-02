@@ -1,22 +1,26 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — P4-00..P4-05 FEITOS). **Fases 0, 1, 2 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 14:25 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P4-05 FEITO (evals)
-ÂNCORA (leve, manual): sobre `redesign` @ **`4655f41`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 5 — Spike RLM** (próxima). **Fases 0, 1, 2, 3 e 4 FECHADAS.**
+ATUALIZADO: 2026-09-02 14:30 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P4-06 FEITO, FASE 4 FECHADA
+ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **P4-00..P4-05 FEITOS** (2026-09-02 ~14:25).
-P4-00..P4-04 (durabilidade / esqueleto / tools+sandbox / GBNF envelope / `agata` CLI) ·
-**P4-05** `evals/fabricacao.py` (3/3 PASS — (138) não reproduz, (307) mantida; regressão
-proposital fica vermelha) + `evals/hidratacao.py` (PASS — cita `(309)`, mentira `(999)`
-pega). `redesign/grafo/README.md`.
-**Próximo: P4-06** (adapter dsh **dormente** — doc + stub `ENABLED=False`, **não** instala o
-preview) → **FECHA a Fase 4**.
+_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
+P4-00 durabilidade (SqliteSaver+WAL) · P4-01 esqueleto (6 nós, `interrupt`) · P4-02 tools+
+sandbox `bwrap` · P4-03 GBNF só no envelope (2 fases) · P4-04 `agata` CLI (verify/
+commit-entry model-free) · P4-05 evals ((138)/(307) + hidratação) · P4-06 adapter dsh
+dormente. Aceite conjunto re-rodado: loop ponta a ponta num clone · verify+commit-entry com
+tudo parado · portão pausa/retoma · grammar rejeita cabeçalho malformado sem distorcer o
+corpo. **Incidente:** teste com args trocados commitou lixo no `redesign` (local, não
+empurrado) → revertido (`reset --soft`); trava `_exige_raiz_git` adicionada. `redesign/grafo/README.md`.
+**Próximo: Fase 5 (Spike RLM)** — ordem do ROADMAP `…→4→5→6→7→8`. Pede o "vai" do Humano +
+arquivos-tarefa. **Antes:** a Fronteira de recusas (a entrada "RLM self-training" é outra
+coisa — isto é padrão de inferência).
 
 _(histórico:)_ **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
 P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · P2-02
