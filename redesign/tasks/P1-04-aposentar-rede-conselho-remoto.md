@@ -5,8 +5,55 @@ a z.ai / Google) e passa a mandar o pedido pelo OmniRoute (`:20128`). **Toda a p
 continua** — check de conteúdo privado, teto de chars, uma chamada por invocação, nunca
 escreve canon, nunca encadeia. É o último item da Fase 1.
 
-**Pré-requisitos:** P1-00 a P1-03 FEITO. Em especial P1-03 (a combo que substitui o
-fallback GLM→Gemini que hoje está codado no script).
+**Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. P1-03 parcial (combo `conselho` criada).
+
+**Status:** ⏳ **CÓDIGO FEITO + PLUMBING TESTADO, NÃO COMITADO NO CAMINHO CANÔNICO —
+2026-09-02 ~01:00, sessão autônoma.**
+
+> **P-8 barrou o commit em `scripts/conselho_remoto.py`** (arquivo canônico, muda
+> comportamento, sem par `propostas/APROVADO-`). A suspensão de P-8 é do *estado de
+> exceção* mas o `pre-commit` não sabe disso, e **não forcei** (`--no-verify` num arquivo
+> canônico, autônomo, de madrugada, é linha que não passo sozinho). A reescrita, testada,
+> está em **`redesign/router/conselho_remoto.py.P1-04-proposto`** (caminho não-canônico,
+> versionado). O `scripts/conselho_remoto.py` do working tree voltou ao canon.
+> **Para aplicar (Humano):** `cp redesign/router/conselho_remoto.py.P1-04-proposto
+> scripts/conselho_remoto.py` e commitar com `--no-verify` (exceção escrita) **ou** por um
+> par `propostas/`. Merge p/ `main`: Fase 8.
+
+> **Feito (na cópia `.P1-04-proposto`, testada com o script apontado p/ ela):**
+> - reescrito: −246/+70 linhas. Removidos
+>   `enviar_glm`/`enviar_gemini`, `carregar_chave`, todo o backoff/429, os contadores
+>   Gemini, os endpoints diretos. Adicionado `enviar_omniroute()` — **uma** POST em
+>   `http://127.0.0.1:20127/v1/chat/completions` (o proxy de sanitização!) na combo
+>   `conselho`. O script **não lê mais chave nenhuma**.
+> - **Política preservada** (verificado): `checar_conteudo_privado` (aborta em
+>   `memoria/missoes`), `TETO_CHARS_PEDIDO`, `checar_formato_parecer`, `_normalizar`
+>   (só o ramo OpenAI-compat), uma chamada por invocação, **ABORTA** em vez de cair pro
+>   local, grava a resposta crua em `memoria/missoes/conselho-remoto/`.
+> - **Ganho novo:** o pedido do Conselho agora passa pela sanitização (P1-02) — segredo
+>   no texto → bloqueado antes de sair. O script trata o 422 do proxy com mensagem própria.
+> - Combo `conselho` criada (`omniroute combo create conselho --strategy priority --model
+>   ollama-local/llama3.2:3b` — **placeholder**; troca por glm→gemini em P1-03-chaves).
+>
+> **Testes (sem as chaves reais):**
+> - T1 privado: pedido citando `memoria/missoes` → `ABORTADO ... camada privada`, exit 1,
+>   sem rede. ✅
+> - T2 segredo: pedido com `sk-…` + `API_TOKEN=…` → o proxy devolve **422**
+>   `secret_blocked_before_egress` (2 padrões, redigidos) → `ABORTADO`, exit 1. ✅
+> - T3 rota completa: pedido normal → `:20127`→`:20128`→combo `conselho`→Ollama → resposta,
+>   **registro gravado** (`via: omniroute`, `combo: conselho`, tokens contados), format
+>   check rodou (`FORA DO FORMATO` — correto, Ollama não é parecer). ✅
+> - Abort em erro: um 504 do gateway (timeout `maxWaitMs=15s` com modelo 9B lento) →
+>   `ABORTADO ... cair pro local é decisão do Humano (276)`, **nada gravado**. ✅
+>
+> **Achados:** `omniroute combo delete` **exige `--yes`** (prompt interativo trava em
+> shell não-interativo, exit 13). `resilienceSettings.requestQueue.maxWaitMs=15000` é
+> curto p/ modelo local lento (9B ~13s) → usei `llama3.2:3b` no placeholder; os provedores
+> reais da combo (glm/gemini nuvem) são rápidos, não batem nisso.
+>
+> **Falta:** trocar o placeholder por glm-4.7-flash→gemini-2.5-flash quando o Humano
+> puser `ZHIPU_API_KEY`/`GOOGLE_API_KEY` no store do OmniRoute; então repetir T3 com um
+> pedido de parecer real. **Merge p/ `main`: só na Fase 8.**
 
 **Arquivos que a tarefa toca:**
 - `scripts/conselho_remoto.py` — **canônico, mas NÃO em `main`**: fica no branch

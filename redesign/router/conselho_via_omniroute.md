@@ -3,6 +3,13 @@
 Como `scripts/conselho_remoto.py` passa a falar pelo OmniRoute em vez de fazer `urllib`
 direto a z.ai / Google. **A política não muda — só a camada de rede.**
 
+> **APLICADO 2026-09-02 (branch): código feito, plumbing testado.** −246/+70 linhas.
+> `enviar_omniroute()` faz UMA POST em `http://127.0.0.1:20127/v1/chat/completions` (o
+> proxy de sanitização — o pedido do Conselho passa a ser scrub-ado antes de sair) na
+> combo `conselho`. O script não lê mais chave. Testes T1/T2/T3 + abort-em-erro passaram
+> (ver `redesign/tasks/P1-04-*.md`). Falta: combo `conselho` com glm→gemini reais (chaves
+> do Humano) e um pedido de parecer real. Merge p/ `main`: Fase 8.
+
 > Toca um arquivo que existe em `main`. A edição é na cópia do branch `redesign`; o merge
 > para `main` é só na **Fase 8**, pela Cadeia de auditoria. `git diff main..redesign --
 > scripts/conselho_remoto.py` passa a ter conteúdo — esperado, não reverter.

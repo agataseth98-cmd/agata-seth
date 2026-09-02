@@ -746,3 +746,63 @@ via `:20127` na combo `conselho` (criar a combo lá). T2 self-review antes. Test
 provedor real aguarda chaves; testes de política (abort privado, combo vazia) rodam já.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~01:00 -03 · sessão Claude (na Máquina, autônoma) — P1-04 código + plumbing (Conselho pelo OmniRoute)
+
+**T2 self-review (classe: script canônico + rede):** PRONTO — edição na cópia-branch,
+`main` intocado, reversível (`git checkout main -- scripts/conselho_remoto.py`), política
+preservada por desenho.
+
+**Reescrita (−246/+70) — em `redesign/router/conselho_remoto.py.P1-04-proposto`, NÃO no
+caminho canônico (ver abaixo):**
+- Removidos: `enviar_glm`/`enviar_gemini`, `carregar_chave`, `checar_backoff` + todo o
+  bloco de backoff/429, os contadores Gemini, `ENDPOINT`/`GEMINI_ENDPOINT`/`MODELO`.
+- Adicionado `enviar_omniroute()` — **uma** POST em `http://127.0.0.1:20127/v1/chat/
+  completions` (o **proxy de sanitização** da P1-02) na combo `conselho`. O script **não
+  lê mais chave nenhuma**; o fallback glm→gemini + breaker + cooldown 429 são do OmniRoute.
+- **Política preservada e verificada:** `checar_conteudo_privado`, `TETO_CHARS_PEDIDO`,
+  `checar_formato_parecer`, `_normalizar` (só o ramo OpenAI-compat), uma chamada por
+  invocação, **ABORTA** em vez de cair pro local (mensagem `(276)` mantida), grava a
+  resposta crua em `memoria/missoes/conselho-remoto/` (agora com `via: omniroute`, `combo`).
+- **Ganho novo:** o pedido do Conselho passa a ser scrub-ado antes de sair — o script
+  trata o 422 do proxy (`secret_blocked_before_egress`) com mensagem própria.
+
+**Combo `conselho`:** criada `--strategy priority --model ollama-local/llama3.2:3b`
+(**placeholder** — troca por glm-4.7-flash→gemini-2.5-flash em P1-03-chaves).
+
+**Testes (sem as chaves reais):**
+- T1 privado → `ABORTADO ... camada privada`, exit 1, sem rede. ✅
+- T2 segredo (`sk-…` + `API_TOKEN=…`) → proxy 422 (2 padrões, redigidos) → `ABORTADO`,
+  exit 1, nada enviado. ✅
+- T3 rota completa → `:20127`→`:20128`→combo `conselho`→Ollama → resposta, **registro
+  gravado** (`20260902-001729-llama3.2_3b.json`, tokens 46/113/159), format check rodou
+  (`FORA DO FORMATO` — correto, Ollama não é parecer). ✅
+- Abort-em-erro: 504 do gateway (ver achado abaixo) → `ABORTADO ... (276)`, nada gravado. ✅
+
+**Achados:**
+- `omniroute combo delete <name>` **exige `--yes`** — sem ele o prompt interativo trava
+  em shell não-interativo (`exit 13`, "unsettled top-level await"). Custou uma volta.
+- `resilienceSettings.requestQueue.maxWaitMs=15000` (bloco "legacy", não exposto pelo
+  `resilience config set`) é curto p/ modelo local lento — `qwen3.5:9b` (~13 s) deu **504
+  gateway_timeout** pela combo. Usei `llama3.2:3b` no placeholder; os provedores nuvem
+  reais são rápidos e não batem nisso. Registrado em `PROVEDORES.md`.
+
+**P-8 barrou o commit em `scripts/conselho_remoto.py`** (canônico, muda comportamento,
+sem par `propostas/APROVADO-`). O estado de exceção suspende P-8, mas o `pre-commit` não
+sabe disso e **não forcei `--no-verify` num arquivo canônico, autônomo, de madrugada**.
+A reescrita testada ficou em `redesign/router/conselho_remoto.py.P1-04-proposto`
+(versionada, caminho não-canônico); o working tree de `scripts/conselho_remoto.py` voltou
+ao canon. Aplicar = decisão do Humano (`cp` + `commit --no-verify` pela exceção escrita,
+ou par `propostas/`).
+
+**Não tocado:** `main`, `scripts/conselho_remoto.py` (canon — voltou ao original), canon,
+Hermes, Ollama de produção, hooks, `servidor.py`. Nada instalado. Nenhuma chave real.
+
+**Falta / próximo — tudo aguarda o Humano:** as chaves nuvem em `~/.hermes/.env` (P1-03
+provedores + fallback real; P1-04 combo `conselho` com glm→gemini + 1 parecer real); o HD
+p/ a Fase 0. **A sessão autônoma parou aqui — nada mais avança sem o Humano.** Rotina de
+briefing dispara 02/09 10:00 -03.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

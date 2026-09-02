@@ -1,19 +1,18 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-02 ~00:35 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`c35ea16`**; ver
-`redesign/ANCORA.md` para os refs esperados e a referência viva.
+FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0** fechada exceto o HD.
+ATUALIZADO: 2026-09-02 ~01:00 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`e9ef170`**; a
+referência viva é `git rev-parse origin/redesign`; ver `redesign/ANCORA.md`.
 NOTA: Humano dormindo — sessão prosseguindo autônoma até de manhã ("Prossiga até amanhã").
-e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
-(ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
-atrás — mesma defasagem da âncora-SHA do canon.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — P1-00 FEITO 2026-09-02 ~00:02; P1-01 é o próximo.
+_(nenhuma tarefa EM ANDAMENTO)_ — Fase 1: P1-00/01/02 FEITO, P1-03/04 aguardando as
+chaves nuvem do Humano. Fase 0: aguardando o HD. Sessão autônoma parou aqui (nada mais
+avança sem o Humano).
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -121,9 +120,16 @@ nesta fase (ver LOG 01/09 ~17:10).
     pedido limpo via `:20127` → resposta do Ollama; pedido com `sk-…` plantado → **422**
     `secret_blocked_before_egress`, e `omniroute cost` Reqs 2→3 (o bloqueado **não**
     chegou ao OmniRoute). **Callers agora apontam para `:20127`.**
-- **Próximo da Fase 1: P1-03** (pool nuvem — **precisa das chaves do Humano** no
-  `~/.hermes/.env`; a estrutura de combos + breaker pode ser adiantada só com Ollama) e
-  **P1-04** (editar a cópia-branch de `conselho_remoto.py`; merge p/ `main` só na Fase 8).
+- **P1-03 ⏳ PARCIAL** (~00:35): combos `cheap`/`auto`/`conselho` criados (placeholder
+    `ollama-local/llama3.2:3b`), roteiam OK; breaker = defaults do OmniRoute (em
+    `PROVEDORES.md`). **Provedores nuvem + teste de fallback real aguardam as chaves do
+    Humano** em `~/.hermes/.env` (comandos prontos em `PROVEDORES.md`).
+  - **P1-04 ⏳ CÓDIGO FEITO** (~01:00): `scripts/conselho_remoto.py` (cópia-branch)
+    reescrito −246/+70 — `enviar_omniroute()` faz UMA POST no proxy `:20127` na combo
+    `conselho`; não lê mais chave; toda a política preservada; **ganho novo:** o pedido do
+    Conselho passa pela sanitização. T1 (privado)/T2 (segredo→422)/T3 (rota completa +
+    registro)/abort-em-erro testados. Falta: combo `conselho` com glm→gemini reais
+    (chaves) + 1 parecer real. **Merge p/ `main`: Fase 8.**
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 - **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`

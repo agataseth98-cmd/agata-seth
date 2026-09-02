@@ -48,7 +48,17 @@ systemctl --user start ollama
 | requestQueue | 60 rpm · 350 ms entre req · 6 concorrentes · maxWait 15 s | — |
 | comboCooldownWait | enabled · maxWait 90 s · maxAttempts 5 · budget 300 s | — |
 
-Ajustar com `omniroute resilience config set` só se a operação mostrar necessidade.
+Ajustar com `omniroute resilience config set` (só expõe `--threshold`, `--reset-timeout`,
+`--base-cooldown`) só se a operação mostrar necessidade.
+
+**Achado 02/09 (P1-04):** `resilienceSettings.requestQueue.maxWaitMs=15000` (bloco
+"legacy", **não** exposto pelo `resilience config set`) é curto demais para modelo local
+lento — `qwen3.5:9b` (~13 s) deu **504** `gateway_timeout` pela combo. Fica como está por
+ora (os provedores nuvem são rápidos); se um combo precisar de um local lento, achar o
+jeito de subir esse valor (DB / env não documentada) é tarefa da execução com chaves.
+
+**Achado 02/09:** `omniroute combo delete <name>` **exige `--yes`** — sem ele, prompt
+interativo trava em shell não-interativo (`exit 13`, "unsettled top-level await").
 
 ---
 
