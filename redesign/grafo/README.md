@@ -8,7 +8,7 @@
 |---|---|
 | **P4-00** spike de durabilidade | ✅ `DURABILIDADE.md` — veredito **OPÇÃO A** |
 | **P4-01** estado tipado + esqueleto do grafo | ✅ `estado.py` + `grafo.py` (6 nós, `interrupt` no portão) |
-| P4-02 tools + sandbox `bwrap` | ⏳ |
+| **P4-02** tools + sandbox `bwrap` | ✅ `tools.py` (6 tools) + `sandbox.py` (`bwrap`); `verificar` usa `tools.py` |
 | P4-03 GBNF só no envelope | ⏳ |
 | P4-04 `agata` CLI | ⏳ |
 | P4-05 evals | ⏳ |
@@ -70,6 +70,46 @@ redesign/grafo/.venv/bin/python redesign/grafo/grafo.py resume --thread <id> --r
 | matar o processo no meio e retomar **não duplica o commit** (herda P4-00) | ✅ `GRAFO_KILL_AFTER_COMMIT=1` no `resume` → `rc 137` → `resume` de novo → `registrar_e_commitar:pulado`; **1** commit `loop: registro de t-p401-kill`, **1** ocorrência da idem key em `loop.log`; WAL = `intent,[SIGKILL],intent,done` |
 
 Gancho de teste: `GRAFO_KILL_AFTER_COMMIT=1` (`os.kill(pid,9)` logo após o `git commit`).
+
+## `tools.py` + `sandbox.py` — P4-02
+
+**`tools.py`** — 6 funções tipadas, retorno estruturado, `_run` nunca levanta (timeout 124,
+binário ausente 127). Herdam o desenho do P0-02 (`redesign/mcp/servidor.py`):
+
+| tool | wrappa | leitura pura? |
+|---|---|---|
+| `git_sync` | `git fetch` + rev-parse (2 eixos: canon vs `origin/main`; branch vs upstream) | sim (toca `.git/`) |
+| `run_perimetro` | `scripts/perimetro.sh` | sim |
+| `check_citation` | `scripts/checar_citacao.sh` (adaptador de temp — script recebe caminho) | sim |
+| `lint_header` | `scripts/verificar_cabecalho.py` (stdin) | sim |
+| `query_canon` | `scripts/consultar_indice.py` — **rejeita termo com `-` inicial** (`--rebuild`) + regex | sim |
+| `commit_entry` | **escreve canon** — append-only + `git commit` idempotente (saiu da Fase 0, P0-00) | **não** |
+
+`commit_entry(repo, alvo, entrada, idem, *, posicao)`:
+- valida cabeçalho (`lint_header`) + citações (`check_citation`) **antes** de escrever; inválido → `{ok: False}`, nada tocado.
+- `posicao="fim"` (LOG) ou `"apos-marcador"` (MEMÓRIAS — insere logo após `ENTRADAS-NOVAS:AQUI`, nunca mexe acima).
+- assert de que o arquivo **só cresceu** e o conteúdo antigo continua lá (append-only).
+- idempotente: `git log --grep=idem:<idem>` já acha → pula.
+
+**`sandbox.py`** — `run_sandboxed(argv, *, ro=[], rw=[], net=False, cwd=None)` via `bwrap`
+(`--unshare-all` [+ `--share-net` se `net`], `/usr`+`/etc` ro, `/proc`+`/dev`+tmpfs `/tmp`,
+Arch usr-merged). Leitura pura roda sem sandbox; `commit_entry` roda com `rw=[<.git>, <alvo>]`.
+
+### Verificação (aceite P4-02)
+
+| critério | resultado |
+|---|---|
+| 6 tools tipadas, retorno estruturado, nunca levanta | ✅ |
+| tool == script cru (`run_perimetro`/`lint_header`/`check_citation`) | ✅ mesmo exit/resumo/suspeitos |
+| `query_canon` barra `--rebuild` | ✅ `TermoInvalido` |
+| `commit_entry`: nova → grava+commita; repetida → pula; citação falsa → rejeita, nada escrito | ✅ 1 commit, `git show --stat` = só o alvo, arquivo cresceu |
+| `run_sandboxed` nega escrita fora de `rw` | ✅ `EROFS` ("Sistema de arquivos somente para leitura"), arquivo não criado |
+| `run_sandboxed` nega rede (sem `net`) | ✅ `OSError [Errno 101] Network is unreachable` |
+| escrita **dentro** de um `rw` path funciona | ✅ exit 0 |
+| equivalência **dentro** do sandbox: `perimetro` verde, `verificar_cabecalho` mesmo veredito | ✅ (P-2 vira SKIP no sandbox — menos visibilidade, esperado) |
+
+`grafo.py::verificar` passou a chamar `tools.run_perimetro/lint_header/check_citation` —
+uma fonte só. Loop ponta a ponta re-testado, segue verde.
 
 ## O que a P4-01 deixa para as próximas
 

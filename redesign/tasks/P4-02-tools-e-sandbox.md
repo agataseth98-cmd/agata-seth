@@ -4,6 +4,15 @@
 tipadas, e qualquer execução de tool que não seja leitura pura roda dentro de `bwrap`
 (bubblewrap 0.12, já instalado).
 
+**Status:** ✅ **FEITO — 2026-09-02 ~13:35 (relógio da máquina).** `tools.py` (6 funções:
+`git_sync`, `run_perimetro`, `check_citation`, `lint_header`, `query_canon` + `commit_entry`
+— esta escreve canon, append-only + `git commit` idempotente, valida cabeçalho/citações
+antes). `sandbox.py` (`run_sandboxed` via `bwrap --unshare-all`). `grafo.py::verificar`
+passou a usar `tools.py`. Testado: tool == script cru; `query_canon` barra `--rebuild`;
+`commit_entry` grava/pula/rejeita corretamente (`git show --stat` = só o alvo); sandbox nega
+escrita fora de `rw` (EROFS) e nega rede (Errno 101); escrita dentro de `rw` OK. Loop ponta
+a ponta re-testado, verde. Nada instalado, sem `sudo`. Ver `redesign/grafo/README.md`.
+
 **Pré-requisitos:** P4-01 FEITO (o grafo existe). Reusa o P0-02 (o `redesign/mcp/servidor.py`
 já wrappa 5 dessas ferramentas read-only — aproveitar o desenho, não duplicar).
 

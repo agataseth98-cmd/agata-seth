@@ -18,7 +18,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -26,6 +25,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from estado import Estado, estado_inicial          # noqa: E402
 from durabilidade import WAL, efeito_idempotente   # noqa: E402
+import tools                                       # noqa: E402  (P4-02 -- wrappers dos scripts)
 
 AGATA = Path(os.path.expanduser("~/agata"))
 SCRIPTS = AGATA / "scripts"
@@ -103,32 +103,22 @@ def trabalhar(s: Estado) -> dict:
 
 
 def verificar(s: Estado) -> dict:
-    """ESPINHA deterministica: perimetro + cabecalho + citacao. Roda com o modelo desligado."""
+    """ESPINHA deterministica: perimetro + cabecalho + citacao via tools.py (P4-02).
+    Roda com o modelo desligado. As 3 sao leitura pura -> nao precisam de sandbox."""
     repo = s["repo"]
-    rc_per, out_per, _ = _run(["bash", str(SCRIPTS / "perimetro.sh")], cwd=repo, timeout=120)
-    resumo_per = next((l for l in out_per.splitlines() if "RESULTADO GERAL" in l), "").strip()
+    per = tools.run_perimetro(repo=repo)
+    cab = tools.lint_header(s.get("trabalho", ""), repo=repo)
+    cit = tools.check_citation(s.get("trabalho", ""), repo=repo)
 
-    rc_cab, out_cab, _ = _run(["python3", str(SCRIPTS / "verificar_cabecalho.py")],
-                              cwd=repo, stdin=s.get("trabalho", ""))
-    cab_ok = rc_cab == 0
-    cab_falhas = [] if cab_ok else [l for l in out_cab.splitlines() if l.strip() and l != "OK"]
-
-    # checar_citacao.sh recebe CAMINHO (nao stdin) -- adaptador de temp (como no P0-02)
-    fd, tmp = tempfile.mkstemp(suffix=".txt")
-    try:
-        with os.fdopen(fd, "w") as f:
-            f.write(s.get("trabalho", ""))
-        rc_cit, out_cit, _ = _run(["bash", str(SCRIPTS / "checar_citacao.sh"), tmp], cwd=repo)
-    finally:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-    suspeitos = [l for l in out_cit.splitlines() if "SUSPEITO" in l]
-
-    v = {"perimetro_exit": rc_per, "perimetro_resumo": resumo_per,
-         "cabecalho_ok": cab_ok, "cabecalho_falhas": cab_falhas,
-         "citacao_exit": rc_cit, "citacoes_suspeitas": suspeitos}
+    v = {"perimetro_exit": per["exit_code"], "perimetro_resumo": per["resumo"],
+         "cabecalho_ok": cab["ok"],
+         "cabecalho_falhas": [] if cab["ok"] else [l for l in cab["motivo"].splitlines() if l.strip() and l != "OK"],
+         "citacao_exit": cit["exit_code"], "citacoes_suspeitas": cit["suspeitos"]}
+    resumo_per = per["resumo"]
+    rc_per = per["exit_code"]
+    suspeitos = cit["suspeitos"]
+    cab_ok = cab["ok"]
+    rc_cit = cit["exit_code"]
     return {"verificacao": v,
             "eventos": [f"verificar:per={rc_per}:cab={'ok' if cab_ok else 'falha'}:cit={rc_cit}"],
             "decisao_log": [f"verificacao: {resumo_per or 'perimetro sem resumo'}; "

@@ -1781,3 +1781,59 @@ de teste (o `commit_entry` real do canon é a P4-02).
 contenção. Classe runtime, auto-revisão (sem `sudo`, sem instalação).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 13:35 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P4-02 FEITO — tools + sandbox bwrap
+
+Direção do Humano (indo p/ reunião): "só pare para passos que realmente precisam de mim
+(destrutivo/segredo/main/canon/Hermes/Ollama/espinha/sudo/instalação) ou que ponham a
+segurança do sistema em risco; senão siga pelo espelho". P4-02..P4-06 não tocam nada disso
+→ execução autônoma. Auto-revisão (classe runtime): PRONTO (sem `sudo`, sem instalação —
+`bwrap 0.12` já estava).
+
+- **`redesign/grafo/tools.py`** — 6 funções tipadas, retorno estruturado, `_run` nunca
+  levanta (124/127). As 5 read-only herdadas do P0-02 (`git_sync` 2 eixos, `run_perimetro`,
+  `check_citation` com adaptador de temp, `lint_header` stdin, `query_canon` que **rejeita
+  termo com `-` inicial** — `TermoInvalido`). Nova: **`commit_entry`** (saiu da Fase 0,
+  P0-00): `commit_entry(repo, alvo, entrada, idem, *, posicao)` — valida cabeçalho
+  (`lint_header`) + citações (`check_citation`) **antes**; **append-only** (`posicao="fim"`
+  = EOF do LOG; `"apos-marcador"` = logo após `ENTRADAS-NOVAS:AQUI` do MEMÓRIAS, nunca mexe
+  acima); assert de que o arquivo só cresceu e o conteúdo antigo continua; `git commit`
+  idempotente por `idem:<key>` no corpo.
+- **`redesign/grafo/sandbox.py`** — `run_sandboxed(argv, *, ro=[], rw=[], net=False, cwd=)`
+  via `bwrap --unshare-all` (`--share-net` só se `net`), `/usr`+`/etc` ro,
+  `/proc`+`/dev`+tmpfs `/tmp`, Arch usr-merged (symlinks `/bin`,`/lib` → `usr/...`). Nunca
+  levanta (124/127).
+- **`grafo.py::verificar`** passou a chamar `tools.run_perimetro/lint_header/check_citation`
+  — uma fonte só. `tempfile` removido do `grafo.py`.
+
+**Verificação (S7, aceite P4-02) — testes num clone `git clone --local`:**
+- tool == script cru: `run_perimetro` exit 0 / mesmo resumo; `lint_header` mesmo veredito
+  (válido→ok, quebrado→ok=False + 1ª linha certa); `check_citation` `(309)`→0/0 suspeitos,
+  `(99999)`→1/suspeito listado. ✅
+- `query_canon hidratação âncora` → exit 0, 37 KB de trechos; `query_canon --rebuild x` →
+  `TermoInvalido` (barrado). ✅
+- `commit_entry`: nova → `estado:novo`, commit `bc64414`, bytes 108458→108602 (cresceu);
+  repetida (mesma idem) → `pulado(idempotente)`, mesmo sha, nada escrito; citação `(99999)`
+  → `ok:False`, nada tocado. `git show --stat` = **só** `redesign/LOG.md | 4 ++++`. 1
+  commit, não 2. ✅
+- **`run_sandboxed` — contenção:** escrever fora de `rw` → `EROFS` ("Sistema de arquivos
+  somente para leitura"), arquivo **não** criado; abrir socket → `OSError [Errno 101]
+  Network is unreachable`; escrever **dentro** de um `rw` path → exit 0. ✅
+- **equivalência dentro do sandbox:** `perimetro.sh` verde (P-2 vira SKIP no sandbox —
+  menos visibilidade, esperado, não FALHA); `verificar_cabecalho.py` mesmo veredito. ✅
+- Loop `grafo.py` ponta a ponta re-testado com o `verificar` novo → segue verde
+  (`registrar_e_commitar:novo`, commit no clone). `ast.parse` nos 3 módulos. Perímetro
+  verde. ✅
+- **P4-02 → PASS.**
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado, sem
+`sudo`. Scratch (`~/.cache/agata/grafo*`) fora do repo, limpo no fim. Serviços da Fase 2 de
+pé; `llamacpp-agata` parado.
+
+**Falta / próximo:** **P4-03** — `envelope.gbnf` (só cabeçalho Regra 1 / `sync:` / eco;
+corpo `.*`) via GBNF nativo do `llama-server` da Fase 3. Vou **subir o `llamacpp-agata.service`**
+(systemd --user, não está no stop-list) para o teste, e paro/deixo conforme.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
