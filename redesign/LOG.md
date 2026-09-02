@@ -2062,3 +2062,49 @@ precisa dos seus). O ROADMAP manda **conferir a Fronteira de recusas antes** (a 
 self-training" é outra coisa — isto é padrão de inferência, não treino).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 14:40 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · Fase 5 "vai" — P5-00 (Fronteira conferida) + P5-01 rodando
+
+Humano: "vai" (em casa; HD só amanhã no trabalho, **não pedir hoje**, risco assumido).
+
+**P5-00 — Fronteira de recusas CONFERIDA.** `PROJETO_REFERENCIA.md` "Fronteira de recusas"
+tem `| RLM como auto-treino sem humano no loop | Regra 3 | MEMÓRIAS (114) |`. MEMÓRIAS (114)
+desambigua explícito: **isso é outro RLM** — *Reinforcement Learning from Models* (auto-
+treino, recusado). O que a Fase 5 mede é **Recursive Language Models** (Zhang/Kraska/Khattab,
+arXiv:2512.24601) = **padrão de inferência** (corpus alcançado por busca, não injetado). A
+pasta `training/` fica fora. Autorização de (114): **"MEDIR. Nada além."** Decisão de adoção
+é do Humano (ver (186)/(187) — o experimento "RLM em 3 caminhos" de ago/2026 deixou isso em
+aberto). Arquivos-tarefa `P5-00`/`P5-01` escritos.
+
+**P5-01 — spike A/B rodando** (`redesign/rlm/spike_ab.py`, background):
+- Reusa a bancada **congelada** de `memoria/missoes/rlm-3caminhos/` — 16 perguntas
+  (`bancada.json`, classes needle/agregação/veredito/fabricação com `gabarito`/`termos_chave`),
+  `corpus/` (snapshot do canon 14/08), `corpus_b0/hermes_B0.md` (a injeção de então, ~28k tok).
+  **Escolha:** medir sobre o bench congelado (gabaritos válidos, comparável aos números de
+  ago/2026) em vez do canon de hoje (que faria os gabaritos N2/N4 derivarem). O
+  arquivo-tarefa P5-00 descrevia a variante "índice de produção"; a execução foi pela
+  congelada, pelo motivo acima.
+- **Braço A (injeção):** system = `hermes_B0.md` inteiro; 1 chamada.
+- **Braço B (consulta):** sem injeção; o modelo emite `BUSCAR: termos` → `grep -n -F` sobre
+  os 4 arquivos do `corpus/` (a operação que o `query_canon` faz — busca indexada);
+  `FINAL:` encerra; loop ≤ 8. Fallback: 2 buscas vazias → similaridade via embeddings
+  `:20134` (P2-03), registrado `usou_embeddings`.
+- **Mesmo modelo/endpoint/temp:** `qwen3.5-9b-64k` @ Ollama `:11434`, `num_ctx=32768`,
+  temp 0. (1ª tentativa com `qwen3.5:9b` bateu no `num_ctx` default de 4096 — o bug de V1
+  da própria bancada; trocado para o tag `-64k`.)
+- **Scoring:** needle/fabricação auto (termos_chave + tokens salientes do gabarito;
+  F1 = tem que recusar `(999)`; F4 = tem que negar RAG); agregação/veredito = fração de
+  palavra-chave + `precisa_leitura_manual`. Fabricação = cita `(999)` / entrada > topo
+  real / inventa RAG.
+- Saída: `redesign/rlm/RESULTADO.md` (tabela A vs B + veredito + respostas cruas) +
+  `traces/` JSONL. **Veredito** (aceite ROADMAP): B iguala/supera a fidelidade de A a menor
+  custo de token → **PROPOSTA ao Humano**; senão → **ARQUIVADO** com os números.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (só chamado via API), hooks. Nada
+instalado. Sem `sudo`. Escreve só em `redesign/rlm/`. Nenhuma decisão de adoção.
+
+**Falta / próximo:** o spike terminar → `RESULTADO.md` + veredito → fecha a Fase 5.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

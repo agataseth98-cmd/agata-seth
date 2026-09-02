@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 5 — Spike RLM** (próxima). **Fases 0, 1, 2, 3 e 4 FECHADAS.**
-ATUALIZADO: 2026-09-02 14:30 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P4-06 FEITO, FASE 4 FECHADA
+FASE ATUAL: **Fase 5 — Spike RLM** (EM ANDAMENTO — P5-00 feito, P5-01 rodando). **Fases 0-4 FECHADAS.**
+ATUALIZADO: 2026-09-02 14:40 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — Fase 5 "vai", P5-00 FEITO, spike P5-01 rodando
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -10,7 +10,13 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
+**EM ANDAMENTO: P5-01 (spike A/B RLM) · Claude · 2026-09-02 14:40 -03** — rodando os 2 braços
+(injeção `hermes_B0.md` vs consulta por `BUSCAR:`/grep) sobre a bancada congelada de 16
+perguntas, `qwen3.5-9b-64k` `num_ctx=32768` temp 0. P5-00 FEITO: **Fronteira de recusas
+conferida** — isto é Recursive Language Models (inferência), não o "RLM auto-treino" de
+(114); só MEDIR, decisão de adoção é do Humano. Arquivos-tarefa P5-00/P5-01 escritos.
+
+_(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
 P4-00 durabilidade (SqliteSaver+WAL) · P4-01 esqueleto (6 nós, `interrupt`) · P4-02 tools+
 sandbox `bwrap` · P4-03 GBNF só no envelope (2 fases) · P4-04 `agata` CLI (verify/
 commit-entry model-free) · P4-05 evals ((138)/(307) + hidratação) · P4-06 adapter dsh
