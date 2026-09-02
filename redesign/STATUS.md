@@ -1,8 +1,13 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~21:55 -03 · por: sessão Claude (Claude Code, na Máquina)
-BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` = 4aa90bd (local + remoto)
+ATUALIZADO: 2026-09-01 ~22:10 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`16fecc5`**
+e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
+(ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
+atrás — mesma defasagem da âncora-SHA do canon.
+BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
+→ commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 

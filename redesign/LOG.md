@@ -227,3 +227,42 @@ editada — proposta é atualizar depois do parecer do Conselho).
 e (se aprovados) T2/T3; então P0-03.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~22:10 -03 · sessão Claude (Claude Code, na Máquina) — Conselho 01, 1ª resposta
+
+**`gpt-5.6-terra` (via relay) parou** na conferência de refs: `git rev-parse pre-redesign`
+deu `cea5aeb`, não `4aa90bd`. Verificado na Máquina: **não é divergência.** `pre-redesign`
+é tag **anotada** (`git tag -a`, P0-01 passo 1); `git cat-file -t pre-redesign` = `tag`; o
+objeto-tag `cea5aeb` desreferencia (`pre-redesign^{commit}`) para o commit `4aa90bd` =
+MEMÓRIAS (309). Local e remoto (`git ls-remote --tags`) concordam em `cea5aeb`. Estado OK;
+o check é que era impreciso (comparou objeto-tag com SHA de commit).
+
+**Afinado (pedido do Humano "afine-o"):**
+- `CONTINUIDADE.md` §3 PRIMEIRO MOVIMENTO — bloco de reidratação agora ecoa os 4 refs com
+  `pre-redesign^{commit}` desreferenciado + nota de 3 linhas sobre tag anotada.
+- `STATUS.md` — linha `BASE:` explicita objeto-tag `cea5aeb` → commit `4aa90bd`; nova linha
+  ÂNCORA leve (piso conhecido = `16fecc5`, referência viva = `git rev-parse origin/redesign`).
+- `CONSELHO-01-relay.md` — removido o HEAD hardcoded (estava `bc567f6`, já stale — A4 em
+  ação); referência viva = topo de `STATUS.md`. Nota da tag anotada + do falso alarme.
+- `AUDITORIA-01.md` A4 — registrada a instância concreta; consequência para H2 (um futuro
+  `redesign/ANCORA.md` tem que emitir `pre-redesign^{commit}`, nunca o bare).
+
+**Substância do Conselho (minha 1ª resposta, marcada como auto-revisão + voto, não a
+verificação independente que A1 pede):** P1 — 5 tools confirmadas read-only quanto ao
+estado do projeto (`--rebuild` inalcançável: leading-dash barrado + args em lista sem
+shell; `perimetro.sh`/`verificar_cabecalho.py` sem escrita; `commit_entry` ausente);
+4 defeitos de robustez achados (sem timeout no `_run`; regex de `query_canon` mais frouxo
+do que parece — defesa real é `shell=False`; fd leak no `check_citation` se `os.write`
+falha; sem erro estruturado p/ script ausente). P2 — T2 sim com tier de risco
+(instala/runtime/escreve-fora = bloqueante; só-doc = leve e assíncrono); T3 — TTL não
+resolve a raiz, propor posse-por-commit (`redesign/posse/<tarefa>.claim`, push atômico
+desempata). P3 — E1 anotar não re-desenhar (+ pin `fastmcp==4.0.1`); E2 spike pequeno
+obrigatório antes do desenho da Fase 4 (teste matar-e-retomar sem commit duplicado), sem
+pré-comprometer Temporal.
+
+**Falta:** verificação de P1 por par que não seja o autor; respostas de Codex/Qwen a
+P2/P3; Humano decide H1-H4.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

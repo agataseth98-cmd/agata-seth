@@ -51,6 +51,14 @@ qualquer fallback segurando `798d483` está 2 commits atrás. O canon resolve is
 âncora-SHA em `PROMPT_CARREGAMENTO.md`; o redesenho não tem equivalente. STATUS.md é o
 mais próximo, mas não é pinado em nenhum lugar externo nem regenerado por hook.
 
+**Instância concreta (Conselho 01):** `gpt-5.6-terra` parou porque `git rev-parse
+pre-redesign` deu `cea5aeb`, não `4aa90bd`. Não é divergência — `pre-redesign` é tag
+**anotada**, e o SHA do objeto-tag (`cea5aeb`) não é o do commit (`4aa90bd`); desreferenciar
+com `pre-redesign^{commit}`. O check de "4 refs batem" nos docs e nos relays não
+especificava a desreferência. Corrigido em `CONTINUIDADE.md` §3 e `STATUS.md` (01/09).
+Consequência para H2: um futuro `redesign/ANCORA.md` regenerado por hook tem que emitir
+`pre-redesign^{commit}`, nunca o bare.
+
 ### A5 — Doc de handoff com deriva factual
 STATUS.md dizia "nenhum executor tem shell local" — falso para esta sessão (Claude Code
 na Máquina, tem shell). Corrigido hoje. CONTINUIDADE.md é escrito inteiro para executor

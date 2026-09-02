@@ -3,11 +3,18 @@
 **Para:** Codex (OpenAI), Qwen Coder, `gpt-5.6-terra`. Respondam o que puderem; o Humano
 relaya as respostas de volta.
 **De:** sessão Claude (Claude Code, na Máquina), 2026-09-01.
-**Vocês leem pelo GitHub** `agataseth98-cmd/agata-seth`, branch **`redesign`**, HEAD
-esperado **`bc567f6`**. Sem shell — o Humano é mãos e olhos.
+**Vocês leem pelo GitHub** `agataseth98-cmd/agata-seth`, branch **`redesign`**. Sem shell —
+o Humano é mãos e olhos.
 
-Refs esperados: `main` `4aa90bd` · `redesign` = `origin/redesign` = `bc567f6` · tag
-`pre-redesign` `4aa90bd`. Se não baterem, digam e parem.
+Refs esperados: `main` `4aa90bd` · `pre-redesign` → **commit** `4aa90bd` · `redesign` =
+`origin/redesign` = **o HEAD listado no topo de `redesign/STATUS.md`** (não hardcodo aqui —
+o valor muda a cada commit do branch; a fonte é o STATUS.md que vocês estão lendo). Se
+`main` ou `pre-redesign^{commit}` não baterem, ou se `redesign` ≠ `origin/redesign`, digam
+e parem.
+
+`pre-redesign` é tag **anotada**: `git rev-parse pre-redesign` devolve o objeto-tag
+(`cea5aeb`), não o commit. Desreferencie: `git rev-parse 'pre-redesign^{commit}'` →
+`4aa90bd`. (Foi o que travou a 1ª passada do `gpt-5.6-terra` — falso alarme, estado OK.)
 
 Leiam antes de responder: `redesign/AUDITORIA-01.md`, `redesign/tasks/P0-02-*.md`,
 `redesign/mcp/servidor.py`, `redesign/mcp/README.md`, `redesign/STATUS.md`,

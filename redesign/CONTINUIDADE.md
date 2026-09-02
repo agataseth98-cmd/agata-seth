@@ -44,16 +44,26 @@ colar este bloco e devolver **a saída inteira**:
 
 ```fish
 cd $HOME/agata
-git fetch origin
+git fetch origin --tags
 git switch redesign
 git pull --ff-only origin redesign
 echo "=== HEAD ==="; git rev-parse --short HEAD
+echo "=== refs (comparar com STATUS.md) ==="
+echo "main             = "(git rev-parse --short main)
+echo "redesign         = "(git rev-parse --short redesign)
+echo "origin/redesign  = "(git rev-parse --short origin/redesign)
+echo "pre-redesign     -> commit "(git rev-parse --short 'pre-redesign^{commit}')"  (objeto-tag "(git rev-parse --short pre-redesign)", anotada)"
 echo "=== STATUS.md ==="; cat redesign/STATUS.md
 echo "=== LOG.md (últimas 50 linhas) ==="; tail -n 50 redesign/LOG.md
 echo "=== git log (12) ==="; git log --oneline -12 HEAD --
 echo "=== tarefas ==="; ls -1 redesign/tasks/
 echo "=== MEMÓRIAS: topo (estado herdado) ==="; sed -n '24,90p' "MEMÓRIAS.md"
 ```
+
+**`pre-redesign` é tag anotada.** `git rev-parse pre-redesign` devolve o SHA do
+**objeto-tag** (`cea5aeb`), não o do commit. Sempre desreferencie: `pre-redesign^{commit}`
+(ou `^{}`) → `4aa90bd`. Comparar o objeto-tag com um SHA de commit é falso alarme — foi o
+que travou um par no Conselho 01.
 
 Com a saída em mãos:
 1. Diga qual é a **fase atual** (linha `FASE ATUAL:` em `STATUS.md`) e a **próxima tarefa
