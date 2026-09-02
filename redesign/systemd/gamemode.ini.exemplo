@@ -1,9 +1,17 @@
-# ~/.config/gamemode.ini  -- precisa: sudo pacman -S gamemode
-# Ao lancar um jogo com `gamemoderun <jogo>`, o GameMode roda `start=` (libera a 4060);
-# ao fechar, roda `end=` (retoma). `agata down` drena o WAL antes de cortar (P4-04).
+# ~/.config/gamemode.ini  -- precisa: sudo pacman -S gamemode lib32-gamemode (P7-02)
+#
+# Ao lancar um jogo com `gamemoderun <jogo>`:
+#   start=  roda quando o jogo abre  -> `stop agata.target` (drena o WAL via
+#           agata-drain, para os 5 servicos + o MoE, libera a VRAM da 4060)
+#   end=    roda quando o jogo fecha -> `start agata.target` (re-sobe os 5;
+#           o MoE NAO volta sozinho -- e' PartOf sem WantedBy, sob demanda)
+#
+# gamemode roda start=/end= como o usuario que lancou o jogo, entao
+# `systemctl --user` funciona sem sudo.
+
 [general]
 renice=10
 
 [custom]
-start=/home/orusoua/agata/redesign/grafo/.venv/bin/python /home/orusoua/agata/redesign/grafo/cli.py down
-end=/home/orusoua/agata/redesign/grafo/.venv/bin/python /home/orusoua/agata/redesign/grafo/cli.py up
+start=/usr/bin/systemctl --user stop agata.target
+end=/usr/bin/systemctl --user start agata.target

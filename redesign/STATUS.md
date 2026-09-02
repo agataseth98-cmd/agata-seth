@@ -1,9 +1,9 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; prep sem-HD de P7-03 feita; falta: `enable` do `agata.target` no boot, HD, 2 sudo, régua P-12). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 20:45 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 4) — P7-01 instalado + testado (agata.target + dreno); prep de P7-03 (propostas P-8 + runbook do HD).
-ÂNCORA (leve, manual): sobre `redesign` @ **`7a06d02`**; referência viva = `git rev-parse
+ATUALIZADO: 2026-09-02 21:05 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 4) — P7-01 instalado + testado + `enable` no boot; `SILO-HUMANO.md` (H-1 = régua P-12); P7-02 entregue ao Humano.
+ÂNCORA (leve, manual): sobre `redesign` @ **`e57ac47`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -28,11 +28,10 @@ leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flo
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
 **Fase 7 (Liga/desliga) — P7-00 FEITO · prep sem-HD de P7-03 FEITA · P7-01/02 aguardam:**
-- **P7-01 ✅ FEITO** (2026-09-02 ~20:40) — instalado em `~/.config/systemd/user/` + S7 PASS
-  (ver "Quadro de posse" e `redesign/systemd/README.md`). **Falta só:** `systemctl --user
-  enable agata.target` p/ boot — mudança no comportamento de todo login, e o contrapeso
-  (GameMode que faz `agata down` ao lançar jogo) é o P7-02, ainda travado em `sudo`. **Pede
-  um "vai" à parte.**
+- **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
+  + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
+  `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`
+  honra todo `WantedBy`; teste real acha o que a revisão de papel não acha).
 - **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
   + drop-in em `ollama.service`, ambos `sudo`).
 - **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:
@@ -42,9 +41,10 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
     · `redesign/fase7-hd/REGUA-P12.md` (R1/R2/R3 — **decisão do Humano**, com recomendação) ·
     `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md` (runbook: paths+sha256 dos 4 artefatos, `restic
     check`, restore) · `redesign/fase7-hd/semear_cache_p12.py`.
-  - **FALTA:** o HD (rodar o runbook + `restic check` + restore) · a régua do Humano +
-    `APROVADO-p12-backup-verificavel` / `APROVADO-cifrar-env` · aplicação real dos `.diff`
-    em `scripts/*` (Fase 8, ou "vai" explícito).
+  - **FALTA:** o HD (rodar o runbook + `restic check` + restore) · a régua do P-12 está
+    **parada no `redesign/SILO-HUMANO.md` (H-1)** por decisão do Humano — resolve-se no
+    P7-03, com o HD e os snapshots reais na frente (o `.diff` já pronto) · `APROVADO-*` ·
+    aplicação real dos `.diff` em `scripts/*` (Fase 8, ou "vai" explícito).
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).

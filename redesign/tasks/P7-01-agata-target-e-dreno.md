@@ -1,8 +1,8 @@
 # P7-01 — agata.target + dreno no stop (userspace, sem HD)
 
-**Status:** ✅ **FEITO (instalado + testado) — 2026-09-02 ~20:40 (relógio da máquina),
-com "vai" do Humano.** `agata.target` **NÃO** `enable`d p/ boot (pende de um "vai" à
-parte). Ver `redesign/systemd/README.md` (espelho do instalado + verificação S7).
+**Status:** ✅ **FEITO — 2026-09-02 ~21:00 (relógio da máquina), com "vai" do Humano.**
+Instalado + testado (S7 PASS) **e `agata.target` `enable`d p/ boot** ("sim" do Humano).
+Ver `redesign/systemd/README.md` (espelho do instalado + verificação S7).
 
 **O desenho mudou no caminho** (o rascunho `agata-dropin.conf` punha `ExecStop=cli.py
 down` em cada unit — isso **deadlocka**: `cli.py down` chama `systemctl stop` de dentro

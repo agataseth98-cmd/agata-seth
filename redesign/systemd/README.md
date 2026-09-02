@@ -1,9 +1,10 @@
 # redesign/systemd/ — units da Fase 7 (P7-01)
 
 Espelho do que está instalado em `~/.config/systemd/user/` (P7-01, 2026-09-02).
-**`agata.target` NÃO está `enable`d para o boot** — os membros sobem/param juntos
-por `systemctl --user start/stop agata.target`, mas nada volta sozinho num login
-até alguém rodar `systemctl --user enable agata.target`.
+**`agata.target` está `enable`d para o boot** (`systemctl --user enable agata.target`,
+"sim" do Humano 2026-09-02 ~21:00) — no login, `default.target` → `agata.target` →
+puxa os 5 membros. `llamacpp-agata` **não** sobe no boot (PartOf sem WantedBy).
+Só `agata.target` está em `default.target.wants/`; os membros só em `agata.target.wants/`.
 
 ## Arquivos
 
@@ -32,8 +33,8 @@ systemctl --user daemon-reload
 ```
 
 `agata-drain` foi `enable`d p/ `agata.target.wants/` (senão o target não puxa o dreno).
-`agata.target` em si fica `disabled` — **boot só quando o Humano der o "vai" p/
-`systemctl --user enable agata.target`**.
+`agata.target` foi `enable`d p/ `default.target.wants/` (boot) — "sim" do Humano
+2026-09-02 ~21:00. Rollback do boot: `systemctl --user disable agata.target`.
 
 ## Verificação P7-01 (S7, 2026-09-02 ~20:40) — PASS
 

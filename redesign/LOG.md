@@ -2592,3 +2592,53 @@ Ollama de produção (`:11434`) intocado — `llamacpp-agata` é `:20129`.
 2. Régua do P-12 (Humano) + `APROVADO-*`. 3. HD (runbook). 4. P7-02 (2 sudo). 5. Fase 8.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 21:05 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 4) · P7-01 — `enable` no boot + 3 lições · SILO-HUMANO.md · P7-02 entregue
+
+Respostas do Humano: (1) *"sim, espero três lições disso"* → `systemctl --user enable
+agata.target` feito + 3 lições abaixo. (2) régua do P-12: *"preciso de mais informações
+por aqui, é mais prático para os recursos do sistema, inclua isso no silo humano durante
+o processo de implementação quando for mais seguro"* → **`redesign/SILO-HUMANO.md`** criado
+(item H-1: a régua fica parada até o P7-03, com o HD e os snapshots reais na frente; o
+`.diff` já pronto). (3) HD amanhã: ok. (4) *"me mande os blocos"* → blocos `sudo` do P7-02
+entregues no chat (não rodados por esta sessão).
+
+**`enable` do `agata.target`:** `systemctl --user enable agata.target` → symlink em
+`default.target.wants/agata.target` (só o target; os 5 membros seguem apenas em
+`agata.target.wants/`). No próximo login: `default.target` → `agata.target` → puxa os 5;
+`llamacpp-agata` **não** (PartOf sem WantedBy). `gamemode.ini.exemplo` atualizado para
+`stop/start agata.target` (era `cli.py down/up`).
+
+**As 3 lições (P7-01):**
+
+1. **`systemctl` chamado de dentro de um `ExecStop` da mesma transação de stop
+   deadlocka.** O rascunho (`ExecStop=cli.py down` em cada unit) parecia óbvio e estava
+   errado: `cli.py down` roda `systemctl --user stop`, e o systemd trava isso contra o
+   teardown que ele mesmo está fazendo (`Stopping timed out. Terminating.`, 2×). Dreno via
+   systemd = **um oneshot dedicado**, ordenado `After=` os serviços, que **só espera** o
+   efeito terminar; **parar** os serviços é do systemd (`PartOf`). Separar "esperar" de
+   "orquestrar".
+
+2. **`systemctl enable <unit>` honra TODOS os `WantedBy=`, não só o que você quer.** O
+   `enable` dos membros criou symlink em `agata.target.wants/` (queria) **e** em
+   `default.target.wants/` (do `[Install]` do próprio `.service` — não queria) → os
+   serviços voltariam no boot antes da hora. Conferir `default.target.wants/` depois de
+   todo `enable` e limpar; ou usar `systemctl --user add-wants agata.target <unit>` (não
+   toca no `[Install]`).
+
+3. **Um teste de verdade acha o que a revisão de papel não acha.** O rascunho passou pela
+   checagem de schema (§7) sem levantar nem o deadlock nem o `omniroute` saindo 143
+   (`failed` no stop). Só o `stop agata.target` real, com um `intent` plantado no WAL,
+   expôs os dois. Para tarefa que toca runtime, o "teste de estado limpo" do S7 **é onde o
+   desenho é validado** — orçar tempo pra reprojetar no meio dele, não tratar como carimbo.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (o bloco do P7-02 que mexe em
+`ollama.service` vai para o Humano rodar), hooks, `scripts/*`. `enable` é userspace
+(`systemctl --user`), sem `sudo`.
+
+**Falta / próximo:** P7-02 (Humano roda os 2 blocos `sudo`: `gamemode` + `OLLAMA_KEEP_ALIVE`)
+· HD amanhã (runbook → destrava H-1 do SILO-HUMANO) · Fase 8.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
