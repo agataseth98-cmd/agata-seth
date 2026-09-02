@@ -872,3 +872,37 @@ Nada instalado. `~/.hermes/.env` não backupeado. Serviços OmniRoute seguem de 
 canônico. Fase 2 quando o Humano der o "vai" (ordem do ROADMAP: 1 → 3 → 2).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~08:42 -03 · sessão Claude (na Máquina) — P1-04 aplicado ao canon do branch (--no-verify)
+
+Humano: "não precisa verificar, regime de exceção vigente, a menos que represente perigo
+para o sistema." → apliquei a reescrita P1-04 ao caminho canônico e commitei com
+`git commit --no-verify`.
+
+**Feito:**
+- `cp redesign/router/conselho_remoto.py.P1-04-proposto scripts/conselho_remoto.py`;
+  `git rm` do `.P1-04-proposto` (a mudança agora É o arquivo canônico do branch).
+- **S7 (re-testado do caminho canônico):** T1 privado → `ABORTADO`, exit 1; T2 segredo
+  (`sk-…` + `TOKEN=…`) → proxy 422 (2 padrões redigidos) → `ABORTADO`, exit 1; T3 rota
+  completa → registro gravado (`20260902-083755-llama3.2_3b.json`, 36/46 tok), format
+  check rodou. **PASS.**
+- Perímetro (manual, antes do commit): **só** o `SUSPEITO (P-8)` de `conselho_remoto.py`
+  (a cerimônia que a exceção suspende) — P-1 e todo o resto verdes. Nenhum segredo, nada
+  destrutivo. Por isso `--no-verify` é seguro aqui.
+- `git commit --no-verify` — pula o `pre-commit` (perímetro + reescrita da âncora-SHA em
+  `PROMPT_CARREGAMENTO.md`). O `post-commit` **roda** (bundle/vault/índice). A âncora-SHA
+  do prompt fica um commit atrás; acerta no próximo commit normal.
+
+**Estado do `conselho_remoto.py` (branch):** −246/+70 vs. `main`. Toda a política
+preservada. `git diff main..redesign -- scripts/conselho_remoto.py` agora tem conteúdo —
+**esperado, merge só na Fase 8**. Reverter no branch: `git checkout main -- scripts/conselho_remoto.py`.
+
+**Não tocado:** `main`, canon (`REGRAS`/`PROJETO`/`MEMÓRIAS`), Hermes, Ollama de produção,
+hooks, `servidor.py`. Nada instalado.
+
+**Falta / próximo:** as chaves nuvem do Humano em `~/.hermes/.env` → P1-03 (pool + fallback
+real) + P1-04 (combo `conselho` com glm→gemini + 1 parecer real). Fase 1 fecha aí.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

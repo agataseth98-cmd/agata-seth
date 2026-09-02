@@ -7,18 +7,14 @@ escreve canon, nunca encadeia. É o último item da Fase 1.
 
 **Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. P1-03 parcial (combo `conselho` criada).
 
-**Status:** ⏳ **CÓDIGO FEITO + PLUMBING TESTADO, NÃO COMITADO NO CAMINHO CANÔNICO —
-2026-09-02 ~01:00, sessão autônoma.**
-
-> **P-8 barrou o commit em `scripts/conselho_remoto.py`** (arquivo canônico, muda
-> comportamento, sem par `propostas/APROVADO-`). A suspensão de P-8 é do *estado de
-> exceção* mas o `pre-commit` não sabe disso, e **não forcei** (`--no-verify` num arquivo
-> canônico, autônomo, de madrugada, é linha que não passo sozinho). A reescrita, testada,
-> está em **`redesign/router/conselho_remoto.py.P1-04-proposto`** (caminho não-canônico,
-> versionado). O `scripts/conselho_remoto.py` do working tree voltou ao canon.
-> **Para aplicar (Humano):** `cp redesign/router/conselho_remoto.py.P1-04-proposto
-> scripts/conselho_remoto.py` e commitar com `--no-verify` (exceção escrita) **ou** por um
-> par `propostas/`. Merge p/ `main`: Fase 8.
+**Status:** ✅ **FEITO no branch — 2026-09-02 ~08:40 -03.** Aplicado a
+`scripts/conselho_remoto.py` (cópia-branch) e commitado com **`git commit --no-verify`**
+por autorização explícita do Humano ("não precisa verificar, regime de exceção vigente").
+P-8 é a cerimônia que a exceção suspende; mudança testada e reversível (`git checkout
+main -- scripts/conselho_remoto.py`), `main` intocado. **Merge p/ `main`: só na Fase 8.**
+O `.P1-04-proposto` foi removido (a mudança agora É o arquivo canônico do branch).
+**Falta:** trocar o placeholder da combo `conselho` por glm-4.7-flash→gemini-2.5-flash
+quando as chaves entrarem em `~/.hermes/.env`, e um pedido de parecer real.
 
 > **Feito (na cópia `.P1-04-proposto`, testada com o script apontado p/ ela):**
 > - reescrito: −246/+70 linhas. Removidos
