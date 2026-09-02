@@ -9,7 +9,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-EM ANDAMENTO: P3-00 (manifesto + prova de reconstrutibilidade) · Claude · 2026-09-02 09:50 -03
+_(nenhuma tarefa EM ANDAMENTO)_ — P3-00 FEITO; próximo P3-01 (lista de prune).
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.

@@ -1100,3 +1100,35 @@ Manifesto: 20/20 com sha256 (de P0-00).
 **Próximo:** executar P3-00 (só leitura + reconstrução em daemon isolado — nada apagado).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~10:05 -03 · sessão Claude (na Máquina) — P3-00 FEITO (reconstrutibilidade provada)
+
+**Auditoria dos 20 modelos** (`models/manifest.json`, sem apagar nada — tag descartável +
+`ollama rm`, `ollama list` = 20 antes e depois):
+- **14 registry** → `ollama pull <name>`.
+- **4 custom-param** (`*-64k`) → `ollama pull <base>` + `ollama create -f <Modelfile>`.
+  **Blob de pesos = o da base** (`qwen3.5-9b-64k` e `qwen3.5:9b` compartilham
+  `sha256-dec52a4456…`) — somar `size_gb` deles superestima o prune. **Testado**
+  `qwen3.5-9b-64k`: blob do recriado = manifesto. ✅
+- **`nomic-embed-text`** → é library, `ollama pull nomic-embed-text` (heurística de P0-01
+  classificou "custom" à toa).
+- **`rlm-qwen3-8b-teste`** → único que depende de arquivo local: GGUF
+  `memoria/missoes/rlm-3caminhos/modelo/rlm-qwen3-8b-v0.1-q4_k_m.gguf` (4,7 GB). O `sha256`
+  do GGUF (`c3b6bfbc…`) É o blob do Ollama — import verbatim, reconstrói bit a bit.
+  **Não está nos snapshots restic** (só config). Item de backup a decidir com o Humano.
+
+**`models/RECONSTRUCAO.md`** criado com os 3 métodos + a tabela + o alerta do GGUF do rlm.
+
+**Aceite P3-00:** todo modelo cai numa classe com método escrito; 1 registry + 1 custom
+com sha256 conferido; o não-reconstrutível-só-por-manifesto (`rlm`) está identificado com
+o GGUF localizado; nada apagado. ✅
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (só leitura + tag descartável),
+hooks. Nada instalado.
+
+**Falta / próximo:** **P3-01** — `models/PRUNE.md` (keep-list vs remover, tamanho real por
+blob órfão). Sem apagar. Depois P3-02 pede aprovação item a item do Humano.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -6,6 +6,20 @@ segurança que tem que passar antes do P3-02 (prune destrutivo).
 
 **Pré-requisitos:** Fase 1 FECHADA. Fase 3 com o "vai" do Humano.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~10:05 -03, sessão Claude (na Máquina).**
+- 20 modelos classificados em `models/RECONSTRUCAO.md`: **14** registry (`ollama pull`),
+  **4** custom-param 64k (`pull` da base + `ollama create` — **testado** `qwen3.5-9b-64k`,
+  `blob_sha256` do recriado = `sha256-dec52a4456…` = manifesto), **1** `nomic-embed-text`
+  (é library, `ollama pull`), **1** `rlm-qwen3-8b-teste`.
+- **`rlm-qwen3-8b-teste` é o único ponto de atenção:** reconstrói do GGUF
+  `memoria/missoes/rlm-3caminhos/modelo/rlm-qwen3-8b-v0.1-q4_k_m.gguf` (4,7 GB) — o
+  `sha256` do GGUF (`c3b6bfbc…`) é **idêntico** ao blob do Ollama (import verbatim). Esse
+  GGUF **não** está nos snapshots restic atuais — item de backup a decidir com o Humano.
+- Teste feito com tag descartável (`ollama create` + `ollama rm`); `ollama list` = 20
+  modelos antes e depois, **nada apagado**.
+- **Conclusão:** manifesto + `ollama pull` + o GGUF do rlm reconstroem 100%. Pode seguir
+  para P3-01.
+
 **Arquivos que a tarefa toca (branch `redesign`):**
 - `models/manifest.json` — enriquecer se faltar campo (hoje: 20 modelos, `blob_sha256`
   em 20/20, `origem`, `modelfile` completo — de P0-00)
