@@ -1,5 +1,13 @@
 # P5-01 — spike A/B: hidratação por injeção vs. por consulta
 
+**Status:** ✅ **FEITO (ARQUIVADO) — 2026-09-02 ~18:50 (relógio da máquina).**
+Humano interrompeu em 27/32 unidades ("não vale o esforço; esse padrão precisa ser
+desvendado e assimilado pelo sistema"). **Veredito: ARQUIVADO** — a consulta não bateu a
+injeção (fidelidade 3/13 vs 9/14; **~87k tok/acerto vs ~45k**; ~96 min vs ~6 min; V1_B
+sozinho gastou 110k tok / 45 min). Fabricação real = **0 nos dois braços** (o auto-score
+errou F1/F2 — corrigido na leitura). Marcado p/ trabalho futuro sério (lib `rlms`,
+ferramenta de busca melhor). Nada de produção muda. Ver `redesign/rlm/RESULTADO.md`.
+
 **Objetivo:** medir fidelidade e custo de token dos dois braços sobre `bancada.json` (16
 perguntas congeladas) e emitir o veredito do ROADMAP (iguala/supera → PROPOSTA · ou arquivado).
 

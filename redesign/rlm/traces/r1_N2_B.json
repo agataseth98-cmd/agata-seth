@@ -1,0 +1,47 @@
+{
+  "rodada": 1,
+  "id": "N2",
+  "classe": "needle",
+  "braco": "B",
+  "final": "O arquivo MEMÓRIAS.md tem 1026 linhas.",
+  "tokens": 37916,
+  "ms": 914051,
+  "n_chamadas": 3,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "",
+      "tokens_in": 152,
+      "tokens_out": 32616,
+      "ms": 830766
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: MEMÓRIAS.md, linhas",
+      "tokens_in": 179,
+      "tokens_out": 2407,
+      "ms": 56887
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "MEMÓRIAS.md",
+        "linhas"
+      ],
+      "saida": "MEMÓRIAS.md:1:# MEMÓRIAS.md — Sistema Agata\nMEMÓRIAS.md:1000:Ordem do Humano, risco estrutural assumido por escrito (regra de mudança estrutural cumprida por esta via): consolidar todo o sistema em exatamente 3 arquivos — REGRAS.md, PROJETO.md, MEMÓRIAS.md. MEMÓRIAS absorve DIÁRIO + CONSELHO + MODs + registro de sucessão, append-only, preparado pra receber a história anterior por migração. SUCESSOR.md deixa de existir como arquivo: regras de curador migraram pras REGRAS; nomeação (`lacuna`) vive no PROJETO. selar.sh e roteiro de diagnóstico dos bugs embutidos no PROJETO. Rascunhos anteriores ("
+    },
+    {
+      "tipo": "llm",
+      "saida": "FINAL: O arquivo MEMÓRIAS.md tem 1026 linhas.",
+      "tokens_in": 1478,
+      "tokens_out": 1084,
+      "ms": 26398
+    }
+  ]
+}

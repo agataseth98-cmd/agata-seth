@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "V2",
+  "classe": "veredito",
+  "braco": "A",
+  "final": "FINAL: Agata · Claude Sonnet 5 · t=32 (contado no contexto) · 14/08/2026 16:33 -03 (informado pela interface) · pronto.\n\nNa rodada de TES-001 auditada por Kimi em (143), **ambos foram reprovados**: Seth com 4 achados e Kimi (a auditora) com 2 achados. O motivo: a cadeia de auditoria em camadas exige que cada camada verifique independentemente — um auditor sozinho pode alegar sem verificar, mesma falha que ele audita. A confirmação veio em três camadas de verificação, mostrando que nenhum elo tem imunidade permanente (REGRAS.md, \"Cadeia de auditoria em camadas\").",
+  "tokens": 28835,
+  "ms": 15552,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28289,
+      "tokens_out": 546,
+      "ms": 15552
+    }
+  ]
+}

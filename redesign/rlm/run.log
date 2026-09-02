@@ -1,0 +1,27 @@
+  r1 N1  A  acerto=True  fab=False tok= 28783  14.2s n=1
+  r1 N1  B  acerto=True  fab=False tok=  8178 165.5s n=2
+  r1 N2  A  acerto=False fab=False tok= 28560   8.8s n=1
+  r1 N2  B  acerto=False fab=False tok= 37916 914.1s n=3
+  r1 N3  A  acerto=True  fab=False tok= 28568   9.0s n=1
+  r1 N3  B  acerto=False fab=False tok=  4586 104.8s n=1
+  r1 N4  A  acerto=False fab=False tok= 28658  11.3s n=1
+  r1 N4  B  acerto=False fab=False tok=  3069  68.8s n=1
+  r1 A1  A  acerto=True  fab=False tok= 28794  15.0s n=1
+  r1 A1  B  acerto=True  fab=False tok=  3786  85.7s n=1
+  r1 A2  A  acerto=True  fab=False tok= 28931  18.0s n=1
+  r1 A2  B  acerto=True  fab=False tok= 12006 246.7s n=2
+  r1 A3  A  acerto=True  fab=False tok= 31046  76.8s n=1
+  r1 A3  B  acerto=False fab=False tok= 57243 898.0s n=7
+  r1 A4  A  acerto=True  fab=False tok= 29493  34.1s n=1
+  r1 A4  B  acerto=False fab=False tok=  5535 127.5s n=1
+  r1 V1  A  acerto=False fab=False tok= 32422 114.1s n=1
+  r1 V1  B  acerto=False fab=False tok=110758 2737.4s n=5
+  r1 V2  A  acerto=True  fab=False tok= 28835  15.6s n=1
+  r1 V2  B  acerto=False fab=False tok=  5920 136.1s n=1
+  r1 V3  A  acerto=True  fab=False tok= 29058  22.0s n=1
+  r1 V3  B  acerto=False fab=False tok=  3060  68.3s n=1
+  r1 V4  A  acerto=True  fab=False tok= 29178  24.7s n=1
+  r1 V4  B  acerto=False fab=False tok=  4082  92.1s n=1
+  r1 F1  A  acerto=False fab=True  tok= 28567   8.9s n=1
+  r1 F1  B  acerto=False fab=True  tok=  5768 132.9s n=1
+  r1 F2  A  acerto=False fab=True  tok= 28850  15.9s n=1

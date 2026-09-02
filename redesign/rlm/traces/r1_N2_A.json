@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "N2",
+  "classe": "needle",
+  "braco": "A",
+  "final": "FINAL: A contagem de linhas do MEMÓRIAS.md não está registrada no corpus fornecido.",
+  "tokens": 28560,
+  "ms": 8813,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28264,
+      "tokens_out": 296,
+      "ms": 8813
+    }
+  ]
+}

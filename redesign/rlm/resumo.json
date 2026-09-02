@@ -1,0 +1,32 @@
+{
+  "A": {
+    "n": 14,
+    "acertos": 9,
+    "fabricacoes": 2,
+    "tokens_total": 409743,
+    "tok_por_acerto": 45527,
+    "latencia_s": 388,
+    "n_cham_media": 1.0,
+    "por_classe": {
+      "agregacao": "4/4",
+      "fabricacao": "0/2",
+      "needle": "2/4",
+      "veredito": "3/4"
+    }
+  },
+  "B": {
+    "n": 13,
+    "acertos": 3,
+    "fabricacoes": 1,
+    "tokens_total": 261907,
+    "tok_por_acerto": 87302,
+    "latencia_s": 5778,
+    "n_cham_media": 2.1,
+    "por_classe": {
+      "agregacao": "2/4",
+      "fabricacao": "0/1",
+      "needle": "1/4",
+      "veredito": "0/4"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "N3",
+  "classe": "needle",
+  "braco": "A",
+  "final": "FINAL: O api_server escuta na porta 8642 e o bind é 127.0.0.1 (PROJETO.md, \"Segurança\").",
+  "tokens": 28568,
+  "ms": 8954,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28265,
+      "tokens_out": 303,
+      "ms": 8954
+    }
+  ]
+}

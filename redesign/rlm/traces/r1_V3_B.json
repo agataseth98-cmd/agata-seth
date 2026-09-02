@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "V3",
+  "classe": "veredito",
+  "braco": "B",
+  "final": "Nao encontrei informacoes sobre o status de TES-001 no corpus do sistema Agata.",
+  "tokens": 3060,
+  "ms": 68334,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: Nao encontrei informacoes sobre o status de TES-001 no corpus do sistema Agata.",
+      "tokens_in": 163,
+      "tokens_out": 2897,
+      "ms": 68334
+    }
+  ]
+}

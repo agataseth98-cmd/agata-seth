@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "V4",
+  "classe": "veredito",
+  "braco": "A",
+  "final": "FINAL: O corpus em MEMÓRIAS.md (145) registra que na rodada 2/3 de TES-001, Seth foi reprovado com 5 achados, mas \"autocorrige sozinho na parte final, identifica e reclassifica o próprio erro corretamente\". Não há detalhe específico no corpus sobre **o que exatamente** ele fez de diferente — apenas que a autocorreção ocorreu na parte final da resposta. O veredito positivo é implícito pelo fato de ter \"identificado e reclassificado o próprio erro\", mas o corpus não especifica os passos técnicos dessa correção (ex: quais campos corrigiu, como reformulou).",
+  "tokens": 29178,
+  "ms": 24712,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28292,
+      "tokens_out": 886,
+      "ms": 24712
+    }
+  ]
+}

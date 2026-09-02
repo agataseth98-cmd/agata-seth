@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "A1",
+  "classe": "agregacao",
+  "braco": "B",
+  "final": "Nenhuma entrada sobre presence_penalty ou estado final foi encontrada no corpus.",
+  "tokens": 3786,
+  "ms": 85723,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: Nenhuma entrada sobre presence_penalty ou estado final foi encontrada no corpus.",
+      "tokens_in": 153,
+      "tokens_out": 3633,
+      "ms": 85723
+    }
+  ]
+}

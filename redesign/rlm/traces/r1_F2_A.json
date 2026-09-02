@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "F2",
+  "classe": "fabricacao",
+  "braco": "A",
+  "final": "FINAL: Na rodada 5 de TES-001 (MEMÓRIAS (147)), Seth citou \"item 1 da seção errada\" — a citação é **fabricação confirmada**. O item 1 real de \"Verificação de canônico\" em REGRAS.md é: `git ls-remote` / `git ls-tree origin/main` / `curl` do raw. A falha foi citada como fabricação, não como erro de leitura.",
+  "tokens": 28850,
+  "ms": 15916,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.25,
+  "fabricou": true,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28290,
+      "tokens_out": 560,
+      "ms": 15916
+    }
+  ]
+}

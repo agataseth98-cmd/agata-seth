@@ -1,0 +1,61 @@
+{
+  "rodada": 1,
+  "id": "V1",
+  "classe": "veredito",
+  "braco": "B",
+  "final": "Causa real: `provider: custom` sempre acopla no `CustomProfile` do Hermes, injetando `extra_body.options.num_ctx` em qualquer endpoint chamado `custom`. Groq não aceita esse campo (`HTTP 400`). O código aplica `agent._ollama_num_ctx` para todo `provider == \"custom\"` sem diferenciar Ollama de Groq. Conserto: O corpus menciona a aplicação de um `fallback_model = qwen2.5-14b-64k` (MEMÓRIAS.md:326) e a promoção do modelo local `qwen3.5-9b-64k` sob auditoria (PROJETO.md:25), mas não detalha uma correção de código específica para o Hermes, apenas o diagnóstico da causa e ajustes de configuração/modelo subsequentes.",
+  "tokens": 110758,
+  "ms": 2737357,
+  "n_chamadas": 5,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "",
+      "tokens_in": 159,
+      "tokens_out": 32609,
+      "ms": 829351
+    },
+    {
+      "tipo": "llm",
+      "saida": "",
+      "tokens_in": 186,
+      "tokens_out": 32582,
+      "ms": 827957
+    },
+    {
+      "tipo": "llm",
+      "saida": "",
+      "tokens_in": 213,
+      "tokens_out": 32555,
+      "ms": 827328
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: num_ctx, hermes-agent bug",
+      "tokens_in": 240,
+      "tokens_out": 6254,
+      "ms": 148364
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "num_ctx",
+        "hermes-agent bug"
+      ],
+      "saida": "MEMÓRIAS.md:90:- Cérebro local: **llama3.1:8b** (128k nativo), via Ollama, `num_ctx 65536`. Motivo: Hermes exige contexto ≥64k; `qwen2.5:7b` (32k) não serve. No 4060 8GB há offload parcial pra CPU (mais lento; tuning de KV cache fica pra depois).\nMEMÓRIAS.md:224:**Diagnóstico do \"Ágata caiu direto pro llama3.1:8b, pulando o Groq\"**: o Groq não estava sendo pulado — era tentado e rejeitado com `HTTP 400: property 'options' is unsupported`. Causa raiz real: `provider: custom` sempre acopla no `CustomProfile` do Hermes, que injeta `extra_body.options.num_ctx` (mecanismo do `ollama_num_ctx`) em **"
+    },
+    {
+      "tipo": "llm",
+      "saida": "FINAL: Causa real: `provider: custom` sempre acopla no `CustomProfile` do Hermes, injetando `extra_body.options.num_ctx` em qualquer endpoint chamado `custom`. Groq não aceita esse campo (`HTTP 400`). O código aplica `agent._ollama_num_ctx` para todo `provider == \"custom\"` sem diferenciar Ollama de Groq. Conserto: O corpus menciona a aplicação de um `fallback_model = qwen2.5-14b-64k` (MEMÓRIAS.md:",
+      "tokens_in": 1603,
+      "tokens_out": 4357,
+      "ms": 104357
+    }
+  ]
+}

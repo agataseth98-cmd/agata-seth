@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "V1",
+  "classe": "veredito",
+  "braco": "A",
+  "final": "FINAL: Não era do hermes-agent; causa real é limitação do Ollama no endpoint OpenAI que não suporta num_ctx por desenho, conserto foi tag customizada com num_ctx embutido no Modelfile.",
+  "tokens": 32422,
+  "ms": 114123,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28271,
+      "tokens_out": 4151,
+      "ms": 114123
+    }
+  ]
+}

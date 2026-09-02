@@ -2108,3 +2108,64 @@ instalado. Sem `sudo`. Escreve só em `redesign/rlm/`. Nenhuma decisão de adoç
 **Falta / próximo:** o spike terminar → `RESULTADO.md` + veredito → fecha a Fase 5.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 18:50 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P5-01 ARQUIVADO — FASE 5 FECHADA
+
+**Humano interrompeu o spike em 27/32 unidades:** *"pode parar, não vale o esforço, esse
+padrão precisa ser desvendado e assimilado pelo sistema, vamos prosseguir por ordem minha."*
+→ **veredito: ARQUIVADO** (o aceite do ROADMAP prevê "iguala/supera → PROPOSTA · senão →
+ARQUIVADO com os números"). `qwen3.5-9b-64k` segue titular. Nada de produção muda (decisão
+de adoção é do Humano — (114)/(186)). **Marcado para trabalho futuro sério** — não descartado.
+
+**Números (rodada 1, 27/32; `qwen3.5-9b-64k` `num_ctx=32768` temp 0, bancada congelada):**
+
+| | A — injeção (`hermes_B0.md`) | B — consulta (`BUSCAR:`/grep) |
+|---|---|---|
+| perguntas | 14 | 13 |
+| acertos (auto) | **9** (needle 2/4, agreg 4/4, veredito 3/4) | **3** (needle 1/4, agreg 2/4, veredito 0/4) |
+| tokens totais | 409.743 | 261.907 |
+| **tokens/acerto** | **~45.500** | **~87.300** |
+| latência total | **388 s** (~6 min) | **5.778 s** (~96 min) |
+| chamadas/pergunta | 1,0 | 2,1 |
+| pior caso | A3: 31k/77s | **V1: 110.758 tok / 2.737 s (45 min) / 5 chamadas** |
+
+**Fabricação real = 0 nos dois braços** (nas 27 unidades). O auto-score marcou `fab=True`
+em F1 (A e B) e F2 (A) **por engano** — conta o modelo mencionar `(999)` ou "fabricação"
+numa recusa. Lendo as respostas cruas, os dois trataram as armadilhas certo ("(999) não
+existe — maior é (162)"; "citação de item errado é fabricação confirmada"). Correção
+registrada no `RESULTADO.md`.
+
+**Comparação com "RLM em 3 caminhos" (ago/2026, (186)/(187)):**
+- **Injeção hoje ≈ injeção de então** (custo/fidelidade parecidos; a fabricação de V2 não repetiu — V2_A acertou).
+- **Consulta hoje MUITO pior que o C1 de então** (3/13 vs 9/16; ~87k vs ~21k tok/limpo). O
+  C1 tinha um `grep`-loop cuidado; a minha `BUSCAR:` é crua e o modelo **desiste** ("não
+  encontrado") para N3/A1/A3/A4/V2-V4, que **são** respondíveis. O ganho de token do C1
+  (~2× mais barato) **não se reproduziu** — a consulta ficou ~2× mais **cara** e ~15× mais lenta.
+
+**As 3 lacunas de (114):** (1) o `api/chat` do Ollama serve as sub-chamadas — **sim**, sem
+problema (gargalo foi o `num_ctx` grande, não o endpoint); (2) 1–8 chamadas (média 2,1),
+mas o token dispara com o contexto acumulado; (3) o qwen **não fabrica** como sub-chamada —
+o problema foi o oposto, desiste em vez de inventar.
+
+**Achado técnico (para uma futura tentativa séria):** `qwen3.5:9b` (sem tag) tem `num_ctx`
+default 4096 no Ollama — a injeção de ~28k tokens é silenciosamente truncada (o bug de V1
+da própria bancada). Usar sempre o tag `-64k` ou `options.num_ctx` explícito. Uma tentativa
+séria precisa: lib `rlms==0.1.1`, ferramenta de busca melhor (`wc`/`sha256sum` no toolset,
+índice em vez de `grep` linear), instrumentação de token no schema do trace (o `recursive-llm`
+de então não gravava tokens — (195)).
+
+**Arquivos:** `redesign/rlm/spike_ab.py`, `redesign/rlm/RESULTADO.md`, `redesign/rlm/resumo.json`,
+`redesign/rlm/traces/r1_*.json` (27), `run.log`. `redesign/tasks/P5-01-*.md` (ARQUIVADO).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (só chamado via API), hooks. Nada
+instalado. Sem `sudo`. Escreveu só em `redesign/rlm/`. **HD desconectado** desde ~17:05 —
+bundles no staging local + marcador pendente (previsto; `git push` é a cópia externa).
+
+**Falta / próximo:** **Fase 6 (Obsidian)** — ordem do ROADMAP `…→5→6→7→8`. Pede o "vai" do
+Humano + arquivos-tarefa. Objetivo: `obsidian-local-rest-api` (versão com MCP nativo) em
+`:27124/mcp/`, serve o vault derivado `memoria/obsidian/` read-only, recuperação
+índice-primeiro, **zero vector DB**.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

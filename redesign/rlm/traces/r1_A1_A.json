@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "A1",
+  "classe": "agregacao",
+  "braco": "A",
+  "final": "FINAL: As entradas que tratam de `presence_penalty` são (151), (152), (153) e (154). O estado final registrado em (154): a hipótese de que `presence_penalty=1.5` era causa isolada do corte de geração **não se sustenta** — teste com Ollama 0.32.11 não reproduziu o corte, mas a variável real ainda não foi isolada.",
+  "tokens": 28794,
+  "ms": 15027,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28265,
+      "tokens_out": 529,
+      "ms": 15027
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "V3",
+  "classe": "veredito",
+  "braco": "A",
+  "final": "FINAL: Não, TES-001 não está fechado. PROJETO.md registra explicitamente: \"TES-001 — não fechado. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Exige sessões genuinamente independentes.\"\n\n**Por que não fechado:**\n- O protocolo TES-001 exige sessões genuinamente independentes, não auto-satisfazível numa sessão só por mais rodadas que tenha.\n- Hipótese em aberto: o teto de truncamento do carregador ((103)/(104)) esteve ativo durante as três rodadas — os modelos testados podem ter sido avaliados contra REGRAS que nunca chegaram inteiras.\n\n**O que pesa sobre resultados anteriores:**\n- MEMÓRIAS (106) registra: \"O fenômeno por trás de (103), registrado pra quem não quer acreditar.\"\n- A correção de (104) só foi aplicada depois das três rodadas adversas.\n- PROJETO.md diz: \"Não é reafirmação de causalidade, é motivo pra rerodar TES-001 depois da correção de (104) e comparar.\"\n\n**Em aberto:** rerodar TES-001 após a correção de (104) para comparar resultados.",
+  "tokens": 29058,
+  "ms": 21969,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28275,
+      "tokens_out": 783,
+      "ms": 21969
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 5 — Spike RLM** (EM ANDAMENTO — P5-00 feito, P5-01 rodando). **Fases 0-4 FECHADAS.**
-ATUALIZADO: 2026-09-02 14:40 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — Fase 5 "vai", P5-00 FEITO, spike P5-01 rodando
+FASE ATUAL: **Fase 6 — Obsidian** (próxima). **Fases 0-5 FECHADAS** (5 = spike ARQUIVADO).
+ATUALIZADO: 2026-09-02 18:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P5-01 ARQUIVADO, FASE 5 FECHADA
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -10,11 +10,15 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-**EM ANDAMENTO: P5-01 (spike A/B RLM) · Claude · 2026-09-02 14:40 -03** — rodando os 2 braços
-(injeção `hermes_B0.md` vs consulta por `BUSCAR:`/grep) sobre a bancada congelada de 16
-perguntas, `qwen3.5-9b-64k` `num_ctx=32768` temp 0. P5-00 FEITO: **Fronteira de recusas
-conferida** — isto é Recursive Language Models (inferência), não o "RLM auto-treino" de
-(114); só MEDIR, decisão de adoção é do Humano. Arquivos-tarefa P5-00/P5-01 escritos.
+_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 5 (Spike RLM) FECHADA — ARQUIVADO** (2026-09-02 ~18:50).
+P5-00: Fronteira conferida (Recursive LM = inferência, não o "RLM auto-treino" recusado em
+(114); só MEDIR). P5-01: spike A/B interrompido pelo Humano em 27/32; a consulta não bateu
+a injeção (3/13 vs 9/14 acertos; ~87k vs ~45k tok/acerto; ~96 vs ~6 min). **Fabricação = 0
+nos dois braços.** Marcado p/ trabalho futuro sério (lib `rlms`, busca melhor). Nada de
+produção muda. `redesign/rlm/RESULTADO.md`.
+**Próximo: Fase 6 (Obsidian)** — `obsidian-local-rest-api` (versão com MCP nativo) em
+`:27124/mcp/`, serve o vault derivado read-only, zero vector DB. Pede o "vai" do Humano +
+arquivos-tarefa.
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
 P4-00 durabilidade (SqliteSaver+WAL) · P4-01 esqueleto (6 nós, `interrupt`) · P4-02 tools+

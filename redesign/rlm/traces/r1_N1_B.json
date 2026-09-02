@@ -1,0 +1,39 @@
+{
+  "rodada": 1,
+  "id": "N1",
+  "classe": "needle",
+  "braco": "B",
+  "final": "O valor configurado é 100000, posto no arquivo ~/.hermes/config.yaml. Esse valor foi adotado para evitar o truncamento do arquivo de contexto (.hermes.md) antes da injeção no modelo, que ocorria com limites inferiores (como 20.000 caracteres), garantindo que todo o conteúdo (ex: PROJETO.md) fosse entregue sem corte, sem afetar a compressão de histórico governada por model.context_length.",
+  "tokens": 8178,
+  "ms": 165485,
+  "n_chamadas": 2,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 0.83,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: context_file_max_chars",
+      "tokens_in": 163,
+      "tokens_out": 5750,
+      "ms": 136896
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "context_file_max_chars"
+      ],
+      "saida": "MEMÓRIAS.md:1497:- `_load_hermes_md` + `_get_context_file_max_chars`, chamados com `cwd=~/agata` e o `.hermes.md` real: arquivo tem **37.340 caracteres** (após scan/strip); resultado final entregue ao modelo: **18.200 caracteres — 51% cortados**, meio do arquivo substituído por um marcador `[...truncated...]`.\nMEMÓRIAS.md:1509:**Decisão do Humano, executada:** opção (b) — teto explícito só pra arquivo de contexto, sem tocar `model.context_length` (que também governa compressão de histórico, efeito não medido — `lacuna` mantida de (103)). `context_file_max_chars: 100000` adicionado a `~/.hermes"
+    },
+    {
+      "tipo": "llm",
+      "saida": "FINAL: O valor configurado é 100000, posto no arquivo ~/.hermes/config.yaml. Esse valor foi adotado para evitar o truncamento do arquivo de contexto (.hermes.md) antes da injeção no modelo, que ocorria com limites inferiores (como 20.000 caracteres), garantindo que todo o conteúdo (ex: PROJETO.md) fosse entregue sem corte, sem afetar a compressão de histórico governada por model.context_length.",
+      "tokens_in": 1081,
+      "tokens_out": 1184,
+      "ms": 28589
+    }
+  ]
+}
