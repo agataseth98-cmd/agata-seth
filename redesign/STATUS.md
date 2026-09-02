@@ -1,16 +1,24 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 4 — Grafo** (próxima). **Fases 0, 1, 2 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 12:08 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P2-03 FEITO, FASE 2 FECHADA
-ÂNCORA (leve, manual): sobre `redesign` @ **`637408f`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — "vai" dado, arquivos-tarefa escritos). **Fases 0, 1, 2 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 13:00 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — Fase 4 "vai", P4-00..P4-06 escritos
+ÂNCORA (leve, manual): sobre `redesign` @ **`5905740`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
+**EM ANDAMENTO: P4-00 (spike de durabilidade) · Claude · 2026-09-02 13:00 -03** — GATE da
+Fase 4. Arquivos-tarefa P4-00..P4-06 escritos (analogia do P0-03 para Fases 1-2):
+P4-00 spike durabilidade (matar-e-retomar → veredito A/B) · P4-01 estado+esqueleto do grafo
+(6 nós, interrupt no portão) · P4-02 tools+sandbox `bwrap` · P4-03 GBNF só no envelope ·
+P4-04 `agata` CLI (verify/commit-entry model-free) · P4-05 evals (fabricação (138)/(307) +
+hidratação) · P4-06 adapter dsh dormente. **P4-00 executa a seguir** (instala langgraph em
+venv isolado).
+
+_(histórico:)_ **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
 P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · P2-02
 `openvino-whisper.service` (`:20130`, `GPU.0`, `whisper-base-int8-ov`, RTF 0.082) · P2-03
 `openvino-embeddings.service` (`:20134`, `GPU.0`, `multilingual-e5-small` 384d, formato

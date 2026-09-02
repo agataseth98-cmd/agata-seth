@@ -1615,3 +1615,53 @@ arquitetura. Ordem do ROADMAP: `0→1→3→2→4→5→6→7→8`. Fases 0–3 
 Humano + os arquivos-tarefa da Fase 4 (P0-03 só cobriu Fases 1-2).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 13:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · Fase 4 "vai" — arquivos-tarefa P4-00..P4-06
+
+**Humano: "vai"** para a Fase 4 (Grafo). O P0-03 só tinha escrito os arquivos-tarefa das
+Fases 1-2 — escritos agora os 7 da Fase 4, no schema do `CONTINUIDADE.md`:
+
+- **P4-00 — spike de durabilidade (GATE).** Instala `langgraph` em venv isolado
+  (`redesign/grafo/.venv`). Grafo-brinquedo com os nós reais + WAL próprio (`eventos.ndjson`
+  fsync) + `SqliteSaver` + idempotency key por `(thread,node,passo)`. Matar `-9` em 3
+  pontos (antes do efeito / entre efeito e confirmação / entre confirmação e checkpoint),
+  retomar, provar os 4 critérios do E2 (sem duplicar; idempotente-ou-pendente; estado
+  explica último efeito; log reconstrói a decisão). Sai `DURABILIDADE.md` com o veredito
+  **A** (`SqliteSaver` + WAL mínimo) ou **B** (camada dedicada). Não pré-compromete Temporal.
+- **P4-01** — `estado.py` (TypedDict, reducers append-only) + `grafo.py` (6 nós:
+  `hidratar→rotear→trabalhar→verificar→portão→registrar_e_commitar`, `interrupt` no portão).
+  Usa o veredito do P4-00. Teste ponta a ponta num clone.
+- **P4-02** — `tools.py` (as 5 do P0-02 + `commit_entry`) + `sandbox.py` (`bwrap 0.12` já
+  instalado — `--unshare-all`, ro-bind no repo, sem rede). Equivalência tool↔script +
+  2 testes de contenção.
+- **P4-03** — `envelope.gbnf` (só cabeçalho Regra 1 / `sync:` / eco; corpo `.*`) via GBNF
+  nativo do `llama-server` (Fase 3). Anti "alignment tax" (PESQUISA C3): 10 envelopes
+  válidos + teste adversário que não distorce o corpo.
+- **P4-04** — `agata` CLI (`up`/`down`/`status`/`verify`/`commit-entry`/`run`/`logs`).
+  `verify` e `commit-entry` **model-free** (rodam com tudo desligado). `down` drena (checa
+  o WAL). Só units `--user`, sem `sudo`.
+- **P4-05** — `evals/` — `fabricacao.py` (o cenário de (138) tem que ser pego; manter
+  (307)) + `hidratacao.py` (fidelidade ao topo do canon (309), sem fabricar nº de entrada).
+  Baseline + limiar de FALHA por eval.
+- **P4-06** — adapter `dsh` **dormente** (`ENABLED=False`, `raise NotImplementedError`).
+  `dsh.md` mapeia os 6 nós aos seams do `dsh`. **Não instala** o preview `0.1.0-rc.5`.
+  Gatilho de reavaliação registrado em `PESQUISA.md`. **Fecha a Fase 4** (com P4-00..P4-05).
+
+**Recon feito:** `langgraph` não está em nenhum venv. `bwrap` (bubblewrap 0.12.0) e
+`firejail` instalados. `.gitignore` cobre `redesign/grafo/.venv/` (conferido). Os scripts
+que as tools vão wrappar já existem em `~/agata/scripts/` (o P0-02 já wrappa 5 no
+`redesign/mcp/servidor.py`). Entradas de fabricação: **(138)** (achado original) e **(307)**
+(reteste pós-3.1, zero fabricação — o alvo a manter).
+
+**Posse:** `STATUS.md` → `EM ANDAMENTO: P4-00 · Claude`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado (os
+arquivos são planos). Serviços da Fase 2 seguem de pé; `llamacpp-agata` parado.
+
+**Falta / próximo:** executar **P4-00** — revisão de plano (classe instala-pacote,
+auto-revisão) + `pip install langgraph langgraph-checkpoint-sqlite` no venv isolado + o
+grafo-brinquedo + os 3 kills → `DURABILIDADE.md`.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
