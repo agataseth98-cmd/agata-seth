@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-02 ~00:30 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`b7e0d77`**; ver
+ATUALIZADO: 2026-09-02 ~00:35 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`c35ea16`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 NOTA: Humano dormindo — sessão prosseguindo autônoma até de manhã ("Prossiga até amanhã").
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`

@@ -6,6 +6,16 @@ logado". Adicionar os provedores nuvem free atrás do OmniRoute, com combos e br
 **Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. (P1-02 antes: nenhuma chamada nuvem sai
 sem passar pela sanitização.)
 
+**Status:** ⏳ **PARCIAL — 2026-09-02 ~00:35, sessão autônoma.**
+- ✅ Combos `cheap` e `auto` criados (`omniroute combo create ... --strategy priority`),
+  só com `ollama-local/qwen3.5:9b` por ora; `model:"cheap"` roteia OK pelo proxy `:20127`.
+- ✅ Breaker/cooldown: defaults do OmniRoute 3.8.50 registrados em `PROVEDORES.md`
+  (`failureThreshold` 12 apikey, `resetTimeoutMs` 30 s, etc.).
+- ⏳ **Bloqueado nas chaves:** os provedores nuvem (Groq/Cerebras/DeepSeek/…) e o teste de
+  fallback real precisam do Humano pôr as chaves em `~/.hermes/.env`. Comandos prontos em
+  `redesign/router/PROVEDORES.md` (secção "Comandos"). Nenhuma chave passa pelo chat/repo.
+- `conselho` (combo) fica para P1-04.
+
 **Arquivos que a tarefa toca:**
 - `~/.hermes/.env` — **o Humano** acrescenta as chaves nuvem, editando o arquivo direto.
   Nunca coladas no chat, nunca no repo. (Groq, Cerebras, GitHub Models, DeepSeek, etc.)

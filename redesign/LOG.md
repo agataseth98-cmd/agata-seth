@@ -719,3 +719,30 @@ P1-04 (reescrita da cópia-branch de `conselho_remoto.py` p/ falar via `:20127` 
 `conselho`; teste com provedor real aguarda chaves). HD de manhã p/ a Fase 0.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~00:35 -03 · sessão Claude (na Máquina, autônoma) — P1-03 parcial (combos + breaker)
+
+- Combos `cheap` e `auto` criados: `omniroute combo create <n> --strategy priority
+  --model ollama-local/qwen3.5:9b`. `model:"cheap"` via proxy `:20127` → resposta do
+  Ollama. Estratégia `priority` = tenta em ordem, cai no próximo na falha (o que a Fase 1
+  quer).
+- Breaker/cooldown: **defaults do OmniRoute 3.8.50** (PESQUISA C: usar como estão).
+  Registrados em `PROVEDORES.md` — `providerBreaker.apikey.failureThreshold=12`,
+  `resetTimeoutMs=30000`, `connectionCooldown.apikey.baseCooldownMs=3000`, `requestQueue`
+  60rpm/350ms/6conc, `comboCooldownWait` 90s/5att/300s budget.
+- `PROVEDORES.md` ganhou a secção "Comandos" — `omniroute setup --add-provider` por
+  provedor (chave via `$VAR` do ambiente, nunca literal), o preenchimento dos combos, e o
+  teste de fallback (parar Ollama, pedir `cheap`, ver vir do 2º).
+- **Bloqueado nas chaves:** provedores nuvem + teste de fallback real aguardam o Humano
+  pôr Groq/Cerebras/DeepSeek/… em `~/.hermes/.env`. `conselho` (combo) fica p/ P1-04.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, `scripts/`, hooks. Nada
+instalado. Nenhuma chave. Perímetro verde.
+
+**Próximo:** P1-04 — reescrever a cópia-branch de `scripts/conselho_remoto.py` p/ falar
+via `:20127` na combo `conselho` (criar a combo lá). T2 self-review antes. Teste com
+provedor real aguarda chaves; testes de política (abort privado, combo vazia) rodam já.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
