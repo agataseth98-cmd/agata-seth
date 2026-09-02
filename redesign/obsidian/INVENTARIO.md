@@ -17,13 +17,17 @@
 Se o `.obsidian/` do plugin (config + `obsidian-local-rest-api/`) morar **dentro** de
 `memoria/obsidian/`, a config do plugin é **apagada a cada commit**.
 
-**Solução (P6-01):** o vault do Obsidian é a **raiz do repo `~/agata`** (é o que o
-`_LEIA.md` do vault já manda: *"Abrir a raiz do repo (`~/agata`) como vault; começar por
-`obsidian/INICIO.md`"*). Assim o `.obsidian/` fica em `~/agata/.obsidian/` — **fora** da
-pasta regenerada. `.gitignore` já cobre `.obsidian/workspace*.json` e `.obsidian/graph.json`;
-**P6-01 acrescenta `.obsidian/plugins/` e `.obsidian/*.json` ao `.gitignore`** (o plugin e
-sua config são estado local, nunca canon). O MCP serve o subtree `memoria/obsidian/` (ou o
-repo todo — read-only nos dois casos).
+**Solução (P6-01):** o vault do Obsidian é **`~/agata/memoria/`** (não a raiz do repo).
+Motivos: (a) o `.obsidian/` fica em `~/agata/memoria/.obsidian/` — **fora** de
+`memoria/obsidian/`, a parte que o `gerar_obsidian.py` apaga e reescreve; (b) abrir a raiz
+do repo como vault faz o Obsidian **largar arquivos vazios na raiz** quando alguém navega
+uma wikilink inexistente (`INICIO.md`, `moc-*.md` de 0 byte — documentado em MEMÓRIAS
+(293)/(294) como "acidente do Obsidian, não do sistema"; o P-10 já ignora não-rastreado);
+(c) o vault só expõe `memoria/` (vault derivado + missões), não `scripts/`/canon-fonte.
+`.gitignore` já cobre `.obsidian/workspace*.json` e `.obsidian/graph.json`; **P6-01
+acrescenta `memoria/.obsidian/` (ou `**/.obsidian/plugins/` + `**/.obsidian/*.json`)** ao
+`.gitignore`. O `_LEIA.md` do vault fala em "raiz do repo" — a Fase 6 refina para `memoria/`.
+O MCP serve o subtree `memoria/obsidian/`, read-only.
 
 ## Invariantes da Fase 6 (ROADMAP / E1)
 

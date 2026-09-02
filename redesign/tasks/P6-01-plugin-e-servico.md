@@ -24,16 +24,16 @@
 
 ### 1. Abrir o vault no Obsidian
 
-O vault é a **raiz do repo `~/agata`** (o que o `_LEIA.md` do vault já manda). Assim o
-`.obsidian/` fica em `~/agata/.obsidian/` — **fora** de `memoria/obsidian/`, que o
-`gerar_obsidian.py` apaga e reescreve a cada `post-commit` (INVENTARIO P6-00, "Conflito de
-desenho"). **Acrescentar ao `.gitignore`:** `.obsidian/plugins/` e `.obsidian/*.json` (o
-plugin e a config são estado local, nunca canon). O MCP serve o subtree `memoria/obsidian/`.
+O vault é **`~/agata/memoria/`** (INVENTARIO P6-00, "Solução"). O `.obsidian/` fica em
+`~/agata/memoria/.obsidian/` — fora de `memoria/obsidian/` (que o `gerar_obsidian.py` apaga
+e reescreve). **Acrescentar ao `.gitignore`:** `memoria/.obsidian/` (plugin + config = estado
+local, nunca canon). **Não** abrir a raiz do repo como vault — faz o Obsidian largar `.md`
+vazios na raiz (MEMÓRIAS (293)/(294)). O MCP serve o subtree `memoria/obsidian/`.
 
 ### 2. Instalar `obsidian-local-rest-api`
 
 - Community plugins → procurar "Local REST API" (coddingtonbear) → instalar → habilitar.
-- OU via BRAT / cópia manual do release em `memoria/obsidian/.obsidian/plugins/`.
+- OU via BRAT / cópia manual do release em `memoria/.obsidian/plugins/`.
 - **Confirmar a versão com MCP nativo** (≥ jul/2026 — serve `/mcp/`).
 
 ### 3. Configurar
