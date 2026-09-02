@@ -2320,3 +2320,64 @@ Auto-revisão (classe runtime): PRONTO. Sem `sudo`, sem instalação.
 Reusa `grafo.py`. **Fecha a Fase 6.**
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:25 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P6-03 FEITO — consolidação como flow — FASE 6 FECHADA
+
+Auto-revisão (runtime + escreve `propostas/` dentro do repo): PRONTO.
+
+- **`redesign/grafo/flows/consolidacao.py`** — `StateGraph` de 4 nós (reusa `estado.py`,
+  `durabilidade.py`, `consulta.py`):
+  - `orientar` — para cada tema, `consulta.py` devolve as refs `(NNN)` **e o título real**
+    de cada entrada. Sem modelo. (cap 15 refs/tema; `consulta.py::via_mcp` cortado no top 12
+    por score BM25 — antes um tema como "âncora sha" trazia 246 arquivos.)
+  - `juntar` — `diff_proposto` com as refs por tema. Sem modelo.
+  - `consolidar` — o modelo (`:20127`) redige **uma proposta por tema** a partir dos
+    **títulos reais** → `propostas/consolidacao-<tema>-<data>.md` com cabeçalho "NÃO é
+    canon; o Humano decide (P-8); se aprovada vira ENTRADA NOVA append-only". WAL + idem key.
+  - `podar` — propõe ARQUIVAR entradas redundantes (≥3/tema). `aprovado: false`, **nada
+    apagado** (Regra 4).
+  - Sem portão de commit automático (`commit_sha` vazio).
+
+**Achado (a falha de (138) de novo):** na 1ª versão, `consolidar` recebia só os **números**
+das refs → o modelo **fabricou** ("host-rating", "dias de prisão", "min_presence" para o
+tema `presence_penalty` — nada disso existe). Corrigido: `orientar` guarda o **título real**
+de cada entrada (o `query_canon` de MEMÓRIAS já devolve `(NNN) TÍTULO`) e `consolidar`
+alimenta o modelo com os títulos, com instrução explícita de não supor. Re-teste: a proposta
+ficou fiel — *"(154) corrige (151)-(153), a hipótese do presence_penalty não se sustenta"*
+bate com o título real de (154).
+
+**Verificação (S7, aceite P6-03) — num clone `git clone --local`:**
+- 4 nós ponta a ponta; `git status` do clone = **só `propostas/consolidacao-*.md`** — nada
+  em MEMÓRIAS/REGRAS/PROJETO. ✅
+- Cada proposta cita refs `(NNN)` rastreáveis + o cabeçalho de quarentena. ✅
+- `podar` = proposta de arquivamento, nada apagado. ✅
+- Modelo alimentado com títulos reais → proposta fiel (sem fabricação). Quando o `:20127`
+  falha, a proposta diz "(sem modelo: HTTPError)" em vez de inventar. ✅
+- **P6-03 → PASS.**
+
+**→ FASE 6 (Obsidian) FECHADA.** Aceite conjunto do ROADMAP: cliente MCP consulta o vault
+via `:27125` (proxy read-only na frente do `:27124/mcp/`) · recuperação índice-primeiro
+devolve refs rastreáveis (`consulta.py`, `(NNN)` + arquivo) · **zero vector DB** introduzido
+· consolidação noturna é flow do grafo.
+
+**Arquivos:** `redesign/grafo/flows/consolidacao.py` + `flows/README.md`; `consulta.py`
+(cap 12); `redesign/tasks/P6-03-*.md` (FEITO); `STATUS.md`, `ANCORA.md` (piso → `ec357b8`),
+`LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `servidor.py`. Nada
+instalado, sem `sudo`. **HD desconectado** — bundles no staging local + marcador (o Humano
+avisou: HD só amanhã no trabalho, risco assumido). Serviços de pé: omniroute/sanitizer/
+whisper/embeddings/obsidian(:27124)/ro-proxy(:27125); `llamacpp-agata` parado.
+
+**Falta / próximo:** **Fase 7 (Liga/desliga + backup + verificação)** — ordem do ROADMAP
+`…→6→7→8`. `agata.target` (systemd) puxando as units; hook Feral GameMode
+(`~/.config/gamemode.ini` `[custom] start=agata down` / `end=agata up`); `ExecStop` que
+**drena** (checkpoint do run, nunca corta no meio de um commit); `OLLAMA_KEEP_ALIVE=30s`;
+repo restic no HD + `agata-backup-artifacts.timer`; bundle de segredos cifrado
+(`cifrar_env.sh`); **controle P-12** no `perimetro.sh` (recurso no manifesto sem backup <
+N dias = FALHA); OpenTelemetry só coletor local. Pede o "vai" do Humano + arquivos-tarefa.
+**Boa parte pede o HD** (restic) — que só volta amanhã.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

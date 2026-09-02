@@ -1,5 +1,13 @@
 # P6-03 — consolidação noturna como flow do grafo (orientar → juntar → consolidar → podar)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~19:23 (relógio da máquina). FASE 6 FECHADA.**
+`redesign/grafo/flows/consolidacao.py` — `orientar → juntar → consolidar → podar`
+(reusa `estado.py`/`durabilidade.py`/`consulta.py`). Testado num clone: 4 nós ponta a
+ponta; `git status` = **só `propostas/consolidacao-*.md`** (nada em canon); cada proposta
+cita refs `(NNN)` + cabeçalho de quarentena; `podar` propõe arquivar, **nada apagado**.
+**Achado:** alimentar o modelo com os **títulos reais** das refs (não só os números)
+evita a fabricação de (138). `flows/README.md`.
+
 **Objetivo:** a consolidação noturna vira um flow do grafo da Fase 4 — quatro nós — que
 escreve **proposta** em `propostas/`, nunca canon direto. **Fecha a Fase 6.**
 

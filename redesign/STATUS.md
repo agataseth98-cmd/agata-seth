@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 6 — Obsidian** (EM ANDAMENTO — P6-00..P6-02 feitos). **Fases 0-5 FECHADAS.**
-ATUALIZADO: 2026-09-02 19:25 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P6-02 FEITO (consulta.py índice-primeiro)
+FASE ATUAL: **Fase 7 — Liga/desliga + backup + verificação** (próxima). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-02 19:25 -03 (P6-03) (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P6-03 FEITO, FASE 6 FECHADA
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -15,8 +15,13 @@ P6-00: `INVENTARIO.md`. P6-01: plugin `obsidian-local-rest-api` 5.1.0 (`~/agata/
 gitignorado) → `:27124` HTTPS loopback, token em `~/.config/agata/obsidian.token` (chmod 600).
 O plugin não tem read-only global → **`ro_proxy.py` em `:27125`** (só leitura, injeta o token;
 escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `redesign/obsidian/PLUGIN.md`.
-**Próximo: P6-03** — consolidação noturna como flow do grafo (`orientar → juntar →
-consolidar → podar`), saída só em `propostas/`, nunca canon → **fecha a Fase 6**.
+**FASE 6 (Obsidian) FECHADA** (2026-09-02 ~19:25). P6-01 plugin + `ro_proxy` `:27125` (só
+leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
+(4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
+fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
+**Próximo: Fase 7 (Liga/desliga + backup + verificação)** — `agata.target` (systemd) puxando
+as units; hook Feral GameMode; `ExecStop` que drena; repo restic no HD + timer; controle
+P-12 no `perimetro.sh`. Pede o "vai" + arquivos-tarefa. **HD só amanhã.**
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).

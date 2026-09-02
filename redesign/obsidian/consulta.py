@@ -91,14 +91,15 @@ def via_mcp(termos):
                 ctx = (m.get("context", "") or "").replace("\n", " ")[:180]
                 hits.append({"ref": ref, "arquivo": fn, "offset": m.get("start"),
                              "trecho": ctx, "score": h.get("score")})
-    # dedup por (arquivo, trecho)
+    # dedup por (arquivo, trecho), ordena por score (BM25 -- maior = melhor) e corta no top 12
     vistos, dedup = set(), []
     for h in hits:
         k = (h["arquivo"], h["trecho"])
         if k not in vistos:
             vistos.add(k)
             dedup.append(h)
-    return {"erro": None, "hits": dedup}
+    dedup.sort(key=lambda h: (h.get("score") or -999), reverse=True)
+    return {"erro": None, "hits": dedup[:12]}
 
 
 def consultar(termos, via="ambos"):
