@@ -1,15 +1,19 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 3 — Modelos** (manifesto + prune + llama.cpp). Fases 0 e 1 FECHADAS.
-ATUALIZADO: 2026-09-02 ~11:00 -03 · por: sessão Claude (Claude Code, na Máquina) — MIGRAÇÃO DE CHAT
-ÂNCORA (leve, manual): sobre `redesign` @ **`f49387e`**; referência viva = `git rev-parse
+ATUALIZADO: 2026-09-02 10:37 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P3-02 FECHADO
+ÂNCORA (leve, manual): sobre `redesign` @ **`53b2d42`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **MIGRAÇÃO DE CHAT** (janela 84%). Retomar: `redesign/REIDRATACAO-chat-3.md`. P3-02 quase (16 removidos; confirmar ~112 GB); P3-03 a fazer.
+_(nenhuma tarefa EM ANDAMENTO)_ — **P3-02 FECHADO** (2026-09-02 ~10:37, relógio da máquina):
+16 modelos removidos, keep-list de 5, **~148 GiB reclamados** (362 → 510 GB livres) após apagar
+os 50 snapshots pacman do snapper que prendiam os blobs no btrfs. **Próximo: P3-03** (llama.cpp
++ MoE — INSTALA SOFTWARE, sudo do Humano) → fecha a Fase 3.
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -107,11 +111,22 @@ nesta fase (ver LOG 01/09 ~17:10).
   Providers ativos: Ollama, Groq (`gpt-oss-120b`), Gemini (`2.5-flash`), OpenRouter
   (`minimax-m3:free`), Z.AI (`glm-4.7-flash`). DeepSeek fora (402, sem crédito). Cerebras
   não configurado (`~/.hermes/.env` sem a chave — walkthrough em `PROVEDORES.md`).
-- **Fase 3 — Modelos** — "vai" dado (2026-09-02). Arquivos-tarefa escritos: `P3-00`
-  (manifesto + prova de reconstrutibilidade, gate antes de apagar), `P3-01` (lista de
-  prune, sem apagar), `P3-02` (**prune destrutivo** — aprovação item a item do Humano),
-  `P3-03` (llama.cpp com `--n-cpu-moe` como 2º backend local, INSTALA SOFTWARE). Em
-  andamento: **P3-00**. Fase 2 (iGPU) fica para depois da Fase 3 (ordem `0→1→3→2`).
+- **Fase 3 — Modelos** — "vai" dado (2026-09-02). EM ANDAMENTO.
+  - **P3-00 ✅ FEITO** — reconstrutibilidade dos 20 modelos provada (`models/RECONSTRUCAO.md`).
+  - **P3-01 ✅ FEITO** — `models/PRUNE.md` (keep-list de 5 vs. 15/16 a remover).
+  - **P3-02 ✅ FECHADO** (2026-09-02 ~10:37, relógio da máquina). 16 `ollama rm`; `ollama list`
+    = keep-list de 5 (`qwen3.5:9b`, `qwen3.5-9b-64k`, `qwen3:4b` [base do LoRA], `rlm-qwen3-8b-teste`,
+    `nomic-embed-text`); `manifest.json` regenerado (5, sha256 5/5); GGUF do rlm no snapshot
+    restic `c19275ec`. **Espaço:** o restart do Ollama não reclamou nada porque o btrfs
+    (CachyOS + snapper) mantinha os blobs em 50 snapshots `pre`/`post` do `pacman`
+    (`#454`–`#503`, todos anteriores ao prune). Humano apagou os 50 (`snapper -c root delete
+    454-503`) → **~148 GiB reclamados** (livre 362 → 510 GB; `Data used` 578 → 430 GiB).
+    S7 re-rodado de estado limpo: keep-list responde (`qwen3.5:9b`/`-64k`/`qwen3:4b` → "ok";
+    `rlm` responde; `nomic-embed-text` → embedding 768-dim). **PASS.**
+  - **P3-03 — a fazer.** `llama.cpp` (INSTALA SOFTWARE — `sudo pacman -S llama.cpp`, senha do
+    Humano) + MoE GGUF (Qwen3-30B-A3B / Qwen3.6-35B-A3B) + varredura `--n-cpu-moe` + servir
+    em `127.0.0.1:20129` + registrar no OmniRoute como `llamacpp-local` + pôr na combo `auto`.
+    **Fase 3 fecha aí.** Fase 2 (iGPU) vem depois (ordem `0→1→3→2`).
 - **Fase 1 (histórico dos passos):**
   - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
     `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele

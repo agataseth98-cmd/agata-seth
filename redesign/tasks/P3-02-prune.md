@@ -3,7 +3,13 @@
 **Objetivo:** remover do Ollama os modelos que `models/PRUNE.md` marca `REMOVER` e o
 Humano aprovou item a item. Libera ~100–180 GB conforme a lista.
 
-**Status:** ⏳ **REMOÇÃO FEITA, ESPAÇO PENDENTE DE RESTART — 2026-09-02 ~10:40.**
+**Status:** ✅ **FECHADO — 2026-09-02 ~10:37 (relógio da máquina).** ~148 GiB reclamados
+após apagar os 50 snapshots `pacman` do snapper (`snapper -c root delete 454-503`) que
+prendiam os blobs no btrfs; o `systemctl restart ollama` sozinho não bastava. Livre 362 →
+510 GB. S7 re-rodado de estado limpo: keep-list de 5 responde, `manifest.json` 5/5 sha256.
+Ver `LOG.md` entrada de 2026-09-02 10:37.
+
+**Status (histórico):** ⏳ **REMOÇÃO FEITA, ESPAÇO PENDENTE DE RESTART — 2026-09-02 ~10:40.**
 Humano aprovou ("1 sim") a lista + `llama3.2:3b` (trocado por `qwen3:4b`, a base do LoRA
 mais coerente com o zoo Qwen — decisão de "o que for melhor pro sistema").
 - **16 modelos removidos** via `ollama rm` (todos com `ok`). `ollama list` agora = a

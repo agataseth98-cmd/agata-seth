@@ -1232,3 +1232,59 @@ entrada.
 (2) P3-03 (`llama.cpp` + MoE — sudo do Humano) → fecha a Fase 3; (3) depois Fase 2 (iGPU).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 10:37 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3 pós-migração) · P3-02 FECHADO (disco reclamado)
+
+**Reidratação:** 4 refs conferidos — `main` `4aa90bd`, `pre-redesign^{commit}` `4aa90bd`
+(objeto-tag bare `cea5aeb`), `redesign` = `origin/redesign` `53b2d42` (adiante do piso
+`7fbaf41`, ancestral confirmado). `git status --porcelain` vazio. `git diff main..redesign`
+só o esperado (`PROMPT_CARREGAMENTO.md` bloco `ANCORA-SHA`; `scripts/conselho_remoto.py`
+P1-04 cópia-branch; `.gitignore` P0-00; `models/*` Fase 3). Perímetro verde (10 OK · 1
+PARCIAL · 0 FALHA). Lidos na ordem do `REIDRATACAO-chat-3.md`. Canon em (309).
+
+**Nota de relógio:** a máquina marca ~10:37 -03; os commits de hoje são 09:26–09:56. Os
+carimbos "~10:40 / ~11:00" das últimas entradas eram ~1h adiantados (relógio da UI). Uso a
+hora da máquina daqui pra frente.
+
+**Item aberto do P3-02 — resolvido:** o `sudo systemctl restart ollama` de ontem (09:49:13,
+confirmado no journal) **não reclamou** os ~112 GB — `df /` seguia 586 usados / 362 livres.
+
+Diagnóstico (bloco só-leitura com sudo, rodado pelo Humano):
+- `du` do dir do Ollama = **14 GB** (era ~126). O `ollama rm` funcionou; 20 blobs para 5
+  modelos, **zero órfão**.
+- Sistema é **btrfs** (`@`, `compress=zstd:3`) + **snapper**. `btrfs fi usage`: `Data Used
+  578 GiB` — os 112 GB seguiam **referenciados**.
+- `snapper -c root list`: **50 snapshots `pre`/`post` de `pacman`** (`#454` 12/ago → `#503`
+  01/set 20:07), cleanup `number`. **Todos anteriores ao prune** (~09:45 de hoje). Cada um
+  contém uma cópia congelada de `/usr/share/ollama/` → o btrfs mantém os extents vivos.
+- Recuperação **tudo-ou-nada**: os 16 modelos removidos são antigos, presentes em todos os
+  50 snapshots; manter 1 pré-prune mantém ~126 GB presos.
+
+**Ação (destrutiva, aprovada e rodada pelo Humano):** `sudo snapper -c root delete 454-503`
+— apaga os 50 pontos de rollback do `pacman` (não toca o snapshot `0`/`current`, nem
+`@home`/`@log`, nem dados do Humano; o próximo `pacman -Syu` cria snapshots novos).
+
+**Resultado:** livre **362 → 510 GB** (`df`), `Data used` **578 → 430 GiB** — **~148 GiB
+reclamados** (os ~112 dos modelos + ~36 de outra churn de 3 semanas que os snapshots
+prendiam). `Device allocated` 729 → 684 GiB.
+
+**S7 (re-rodado de estado limpo):**
+- `ollama list` == keep-list de 5 (`qwen3.5:9b`, `qwen3.5-9b-64k`, `qwen3:4b`,
+  `rlm-qwen3-8b-teste`, `nomic-embed-text`). ✅
+- `/api/generate`: `qwen3.5:9b`/`qwen3.5-9b-64k`/`qwen3:4b` → `"ok"`; `rlm-qwen3-8b-teste`
+  → responde (tagarela mas `done=true`); `nomic-embed-text` → embedding **768-dim**. ✅
+- `models/manifest.json`: **5 modelos, sha256 em 5/5** (`qwen3.5:9b` e `-64k` compartilham
+  o blob `dec52a44…` — esperado, P3-00), commitado em `7fbaf41`, `git status models/` limpo. ✅
+- **P3-02 → PASS. FECHADO.**
+
+**Não tocado:** `main`, canon (`REGRAS`/`PROJETO`/`MEMÓRIAS`), Hermes, Ollama de produção
+(só API HTTP + `ollama rm`/`list`), hooks, `servidor.py`. Nada instalado. Os snapshots
+apagados são do `pacman`/snapper, fora do escopo do Agata — só prendiam disco.
+
+**Falta / próximo:** **P3-03** — `sudo pacman -S llama.cpp` (senha do Humano) → MoE GGUF →
+varredura `--n-cpu-moe` → `127.0.0.1:20129` → OmniRoute `llamacpp-local` → combo `auto`.
+**Fase 3 fecha aí.** Depois Fase 2 (iGPU).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
