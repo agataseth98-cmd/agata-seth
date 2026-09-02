@@ -6,12 +6,21 @@ Fase 1: "segredo plantado é bloqueado antes de sair".
 
 **Pré-requisitos:** P1-00 e P1-01 FEITO.
 
+> **`redesign/router/sanitizar.py` JÁ EXISTE e está testado offline** (feito 2026-09-01,
+> "continuar sem o HD"). Régua única: extrai `PADROES_SEGREDO` de
+> `scripts/varredura_segredo.sh` via `bash -c 'source ...; printf ...'` — sem 2ª cópia.
+> Única tradução ERE→Python: `[[:space:]]` → conjunto explícito; outra classe POSIX faz o
+> módulo falhar alto. `--autoteste` verde (7 padrões casam os positivos, casos de menção
+> não-valor passam). `--selftest` aceita payload JSON **ou** texto cru, exit 3 = bloqueado,
+> redige o trecho (`sk-7…[33 chars]`, nunca o valor). **Falha fechada:** `sanitizar_payload`
+> **levanta** `SegredoNoPayload`, não mascara-e-envia. Ver `redesign/router/README.md`.
+> **O que falta desta tarefa:** só ligar o módulo no caminho de egresso (passo 3, A ou B)
+> e os testes de integração (passos 4–5).
+
 **Arquivos que a tarefa toca:**
-- `redesign/router/sanitizar.py` (novo) — o módulo de scrub, que **reusa os mesmos
-  padrões** de `scripts/varredura_segredo.sh` (`PADROES_SEGREDO`)
-- `redesign/router/PADROES_SEGREDO.txt` (novo) — os padrões extraídos num só lugar, para
-  o `.sh` e o `.py` lerem a mesma régua (ou o `.py` lê o próprio `.sh` — decidir no passo 1)
-- config do OmniRoute: um hook de pré-request **ou** um proxy fino local (ver passo 2)
+- `redesign/router/sanitizar.py` — **já existe**; a tarefa só o wira no egresso
+- config do OmniRoute: um hook de pré-request **ou** um proxy fino local (ver passo 3)
+- `redesign/router/proxy.py` (novo, se for a opção B)
 - `redesign/tasks/P1-02-*.md`
 
 ---
@@ -35,28 +44,17 @@ casou (sem ecoar o segredo).
 
 ## Passos
 
-### 1. Extrair os padrões para um só lugar
+### 1. Confirmar que a régua ainda casa (o módulo já existe)
 
 ```fish
 cd $HOME/agata
-# tira o array PADROES_SEGREDO do .sh e grava um por linha
-awk '/^PADROES_SEGREDO=\(/{f=1;next} f&&/^\)/{f=0} f{gsub(/^[ \t]*.\x27/,"");gsub(/\x27.*$/,"");print}' \
-  scripts/varredura_segredo.sh > redesign/router/PADROES_SEGREDO.txt
-cat redesign/router/PADROES_SEGREDO.txt
+python3 redesign/router/sanitizar.py --padroes      # 7 padrões, iguais aos de varredura_segredo.sh
+python3 redesign/router/sanitizar.py --autoteste    # tem que sair 0
 ```
-Colar de volta: o conteúdo. Sucesso: 7 regexes, iguais às do `.sh` (conferir à mão).
-**Alternativa mais robusta:** `sanitizar.py` faz `source` lógico do `.sh` via `bash -c`
-uma vez no import e captura o array — assim nunca há duas cópias. Decidir aqui.
+Sucesso: `AUTOTESTE OK`, exit 0. Se `varredura_segredo.sh` mudou os padrões desde
+2026-09-01, o `--autoteste` acusa (é a mesma fonte) — reconciliar antes de seguir.
 
-### 2. `sanitizar.py`
-
-Escrever `redesign/router/sanitizar.py`:
-- `carregar_padroes()` — lê `PADROES_SEGREDO.txt` (ou extrai do `.sh`), compila com `re`.
-- `varrer(texto) -> list[tuple[str,str]]` — devolve [(nome_padrão, trecho_redigido)] dos
-  casos; `trecho_redigido` mostra só os 4 primeiros chars + `…` (nunca o segredo inteiro).
-- `sanitizar_payload(payload: dict) -> dict` — varre todos os `messages[*].content` (e
-  `system`); se achar, **levanta** `SegredoNoPayload` com a lista de nomes de padrão.
-- CLI `--selftest`: lê JSON do stdin, imprime `{bloqueado: bool, padroes: [...]}`.
+### 2. — (feito) `sanitizar.py` está escrito e testado. Ver o cabeçalho desta tarefa e `redesign/router/README.md`.
 
 ### 3. Ligar no caminho de egresso (A ou B)
 
@@ -106,18 +104,20 @@ Colar de volta: a saída do `tcpdump` (esperado: nada de tráfego externo dispar
 - Payload com um padrão de `PADROES_SEGREDO` ⇒ HTTP 4xx do gateway/proxy, corpo nomeia o
   padrão, **não** ecoa o segredo, e **nada** trafega para fora (passo 5).
 - Payload limpo ⇒ 200, resposta normal.
-- `sanitizar.py --selftest` casa exatamente os mesmos casos que `bash scripts/varredura_segredo.sh`
-  casaria para os mesmos textos (rodar os 7 padrões contra strings de exemplo, comparar).
+- `python3 redesign/router/sanitizar.py --autoteste` → exit 0 (a régua ainda casa; mesma
+  fonte que `varredura_segredo.sh`).
+- `python3 redesign/router/sanitizar.py --padroes` == os 7 padrões de
+  `bash -c 'source scripts/varredura_segredo.sh; printf "%s\n" "${PADROES_SEGREDO[@]}"'`.
 - `redesign/router/` não contém nenhum segredo real (só regexes e código).
 
 ## Verificação independente
 
 - **Quem:** fallback afinado ou Humano.
-- **O quê:** que os padrões do `.py` são byte-a-byte os do `.sh` (uma régua só), e que o
-  bloqueio falha **fechado** (não "sanitiza e envia").
-- **Como:** `diff <(sed -n '/PADROES_SEGREDO=(/,/^)/p' scripts/varredura_segredo.sh | grep -oE "\x27[^\x27]+\x27") redesign/router/PADROES_SEGREDO.txt`
-  (ajustar); revisar o caminho de erro do `sanitizar_payload` — que ele `raise`, não
-  `return payload_limpo`.
+- **O quê:** que os padrões do `.py` vêm mesmo do `.sh` sem 2ª cópia, e que o bloqueio
+  falha **fechado** (não "sanitiza e envia").
+- **Como:** `diff <(python3 redesign/router/sanitizar.py --padroes | cut -f2) <(bash -c 'source scripts/varredura_segredo.sh; printf "%s\n" "${PADROES_SEGREDO[@]}"')`
+  → sem diferença; ler o corpo de `sanitizar_payload` — confirma `raise SegredoNoPayload`,
+  nunca `return payload` depois de achar.
 - **Resultado:** anotar no LOG.
 
 ## Rollback

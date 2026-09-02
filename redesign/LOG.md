@@ -452,3 +452,54 @@ de restore do P0-02). Ao montar o HD: fecha a Fase 0.
 (começando por P1-00, com revisão de plano de tier de risco antes).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~23:35 -03 · sessão Claude (Claude Code, na Máquina) — RUNBOOK do HD + rotina 10h + adiantar sem HD
+
+**Humano:** "vamos prosseguir, agende o procedimento para as 10hrs" → depois "vamos
+continuar sem o hd, agora".
+
+**Feito:**
+1. `redesign/RUNBOOK-fase0-HD.md` (commit `f6d94be`, cópia no desktop) — P0-01 passos 3-4
+   + P0-02 aceite de restore consolidados, paste-and-go fish. Pré-checado: `restic 0.19.1`
+   ok, as 4 fontes de config existem, HD não montado. `~/.hermes/.env` fica FORA do backup.
+2. **Rotina de nuvem agendada** `trig_01QiW6UXWYYJbHxRxMG44v6d`, dispara 2026-09-02
+   13:00Z = **10:00 -03**, uma vez. Só verifica o estado do repo e entrega um briefing da
+   manhã (as refs, drift desde `f6d94be`, o procedimento em 1 parágrafo apontando o
+   RUNBOOK). **Não** roda nada local — um cloud agent não alcança o Predator; os passos do
+   HD são do Humano/da sessão na Máquina.
+3. **Adiantado sem HD e sem instalação** — `redesign/router/sanitizar.py` (o scrub de
+   segredo da P1-02):
+   - **Régua única:** extrai `PADROES_SEGREDO` de `scripts/varredura_segredo.sh` via
+     `bash -c 'source ...; printf "%s\n" "${PADROES_SEGREDO[@]}"'` — sem 2ª cópia. Única
+     tradução ERE→Python: `[[:space:]]` → `[ \t\n\r\f\v]`; outra classe POSIX ⇒
+     `PadraoNaoTraduzivel` (não adivinha). `diff` da saída `--padroes` contra o `source`
+     do `.sh`: **sem diferença**.
+   - **Falha fechada:** `sanitizar_payload` **levanta** `SegredoNoPayload`; não existe
+     caminho "mascara e devolve".
+   - `varrer` redige o trecho (`sk-7…[33 chars]`), nunca o valor. Varre `system`,
+     `prompt`, `input[*]`, `messages[*].content` (str + content-parts).
+   - CLI: `--padroes` (auditoria), `--autoteste` (7 padrões casam positivos, 4 casos de
+     menção-não-valor passam — **verde**), `--selftest` (payload JSON ou texto cru, exit
+     3 = bloqueado). Testado: payload com `sk-…` (gerado na hora, não versionado) →
+     bloqueado exit 3; payload limpo → exit 0; PEM cru → bloqueado.
+   - `redesign/router/README.md` documenta. **Não ligado** ao egresso — isso é o passo 3
+     da P1-02, precisa do OmniRoute de pé.
+   - `P1-02` atualizado: passos 1-2 viram "confirmar régua / já feito"; Aceite e
+     Verificação independente reescritos sem o `PADROES_SEGREDO.txt` (fui pela opção
+     "ler o .sh direto", que é a régua única de verdade).
+
+**Verificação (S7):** `sanitizar.py --autoteste` exit 0; `--padroes` == `source` do `.sh`
+(diff vazio); `ast.parse` ok. Doc/código offline, sem `Aceite` de integração ainda (esse
+é da P1-02 com o OmniRoute). Perímetro roda no pre-commit.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, `scripts/`, hooks, `servidor.py`. Nada
+instalado. Fase 1 **não** começou — P1-00 (instalar OmniRoute) precisa do "vai" do Humano
++ revisão de plano (classe de risco). Só adiantei o que é offline e sem risco.
+
+**Falta / próximo:** HD para fechar a Fase 0 (rotina 10h + runbook prontos); "vai" do
+Humano para a Fase 1. Adiantável sem "vai": `proxy.py` (P1-02 opção B) contra alvo dummy;
+`PROVEDORES.md` / `conselho_via_omniroute.md` (doc).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
