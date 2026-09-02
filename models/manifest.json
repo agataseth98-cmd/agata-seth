@@ -1,7 +1,7 @@
 {
-  "gerado_por": "P3-02 (prune -- keep-list de 5) ; P3-03 acrescentou o MoE llama.cpp (qwen3-30b-a3b) ; P2-02 acrescentou os IR OpenVINO de STT (whisper base/small)",
+  "gerado_por": "P3-02 (prune -- keep-list de 5) ; P3-03 acrescentou o MoE llama.cpp (qwen3-30b-a3b) ; P2-02 acrescentou os IR OpenVINO de STT (whisper base/small) ; P2-03 acrescentou o IR de embeddings (multilingual-e5-small)",
   "gerado_em": "2026-09-02T09:44:43-03:00",
-  "n_modelos": 8,
+  "n_modelos": 9,
   "modelos": [
     {
       "name": "qwen3:4b",
@@ -80,8 +80,19 @@
       "ir_sha256_xmlbin": "140049e901c45cfe6936de6c1946ec71698a75fd43423b28b5c84a72987d8817",
       "nota": "STT upgrade drop-in (baixado, nao servido por padrao)",
       "reconstrucao": "snapshot_download('OpenVINO/whisper-small-int8-ov', local_dir=...) -- publico, sem hash fixado no HF; ir_sha256_xmlbin e' o hash local dos .xml/.bin"
+    },
+    {
+      "name": "multilingual-e5-small-int8",
+      "backend": "openvino-ir",
+      "origem": "optimum-cli export openvino --model intfloat/multilingual-e5-small --task feature-extraction --weight-format int8",
+      "path": "~/.cache/agata/openvino/embeddings/multilingual-e5-small-int8",
+      "ir_sha256_xmlbin": "fede3ab3e9975b7f300d744d0c16a4f3c9e5be4841a503c7efe405b890e9c042",
+      "dim": 384,
+      "nota": "embeddings STT/RLM (Fase 2, P2-03) -- servido em 127.0.0.1:20134 formato OpenAI; mean-pool+L2-norm; prefixo e5 query:/passage:",
+      "reconstrucao": "re-exportar com o optimum-cli acima (funciona p/ XLM-R; so o export de Whisper que quebra no optimum 2.3.0)"
     }
   ],
   "gerado_em_p3_03": "2026-09-02T11:00:35-03:00",
-  "gerado_em_p2_02": "2026-09-02T12:01:27-03:00"
+  "gerado_em_p2_02": "2026-09-02T12:01:27-03:00",
+  "gerado_em_p2_03": "2026-09-02T12:07:57-03:00"
 }

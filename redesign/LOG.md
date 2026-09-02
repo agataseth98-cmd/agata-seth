@@ -1557,3 +1557,61 @@ venv, formato OpenAI, zero vector DB) → passo 5 mede a 4060 com display+STT+em
 todos fora dela → **Fase 2 FECHADA**.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 12:08 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P2-03 FEITO — FASE 2 FECHADA
+
+**P2-03 — embeddings na iGPU.** Reusou o venv + runtime do P2-02 (sem novo `sudo`).
+
+- **Modelo:** `intfloat/multilingual-e5-small` (384 dim) — **`optimum-cli export openvino
+  --task feature-extraction --weight-format int8` FUNCIONOU** (o bug do `optimum` 2.3.0 era
+  só no `NormalizedConfig` de **Whisper**; XLM-RoBERTa exporta normal). IR int8 (~140 MB) em
+  `~/.cache/agata/openvino/embeddings/multilingual-e5-small-int8`. Escolha multilíngue
+  porque o canon é PT-BR (o arquivo-tarefa dava a opção).
+- **`redesign/igpu/embeddings_server.py`** (novo, stdlib): `OVModelForFeatureExtraction.
+  from_pretrained(dir, device="GPU.0")` + `AutoTokenizer`, mean-pool mascarado + L2-norm.
+  `POST /embed` (e `/v1/embeddings`) → **formato OpenAI embeddings** (`object:"list"`,
+  `data:[{object:"embedding",index,embedding}]`, `usage`), sem adaptador no grafo. Prefixo
+  e5 `query:`/`passage:` (não duplica). `GET /health` → `{dim:384}`.
+- **Porta:** 20131 (do arquivo-tarefa) estava **ocupada pelo OmniRoute** (`ss -tlnp`: ele
+  tem 20127/20128/20131/20132). O serviço entrou em crash-loop (`OSError: Address already
+  in use`). Movido para **`127.0.0.1:20134`** (server + unit + doc).
+- **`--selftest`:** `cos(próximas)=0.885 > cos(distante)=0.791` na iGPU (idem CPU — mesmo
+  int8). PASS.
+- **Zero vector DB:** `pip list` sem faiss/chroma/qdrant/weaviate/milvus/lancedb.
+- Serviço: `~/.config/systemd/user/openvino-embeddings.service` (`GPU.0`, sem `enable`).
+
+**Aceite conjunto da Fase 2 (P2-03 passo 5):** com `openvino-whisper` + `openvino-embeddings`
+carregados e sob **fogo cruzado** (1 transcrição + 8 `POST /embed` simultâneos):
+- **4060: 1 W** (clock caiu p/ 405/210 MHz), **`fb` 56 MB** (só `kwin_wayland` 7 MiB +
+  overhead), util 0 %. Processos compute na 4060: **só `kwin_wayland`** — nenhum
+  python/whisper/embeddings.
+- Whisper RTF sob carga simultânea: **0.051**.
+- Display + STT + embeddings **todos na iGPU**; a 4060 livre p/ inferência (llama.cpp) e jogos.
+- **iGPU vs CPU (não caiu p/ CPU em silêncio):** os RTF diferem por device (whisper base
+  iGPU 0.082 vs CPU 0.022) — caminhos de compute distintos; `device="GPU.0"` também falha
+  no load se a iGPU não estiver disponível.
+
+**→ FASE 2 (iGPU) FECHADA.** Aceite: `nvidia-smi` sem display/STT/embeddings na 4060 ✅ ·
+Whisper tempo real na iGPU (RTF 0.05–0.08) ✅ · endpoint de embedding responde (OpenAI,
+384d) ✅ · zero vector DB ✅.
+
+**Manifesto:** +1 entrada `multilingual-e5-small-int8` (`backend: openvino-ir`, dim 384).
+n_modelos 8 → 9.
+
+**Arquivos:** novo `redesign/igpu/embeddings_server.py`; `redesign/igpu/README.md`
+(seção P2-03 + aceite conjunto); `models/manifest.json`; `redesign/tasks/P2-03-*.md`
+(FEITO); `STATUS.md`, `ANCORA.md` (piso → `637408f`), `LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado nesta
+entrada (reusou o venv). Sem segredo. `openvino-whisper.service` e
+`openvino-embeddings.service` ficam **de pé** (leves — ~1,2 GB RAM juntos, 4060 a 1 W;
+boot-persistência é Fase 7). `llamacpp-agata.service` segue parado.
+
+**Falta / próximo:** **Fase 4 (Grafo)** — LangGraph. Começa pelo **spike P4-00**
+(durabilidade / "checkpoint ≠ execução durável", E2 da AUDITORIA-01) antes de comprometer a
+arquitetura. Ordem do ROADMAP: `0→1→3→2→4→5→6→7→8`. Fases 0–3 fechadas. Pede o "vai" do
+Humano + os arquivos-tarefa da Fase 4 (P0-03 só cobriu Fases 1-2).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

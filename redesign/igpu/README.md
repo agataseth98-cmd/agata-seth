@@ -10,7 +10,8 @@ RTX 4060 e pôr na iGPU Intel UHD.
 | **P2-00** inventário | ✅ `INVENTARIO.md` |
 | **P2-01** display na iGPU | ✅ `DISPLAY-PIN.md` — **já estava lá, sem mudança** |
 | **P2-02** whisper STT na iGPU | ✅ `openvino-whisper.service` (`:20130`, `GPU.0`, RTF ~0.08) |
-| **P2-03** embeddings na iGPU | ⏳ a seguir |
+| **P2-03** embeddings na iGPU | ✅ `openvino-embeddings.service` (`:20134`, `GPU.0`, e5-small 384d) |
+| **Fase 2** | ✅ **FECHADA** — 4060 em **1 W / 56 MB** com display+STT+embeddings todos na iGPU |
 
 ## Hardware (do `INVENTARIO.md`)
 
@@ -77,16 +78,56 @@ Sobe healthy em ~6 s.
 export mas 4.57 é o alvo testado), torch 2.14 (puxou ~2 GB de libs CUDA à toa — venv
 descartável). ~6.2 GB no total.
 
-## Rollback (P2-02)
+## `embeddings_server.py` — embeddings na iGPU (P2-03)
+
+- Modelo **`intfloat/multilingual-e5-small`** (384 dim, PT-BR + multilíngue) — o export
+  `optimum-cli export openvino --task feature-extraction --weight-format int8`
+  **funcionou** (o bug do `optimum` 2.3.0 era só no `NormalizedConfig` de **Whisper**;
+  XLM-RoBERTa exporta normal). IR int8 em `~/.cache/agata/openvino/embeddings/multilingual-e5-small-int8`.
+- `optimum.intel.OVModelForFeatureExtraction.from_pretrained(dir, device="GPU.0")` +
+  `AutoTokenizer`. mean-pooling mascarado + L2-normalize (receita e5).
+- **`POST /embed`** (e `/v1/embeddings`) em **`127.0.0.1:20134`** — body
+  `{"input": str|[str], "input_type": "query"|"passage"}` → **formato OpenAI embeddings**
+  (`{object:"list", data:[{object:"embedding",index,embedding:[...]}], model, usage}`),
+  sem adaptador no grafo. Prefixo `query: `/`passage: ` aplicado (não duplica se já vier).
+  `GET /health` → `{dim:384}`.
+- **Porta 20134** (não 20131): o OmniRoute ocupa `20127/20128/20131/20132`.
+- `--selftest [--device CPU|GPU.0]`: 2 frases próximas + 1 distante → cossenos.
+  Medido: `cos(próximas)=0.885` > `cos(distante)=0.791` na iGPU (idem no CPU — mesmo int8).
+- **Zero vector DB** (invariante Fase 6): só devolve o vetor. `pip list` sem
+  faiss/chroma/qdrant/weaviate/milvus/lancedb.
+- Serviço: `~/.config/systemd/user/openvino-embeddings.service` (`GPU.0`, sem `enable`).
+
+## Aceite conjunto da Fase 2 (P2-03 passo 5) — FECHADO
+
+Com `openvino-whisper` + `openvino-embeddings` carregados **e** sob fogo cruzado (1
+transcrição + 8 `POST /embed` simultâneos):
+
+| 4060 | valor |
+|---|---|
+| potência | **1 W** (clock caiu p/ 405/210 MHz — idle profundo) |
+| VRAM (`fb`) | **56 MB** (só o `kwin_wayland` 7 MiB + overhead do driver) |
+| util (sm/mem/enc/dec) | 0 % |
+| processos compute | **só `kwin_wayland`** — nenhum python/whisper/embeddings |
+
+Whisper RTF durante a carga simultânea: **0.051**. Display + STT + embeddings **todos na
+iGPU**; a 4060 fica livre para inferência (llama.cpp) e jogos.
+
+> **iGPU vs CPU — a inferência roda mesmo na iGPU, não caiu p/ CPU em silêncio:** os RTF
+> medidos são *diferentes* por device (whisper base iGPU 0.082 vs CPU 0.022; e5 idem),
+> o que só acontece se forem caminhos de compute distintos. `device="GPU.0"` também
+> falharia no load se a iGPU não estivesse disponível.
+
+## Rollback
 
 ```fish
-systemctl --user stop openvino-whisper.service
-rm -f ~/.config/systemd/user/openvino-whisper.service
+systemctl --user stop openvino-whisper.service openvino-embeddings.service
+rm -f ~/.config/systemd/user/openvino-whisper.service ~/.config/systemd/user/openvino-embeddings.service
 systemctl --user daemon-reload
 git checkout -- redesign/igpu
 ```
 > ⚠️ **Remove o venv (~6 GB) e os modelos IR. Rode sozinho.**
 > ```fish
-> rm -rf redesign/igpu/.venv ~/.cache/agata/openvino/whisper
+> rm -rf redesign/igpu/.venv ~/.cache/agata/openvino
 > sudo pacman -Rns intel-gpu-tools intel-compute-runtime intel-graphics-compiler
 > ```

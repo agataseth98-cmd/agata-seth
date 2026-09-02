@@ -2,6 +2,15 @@
 
 **Objetivo:** um endpoint de embedding pequeno rodando na iGPU via OpenVINO — o que a
 Fase 5 (RLM) e a Fase 6 (recuperação índice-primeiro) vão consumir, sem tocar a 4060.
+
+**Status:** ✅ **FEITO — 2026-09-02 ~12:08 (relógio da máquina). FASE 2 FECHADA.**
+`multilingual-e5-small` (384 dim, PT-BR) exportado por `optimum-cli` (funciona p/ XLM-R — só
+o Whisper que quebra). `embeddings_server.py` (`127.0.0.1:20134` — o OmniRoute ocupa 20131),
+formato **OpenAI embeddings**, mean-pool+L2-norm, prefixo e5. `openvino-embeddings.service`
+(`GPU.0`, sem `enable`). `--selftest`: `cos(próximas)=0.885 > cos(distante)=0.791`. **Zero
+vector DB**. **Aceite conjunto:** com whisper+embeddings sob fogo cruzado, a 4060 fica em
+**1 W / 56 MB / 0 %**, só `kwin_wayland` — display+STT+embeddings todos na iGPU. Detalhes:
+`redesign/igpu/README.md`.
 Item do aceite da Fase 2: "endpoint de embedding responde".
 
 **Pré-requisitos:** P2-02 FEITO (venv `redesign/igpu/.venv` e OpenVINO já provados na iGPU).

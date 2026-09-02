@@ -1,22 +1,24 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 2 — iGPU** (EM ANDAMENTO — P2-00/01/02 feitos; falta P2-03). **Fases 0, 1 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 12:00 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P2-02 FEITO (whisper STT na iGPU)
-ÂNCORA (leve, manual): sobre `redesign` @ **`2c7de92`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 4 — Grafo** (próxima). **Fases 0, 1, 2 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 12:08 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P2-03 FEITO, FASE 2 FECHADA
+ÂNCORA (leve, manual): sobre `redesign` @ **`637408f`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 2: P2-00/01/02 FEITOS** (2026-09-02 ~12:00).
-P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · **P2-02**:
-`intel-compute-runtime` instalado; venv OpenVINO; `openvino-whisper.service` (`:20130`,
-`GPU.0`, modelo `whisper-base-int8-ov` multilíngue — desvio do `distil-small.en` porque o
-`optimum-cli export` está quebrado + canon é PT-BR); **RTF na iGPU 0.082**; `nvidia-smi`
-limpo. **Próximo: P2-03** (`openvino-embeddings` — reusa o venv; `multilingual-e5-small`,
-384 dim; formato OpenAI; zero vector DB) → passo 5 mede a 4060 conjunta → **Fase 2 fecha**.
+_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
+P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · P2-02
+`openvino-whisper.service` (`:20130`, `GPU.0`, `whisper-base-int8-ov`, RTF 0.082) · P2-03
+`openvino-embeddings.service` (`:20134`, `GPU.0`, `multilingual-e5-small` 384d, formato
+OpenAI, zero vector DB). **Aceite conjunto:** 4060 em **1 W / 56 MB / 0 %** com
+display+STT+embeddings todos na iGPU. Serviços `sem enable` (boot = Fase 7).
+**Próximo: Fase 4 (Grafo)** — LangGraph; começa pelo spike **P4-00** (durabilidade, E2 da
+AUDITORIA-01) antes de comprometer a arquitetura do loop. Pede o "vai" do Humano +
+arquivos-tarefa (P0-03 só cobriu Fases 1-2; a Fase 4 precisa dos seus).
 
 _(histórico:)_ **FASE 3 FECHADA** (2026-09-02 ~11:00, relógio da máquina).
 P3-02: 16 modelos removidos, keep-list de 5, ~148 GiB reclamados (apagados os 50 snapshots
