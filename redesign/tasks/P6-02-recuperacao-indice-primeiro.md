@@ -1,5 +1,13 @@
 # P6-02 — recuperação índice-primeiro (refs rastreáveis, zero vector DB)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~19:25 (relógio da máquina).** `redesign/obsidian/
+consulta.py` — duas vias, mesmo formato de hit (`ref`+`arquivo`+`trecho`): `query_canon`
+(PRIMÁRIA, índice derivado) + FTS do plugin pelo `:27125` (SECUNDÁRIA). **Zero vector DB**
+(`_sem_vector_db()` + `pip list` limpos). 5 consultas com gabarito: `presence_penalty` e
+`TES-002 nonce` convergem nas refs `(151)-(154)` / `(70)(89)(90)`; as outras 3 são
+complementares (seção vs texto), toda hit rastreável. Adicionado `/search/` ao allowlist
+do `ro_proxy`. Ver `redesign/obsidian/README.md`.
+
 **Objetivo:** uma ferramenta que consulta o vault e devolve **referências rastreáveis**
 (`(NNN)` + arquivo + linha), pelo MCP `:27124/mcp/` **e** por leitura direta de disco
 (fallback), sem nenhum índice vetorial.

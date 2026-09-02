@@ -2275,3 +2275,48 @@ o vault registrado).
 (disco); convergência MCP↔disco; **zero vector DB**. Classe runtime, auto-revisão.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:25 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P6-02 FEITO — consulta.py (índice-primeiro, zero vector DB)
+
+Auto-revisão (classe runtime): PRONTO. Sem `sudo`, sem instalação.
+
+- **`redesign/obsidian/consulta.py`** — `consultar(termos, via)` → duas vias, mesmo formato
+  de hit `{ref, arquivo, offset|linha, trecho}`:
+  - **`query_canon`** (P4-02) sobre o índice derivado — **PRIMÁRIA** (o loop não depende do
+    Obsidian; invariante da Fase 6). MEMÓRIAS vem como título com `(NNN)`; REGRAS/PROJETO
+    como `arquivo › seção`.
+  - **FTS do plugin** pelo `:27125/search/simple/` (ro_proxy) — SECUNDÁRIA. Busca de texto
+    completa, **filtrada** para canon + `memoria/obsidian/` (fora venv/traces). `ref`
+    derivada de `entradas/NNNN.md`.
+  - `score` do plugin = BM25 de texto, só ordena. `_sem_vector_db()` confirma que
+    faiss/chroma/qdrant/weaviate/lancedb/milvus/annoy/hnswlib **não** estão carregados;
+    `pip list` do venv idem.
+- **Ajuste no `ro_proxy.py`:** `/search`, `/search/simple`, `/search/gui` entram no
+  allowlist de `POST` (são leitura). `PUT`/`PATCH`/`DELETE`/`/vault/` POST seguem 403
+  (re-conferido). Match do path ignora a query-string.
+- Bug corrigido: `urllib.request.urlopen(url, method=...)` → `Request(url, method="POST")`.
+
+**Verificação (S7, aceite P6-02) — 5 consultas com gabarito no canon:**
+| termos | `query_canon` | MCP/FTS | em comum |
+|---|---|---|---|
+| `presence_penalty` | `(151)–(154)` | `(151)–(154)` + `(135)(172)` | **`(151)(152)(153)(154)`** |
+| `TES-002 nonce` | REGRAS §§ + `(70)(89)(90)` | 114 hits + `(70)(89)(90)` | **`(70)(89)(90)`** |
+| `16814` · `context_file_max_chars` · `api_server 8642` | PROJETO §§ | entradas MEMÓRIAS | — (complementares) |
+
+- **Convergência parcial e esperada:** `query_canon` é seção/título sobre o índice
+  derivado; o FTS é texto completo. Onde indexam a mesma granularidade, batem. Onde não,
+  são complementares (a seção do PROJETO onde o valor *está* vs as entradas que o
+  *discutem*). **Toda hit dos dois carrega ref checável.** ✅
+- **Zero vector DB** confirmado (função + `pip list`). ✅
+- **P6-02 → PASS.** `redesign/obsidian/README.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Nada instalado, sem
+`sudo`. **HD desconectado** — bundles no staging local. Obsidian + `:27124` + `:27125` de pé.
+
+**Falta / próximo:** **P6-03** — consolidação noturna como flow do grafo da Fase 4
+(`orientar → juntar → consolidar → podar`), saída só em `propostas/`, nunca canon direto.
+Reusa `grafo.py`. **Fecha a Fase 6.**
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

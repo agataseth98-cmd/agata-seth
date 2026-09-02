@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 6 — Obsidian** (EM ANDAMENTO — P6-00, P6-01 feitos). **Fases 0-5 FECHADAS.**
-ATUALIZADO: 2026-09-02 19:15 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P6-01 FEITO (plugin + ro_proxy :27125)
+FASE ATUAL: **Fase 6 — Obsidian** (EM ANDAMENTO — P6-00..P6-02 feitos). **Fases 0-5 FECHADAS.**
+ATUALIZADO: 2026-09-02 19:25 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P6-02 FEITO (consulta.py índice-primeiro)
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -15,8 +15,8 @@ P6-00: `INVENTARIO.md`. P6-01: plugin `obsidian-local-rest-api` 5.1.0 (`~/agata/
 gitignorado) → `:27124` HTTPS loopback, token em `~/.config/agata/obsidian.token` (chmod 600).
 O plugin não tem read-only global → **`ro_proxy.py` em `:27125`** (só leitura, injeta o token;
 escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `redesign/obsidian/PLUGIN.md`.
-**Próximo: P6-02** — `consulta.py` (recuperação índice-primeiro: refs rastreáveis pelo
-`:27125/mcp/` **e** por `query_canon`; zero vector DB).
+**Próximo: P6-03** — consolidação noturna como flow do grafo (`orientar → juntar →
+consolidar → podar`), saída só em `propostas/`, nunca canon → **fecha a Fase 6**.
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).

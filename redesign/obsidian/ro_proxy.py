@@ -120,6 +120,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self._repassa("OPTIONS")
 
+    # POST permitido so em /mcp/ (filtrado) e nos endpoints de BUSCA (leitura pura)
+    _POST_BUSCA = ("/search", "/search/", "/search/simple", "/search/simple/",
+                   "/search/gui", "/search/gui/")
+
     def do_POST(self):
         n = int(self.headers.get("content-length", 0))
         corpo = self.rfile.read(n) if n else b""
@@ -128,7 +132,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if motivo:
                 return self._403(motivo)
             return self._repassa("POST", corpo)
-        return self._403(f"POST {self.path} nao permitido (so /mcp/ de leitura)")
+        if self.path.split("?", 1)[0] in self._POST_BUSCA:
+            return self._repassa("POST", corpo)
+        return self._403(f"POST {self.path} nao permitido (so /mcp/ e /search/ de leitura)")
 
     def do_PUT(self):
         self._403("PUT bloqueado (proxy read-only)")
