@@ -1,7 +1,8 @@
 [Unit]
-Description=Agata -- todos os servicos locais (Fase 7)
-Documentation=file:///home/orusoua/agata/redesign/STATUS.md
-# nao e' Requires: cada service decide se sobe; o target so agrupa p/ start/stop de uma vez
+Description=Agata -- todos os servicos locais (Fase 7, P7-01)
+Documentation=file:///home/orusoua/agata/redesign/systemd/README.md
+# Sem Requires/Wants aqui: os membros se ligam pelo [Install] WantedBy=agata.target
+# (systemctl --user enable <unit>). PartOf nos membros propaga stop/restart do target.
 
 [Install]
 WantedBy=default.target

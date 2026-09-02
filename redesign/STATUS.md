@@ -1,16 +1,24 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 feito; prep sem-HD de P7-03 feita; BLOQUEADA no HD/sudo/P-8 + "vai" de P7-01). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 20:20 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 4) — "prosseguir sem o HD, risco assumido pelo Humano": prep de P7-03 (propostas P-8 + runbook do HD).
-ÂNCORA (leve, manual): sobre `redesign` @ **`ca4c689`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; prep sem-HD de P7-03 feita; falta: `enable` do `agata.target` no boot, HD, 2 sudo, régua P-12). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-02 20:45 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 4) — P7-01 instalado + testado (agata.target + dreno); prep de P7-03 (propostas P-8 + runbook do HD).
+ÂNCORA (leve, manual): sobre `redesign` @ **`7a06d02`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **P6-00 + P6-01 FEITOS** (2026-09-02 ~19:15).
+_(nenhuma tarefa EM ANDAMENTO)_ — **P7-01 FEITO** (2026-09-02 ~20:40, chat 4, com "vai").
+`agata.target` + `agata-drain.service` (dreno via `redesign/grafo/drenar.py`, não corta) +
+drop-ins (`PartOf`/`WantedBy`; `omniroute` c/ `SuccessExitStatus=143`; `llamacpp-agata` só
+`PartOf`). Instalado em `~/.config/systemd/user/`, **NÃO `enable`d p/ boot** (pende "vai").
+S7 PASS: dreno segura 26 s c/ efeito pendente e registra sem cortar · WAL limpo = teardown
+1 s · `start` re-sobe os 5 (portas :20127/8/:20130/4/:27124/5) · MoE: `agata down` derruba
+e a 4060 volta de 6229→54 MiB. `redesign/systemd/README.md`.
+
+_(P6-00 + P6-01 FEITOS 2026-09-02 ~19:15.)_
 P6-00: `INVENTARIO.md`. P6-01: plugin `obsidian-local-rest-api` 5.1.0 (`~/agata/.obsidian/`,
 gitignorado) → `:27124` HTTPS loopback, token em `~/.config/agata/obsidian.token` (chmod 600).
 O plugin não tem read-only global → **`ro_proxy.py` em `:27125`** (só leitura, injeta o token;
@@ -20,10 +28,11 @@ leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flo
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
 **Fase 7 (Liga/desliga) — P7-00 FEITO · prep sem-HD de P7-03 FEITA · P7-01/02 aguardam:**
-- **P7-01** `agata.target` + dreno no stop — rascunhos em `redesign/systemd/` (não
-  instalados). Userspace, sem HD, sem sudo. **PRÓXIMO — pede o "vai":** instalar em
-  `~/.config/systemd/user/` + teste de dreno (bounça os 5 serviços `--user`) e só então
-  `enable` (CONTINUIDADE §7: revisão de plano p/ tarefa que toca systemd).
+- **P7-01 ✅ FEITO** (2026-09-02 ~20:40) — instalado em `~/.config/systemd/user/` + S7 PASS
+  (ver "Quadro de posse" e `redesign/systemd/README.md`). **Falta só:** `systemctl --user
+  enable agata.target` p/ boot — mudança no comportamento de todo login, e o contrapeso
+  (GameMode que faz `agata down` ao lançar jogo) é o P7-02, ainda travado em `sudo`. **Pede
+  um "vai" à parte.**
 - **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
   + drop-in em `ollama.service`, ambos `sudo`).
 - **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:

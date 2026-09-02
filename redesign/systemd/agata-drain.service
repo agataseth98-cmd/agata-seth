@@ -1,0 +1,17 @@
+[Unit]
+Description=Agata -- dreno do WAL antes de parar os servicos (P7-01)
+PartOf=agata.target
+# Sobe DEPOIS dos servicos => no shutdown para ANTES deles => o dreno espera
+# os efeitos em curso enquanto o grafo ainda esta vivo, e so entao o systemd
+# derruba os servicos (PartOf). O dreno NAO para servico -- ver drenar.py.
+After=omniroute.service omniroute-sanitizer.service openvino-whisper.service openvino-embeddings.service obsidian-ro-proxy.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/home/orusoua/agata/redesign/grafo/.venv/bin/python /home/orusoua/agata/redesign/grafo/drenar.py
+TimeoutStopSec=45
+
+[Install]
+WantedBy=agata.target

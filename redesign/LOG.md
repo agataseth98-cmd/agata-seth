@@ -2521,3 +2521,74 @@ estão em `redesign/propostas/`, **não aplicados**; sem `APROVADO-`). Nada inst
    aplicados de verdade.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 20:45 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 4) · P7-01 FEITO — agata.target + dreno (instalado + testado; NÃO enable p/ boot)
+
+O Humano: *"Vai, o HD só amanhã."* → executado o P7-01 (userspace, sem HD, sem sudo).
+Revisão de plano (CONTINUIDADE §7, tarefa que toca systemd) = o "vai" do Humano depois de
+eu ter posto os riscos por escrito (bounça os 5 serviços `--user`; reversível).
+
+**O rascunho não sobreviveu ao teste — e ainda bem.** O `agata-dropin.conf` original punha
+`ExecStop=<venv> cli.py down` em **cada** unit. No `systemctl --user stop agata.target`
+isso **deadlocka**: `cli.py down` chama `systemctl --user stop` de dentro da própria
+transação de stop do systemd → `TimeoutStopSec` estoura → SIGTERM no meio do "dreno" (o
+oposto do que a tarefa quer). Visto duas vezes no journal (`Stopping timed out.
+Terminating.`).
+
+**Desenho instalado (substitui o rascunho):**
+- **`agata-drain.service`** — oneshot `RemainAfterExit`, `After=` os 5 serviços (⇒ no
+  shutdown para **antes** deles). `ExecStart=/bin/true`. `ExecStop` roda
+  **`redesign/grafo/drenar.py`** (novo): importa `cli._pendencias_wal`, espera até 25 s os
+  `intent`-sem-`done`, se sobrar registra `thread/node/passo/chave` e **sai 0** — nunca
+  corta, nunca chama `systemctl`. `TimeoutStopSec=45` (folga sobre os 25).
+- **drop-in genérico** (`~/.config/systemd/user/<unit>.service.d/agata.conf`) em
+  `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`:
+  `[Unit] PartOf=agata.target` + `[Install] WantedBy=agata.target`.
+- **`omniroute`**: idem + `[Service] SuccessExitStatus=143 SIGTERM` — é `Type=simple` e o
+  `ExecStop=omniroute stop` mata o próprio main (sai `code=exited status=143`); sem isto o
+  stop normal fica `failed`. Conferido isolado depois do fix: `stop omniroute` → `success`.
+- **`llamacpp-agata`**: drop-in **só** `PartOf=agata.target` (sem `WantedBy`) — o MoE
+  **para** com `agata down`/`stop agata.target` (libera a 4060) mas **não sobe** junto;
+  segue sob demanda (`agata up --moe`).
+- **`agata.target`**: sem `Requires`/`Wants` (os membros se ligam pelo `WantedBy`).
+- **`enable` dos membros** (`omniroute … obsidian-ro-proxy agata-drain`) popula
+  `agata.target.wants/` **mas também** cria `default.target.wants/<unit>` — os 5 desse
+  segundo tipo foram **removidos à mão**. `agata.target` em si fica `disabled`. **Boot: nada
+  do Agata sobe sozinho.**
+
+**Verificação (S7, aceite P7-01) — PASS:**
+- **dreno com efeito pendente:** plantei um `intent` sem `done` no
+  `~/.cache/agata/grafo/eventos.ndjson`; `stop agata.target` → `agata-drain` segurou **26 s**,
+  logou `dreno: AVISO -- 1 efeito(s) ainda pendente(s) apos 25s; ... NAO cortados` com
+  `thread=P7-01-teste-dreno node=trabalhar passo=1 chave=efeito-fake`, saiu 0
+  (`Result=success`). Os 5 serviços só caíram **depois**. Nenhum membro `failed`.
+- **dreno com WAL limpo:** `dreno: WAL limpo, nada a esperar` → teardown em **1 s**, todos
+  `Result=success`.
+- **restart:** `start agata.target` → os 5 voltam em ~6 s; portas `:20127 :20128 :20130
+  :20134 :27124 :27125` todas UP.
+- **VRAM da 4060 (aceite do ROADMAP):** `start llamacpp-agata` → 56 → **6229 MiB**;
+  `stop agata.target` → MoE `inactive` (`success`), 4060 volta a **54 MiB**. WAL/checkpoint
+  intactos (`drenar.py` não apaga nada).
+- **boot:** `default.target.wants/` sem nada do Agata; `agata.target is-enabled = disabled`.
+
+**Estado restaurado ao fim:** os 5 serviços de novo UP (como estavam antes da sessão),
+`llamacpp-agata` parado, WAL removido (arquivo não existe, como no início).
+
+**Arquivos:** `redesign/grafo/drenar.py` (novo) · `redesign/systemd/` sincronizado
+(`agata.target`, `agata-drain.service`, `dropin-generico.conf`, `dropin-omniroute.conf`,
+`dropin-llamacpp.conf`, `README.md` reescrito; `agata-dropin.conf` removido) ·
+`redesign/tasks/P7-01-*.md` (FEITO) · `STATUS.md`, `ANCORA.md` (piso → `7a06d02`), `LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`. Sem `sudo`,
+nada instalado via pacote (só arquivos em `~/.config/systemd/user/` e `redesign/`). O
+Ollama de produção (`:11434`) intocado — `llamacpp-agata` é `:20129`.
+
+**Falta / próximo:**
+1. **`systemctl --user enable agata.target`** (boot) — pede um "vai" à parte: muda o
+   comportamento de todo login e o contrapeso (GameMode → `agata down` ao lançar jogo) é o
+   P7-02, ainda travado em `sudo`.
+2. Régua do P-12 (Humano) + `APROVADO-*`. 3. HD (runbook). 4. P7-02 (2 sudo). 5. Fase 8.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

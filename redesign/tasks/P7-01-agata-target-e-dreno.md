@@ -1,7 +1,20 @@
 # P7-01 — agata.target + dreno no stop (userspace, sem HD)
 
-**Status:** ⏳ rascunho em `redesign/systemd/` (não instalado). Pede o "vai" para copiar
-para `~/.config/systemd/user/` e `enable`.
+**Status:** ✅ **FEITO (instalado + testado) — 2026-09-02 ~20:40 (relógio da máquina),
+com "vai" do Humano.** `agata.target` **NÃO** `enable`d p/ boot (pende de um "vai" à
+parte). Ver `redesign/systemd/README.md` (espelho do instalado + verificação S7).
+
+**O desenho mudou no caminho** (o rascunho `agata-dropin.conf` punha `ExecStop=cli.py
+down` em cada unit — isso **deadlocka**: `cli.py down` chama `systemctl stop` de dentro
+da transação de stop do systemd, timeout + SIGKILL, corta no meio). Trocado por:
+- **`agata-drain.service`** — oneshot único, `After=` os 5 serviços (⇒ para antes deles),
+  `ExecStop` roda **`redesign/grafo/drenar.py`** (só espera o WAL 25 s e registra
+  pendências; **não** chama `systemctl`, **não** corta, sai 0 sempre).
+- drop-in genérico (`PartOf` + `WantedBy=agata.target`) nos 4; **`omniroute`** ganha
+  `SuccessExitStatus=143 SIGTERM` (senão fica `failed` no stop normal).
+- **`llamacpp-agata`**: drop-in só com `PartOf` (para com `agata down`, **não** sobe junto).
+- o `enable` dos membros também cria `default.target.wants/<unit>` — **removidos à mão**
+  (não queremos boot); só `agata.target.wants/` fica.
 
 **Objetivo:** `agata.target` agrupa as units do Agata; `agata up`/`down` (P4-04) sobem/param
 todas; `ExecStop` de cada service chama `agata down` (dreno do WAL — não corta no meio de um
