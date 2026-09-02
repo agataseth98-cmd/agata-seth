@@ -1,7 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0 FECHADA** (2026-09-02).
-ATUALIZADO: 2026-09-02 ~08:45 -03 · por: sessão Claude (Claude Code, na Máquina)
+FASE ATUAL: **Fase 0 e Fase 1 FECHADAS** (2026-09-02). Próxima: **Fase 3 — Modelos**
+(ordem do ROADMAP: 0 → 1 → 3 → 2 …), precisa do "vai" do Humano.
+ATUALIZADO: 2026-09-02 ~09:00 -03 · por: sessão Claude (Claude Code, na Máquina)
 ÂNCORA (leve, manual): sobre `redesign` @ **`16dd3d5`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -9,8 +10,8 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 0 FECHADA.** Fase 1: P1-00/01/02/04 FEITO,
-P1-03 quase (falta model-id de deepseek/openrouter e consertar groq).
+_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 0 e Fase 1 FECHADAS.** P1-00 a P1-04 FEITO.
+Próxima: Fase 3 (Modelos), aguardando o "vai" do Humano.
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -99,11 +100,18 @@ nesta fase (ver LOG 01/09 ~17:10).
 
 ## Próximo
 
-- **Fase 0 — ✅ FECHADA** (2026-09-02): repo restic + 2 snapshots + `restic check` limpo +
-  restore byte a byte OK; MCP == script cru.
-- **Fase 1 — quase fechando.** Falta só, em P1-03: model-id certo de `deepseek` e
-  `openrouter`, e consertar `groq` (`unavailable` — default-model). Ver `PROVEDORES.md`.
-  Depois refazer `cheap`/`auto` com a cadeia completa. **Então Fase 1 FECHADA → Fase 3.**
+- **Fase 0 — ✅ FECHADA**: repo restic + 3 snapshots + `restic check` limpo + restore byte
+  a byte OK; MCP == script cru.
+- **Fase 1 — ✅ FECHADA** (2026-09-02 ~09:00). Aceite todo cumprido: um pedido roteia · cai
+  no fallback sob falha real (`[deepseek 402 → groq]`; `conselho` GLM→Gemini) · custo
+  logado (`omniroute cost`) · segredo plantado bloqueado antes de sair (proxy `:20127`) ·
+  a rede do `conselho_remoto.py` aposentada (P1-04, verificado com parecer real).
+  Providers ativos: Ollama, Groq (`gpt-oss-120b`), Gemini (`2.5-flash`), OpenRouter
+  (`minimax-m3:free`), Z.AI (`glm-4.7-flash`). DeepSeek fora (402, sem crédito). Cerebras
+  não configurado (`~/.hermes/.env` sem a chave — walkthrough em `PROVEDORES.md`).
+- **Fase 3 — Modelos** (próxima pela ordem `0→1→3→2`): manifesto completo + prune (~140 GB)
+  + llama.cpp com `--n-cpu-moe` como 2º backend local. Arquivos-tarefa: ainda não escritos
+  (P0-03 cobriu só Fases 1-2). **Precisa do "vai" do Humano.**
 - **Fase 1 (histórico dos passos):**
   - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
     `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele

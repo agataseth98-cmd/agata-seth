@@ -6,25 +6,43 @@
 `GOOGLE_API_KEY`, `ZHIPU_API_KEY`. Registrei os 5 providers no OmniRoute (valores lidos do
 `.env` para env vars, nunca impressos): `groq`, `deepseek`, `openrouter`, `gemini`, `zai`.
 
-| provider | status | model ID que **funciona** | nota |
+| provider | status | model ID que **funciona** (id RAW, não o nome do catálogo) | nota |
 |---|---|---|---|
 | `ollama-local` | active | `ollama-local/qwen3.5:9b`, `ollama-local/llama3.2:3b` | local, $0 |
-| `zai` (GLM) | active | **`zai/glm-4.7-flash`** ✅ (13 s — lento, bate no `maxWaitMs`) | `GLM 4.7 Flash` do catálogo NÃO funciona; usar o id raw |
-| `gemini` | active | **`gemini/gemini-2.5-flash`** ✅ (2 s) | free tier do `GOOGLE_API_KEY`; ~$0,01 num parecer de 3,5k tok |
-| `deepseek` | active | **pendente** — `deepseek/deepseek-chat` dá "ambiguous"; achar o id/prefixo certo | chave OK |
-| `openrouter` | active | **pendente** — os `:free` rotacionam (`llama-3.3-70b-instruct:free` saiu) | chave OK; ver `openrouter.ai/models?max_price=0` |
-| `groq` | **unavailable** | **pendente** — OmniRoute devolve sempre `model 'llama 3.3 70b' does not exist` p/ QUALQUER modelo; provável `--default-model` não setado / bug de alias | chave OK (auth passou); rodar `omniroute provider ... set-default-model` ou reconfigurar |
+| `groq` | **active** ✅ | **`groq/openai/gpt-oss-120b`** (~450 ms) | Groq **aposentou** `llama-3.3-70b-versatile`; o erro "model 'llama 3.3 70b'…" era breaker em cooldown + default velho. Re-registrado com `--default-model openai/gpt-oss-120b`. |
+| `gemini` | active | **`gemini/gemini-2.5-flash`** (~2 s) | free tier do `GOOGLE_API_KEY`; ~$0,01 num parecer de 3,5k tok |
+| `openrouter` | **active** ✅ | **`openrouter/minimax/minimax-m3:free`** (~1,2 s) | os `:free` rotacionam — lista viva em `openrouter.ai/api/v1/models` filtrando `pricing.prompt==0` |
+| `zai` (GLM) | active | **`zai/glm-4.7-flash`** (5–13 s, oscila) | p/ `conselho`; quando passa de 15 s (`maxWaitMs`) cai no fallback |
+| `deepseek` | registrado, **fora dos combos** | — | chave dá **402 Insufficient Balance** — a conta DeepSeek precisa de crédito. Sem custo grátis. |
+| `cerebras` | **não registrado** | — | `CEREBRAS_API_KEY` não existe no `.env` (opcional — ver INSTALAR-CEREBRAS abaixo) |
 
-**Combos (2026-09-02):**
-| combo | entradas (priority) | testado |
+**Combos finais (2026-09-02, todos testados pelo proxy `:20127`):**
+| combo | entradas (priority) | teste |
 |---|---|---|
-| `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ parecer real; **fallback GLM→Gemini disparou de verdade** (GLM > `maxWaitMs`) |
-| `cheap` | `ollama-local/llama3.2:3b` → `gemini/gemini-2.5-flash` | ✅ roteia |
-| `auto` | `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ criado |
+| `cheap` | `ollama-local/llama3.2:3b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free` | ✅ roteia (Ollama) |
+| `auto` | `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ roteia (Groq) |
+| `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ **parecer real**; fallback GLM→Gemini disparou de verdade num teste |
 
-**Falta em P1-03:** id/prefixo correto de `deepseek` e `openrouter`; consertar `groq`
-(default-model). Depois, refazer `cheap`/`auto` com a cadeia completa
-`ollama → groq → cerebras → deepseek`. `CEREBRAS_API_KEY` não existe no `.env` (opcional).
+**Fallback verificado com falha real:** combo `[deepseek (402) → groq]` → resposta veio do
+Groq. `omniroute cost` conta por provedor.
+
+**P1-03 FEITO.** Quando `cerebras` entrar, acrescentar `cerebras/<modelo>` no meio de
+`cheap`/`auto`. Quando a conta DeepSeek tiver crédito, reincluir `deepseek/deepseek-v4-flash`.
+
+---
+
+## INSTALAR-CEREBRAS (para o Humano)
+
+1. Abrir **`cloud.cerebras.ai`** → **Sign in** (Google/GitHub) → no menu lateral,
+   **API Keys** → **Create API Key** → copiar (começa com `csk-`).
+2. `nano ~/.hermes/.env` → acrescentar no fim: `CEREBRAS_API_KEY=csk-...` → salvar
+   (`Ctrl+O`, `Enter`, `Ctrl+X`). O arquivo já é `chmod 600`.
+3. Conferir que entrou (sem mostrar o valor): `grep -c '^CEREBRAS_API_KEY=' ~/.hermes/.env`
+   → deve imprimir `1`.
+4. Avisar o Claude "adiciona o cerebras" — ele roda
+   `omniroute setup --add-provider --provider cerebras --api-key "$CEREBRAS_API_KEY"` e
+   põe `cerebras/<modelo>` nos combos. Modelos Cerebras atuais em
+   `api.cerebras.ai/v1/models` (ex.: um ~120B rápido).
 
 ---
 

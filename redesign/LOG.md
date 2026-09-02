@@ -952,3 +952,42 @@ os providers é de agora — vale um 3º snapshot num próximo passo).
 Fase 3 (modelos) pela ordem do ROADMAP.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~09:00 -03 · sessão Claude (na Máquina) — FASE 1 FECHADA (groq/openrouter consertados)
+
+**Model-ids reais (consultei as APIs direto com as chaves, sem imprimir valores):**
+- Groq **aposentou** `llama-3.3-70b-versatile`. O erro "model 'llama 3.3 70b'…" era
+  breaker em cooldown + default velho. Re-registrei `groq` com `--default-model
+  openai/gpt-oss-120b`. **`groq/openai/gpt-oss-120b`** → ok (~450 ms). ✅
+- OpenRouter `:free` rotacionam; o que testei ontem saiu. **`openrouter/minimax/minimax-m3:free`**
+  → ok (~1,2 s). ✅ (lista viva: `openrouter.ai/api/v1/models`, `pricing.prompt==0`.)
+- DeepSeek: `deepseek/deepseek-v4-flash` → **402 Insufficient Balance**. A conta precisa de
+  crédito. Registrado mas **fora dos combos**.
+- Regra: os nomes do **catálogo** do OmniRoute (`GLM 4.7 Flash` etc.) não funcionam como
+  model-id — usar sempre o **id raw** do provedor.
+
+**Combos finais (testados pelo proxy `:20127`):**
+- `cheap` = `ollama-local/llama3.2:3b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free`
+- `auto` = `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b`
+- `conselho` = `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash`
+
+**Fallback sob falha REAL:** combo `[deepseek/deepseek-v4-flash (402) → groq/openai/gpt-oss-120b]`
+→ resposta veio do Groq. `omniroute cost` conta por provedor (7 provedores, total $0,0115).
+
+**→ FASE 1 (Router) FECHADA.** Aceite: um pedido roteia ✅ · fallback sob falha forçada ✅ ·
+custo logado ✅ · segredo plantado bloqueado antes de sair (proxy `:20127`, P1-02) ✅ ·
+rede do `conselho_remoto.py` aposentada (P1-04, parecer real verificado) ✅.
+
+**Backup:** 3º snapshot restic (tag `fase1-fechada`) com `~/.omniroute/storage.sqlite`
+atualizada (providers + combos).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `servidor.py`. Chaves
+nunca no chat/git — `.env` → env var → `~/.omniroute/storage.sqlite` (cifrado).
+
+**Falta / próximo:** **Fase 3 (Modelos)** pela ordem do ROADMAP — precisa do "vai" do
+Humano e dos arquivos-tarefa (P0-03 só cobriu Fases 1-2). Opcional antes: registrar
+Cerebras quando o Humano puser `CEREBRAS_API_KEY` (walkthrough em `PROVEDORES.md`).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -6,18 +6,20 @@ logado". Adicionar os provedores nuvem free atrás do OmniRoute, com combos e br
 **Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. (P1-02 antes: nenhuma chamada nuvem sai
 sem passar pela sanitização.)
 
-**Status:** ⏳ **QUASE — 2026-09-02 ~08:45.** As chaves já estavam em `~/.hermes/.env`.
-- ✅ 5 providers registrados no OmniRoute (`groq`, `deepseek`, `openrouter`, `gemini`,
-  `zai`) — valores lidos do `.env` para env vars, nunca impressos.
-- ✅ Combos `cheap`/`auto`/`conselho` criados e roteando pelo proxy `:20127`.
-- ✅ **Fallback real disparou**: na combo `conselho`, `zai/glm-4.7-flash` (lento, > 15 s
-  `maxWaitMs`) → caiu para `gemini/gemini-2.5-flash` num pedido de verdade.
-- ✅ **Custo logado**: `omniroute cost` — Gemini 3 reqs $0,0115, Ollama/Z.AI $0, etc.
-- ✅ Breaker/cooldown = defaults do OmniRoute (em `PROVEDORES.md`).
-- ⏳ **Falta:** model-id certo de `deepseek` (dá "ambiguous") e `openrouter` (`:free`
-  rotaciona); `groq` está `unavailable` (OmniRoute devolve "model 'llama 3.3 70b' does not
-  exist" p/ qualquer modelo — provável `--default-model` não setado). Detalhes e próximos
-  passos em `redesign/router/PROVEDORES.md`.
+**Status:** ✅ **FEITO — 2026-09-02 ~09:00.** As chaves já estavam em `~/.hermes/.env`.
+- ✅ Providers **ativos**: `ollama-local`, `groq` (`groq/openai/gpt-oss-120b`), `gemini`
+  (`gemini/gemini-2.5-flash`), `openrouter` (`openrouter/minimax/minimax-m3:free`), `zai`
+  (`zai/glm-4.7-flash`). Valores lidos do `.env` p/ env vars, **nunca impressos**.
+  `deepseek` registrado mas **fora dos combos** — chave dá `402 Insufficient Balance`.
+- ✅ Combos `cheap` / `auto` / `conselho` — todos roteiam pelo proxy `:20127` (testados).
+- ✅ **Fallback sob falha real**: combo `[deepseek (402) → groq]` → resposta veio do Groq.
+  Também: `conselho` GLM→Gemini quando o GLM passa de `maxWaitMs`.
+- ✅ **Custo logado** por provedor (`omniroute cost`): total US$0,0115 (o parecer real de
+  P1-04 no Gemini); Groq/OpenRouter/Z.AI/Ollama $0.
+- ✅ Breaker/cooldown = defaults do OmniRoute (registrados em `PROVEDORES.md`).
+- Achados: Groq aposentou `llama-3.3-70b-versatile` (o erro "model 'llama 3.3 70b'" era
+  breaker + default velho; resolvido re-registrando com `--default-model`). Os ids do
+  **catálogo** do OmniRoute (nomes bonitos) não funcionam — usar sempre o id RAW do provedor.
 
 **Arquivos que a tarefa toca:**
 - `~/.hermes/.env` — **o Humano** acrescenta as chaves nuvem, editando o arquivo direto.
