@@ -266,3 +266,72 @@ pré-comprometer Temporal.
 P2/P3; Humano decide H1-H4.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~22:35 -03 · sessão Claude (Claude Code, na Máquina) — Conselho 01, parecer do gpt-5.6-terra aplicado
+
+**`gpt-5.6-terra` respondeu P1/P2/P3** (via relay; a verificação web dele voltou HTTP 401,
+então P3 dele se apoia na evidência do branch, não em confirmação externa nova).
+**Convergência forte** com a minha 1ª resposta — sem divergência a subir ao Humano. Ele
+confirmou: 5 tools não escrevem workspace/canon, `commit_entry` ausente, `--rebuild`
+inalcançável (subprocess sem shell + args em lista; `"x --rebuild"` vira um argumento de
+texto), `check_citation` resistente a injeção. Achados novos aplicados agora em
+`servidor.py` + `mcp/README.md` (mudança só no branch, doc + robustez, reversível por
+`git checkout -- redesign/mcp`):
+
+1. **Frase errada corrigida** (era erro factual meu): a doc dizia `query_canon` "nunca
+   toca `memoria/missoes/`" — o script **lê** o índice derivado lá. Agora: "lê, não
+   escreve; índice ausente/corrompido continua sendo erro de leitura, nunca reconstrução".
+2. **`_run` ganhou timeout** (124) e trata binário ausente (127) sem levantar exceção —
+   erro vai em campo estruturado. Fecha o "sem erro estruturado p/ script ausente".
+3. **`check_citation`**: `os.write`+`os.close` → `os.fdopen(fd,'w')` num `with` — fd
+   sempre fechado mesmo em erro de escrita; `unlink` no `finally` com `try/except`.
+4. **`git_sync` re-desenhado** — a versão antiga comparava `HEAD` (branch atual) com
+   `origin/main`, o que na `redesign` mede "outra coisa" (terra). Agora reporta **dois
+   eixos separados**: `canon_local/canon_remote/canon_em_dia` (`main` vs `origin/main` —
+   alimenta o `sync:`) e `branch_*` (branch atual vs `@{upstream}`), mais
+   `fetch_exit_code/fetch_error` (não mascara erro de transporte como `em_dia:false`).
+5. **`mcp/README.md`**: invariante "read-only" reescrita (= sem escrita em
+   workspace/canon, não zero escrita no filesystem — `git fetch` toca `.git/`, o temp do
+   `check_citation` é criado e apagado); tabela de equivalência + 6 casos de borda novos
+   (git_sync na redesign, erro de rede, termo composto, índice ausente, script ausente
+   →127, subprocess travado →124).
+
+**Equivalência re-rodada, MCP ↔ script cru, tudo bate:** `run_perimetro` (exit 0, mesmo
+placar 10/0/1/0); `lint_header` 3 casos (válido 0/0, `Nonce:` incompleto 1/1, vazio 1/1);
+`check_citation` real 0/0 e inexistente 1/1 (mesmo `__RESUMO_P7__`). Servidor sobe e lista
+as 5 tools. `git status` só com `servidor.py` + `README.md` — índice **não** regenerado.
+
+**P2 — convergência terra + Claude (aguarda Codex/Qwen ou "vai" do Humano p/ virar norma):**
+- T2: verificação prévia **com tier de risco** — checagem mecânica curta de schema em toda
+  tarefa; revisão independente por 2º executor só quando instala pacote / toca runtime /
+  escreve fora do repo / mexe em rede / cria credencial / muda garantia. 3 resultados:
+  pronto / ajustes exigidos / lacuna. Separa legibilidade barata de revisão de risco.
+- T3: TTL sozinho não resolve corrida por cópia atrasada. Mecanismo mínimo (convergente
+  com o "posse-por-commit" que propus): grava posse com hora+expiração → commit+push →
+  **só age após confirmar que o remoto aponta para o commit que contém a posse** → posse
+  expirada torna a tarefa elegível mas não autoriza tomada automática (novo executor
+  publica a nova posse antes) → fechamento também commitado+enviado antes de outro pegar
+  trabalho. TTL vira recuperação de abandono; a trava de concorrência é a confirmação do
+  commit remoto.
+
+**P3 — convergência:**
+- E1: **não re-desenhar agora.** PESQUISA.md/ROADMAP.md desatualizados (P0-02 usa fastmcp
+  4.0.1, PESQUISA diz 3.x). Tratar o transporte MCP como stateless; estado de
+  execução/autorização/continuidade mora no grafo / storage / cliente, nunca em sessão
+  MCP implícita. Entra como correção de premissa + critério de aceite nas tarefas das
+  Fases 4 e 6. Some: pin `fastmcp==4.0.1` no `requisitos.txt` (feito? — ver próximo).
+- E2: premissa de durabilidade **não validada**; spike explícito antes de comprometer a
+  arquitetura da Fase 4. Aceite do spike: iniciar execução, interromper em pontos
+  definidos, retomar e provar (a) nenhum commit/escrita duplicado, (b) efeito externo
+  idempotente ou registrado como pendente, (c) estado retomado explica o último efeito
+  confirmado, (d) log append-only reconstrói a decisão. O resultado decide entre
+  checkpointer + camada externa mínima ou camada de durabilidade dedicada — não
+  pré-comprometer Temporal.
+
+**Falta:** respostas de Codex e Qwen Coder (P1 verificação + P2/P3); Humano decide H1-H4 e
+se T2/T3 (convergência de 2 modelos) já viram norma ou esperam os outros 2; aplicar o pin
+do `fastmcp` + as linhas de premissa MCP-stateless nas Fases 4/6 do ROADMAP; P0-03.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

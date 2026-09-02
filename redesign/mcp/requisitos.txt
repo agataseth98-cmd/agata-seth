@@ -2,5 +2,7 @@
 # Instalar num venv isolado: redesign/mcp/.venv (gitignorado)
 #   python3 -m venv redesign/mcp/.venv
 #   redesign/mcp/.venv/bin/pip install -r redesign/mcp/requisitos.txt
-fastmcp>=3.2
-# testado com fastmcp 4.0.1 (01/09/2026, Python 3.14) — a API @mcp.tool / mcp.run() é estável de 3.x a 4.x
+# pin exato (Conselho 01, terra + Claude): reprodutibilidade — um fallback não deve
+# pegar uma 5.x com mais churn. Subir só de propósito, re-rodando a equivalência.
+# Piso funcional testado: >=3.2 (a API @mcp.tool / mcp.run() é estável de 3.x a 4.x).
+fastmcp==4.0.1  # Python 3.14, 01/09/2026

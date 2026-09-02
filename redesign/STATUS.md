@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~22:10 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`16fecc5`**
+ATUALIZADO: 2026-09-01 ~22:35 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`8ea2a1a`**
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
 atrás — mesma defasagem da âncora-SHA do canon.
@@ -37,14 +37,18 @@ nesta fase (ver LOG 01/09 ~17:10).
   - ✅ passo 3: `restic` v0.19.1 instalado e verificado.
   - ⏸️ passos 3-4 (repo restic + 1º snapshot): **bloqueado** — HD `AgataBkup01` não
     montado (previsto para 02/09).
-- **P0-02 — servidor FastMCP das ferramentas de Máquina** ✅ (sessão Claude, 01/09).
-  `redesign/mcp/servidor.py` + `requisitos.txt` + `README.md`. **fastmcp 4.0.1** num venv
-  isolado (`redesign/mcp/.venv`, gitignorado). 5 tools read-only: `git_sync`,
-  `run_perimetro`, `check_citation` (adaptador de temp), `lint_header`, `query_canon`
-  (rejeita flags — `--rebuild` barrado, índice não regenera). Equivalência MCP↔script cru
-  verificada em `run_perimetro`, `lint_header` (ok+falha) e `check_citation` (ok+suspeito);
-  `query_canon` aceita termos válidos e rejeita `--rebuild`, `git status` limpo depois.
-  Tabela de equivalência em `redesign/mcp/README.md`. `commit_entry` continua fora (Fase 4).
+- **P0-02 — servidor FastMCP das ferramentas de Máquina** ✅ (sessão Claude, 01/09;
+  revisto pelo `gpt-5.6-terra` no Conselho 01). `redesign/mcp/servidor.py` +
+  `requisitos.txt` (`fastmcp==4.0.1`, pin) + `README.md`. Venv isolado
+  (`redesign/mcp/.venv`, gitignorado). 5 tools sem escrita em workspace/canon: `git_sync`
+  (2 eixos: `canon_*` = `main` vs `origin/main`; `branch_*` = branch vs upstream; +
+  `fetch_error`), `run_perimetro`, `check_citation` (adaptador de temp com `os.fdopen`),
+  `lint_header`, `query_canon` (rejeita flags — defesa real é subprocess sem shell + args
+  em lista; `--rebuild` inalcançável, índice não regenera). `_run` nunca levanta (124
+  timeout / 127 binário ausente). Equivalência MCP↔script cru re-verificada em
+  `run_perimetro`, `lint_header` (3 casos) e `check_citation` (real+suspeito); `git status`
+  limpo depois. Tabela + 6 casos de borda em `redesign/mcp/README.md`. `commit_entry`
+  continua fora (Fase 4).
 - Scaffolding do workspace `redesign/` (branch criado de `main` @ 4aa90bd): README,
   CONTINUIDADE, ROADMAP, PESQUISA, STATUS, LOG, tasks/P0-00, P0-01, P0-02.
 - **AUDITORIA-01** (sessão Claude, 01/09) — auditoria de atrito de equipe + delta de
@@ -53,15 +57,27 @@ nesta fase (ver LOG 01/09 ~17:10).
   3.x (E1); "checkpoint ≠ execução durável" agora é crítica mainstream, Fase 4 tem premissa
   não validada (E2). 4 decisões para o Humano (H1-H4), 4 mudanças de processo (T1/T4
   aplicáveis já; T2/T3 pendentes de parecer). Ver `redesign/AUDITORIA-01.md`.
-- **CONSELHO-01** — pacote de relay para Codex / Qwen Coder / `gpt-5.6-terra`:
-  verificação independente do P0-02, parecer sobre T2/T3, peso do delta E1/E2. Ver
-  `redesign/CONSELHO-01-relay.md` (cópia em `~/Área de trabalho/`). **Aguardando respostas.**
+- **CONSELHO-01** — pacote de relay para Codex / Qwen Coder / `gpt-5.6-terra`. Ver
+  `redesign/CONSELHO-01-relay.md` (cópia em `~/Área de trabalho/`).
+  - ✅ **`gpt-5.6-terra` respondeu** (P1/P2/P3), convergência forte com a auto-revisão do
+    Claude, sem divergência. P1: achados de robustez aplicados em `servidor.py` +
+    `README.md` (timeout no `_run`; `git_sync` em 2 eixos + `fetch_error`; `os.fdopen` no
+    `check_citation`; frase errada sobre `memoria/missoes/` corrigida; pin do `fastmcp`).
+    P2: T2 (tier de risco) e T3 (posse confirmada por commit remoto; TTL = recuperação de
+    abandono) — convergência de 2 modelos. P3: E1 anotar não re-desenhar; E2 spike de
+    durabilidade antes do desenho da Fase 4.
+  - ⏳ **aguardando Codex e Qwen Coder** (P1 verificação + P2/P3).
 
 ## Próximo (Fase 0, precisa do "vai" do Humano)
 
 - **Humano decide H1-H4** da AUDITORIA-01 (verificação sob exceção; âncora de coordenação;
-  pointer em `main`; provocar divergência entre executores).
-- **Conselho responde** ao CONSELHO-01-relay.
+  pointer em `main`; provocar divergência entre executores) **e** se T2/T3 (convergência
+  terra+Claude) já viram norma ou esperam Codex/Qwen.
+- **Codex / Qwen Coder respondem** ao CONSELHO-01-relay.
+- **ROADMAP.md** — acrescentar às Fases 4 e 6 a linha de premissa "MCP transporte é
+  stateless (spec 2026-07-28); estado mora no grafo/storage/cliente" (E1); transformar a
+  decisão do checkpointer append-only da Fase 4 numa tarefa-spike P4-00 com o teste
+  matar-e-retomar como aceite (E2). Pendente do "vai".
 - **P0-01 passos 3-4** — inicializar o repo restic + 1º snapshot, quando o HD montar.
 - **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 (aplicar T1/T4 antes; T2/T3 se
   aprovados).

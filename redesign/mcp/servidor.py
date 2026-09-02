@@ -6,12 +6,18 @@ que qualquer executor — sessão Claude, Codex, Qwen Coder, Goose, humano — d
 camada de verificação de forma idêntica. É a cola do handoff.
 
 Invariantes (ver redesign/README.md e redesign/tasks/P0-02-*.md):
-- NENHUMA tool escreve. Sem commit_entry nesta fase (foi para a Fase 4).
+- NENHUMA tool escreve no workspace nem no canon. "read-only" aqui = sem escrita em
+  arquivo rastreado / MEMÓRIAS / índice, NÃO "zero escrita no filesystem": git_sync
+  faz `git fetch`, que atualiza metadados em .git/ (refs de rastreio, FETCH_HEAD,
+  objetos); check_citation escreve um temp e o apaga. Nenhuma toca a árvore de trabalho.
+- Sem commit_entry nesta fase (foi para a Fase 4).
 - Cada tool é wrapper fino de um script existente em ~/agata/scripts/, chamado com
   cwd=~/agata. Retorno é sempre dado estruturado, nunca texto livre "achando" verdade.
-- query_canon rejeita qualquer flag (barra --rebuild, que regenera o índice).
+- query_canon rejeita qualquer flag (barra --rebuild, que regenera o índice). LÊ o
+  índice derivado em memoria/missoes/agata-sistema/derivado/ — não escreve lá.
 - check_citation não é passthrough de stdin: escreve um temp privado, chama o
   script (que recebe caminho), captura o resumo e apaga o temp.
+- _run nunca levanta: timeout -> returncode 124; binário ausente/não-executável -> 127.
 
 Uso:
     redesign/mcp/.venv/bin/python redesign/mcp/servidor.py
@@ -41,15 +47,31 @@ REPO = os.path.expanduser("~/agata")
 mcp = FastMCP("agata-maquina")
 
 
-def _run(cmd: list[str], stdin: str | None = None) -> subprocess.CompletedProcess:
-    """subprocess.run fixo em cwd=~/agata, sem shell, capturando texto."""
-    return subprocess.run(
-        cmd,
-        cwd=REPO,
-        input=stdin,
-        capture_output=True,
-        text=True,
-    )
+_TIMEOUT_PADRAO = 120
+
+
+def _run(
+    cmd: list[str], stdin: str | None = None, timeout: int = _TIMEOUT_PADRAO
+) -> subprocess.CompletedProcess:
+    """subprocess.run fixo em cwd=~/agata, sem shell, texto. NUNCA levanta:
+    timeout -> returncode 124; binário ausente/não-executável -> 127."""
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=REPO,
+            input=stdin,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as e:
+        return subprocess.CompletedProcess(
+            cmd, 124, e.stdout or "", (e.stderr or "") + f"\n[timeout após {timeout}s]"
+        )
+    except OSError as e:
+        return subprocess.CompletedProcess(
+            cmd, 127, "", f"[falha ao executar {cmd!r}: {e}]"
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -57,20 +79,52 @@ def _run(cmd: list[str], stdin: str | None = None) -> subprocess.CompletedProces
 # --------------------------------------------------------------------------- #
 @mcp.tool
 def git_sync() -> dict:
-    """Compara o HEAD local com origin/main (o canon remoto).
+    """Estado de sincronização com o remoto, em dois eixos separados:
+    (a) o canon local (`main`) vs `origin/main` — é o que alimenta o `sync:` do cabeçalho;
+    (b) a branch atual vs o seu upstream.
 
-    Faz `git fetch` e lê o remoto por `git ls-remote` (não depende de ref local
-    atualizada). Não escreve nada além do que o fetch guarda em .git.
-    Retorna {head, origin_head, em_dia}.
+    Faz `git fetch`, que ATUALIZA metadados em .git/ (refs de rastreio, FETCH_HEAD,
+    objetos); nunca toca a árvore de trabalho, o índice, nem empurra nada.
+
+    Retorna: canon_local, canon_remote, canon_em_dia · branch, branch_head,
+    branch_upstream, branch_upstream_head, branch_em_dia · fetch_exit_code, fetch_error
+    (0/None quando o fetch foi ok; != 0 quando houve erro de transporte — nesse caso
+    canon_remote pode vir de um ls-remote que também falhou, então cheque fetch_error).
     """
-    _run(["git", "fetch", "--quiet", "origin"])
-    head = _run(["git", "rev-parse", "HEAD"]).stdout.strip()
-    ls = _run(["git", "ls-remote", "origin", "refs/heads/main"]).stdout.strip()
-    origin_head = ls.split()[0] if ls else None
+    fetch = _run(["git", "fetch", "--quiet", "origin"], timeout=180)
+
+    main_local = _run(["git", "rev-parse", "main"]).stdout.strip() or None
+    ls = _run(["git", "ls-remote", "origin", "refs/heads/main"])
+    ls_out = (ls.stdout or "").strip()
+    main_remote = ls_out.split()[0] if ls_out else None
+
+    branch = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip() or None
+    head = _run(["git", "rev-parse", "HEAD"]).stdout.strip() or None
+    up = _run(
+        ["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"]
+    )
+    upstream = up.stdout.strip() if up.returncode == 0 else None
+    upstream_head = (
+        (_run(["git", "rev-parse", upstream]).stdout.strip() or None)
+        if upstream
+        else None
+    )
+
     return {
-        "head": head or None,
-        "origin_head": origin_head,
-        "em_dia": bool(head and origin_head and head == origin_head),
+        "canon_local": main_local,
+        "canon_remote": main_remote,
+        "canon_em_dia": bool(
+            main_local and main_remote and main_local == main_remote
+        ),
+        "branch": branch,
+        "branch_head": head,
+        "branch_upstream": upstream,
+        "branch_upstream_head": upstream_head,
+        "branch_em_dia": bool(
+            head and upstream_head and head == upstream_head
+        ),
+        "fetch_exit_code": fetch.returncode,
+        "fetch_error": (fetch.stderr or "").strip() or None,
     }
 
 
@@ -114,11 +168,16 @@ def _parse_citacao(stdout: str) -> list[str]:
 def _check_citation(texto: str) -> dict:
     fd, path = tempfile.mkstemp(prefix="mcp_cit_", suffix=".txt")
     try:
-        os.write(fd, texto.encode("utf-8"))
-        os.close(fd)
+        # os.fdopen assume a posse do fd e o fecha na saída do with, mesmo em
+        # erro de escrita — sem fd vazado se o write falhar (ENOSPC etc.).
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(texto)
         r = _run(["scripts/checar_citacao.sh", path])
     finally:
-        os.unlink(path)
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
     stdout = r.stdout or ""
     contagem = _RESUMO_P7_RE.search(stdout)
     return {
@@ -200,8 +259,15 @@ def query_canon(termos: list[str]) -> dict:
     """Consulta dirigida ao índice derivado do canon (scripts/consultar_indice.py).
 
     READ-ONLY: rejeita qualquer termo começando com '-' (barra --rebuild) e qualquer
-    termo fora de ^[\\wÀ-ÿ][\\wÀ-ÿ\\- ]*$. Nunca regenera o índice, nunca toca
-    memoria/missoes/. Retorna {exit_code, trechos, erro}.
+    termo fora de ^[\\wÀ-ÿ][\\wÀ-ÿ\\- ]*$. Nunca regenera o índice. LÊ o índice em
+    memoria/missoes/agata-sistema/derivado/indice.md — não escreve nessa área. Se o
+    índice estiver ausente/corrompido, isso continua sendo erro de leitura (o script
+    orienta a rodar o gerador), nunca reconstrução automática. Retorna {exit_code,
+    trechos, erro}.
+
+    Nota de defesa: a garantia contra --rebuild vem de subprocess sem shell + args em
+    lista (um termo como "x --rebuild" chega como UM argumento de texto, não como flag);
+    o regex é a segunda linha, não a primeira.
     """
     return _query_canon(termos)
 
