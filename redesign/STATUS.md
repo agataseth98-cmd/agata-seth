@@ -2,8 +2,8 @@
 
 FASE ATUAL: **Fase 0 e Fase 1 FECHADAS** (2026-09-02). Próxima: **Fase 3 — Modelos**
 (ordem do ROADMAP: 0 → 1 → 3 → 2 …), precisa do "vai" do Humano.
-ATUALIZADO: 2026-09-02 ~09:15 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): sobre `redesign` @ **`d5288d9`**; referência viva = `git rev-parse
+ATUALIZADO: 2026-09-02 ~09:25 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): sobre `redesign` @ **`f49387e`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto

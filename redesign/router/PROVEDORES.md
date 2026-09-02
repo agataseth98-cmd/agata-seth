@@ -13,14 +13,14 @@
 | `gemini` | active | **`gemini/gemini-2.5-flash`** (~2 s) | free tier do `GOOGLE_API_KEY`; ~$0,01 num parecer de 3,5k tok |
 | `openrouter` | **active** ✅ | **`openrouter/minimax/minimax-m3:free`** (~1,2 s) | os `:free` rotacionam — lista viva em `openrouter.ai/api/v1/models` filtrando `pricing.prompt==0` |
 | `zai` (GLM) | active | **`zai/glm-4.7-flash`** (5–13 s, oscila) | p/ `conselho`; quando passa de 15 s (`maxWaitMs`) cai no fallback |
-| `deepseek` | registrado, `credits_exhausted`, **fora dos combos** | — | chave dá **402 Insufficient Balance** — a conta precisa de crédito (`platform.deepseek.com`) |
-| `cerebras` | registrado 09/02, `credits_exhausted`, **fora dos combos** | `cerebras/gpt-oss-120b` (quando ativar) | chave OK (52 chars, `csk-`); modelos `gpt-oss-120b`, `gemma-4-31b`. **402 "Visit your billing tab"** — a Cerebras exige ativar billing (cartão) mesmo p/ o free. Ver INSTALAR-CEREBRAS. |
+| `cerebras` | **active** ✅ (após o Humano cadastrar cartão + `omniroute keys add cerebras --stdin` p/ re-habilitar) | **`cerebras/gpt-oss-120b`** (~665 ms — o mais rápido dos grandes) | modelos: `gpt-oss-120b`, `gemma-4-31b`. Nota: após um 402 o OmniRoute **auto-desabilita a chave** (`○ disabled`) — re-habilitar com `omniroute keys add <prov> --stdin`. |
+| `deepseek` | `credits_exhausted`, **fora dos combos** | — | chave dá **402 Insufficient Balance** — a conta precisa de crédito (`platform.deepseek.com`) |
 
-**Combos finais (2026-09-02, todos testados pelo proxy `:20127`, 1 req limpa cada):**
+**Combos finais (2026-09-02 ~09:25, testados pelo proxy `:20127`, 1 req limpa cada):**
 | combo | entradas (priority) | teste |
 |---|---|---|
-| `cheap` | `ollama-local/llama3.2:3b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free` | ✅ roteia (Ollama) |
-| `auto` | `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ roteia (Groq) |
+| `cheap` | `ollama-local/llama3.2:3b` → `cerebras/gpt-oss-120b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free` | ✅ roteia (Ollama) |
+| `auto` | `cerebras/gpt-oss-120b` → `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ roteia (Cerebras) |
 | `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ **parecer real**; fallback GLM→Gemini disparou num teste |
 
 > **Nota de operação:** rajadas de requisições em paralelo esgotam o pool de conexão do
@@ -36,22 +36,20 @@ Groq. `omniroute cost` conta por provedor.
 
 ---
 
-## INSTALAR-CEREBRAS (para o Humano)
+## INSTALAR-CEREBRAS — ✅ CONCLUÍDO 2026-09-02
 
-Passos 1-4 **feitos** 2026-09-02 — a chave está no `.env` e o provider está registrado no
-OmniRoute. **Bloqueio:** a Cerebras devolve `402 "Visit your billing tab"` — o tier grátis
-dela agora exige ativar o billing.
+Passos 1-4 (chave no `.env`, provider registrado) e passo 5 (Humano cadastrou cartão em
+`cloud.cerebras.ai`) feitos.
 
-**Passo 5 — ativar o billing (só você faz):**
-1. Abrir **`https://cloud.cerebras.ai`** → menu lateral → **Billing** (ou **Settings → Billing**).
-2. Adicionar um método de pagamento. O free tier continua grátis (não cobra dentro da
-   cota), mas a Cerebras exige o cartão cadastrado para liberar o acesso à API.
-3. Conferir no dashboard que a cota/quota aparece como ativa.
-4. Avisar o Claude — ele re-testa `cerebras/gpt-oss-120b` e, se responder, põe
-   `cerebras/gpt-oss-120b` no meio de `cheap` e `auto` (entre o Groq e o fallback).
-
-Se você preferir não cadastrar cartão: o pool atual (Ollama + Groq + Gemini + OpenRouter)
-já cobre `cheap`/`auto` com folga. Cerebras é ganho de velocidade, não necessidade.
+**Pegadinha resolvida:** o 1º re-teste após o cartão ainda deu `401 credits exhausted` —
+o OmniRoute tinha **auto-desabilitado a chave** (`○ disabled`) depois do 402 anterior.
+Re-habilitado com:
+```
+printf '%s' "$CEREBRAS_API_KEY" | omniroute keys add cerebras --stdin
+```
+→ `● enabled` → `cerebras/gpt-oss-120b` respondeu em **665 ms**. Cerebras está em `cheap`
+(2ª posição) e `auto` (1ª). **Regra geral:** depois de um provider dar 402/401, o OmniRoute
+desabilita a chave — reativar sempre com `omniroute keys add <prov> --stdin`.
 
 ---
 

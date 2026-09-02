@@ -1021,3 +1021,29 @@ cerebras, deepseek.
 Fase 1 segue FECHADA (cerebras era opcional, ganho de velocidade).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~09:25 -03 · sessão Claude (na Máquina) — Cerebras ativo, entrou nos combos
+
+Humano cadastrou cartão em `cloud.cerebras.ai`. O re-teste ainda deu `401 credits
+exhausted` — o OmniRoute tinha **auto-desabilitado a chave** (`○ disabled`) após o 402
+anterior. Re-habilitei: `printf '%s' "$CEREBRAS_API_KEY" | omniroute keys add cerebras
+--stdin` → `● enabled`. `cerebras/gpt-oss-120b` → ok em **665 ms** (o mais rápido dos
+grandes).
+
+**Combos atualizados** (testados, 1 req limpa cada):
+- `cheap` = `ollama-local/llama3.2:3b` → `cerebras/gpt-oss-120b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free`
+- `auto` = `cerebras/gpt-oss-120b` → `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b`
+- `conselho` = inalterado (`zai/glm-4.7-flash` → `gemini/gemini-2.5-flash`)
+
+Providers **ativos**: cerebras, gemini, groq, ollama-local, openrouter, zai. Inativo:
+deepseek (402, sem crédito).
+
+**Regra registrada em `PROVEDORES.md`:** depois de um provider dar 402/401, o OmniRoute
+desabilita a chave — reativar com `omniroute keys add <prov> --stdin`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Chave nunca no chat/git.
+Fase 1 segue FECHADA (Cerebras é reforço de velocidade).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
