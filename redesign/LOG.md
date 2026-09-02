@@ -166,3 +166,64 @@ handoff" atualizado para refletir isso e para registrar a migração de chat com
 aceite de restore do P0-02 (com HD). Pedem o "vai" do Humano.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~21:55 -03 · sessão Claude (Claude Code, na Máquina)
+
+**Pedido do Humano:** auditar atrito entre a equipe de executores; alcançar o estado da
+arte; orientar Humano e equipe. "Você está na fronteira; se seguro, prossiga; senão, o
+sistema aconselha pedir ajuda dos pares, todos os disponíveis."
+
+**Decisão de fronteira:** feito solo o que é observação/verificação (auditoria de atrito,
+delta de estado da arte, lista de decisões do Humano). Enviado ao Conselho o que é
+estrutural ou conflito de interesse (verificação independente do P0-02; parecer sobre as
+propostas de doutrina T2/T3; peso do delta E1/E2 nas Fases 4/6) — estou auditando uma
+equipe da qual faço parte, e o atrito central (A1/A2) envolve meus próprios outputs.
+
+**Feito:**
+- `redesign/AUDITORIA-01.md` — 8 pontos de atrito ranqueados:
+  - A1 (mais grave): sob o estado de exceção não há verificação independente. `gpt-5.6-terra`
+    auditou o *plano* (P0-00), não a *execução*. P0-02 comitado por 1 executor, sem 2º par
+    de olhos. A "equipe" hoje = 1 ativo + 2 fallbacks dormentes + 1 auditor de plano.
+  - A2: gate de qualidade de plano veio depois da execução começar (P0-00). Schema de
+    tarefa não tem passo "plano revisado antes de executar".
+  - A3: posse (`EM ANDAMENTO` em STATUS.md) é markdown sem trava; fallbacks veem com
+    latência (GitHub + relay).
+  - A4: âncora de coordenação do redesenho vive fora do git (guia em chat diz "798d483",
+    HEAD já é bc567f6). Canon resolve com âncora-SHA; redesenho não tem equivalente.
+  - A5: doc de handoff com deriva factual (STATUS.md dizia "nenhum executor tem shell";
+    falso p/ esta sessão — corrigido hoje). CONTINUIDADE.md só cobre executor sem shell.
+  - A6: `main` (PROJETO.md, ONDE_ESTAMOS.md) não aponta para o redesenho. Tensão real
+    entre "main congelado até Fase 8" e continuidade.
+  - A7 (positiva): a doutrina de atrito (Conselho §4, Regra 8) funciona no canon
+    ((308)/(309)); nunca foi exercida entre executores.
+  - A8: migração de chat por falso-positivo `[bio]` é custo recorrente.
+- Delta de estado da arte (verificação web, PESQUISA.md é de hoje mas em parte escrita de
+  memória):
+  - E1: MCP virou **stateless** (spec 2026-07-28); FastMCP em **4.0.1** (PESQUISA diz
+    3.x). Servidores FastMCP 3 sobem sem mudança — P0-02 passa. Fases 4/6 desenhadas
+    contra o modelo com sessão precisam de revisão leve. SDK Python v2: tipos em
+    `mcp_types` (alias `mcp.types`), snake_case.
+  - E2: "checkpoint do LangGraph ≠ execução durável" virou crítica mainstream
+    (Temporal+LangGraph, Diagrid). Fase 4 (checkpointer append-only "estilo dsh") tem
+    premissa não validada — talvez precise de spike de durabilidade / camada externa.
+  - E3: RLM — somar refs `alexzhang13/rlm` e `recursive-lm` (PyPI, fev/2026); paper
+    2512.24601 revisado mai/2026. Não urgente.
+- 4 decisões para o Humano (H1 verificação sob exceção — recomendo S7 mínimo por commit;
+  H2 âncora de coordenação do redesenho; H3 pointer em `main`; H4 provocar 1ª divergência
+  entre executores em P0-03). 4 mudanças de processo: T1 (campo "Verificação independente"
+  no schema de tarefa) e T4 (`CLAUDE-NA-MAQUINA.md`) aplicáveis já; T2 (plano auditado
+  antes de executar) e T3 (posse com TTL) pendentes de parecer dos pares.
+- `redesign/CONSELHO-01-relay.md` — pacote de relay p/ Codex / Qwen Coder / `gpt-5.6-terra`
+  (3 perguntas: verificação do P0-02; parecer T2/T3; peso do delta E1/E2). Cópias em
+  `~/Área de trabalho/` (`CONSELHO-01-relay.md`, `agata-AUDITORIA-01.md`).
+
+**Não tocado:** `main`, canon, Hermes, Ollama, `.hermes.md` de produção, `scripts/`,
+índice derivado, `PESQUISA.md` (o delta está na AUDITORIA-01; PESQUISA em si não foi
+editada — proposta é atualizar depois do parecer do Conselho).
+
+**Falta / próximo:** Humano decide H1-H4; Conselho responde ao relay; então aplicar T1/T4
+e (se aprovados) T2/T3; então P0-03.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

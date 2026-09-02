@@ -42,11 +42,24 @@ nesta fase (ver LOG 01/09 ~17:10).
   Tabela de equivalência em `redesign/mcp/README.md`. `commit_entry` continua fora (Fase 4).
 - Scaffolding do workspace `redesign/` (branch criado de `main` @ 4aa90bd): README,
   CONTINUIDADE, ROADMAP, PESQUISA, STATUS, LOG, tasks/P0-00, P0-01, P0-02.
+- **AUDITORIA-01** (sessão Claude, 01/09) — auditoria de atrito de equipe + delta de
+  estado da arte. 8 pontos de atrito (A1 = sem verificação independente sob o estado de
+  exceção, o mais grave). Delta: MCP virou stateless (spec 2026-07-28), FastMCP em 4.0 não
+  3.x (E1); "checkpoint ≠ execução durável" agora é crítica mainstream, Fase 4 tem premissa
+  não validada (E2). 4 decisões para o Humano (H1-H4), 4 mudanças de processo (T1/T4
+  aplicáveis já; T2/T3 pendentes de parecer). Ver `redesign/AUDITORIA-01.md`.
+- **CONSELHO-01** — pacote de relay para Codex / Qwen Coder / `gpt-5.6-terra`:
+  verificação independente do P0-02, parecer sobre T2/T3, peso do delta E1/E2. Ver
+  `redesign/CONSELHO-01-relay.md` (cópia em `~/Área de trabalho/`). **Aguardando respostas.**
 
 ## Próximo (Fase 0, precisa do "vai" do Humano)
 
+- **Humano decide H1-H4** da AUDITORIA-01 (verificação sob exceção; âncora de coordenação;
+  pointer em `main`; provocar divergência entre executores).
+- **Conselho responde** ao CONSELHO-01-relay.
 - **P0-01 passos 3-4** — inicializar o repo restic + 1º snapshot, quando o HD montar.
-- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2.
+- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 (aplicar T1/T4 antes; T2/T3 se
+  aprovados).
 - **P0-02 — aceite de restore** (parte do critério da Fase 0): restore do restic num
   scratch reproduz config — depende de P0-01 passos 3-4 (HD).
 
