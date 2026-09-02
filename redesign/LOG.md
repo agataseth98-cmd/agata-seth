@@ -1376,3 +1376,47 @@ P2-00..P2-03 já escritos (P0-03). Pede o "vai" do Humano + revisão de plano (P
 pinar display na iGPU — é risco alto, sessão gráfica; reversão testada antes).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 11:08 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · Fase 2 "vai"; P2-00 FEITO (inventário iGPU)
+
+**Humano: "vai"** para a Fase 2 (iGPU). Executado **P2-00** (inventário — só leitura, nada
+instalado; `glxinfo`/`clinfo` já estavam no sistema). `redesign/igpu/INVENTARIO.md` escrito.
+
+**Achados-chave:**
+- **iGPU:** Intel Raptor Lake-S UHD Graphics `[8086:a78b]` rev 04 (PCI `0000:00:02.0`),
+  driver **`i915`**, Mesa 26.2.1. Nó de compute: **`/dev/dri/renderD129`** (a NVIDIA tem o
+  `renderD128` — o aceite do P2-00 supunha `renderD128` para a iGPU; é o 129). `renderD129`
+  é `crw-rw-rw-`, iGPU exposta. (A dúvida da PESQUISA "HX não bate com -S" não procede — o
+  i7-13650HX usa a die RPL-S.)
+- **Display JÁ está na iGPU.** Painel `eDP-1` no conector de `card2` (i915); único output,
+  sem MUX, sem tela externa. `kwin_wayland` usa **7 MiB** na 4060 (handle de modo híbrido,
+  não render). Renderer GL default = `Mesa Intel(R) Graphics (RPL-S)`; `DRI_PRIME=1` →
+  offload zink p/ a 4060. → **P2-01 cai de risco ALTO para BAIXO** — vira "tornar explícito
+  + verificar após reboot de teste", não migração no escuro.
+- **Baseline 4060 em repouso** (10 amostras `nvidia-smi dmon`, estável): **54 MiB / 8188 de
+  VRAM · ~16–17 W · GPU-util 0 % · 42–44 °C.** Consumidores: `kwin_wayland` 7 MiB, `Xorg`
+  4 MiB, Brave com `/dev/nvidiactl`. Nenhum compute. Ollama keep-alive não residente.
+- **Nenhum STT existe hoje.** Zero unit whisper/stt/voice (só `speech-dispatcher` = TTS de
+  acessibilidade). Nada em `~/.hermes/`/`~/.config/`. → **P2-02 é greenfield**, não desmonta nada.
+- **Lacuna:** `clinfo -l` só lista `NVIDIA CUDA` — a iGPU não tem runtime de compute. O
+  plugin GPU do OpenVINO precisa de **`intel-compute-runtime`** (Level Zero + OpenCL).
+  Instalar em P2-02 (sudo). `intel-gpu-tools` e `libva-utils` também ausentes.
+- **Nota de ferramenta:** o driver `NVIDIA-SMI 610.57.04` **não aceita** `power.draw` nem
+  `temperature.gpu` em `--query-gpu` (a query inteira falha). Usar `dmon`/`-q` p/ isso.
+
+**Verificação (S7):** P2-00 é só leitura, sem `Aceite` executável — o `INVENTARIO.md`
+responde as 4 perguntas (a/b/c/d) contra saídas cruas. `bash scripts/perimetro.sh` roda no
+pre-commit e tem que sair verde.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado. Nenhum
+serviço mexido. `llamacpp-agata.service` foi **parado** após o P3-03 (VRAM livre; boot é Fase 7).
+
+**Falta / próximo:** revisão de plano (tier de risco) de **P2-01** (agora BAIXO — tornar o
+display-na-iGPU explícito + verificar por reboot), **P2-02** (`openvino-whisper` — INSTALA
+`intel-compute-runtime` + `intel-gpu-tools`, venv, distil-whisper int8; classe instala-pacote
+→ 2º par de olhos) e **P2-03** (`openvino-embeddings` — reusa o runtime). Cada um pede o
+"vai" quando tocar `sudo`/instalação.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -1,16 +1,22 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 2 — iGPU** (próxima). **Fases 0, 1 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 11:01 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P3-03 FEITO, FASE 3 FECHADA
-ÂNCORA (leve, manual): sobre `redesign` @ **`224901a`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 2 — iGPU** (EM ANDAMENTO — P2-00 feito). **Fases 0, 1 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 11:08 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — Fase 2 "vai" dado, P2-00 FEITO
+ÂNCORA (leve, manual): sobre `redesign` @ **`86010c1`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 3 FECHADA** (2026-09-02 ~11:00, relógio da máquina).
+_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 2 (iGPU) "vai" dado; P2-00 FEITO** (2026-09-02
+~11:07). `redesign/igpu/INVENTARIO.md`: **display já está na iGPU** (P2-01 vira verificação,
+risco ALTO→BAIXO); baseline 4060 em repouso ~54 MiB / ~16 W / 0 %; **nenhum STT existe**
+(P2-02 greenfield); lacuna = iGPU sem `intel-compute-runtime`. **Próximo: revisão de plano
+de P2-01/P2-02/P2-03 + "vai" por passo** (P2-02/P2-03 instalam pacote → 2º par de olhos).
+
+_(histórico:)_ **FASE 3 FECHADA** (2026-09-02 ~11:00, relógio da máquina).
 P3-02: 16 modelos removidos, keep-list de 5, ~148 GiB reclamados (apagados os 50 snapshots
 pacman do snapper que prendiam os blobs no btrfs). P3-03: `llama-cpp 0.3.0` + `ggml-cuda`;
 `Qwen3-30B-A3B-Instruct-2507` Q4_K_M em `llamacpp-agata.service` (`:20129`, `--n-cpu-moe 36`,

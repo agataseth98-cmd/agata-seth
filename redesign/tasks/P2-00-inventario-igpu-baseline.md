@@ -3,6 +3,14 @@
 **Objetivo:** saber, com medida, o que está na 4060 hoje (display? STT? nada?), qual é a
 iGPU exata e se ela está utilizável para compute — antes de mover qualquer coisa.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~11:07 (relógio da máquina).** `redesign/igpu/INVENTARIO.md`
+escrito. Achados: iGPU = Intel UHD RPL-S `[8086:a78b]` / `i915` / nó `renderD129`; **display
+já está na iGPU** (painel `eDP-1` em `card2`; kwin usa 7 MiB na 4060) → P2-01 vira
+verificação, não migração de risco; baseline 4060 em repouso = **~54 MiB / ~16 W / 0 %
+util**; **nenhum STT existe** (P2-02 é greenfield); lacuna: iGPU sem `intel-compute-runtime`
+(pré-req do plugin GPU do OpenVINO). Nada instalado (glxinfo/clinfo já estavam). S7: n/a
+(só leitura).
+
 **Pré-requisitos:** Fase 2 recebeu o "vai". (Ordem recomendada do ROADMAP: a Fase 2 pode
 correr em paralelo com a Fase 3.)
 
