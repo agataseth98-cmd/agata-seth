@@ -1,9 +1,9 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 feito; BLOQUEADA no HD/sudo/P-8). **Fases 0-6 FECHADAS.** — **MIGRAÇÃO DE CHAT** (chat 4): retomar por `redesign/REIDRATACAO-chat-4.md`.
-ATUALIZADO: 2026-09-02 19:45 -03 (relógio da máquina) — MIGRAÇÃO DE CHAT (janela do chat 3 estourou) (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — MIGRAÇÃO DE CHAT; retomar por redesign/REIDRATACAO-chat-4.md
-ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 feito; prep sem-HD de P7-03 feita; BLOQUEADA no HD/sudo/P-8 + "vai" de P7-01). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-02 20:20 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 4) — "prosseguir sem o HD, risco assumido pelo Humano": prep de P7-03 (propostas P-8 + runbook do HD).
+ÂNCORA (leve, manual): sobre `redesign` @ **`ca4c689`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -19,14 +19,23 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Fase 7 (Liga/desliga) — P7-00 FEITO, resto BLOQUEADO:**
+**Fase 7 (Liga/desliga) — P7-00 FEITO · prep sem-HD de P7-03 FEITA · P7-01/02 aguardam:**
 - **P7-01** `agata.target` + dreno no stop — rascunhos em `redesign/systemd/` (não
-  instalados). Userspace; pede o "vai" p/ copiar + `enable`.
+  instalados). Userspace, sem HD, sem sudo. **PRÓXIMO — pede o "vai":** instalar em
+  `~/.config/systemd/user/` + teste de dreno (bounça os 5 serviços `--user`) e só então
+  `enable` (CONTINUIDADE §7: revisão de plano p/ tarefa que toca systemd).
 - **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
   + drop-in em `ollama.service`, ambos `sudo`).
-- **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh` — BLOQUEADO:
-  **HD só amanhã** + P-12/`cifrar_env` são `scripts/*` → **quarentena P-8** (vão como
-  `propostas/<nome>.diff` + `APROVADO-`, nunca edição direta; decisão do Humano).
+- **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:
+  - **PREP FEITA sem o HD (chat 4):** `redesign/propostas/p12-backup-verificavel.diff` (P-12
+    completo, `bash -n` + `git apply --check` + run do perímetro modificado = OK, P-12 dá
+    PARCIAL com o HD fora) · `redesign/propostas/cifrar-env.diff` · `redesign/propostas/README.md`
+    · `redesign/fase7-hd/REGUA-P12.md` (R1/R2/R3 — **decisão do Humano**, com recomendação) ·
+    `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md` (runbook: paths+sha256 dos 4 artefatos, `restic
+    check`, restore) · `redesign/fase7-hd/semear_cache_p12.py`.
+  - **FALTA:** o HD (rodar o runbook + `restic check` + restore) · a régua do Humano +
+    `APROVADO-p12-backup-verificavel` / `APROVADO-cifrar-env` · aplicação real dos `.diff`
+    em `scripts/*` (Fase 8, ou "vai" explícito).
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).

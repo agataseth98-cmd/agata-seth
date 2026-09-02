@@ -2460,3 +2460,64 @@ instalado nesta entrada.
 `redesign/REIDRATACAO-chat-4.md`.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 20:20 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 4) · P7-03 — prep sem o HD (propostas P-8 + runbook)
+
+O Humano: *"vamos prosseguir sem o hd, eu assumo o risco, o HD só fica disponível no
+trabalho, quando não, juntamos informações, quando o HD vier a gente salva."* → feita toda
+a prep da Fase 7 que **não** depende do HD nem de `sudo` nem de editar `scripts/*` direto.
+
+**Escrito (tudo em `redesign/`, nada aplicado a `scripts/`):**
+- **`redesign/propostas/` + `README.md`** — o diretório da quarentena P-8 do redesenho.
+- **`redesign/propostas/p12-backup-verificavel.diff`** — o controle **P-12** completo,
+  contra `scripts/perimetro.sh` (blob base `70387a97`). Acrescenta `p12_backup_verificavel()`
+  + o bloco no `main()`. Lógica: FALHA-class só quando o HD está montado E um recurso da
+  lista `P12_FALHA_SEM_BACKUP` não tem snapshot restic do `sha256` atual < N dias; AVISO p/
+  a lista `P12_AVISO_SEM_BACKUP`; recurso fora das duas listas = ISENTO (reconstruível);
+  **HD ausente ⇒ PARCIAL, nunca FALHA um commit** (lê o cache
+  `~/.agata-backup-staging/p12-cobertura.json`). **Verificado nesta sessão:** `bash -n` OK;
+  `git apply --check` contra o blob limpo = OK; run completo do `perimetro.sh` modificado =
+  `10 OK · 0 SKIP · 2 PARCIAL · 0 FALHA` (P-12 PARCIAL, HD fora — como esperado).
+- **`redesign/propostas/cifrar-env.diff`** — contra `scripts/cifrar_env.sh` (blob `670dc6a`):
+  quando o repo restic está alcançável, o `.gpg` do `~/.hermes/.env` entra **dentro** do
+  repo restic (`restic backup --tag agata-env --tag <sha256>` + `restic check` parcial), não
+  só um `cp` solto que o `restic check` nunca vê. Sem mudança no jeito de cifrar (GPG
+  simétrico AES256, senha por prompt). `sh -n` OK, `git apply --check` OK. Não rodado (sem HD).
+- **`redesign/fase7-hd/REGUA-P12.md`** — as **3 decisões do Humano** (R1 quais recursos + em
+  que severidade; R2 = N dias; R3 = comportamento com HD ausente), cada uma com o porquê, a
+  recomendação e como conferir. Recomendação: R1 = FALHA p/ `rlm-qwen3-8b-teste` +
+  `multilingual-e5-small-int8` (builds locais, o e5 servido em produção), AVISO p/ o GGUF MoE
+  + os 2 IR de whisper (públicos, hash fixado), ISENTO p/ os 4 de ollama registry; R2 = 14;
+  R3 = PARCIAL sempre (um disco no trabalho não trava commit).
+- **`redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md`** — runbook da passada de backup: os caminhos +
+  `sha256`/`ir_sha256_xmlbin` exatos dos 4 artefatos que faltam (GGUF Qwen3-30B-A3B 18G;
+  whisper base 81M / small 245M; e5-small 262M — todos conferidos no disco nesta sessão), o
+  blob do `rlm` (owned por `ollama`, `restic` como `orusoua` não lê — precisa `ollama cp` ou
+  `sudo restic` ou re-tag do snapshot `c19275ec`), `restic check`, semear o cache do P-12,
+  `cifrar_env.sh`, teste de restore.
+- **`redesign/fase7-hd/semear_cache_p12.py`** — lê `restic snapshots --json`, cruza com o
+  `manifest.json`, grava o cache de cobertura do P-12. `ast.parse` OK; `--dry-run` sem o HD
+  aborta limpo ("RESTIC_REPOSITORY não setado").
+
+**Verificação (S7):** os dois `.diff` passam `bash -n`/`sh -n` **e** `git apply --check`
+contra os blobs limpos de `main`; o `perimetro.sh` com o P-12 aplicado roda ponta a ponta
+sem erro e o P-12 se comporta como projetado com o HD fora (PARCIAL, não FALHA). PASS.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*` (os `.diff`
+estão em `redesign/propostas/`, **não aplicados**; sem `APROVADO-`). Nada instalado, sem
+`sudo`. **HD ainda desconectado** — a passada de backup fica no runbook.
+
+**Falta / próximo:**
+1. **P7-01** (`agata.target` + dreno) — userspace, sem HD, sem sudo, mas o teste de dreno
+   bounça os 5 serviços `--user` e CONTINUIDADE §7 pede revisão de plano p/ tarefa que toca
+   systemd → **aguarda o "vai" do Humano** (instalar + testar dreno + só então `enable`).
+2. **Régua do P-12** — o Humano lê `redesign/fase7-hd/REGUA-P12.md`, decide R1/R2/R3, cria
+   `redesign/propostas/APROVADO-p12-backup-verificavel` (e `APROVADO-cifrar-env`).
+3. **HD** (trabalho) — rodar `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md`.
+4. **P7-02** — `sudo pacman -S gamemode` + drop-in `OLLAMA_KEEP_ALIVE` em `ollama.service`.
+5. Fase 8 (cutover + merge p/ `main`) depois da 7 — aí os `.diff` de `propostas/` são
+   aplicados de verdade.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
