@@ -1,21 +1,22 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — P4-00..P4-04 FEITOS). **Fases 0, 1, 2 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 14:15 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P4-04 FEITO (agata CLI)
-ÂNCORA (leve, manual): sobre `redesign` @ **`e2774ed`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — P4-00..P4-05 FEITOS). **Fases 0, 1, 2 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 14:25 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P4-05 FEITO (evals)
+ÂNCORA (leve, manual): sobre `redesign` @ **`4655f41`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **P4-00..P4-04 FEITOS** (2026-09-02 ~14:15).
-P4-00 durabilidade OPÇÃO A · P4-01 esqueleto (6 nós) · P4-02 `tools.py`+`sandbox.py` ·
-P4-03 `envelope.gbnf`+`envelope.py` (2 fases) · **P4-04** `cli.py` — `agata up/down/status/
-verify/commit-entry/run/resume/logs`; `verify`+`commit-entry` **model-free** (testado com
-tudo parado); `down` drena o WAL. `redesign/grafo/README.md`.
-**Próximo: P4-05** (evals — `fabricacao.py` [(138)/(307)] + `hidratacao.py`; classe runtime).
+_(nenhuma tarefa EM ANDAMENTO)_ — **P4-00..P4-05 FEITOS** (2026-09-02 ~14:25).
+P4-00..P4-04 (durabilidade / esqueleto / tools+sandbox / GBNF envelope / `agata` CLI) ·
+**P4-05** `evals/fabricacao.py` (3/3 PASS — (138) não reproduz, (307) mantida; regressão
+proposital fica vermelha) + `evals/hidratacao.py` (PASS — cita `(309)`, mentira `(999)`
+pega). `redesign/grafo/README.md`.
+**Próximo: P4-06** (adapter dsh **dormente** — doc + stub `ENABLED=False`, **não** instala o
+preview) → **FECHA a Fase 4**.
 
 _(histórico:)_ **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
 P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · P2-02

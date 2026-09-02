@@ -11,6 +11,7 @@
 | **P4-02** tools + sandbox `bwrap` | ✅ `tools.py` (6 tools) + `sandbox.py` (`bwrap`); `verificar` usa `tools.py` |
 | **P4-03** GBNF só no envelope | ✅ `envelope.gbnf` + `envelope.py` (2 fases); `trabalhar --com-envelope` |
 | **P4-04** `agata` CLI | ✅ `cli.py` — `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs` |
+| **P4-05** evals | ✅ `evals/fabricacao.py` (3/3) + `evals/hidratacao.py`; `evals/run_all.py` |
 | P4-03 GBNF só no envelope | ⏳ |
 | P4-04 `agata` CLI | ⏳ |
 | P4-05 evals | ⏳ |

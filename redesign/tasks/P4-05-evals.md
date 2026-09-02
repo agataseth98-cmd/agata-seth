@@ -1,5 +1,14 @@
 # P4-05 — `evals/` (reteste de fabricação + fidelidade de hidratação)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~14:25 (relógio da máquina).** `redesign/grafo/evals/`:
+- `fabricacao.py` (3 testes, **3/3 PASS**): tool mentirosa pega por check determinístico ·
+  `commit_entry` real não fabrica (assert de crescimento) · grafo **sempre pausa no portão**,
+  repo intacto sem aprovação. Prova de detecção: `portao` monkeypatchado p/ auto-aprovar →
+  eval fica **vermelho**.
+- `hidratacao.py` (**PASS**): grafo cita o topo real `(309)`; fato mentido `entrada=999` é
+  pego por `verificar_cabecalho.py --max-entrada 309` ("implausível").
+- `run_all.py` + `evals/README.md` (baseline + limiar binário PASS/FALHA). Ver `redesign/grafo/README.md`.
+
 **Objetivo:** uma suíte que mede, a cada mudança no loop, se (a) o problema de fabricação
 das entradas (138)/(307) reproduz, e (b) a hidratação pelo grafo é fiel ao canon.
 
