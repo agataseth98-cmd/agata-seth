@@ -1420,3 +1420,57 @@ display-na-iGPU explícito + verificar por reboot), **P2-02** (`openvino-whisper
 "vai" quando tocar `sudo`/instalação.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 11:12 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P2-01 FEITO (sem mudança) + revisão de plano P2-02/P2-03
+
+**P2-01 — display na iGPU — FEITO, SEM MUDANÇA.** O P2-00 já mostrou o display na iGPU; o
+passo 0 do arquivo-tarefa manda ir direto para "documentar + verificar". `redesign/igpu/
+DISPLAY-PIN.md` escrito.
+- **Estrutural, não config:** o painel `eDP-1` é conector de `card2` (i915); a 4060 não tem
+  trilha de display para o eDP (laptop Optimus sem MUX no painel interno). O KWin **tem**
+  que usar a iGPU para acender a tela.
+- **Nada força a 4060:** procurado e ausente — `~/.config/plasma-workspace/env/` (não
+  existe), `environment.d`/`/etc/environment` (sem PRIME/DRI_PRIME/KWIN_DRM), `xorg.conf.d`
+  (só teclado), `envycontrol`/`supergfxctl`/`optimus-manager`/`prime-select` (nenhum
+  instalado), `kwinrc` (sem GPU), `/proc/cmdline` (sem flag).
+- **Decisão pelo espelho (sem risco → executada e registrada):** **não** adicionar
+  `KWIN_DRM_DEVICES`. A garantia física (fiação do painel) é mais forte que env var, que
+  ainda poderia quebrar num rename do `by-path`. Espinha mínima.
+- Risco reavaliado: ALTO → **nenhum** (nada mudou; `redesign-igpu-backup/` nem foi criado).
+- Reboot de teste: a sessão atual já é pós-boot nesta config (uptime > 1 dia). Pendente só
+  se o Humano quiser confirmação dedicada.
+- **Verificação (aceite):** `nvidia-smi` 4060 em repouso 54 MiB / 0 % util (kwin 7 MiB /
+  Xorg 4 MiB = handles de modo híbrido, não render); sem fração de display a remover. ✅
+
+**Revisão de plano — P2-02 e P2-03 (T2, classe instala-pacote — auto-revisão):**
+
+- **P2-02 (`openvino-whisper`) — veredito PRONTO.** Contém o risco: `sudo pacman -S
+  intel-compute-runtime intel-gpu-tools` (repo `extra`, assinado, reversível `-Rns`) — a
+  lacuna que o P2-00 achou (o plugin GPU do OpenVINO precisa do Level Zero); venv
+  `redesign/igpu/.venv` gitignorado (conferido, `redesign/**/.venv/`), `rm -rf` reversível;
+  pip ~2–3 GB (openvino, openvino-genai, optimum[openvino], transformers, librosa,
+  soundfile — puxa torch); modelo distil-whisper int8 ~200–500 MB em
+  `~/.cache/agata/openvino/`. Sem segredo/canon/Hermes/Ollama/hooks. **Ajuste ao arquivo-
+  tarefa:** o passo 1 tem que instalar `intel-compute-runtime` **antes** do check
+  `ov.Core().available_devices` (senão só lista `CPU`). Incerteza medida-e-decide: a UHD
+  RPL-S (no 13650HX pode ser a versão de 16 EU) pode não fechar RTF<1 no distil-small — o
+  arquivo já tem o fallback (medir, tentar distil-medium, ou registrar e seguir). Precisa
+  de um WAV de ~30 s de fala p/ o selftest (gero por TTS local).
+- **P2-03 (`openvino-embeddings`) — veredito PRONTO, menor risco.** Reusa venv + runtime do
+  P2-02; só adiciona um modelo IR (~130 MB) e um serviço `:20131`. **Decisão embutida:**
+  bge-small-en-v1.5 vs multilingual-e5-small — o corpus do Agata (REGRAS/PROJETO/MEMÓRIAS)
+  é **PT-BR** → recomendo **`intfloat/multilingual-e5-small`** (384 dim, prefixos
+  `query:`/`passage:`). Resposta no formato OpenAI embeddings (sem adaptador no grafo).
+  **Zero vector DB** (invariante) — só devolve o vetor.
+- **Sequência:** P2-02 (1 bloco sudo + pip longo + medir) → P2-03 (reusa, fecha o aceite
+  conjunto da Fase 2: 4060 sem display/STT/embeddings).
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado nesta
+entrada. `llamacpp-agata.service` segue parado (boot = Fase 7).
+
+**Falta / próximo:** "vai" do Humano para o `sudo pacman -S intel-compute-runtime
+intel-gpu-tools` (P2-02 passo 1) → resto do P2-02 → P2-03 → Fase 2 fechada.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

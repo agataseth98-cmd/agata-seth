@@ -4,6 +4,15 @@
 de forma explícita e persistente. Item do aceite da Fase 2: "`nvidia-smi` sem carga de
 display na 4060".
 
+**Status:** ✅ **FEITO — 2026-09-02 ~11:12 (relógio da máquina). SEM MUDANÇA.** O P2-00
+mostrou o display já na iGPU; o passo 0 deste arquivo manda pular para "documentar +
+verificar". `redesign/igpu/DISPLAY-PIN.md` escrito: o painel `eDP-1` é conector de `card2`
+(i915) e a 4060 **não tem trilha de display para o eDP** — é estrutural, não config. Nada
+força a 4060 (procurado: env.d, xorg.conf.d, envycontrol/supergfxctl, kwinrc, cmdline —
+nada). **Decisão pelo espelho:** não adicionar `KWIN_DRM_DEVICES` (a garantia física é mais
+forte; espinha mínima). Risco reavaliado de ALTO → nenhum. Reboot de teste pendente só se o
+Humano quiser confirmação explícita (a sessão atual já é pós-boot nesta config).
+
 **Pré-requisitos:** P2-00 FEITO (INVENTARIO diz onde o display está e se há MUX).
 
 > **CLASSE DE RISCO ALTA (CONTINUIDADE §7): mexe na sessão gráfica.** Um erro aqui deixa a

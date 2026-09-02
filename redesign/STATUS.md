@@ -1,20 +1,23 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 2 — iGPU** (EM ANDAMENTO — P2-00 feito). **Fases 0, 1 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 11:08 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — Fase 2 "vai" dado, P2-00 FEITO
-ÂNCORA (leve, manual): sobre `redesign` @ **`86010c1`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 2 — iGPU** (EM ANDAMENTO — P2-00 e P2-01 feitos). **Fases 0, 1 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 11:12 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P2-00 e P2-01 FEITOS
+ÂNCORA (leve, manual): sobre `redesign` @ **`d4c251f`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 2 (iGPU) "vai" dado; P2-00 FEITO** (2026-09-02
-~11:07). `redesign/igpu/INVENTARIO.md`: **display já está na iGPU** (P2-01 vira verificação,
-risco ALTO→BAIXO); baseline 4060 em repouso ~54 MiB / ~16 W / 0 %; **nenhum STT existe**
-(P2-02 greenfield); lacuna = iGPU sem `intel-compute-runtime`. **Próximo: revisão de plano
-de P2-01/P2-02/P2-03 + "vai" por passo** (P2-02/P2-03 instalam pacote → 2º par de olhos).
+_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 2: P2-00 + P2-01 FEITOS** (2026-09-02 ~11:12).
+P2-00: `INVENTARIO.md` — display já na iGPU, baseline 4060 ~54 MiB/16 W/0 %, nenhum STT,
+lacuna `intel-compute-runtime`. P2-01: `DISPLAY-PIN.md` — **sem mudança** (painel wired à
+iGPU, estrutural; nada força a 4060). **Próximo: P2-02** (`openvino-whisper`) — INSTALA
+`intel-compute-runtime` + `intel-gpu-tools` (sudo) + venv OpenVINO + distil-whisper int8;
+classe instala-pacote → revisão de plano feita (auto-revisão: PRONTO), pede o "vai" p/ o
+`sudo`. Depois **P2-03** (`openvino-embeddings`, reusa tudo — recomendado
+`multilingual-e5-small` por o corpus ser PT-BR) → fecha a Fase 2.
 
 _(histórico:)_ **FASE 3 FECHADA** (2026-09-02 ~11:00, relógio da máquina).
 P3-02: 16 modelos removidos, keep-list de 5, ~148 GiB reclamados (apagados os 50 snapshots
