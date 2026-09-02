@@ -45,12 +45,36 @@ python3 redesign/router/sanitizar.py --selftest    # stdin = JSON de payload OU 
 
 ### O que falta (P1-02, quando o OmniRoute existir)
 
-Ligar no egresso: (A) policy de pré-request nativa do OmniRoute, ou (B) proxy fino
-`redesign/router/proxy.py` em `127.0.0.1:20127` que chama `sanitizar_payload` e repassa
-para `:20128`. Depois os testes de integração (curl + `tcpdump`).
+Escolher (A) policy de pré-request nativa do OmniRoute, **ou** (B) o `proxy.py` abaixo.
+Depois os testes de integração contra o OmniRoute real (curl + `tcpdump`).
 
-## Outros arquivos da Fase 1 (ainda não criados)
+## `proxy.py` — opção B da P1-02 (feito, testado offline)
 
-- `proxy.py` — opção B da P1-02.
-- `PROVEDORES.md` — P1-03 (lista curada do pool nuvem, limites, combos).
-- `conselho_via_omniroute.md` — P1-04 (antes/depois do `conselho_remoto.py`).
+Proxy fino em `127.0.0.1:20127`, só stdlib (`http.server` + `urllib`), sem instalar nada.
+POST com corpo JSON → `sanitizar.sanitizar_payload` → **só então** repassa para o
+`OMNIROUTE_UPSTREAM` (default `:20128`). Casou um padrão ⇒ **422** com erro estruturado
+(campo + rótulo + trecho redigido), e o **upstream nunca é tocado**. GET/HEAD passam sem
+inspeção. Streaming/SSE passa byte a byte.
+
+```
+python3 redesign/router/proxy.py             # sobe (caller aponta para :20127)
+python3 redesign/router/proxy.py --selftest  # upstream dummy + proxy; 1 limpo (200) + 1 sujo (422, upstream NAO tocado)
+```
+Verificado 2026-09-01: `--selftest` verde — pedido limpo passa (200, dummy respondeu),
+pedido com `sk-…` plantado → 422, dummy **não tocado**, trecho `sk-Z…[27 chars]`.
+Env: `OMNIROUTE_UPSTREAM`, `SANITIZER_BIND`. `systemd --user omniroute-sanitizer.service`
+na execução da P1-02.
+
+## `PROVEDORES.md` — P1-03 (template, feito)
+
+Tabela do pool nuvem (Groq/Cerebras/DeepSeek/GitHub Models/Gemini/OpenRouter/Mistral) com
+env vars, base URLs, limites vistos em 01/09 (marcados RECONFERIR) e as combos
+`cheap`/`auto`/`conselho`. Chaves só no `~/.hermes/.env`, editadas pelo Humano.
+
+## `conselho_via_omniroute.md` — P1-04 (desenho, feito)
+
+Antes/depois de `scripts/conselho_remoto.py`: tabela do que **não muda** (política:
+conteúdo privado, teto, uma chamada, aborta-não-cai-pro-local, não escreve canon) vs. o
+que muda (urllib direto a z.ai/Google → `enviar_omniroute()` na combo `conselho`; script
+não lê mais chave; breaker/contadores → OmniRoute). Esboço de código + testes + rollback.
+Merge para `main` só na Fase 8.

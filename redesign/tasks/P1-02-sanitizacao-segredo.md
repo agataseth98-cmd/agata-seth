@@ -18,9 +18,10 @@ Fase 1: "segredo plantado é bloqueado antes de sair".
 > e os testes de integração (passos 4–5).
 
 **Arquivos que a tarefa toca:**
-- `redesign/router/sanitizar.py` — **já existe**; a tarefa só o wira no egresso
-- config do OmniRoute: um hook de pré-request **ou** um proxy fino local (ver passo 3)
-- `redesign/router/proxy.py` (novo, se for a opção B)
+- `redesign/router/sanitizar.py` — **já existe e testado**; a tarefa só o wira no egresso
+- `redesign/router/proxy.py` — **já existe e testado** (opção B); a tarefa só o sobe como serviço
+- config do OmniRoute: uma policy de pré-request (opção A) — só na execução
+- `~/.config/systemd/user/omniroute-sanitizer.service` (se opção B)
 - `redesign/tasks/P1-02-*.md`
 
 ---
@@ -54,14 +55,34 @@ python3 redesign/router/sanitizar.py --autoteste    # tem que sair 0
 Sucesso: `AUTOTESTE OK`, exit 0. Se `varredura_segredo.sh` mudou os padrões desde
 2026-09-01, o `--autoteste` acusa (é a mesma fonte) — reconciliar antes de seguir.
 
-### 2. — (feito) `sanitizar.py` está escrito e testado. Ver o cabeçalho desta tarefa e `redesign/router/README.md`.
+### 2. — (feito) `sanitizar.py` e `proxy.py` escritos e testados offline.
 
-### 3. Ligar no caminho de egresso (A ou B)
+Ver o cabeçalho desta tarefa e `redesign/router/README.md`. `proxy.py --selftest` já
+prova o ponta a ponta contra um upstream dummy (limpo → 200 passthrough; sujo → 422,
+upstream não tocado).
 
-- (A): registrar `sanitizar_payload` como policy de pré-request no OmniRoute.
-- (B): `redesign/router/proxy.py` — `aiohttp`/`http.server` em `127.0.0.1:20127`, chama
-  `sanitizar_payload`, repassa para `:20128`, devolve a resposta. `systemd --user`
-  `omniroute-sanitizer.service`.
+### 3. Ligar no caminho de egresso (A ou B) — decidir com o OmniRoute na frente
+
+- **(A)** se a versão do OmniRoute expõe policy/request-transform in-process que roda
+  antes do egresso: registrar `sanitizar.sanitizar_payload` como essa policy. Preferível
+  (um processo a menos).
+- **(B)** senão: subir `redesign/router/proxy.py` e o caller aponta para `127.0.0.1:20127`
+  em vez de `:20128`.
+  ```fish
+  printf '%s\n' \
+    '[Unit]' 'Description=Proxy de sanitizacao antes do OmniRoute (Agata P1-02)' 'After=default.target' \
+    '' '[Service]' \
+    'Environment=OMNIROUTE_UPSTREAM=http://127.0.0.1:20128' \
+    'Environment=SANITIZER_BIND=127.0.0.1:20127' \
+    'ExecStart=%h/agata/redesign/router/.venv/bin/python %h/agata/redesign/router/proxy.py' \
+    'Restart=on-failure' \
+    '' '[Install]' 'WantedBy=default.target' \
+    > $HOME/.config/systemd/user/omniroute-sanitizer.service
+  # proxy.py só usa stdlib -- se não houver redesign/router/.venv, trocar por
+  # ExecStart=/usr/bin/python3 %h/agata/redesign/router/proxy.py
+  systemctl --user daemon-reload
+  systemctl --user start omniroute-sanitizer.service
+  ```
 
 ### 4. Teste — segredo plantado é bloqueado
 

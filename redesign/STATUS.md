@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~23:35 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`f6d94be`**; ver
+ATUALIZADO: 2026-09-01 ~23:45 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`d58662b`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
@@ -84,23 +84,30 @@ nesta fase (ver LOG 01/09 ~17:10).
     pinar display na iGPU (**risco alto — sessão gráfica**; reversão testada antes) ·
     `P2-02` `openvino-whisper.service` distil-whisper int8 chunked, RTF<1 · `P2-03`
     `openvino-embeddings.service` bge-small/e5-small, formato OpenAI, zero vector DB.
-- **Adiantado sem HD nem instalação (01/09, "continuar sem o HD"):**
-  `redesign/router/sanitizar.py` — o scrub de segredo da P1-02, **escrito e testado
-  offline**. Régua única (extrai `PADROES_SEGREDO` de `varredura_segredo.sh` via `bash
-  source`, sem 2ª cópia; só traduz `[[:space:]]`). Falha fechada (`raise SegredoNoPayload`).
-  `--autoteste` verde; `--selftest` (payload JSON ou texto) redige o trecho, exit 3 =
-  bloqueado. **Não ligado** ao egresso ainda (isso é o passo 3 da P1-02, precisa do
-  OmniRoute). P1-02 atualizado: passos 1-2 viram "confirmar régua + já feito". Ver
-  `redesign/router/README.md`.
+- **Adiantado sem HD nem instalação (01/09, "continuar sem o HD"):** o que dava para fazer
+  offline da Fase 1, tudo em `redesign/router/`:
+  - `sanitizar.py` — scrub de segredo da P1-02. Régua única (extrai `PADROES_SEGREDO` de
+    `varredura_segredo.sh` via `bash source`, sem 2ª cópia; só traduz `[[:space:]]`). Falha
+    fechada (`raise SegredoNoPayload`). `--autoteste` verde; `--selftest` redige o trecho.
+  - `proxy.py` — opção B da P1-02: proxy fino stdlib em `:20127` → `sanitizar_payload` →
+    repassa para `:20128`. `--selftest` (upstream dummy) **verde**: pedido limpo → 200
+    passthrough; pedido com `sk-…` plantado → 422, **upstream não tocado**, trecho redigido.
+    Streaming/SSE passa direto.
+  - `PROVEDORES.md` (P1-03) — template do pool nuvem: env vars, base URLs, limites de
+    01/09 (RECONFERIR), combos `cheap`/`auto`/`conselho`.
+  - `conselho_via_omniroute.md` (P1-04) — antes/depois de `conselho_remoto.py`: tabela do
+    que **não muda** (política) vs. o que muda (rede), esboço de código, testes, rollback.
+  - `README.md` do dir documenta os 4.
+  **Nada ligado ao OmniRoute** — isso são os passos de integração, precisam do gateway de pé.
+  `P1-02` e `P1-04` atualizados para refletir o que já está pronto.
 
 ## Próximo
 
 - **Fase 0 — só o HD:** quando `AgataBkup01` montar → P0-01 passos 3-4 + P0-02 aceite de
   restore (runbook: `redesign/RUNBOOK-fase0-HD.md`; rotina de briefing agendada 02/09 10h -03).
 - **Fase 1 — precisa do "vai" do Humano + revisão de plano (tier de risco, T2):** começa
-  por `P1-00` (INSTALA OmniRoute). Adiantável sem "vai" e sem risco: o `proxy.py` da P1-02
-  (opção B) pode ser escrito e testado contra um alvo dummy; `PROVEDORES.md`/`conselho_via_omniroute.md`
-  são só doc.
+  por `P1-00` (INSTALA OmniRoute). O grosso do trabalho offline da fase já está adiantado
+  (sanitização + docs); o que resta é instalar/subir/wire, que pede o "vai".
 - **P4-00** (spike de durabilidade da Fase 4, de E2) — quando a Fase 4 se aproximar.
 - Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 

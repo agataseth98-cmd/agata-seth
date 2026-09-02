@@ -503,3 +503,53 @@ Humano para a Fase 1. Adiantável sem "vai": `proxy.py` (P1-02 opção B) contra
 `PROVEDORES.md` / `conselho_via_omniroute.md` (doc).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~23:45 -03 · sessão Claude (Claude Code, na Máquina) — proxy.py + docs da Fase 1 (offline)
+
+**Humano:** "continua com proxy.py e os docs". Segui adiantando o offline da Fase 1.
+
+**Feito, tudo em `redesign/router/`:**
+- **`proxy.py`** — opção B da P1-02. Proxy fino em `127.0.0.1:20127`, **só stdlib**
+  (`http.server` + `urllib`), sem instalar nada. POST com corpo JSON → `sanitizar.
+  sanitizar_payload` → **só então** repassa para `OMNIROUTE_UPSTREAM` (default `:20128`).
+  Casou padrão ⇒ **422** com erro estruturado (campo + rótulo + trecho redigido), e o
+  **upstream nunca é tocado**. GET/HEAD passam sem inspeção. Streaming/SSE copiado byte a
+  byte (chunked). `--selftest` sobe um upstream dummy + o proxy e roda 2 casos:
+  - pedido limpo → 200, dummy respondeu (passthrough ok);
+  - pedido com `sk-…` plantado (gerado na hora via `_fx`) → 422, **dummy NÃO tocado**,
+    trecho `sk-Z…[27 chars]`.
+  **SELFTEST OK**, exit 0.
+- **`PROVEDORES.md`** (P1-03) — template do pool nuvem: Groq / Cerebras / DeepSeek /
+  GitHub Models / Gemini / OpenRouter / Mistral com env var sugerida, base URL, limite
+  visto em 01/09 (marcado RECONFERIR — os limites free mudam), e as combos
+  `cheap` / `auto` / `conselho`. Breaker/cooldown = campos a preencher na execução.
+  Chaves só no `~/.hermes/.env`.
+- **`conselho_via_omniroute.md`** (P1-04) — desenho: tabela do que **NÃO muda** (política:
+  conteúdo privado, teto, uma chamada, aborta-não-cai-pro-local, não escreve canon,
+  resposta crua) vs. o que muda (`enviar_glm`/`enviar_gemini` urllib direto → uma
+  `enviar_omniroute()` na combo `conselho`; script não lê mais chave; backoff/429/
+  contadores → circuit breaker do OmniRoute). Esboço de código, `main()` reescrito,
+  testes (P1-04 passos 3-5), rollback (`git checkout main -- scripts/conselho_remoto.py`).
+  Merge p/ `main` só na Fase 8.
+- **`README.md`** do dir atualizado — lista `sanitizar.py`, `proxy.py`, `PROVEDORES.md`,
+  `conselho_via_omniroute.md`, o que está testado e o que falta (integração com o OmniRoute).
+- `P1-02` e (implícito) `P1-04` atualizados: os passos "escrever X" viram "X já existe,
+  testado; falta subir/wire". `P1-02` passo 3 ganhou o unit `omniroute-sanitizer.service`.
+
+**Verificação (S7):** `proxy.py --selftest` exit 0; `sanitizar.py --autoteste` exit 0
+(inalterado); `ast.parse` nos dois; perímetro roda no pre-commit e tem que sair verde.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, `scripts/`, hooks, `servidor.py`. Nada
+instalado, nada de systemd (os `.service` ficam nos arquivos-tarefa como texto). O
+`proxy.py` só usa stdlib — nem venv precisa.
+
+**Estado da Fase 1:** o trabalho **offline** (sanitização ponta a ponta + os 2 docs de
+apoio) está adiantado. O que resta da Fase 1 são os passos que tocam o sistema: `P1-00`
+(instalar/subir OmniRoute) e o wiring — **pedem o "vai" do Humano + revisão de plano
+(tier de risco, T2)**.
+
+**Falta / próximo:** HD para fechar a Fase 0; "vai" do Humano para a Fase 1.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
