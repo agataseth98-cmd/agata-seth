@@ -4,6 +4,15 @@
 comprometer a arquitetura — provando, com um grafo-brinquedo que tem os nós reais do
 desenho, o comportamento matar-processo-e-retomar. Sai um veredito escrito.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~13:10 (relógio da máquina). VEREDITO: OPÇÃO A.**
+`langgraph 1.2.11` + `langgraph-checkpoint-sqlite 3.1.1` em venv isolado. `spike_durabilidade.py`
+(grafo-brinquedo + harness `SIGKILL`). Matriz **3 pontos de morte × 4 critérios do E2 = PASS**
+em 3 execuções (determinístico). **`SqliteSaver` + WAL próprio (`eventos.ndjson` fsync,
+intent-antes/done-depois) + idempotency key `(thread,node,passo)`** fecha os 4 critérios —
+**não** precisa Temporal / camada dedicada. Achado: o WAL acumula `done` repetido no
+crash+resume (append-only correto) → replay tem que ser idempotency-aware. Veredito completo:
+`redesign/grafo/DURABILIDADE.md`.
+
 **Pré-requisitos:** Fase 4 recebeu o "vai" (2026-09-02). Independente das outras `P4-*`.
 
 **Arquivos que a tarefa toca:**

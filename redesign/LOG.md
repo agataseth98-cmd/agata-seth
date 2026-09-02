@@ -1665,3 +1665,63 @@ auto-revisão) + `pip install langgraph langgraph-checkpoint-sqlite` no venv iso
 grafo-brinquedo + os 3 kills → `DURABILIDADE.md`.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 13:10 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P4-00 FEITO — spike de durabilidade, veredito OPÇÃO A
+
+**Revisão de plano (T2, classe instala-pacote — auto-revisão):** PRONTO. `pip install
+langgraph langgraph-checkpoint-sqlite` em venv isolado `redesign/grafo/.venv` (gitignorado,
+conferido), `rm -rf` reversível. Sem `sudo`, sem canon/Hermes/Ollama/main/hooks. Scratch
+fora do repo (`~/.cache/agata/grafo-spike/`).
+
+**Instalado:** `langgraph 1.2.11`, `langgraph-checkpoint 4.2.0`, `langgraph-checkpoint-sqlite
+3.1.1`, `langchain-core 1.6.1`.
+
+**`redesign/grafo/spike_durabilidade.py`** — grafo-brinquedo com os nós reais
+(`hidratar → trabalhar → efeito_externo → registrar_e_commitar`), estado `TypedDict` com
+`eventos: Annotated[list, operator.add]` (event-stream por reducer). Camadas: `SqliteSaver`
+(checkpoint por nó) + WAL próprio `eventos.ndjson` (`intent` antes / `done` depois de cada
+efeito, `os.fsync`) + idempotency key `sha1(thread|node|passo)[:16]`. Efeito externo =
+append em `efeitos.log` (pula se a chave já está) + `git commit` num repo-clone descartável
+(pula se `git log --grep=<chave>` acha). Harness: `matrix` roda os 3 pontos de morte
+(`SIGKILL` via `os.kill(pid,9)` guardado por env `SPIKE_KILL_AT`), `resume` com o mesmo
+`thread_id`.
+
+**Matriz — 3 pontos de morte × 4 critérios do E2 (3 execuções, determinístico):**
+
+| ponto de morte | kill | resume | (a) sem dup | (b) idempotente/pendente | (c) estado explica | (d) WAL reconstrói |
+|---|---|---|---|---|---|---|
+| `apos_wal_antes_efeito` | `-9` | ok | OK | OK (refaz 1×) | OK | OK |
+| `apos_efeito_antes_wal_done` | `-9` | ok | OK | OK (pula) | OK | OK |
+| `apos_wal_done_antes_checkpoint` | `-9` | ok | OK | OK (pula) | OK | OK |
+
+Evidência (independente) do último run: `kills.log` mostra `SIGKILL @ apos_wal_done...
+pid=575244`; `eventos.ndjson` = `intent,done,[SIGKILL],intent,done` (4 registros — o WAL
+registra a reconfirmação); `git log` do repo-clone = **1** commit de efeito; `efeitos.log`
+= **1** linha. Nada duplicado no mundo real.
+
+**Achado (herda a P4-01):** o WAL acumula `done` **repetido** entre crash e resume — isso é
+append-only **correto** (registra a reconfirmação). O replay tem que ser **idempotency-aware**
+(dedup por chave ao reconstruir "quais efeitos aconteceram"). O 1º `matrix` deu FALHA no
+critério (d) porque o check exigia `wal_done == [k1]` (sem repetição); corrigido para
+`decisao_reconstruida (dedup) == [k1] and efeitos.log conta k1 1×` — passou. A correção foi
+no **teste**, não no mecanismo (todos os critérios de mundo real já passavam).
+
+**→ VEREDITO: OPÇÃO A.** `SqliteSaver` + WAL mínimo próprio + idempotency key por
+`(thread,node,passo)`, na ordem `wal(intent) → checar chave → efeito → wal(done) → return`.
+**Não** pré-compromete Temporal / camada dedicada. `redesign/grafo/DURABILIDADE.md` com o
+veredito, a matriz, a evidência e o que a P4-01 herda.
+
+**Aceite P4-00 (S7):** 3 pontos de morte testados, 4 critérios PASS em cada, 3 execuções
+determinísticas; `DURABILIDADE.md` existe com veredito + números; `.venv` fora do `git`;
+scratch fora do repo; Temporal não pré-comprometido. ✅
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Instalado só no venv
+isolado (`langgraph` + deps). Sem `sudo`, sem segredo.
+
+**Falta / próximo:** **P4-01** — `estado.py` (TypedDict + reducers) + `grafo.py` (6 nós:
+`hidratar → rotear → trabalhar → verificar → portão → registrar_e_commitar`, `interrupt` no
+portão), usando o padrão do `DURABILIDADE.md`. Teste ponta a ponta num clone.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
