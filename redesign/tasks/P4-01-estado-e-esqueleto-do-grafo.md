@@ -3,6 +3,16 @@
 **Objetivo:** o `StateGraph` com os 6 nós do loop de governança, estado tipado, e
 `interrupt` no portão — usando a estratégia de durabilidade que o **P4-00** decidiu.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~13:20 (relógio da máquina).** `estado.py` (`Estado`
+TypedDict + reducers `operator.add` p/ `eventos`/`decisao_log`), `durabilidade.py` (`WAL` +
+`idem_key` + `efeito_idempotente` + `replay` idempotency-aware — extraído do spike P4-00),
+`grafo.py` (6 nós: `hidratar → rotear → trabalhar → verificar → portao → registrar_e_commitar`,
+`SqliteSaver`, `interrupt()` no portão). Testado num clone `git clone --local`: 6 nós ponta a
+ponta ✅ · portão pausa/retoma sem perder estado ✅ · `verificar` roda com o modelo desligado
+(`AGATA_PROXY` morto → `trabalhar:sem_modelo` → segue) ✅ · matar após o commit + retomar =
+`registrar_e_commitar:pulado`, **1** commit, **1** idem key em `loop.log` ✅. Ver
+`redesign/grafo/README.md`.
+
 **Pré-requisitos:** **P4-00 FEITO** (o `DURABILIDADE.md` diz qual checkpointer/WAL usar).
 
 **Arquivos:**

@@ -1725,3 +1725,59 @@ isolado (`langgraph` + deps). Sem `sudo`, sem segredo.
 portão), usando o padrão do `DURABILIDADE.md`. Teste ponta a ponta num clone.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 13:20 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P4-01 FEITO — esqueleto do grafo (6 nós, interrupt no portão)
+
+**Sem instalação nova** (venv do P4-00). Auto-revisão (classe runtime): PRONTO.
+
+- **`redesign/grafo/durabilidade.py`** — extraído do spike P4-00: `WAL` (`eventos.ndjson`
+  append-only, `os.fsync`, `intent`/`done`), `idem_key(thread,node,passo)`,
+  `efeito_idempotente(...)`, `WAL.replay()` **idempotency-aware** (dedup por chave — o WAL
+  acumula `done` repetido no crash+resume).
+- **`redesign/grafo/estado.py`** — `Estado(TypedDict)`: `thread_id/entrada/tipo/repo/
+  hidratacao/rota/trabalho/trabalho_erro/verificacao/diff_proposto/portao/commit_sha/
+  ultimo_efeito_confirmado` + `eventos` e `decisao_log` com reducer `operator.add`.
+- **`redesign/grafo/grafo.py`** — `StateGraph` com 6 nós:
+  - `hidratar` → `scripts/estado_para_eco.sh` no repo alvo (hash_estado, head, sync). Sem modelo.
+  - `rotear` → combo do OmniRoute por heurística (`conselho`/`cheap`/`auto`). Sem modelo.
+  - `trabalhar` → `POST :20127` (proxy sanitizador). **Degrada limpo** → `trabalho="(sem
+    modelo)"` se o proxy cair.
+  - `verificar` → `perimetro.sh` + `verificar_cabecalho.py` (stdin) + `checar_citacao.sh`
+    (adaptador de temp `os.fdopen`, como o P0-02). **Espinha determinística — sem modelo.**
+  - `portao` → `interrupt()` com as 3 perguntas (reversível/alcance/silêncio) + o
+    `diff_proposto`. Retoma com `Command(resume={"aprovado": bool})`.
+  - `registrar_e_commitar` → se aprovado: `efeito_idempotente` → 1 linha em `loop.log` +
+    `git commit` (idem key no corpo). Se recusado: pula.
+  - `SqliteSaver` em `~/.cache/agata/grafo/checkpoints.sqlite`. CLI `run` / `resume`.
+
+**Verificação (S7, aceite P4-01) — num clone `git clone --local`:**
+- **6 nós ponta a ponta:** `run` → `hidratar/rotear/trabalhar/verificar` + pausa no portão;
+  `resume --aprovar` → `portao:aprovado` + `registrar_e_commitar:novo` → commit `51a7fd7`
+  no clone; `loop.log` com 1 linha; WAL `intent`+`done`. ✅
+- **Portão pausa e retoma:** `pausado_no_portao: true`, `next: ["portao"]`, payload do
+  `interrupt` com as 3 perguntas → `Command(resume)` retoma do checkpoint. ✅
+- **`verificar` com o modelo desligado:** `AGATA_PROXY=http://127.0.0.1:59999` (morto) →
+  `trabalhar:sem_modelo:URLError` → `verificar` roda igual (perímetro OK, cabeçalho check) →
+  loop chega ao portão. ✅
+- **Matar-e-retomar não duplica o commit (herda P4-00):** gancho `GRAFO_KILL_AFTER_COMMIT=1`
+  (`os.kill(pid,9)` logo após o `git commit`) → `resume` morre com `rc 137`, 1 commit
+  `ed6e4aa` no clone → `resume` de novo (sem kill) → `registrar_e_commitar:pulado`,
+  `commit_sha` inalterado. **1** commit `loop: registro de t-p401-kill`; **1** ocorrência
+  da idem key em `loop.log`; WAL = `intent,[SIGKILL],intent,done`. ✅
+- **P4-01 → PASS.**
+
+**Deixado para as próximas** (documentado no `README.md`): `rotear` é heurística de string;
+`verificar` reporta mas não decide (o portão sempre pausa); `trabalhar` chama o modelo
+direto (a versão com tools/sandbox é a P4-02); `registrar_e_commitar` escreve num `loop.log`
+de teste (o `commit_entry` real do canon é a P4-02).
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Nada instalado. Scratch
+(`~/.cache/agata/grafo*`) fora do repo, limpo no fim. Serviços da Fase 2 de pé; llamacpp parado.
+
+**Falta / próximo:** **P4-02** — `tools.py` (as 5 do P0-02 + `commit_entry`) + `sandbox.py`
+(`bwrap 0.12` — `--unshare-all`, ro-bind, sem rede). Equivalência tool↔script + 2 testes de
+contenção. Classe runtime, auto-revisão (sem `sudo`, sem instalação).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

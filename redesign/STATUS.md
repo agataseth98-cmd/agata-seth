@@ -1,21 +1,23 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — P4-00 FEITO). **Fases 0, 1, 2 e 3 FECHADAS.**
-ATUALIZADO: 2026-09-02 13:10 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P4-00 FEITO (veredito de durabilidade: opção A)
-ÂNCORA (leve, manual): sobre `redesign` @ **`27b4e6d`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 4 — Grafo** (EM ANDAMENTO — P4-00 e P4-01 FEITOS). **Fases 0, 1, 2 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 13:20 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P4-01 FEITO (esqueleto do grafo, 6 nós)
+ÂNCORA (leve, manual): sobre `redesign` @ **`987a12a`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **P4-00 FEITO** (2026-09-02 ~13:10). **Veredito de
-durabilidade: OPÇÃO A** — `SqliteSaver` (LangGraph) + WAL próprio (`eventos.ndjson` fsync,
-intent/done) + idempotency key `(thread,node,passo)`. Matriz 3 kills × 4 critérios do E2 =
-PASS (3×, determinístico). Sem Temporal. `redesign/grafo/DURABILIDADE.md`.
-Arquivos-tarefa P4-00..P4-06 escritos. **Próximo: P4-01** (estado tipado + esqueleto do grafo
-— 6 nós, `interrupt` no portão; usa o veredito do P4-00).
+_(nenhuma tarefa EM ANDAMENTO)_ — **P4-00 + P4-01 FEITOS** (2026-09-02 ~13:20).
+P4-00: veredito de durabilidade **OPÇÃO A** (`SqliteSaver` + WAL próprio + idem key;
+sem Temporal; `DURABILIDADE.md`). P4-01: `estado.py` + `durabilidade.py` + `grafo.py` — os
+6 nós (`hidratar → rotear → trabalhar → verificar → portao → registrar_e_commitar`),
+`interrupt` no portão; testado num clone (ponta a ponta · pausa/retoma · `verificar` roda
+com o modelo desligado · matar-após-commit não duplica). `redesign/grafo/README.md`.
+**Próximo: P4-02** (tools + sandbox `bwrap` — reusa as 5 do P0-02 + `commit_entry`; classe
+runtime, auto-revisão).
 
 _(histórico:)_ **FASE 2 (iGPU) FECHADA** (2026-09-02 ~12:08).
 P2-00 `INVENTARIO.md` · P2-01 `DISPLAY-PIN.md` (display já na iGPU, sem mudança) · P2-02
