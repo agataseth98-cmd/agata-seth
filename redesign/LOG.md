@@ -648,3 +648,44 @@ apontado para ele em P1-01), `scripts/`, hooks, `servidor.py`. Nenhuma chave de 
 rota mínima. HD amanhã para a Fase 0.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~00:20 -03 · sessão Claude (Claude Code, na Máquina) — P1-01 FEITO (Ollama roteia pelo OmniRoute)
+
+**Feito, sem instalar nada, sem tocar a config do Ollama de produção:**
+- Provider `ollama-local` (id `dae5752b`) adicionado ao OmniRoute:
+  `omniroute setup --add-provider --non-interactive --provider ollama-local
+  --provider-base-url http://127.0.0.1:11434 --api-key ollama-local-nokey
+  --default-model qwen3.5:9b`. O `--api-key` é obrigatório mesmo p/ local —
+  placeholder sem valor real (não é segredo).
+- **`omniroute nodes add --base-url` está quebrado no 3.8.50** (rejeita a opção com
+  qualquer sintaxe) — `setup --add-provider` é o caminho que funciona.
+- **Rota mínima OK:** `omniroute chat --model ollama-local/qwen3.5:9b "..."` → `ok`
+  (13,4s, 308 tok, rc 0). `curl 127.0.0.1:20128/v1/chat/completions` com
+  `{"model":"ollama-local/qwen3.5:9b","messages":[...]}` → `{"choices":[{"message":
+  {"content":"pong"}}]}`, shape OpenAI-compat.
+- **Modelo exige prefixo de provider** — `ollama-local/qwen3.5:9b`; bare `qwen3.5:9b`
+  → 400 "Unable to determine provider". Importa p/ os combos de P1-03.
+- **Contabilização nativa:** `omniroute cost` → `Ollama · 2 reqs · 35 tok in · 748 tok
+  out · $0.0000`. Suficiente (sem dashboard extra — PESQUISA).
+- `providers list` mostra `ollama-local` como `error` só porque "Provider test not
+  supported" p/ esse tipo — o roteamento funciona.
+
+**Ajuste em P1-00 (durante P1-01):** `REQUIRE_API_KEY=true` que eu tinha posto quebrava
+o CLI de gestão do próprio OmniRoute (401 nas escritas — precisaria de machine token).
+Removido do `~/.omniroute/.env` e da unit. O bind loopback (`OMNIROUTE_SERVER_HOST=
+127.0.0.1`) é a proteção documentada e suficiente ("loopback OU require-key", não os
+dois). `is-active` = active depois do restart.
+
+**Estado fora do git:** config do provider em `~/.omniroute/storage.sqlite` (já na lista
+do backup P0-01). Sem segredo novo.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (só o endpoint HTTP é chamado),
+`scripts/`, hooks, `servidor.py`. Nenhuma chave de provedor real.
+
+**Falta / próximo:** **P1-02** — ligar `sanitizar.py`/`proxy.py` no egresso (opção A
+policy nativa, ou B subir `proxy.py` em `:20127`). Sem instalar nada. Depois P1-03
+(pool nuvem — precisa das chaves do Humano no `.env`) e P1-04. HD amanhã p/ a Fase 0.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

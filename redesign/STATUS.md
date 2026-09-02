@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-02 ~00:05 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`8a2f553`**; ver
+ATUALIZADO: 2026-09-02 ~00:20 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`6084250`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
@@ -105,18 +105,24 @@ nesta fase (ver LOG 01/09 ~17:10).
 
 - **Fase 0 — só o HD:** quando `AgataBkup01` montar → P0-01 passos 3-4 + P0-02 aceite de
   restore (runbook: `redesign/RUNBOOK-fase0-HD.md`; rotina de briefing agendada 02/09 10h -03).
-- **Fase 1 EM ANDAMENTO — P1-00 ✅ FEITO** (2026-09-02 ~00:02). `omniroute@3.8.50` em
-  `~/.npm-global` (sem sudo), `systemd --user omniroute.service` **active**, bind
-  **`127.0.0.1:20128`** (default dele era `0.0.0.0` — corrigido via `~/.omniroute/.env`),
-  `omniroute health` = healthy, **zero provedor/chave**, unit `disabled` (boot = Fase 7).
-  Detalhes em `redesign/tasks/P1-00-*.md`.
-- **Próximo da Fase 1: P1-01** — registrar o Ollama de produção (`:11434`) como provider e
-  uma rota mínima que responde. Não instala nada, não toca a config do Ollama.
+- **Fase 1 EM ANDAMENTO:**
+  - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
+    `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele
+    era `0.0.0.0` — corrigido). `health` = healthy. `REQUIRE_API_KEY` **removido** (quebrava
+    o CLI de gestão; loopback já é a proteção documentada). Unit `disabled` (boot = Fase 7).
+  - **P1-01 ✅ FEITO** (~00:20). Provider `ollama-local` (id `dae5752b`) adicionado via
+    `omniroute setup --add-provider` (o `nodes add` está quebrado no 3.8.50). Rota mínima:
+    `curl :20128/v1/chat/completions` com `model: "ollama-local/qwen3.5:9b"` → resposta
+    OpenAI-compat do Ollama local. `omniroute cost` contabiliza (2 reqs, 35/748 tok, $0).
+    Modelo **exige prefixo de provider** (`ollama-local/...`). Ollama de produção intocado.
+- **Próximo da Fase 1: P1-02** — ligar `sanitizar.py`/`proxy.py` no egresso. Opção A
+  (policy nativa) ou B (subir `proxy.py` em `:20127` como `systemd --user`). Sem instalar nada.
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 - **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`
-  (config + `storage.sqlite`; o `.env` tem `STORAGE_ENCRYPTION_KEY`, segredo local) e a
-  unit systemd. O pacote em `~/.npm-global` (2,3G) reconstrói com `npm install -g omniroute`.
+  (config + `storage.sqlite` com os providers; o `.env` tem `STORAGE_ENCRYPTION_KEY`,
+  segredo local, não commitar) e a unit systemd. O pacote em `~/.npm-global` (2,3G)
+  reconstrói com `npm install -g omniroute`.
 - **P4-00** (spike de durabilidade da Fase 4, de E2) — quando a Fase 4 se aproximar.
 - Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 
