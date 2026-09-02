@@ -6,15 +6,18 @@ logado". Adicionar os provedores nuvem free atrás do OmniRoute, com combos e br
 **Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. (P1-02 antes: nenhuma chamada nuvem sai
 sem passar pela sanitização.)
 
-**Status:** ⏳ **PARCIAL — 2026-09-02 ~00:35, sessão autônoma.**
-- ✅ Combos `cheap` e `auto` criados (`omniroute combo create ... --strategy priority`),
-  só com `ollama-local/qwen3.5:9b` por ora; `model:"cheap"` roteia OK pelo proxy `:20127`.
-- ✅ Breaker/cooldown: defaults do OmniRoute 3.8.50 registrados em `PROVEDORES.md`
-  (`failureThreshold` 12 apikey, `resetTimeoutMs` 30 s, etc.).
-- ⏳ **Bloqueado nas chaves:** os provedores nuvem (Groq/Cerebras/DeepSeek/…) e o teste de
-  fallback real precisam do Humano pôr as chaves em `~/.hermes/.env`. Comandos prontos em
-  `redesign/router/PROVEDORES.md` (secção "Comandos"). Nenhuma chave passa pelo chat/repo.
-- `conselho` (combo) fica para P1-04.
+**Status:** ⏳ **QUASE — 2026-09-02 ~08:45.** As chaves já estavam em `~/.hermes/.env`.
+- ✅ 5 providers registrados no OmniRoute (`groq`, `deepseek`, `openrouter`, `gemini`,
+  `zai`) — valores lidos do `.env` para env vars, nunca impressos.
+- ✅ Combos `cheap`/`auto`/`conselho` criados e roteando pelo proxy `:20127`.
+- ✅ **Fallback real disparou**: na combo `conselho`, `zai/glm-4.7-flash` (lento, > 15 s
+  `maxWaitMs`) → caiu para `gemini/gemini-2.5-flash` num pedido de verdade.
+- ✅ **Custo logado**: `omniroute cost` — Gemini 3 reqs $0,0115, Ollama/Z.AI $0, etc.
+- ✅ Breaker/cooldown = defaults do OmniRoute (em `PROVEDORES.md`).
+- ⏳ **Falta:** model-id certo de `deepseek` (dá "ambiguous") e `openrouter` (`:free`
+  rotaciona); `groq` está `unavailable` (OmniRoute devolve "model 'llama 3.3 70b' does not
+  exist" p/ qualquer modelo — provável `--default-model` não setado). Detalhes e próximos
+  passos em `redesign/router/PROVEDORES.md`.
 
 **Arquivos que a tarefa toca:**
 - `~/.hermes/.env` — **o Humano** acrescenta as chaves nuvem, editando o arquivo direto.

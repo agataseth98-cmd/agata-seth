@@ -1,10 +1,34 @@
 # PROVEDORES.md — pool de modelos atrás do OmniRoute (Fase 1, P1-03)
 
-**Estado (2026-09-02 ~00:35):** estrutura adiantada pela sessão autônoma. Combos `cheap`
-e `auto` criados (só com `ollama-local/qwen3.5:9b` por ora), roteiam OK pelo proxy
-`:20127`. `conselho` fica para P1-04. **As entradas nuvem aguardam o Humano pôr as chaves
-em `~/.hermes/.env`** e rodar os comandos abaixo. Os limites free **mudam sempre** — a
-fonte da verdade é a lista curada, não este arquivo.
+## Estado (2026-09-02 ~08:45) — chaves do Humano já estavam em `~/.hermes/.env`
+
+`~/.hermes/.env` já tinha `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`,
+`GOOGLE_API_KEY`, `ZHIPU_API_KEY`. Registrei os 5 providers no OmniRoute (valores lidos do
+`.env` para env vars, nunca impressos): `groq`, `deepseek`, `openrouter`, `gemini`, `zai`.
+
+| provider | status | model ID que **funciona** | nota |
+|---|---|---|---|
+| `ollama-local` | active | `ollama-local/qwen3.5:9b`, `ollama-local/llama3.2:3b` | local, $0 |
+| `zai` (GLM) | active | **`zai/glm-4.7-flash`** ✅ (13 s — lento, bate no `maxWaitMs`) | `GLM 4.7 Flash` do catálogo NÃO funciona; usar o id raw |
+| `gemini` | active | **`gemini/gemini-2.5-flash`** ✅ (2 s) | free tier do `GOOGLE_API_KEY`; ~$0,01 num parecer de 3,5k tok |
+| `deepseek` | active | **pendente** — `deepseek/deepseek-chat` dá "ambiguous"; achar o id/prefixo certo | chave OK |
+| `openrouter` | active | **pendente** — os `:free` rotacionam (`llama-3.3-70b-instruct:free` saiu) | chave OK; ver `openrouter.ai/models?max_price=0` |
+| `groq` | **unavailable** | **pendente** — OmniRoute devolve sempre `model 'llama 3.3 70b' does not exist` p/ QUALQUER modelo; provável `--default-model` não setado / bug de alias | chave OK (auth passou); rodar `omniroute provider ... set-default-model` ou reconfigurar |
+
+**Combos (2026-09-02):**
+| combo | entradas (priority) | testado |
+|---|---|---|
+| `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ parecer real; **fallback GLM→Gemini disparou de verdade** (GLM > `maxWaitMs`) |
+| `cheap` | `ollama-local/llama3.2:3b` → `gemini/gemini-2.5-flash` | ✅ roteia |
+| `auto` | `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ criado |
+
+**Falta em P1-03:** id/prefixo correto de `deepseek` e `openrouter`; consertar `groq`
+(default-model). Depois, refazer `cheap`/`auto` com a cadeia completa
+`ollama → groq → cerebras → deepseek`. `CEREBRAS_API_KEY` não existe no `.env` (opcional).
+
+---
+
+## (Histórico) plano quando as chaves ainda não existiam
 
 ## Comandos (rodar quando as chaves existirem no `~/.hermes/.env`)
 

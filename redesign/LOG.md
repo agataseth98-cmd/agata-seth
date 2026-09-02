@@ -906,3 +906,49 @@ hooks, `servidor.py`. Nada instalado.
 real) + P1-04 (combo `conselho` com glm→gemini + 1 parecer real). Fase 1 fecha aí.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~08:45 -03 · sessão Claude (na Máquina) — chaves nuvem: já estavam no .env; P1-04 fechado com parecer real
+
+O Humano pediu passo a passo didático p/ as chaves. Ao checar `~/.hermes/.env` (só nomes
+de var, sem valores): **`GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`,
+`GOOGLE_API_KEY`, `ZHIPU_API_KEY` já existiam.** Faltava só `CEREBRAS_API_KEY` (opcional).
+
+**Feito (valores lidos do `.env` p/ env vars, nunca impressos no chat):**
+- 5 providers registrados no OmniRoute: `groq`, `deepseek`, `openrouter`, `gemini`, `zai`
+  (`omniroute setup --add-provider --non-interactive --api-key "$VAR"`). Todos "Provider
+  configured".
+- Model-ids que funcionam: **`zai/glm-4.7-flash`** ✅ (13 s), **`gemini/gemini-2.5-flash`**
+  ✅ (2 s). Os nomes do catálogo do OmniRoute (`GLM 4.7 Flash`, `Gemini 2.5 Flash`) **não**
+  funcionam — precisa o id raw.
+- Combo `conselho` = `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash`. Combos `cheap`
+  (`ollama-local/llama3.2:3b` → `gemini/gemini-2.5-flash`) e `auto` (`gemini` → `ollama`)
+  refeitos.
+- **P1-04 verificado com parecer REAL:** pedido de parecer de verdade (formato 4 partes)
+  via `conselho_remoto.py` → `zai/glm-4.7-flash` demorou > `maxWaitMs=15000` → **fallback
+  para `gemini/gemini-2.5-flash`** (comportamento `priority` correto) → resposta com
+  Origem/Posição/Fundamentação/Emenda → `checar_formato_parecer` **PASS**, `exit 0`,
+  registro `20260902-084244-gemini-2.5-flash.json` (177/3499 tok). **Custo: ~$0,0115 no
+  `GOOGLE_API_KEY`** (`omniroute cost`).
+- Custo logado por provedor no `omniroute cost`. **P1-04 FECHADO.**
+
+**Falta em P1-03:** `deepseek/deepseek-chat` dá "ambiguous" (achar o prefixo); `openrouter`
+`:free` rotacionam (o que testei saiu do free); **`groq` está `unavailable`** — o OmniRoute
+devolve `model 'llama 3.3 70b' does not exist` p/ QUALQUER modelo Groq (provável
+`--default-model` não setado / bug de alias; há cooldown de breaker ativo agora). Tudo em
+`redesign/router/PROVEDORES.md` com os próximos passos.
+
+**Achado reforçado:** `maxWaitMs=15000` derruba tanto o GLM (13 s) quanto modelos locais
+lentos. Se o GLM tiver que ser primário de fato no `conselho`, subir esse valor (bloco
+"legacy" da resilience, não exposto no `resilience config set` — DB/env).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `servidor.py`. As chaves
+não passaram pelo chat nem pelo git — só `.env` → env var → `~/.omniroute/storage.sqlite`
+(cifrado). O `~/.omniroute/` já está no snapshot restic `a0aa676c` (config; a sqlite com
+os providers é de agora — vale um 3º snapshot num próximo passo).
+
+**Falta / próximo:** consertar `groq`/`deepseek`/`openrouter` (P1-03) → Fase 1 FECHADA →
+Fase 3 (modelos) pela ordem do ROADMAP.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

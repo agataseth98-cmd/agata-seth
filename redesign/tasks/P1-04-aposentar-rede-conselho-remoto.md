@@ -7,14 +7,20 @@ escreve canon, nunca encadeia. É o último item da Fase 1.
 
 **Pré-requisitos:** P1-00, P1-01, P1-02 FEITO. P1-03 parcial (combo `conselho` criada).
 
-**Status:** ✅ **FEITO no branch — 2026-09-02 ~08:40 -03.** Aplicado a
-`scripts/conselho_remoto.py` (cópia-branch) e commitado com **`git commit --no-verify`**
-por autorização explícita do Humano ("não precisa verificar, regime de exceção vigente").
-P-8 é a cerimônia que a exceção suspende; mudança testada e reversível (`git checkout
-main -- scripts/conselho_remoto.py`), `main` intocado. **Merge p/ `main`: só na Fase 8.**
-O `.P1-04-proposto` foi removido (a mudança agora É o arquivo canônico do branch).
-**Falta:** trocar o placeholder da combo `conselho` por glm-4.7-flash→gemini-2.5-flash
-quando as chaves entrarem em `~/.hermes/.env`, e um pedido de parecer real.
+**Status:** ✅ **FEITO E VERIFICADO COM PARECER REAL — 2026-09-02 ~08:45 -03.**
+- `scripts/conselho_remoto.py` (cópia-branch) reescrito e commitado com
+  `git commit --no-verify` (autorização do Humano — "regime de exceção vigente"). `main`
+  intocado; merge só na Fase 8. Reverter no branch: `git checkout main -- scripts/conselho_remoto.py`.
+- Combo `conselho` = `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` (chaves
+  `ZHIPU_API_KEY`/`GOOGLE_API_KEY` que já estavam em `~/.hermes/.env`).
+- **Teste real:** um pedido de parecer de verdade (formato 4 partes) → `zai/glm-4.7-flash`
+  demorou > `maxWaitMs` → **fallback para `gemini/gemini-2.5-flash`** (comportamento
+  correto da combo `priority`) → resposta com Origem/Posição/Fundamentação/Emenda →
+  `checar_formato_parecer` **PASS**, `exit 0`, registro gravado
+  (`20260902-084244-gemini-2.5-flash.json`, 177/3499 tok). Custo: ~$0,01 no `GOOGLE_API_KEY`.
+- T1 (privado) e T2 (segredo→proxy 422) já verificados do caminho canônico.
+- **P1-04 fecha aqui.** (Nota P1-03: o GLM lento batendo no `maxWaitMs=15000` é o mesmo
+  achado do backup — se quiser o GLM como primário de fato, subir esse valor.)
 
 > **Feito (na cópia `.P1-04-proposto`, testada com o script apontado p/ ela):**
 > - reescrito: −246/+70 linhas. Removidos

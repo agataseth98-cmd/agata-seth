@@ -1,17 +1,16 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0 FECHADA** (2026-09-02).
-ATUALIZADO: 2026-09-02 ~08:42 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): sobre `redesign` @ **`caa3a00`**; referência viva = `git rev-parse
+ATUALIZADO: 2026-09-02 ~08:45 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): sobre `redesign` @ **`16dd3d5`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — Fase 1: P1-00/01/02 FEITO, P1-03/04 aguardando as
-chaves nuvem do Humano. Fase 0: aguardando o HD. Sessão autônoma parou aqui (nada mais
-avança sem o Humano).
+_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 0 FECHADA.** Fase 1: P1-00/01/02/04 FEITO,
+P1-03 quase (falta model-id de deepseek/openrouter e consertar groq).
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -100,9 +99,12 @@ nesta fase (ver LOG 01/09 ~17:10).
 
 ## Próximo
 
-- **Fase 0 — só o HD:** quando `AgataBkup01` montar → P0-01 passos 3-4 + P0-02 aceite de
-  restore (runbook: `redesign/RUNBOOK-fase0-HD.md`; rotina de briefing agendada 02/09 10h -03).
-- **Fase 1 EM ANDAMENTO:**
+- **Fase 0 — ✅ FECHADA** (2026-09-02): repo restic + 2 snapshots + `restic check` limpo +
+  restore byte a byte OK; MCP == script cru.
+- **Fase 1 — quase fechando.** Falta só, em P1-03: model-id certo de `deepseek` e
+  `openrouter`, e consertar `groq` (`unavailable` — default-model). Ver `PROVEDORES.md`.
+  Depois refazer `cheap`/`auto` com a cadeia completa. **Então Fase 1 FECHADA → Fase 3.**
+- **Fase 1 (histórico dos passos):**
   - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
     `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele
     era `0.0.0.0` — corrigido). `health` = healthy. `REQUIRE_API_KEY` **removido** (quebrava
@@ -117,18 +119,21 @@ nesta fase (ver LOG 01/09 ~17:10).
     pedido limpo via `:20127` → resposta do Ollama; pedido com `sk-…` plantado → **422**
     `secret_blocked_before_egress`, e `omniroute cost` Reqs 2→3 (o bloqueado **não**
     chegou ao OmniRoute). **Callers agora apontam para `:20127`.**
-- **P1-03 ⏳ PARCIAL** (~00:35): combos `cheap`/`auto`/`conselho` criados (placeholder
-    `ollama-local/llama3.2:3b`), roteiam OK; breaker = defaults do OmniRoute (em
-    `PROVEDORES.md`). **Provedores nuvem + teste de fallback real aguardam as chaves do
-    Humano** em `~/.hermes/.env` (comandos prontos em `PROVEDORES.md`).
+- **P1-03 ⏳ QUASE** (~08:45): as chaves já estavam em `~/.hermes/.env`. 5 providers
+    registrados (`groq`/`deepseek`/`openrouter`/`gemini`/`zai`, valores nunca impressos).
+    Combos `cheap`/`auto`/`conselho` roteiam. **Fallback real disparou** (conselho:
+    `zai/glm-4.7-flash` lento → `gemini/gemini-2.5-flash`). Custo logado (`omniroute cost`:
+    Gemini $0,0115). **Falta:** model-id de `deepseek`/`openrouter`, consertar `groq`
+    (`unavailable`, default-model). Ver `redesign/router/PROVEDORES.md`.
   - **P1-04 ✅ FEITO no branch** (~08:40 -03, `git commit --no-verify` por autorização
     explícita do Humano — "regime de exceção vigente"). `scripts/conselho_remoto.py`
     (cópia-branch) reescrito −246/+70: `enviar_omniroute()` → uma POST no proxy `:20127`
     na combo `conselho`; **não lê mais chave**; política preservada (privado, teto, uma
     chamada, aborta-não-local, formato, resposta crua); **ganho:** o pedido do Conselho
-    passa pela sanitização. T1/T2/T3/abort re-testados do caminho canônico. `.P1-04-proposto`
-    removido. `main` intocado — **merge só na Fase 8**. Falta: combo `conselho` com
-    glm→gemini reais (chaves) + 1 parecer real.
+    passa pela sanitização. **Verificado com parecer real** (2026-09-02 ~08:45): combo
+    `conselho` = `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash`; pedido de parecer de
+    verdade → GLM lento → **fallback p/ Gemini** → 4 partes presentes → `checar_formato_parecer`
+    PASS, registro gravado. `main` intocado — **merge só na Fase 8**. **P1-04 FECHADO.**
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 
