@@ -102,3 +102,67 @@ registrado na memória do Claude Code). O chat novo retoma de `STATUS.md` + `LOG
 FastMCP, já corrigido); P0-03 (tarefas das Fases 1-2). Todos pedem o "vai" do Humano.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~21:55 -03 · sessão Claude (Claude Code, na Máquina — chat novo pós-migração)
+
+**Contexto:** chat novo, reidratado do repositório (a conversa anterior foi encerrada por
+falso positivo recorrente do classificador `[bio]` no harness). Reidratação conferida:
+`git status` limpo; 4 refs batem — `main` 4aa90bd, `redesign` = `origin/redesign` = 798d483,
+tag `pre-redesign` = 4aa90bd. `git diff main..redesign` em `PROMPT_CARREGAMENTO.md` = só o
+bloco `ANCORA-SHA` (máquina, `pre-commit`), esperado, não revertido. Lidos, na ordem:
+`README.md` → `STATUS.md` → `LOG.md` → `CONTINUIDADE.md` → `ROADMAP.md` + `PESQUISA.md` →
+topo de `MEMÓRIAS.md` (canon em (309)).
+
+**Direção do Humano:** "sem escolhas, em estado de exceção, você prevê meu comportamento e
+apresenta só as opções que amadurecem o sistema. Prossiga." → executei a próxima tarefa
+não bloqueada de maior valor de maturidade: **P0-02**. (P0-01 passos 3-4 seguem bloqueados
+pelo HD; P0-03 é o próximo alvo.)
+
+**Feito (P0-02 — servidor FastMCP das ferramentas de Máquina):**
+- `redesign/mcp/.venv` — venv isolado, **fastmcp 4.0.1** (`fastmcp>=3.2` satisfeito; API
+  `@mcp.tool` / `mcp.run()` estável de 3.x a 4.x). Gitignorado (`.gitignore:54`,
+  `redesign/mcp/.venv/`), confirmado com `git check-ignore`.
+- `redesign/mcp/servidor.py` — 5 tools read-only, cada uma wrapper fino de um script de
+  `~/agata/scripts/` com `cwd=~/agata`, sem shell:
+  - `git_sync` — `git fetch` + `git ls-remote origin refs/heads/main`; `{head, origin_head,
+    em_dia}`. Testado: `head` 798d483 (redesign), `origin_head` 4aa90bd (main), `em_dia:false`.
+  - `run_perimetro` — `bash scripts/perimetro.sh`; `{exit_code, resumo, linhas}`.
+  - `check_citation` — adaptador de temp (`mkstemp` → script recebe caminho → `unlink`);
+    `{exit_code, resumo, suspeitos}`.
+  - `lint_header` — `verificar_cabecalho.py` por stdin; `{ok, motivo}`.
+  - `query_canon` — `consultar_indice.py`; valida cada termo contra `^[\wÀ-ÿ][\wÀ-ÿ\- ]*$`,
+    **rejeita** qualquer termo com `-` inicial (barra `--rebuild`); `{exit_code, trechos, erro}`.
+  - Modo `--selftest <tool>` para rodar cada tool fora do protocolo MCP.
+- `redesign/mcp/requisitos.txt`, `redesign/mcp/README.md` (com a tabela de equivalência).
+
+**Equivalência MCP ↔ script cru (verificada):**
+- `run_perimetro`: script exit 0 · `RESULTADO GERAL: OK — 10 OK · 0 SKIP · 1 PARCIAL · 0
+  FALHA`; MCP idêntico (mesmo placar, mesmo exit).
+- `lint_header`: cabeçalho válido → `OK`/exit 0 ↔ `{ok:true}`; cabeçalho sem `t=`/sem
+  citação → 2 linhas `FALHA:`/exit 1 ↔ mesmas 2 linhas/`ok:false`/exit 1.
+- `check_citation`: `(302 - ...)` real → `suspeitos=0`/exit 0 ↔ `suspeitos:[]`; `(99999 -
+  ...)` inexistente → `SUSPEITO (P-7)`/exit 1 ↔ mesma linha em `suspeitos[]`/exit 1.
+- `query_canon`: `["--rebuild","x"]` (e `["--","--rebuild"...]`) → erro de validação/exit 3,
+  **índice não regenerado**; `["hidratação","âncora"]` → 8 seções de REGRAS + títulos/exit 0.
+- `git status` limpo depois de tudo (fora as mudanças intencionais); `.venv` e `__pycache__`
+  não aparecem (`!!` ignorado).
+
+**Aceite P0-02:** servidor sobe e lista **5** tools (`mcp.list_tools()`); resultado por MCP
+= resultado do script cru em `run_perimetro`/`check_citation`/`lint_header`; `query_canon`
+rejeita `--rebuild` e aceita termos válidos sem regenerar índice; `.venv` fora do git. ✅
+O outro item do critério da Fase 0 ("restore do restic num scratch reproduz config")
+depende de P0-01 passos 3-4 (HD) — anotado em `STATUS.md` como "aceite de restore".
+
+**Não tocado:** `main`, canon (`REGRAS.md`/`PROJETO.md`/`MEMÓRIAS.md`), Hermes, Ollama,
+`.hermes.md` de produção, `scripts/` (só lidos e chamados, nunca editados), índice derivado.
+
+**Nota de fato:** esta sessão Claude Code roda na Máquina e **tem shell** — executou os
+blocos direto. Os fallbacks (Codex/Qwen) continuam sem shell. `STATUS.md` "Notas de
+handoff" atualizado para refletir isso e para registrar a migração de chat como feita.
+
+**Falta / próximo:** P0-01 passos 3-4 (HD); P0-03 (arquivos-tarefa das Fases 1-2);
+aceite de restore do P0-02 (com HD). Pedem o "vai" do Humano.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
