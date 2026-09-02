@@ -1,5 +1,12 @@
 # P4-04 — `agata` CLI (up / down / status / verify / commit-entry / run / logs)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~14:15 (relógio da máquina).** `redesign/grafo/cli.py`
+— `up [--moe]` / `down` (drena: `intent` sem `done` no WAL → espera 30s, senão avisa+lista,
+não corta) / `status` (serviços + `git_sync` 2 eixos + `HASH-ESTADO`) / `verify [--entrada]`
+(**model-free** — testado com todos os serviços parados: exit 0; arquivo ruim → exit 1) /
+`commit-entry` (**model-free**, `tools.commit_entry`, idempotente) / `run [--com-envelope]` /
+`resume` / `logs`. Só units `--user`, sem `sudo`. Ver `redesign/grafo/README.md`.
+
 **Objetivo:** um comando `agata` que opera o sistema — sobe/desce os serviços, mostra
 estado, roda a verificação e o `commit-entry` **sem depender de modelo**, e dispara o loop.
 

@@ -1888,3 +1888,54 @@ Serviços da Fase 2 de pé.
 `systemctl --user` (sem `sudo`). Classe runtime, auto-revisão.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 14:15 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P4-04 FEITO — `agata` CLI
+
+Auto-revisão (classe runtime + `systemctl --user`, sem `sudo`): PRONTO.
+
+**`redesign/grafo/cli.py`** — `agata <cmd>` (na Fase 8 vira `/usr/local/bin/agata`):
+
+| cmd | o que faz |
+|---|---|
+| `up [--moe]` | `systemctl --user start` omniroute, sanitizer, whisper, embeddings (+ llamacpp com `--moe`) |
+| `down` | **DRENA** — `thread` com `intent` sem `done` no WAL → espera 30 s; se persistir, avisa e lista, **não corta**; depois para os serviços |
+| `status` | serviços (`is-active`/`is-enabled`) + `git_sync` (canon vs `origin/main`; branch vs upstream) + `HEAD`/`TOPO-MEMÓRIAS`/`sync:`/`HASH-ESTADO` do `estado_para_eco.sh` |
+| `verify [--entrada <arq>]` | `perimetro.sh` (+ `lint_header` + `check_citation` se `--entrada`). exit 0/≠0. **SEM MODELO** |
+| `commit-entry <arq> [--alvo] [--posicao fim\|apos-marcador]` | `tools.commit_entry` (append-only + `git commit` idempotente). **SEM MODELO** |
+| `run "<pedido>" [--tipo] [--com-envelope] [--repo]` · `resume --thread <id> [--recusar]` · `logs [--thread]` | dispara / retoma o grafo; tail do `eventos.ndjson` |
+
+**Verificação (S7, aceite P4-04):**
+- **`verify` e `commit-entry` model-free:** parei omniroute/sanitizer/whisper/embeddings/
+  llamacpp e rodei — `verify` → exit 0 (`perimetro` verde); `verify --entrada` arquivo bom
+  (cabeçalho Regra 1 + cita `(309)`) → exit 0; arquivo ruim (sem `t=`, cita `(99999)`) →
+  **exit 1** (cabeçalho FALHA + 1 citação suspeita). `commit-entry` num clone: nova →
+  `estado:novo`, commit; repetida → `pulado(idempotente)`. Nenhum importa langgraph nem
+  toca modelo. ✅
+- **`down` drena:** plantei `{fase:"intent", chave:"abc123"}` sem `done` no
+  `eventos.ndjson` → `agata down` → "DRENANDO: 1 efeito(s) em curso… AVISO: ainda há
+  efeito(s) pendente(s)" + listou `thread=t-drain node=registrar_e_commitar chave=abc123` —
+  **não cortou**; só então parou os serviços. ✅
+- **`up`/`down` só units `--user`:** confirmado (nenhum `sudo`). `up --moe` a partir de
+  estado `failed` → `systemctl start` limpa o `failed` → os 5 `active`. ✅
+- **`status`:** serviços + sync (canon `4aa90bd` em dia; branch em dia) + `HASH-ESTADO
+  1df787e7972e` numa tela. ✅
+- **`run --com-envelope`** num clone → `trabalhar:envelope-gbnf:505ch` →
+  `verificar:per=0:cab=ok:cit=0` → pausa no portão. ✅
+- **P4-04 → PASS.**
+
+**Nota (fora de escopo, registrada):** `omniroute.service` vai para `failed` no `stop` (o
+filho `serve` sai 143 no SIGTERM). `agata up` recupera sozinho. `SuccessExitStatus=SIGTERM`
+na unit do OmniRoute resolveria — tweak de Fase 1, não feito aqui.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `servidor.py`. Nada
+instalado, sem `sudo`. `agata up --moe` deixou os 5 serviços de pé (P4-05 usa o MoE e o
+proxy). Scratch limpo.
+
+**Falta / próximo:** **P4-05** — `redesign/grafo/evals/` — `fabricacao.py` (o cenário de
+(138): tool que "completa" sem escrever + narrativa por cima → o loop tem que **pegar**;
+manter (307)) + `hidratacao.py` (fidelidade ao topo do canon (309), sem fabricar nº de
+entrada). Baseline + limiar de FALHA por eval. Classe runtime, auto-revisão.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

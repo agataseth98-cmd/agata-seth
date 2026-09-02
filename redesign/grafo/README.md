@@ -10,6 +10,7 @@
 | **P4-01** estado tipado + esqueleto do grafo | ✅ `estado.py` + `grafo.py` (6 nós, `interrupt` no portão) |
 | **P4-02** tools + sandbox `bwrap` | ✅ `tools.py` (6 tools) + `sandbox.py` (`bwrap`); `verificar` usa `tools.py` |
 | **P4-03** GBNF só no envelope | ✅ `envelope.gbnf` + `envelope.py` (2 fases); `trabalhar --com-envelope` |
+| **P4-04** `agata` CLI | ✅ `cli.py` — `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs` |
 | P4-03 GBNF só no envelope | ⏳ |
 | P4-04 `agata` CLI | ⏳ |
 | P4-05 evals | ⏳ |
@@ -150,6 +151,34 @@ em loop). Solução: **2 fases**.
 Achado registrado: `corpo ::= .*` na mesma gramática degenera → **2 fases é obrigatório**;
 `nl ::= [\n]` (não `"\n"`); `nome` restrito senão adversário crama junk; o `max(x,1)` num
 divisor de fração foi bug do 1º script de teste (mascarou o TTR real, que passa).
+
+## `cli.py` — `agata` CLI (P4-04)
+
+`redesign/grafo/.venv/bin/python redesign/grafo/cli.py <cmd>` (na Fase 8 vira `/usr/local/bin/agata`).
+
+| cmd | faz | modelo? |
+|---|---|---|
+| `up [--moe]` | `systemctl --user start` omniroute, sanitizer, whisper, embeddings (+ llamacpp com `--moe`) | — |
+| `down` | **DRENA** (thread com `intent` sem `done` no WAL → espera 30 s, senão avisa e lista) → para os serviços | — |
+| `status` | serviços + `git_sync` (canon vs `origin/main`; branch vs upstream) + `HASH-ESTADO` do `estado_para_eco.sh` | — |
+| `verify [--entrada <arq>]` | `perimetro.sh` (+ cabeçalho + citações se `--entrada`). exit 0/≠0. **SEM MODELO** | não |
+| `commit-entry <arq> [--alvo] [--posicao fim\|apos-marcador]` | `tools.commit_entry` — append-only + `git commit` idempotente. **SEM MODELO** | não |
+| `run "<pedido>" [--tipo] [--com-envelope] [--repo]` | dispara o grafo (`grafo.run`) | sim |
+| `resume --thread <id> [--recusar] [--repo]` | retoma do checkpoint | — |
+| `logs [--thread <id>]` | tail do `eventos.ndjson` (event-stream / WAL) | — |
+
+### Verificação (aceite P4-04)
+
+| critério | resultado |
+|---|---|
+| `verify` e `commit-entry` rodam **com os serviços de modelo parados** | ✅ `verify` → exit 0 (perímetro); `verify --entrada` arquivo bom → exit 0, arquivo ruim (sem cabeçalho + `(99999)`) → exit 1; `commit-entry` nova → commit, repetida → `pulado(idempotente)` |
+| `up`/`down` mexem só nos units `--user`; `down` **não interrompe um commit em curso** | ✅ `down` com `intent` sem `done` no WAL → "DRENANDO… AVISO: efeito pendente" + lista, **não** cortou; depois parou os serviços |
+| `status` mostra serviços + sync + `HASH-ESTADO` numa tela | ✅ |
+| `run` dispara o grafo; `--com-envelope` → `verificar` acha cabeçalho OK | ✅ `trabalhar:envelope-gbnf` → `verificar:per=0:cab=ok:cit=0` |
+
+**Nota:** `omniroute.service` vai para estado `failed` no `stop` (o filho `serve` sai 143 no
+SIGTERM). `agata up` recupera sozinho (`start` limpa `failed`). Um `SuccessExitStatus=SIGTERM`
+na unit do OmniRoute resolveria — tweak de Fase 1, não feito aqui.
 
 ## O que a P4-01 deixa para as próximas
 
