@@ -1073,3 +1073,30 @@ provider `disabled` seria trabalho de **Fase 7** (liga/desliga + automação), n
 **Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Fase 1 FECHADA.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~09:50 -03 · sessão Claude (na Máquina) — "vai" da Fase 3; arquivos-tarefa escritos
+
+Humano: "vai para a Fase 3." Escritos os 4 arquivos-tarefa em `redesign/tasks/`:
+- **P3-00** — manifesto completo + **prova de reconstrutibilidade** num daemon ollama
+  isolado (sem apagar nada). É o gate de segurança antes de qualquer prune.
+- **P3-01** — `models/PRUNE.md`: keep-list vs. remover, tamanho **real** (blobs
+  compartilhados — `qwen3.5:9b` e o `-64k` dividem o mesmo blob), reconstrutível?. Sem apagar.
+- **P3-02** — **prune destrutivo**. Classe de risco máxima: revisão de plano obrigatória,
+  aprovação do Humano item a item, cada `ollama rm` sozinho num bloco com ⚠️, um por vez,
+  `du` entre cada. Manifesto commitado antes.
+- **P3-03** — `llama.cpp` (INSTALA SOFTWARE; `pacman` precisa de sudo) com `--n-cpu-moe`
+  varrido 8→30, MoE (Qwen3-30B-A3B ou 3.6-35B-A3B GGUF) servido em `127.0.0.1:20129`
+  OpenAI-compat, registrado no OmniRoute como `llamacpp-local`, na combo `auto`. Aceite:
+  MoE ≥ ~20 tok/s **ou** número medido + decisão conservadora (worker = 9B+LoRA).
+
+**Estado atual dos modelos:** 20 no Ollama, dir `/usr/share/ollama/.ollama/models`,
+`/home` com 364 GB livres. **Nenhum MoE ainda** (P3-03 adquire). `llama.cpp` não instalado.
+Manifesto: 20/20 com sha256 (de P0-00).
+
+**Posse:** `STATUS.md` → `EM ANDAMENTO: P3-00`.
+
+**Próximo:** executar P3-00 (só leitura + reconstrução em daemon isolado — nada apagado).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

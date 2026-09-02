@@ -1,7 +1,6 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 0 e Fase 1 FECHADAS** (2026-09-02). Próxima: **Fase 3 — Modelos**
-(ordem do ROADMAP: 0 → 1 → 3 → 2 …), precisa do "vai" do Humano.
+FASE ATUAL: **Fase 3 — Modelos** (manifesto + prune + llama.cpp). Fases 0 e 1 FECHADAS.
 ATUALIZADO: 2026-09-02 ~09:25 -03 · por: sessão Claude (Claude Code, na Máquina)
 ÂNCORA (leve, manual): sobre `redesign` @ **`f49387e`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
@@ -10,8 +9,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **Fase 0 e Fase 1 FECHADAS.** P1-00 a P1-04 FEITO.
-Próxima: Fase 3 (Modelos), aguardando o "vai" do Humano.
+EM ANDAMENTO: P3-00 (manifesto + prova de reconstrutibilidade) · Claude · 2026-09-02 09:50 -03
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -109,9 +107,11 @@ nesta fase (ver LOG 01/09 ~17:10).
   Providers ativos: Ollama, Groq (`gpt-oss-120b`), Gemini (`2.5-flash`), OpenRouter
   (`minimax-m3:free`), Z.AI (`glm-4.7-flash`). DeepSeek fora (402, sem crédito). Cerebras
   não configurado (`~/.hermes/.env` sem a chave — walkthrough em `PROVEDORES.md`).
-- **Fase 3 — Modelos** (próxima pela ordem `0→1→3→2`): manifesto completo + prune (~140 GB)
-  + llama.cpp com `--n-cpu-moe` como 2º backend local. Arquivos-tarefa: ainda não escritos
-  (P0-03 cobriu só Fases 1-2). **Precisa do "vai" do Humano.**
+- **Fase 3 — Modelos** — "vai" dado (2026-09-02). Arquivos-tarefa escritos: `P3-00`
+  (manifesto + prova de reconstrutibilidade, gate antes de apagar), `P3-01` (lista de
+  prune, sem apagar), `P3-02` (**prune destrutivo** — aprovação item a item do Humano),
+  `P3-03` (llama.cpp com `--n-cpu-moe` como 2º backend local, INSTALA SOFTWARE). Em
+  andamento: **P3-00**. Fase 2 (iGPU) fica para depois da Fase 3 (ordem `0→1→3→2`).
 - **Fase 1 (histórico dos passos):**
   - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
     `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele
