@@ -6,7 +6,7 @@ A referência viva é sempre `git rev-parse origin/redesign` (ou o topo do `git 
 branch no GitHub).
 
 ```
-commit anterior (piso):   b09e7b4      escrito em: 2026-09-02 ~10:05 -03
+commit anterior (piso):   a316528      escrito em: 2026-09-02 ~10:15 -03
 ```
 
 ## Refs esperados (confira com estes)

@@ -1132,3 +1132,34 @@ hooks. Nada instalado.
 blob órfão). Sem apagar. Depois P3-02 pede aprovação item a item do Humano.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~10:15 -03 · sessão Claude (na Máquina) — P3-01 FEITO (models/PRUNE.md, sem apagar)
+
+Análise por blob (do `ollama show --modelfile` de cada modelo + `size_gb` do manifesto;
+`du` do dir de blobs deu "permissão negada" — é do user `ollama` — a conferência exata de
+GB vai no P3-02 com `sudo du`).
+
+**Proposta:**
+- **Keep-list (~14 GB):** `qwen3.5:9b` (6,6) + `qwen3.5-9b-64k` (blob compart., de graça) +
+  `rlm-qwen3-8b-teste` (5,0) + `llama3.2:3b` (2,0, 4B-base provisório) + `nomic-embed-text`
+  (0,27). O MoE do P3-03 entra depois (~18 GB, GGUF fora do Ollama).
+- **Remover (15 modelos, LIBERA ~112 GB):** `llama3.3:70b` (42), `qwen2.5:32b`+`-64k` (19),
+  `qwen3:14b`+`-64k` (9,3), `qwen2.5:14b`+`-64k` (9,0), `deepseek-r1:14b` (9,0), `gemma2:9b`
+  (5,4), `qwen3:8b` (5,2), `llama3.1:8b` (4,9), `qwen2.5:7b`+`-instruct-q4` (4,7),
+  `phi3:mini` (2,2), `gemma2:2b` (1,6). **Todos reconstroem 100% por `ollama pull`** (+
+  `ollama create` p/ os `-64k`) — nenhum depende de GGUF local.
+- Motivo do prune agressivo: a Fase 1 pôs nuvem grátis+rápida (`gpt-oss-120b` no Groq/
+  Cerebras, $0) no lugar dos densos grandes locais.
+
+**Pende de decisão do Humano** (é remoção destrutiva de dados): aprovar a lista item a
+item; escolher o 4B-base (`llama3.2:3b` vs. baixar um 4B real); decidir backup do GGUF do
+`rlm-qwen3-8b-teste`; salvar algum "remover" mesmo assim (ex. `deepseek-r1:14b`).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção (só `ollama show`), hooks. Nada
+apagado, nada instalado.
+
+**Falta / próximo:** aprovação do Humano → **P3-02** (prune, um `ollama rm` por bloco).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
