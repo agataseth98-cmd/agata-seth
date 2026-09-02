@@ -3,6 +3,18 @@
 **Objetivo:** congelar o estado pré-redesenho de forma reproduzível antes de qualquer
 mudança de máquina.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~08:32 -03, sessão Claude (na Máquina).**
+Passos 1-2 já em 01/09 (tag `pre-redesign` @ 4aa90bd; `models/manifest.json` 20/20).
+Passo 3-4 hoje, HD `AgataBkup01` reconectado (`/run/media/orusoua/AgataBkup01`, 1,9T exfat):
+- `restic init` → repo `d0223c4ffb`. Senha em `~/.config/agata/restic.pass` (chmod 600,
+  **fora do git**, excluída do próprio backup; guardar cópia fora da máquina).
+- `restic backup` → snapshot **`61b986a3`** (`~/.hermes/config.yaml`, `~/agata/config/`,
+  `~/.config/agata/`, `~/agata/models/manifest.json` — 9 arquivos, 239 KiB).
+- `restic check` → **no errors were found**.
+- 2º snapshot **`a0aa676c`** — + `~/.omniroute/` (config + `storage.sqlite` da Fase 1) e
+  as 2 units systemd; exclui `db_backups`/`logs`/WAL/SHM. `~/.hermes/.env` **NÃO** entra
+  (segredo; bundle cifrado é da Fase 7).
+
 **Pré-requisitos:** nenhum.
 
 **Arquivos que a tarefa toca:**

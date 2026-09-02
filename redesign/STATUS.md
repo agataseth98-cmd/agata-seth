@@ -1,7 +1,7 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0** fechada exceto o HD.
-ATUALIZADO: 2026-09-02 ~01:15 -03 · por: sessão Claude (Claude Code, na Máquina)
+FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0 FECHADA** (2026-09-02).
+ATUALIZADO: 2026-09-02 ~08:35 -03 · por: sessão Claude (Claude Code, na Máquina)
 ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`e9ef170`**; a
 referência viva é `git rev-parse origin/redesign`; ver `redesign/ANCORA.md`.
 NOTA: Humano dormindo — sessão prosseguindo autônoma até de manhã ("Prossiga até amanhã").
@@ -31,13 +31,11 @@ nesta fase (ver LOG 01/09 ~17:10).
   `check_citation` com adaptador de temp especificado; rollbacks destrutivos isolados com
   aviso; `git log ... redesign` ambíguo corrigido no `CONTINUIDADE.md`; efeito da âncora
   registrado no `README.md`.
-- **P0-01 — parcial:**
-  - ✅ passo 1: tag `pre-redesign` criada em `main` e no remoto (@ 4aa90bd).
-  - ✅ passo 2: `models/manifest.json` gerado (versão corrigida por P0-00 — 20 modelos,
-    sha256 em 20/20).
-  - ✅ passo 3: `restic` v0.19.1 instalado e verificado.
-  - ⏸️ passos 3-4 (repo restic + 1º snapshot): **bloqueado** — HD `AgataBkup01` não
-    montado (previsto para 02/09).
+- **P0-01 — ✅ FEITO** (2026-09-02). Tag `pre-redesign` @ 4aa90bd · `models/manifest.json`
+  20/20 · `restic` v0.19.1 · **repo restic `d0223c4ffb` em `AgataBkup01`** + snapshot
+  `61b986a3` (4 itens de config) + snapshot `a0aa676c` (+ `~/.omniroute/` da Fase 1 + units
+  systemd) · `restic check` = no errors. Senha em `~/.config/agata/restic.pass` (fora do
+  git, chmod 600). `~/.hermes/.env` fora do backup.
 - **P0-02 — servidor FastMCP das ferramentas de Máquina** ✅ (sessão Claude, 01/09;
   revisto pelo `gpt-5.6-terra` no Conselho 01). `redesign/mcp/servidor.py` +
   `requisitos.txt` (`fastmcp==4.0.1`, pin) + `README.md`. Venv isolado
@@ -133,16 +131,17 @@ nesta fase (ver LOG 01/09 ~17:10).
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 
-## Para o Humano, de manhã (2026-09-02)
+## Pendências com o Humano (2026-09-02)
 
-1. **HD:** montar `AgataBkup01` → seguir `redesign/RUNBOOK-fase0-HD.md` → fecha a Fase 0.
-   (A rotina de nuvem `trig_01QiW6UXWYYJbHxRxMG44v6d` dá um briefing às 10:00 -03.)
+1. ~~HD / Fase 0~~ **FEITO** (HD reconectado; snapshots `61b986a3` + `a0aa676c`; restore
+   byte a byte OK). A rotina de briefing `trig_01QiW6UXWYYJbHxRxMG44v6d` (10:00 -03) já
+   não é necessária — pode ignorar a saída dela.
 2. **Chaves nuvem:** pôr `GROQ_API_KEY` / `CEREBRAS_API_KEY` / `DEEPSEEK_API_KEY` /
    `ZHIPU_API_KEY` / `GOOGLE_API_KEY` em `~/.hermes/.env` → rodar os comandos de
    `redesign/router/PROVEDORES.md` → fecha P1-03 e destrava o teste real de P1-04.
 3. **P1-04 canônico:** decidir se `redesign/router/conselho_remoto.py.P1-04-proposto` vai
    pra `scripts/conselho_remoto.py` (via `--no-verify` pela exceção escrita, ou `propostas/`).
-4. **Serviços de pé agora** (não habilitados no boot): `omniroute.service` (`:20128`),
+4. **Serviços de pé** (não habilitados no boot): `omniroute.service` (`:20128`),
    `omniroute-sanitizer.service` (`:20127`). `omniroute health` = healthy.
 - **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`
   (config + `storage.sqlite` com os providers; o `.env` tem `STORAGE_ENCRYPTION_KEY`,
@@ -158,7 +157,10 @@ restore do P0-02 → **Fase 0 fechada, pronta para o "vai" da Fase 1**.
 
 ## Bloqueios
 
-- **P0-01 passos 3-4** — HD externo `AgataBkup01` não montado. Reavaliar em 02/09.
+- **Fase 1 P1-03 / P1-04** — provedores nuvem + teste real aguardam as chaves do Humano em
+  `~/.hermes/.env` (comandos em `redesign/router/PROVEDORES.md`). P1-04 canônico aguarda a
+  decisão do Humano (`--no-verify` pela exceção, ou `propostas/`).
+- ~~P0-01 passos 3-4 — HD não montado~~ **RESOLVIDO 2026-09-02** (HD reconectado).
 
 ## Papéis (fixado pelo Humano, 01/09/2026)
 

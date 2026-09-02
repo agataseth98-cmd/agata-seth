@@ -99,12 +99,19 @@ Sucesso: mesmo placar de perímetro pelos dois caminhos.
 
 ## Aceite
 
-- `redesign/mcp/servidor.py` sobe sem erro e lista as **5** tools.
+- `redesign/mcp/servidor.py` sobe sem erro e lista as **5** tools. ✅
 - Para `run_perimetro`, `check_citation` e `lint_header`: o resultado pelo MCP é igual ao
-  do script cru num caso conhecido.
+  do script cru num caso conhecido. ✅ (re-verificado 01/09 pós-parecer terra)
 - `query_canon` **rejeita** `["--rebuild", "x"]` com erro de validação e **aceita**
-  `["hidratação", "âncora"]`, sem regenerar o índice (conferir `git status` limpo depois).
-- `redesign/mcp/.venv` **não aparece** em `git status` (coberto por `.gitignore`).
+  `["hidratação", "âncora"]`, sem regenerar o índice (`git status` limpo depois). ✅
+- `redesign/mcp/.venv` **não aparece** em `git status` (coberto por `.gitignore`). ✅
+- **Restore do restic num scratch reproduz config** (o outro critério da Fase 0): ✅
+  **2026-09-02** — `restic restore latest` do snapshot `61b986a3` para um `mktemp -d`;
+  `diff -rq` byte a byte contra as fontes reais (`.hermes/config.yaml`,
+  `models/manifest.json`, `agata/config/`, `.config/agata/` menos `restic.pass`) → **todos
+  OK**. Scratch removido.
+
+**→ Com isto, a Fase 0 está FECHADA.**
 
 ## Rollback
 

@@ -833,3 +833,42 @@ para P1-03/P1-04; (c) decisão do Humano sobre o commit canônico de P1-04. Ver
 `STATUS.md` §"Para o Humano, de manhã".
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~08:35 -03 · sessão Claude (na Máquina) — Fase 0 FECHADA (HD reconectado)
+
+Humano voltou, HD `AgataBkup01` reconectado (`/run/media/orusoua/AgataBkup01`, 1,9T exfat).
+Reidratação conferida: árvore limpa; `main` 4aa90bd, `pre-redesign^{commit}` 4aa90bd,
+`redesign` = `origin/redesign` = 82e2895.
+
+**P0-01 passos 3-4 (RUNBOOK-fase0-HD.md):**
+- `restic init` → repo `d0223c4ffb` em `/run/media/orusoua/AgataBkup01/restic-agata-local`.
+  Senha gerada (`openssl rand -base64 32`) em `~/.config/agata/restic.pass`, chmod 600,
+  fora do git, **excluída do próprio backup**. (Humano: guardar cópia fora da máquina.)
+- `restic backup` → snapshot **`61b986a3`** — `~/.hermes/config.yaml`, `~/agata/config/`,
+  `~/.config/agata/` (menos `restic.pass`), `~/agata/models/manifest.json`. 9 arquivos, 239 KiB.
+- `restic check` → **no errors were found**.
+- 2º `restic backup` → snapshot **`a0aa676c`** — os 4 itens + `~/.omniroute/` (config +
+  `storage.sqlite` com providers/combos da Fase 1) + as 2 units systemd. Exclui
+  `db_backups`/`logs`/WAL/SHM/`server`/`supervisor`. `~/.hermes/.env` **NÃO** entra (segredo).
+
+**P0-02 aceite de restore (o outro critério da Fase 0):**
+- `restic restore latest` (snapshot `61b986a3`) → `mktemp -d`. 18 files/dirs.
+- `diff -rq` byte a byte contra as fontes reais: `.hermes/config.yaml` **OK**,
+  `models/manifest.json` **OK**, `agata/config/` (recursivo) **OK**, `.config/agata/`
+  (recursivo, menos `restic.pass`) **OK**. Scratch removido.
+
+**Verificação S7 mínimo:** re-rodado `restic snapshots` (2), `restic check` (no errors),
+`diff -rq` do restore de estado limpo (todos OK) → **PASS**.
+
+**→ FASE 0 FECHADA.** Critérios: tag `pre-redesign` ✅ · manifesto 20/20 ✅ · restore do
+restic reproduz config byte a byte ✅ · MCP == script cru (01/09) ✅.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, `scripts/`, hooks, `servidor.py`.
+Nada instalado. `~/.hermes/.env` não backupeado. Serviços OmniRoute seguem de pé.
+
+**Falta / próximo:** Fase 1 P1-03/P1-04 (chaves nuvem do Humano); decisão do P1-04
+canônico. Fase 2 quando o Humano der o "vai" (ordem do ROADMAP: 1 → 3 → 2).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
