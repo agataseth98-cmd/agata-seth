@@ -19,9 +19,9 @@ else
   echo "resultado: $FALHAS falha(s). Pare aqui." ; exit 1
 fi
 
-echo "== 2. subir em foreground 8s e observar =="
-( "$BIN" >/tmp/omniroute.boot 2>&1 & echo $! >/tmp/omniroute.pid )
-sleep 8
+echo "== 2. subir em foreground 12s e observar =="
+( "$BIN" serve --no-open --no-tray --log --port "$PORT" >/tmp/omniroute.boot 2>&1 & echo $! >/tmp/omniroute.pid )
+sleep 12
 PID="$(cat /tmp/omniroute.pid 2>/dev/null)"
 echo "--- primeiras linhas do boot ---"; sed -n '1,25p' /tmp/omniroute.boot
 
@@ -34,12 +34,16 @@ else
   bad "nada escutando em :${PORT}"
 fi
 
-echo "== 4. endpoints =="
+echo "== 4. saúde e endpoints =="
+"$BIN" health 2>&1 | grep -qiE 'healthy' && ok "omniroute health: healthy" || bad "omniroute health não retornou healthy"
 code_root=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" || echo 000)
 code_models=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/v1/models" || echo 000)
-echo "  /            -> $code_root"
-echo "  /v1/models   -> $code_models"
-[ "$code_models" = "200" ] && ok "/v1/models responde 200" || bad "/v1/models = $code_models (esperado 200)"
+echo "  /            -> $code_root   (307 = redireciona p/ dashboard, ok)"
+echo "  /v1/models   -> $code_models   (401 sem chave = auth exigida, ok; 200 = ok)"
+case "$code_models" in
+  200|401) ok "/v1/models responde ($code_models) -- servidor no ar, plano de inferência protegido" ;;
+  *) bad "/v1/models = $code_models (esperado 200 ou 401)" ;;
+esac
 
 echo "== 5. nenhum segredo em disco =="
 for d in "$HOME/.config/omniroute" "$HOME/.omniroute" "$HOME/.local/share/omniroute"; do

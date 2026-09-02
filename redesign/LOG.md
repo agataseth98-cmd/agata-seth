@@ -599,3 +599,52 @@ regra de permissão; então: `verificar.sh` → unit → **P1-00 FEITO** → P1-
 Ollama). HD amanhã para a Fase 0.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~00:05 -03 · sessão Claude (Claude Code, na Máquina) — P1-00 FEITO (OmniRoute no ar)
+
+**O install destravou.** A 1ª tentativa de `npm install -g omniroute` foi barrada pelo
+classificador; depois (não tenho certeza do gatilho — provável aprovação de retry pelo
+harness) o `npm install` rodou e `omniroute@3.8.50` ficou instalado em `~/.npm-global`
+(userspace, sem sudo, exatamente onde o plano previa). 10 postinstall scripts nativos
+bloqueados pelo npm safe-mode — **não impediram**: `better-sqlite3` veio prebuilt, CLI e
+servidor rodam. Existe `omniroute runtime repair` se onnx/sharp/keytar forem precisos.
+
+**Verificação e ajuste (P1-00):**
+- `omniroute --version` → 3.8.50; `--help` completo (CLI em PT). `omniroute doctor`:
+  Node ok, `better-sqlite3` ok, porta 20128 livre, 26 GB RAM livre. Doctor **criou**
+  `~/.omniroute/.env` com um `STORAGE_ENCRYPTION_KEY` gerado (segredo local, cifra o
+  sqlite dele; fora do repo).
+- **Gotcha:** `omniroute serve` **default binda `0.0.0.0`** — ele mesmo imprime um aviso
+  de segurança no boot. Corrigido: acrescentei ao `~/.omniroute/.env`
+  `OMNIROUTE_SERVER_HOST=127.0.0.1` e `REQUIRE_API_KEY=true`. Reteste: bind
+  `127.0.0.1:20128` confirmado; `/v1/models` sem chave → 401 (auth exigida, correto).
+- `~/.config/systemd/user/omniroute.service` (do `omniroute-prep/`, `%h`→`$HOME`),
+  `Type=simple`, `serve --no-open --no-tray --no-recovery --port 20128`, as 2 envs
+  redundantes. `systemctl --user start` (**não** `enable` — boot é Fase 7).
+  `is-active` = active; `systemctl status` mostra Main PID + o child Next.js no cgroup.
+- `omniroute health` → `Status: healthy`. `omniroute keys list` → "Nenhuma chave
+  configurada". `providers` → nenhum. **Gateway vazio**, como P1-00 exige.
+
+**Aceite P1-00 revisto** (o `/v1/models` → 200 do arquivo-tarefa estava errado — o plano
+de inferência exige chave OmniRoute): `is-active` active · `health` healthy · bind
+`127.0.0.1` · `/v1/models` sem chave → 401 · zero provedor/chave · unit `disabled`. **Tudo ✅.**
+
+**Preparados atualizados:** `omniroute.service` (versão real, com `serve` + flags),
+`verificar.sh` (aceita 401/200 em `/v1/models`, checa `omniroute health`), `INSTALAR.md`
+(marcado INSTALADO), `P1-00-*.md` (FEITO + aceite revisto + gotcha do bind + estado
+fora do repo p/ o backup).
+
+**Estado fora do git (para o restic da P0-01):** `~/.omniroute/` (2,5M: `storage.sqlite`,
+`logs`, `db_backups`, `.env` com o `STORAGE_ENCRYPTION_KEY` — **segredo local, não
+commitar**); `~/.config/systemd/user/omniroute.service`; `~/.npm-global/lib/node_modules/
+omniroute` (2,3G — reconstrói com `npm install -g omniroute`). Anotado no `STATUS.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama (o de produção — o OmniRoute só será
+apontado para ele em P1-01), `scripts/`, hooks, `servidor.py`. Nenhuma chave de provedor.
+
+**Falta / próximo:** **P1-01** — registrar o Ollama `:11434` como provider no OmniRoute +
+rota mínima. HD amanhã para a Fase 0.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

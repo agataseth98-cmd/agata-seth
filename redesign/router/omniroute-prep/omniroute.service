@@ -6,19 +6,16 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-# CONFERIR o caminho real do binário depois do install:
-#   set -p  (ou)  type -p omniroute        -> normalmente ~/.npm-global/bin/omniroute
-ExecStart=%h/.npm-global/bin/omniroute
-# CONFERIR o subcomando na doc: pode ser `omniroute`, `omniroute serve`, `omniroute start`.
-# Se for subcomando: ExecStart=%h/.npm-global/bin/omniroute serve
+# serve em foreground; systemd supervisiona (--no-recovery: sem o supervisor proprio do
+# omniroute, para nao ter dois). --no-open/--no-tray: headless.
+ExecStart=%h/.npm-global/bin/omniroute serve --no-open --no-tray --no-recovery --port 20128
+ExecStop=%h/.npm-global/bin/omniroute stop
 Restart=on-failure
 RestartSec=3
-# porta: confirmar o nome da env var na doc (ilustrativo abaixo)
-Environment=OMNIROUTE_PORT=20128
-Environment=OMNIROUTE_HOST=127.0.0.1
-# nao deixar abrir navegador nem telemetria em servico headless (confirmar as flags reais):
-Environment=NO_BROWSER=1
-Environment=CI=1
+# loopback + chave obrigatoria no inference plane. Redundante com ~/.omniroute/.env
+# (onde ja foi setado), mas explicito aqui tambem.
+Environment=OMNIROUTE_SERVER_HOST=127.0.0.1
+Environment=REQUIRE_API_KEY=true
 
 [Install]
 WantedBy=default.target

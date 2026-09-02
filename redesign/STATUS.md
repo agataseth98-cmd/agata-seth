@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-02 ~00:00 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`67d07c6`**; ver
+ATUALIZADO: 2026-09-02 ~00:05 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`8a2f553`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
@@ -12,7 +12,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-EM ANDAMENTO: P1-00 (instalar/subir OmniRoute) · Claude · 2026-09-02 00:00 -03 · bloqueado no `npm install` (classificador da sessão) — resto preparado em `redesign/router/omniroute-prep/`
+_(nenhuma tarefa EM ANDAMENTO)_ — P1-00 FEITO 2026-09-02 ~00:02; P1-01 é o próximo.
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -105,14 +105,18 @@ nesta fase (ver LOG 01/09 ~17:10).
 
 - **Fase 0 — só o HD:** quando `AgataBkup01` montar → P0-01 passos 3-4 + P0-02 aceite de
   restore (runbook: `redesign/RUNBOOK-fase0-HD.md`; rotina de briefing agendada 02/09 10h -03).
-- **Fase 1 EM ANDAMENTO.** Revisão de plano do P1-00 feita (T2, auto-revisão, PRONTO — risco
-  contido a userspace + localhost, `npm` sem sudo, reversível). **Bloqueio técnico:** o
-  classificador de permissão do Claude Code barra `npm install` nesta sessão. Preparado:
-  `redesign/router/omniroute-prep/` (`INSTALAR.md` + `omniroute.service` + `verificar.sh`).
-  Falta 1 linha do Humano — `npm install -g omniroute` — ou uma regra `Bash(npm:*)` em
-  `settings.json`; então a sessão roda `verificar.sh`, instala a unit e segue para P1-01.
+- **Fase 1 EM ANDAMENTO — P1-00 ✅ FEITO** (2026-09-02 ~00:02). `omniroute@3.8.50` em
+  `~/.npm-global` (sem sudo), `systemd --user omniroute.service` **active**, bind
+  **`127.0.0.1:20128`** (default dele era `0.0.0.0` — corrigido via `~/.omniroute/.env`),
+  `omniroute health` = healthy, **zero provedor/chave**, unit `disabled` (boot = Fase 7).
+  Detalhes em `redesign/tasks/P1-00-*.md`.
+- **Próximo da Fase 1: P1-01** — registrar o Ollama de produção (`:11434`) como provider e
+  uma rota mínima que responde. Não instala nada, não toca a config do Ollama.
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
+- **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`
+  (config + `storage.sqlite`; o `.env` tem `STORAGE_ENCRYPTION_KEY`, segredo local) e a
+  unit systemd. O pacote em `~/.npm-global` (2,3G) reconstrói com `npm install -g omniroute`.
 - **P4-00** (spike de durabilidade da Fase 4, de E2) — quando a Fase 4 se aproximar.
 - Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 

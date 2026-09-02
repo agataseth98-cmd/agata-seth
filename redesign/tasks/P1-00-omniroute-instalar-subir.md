@@ -5,14 +5,28 @@ dashboard), isolado, sem nenhum provedor ainda configurado — a base da Fase 1.
 
 **Pré-requisitos:** P0-02 FEITO.
 
-> **Estado (01/09/2026):** revisão de plano (T2, classe instala-pacote) feita — auto-revisão
-> na sessão, veredito PRONTO: `sudo` pede senha (AUR/pacman fora); `npm config get prefix`
-> = `~/.npm-global` (user-writable) ⇒ `npm install -g omniroute` **sem sudo**; risco contido
-> a userspace + localhost, reversível (`npm uninstall -g`). **A instalação em si está
-> bloqueada pelo classificador de permissão do Claude Code nesta sessão** — o resto de
-> P1-00 está preparado em `redesign/router/omniroute-prep/` (`INSTALAR.md`, `omniroute.service`,
-> `verificar.sh`). Falta só rodar `npm install -g omniroute` (Humano, 1 linha) e a sessão
-> retoma. Nenhum provedor é configurado aqui — o gateway sobe vazio.
+**Status:** ✅ **FEITO — 2026-09-02 ~00:02 -03, sessão Claude (na Máquina).**
+
+> Revisão de plano (T2, classe instala-pacote): auto-revisão, veredito PRONTO — `npm`
+> sem sudo em `~/.npm-global`, userspace + localhost, reversível.
+>
+> **Feito:**
+> - `omniroute@3.8.50` instalado em `~/.npm-global` (sem sudo; AUR/pacman precisariam de
+>   senha). 10 postinstall scripts nativos bloqueados pelo npm safe-mode — **não
+>   impediram**: `better-sqlite3` veio prebuilt e o CLI/servidor rodam. `omniroute runtime
+>   repair` existe se algum pack nativo (onnx/sharp/keytar) for preciso depois.
+> - **Gotcha achado:** `omniroute serve` **default é `0.0.0.0`** (ele mesmo avisa no boot).
+>   Corrigido: `~/.omniroute/.env` ganhou `OMNIROUTE_SERVER_HOST=127.0.0.1` e
+>   `REQUIRE_API_KEY=true`. Confirmado bind `127.0.0.1:20128`.
+> - `~/.config/systemd/user/omniroute.service` (de `redesign/router/omniroute-prep/`,
+>   `%h`→`$HOME`), `Type=simple`, `serve --no-open --no-tray --no-recovery`, as 2 envs
+>   redundantes. `systemctl --user start` (NÃO `enable` — boot é Fase 7). `is-active` = active.
+> - `omniroute health` → `Status: healthy`. `omniroute keys list` → "Nenhuma chave
+>   configurada". `providers` → nenhum. Gateway **vazio**, como P1-00 pede.
+>
+> **Estado fora do repo (para o backup restic, P0-01):** `~/.omniroute/` (2,5M —
+> `storage.sqlite`, logs, `db_backups`; `.env` com `STORAGE_ENCRYPTION_KEY` **segredo
+> local**, não commitar); `~/.npm-global/lib/node_modules/omniroute` (2,3G); a unit systemd.
 
 **Arquivos que a tarefa toca (fora do repo, exceto o registro):**
 - instala o pacote `omniroute` (ver passo 1 — AUR ou npm global, decidir na hora pelo que
@@ -93,12 +107,16 @@ Colar de volta: o `status` (tem que estar `active (running)`).
 
 ---
 
-## Aceite
+## Aceite (revisto na execução — `/v1/models` 200 estava errado)
 
-- `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:20128/v1/models` → `200`.
-- `systemctl --user is-active omniroute.service` → `active`.
-- Nenhuma chave/segredo em `~/.config/omniroute/` (`grep -rIlE '(KEY|TOKEN|SECRET)' ~/.config/omniroute/` → vazio).
-- `git status` do repo limpo fora deste arquivo-tarefa.
+- `systemctl --user is-active omniroute.service` → `active`. ✅
+- `omniroute health` → `Status: healthy`. ✅
+- `ss -tlnp | grep 20128` → bind **`127.0.0.1`** (não `0.0.0.0`). ✅
+- `curl http://127.0.0.1:20128/v1/models` sem chave → **401** (auth exigida) — servidor no
+  ar, plano de inferência protegido. (200 só depois de uma chave OmniRoute; não é P1-00.) ✅
+- `omniroute keys list` → "Nenhuma chave configurada"; `omniroute providers list` → nenhum. ✅
+- `git status` do repo limpo fora deste arquivo-tarefa. ✅
+- unit `disabled` (não habilitada no boot — Fase 7). ✅
 
 ## Verificação independente
 

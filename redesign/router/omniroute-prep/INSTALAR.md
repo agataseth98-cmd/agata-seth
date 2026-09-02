@@ -1,8 +1,13 @@
-# P1-00 — o único passo que a sessão Claude não consegue rodar
+# P1-00 — INSTALADO ✅ (2026-09-02 ~00:02)
 
-O classificador de permissão do Claude Code **bloqueia instalação de pacote** nesta
-sessão. `sudo` também pede senha (então AUR/pacman estão fora). Todo o resto de P1-00
-está pronto aqui — falta só isto:
+`omniroute@3.8.50` instalado em `~/.npm-global` (sem sudo), rodando como
+`systemd --user omniroute.service`, bind `127.0.0.1:20128`, `health` = healthy, zero
+provedor. Ver `redesign/tasks/P1-00-*.md`.
+
+Este dir fica como referência de instalação/reinstalação. O que segue era o plano; foi
+executado com um ajuste (o default de bind do OmniRoute é `0.0.0.0` — corrigido).
+
+---
 
 ## Instalar (userspace, SEM sudo — prefix `~/.npm-global`)
 
