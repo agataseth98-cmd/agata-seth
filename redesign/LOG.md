@@ -2418,3 +2418,45 @@ quarentena P-8). Fases 0-6 fechadas; o redesenho está pronto para a Fase 7 assi
 voltar. A Fase 8 (cutover + merge p/ `main`) vem depois da 7.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:45 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · MIGRAÇÃO DE CHAT (janela estourou)
+
+O Humano pediu pausa segura — a janela de contexto do chat 3 estourou. Sessão longa:
+**fechou as Fases 2, 3, 4 e 6, arquivou a 5, deixou a 7 bloqueada no HD/sudo/P-8.**
+
+**Verificação de segurança feita antes da pausa (a pedido do Humano):**
+- canon `main` = `4aa90bd` == `origin/main`, tag `pre-redesign` intacta, `REGRAS/PROJETO/
+  MEMÓRIAS` não tocados. `diff main..redesign` fora de `redesign/` = só `.gitignore`,
+  `PROMPT_CARREGAMENTO.md` (hook), `models/{PRUNE,RECONSTRUCAO,manifest}`,
+  `scripts/conselho_remoto.py` (cópia-branch P1-04) — tudo esperado.
+- commit acidental `9d015bb` não está em nenhum branch (só reflog).
+- segredos: token Obsidian / `.env` / `data.json` do plugin — gitignorados / em
+  `~/.config/agata/` chmod 600. `git grep` do token = vazio.
+- rede: todo serviço do Agata em `127.0.0.1`. O `0.0.0.0:8880` é o container kokoro-tts do
+  Humano (mapeado p/ `127.0.0.1`), pré-existente.
+- boot: todo serviço do redesenho `disabled`. Só `agata-consolidacao`/`agata-token-check`
+  timers `enabled` — pré-existentes.
+- perímetro `10 OK · 1 PARCIAL · 0 FALHA`. Árvore limpa, HEAD == origin/redesign.
+
+**Escrito:** `redesign/REIDRATACAO-chat-4.md` (guia de retomada do chat novo: reidratação,
+ordem de leitura, estado numa tela, papéis, fluxo, próximo passo). Cópia em
+`~/Área de trabalho/agata-REIDRATACAO-chat-4.md`.
+
+**Estado do git no fim:** árvore limpa, tudo commitado e empurrado. `main` `4aa90bd`,
+`pre-redesign^{commit}` `4aa90bd`, `redesign` = `origin/redesign` (ver HEAD abaixo).
+
+**Serviços de pé:** omniroute/sanitizer (`:20127/8`), openvino-whisper (`:20130`),
+openvino-embeddings (`:20134`), Obsidian+plugin (`:27124`), obsidian-ro-proxy (`:27125`).
+Parado: `llamacpp-agata`. Ollama de produção (`:11434`) intocado. HD desconectado —
+bundles no staging local + marcador pendente (o Humano traz o HD amanhã).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/`. Nada
+instalado nesta entrada.
+
+**Falta / próximo (chat novo):** nada urgente. A Fase 7 espera o HD (amanhã) + dois `sudo`
++ a decisão do Humano sobre a régua do P-12 (via quarentena P-8). Retomar por
+`redesign/REIDRATACAO-chat-4.md`.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga + backup + verificação** (EM ANDAMENTO — P7-00 feito; BLOQUEADA no HD/sudo/P-8). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 19:26 -03 (P7-00) (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P7-00 FEITO; Fase 7 bloqueada (HD amanhã)
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 feito; BLOQUEADA no HD/sudo/P-8). **Fases 0-6 FECHADAS.** — **MIGRAÇÃO DE CHAT** (chat 4): retomar por `redesign/REIDRATACAO-chat-4.md`.
+ATUALIZADO: 2026-09-02 19:45 -03 (relógio da máquina) — MIGRAÇÃO DE CHAT (janela do chat 3 estourou) (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — MIGRAÇÃO DE CHAT; retomar por redesign/REIDRATACAO-chat-4.md
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
