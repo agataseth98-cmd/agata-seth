@@ -806,3 +806,30 @@ p/ a Fase 0. **A sessão autônoma parou aqui — nada mais avança sem o Humano
 briefing dispara 02/09 10:00 -03.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~01:15 -03 · sessão Claude (na Máquina, autônoma) — parada da noite
+
+A sessão autônoma ("Prossiga até amanhã") parou aqui. **Nada mais avança sem o Humano.**
+
+**Feito nesta noite (autônomo, nada tocado em `main`/canon/Hermes/Ollama-prod, nada com
+`sudo`):**
+- Fase 0 fechada exceto o HD; `RUNBOOK-fase0-HD.md` + rotina de briefing (10:00 -03) prontos.
+- Fase 1: **P1-00 ✅** (OmniRoute 3.8.50 instalado userspace, `systemd --user`, loopback,
+  health OK, vazio), **P1-01 ✅** (Ollama `:11434` como provider, rota mínima roteia,
+  custo contabilizado), **P1-02 ✅** (proxy de sanitização `:20127` na frente do `:20128`,
+  segredo plantado bloqueado antes do egresso, upstream não tocado).
+- **P1-03 parcial** (combos `cheap`/`auto`/`conselho` com placeholder rápido; breaker =
+  defaults; nuvem aguarda chaves).
+- **P1-04 código feito e testado** (T1/T2/T3/abort), em `redesign/router/
+  conselho_remoto.py.P1-04-proposto` — não comitado no canon: **P-8 barrou e não forcei**.
+
+**Serviços de pé** (não `enable`d no boot): `omniroute.service` `127.0.0.1:20128`,
+`omniroute-sanitizer.service` `127.0.0.1:20127`. `omniroute health` = healthy.
+
+**Bloqueios reais restantes:** (a) HD para a Fase 0; (b) chaves nuvem em `~/.hermes/.env`
+para P1-03/P1-04; (c) decisão do Humano sobre o commit canônico de P1-04. Ver
+`STATUS.md` §"Para o Humano, de manhã".
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

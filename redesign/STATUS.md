@@ -1,7 +1,7 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 1 — Router (OmniRoute)** em andamento · **Fase 0** fechada exceto o HD.
-ATUALIZADO: 2026-09-02 ~01:00 -03 · por: sessão Claude (Claude Code, na Máquina)
+ATUALIZADO: 2026-09-02 ~01:15 -03 · por: sessão Claude (Claude Code, na Máquina)
 ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`e9ef170`**; a
 referência viva é `git rev-parse origin/redesign`; ver `redesign/ANCORA.md`.
 NOTA: Humano dormindo — sessão prosseguindo autônoma até de manhã ("Prossiga até amanhã").
@@ -124,14 +124,26 @@ nesta fase (ver LOG 01/09 ~17:10).
     `ollama-local/llama3.2:3b`), roteiam OK; breaker = defaults do OmniRoute (em
     `PROVEDORES.md`). **Provedores nuvem + teste de fallback real aguardam as chaves do
     Humano** em `~/.hermes/.env` (comandos prontos em `PROVEDORES.md`).
-  - **P1-04 ⏳ CÓDIGO FEITO** (~01:00): `scripts/conselho_remoto.py` (cópia-branch)
-    reescrito −246/+70 — `enviar_omniroute()` faz UMA POST no proxy `:20127` na combo
-    `conselho`; não lê mais chave; toda a política preservada; **ganho novo:** o pedido do
-    Conselho passa pela sanitização. T1 (privado)/T2 (segredo→422)/T3 (rota completa +
-    registro)/abort-em-erro testados. Falta: combo `conselho` com glm→gemini reais
-    (chaves) + 1 parecer real. **Merge p/ `main`: Fase 8.**
+  - **P1-04 ⏳ CÓDIGO FEITO, não comitado no canon** (~01:00): a reescrita de
+    `conselho_remoto.py` (−246/+70, `enviar_omniroute()` → proxy `:20127` combo `conselho`,
+    não lê chave, política preservada, ganho: pedido do Conselho sanitizado) está em
+    **`redesign/router/conselho_remoto.py.P1-04-proposto`** — **P-8 barrou o commit no
+    caminho canônico e não forcei `--no-verify` sozinho**. T1/T2/T3/abort testados. Aplicar
+    = decisão do Humano (`cp` + `commit --no-verify` pela exceção, ou par `propostas/`).
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
+
+## Para o Humano, de manhã (2026-09-02)
+
+1. **HD:** montar `AgataBkup01` → seguir `redesign/RUNBOOK-fase0-HD.md` → fecha a Fase 0.
+   (A rotina de nuvem `trig_01QiW6UXWYYJbHxRxMG44v6d` dá um briefing às 10:00 -03.)
+2. **Chaves nuvem:** pôr `GROQ_API_KEY` / `CEREBRAS_API_KEY` / `DEEPSEEK_API_KEY` /
+   `ZHIPU_API_KEY` / `GOOGLE_API_KEY` em `~/.hermes/.env` → rodar os comandos de
+   `redesign/router/PROVEDORES.md` → fecha P1-03 e destrava o teste real de P1-04.
+3. **P1-04 canônico:** decidir se `redesign/router/conselho_remoto.py.P1-04-proposto` vai
+   pra `scripts/conselho_remoto.py` (via `--no-verify` pela exceção escrita, ou `propostas/`).
+4. **Serviços de pé agora** (não habilitados no boot): `omniroute.service` (`:20128`),
+   `omniroute-sanitizer.service` (`:20127`). `omniroute health` = healthy.
 - **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`
   (config + `storage.sqlite` com os providers; o `.env` tem `STORAGE_ENCRYPTION_KEY`,
   segredo local, não commitar) e a unit systemd. O pacote em `~/.npm-global` (2,3G)
