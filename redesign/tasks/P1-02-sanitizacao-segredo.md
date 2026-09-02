@@ -6,6 +6,21 @@ Fase 1: "segredo plantado é bloqueado antes de sair".
 
 **Pré-requisitos:** P1-00 e P1-01 FEITO.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~00:30 -03, sessão Claude (na Máquina).** Via **opção
+B** (`proxy.py`). `~/.config/systemd/user/omniroute-sanitizer.service`
+(`/usr/bin/python3 …/proxy.py`, `SANITIZER_BIND=127.0.0.1:20127`,
+`OMNIROUTE_UPSTREAM=http://127.0.0.1:20128`), `systemctl --user start` (não `enable`).
+`is-active` = active, bind `127.0.0.1:20127`.
+**Teste de integração** (pedidos reais via `:20127`):
+- limpo → `{"choices":[{"message":{"content":"pong"}}]}` (roteou OmniRoute→Ollama).
+- com `sk-…` plantado → **HTTP 422** `{"error":{"type":"secret_blocked_before_egress",
+  "achados":[{"campo":"messages[0].content","padrao":"openai-style-key","trecho":
+  "sk-4…[31 chars]"}]}}` — bloqueado, trecho redigido.
+- **`omniroute cost` Reqs: 2 → 3** (só o limpo incrementou) — o bloqueado **não chegou**
+  ao OmniRoute. Prova melhor que `tcpdump` p/ o caminho local; o `tcpdump` de egresso
+  externo fica p/ P1-03 (provedores nuvem).
+Os callers passam a apontar para **`:20127`** em vez de `:20128`.
+
 > **`redesign/router/sanitizar.py` JÁ EXISTE e está testado offline** (feito 2026-09-01,
 > "continuar sem o HD"). Régua única: extrai `PADROES_SEGREDO` de
 > `scripts/varredura_segredo.sh` via `bash -c 'source ...; printf ...'` — sem 2ª cópia.

@@ -689,3 +689,33 @@ policy nativa, ou B subir `proxy.py` em `:20127`). Sem instalar nada. Depois P1-
 (pool nuvem — precisa das chaves do Humano no `.env`) e P1-04. HD amanhã p/ a Fase 0.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~00:30 -03 · sessão Claude (Claude Code, na Máquina) — P1-02 FEITO (sanitizador no egresso)
+
+Humano: "Prossiga até amanhã, descansarei." Sessão segue autônoma.
+
+**P1-02 via opção B (`proxy.py`):**
+- `~/.config/systemd/user/omniroute-sanitizer.service` — `/usr/bin/python3
+  $HOME/agata/redesign/router/proxy.py`, `SANITIZER_BIND=127.0.0.1:20127`,
+  `OMNIROUTE_UPSTREAM=http://127.0.0.1:20128`, `After=omniroute.service`.
+  `systemctl --user start` (não `enable`). `is-active` = active; bind `127.0.0.1:20127`.
+- **Teste de integração (pedidos reais via `:20127`):**
+  - limpo → `{"choices":[{"message":{"content":"pong"}}]}` (roteou OmniRoute→Ollama).
+  - `sk-…` plantado → **HTTP 422** `secret_blocked_before_egress`, achado
+    `messages[0].content` / `openai-style-key` / trecho `sk-4…[31 chars]` (redigido).
+  - `omniroute cost` Reqs **2 → 3** — só o limpo incrementou; o bloqueado **não chegou**
+    ao OmniRoute. (Prova melhor que `tcpdump` p/ o caminho local; `tcpdump` de egresso
+    externo fica p/ P1-03.)
+- Os callers passam a apontar para `:20127`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, `scripts/`, hooks, `servidor.py`.
+Nada instalado (proxy.py é stdlib). Perímetro verde.
+
+**Próximo (autônomo, sem as chaves do Humano):** P1-03 estrutura (combos `cheap`/`auto`/
+`conselho` + breaker, só com Ollama vivo; entradas nuvem aguardam `~/.hermes/.env`);
+P1-04 (reescrita da cópia-branch de `conselho_remoto.py` p/ falar via `:20127` na combo
+`conselho`; teste com provedor real aguarda chaves). HD de manhã p/ a Fase 0.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

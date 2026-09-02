@@ -1,9 +1,10 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-02 ~00:20 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`6084250`**; ver
+ATUALIZADO: 2026-09-02 ~00:30 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`b7e0d77`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
+NOTA: Humano dormindo — sessão prosseguindo autônoma até de manhã ("Prossiga até amanhã").
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
 atrás — mesma defasagem da âncora-SHA do canon.
@@ -115,8 +116,14 @@ nesta fase (ver LOG 01/09 ~17:10).
     `curl :20128/v1/chat/completions` com `model: "ollama-local/qwen3.5:9b"` → resposta
     OpenAI-compat do Ollama local. `omniroute cost` contabiliza (2 reqs, 35/748 tok, $0).
     Modelo **exige prefixo de provider** (`ollama-local/...`). Ollama de produção intocado.
-- **Próximo da Fase 1: P1-02** — ligar `sanitizar.py`/`proxy.py` no egresso. Opção A
-  (policy nativa) ou B (subir `proxy.py` em `:20127` como `systemd --user`). Sem instalar nada.
+  - **P1-02 ✅ FEITO** (~00:30). Opção B: `omniroute-sanitizer.service` (`proxy.py`,
+    `/usr/bin/python3`, stdlib) em `127.0.0.1:20127` → `:20128`. Teste de integração:
+    pedido limpo via `:20127` → resposta do Ollama; pedido com `sk-…` plantado → **422**
+    `secret_blocked_before_egress`, e `omniroute cost` Reqs 2→3 (o bloqueado **não**
+    chegou ao OmniRoute). **Callers agora apontam para `:20127`.**
+- **Próximo da Fase 1: P1-03** (pool nuvem — **precisa das chaves do Humano** no
+  `~/.hermes/.env`; a estrutura de combos + breaker pode ser adiantada só com Ollama) e
+  **P1-04** (editar a cópia-branch de `conselho_remoto.py`; merge p/ `main` só na Fase 8).
 - Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
   `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 - **Nota p/ P0-01 (backup):** somar ao restic o estado do OmniRoute — `~/.omniroute/`
