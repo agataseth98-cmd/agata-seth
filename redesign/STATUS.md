@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~22:35 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`8ea2a1a`**
+ATUALIZADO: 2026-09-01 ~23:02 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`ca6f76d`**
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
 atrás — mesma defasagem da âncora-SHA do canon.
@@ -68,31 +68,38 @@ nesta fase (ver LOG 01/09 ~17:10).
     durabilidade antes do desenho da Fase 4.
   - ⏳ **aguardando Codex e Qwen Coder** (P1 verificação + P2/P3).
 
-## Próximo (Fase 0, precisa do "vai" do Humano)
+## Próximo (Fase 0 — aguardando as decisões do Humano; ver PLANO reapresentado no chat, 01/09 ~23h)
 
-- **Humano decide H1-H4** da AUDITORIA-01 (verificação sob exceção; âncora de coordenação;
-  pointer em `main`; provocar divergência entre executores) **e** se T2/T3 (convergência
-  terra+Claude) já viram norma ou esperam Codex/Qwen.
-- **Codex / Qwen Coder respondem** ao CONSELHO-01-relay.
-- **ROADMAP.md** — acrescentar às Fases 4 e 6 a linha de premissa "MCP transporte é
-  stateless (spec 2026-07-28); estado mora no grafo/storage/cliente" (E1); transformar a
-  decisão do checkpointer append-only da Fase 4 numa tarefa-spike P4-00 com o teste
-  matar-e-retomar como aceite (E2). Pendente do "vai".
-- **P0-01 passos 3-4** — inicializar o repo restic + 1º snapshot, quando o HD montar.
-- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 (aplicar T1/T4 antes; T2/T3 se
-  aprovados).
-- **P0-02 — aceite de restore** (parte do critério da Fase 0): restore do restic num
-  scratch reproduz config — depende de P0-01 passos 3-4 (HD).
+- **Humano decide:** H1 (verificação sob exceção) · H2 (âncora de coordenação do branch) ·
+  H3 (pointer em `main`) · H4 **retirada** (fallbacks só afinados — não há divergência
+  entre executores a exercitar) · T1/T4 (aplicáveis já) · T2 (plano auditado, tier de
+  risco) · T3 (posse — dormante com 1 executor ativo) · E1/E2 (linhas no ROADMAP + spike P4-00).
+- **Depois do "vai":** aplicar T1/T4 + E1/E2 (docs); H2 se aprovado (hook + `ANCORA.md`);
+  então **P0-03** (arquivos-tarefa das Fases 1-2).
+- **Quando o HD montar:** P0-01 passos 3-4 (repo restic + 1º snapshot) + **P0-02 aceite de
+  restore** (restore num scratch reproduz config — fecha o critério da Fase 0).
+- **Fallbacks:** manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 
 ## Bloqueios
 
 - **P0-01 passos 3-4** — HD externo `AgataBkup01` não montado. Reavaliar em 02/09.
 
+## Papéis (fixado pelo Humano, 01/09/2026)
+
+- **Humano (Orusoua) decide.** Sozinho. Nenhum modelo co-decide.
+- **Claude (esta sessão, na Máquina) = conselheiro + primeiro executor.** Aconselha (com
+  recomendação explícita) e executa. Não decide doutrina.
+- **Codex, Qwen Coder = executores de reserva, apenas AFINADOS.** Reidratam do branch
+  quando o Humano pedir, ficam no HEAD do momento, conhecem o `CONTINUIDADE.md`. **Não**
+  são conselheiros nem gate: não se espera parecer deles para o plano andar.
+- **`gpt-5.6-terra` = ferramenta de auditoria pontual** que o Humano aciona (achou os 8
+  defeitos de P0-00; achou o `git_sync` mal-desenhado no Conselho 01). Útil, não trava.
+
 ## Notas de handoff
 
-- Executor primário: sessão Claude. Fallback 1: Codex (OpenAI, plano gratuito). Fallback 2:
-  Qwen Coder (plano gratuito). Ambos com integração nativa ao GitHub `agataseth98-cmd/agata-seth`.
-- Auditor de plano ativo nesta fase: `gpt-5.6-terra` (achou os 8 defeitos de P0-00).
+- **Shell:** a sessão Claude Code roda na Máquina (Predator) e **tem shell** — executa os
+  blocos direto e cola a saída. Os fallbacks (Codex, Qwen Coder) **não têm shell**: para
+  eles o Humano (Orusoua) é mãos e olhos, roda os blocos fish e cola a saída (`CONTINUIDADE.md`).
 - **Shell:** a sessão Claude Code roda na Máquina (Predator) e **tem shell** — executa os
   blocos direto e cola a saída. Os fallbacks (Codex, Qwen Coder) **não têm shell**: para
   eles o Humano (Orusoua) é mãos e olhos, roda os blocos fish e cola a saída (`CONTINUIDADE.md`).
