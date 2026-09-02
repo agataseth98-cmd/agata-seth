@@ -13,15 +13,20 @@
 | `gemini` | active | **`gemini/gemini-2.5-flash`** (~2 s) | free tier do `GOOGLE_API_KEY`; ~$0,01 num parecer de 3,5k tok |
 | `openrouter` | **active** ✅ | **`openrouter/minimax/minimax-m3:free`** (~1,2 s) | os `:free` rotacionam — lista viva em `openrouter.ai/api/v1/models` filtrando `pricing.prompt==0` |
 | `zai` (GLM) | active | **`zai/glm-4.7-flash`** (5–13 s, oscila) | p/ `conselho`; quando passa de 15 s (`maxWaitMs`) cai no fallback |
-| `deepseek` | registrado, **fora dos combos** | — | chave dá **402 Insufficient Balance** — a conta DeepSeek precisa de crédito. Sem custo grátis. |
-| `cerebras` | **não registrado** | — | `CEREBRAS_API_KEY` não existe no `.env` (opcional — ver INSTALAR-CEREBRAS abaixo) |
+| `deepseek` | registrado, `credits_exhausted`, **fora dos combos** | — | chave dá **402 Insufficient Balance** — a conta precisa de crédito (`platform.deepseek.com`) |
+| `cerebras` | registrado 09/02, `credits_exhausted`, **fora dos combos** | `cerebras/gpt-oss-120b` (quando ativar) | chave OK (52 chars, `csk-`); modelos `gpt-oss-120b`, `gemma-4-31b`. **402 "Visit your billing tab"** — a Cerebras exige ativar billing (cartão) mesmo p/ o free. Ver INSTALAR-CEREBRAS. |
 
-**Combos finais (2026-09-02, todos testados pelo proxy `:20127`):**
+**Combos finais (2026-09-02, todos testados pelo proxy `:20127`, 1 req limpa cada):**
 | combo | entradas (priority) | teste |
 |---|---|---|
 | `cheap` | `ollama-local/llama3.2:3b` → `groq/openai/gpt-oss-120b` → `openrouter/minimax/minimax-m3:free` | ✅ roteia (Ollama) |
 | `auto` | `groq/openai/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5:9b` | ✅ roteia (Groq) |
-| `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ **parecer real**; fallback GLM→Gemini disparou de verdade num teste |
+| `conselho` | `zai/glm-4.7-flash` → `gemini/gemini-2.5-flash` | ✅ **parecer real**; fallback GLM→Gemini disparou num teste |
+
+> **Nota de operação:** rajadas de requisições em paralelo esgotam o pool de conexão do
+> Gemini (`exhausted_connection`) e a Z.AI dá 529 transiente sob carga. Uso normal
+> (1 pedido por vez) não vê isso. Quando `cerebras`/`deepseek` ativarem billing, pôr
+> `cerebras/gpt-oss-120b` no meio de `cheap`/`auto` (entre o Groq e o fallback).
 
 **Fallback verificado com falha real:** combo `[deepseek (402) → groq]` → resposta veio do
 Groq. `omniroute cost` conta por provedor.
@@ -33,16 +38,20 @@ Groq. `omniroute cost` conta por provedor.
 
 ## INSTALAR-CEREBRAS (para o Humano)
 
-1. Abrir **`cloud.cerebras.ai`** → **Sign in** (Google/GitHub) → no menu lateral,
-   **API Keys** → **Create API Key** → copiar (começa com `csk-`).
-2. `nano ~/.hermes/.env` → acrescentar no fim: `CEREBRAS_API_KEY=csk-...` → salvar
-   (`Ctrl+O`, `Enter`, `Ctrl+X`). O arquivo já é `chmod 600`.
-3. Conferir que entrou (sem mostrar o valor): `grep -c '^CEREBRAS_API_KEY=' ~/.hermes/.env`
-   → deve imprimir `1`.
-4. Avisar o Claude "adiciona o cerebras" — ele roda
-   `omniroute setup --add-provider --provider cerebras --api-key "$CEREBRAS_API_KEY"` e
-   põe `cerebras/<modelo>` nos combos. Modelos Cerebras atuais em
-   `api.cerebras.ai/v1/models` (ex.: um ~120B rápido).
+Passos 1-4 **feitos** 2026-09-02 — a chave está no `.env` e o provider está registrado no
+OmniRoute. **Bloqueio:** a Cerebras devolve `402 "Visit your billing tab"` — o tier grátis
+dela agora exige ativar o billing.
+
+**Passo 5 — ativar o billing (só você faz):**
+1. Abrir **`https://cloud.cerebras.ai`** → menu lateral → **Billing** (ou **Settings → Billing**).
+2. Adicionar um método de pagamento. O free tier continua grátis (não cobra dentro da
+   cota), mas a Cerebras exige o cartão cadastrado para liberar o acesso à API.
+3. Conferir no dashboard que a cota/quota aparece como ativa.
+4. Avisar o Claude — ele re-testa `cerebras/gpt-oss-120b` e, se responder, põe
+   `cerebras/gpt-oss-120b` no meio de `cheap` e `auto` (entre o Groq e o fallback).
+
+Se você preferir não cadastrar cartão: o pool atual (Ollama + Groq + Gemini + OpenRouter)
+já cobre `cheap`/`auto` com folga. Cerebras é ganho de velocidade, não necessidade.
 
 ---
 

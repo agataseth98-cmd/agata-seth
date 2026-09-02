@@ -991,3 +991,33 @@ Humano e dos arquivos-tarefa (P0-03 só cobriu Fases 1-2). Opcional antes: regis
 Cerebras quando o Humano puser `CEREBRAS_API_KEY` (walkthrough em `PROVEDORES.md`).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~09:15 -03 · sessão Claude (na Máquina) — Cerebras registrado (billing pendente)
+
+Humano pôs `CEREBRAS_API_KEY` em `~/.hermes/.env` (52 chars, `csk-`). Registrei o provider
+`cerebras` no OmniRoute (`--default-model gpt-oss-120b`). Modelos Cerebras: `gpt-oss-120b`,
+`gemma-4-31b`.
+
+**Bloqueio:** `cerebras/gpt-oss-120b` → **402 "Visit your billing tab"**. O free tier da
+Cerebras agora exige billing ativado (cartão). Provider fica `credits_exhausted`, **fora
+dos combos** — igual ao DeepSeek. Passo 5 (ativar billing) documentado em `PROVEDORES.md`
+para o Humano.
+
+`cheap`/`auto` refeitos **sem** cerebras: `cheap` = ollama-local/llama3.2:3b →
+groq/openai/gpt-oss-120b → openrouter/minimax/minimax-m3:free · `auto` =
+groq/openai/gpt-oss-120b → gemini/gemini-2.5-flash → ollama-local/qwen3.5:9b. Os 3 combos
+(`cheap`/`auto`/`conselho`) re-verificados com 1 requisição limpa cada — **todos OK**.
+
+**Nota:** uma falha transiente no `conselho` durante o teste foi carga minha (rajada de
+reqs esgotou o pool de conexão do Gemini + Z.AI deu 529). Uso normal (1 pedido por vez)
+não vê. Anotado em `PROVEDORES.md`.
+
+Providers ativos: gemini, groq, ollama-local, openrouter, zai. Inativos (billing):
+cerebras, deepseek.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Chave nunca no chat/git.
+Fase 1 segue FECHADA (cerebras era opcional, ganho de velocidade).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
