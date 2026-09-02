@@ -12,11 +12,16 @@ mais coerente com o zoo Qwen — decisão de "o que for melhor pro sistema").
 - Keep-list **verificada** pela API `/api/generate`: `qwen3.5:9b`, `qwen3:4b`,
   `rlm-qwen3-8b-teste` respondem "ok"; `nomic-embed-text` é embedding (não faz generate,
   ok). `models/manifest.json` regenerado: **5 modelos, sha256 5/5**.
-- ⏳ **Espaço não reclamado ainda:** Ollama 0.32.11 faz GC de blob **lazy** — `df /` segue
-  em 362 GB livres. Reclamar precisa de **`sudo systemctl restart ollama`** (senha do
-  Humano). Depois: `sudo du -sh /usr/share/ollama/.ollama/models` p/ conferir os ~112 GB.
-- O dir de blobs é `ollama:700` — `du`/`ls` do executor dá "permissão negada"; a
-  conferência de GB exige sudo.
+- **GGUF do `rlm-qwen3-8b-teste` backupeado** (decisão do Humano no #3): snapshot restic
+  **`c19275ec`** (tag `rlm-gguf`, 4,685 GiB) — o único modelo não-reproduzível agora está
+  protegido no HD externo.
+- ⏳ **Espaço ainda não confirmado reclamado:** o Humano rodou `sudo systemctl restart
+  ollama`, mas o `df /` desta sessão ainda mostrava 362 GB livres (pode ser cache do `df`,
+  GC do Ollama 0.32.11 mais lento, ou precisar de `ollama` recarregar). **Item aberto p/ o
+  chat novo:** `df -h /` + `sudo du -sh /usr/share/ollama/.ollama/models` (esperado ~14 GB;
+  era ~126 GB). Se não caiu: investigar GC do Ollama (ver issues / `OLLAMA_*`), ou aceitar
+  que o disco só volta depois de um tempo/reboot. O dir de blobs é `ollama:700` — `du`/`ls`
+  do executor dá "permissão negada"; conferência exige sudo.
 
 **Pré-requisitos:** P3-00 FEITO (reconstrutibilidade provada) · P3-01 FEITO (`PRUNE.md`) ·
 **aprovação explícita do Humano, item a item, do `PRUNE.md`** · manifesto commitado e

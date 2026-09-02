@@ -1,7 +1,7 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 3 — Modelos** (manifesto + prune + llama.cpp). Fases 0 e 1 FECHADAS.
-ATUALIZADO: 2026-09-02 ~09:25 -03 · por: sessão Claude (Claude Code, na Máquina)
+ATUALIZADO: 2026-09-02 ~11:00 -03 · por: sessão Claude (Claude Code, na Máquina) — MIGRAÇÃO DE CHAT
 ÂNCORA (leve, manual): sobre `redesign` @ **`f49387e`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -9,7 +9,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-EM ANDAMENTO: P3-02 — 16 modelos removidos (ollama rm); falta `sudo systemctl restart ollama` p/ reclamar ~112 GB.
+_(nenhuma tarefa EM ANDAMENTO)_ — **MIGRAÇÃO DE CHAT** (janela 84%). Retomar: `redesign/REIDRATACAO-chat-3.md`. P3-02 quase (16 removidos; confirmar ~112 GB); P3-03 a fazer.
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.

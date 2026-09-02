@@ -1196,3 +1196,39 @@ blobs é `ollama:700` — `du`/`ls` do executor dá permissão negada; conferên
 então P3-02 fecha e vai P3-03 (llama.cpp + MoE, INSTALA SOFTWARE — também sudo).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~11:00 -03 · sessão Claude (na Máquina) — backup do GGUF do rlm + MIGRAÇÃO DE CHAT
+
+**#3 (backup do rlm):** Humano autorizou. Snapshot restic **`c19275ec`** (tag `rlm-gguf`,
+4,685 GiB) — inclui `memoria/missoes/rlm-3caminhos/modelo/rlm-qwen3-8b-v0.1-q4_k_m.gguf`
+(o único modelo não-reproduzível) + `models/` (com `RECONSTRUCAO.md`/`PRUNE.md`) +
+`~/.omniroute` atualizado. Confirmado que o GGUF entrou (`restic ls latest`). 4 snapshots
+no repo.
+
+**Prune (P3-02):** Humano rodou `sudo systemctl restart ollama` e disse "tudo certo". O
+`df -h /` desta sessão ainda mostrava 362 GB livres / 587 usados — **não confirmei os ~112
+GB reclamados** (pode ser cache do `df`, GC lento do Ollama 0.32.11, ou precisar de mais
+tempo/reboot). **Item aberto explícito no chat novo:** `df -h /` + `sudo du -sh
+/usr/share/ollama/.ollama/models` (esperado ~14 GB, era ~126). O `ollama list` já está
+correto (keep-list de 5) e `manifest.json` regenerado — a remoção lógica está feita, só a
+recuperação física de disco pende de conferência.
+
+**Migração de chat:** a janela de contexto do chat atual chegou a ~84%. Escritos:
+- `redesign/REIDRATACAO-chat-3.md` — guia de retomada para a sessão Claude nova (reidratar,
+  ordem de leitura, estado numa tela, papéis, fluxo, próximo passo). Cópia em
+  `~/Área de trabalho/agata-REIDRATACAO-chat-3.md`.
+- `redesign/CONSELHO-02-sync-fallbacks.md` — orienta Codex e Qwen Coder a sincronizar com
+  este HEAD e ficar **de prontidão** (não executam nada agora). Cópia no desktop.
+
+**Estado do git no fim:** árvore limpa, tudo commitado e empurrado. `main` `4aa90bd`,
+`pre-redesign^{commit}` `4aa90bd`, `redesign` = `origin/redesign` (ver HEAD abaixo).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Nada instalado nesta
+entrada.
+
+**Falta / próximo (chat novo):** (1) confirmar o disco reclamado → fechar P3-02;
+(2) P3-03 (`llama.cpp` + MoE — sudo do Humano) → fecha a Fase 3; (3) depois Fase 2 (iGPU).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
