@@ -1474,3 +1474,86 @@ entrada. `llamacpp-agata.service` segue parado (boot = Fase 7).
 intel-gpu-tools` (P2-02 passo 1) → resto do P2-02 → P2-03 → Fase 2 fechada.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 12:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P2-02 FEITO — whisper STT na iGPU
+
+**Instalação (Bloco 1, Humano com sudo):** `sudo pacman -S --needed intel-compute-runtime
+intel-gpu-tools` (puxou `intel-graphics-compiler`, `libprocps`, `peg`; repo
+`cachyos-extra-v3`/`extra`, assinados). `clinfo -l` **agora lista** `Platform #1: Intel(R)
+OpenCL Graphics -> Intel(R) UHD Graphics` — a lacuna do P2-00 fechada. snapshots snapper
+#506/#507 (pequenos).
+
+**venv `redesign/igpu/.venv`** (gitignorado, conferido): `pip install openvino>=2026.1
+openvino-genai>=2026.1 optimum[openvino] transformers librosa soundfile hf_transfer`.
+Instalou **openvino 2026.3.1**, **openvino-genai 2026.3.1**, optimum 2.3.0, optimum-intel
+2.1.0, transformers 5.5.4, torch 2.14 (cp314; puxou ~2 GB de libs CUDA à toa — venv
+descartável). `ov.Core().available_devices` = **`['CPU','GPU.0','GPU.1']`** — `GPU.0` =
+Intel UHD (iGPU), `GPU.1` = RTX 4060, `CPU` = i7-13650HX.
+
+**Conversão do modelo — o caminho do arquivo-tarefa falhou, troquei:**
+- `optimum-cli export openvino --model distil-whisper/distil-small.en --weight-format int8`
+  → **`TypeError: NormalizedConfig.__init__() got multiple values for argument 'allow_new'`**.
+  Bug do `optimum` 2.3.0 no export de Whisper; persiste com `transformers` 5.5.4 **e**
+  4.57.6 (baixei p/ 4.57.6 e não resolveu — mantido 4.57.6, que é o alvo testado do
+  optimum-intel 2.1.0).
+- **Solução:** IR **pré-convertido** do org `OpenVINO/` no HF, via `snapshot_download`.
+  Baixados `OpenVINO/whisper-base-int8-ov` (74 M, 81 MB) e `OpenVINO/whisper-small-int8-ov`
+  (244 M, 245 MB) — trazem `openvino_encoder/decoder_model.xml/.bin` + `openvino_tokenizer`
+  /`detokenizer`, prontos p/ o `WhisperPipeline`. **Desvio de modelo registrado:** não
+  `distil-small.en` (English-only; o canon é PT-BR) → **whisper-base multilíngue**.
+
+**`redesign/igpu/whisper_server.py`** (novo, stdlib http.server): `openvino_genai.
+WhisperPipeline(dir, device="GPU.0")`; `POST /transcribe` (path ou WAV cru) →
+`{text,chunks,audio_s,proc_s,rtf,device,model}`; `GET /health`; long-form chunkado pelo
+pipeline; `--selftest <wav> [--device CPU|GPU.0] [--model DIR]`. `GPU.0` fixado no default
+(nunca cair na `GPU.1`/4060).
+
+**RTF medido** (`fala30s.wav`, 36 s, espeak-ng), iGPU (`GPU.0`) vs CPU:
+
+| modelo | GPU.0 (iGPU) | CPU |
+|---|---|---|
+| **base**  | **RTF 0.082** (2.97 s) | RTF 0.022 (0.8 s) |
+| small | RTF 0.212 (7.64 s) | RTF 0.057 (2.07 s) |
+
+Todos **muito** abaixo de RTF 1. O CPU é 3–4× mais rápido para esse tamanho — mas
+**escolhi `GPU.0` de propósito** (decisão pelo espelho): a iGPU é capacidade ociosa (só
+move o display), STT é rajada, e assim fica fora do caminho crítico do CPU (grafo, git,
+scripts, llama.cpp). RTF 0.08 = ~8 % do tempo da iGPU. Se STT virar contínuo e latência
+importar, `--device CPU` está registrado como alternativa. `whisper-small` é upgrade
+drop-in (RTF 0.21, ainda tempo real).
+
+**Serviço:** `~/.config/systemd/user/openvino-whisper.service` (`Type=simple`, `Nice=5`,
+`Restart=on-failure`, `Environment=OVW_DEVICE=GPU.0` + `OVW_MODEL_DIR` + `OVW_BIND`, **sem
+`enable`**). Sobe healthy em ~6 s.
+
+**Verificação (S7, aceite P2-02):**
+- `--selftest` → transcrição (texto coerente; erros vêm da voz robótica do espeak-ng +
+  modelo base), **RTF 0.082 < 1** na iGPU. ✅
+- `is-active` = active, `is-enabled` = disabled, `/health` → `{device: GPU.0}`, bind
+  `127.0.0.1:20130`. ✅
+- `POST /transcribe` (via `{"path":...}`) end-to-end → `rtf 0.083`, `device GPU.0`. ✅
+- **`nvidia-smi` durante a inferência na iGPU:** só `kwin_wayland` 7 MiB — **nenhum
+  processo python na 4060**. ✅
+- **iGPU vs CPU:** RTF na iGPU claramente medido, não estimado (tabela acima). ✅
+- `redesign/igpu/.venv` não aparece em `git status`. ✅
+- **P2-02 → PASS.**
+
+**Manifesto:** +2 entradas `backend: openvino-ir` (whisper base/small), `ir_sha256_xmlbin`
+local registrado. n_modelos 6 → 8.
+
+**Arquivos:** novo `redesign/igpu/whisper_server.py`, `redesign/igpu/README.md`;
+`models/manifest.json`; `redesign/tasks/P2-02-*.md` (FEITO); `STATUS.md`, `ANCORA.md`
+(piso → `2c7de92`), `LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, hooks, `servidor.py`. Sem segredo (modelos
+públicos). Os pacotes Intel são do repo oficial, reversíveis por `pacman -Rns`.
+`llamacpp-agata.service` segue parado (boot = Fase 7). O `openvino-whisper.service` fica
+**de pé** durante a Fase 2 (leve — ~150 MB RAM idle) para o passo 5 conjunto do P2-03.
+
+**Falta / próximo:** **P2-03** (`openvino-embeddings` — `multilingual-e5-small`, reusa o
+venv, formato OpenAI, zero vector DB) → passo 5 mede a 4060 com display+STT+embeddings
+todos fora dela → **Fase 2 FECHADA**.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

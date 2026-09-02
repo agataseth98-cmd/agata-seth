@@ -1,7 +1,7 @@
 {
-  "gerado_por": "P3-02 (prune -- keep-list de 5) ; P3-03 acrescentou o MoE llama.cpp (qwen3-30b-a3b)",
+  "gerado_por": "P3-02 (prune -- keep-list de 5) ; P3-03 acrescentou o MoE llama.cpp (qwen3-30b-a3b) ; P2-02 acrescentou os IR OpenVINO de STT (whisper base/small)",
   "gerado_em": "2026-09-02T09:44:43-03:00",
-  "n_modelos": 6,
+  "n_modelos": 8,
   "modelos": [
     {
       "name": "qwen3:4b",
@@ -62,7 +62,26 @@
       "servico": "llamacpp-agata.service (systemd --user, sem enable) -> 127.0.0.1:20129, ExecStart llama-server -ngl 999 --n-cpu-moe 36 -c 8192 --alias qwen3-30b-a3b",
       "reconstrucao": "download do HF (URL acima) + conferir blob_sha256; NAO precisa de snapshot restic (publico, hash fixado). Ver redesign/router/llamacpp.md.",
       "registrado_omniroute": "provider llamacpp-local -> llamacpp-local/qwen3-30b-a3b; combo auto tier 4"
+    },
+    {
+      "name": "whisper-base-int8-ov",
+      "backend": "openvino-ir",
+      "origem": "huggingface: OpenVINO/whisper-base-int8-ov (IR pre-convertido, snapshot_download)",
+      "path": "~/.cache/agata/openvino/whisper/whisper-base-int8-ov",
+      "ir_sha256_xmlbin": "37f1fc33558914699613c25f24548e571810fc5194b622755d289180d0edc94e",
+      "nota": "STT (Fase 2, P2-02) -- servido; whisper base multilingue int8",
+      "reconstrucao": "snapshot_download('OpenVINO/whisper-base-int8-ov', local_dir=...) -- publico, sem hash fixado no HF; ir_sha256_xmlbin e' o hash local dos .xml/.bin"
+    },
+    {
+      "name": "whisper-small-int8-ov",
+      "backend": "openvino-ir",
+      "origem": "huggingface: OpenVINO/whisper-small-int8-ov (IR pre-convertido, snapshot_download)",
+      "path": "~/.cache/agata/openvino/whisper/whisper-small-int8-ov",
+      "ir_sha256_xmlbin": "140049e901c45cfe6936de6c1946ec71698a75fd43423b28b5c84a72987d8817",
+      "nota": "STT upgrade drop-in (baixado, nao servido por padrao)",
+      "reconstrucao": "snapshot_download('OpenVINO/whisper-small-int8-ov', local_dir=...) -- publico, sem hash fixado no HF; ir_sha256_xmlbin e' o hash local dos .xml/.bin"
     }
   ],
-  "gerado_em_p3_03": "2026-09-02T11:00:35-03:00"
+  "gerado_em_p3_03": "2026-09-02T11:00:35-03:00",
+  "gerado_em_p2_02": "2026-09-02T12:01:27-03:00"
 }

@@ -4,6 +4,18 @@
 Whisper da 4060 (ou da CPU). Item do aceite da Fase 2: "Whisper transcreve em tempo real
 na iGPU".
 
+**Status:** ✅ **FEITO — 2026-09-02 ~12:00 (relógio da máquina).** `sudo pacman -S
+intel-compute-runtime intel-graphics-compiler intel-gpu-tools` (a lacuna do P2-00 —
+`clinfo -l` agora lista a iGPU). venv `redesign/igpu/.venv` (OpenVINO 2026.3.1 + genai +
+optimum-intel + transformers 4.57.6 fixado). **Modelo: `OpenVINO/whisper-base-int8-ov`** (IR
+pré-convertido, multilíngue — o `optimum-cli export` está quebrado no `optimum` 2.3.0, e o
+canon é PT-BR, não `distil-small.en`). `whisper_server.py` (`:20130`, stdlib) +
+`openvino-whisper.service` (`GPU.0`, sem `enable`). **RTF na iGPU = 0.082** (base) / 0.212
+(small) — muito abaixo de 1. CPU é 3–4× mais rápido mas a iGPU é escolha deliberada
+(capacidade ociosa, STT é rajada, fora do caminho crítico do CPU). `nvidia-smi` sem processo
+python durante a inferência. `whisper-small-int8-ov` baixado como upgrade drop-in. Detalhes:
+`redesign/igpu/README.md`.
+
 **Pré-requisitos:** P2-00 FEITO (iGPU confirmada, `renderD*` presente). P2-01 recomendável
 mas não bloqueante (o Whisper na iGPU independe de onde o display está).
 
