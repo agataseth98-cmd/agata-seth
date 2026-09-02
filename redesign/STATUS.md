@@ -1,19 +1,23 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 3 — Modelos** (manifesto + prune + llama.cpp). Fases 0 e 1 FECHADAS.
-ATUALIZADO: 2026-09-02 10:37 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P3-02 FECHADO
-ÂNCORA (leve, manual): sobre `redesign` @ **`53b2d42`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 2 — iGPU** (próxima). **Fases 0, 1 e 3 FECHADAS.**
+ATUALIZADO: 2026-09-02 11:01 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P3-03 FEITO, FASE 3 FECHADA
+ÂNCORA (leve, manual): sobre `redesign` @ **`224901a`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **P3-02 FECHADO** (2026-09-02 ~10:37, relógio da máquina):
-16 modelos removidos, keep-list de 5, **~148 GiB reclamados** (362 → 510 GB livres) após apagar
-os 50 snapshots pacman do snapper que prendiam os blobs no btrfs. **Próximo: P3-03** (llama.cpp
-+ MoE — INSTALA SOFTWARE, sudo do Humano) → fecha a Fase 3.
+_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 3 FECHADA** (2026-09-02 ~11:00, relógio da máquina).
+P3-02: 16 modelos removidos, keep-list de 5, ~148 GiB reclamados (apagados os 50 snapshots
+pacman do snapper que prendiam os blobs no btrfs). P3-03: `llama-cpp 0.3.0` + `ggml-cuda`;
+`Qwen3-30B-A3B-Instruct-2507` Q4_K_M em `llamacpp-agata.service` (`:20129`, `--n-cpu-moe 36`,
+**31,4 tok/s**, ~1,6 GB folga de VRAM); registrado no OmniRoute (`llamacpp-local`, combo `auto`
+tier 4). **Próximo: Fase 2 (iGPU)** — ordem `0→1→3→2` do ROADMAP. Arquivos-tarefa P2-00..P2-03
+já escritos (P0-03). Pede o "vai" do Humano + revisão de plano (P2-01 é risco alto — sessão
+gráfica).
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -111,7 +115,9 @@ nesta fase (ver LOG 01/09 ~17:10).
   Providers ativos: Ollama, Groq (`gpt-oss-120b`), Gemini (`2.5-flash`), OpenRouter
   (`minimax-m3:free`), Z.AI (`glm-4.7-flash`). DeepSeek fora (402, sem crédito). Cerebras
   não configurado (`~/.hermes/.env` sem a chave — walkthrough em `PROVEDORES.md`).
-- **Fase 3 — Modelos** — "vai" dado (2026-09-02). EM ANDAMENTO.
+- **Fase 3 — Modelos — ✅ FECHADA** (2026-09-02 ~11:00, relógio da máquina). Aceite cumprido:
+  manifesto reconstrói qualquer mantido · `ollama list` + backend llama.cpp batem com o
+  manifesto · MoE roda **31,4 tok/s** (≥ ~20) no `--n-cpu-moe 36`.
   - **P3-00 ✅ FEITO** — reconstrutibilidade dos 20 modelos provada (`models/RECONSTRUCAO.md`).
   - **P3-01 ✅ FEITO** — `models/PRUNE.md` (keep-list de 5 vs. 15/16 a remover).
   - **P3-02 ✅ FECHADO** (2026-09-02 ~10:37, relógio da máquina). 16 `ollama rm`; `ollama list`
@@ -123,10 +129,18 @@ nesta fase (ver LOG 01/09 ~17:10).
     454-503`) → **~148 GiB reclamados** (livre 362 → 510 GB; `Data used` 578 → 430 GiB).
     S7 re-rodado de estado limpo: keep-list responde (`qwen3.5:9b`/`-64k`/`qwen3:4b` → "ok";
     `rlm` responde; `nomic-embed-text` → embedding 768-dim). **PASS.**
-  - **P3-03 — a fazer.** `llama.cpp` (INSTALA SOFTWARE — `sudo pacman -S llama.cpp`, senha do
-    Humano) + MoE GGUF (Qwen3-30B-A3B / Qwen3.6-35B-A3B) + varredura `--n-cpu-moe` + servir
-    em `127.0.0.1:20129` + registrar no OmniRoute como `llamacpp-local` + pôr na combo `auto`.
-    **Fase 3 fecha aí.** Fase 2 (iGPU) vem depois (ordem `0→1→3→2`).
+  - **P3-03 ✅ FEITO** (2026-09-02 ~11:00). `sudo pacman -S llama-cpp ggml-cuda` (repo `extra`;
+    `cuda`/`nvidia-utils` já estavam). `Qwen3-30B-A3B-Instruct-2507` Q4_K_M (17,3 GiB, sha256
+    `6c997b8a…`, HF unsloth) em `~/.cache/agata/models/` (`@cache`, fora dos snapshots).
+    Varredura `--n-cpu-moe` 48→20 com `llama-bench` (N≤28 = CUDA OOM na 4060): **N=36** escolhido
+    → servidor real `-c 8192` dá **31,4 tok/s** e ~1,6 GB de folga de VRAM (N=32 = 34,9 tok/s
+    mas só ~200 MiB — apertado demais). `llamacpp-agata.service` (`127.0.0.1:20129`, sem
+    `enable`). OmniRoute: provider `llamacpp-local`, model-id `llamacpp-local/qwen3-30b-a3b`;
+    combo `auto` refeita com ele em **tier 4** (acima do denso 9B — decisão pelo espelho, ver
+    LOG). Offload GPU confirmado (`nvidia-smi` 9–100 %). Fallback forçado p/ o MoE testado
+    (`[deepseek 402 → llamacpp-local]`). `omniroute cost` contabiliza. Manifesto: 6 modelos
+    (5 Ollama + 1 llama.cpp), sha256 6/6. Doc: `redesign/router/llamacpp.md`. S7 → PASS.
+  - **Próximo: Fase 2 (iGPU).** Ver bloco abaixo.
 - **Fase 1 (histórico dos passos):**
   - **P1-00 ✅ FEITO** (~00:02). `omniroute@3.8.50` em `~/.npm-global` (sem sudo),
     `systemd --user omniroute.service` **active**, bind **`127.0.0.1:20128`** (default dele

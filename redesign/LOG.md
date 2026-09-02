@@ -1288,3 +1288,91 @@ varredura `--n-cpu-moe` → `127.0.0.1:20129` → OmniRoute `llamacpp-local` →
 **Fase 3 fecha aí.** Depois Fase 2 (iGPU).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 11:01 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P3-03 FEITO — FASE 3 FECHADA
+
+**Revisão de plano (T2, classe instala-pacote + baixa ~18 GB + serviço novo — auto-revisão):**
+veredito PRONTO com 2 ajustes ao arquivo-tarefa: (1) o pacote é `llama-cpp` (não `llama.cpp`)
+e o offload CUDA vem no backend separado `ggml-cuda`; `cuda 13.3.1` + `nvidia-utils` já
+instalados. (2) `huggingface_hub` não está no python do sistema → baixar o GGUF por `wget`
+da URL pública do HF.
+
+**Instalação (Bloco 1, rodado pelo Humano com sudo):** `sudo pacman -S --needed llama-cpp
+ggml-cuda` (repo `extra`/`cachyos-extra-v3`, assinados; puxou `ggml` + `nccl`). `llama-cpp
+0.3.0-1.1` build 10621 commit `c1d0e7a004`. `llama-server --list-devices` → `CUDA0: RTX
+4060`. O `pacman` tirou os snapshots snapper #504/#505 (4 pacotes, ~540 MiB — sem risco).
+
+**Modelo:** escolha do Humano entre Qwen3-30B-A3B e Qwen3.6-35B-A3B → **Qwen3-30B-A3B**
+(mais capaz na variante `-Instruct-2507`, GGUF unsloth consolidado, cabe folgado na RAM).
+`Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf` — 17,3 GiB (18.550.716.416 B), arquivo único,
+`sha256 6c997b8af17debdfb01d890214400ccbab00db6acc0ba8da5de1cc906c4774d0`. Em
+`~/.cache/agata/models/` (subvolume `@cache`, **fora dos snapshots do snapper** — não
+repete o P3-02). Baixado por `wget -c` (sessão, ~22 MB/s).
+
+**Varredura `--n-cpu-moe`** (`llama-bench -ngl 999 -p 128 -n 128 -r 3`):
+
+| N | pp128 | tg128 | VRAM pico (bench) |
+|---:|---:|---:|---:|
+| 48 | 116,1 | 20,3 | 1165 MiB |
+| 44 | 126,3 | 22,5 | 2659 MiB |
+| 40 | 138,1 | 25,7 | 4103 MiB |
+| 36 | 148,9 | 28,4 | 5449 MiB |
+| 32 | 161,1 | 32,1 | 6843 MiB |
+| 28 / 24 / 20 | — | — | **falha ao carregar (CUDA OOM)** — usável ≈ 7834 MiB |
+
+Servidor real (`llama-server -c 8192`, geração de verdade): **N=32** → 34,9 tok/s mas VRAM
+pico 7637 MiB (**só ~197 MiB de folga** — inseguro); **N=36** → **31,4 tok/s**, VRAM pico
+6243 MiB (**~1590 MiB de folga**). **Escolhido N=36** — os ~3 tok/s abertos mão compram
+margem real na 4060 (que também move o desktop) até a Fase 7 fazer o liga/desliga de VRAM.
+Offload GPU confirmado: `nvidia-smi utilization.gpu` oscilou 9–100 % na geração, não é 100 %
+CPU.
+
+**Serviço:** `~/.config/systemd/user/llamacpp-agata.service` (`Type=simple`,
+`Restart=on-failure`, `Nice=5`, **sem `enable`** — boot é Fase 7). `llama-server -ngl 999
+--n-cpu-moe 36 --host 127.0.0.1 --port 20129 -c 8192 --alias qwen3-30b-a3b --no-webui`.
+Sobe healthy em ~6 s. `/v1/models` → id `qwen3-30b-a3b`.
+
+**OmniRoute:** provider `llamacpp-local` (`--provider-base-url http://127.0.0.1:20129/v1`,
+`--default-model qwen3-30b-a3b`). Model-id de chamada `llamacpp-local/qwen3-30b-a3b`.
+Combo `auto` refeita:
+- antes: `cerebras/gpt-oss-120b → groq/openai/gpt-oss-120b → gemini/gemini-2.5-flash → ollama-local/qwen3.5:9b`
+- depois: `… → gemini/gemini-2.5-flash → llamacpp-local/qwen3-30b-a3b → ollama-local/qwen3.5:9b`
+
+**Decisão de posição (pelo espelho, sem risco → executada e registrada):** o arquivo-tarefa
+sugeria o MoE em tier 2. Com o número real (31 tok/s, ~2 s ao 1º token) ele não compete em
+latência com o `gpt-oss-120b` na nuvem (~450 ms); é um *bom fallback local*. Posto em
+**tier 4**, logo acima do denso 9B — sobe o tier local de 9B para 30B-A3B e mantém `auto`
+com as nuvens rápidas primeiro. Reversível (`combo delete/create`).
+
+**Verificação (S7, re-rodado de estado limpo):**
+- `is-active` = active · `/health` 200 · bind `127.0.0.1:20129` · `is-enabled` = disabled. ✅
+- `/v1/models` → `qwen3-30b-a3b`, `n_ctx 8192`, 30.5B, Q4_K_M. ✅
+- `llamacpp-local/qwen3-30b-a3b` roteia direto (`:20128`) **e pelo proxy sanitizador**
+  (`:20127`) → `"ok"`, fingerprint `b10621-c1d0e7a004`. ✅
+- Fallback forçado: combo throwaway `[deepseek/deepseek-v4-flash (402) → llamacpp-local/
+  qwen3-30b-a3b]` via `:20127` → resposta de `model: qwen3-30b-a3b`. Combo apagada. ✅
+- `omniroute cost` → linha `llamacpp-local` (2 reqs, $0,0000). ✅
+- `models/manifest.json` → 6 modelos (5 Ollama + 1 `backend: llama.cpp`), `blob_sha256`
+  em 6/6. ✅
+- **P3-03 → PASS.**
+
+**→ FASE 3 (Modelos) FECHADA.** Aceite: manifesto reconstrói qualquer mantido (registry
+pull / `ollama create` / download HF+sha256) · `ollama list` (5) + backend llama.cpp (1)
+batem com o manifesto · MoE **31,4 tok/s ≥ ~20**.
+
+**Arquivos:** novo `redesign/router/llamacpp.md` (tabelas da varredura, decisão do N,
+comando do serviço, rollback, reconstrução); `models/manifest.json` (+entry MoE);
+`redesign/tasks/P3-03-*.md` (status FEITO); `STATUS.md`, `ANCORA.md` (piso → `224901a`),
+`LOG.md`.
+
+**Não tocado:** `main`, canon (`REGRAS`/`PROJETO`/`MEMÓRIAS`), Hermes, Ollama de produção,
+hooks, `servidor.py`. Sem segredo (o GGUF é público; api-key do provider é placeholder).
+Os pacotes instalados são do repo oficial Arch, reversíveis por `pacman -Rns`.
+
+**Falta / próximo:** **Fase 2 (iGPU)** — ordem `0→1→3→2` do ROADMAP. Arquivos-tarefa
+P2-00..P2-03 já escritos (P0-03). Pede o "vai" do Humano + revisão de plano (P2-01 —
+pinar display na iGPU — é risco alto, sessão gráfica; reversão testada antes).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -4,6 +4,15 @@
 com `--n-cpu-moe` varrido, servido em endpoint OpenAI-compat local, registrado no OmniRoute
 como provider `llamacpp-local` e posto na combo `auto`. Fecha o aceite da Fase 3.
 
+**Status:** ✅ **FEITO — 2026-09-02 ~11:00 (relógio da máquina). FASE 3 FECHADA.**
+`llama-cpp 0.3.0` + `ggml-cuda` instalados; `Qwen3-30B-A3B-Instruct-2507` Q4_K_M (17,3 GiB,
+sha256 `6c997b8a…`) em `~/.cache/agata/models/`. Varredura `--n-cpu-moe` 48→20 (20/24/28 =
+CUDA OOM); **escolhido N=36** → `tg 31,4 tok/s` no servidor real com `-c 8192` e ~1,6 GB de
+folga de VRAM (N=32 dava 34,9 tok/s mas só ~200 MiB de folga — apertado). Serviço
+`llamacpp-agata.service` (`127.0.0.1:20129`, sem `enable`). OmniRoute: provider
+`llamacpp-local`, combo `auto` tier 4 (acima do denso 9B). Offload GPU confirmado
+(`nvidia-smi` 9–100 %). Detalhes e tabelas: `redesign/router/llamacpp.md`.
+
 **Pré-requisitos:** P3-00, P3-01 FEITO. P3-02 recomendável antes (libera VRAM/RAM/disco).
 OmniRoute de pé (Fase 1).
 
