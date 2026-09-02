@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 6 — Obsidian** (próxima). **Fases 0-5 FECHADAS** (5 = spike ARQUIVADO).
-ATUALIZADO: 2026-09-02 18:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P5-01 ARQUIVADO, FASE 5 FECHADA
+FASE ATUAL: **Fase 6 — Obsidian** (EM ANDAMENTO — P6-00 feito; P6-01 pende "vai"). **Fases 0-5 FECHADAS.**
+ATUALIZADO: 2026-09-02 19:00 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P6-00 FEITO (inventário Obsidian)
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -10,15 +10,13 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_ — **FASE 5 (Spike RLM) FECHADA — ARQUIVADO** (2026-09-02 ~18:50).
-P5-00: Fronteira conferida (Recursive LM = inferência, não o "RLM auto-treino" recusado em
-(114); só MEDIR). P5-01: spike A/B interrompido pelo Humano em 27/32; a consulta não bateu
-a injeção (3/13 vs 9/14 acertos; ~87k vs ~45k tok/acerto; ~96 vs ~6 min). **Fabricação = 0
-nos dois braços.** Marcado p/ trabalho futuro sério (lib `rlms`, busca melhor). Nada de
-produção muda. `redesign/rlm/RESULTADO.md`.
-**Próximo: Fase 6 (Obsidian)** — `obsidian-local-rest-api` (versão com MCP nativo) em
-`:27124/mcp/`, serve o vault derivado read-only, zero vector DB. Pede o "vai" do Humano +
-arquivos-tarefa.
+_(nenhuma tarefa EM ANDAMENTO)_ — **P6-00 FEITO** (2026-09-02 ~19:00). `redesign/obsidian/
+INVENTARIO.md`: Obsidian instalado (flatpak 1.13.7); vault `memoria/obsidian/` é derivado
+gitignorado (apaga+reescreve no post-commit) → **conflito:** o `.obsidian/` do plugin não
+pode morar lá; vault root = `~/agata`. Arquivos-tarefa P6-00..P6-03 escritos.
+**Próximo: P6-01** — instalar `obsidian-local-rest-api` + subir `:27124/mcp/` read-only.
+**PENDE do "vai" do Humano** — INSTALA SOFTWARE (plugin) + serviço de rede novo.
+_(Fase 5 = spike RLM ARQUIVADO; `redesign/rlm/RESULTADO.md`.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
 P4-00 durabilidade (SqliteSaver+WAL) · P4-01 esqueleto (6 nós, `interrupt`) · P4-02 tools+

@@ -2169,3 +2169,47 @@ Humano + arquivos-tarefa. Objetivo: `obsidian-local-rest-api` (versão com MCP n
 índice-primeiro, **zero vector DB**.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · Fase 6 — arquivos-tarefa P6-00..P6-03 + P6-00 FEITO
+
+Humano: "vamos prosseguir por ordem minha" (após arquivar a Fase 5). Escritos os 4
+arquivos-tarefa da Fase 6 e executado o P6-00 (inventário — só leitura).
+
+**Arquivos-tarefa (schema do `CONTINUIDADE.md`):**
+- **P6-00** — inventário Obsidian + desenho (feito, abaixo).
+- **P6-01** — instalar `obsidian-local-rest-api` + subir `:27124/mcp/` read-only.
+  **PENDE do "vai"** — INSTALA SOFTWARE (plugin) + serviço de rede novo.
+- **P6-02** — `consulta.py`: recuperação índice-primeiro, refs rastreáveis (`(NNN)` +
+  arquivo + linha) pelo MCP **e** por `query_canon` (disco); zero vector DB.
+- **P6-03** — consolidação noturna como flow do grafo (`orientar → juntar → consolidar →
+  podar`), saída só em `propostas/`, nunca canon. **Fecha a Fase 6.**
+
+**P6-00 — inventário (`redesign/obsidian/INVENTARIO.md`):**
+- **Obsidian instalado** — flatpak `md.obsidian.Obsidian 1.13.7` (flathub). `filesystems=home`
+  (enxerga `~/agata`), `shared=network` (pode abrir `:27124`).
+- **Vault `memoria/obsidian/`** — 438 arquivos, **gitignorado** (`.gitignore:48`, 0
+  rastreados), regenerado pelo `scripts/gerar_obsidian.py` no `post-commit` — e a geração
+  **apaga a pasta inteira e reescreve** (`_LEIA.md`).
+- **Plugin `obsidian-local-rest-api`** — não instalado. Serve MCP nativo em
+  `https://127.0.0.1:27124/mcp/` desde jul/2026, bearer token.
+- **Conflito de desenho achado:** se o `.obsidian/` do plugin morar dentro de
+  `memoria/obsidian/`, o `gerar_obsidian.py` apaga a config do plugin a cada commit.
+  **Solução:** vault root = **`~/agata`** (o que o `_LEIA.md` do vault já manda) → `.obsidian/`
+  fica fora da pasta regenerada. P6-01 acrescenta `.obsidian/plugins/` + `.obsidian/*.json`
+  ao `.gitignore`.
+- **4 invariantes fixados:** (1) read-only para modelos (a geração é a única escrita; P-10 é
+  o backstop); (2) o loop lê `.md` do disco direto, não depende do plugin; (3) zero vector
+  DB — refs rastreáveis, o `e5-small` no máximo reordena; (4) MCP stateless (E1) — token é
+  config local, não sessão.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Nada instalado. **HD
+desconectado** — bundles no staging local (`git push` é a cópia externa).
+
+**Falta / próximo:** o **"vai" do Humano** para o **P6-01** (instalar o plugin
+`obsidian-local-rest-api` no Obsidian + configurar o serviço `:27124/mcp/` read-only,
+vault = `~/agata`, token fora do git). É instalação de software + serviço de rede novo — na
+lista de "pergunta ao Humano".
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
