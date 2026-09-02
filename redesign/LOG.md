@@ -2381,3 +2381,40 @@ N dias = FALHA); OpenTelemetry só coletor local. Pede o "vai" do Humano + arqui
 **Boa parte pede o HD** (restic) — que só volta amanhã.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:26 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P7-00 — Fase 7 inventariada e BLOQUEADA (HD / sudo / P-8)
+
+Escritos os arquivos-tarefa P7-00..P7-03 + rascunhos em `redesign/systemd/`. **A Fase 7 não
+roda autônoma hoje** — três gates:
+
+1. **HD `AgataBkup01` só amanhã** (o Humano avisou). O núcleo da Fase 7 — repo restic dos
+   GGUF/IR, `agata-backup-artifacts.timer`, o "P-12 verde com backup fresco", o aceite
+   "restore do HD num scratch reproduz" — **tudo precisa do HD**.
+2. **`sudo`** — `pacman -S gamemode lib32-gamemode` (P7-02); drop-in de
+   `OLLAMA_KEEP_ALIVE=30s` em `ollama.service` (unit **de sistema**). Pedem o "vai".
+3. **Quarentena P-8** — **`perimetro.sh` (P-12) e `cifrar_env.sh` são `scripts/*`** →
+   mudança de comportamento, quarentena OBRIGATÓRIA (`propostas/<nome>.diff` + `APROVADO-`,
+   nunca edição direta). E o P-12 precisa da **decisão do Humano** sobre a régua (N dias,
+   quais recursos) — que só faz sentido com o backup de pé.
+
+**Adiantado hoje (userspace, sem HD, sem P-8):**
+- `redesign/systemd/agata.target` + `agata-dropin.conf` (drop-in comum: `PartOf=agata.target`
+  + `ExecStop=cli.py down` — o dreno do WAL do P4-04) + `gamemode.ini.exemplo`. **Rascunhos,
+  não instalados, nada `enable`d.**
+- `redesign/systemd/README.md` — como instalar (P7-01, com "vai").
+
+**Inventário:** `restic 0.19.1` ok, HD não montado. `gamemode` não instalado. `agata`
+CLI (`cli.py`, P4-04) já tem `up`/`down` com dreno — base do `agata.target`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/`. Nada
+instalado, sem `sudo`. `.diff` de P-12/`cifrar_env` **não** escritos ainda (dependem da
+régua do Humano + do HD).
+
+**Falta / próximo:** **evento para o Humano** — a Fase 7 precisa do HD (amanhã), de dois
+`sudo` (gamemode + env do ollama), e da decisão sobre a régua do P-12 (que vai por
+quarentena P-8). Fases 0-6 fechadas; o redesenho está pronto para a Fase 7 assim que o HD
+voltar. A Fase 8 (cutover + merge p/ `main`) vem depois da 7.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

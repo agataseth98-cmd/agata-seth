@@ -1,0 +1,7 @@
+[Unit]
+Description=Agata -- todos os servicos locais (Fase 7)
+Documentation=file:///home/orusoua/agata/redesign/STATUS.md
+# nao e' Requires: cada service decide se sobe; o target so agrupa p/ start/stop de uma vez
+
+[Install]
+WantedBy=default.target

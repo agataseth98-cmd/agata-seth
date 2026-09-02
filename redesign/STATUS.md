@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga + backup + verificação** (próxima). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 19:25 -03 (P6-03) (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 3 pós-migração) — P6-03 FEITO, FASE 6 FECHADA
+FASE ATUAL: **Fase 7 — Liga/desliga + backup + verificação** (EM ANDAMENTO — P7-00 feito; BLOQUEADA no HD/sudo/P-8). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-02 19:26 -03 (P7-00) (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 3 pós-migração) — P7-00 FEITO; Fase 7 bloqueada (HD amanhã)
 ÂNCORA (leve, manual): sobre `redesign` @ **`81b2aea`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -19,9 +19,14 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Próximo: Fase 7 (Liga/desliga + backup + verificação)** — `agata.target` (systemd) puxando
-as units; hook Feral GameMode; `ExecStop` que drena; repo restic no HD + timer; controle
-P-12 no `perimetro.sh`. Pede o "vai" + arquivos-tarefa. **HD só amanhã.**
+**Fase 7 (Liga/desliga) — P7-00 FEITO, resto BLOQUEADO:**
+- **P7-01** `agata.target` + dreno no stop — rascunhos em `redesign/systemd/` (não
+  instalados). Userspace; pede o "vai" p/ copiar + `enable`.
+- **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
+  + drop-in em `ollama.service`, ambos `sudo`).
+- **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh` — BLOQUEADO:
+  **HD só amanhã** + P-12/`cifrar_env` são `scripts/*` → **quarentena P-8** (vão como
+  `propostas/<nome>.diff` + `APROVADO-`, nunca edição direta; decisão do Humano).
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
