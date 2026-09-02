@@ -3,8 +3,16 @@
 **Objetivo:** ter o `omniroute` rodando local em `:20128` (endpoint OpenAI-compatível +
 dashboard), isolado, sem nenhum provedor ainda configurado — a base da Fase 1.
 
-**Pré-requisitos:** P0-02 FEITO (o servidor MCP e o venv já mostram o padrão de isolamento).
-Fase 1 recebeu o "vai" do Humano.
+**Pré-requisitos:** P0-02 FEITO.
+
+> **Estado (01/09/2026):** revisão de plano (T2, classe instala-pacote) feita — auto-revisão
+> na sessão, veredito PRONTO: `sudo` pede senha (AUR/pacman fora); `npm config get prefix`
+> = `~/.npm-global` (user-writable) ⇒ `npm install -g omniroute` **sem sudo**; risco contido
+> a userspace + localhost, reversível (`npm uninstall -g`). **A instalação em si está
+> bloqueada pelo classificador de permissão do Claude Code nesta sessão** — o resto de
+> P1-00 está preparado em `redesign/router/omniroute-prep/` (`INSTALAR.md`, `omniroute.service`,
+> `verificar.sh`). Falta só rodar `npm install -g omniroute` (Humano, 1 linha) e a sessão
+> retoma. Nenhum provedor é configurado aqui — o gateway sobe vazio.
 
 **Arquivos que a tarefa toca (fora do repo, exceto o registro):**
 - instala o pacote `omniroute` (ver passo 1 — AUR ou npm global, decidir na hora pelo que

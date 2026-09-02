@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~23:45 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`d58662b`**; ver
+ATUALIZADO: 2026-09-02 ~00:00 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`67d07c6`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
@@ -12,7 +12,7 @@ BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-
 
 ## Quadro de posse
 
-_(nenhuma tarefa EM ANDAMENTO)_
+EM ANDAMENTO: P1-00 (instalar/subir OmniRoute) · Claude · 2026-09-02 00:00 -03 · bloqueado no `npm install` (classificador da sessão) — resto preparado em `redesign/router/omniroute-prep/`
 
 Formato: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>` enquanto trabalha;
 `FEITO: <tarefa> · <executor> · <data>` ao terminar.
@@ -105,9 +105,14 @@ nesta fase (ver LOG 01/09 ~17:10).
 
 - **Fase 0 — só o HD:** quando `AgataBkup01` montar → P0-01 passos 3-4 + P0-02 aceite de
   restore (runbook: `redesign/RUNBOOK-fase0-HD.md`; rotina de briefing agendada 02/09 10h -03).
-- **Fase 1 — precisa do "vai" do Humano + revisão de plano (tier de risco, T2):** começa
-  por `P1-00` (INSTALA OmniRoute). O grosso do trabalho offline da fase já está adiantado
-  (sanitização + docs); o que resta é instalar/subir/wire, que pede o "vai".
+- **Fase 1 EM ANDAMENTO.** Revisão de plano do P1-00 feita (T2, auto-revisão, PRONTO — risco
+  contido a userspace + localhost, `npm` sem sudo, reversível). **Bloqueio técnico:** o
+  classificador de permissão do Claude Code barra `npm install` nesta sessão. Preparado:
+  `redesign/router/omniroute-prep/` (`INSTALAR.md` + `omniroute.service` + `verificar.sh`).
+  Falta 1 linha do Humano — `npm install -g omniroute` — ou uma regra `Bash(npm:*)` em
+  `settings.json`; então a sessão roda `verificar.sh`, instala a unit e segue para P1-01.
+- Offline da Fase 1 já pronto (`redesign/router/`): `sanitizar.py`, `proxy.py` (ambos
+  `--selftest` verde), `PROVEDORES.md`, `conselho_via_omniroute.md`.
 - **P4-00** (spike de durabilidade da Fase 4, de E2) — quando a Fase 4 se aproximar.
 - Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 

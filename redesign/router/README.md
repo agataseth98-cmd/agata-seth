@@ -71,6 +71,16 @@ Tabela do pool nuvem (Groq/Cerebras/DeepSeek/GitHub Models/Gemini/OpenRouter/Mis
 env vars, base URLs, limites vistos em 01/09 (marcados RECONFERIR) e as combos
 `cheap`/`auto`/`conselho`. Chaves só no `~/.hermes/.env`, editadas pelo Humano.
 
+## `omniroute-prep/` — P1-00, tudo menos o install
+
+A sessão Claude não pode rodar `npm install` (classificador de permissão). Preparado aqui:
+- `INSTALAR.md` — a linha única (`! npm install -g omniroute`, sem sudo, prefix
+  `~/.npm-global`) ou a regra `Bash(npm:*)`.
+- `omniroute.service` — unit `systemd --user` (bind `127.0.0.1:20128`, headless; CONFERIR
+  subcomando/env na doc). Sem `enable`.
+- `verificar.sh` — checagens de P1-00 (binário, boot, bind local, `/v1/models` 200, sem
+  chave em disco). Read-only.
+
 ## `conselho_via_omniroute.md` — P1-04 (desenho, feito)
 
 Antes/depois de `scripts/conselho_remoto.py`: tabela do que **não muda** (política:

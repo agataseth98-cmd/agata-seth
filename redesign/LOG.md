@@ -553,3 +553,49 @@ apoio) está adiantado. O que resta da Fase 1 são os passos que tocam o sistema
 **Falta / próximo:** HD para fechar a Fase 0; "vai" do Humano para a Fase 1.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~00:00 -03 · sessão Claude (Claude Code, na Máquina) — P1-00 iniciado, bloqueio técnico no install
+
+**Humano:** "Negativo, por que vc acha que habilitei fallbacks? Vamos prosseguir e amanhã
+plugamos o HD, não quero ser incomodado com isso por agora." → correção: não parar em
+cada fronteira de fase pedindo "vai"; P1-00 (instalar OmniRoute em userspace, localhost,
+reversível) não está na lista de "perguntar ao Humano" (destrutivo / segredo / main /
+canon / Hermes / Ollama / espinha). Prossegui.
+
+**T2 — revisão de plano do P1-00 (auto-revisão, classe instala-pacote):** veredito
+**PRONTO**. Fatos que contêm o risco: `sudo` pede senha (AUR/pacman fora); `npm config
+get prefix` = `~/.npm-global`, user-writable ⇒ `npm install -g omniroute` **sem sudo**;
+`systemctl --user` disponível; nenhum provedor/chave nesta tarefa (gateway sobe vazio);
+não toca hooks/canon/scripts/Hermes/Ollama; reversível com `npm uninstall -g`. O AUR tem
+`omniroute 3.8.50-1` mas exige sudo — via npm.
+
+**Bloqueio técnico:** `npm install -g omniroute` foi **barrado pelo classificador de
+permissão do Claude Code** nesta sessão ("Blocked by classifier"). Não é decisão minha
+evitando — é parede do harness. Não insisti (a orientação do próprio bloqueio diz para
+não tentar contornar).
+
+**Preparado — tudo menos o install (`redesign/router/omniroute-prep/`):**
+- `INSTALAR.md` — a linha única (`! npm install -g omniroute`) ou a regra
+  `Bash(npm:*)` em `settings.json`; depois a sessão retoma.
+- `omniroute.service` — unit `systemd --user` template (ExecStart `~/.npm-global/bin/omniroute`,
+  bind `127.0.0.1:20128`, `NO_BROWSER`/`CI` p/ headless; marcado CONFERIR subcomando/env
+  na doc). **Sem `enable`** — boot é Fase 7.
+- `verificar.sh` — checagens de P1-00: binário, sobe 8s em foreground e mostra o boot,
+  bind é `127.0.0.1` (não `0.0.0.0`), `/v1/models` → 200, nenhum padrão de chave em
+  `~/.config/omniroute` / `~/.omniroute` / `~/.local/share/omniroute`. Read-only, mata o
+  processo de teste no fim.
+- `P1-00` (arquivo-tarefa) e `router/README.md` atualizados com o estado.
+
+**Posse:** `STATUS.md` "Quadro de posse" → `EM ANDAMENTO: P1-00 · Claude · 2026-09-02
+00:00 -03 · bloqueado no npm install`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama, `scripts/`, hooks, `servidor.py`. Nada
+instalado (o install foi barrado). Nenhuma chave.
+
+**Falta / próximo:** o `npm install -g omniroute` (1 linha do Humano, sem sudo) OU uma
+regra de permissão; então: `verificar.sh` → unit → **P1-00 FEITO** → P1-01 (provider
+Ollama). HD amanhã para a Fase 0.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
