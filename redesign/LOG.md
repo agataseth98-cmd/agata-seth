@@ -386,3 +386,69 @@ pre-commit (tem que sair verde).
 P0-01 passos 3-4 + aceite de restore do P0-02.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~23:30 -03 · sessão Claude (Claude Code, na Máquina) — P0-03 (arquivos-tarefa Fases 1 e 2)
+
+**Feito:** 9 arquivos-tarefa em `redesign/tasks/`, no schema (com o campo "Verificação
+independente" da T1). São **planos para execução futura** (cada fase pega o "vai" do
+Humano e passa pela revisão de plano com tier de risco da T2 antes de rodar).
+
+**Fase 1 — Router / OmniRoute** (fecha o aceite: um pedido roteia · fallback sob falha ·
+custo logado · segredo bloqueado antes de sair · aposenta a rede do `conselho_remoto.py`):
+- `P1-00` — instala OmniRoute (AUR ou npm global — decidir na hora), sobe em
+  `127.0.0.1:20128` (OpenAI-compat + dashboard), `systemd --user` sem `enable`. Marcado
+  INSTALA SOFTWARE / classe de risco.
+- `P1-01` — provider Ollama local (aponta pro `:11434` de produção, não toca a config
+  dele), uma rota mínima que responde, pedido aparece no log nativo.
+- `P1-02` — sanitização de segredo **antes do egresso**: `redesign/router/sanitizar.py`
+  reusa os padrões de `varredura_segredo.sh` (`PADROES_SEGREDO`, 7 regexes), **falha
+  fechado** (padrão casado ⇒ chamada bloqueada, não mascarada). Via policy nativa (A) ou
+  proxy fino `:20127` (B). Teste com chave falsa `sk-AAAA…` + `tcpdump` confirmando que
+  nada saiu.
+- `P1-03` — pool nuvem free (Groq, Cerebras, GitHub Models, DeepSeek…), chaves **o Humano
+  edita no `~/.hermes/.env`**, nunca no chat/repo. Combos `auto`/`cheap`, fallback +
+  circuit breaker + cooldown (defaults do OmniRoute). Teste de fallback forçando o 1º
+  provedor a falhar; custo por chamada no painel nativo (sem dashboard extra — PESQUISA).
+- `P1-04` — `conselho_remoto.py` deixa de fazer urllib direto a z.ai/Google; passa a
+  `POST 127.0.0.1:20128/v1/chat/completions` numa combo `conselho` = [glm-flash →
+  gemini-flash]. **Mantém** toda a política (conteúdo privado, teto de chars, uma chamada
+  por invocação, não encadeia, não escreve canon, aborta em vez de cair pro local). Edita
+  a cópia do branch; **merge p/ `main` só na Fase 8**. Classe de risco (script canônico +
+  rede) — revisão de plano antes.
+
+**Fase 2 — iGPU** (fecha o aceite: `nvidia-smi` sem display/STT na 4060 · Whisper tempo
+real na iGPU · endpoint de embedding responde):
+- `P2-00` — inventário (só leitura): iGPU real (a PESQUISA disse "Raptor Lake-S" mas o
+  CPU é HX — reconferir), driver, nós `/dev/dri`, onde o display renderiza, **baseline
+  numérico da 4060** (10 amostras), STT atual. `redesign/igpu/INVENTARIO.md`.
+- `P2-01` — pinar o display na iGPU. **RISCO ALTO (sessão gráfica)**: reversão preparada e
+  testada **antes** de aplicar; TTY à mão; se o INVENTARIO já mostrar display na iGPU,
+  vira só "tornar explícito + verificar". Verificação independente = o Humano + reboot de
+  teste.
+- `P2-02` — `openvino-whisper.service`: venv isolado `redesign/igpu/.venv` (gitignorado,
+  conferido), OpenVINO 2026.1 + `openvino-genai`, distil-whisper (small/medium, decidir
+  por qualidade) exportado p/ IR int8 via `optimum-cli`, chunked long-form, `device="GPU"`.
+  Aceite: RTF < 1 com carga na iGPU e **nada** no `nvidia-smi`. Verificação independente:
+  comparar RTF iGPU vs CPU em 3 áudios.
+- `P2-03` — `openvino-embeddings.service`: bge-small-en-v1.5 (ou multilingual-e5-small se
+  o corpus for PT-BR) IR int8, resposta no **formato OpenAI embeddings** (sem adaptador no
+  grafo), mean-pool + L2-norm. **Zero vector DB** (invariante da Fase 6) — só devolve o
+  vetor. Passo 5 fecha o aceite conjunto da Fase 2 (medição da 4060 com display+STT+embed
+  todos fora dela).
+
+**Verificação (S7 mínimo):** P0-03 é doc-only, sem `Aceite` executável próprio.
+`bash scripts/perimetro.sh` roda no pre-commit e tem que sair verde. `git check-ignore`
+confirma `redesign/igpu/.venv` ignorado e `redesign/router/` **não** (vai ter código).
+
+**Não tocado:** `main`, canon, Hermes, Ollama, `scripts/`, hooks, `servidor.py`. Nada
+instalado, nada de systemd — os arquivos-tarefa são planos, não execução.
+
+**Fase 0:** tudo FEITO menos o que depende do HD `AgataBkup01` (P0-01 passos 3-4 + aceite
+de restore do P0-02). Ao montar o HD: fecha a Fase 0.
+
+**Falta / próximo:** HD para fechar a Fase 0; depois, "vai" do Humano para a Fase 1
+(começando por P1-00, com revisão de plano de tier de risco antes).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

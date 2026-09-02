@@ -1,8 +1,8 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~23:08 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`e4398e2`**; ver
+ATUALIZADO: 2026-09-01 ~23:30 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`eeb3296`**; ver
 `redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
@@ -73,14 +73,30 @@ nesta fase (ver LOG 01/09 ~17:10).
   de estado limpo, PASS/FALHA no LOG); H2 = `redesign/ANCORA.md` manual (hook pende do
   Humano — mudança de espinha); H3 = não (invariante vence); H4 = retirada; T1/T2/T4
   aplicados; T3 dormente; E1/E2 no ROADMAP + spike P4-00. Ver `AUDITORIA-01.md` §Resolução.
+- **P0-03 — arquivos-tarefa das Fases 1 e 2** ✅ (sessão Claude, 01/09). 9 arquivos no
+  schema (com o campo "Verificação independente"):
+  - **Fase 1 (Router/OmniRoute):** `P1-00` instalar+subir `:20128` · `P1-01` provider
+    Ollama + rota mínima · `P1-02` sanitização de segredo antes do egresso (reusa
+    `PADROES_SEGREDO`, falha fechado) · `P1-03` pool nuvem free + combos auto/cheap +
+    fallback + breaker + custo · `P1-04` aposentar a rede do `conselho_remoto.py` (mantém
+    política + regex; merge p/ `main` só na Fase 8).
+  - **Fase 2 (iGPU):** `P2-00` inventário iGPU + baseline da 4060 (só leitura) · `P2-01`
+    pinar display na iGPU (**risco alto — sessão gráfica**; reversão testada antes) ·
+    `P2-02` `openvino-whisper.service` distil-whisper int8 chunked, RTF<1 · `P2-03`
+    `openvino-embeddings.service` bge-small/e5-small, formato OpenAI, zero vector DB.
 
 ## Próximo (Fase 0)
 
-- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 no schema (já com o campo
-  "Verificação independente"). **Em andamento a seguir.**
 - **Quando o HD `AgataBkup01` montar:** P0-01 passos 3-4 (repo restic + 1º snapshot) +
   **P0-02 aceite de restore** (restore num scratch reproduz config) → **fecha a Fase 0**.
+- **P4-00** (spike de durabilidade da Fase 4, de E2) — arquivo-tarefa a escrever quando a
+  Fase 4 se aproximar; registrado no `ROADMAP.md`.
 - Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
+
+## Fim da Fase 0 depende só do HD
+
+Todo o resto da Fase 0 está FEITO. Ao montar o `AgataBkup01`: P0-01 passos 3-4 + aceite de
+restore do P0-02 → **Fase 0 fechada, pronta para o "vai" da Fase 1**.
 
 ## Bloqueios
 
