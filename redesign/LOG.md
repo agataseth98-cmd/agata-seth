@@ -1047,3 +1047,29 @@ desabilita a chave — reativar com `omniroute keys add <prov> --stdin`.
 Fase 1 segue FECHADA (Cerebras é reforço de velocidade).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 ~09:38 -03 · sessão Claude (na Máquina) — helper reativar-provider.sh
+
+Humano perguntou se re-habilitar a chave depois de 401/402 dá pra ser automático.
+**Não nativamente** — e é o default certo: 401/402 = credencial ruim / conta sem saldo,
+não é transiente (só 429/5xx o OmniRoute recupera sozinho via breaker). O OmniRoute não
+tem como saber que a conta foi consertada sem tentar, e não tenta chave `disabled`.
+
+`redesign/router/reativar-provider.sh <nome>`: lê a chave de `~/.hermes/.env` pela
+convenção `<PROV>_API_KEY` (mapa `zai→ZHIPU_API_KEY`, `gemini→GOOGLE_API_KEY`), roda
+`omniroute keys add <prov> --stdin` + `resilience reset --provider <p> --yes`, mostra o
+status. Valor da chave **nunca impresso**. Toda chamada `omniroute` com `timeout`.
+Testado com `cerebras` → `● enabled`, `cerebras/gpt-oss-120b` responde.
+
+Achado no caminho: `omniroute resilience reset` (e `combo delete`) **prompta `[y/N]` e
+trava** em shell não-interativo sem `--yes` (o "unsettled top-level await"). Anotado.
+
+Um **timer diário de re-probe** (systemd --user) que rodasse este helper p/ qualquer
+provider `disabled` seria trabalho de **Fase 7** (liga/desliga + automação), não agora —
+401/402 é raro e sempre o Humano já está no loop consertando a conta.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks. Fase 1 FECHADA.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
