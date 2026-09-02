@@ -52,3 +52,9 @@ redesign/**/.venv/
 redesign/**/__pycache__/
 redesign/**/*.pyc
 redesign/mcp/.venv/
+
+# Fase 6 -- plugin obsidian-local-rest-api: binarios + data.json (API key, cert self-signed)
+# NUNCA no git. O plugin guarda a chave em data.json.
+.obsidian/plugins/
+.obsidian/community-plugins.json
+.obsidian/**/data.json

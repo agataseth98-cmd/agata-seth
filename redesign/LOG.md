@@ -2213,3 +2213,65 @@ vault = `~/agata`, token fora do git). É instalação de software + serviço de
 lista de "pergunta ao Humano".
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 19:15 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 3) · P6-01 FEITO — plugin obsidian-local-rest-api + proxy read-only
+
+Humano: "Vai, mitize os riscos e só me chame em eventos." → executado o P6-01 (instala
+plugin + serviço de rede), com as travas de segurança primeiro.
+
+**Instalação:**
+- **`.gitignore` ANTES de tudo:** `.obsidian/plugins/`, `.obsidian/community-plugins.json`,
+  `.obsidian/**/data.json` — o `data.json` do plugin guarda a `apiKey` e o cert self-signed;
+  **nunca no git**. Conferido com `git check-ignore`.
+- **Plugin `obsidian-local-rest-api` 5.1.0** ("Local REST API **with MCP**", `isDesktopOnly`).
+  `main.js`/`manifest.json`/`styles.css` baixados do release GitHub para
+  `~/agata/.obsidian/plugins/obsidian-local-rest-api/`. Habilitado em
+  `~/agata/.obsidian/community-plugins.json`.
+- Vault = **`~/agata`** (o que o Humano já tinha registrado — `obsidian.json` do flatpak
+  tem `~/agata` com `"open":true`). O MCP serve o subtree `memoria/obsidian/`.
+- Config `data.json`: `bindingHost 127.0.0.1`, `port 27124`, `enableSecureServer true`,
+  `enableInsecureServer false`. `apiKey` (64 hex) + `crypto` gerados pelo plugin no 1º
+  start. `apiKey` copiado para **`~/.config/agata/obsidian.token`** (chmod 600, fora do
+  repo, valor nunca impresso).
+- Obsidian subido (`flatpak run md.obsidian.Obsidian ~/agata`) — `:27124` UP em ~14 s,
+  bind `127.0.0.1`, pid do plugin.
+
+**Trava de read-only (mitigação):** o plugin 5.1.0 **NÃO tem toggle global de read-only**
+(confirmado no `main.js` — só `readOnlyHint` por tool MCP). Teste ao vivo: `PUT
+/vault/...` com o token → **HTTP 204, arquivo criado no disco** (apaguei). Então:
+- **`redesign/obsidian/ro_proxy.py`** — proxy em `127.0.0.1:27125`: `GET`/`HEAD`/`OPTIONS`
+  repassam; `POST /mcp/` só se o JSON-RPC for método de leitura ou `tools/call` cujo `name`
+  não contém `put|patch|append|delete|post|create|write|execute|command|move|rename|trash|
+  insert|replace`; `PUT`/`PATCH`/`DELETE` → 403; `/commands/` → 403. **Injeta o Bearer do
+  `:27124`** — o cliente do `:27125` não precisa do segredo. `--selftest` verde.
+- `~/.config/systemd/user/obsidian-ro-proxy.service` (`systemd --user`, **sem `enable`** —
+  boot é Fase 7). `is-active` = active.
+- **Regra:** clientes usam `:27125`. `:27124` fica atrás do proxy. `gerar_obsidian.py`
+  segue a única via de escrita no vault; **P-10** é o backstop.
+
+**Verificação (S7, aceite P6-01):**
+- `curl` autenticado `https://127.0.0.1:27124/` → 200 `{"status":"OK","authenticated":true}`;
+  sem token → **401**. ✅
+- `/mcp/` `initialize` (Accept `application/json, text/event-stream`) → `serverInfo`,
+  protocol `2025-11-25`. ✅
+- **`:27125` (superfície de cliente):** `GET /vault/memoria/obsidian/` sem token → 200, 18
+  itens; `PUT` → **403**, arquivo não criado; `/commands/` → **403**; MCP `tools/call`
+  write (`obsidian_put_content`) → **403**. ✅
+- binds: `ss` → `127.0.0.1:27124` e `127.0.0.1:27125`. ✅
+- token em `~/.config/agata/obsidian.token` chmod 600; `git status` só `.gitignore`;
+  `git grep` do prefixo do token = vazio; `.obsidian/**/data.json` gitignorado. ✅
+- `obsidian-ro-proxy.service` `disabled` (boot = Fase 7). ✅
+- **P6-01 → PASS.** `redesign/obsidian/PLUGIN.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `servidor.py`. Sem `sudo`
+(plugin é userspace). O plugin/token/cert **não** entram no git (gitignore + store local).
+**HD desconectado** — bundles no staging local. Obsidian ficou **de pé** (o Humano já tinha
+o vault registrado).
+
+**Falta / próximo:** **P6-02** — `redesign/obsidian/consulta.py`: recuperação índice-primeiro
+— refs rastreáveis (`(NNN)` + arquivo + linha) pelo `:27125/mcp/` **e** por `query_canon`
+(disco); convergência MCP↔disco; **zero vector DB**. Classe runtime, auto-revisão.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

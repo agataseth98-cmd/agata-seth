@@ -1,7 +1,13 @@
 # P6-01 — instalar/configurar `obsidian-local-rest-api` + subir `:27124/mcp/`
 
-**Status:** ⏳ **PENDE do "vai" do Humano** — INSTALA SOFTWARE (plugin `obsidian-local-rest-api`)
-+ serviço de rede novo (`:27124/mcp/`). P6-00 fez o inventário e o desenho.
+**Status:** ✅ **FEITO — 2026-09-02 ~19:15 (relógio da máquina).** Plugin `obsidian-local-rest-api`
+5.1.0 ("Local REST API with MCP") em `~/agata/.obsidian/plugins/` (gitignorado); config
+`bindingHost 127.0.0.1`, `port 27124`, só HTTPS; `apiKey` gerado pelo plugin, copiado p/
+`~/.config/agata/obsidian.token` (chmod 600, fora do git). **O plugin 5.1.0 NÃO tem
+read-only global** → trava = `redesign/obsidian/ro_proxy.py` (`:27125`, só leitura, injeta o
+token; `PUT`/`PATCH`/`DELETE`/`/commands/`/MCP-write → 403). `obsidian-ro-proxy.service`
+(systemd --user, sem enable). S7: `:27124` autenticado 200 / sem token 401 · `:27125`
+leitura 200 sem token / escrita 403 · binds loopback · token fora do git. Ver `redesign/obsidian/PLUGIN.md`.
 
 **Objetivo:** o vault derivado `memoria/obsidian/` servido por MCP nativo em
 `https://127.0.0.1:27124/mcp/`, bearer token em store local, **read-only**.
