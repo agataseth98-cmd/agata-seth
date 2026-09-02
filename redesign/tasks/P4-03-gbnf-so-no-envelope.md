@@ -1,5 +1,14 @@
 # P4-03 — GBNF só no envelope (cabeçalho Regra 1 / sync: / eco)
 
+**Status:** ✅ **FEITO — 2026-09-02 ~14:05 (relógio da máquina).** `envelope.gbnf` (só
+cabeçalho Regra 1 / `sync:` / eco; `nl ::= [\n]`; `nome` restrito; `campo {2,180}`) +
+`envelope.py` em **2 FASES** (fase 1 grammar → envelope; fase 2 sem grammar → corpo).
+`corpo ::= .*` na mesma gramática **degenerou** o corpo — 2 fases resolveu. **13/13**
+envelopes passam `verificar_cabecalho.py`; corpo não distorcido (palavras 0.93×–0.95×,
+TTR 1.01×–1.08× vs baseline); adversário ("sem envelope") → gramática ainda produz
+envelope válido. `grafo.py::trabalhar --com-envelope` → `verificar` acha cabeçalho OK.
+Ver `redesign/grafo/README.md`.
+
 **Objetivo:** o modelo é forçado por gramática GBNF a emitir o **envelope** bem-formado
 (cabeçalho da Regra 1, linha `sync:`, bloco de eco) — **sem** restringir o corpo da
 resposta (evita o "alignment tax / structure snowballing" da PESQUISA C3).

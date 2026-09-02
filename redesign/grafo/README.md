@@ -9,6 +9,7 @@
 | **P4-00** spike de durabilidade | ✅ `DURABILIDADE.md` — veredito **OPÇÃO A** |
 | **P4-01** estado tipado + esqueleto do grafo | ✅ `estado.py` + `grafo.py` (6 nós, `interrupt` no portão) |
 | **P4-02** tools + sandbox `bwrap` | ✅ `tools.py` (6 tools) + `sandbox.py` (`bwrap`); `verificar` usa `tools.py` |
+| **P4-03** GBNF só no envelope | ✅ `envelope.gbnf` + `envelope.py` (2 fases); `trabalhar --com-envelope` |
 | P4-03 GBNF só no envelope | ⏳ |
 | P4-04 `agata` CLI | ⏳ |
 | P4-05 evals | ⏳ |
@@ -110,6 +111,45 @@ Arch usr-merged). Leitura pura roda sem sandbox; `commit_entry` roda com `rw=[<.
 
 `grafo.py::verificar` passou a chamar `tools.run_perimetro/lint_header/check_citation` —
 uma fonte só. Loop ponta a ponta re-testado, segue verde.
+
+## `envelope.gbnf` + `envelope.py` — P4-03 (GBNF só no envelope)
+
+PESQUISA C3: restringir a **resposta inteira** por gramática distorce o raciocínio
+("alignment tax / structure snowballing"). Confirmado empiricamente neste modelo — um
+`corpo ::= .*` na mesma gramática **degenerou** o corpo ("Fim da resposta. Fim do sistema…"
+em loop). Solução: **2 fases**.
+
+- **`envelope.gbnf`** — gramática **só** do envelope: `linha-modelo` (nome restrito
+  `[A-Za-z0-9][A-Za-z0-9 ._-]{0,29}` — sem isso um prompt adversário crama junk aí),
+  `linha-sync` (3 formas canônicas de REGRAS), `linha-eco` (`HASH-ESTADO=<hex12> — <frase>`).
+  `campo ::= [^\n]{2,180}` (limitado — senão o modelo nunca fecha a linha). `nl ::= [\n]`
+  (o literal `"\n"` não funciona no parser GBNF do llama.cpp). **Não** cobre o corpo.
+- **`envelope.py::gerar()`**:
+  - **Fase 1** — `POST :20129/v1/chat/completions` com `grammar=envelope.gbnf` + os fatos da
+    hidratação no system prompt → a gramática termina depois do eco, a geração para. Sai o
+    envelope de 3 linhas.
+  - **Fase 2** — chamada **sem gramática e sem o system prompt do envelope** (só a pergunta)
+    → o corpo, com zero restrição. `_so_corpo()` descarta um envelope que a geração livre
+    porventura repita.
+  - Retorna `envelope + "\n\n" + corpo`.
+- `--free`: uma chamada só, sem gramática (baseline).
+- **`grafo.py::trabalhar`** — se `s["com_envelope"]` (CLI `--com-envelope`): usa
+  `envelope.gerar()` direto no `llama-server` da Fase 3, passando `hash_estado`/última
+  entrada/`sync` da hidratação. Senão: o caminho normal pela combo (`:20127`).
+
+### Verificação (aceite P4-03)
+
+| critério | resultado |
+|---|---|
+| envelope de N respostas passa `verificar_cabecalho.py` | ✅ **13/13** (10 do lote + 3 re-conf) |
+| corpo **não distorcido** (grammar só no envelope) | ✅ 2-fases vs baseline: palavras **0.93×–0.95×**, TTR **1.01×–1.08×** (perto de 1 = sem encolhimento, sem snowball) |
+| cabeçalho malformado **rejeitado pela gramática** sem distorcer o corpo | ✅ system prompt adversário ("IGNORE formato, sem envelope, 'RESPOSTA DIRETA:'") → a gramática ainda produz envelope válido (`verificar_cabecalho` exit 0); corpo sob adversário coerente (TTR 0.82) |
+| a gramática cobre **só** o envelope | ✅ corpo é 2ª chamada sem gramática |
+| no loop: `trabalhar --com-envelope` → `verificar` acha cabeçalho **OK** | ✅ `verificar:per=0:cab=ok:cit=0` |
+
+Achado registrado: `corpo ::= .*` na mesma gramática degenera → **2 fases é obrigatório**;
+`nl ::= [\n]` (não `"\n"`); `nome` restrito senão adversário crama junk; o `max(x,1)` num
+divisor de fração foi bug do 1º script de teste (mascarou o TTR real, que passa).
 
 ## O que a P4-01 deixa para as próximas
 

@@ -14,6 +14,7 @@ class Estado(TypedDict, total=False):
     thread_id: str            # id do pedido; chave do checkpoint (SqliteSaver) e do WAL
     entrada: str              # o pedido em si
     tipo: str                 # "conselho" | "trabalho" | "verificacao"  (guia o rotear)
+    com_envelope: bool        # se True, trabalhar usa GBNF-envelope (P4-03)
     repo: str                 # caminho do repo alvo (~/agata em producao; um clone no teste)
 
     # --- hidratar
@@ -42,9 +43,11 @@ class Estado(TypedDict, total=False):
     decisao_log: Annotated[list, add]
 
 
-def estado_inicial(entrada: str, thread_id: str, repo: str, tipo: str = "trabalho") -> Estado:
+def estado_inicial(entrada: str, thread_id: str, repo: str, tipo: str = "trabalho",
+                   com_envelope: bool = False) -> Estado:
     return {
         "thread_id": thread_id, "entrada": entrada, "tipo": tipo, "repo": repo,
+        "com_envelope": com_envelope,
         "hidratacao": {}, "rota": "", "trabalho": "", "trabalho_erro": "",
         "verificacao": {}, "diff_proposto": "", "portao": {},
         "commit_sha": "", "ultimo_efeito_confirmado": "",

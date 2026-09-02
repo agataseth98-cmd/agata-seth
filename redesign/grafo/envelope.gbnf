@@ -1,0 +1,29 @@
+# envelope.gbnf -- GBNF SO do envelope (P4-03).
+# Forca a estrutura do cabecalho Regra 1 + linha sync: + bloco eco. O CORPO NAO entra
+# nesta gramatica: a geracao com gramatica PARA depois do eco (2 fases -- ver envelope.py),
+# para nao distorcer o raciocinio do corpo (alignment tax / structure snowballing, PESQUISA C3).
+#
+# Casa com scripts/verificar_cabecalho.py (forma t=<n>):
+#   - `t=<n> (contado no contexto | prefixo compactado | contador mecanico)` colado (janela de 60 chars).
+#   - cita `ultima entrada: (NNN)`.
+# A linha sync: sai numa das 3 formas canonicas de REGRAS.
+#
+# Newline em GBNF: `nl ::= [\n]` (string literal "\n" nao funciona no parser do llama.cpp).
+
+root         ::= linha-modelo nl linha-sync nl linha-eco nl
+
+# nome do modelo: charset restrito e curto -- sem isso um prompt adversario crama junk aqui
+linha-modelo ::= "modelo: " nome " · turno: t=" digitos " (" qualif ")" " · última entrada: (" digitos ")"
+nome         ::= [A-Za-z0-9][A-Za-z0-9 ._-]{0,29}
+qualif       ::= "contado no contexto" | "prefixo compactado" | "contador mecânico"
+
+linha-sync   ::= "sync: " sync-estado " · " campo
+sync-estado  ::= "PASS" | "FALHA" | "não verificado"
+
+linha-eco    ::= "eco: HASH-ESTADO=" hex12 " — " campo
+
+campo        ::= [^\n]{2,180}   # limitado: sem isso o modelo pode nunca fechar a linha
+digitos      ::= [0-9]+
+hex12        ::= hexd hexd hexd hexd hexd hexd hexd hexd hexd hexd hexd hexd
+hexd         ::= [0-9a-f]
+nl           ::= [\n]

@@ -15,6 +15,7 @@ Uso:
     grafo.py resume --thread <id> --repo <dir> [--aprovar | --recusar]
 """
 import json
+import re
 import os
 import subprocess
 import sys
@@ -81,7 +82,24 @@ def rotear(s: Estado) -> dict:
 
 
 def trabalhar(s: Estado) -> dict:
-    """Chama o modelo pelo proxy sanitizador (:20127). Degrada limpo se nao houver modelo."""
+    """Chama o modelo. Se `s["com_envelope"]`, usa envelope.gerar (GBNF so no envelope,
+    2 fases, direto no llama.cpp da Fase 3 -- P4-03). Senao, o proxy sanitizador (:20127)
+    na combo escolhida. Degrada limpo se nao houver modelo."""
+    if s.get("com_envelope"):
+        try:
+            import envelope as _env
+            h = s.get("hidratacao", {})
+            txt = _env.gerar(s["entrada"],
+                             hash_estado=h.get("hash_estado") or "000000000000",
+                             entrada=int(re.search(r"\((\d+)\)", h.get("topo_memorias", "(0)")).group(1) or 0),
+                             sync=(h.get("sync") or "não verificado").replace("sync: ", ""))
+            return {"trabalho": txt, "trabalho_erro": "",
+                    "eventos": [f"trabalhar:envelope-gbnf:{len(txt)}ch"],
+                    "decisao_log": ["modelo respondeu com envelope garantido (GBNF, 2 fases)"]}
+        except Exception as e:  # noqa: BLE001
+            return {"trabalho": "(sem modelo)", "trabalho_erro": f"envelope: {type(e).__name__}: {e}",
+                    "eventos": [f"trabalhar:envelope_falhou:{type(e).__name__}"],
+                    "decisao_log": ["envelope GBNF indisponivel -- segue para verificar/portao"]}
     body = json.dumps({
         "model": s["rota"],
         "messages": [{"role": "user", "content": s["entrada"]}],
@@ -210,11 +228,11 @@ def _cfg(thread_id):
     return {"configurable": {"thread_id": thread_id}}
 
 
-def run(entrada, repo, thread_id, tipo):
+def run(entrada, repo, thread_id, tipo, com_envelope=False):
     DIR_ESTADO.mkdir(parents=True, exist_ok=True)
     graph, cm = build()
     try:
-        out = graph.invoke(estado_inicial(entrada, thread_id, os.path.abspath(repo), tipo),
+        out = graph.invoke(estado_inicial(entrada, thread_id, os.path.abspath(repo), tipo, com_envelope),
                            _cfg(thread_id))
         _print_estado(graph, thread_id, out)
     finally:
@@ -254,7 +272,7 @@ if __name__ == "__main__":
     g = lambda flag, d=None: a[a.index(flag) + 1] if flag in a else d
     if mode == "run":
         run(a[1], g("--repo", str(AGATA)), g("--thread", f"loop-{os.getpid()}"),
-            g("--tipo", "trabalho"))
+            g("--tipo", "trabalho"), "--com-envelope" in a)
     elif mode == "resume":
         resume(g("--thread"), g("--repo", str(AGATA)), "--recusar" not in a)
     else:
