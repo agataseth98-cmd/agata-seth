@@ -9,11 +9,11 @@ sistema — todas são nós/config trocáveis.
 
 | Fase | Objetivo | Entrega | Critério de aceite |
 |---|---|---|---|
-| **0 — Rede de segurança** | congelar estado, montar o sistema de tarefas e a cola de handoff | `git tag pre-redesign` em `main`; backup restic inicial (`~/.hermes`, configs, `models/manifest.json`); `redesign/` com README + CONTINUIDADE + ROADMAP + PESQUISA + STATUS + LOG; **servidor FastMCP 3.0** das ferramentas de Máquina (`git_sync`, `run_perimetro`, `check_citation`, `lint_header`, `query_canon`, `commit_entry`) | restore do restic num scratch reproduz config; MCP responde `run_perimetro` e `check_citation` com o mesmo resultado dos scripts |
+| **0 — Rede de segurança** | congelar estado, montar o sistema de tarefas e a cola de handoff | `git tag pre-redesign` em `main`; backup restic inicial (`~/.hermes`, configs, `models/manifest.json`); `redesign/` com README + CONTINUIDADE + ROADMAP + PESQUISA + STATUS + LOG; **servidor FastMCP 4.0.1** das ferramentas de Máquina — **5** tools read-only: `git_sync`, `run_perimetro`, `check_citation`, `lint_header`, `query_canon` (`commit_entry` foi para a Fase 4 — escreve canon, não é wrapper fino; P0-00) | restore do restic num scratch reproduz config; MCP responde `run_perimetro` e `check_citation` com o mesmo resultado dos scripts |
 | **1 — Router** | OmniRoute como gateway único de modelo | `omniroute` local em `:20128`; provedores: Ollama (local) + pool nuvem (Qwen3.8-Flash-Next, Groq, Cerebras, Gemini-free, GitHub Models, DeepSeek); combos `auto/cheap` + fallback + circuit breaker; sanitização de segredo **antes** da chamada (reusa `PADROES_SEGREDO`); aposenta a rede do `conselho_remoto.py` (mantém a política e o módulo de regex) | um pedido roteia; cai no fallback sob falha forçada; custo logado; segredo plantado é bloqueado antes de sair |
 | **2 — iGPU** | tirar display + STT + embeddings da RTX 4060 | display **pinado** na iGPU (hoje é implícito); OpenVINO runtime; `openvino-whisper.service` (distil-whisper int8, chunked) e `openvino-embeddings.service` (modelo pequeno: bge-small / e5-small via optimum-intel) na iGPU UHD | `nvidia-smi` sem carga de display/STT na 4060; Whisper transcreve em tempo real na iGPU; endpoint de embedding responde |
 | **3 — Modelos** | manifesto + prune + runtime duplo | `models/manifest.json` completo (sha256/origem/Modelfile de cada peso); prune (~140 GB) mantendo: denso 9B (Ollama, fallback testado), MoE 30B-A3B **ou** 3.6-35B-A3B (llama.cpp, ver correção C1), um 4B base (LoRA), `rlm-qwen3-8b-teste`; **llama.cpp** com `--n-cpu-moe` varrido (8→30) exposto ao OmniRoute como 2º backend local | manifesto reconstrói qualquer mantido; `ollama list` + backends batem com o manifesto; MoE roda ≥ ~20 tok/s no llama.cpp |
-| **4 — Grafo** | LangGraph como loop de governança | nós `hidratar → rotear → trabalhar → verificar → portão → registrar+commitar`, estado tipado, `interrupt` no portão; checkpointer configurado **append-only** (event-stream, ideia do dsh); tools Python (wrap dos scripts) + `query_canon`; adapter dsh escrito, `enabled: false` (armado, dormente); **GBNF só no envelope** (cabeçalho Regra 1 / `sync:` / eco — nunca a resposta inteira); `evals/` (reteste de fabricação (138)/(307) + fidelidade de hidratação); execução de tool em sandbox (`bwrap`/`nsjail`); `agata` CLI (`up`/`down`/`status`/`verify`/`commit-entry`/`run`/`logs`) | loop roda ponta a ponta num clone; `verify` e `commit-entry` funcionam com modelos desligados; portão pausa/retoma; grammar rejeita cabeçalho malformado sem distorcer o corpo |
+| **4 — Grafo** | LangGraph como loop de governança | nós `hidratar → rotear → trabalhar → verificar → portão → registrar+commitar`, estado tipado, `interrupt` no portão; **checkpointer/durabilidade decidido pelo spike P4-00** (não pré-comprometido — ver "Correções pós-Fase 0", E2); tools Python (wrap dos scripts) + `query_canon`; adapter dsh escrito, `enabled: false` (armado, dormente); **GBNF só no envelope** (cabeçalho Regra 1 / `sync:` / eco — nunca a resposta inteira); `evals/` (reteste de fabricação (138)/(307) + fidelidade de hidratação); execução de tool em sandbox (`bwrap`/`nsjail`); `agata` CLI (`up`/`down`/`status`/`verify`/`commit-entry`/`run`/`logs`) | loop roda ponta a ponta num clone; `verify` e `commit-entry` funcionam com modelos desligados; portão pausa/retoma; grammar rejeita cabeçalho malformado sem distorcer o corpo |
 | **5 — Spike RLM** | hidratação por consulta, não por injeção | `query_canon` recursivo sobre o canon (`rlms` / `recursive-llm` + índice derivado + embeddings iGPU); A/B contra o `.hermes.md` de ~35k tokens; **conferir a Fronteira de recusas antes** (entrada "RLM self-training" é outra coisa — isto é padrão de inferência, não treino) | RLM iguala ou supera a fidelidade de hidratação a menor custo de token, **ou** é arquivado com os números registrados no LOG |
 | **6 — Obsidian** | superfície de leitura/consulta | `obsidian-local-rest-api` (versão com MCP nativo, ≥ jul/2026) em `:27124/mcp/`, token em store local; serve o vault derivado `memoria/obsidian/` (read-only para modelos — a geração é dona da escrita); loop local segue lendo os `.md` direto do disco (sem depender do Obsidian aberto); consolidação noturna vira flow do grafo (orientar → juntar → consolidar → podar) | cliente MCP consulta o vault via `:27124/mcp/`; recuperação índice-primeiro devolve refs rastreáveis; **zero vector DB** introduzido |
 | **7 — Liga/desliga + backup + verificação** | um botão; todo recurso com backup verificável | `agata.target` (systemd) puxando todas as units; hook Feral GameMode `~/.config/gamemode.ini` `[custom] start=/usr/local/bin/agata down` / `end=/usr/local/bin/agata up`; `ExecStop` **drena** (checkpoint do run em curso, nunca corta no meio de um commit); `OLLAMA_KEEP_ALIVE=30s`; repo **restic** no HD externo + `agata-backup-artifacts.timer` (roda quando o HD monta, senão marcador pendente — padrão do bundle atual); bundle de segredos cifrado (`cifrar_env.sh`); **controle P-12** no `perimetro.sh` (recurso no manifesto sem backup < N dias = FALHA); OpenTelemetry só para coletor local (schema GenAI ainda instável — sem dashboard pesado) | `agata down` libera a VRAM da 4060 no meio de uma sessão com o checkpoint intacto; lançar jogo por `gamemoderun` para o Agata sozinho e retoma ao fechar; P-12 fica vermelho com backup velho e verde com fresco; restore completo do HD num scratch reproduz config + estado de runtime |
@@ -27,3 +27,32 @@ pode entrar em paralelo com a Fase 3).
 
 Cada fase pede o "vai" do Humano antes de começar. Dentro da fase, os arquivos-tarefa
 em `redesign/tasks/` guiam o passo a passo.
+
+## Correções pós-Fase 0 (AUDITORIA-01 + Conselho 01, 01/09/2026)
+
+- **E1 — MCP transporte é stateless (spec MCP 2026-07-28); FastMCP em 4.x.** Premissa a
+  respeitar nas **Fases 4 e 6**: nenhum estado de execução, autorização ou continuidade
+  mora numa sessão MCP implícita — mora no grafo (estado tipado + checkpointer), no
+  armazenamento de estado, ou no cliente. Servidores FastMCP 3 sobem sem mudança (o P0-02
+  roda em 4.0.1 e passa). PESQUISA.md ainda descreve FastMCP 3.x — atualizar quando a fase
+  chegar. `requisitos.txt` do MCP fica pinado (`fastmcp==4.0.1`), sobe de propósito.
+- **E2 — "checkpoint ≠ execução durável".** A entrega da **Fase 4** dizia checkpointer
+  "append-only estilo dsh" como decisão de desenho. Vira **tarefa-spike P4-00**, ANTES de
+  comprometer a arquitetura do loop. Aceite do P4-00: iniciar uma execução, interromper o
+  processo em pontos definidos, retomar e provar — (a) nenhum commit/escrita duplicado;
+  (b) efeito externo idempotente ou registrado como pendente; (c) o estado retomado
+  explica qual foi o último efeito confirmado; (d) o log append-only reconstrói a decisão.
+  O resultado decide entre *checkpointer LangGraph + camada externa mínima* ou *camada de
+  durabilidade dedicada*. **Não** pré-comprometer Temporal — o spike decide.
+- **E3 — RLM (Fase 5), sem urgência:** somar às fontes `alexzhang13/rlm` (lib do autor do
+  paper, vários sandboxes) e `recursive-lm` (PyPI, fev/2026). Paper 2512.24601 revisado
+  mai/2026.
+
+## Verificação e revisão (AUDITORIA-01 T1/T2, H1)
+
+- **Antes de executar:** checagem mecânica de schema em toda tarefa; revisão de plano por
+  2º par de olhos só quando instala pacote / toca runtime / escreve fora de `redesign/` /
+  mexe em rede / cria credencial / muda garantia (`CONTINUIDADE.md` §7).
+- **Depois de commitar:** re-rodar o `Aceite` da tarefa a partir de estado limpo, anotar
+  PASS/FALHA no `LOG.md` (S7 mínimo).
+- Arquivo-tarefa ganha o campo **Verificação independente** no schema.

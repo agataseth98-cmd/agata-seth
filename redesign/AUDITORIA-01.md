@@ -160,9 +160,29 @@ revisado mai/2026. Não urgente (Fase 5 distante).
 
 ---
 
+## Resolução (01/09/2026 ~23:05 -03)
+
+O Humano fixou: **ele decide; Claude aconselha + executa; sem menu de decisão quando não
+há risco ao sistema — escolher pelo princípio-espelho e executar.** As pendências acima
+foram então resolvidas assim (nenhuma expõe o sistema a risco):
+
+| Item | Decisão | Onde entrou |
+|---|---|---|
+| **H1** verificação | **S7 mínimo, apoiado na espinha:** após cada commit, re-rodar o `Aceite` da tarefa a partir de estado limpo, anotar PASS/FALHA no `LOG.md`. Não depende de "outro modelo" — depende de re-derivar dos scripts. | `CONTINUIDADE.md` §7 · `ROADMAP.md` "Verificação e revisão" |
+| **H2** âncora | `redesign/ANCORA.md` criado, atualizado à mão por quem commita (piso = commit anterior; referência viva = `git rev-parse origin/redesign`). **Promoção a hook = mudança de espinha → pende do Humano** (não fiz). | `redesign/ANCORA.md` · `CONTINUIDADE.md` §8 |
+| **H3** pointer em `main` | **Não.** A invariante "main só muda na Fase 8" vence; o branch + `STATUS.md` + `ANCORA.md` bastam. | — (registrado aqui) |
+| **H4** divergência sintética | **Retirada.** Fallbacks só afinados, não são co-executores — não há divergência entre executores a exercitar. Fricção-doutrina fica no canon (Regra 8), onde já funciona. | `STATUS.md` "Papéis" |
+| **T1** campo de verificação | Aplicado ao schema. | `CONTINUIDADE.md` §8 |
+| **T2** plano auditado antes | Aplicado com **tier de risco**: schema-check mecânico em toda tarefa; revisão por 2º par de olhos só p/ instala-pacote / runtime / escreve-fora / rede / credencial / garantia. | `CONTINUIDADE.md` §7 |
+| **T3** posse | **Documentada dormente** (1 executor ativo, sem corrida). Forma "confirmada por commit remoto" escrita para o caso de um fallback ser ativado. | `CONTINUIDADE.md` §6 |
+| **T4** doc do executor primário | Criado. | `redesign/CLAUDE-NA-MAQUINA.md` |
+| **E1** MCP stateless | Anotado nas Fases 4/6; `fastmcp` pinado; ROADMAP "Correções pós-Fase 0". | `ROADMAP.md` · `mcp/requisitos.txt` |
+| **E2** durabilidade | Vira tarefa-spike **P4-00** com o teste matar-e-retomar como aceite; Fase 4 não pré-compromete checkpointer nem Temporal. | `ROADMAP.md` (Fase 4 + "Correções pós-Fase 0") |
+
+Conselho 01: `gpt-5.6-terra` respondeu (convergência, achados de P1 aplicados ao P0-02).
+Codex/Qwen não são gate — se responderem, o parecer entra como afinação, não trava.
+
 ## Próximo
 
-1. Humano decide H1–H4.
-2. Conselho responde ao pacote `redesign/CONSELHO-01-relay.md` (verificação do P0-02;
-   parecer T2/T3; peso do delta E1/E2 nas Fases 4/6).
-3. Com H1 + parecer: aplicar T1/T4 (já) e T2/T3 (se aprovados); então P0-03.
+- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 no schema (já com o campo T1).
+- **Quando o HD montar:** P0-01 passos 3-4 + aceite de restore do P0-02 → Fase 0 fechada.

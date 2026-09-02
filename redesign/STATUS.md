@@ -1,8 +1,9 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 0 — rede de segurança e sistema de tarefas**
-ATUALIZADO: 2026-09-01 ~23:02 -03 · por: sessão Claude (Claude Code, na Máquina)
-ÂNCORA (leve, manual até H2): esta atualização foi escrita sobre `redesign` @ **`ca6f76d`**
+ATUALIZADO: 2026-09-01 ~23:08 -03 · por: sessão Claude (Claude Code, na Máquina)
+ÂNCORA (leve, manual): esta atualização foi escrita sobre `redesign` @ **`e4398e2`**; ver
+`redesign/ANCORA.md` para os refs esperados e a referência viva.
 e cria o commit seguinte. Referência viva para os pares = `git rev-parse origin/redesign`
 (ou o topo do `git log` do branch no GitHub); esta linha dá só o piso conhecido, um commit
 atrás — mesma defasagem da âncora-SHA do canon.
@@ -66,19 +67,20 @@ nesta fase (ver LOG 01/09 ~17:10).
     P2: T2 (tier de risco) e T3 (posse confirmada por commit remoto; TTL = recuperação de
     abandono) — convergência de 2 modelos. P3: E1 anotar não re-desenhar; E2 spike de
     durabilidade antes do desenho da Fase 4.
-  - ⏳ **aguardando Codex e Qwen Coder** (P1 verificação + P2/P3).
+  - Codex/Qwen **não são gate** — se responderem, entra como afinação, não trava.
+- **AUDITORIA-01 resolvida** (01/09 ~23:05) pelo Humano: "ele decide, Claude aconselha+
+  executa, sem menu sem risco — escolher pelo espelho". H1 = S7 mínimo (re-rodar `Aceite`
+  de estado limpo, PASS/FALHA no LOG); H2 = `redesign/ANCORA.md` manual (hook pende do
+  Humano — mudança de espinha); H3 = não (invariante vence); H4 = retirada; T1/T2/T4
+  aplicados; T3 dormente; E1/E2 no ROADMAP + spike P4-00. Ver `AUDITORIA-01.md` §Resolução.
 
-## Próximo (Fase 0 — aguardando as decisões do Humano; ver PLANO reapresentado no chat, 01/09 ~23h)
+## Próximo (Fase 0)
 
-- **Humano decide:** H1 (verificação sob exceção) · H2 (âncora de coordenação do branch) ·
-  H3 (pointer em `main`) · H4 **retirada** (fallbacks só afinados — não há divergência
-  entre executores a exercitar) · T1/T4 (aplicáveis já) · T2 (plano auditado, tier de
-  risco) · T3 (posse — dormante com 1 executor ativo) · E1/E2 (linhas no ROADMAP + spike P4-00).
-- **Depois do "vai":** aplicar T1/T4 + E1/E2 (docs); H2 se aprovado (hook + `ANCORA.md`);
-  então **P0-03** (arquivos-tarefa das Fases 1-2).
-- **Quando o HD montar:** P0-01 passos 3-4 (repo restic + 1º snapshot) + **P0-02 aceite de
-  restore** (restore num scratch reproduz config — fecha o critério da Fase 0).
-- **Fallbacks:** manter afinados (reidratar do branch a pedido do Humano). Não são gate.
+- **P0-03** — escrever os arquivos-tarefa das Fases 1 e 2 no schema (já com o campo
+  "Verificação independente"). **Em andamento a seguir.**
+- **Quando o HD `AgataBkup01` montar:** P0-01 passos 3-4 (repo restic + 1º snapshot) +
+  **P0-02 aceite de restore** (restore num scratch reproduz config) → **fecha a Fase 0**.
+- Fallbacks: manter afinados (reidratar do branch a pedido do Humano). Não são gate.
 
 ## Bloqueios
 

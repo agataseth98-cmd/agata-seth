@@ -335,3 +335,54 @@ se T2/T3 (convergência de 2 modelos) já viram norma ou esperam os outros 2; ap
 do `fastmcp` + as linhas de premissa MCP-stateless nas Fases 4/6 do ROADMAP; P0-03.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-01 ~23:08 -03 · sessão Claude (Claude Code, na Máquina) — papéis + AUDITORIA-01 resolvida
+
+**Humano fixou 2 coisas nesta rodada:**
+1. "Quem decide sou eu, você é meu conselheiro e primeiro executor; os fallbacks devem
+   estar apenas afinados, nada mais." → seção "Papéis" no `STATUS.md` (commit anterior
+   `e4398e2`); `CONTINUIDADE.md` §6 reescrita.
+2. "Não me faça mais essa pergunta [menu de decisão] a menos que o sistema esteja exposto
+   a risco; caso não, opte pelo que segue mais próximo o espelho do sistema." → salvo na
+   memória do Claude Code (`feedback_agata_decide_por_espelho`). Daqui pra frente:
+   decisão de doutrina/processo/plano sem risco = escolho pelo princípio-espelho (topo do
+   ROADMAP) e executo, registrando o porquê; pergunto só em risco (destrutivo, segredo,
+   `main`/canon/Hermes/Ollama, quebrar a espinha).
+
+**AUDITORIA-01 resolvida assim (nenhum item expõe o sistema a risco):**
+- **H1** — S7 mínimo apoiado na espinha: após cada commit, re-rodar o `Aceite` da tarefa
+  de estado limpo, PASS/FALHA no LOG. Não depende de "outro modelo".
+- **H2** — `redesign/ANCORA.md` criado, atualizado à mão (piso = commit anterior;
+  referência viva = `git rev-parse origin/redesign`). **Promoção a hook NÃO feita** —
+  mexer na cadeia de hooks de todo commit é mudança de espinha, pende do Humano.
+- **H3** — não. A invariante "main só muda na Fase 8" vence; branch + STATUS + ANCORA bastam.
+- **H4** — retirada. Fallbacks só afinados ⇒ sem divergência entre executores a exercitar.
+- **T1** — campo "Verificação independente" no schema de tarefa (`CONTINUIDADE.md` §8).
+- **T2** — plano auditado antes de executar, **tier de risco**: schema-check mecânico em
+  toda tarefa; revisão por 2º par de olhos só p/ instala-pacote / runtime / escreve-fora /
+  rede / credencial / garantia (`CONTINUIDADE.md` §7).
+- **T3** — documentada dormente (1 executor ativo). Forma "confirmada por commit remoto"
+  escrita para o caso de um fallback ser ativado (`CONTINUIDADE.md` §6).
+- **T4** — `redesign/CLAUDE-NA-MAQUINA.md` criado (executor primário com shell: o que faz
+  direto, o que mostra sozinho, quando para, atribuição de commit).
+- **E1** — `ROADMAP.md`: seção "Correções pós-Fase 0"; premissa MCP-stateless nas Fases
+  4/6; célula da Fase 0 corrigida (FastMCP 4.0.1, 5 tools, `commit_entry` → Fase 4);
+  `mcp/requisitos.txt` já pinado `fastmcp==4.0.1`.
+- **E2** — `ROADMAP.md`: decisão do checkpointer da Fase 4 vira **tarefa-spike P4-00**
+  (aceite: matar processo / retomar / provar sem commit duplicado + efeito externo
+  idempotente-ou-pendente + estado explica último efeito + log reconstrói a decisão);
+  Fase 4 não pré-compromete Temporal.
+
+**Arquivos tocados:** `CONTINUIDADE.md`, `ROADMAP.md`, `STATUS.md`, `AUDITORIA-01.md`
+(§Resolução), `LOG.md`; novos `redesign/ANCORA.md`, `redesign/CLAUDE-NA-MAQUINA.md`.
+**Não tocado:** `main`, canon, Hermes, Ollama, `scripts/`, hooks, `servidor.py`.
+
+**Verificação:** doc-only, sem `Aceite` executável; `bash scripts/perimetro.sh` roda no
+pre-commit (tem que sair verde).
+
+**Falta / próximo:** **P0-03** (arquivos-tarefa das Fases 1-2) — começa a seguir. HD para
+P0-01 passos 3-4 + aceite de restore do P0-02.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -127,26 +127,60 @@ Ou `printf '%s\n' 'linha1' 'linha2' > arquivo`. Nunca `echo -e`.
 
 ---
 
-## 6. Divisão entre executores
+## 6. Papéis e divisão
 
-Primário: **sessão Claude**. Fallback 1: **Codex**. Fallback 2: **Qwen Coder**.
+**Fixado pelo Humano, 01/09/2026:**
+- **O Humano decide.** Sozinho. Nenhum modelo co-decide.
+- **Claude (sessão na Máquina) = conselheiro + primeiro executor.** Aconselha com
+  recomendação explícita e executa. Em decisão de doutrina/processo/plano **sem risco ao
+  sistema**, não abre menu: escolhe pelo **princípio-espelho** (topo do `ROADMAP.md` — a
+  espinha determinística é o sistema; manter a espinha mínima e verificável; preservar as
+  invariantes, ex.: "main só muda na Fase 8") e executa, registrando a escolha e o porquê
+  no `LOG.md`. Pergunta só quando há risco: destrutivo, segredo, mudança em `main`/canon/
+  Hermes/Ollama, ou algo que possa quebrar a espinha (ex.: a cadeia de hooks de todo commit).
+- **Codex, Qwen Coder = executores de reserva, apenas AFINADOS.** Reidratam do branch a
+  pedido do Humano, ficam no HEAD do momento. **Não** são conselheiros nem gate.
+- **`gpt-5.6-terra` = auditoria pontual** que o Humano aciona. Útil, não trava o plano.
 
-- **Um de cada vez.** Quem assume escreve em `redesign/STATUS.md`, no "Quadro de posse",
-  uma linha: `EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>`.
-- Ao terminar a tarefa, troca para `FEITO: <tarefa> · <executor> · <data>` e registra em
-  `redesign/LOG.md`.
-- Se você vê uma tarefa `EM ANDAMENTO` por outro há < 24 h, deixe quieto e pegue a próxima.
-- Divergência de opinião entre executores sobre uma decisão de design: **não resolve por
-  quem fala mais**. Escreve as duas posições em `redesign/LOG.md` e sobe para o Humano.
+**Posse (dormante enquanto só há 1 executor ativo — T3 da AUDITORIA-01):** se um fallback
+for ativado, quem assume grava em `redesign/STATUS.md` "Quadro de posse" a linha
+`EM ANDAMENTO: <tarefa> · <executor> · <AAAA-MM-DD HH:MM -03>`, **commita e empurra**, e
+só age depois de confirmar que o remoto aponta para o commit que contém a posse. Ao
+terminar: `FEITO: …`, registra no `LOG.md`, commita+empurra. Posse alheia com < 24 h: não
+toca. Divergência de opinião: escreve as duas posições no `LOG.md` e sobe para o Humano
+(que arbitra — Regra 8 / REGRAS "O Conselho").
 
 ---
 
-## 7. Fim de cada sessão de trabalho — obrigatório
+## 7. Antes de executar / ao fim de cada sessão
 
-1. Atualize `redesign/STATUS.md`: `FASE ATUAL`, quadro de posse, "Feito", "Próximo", "Bloqueios".
-2. Acrescente uma entrada em `redesign/LOG.md` (**append-only**, mais recente no fim):
-   data-hora `-03`, executor, o que foi feito, o que falta, bloqueios, `HEAD` no fim.
-3. Commit no branch `redesign`. Peça ao Humano rodar:
+### Antes de executar uma tarefa — revisão de plano com tier de risco (T2 da AUDITORIA-01)
+
+1. **Toda tarefa:** checagem mecânica curta do arquivo-tarefa — schema completo
+   (Objetivo…Registro), pré-requisitos `FEITO`, caminhos exatos, `Aceite` checável,
+   `Rollback` real, invariantes respeitadas. É legibilidade, é barato, não bloqueia.
+2. **Só quando a tarefa instala pacote, toca runtime/systemd/modelos, escreve fora de
+   `redesign/`, mexe em rede, cria credencial, ou muda uma garantia:** revisão do plano
+   por um segundo par de olhos antes de qualquer passo — um fallback afinado, o Humano, ou
+   `gpt-5.6-terra`. Três resultados: `pronto` · `ajustes exigidos` · `lacuna`. Não
+   reescreve a tarefa inteira.
+
+### Verificação depois de executar (S7 mínimo — H1 da AUDITORIA-01)
+
+Depois do commit de uma tarefa, **re-rodar o `Aceite` dela a partir de estado limpo** (não
+da memória de já ter feito) e anotar `PASS`/`FALHA` + o comando no `LOG.md`. É verificação
+apoiada na espinha determinística, não em opinião. Se um fallback estiver disponível, ele
+faz; senão, o próprio executor re-deriva.
+
+### Fim de sessão — obrigatório
+
+1. Atualize `redesign/STATUS.md`: `FASE ATUAL`, `ATUALIZADO`, linha ÂNCORA, papéis se
+   mudaram, "Feito", "Próximo", "Bloqueios", "Quadro de posse".
+2. Atualize `redesign/ANCORA.md` (HEAD do commit anterior + refs esperados).
+3. Acrescente uma entrada em `redesign/LOG.md` (**append-only**, mais recente no fim):
+   data-hora `-03`, executor, o que foi feito, verificação (PASS/FALHA), o que falta,
+   bloqueios, `HEAD` no fim.
+4. Commit no branch `redesign`:
    ```fish
    cd $HOME/agata
    git add -A redesign
@@ -154,8 +188,7 @@ Primário: **sessão Claude**. Fallback 1: **Codex**. Fallback 2: **Qwen Coder**
    git push origin redesign
    git rev-parse --short HEAD
    ```
-   e confirme o `HEAD` na saída.
-4. **Nunca deixe estado só no chat.** Se não está no repo, não aconteceu.
+5. **Nunca deixe estado só no chat.** Se não está no repo, não aconteceu.
 
 ---
 
@@ -169,12 +202,18 @@ Primário: **sessão Claude**. Fallback 1: **Codex**. Fallback 2: **Qwen Coder**
 - `redesign/LOG.md` — histórico append-only do redesenho.
 - `redesign/tasks/` — arquivos-tarefa. Schema fixo:
   ```
-  Objetivo        — uma frase
-  Pré-requisitos  — IDs de tarefas que têm que estar FEITO
-  Arquivos        — caminhos exatos que a tarefa toca
-  Passos          — blocos fish numerados, copiáveis
-  Aceite          — comando que sai 0 / condição checável
-  Rollback        — o revert exato
-  Registro        — linha p/ STATUS.md + o que anotar no LOG.md
+  Objetivo                 — uma frase
+  Pré-requisitos           — IDs de tarefas que têm que estar FEITO
+  Arquivos                 — caminhos exatos que a tarefa toca
+  Passos                   — blocos fish numerados, copiáveis
+  Aceite                   — comando que sai 0 / condição checável
+  Verificação independente — quem confere, o quê, como (comando/condição), resultado  (T1)
+  Rollback                 — o revert exato
+  Registro                 — linha p/ STATUS.md + o que anotar no LOG.md
   ```
+- `redesign/ANCORA.md` — HEAD do commit anterior + refs esperados; a referência de
+  reidratação para os pares (não hardcodar HEAD em relay). `pre-redesign` é tag anotada:
+  usar `pre-redesign^{commit}`.
+- `redesign/CLAUDE-NA-MAQUINA.md` — como opera o executor primário (tem shell), o que
+  mostra sozinho, quando para.
 - Canon (só leitura, não muda até a Fase 8): `REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md` em `main`.
