@@ -2889,3 +2889,102 @@ GPG) · aplicação real dos 2 `.diff` em `scripts/*` (Fase 8, ou "vai"). Depois
 revertido só para o teste), `.githooks/*`. Sem `sudo`. Nada instalado.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 09:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · P7-02 replanejado — NÃO Feral GameMode (conflito com o ananicy-cpp do CachyOS); wrapper `agata-jogo` + respostas ao Humano
+
+**Ordem do Humano:** "vamos fazer tudo, só me chamar para o essencial/risco"; e antes:
+"o CachyOS já tem seu próprio gamemode, pesquise conflitos" + "as atualizações do CachyOS
+não vão remover as alterações na máquina local?".
+
+### Pesquisa — GameMode vs. CachyOS (medido na Máquina + wiki CachyOS)
+
+- `ananicy-cpp` **ativo** nesta máquina (`systemctl is-active` = active) + `cachyos-ananicy-rules`
+  1:1.1.48 — renice/ioclass automático por regra, inclui regras de Games (`wine_proton`,
+  `linux-native`, `wineserver`).
+- **Feral GameMode também faz renice** → briga pelo mesmo processo. A wiki do CachyOS
+  (`wiki.cachyos.org/configuration/gaming/`) **diz para não usar Feral GameMode** por isso.
+- Caminho oficial do CachyOS: **`game-performance`** (script do pacote `cachyos-settings`,
+  já em `/usr/bin/game-performance`). É um prefixo de lançamento: `systemd-inhibit ...
+  powerprofilesctl launch -p performance -- "$@"` — põe o `power-profiles-daemon` (ativo,
+  perfis performance/balanced/power-saver) em `performance` pelo tempo do jogo, **sem
+  renice**, sem daemon novo. Sem hooks `[custom]`.
+- `gamemode` existe nos repos (`extra/gamemode 1.8.2-3`, `cachyos-extra-v3/gamemode 1.8.2-3.1`)
+  — não é AUR — mas instalá-lo contraria a distro. `cachyos-gaming-meta` **não** depende de
+  `gamemode` (só proton/wine/vulkan/media libs). `gamemoderun`/`gamemoded` não existem aqui.
+
+### Decisão (princípio-espelho — nó determinístico nosso, sem pacote em conflito, sem sudo)
+
+O hook do P7-02 vira **`redesign/systemd/agata-jogo`** (fonte versionada) → instalado em
+**`~/.local/bin/agata-jogo`** (`install -Dm755`, `~/.local/bin` já no PATH). Ordem:
+1. `systemctl --user stop agata.target` — o `agata-drain` drena o WAL (não corta commit),
+   para os 5 + o MoE :20129, libera a VRAM.
+2. `ollama stop` de cada modelo carregado no Ollama de **produção** (:11434) — sem sudo,
+   sem tocar o `ollama.service`, só descarrega da VRAM.
+3. roda o jogo via `game-performance` (ou direto se ele sumir).
+4. `trap _agata_up EXIT` (+ traps de INT/TERM que forçam exit) → `systemctl --user start
+   agata.target` **sempre**, inclusive crash/Ctrl-C do jogo.
+
+**Teste (PASS, 03/09 ~08:56):** `agata-jogo sh -c 'echo ...; sleep 3; echo ...'` →
+"parando agata.target" → "lancando via game-performance" → jogo fake 3 s → ao sair, os 6
+membros voltaram `active`; após ~8 s as 5 portas UP (:20127/:20128/:20130/:20134/:27125),
+whisper e embeddings `/health` 200, 4060 em **56 MiB / 0 % / 1,77 W**. `git status` limpo
+fora dos arquivos desta entrada.
+
+**`gamemode.ini.exemplo` removido** de `redesign/systemd/` (obsoleto). `P7-02-*.md` e
+`P7-02-RUNBOOK.md` reescritos: Bloco A (instalar GameMode) descartado; Bloco B
+(`OLLAMA_KEEP_ALIVE=30s`, 1 sudo, `ollama.service` de produção) **rebaixado a opcional** —
+o `agata-jogo` já faz `ollama stop` no start do jogo, então não é mais necessário para o
+aceite; continua bom para o caso geral "Ollama ocioso não deve acampar na VRAM".
+
+**Falta de P7-02 (Humano, GUI, uma vez cada):** `agata-jogo %command%` nas Opções de
+inicialização do Steam; `agata-jogo` como "Command prefix" no Lutris; "Wrapper command" no
+Heroic. E, quando tiver sudo à mão e quiser, o Bloco B opcional.
+
+### Resposta — atualizações do CachyOS NÃO removem o que fizemos
+
+Conferido na Máquina, recurso por recurso (`pacman -Qo`):
+
+| o que mudamos | onde vive | `pacman -Syu` mexe? |
+|---|---|---|
+| `omniroute*.service`, `openvino-*.service`, `obsidian-ro-proxy.service`, `agata.target`, `agata-drain.service` + drop-ins | `~/.config/systemd/user/` | **Nunca.** `pacman -Qo` de cada um: "Nenhum pacote possui". São arquivos do usuário. |
+| os 3 edits das unidades base (fix do ciclo, chat 5) | idem | **Nunca.** Mesmo motivo. |
+| `ollama.service` override | `/etc/systemd/system/ollama.service.d/override.conf` | **Não.** Drop-in do admin; o pacote `ollama` só possui `/usr/lib/systemd/system/ollama.service`. Upgrade do `ollama` troca a unit base, o drop-in sobrevive (é o propósito do drop-in). |
+| `omniroute` (npm), OpenVINO runtime (pip em `redesign/igpu/.venv`), GGUF em `~/.cache/`, plugin Obsidian em `~/agata/.obsidian/` | fora do pacman | **Nunca.** |
+| `agata-jogo` | `~/.local/bin/` | **Nunca.** |
+
+O que um update **pode** fazer: (a) **subir a versão** de pacotes que usamos —
+`llama-cpp 0.3.0`, `ggml-cuda 0.22.0` (ambos `cachyos-extra-v3`), `power-profiles-daemon`,
+`ananicy-cpp`, o kernel `linux-cachyos`. É bump de versão, não remoção da nossa config;
+comportamento pode mudar (ex.: flag de CLI do `llama-server`), por isso o manifesto fixa o
+GGUF por sha256 e os serviços são re-deriváveis — vale um S7 depois de update grande, não é
+risco. (b) `.pacnew` para arquivos de `/etc` que o usuário editou — o pacman **mantém a
+versão do usuário** e larga o novo default como `X.pacnew` ao lado (já há 13 `.pacnew` nesta
+máquina de updates passados — nenhum nosso; drop-ins nunca geram `.pacnew`).
+
+### Observações (não é meu, não toquei)
+
+- **`~/agata/INICIO.md`** (0 byte) apareceu na raiz do repo às 08:48, criado pelo
+  `scripts/gerar_obsidian.py` (linha 487) que o `post-commit` roda. É wikilink-alvo vazio
+  já documentado (`redesign/obsidian/INVENTARIO.md:24` cita "MEMÓRIAS"). Untracked, **não**
+  ignorado, **não** commitado (uso `git add redesign` escopado). Fica anotado — o gerador
+  deveria escrever em `memoria/obsidian/`, não na raiz.
+- `/etc/systemd/system/ollama.service.d/.#override.conf...` — arquivo de lock/`.save` de
+  editor (Emacs) de **03/jun**, root. Inofensivo (systemd só lê `*.conf`), mas sujeira;
+  limpar precisa de root → não toquei.
+
+**Arquivos:** novo `redesign/systemd/agata-jogo` (+ cópia em `~/.local/bin/`); removido
+`redesign/systemd/gamemode.ini.exemplo`; `redesign/tasks/P7-02-gamemode-e-ollama-keepalive.md`
+e `P7-02-RUNBOOK.md` reescritos; `redesign/systemd/README.md` (linha da tabela);
+`STATUS.md`, `ANCORA.md`, `LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`.
+Sem `sudo`. Nada instalado via pacote.
+
+**Estado da Fase 7:** P7-00 ✅ · P7-01 ✅ (reboot confirmado) · P7-03 backup ✅ + régua P-12 ✅ ·
+**P7-02 hook ✅** (falta fiar nos lançadores — Humano). Falta: `cifrar_env.sh` (Humano,
+prompt GPG) · aplicar os 2 `.diff` em `scripts/*` = Fase 8. Depois: **Fase 8**.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

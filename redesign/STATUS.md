@@ -1,15 +1,17 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 ✅ · **P7-01 ✅** (enable + regressão de boot corrigida + **reboot real confirmado 03/09**) · **P7-03 passada de backup ✅ + régua P-12 aprovada ✅**; falta: P7-02 (2 sudo), `cifrar_env.sh` (Humano), aplicar os 2 `.diff` em `scripts/*` (Fase 8)). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-03 08:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — reboot 02→03/09 confirmou o P7-01 (boot 07:06, `journalctl -b 0` sem
-"ordering cycle", 5 membros `active`, `default.target.wants/` só com `agata.target`). Humano
-aprovou a régua do P-12 (`APROVADO-p12-backup-verificavel`); régua reafinada por ordem dele:
-`qwen3-30b-a3b` AVISO → ISENTO (público + `blob_sha256` fixado no manifesto — o próprio
-manifesto diz "não precisa de snapshot"). `.diff` reverificado (`git apply` + `bash -n` OK).
-_(entrada anterior 08:35: HD montado; passada de backup do P7-03 — 5 recursos com snapshot,
-`restic check` verde, restore byte a byte OK, `p12-cobertura.json` semeado.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`23a840c`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 ✅ · **P7-01 ✅** (enable + regressão de boot corrigida + reboot real confirmado 03/09) · **P7-03 passada de backup ✅ + régua P-12 aprovada ✅** · **P7-02 hook ✅** (`agata-jogo`, testado); falta: fiar `agata-jogo` nos lançadores (Humano, GUI), `cifrar_env.sh` (Humano, prompt GPG), aplicar os 2 `.diff` em `scripts/*` (Fase 8)). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-03 09:00 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — P7-02 replanejado: **NÃO** instalar Feral GameMode (o CachyOS roda
+`ananicy-cpp`, GameMode brigaria — wiki CachyOS desaconselha). Hook virou o wrapper
+`redesign/systemd/agata-jogo` → `~/.local/bin/agata-jogo` (sem sudo): para `agata.target` +
+`ollama stop` dos modelos ativos → roda o jogo via `game-performance` (wrapper oficial do
+CachyOS) → `trap EXIT` re-sobe. Testado (PASS). `OLLAMA_KEEP_ALIVE` (1 sudo) rebaixado a
+opcional. Respondido ao Humano: `pacman -Syu` **não** remove nossa config (tudo em
+`~/.config`, `~/.local`, `~/.cache`, venv — nada é de pacote; `pacman -Qo` confirma).
+_(entradas anteriores 08:35/08:50: passada de backup do P7-03; reboot confirmou o P7-01;
+régua P-12 aprovada + `qwen3-30b-a3b` → ISENTO.)_
+ÂNCORA (leve, manual): sobre `redesign` @ **`d4ad12a`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -33,7 +35,7 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 passada de backup FEITA + régua P-12 aprovada · falta: P7-02 (2 sudo) + `cifrar_env` (Humano) + aplicar `.diff` em `scripts/*` (Fase 8):**
+**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 passada de backup FEITA + régua P-12 aprovada · P7-02 hook FEITO (`agata-jogo`) · falta: fiar `agata-jogo` nos lançadores + `cifrar_env` (Humano) + aplicar `.diff` em `scripts/*` (Fase 8):**
 - **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
   + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
   `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`
@@ -52,10 +54,16 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
     **Reboot real (chat 6, 03/09 boot 07:06):** `journalctl --user -b 0` e `journalctl -b 0`
     sem "ordering cycle"; `agata.target` `enabled`+`active` + 5 membros `active`;
     `default.target.wants/` só com `agata.target`. **P7-01 FECHADO.**
-- **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
-  + drop-in em `ollama.service`, ambos `sudo`). **Runbook pronto:** `redesign/tasks/P7-02-RUNBOOK.md`
-  (blocos `sudo` prontos + pré-checagens de 02/09 ~22:05: `gamemode` não instalado,
-  `ollama.service` sem `OLLAMA_KEEP_ALIVE`, `gamemode.ini.exemplo` já correto).
+- **P7-02** hook "jogo liga/desliga o Agata" — **hook FEITO (chat 6, 03/09), sem sudo.**
+  **NÃO** Feral GameMode: o CachyOS roda `ananicy-cpp` (renice automático) e GameMode
+  brigaria com ele — a wiki do CachyOS desaconselha; o caminho da distro é `game-performance`.
+  Wrapper `redesign/systemd/agata-jogo` → `~/.local/bin/agata-jogo`: `stop agata.target`
+  (drena) + `ollama stop` dos modelos ativos → jogo via `game-performance` → `trap EXIT`
+  re-sobe. **Testado PASS** (03/09 ~08:56: para/re-sobe, 5 portas UP, 4060 56 MiB).
+  **Falta (Humano):** pôr `agata-jogo %command%` no Steam / "Command prefix" no Lutris /
+  "Wrapper" no Heroic. **Opcional (1 sudo):** `OLLAMA_KEEP_ALIVE=30s` em `ollama.service`
+  (`P7-02-RUNBOOK.md` bloco B) — não é mais necessário para o aceite (o wrapper já faz
+  `ollama stop`), só bom para o caso geral.
 - **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:
   - **PASSADA DE BACKUP FEITA (chat 6, 2026-09-03, HD montado):** 5 recursos do manifesto
     com snapshot restic tagueado (nome + sha256): `multilingual-e5-small-int8` `8c1a077a` ·

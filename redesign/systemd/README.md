@@ -15,7 +15,7 @@ Só `agata.target` está em `default.target.wants/`; os membros só em `agata.ta
 | `dropin-generico.conf` | `<unit>.service.d/agata.conf` em `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy` | `[Unit] PartOf=agata.target` + `[Install] WantedBy=agata.target`. |
 | `dropin-omniroute.conf` | `omniroute.service.d/agata.conf` | igual ao genérico + `[Service] SuccessExitStatus=143 SIGTERM` — `omniroute` é `Type=simple` e o `ExecStop=omniroute stop` mata o próprio main (sai 143); sem isto o stop normal fica `failed`. |
 | `dropin-llamacpp.conf` | `llamacpp-agata.service.d/agata.conf` | **só** `PartOf=agata.target` (sem `WantedBy`): o MoE **para** com o `agata down` (libera a VRAM da 4060) mas **não sobe** junto — fica sob demanda (`agata up --moe`). |
-| `gamemode.ini.exemplo` | `~/.config/gamemode.ini` (P7-02, precisa `sudo pacman -S gamemode`) | hook `[custom] start=cli.py down` / `end=cli.py up`. `cli.py down` chamado como processo solto (fora do systemd) drena + para os serviços — funciona; o deadlock era só via `ExecStop`. |
+| `agata-jogo` | `~/.local/bin/agata-jogo` (`install -Dm755`, **sem sudo**) | **P7-02 (chat 6).** Wrapper: `stop agata.target` (drena) + `ollama stop` dos modelos ativos → roda o jogo via `game-performance` (wrapper oficial do CachyOS) → `trap EXIT` re-sobe `agata.target`. **Substitui o Feral GameMode** — o CachyOS já roda `ananicy-cpp` (renice automático) e GameMode brigaria com ele. `gamemode.ini.exemplo` foi removido. |
 
 ## Instalado assim (P7-01, com "vai" do Humano 2026-09-02 ~20:30)
 
