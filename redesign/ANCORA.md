@@ -6,7 +6,7 @@ A referência viva é sempre `git rev-parse origin/redesign` (ou o topo do `git 
 branch no GitHub).
 
 ```
-commit anterior (piso):   bc15673      escrito em: 2026-09-03 10:05 -03 (relogio da maquina, chat 6 -- Fase 8: N do paralelo = 7+piso, P8-02 aberto (harness validado); P8-04 Goose pesquisado (aguarda metodo+vai); main intocado 4aa90bd)
+commit anterior (piso):   55c980c      escrito em: 2026-09-03 11:00 -03 (relogio da maquina, chat 6 -- Fase 8 P8-04 FEITO: Goose v1.48.0 em ~/.local/bin, config -> :20127; main intocado 4aa90bd)
 ```
 
 ## Refs esperados (confira com estes)

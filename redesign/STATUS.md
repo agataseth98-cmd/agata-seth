@@ -1,6 +1,6 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 🔶** (Goose pesquisado — aguarda método + "vai") · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
+FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 ✅** (Goose v1.48.0 instalado) · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
 ATUALIZADO: 2026-09-03 10:05 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
 Máquina — chat 6) — **N do paralelo = 7 dias + piso de amostragem** (≥1 par por tipo, ≥1
 fallback, ≥1 pausa de portão, zero fabricação; estende só até cobrir o piso). P8-02 aberto,
@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`bc15673`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`55c980c`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -48,8 +48,10 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
 - **P8-02 🟢** paralelo **N=7 dias + piso de amostragem** (Hermes vs. grafo+OmniRoute, sem
   desligar nada). Aberto — acumula em `redesign/grafo/paralelo.md` conforme o Humano usa.
 - **P8-03** reteste de fabricação no caminho novo ((138)/(307) + hidratação), config de cutover.
-- **P8-04 🔶** Goose = shell de fallback → OmniRoute. Pesquisado (`redesign/router/goose.md`):
-  binário Rust, não `pipx`. Aguarda o Humano escolher A/B/C/D + "vai" p/ instalar.
+- **P8-04 ✅** Goose **v1.48.0** → `~/.local/bin/goose` (método B, sha256 conferido).
+  Config → `:20127`, modelo `ollama-local/qwen3.5:9b`. `goose run` OK via OmniRoute; segredo
+  plantado → 422. Achado: cold start do Ollama estoura o deadline (15s) do OmniRoute na 1ª
+  chamada — mitigar no cutover. `redesign/router/goose.md`.
 - **P8-05** Hermes sai do loop (grafo+OmniRoute dirige; voz/OWUI ficam à parte se em uso).
 - **P8-06** canon reflete a realidade: `REGRAS`/`PROJETO`/`ONDE_ESTAMOS` pela Cadeia de
   auditoria em camadas + 2ª opinião; 1 entrada em `MEMÓRIAS.md` por fase (0–8), append-only.

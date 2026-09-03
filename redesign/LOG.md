@@ -3215,3 +3215,47 @@ pedir; (3) usar o sistema pelos próximos 7 dias para o paralelo acumular; (4) m
 no branch em P8-01), `.githooks/*`. Sem `sudo`. Nada instalado.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 11:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-04 FEITO (Goose instalado, método B)
+
+**Humano: "vamos seguir com sua recomendação"** → método B (binário do release + sha256).
+
+**Instalado:** Goose **v1.48.0** (Block → Agentic AI Foundation, Apache-2.0; binário Rust —
+o `goose-ai` do PyPI é o predecessor de 2024, deprecado, não usado). Asset
+`goose-x86_64-unknown-linux-gnu.tar.bz2`, **sha256 conferido contra o `digest` da API do
+GitHub** (`fbe2f128ff68383cdab57431c577ed771e2ada035a9639520b2e28a871a56a1f` — bateu) →
+`install -m755 goose ~/.local/bin/goose` (sem sudo, `~/.local/bin` já no PATH). Tarball
+removido.
+
+**Config** `~/.config/goose/config.yaml`: `GOOSE_PROVIDER: openai` · `GOOSE_MODEL:
+ollama-local/qwen3.5:9b` · `OPENAI_HOST: http://127.0.0.1:20127` (proxy sanitizador, não
+`:20128`) · `OPENAI_API_KEY` placeholder (loopback é a proteção) · `GOOSE_MODE: approve`.
+
+**Aceite:**
+- `goose run` (pergunta simples) → sessão `openai ollama-local/qwen3.5:9b` em
+  `/home/orusoua/agata`, respondeu `42`. Ponta a ponta pelo OmniRoute ✓.
+- `omniroute cost` contabilizou (Ollama 41 reqs).
+- **Segredo barrado:** `POST :20127` com `sk-ABCDEF…0123456789` → **422**
+  `secret_blocked_before_egress`, redigido, não chegou ao provedor; `AKIA…` → 422 também.
+
+**Achado (não bloqueia) — deadline do OmniRoute vs. cold start.** A 1ª chamada a um modelo
+Ollama não carregado (~30 s de load) estoura o `resilienceSettings.requestQueue.maxWaitMs=
+15000` do OmniRoute → **504** `RATE_LIMIT_EXECUTION_TIMEOUT`. O modelo carrega mesmo assim;
+a 2ª chamada (quente) responde em ~0,5 s. Foi o que travou o `goose doctor` e a 1ª
+tentativa do teste. Mitigação p/ o cutover (P8-02/P8-05): pré-aquecer o modelo no
+`agata up`, ou subir o `maxWaitMs`. Anotado em `redesign/router/goose.md`.
+
+**Papel do Goose:** fallback operacional (Humano sem a sessão Claude). **Não** é
+conselheiro nem gate. Codex CLI terciário.
+
+**Estado da Fase 8:** P8-00 ✅ · P8-01 🔶 (falta B/C + APROVADO do conselho-remoto) ·
+P8-02 🟢 aberto (N=7+piso) · P8-03 aguarda MoE `:20129` + config de cutover · **P8-04 ✅** ·
+P8-05/06/07 em cadeia.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`.
+Sem `sudo`. Instalado: `~/.local/bin/goose` (userspace, reversível por `rm`).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

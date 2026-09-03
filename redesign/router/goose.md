@@ -1,48 +1,60 @@
 # P8-04 — Goose como shell operacional de fallback
 
-**Não é canon.** Branch `redesign`. Estado: **pesquisa feita, instalação aguarda decisão do
-Humano** (2026-09-03, chat 6).
+**Não é canon.** Branch `redesign`. **FEITO — 2026-09-03 (chat 6), método B.**
 
 ## Papel
 
 Executor-shell de fallback, agnóstico de modelo, apontado para o OmniRoute — para quando a
 sessão Claude Code primária cair e o Humano precise tocar o sistema sem ela. **Não** é
-conselheiro nem gate (igual aos outros fallbacks). Codex CLI é terciário (só com cota
-OpenAI, não roda modelo local) — PESQUISA.md C7.
+conselheiro nem gate. Codex CLI é terciário (só com cota OpenAI, não roda modelo local) —
+PESQUISA.md C7.
 
-## Pesquisa da instalação vigente (2026-09-03)
+## Instalação (método B — binário do release + sha256)
 
-O **Goose atual** (Block → Agentic AI Foundation, ~53k estrelas, Apache-2.0) é um **binário
-Rust**, não o pacote Python `goose-ai` do PyPI (esse é o predecessor de 2024, deprecado —
-**não usar**). "≥40 provedores, bring-your-own-key" (Anthropic/OpenAI/Google/Ollama/
-OpenRouter/OpenAI-compat).
+O **Goose atual** (Block → Agentic AI Foundation, `github.com/block/goose` → assets em
+`aaif-goose/goose`, Apache-2.0) é **binário Rust**. O pacote PyPI `goose-ai` é o
+predecessor de 2024 — **deprecado, não usado**.
 
-Métodos de instalação (nenhum é `pipx` para a versão Rust):
+- Versão: **v1.48.0** (publicada 2026-08-27).
+- Asset: `goose-x86_64-unknown-linux-gnu.tar.bz2` (86,8 MB).
+- **sha256 conferido contra o `digest` da API do GitHub:**
+  `fbe2f128ff68383cdab57431c577ed771e2ada035a9639520b2e28a871a56a1f` — bateu.
+- Instalado: `install -m755 goose ~/.local/bin/goose` (sem sudo; `~/.local/bin` já no
+  PATH). Binário ~311 MB descompactado. Tarball do install removido.
+- Atualizar depois: `goose update` (subcomando nativo).
 
-| método | sudo? | transparência | nota |
-|---|---|---|---|
-| **A. script oficial** `curl -fsSL .../download_cli.sh \| bash` (GitHub releases) | não | baixa binário para `~/.local/bin` — **roda um script buscado da rede** | rápido; o script é auditável antes |
-| **B. binário do release, à mão** — baixar `goose-x86_64-unknown-linux-gnu.tar.bz2`, conferir sha256, extrair em `~/.local/bin` | não | alta — só um binário, checksum conferido | mais passos, sem script |
-| **C. AUR** (`goose-cli` / similar) | via helper | média | `pacman -Ss goose` no repo oficial = nada; conferir AUR |
-| **D. adiar** | — | — | Goose não bloqueia P8-05/06/07; pode entrar depois do merge |
+## Config — `~/.config/goose/config.yaml`
 
-**Recomendação:** **B** (binário + sha256 conferido em `~/.local/bin`) — mesma linha do
-`agata-jogo` (nó nosso, sem sudo, verificável), evita `curl \| bash`. Se o Humano preferir
-velocidade, **A**. Qualquer uma **precisa do "vai" para instalar software** (linha do
-`CLAUDE-NA-MAQUINA.md`).
+```yaml
+GOOSE_PROVIDER: openai
+GOOSE_MODEL: ollama-local/qwen3.5:9b
+OPENAI_HOST: http://127.0.0.1:20127     # proxy sanitizador (NAO :20128 direto)
+OPENAI_API_KEY: nao-usada-proxy-loopback
+GOOSE_MODE: approve                      # pede confirmacao antes de cada acao de ferramenta
+```
 
-## Config planejada (depois da instalação)
+- `:20127` = o proxy da P1-02 — redige segredo antes do egresso. Sem chave: loopback é a
+  proteção.
+- Modelo exige prefixo de provider (`ollama-local/...`); combos (`cheap`/`auto`/`conselho`)
+  também servem como `GOOSE_MODEL`.
 
-- Provider Goose = **OpenAI-compat** apontando para o proxy sanitizador
-  `http://127.0.0.1:20127/v1` (não o `:20128` direto — o `:20127` redige segredo antes do
-  egresso).
-- Modelo default: `ollama-local/qwen3.5:9b`; combos via OmniRoute.
-- Sem chave: o `:20127` não exige (loopback é a proteção, como no resto).
-- Teste de aceite: uma tarefa real (ler o repo, propor um diff, **sem** tocar `main`) →
-  `omniroute cost` incrementa; segredo plantado é barrado (mesmo teste da P1-02).
+## Teste de aceite (2026-09-03)
 
-## Pendências
+- `goose run` (pergunta simples, sem ferramentas) → sessão `openai ollama-local/qwen3.5:9b`,
+  respondeu `42`. Caminho ponta a ponta pelo OmniRoute ✓.
+- `omniroute cost` contabilizou o tráfego (Ollama 41 reqs).
+- **Segredo barrado:** `POST :20127` com `sk-ABCDEF…0123456789` (casa `sk-[A-Za-z0-9]{20,}`)
+  → **422** `secret_blocked_before_egress`, trecho redigido, não chegou ao provedor. Idem
+  `AKIA…` → 422. (Uma string tipo `sk-proj-…XX` passa 200 — não casa o padrão; correto.)
 
-1. **Humano escolhe A/B/C/D** e dá o "vai" para instalar.
-2. Depois: instalar, configurar o provider `:20127`, rodar o teste, preencher esta doc com
-   versão + sha256 + saída do teste.
+## Achado — deadline do OmniRoute vs. cold start do Ollama
+
+A **primeira** chamada a um modelo Ollama não carregado (~30 s de load) estoura o
+`resilienceSettings.requestQueue.maxWaitMs=15000` do OmniRoute → **504**
+`RATE_LIMIT_EXECUTION_TIMEOUT`. O modelo **carrega mesmo assim** e as chamadas seguintes
+(modelo quente) respondem em ~0,5 s. Mitigação p/ o cutover (P8-02/P8-05): pré-aquecer o
+modelo local no `agata up`, ou subir o `maxWaitMs`. Anotado, não bloqueia.
+
+## Rollback
+
+`rm ~/.local/bin/goose ~/.config/goose/config.yaml`. Não afeta o resto.

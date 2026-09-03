@@ -1,9 +1,11 @@
 # P8-04 — Goose como shell operacional de fallback
 
-**Status:** 🔶 **PESQUISA FEITA — 2026-09-03 (chat 6).** O Goose atual é binário Rust (o
-`goose-ai` do PyPI é o predecessor deprecado — não usar). Opções de instalação em
-`redesign/router/goose.md`; recomendação = binário do release + sha256 em `~/.local/bin`
-(sem sudo). **Aguarda o Humano escolher o método e dar o "vai" para instalar.**
+**Status:** ✅ **FEITO — 2026-09-03 (chat 6), método B** ("vamos seguir com sua
+recomendação"). Goose **v1.48.0** → `~/.local/bin/goose` (sha256 conferido contra o digest
+da API do GitHub). Config `~/.config/goose/config.yaml` → OpenAI-compat → `:20127` (proxy
+sanitizador), modelo `ollama-local/qwen3.5:9b`, sem chave. `goose run` respondeu via
+OmniRoute; `omniroute cost` contabilizou; segredo plantado → 422. Detalhe + achado do
+deadline do OmniRoute em `redesign/router/goose.md`.
 
 **Objetivo:** um executor-shell de fallback agnóstico, apontado para o OmniRoute, para
 quando a sessão Claude Code primária cair e o Humano precisar tocar o sistema sem ela.
