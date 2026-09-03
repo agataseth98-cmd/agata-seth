@@ -84,3 +84,31 @@ Verifiquei no código e no git:
 Formato da resposta: **Origem · Posição · Fundamentação · Emenda** (as 4 partes que o
 próprio Conselho exige). Sem executar nada — você não tem shell; aponte o que a camada C
 (Máquina) deve rodar para confirmar cada achado seu.
+
+---
+
+## Camada B — resposta (Qwen, Qwen Studio, nuvem, 2026-09-03) — RESUMO
+
+**Posição:** diff seguro para merge sob P-8, com 3 emendas (1 documental obrigatória,
+2 código recomendada, 3 nice-to-have). Delegação ao OmniRoute completa; I1–I7 preservados;
+nenhum bloqueio para a Fase 8. 6 perguntas respondidas; sem achado bloqueante.
+
+## Camada C — verificação na Máquina (sessão Claude, 2026-09-03) — VEREDITO
+
+Rodado no `~/.omniroute/storage.sqlite` e no `:20127`:
+
+| ponto de B | o que a Máquina achou |
+|---|---|
+| **I4 — combo `conselho` tem tier local?** | **NÃO.** `combos` v2 (2026-09-02T11:42): exatamente `zai/glm-4.7-flash → gemini/gemini-2.5-flash`, `strategy=priority`, **sem tier local**. `session_model_history` mostra entradas `conselho → ollama-local/llama3.2:3b` mas TODAS **antes** da v2 (03:17 / 11:37) — combo antiga. **I4 preservado.** |
+| B: "código em `router/providers.py`, `_request_with_backoff`, `~/.omniroute/state.json`, `~/.omniroute/costs/`" | **Esses paths NÃO EXISTEM.** OmniRoute é Node (`~/.npm-global`) + SQLite (`~/.omniroute/storage.sqlite`), não Python. As alegações de B sobre os internos do OmniRoute são **não verificadas**. A *posição* de B (delegação sonora, sem bloqueio) se sustenta pelo teste prático do fallback (LOG 02/09 ~08:45) + a combo v2 conferida agora. |
+| B: timeout da combo 30–120s | Real: o deadline é `resilienceSettings.requestQueue.maxWaitMs=15000` (15 s, default de código do OmniRoute — não está em `key_value`). Não afeta o `conselho_remoto.py` (que tem `urlopen(timeout=180)` próprio + os modelos de nuvem estão quentes). Mitigado p/ modelo local frio pelo `agata-warmup.service` (B2). |
+| B: logs do OmniRoute com texto do pedido | `~/.omniroute/call_logs/<data>/` + tabelas `call_logs`/`request_detail_logs` no sqlite. Guardam o pedido. Por I1 é material público; segredo barrado no `:20127`. Aceitável — nota adicionada ao docstring (Emenda 1). |
+| B Emenda 1 (doc) | **aplicada** — nota de rastreabilidade + logs no docstring. |
+| B Emenda 2 (`provider` no `.json`) | **aplicada** — `_provider_do_modelo()` deriva do nome; testado: `.json` de saída agora tem `"provider": "gemini"`. A `resposta_crua` continua sendo a fonte. |
+| B Emenda 3 (erro de conexão claro) | **aplicada** — `except (ConnectionRefusedError, URLError)` → "suba o serviço P1-02". |
+| `checar_conteudo_privado` vs `main` | **byte a byte idêntico** (Camada A já tinha verificado; C confirma). |
+
+**Veredito C:** o `.diff` (com as 3 emendas) está **pronto para o merge**. As camadas A, B e C
+concordam na direção; C corrigiu as alegações de B sobre internos do OmniRoute (paths
+inexistentes) sem mudar a conclusão. `py_compile` OK; parecer real de teste gravado com os
+4 campos + `provider`.

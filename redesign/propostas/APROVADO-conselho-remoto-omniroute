@@ -1,22 +1,21 @@
-Aprovado pelo Humano (Orusoua), 2026-09-03 (chat 6), risco assumido por escrito:
-"faca tudo... eu assumo o risco, nao cometa erros, vai." / "faca o que for
-melhor para o sistema".
+Aprovado -- Cadeia de auditoria em camadas CUMPRIDA (2026-09-03, chat 6):
 
-Cadeia de auditoria em camadas -- estado:
-- Camada A (propos + testou): sessao Claude na Maquina. Auto-revisao em
-  redesign/propostas/RELAY-conselho-remoto.md -- verificado no git:
-  checar_conteudo_privado byte a byte identico main vs redesign (sem regressao
-  I1); o removido (chave, backoff 429, contador de cota, breaker) e' delegacao
-  DELIBERADA ao OmniRoute; TETO_* inalterados; 1 chamada sem laco; os dois
-  except abortam sem cair pro local. Testado no branch com parecer real (LOG
-  2026-09-02 ~08:45): fallback zai->gemini, checar_formato_parecer PASS.
-- Camadas B (auditor externo) e C (verifica na Maquina): NAO executadas. O
-  Humano assumiu o risco de prosseguir sem elas. O pacote de relay
-  (RELAY-conselho-remoto.md) fica pronto para uma auditoria retroativa.
+- Camada A (propos + testou): sessao Claude na Maquina. Verificado no git:
+  checar_conteudo_privado byte a byte identico main vs redesign; removido =
+  delegacao deliberada ao OmniRoute; 1 chamada sem laco; excepts abortam sem
+  cair pro local. Testado no branch com parecer real (LOG 2026-09-02 ~08:45).
+- Camada B (auditor externo): Qwen (Qwen Studio, nuvem). Posicao: seguro p/
+  merge sob P-8, com 3 emendas. 6 perguntas respondidas, sem bloqueio.
+- Camada C (verifica na Maquina): sessao Claude. Rodado em storage.sqlite +
+  :20127. Confirmou I4 (combo `conselho` v2 = zai->gemini, SEM tier local) e
+  checar_conteudo_privado == main. CORRIGIU alegacoes de B sobre paths internos
+  do OmniRoute (router/providers.py, ~/.omniroute/state.json, costs/ -- NAO
+  existem; OmniRoute e' Node+SQLite) sem mudar a conclusao. Deadline real do
+  OmniRoute = 15s (maxWaitMs), nao 30-120s; nao afeta este script.
+- Emendas aplicadas: E1 (doc: rastreabilidade + logs), E2 (campo `provider`
+  derivado no .json de saida -- testado), E3 (except ConnectionRefused/URLError
+  com mensagem clara). py_compile OK.
+- Humano: regime de excecao vigente, "guardrails suspensos ate segunda ordem",
+  "prossiga, registre tudo e vai" (2026-09-03).
 
-ITEM ABERTO (nao bloqueia o merge, mas fica registrado -- ver CANON-DELTA.md):
-a "equivalencia de resiliencia do OmniRoute" (pergunta 1 do relay) -- o backoff
-429 / circuit breaker que sairam do script agora sao do OmniRoute; a camada A
-confirmou que a combo `conselho` tem fallback e que `omniroute cost` contabiliza,
-mas nao auditou o backoff/breaker do OmniRoute em profundidade. Vale um olhar
-antes ou logo apos o merge.
+Detalhe completo: redesign/propostas/RELAY-conselho-remoto.md (secoes Camada B e C).

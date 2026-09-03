@@ -20,6 +20,16 @@ O QUE NAO MUDOU (a razao do script existir):
   - nao escreve MEMORIAS/PROJETO/REGRAS; nao interpreta, resume nem julga
   - guarda a resposta crua; so relata "fora do formato" quando aplicavel
 
+Rastreabilidade (Cadeia de auditoria em camadas, Camada B/C, 03/09/2026): a combo
+`conselho` do OmniRoute e' config (hoje `zai/glm-4.7-flash -> gemini-2.5-flash`,
+strategy=priority, SEM tier local -- verificado na Maquina em storage.sqlite). Se
+a combo mudar, o parecer usa outro modelo sem mudanca aqui -- por isso o registro
+`.json` grava `combo`, `modelo` e `provider` (derivado) do parecer especifico,
+alem da `resposta_crua`. Camada C tambem confirmou: I4 preservado (combo sem local),
+`checar_conteudo_privado` byte a byte identico ao de `main`. Os logs do OmniRoute
+(`~/.omniroute/call_logs/`) guardam o texto do pedido -- por I1 e' material publico;
+segredo e' barrado no proxy `:20127` antes do egresso.
+
 Merge para `main`: so na Fase 8 (Cadeia de auditoria). Ate la vive no branch.
 
 Uso: python3 scripts/conselho_remoto.py <arquivo-com-o-pedido.txt>
@@ -124,6 +134,18 @@ def _normalizar(resposta):
     return conteudo, te, ts, tt
 
 
+def _provider_do_modelo(modelo):
+    """Emenda 2 (Cadeia de auditoria, Camada B). A resposta do OmniRoute so traz
+    `model` (ex.: 'gemini-2.5-flash'), sem `provider`. Deriva o provedor do nome
+    para o registro -- best-effort; a `resposta_crua` continua sendo a fonte."""
+    m = (modelo or "").lower()
+    for chave, prov in (("glm", "zai"), ("gemini", "gemini"), ("gpt-oss", "groq/cerebras"),
+                        ("qwen", "local?"), ("llama", "local?"), ("minimax", "openrouter")):
+        if chave in m:
+            return prov
+    return "?"
+
+
 def main():
     if len(sys.argv) != 2:
         print(f"uso: {sys.argv[0]} <arquivo-com-o-pedido.txt>", file=sys.stderr)
@@ -152,6 +174,11 @@ def main():
             return 1
         print(f"ABORTADO: OmniRoute retornou HTTP {e.code}: {corpo_erro[:500]}. Nada foi guardado -- cair pro modelo local é decisão do Humano (ver (276)).")
         return 1
+    except (ConnectionRefusedError, urllib.error.URLError) as e:
+        # Emenda 3 (Cadeia de auditoria, Camada B): mensagem clara quando o proxy
+        # de sanitizacao nao responde (causa mais comum: servico P1-02 parado).
+        print(f"ABORTADO: o proxy de sanitização não responde em {SANITIZADOR_ENDPOINT} ({type(e).__name__}). Suba o serviço P1-02: `systemctl --user start omniroute-sanitizer omniroute`. Nada foi enviado. Cair pro modelo local é decisão do Humano (276).")
+        return 1
     except Exception as e:  # noqa: BLE001 -- qualquer falha de rede/gateway aborta igual
         print(f"ABORTADO: falha ao falar com o OmniRoute ({SANITIZADOR_ENDPOINT}) -- {type(e).__name__}: {e}. O gateway está no ar? (`systemctl --user status omniroute-sanitizer omniroute`). Cair pro modelo local é decisão do Humano (276).")
         return 1
@@ -175,6 +202,7 @@ def main():
         "via": "omniroute",
         "combo": COMBO,
         "modelo": modelo_usado,
+        "provider": _provider_do_modelo(modelo_usado),
         "duracao_s": duracao_s,
         "tokens_entrada": tokens_entrada,
         "tokens_saida": tokens_saida,

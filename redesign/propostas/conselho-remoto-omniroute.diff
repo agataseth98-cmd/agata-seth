@@ -18,6 +18,17 @@
 # GLM lento -> fallback -> 4 partes presentes -> checar_formato_parecer PASS,
 # registro gravado. -246/+70 linhas. `python3 -m py_compile` OK no branch.
 diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+# ---
+# Emendas da Cadeia de auditoria (Camada B = Qwen; Camada C = Maquina), 03/09/2026:
+#  E1 (doc): nota de rastreabilidade + logs do OmniRoute no docstring.
+#  E2 (codigo): campo 'provider' (derivado do nome do modelo) no registro .json.
+#  E3 (codigo): except (ConnectionRefusedError, URLError) com mensagem clara -> P1-02.
+# Camada C verificou na Maquina: combo 'conselho' = zai->gemini, SEM tier local
+#  (storage.sqlite, combos v2 2026-09-02T11:42) -> I4 preservado. checar_conteudo
+#  _privado byte a byte == main. As alegacoes de B sobre paths internos do OmniRoute
+#  (router/providers.py, ~/.omniroute/state.json, costs/) NAO existem -- OmniRoute e'
+#  Node+SQLite; a posicao de B (delegacao sonora, sem bloqueio) se sustenta.
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
 index 9f0d1f4..ff55205 100755
 --- a/scripts/conselho_remoto.py
 +++ b/scripts/conselho_remoto.py

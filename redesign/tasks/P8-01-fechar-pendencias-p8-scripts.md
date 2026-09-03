@@ -1,6 +1,9 @@
 # P8-01 — fechar as pendências P-8 de `scripts/*`
 
-**Status:** ✅ **FEITO — 2026-09-03 (chat 6).** `p12-backup-verificavel.diff` e
+**Status:** ✅ **FEITO — 2026-09-03 (chat 6).** Cadeia A→B→C do `conselho-remoto` CUMPRIDA
+(B=Qwen; C=Máquina confirmou I4 + pegou fabricação de B sobre internos do OmniRoute).
+Emendas E1/E2/E3 aplicadas e testadas. Os 4 pares `.diff`+`APROVADO-`: p12, cifrar-env,
+conselho-remoto, consolidacao-flow. `p12-backup-verificavel.diff` e
 `cifrar-env.diff` **aplicados no branch** + `perimetro.sh` 11 controles + P-12
 vermelho/verde demonstrado. `conselho-remoto-omniroute.diff` **gerado** + **pacote de relay pronto**
 (`redesign/propostas/RELAY-conselho-remoto.md`, cópia no Desktop). `APROVADO-conselho-remoto-omniroute` criado com proveniência (Humano assumiu o risco de

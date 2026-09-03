@@ -3541,3 +3541,53 @@ P8-07 dry-run. Otimizações A1/B1/B2/B3/D1/D2 (~4,4 GB), C2 `.diff` pronto.
 (manual). `igpu/.venv` reconstruído (gitignorado).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 13:25 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — Cadeia de auditoria do conselho-remoto CUMPRIDA (A+B+C) + emendas
+
+**Humano:** regime de exceção, "guardrails suspensos até segunda ordem", autorização para a
+Fase 8 inteira ("prossiga, registre tudo e vai"). Camada B relayada (Qwen Studio).
+
+### Cadeia de auditoria A→B→C do `conselho-remoto-omniroute.diff`
+
+- **B (Qwen, nuvem):** diff seguro p/ merge sob P-8, 3 emendas, sem bloqueio. 6 perguntas
+  respondidas.
+- **C (Máquina):** rodado em `~/.omniroute/storage.sqlite` + `:20127`:
+  - **I4 preservado** — combo `conselho` v2 (2026-09-02T11:42) = `zai/glm-4.7-flash →
+    gemini-2.5-flash`, `strategy=priority`, **SEM tier local**. As entradas
+    `conselho → ollama-local/llama3.2:3b` em `session_model_history` são todas ANTERIORES à
+    v2 (combo antiga). Se zai+gemini falham, OmniRoute erra → o script aborta.
+  - **B fabricou os internos do OmniRoute** — `router/providers.py`, `_request_with_backoff`,
+    `~/.omniroute/state.json`, `~/.omniroute/costs/` **não existem** (OmniRoute é Node+SQLite,
+    não Python). C registrou isso; a *posição* de B (delegação sonora) se sustenta pelo
+    teste prático de fallback + a combo v2.
+  - deadline real do OmniRoute = 15 s (`maxWaitMs`, default de código), não 30–120 s; não
+    afeta este script (`urlopen(timeout=180)` próprio).
+  - `checar_conteudo_privado` byte a byte == `main` (A já vira; C confirma).
+
+### Emendas aplicadas a `scripts/conselho_remoto.py` (branch, sob exceção)
+
+- **E1 (doc):** nota de rastreabilidade (combo é config; o `.json` grava combo/modelo/
+  provider do parecer específico) + logs do OmniRoute (`call_logs/`, material público por I1).
+- **E2 (código):** `_provider_do_modelo()` deriva o provedor do nome; `registro["provider"]`.
+  **Testado:** parecer real → `.json` com `"provider": "gemini"`, 4 partes OK.
+- **E3 (código):** `except (ConnectionRefusedError, urllib.error.URLError)` com mensagem
+  clara ("suba o serviço P1-02") antes do `except Exception` genérico.
+- `python3 -m py_compile` OK. `.diff` regenerado (429 linhas) com o header das emendas +
+  veredito C.
+
+### `APROVADO-conselho-remoto-omniroute` finalizado
+
+A+B+C cumpridas, emendas aplicadas. `redesign/propostas/RELAY-conselho-remoto.md` tem as
+seções Camada B e Camada C completas.
+
+**Estado:** P8-01 100% fechado (os 4 pares `.diff`+`APROVADO-`: p12, cifrar-env,
+conselho-remoto, consolidacao-flow). Próximo nesta sessão: P8-05 (tirar o Hermes do loop —
+Humano autorizou "agora", mantendo Open WebUI + voz), depois P8-06 (canon) e P8-07 (merge).
+
+**Não tocado:** `main`, canon, Hermes-gateway (ainda), Ollama de produção, `.githooks/*`.
+`scripts/conselho_remoto.py` editado no branch (sob exceção; `.diff`+`APROVADO-` prontos).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
