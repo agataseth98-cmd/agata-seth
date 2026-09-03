@@ -1,6 +1,6 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 ✅** (Goose v1.48.0 instalado) · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
+FASE ATUAL: **REDESENHO MERGEADO EM `main` @ `27ad248` (2026-09-03).** Falta só o **S7 pós-push por sessão independente**. _(histórico: Fase 8 — Cutover — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 ✅** (Goose v1.48.0 instalado) · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
 ATUALIZADO: 2026-09-03 10:05 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
 Máquina — chat 6) — **N do paralelo = 7 dias + piso de amostragem** (≥1 par por tipo, ≥1
 fallback, ≥1 pausa de portão, zero fabricação; estende só até cobrir o piso). P8-02 aberto,
@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`a9d9ee6`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): `main` @ **`27ad248`** (merge do redesenho); `redesign` @ `fb5e7e7` (congelado); referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -58,7 +58,9 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   P-9 atualizado; smoke test do loop sem Hermes OK.
 - **P8-06 🔶** `redesign/CANON-DELTA.md` mapeia cada mudança de canon. **Nada aplicado** —
   Cadeia A→B→C + autorização por mudança (linha vermelha).
-- **P8-07 🔶** **dry-run do merge FEITO** (clone descartável: `merge --no-ff` rc 0, sem
+- **P8-07 ✅ (parcial)** merge real feito: `main` `4aa90bd` → **`27ad248`** (`--no-ff`, sem
+  conflito, `perimetro.sh` 11 OK / 1 PARCIAL / 0 FALHA no tree mergeado, vault regenerado).
+  `pre-redesign` intacto p/ rollback. **Falta o S7 por sessão independente.** _(antes: dry-run)_ — (clone descartável: `merge --no-ff` rc 0, sem
   conflito; âncora restaurável; `perimetro.sh` OK no tree mergeado). Falta P8-05/06 + push
   (Humano) + sessão independente p/ o S7.
 

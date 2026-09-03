@@ -3668,3 +3668,45 @@ exceção), todos os outros OK/PARCIAL/AVISO. 10 OK · 1 PARCIAL (P-4) · 1 FALH
 **Falta:** P8-07 (o merge real para `main` — o dry-run já deu rc 0) + o S7 independente.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 14:05 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-07: MERGE REAL para `main`
+
+**Humano:** "prossiga pelos mesmos motivos... registre tudo e vai." Regime de exceção.
+
+- `git switch main` (`4aa90bd`, == `origin/main`) → `git merge --no-ff redesign` →
+  **`27ad248`**, **rc 0, sem conflito**.
+- Âncora do `PROMPT_CARREGAMENTO.md`: o merge trouxe a do branch (`4f4f657` / 02/09 22:16).
+  **Deixada como está** — fica ~1 commit atrasada, que é o comportamento normal documentado
+  do bloco `ANCORA-SHA`; o próximo commit em `main` a reescreve. (Tentei restaurar a de
+  `main` mas isso deixava a árvore suja → `gerar_obsidian.py` carimbava `-arvore-suja` →
+  P-10 reprovava contra o `git archive HEAD` limpo. Aceitar a churn é mais limpo.)
+- `python3 scripts/gerar_obsidian.py` com a árvore limpa → vault 440 notas, `canon: 27ad248`
+  (sem sufixo).
+- **`bash scripts/perimetro.sh` em `main` mergeado: `RESULTADO GERAL: OK — 11 OK · 0 SKIP ·
+  1 PARCIAL · 0 FALHA`.** P-8, P-10, P-12 todos OK. (P-4 PARCIAL = sempre parcial sem sudo.)
+- `git push origin main` → `4aa90bd..27ad248`. `origin/main` == `27ad248`. `pre-redesign`
+  (`4aa90bd`) **intacto** — rollback total: `git reset --hard pre-redesign` + push (destrutivo,
+  só com "vai" e só se o cutover falhar feio).
+
+**`main` agora tem:** o controle P-12 no `perimetro.sh`; `PROJETO.md`/`ONDE_ESTAMOS.md`
+descrevendo o sistema novo; `MEMÓRIAS (310)/(311)`; `redesign/` inteiro como registro
+histórico; `scripts/conselho_remoto.py` pelo OmniRoute; `config/agata-consolidacao.service`
+pelo flow do grafo.
+
+**FALTA — o único item aberto da Fase 8:**
+**S7 pós-push por sessão independente.** Uma sessão que NÃO fez este merge (Claude Code
+nova, ou um fallback com acesso ao GitHub) precisa: `git fetch` + confirmar
+`origin/main == 27ad248`; `git clone` limpo + `bash scripts/perimetro.sh` (esperar 11 OK /
+1 PARCIAL / 0 FALHA); re-rodar `redesign/grafo/evals/run_all.py` (fabricação 3/3 +
+hidratação PASS); escrever o resultado no `redesign/LOG.md` **por essa sessão**, não por
+esta. É a Cadeia de auditoria, item 6 — "push alegado nunca é cruzado contra o hash real".
+
+**Também aberto:** os ~7 dias de observação do caminho novo antes de considerar o cutover
+consolidado; a decisão sobre substituir o Open WebUI; o **regime de exceção segue ligado
+até ordem do Humano**.
+
+**Estado da Fase 8:** P8-00..P8-07 feitos (P8-07 falta só o S7 independente). O redesenho
+está em `main`.
