@@ -61,3 +61,8 @@ redesign/mcp/.venv/
 
 # redesenho -- logs de execucao do paralelo P8-02 (transitorios)
 redesign/grafo/paralelo-runs/
+
+# artefatos que o Obsidian larga na raiz do vault quando um [[link]] nao resolve
+# (0 byte; o INICIO/moc de verdade estao em memoria/obsidian/, gerados)
+/INICIO.md
+/moc-*.md

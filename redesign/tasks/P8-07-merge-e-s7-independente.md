@@ -1,6 +1,18 @@
 # P8-07 — o merge para `main` + S7 por sessão independente
 
-**Status:** ⏳ a fazer. **É o merge para `main`.** Comando destrutivo nenhum; merge aditivo,
+**Status:** 🔶 **DRY-RUN FEITO — 2026-09-03 (chat 6).** `git merge --no-ff redesign` num
+clone descartável: **rc 0, sem conflito**. Fora de `redesign/`, o merge traz exatamente o
+que o P8-00 previu (`.gitignore`, `PROMPT_CARREGAMENTO.md` [âncora — restaurar de `main`],
+`models/*`, `scripts/{cifrar_env.sh,conselho_remoto.py,perimetro.sh}`). O descarte da
+âncora (`git checkout 4aa90bd -- PROMPT_CARREGAMENTO.md` + `--amend`) aplica limpo.
+`perimetro.sh` no tree mergeado: `RESULTADO GERAL: OK — 10 OK · 1 SKIP · 1 PARCIAL · 0
+FALHA` — o **1 SKIP é o P-10** (vault não gerado no clone); em `main` real o `post-commit`
+regenera → roda `python3 scripts/gerar_obsidian.py` antes do check final para dar 11 OK.
+Nota: o merge-commit não dispara o caminho de P-8 do `pre-commit` (nada "staged"); os pares
+`.diff`+`APROVADO-` viajam no merge dentro de `redesign/propostas/` — o registro acompanha.
+**Ainda falta:** P8-05/06 verdes, o `push` (Humano), a sessão independente p/ o S7.
+
+**É o merge para `main`.** Comando destrutivo nenhum; merge aditivo,
 sem `--force`/`reset`/rebase. Autorização explícita do Humano no passo do `push`.
 
 **Objetivo:** `redesign` → `main`. O caminho novo vira o único. Canon == realidade,

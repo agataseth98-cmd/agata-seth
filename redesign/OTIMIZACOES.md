@@ -24,7 +24,8 @@ Removidos `torch`(CUDA)+`triton`+18 pacotes `nvidia-*`/`cuda-*`; instalado
 `torch==2.14.0+cpu` (wheel cp314, 196 MB) do índice `download.pytorch.org/whl/cpu`.
 `pip check` limpo. **Verificado:** `openvino-whisper` e `openvino-embeddings` reiniciados →
 `/health` OK nos dois (`device: GPU.0`); `/v1/embeddings` real devolve vetor 384-d;
-`WhisperPipeline` carrega em `GPU.0`; nenhum processo python na 4060. Rollback:
+`WhisperPipeline` carrega em `GPU.0` e **transcreve** um wav de teste (espeak-ng) com **RTF
+0.24 em `GPU.0`** (< 1); nenhum processo python na 4060. Rollback:
 `redesign/igpu/.venv-freeze-pre-A1.txt` (87 linhas, `pip install -r`).
 
 ### B2 — `agata-warmup.service` (manual) · mitiga o 504 de cold start

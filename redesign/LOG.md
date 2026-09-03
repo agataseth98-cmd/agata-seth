@@ -3481,3 +3481,63 @@ no branch), `.githooks/*`. Instalado só em userspace: `agata-warmup.service` (m
 `igpu/.venv` foi reconstruído (gitignorado, backup de freeze no repo).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 12:10 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — A1 selftest completo + dry-run do merge P8-07
+
+Fim do que dá para executar sozinho sem cruzar uma trava do sistema.
+
+### A1 — verificação completa
+
+`whisper_server.py --selftest` com um wav gerado (espeak-ng, pt-br): **transcreveu**, RTF
+**0.24 em `GPU.0`** (< 1). Somado ao que já estava: A1 (torch-CPU) verificado ponta a ponta
+nos dois servidores OpenVINO — transcrição e embedding, ambos na iGPU, nenhum python na
+4060. (RTF 0.24 vs. 0.082 do LOG da Fase 2 — voz/tamanho diferentes e pipeline frio; segue
+folgado abaixo de 1.)
+
+### P8-07 — dry-run do merge (clone descartável, nunca empurrado)
+
+`git clone --local` de `~/agata` → `git merge --no-ff redesign` em `main`:
+- **rc 0, sem conflito.** HEAD do merge no clone: efêmero.
+- Fora de `redesign/`, o merge traz: `.gitignore`, `PROMPT_CARREGAMENTO.md` (só a âncora),
+  `models/{PRUNE,RECONSTRUCAO,manifest}`, `scripts/{cifrar_env.sh,conselho_remoto.py,perimetro.sh}`
+  — exatamente o que o P8-00 previu.
+- Descarte da âncora: `git checkout 4aa90bd -- PROMPT_CARREGAMENTO.md` + `--amend` → aplica
+  limpo (o `pre-commit` de `main` re-carimba com o SHA pós-merge correto).
+- `perimetro.sh` no tree mergeado (com a âncora restaurada): **`RESULTADO GERAL: OK — 10 OK
+  · 1 SKIP · 1 PARCIAL · 0 FALHA`**. O 1 SKIP é o **P-10** (vault não gerado no clone) — em
+  `main` real o `post-commit` regenera; o P8-07 roda `gerar_obsidian.py` antes do check
+  final para dar 11 OK. O 1 PARCIAL é o P-4 (sem sudo, nunca falha).
+- Nota: o merge-commit não dispara o caminho de P-8 do `pre-commit` (nada "staged"); os
+  pares `.diff`+`APROVADO-` viajam no merge dentro de `redesign/propostas/`.
+**Conclusão:** a mecânica do P8-07 está sólida. Falta P8-05/06 verdes, o `push` (Humano), e
+a sessão independente para o S7.
+
+### Faxina
+
+`/INICIO.md` e `/moc-*.md` (soltos na raiz, 0 byte, artefato do Obsidian quando um
+`[[link]]` não resolve) → gitignorados. O `INICIO.md`/`moc-*` de verdade seguem em
+`memoria/obsidian/`, gerados.
+
+### Estado da Fase 8 — o que EU podia fazer está feito
+
+**Feito:** P8-00 (inventário), P8-01 (3 `.diff`+`APROVADO-`), P8-03 (evals PASS), P8-04
+(Goose), P8-02 bateria sintética + `rodar_par.sh`, P8-05 inventário, P8-06 `CANON-DELTA.md`,
+P8-07 dry-run. Otimizações A1/B1/B2/B3/D1/D2 (~4,4 GB), C2 `.diff` pronto.
+
+**As 4 travas restantes NÃO são minhas de cruzar:**
+1. **P8-02** — 7 dias de calendário com uso real. Não se comprime.
+2. **P8-05** — precisa da resposta do Humano (usa Open WebUI? voz?) + P8-02 verde.
+3. **P8-06** — Cadeia de auditoria em camadas (com um modelo externo como camada B) +
+   autorização explícita do Humano por mudança de canon. Linha vermelha — não se cruza
+   nem com "assumo o risco": a Cadeia exige outro modelo, não é algo que eu resolva só.
+4. **P8-07** — depois de 05/06; `git push origin main` é ato do Humano; o S7 pós-push é de
+   uma sessão independente.
+
+**Não tocado:** `main` (`4aa90bd`), canon, Hermes-gateway, Ollama de produção, hooks,
+`scripts/*` (já no branch), `.githooks/*`. Sem `sudo`. Userspace: `agata-warmup.service`
+(manual). `igpu/.venv` reconstruído (gitignorado).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

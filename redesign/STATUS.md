@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`217e62f`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`822f17c`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -58,8 +58,9 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   Humano (usa OWUI? voz?).
 - **P8-06 🔶** `redesign/CANON-DELTA.md` mapeia cada mudança de canon. **Nada aplicado** —
   Cadeia A→B→C + autorização por mudança (linha vermelha).
-- **P8-07** o merge (`--no-ff`, sem force/reset/rebase) + **S7 pós-push por sessão
-  independente** + `perimetro.sh` verde com P-12. Fecha o redesenho.
+- **P8-07 🔶** **dry-run do merge FEITO** (clone descartável: `merge --no-ff` rc 0, sem
+  conflito; âncora restaurável; `perimetro.sh` OK no tree mergeado). Falta P8-05/06 + push
+  (Humano) + sessão independente p/ o S7.
 
 **Otimizações (revisão 03/09 — `redesign/OTIMIZACOES.md`):** B1 ✅ (3 unidades base entraram
 no repo) · D1 ✅ (varredura do footgun do heredoc). Propostas: A1 (igpu venv sem CUDA, ~5 GB) ·
