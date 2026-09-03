@@ -4,9 +4,13 @@ Description=Ágata — consolidação noturna (memória → proposta em proposta
 [Service]
 Type=oneshot
 WorkingDirectory=%h/agata
-ExecStart=/bin/bash -c '/home/orusoua/.local/bin/hermes chat -q "$(cat /home/orusoua/agata/config/agata-consolidacao.prompt.txt)" --cli -Q --source cron'
+# C2 (redesenho, Fase 8): era `hermes chat` -- agora o flow do grafo (P6-03).
+# Saida so em propostas/consolidacao-<data>.md; nunca toca canon.
+ExecStart=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%h/agata/propostas %h/.hermes
+# C2: o flow do grafo escreve a proposta em propostas/ e o checkpoint/estado em
+# ~/.cache/agata/ (SqliteSaver + WAL). Nao toca mais ~/.hermes.
+ReadWritePaths=%h/agata/propostas %h/.cache/agata
 Restart=on-failure
 RestartSec=30

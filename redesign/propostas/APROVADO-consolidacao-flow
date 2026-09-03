@@ -1,0 +1,14 @@
+Aprovado -- regime de excecao vigente, Humano autorizou a Fase 8 inteira
+("guardrails suspensos ate segunda ordem", "prossiga, registre tudo e vai",
+2026-09-03).
+
+C2: config/agata-consolidacao.service deixa de chamar `hermes chat` e roda o
+flow do grafo (redesign/grafo/flows/consolidacao.py, P6-03). Motivo: P8-05 tira
+o Hermes do loop; e o `hermes chat` antigo JA estava quebrado (journal 03/09
+07:06: "ferramentas read_file/terminal falhando -- sem diretorio temporario").
+
+Verificado na Maquina (03/09 ~13:30): com ReadWritePaths corrigido para
+`propostas .cache/agata`, o service roda sob ProtectSystem=strict /
+ProtectHome=read-only, termina 0 (oneshot), e escreve 4 propostas em propostas/
++ o checkpoint em ~/.cache/agata/ -- nada fora disso. `systemd-analyze --user
+verify` sem erro grave.

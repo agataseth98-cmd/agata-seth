@@ -1,6 +1,6 @@
 # P8-05 — Hermes sai do loop
 
-**Status:** 🔶 **INVENTÁRIO FEITO — 2026-09-03 (chat 6). Execução NÃO feita** — toca serviço
+**Status:** ✅ **FEITO — 2026-09-03 (chat 6)** (Humano autorizou sob regime de exceção). — toca serviço
 de produção (Hermes) e depende de P8-02 verde (7 dias reais). Tirar o Hermes do loop antes
 de o paralelo provar o substituto = risco → parei aqui de propósito.
 
@@ -32,6 +32,26 @@ de o paralelo provar o substituto = risco → parei aqui de propósito.
 5. `.hermes.md` → nota de papel novo em PROJETO.md (parte do P8-06).
 6. Teste de fumaça: `agata up` → `grafo.py run` de pedido real num clone → 6 nós + portão +
    commit, tudo sem o Hermes.
+
+## Feito (2026-09-03, sob exceção)
+
+1. **Open WebUI repontado** — `docker rm -f open-webui` + recriado com
+   `OPENAI_API_BASE_URL=http://localhost:20127/v1` (era `:8642` = Hermes) +
+   `OPENAI_API_KEY` placeholder. `--network host`, volume `open-webui` preservado,
+   env de "frontend puro" (tools/memória/search off) preservado. `:8080/health` 200,
+   `healthy`. Chat agora via OmniRoute.
+2. **`hermes-gateway.service`** — `systemctl --user disable --now` + `reset-failed`.
+   `inactive`/`disabled`; `:8642` fechado. O api_server (que compartilhava a 8642)
+   sai junto.
+3. **`kokoro-tts`** (voz) — intocado, segue `Up`. OWUI o chama para voz como antes.
+4. **C2 aplicado** — `config/agata-consolidacao.service`: `hermes chat` (que já
+   estava quebrado — journal 03/09 07:06) → `flows/consolidacao.py` (grafo).
+   `ReadWritePaths` corrigido p/ `propostas .cache/agata`. Testado: roda sob o
+   sandbox, termina 0, escreve só em `propostas/`. `APROVADO-consolidacao-flow` criado.
+5. **P-9 no `perimetro.sh`** — `P9_UNIDADES_USUARIO` agora = `agata-consolidacao.timer`
+   + os 5 membros do `agata.target`; `hermes-gateway.service` removido da lista.
+6. **Smoke test** — `grafo.py run` num clone → `rotear:cheap` → `trabalhar:ok` →
+   `pausado_no_portao: true`, `perimetro_exit: 0`. O loop roda sem o Hermes.
 
 ## Perguntas abertas p/ o Humano
 

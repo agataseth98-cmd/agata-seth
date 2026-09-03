@@ -1,22 +1,24 @@
-# PROPOSTA P-8 -- NAO APLICADA
+# PROPOSTA P-8 -- NAO APLICADA (aplicada no branch sob regime de excecao, 03/09)
 # arquivo alvo:  config/agata-consolidacao.service
 # nome:          consolidacao-flow
 # aprova com:    redesign/propostas/APROVADO-consolidacao-flow  (o Humano cria)
 # depende de:    redesign/grafo/flows/consolidacao.py (P6-03) + redesign/grafo/.venv
 #
-# Otimizacao C2: a consolidacao noturna deixa de chamar o Hermes (hermes chat,
-# contencao de SQLite no state.db) e passa a rodar o flow do grafo (P6-03) --
-# LangGraph, saida so em propostas/, nunca canon. Tira uma amarra do Hermes ANTES
-# do P8-05. Job DESATENDIDO (systemd timer) -> Cadeia de auditoria vale.
-# O flow ja tem entrypoint: consolidacao.py --repo <dir> [--temas "a;b"].
-# A contencao ProtectSystem=strict / ReadWritePaths=propostas nao muda.
-# Verificado: o flow roda e escreve so em propostas/ (aceite P6-03). Rodar
-# `systemd-analyze --user verify` antes do APROVADO-.
+# Otimizacao C2 (P8-05): a consolidacao noturna deixa de chamar o Hermes e passa
+# a rodar o flow do grafo (LangGraph, saida so em propostas/, nunca canon). Tira
+# a ultima amarra do Hermes-executor. O `hermes chat` antigo ja estava quebrado
+# (journal 03/09 07:06: "ferramentas read_file/terminal falhando -- sem diretorio
+# temporario no ambiente do Hermes").
+#
+# ReadWritePaths: era `propostas .hermes` -> agora `propostas .cache/agata`
+# (o flow escreve o checkpoint/WAL em ~/.cache/agata/; nao toca mais ~/.hermes).
+# Testado na Maquina 03/09: com o RW path corrigido, o service roda sob
+# ProtectSystem=strict / ProtectHome=read-only e escreve so onde deve.
 diff --git a/config/agata-consolidacao.service b/config/agata-consolidacao.service
-index 75127d6..2be2af1 100644
+index 75127d6..e16e6ca 100644
 --- a/config/agata-consolidacao.service
 +++ b/config/agata-consolidacao.service
-@@ -4,7 +4,9 @@ Description=Ágata — consolidação noturna (memória → proposta em proposta
+@@ -4,9 +4,13 @@ Description=Ágata — consolidação noturna (memória → proposta em proposta
  [Service]
  Type=oneshot
  WorkingDirectory=%h/agata
@@ -26,4 +28,9 @@ index 75127d6..2be2af1 100644
 +ExecStart=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
  ProtectSystem=strict
  ProtectHome=read-only
- ReadWritePaths=%h/agata/propostas %h/.hermes
+-ReadWritePaths=%h/agata/propostas %h/.hermes
++# C2: o flow do grafo escreve a proposta em propostas/ e o checkpoint/estado em
++# ~/.cache/agata/ (SqliteSaver + WAL). Nao toca mais ~/.hermes.
++ReadWritePaths=%h/agata/propostas %h/.cache/agata
+ Restart=on-failure
+ RestartSec=30

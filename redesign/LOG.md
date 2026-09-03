@@ -3591,3 +3591,43 @@ Humano autorizou "agora", mantendo Open WebUI + voz), depois P8-06 (canon) e P8-
 `scripts/conselho_remoto.py` editado no branch (sob exceção; `.diff`+`APROVADO-` prontos).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 13:35 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-05 FEITO: Hermes fora do loop
+
+**Humano:** "vamos remover o hermes agora"; Open WebUI "costumo usar mas está programado
+encontrar uma melhor opção" (fica, degradado); voz "uso sim" (fica). Regime de exceção.
+
+- **Open WebUI repontado** `:8642` (Hermes) → **`:20127`** (OmniRoute sanitizador). Container
+  recriado (`docker run`, config imutável); `--network host`, volume `open-webui` e o env de
+  "frontend puro" (tools/memória/search off) preservados. `:8080/health` 200, `healthy`. Chat
+  agora sai pelo OmniRoute (perde a camada de memória/governança do Hermes — que é o intuito
+  do cutover; a governança é o grafo).
+- **`hermes-gateway.service`** `disable --now` + `reset-failed` → `inactive`/`disabled`,
+  `:8642` fechado (o api_server sai junto).
+- **`kokoro-tts`** (voz) intocado, segue de pé.
+- **C2 aplicado** — `config/agata-consolidacao.service`: `hermes chat` (já quebrado — journal
+  03/09 07:06 "ferramentas read_file/terminal falhando") → `flows/consolidacao.py` (grafo).
+  `ReadWritePaths` corrigido `propostas .hermes` → `propostas .cache/agata` (o flow escreve
+  checkpoint/WAL lá). Testado sob `ProtectSystem=strict`: termina 0, escreve 4 propostas em
+  `propostas/` + checkpoint em `~/.cache/agata/`, nada fora. `APROVADO-consolidacao-flow` criado.
+- **P-9 (`perimetro.sh`)** — `P9_UNIDADES_USUARIO` = `agata-consolidacao.timer` + os 5
+  membros do `agata.target`; `hermes-gateway.service` fora.
+- **Smoke test** — `grafo.py run` num clone sem o Hermes: `rotear:cheap` → `trabalhar:ok` →
+  `pausado_no_portao: true`, `perimetro_exit: 0`. Loop OK.
+
+**Estado:** o executor do Agata agora é **grafo + OmniRoute**. Hermes-gateway parado e
+desabilitado; volta com `systemctl --user enable --now hermes-gateway.service` se preciso
+(reversível até o merge). Open WebUI + voz de pé como serviços à parte.
+
+**Nota P8-02:** com o Hermes fora, o "paralelo" muda de forma — não há mais um Hermes
+rodando lado a lado para comparar. O que resta é observar o caminho novo em uso real por
+alguns dias antes do merge (o Humano autorizou seguir). Registrado.
+
+**Não tocado:** `main`, canon (P8-06 a seguir), Ollama de produção, `.githooks/*`. Sob
+exceção: `config/agata-consolidacao.service`, `scripts/perimetro.sh` (P-9),
+`scripts/conselho_remoto.py` — todos com `.diff`+`APROVADO-` no branch.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

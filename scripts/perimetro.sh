@@ -612,7 +612,9 @@ p11_silos_nao_versionados() {
 # alarme a cada execução normal. O que importa pra "vai rodar de novo" é
 # o TIMER que dispara ele, não o resultado da última corrida.
 P9_UNIDADES_SISTEMA=("ollama.service")
-P9_UNIDADES_USUARIO=("hermes-gateway.service" "agata-consolidacao.timer")
+# Fase 8 (redesenho): hermes-gateway saiu do loop (P8-05). O executor agora e' o
+# grafo + OmniRoute -- os membros do agata.target sao os servicos criticos.
+P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service")
 P9_CONTAINERS_DOCKER=("open-webui" "kokoro-tts")
 
 p9_servicos_declarados() {
