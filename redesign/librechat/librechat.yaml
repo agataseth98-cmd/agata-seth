@@ -1,0 +1,65 @@
+# librechat.yaml -- config do LibreChat do sistema Agata.
+# Fonte versionada: ~/agata/redesign/librechat/librechat.yaml
+# Runtime: ~/librechat/librechat.yaml  (montado em /app/librechat.yaml :ro)
+#
+# Principios espelhados do sistema:
+#  - memoria DESLIGADA: a hidratacao da Seth vem do seth_gateway (:20126),
+#    que injeta canon-em-git verificavel. Nada de auto-captura por LLM (MEMORIAS (312)).
+#  - SEM RAG por embedding: MEMORIAS (115)/(293) recusaram busca semantica.
+#    O rag_api e o pgvector nao sao implantados.
+#  - um unico endpoint "Seth" -> :20126 (loopback: seth_gateway -> sanitizador -> OmniRoute).
+
+version: 1.3.13
+cache: true
+
+interface:
+  customWelcome: "Seth -- sistema Agata. Hidratada pelo seth_gateway (:20126). A Regra 1 vale: toda resposta abre com modelo - turno - ultima entrada de MEMORIAS - o que esta quebrado."
+  privacyPolicy:
+    externalUrl: ""
+  termsOfService:
+    externalUrl: ""
+
+registration:
+  socialLogins: []
+
+# Memoria persistente: desligada de proposito. Ver acima.
+memory:
+  disabled: true
+
+endpoints:
+  custom:
+    - name: "Seth"
+      apiKey: "loopback-sem-chave"
+      baseURL: "http://127.0.0.1:20126/v1"
+      models:
+        default:
+          - "auto/chat"
+          - "auto/smart"
+          - "auto/cheap"
+          - "auto/claude-sonnet"
+          - "auto/claude-opus"
+          - "auto/reasoning"
+          - "auto/coding"
+          - "auto/vision"
+        fetch: true
+      titleConvo: true
+      titleModel: "auto/fast"
+      modelDisplayLabel: "Seth"
+      forcePrompt: false
+
+# Voz: TTS pelo kokoro-fastapi (:8880, ja roda nesta maquina, OpenAI-compat).
+# STT (whisper :20130) ainda nao e OpenAI-compat em /v1 -- pendente, ver redesign/librechat/README.md
+speech:
+  tts:
+    openai:
+      url: "http://127.0.0.1:8880/v1/audio/speech"
+      apiKey: "loopback-sem-chave"
+      model: "tts-1"
+      voices:
+        - "af_sky"
+        - "af_bella"
+        - "af_heart"
+        - "af_nicole"
+        - "am_adam"
+        - "am_michael"
+        - "bf_emma"

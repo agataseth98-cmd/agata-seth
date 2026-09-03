@@ -11,9 +11,10 @@ Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + govern
 **Redesenho concluído no branch `redesign`, mergeado na Fase 8 (2026-09-03, MEMÓRIAS (310)/(311)).**
 O executor do loop passou a ser **grafo LangGraph + OmniRoute** (não mais o Hermes). Os modelos
 são trabalhadores substituíveis; nenhuma ferramenta É o sistema. Hermes-gateway saiu do loop
-(desabilitado); Open WebUI (repontado para o OmniRoute `:20127`) e a voz (kokoro-tts) seguem
-como frontends à parte. Acesso multi-dispositivo por Open WebUI sobre Tailscale, nunca internet
-pública.
+(desabilitado); **LibreChat** (lane de conversa, aponta no `seth_gateway` `:20126`) e a voz
+(kokoro-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
+Tailscale serve, nunca internet pública. (Open WebUI foi trocado por LibreChat em
+2026-09-03, MEMÓRIAS (313).)
 
 Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada usa grafias antigas; não se corrige história.
 
@@ -46,8 +47,10 @@ Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `
 `agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper
 para lançar jogo com o Agata fora da RTX 4060 — **não** Feral GameMode, que briga com o
 `ananicy-cpp` do CachyOS; usa o `game-performance` da distro).
-**Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`) · Docker `open-webui`
-(`:8080`, `--restart=no`, aponta p/ `:20126`) + `kokoro-tts` (`:8880`, `--restart=no`).
+**Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`) · a stack Docker do
+**LibreChat** (`librechat` em `network_mode: host` bind `127.0.0.1:3080`, + `librechat-mongodb`
+e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose em
+`~/librechat/`, fonte versionada em `redesign/librechat/`) + `kokoro-tts` (`:8880`).
 Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
 **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
 a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para
@@ -65,8 +68,9 @@ carregada:** o resumo de 1 linha do log já alegou sucesso sem o arquivo existir
 **P-9 (MEMÓRIAS (221); lista atualizada na Fase 8, MEMÓRIAS (311)):** `scripts/perimetro.sh`
 avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`, os 5 membros do
 `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`,
-`obsidian-ro-proxy`) ou os containers `open-webui`/`kokoro-tts` estiverem `failed`,
-`disabled`/`masked`, ou (containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8).
+`obsidian-ro-proxy`) ou os containers do LibreChat (`librechat`, `librechat-mongodb`,
+`librechat-meilisearch`) e `kokoro-tts` estiverem `failed`, `disabled`/`masked`, ou
+(containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8).
 Motivo do controle: foi a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
 
 Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).
@@ -90,7 +94,10 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
 - Silos por modelo (Fase 2, ainda NÃO construídos): o hook `gerar-hidratacao.sh` gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, que o `seth_gateway` usa no modo `full`); cada um filtra só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria (vaza MOD entre modelos). Silo do Conselho (REGRAS, "O Conselho" item 3): norma.
 - **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hidratacao.sh` acumula entradas completas até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres — desde MEMÓRIAS (271), de cima pra baixo a partir do marcador `ENTRADAS-NOVAS` (mais recente primeiro); nas entradas migradas de antes de (271), o mecanismo original (de trás pra frente, a partir do fim físico) continua documentado como fallback para HEADs sem o marcador. Nunca corta uma entrada no meio — se a primeira sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026 (antes da migração): o `.hidrata.md` (então `.hermes.md`) publicado carregava 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior a essa medição ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida em (215), sem apagar a entrada de MEMÓRIAS que registra o achado.
 - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento — nunca por offset fixo ou número de linha, que se deslocam a cada edição de preâmbulo (MEMÓRIAS (96) achou isso; (97) corrigiu: o offset registrado em (96) é foto, não âncora durável). Script: `scripts/achar_ancora_1_62.py`.
-- RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
+- **[FECHADO por (313)]** RAG só no Open WebUI e só em sessões Gemini. Sem objeto: o Open WebUI
+  saiu (03/09/2026) e o LibreChat foi implantado **sem** RAG por embedding de propósito
+  (`rag_api`/`pgvector` não subidos) — respeita MEMÓRIAS (115)/(293). Janela grande hoje vem
+  do modelo (`auto/*` do OmniRoute), não de recorte por vetor.
 - **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
 - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`) — sincronizar contra ele no início de toda sessão, não só na primeira. Achado recorrente com sessões autônomas na nuvem (sem Humano revisando cada resposta): a sincronização falha silenciosamente com frequência — não presuma feita, verifique.
 - **Fonte canônica (URLs) e atualização:** `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/{REGRAS,PROJETO,MEMÓRIAS}.md`. Primeira sessão: o Humano envia os 3. Depois: o modelo busca das URLs, seguindo a ordem de verificação de REGRAS.md. `atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar hidratação. Nunca sobrescreve história; conflito → para e avisa.
@@ -127,9 +134,12 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só sob configuração —
   ~45k tokens estouram o `maxWaitMs` do OmniRoute. **Qualquer frontend que aponte para
   `:20126` fala com a Seth hidratada.**
-- **Open WebUI** (`:8080`, `--restart=no`) — frentE de **conversa**, aponta para `:20126`.
-  Preset `Seth` = `ollama-local/qwen3.5:9b`, hidratação vem do gateway (system do preset
-  vazio). Marcado para substituição/atualização (decisão do Humano).
+- **LibreChat** (`127.0.0.1:3080`, stack Docker sob demanda) — frente de **conversa** informal,
+  aponta para `:20126`. Endpoint único "Seth" (`ENDPOINTS=custom`), `fetch` dos modelos `auto/*`
+  do OmniRoute. **Memória desligada** (`memory.disabled`) e **sem RAG** de propósito — a
+  hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`). Meilisearch para
+  busca de conversa. Substituiu o Open WebUI em 2026-09-03 (MEMÓRIAS (313); config em
+  `redesign/librechat/`).
 - **Goose** (`~/.local/bin/goose` v1.48.0, `:20126`) — frentE de **agente / código**
   (`goose session`); também é o shell de fallback operacional. Codex CLI terciário.
 - **Voz:** kokoro-tts (`:8880`, `--restart=no`) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
@@ -145,7 +155,7 @@ movido na remoção do Hermes, 2026-09-03, MEMÓRIAS (312); junto de `restic.pas
 `obsidian.token`, `google-project/` no mesmo diretório). O OmniRoute não lê esse arquivo em
 runtime — as chaves ficam cifradas no `~/.omniroute/storage.sqlite`; `~/.config/agata/.env`
 é a fonte para adicionar/rotacionar provedor (ver `redesign/router/PROVEDORES.md`).
-**O api_server executa terminal: nunca expor sem contenção.** Auditado em MEMÓRIAS (126) — a frase antiga desta seção descrevia Tailscale com dupla autenticação, mecanismo que **não existe nesta máquina** (achado em (125)). O mecanismo real, confirmado por `ss -tlnp`: `api_server` compartilha a porta do `hermes-gateway` (8642), e o bind é **`127.0.0.1`** — contenção de kernel, não de firewall. Open WebUI (8080, `network_mode: host`) e Kokoro TTS (8880, publicado pelo Docker) também só em loopback. Mesmo efeito de contenção do texto antigo, mecanismo diferente do descrito — corrigido aqui pra não sustentar um controle de segurança em algo que não roda.
+**O api_server executa terminal: nunca expor sem contenção.** Auditado em MEMÓRIAS (126) — a frase antiga desta seção descrevia Tailscale com dupla autenticação, mecanismo que **não existe nesta máquina** (achado em (125)). O mecanismo real, confirmado por `ss -tlnp`: `api_server` compartilha a porta do `hermes-gateway` (8642), e o bind é **`127.0.0.1`** — contenção de kernel, não de firewall. LibreChat (`network_mode: host`, bind `127.0.0.1:3080`), Mongo/Meili (publicados só em `127.0.0.1`) e Kokoro TTS (8880, publicado pelo Docker) também só em loopback. Mesmo efeito de contenção do texto antigo, mecanismo diferente do descrito — corrigido aqui pra não sustentar um controle de segurança em algo que não roda.
 **Ollama (`11434`):** restrito a `127.0.0.1` desde MEMÓRIAS (126)/(127), confirmado no bind real (`ss -tlnp`) e no ambiente do processo. `override.conf` completo com as 5 variáveis (`OLLAMA_NUM_GPU=999`, `OLLAMA_KV_CACHE_TYPE=q4_0`, `CUDA_VISIBLE_DEVICES=0`, `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_HOST=127.0.0.1:11434`) — o efeito colateral de (127) (`OLLAMA_NUM_GPU`/`CUDA_VISIBLE_DEVICES`/`OLLAMA_FLASH_ATTENTION` apagados por um `tee` destrutivo) foi corrigido, confirmado em MEMÓRIAS (130). Efeito sobre estabilidade de VRAM não medido nesta correção — restaurar a variável não é o mesmo que testar carga.
 Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
 

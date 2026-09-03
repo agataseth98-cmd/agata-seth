@@ -1,0 +1,64 @@
+# ~/librechat/docker-compose.yml
+# LibreChat ENXUTO para o sistema Agata -- 3 servicos, nada mais.
+#   librechat-mongodb      conversas / usuarios / presets
+#   librechat-meilisearch  busca de conversa
+#   librechat              a app (api + cliente)
+#
+# NAO tem rag_api nem pgvector de proposito (MEMORIAS (115)/(293): sem busca por embedding).
+# A app roda em network_mode:host para alcancar o seth_gateway em 127.0.0.1:20126 --
+# mesmo padrao que o Open WebUI usava nesta maquina. Mongo/Meili ficam numa bridge
+# privada e so publicam em 127.0.0.1.
+#
+# restart:"no" em tudo -- nada sobe no boot. Os atalhos `seth` / `Parar Seth` controlam.
+# Fonte versionada: ~/agata/redesign/librechat/docker-compose.yml
+
+services:
+  librechat-mongodb:
+    container_name: librechat-mongodb
+    image: mongo:8.0.20
+    restart: "no"
+    networks: [librechat]
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - librechat-mongo-data:/data/db
+
+  librechat-meilisearch:
+    container_name: librechat-meilisearch
+    image: getmeili/meilisearch:v1.35.1
+    restart: "no"
+    networks: [librechat]
+    ports:
+      - "127.0.0.1:7700:7700"
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+    volumes:
+      - librechat-meili-data:/meili_data
+
+  librechat:
+    container_name: librechat
+    image: ghcr.io/danny-avila/librechat:latest
+    restart: "no"
+    network_mode: host
+    depends_on:
+      - librechat-mongodb
+      - librechat-meilisearch
+    env_file:
+      - .env
+    environment:
+      - CONFIG_PATH=/app/librechat.yaml
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./images:/app/client/public/images
+      - ./uploads:/app/uploads
+      - ./logs:/app/api/logs
+      - ./data:/app/data
+
+networks:
+  librechat:
+    name: librechat
+
+volumes:
+  librechat-mongo-data:
+  librechat-meili-data:

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Para os frentes da Seth e libera recursos. Mantém a espinha (agata.target).
-docker stop open-webui kokoro-tts >/dev/null 2>&1 || true
+# Para os frentes da Seth e libera recursos. Mantem a espinha (agata.target).
+# Fonte versionada: ~/agata/redesign/systemd/seth-parar
+LC=~/librechat/docker-compose.yml
+docker compose -f "$LC" stop >/dev/null 2>&1 || true
+docker stop kokoro-tts >/dev/null 2>&1 || true
 systemctl --user stop seth-gateway.service 2>/dev/null || true
-notify-send -a Seth "Seth" "frentes parados (espinha segue de pé)" 2>/dev/null || true
+notify-send -a Seth "Seth" "frentes parados (espinha segue de pe)" 2>/dev/null || true

@@ -62,9 +62,10 @@ faillock --user orusoua
 
 ## Sobre acesso remoto — achado importante, corrige PROJETO.md
 
-`PROJETO.md` descreve acesso remoto "por Open WebUI sobre Tailscale". **Tailscale não
-está instalado nesta máquina** — sem binário, sem serviço, sem interface de rede
-(`tailscale0` ausente). SSH (`sshd`) está instalado mas **desabilitado e parado**.
+`PROJETO.md` descreve acesso remoto por LibreChat sobre Tailscale serve. **Tailscale não
+está instalado nesta máquina** (reconfirmado 03/09/2026 na troca p/ LibreChat) — sem binário,
+sem serviço, sem interface de rede (`tailscale0` ausente). Passos de instalação em
+`redesign/librechat/README.md`. SSH (`sshd`) está instalado mas **desabilitado e parado**.
 Ou seja: hoje, se a tela travar, **não há como acessar a máquina de outro dispositivo**
 — só o procedimento local acima. Corrigido no registro; decisão de reativar SSH/instalar
 Tailscale é sua, não tomada aqui.

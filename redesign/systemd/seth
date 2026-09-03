@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-# Inicia a Seth para CONVERSA (Open WebUI). Sobe o que precisa, abre o navegador.
+# Inicia a Seth para CONVERSA (LibreChat). Sobe a espinha + o gateway + a stack
+# do LibreChat + a voz, espera responder e abre o navegador.
+# Fonte versionada: ~/agata/redesign/systemd/seth
 set -e
-notify-send -a Seth "Seth" "subindo…" 2>/dev/null || true
+LC=~/librechat/docker-compose.yml
+notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
 systemctl --user start agata.target 2>/dev/null || true
 systemctl --user start seth-gateway.service
-docker start open-webui kokoro-tts >/dev/null 2>&1 || true
-# espera o OWUI responder (ate ~40s)
-for i in $(seq 1 20); do
-  curl -sf -o /dev/null --max-time 2 http://127.0.0.1:8080/health && break || sleep 2
+docker compose -f "$LC" up -d >/dev/null 2>&1 || true
+docker start kokoro-tts >/dev/null 2>&1 || true
+# espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
+for i in $(seq 1 30); do
+  curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
 done
-xdg-open "http://127.0.0.1:8080" >/dev/null 2>&1 &
+xdg-open "http://127.0.0.1:3080" >/dev/null 2>&1 &
+notify-send -a Seth "Seth" "pronta em http://127.0.0.1:3080" 2>/dev/null || true

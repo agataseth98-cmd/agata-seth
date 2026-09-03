@@ -27,10 +27,18 @@ O sistema foi reconstruído. Durante alguns dias tudo isso viveu num ramo
   reclama se algo ficou sem backup.
 - **Um botão liga/desliga tudo** (`agata.target`), com um "dreno" que nunca
   corta no meio de uma gravação.
-- **O Hermes saiu do circuito.** O Open WebUI (a telinha web) e a voz
-  continuam funcionando, mas o Open WebUI agora fala com o roteador novo —
-  perdeu a memória que o Hermes dava. Você já disse que quer trocá-lo por
-  algo melhor; por ora ele fica assim.
+- **O Hermes saiu do circuito** e a telinha web foi trocada. No lugar do
+  Open WebUI entrou o **LibreChat** (03/09/2026) — mais moderno, com busca
+  de conversa e pronto para "plugins" (MCP) quando você quiser. Ele foi
+  instalado enxuto: sem a "memória automática" e sem a busca-por-vetor de
+  arquivos, de propósito — quem hidrata a Seth é o roteador, com o que está
+  escrito no canon (que é conferível). A voz (kokoro) segue igual.
+  Abre em `http://127.0.0.1:3080`; a senha do primeiro acesso está em
+  `~/librechat/PRIMEIRO-ACESSO.txt` (troque e apague o arquivo).
+- **Acesso de fora (Tailscale) ainda depende de você.** O Tailscale não
+  está instalado nesta máquina. Os comandos exatos (precisam de `sudo` e do
+  seu login) estão em `redesign/librechat/README.md`. Até lá, o LibreChat
+  só responde nesta máquina.
 - **Uma cópia de reserva do "operador de terminal"** (Goose) foi instalada,
   caso a sessão principal caia.
 
