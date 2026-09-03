@@ -1,8 +1,10 @@
 # P8-02 — paralelo N dias: Hermes vs. grafo + OmniRoute
 
-**Status:** 🟢 **ABERTO — 2026-09-03 (chat 6).** Régua decidida: **N = 7 dias + piso de
-amostragem**. Harness validado (1 seed em `redesign/grafo/paralelo.md`). Acumula conforme o
-Humano usa o sistema.
+**Status:** 🟢 **ABERTO — 2026-09-03 (chat 6).** N = 7 dias + piso de amostragem. Harness
+validado + **bateria sintética** (5 pares, marcados) cobriu o piso quase todo: ≥1 par por
+tipo ✓, portão pausa ✓, zero fabricação ✓, **nenhuma divergência**. Fallback: parcial
+(b2 landou no alvo do `conselho`; falta um em uso real). **Ainda aberto: os 7 dias de
+calendário com pedidos reais.** Log: `redesign/grafo/paralelo.md`.
 
 **Objetivo:** medir o caminho novo (grafo LangGraph + OmniRoute) contra o Hermes em uso
 real por N dias, com número, antes de tirar o Hermes do loop (P8-05).

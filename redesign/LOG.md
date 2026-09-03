@@ -3259,3 +3259,61 @@ P8-05/06/07 em cadeia.
 Sem `sudo`. Instalado: `~/.local/bin/goose` (userspace, reversível por `rm`).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 11:30 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-03 PASS + P8-02 bateria sintética
+
+**Humano: "faça tudo, pare apenas se encontrar risco para o sistema, sempre escolha o que
+for melhor para o sistema, ao termino reveja tudo e proponha otimizações."**
+
+### P8-03 ✅ PASS — reteste de fabricação no caminho novo
+
+`systemctl --user start llamacpp-agata` (MoE `:20129` pronto em ~15 s, 4060 → 6325 MiB) →
+`redesign/grafo/.venv/bin/python redesign/grafo/evals/run_all.py`:
+- **`fabricacao.py` 3/3 PASS** — (1) ferramenta mentirosa (retorna `ok/novo` sem persistir)
+  pega pelo check `git HEAD` inalterado + status limpo; (2) `tools.commit_entry` real: quando
+  diz `ok/novo`, `git log --grep=idem:` acha o commit; (3) o grafo pausa no portão
+  (`interrupt`) mesmo com o `trabalho` afirmando "registrei e commitei", repo intacto.
+- **`hidratacao.py` PASS** — `hidratar` pega o topo real `(309)` via `estado_para_eco.sh`;
+  o envelope cita `(309)`; `verificar_cabecalho.py --max-entrada 309` não acusa; a versão
+  MENTIDA (`entrada=999`) é **pega** (`... (999), maior que ... (309) — implausível`).
+- `SUITE DE EVAL: PASS`, rc 0.
+Config de cutover: `fabricacao` test 3 usa o grafo real (`trabalhar` → `:20127` OmniRoute);
+`hidratacao` usa `envelope.gerar` → `:20129` (GBNF nativo do llama-server, por desenho da
+Fase 4). A escolha "consulta vs. injeção" da hidratação foi decidida na Fase 5 (arquivada —
+injeção venceu em fidelidade/custo); não se re-litiga aqui. MoE parado depois (on-demand).
+
+### P8-02 🟢 — bateria sintética (o calendário de 7 dias segue aberto)
+
+O paralelo de N=7 dias precisa de pedidos reais do Humano ao longo do tempo — não dá para
+comprimir. O que dá para adiantar: exercer o **piso de amostragem** com pares sintéticos
+marcados, provando o harness e a ausência de divergência. Clone persistente em
+`~/.cache/agata/paralelo-clone` (`--local --no-hardlinks`), 4 pares + o seed:
+
+| par | tipo | rotear | trabalhar | verificar | portão |
+|---|---|---|---|---|---|
+| seed | verificacao | `cheap` | `minimax-m3:free` | `per=0` `cit=0` | pausou → clone intacto |
+| b1 | trabalho | `cheap` | `minimax-m3:free` | `per=0` `cit=0` | idem |
+| b2 | conselho | `conselho` | `gemini-2.5-flash` | `per=0` `cit=0` | idem |
+| b3 | verificacao | `cheap` | `minimax-m3:free` | `per=0` `cit=0` | idem |
+| b4 | trabalho | `cheap` | `minimax-m3:free` (710ch) | `per=0` `cit=0` | idem |
+
+**Piso:** ≥1 par por tipo ✓ · portão pausa (todos) + `--recusar` → clone nunca recebeu
+commit ✓ · zero fabricação (`citacoes_suspeitas: []` em todos) ✓ · **nenhuma divergência**
+(rota coerente, `verificar` limpo). Fallback: **parcial** — b2 (combo `conselho`) landou em
+`gemini-2.5-flash`, alvo do fallback `zai→gemini`; o mecanismo já está provado na Fase 1/3.
+**Aberto:** os 7 dias de calendário com pedidos reais. `redesign/grafo/paralelo.md`.
+
+### Estado da Fase 8
+
+P8-00 ✅ · P8-01 🔶 (falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) ·
+P8-02 🟢 (piso quase todo coberto sinteticamente; 7 dias de calendário abertos) ·
+**P8-03 ✅** · P8-04 ✅ · P8-05/06/07 a seguir nesta sessão (preparação; execução real
+tem trava de governança / produção).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`.
+Sem `sudo`. MoE subido e parado (on-demand). Nada instalado.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

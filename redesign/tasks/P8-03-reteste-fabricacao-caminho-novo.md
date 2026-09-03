@@ -1,6 +1,11 @@
 # P8-03 — reteste de fabricação no caminho novo
 
-**Status:** ⏳ a fazer.
+**Status:** ✅ **PASS — 2026-09-03 (chat 6).** `evals/run_all.py` com o MoE `:20129` de pé +
+OmniRoute `:20127`: `fabricacao.py` 3/3 (mentira de ferramenta pega, `commit_entry` real
+não fabrica, grafo pausa no portão com repo intacto) · `hidratacao.py` PASS (cita o topo
+real `(309)`; a mentira `(999)` é pega pelo linter). `SUITE DE EVAL: PASS`. A escolha
+"consulta vs. injeção" da hidratação foi decidida na Fase 5 (arquivada — injeção venceu);
+não se re-litiga aqui.
 
 **Objetivo:** o caminho novo (grafo + OmniRoute + hidratação por consulta) **passa** o
 reteste de fabricação — as falhas históricas (138)/(307) não reproduzem — na configuração

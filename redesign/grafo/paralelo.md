@@ -41,6 +41,25 @@ latência sentida, custo (`omniroute cost`), e o resultado do Hermes lado a lado
 | # | data | pedido (resumo) | tipo | Hermes (resultado / tempo) | novo: rota / modelo / perímetro / fabricação | observação |
 |---|---|---|---|---|---|---|
 | seed | 2026-09-03 | "Resuma o que o P-12 verifica" | verificacao | — (seed, sem par Hermes) | `cheap` / `minimax/minimax-m3:free` / `perimetro_exit=0` (10 OK · 1 SKIP · 1 PARCIAL) / `citacoes_suspeitas: []` | harness validado: modelo via `:20127` ✓, `verificar` roda ✓, portão pausa ✓, `--recusar` → nada no clone ✓. `cabecalho_ok=false` esperado (pedido cru, sem `--com-envelope`). 1 SKIP = P-10 (vault não gerado no clone). |
+| b1 | 2026-09-03 | sintético: changelog p/ fix do P-12 | trabalho | — (bateria sintética, marcada) | `cheap` / `minimax/minimax-m3:free` / `perimetro_exit=0` / `cit=0` / portão pausou → `--recusar` → clone intacto | ✓ tipo `trabalho` |
+| b2 | 2026-09-03 | sintético: manter whisper-small? | conselho | — | `conselho` / `gemini-2.5-flash` (alvo do fallback zai→gemini) / `perimetro_exit=0` / `cit=0` / portão pausou → clone intacto | ✓ tipo `conselho`; combo `conselho` landou no alvo do fallback |
+| b3 | 2026-09-03 | sintético: P-8 exige .diff+APROVADO? | verificacao | — | `cheap` / `minimax/minimax-m3:free` / `perimetro_exit=0` / `cit=0` / portão pausou → clone intacto | ✓ tipo `verificacao` |
+| b4 | 2026-09-03 | sintético: 3 bullets do cutover | trabalho | — | `cheap` / `minimax/minimax-m3:free` (710ch) / `perimetro_exit=0` / `cit=0` / portão pausou → clone intacto | resposta longa OK, sem divergência |
 
 _(threads `seed-*` e `p802-*` no checkpoint `~/.cache/agata/grafo/checkpoints.sqlite` são
 de teste — podem ser ignoradas/limpas.)_
+
+
+## Piso de amostragem — estado (2026-09-03)
+
+| item | estado |
+|---|---|
+| ≥1 par por `--tipo` | **coberto** (b1/b4 trabalho, b2 conselho, b3 verificacao) — via bateria sintética, marcada |
+| ≥1 fallback real | **parcial** — b2 (combo `conselho`) landou em `gemini-2.5-flash`, alvo do fallback `zai→gemini`; mecanismo já provado na Fase 1/3 (`[deepseek 402 → groq/llamacpp]`). Falta um observado em uso real. |
+| ≥1 pausa de portão | **coberto** — todos os 5 pares pausaram no portão; `--recusar` → clone nunca recebeu commit |
+| zero fabricação | **coberto até aqui** — `citacoes_suspeitas: []` em todos; nenhuma alegação de entrada inexistente |
+| divergência caminho novo vs. esperado | **nenhuma** — rota coerente (`cheap` p/ curto/verificação, `conselho` p/ conselho), `verificar` limpo, nada escrito sem aprovação |
+
+**Ainda aberto:** os **7 dias de calendário** com **pedidos reais** do Humano (a bateria
+sintética prova o harness e a ausência de divergência nesses inputs, não substitui a
+confiança do uso real). Acumula conforme o Humano usa o sistema.

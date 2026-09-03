@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`55c980c`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`d1ad4a1`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -45,9 +45,11 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   `perimetro.sh` = **11 controles, P-12 vermelho/verde demonstrado** (bug do `hd_ok=1`
   corrigido — `subprocess` no lugar de `restic | python3 - <<'PY'`). **Falta:** camadas B/C
   da Cadeia + `APROVADO-conselho-remoto-omniroute` (toca rede — não auto-aprovado).
-- **P8-02 🟢** paralelo **N=7 dias + piso de amostragem** (Hermes vs. grafo+OmniRoute, sem
-  desligar nada). Aberto — acumula em `redesign/grafo/paralelo.md` conforme o Humano usa.
-- **P8-03** reteste de fabricação no caminho novo ((138)/(307) + hidratação), config de cutover.
+- **P8-02 🟢** paralelo **N=7 dias + piso**. Bateria sintética (5 pares) cobriu: ≥1 por tipo,
+  portão pausa, zero fabricação, **nenhuma divergência**. **Aberto:** os 7 dias com pedidos
+  reais. `redesign/grafo/paralelo.md`.
+- **P8-03 ✅** `evals/run_all.py` (MoE `:20129` + OmniRoute `:20127`): `fabricacao` 3/3 +
+  `hidratacao` PASS (cita `(309)` real; mentira `(999)` pega). `SUITE DE EVAL: PASS`.
 - **P8-04 ✅** Goose **v1.48.0** → `~/.local/bin/goose` (método B, sha256 conferido).
   Config → `:20127`, modelo `ollama-local/qwen3.5:9b`. `goose run` OK via OmniRoute; segredo
   plantado → 422. Achado: cold start do Ollama estoura o deadline (15s) do OmniRoute na 1ª
