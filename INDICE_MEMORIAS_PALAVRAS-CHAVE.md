@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/agata/.env` · hidratação renomeada · `seth_gateway` (:20126) + frentes sob demanda + atalhos
+  palavras-chave: hermes, removido, inteiro, cofre, config, agata, env, hidratação, renomeada, seth, gateway, frentes, sob, demanda, atalhos
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeados em main; Hermes fora do loop; canon atualizado
   palavras-chave: redesenho, fase, cutover, scripts, canon, mergeados, main, hermes, fora, loop, atualizado
 (310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede de segurança, router, iGPU, modelos, grafo, spike RLM, Obsidian, liga/desliga)
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: limpeza, par, esferas, movido, propostas, aplicadas, rodapé, estamos, ponteiro, acb, projeto, referencia, atualizados
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + reversão parcial de (223) para assunto de sistema — decisão do Humano, seção "Memória em duas camadas" do PROJETO.md reescrita
   palavras-chave: esferas, memória, pessoal, projeto, reversão, parcial, assunto, sistema, decisão, humano, seção, camadas, reescrita
-(282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
-  palavras-chave: humano, confirmou, conversa, modelos, edição, config, yaml, real
+(282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a e …
+  palavras-chave: humano, confirmou, conversa, modelos
 (281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nun …
   palavras-chave: proposta, ancora, defasagem, honesta, aplicada, nun
 (280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: n …

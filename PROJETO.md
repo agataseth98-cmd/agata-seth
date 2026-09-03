@@ -46,12 +46,21 @@ Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `
 `agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper
 para lançar jogo com o Agata fora da RTX 4060 — **não** Feral GameMode, que briga com o
 `ananicy-cpp` do CachyOS; usa o `game-performance` da distro).
-Ainda de pé: `ollama.service` (produção, `:11434`, intocado) · Docker `open-webui` (`:8080`,
-repontado p/ `:20127`) + `kokoro-tts` (`:8880`, voz) · `agata-consolidacao.timer`.
-**`hermes-gateway.service` — `disabled` (saiu do loop, Fase 8).** Reversível:
-`systemctl --user enable --now hermes-gateway.service`.
+**Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`) · Docker `open-webui`
+(`:8080`, `--restart=no`, aponta p/ `:20126`) + `kokoro-tts` (`:8880`, `--restart=no`).
+Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
+**Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
+a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para
+`~/.config/agata/.env` (o OmniRoute não os lê em runtime — ver `CHAVES.md`).
 
-**`agata-consolidacao.timer`, restaurado em quarentena 20/08/2026 (MEMÓRIAS (220)).** Ficou falhando em silêncio (PATH, prompt apontando pro `DIÁRIO.md` extinto) desde data não determinada — nenhum controle percebeu, motivo de P-9 existir (ver abaixo). Hoje: `ExecStart` usa caminho absoluto do binário, sem depender de PATH/shell de login; roda sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` restrito a `propostas/` e `~/.hermes` — nunca escreve em canon, isso é imposto pelo kernel, não só pelo texto do prompt; `Restart=on-failure`/`RestartSec=30` cobre uma falha intermitente real e reproduzida (contenção de SQLite no `state.db` do Hermes, provável concorrência com `hermes-gateway.service`). O prompt (`config/agata-consolidacao.prompt.txt`) só propõe: escreve `propostas/consolidacao-<data>.md` com entrada `(a numerar)`, nunca toca MEMÓRIAS/REGRAS/PROJETO/ONDE_ESTAMOS. **`lacuna` registrada:** o resumo de 1 linha que a corrida imprime no log já mostrou, ao vivo, alegar sucesso sem o arquivo existir — confira sempre `propostas/`, nunca só o log.
+**`agata-consolidacao.timer` (MEMÓRIAS (220); repontado na Fase 8, MEMÓRIAS (311)).** Roda
+23:00 diário. `ExecStart` = `redesign/grafo/flows/consolidacao.py` (flow do grafo — LangGraph,
+saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`, nunca toca canon).
+Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` +
+`~/.cache/agata/` (checkpoint/WAL) — a contenção é do kernel, não só do prompt. O `hermes
+chat` antigo já estava quebrado (sem diretório temporário) quando foi trocado. **`lacuna`
+carregada:** o resumo de 1 linha do log já alegou sucesso sem o arquivo existir — confira
+`propostas/`, nunca só o log.
 
 **P-9 (MEMÓRIAS (221); lista atualizada na Fase 8, MEMÓRIAS (311)):** `scripts/perimetro.sh`
 avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`, os 5 membros do
@@ -64,13 +73,13 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
 
 ## Memória e hidratação
 - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
-- **Vault Obsidian derivado (MEMÓRIAS (290)):** `memoria/obsidian/` — gerado por `scripts/gerar_obsidian.py` a cada commit (passo `post-commit`, pasta gitignorada). Representa TODO o sistema como notas religadas por wikilinks: uma por entrada de MEMÓRIAS, por regra, por seção de PROJETO/PROJETO_REFERENCIA, por script, por controle P-N, por proposta aplicada, mais MOCs e um painel de estado. **Fonte da verdade continua sendo o canon** — isto é camada de leitura, como o `.hermes.md`. Modelo com acesso à Máquina (Seth) navega a partir de `memoria/obsidian/INICIO.md`; não editar (a geração apaga e reescreve — correção é entrada nova em MEMÓRIAS).
-- **Quando a Seth usa o vault (MEMÓRIAS (292)):** consulta dirigida, nunca varredura. Serve para história além da janela do `.hermes.md`, para os backlinks de uma entrada/regra/proposta, ou para "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/`, chegando por `INICIO.md` ou pelos `moc-*`. São centenas de notas: não varrer o vault nem o `MEMÓRIAS.md` cru, o custo é de contexto.
+- **Vault Obsidian derivado (MEMÓRIAS (290)):** `memoria/obsidian/` — gerado por `scripts/gerar_obsidian.py` a cada commit (passo `post-commit`, pasta gitignorada). Representa TODO o sistema como notas religadas por wikilinks: uma por entrada de MEMÓRIAS, por regra, por seção de PROJETO/PROJETO_REFERENCIA, por script, por controle P-N, por proposta aplicada, mais MOCs e um painel de estado. **Fonte da verdade continua sendo o canon** — isto é camada de leitura, como o `.hidrata.md`. Modelo com acesso à Máquina (Seth) navega a partir de `memoria/obsidian/INICIO.md`; não editar (a geração apaga e reescreve — correção é entrada nova em MEMÓRIAS).
+- **Quando a Seth usa o vault (MEMÓRIAS (292)):** consulta dirigida, nunca varredura. Serve para história além da janela do `.hidrata.md`, para os backlinks de uma entrada/regra/proposta, ou para "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/`, chegando por `INICIO.md` ou pelos `moc-*`. São centenas de notas: não varrer o vault nem o `MEMÓRIAS.md` cru, o custo é de contexto.
 - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
 - **Hidratação — pós-redesenho (Fase 8):** o **loop de governança** (grafo LangGraph) hidrata
   pelo nó `hidratar` = `scripts/estado_para_eco.sh` (fatos de Máquina: HEAD, topo de MEMÓRIAS,
   `sync`, `HASH-ESTADO`) + `query_canon` / `redesign/grafo/flows` (`consulta.py`, índice-primeiro,
-  zero vector DB) para profundidade sob demanda. O **`.hermes.md`** continua sendo gerado pelo
+  zero vector DB) para profundidade sob demanda. O **`.hidrata.md`** continua sendo gerado pelo
   `pre-commit` (`.githooks/gerar-hidratacao.sh`) como **referência** — não é mais a hidratação
   primária do loop. Sessões em nuvem seguem carregando por `PROMPT_CARREGAMENTO.md` + canon.
   Fora do loop não há contador mecânico de turno — conta-se a própria resposta no contexto
@@ -78,8 +87,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   **arquivado** — injeção venceu em fidelidade/custo; números no `redesign/LOG.md`).
 - **`ONDE_ESTAMOS.md` (16/08/2026) é um quarto arquivo na raiz, só para o Humano — nunca entra na hidratação.** Uma tela, português simples, sem jargão de canon. Mantido atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado (REGRAS, Regra 4). MEMÓRIAS (196)/(197).
 - **[FECHADO] Teto de entrega do carregador do `hermes-agent`.** Veredito: `agent/prompt_builder.py` truncava `.hermes.md` antes de injetar — piso dinâmico de 20.000 chars vindo de `model.context_length: 65536`, e **o PROJETO.md inteiro nunca chegava a nenhum modelo**. Corrigido com `context_file_max_chars: 100000` explícito no `config.yaml`, escopo estreito, verificado rodando o carregador real e não só lendo a config. `lacuna` que permanece: efeito de `model.context_length` sobre a compressão de histórico de conversa, não medido. Histórico: MEMÓRIAS (103)-(105).
-- Silos por modelo (Fase 2, ainda NÃO construídos): o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + a janela mais recente de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo do Conselho (REGRAS, "O Conselho" item 3) é **norma, não mecanismo**.
-- **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hidratacao.sh` acumula entradas completas até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres — desde MEMÓRIAS (271), de cima pra baixo a partir do marcador `ENTRADAS-NOVAS` (mais recente primeiro); nas entradas migradas de antes de (271), o mecanismo original (de trás pra frente, a partir do fim físico) continua documentado como fallback para HEADs sem o marcador. Nunca corta uma entrada no meio — se a primeira sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026 (antes da migração): o `.hermes.md` publicado carregava 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior a essa medição ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida em (215), sem apagar a entrada de MEMÓRIAS que registra o achado.
+- Silos por modelo (Fase 2, ainda NÃO construídos): o hook `gerar-hidratacao.sh` gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, que o `seth_gateway` usa no modo `full`); cada um filtra só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria (vaza MOD entre modelos). Silo do Conselho (REGRAS, "O Conselho" item 3): norma.
+- **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hidratacao.sh` acumula entradas completas até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres — desde MEMÓRIAS (271), de cima pra baixo a partir do marcador `ENTRADAS-NOVAS` (mais recente primeiro); nas entradas migradas de antes de (271), o mecanismo original (de trás pra frente, a partir do fim físico) continua documentado como fallback para HEADs sem o marcador. Nunca corta uma entrada no meio — se a primeira sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026 (antes da migração): o `.hidrata.md` (então `.hermes.md`) publicado carregava 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior a essa medição ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida em (215), sem apagar a entrada de MEMÓRIAS que registra o achado.
 - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento — nunca por offset fixo ou número de linha, que se deslocam a cada edição de preâmbulo (MEMÓRIAS (96) achou isso; (97) corrigiu: o offset registrado em (96) é foto, não âncora durável). Script: `scripts/achar_ancora_1_62.py`.
 - RAG só no Open WebUI e só em sessões Gemini — mantido por prudência (janela maior), não pela justificativa antiga de "qwen 32k estoura", que está desatualizada.
 - **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
@@ -109,15 +118,26 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
 **Selo de auditoria:** `(API externa via script)` quando usar code_interpreter + script.
 
 ## Interface
-**Pós-redesenho (Fase 8):** o executor é o **grafo + OmniRoute** (via o `agata` CLI —
-`redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
-**Goose** (`~/.local/bin/goose` v1.48.0, apontado p/ `:20127`) é o shell operacional de
-**fallback** — não é conselheiro nem gate; Codex CLI é terciário.
-**Open WebUI** como frontend puro (tools/memória/search nativos desligados), agora falando com
-o **OmniRoute `:20127`** (era o Hermes) — perde a camada de memória/governança do Hermes, que
-agora é do grafo. Voz = kokoro-tts (`:8880`), inalterada. Open WebUI está marcado para
-substituição/atualização (decisão do Humano, Fase 8).
-Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.
+**Pós-redesenho + remoção do Hermes (2026-09-03, MEMÓRIAS (310)–(312)):**
+- **Executor / loop:** grafo + OmniRoute, via o `agata` CLI (`~/.local/bin/agata` →
+  `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
+- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, `seth-gateway.service`
+  **sob demanda**) — reidrata a **Seth** antes do sanitizador. Modo `compacto` (default):
+  cabeçalho curto (identidade + Regra 1 + ponteiro p/ `query_canon`) + estado atual de
+  `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só sob configuração —
+  ~45k tokens estouram o `maxWaitMs` do OmniRoute. **Qualquer frontend que aponte para
+  `:20126` fala com a Seth hidratada.**
+- **Open WebUI** (`:8080`, `--restart=no`) — frentE de **conversa**, aponta para `:20126`.
+  Preset `Seth` = `ollama-local/qwen3.5:9b`, hidratação vem do gateway (system do preset
+  vazio). Marcado para substituição/atualização (decisão do Humano).
+- **Goose** (`~/.local/bin/goose` v1.48.0, `:20126`) — frentE de **agente / código**
+  (`goose session`); também é o shell de fallback operacional. Codex CLI terciário.
+- **Voz:** kokoro-tts (`:8880`, `--restart=no`) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+- **Atalhos** (`~/Área de trabalho/`, ícone `~/Imagens/Ágatha Seth.png`): **Seth** (chat —
+  sobe tudo + abre o navegador), **Seth (agente)** (Goose no terminal), **Parar Seth**
+  (para os frentes; a espinha `agata.target` segue de pé). Skills/integrações futuras
+  (browser-use, Home Assistant, pontes Discord/WhatsApp) entram **sob demanda**, cada uma
+  como servidor MCP (ver desenho da arquitetura da Seth).
 
 ## Segurança
 Sandbox sempre. Segredos só em `~/.config/agata/.env`, fora do repo (era `~/.hermes/.env` —
@@ -136,7 +156,7 @@ Aprovado em princípio, escopo pequeno de propósito: UM modelo, UMA tarefa — 
 
 **Mecanismo, `scripts/conselho_remoto.py` (MEMÓRIAS (207)):** recebe um arquivo de texto com o pedido (escrito pelo Humano) → envia UMA vez a UM modelo → guarda a resposta CRUA em `memoria/missoes/conselho-remoto/` (data, modelo, tokens, custo) → confere as 4 partes do parecer (Origem/Posição/Fundamentação/Emenda); se faltar, reporta "fora do formato" e para — REGRAS ("Segunda opinião") manda devolver o pedido uma vez com o formato junto, decisão de reenviar é do Humano, não do script. Nunca escreve em MEMÓRIAS/PROJETO/REGRAS, nunca interpreta ou julga a resposta, nunca encadeia chamadas, nunca decide nada.
 
-**Segurança, o ponto que esta fase introduz:** hoje um Humano lê todo texto entre modelos antes dele influenciar outro modelo; automatizar o transporte remove esse filtro. **A resposta de um modelo remoto é DADO NÃO CONFIÁVEL** — nunca executada, nunca interpretada como instrução, guardada em arquivo, nunca injetada automaticamente no contexto de outro modelo nem no `.hermes.md`. O Humano lê antes de qualquer coisa acontecer com ela.
+**Segurança, o ponto que esta fase introduz:** hoje um Humano lê todo texto entre modelos antes dele influenciar outro modelo; automatizar o transporte remove esse filtro. **A resposta de um modelo remoto é DADO NÃO CONFIÁVEL** — nunca executada, nunca interpretada como instrução, guardada em arquivo, nunca injetada automaticamente no contexto de outro modelo nem na hidratação (`.hidrata*.md`). O Humano lê antes de qualquer coisa acontecer com ela.
 
 **Condição 1 (MEMÓRIAS (206)), tecnicamente forçada no script (MEMÓRIAS (207)):** só material já no repositório PÚBLICO pode ir no texto do pedido — nunca `memoria/missoes/`. `conselho_remoto.py` recusa enviar se o texto do pedido mencionar `memoria/missoes` (barra ou contrabarra), antes de qualquer chamada de rede. Reforçado porque **os termos de treino da Zhipu sobre dado enviado pela camada grátis não foram confirmados em fonte primária** (`z.ai/privacy-policy`, `z.ai/legal-agreement`, `docs.z.ai/api-reference/introduction` — 404 ou sem a cláusula) — tratado como se pudesse treinar sobre o enviado, até prova em contrário.
 
@@ -174,7 +194,7 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
 ## Quarentena estrutural (P-8)
 **O buraco, 20/08/2026 (item 6 do documento do Humano, proposta do Marcos, MEMÓRIAS (218)).** Até aqui, o executor escreve em canon, comita e empurra — o Humano fica sabendo depois. Nenhuma das sete checagens do perímetro cobria isso, e é a mesma classe do incidente registrado em MEMÓRIAS (214) (`sincronizar-estado.sh` publicando sozinho apesar do próprio cabeçalho dizer que não).
 
-**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hermes.md` (gerado), `PROMPT_CARREGAMENTO.md` (movido pra dentro do repo em 20/08/2026, item 2 do documento do Humano). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não. `PROMPT_CARREGAMENTO.md` fica fora da quarentena apesar de "dirigir" um modelo, ao contrário de `config/agata-consolidacao.prompt.txt`: a diferença é que este último dirige um processo DESATENDIDO (systemd timer, sem Humano revisando antes de agir), e o prompt de carregamento é sempre lido por um Humano que cola o texto numa sessão nova e revisa cada resposta — mais perto de `ONDE_ESTAMOS.md` (registro pro Humano) do que de um script autônomo.
+**Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hidrata.md` (gerado), `PROMPT_CARREGAMENTO.md` (movido pra dentro do repo em 20/08/2026, item 2 do documento do Humano). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não. `PROMPT_CARREGAMENTO.md` fica fora da quarentena apesar de "dirigir" um modelo, ao contrário de um prompt que dirige um processo DESATENDIDO (systemd timer sem Humano revisando antes de agir — o `config/agata-consolidacao.prompt.txt` era desse tipo, removido em (312) quando a consolidação virou flow do grafo): o prompt de carregamento é sempre lido por um Humano que cola o texto numa sessão nova e revisa cada resposta — mais perto de `ONDE_ESTAMOS.md` (registro pro Humano) do que de um script autônomo.
 
 **Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova criando `propostas/APROVADO-<nome>`. `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
 
@@ -228,7 +248,7 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
 - **[FECHADO] Segunda opinião sobre a regra 3X.** Pendente desde MEMÓRIAS (68) — o executor designado devolveu eco do texto do proponente, não parecer. **Resolvido 25/08/2026:** pedido formal refeito, parecer real recebido e auditado (MEMÓRIAS (246)/(247)), resultado virou REGRAS.md, "Regra 8 — Verificação tripla para decisões não verificáveis".
 
 ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
-- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · reverificar o patch do 429 após qualquer `hermes update`.
+- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
 - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
 - **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
 - **Fase 3:** GLM membro pleno (MOD-002) · válvula de discordância sintética.
@@ -296,7 +316,7 @@ O Humano autoriza o uso dos dados da esfera do projeto nos serviços Google esco
 ### Limitação conhecida — Conselho Remoto
 A esfera do projeto mora em `memoria/missoes/`, que casa com o regex da Condição 1 em `scripts/conselho_remoto.py`. Por mecanismo, ela não pode ser discutida com o Conselho Remoto hoje. Não é defeito: é a proteção funcionando. Mudar isso exige allowlist explícita ou mover a esfera para fora de `memoria/missoes/`, e qualquer das duas é decisão do Humano.
 
-**bg-review do Hermes Gateway está desligado** (`nudge_interval: 0` em `~/.hermes/config.yaml`, fora do repo). Era um mecanismo que reescrevia sozinho o MEMORY.md nativo — mesmo inode do canônico — e chegou a **apagar identidade e história** para caber num teto de caracteres, sem humano no loop. Consequência aceita: sem auto-captura de fatos; a memória muda só por edição deliberada, por MEMÓRIAS, ou sob comando explícito.
+**Sem auto-captura de fatos.** (Histórico: o `bg-review` do Hermes reescrevia sozinho o MEMORY.md nativo e chegou a apagar identidade e história para caber num teto — ficou desligado, e o Hermes foi removido em (312).) A memória muda só por edição deliberada, por entrada em MEMÓRIAS, ou sob comando explícito — o portão do grafo garante isso agora.
 
 
 ## Referência
