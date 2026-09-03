@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`1660790`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`217e62f`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -40,11 +40,10 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
 - **P8-00 ✅** inventário + estratégia de merge (só doc). `main..redesign` fora de
   `redesign/`: `.gitignore` (aditivo), `PROMPT_CARREGAMENTO.md` (**excluir** — churn da
   âncora), `models/*` (Fase 3), `scripts/conselho_remoto.py` (par P-8 retroativo).
-- **P8-01 🔶** fechar P-8 de `scripts/*`: `p12-backup-verificavel.diff` (APROVADO ✅) +
-  `cifrar-env.diff` (APROVADO ✅, `--host predator` removido) **aplicados no branch**.
-  `perimetro.sh` = **11 controles, P-12 vermelho/verde demonstrado** (bug do `hd_ok=1`
-  corrigido — `subprocess` no lugar de `restic | python3 - <<'PY'`). **Falta:** camadas B/C
-  da Cadeia + `APROVADO-conselho-remoto-omniroute` (toca rede — não auto-aprovado).
+- **P8-01 ✅** os 3 `.diff` de `scripts/*` com `APROVADO-` (`p12` + `cifrar-env` +
+  `conselho-remoto-omniroute`, este com proveniência: Humano assumiu o risco sem B/C
+  externo). `perimetro.sh` 11 controles, P-12 vermelho/verde. Item aberto (não bloqueia):
+  equivalência de resiliência do OmniRoute.
 - **P8-02 🟢** paralelo **N=7 dias + piso**. Bateria sintética (5 pares) cobriu: ≥1 por tipo,
   portão pausa, zero fabricação, **nenhuma divergência**. **Aberto:** os 7 dias com pedidos
   reais. `redesign/grafo/paralelo.md`.

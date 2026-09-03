@@ -1,0 +1,29 @@
+# PROPOSTA P-8 -- NAO APLICADA
+# arquivo alvo:  config/agata-consolidacao.service
+# nome:          consolidacao-flow
+# aprova com:    redesign/propostas/APROVADO-consolidacao-flow  (o Humano cria)
+# depende de:    redesign/grafo/flows/consolidacao.py (P6-03) + redesign/grafo/.venv
+#
+# Otimizacao C2: a consolidacao noturna deixa de chamar o Hermes (hermes chat,
+# contencao de SQLite no state.db) e passa a rodar o flow do grafo (P6-03) --
+# LangGraph, saida so em propostas/, nunca canon. Tira uma amarra do Hermes ANTES
+# do P8-05. Job DESATENDIDO (systemd timer) -> Cadeia de auditoria vale.
+# O flow ja tem entrypoint: consolidacao.py --repo <dir> [--temas "a;b"].
+# A contencao ProtectSystem=strict / ReadWritePaths=propostas nao muda.
+# Verificado: o flow roda e escreve so em propostas/ (aceite P6-03). Rodar
+# `systemd-analyze --user verify` antes do APROVADO-.
+diff --git a/config/agata-consolidacao.service b/config/agata-consolidacao.service
+index 75127d6..2be2af1 100644
+--- a/config/agata-consolidacao.service
++++ b/config/agata-consolidacao.service
+@@ -4,7 +4,9 @@ Description=Ágata — consolidação noturna (memória → proposta em proposta
+ [Service]
+ Type=oneshot
+ WorkingDirectory=%h/agata
+-ExecStart=/bin/bash -c '/home/orusoua/.local/bin/hermes chat -q "$(cat /home/orusoua/agata/config/agata-consolidacao.prompt.txt)" --cli -Q --source cron'
++# C2 (redesenho, Fase 8): era `hermes chat` -- agora o flow do grafo (P6-03).
++# Saida so em propostas/consolidacao-<data>.md; nunca toca canon.
++ExecStart=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
+ ProtectSystem=strict
+ ProtectHome=read-only
+ ReadWritePaths=%h/agata/propostas %h/.hermes

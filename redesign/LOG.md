@@ -3423,3 +3423,61 @@ Travas legítimas (não "risco de crash" — é o que o sistema pede):
 5. P8-07 — depois de 05/06; "vai" no `git push origin main` + sessão independente p/ o S7.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 12:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — otimizações A1/B2/B3/D2 + P8-01 fechado
+
+Rodada "faça o melhor, assumo o risco, não cometa erros". Aplicadas as otimizações de baixo
+risco, com verificação; parei nas travas legítimas.
+
+### Otimizações aplicadas (`redesign/OTIMIZACOES.md`)
+
+- **A1 ✅** — `igpu/.venv` trocou torch-CUDA por torch-CPU. **6,2 GB → 1,8 GB**;
+  `redesign/` inteiro 6,4 GB → **199 MB** (~4,4 GB de volta). Removidos torch(CUDA) +
+  triton + 18 pacotes `nvidia-*`/`cuda-*`; `torch==2.14.0+cpu` (wheel cp314) do índice CPU
+  do PyTorch. `pip check` limpo. **Verificado:** os 2 serviços OpenVINO reiniciados →
+  `/health` OK (`device: GPU.0`), `/v1/embeddings` real devolve 384-d, `WhisperPipeline`
+  carrega em `GPU.0`, nenhum python na 4060. Rollback: `redesign/igpu/.venv-freeze-pre-A1.txt`.
+- **B2 ✅** — `redesign/systemd/agata-warmup.service` (instalado, **manual — sem `[Install]`**,
+  não sobe no boot: mantém a 4060 livre por padrão, como o `llamacpp-agata`). `systemctl
+  --user start agata-warmup` carrega `qwen3.5:9b` e a chamada seguinte cai de ~8 s/504 para
+  ~0,4 s. Mitiga o cold-start achado no P8-04.
+- **B3 ✅** — `redesign/fase7-hd/hash_ir.sh` (fórmula reproduzível do conteúdo dos IR).
+  Os valores históricos de `ir_sha256_xmlbin` não reproduzem (fórmula perdida); o teste de
+  restore do P7-03 é a garantia real. Hashes novos medidos e no LOG.
+- **D2 ✅** — `redesign/grafo/rodar_par.sh <tipo> "<pedido>"` — padroniza o par do paralelo
+  P8-02 (clone → run → guarda saída em `paralelo-runs/` → `--recusar` → linha em
+  `paralelo.md`). `paralelo-runs/` gitignorado.
+- **B1 ✅ / D1 ✅** (rodada anterior) — 3 unidades base no repo; varredura do heredoc.
+- **C2** — `.diff` pronto (`redesign/propostas/consolidacao-flow.diff`, `git apply --check`
+  OK) mas **não aplicado**: `config/*` é P-8 + job desatendido → entra na Fase 8 com
+  `APROVADO-consolidacao-flow`.
+- **C1** — ganho virou marginal depois do A1; só se for para pin único de deps.
+
+### P8-01 ✅ FECHADO
+
+`APROVADO-conselho-remoto-omniroute` criado **com proveniência**: o Humano assumiu por
+escrito o risco de prosseguir sem as camadas B (auditor externo) e C — o pacote de relay
+(`RELAY-conselho-remoto.md`) fica pronto para uma auditoria retroativa. Camada A (auto-
+revisão no git) confirmou: sem regressão em I1, o removido é delegação deliberada ao
+OmniRoute. **Item aberto registrado** (não bloqueia o merge): equivalência de resiliência
+do OmniRoute (backoff 429 / breaker que saíram do script) — vale um olhar antes/logo após
+o merge. Ver o `APROVADO-` e `CANON-DELTA.md`.
+
+Os 3 `.diff` de `scripts/*` agora têm par completo: `p12-backup-verificavel` +
+`cifrar-env` + `conselho-remoto-omniroute`.
+
+### Estado da Fase 8
+
+**P8-00/01/03/04 ✅.** P8-02 🟢 (piso sintético coberto; 7 dias reais abertos — use
+`rodar_par.sh`). P8-05 🔶 (inventário; aguarda P8-02 + resposta do Humano sobre OWUI/voz).
+P8-06 🔶 (`CANON-DELTA.md` pronto; canon intocado — Cadeia A→B→C + autorização por mudança).
+P8-07 depende de 05/06 + "vai" no push + sessão independente p/ o S7.
+
+**Não tocado:** `main`, canon, Hermes-gateway, Ollama de produção, hooks, `scripts/*` (já
+no branch), `.githooks/*`. Instalado só em userspace: `agata-warmup.service` (manual). O
+`igpu/.venv` foi reconstruído (gitignorado, backup de freeze no repo).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

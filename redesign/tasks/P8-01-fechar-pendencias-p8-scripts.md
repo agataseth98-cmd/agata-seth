@@ -1,10 +1,11 @@
 # P8-01 — fechar as pendências P-8 de `scripts/*`
 
-**Status:** 🔶 **QUASE — 2026-09-03 ~09:50 (chat 6).** `p12-backup-verificavel.diff` e
+**Status:** ✅ **FEITO — 2026-09-03 (chat 6).** `p12-backup-verificavel.diff` e
 `cifrar-env.diff` **aplicados no branch** + `perimetro.sh` 11 controles + P-12
 vermelho/verde demonstrado. `conselho-remoto-omniroute.diff` **gerado** + **pacote de relay pronto**
-(`redesign/propostas/RELAY-conselho-remoto.md`, cópia no Desktop). Falta o Humano relayar p/
-um modelo (camada B), a Máquina confirmar (C), e o `APROVADO-`. **Bug achado e corrigido:** o caminho
+(`redesign/propostas/RELAY-conselho-remoto.md`, cópia no Desktop). `APROVADO-conselho-remoto-omniroute` criado com proveniência (Humano assumiu o risco de
+prosseguir sem B/C externo; relay fica pronto p/ auditoria retroativa). **Item aberto**
+(não bloqueia): equivalência de resiliência do OmniRoute — ver o `APROVADO-` e `CANON-DELTA.md`. **Bug achado e corrigido:** o caminho
 `hd_ok=1` do P-12 estava quebrado (`restic | python3 - <<'PY'` — heredoc vencia o pipe,
 `json.load(sys.stdin)` nunca via o JSON → P-12 sempre FALHOU com HD montado; a verificação
 do chat 4 só exercitou `hd_ok=0`). Fix: python chama `restic` por `subprocess`.

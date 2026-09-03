@@ -58,3 +58,6 @@ redesign/mcp/.venv/
 .obsidian/plugins/
 .obsidian/community-plugins.json
 .obsidian/**/data.json
+
+# redesenho -- logs de execucao do paralelo P8-02 (transitorios)
+redesign/grafo/paralelo-runs/

@@ -63,3 +63,4 @@ de teste — podem ser ignoradas/limpas.)_
 **Ainda aberto:** os **7 dias de calendário** com **pedidos reais** do Humano (a bateria
 sintética prova o harness e a ausência de divergência nesses inputs, não substitui a
 confiança do uso real). Acumula conforme o Humano usa o sistema.
+| par-260903-114438 | 2026-09-03 | Em uma linha: para que serve o agata-drain? | verificacao | _(Hermes: preencher)_ | rota=cheap · trabalhar:ok:408ch:minimax/minimax-m3:free · perímetro=OK · fab=0 citacao · portão=pausou | clone @ 217e62f · run: paralelo-runs/par-260903-114438.txt |

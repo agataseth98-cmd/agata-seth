@@ -8,76 +8,64 @@ e footgun sem tocar o que funciona.
 
 ---
 
-## ✅ FEITO nesta rodada (risco zero)
+## ✅ FEITO nesta rodada
 
 ### B1 — as 3 unidades base entraram no repo
 `openvino-whisper.service`, `openvino-embeddings.service`, `obsidian-ro-proxy.service`
-viviam **só** em `~/.config/systemd/user/` (nunca versionadas; o chat 5 as editou e o
-backup foi pro scratchpad efêmero). Copiadas para `redesign/systemd/` com o fix do chat 5
-(`After=default.target` removido, `[Install] WantedBy=agata.target`). Fecha a lacuna que o
-próprio LOG do chat 5 apontou. Se uma unidade voltar ao estado antigo (update, `revert`), o
-repo agora tem a boa.
+copiadas de `~/.config/systemd/user/` para `redesign/systemd/` com o fix do chat 5.
 
 ### D1 — varredura do footgun do heredoc
-O bug do P-12 (`restic ... | python3 - <<'PY'` — o heredoc vence o pipe) foi conferido nos
-outros dois `python3 - <<'PY'` do controle (linhas `linhas=$(...)` e `visto=$(...)`):
-**ambos lêem `sys.argv`/arquivo, nenhum tem pipe entrando** — limpos. Só o caminho
-`hd_ok=1` tinha o defeito, e está corrigido.
+Os outros dois `python3 - <<'PY'` do P-12 lêem `sys.argv`/arquivo, sem pipe entrando —
+limpos. Só o caminho `hd_ok=1` tinha o defeito (corrigido em `bc15673`).
+
+### A1 — `igpu/.venv` trocou torch-CUDA por torch-CPU · **~4,4 GB de volta**
+`redesign/igpu/.venv`: **6,2 GB → 1,8 GB**; `redesign/` inteiro: 6,4 GB → **199 MB**.
+Removidos `torch`(CUDA)+`triton`+18 pacotes `nvidia-*`/`cuda-*`; instalado
+`torch==2.14.0+cpu` (wheel cp314, 196 MB) do índice `download.pytorch.org/whl/cpu`.
+`pip check` limpo. **Verificado:** `openvino-whisper` e `openvino-embeddings` reiniciados →
+`/health` OK nos dois (`device: GPU.0`); `/v1/embeddings` real devolve vetor 384-d;
+`WhisperPipeline` carrega em `GPU.0`; nenhum processo python na 4060. Rollback:
+`redesign/igpu/.venv-freeze-pre-A1.txt` (87 linhas, `pip install -r`).
+
+### B2 — `agata-warmup.service` (manual) · mitiga o 504 de cold start
+`redesign/systemd/agata-warmup.service` → `~/.config/systemd/user/`. Oneshot: 1 token pelo
+`:20127` que carrega `qwen3.5:9b` na VRAM (o 504 do OmniRoute nesta 1ª chamada é esperado;
+o efeito é o load). **Sem `[Install]` — NÃO sobe no boot nem com `agata up`** (mantém a 4060
+livre por padrão, mesma lógica do `llamacpp-agata`). Dispare a mão antes de usar o modelo
+local pesado: `systemctl --user start agata-warmup.service`. Testado: `Result=success`,
+modelo carregado, chamada seguinte em ~0,4 s.
+
+### B3 — `hash_ir.sh` · fórmula reproduzível para os IR OpenVINO
+`redesign/fase7-hd/hash_ir.sh` — `sha256` da concatenação de todos os arquivos do dir do IR
+(menos `model_cache/`), ordem `LC_ALL=C sort`. Os valores históricos de `ir_sha256_xmlbin`
+no manifesto são de uma fórmula não documentada e não reproduzem; **o teste de restore do
+P7-03 é a garantia real**. Hashes reproduzíveis medidos:
+`multilingual-e5-small-int8` `9f38702dc22c7a99…` · `whisper-base-int8-ov` `d3c0f3645e7cec06…` ·
+`whisper-small-int8-ov` `0f7d10a50e792aca…`.
+
+### D2 — `rodar_par.sh` · reduz o atrito dos 7 dias do paralelo
+`redesign/grafo/rodar_par.sh <tipo> "<pedido>"` — clone fresco → `grafo.py run` → guarda a
+saída em `paralelo-runs/` → `resume --recusar` → 1 linha em `paralelo.md`. Testado:
+`rota=cheap · trabalhar:…minimax… · perímetro=OK · fab=0 · portão=pausou`.
+
+### C2 — `.diff` pronto (não aplicado — P-8, job desatendido)
+`redesign/propostas/consolidacao-flow.diff` — `config/agata-consolidacao.service` deixa de
+chamar `hermes chat` e passa a rodar `flows/consolidacao.py` (grafo). `git apply --check`
+limpo. Entra na Fase 8 com os outros `.diff`; precisa de `APROVADO-consolidacao-flow` +
+`systemd-analyze --user verify`.
 
 ---
 
-## Propostas (o Humano decide)
-
-### A1 — reconstruir `igpu/.venv` sem torch-CUDA · **~5 GB de volta** · risco baixo
-`redesign/igpu/.venv` tem **6,2 GB** — o LOG da Fase 2 já anotou "puxou ~2 GB de libs CUDA
-à toa". OpenVINO + optimum-intel servem os modelos na **iGPU Intel**; não precisam de
-`torch` compilado para CUDA. Reconstruir o venv com `torch` CPU-only (ou sem torch, se o
-`optimum-cli export` não precisar em runtime) derruba `redesign/` de 6,4 GB para ~400 MB.
-- **Teste:** re-rodar `--selftest` de `whisper_server.py` e `embeddings_server.py` + o
-  aceite conjunto da Fase 2 (`nvidia-smi` sem carga, RTF < 1, embedding responde).
-- **Rollback:** o venv é descartável e gitignorado; reconstrói pelo `requisitos` da Fase 2.
-
-### B2 — pré-aquecer o modelo local no `agata up` · corrige um 504 real · risco baixo
-Achado no P8-04: a **1ª** chamada a um modelo Ollama frio (~30 s de load) estoura o
-`resilienceSettings.requestQueue.maxWaitMs=15000` do OmniRoute → **504**
-`RATE_LIMIT_EXECUTION_TIMEOUT`. O modelo carrega mesmo assim; a 2ª responde em ~0,5 s.
-Duas saídas, a 1ª é mais espelho:
-- **B2a (preferida):** `ExecStartPost` no `agata.target`/`agata-drain` (ou um
-  `agata-warmup.service` oneshot) que faz um `curl` de 1 token em `ollama-local/qwen3.5:9b`
-  logo após subir — determinístico, no nosso controle, sem tocar config de terceiro.
-- **B2b:** subir o `maxWaitMs` do OmniRoute para ~45000. Mais simples, mas é config do
-  OmniRoute (fora do nosso código) e afrouxa o deadline para todo request.
-
-### B3 — fixar a fórmula do `ir_sha256_xmlbin` · risco zero
-O manifesto usa `ir_sha256_xmlbin` como tag do P-12, mas **a fórmula de cálculo não está
-registrada em lugar nenhum** (o chat 3 calculou e não anotou; nenhum recorte óbvio
-reproduz). Escrever `models/hash_ir.sh` (o comando exato) + uma linha no `manifest.json`
-por recurso OpenVINO dizendo qual é. Sem isso, um dia alguém restaura um IR e não tem como
-conferir que bate.
+## Propostas que sobram
 
 ### C1 — unificar `mcp/.venv` + `grafo/.venv` · ~100 MB + menos manutenção · risco médio
-Dois venvs (`fastmcp` 115 MB, `langgraph` 84 MB) que provavelmente não conflitam. Um
-`redesign/.venv` só reduz duplicação de stdlib/pip e dá um lugar único para pinar deps. O
-`igpu/.venv` fica separado (deps pesadas e específicas). **Risco médio:** checar conflito
-`fastmcp` vs `langgraph`/`langchain-core` antes; ganho modesto.
-
-### C2 — repontar `agata-consolidacao.timer` para o flow do grafo · tira 1 amarra do Hermes cedo · risco baixo
-O `agata-consolidacao.timer` ainda chama o Hermes (contenção de SQLite no `state.db`,
-`Restart=on-failure` cobrindo isso). O `redesign/grafo/flows/consolidacao.py` (P6-03) é o
-substituto pronto. Repontar o timer agora é userspace, **não toca o Hermes-executor**, e
-adianta parte do P8-05.
-
-### D2 — `redesign/grafo/rodar_par.sh` para o paralelo de 7 dias · risco zero · aumenta a chance de P8-02 acontecer
-Um script que padroniza o par do P8-02: clone fresco → `grafo.py run` → captura
-rota/modelo/perímetro/fabricação/tempo → `resume --recusar` → 1 linha em `paralelo.md`.
-Reduz o atrito do Humano nos 7 dias (hoje é copiar/colar comando + parsear JSON à mão).
-
----
+Depois do A1, `redesign/` já caiu para 199 MB — o ganho de C1 virou marginal. Só vale se
+for para ter um lugar único de pin de deps. Checar conflito `fastmcp` vs `langgraph` antes.
 
 ## Observações sem ação proposta
 
-- **`redesign/` no git é pequeno** — os 6,4 GB são os `.venv` gitignorados no disco local,
-  não o repositório. A1 resolve o disco.
+- **`redesign/` no disco: 199 MB** depois do A1 (era 6,4 GB). O repositório git sempre foi
+  pequeno (os `.venv` são gitignorados).
 - **6 serviços `--user` sempre de pé** (~1,2 GB RAM idle, 4060 em 152 MiB). Socket-activation
   do whisper/embeddings (subir na 1ª chamada) economizaria RAM, mas eles são baratos e o
   atraso de load na 1ª transcrição pesaria — **não vale o risco/complexidade agora.**
