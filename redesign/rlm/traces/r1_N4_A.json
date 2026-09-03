@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "N4",
+  "classe": "needle",
+  "braco": "A",
+  "final": "FINAL: lacuna: sha256 de REGRAS.md não registrado no corpus",
+  "tokens": 28658,
+  "ms": 11328,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28265,
+      "tokens_out": 393,
+      "ms": 11328
+    }
+  ]
+}

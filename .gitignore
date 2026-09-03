@@ -46,3 +46,23 @@ home/
 # Camada de leitura Obsidian -- gerada por scripts/gerar_obsidian.py a partir de
 # MEMÓRIAS.md, nunca editada à mão. Regenerável, não versionada (MEMÓRIAS (289)).
 memoria/obsidian/
+
+# redesenho (branch redesign) -- artefatos locais, nunca commitar
+redesign/**/.venv/
+redesign/**/__pycache__/
+redesign/**/*.pyc
+redesign/mcp/.venv/
+
+# Fase 6 -- plugin obsidian-local-rest-api: binarios + data.json (API key, cert self-signed)
+# NUNCA no git. O plugin guarda a chave em data.json.
+.obsidian/plugins/
+.obsidian/community-plugins.json
+.obsidian/**/data.json
+
+# redesenho -- logs de execucao do paralelo P8-02 (transitorios)
+redesign/grafo/paralelo-runs/
+
+# artefatos que o Obsidian larga na raiz do vault quando um [[link]] nao resolve
+# (0 byte; o INICIO/moc de verdade estao em memoria/obsidian/, gerados)
+/INICIO.md
+/moc-*.md

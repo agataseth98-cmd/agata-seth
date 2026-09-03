@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "N1",
+  "classe": "needle",
+  "braco": "A",
+  "final": "FINAL: 100000 caracteres no arquivo `~/.hermes/config.yaml`, configurado para corrigir um truncamento anterior de 20.000 caracteres que fazia o PROJETO.md inteiro (começando no char 16.353) nunca chegar a nenhum modelo.",
+  "tokens": 28783,
+  "ms": 14157,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 0.67,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28275,
+      "tokens_out": 508,
+      "ms": 14157
+    }
+  ]
+}

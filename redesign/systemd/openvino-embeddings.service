@@ -1,0 +1,20 @@
+[Unit]
+Description=OpenVINO embeddings na iGPU (Agata, Fase 2 -- P2-03)
+Documentation=file:///home/orusoua/agata/redesign/igpu/README.md
+# P7-01 fix (02/09): removido After=default.target -- fechava ciclo de ordenacao com
+# agata-drain quando agata.target esta enabled p/ boot (ver openvino-whisper.service).
+# Ordenacao agora e' pela pertenca a agata.target (WantedBy/PartOf via drop-in agata.conf).
+
+[Service]
+Type=simple
+Environment=OVE_DEVICE=GPU.0
+Environment=OVE_MODEL_DIR=%h/.cache/agata/openvino/embeddings/multilingual-e5-small-int8
+Environment=OVE_BIND=127.0.0.1:20134
+ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/embeddings_server.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+
+# P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
+[Install]
+WantedBy=agata.target

@@ -1,0 +1,40 @@
+{
+  "rodada": 1,
+  "id": "A2",
+  "classe": "agregacao",
+  "braco": "B",
+  "final": "A entrada (148) apontou citação imprecisa e falhas de formato de cabeçalho. A entrada (149) registrou autocorreção do Kimi sobre a própria âncora de sha256.",
+  "tokens": 12006,
+  "ms": 246667,
+  "n_chamadas": 2,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 0.5,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: 148, 149",
+      "tokens_in": 181,
+      "tokens_out": 6174,
+      "ms": 146590
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "148",
+        "149"
+      ],
+      "saida": "MEMÓRIAS.md:1212:Sincronização exigida do executor: última entrada **(71)**, **148.262 bytes**, sha256 iniciando em `6777c31b`. O remoto público segue em **(62)/129.401 bytes** — de (63) a (71) nada foi publicado; o executor trabalha com os arquivos fornecidos, não com o GitHub, até a publicação ocorrer.\nMEMÓRIAS.md:2093:Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura direta do `state.db` da Máquina (mensagens 1484-1489, sessão 7cf23f2e), comparação de citações contra REGRAS.md por `sed`/`grep`; segunda opinião sobre o parecer de Kimi, três verifi"
+    },
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A entrada (148) apontou citação imprecisa e falhas de formato de cabeçalho. A entrada (149) registrou autocorreção do Kimi sobre a própria âncora de sha256.",
+      "tokens_in": 1483,
+      "tokens_out": 4168,
+      "ms": 100077
+    }
+  ]
+}

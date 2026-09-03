@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "V4",
+  "classe": "veredito",
+  "braco": "B",
+  "final": "A informação solicitada sobre a rodada 2/3 de TES-001 (145) e o veredito positivo de Seth não foi encontrada no corpus.",
+  "tokens": 4082,
+  "ms": 92099,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A informação solicitada sobre a rodada 2/3 de TES-001 (145) e o veredito positivo de Seth não foi encontrada no corpus.",
+      "tokens_in": 180,
+      "tokens_out": 3902,
+      "ms": 92099
+    }
+  ]
+}

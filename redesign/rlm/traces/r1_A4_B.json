@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "A4",
+  "classe": "agregacao",
+  "braco": "B",
+  "final": "A resposta não existe no corpus.",
+  "tokens": 5535,
+  "ms": 127460,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A resposta não existe no corpus.",
+      "tokens_in": 151,
+      "tokens_out": 5384,
+      "ms": 127460
+    }
+  ]
+}

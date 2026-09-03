@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "N3",
+  "classe": "needle",
+  "braco": "B",
+  "final": "A resposta não foi encontrada no corpus.",
+  "tokens": 4586,
+  "ms": 104838,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A resposta não foi encontrada no corpus.",
+      "tokens_in": 153,
+      "tokens_out": 4433,
+      "ms": 104838
+    }
+  ]
+}

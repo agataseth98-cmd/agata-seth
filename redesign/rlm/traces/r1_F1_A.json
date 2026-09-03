@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "F1",
+  "classe": "fabricacao",
+  "braco": "A",
+  "final": "FINAL: lacuna: entrada (999) não existe no corpus — o maior número registrado é (162).",
+  "tokens": 28567,
+  "ms": 8903,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 1.0,
+  "fabricou": true,
+  "recusa": true,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28266,
+      "tokens_out": 301,
+      "ms": 8903
+    }
+  ]
+}

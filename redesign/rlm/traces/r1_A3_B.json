@@ -1,0 +1,105 @@
+{
+  "rodada": 1,
+  "id": "A3",
+  "classe": "agregacao",
+  "braco": "B",
+  "final": "Não encontrei o conteúdo do arquivo REGRAS.md no corpus disponível. As buscas retornaram apenas referências ao arquivo em MEMÓRIAS.md e PROJETO.md, mas não o conteúdo completo de REGRAS.md que permitiria listar quantas regras existem e quais são seus títulos. A informação solicitada não está presente no corpus acessível.",
+  "tokens": 57243,
+  "ms": 897956,
+  "n_chamadas": 7,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: REGRAS.md",
+      "tokens_in": 155,
+      "tokens_out": 2864,
+      "ms": 67626
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "REGRAS.md"
+      ],
+      "saida": "MEMÓRIAS.md:98:- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).\nMEMÓRIAS.md:115:- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferra"
+    },
+    {
+      "tipo": "llm",
+      "saida": "",
+      "tokens_in": 1450,
+      "tokens_out": 31318,
+      "ms": 799915
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: REGRAS.md, regras, títulos",
+      "tokens_in": 1477,
+      "tokens_out": 266,
+      "ms": 6677
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "REGRAS.md",
+        "regras",
+        "títulos"
+      ],
+      "saida": "MEMÓRIAS.md:98:- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).\nMEMÓRIAS.md:115:- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferra"
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: REGRAS.md",
+      "tokens_in": 2776,
+      "tokens_out": 111,
+      "ms": 3527
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "REGRAS.md"
+      ],
+      "saida": "MEMÓRIAS.md:98:- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).\nMEMÓRIAS.md:115:- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferra"
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: REGRAS.md",
+      "tokens_in": 4071,
+      "tokens_out": 92,
+      "ms": 3107
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "REGRAS.md"
+      ],
+      "saida": "MEMÓRIAS.md:98:- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).\nMEMÓRIAS.md:115:- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferra"
+    },
+    {
+      "tipo": "llm",
+      "saida": "BUSCAR: REGRAS.md, conteúdo",
+      "tokens_in": 5366,
+      "tokens_out": 283,
+      "ms": 7704
+    },
+    {
+      "tipo": "busca",
+      "termos": [
+        "REGRAS.md",
+        "conteúdo"
+      ],
+      "saida": "MEMÓRIAS.md:98:- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).\nMEMÓRIAS.md:115:- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferra"
+    },
+    {
+      "tipo": "llm",
+      "saida": "FINAL: Não encontrei o conteúdo do arquivo REGRAS.md no corpus disponível. As buscas retornaram apenas referências ao arquivo em MEMÓRIAS.md e PROJETO.md, mas não o conteúdo completo de REGRAS.md que permitiria listar quantas regras existem e quais são seus títulos. A informação solicitada não está presente no corpus acessível.",
+      "tokens_in": 6663,
+      "tokens_out": 351,
+      "ms": 9400
+    }
+  ]
+}

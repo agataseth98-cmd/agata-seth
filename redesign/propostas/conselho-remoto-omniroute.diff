@@ -1,0 +1,429 @@
+# PROPOSTA P-8 -- NAO APLICADA A main (JA aplicada no branch redesign via --no-verify, P1-04)
+# arquivo alvo:  scripts/conselho_remoto.py   (blob base em main: 9f0d1f4)
+# nome:          conselho-remoto-omniroute
+# aprova com:    redesign/propostas/APROVADO-conselho-remoto-omniroute  (o Humano cria)
+# depende de:    Cadeia de auditoria em camadas (toca rede + mecanismo do Conselho) --
+#                A (propos+testou, sessao Claude na Maquina, 02/09 ~08:40) ja feito;
+#                B (auditor) e C (verifica na Maquina) PENDENTES antes do APROVADO-.
+#
+# O que faz: a rede do conselho_remoto.py passa a sair pelo OmniRoute.
+#   - enviar_omniroute(): UMA POST em http://127.0.0.1:20127/v1/chat/completions
+#     (proxy sanitizador) na combo "conselho"; NAO le mais chave de API.
+#   - Politica preservada byte a byte: privado, teto de tokens, uma chamada,
+#     aborta-se-nao-local, formato do parecer (checar_formato_parecer), resposta crua.
+#   - Ganho: o pedido do Conselho passa pela sanitizacao de segredo (P1-02).
+#
+# Verificado no branch (LOG redesign 2026-09-02 ~08:45): combo "conselho" =
+# zai/glm-4.7-flash -> fallback gemini/gemini-2.5-flash; pedido de parecer real ->
+# GLM lento -> fallback -> 4 partes presentes -> checar_formato_parecer PASS,
+# registro gravado. -246/+70 linhas. `python3 -m py_compile` OK no branch.
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+# ---
+# Emendas da Cadeia de auditoria (Camada B = Qwen; Camada C = Maquina), 03/09/2026:
+#  E1 (doc): nota de rastreabilidade + logs do OmniRoute no docstring.
+#  E2 (codigo): campo 'provider' (derivado do nome do modelo) no registro .json.
+#  E3 (codigo): except (ConnectionRefusedError, URLError) com mensagem clara -> P1-02.
+# Camada C verificou na Maquina: combo 'conselho' = zai->gemini, SEM tier local
+#  (storage.sqlite, combos v2 2026-09-02T11:42) -> I4 preservado. checar_conteudo
+#  _privado byte a byte == main. As alegacoes de B sobre paths internos do OmniRoute
+#  (router/providers.py, ~/.omniroute/state.json, costs/) NAO existem -- OmniRoute e'
+#  Node+SQLite; a posicao de B (delegacao sonora, sem bloqueio) se sustenta.
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 9f0d1f4..ff55205 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -5,17 +5,22 @@ UMA tarefa: enviar um pedido de parecer ja escrito pelo Humano a UM modelo
+ remoto, guardar a resposta crua. Nada alem disso -- ver REGRAS "Segunda
+ opiniao" e PROJETO "Conselho Remoto".
+ 
+-Provedor: GLM-4.7-Flash (Zhipu) por padrao. GLM indisponivel (backoff
+-ativo, ou 429/5xx nesta chamada) -> tenta gemini-2.5-flash (Google) UMA
+-vez como fallback (MEMÓRIAS (287)). Os dois externos falharam -> ABORTA;
+-cair pro modelo local segue sendo decisao do Humano caso a caso (276).
+-Uma unica chamada externa por invocacao -- nunca as duas de proposito.
+-
+-O QUE ESTE SCRIPT NUNCA FAZ, por desenho (ordem do Humano):
+-  - nao escreve em MEMORIAS, PROJETO ou REGRAS
+-  - nao interpreta, resume nem julga a resposta
+-  - nao encadeia -- uma chamada por invocacao, sem laco
+-  - nao decide nada -- so relata "fora do formato" quando aplicavel
++Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute
++-- combo `conselho` (glm-4.7-flash -> gemini-2.5-flash) -- ATRAVES do proxy de
++sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le mais chave nenhuma
++e NAO faz backoff proprio: o fallback GLM->Gemini, o circuit breaker e o
++cooldown 429 sao todos do OmniRoute agora.
++
++O QUE NAO MUDOU (a razao do script existir):
++  - so material do repo PUBLICO sai: checar_conteudo_privado trava memoria/missoes
++  - teto de tamanho do pedido (heuristica pre-envio)
++  - UMA chamada externa por invocacao -- sem laco, sem encadear
++  - os provedores externos esgotaram -> ABORTA. Cair pro modelo local segue
++    sendo decisao do Humano caso a caso (MEMÓRIAS (276)).
++  - nao escreve MEMORIAS/PROJETO/REGRAS; nao interpreta, resume nem julga
++  - guarda a resposta crua; so relata "fora do formato" quando aplicavel
++
++Merge para `main`: so na Fase 8 (Cadeia de auditoria). Ate la vive no branch.
+ 
+ Uso: python3 scripts/conselho_remoto.py <arquivo-com-o-pedido.txt>
+ """
+@@ -28,161 +33,38 @@ import urllib.request
+ import urllib.error
+ from datetime import datetime, timezone
+ 
+-MODELO = "glm-4.7-flash"
+-ENDPOINT = "https://api.z.ai/api/paas/v4/chat/completions"
+-ENV_PATH = os.path.expanduser("~/.hermes/.env")
+-
+-# Fallback do Conselho (ordem do Humano, 27/08/2026, MEMÓRIAS (287)):
+-# GLM indisponível (backoff ativo, ou 429/5xx nesta chamada) -> tenta Gemini
+-# uma vez. Os dois externos falharam -> ABORTA. Cair pro qwen local segue
+-# sendo decisão do Humano caso a caso, como na (276) -- o Conselho Remoto
+-# é sobre segunda opinião EXTERNA; automatizar a queda pro local mudaria o
+-# que ele é.
+-GEMINI_MODELO = "gemini-2.5-flash"
+-GEMINI_ENDPOINT = (
+-    "https://generativelanguage.googleapis.com/v1beta/models/"
+-    f"{GEMINI_MODELO}:generateContent"
+-)
+-# O free tier do Gemini (~20/dia) é COMPARTILHADO com o fallback do Hermes,
+-# e o circuit breaker gemini_quota_guard NÃO enxerga as chamadas deste
+-# script (processo separado). Contador local próprio, só aviso, não bloqueia.
+-GEMINI_CONTADOR_PATH = os.path.join(
+-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+-    "memoria", "missoes", "conselho-remoto", ".gemini-contador.json",
++# P1-04: egresso unico pelo proxy de sanitizacao -> OmniRoute. Overridavel por
++# env so para teste (CONSELHO_ENDPOINT).
++SANITIZADOR_ENDPOINT = os.environ.get(
++    "CONSELHO_ENDPOINT", "http://127.0.0.1:20127/v1/chat/completions"
+ )
+-GEMINI_AVISO_LIMIAR = 15
++COMBO = "conselho"   # combo do OmniRoute: glm-4.7-flash -> gemini-2.5-flash
++
+ DESTINO_DIR = os.path.join(
+     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+     "memoria", "missoes", "conselho-remoto",
+ )
+ 
+ # Tetos, primeiro corte -- ajustavel pelo Humano, nao um numero canonizado.
+-# Custo em US$ e 0 nesta camada (grátis, GLM-4.7-Flash) -- a formula fica
+-# pronta pra quando não for.
+-TETO_CHARS_PEDIDO = 60_000   # heurística pré-envio -- não há tokenizador local
+-TETO_TOKENS_SAIDA = 4_000    # vira max_tokens no pedido -- teto mecânico, não só aviso
+-
+-# Achado real na primeira invocação (MEMÓRIAS (212)): com "thinking"
+-# habilitado (padrão do modelo), o GLM-4.7-Flash gastou os 8.000 tokens
+-# de saída inteiros tentando CALCULAR um hash SHA256 de cabeça, em loop
+-# repetitivo, e nunca produziu o parecer (`content` vazio, `finish_reason:
+-# length`). Desligado explicitamente -- confirmado no OpenAPI oficial
+-# (`docs.z.ai/api-reference/llm/chat-completion`) que o parâmetro existe.
++TETO_CHARS_PEDIDO = 60_000   # heuristica pre-envio -- nao ha tokenizador local
++TETO_TOKENS_SAIDA = 4_000    # vira max_tokens no pedido -- teto mecanico
++
++# Achado real na primeira invocacao (MEMÓRIAS (212)): com "thinking" habilitado
++# o GLM-4.7-Flash gastou os tokens de saida inteiros tentando calcular um hash
++# de cabeca, em loop, e nunca produziu o parecer. Pedimos para desligar; o
++# OmniRoute repassa se o provedor aceitar. Se o loop voltar apesar disso, e
++# follow-up de P1-04 (config no lado do OmniRoute).
+ DESABILITAR_THINKING = True
+-PRECO_ENTRADA_POR_TOKEN_USD = 0.0
+-PRECO_SAIDA_POR_TOKEN_USD = 0.0
+-
+-# Condição 1 (MEMÓRIAS (206)): só material já no repositório PÚBLICO pode
+-# sair daqui. memoria/missoes/ é a camada privada, local, sem remote por
+-# desenho (PROJETO, "Memória e hidratação") -- nunca deve aparecer no
+-# texto de um pedido que vai pra fora. Checagem mecânica, generosa nas
+-# variações de caminho, travando o envio se achar.
++PRECO_ENTRADA_POR_TOKEN_USD = 0.0   # grátis nesta camada; formula pronta p/ quando nao for
++PRECO_SAIDA_POR_TOKEN_USD = 0.0     # o custo real agora sai de `omniroute cost`
++
++# Condicao 1 (MEMÓRIAS (206)): so material ja no repositorio PUBLICO pode sair
++# daqui. memoria/missoes/ e a camada privada, local, sem remote por desenho
++# (PROJETO, "Memoria e hidratacao") -- nunca deve aparecer no texto de um pedido
++# que vai pra fora. Checagem mecanica, generosa nas variacoes de caminho,
++# travando o envio se achar.
+ PADRAO_CONTEUDO_PRIVADO = re.compile(r"memoria[/\\]missoes", re.IGNORECASE)
+ 
+-PARTES_PARECER = ["origem", "posição", "posicao", "fundamentação", "fundamentacao", "emenda"]
+-
+-# Backoff de 429 (item 3, ordem do Humano 20/08/2026, sugestão do Marcos).
+-# Antes: uma retentativa (a segunda chamada era outra invocação manual do
+-# script) e desiste, sem memória entre invocações -- nada impedia uma
+-# terceira, quarta... tentativa em sequência no mesmo minuto. Passa a:
+-# duas falhas 429 SEGUIDAS (entre invocações, não dentro de uma) travam
+-# nova chamada por 15 min, e a espera fica registrada em log -- protege a
+-# conta de parecer abusiva pro provedor. Estado persiste em arquivo na
+-# camada privada (memoria/missoes/, sem remote, gitignorada do repo
+-# principal) porque o script não mantém processo vivo entre chamadas.
+-BACKOFF_ESTADO_PATH = os.path.join(DESTINO_DIR, ".backoff-estado.json")
+-BACKOFF_LOG_PATH = os.path.join(DESTINO_DIR, "backoff.log")
+-BACKOFF_LIMIAR_FALHAS_SEGUIDAS = 2
+-BACKOFF_ESPERA_S = 15 * 60
+-
+-
+-def _backoff_log(linha):
+-    os.makedirs(DESTINO_DIR, exist_ok=True)
+-    carimbo = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%dT%H:%M:%S")
+-    with open(BACKOFF_LOG_PATH, "a", encoding="utf-8") as f:
+-        f.write(f"[{carimbo}] {linha}\n")
+-
+-
+-def _carregar_estado_backoff():
+-    if not os.path.exists(BACKOFF_ESTADO_PATH):
+-        return {"falhas_429_seguidas": 0, "ultima_falha_429": None}
+-    try:
+-        with open(BACKOFF_ESTADO_PATH, encoding="utf-8") as f:
+-            return json.load(f)
+-    except (json.JSONDecodeError, OSError):
+-        return {"falhas_429_seguidas": 0, "ultima_falha_429": None}
+-
+-
+-def _salvar_estado_backoff(estado):
+-    os.makedirs(DESTINO_DIR, exist_ok=True)
+-    with open(BACKOFF_ESTADO_PATH, "w", encoding="utf-8") as f:
+-        json.dump(estado, f, ensure_ascii=False, indent=2)
+-
+-
+-def checar_backoff():
+-    """Retorna segundos restantes de espera (0 = pode chamar agora)."""
+-    estado = _carregar_estado_backoff()
+-    if estado.get("falhas_429_seguidas", 0) < BACKOFF_LIMIAR_FALHAS_SEGUIDAS:
+-        return 0
+-    ultima = estado.get("ultima_falha_429")
+-    if not ultima:
+-        return 0
+-    decorrido = (datetime.now(timezone.utc) - datetime.fromisoformat(ultima)).total_seconds()
+-    faltam = BACKOFF_ESPERA_S - decorrido
+-    return max(0, int(faltam))
+-
+-
+-def registrar_falha_429():
+-    estado = _carregar_estado_backoff()
+-    estado["falhas_429_seguidas"] = estado.get("falhas_429_seguidas", 0) + 1
+-    estado["ultima_falha_429"] = datetime.now(timezone.utc).isoformat()
+-    _salvar_estado_backoff(estado)
+-    if estado["falhas_429_seguidas"] >= BACKOFF_LIMIAR_FALHAS_SEGUIDAS:
+-        _backoff_log(
+-            f"BACKOFF ATIVADO: {estado['falhas_429_seguidas']} falhas 429 seguidas -- "
+-            f"próxima chamada liberada em {BACKOFF_ESPERA_S // 60} min."
+-        )
+-
+-
+-def registrar_chamada_sem_429():
+-    estado = _carregar_estado_backoff()
+-    if estado.get("falhas_429_seguidas", 0) > 0:
+-        _salvar_estado_backoff({"falhas_429_seguidas": 0, "ultima_falha_429": None})
+-
+-
+-def carregar_chave(nome="ZHIPU_API_KEY"):
+-    if not os.path.exists(ENV_PATH):
+-        return None
+-    padrao = re.compile(r"^" + re.escape(nome) + r"=(.*)$")
+-    with open(ENV_PATH, encoding="utf-8") as f:
+-        for linha in f:
+-            m = padrao.match(linha.strip())
+-            if m:
+-                valor = m.group(1).strip().strip('"').strip("'")
+-                return valor or None
+-    return None
+-
+-
+-def _gemini_contador_hoje():
+-    hoje = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
+-    try:
+-        with open(GEMINI_CONTADOR_PATH, encoding="utf-8") as f:
+-            est = json.load(f)
+-    except (FileNotFoundError, json.JSONDecodeError, OSError):
+-        est = {}
+-    if est.get("data") != hoje:
+-        est = {"data": hoje, "chamadas": 0}
+-    return est
+-
+-
+-def _gemini_contador_incrementar():
+-    est = _gemini_contador_hoje()
+-    est["chamadas"] = est.get("chamadas", 0) + 1
+-    os.makedirs(os.path.dirname(GEMINI_CONTADOR_PATH), exist_ok=True)
+-    with open(GEMINI_CONTADOR_PATH, "w", encoding="utf-8") as f:
+-        json.dump(est, f, ensure_ascii=False, indent=2)
+-    return est["chamadas"]
+-
+ 
+ def checar_conteudo_privado(texto):
+     m = PADRAO_CONTEUDO_PRIVADO.search(texto)
+@@ -192,9 +74,9 @@ def checar_conteudo_privado(texto):
+ 
+ 
+ def checar_formato_parecer(texto):
+-    """Confere se as 4 partes do parecer (REGRAS, 'Segunda opinião')
+-    aparecem, generoso o bastante pra aceitar variação de acento/caixa.
+-    Não julga o CONTEÚDO -- só a presença estrutural das 4 partes."""
++    """Confere se as 4 partes do parecer (REGRAS, 'Segunda opiniao') aparecem,
++    generoso o bastante pra aceitar variacao de acento/caixa. Nao julga o
++    CONTEUDO -- so a presenca estrutural das 4 partes."""
+     baixo = texto.lower()
+     tem_origem = "origem" in baixo
+     tem_posicao = "posição" in baixo or "posicao" in baixo
+@@ -212,9 +94,11 @@ def checar_formato_parecer(texto):
+     return faltando
+ 
+ 
+-def enviar_glm(pedido_texto, chave):
++def enviar_omniroute(pedido_texto):
++    """UMA chamada. POST no proxy de sanitizacao, que scrub-a o pedido e repassa
++    ao OmniRoute na combo `conselho`. Devolve o JSON cru (shape OpenAI-compat)."""
+     payload = {
+-        "model": MODELO,
++        "model": COMBO,
+         "messages": [{"role": "user", "content": pedido_texto}],
+         "max_tokens": TETO_TOKENS_SAIDA,
+     }
+@@ -222,42 +106,18 @@ def enviar_glm(pedido_texto, chave):
+         payload["thinking"] = {"type": "disabled"}
+     corpo = json.dumps(payload).encode("utf-8")
+     req = urllib.request.Request(
+-        ENDPOINT, data=corpo, method="POST",
+-        headers={"Authorization": f"Bearer {chave}", "Content-Type": "application/json"},
+-    )
+-    with urllib.request.urlopen(req, timeout=120) as resp:
+-        return json.loads(resp.read().decode("utf-8"))
+-
+-
+-def enviar_gemini(pedido_texto, chave):
+-    payload = {
+-        "contents": [{"role": "user", "parts": [{"text": pedido_texto}]}],
+-        "generationConfig": {"maxOutputTokens": TETO_TOKENS_SAIDA},
+-    }
+-    corpo = json.dumps(payload).encode("utf-8")
+-    req = urllib.request.Request(
+-        f"{GEMINI_ENDPOINT}?key={chave}", data=corpo, method="POST",
++        SANITIZADOR_ENDPOINT, data=corpo, method="POST",
+         headers={"Content-Type": "application/json"},
+     )
+-    with urllib.request.urlopen(req, timeout=120) as resp:
++    with urllib.request.urlopen(req, timeout=180) as resp:
+         return json.loads(resp.read().decode("utf-8"))
+ 
+ 
+-def _normalizar(provedor, resposta):
+-    """Devolve (conteudo, tokens_entrada, tokens_saida, tokens_total) do
+-    formato cru de cada provedor. Não julga nada."""
+-    if provedor == "gemini":
+-        cands = resposta.get("candidates", [{}])
+-        partes = cands[0].get("content", {}).get("parts", []) if cands else []
+-        conteudo = "".join(p.get("text", "") for p in partes)
+-        um = resposta.get("usageMetadata", {})
+-        te = um.get("promptTokenCount", 0)
+-        ts = um.get("candidatesTokenCount", 0)
+-        tt = um.get("totalTokenCount", te + ts)
+-        return conteudo, te, ts, tt
+-    # glm / openai-compatível
+-    conteudo = resposta.get("choices", [{}])[0].get("message", {}).get("content", "")
+-    uso = resposta.get("usage", {})
++def _normalizar(resposta):
++    """(conteudo, tokens_entrada, tokens_saida, tokens_total) do shape
++    OpenAI-compat que o OmniRoute devolve. Nao julga nada."""
++    conteudo = resposta.get("choices", [{}])[0].get("message", {}).get("content", "") or ""
++    uso = resposta.get("usage", {}) or {}
+     te = uso.get("prompt_tokens", 0)
+     ts = uso.get("completion_tokens", 0)
+     tt = uso.get("total_tokens", te + ts)
+@@ -282,61 +142,23 @@ def main():
+         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
+         return 1
+ 
+-    chave_glm = carregar_chave("ZHIPU_API_KEY")
+-    chave_gemini = carregar_chave("GOOGLE_API_KEY")
+-    if not chave_glm and not chave_gemini:
+-        print(f"ABORTADO: nem ZHIPU_API_KEY nem GOOGLE_API_KEY em {ENV_PATH}. Nada foi enviado. Ver PROJETO, 'Conselho Remoto'.")
+-        return 1
+-
+-    espera_restante = checar_backoff() if chave_glm else 0
+-    glm_pulavel = (not chave_glm) or espera_restante > 0
+-    if espera_restante > 0:
+-        minutos = espera_restante // 60 + (1 if espera_restante % 60 else 0)
+-        print(f"AVISO: GLM em backoff (~{minutos} min restantes) -- tentando Gemini como fallback.")
+-        _backoff_log(f"GLM em backoff ({espera_restante}s) -- fallback para Gemini.")
+-
+-    provedor = modelo_usado = resposta = None
+-    erro_glm = None
+     inicio = time.time()
+-
+-    if not glm_pulavel:
+-        try:
+-            resposta = enviar_glm(pedido_texto, chave_glm)
+-            provedor, modelo_usado = "glm", MODELO
+-        except urllib.error.HTTPError as e:
+-            corpo_erro = e.read().decode("utf-8", errors="replace")
+-            if e.code == 429:
+-                registrar_falha_429()
+-            erro_glm = f"HTTP {e.code}: {corpo_erro[:500]}"
+-        except Exception as e:
+-            erro_glm = f"{type(e).__name__}: {e}"
+-
+-    if resposta is None:
+-        if not chave_gemini:
+-            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) e GOOGLE_API_KEY ausente. Nada foi enviado.")
+-            return 1
+-        n_hoje = _gemini_contador_hoje().get("chamadas", 0)
+-        if n_hoje >= GEMINI_AVISO_LIMIAR:
+-            print(f"AVISO: {n_hoje} chamadas Gemini deste script hoje -- o teto free (~20/dia) é COMPARTILHADO com o fallback do Hermes e o gemini_quota_guard não enxerga estas. Seguindo mesmo assim.")
+-        inicio = time.time()
+-        try:
+-            resposta = enviar_gemini(pedido_texto, chave_gemini)
+-            provedor, modelo_usado = "gemini", GEMINI_MODELO
+-            usadas = _gemini_contador_incrementar()
+-            print(f"Gemini usado como fallback (chamada {usadas} do dia neste script).")
+-        except urllib.error.HTTPError as e:
+-            corpo_erro = e.read().decode("utf-8", errors="replace")
+-            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) E Gemini falhou HTTP {e.code}: {corpo_erro[:500]}. Nada foi enviado -- cair pro modelo local é decisão do Humano (ver (276)).")
+-            return 1
+-        except Exception as e:
+-            print(f"ABORTADO: GLM indisponível ({erro_glm or 'backoff'}) E Gemini falhou -- {type(e).__name__}: {e}. Nada foi enviado.")
++    try:
++        resposta = enviar_omniroute(pedido_texto)
++    except urllib.error.HTTPError as e:
++        corpo_erro = e.read().decode("utf-8", errors="replace")
++        if e.code == 422 and "secret_blocked_before_egress" in corpo_erro:
++            print(f"ABORTADO: o proxy de sanitização (P1-02) bloqueou o pedido -- há um padrão de segredo no texto. Nada foi enviado. Detalhe: {corpo_erro[:400]}")
+             return 1
++        print(f"ABORTADO: OmniRoute retornou HTTP {e.code}: {corpo_erro[:500]}. Nada foi guardado -- cair pro modelo local é decisão do Humano (ver (276)).")
++        return 1
++    except Exception as e:  # noqa: BLE001 -- qualquer falha de rede/gateway aborta igual
++        print(f"ABORTADO: falha ao falar com o OmniRoute ({SANITIZADOR_ENDPOINT}) -- {type(e).__name__}: {e}. O gateway está no ar? (`systemctl --user status omniroute-sanitizer omniroute`). Cair pro modelo local é decisão do Humano (276).")
++        return 1
+ 
+     duracao_s = round(time.time() - inicio, 1)
+-    if provedor == "glm":
+-        registrar_chamada_sem_429()
+-
+-    conteudo, tokens_entrada, tokens_saida, tokens_total = _normalizar(provedor, resposta)
++    conteudo, tokens_entrada, tokens_saida, tokens_total = _normalizar(resposta)
++    modelo_usado = resposta.get("model") or COMBO
+     custo_usd = round(
+         tokens_entrada * PRECO_ENTRADA_POR_TOKEN_USD
+         + tokens_saida * PRECO_SAIDA_POR_TOKEN_USD,
+@@ -345,11 +167,13 @@ def main():
+ 
+     os.makedirs(DESTINO_DIR, exist_ok=True)
+     agora = datetime.now(timezone.utc).astimezone()
+-    nome_arquivo = agora.strftime("%Y%m%d-%H%M%S") + f"-{modelo_usado}.json"
++    modelo_slug = re.sub(r"[^A-Za-z0-9._-]", "_", str(modelo_usado))
++    nome_arquivo = agora.strftime("%Y%m%d-%H%M%S") + f"-{modelo_slug}.json"
+     destino = os.path.join(DESTINO_DIR, nome_arquivo)
+     registro = {
+         "data": agora.isoformat(),
+-        "provedor": provedor,
++        "via": "omniroute",
++        "combo": COMBO,
+         "modelo": modelo_usado,
+         "duracao_s": duracao_s,
+         "tokens_entrada": tokens_entrada,
+@@ -363,7 +187,7 @@ def main():
+         json.dump(registro, f, ensure_ascii=False, indent=2)
+ 
+     print(f"Guardado: {destino}")
+-    print(f"Tokens: {tokens_entrada} entrada + {tokens_saida} saída = {tokens_total} total. Custo: US${custo_usd}.")
++    print(f"Tokens: {tokens_entrada} entrada + {tokens_saida} saída = {tokens_total} total. Custo: US${custo_usd}. (custo real do gateway: `omniroute cost`)")
+ 
+     faltando = checar_formato_parecer(conteudo)
+     if faltando:

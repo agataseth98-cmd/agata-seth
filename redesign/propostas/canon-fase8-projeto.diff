@@ -1,0 +1,149 @@
+# PROPOSTA P-8 -- aplicada no branch sob regime de excecao (Humano, 03/09/2026)
+# arquivo alvo:  PROJETO.md
+# nome:          canon-fase8-projeto
+# aprova com:    redesign/propostas/APROVADO-canon-fase8-projeto  (o Humano cria)
+#
+# P8-06: PROJETO.md descreve o sistema pos-redesenho (Fase 8). Secoes tocadas:
+# "O que e" (Agata = espinha + grafo + OmniRoute, nao mais "sobre Hermes"),
+# "Servicos" (stack do agata.target), "P-9" (lista atualizada), "Memoria e
+# hidratacao" (loop hidrata por estado_para_eco + query_canon; .hermes.md vira
+# referencia), "Interface" (grafo+OmniRoute; Goose fallback; OWUI -> :20127),
+# "Conselho Remoto" (P1-04), "Estado dos bugs e dos testes" (a fase + o bug do
+# P-12 + o 504 de cold-start + hash_ir.sh + consolidacao).
+# PROJETO.md e' P-8 mas as mudancas sao REGISTRO de realidade ja mudada; o
+# mecanico do P-8 dispara mesmo assim -> par gerado para o merge. REGRAS.md NAO
+# mudou (doutrina universal; excecao continua). MEMORIAS (310)/(311),
+# ONDE_ESTAMOS.md fora da quarentena.
+diff --git a/PROJETO.md b/PROJETO.md
+index c07c195..95a8125 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -5,9 +5,15 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
+ Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
+ 
+ ## O que é
+-Assistente pessoal do Orusoua, local-first e grátis por padrão, sobre **Hermes Agent** (Nous Research).
+-Agata = Hermes + governança canônica (REGRAS / PROJETO / MEMÓRIAS) + Conselho Federado de modelos.
+-Acesso multi-dispositivo por Open WebUI sobre Tailscale, nunca internet pública.
++Assistente pessoal do Orusoua, local-first e grátis por padrão.
++Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + governança canônica
++(REGRAS / PROJETO / MEMÓRIAS) + Conselho Federado de modelos.
++**Redesenho concluído no branch `redesign`, mergeado na Fase 8 (2026-09-03, MEMÓRIAS (310)/(311)).**
++O executor do loop passou a ser **grafo LangGraph + OmniRoute** (não mais o Hermes). Os modelos
++são trabalhadores substituíveis; nenhuma ferramenta É o sistema. Hermes-gateway saiu do loop
++(desabilitado); Open WebUI (repontado para o OmniRoute `:20127`) e a voz (kokoro-tts) seguem
++como frontends à parte. Acesso multi-dispositivo por Open WebUI sobre Tailscale, nunca internet
++pública.
+ 
+ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada usa grafias antigas; não se corrige história.
+ 
+@@ -31,11 +37,28 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ - **Padrão de alucinação** documentado é do antecessor `qwen2.5-14b-64k` (inventava entradas e datas) — não do `qwen3.5-9b-64k`, que tem incidentes próprios registrados ((120), (138), (139)) sob rótulo de fabricação, não do mesmo padrão antigo.
+ 
+ ## Serviços (boot)
+-`ollama.service` · Docker `open-webui` + `kokoro-tts` · `hermes-gateway.service` (user unit, linger, porta 8642) · `agata-consolidacao.timer`.
++**Pós-redesenho (Fase 8, 2026-09-03):** `agata.target` (`systemd --user`, `enable`d p/ boot)
++puxa `omniroute` (`:20128`) · `omniroute-sanitizer` (`:20127`, os callers usam este — sanitiza
++segredo antes do egresso) · `openvino-whisper` (`:20130`, STT na iGPU) · `openvino-embeddings`
++(`:20134`, embeddings na iGPU) · `obsidian-ro-proxy` (`:27125`, só leitura) · `agata-drain`
++(oneshot, drena o WAL do grafo no stop, nunca corta um commit). `llamacpp-agata` (`:20129`, MoE
++Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `WantedBy`).
++`agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper
++para lançar jogo com o Agata fora da RTX 4060 — **não** Feral GameMode, que briga com o
++`ananicy-cpp` do CachyOS; usa o `game-performance` da distro).
++Ainda de pé: `ollama.service` (produção, `:11434`, intocado) · Docker `open-webui` (`:8080`,
++repontado p/ `:20127`) + `kokoro-tts` (`:8880`, voz) · `agata-consolidacao.timer`.
++**`hermes-gateway.service` — `disabled` (saiu do loop, Fase 8).** Reversível:
++`systemctl --user enable --now hermes-gateway.service`.
+ 
+ **`agata-consolidacao.timer`, restaurado em quarentena 20/08/2026 (MEMÓRIAS (220)).** Ficou falhando em silêncio (PATH, prompt apontando pro `DIÁRIO.md` extinto) desde data não determinada — nenhum controle percebeu, motivo de P-9 existir (ver abaixo). Hoje: `ExecStart` usa caminho absoluto do binário, sem depender de PATH/shell de login; roda sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` restrito a `propostas/` e `~/.hermes` — nunca escreve em canon, isso é imposto pelo kernel, não só pelo texto do prompt; `Restart=on-failure`/`RestartSec=30` cobre uma falha intermitente real e reproduzida (contenção de SQLite no `state.db` do Hermes, provável concorrência com `hermes-gateway.service`). O prompt (`config/agata-consolidacao.prompt.txt`) só propõe: escreve `propostas/consolidacao-<data>.md` com entrada `(a numerar)`, nunca toca MEMÓRIAS/REGRAS/PROJETO/ONDE_ESTAMOS. **`lacuna` registrada:** o resumo de 1 linha que a corrida imprime no log já mostrou, ao vivo, alegar sucesso sem o arquivo existir — confira sempre `propostas/`, nunca só o log.
+ 
+-**P-9 (MEMÓRIAS (221)):** `scripts/perimetro.sh` avisa (nunca falha) se `ollama.service`, `hermes-gateway.service`, `agata-consolidacao.timer` ou os containers Docker `open-webui`/`kokoro-tts` — as unidades listadas acima — estiverem `failed`, `disabled`/`masked`, ou (containers) fora do ar. Motivo: foi exatamente a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
++**P-9 (MEMÓRIAS (221); lista atualizada na Fase 8, MEMÓRIAS (311)):** `scripts/perimetro.sh`
++avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`, os 5 membros do
++`agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`,
++`obsidian-ro-proxy`) ou os containers `open-webui`/`kokoro-tts` estiverem `failed`,
++`disabled`/`masked`, ou (containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8).
++Motivo do controle: foi a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
+ 
+ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).
+ 
+@@ -44,7 +67,15 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ - **Vault Obsidian derivado (MEMÓRIAS (290)):** `memoria/obsidian/` — gerado por `scripts/gerar_obsidian.py` a cada commit (passo `post-commit`, pasta gitignorada). Representa TODO o sistema como notas religadas por wikilinks: uma por entrada de MEMÓRIAS, por regra, por seção de PROJETO/PROJETO_REFERENCIA, por script, por controle P-N, por proposta aplicada, mais MOCs e um painel de estado. **Fonte da verdade continua sendo o canon** — isto é camada de leitura, como o `.hermes.md`. Modelo com acesso à Máquina (Seth) navega a partir de `memoria/obsidian/INICIO.md`; não editar (a geração apaga e reescreve — correção é entrada nova em MEMÓRIAS).
+ - **Quando a Seth usa o vault (MEMÓRIAS (292)):** consulta dirigida, nunca varredura. Serve para história além da janela do `.hermes.md`, para os backlinks de uma entrada/regra/proposta, ou para "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/`, chegando por `INICIO.md` ou pelos `moc-*`. São centenas de notas: não varrer o vault nem o `MEMÓRIAS.md` cru, o custo é de contexto.
+ - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
+-- **Hidratação real hoje:** `.hermes.md` único, gerado por hook pre-commit (`.githooks/gerar-hermes-md.sh`), sem filtro por modelo. Injeta REGRAS + PROJETO + a janela mais recente de MEMÓRIAS no system prompt (desde MEMÓRIAS (271): topo do corpo, logo após o marcador `ENTRADAS-NOVAS`). Fora do Hermes (outro executor/cliente lendo o canon) não há contador mecânico de turno — conta-se a própria resposta no contexto, como manda REGRAS Regra 1.
++- **Hidratação — pós-redesenho (Fase 8):** o **loop de governança** (grafo LangGraph) hidrata
++  pelo nó `hidratar` = `scripts/estado_para_eco.sh` (fatos de Máquina: HEAD, topo de MEMÓRIAS,
++  `sync`, `HASH-ESTADO`) + `query_canon` / `redesign/grafo/flows` (`consulta.py`, índice-primeiro,
++  zero vector DB) para profundidade sob demanda. O **`.hermes.md`** continua sendo gerado pelo
++  `pre-commit` (`.githooks/gerar-hermes-md.sh`) como **referência** — não é mais a hidratação
++  primária do loop. Sessões em nuvem seguem carregando por `PROMPT_CARREGAMENTO.md` + canon.
++  Fora do loop não há contador mecânico de turno — conta-se a própria resposta no contexto
++  (REGRAS Regra 1). A escolha "consulta vs. injeção" foi decidida na Fase 5 (spike RLM
++  **arquivado** — injeção venceu em fidelidade/custo; números no `redesign/LOG.md`).
+ - **`ONDE_ESTAMOS.md` (16/08/2026) é um quarto arquivo na raiz, só para o Humano — nunca entra na hidratação.** Uma tela, português simples, sem jargão de canon. Mantido atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado (REGRAS, Regra 4). MEMÓRIAS (196)/(197).
+ - **[FECHADO] Teto de entrega do carregador do `hermes-agent`.** Veredito: `agent/prompt_builder.py` truncava `.hermes.md` antes de injetar — piso dinâmico de 20.000 chars vindo de `model.context_length: 65536`, e **o PROJETO.md inteiro nunca chegava a nenhum modelo**. Corrigido com `context_file_max_chars: 100000` explícito no `config.yaml`, escopo estreito, verificado rodando o carregador real e não só lendo a config. `lacuna` que permanece: efeito de `model.context_length` sobre a compressão de histórico de conversa, não medido. Histórico: MEMÓRIAS (103)-(105).
+ - Silos por modelo (Fase 2, ainda NÃO construídos): o hook passará a gerar `.hermes-<modelo>.md`, cada um com REGRAS + PROJETO + a janela mais recente de MEMÓRIAS filtrando só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria: vaza MOD entre modelos via system prompt. Até lá, silo do Conselho (REGRAS, "O Conselho" item 3) é **norma, não mecanismo**.
+@@ -78,7 +109,14 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ **Selo de auditoria:** `(API externa via script)` quando usar code_interpreter + script.
+ 
+ ## Interface
+-Hermes CLI/TUI na Máquina. Open WebUI como frontend puro: tools, memória e search nativos desligados — o executor e a memória são únicos, e são do Hermes.
++**Pós-redesenho (Fase 8):** o executor é o **grafo + OmniRoute** (via o `agata` CLI —
++`redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
++**Goose** (`~/.local/bin/goose` v1.48.0, apontado p/ `:20127`) é o shell operacional de
++**fallback** — não é conselheiro nem gate; Codex CLI é terciário.
++**Open WebUI** como frontend puro (tools/memória/search nativos desligados), agora falando com
++o **OmniRoute `:20127`** (era o Hermes) — perde a camada de memória/governança do Hermes, que
++agora é do grafo. Voz = kokoro-tts (`:8880`), inalterada. Open WebUI está marcado para
++substituição/atualização (decisão do Humano, Fase 8).
+ Voz: Kokoro-FastAPI (`pf_dora`, CPU) + Whisper STT. Remoto exige HTTPS via Tailscale.
+ 
+ ## Segurança
+@@ -108,6 +146,18 @@ Aprovado em princípio, escopo pequeno de propósito: UM modelo, UMA tarefa —
+ 
+ **Backoff de 429, 20/08/2026 (item 3 do documento do Humano, sugestão do Marcos, MEMÓRIAS (216)).** Antes: uma retentativa (duas invocações manuais em sequência) e desiste, sem memória entre invocações. Agora: `conselho_remoto.py` guarda em `memoria/missoes/conselho-remoto/.backoff-estado.json` (camada privada, sem remote) quantas falhas HTTP 429 aconteceram SEGUIDAS entre invocações; na segunda falha seguida, a próxima chamada é recusada por 15 minutos, com a espera registrada em `memoria/missoes/conselho-remoto/backoff.log`. Uma chamada sem 429 (sucesso ou erro de outro tipo) zera o contador. Testado isolado: 1 falha não trava, 2 falhas seguidas travam por ~900s, sucesso depois reseta — os três casos rodados de verdade contra o módulo importado, sem chamada de rede real.
+ 
++**Pós-redesenho (Fase 1 do `redesign`, P1-04; mergeado na Fase 8, MEMÓRIAS (310)/(311)):**
++`conselho_remoto.py` **não lê mais chave nenhuma** e não faz backoff próprio — a chamada externa
++sai por **UMA POST em `http://127.0.0.1:20127/v1/chat/completions`** (o proxy de sanitização
++P1-02) → OmniRoute, combo `conselho` (`zai/glm-4.7-flash → gemini-2.5-flash`, `strategy=priority`,
++**sem tier local** — verificado em `storage.sqlite`). Backoff/breaker/cota agora são do OmniRoute.
++**Ganho:** o pedido do Conselho passa pela sanitização de segredo. **Invariantes preservados:**
++só material público sai (`checar_conteudo_privado` byte a byte igual), teto de tamanho, UMA
++chamada, aborta se os externos esgotarem (não cai pro local), formato do parecer, resposta crua.
++O `.json` de saída passou a gravar `provider` (derivado do modelo) — rastreabilidade, já que a
++combo é config. Cadeia de auditoria A→B→C cumprida (B=Qwen; C=Máquina); `redesign/propostas/
++conselho-remoto-omniroute.diff` + `APROVADO-`.
++
+ ## Sudo e interação humana
+ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou similar) pausa o processo em curso e pede ao Humano para rodar o comando (ex: via prefixo `!` no Claude Code). Não armazenar senha, não simular autenticação, não tentar contornar. Confirmado na prática em MEMÓRIAS (110): sudo sem sessão interativa já foi um bloqueio real, não hipotético.
+ 
+@@ -141,6 +191,26 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
+ **Formato de "pedido de decisão" (itens numerados, marcador de aguardando, ordem de execução) não é canonizado.** Roda informalmente mais algumas vezes; canoniza-se a versão que sobreviver ao uso.
+ 
+ ## Estado dos bugs e dos testes
++- **[FASE 8 / redesenho, 2026-09-03 — MEMÓRIAS (310)/(311)]** O redesenho (branch `redesign`,
++  Fases 0–8) foi mergeado em `main`. Detalhe granular: `redesign/LOG.md`. **Achados desta fase:**
++  - **P-12 (`perimetro.sh`) — bug corrigido:** o caminho `hd_ok=1` fazia
++    `restic ... | python3 - <<'PY'` — a redireção do heredoc vence o pipe, `json.load(sys.stdin)`
++    nunca via o JSON do restic, e todo recurso da lista-FALHA virava SUSPEITO → **P-12 travava
++    todo commit com o HD montado**. A verificação original só exercitou `hd_ok=0`. Fix: o python
++    chama `restic snapshots` por `subprocess`. Vermelho/verde demonstrado.
++  - **OmniRoute vs. cold-start do Ollama:** a 1ª chamada a um modelo Ollama não carregado (~30s
++    de load) estoura o `resilienceSettings.requestQueue.maxWaitMs=15000` (15s, default de código)
++    → **504**; o modelo carrega mesmo assim e a 2ª chamada responde em ~0,5s. Mitigação:
++    `agata-warmup.service` (manual — `systemctl --user start agata-warmup.service` antes de usar
++    o modelo local pesado).
++  - **`ir_sha256_xmlbin` do manifesto:** a fórmula original não está registrada e não reproduz.
++    `redesign/fase7-hd/hash_ir.sh` fixa uma fórmula reproduzível daqui pra frente; o teste de
++    restore do restic (`diff -rq` restaurado vs. vivo) é a garantia real.
++  - **`agata-consolidacao` (via `hermes chat`) já estava quebrado** (journal 03/09 07:06:
++    "ferramentas read_file/terminal falhando — sem diretório temporário no ambiente do Hermes").
++    Repontado para `redesign/grafo/flows/consolidacao.py` (grafo, sob o mesmo sandbox).
++  - **`igpu/.venv`** tinha ~5 GB de libs CUDA (torch-CUDA + nvidia-* + triton) inúteis para o
++    runtime OpenVINO na iGPU Intel — trocado por `torch==2.14.0+cpu` (6,2 GB → 1,8 GB).
+ - **Gemini 429 ("perdi a conexão"):** corrigido. Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação: MEMÓRIAS (38)-(40).
+   **Risco residual, não bug ativo:** o patch vive no `hermes-agent` vendored, fora do repo canônico, sem backup. Um `hermes update` pode descartá-lo em silêncio. **Reverificar após qualquer atualização do Hermes.**
+   **14/08/2026 — reverificado após update real (0.18.0 → 0.20.1, MEMÓRIAS (150)):** o risco se concretizou (conflito real ao restaurar via stash, upstream mexeu na mesma área) e foi resolvido — patch mesclado manualmente com a mudança do upstream, não apenas restaurado igual. Continua fora do canon, sem backup — risco residual inalterado para a próxima atualização.

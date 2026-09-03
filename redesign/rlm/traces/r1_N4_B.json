@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "N4",
+  "classe": "needle",
+  "braco": "B",
+  "final": "A resposta nao existe no corpus.",
+  "tokens": 3069,
+  "ms": 68785,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 0.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A resposta nao existe no corpus.",
+      "tokens_in": 153,
+      "tokens_out": 2916,
+      "ms": 68785
+    }
+  ]
+}

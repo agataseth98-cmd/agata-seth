@@ -1,0 +1,20 @@
+[Unit]
+Description=Proxy read-only na frente do obsidian-local-rest-api (Agata, Fase 6 -- P6-01)
+Documentation=file:///home/orusoua/agata/redesign/obsidian/PLUGIN.md
+# P7-01 fix (02/09): removido After=default.target -- fechava ciclo de ordenacao com
+# agata-drain quando agata.target esta enabled p/ boot (ver openvino-whisper.service).
+# Ordenacao agora e' pela pertenca a agata.target (WantedBy/PartOf via drop-in agata.conf).
+
+[Service]
+Type=simple
+Environment=OBS_UPSTREAM=https://127.0.0.1:27124
+Environment=OBS_BIND=127.0.0.1:27125
+Environment=OBS_TOKEN_FILE=%h/.config/agata/obsidian.token
+ExecStart=/usr/bin/python3 %h/agata/redesign/obsidian/ro_proxy.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+
+# P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
+[Install]
+WantedBy=agata.target

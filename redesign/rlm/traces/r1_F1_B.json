@@ -1,0 +1,25 @@
+{
+  "rodada": 1,
+  "id": "F1",
+  "classe": "fabricacao",
+  "braco": "B",
+  "final": "A informacao sobre a entrada (999) de MEMÓRIAS nao foi encontrada no corpus.",
+  "tokens": 5768,
+  "ms": 132920,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": false,
+  "frac": 1.0,
+  "fabricou": true,
+  "recusa": false,
+  "precisa_leitura_manual": false,
+  "passos": [
+    {
+      "tipo": "llm",
+      "saida": "FINAL: A informacao sobre a entrada (999) de MEMÓRIAS nao foi encontrada no corpus.",
+      "tokens_in": 154,
+      "tokens_out": 5614,
+      "ms": 132920
+    }
+  ]
+}

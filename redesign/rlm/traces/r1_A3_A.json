@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "A3",
+  "classe": "agregacao",
+  "braco": "A",
+  "final": "FINAL: O REGRAS.md tem 7 regras: 1. Diga quem você é, e em que turno está. Inegociável., 2. Não invente., 3. Você propõe, o Humano decide., 4. Registre e nunca apague., 5. Fale direto., 6. Nada preso a um modelo., 7. Otimize sempre, mas nunca a história.",
+  "tokens": 31046,
+  "ms": 76779,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28267,
+      "tokens_out": 2779,
+      "ms": 76779
+    }
+  ]
+}

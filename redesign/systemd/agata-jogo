@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# agata-jogo -- roda um jogo com o Agata FORA da RTX 4060.  (P7-02, chat 6, 03/09/2026)
+#
+# POR QUE NAO Feral GameMode: o CachyOS ja roda `ananicy-cpp` (renice automatico
+# por regra). O Feral GameMode tambem faz renice -> os dois brigam pelo mesmo
+# processo. A wiki do CachyOS diz explicitamente para NAO usar Feral GameMode
+# aqui. O caminho oficial do CachyOS e o wrapper `game-performance` (parte do
+# pacote `cachyos-settings`): poe o power-profiles-daemon em `performance` pelo
+# tempo do jogo, SEM renice. Este script compoe com ele.
+#
+# O QUE FAZ:
+#   1. para `agata.target` (o `agata-drain` drena o WAL -> nunca corta no meio de
+#      um commit; para os 5 servicos + o MoE :20129; libera a VRAM que eles usam);
+#   2. pede pro Ollama de producao (:11434) descarregar os modelos ativos
+#      (`ollama stop`, sem sudo, sem tocar o `ollama.service`) -- assim a 4060
+#      fica realmente livre pro jogo;
+#   3. roda o jogo via `game-performance` (se existir), senao direto;
+#   4. ao terminar -- inclusive se o jogo crashar ou receber Ctrl-C -- re-sobe
+#      `agata.target` (os 5 voltam; o MoE NAO volta sozinho, e' sob demanda).
+#
+# USO:
+#   Steam   -> Propriedades do jogo > Opcoes de inicializacao:  agata-jogo %command%
+#   Lutris  -> Configuracoes > Opcoes de execucao > "Command prefix":  agata-jogo
+#   Heroic  -> Settings > Advanced > "Wrapper command":  agata-jogo
+#   Manual  -> agata-jogo <binario-do-jogo> [args...]
+#
+# Este arquivo e a FONTE versionada. A copia executavel vive em
+# ~/.local/bin/agata-jogo (instalada por: install -Dm755 este-arquivo
+# ~/.local/bin/agata-jogo). Sem sudo -- ~/.local/bin ja esta no PATH.
+
+set -u
+
+_agata_up() {
+  # idempotente: `start` num target ja ativo e' no-op
+  systemctl --user start agata.target 2>/dev/null || true
+}
+# EXIT cobre saida normal; os traps de sinal forcam um exit -> disparam o de EXIT
+trap _agata_up EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+echo "agata-jogo: parando agata.target (drena o WAL, libera a 4060)..." >&2
+systemctl --user stop agata.target
+
+if command -v ollama >/dev/null 2>&1; then
+  # descarrega o que estiver carregado no Ollama de producao (nao mexe no servico)
+  ollama ps 2>/dev/null | awk 'NR>1 && $1 != "" {print $1}' | while read -r _m; do
+    [ -n "$_m" ] && ollama stop "$_m" 2>/dev/null || true
+  done
+fi
+
+if [ "$#" -eq 0 ]; then
+  echo "agata-jogo: sem comando -- so parei o Agata. Rode 'systemctl --user start agata.target' ou saia deste shell." >&2
+  echo "agata-jogo: (dica) use 'agata-jogo %command%' no Steam / 'agata-jogo' como wrapper no Lutris/Heroic." >&2
+  # segura ate Ctrl-C pra que o trap de EXIT re-suba o Agata
+  read -r -p "agata-jogo: ENTER para re-subir o Agata agora... " _ || true
+  exit 0
+fi
+
+if command -v game-performance >/dev/null 2>&1; then
+  echo "agata-jogo: lancando via game-performance (power-profiles-daemon -> performance)" >&2
+  game-performance "$@"
+else
+  echo "agata-jogo: game-performance ausente -- lancando direto" >&2
+  "$@"
+fi

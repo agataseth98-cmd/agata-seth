@@ -1,0 +1,21 @@
+Aprovado -- Cadeia de auditoria em camadas CUMPRIDA (2026-09-03, chat 6):
+
+- Camada A (propos + testou): sessao Claude na Maquina. Verificado no git:
+  checar_conteudo_privado byte a byte identico main vs redesign; removido =
+  delegacao deliberada ao OmniRoute; 1 chamada sem laco; excepts abortam sem
+  cair pro local. Testado no branch com parecer real (LOG 2026-09-02 ~08:45).
+- Camada B (auditor externo): Qwen (Qwen Studio, nuvem). Posicao: seguro p/
+  merge sob P-8, com 3 emendas. 6 perguntas respondidas, sem bloqueio.
+- Camada C (verifica na Maquina): sessao Claude. Rodado em storage.sqlite +
+  :20127. Confirmou I4 (combo `conselho` v2 = zai->gemini, SEM tier local) e
+  checar_conteudo_privado == main. CORRIGIU alegacoes de B sobre paths internos
+  do OmniRoute (router/providers.py, ~/.omniroute/state.json, costs/ -- NAO
+  existem; OmniRoute e' Node+SQLite) sem mudar a conclusao. Deadline real do
+  OmniRoute = 15s (maxWaitMs), nao 30-120s; nao afeta este script.
+- Emendas aplicadas: E1 (doc: rastreabilidade + logs), E2 (campo `provider`
+  derivado no .json de saida -- testado), E3 (except ConnectionRefused/URLError
+  com mensagem clara). py_compile OK.
+- Humano: regime de excecao vigente, "guardrails suspensos ate segunda ordem",
+  "prossiga, registre tudo e vai" (2026-09-03).
+
+Detalhe completo: redesign/propostas/RELAY-conselho-remoto.md (secoes Camada B e C).

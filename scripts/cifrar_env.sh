@@ -38,6 +38,25 @@ if mountpoint -q "$USB" 2>/dev/null; then
   DEST="$USB/env-$(date +%Y%m%d).gpg"
   cp "$OUT" "$DEST"
   echo "Copiado pro HD: $DEST"
+
+  # P7-03: o .gpg tambem entra DENTRO do repo restic, com tag -- assim o
+  # `restic check` e o P-12 do perimetro.sh enxergam a cobertura. O `cp`
+  # solto acima fica como redundancia (o `restic check` nao valida ele).
+  RESTIC_REPO="${AGATA_RESTIC_REPO:-$USB/restic-agata-local}"
+  RESTIC_PASS="$HOME/.config/agata/restic.pass"
+  ENV_SHA="$(sha256sum "$OUT" | cut -d' ' -f1)"
+  if [ -d "$RESTIC_REPO" ] && [ -f "$RESTIC_PASS" ]; then
+    if RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" cat config >/dev/null 2>&1; then
+      RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" backup \
+        --tag agata-env --tag "$ENV_SHA" "$OUT"
+      RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" check --read-data-subset=1/50
+      echo "restic: env cifrado no repo $RESTIC_REPO (tag agata-env / $ENV_SHA)."
+    else
+      echo "restic: repo $RESTIC_REPO inacessivel (senha? init?) -- so o .gpg solto foi pro HD."
+    fi
+  else
+    echo "restic: repo $RESTIC_REPO ou $RESTIC_PASS ausente -- so o .gpg solto foi pro HD."
+  fi
   echo "FALTA: registrar isto no MANIFESTO.txt da passada de backup (incluído, AES256 simétrico, data do conteúdo do .env)."
 else
   echo "HD não montado — o .gpg ficou só em $OUT (mesmo disco do Predator, não é backup ainda)."

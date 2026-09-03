@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "A4",
+  "classe": "agregacao",
+  "braco": "A",
+  "final": "FINAL: Existem dois testes TES documentados no corpus:\n\n**TES-001** — bateria de relatos independentes sobre o mesmo estado. Não é auto-satisfazível numa sessão só, exige sessões genuinamente independentes. Estado: não fechado. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Hipótese em aberto: o teto de truncamento do carregador ((103)/(104)) esteve ativo durante essas três rodadas — os modelos testados podem ter sido avaliados contra REGRAS que nunca chegaram inteiras. Motivo pra rerodar TES-001 depois da correção de (104) e comparar.\n\n**TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade. Estado: formalmente inativo até existir silo (Fase 2). Nonce `e1d1a` aposentado (MEMÓRIAS (90)) — não deve ser ecoado por ninguém. Sucessor existe, gerado pela Máquina, guardado fora do canônico, nunca commitado, nunca em hidratação — entregue à mão pelo Humano, uma vez, só ao modelo-alvo, quando ele decidir reabrir o teste. Até lá: nenhum nonce ativo, dizer isso em vez de fingir. Protocolo completo em REGRAS.md, \"Continuidade mecânica\". Ver MEMÓRIAS (70), (90).",
+  "tokens": 29493,
+  "ms": 34134,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 1.0,
+  "fabricou": false,
+  "recusa": true,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28263,
+      "tokens_out": 1230,
+      "ms": 34134
+    }
+  ]
+}

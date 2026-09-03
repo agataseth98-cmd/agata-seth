@@ -1,0 +1,21 @@
+[Unit]
+Description=OmniRoute AI gateway (Agata, Fase 1 -- P1-00)
+Documentation=https://github.com/pitbaden/omniroute
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# serve em foreground; systemd supervisiona (--no-recovery: sem o supervisor proprio do
+# omniroute, para nao ter dois). --no-open/--no-tray: headless.
+ExecStart=%h/.npm-global/bin/omniroute serve --no-open --no-tray --no-recovery --port 20128
+ExecStop=%h/.npm-global/bin/omniroute stop
+Restart=on-failure
+RestartSec=3
+# loopback + chave obrigatoria no inference plane. Redundante com ~/.omniroute/.env
+# (onde ja foi setado), mas explicito aqui tambem.
+Environment=OMNIROUTE_SERVER_HOST=127.0.0.1
+Environment=REQUIRE_API_KEY=true
+
+[Install]
+WantedBy=default.target

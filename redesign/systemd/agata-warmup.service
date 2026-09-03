@@ -1,0 +1,15 @@
+[Unit]
+Description=Agata -- pre-aquece o modelo local (mitiga o 504 de cold start do OmniRoute)
+After=omniroute.service omniroute-sanitizer.service
+
+[Service]
+Type=oneshot
+# '-' no ExecStart: o 504 do OmniRoute na 1a chamada (cold load ~30s > deadline
+# 15s) e' esperado; o efeito util e' o load. Nao marcar o oneshot como failed.
+ExecStart=-/usr/bin/curl -s -o /dev/null --max-time 90 http://127.0.0.1:20127/v1/chat/completions -H "content-type: application/json" --data-raw {"model":"ollama-local/qwen3.5:9b","messages":[{"role":"user","content":"oi"}],"max_tokens":1}
+TimeoutStartSec=120
+
+# SEM [Install] -- NAO sobe no boot nem com `agata up`. Dispare a mao quando for
+# usar o modelo local pesado:  systemctl --user start agata-warmup.service
+# (Manter a 4060 livre por padrao segue a mesma logica do llamacpp-agata, que e'
+# PartOf sem WantedBy.)

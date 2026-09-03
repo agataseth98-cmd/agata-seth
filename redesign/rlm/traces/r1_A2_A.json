@@ -1,0 +1,24 @@
+{
+  "rodada": 1,
+  "id": "A2",
+  "classe": "agregacao",
+  "braco": "A",
+  "final": "FINAL: Agata · Claude Sonnet 5 · t=32 (contado no contexto) · 14/08/2026 16:33 -03 (informado pela interface)\n\n(148): Kimi cometeu **citação imprecisa** — o núcleo factual do autorrelato de Seth era correto, sem fabricação grave, mas Kimi citou algo de forma imprecisa durante sua auditoria.\n\n(149): Kimi cometeu erro sobre a **própria âncora de sha256** nas emendas que propôs (E0+C1-C7). Houve autocorreção do Kimi sobre essa âncora específica.",
+  "tokens": 28931,
+  "ms": 18036,
+  "n_chamadas": 1,
+  "usou_embeddings": false,
+  "acerto": true,
+  "frac": 0.5,
+  "fabricou": false,
+  "recusa": false,
+  "precisa_leitura_manual": true,
+  "passos": [
+    {
+      "tipo": "llm",
+      "tokens_in": 28293,
+      "tokens_out": 638,
+      "ms": 18036
+    }
+  ]
+}
