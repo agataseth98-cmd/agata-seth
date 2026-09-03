@@ -1,7 +1,9 @@
 # P8-04 — Goose como shell operacional de fallback
 
-**Status:** ⏳ a fazer. Pode instalar software → **precisa do "vai"** (provável `sudo`/AUR
-ou `pipx`).
+**Status:** 🔶 **PESQUISA FEITA — 2026-09-03 (chat 6).** O Goose atual é binário Rust (o
+`goose-ai` do PyPI é o predecessor deprecado — não usar). Opções de instalação em
+`redesign/router/goose.md`; recomendação = binário do release + sha256 em `~/.local/bin`
+(sem sudo). **Aguarda o Humano escolher o método e dar o "vai" para instalar.**
 
 **Objetivo:** um executor-shell de fallback agnóstico, apontado para o OmniRoute, para
 quando a sessão Claude Code primária cair e o Humano precisar tocar o sistema sem ela.

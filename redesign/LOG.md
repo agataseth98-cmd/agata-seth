@@ -3154,3 +3154,64 @@ instalado. `git commit --no-verify` (stage de `scripts/*` no branch — permitid
 de exceção).
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 10:05 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — N do paralelo decidido (7 + piso); P8-02 aberto; P8-04 pesquisado
+
+**Humano: "Me aconselhe o melhor numero para N, e vai."**
+
+### Conselho — N do paralelo (P8-02)
+
+**N = 7 dias, com piso de amostragem.** Razão: o caminho novo já passou muito teste
+(evals da Fase 4 — fabricação 3/3, hidratação; loop ponta a ponta em clones; spike de
+durabilidade; S7 por fase). O paralelo é confirmação em uso real, não validação do zero.
+7 dias do uso real do Humano dão a variedade de pedido necessária (combos de rota, portão,
+hidratação sobre temas diferentes, ao menos um fallback). 14 dias só adia sair do estado de
+exceção e mergear, com retorno decrescente. O risco real de um N puro por calendário é
+"7 dias parados" — por isso o **piso**: não fecha antes de ter, em pares,
+(1) ≥1 de cada `--tipo`, (2) ≥1 fallback real, (3) ≥1 pausa de portão, (4) zero fabricação.
+Se o piso não fechou em 7 dias, estende só até cobrir. Regressão → para, volta ao branch,
+não conta dia.
+
+Régua gravada em `redesign/tasks/P8-02-*.md` e `redesign/grafo/paralelo.md`.
+
+### P8-02 aberto — harness validado
+
+`redesign/grafo/paralelo.md` (append-only, um par por linha). Harness: clone persistente em
+`~/.cache/agata/paralelo-clone` (`git clone --local --no-hardlinks` — o `--local` puro
+falha cross-device p/ `/tmp`); `grafo.py run … --repo $CLONE` + `resume --recusar` (nunca
+commita no clone). **Seed rodado:** pedido `verificacao` → `rota=cheap` →
+`trabalhar:ok:minimax/minimax-m3:free` (via `:20127`) → `verificar` rodou (`perimetro_exit=0`,
+`10 OK · 1 SKIP · 1 PARCIAL`; o SKIP é o P-10, vault não gerado no clone) →
+`citacoes_suspeitas: []` → portão pausou → `--recusar` → **nada commitado no clone**.
+Modelo-path + verificação + portão OK.
+
+### P8-04 — Goose pesquisado, instalação aguarda decisão
+
+`redesign/router/goose.md`. O **Goose atual** (Block → Agentic AI Foundation, Apache-2.0) é
+**binário Rust** — o pacote PyPI `goose-ai` é o predecessor de 2024, **deprecado, não usar**.
+Sem caminho `pipx` para a versão vigente. Opções: (A) script oficial `curl … | bash` →
+`~/.local/bin` (sem sudo, mas roda script da rede); (B) binário do release + sha256 conferido
+em `~/.local/bin` (sem sudo, recomendado — linha do `agata-jogo`); (C) AUR (não está no repo
+oficial); (D) adiar (não bloqueia P8-05/06/07). **Instalar software precisa do "vai" —
+Humano escolhe A/B/C/D.** Config planejada: provider OpenAI-compat → `:20127` (proxy
+sanitizador), modelo `ollama-local/qwen3.5:9b`, sem chave.
+
+### Estado da Fase 8
+
+P8-00 ✅ · P8-01 🔶 (falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) ·
+**P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda o caminho de cutover de
+pé (servidor MoE `:20129` — `envelope.py` bate nele) · **P8-04 🔶** (aguarda escolha do
+método + "vai") · P8-05/06/07 em cadeia depois.
+
+**Pendências do Humano:** (1) método de instalação do Goose + "vai"; (2) pacote de relay do
+`conselho-remoto-omniroute.diff` para auditoria por outro modelo (P8-01 B/C) — monto se
+pedir; (3) usar o sistema pelos próximos 7 dias para o paralelo acumular; (4) mais adiante:
+"vai" no push (P8-07).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*` (já commitado
+no branch em P8-01), `.githooks/*`. Sem `sudo`. Nada instalado.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

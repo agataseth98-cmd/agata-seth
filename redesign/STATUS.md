@@ -1,17 +1,18 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` P-12/cifrar-env aplicados no branch, `perimetro.sh` 11 controles, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · P8-02..P8-07 aguardam). **Fases 0-7 FECHADAS.** **`main` ainda intocado (`4aa90bd`)** — o merge é P8-07.
-ATUALIZADO: 2026-09-03 09:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — P8-00 FEITO (estratégia de merge aprovada). P8-01: `p12-backup-verificavel.diff`
-e `cifrar-env.diff` aplicados no branch; **bug do P-12 achado e corrigido** (caminho
-`hd_ok=1` — `restic | python3 - <<'PY'` fazia o heredoc vencer o pipe → P-12 sempre FALHOU
-com HD montado; a verificação do chat 4 só testou `hd_ok=0`; fix = `subprocess`).
-`perimetro.sh` verde (11 OK, 1 PARCIAL do P-4, 0 FALHA); vermelho demonstrado com repo
-restic vazio. `conselho-remoto-omniroute.diff` gerado, aguarda Cadeia B/C + `APROVADO-`.
+FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 🔶** (Goose pesquisado — aguarda método + "vai") · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
+ATUALIZADO: 2026-09-03 10:05 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — **N do paralelo = 7 dias + piso de amostragem** (≥1 par por tipo, ≥1
+fallback, ≥1 pausa de portão, zero fabricação; estende só até cobrir o piso). P8-02 aberto,
+harness validado (seed em `redesign/grafo/paralelo.md`: modelo via `:20127` ✓, `verificar`
+✓, portão ✓, `--recusar` → nada no clone ✓). P8-04: Goose atual = binário Rust (não `pipx`;
+`goose-ai` do PyPI é deprecado) — `redesign/router/goose.md`, aguarda o Humano escolher
+A/B/C/D + "vai". _(entrada 09:50: P8-00 FEITO; P8-01 — bug do P-12 (`hd_ok=1`, heredoc vs
+pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK.)_
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`07a9087`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`bc15673`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -44,9 +45,11 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   `perimetro.sh` = **11 controles, P-12 vermelho/verde demonstrado** (bug do `hd_ok=1`
   corrigido — `subprocess` no lugar de `restic | python3 - <<'PY'`). **Falta:** camadas B/C
   da Cadeia + `APROVADO-conselho-remoto-omniroute` (toca rede — não auto-aprovado).
-- **P8-02** paralelo N dias (Hermes vs. grafo+OmniRoute, sem desligar nada) → decisão do Humano.
+- **P8-02 🟢** paralelo **N=7 dias + piso de amostragem** (Hermes vs. grafo+OmniRoute, sem
+  desligar nada). Aberto — acumula em `redesign/grafo/paralelo.md` conforme o Humano usa.
 - **P8-03** reteste de fabricação no caminho novo ((138)/(307) + hidratação), config de cutover.
-- **P8-04** Goose = shell operacional de fallback, apontado pro OmniRoute (instala software → "vai").
+- **P8-04 🔶** Goose = shell de fallback → OmniRoute. Pesquisado (`redesign/router/goose.md`):
+  binário Rust, não `pipx`. Aguarda o Humano escolher A/B/C/D + "vai" p/ instalar.
 - **P8-05** Hermes sai do loop (grafo+OmniRoute dirige; voz/OWUI ficam à parte se em uso).
 - **P8-06** canon reflete a realidade: `REGRAS`/`PROJETO`/`ONDE_ESTAMOS` pela Cadeia de
   auditoria em camadas + 2ª opinião; 1 entrada em `MEMÓRIAS.md` por fase (0–8), append-only.

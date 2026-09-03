@@ -1,6 +1,8 @@
 # P8-02 — paralelo N dias: Hermes vs. grafo + OmniRoute
 
-**Status:** ⏳ a fazer. Não desliga nada — os dois caminhos rodam lado a lado.
+**Status:** 🟢 **ABERTO — 2026-09-03 (chat 6).** Régua decidida: **N = 7 dias + piso de
+amostragem**. Harness validado (1 seed em `redesign/grafo/paralelo.md`). Acumula conforme o
+Humano usa o sistema.
 
 **Objetivo:** medir o caminho novo (grafo LangGraph + OmniRoute) contra o Hermes em uso
 real por N dias, com número, antes de tirar o Hermes do loop (P8-05).
@@ -20,9 +22,11 @@ real por N dias, com número, antes de tirar o Hermes do loop (P8-05).
    `diff_proposto`, veredito do `verificar`, e se o portão pausou onde devia.
 2. **Planilha append-only** em `redesign/grafo/paralelo.md` (data · pedido · Hermes:
    resultado/tempo · novo: resultado/tempo/custo · observação).
-3. **Sem автomatizar decisão:** o critério "empatou ou melhorou" e o **N** (dias) são do
-   Humano (Regra 3). Sugestão inicial: N=7, critério = nenhuma regressão de fidelidade +
-   custo ≤ Hermes + zero fabricação (cruza com P8-03).
+3. **N e critério — decididos 2026-09-03 (chat 6):** **N = 7 dias**, com piso de
+   amostragem (≥1 par por `--tipo`; ≥1 fallback real; ≥1 pausa de portão; zero fabricação).
+   Estende só até cobrir o piso; regressão → para e volta ao branch. Critério de aprovação:
+   nenhuma regressão de fidelidade + custo ≤ Hermes + portão/fallback OK + zero fabricação.
+   Detalhe e log dos pares: `redesign/grafo/paralelo.md`.
 
 ## Aceite
 - `redesign/grafo/paralelo.md` com ≥ N dias de pares registrados.
