@@ -308,3 +308,9 @@ restore do P0-02 → **Fase 0 fechada, pronta para o "vai" da Fase 1**.
   recorrente de classificador `[bio]` no harness) e retomada num chat novo, que reidratou
   de `STATUS.md` + `LOG.md` + `CONTINUIDADE.md` no branch `redesign` (4 refs conferidas:
   `main` 4aa90bd, `redesign`/`origin/redesign` 798d483, `pre-redesign` 4aa90bd).
+- **Passagem chat 5 → chat 6 (02/09 ~22:15):** carta de reidratação
+  `redesign/REIDRATACAO-chat-6.md` (para a próxima sessão Claude) e
+  `redesign/CONSELHO-03-sync-fallbacks.md` (acompanhamento próximo dos fallbacks; cópia em
+  `~/Área de trabalho/`). Estado: Fase 7 EM ANDAMENTO — P7-01 feito + regressão de boot
+  corrigida + S7 PASS, **pende reboot real** (Humano adiou); P7-02 runbook pronto (2 sudo);
+  P7-03 aguarda o HD (03/09) + régua P-12.
