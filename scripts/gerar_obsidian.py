@@ -383,7 +383,7 @@ def main():
 
     # -------- controles do perímetro
     CTRL_DESC = {
-        "P-1": "Segredos só em ~/.hermes/.env, fora do repo",
+        "P-1": "Segredos só em ~/.config/agata/.env, fora do repo",
         "P-2": "O executor pausa e pede sudo ao Humano",
         "P-3": "Publicação é decisão deliberada; consentimento por trecho",
         "P-4": "api_server contido; Ollama só em 127.0.0.1",
