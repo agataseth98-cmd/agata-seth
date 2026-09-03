@@ -3317,3 +3317,59 @@ tem trava de governança / produção).
 Sem `sudo`. MoE subido e parado (on-demand). Nada instalado.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 11:45 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-01 relay pronto · P8-05 inventário · P8-06 CANON-DELTA
+
+Continuação de "faça tudo, pare em risco". Fiz o que dava sem trava; parei nos que têm.
+
+### P8-01 — pacote de relay do `conselho-remoto-omniroute.diff` (camada B)
+
+`redesign/propostas/RELAY-conselho-remoto.md` (cópia em `~/Área de trabalho/`). Traz: o
+contexto de P1-04, os 7 invariantes (I1–I7), a **auto-revisão da camada A** (verifiquei no
+git: `checar_conteudo_privado` **byte a byte idêntico** entre `main` e `redesign` — sem
+regressão em I1; o que saiu (chave, backoff 429, contador de cota, breaker) é delegação
+deliberada ao OmniRoute; `TETO_*` inalterados; 1 chamada, sem laço; os dois `except` abortam
+sem cair pro local), e **6 perguntas** para a camada B (delegação completa? rota por config
+vs. pino? logs do OmniRoute? `thinking:disabled` repassado? `except` genérico cedo demais?
+algo que A não viu). **Falta:** Humano relaya → B responde → C (Máquina) confirma →
+`APROVADO-conselho-remoto-omniroute`.
+
+### P8-05 — inventário do Hermes (execução NÃO feita, de propósito)
+
+`hermes-gateway.service` (`active`+`enabled`, porta 8642) é o **executor** do loop.
+`channel_directory.json` → `"platforms": {}` — **nenhuma ponte** Slack/Discord/Telegram
+ativa agora. `open-webui`(8080) + `kokoro-tts`(8880) são frontend/voz à parte (Docker).
+`agata-consolidacao.timer` ainda aponta pro Hermes (o `flows/consolidacao.py` do P6-03 é o
+substituto). P-9 do `perimetro.sh` monitora o gateway — ajustar se sair. **Parei aqui:**
+tirar o Hermes antes de o paralelo de 7 dias provar o substituto = risco. Precisa de
+P8-02 verde + o Humano dizer se usa OWUI/voz. Passos e perguntas em `redesign/tasks/P8-05-*.md`.
+
+### P8-06 — `redesign/CANON-DELTA.md` (nada aplicado ao canon)
+
+Mapa de cada mudança que o cutover implica em PROJETO.md (11 seções — abertura "Agata =
+Hermes" → "Agata = espinha + grafo + OmniRoute"; Serviços; Memória e hidratação; P-9;
+Conselho Remoto; …), REGRAS.md (fim do estado de exceção; P-10/11/12 no controle padrão;
+Regra 1/turno; §4.2 aberto de (309)), ONDE_ESTAMOS.md (reescrito), MEMÓRIAS.md (1 entrada
+DIÁRIO por fase, provável (310)–(318)). **Linha vermelha:** cada linha passa pela Cadeia
+A→B→C + autorização explícita do Humano por mudança. Não toquei canon.
+
+### Estado da Fase 8
+
+P8-00 ✅ · P8-03 ✅ · P8-04 ✅ · P8-01 🔶 (relay pronto — falta B/C + APROVADO) ·
+P8-02 🟢 (piso sintético coberto; 7 dias reais abertos) · P8-05 🔶 (inventário; execução
+travada) · P8-06 🔶 (delta mapeado; canon intocado) · P8-07 depende de 05/06.
+
+**O que trava daqui (não é "risco de crash", é o que o sistema pede):**
+1. **P8-01** — relay para um modelo externo (Humano) + confirmação na Máquina + `APROVADO-`.
+2. **P8-02** — 7 dias de uso real do Humano.
+3. **P8-05** — resposta do Humano (OWUI? voz?) + P8-02 verde antes de mexer no `hermes-gateway`.
+4. **P8-06** — Cadeia de auditoria + autorização do Humano por mudança de canon.
+5. **P8-07** — depois de 05/06; "vai" no `git push origin main` + sessão independente p/ o S7.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*` (já no branch),
+`.githooks/*`. Sem `sudo`. Nada instalado nesta entrada.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

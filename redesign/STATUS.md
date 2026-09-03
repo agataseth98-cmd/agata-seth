@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`d1ad4a1`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`77c62d5`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -54,9 +54,11 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   Config → `:20127`, modelo `ollama-local/qwen3.5:9b`. `goose run` OK via OmniRoute; segredo
   plantado → 422. Achado: cold start do Ollama estoura o deadline (15s) do OmniRoute na 1ª
   chamada — mitigar no cutover. `redesign/router/goose.md`.
-- **P8-05** Hermes sai do loop (grafo+OmniRoute dirige; voz/OWUI ficam à parte se em uso).
-- **P8-06** canon reflete a realidade: `REGRAS`/`PROJETO`/`ONDE_ESTAMOS` pela Cadeia de
-  auditoria em camadas + 2ª opinião; 1 entrada em `MEMÓRIAS.md` por fase (0–8), append-only.
+- **P8-05 🔶** inventário do Hermes feito (`hermes-gateway` = executor; `platforms: {}` — sem
+  ponte ativa; OWUI/voz à parte). **Execução parada** — depende de P8-02 verde + resposta do
+  Humano (usa OWUI? voz?).
+- **P8-06 🔶** `redesign/CANON-DELTA.md` mapeia cada mudança de canon. **Nada aplicado** —
+  Cadeia A→B→C + autorização por mudança (linha vermelha).
 - **P8-07** o merge (`--no-ff`, sem force/reset/rebase) + **S7 pós-push por sessão
   independente** + `perimetro.sh` verde com P-12. Fecha o redesenho.
 
