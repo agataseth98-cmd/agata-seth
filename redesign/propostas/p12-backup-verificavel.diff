@@ -1,7 +1,7 @@
-# PROPOSTA P-8 -- NAO APLICADA
+# PROPOSTA P-8 -- NAO APLICADA A main
 # arquivo alvo:  scripts/perimetro.sh   (blob base: 70387a9)
 # nome:          p12-backup-verificavel
-# aprova com:    redesign/propostas/APROVADO-p12-backup-verificavel  (o Humano cria)
+# aprova com:    redesign/propostas/APROVADO-p12-backup-verificavel  (o Humano criou 03/09 08:41)
 # depende de:    a REGUA do Humano em redesign/fase7-hd/REGUA-P12.md (as 3 linhas P12_*)
 #                + HD montado ao menos uma vez p/ o cache de cobertura existir
 #
@@ -9,30 +9,27 @@
 #   - FALHA-class (soma em FALHA, trava commit) SO quando o HD esta montado E um
 #     recurso da lista P12_FALHA_SEM_BACKUP nao tem snapshot restic do sha256 atual < N dias.
 #   - AVISO (nao trava) p/ os recursos de P12_AVISO_SEM_BACKUP na mesma condicao.
-#   - PARCIAL (nao trava, nunca falha um commit por causa de disco no trabalho) quando o
-#     HD esta ausente -- le o cache ~/.agata-backup-staging/p12-cobertura.json e reporta a
-#     data de cobertura mais velha.
+#   - PARCIAL (nao trava) quando o HD esta ausente -- le o cache
+#     ~/.agata-backup-staging/p12-cobertura.json e reporta a data de cobertura mais velha.
 #   - ISENTO: recurso do manifesto fora das duas listas (reconstruivel -- RECONSTRUCAO.md).
 #
-# Verificado 02/09/2026: `bash -n` OK; run completo do perimetro.sh modificado =
-# "10 OK . 0 SKIP . 2 PARCIAL . 0 FALHA" (P-12 PARCIAL, HD ausente);
-# `git apply --check` contra o blob 70387a9 = OK.
-# Reafinado 03/09/2026 (chat 6, ordem do Humano "otimizar se der"): qwen3-30b-a3b
-# saiu de P12_AVISO -> ISENTO. E' o unico recurso das listas que e' publico E
-# content-imutavel (blob_sha256 fixado no manifesto, URL HF direta; o proprio
-# manifesto diz "NAO precisa de snapshot restic"). Um arquivo que nao pode mudar
-# nao precisa de backup *fresco*, so de backup que exista -- mante-lo em AVISO so
-# geraria, a cada perimetro.sh apos N dias, um nag para re-snapshotar 18 GB
-# identicos (o "AVISO que fica sempre aceso vira AVISO ignorado"). O snapshot
-# 9433e3b8 feito no P7-03 fica como redundancia. Os whisper IR seguem em AVISO:
-# o manifesto os marca "publico, sem hash fixado no HF" -- podem driftar, entao
-# rastrear frescor tem sentido. `bash -n` do resultado = OK; `git apply --check`
-# contra 70387a9 = OK (so muda o conteudo de 1 linha, nao a contagem do hunk).
+# Verificado 02/09/2026: `bash -n` OK; run com HD ausente = P-12 PARCIAL; `git apply --check`
+# contra 70387a9 = OK.
+# Reafinado 03/09/2026 (chat 6, ordem do Humano "otimizar se der"): qwen3-30b-a3b saiu de
+# P12_AVISO -> ISENTO (publico + blob_sha256 fixado no manifesto; imutavel nao precisa de
+# backup *fresco*, so de backup que exista).
+# CORRIGIDO 03/09/2026 (chat 6): o caminho hd_ok=1 estava quebrado -- `restic ... | python3
+# - <<'PY'` fazia o heredoc vencer o pipe, entao `json.load(sys.stdin)` nunca via o JSON do
+# restic e todo recurso da lista-FALHA dava SUSPEITO (P-12 sempre FALHOU com o HD montado).
+# A verificacao do chat 4 so exercitou o caminho hd_ok=0. Fix: o python chama o `restic
+# snapshots --json --tag` por subprocess (nome/hash/N por argv, repo por env), sem stdin.
+# Testado 03/09: HD real + snapshots frescos -> P-12 OK (11 controles); AGATA_RESTIC_REPO
+# apontando p/ repo vazio -> rlm + e5-small SUSPEITO -> P-12 FALHOU. Vermelho/verde OK.
 diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
-index 70387a9..7486533
+index 70387a9..5a4937a 100755
 --- a/scripts/perimetro.sh
 +++ b/scripts/perimetro.sh
-@@ -280,6 +280,130 @@ p6_backup_pendente() {
+@@ -280,6 +280,133 @@ p6_backup_pendente() {
    return 0
  }
  
@@ -98,13 +95,16 @@ index 70387a9..7486533
 +    [ "$em_falha" = 0 ] && [ "$em_aviso" = 0 ] && continue
 +
 +    if [ "$hd_ok" = 1 ]; then
-+      fresco="$(RESTIC_PASSWORD_FILE="$P12_PASS" \
-+        restic -r "$P12_REPO" snapshots --json --tag "$nome" 2>/dev/null \
-+        | python3 - "$hash" "$P12_N_DIAS" <<'PY'
-+import json, sys, datetime
-+alvo, ndias = sys.argv[1], int(sys.argv[2])
++      fresco="$(RESTIC_PASSWORD_FILE="$P12_PASS" P12_REPO="$P12_REPO" \
++        python3 - "$nome" "$hash" "$P12_N_DIAS" <<'PY'
++import json, os, subprocess, sys, datetime
++nome, alvo, ndias = sys.argv[1], sys.argv[2], int(sys.argv[3])
 +try:
-+    snaps = json.load(sys.stdin)
++    out = subprocess.run(
++        ["restic", "-r", os.environ["P12_REPO"], "snapshots", "--json", "--tag", nome],
++        check=True, capture_output=True, text=True, timeout=60,
++    ).stdout
++    snaps = json.loads(out or "[]")
 +except Exception:
 +    snaps = []
 +agora = datetime.datetime.now(datetime.timezone.utc)
@@ -163,7 +163,7 @@ index 70387a9..7486533
  # --- P-7 -----------------------------------------------------------------
  # Citação de MEMÓRIAS aponta pra entrada real, não fabricada (REGRAS,
  # "Citação de MEMÓRIAS -- primeira referência"). Checa só o que esta
-@@ -661,6 +785,11 @@ main() {
+@@ -661,6 +788,11 @@ main() {
    CONT_OK=$((CONT_OK + 1))
    echo
  

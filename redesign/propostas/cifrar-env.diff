@@ -12,8 +12,10 @@
 # continua, como redundancia. Nenhuma mudanca no jeito de cifrar (GPG
 # simetrico AES256, senha por prompt -- nunca por argumento).
 #
-# Verificado nesta sessao (02/09/2026): 'sh -n' OK; 'git apply --check'
-# contra o blob 670dc6a = OK. Nao rodado de verdade (sem HD).
+# Verificado 02/09/2026: 'sh -n' OK; 'git apply --check' contra 670dc6a = OK.
+# Ajuste 03/09 (chat 6): removido '--host predator' do 'restic backup' -- os
+# snapshots do repo usam o host real (cachyos-PHN16-71); o P-12 filtra por tag,
+# nao por host. Consistencia com a passada de backup do P7-03.
 diff --git a/scripts/cifrar_env.sh b/scripts/cifrar_env.sh
 index 670dc6a..694f07d
 --- a/scripts/cifrar_env.sh
@@ -32,7 +34,7 @@ index 670dc6a..694f07d
 +  if [ -d "$RESTIC_REPO" ] && [ -f "$RESTIC_PASS" ]; then
 +    if RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" cat config >/dev/null 2>&1; then
 +      RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" backup \
-+        --tag agata-env --tag "$ENV_SHA" --host predator "$OUT"
++        --tag agata-env --tag "$ENV_SHA" "$OUT"
 +      RESTIC_PASSWORD_FILE="$RESTIC_PASS" restic -r "$RESTIC_REPO" check --read-data-subset=1/50
 +      echo "restic: env cifrado no repo $RESTIC_REPO (tag agata-env / $ENV_SHA)."
 +    else

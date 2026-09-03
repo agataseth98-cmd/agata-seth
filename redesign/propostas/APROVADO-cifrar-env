@@ -1,0 +1,5 @@
+Aprovado pelo Humano (Orusoua) verbalmente na sessao de 2026-09-03 (chat 6):
+"aprovado, vai" sobre o plano P8-00..P8-07, que lista aplicar cifrar-env.diff em
+P8-01. O comportamento ja foi executado a mao em 03/09 (snapshot restic 9d96c3f7,
+restic check + restore OK) -- este .diff so automatiza isso dentro do
+scripts/cifrar_env.sh. Ver redesign/LOG.md 2026-09-03 ~09:12 e ~09:2x.

@@ -1,6 +1,8 @@
 # P8-00 — inventário do cutover + estratégia de merge
 
-**Status:** ⏳ a fazer (só leitura + doc — zero risco).
+**Status:** ✅ **FEITO — 2026-09-03 ~09:45 (chat 6).** Estratégia aprovada pelo Humano
+("aprovado, vai"). O diff `main..redesign -- ':!redesign/'` está mapeado abaixo; a ordem e
+o tratamento da âncora valem.
 
 **Objetivo:** fixar exatamente o que a Fase 8 leva para `main`, o que **não** leva, a
 ordem dos passos P8-01..P8-07, e a estratégia do merge. Nada é aplicado aqui.

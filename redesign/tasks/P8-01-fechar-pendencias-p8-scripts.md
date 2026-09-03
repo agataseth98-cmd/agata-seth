@@ -1,7 +1,12 @@
 # P8-01 — fechar as pendências P-8 de `scripts/*`
 
-**Status:** ⏳ a fazer. Aplica `.diff` em `scripts/*` — **precisa do "vai" da Fase 8** (é a
-primeira mexida real fora de `redesign/`).
+**Status:** 🔶 **QUASE — 2026-09-03 ~09:50 (chat 6).** `p12-backup-verificavel.diff` e
+`cifrar-env.diff` **aplicados no branch** + `perimetro.sh` 11 controles + P-12
+vermelho/verde demonstrado. `conselho-remoto-omniroute.diff` **gerado**; falta B/C da
+Cadeia + `APROVADO-conselho-remoto-omniroute`. **Bug achado e corrigido:** o caminho
+`hd_ok=1` do P-12 estava quebrado (`restic | python3 - <<'PY'` — heredoc vencia o pipe,
+`json.load(sys.stdin)` nunca via o JSON → P-12 sempre FALHOU com HD montado; a verificação
+do chat 4 só exercitou `hd_ok=0`). Fix: python chama `restic` por `subprocess`.
 
 **Objetivo:** os 3 `scripts/*` do redesenho entram em `main` pelo processo P-8 correto,
 não por `--no-verify`. `perimetro.sh` passa a ter o P-12 funcionando.

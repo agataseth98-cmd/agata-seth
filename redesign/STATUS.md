@@ -1,12 +1,13 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00..P8-07 escritos, aguardam revisão do Humano e execução passo a passo). **Fases 0-7 FECHADAS** (Fase 7: falta só o Humano testar `agata-jogo` num jogo real — não bloqueia a Fase 8). **É a primeira vez que `main` muda.**
-ATUALIZADO: 2026-09-03 09:20 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — Humano deu "vai" para a Fase 8. Escritos os 8 arquivos-tarefa
-`redesign/tasks/P8-00..P8-07` no schema. P8-00 mapeia o `git diff main..redesign` real
-(fora de `redesign/`: `.gitignore`, `PROMPT_CARREGAMENTO.md` [EXCLUIR — churn da âncora],
-`models/*`, `scripts/conselho_remoto.py` [sem par P-8 ainda]). Nada aplicado; `main`
-intocado (`4aa90bd`).
+FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00 ✅ · P8-01 🔶 (`.diff` P-12/cifrar-env aplicados no branch, `perimetro.sh` 11 controles, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · P8-02..P8-07 aguardam). **Fases 0-7 FECHADAS.** **`main` ainda intocado (`4aa90bd`)** — o merge é P8-07.
+ATUALIZADO: 2026-09-03 09:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — P8-00 FEITO (estratégia de merge aprovada). P8-01: `p12-backup-verificavel.diff`
+e `cifrar-env.diff` aplicados no branch; **bug do P-12 achado e corrigido** (caminho
+`hd_ok=1` — `restic | python3 - <<'PY'` fazia o heredoc vencer o pipe → P-12 sempre FALHOU
+com HD montado; a verificação do chat 4 só testou `hd_ok=0`; fix = `subprocess`).
+`perimetro.sh` verde (11 OK, 1 PARCIAL do P-4, 0 FALHA); vermelho demonstrado com repo
+restic vazio. `conselho-remoto-omniroute.diff` gerado, aguarda Cadeia B/C + `APROVADO-`.
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
@@ -35,13 +36,14 @@ leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flo
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
 **Fase 8 (Cutover + merge p/ `main`) — arquivos-tarefa escritos, aguardam revisão + execução:**
-- **P8-00** inventário + estratégia de merge (só doc). Mapeia o `git diff main..redesign`
-  fora de `redesign/`: `.gitignore` (aditivo), `PROMPT_CARREGAMENTO.md` (**excluir** — churn
-  da âncora), `models/*` (Fase 3), `scripts/conselho_remoto.py` (**sem par P-8** — foi
-  `--no-verify` no branch).
-- **P8-01** fechar P-8 de `scripts/*`: aplicar `p12-backup-verificavel.diff` (APROVADO ✅),
-  `cifrar-env.diff` (falta `APROVADO-cifrar-env`), gerar+auditar `conselho-remoto-omniroute.diff`.
-  `perimetro.sh` passa a 11 controles com P-12 vermelho/verde.
+- **P8-00 ✅** inventário + estratégia de merge (só doc). `main..redesign` fora de
+  `redesign/`: `.gitignore` (aditivo), `PROMPT_CARREGAMENTO.md` (**excluir** — churn da
+  âncora), `models/*` (Fase 3), `scripts/conselho_remoto.py` (par P-8 retroativo).
+- **P8-01 🔶** fechar P-8 de `scripts/*`: `p12-backup-verificavel.diff` (APROVADO ✅) +
+  `cifrar-env.diff` (APROVADO ✅, `--host predator` removido) **aplicados no branch**.
+  `perimetro.sh` = **11 controles, P-12 vermelho/verde demonstrado** (bug do `hd_ok=1`
+  corrigido — `subprocess` no lugar de `restic | python3 - <<'PY'`). **Falta:** camadas B/C
+  da Cadeia + `APROVADO-conselho-remoto-omniroute` (toca rede — não auto-aprovado).
 - **P8-02** paralelo N dias (Hermes vs. grafo+OmniRoute, sem desligar nada) → decisão do Humano.
 - **P8-03** reteste de fabricação no caminho novo ((138)/(307) + hidratação), config de cutover.
 - **P8-04** Goose = shell operacional de fallback, apontado pro OmniRoute (instala software → "vai").

@@ -3093,3 +3093,64 @@ bloqueia a Fase 8, mas convém antes do P8-05.
 Sem `sudo`. Nada instalado.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 09:50 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-00 FEITO + P8-01 QUASE (bug do P-12 achado e corrigido)
+
+**Humano: "aprovado, vai."** sobre os 8 arquivos-tarefa. Executando.
+
+### P8-00 ✅ — inventário + estratégia de merge
+
+Estratégia aprovada. `main..redesign -- ':!redesign/'` = 6 arquivos (`.gitignore` aditivo,
+`PROMPT_CARREGAMENTO.md` [excluir — âncora], `models/*`, `scripts/conselho_remoto.py` [par
+P-8 retroativo]). Merge `--no-ff`, override da âncora, sem force/reset/rebase. `pre-redesign`
+= rollback total.
+
+### P8-01 🔶 — fechar P-8 de `scripts/*`
+
+**Aplicado no branch (`git apply`, base bate):**
+- `p12-backup-verificavel.diff` → `scripts/perimetro.sh` (base `70387a9` == branch == main).
+- `cifrar-env.diff` → `scripts/cifrar_env.sh` (base `670dc6a`). **Ajuste:** removido
+  `--host predator` do `restic backup` — os snapshots do repo usam o host real
+  (`cachyos-PHN16-71`); o P-12 filtra por tag, não por host. Consistência com o P7-03.
+- `APROVADO-cifrar-env` criado — aprovação verbal do Humano ("aprovado, vai" no plano que
+  lista aplicá-lo); o comportamento já foi feito à mão em 03/09 (snapshot `9d96c3f7`).
+- `redesign/propostas/conselho-remoto-omniroute.diff` **gerado** (`git diff main redesign
+  -- scripts/conselho_remoto.py`, +header P-8). **Falta:** camadas B (auditor) e C (verifica
+  na Máquina) da Cadeia de auditoria + `APROVADO-conselho-remoto-omniroute`. Toca rede +
+  mecanismo do Conselho → não auto-aprovo.
+
+**BUG do P-12 achado e corrigido (chat 6).** Com os `.diff` aplicados, `perimetro.sh` deu
+**P-12 FALHOU** mesmo com os snapshots de `rlm` e `e5-small` feitos hoje. Causa: no caminho
+`hd_ok=1`, o `.diff` fazia
+`restic ... snapshots --json --tag "$nome" | python3 - "$hash" "$N" <<'PY'`. O `python3 -`
+lê o script do stdin, e o `<<'PY'` redireciona o stdin para o heredoc — **a redireção
+vence o pipe**, então `json.load(sys.stdin)` lia o texto do heredoc (não o JSON do restic),
+`except -> snaps = []`, todo recurso da lista-FALHA virava SUSPEITO. A verificação do chat 4
+só exercitou `hd_ok=0` (HD ausente = PARCIAL), então passou.
+**Fix:** o python chama `restic snapshots --json --tag` por `subprocess.run` (`nome`/`hash`/
+`N` por argv, `P12_REPO` + `RESTIC_PASSWORD_FILE` por env), sem depender do stdin. O
+`p12-backup-verificavel.diff` foi **regenerado** de `scripts/perimetro.sh` já corrigido;
+`git apply --check` contra `70387a9` = OK; header do `.diff` documenta o bug + fix.
+
+**Verificação (aceite P8-01 — vermelho/verde):**
+- **Verde:** `bash scripts/perimetro.sh` com HD montado + snapshots frescos →
+  `=== P-12 === veredito: OK`, `RESULTADO GERAL: OK -- 11 OK · 0 SKIP · 1 PARCIAL · 0 FALHA`
+  (o PARCIAL é o P-4, sempre parcial sem sudo).
+- **Vermelho:** `AGATA_RESTIC_REPO=<repo restic vazio> bash scripts/perimetro.sh` →
+  `rlm-qwen3-8b-teste:latest` e `multilingual-e5-small-int8` → `SUSPEITO (P-12)` →
+  `veredito: FALHOU` → `RESULTADO GERAL: FALHOU -- 10 OK · 1 PARCIAL · 1 FALHA`. whisper
+  base/small → `AVISO` (não falha).
+- `bash -n scripts/perimetro.sh` e `sh -n scripts/cifrar_env.sh` OK.
+
+**Falta em P8-01:** B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`. Depois: P8-02
+(paralelo N dias — Humano define N), P8-03 (reteste de fabricação), P8-04 (Goose — "vai"
+p/ instalar).
+
+**Não aplicado a `main`.** Os `.diff` estão no branch; o merge é P8-07. Sem `sudo`, nada
+instalado. `git commit --no-verify` (stage de `scripts/*` no branch — permitido no estado
+de exceção).
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
