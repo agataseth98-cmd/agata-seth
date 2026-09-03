@@ -12,8 +12,16 @@ recomendacao; se voce concordar, e zero trabalho extra — so criar o `APROVADO-
 ```sh
 P12_N_DIAS=14
 P12_FALHA_SEM_BACKUP="rlm-qwen3-8b-teste:latest multilingual-e5-small-int8"
-P12_AVISO_SEM_BACKUP="qwen3-30b-a3b whisper-base-int8-ov whisper-small-int8-ov"
+P12_AVISO_SEM_BACKUP="whisper-base-int8-ov whisper-small-int8-ov"
 ```
+
+**Reafinado 03/09/2026 (chat 6, ordem do Humano "otimizar se der"):** `qwen3-30b-a3b` saiu
+de AVISO -> **ISENTO**. E' o unico recurso das listas que e' publico E content-imutavel
+(`blob_sha256` fixado no manifesto + URL HF direta; o manifesto ja diz "NAO precisa de
+snapshot restic"). Arquivo que nao muda nao precisa de backup *fresco*, so de backup que
+*exista* -- deixa-lo em AVISO so geraria, a cada `perimetro.sh` apos N dias, um nag pra
+re-snapshotar 18 GB identicos. O snapshot `9433e3b8` (feito no P7-03) fica como redundancia.
+Os whisper IR seguem em AVISO: o manifesto os marca "sem hash fixado no HF" -> podem driftar.
 
 ---
 
@@ -32,7 +40,7 @@ reconstruivel, nao estado precioso):**
 |---|---|---|---|
 | `rlm-qwen3-8b-teste:latest` | build local / tag custom (fine-tune LoRA) | **NAO** — e trabalho seu | **FALHA** |
 | `multilingual-e5-small-int8` | `optimum-cli export openvino` local; **servido em producao** (`:20134`); o proprio manifesto nota que o export e fragil ("so o export de Whisper que quebra no optimum 2.3.0") | em tese sim, mas toolchain-sensivel e esta no ar | **FALHA** |
-| `qwen3-30b-a3b` (GGUF MoE) | HF publico `unsloth/...`, **sha256 fixado**; o manifesto ja diz "NAO precisa de snapshot restic (publico, hash fixado)" | sim (download HF) | **AVISO** (vale um snapshot porque HF some as vezes e o re-download e 17 GB) |
+| `qwen3-30b-a3b` (GGUF MoE) | HF publico `unsloth/...`, **sha256 fixado**; o manifesto ja diz "NAO precisa de snapshot restic (publico, hash fixado)" | sim (download HF) | ~~AVISO~~ -> **ISENTO** (03/09: publico + imutavel; snapshot `9433e3b8` fica como redundancia, mas P-12 nao rastreia frescor dele) |
 | `whisper-base-int8-ov` / `whisper-small-int8-ov` | HF publico `OpenVINO/...`, `snapshot_download` | sim | **AVISO** |
 | `qwen3:4b`, `qwen3.5:9b`, `nomic-embed-text`, `qwen3.5-9b-64k` | ollama registry (o `-64k` e o blob publico + Modelfile no manifesto) | sim — `ollama pull` / `models/RECONSTRUCAO.md` | **ISENTO** |
 
@@ -42,10 +50,11 @@ reconstruivel, nao estado precioso):**
 - **AVISO** = imprime a linha, **nao trava** nada.
 - **ISENTO** = nem aparece.
 
-**Recomendacao:** as listas da tabela acima (ja no `.diff`).
-**Alternativa mais dura, se voce quiser:** mover os tres de AVISO para FALHA — ai todo
-artefato nao-Ollama precisa de snapshot fresco para o commit passar. Mais seguro, mais
-atrito.
+**Recomendacao:** as listas da tabela acima (ja no `.diff`), com `qwen3-30b-a3b` ISENTO
+(reafinacao de 03/09 — ver bloco no topo). AVISO fica so com os 2 whisper IR.
+**Alternativa mais dura, se voce quiser:** mover os 2 whisper de AVISO para FALHA — ai todo
+artefato nao-Ollama e nao-imutavel precisa de snapshot fresco para o commit passar. Mais
+seguro, mais atrito.
 
 ## R2 — N dias (`P12_N_DIAS`)
 

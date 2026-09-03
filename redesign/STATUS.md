@@ -1,14 +1,15 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; regressão do `enable` no boot corrigida, pende reboot de teste; **P7-03 passada de backup no HD FEITA** — 5 recursos com snapshot, `restic check` verde, restore byte a byte OK, cache do P-12 semeado; falta: reboot de teste, 2 sudo (P7-02), régua P-12 + `cifrar_env` + aplicar `.diff` (Humano)). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-03 08:35 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — HD `AgataBkup01` montado; passada de backup do P7-03 executada (parte
-que não precisa do Humano): `restic backup` de e5-small/whisper-base/whisper-small/GGUF MoE
-(18 GB, 7m20s) + re-tag do snapshot do `rlm` (sem sudo — GGUF da `missoes` bate o
-`blob_sha256`); `restic check --read-data-subset=10%` = no errors; teste de restore
-(e5-small) = idêntico byte a byte à árvore viva; `p12-cobertura.json` semeado com 5
-recursos. Régua P-12 / `cifrar_env.sh` / aplicar os `.diff` em `scripts/*` seguem no Humano.
-ÂNCORA (leve, manual): sobre `redesign` @ **`66c55f8`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 ✅ · **P7-01 ✅** (enable + regressão de boot corrigida + **reboot real confirmado 03/09**) · **P7-03 passada de backup ✅ + régua P-12 aprovada ✅**; falta: P7-02 (2 sudo), `cifrar_env.sh` (Humano), aplicar os 2 `.diff` em `scripts/*` (Fase 8)). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-03 08:50 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — reboot 02→03/09 confirmou o P7-01 (boot 07:06, `journalctl -b 0` sem
+"ordering cycle", 5 membros `active`, `default.target.wants/` só com `agata.target`). Humano
+aprovou a régua do P-12 (`APROVADO-p12-backup-verificavel`); régua reafinada por ordem dele:
+`qwen3-30b-a3b` AVISO → ISENTO (público + `blob_sha256` fixado no manifesto — o próprio
+manifesto diz "não precisa de snapshot"). `.diff` reverificado (`git apply` + `bash -n` OK).
+_(entrada anterior 08:35: HD montado; passada de backup do P7-03 — 5 recursos com snapshot,
+`restic check` verde, restore byte a byte OK, `p12-cobertura.json` semeado.)_
+ÂNCORA (leve, manual): sobre `redesign` @ **`23a840c`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -32,12 +33,12 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (pende reboot) · P7-03 passada de backup FEITA · falta: P7-02 (2 sudo) + régua P-12 / `cifrar_env` / aplicar `.diff` (Humano):**
+**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 passada de backup FEITA + régua P-12 aprovada · falta: P7-02 (2 sudo) + `cifrar_env` (Humano) + aplicar `.diff` em `scripts/*` (Fase 8):**
 - **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
   + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
   `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`
   honra todo `WantedBy`; teste real acha o que a revisão de papel não acha).
-  - **REGRESSÃO NO BOOT (chat 5, 02/09) — corrigida + endurecida + S7 PASS. Pende reboot real (adiado).**
+  - **REGRESSÃO NO BOOT (chat 5, 02/09) — corrigida + endurecida + S7 PASS + REBOOT REAL CONFIRMADO (chat 6, 03/09).**
     No 1º boot com o `enable`, `systemd --user` achou 3 ciclos de ordenação e quebrou
     apagando o start de `openvino-whisper` (:20130), `openvino-embeddings` (:20134),
     `obsidian-ro-proxy` (:27125) — subiram só os 2 proxies do OmniRoute. Causa:
@@ -48,8 +49,9 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
     **Verificado:** `systemd-analyze verify` rc 0; `reenable` → `default.target.wants/` sem
     nada do Agata; **S7 PASS** (efeito plantado no WAL → dreno segura 25s, loga, não corta,
     serviços param depois; restart → 6 ativos, 5 portas UP, 4060 56 MiB). LOG 02/09 ~22:10.
-    **Falta:** reboot real (o job de `default.target` só existe no boot) — Humano adiou,
-    "avaliar quando um reboot for necessário de qualquer forma".
+    **Reboot real (chat 6, 03/09 boot 07:06):** `journalctl --user -b 0` e `journalctl -b 0`
+    sem "ordering cycle"; `agata.target` `enabled`+`active` + 5 membros `active`;
+    `default.target.wants/` só com `agata.target`. **P7-01 FECHADO.**
 - **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
   + drop-in em `ollama.service`, ambos `sudo`). **Runbook pronto:** `redesign/tasks/P7-02-RUNBOOK.md`
   (blocos `sudo` prontos + pré-checagens de 02/09 ~22:05: `gamemode` não instalado,
@@ -67,10 +69,15 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
     (P-12 completo) · `redesign/propostas/cifrar-env.diff` · `redesign/propostas/README.md`
     · `redesign/fase7-hd/REGUA-P12.md` (R1/R2/R3 — **decisão do Humano**, com recomendação) ·
     `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md` · `redesign/fase7-hd/semear_cache_p12.py`.
-  - **FALTA (tudo do Humano):** a régua do P-12 (H-1 do `SILO-HUMANO.md`; recomendação = os
-    defaults do `.diff`, `N=14`) → `APROVADO-p12-backup-verificavel` · `cifrar_env.sh`
-    (`APROVADO-cifrar-env` + `.diff` aplicado + rodar, prompt GPG) · aplicação real dos
-    `.diff` em `scripts/*` (Fase 8, ou "vai" explícito).
+  - **RÉGUA P-12 APROVADA (chat 6, 03/09):** Humano criou `redesign/propostas/APROVADO-p12-backup-verificavel`.
+    Reafinada por ordem dele ("otimizar se der"): `qwen3-30b-a3b` AVISO → **ISENTO** (público
+    + `blob_sha256` fixado no manifesto — imutável não precisa de backup *fresco*). Régua
+    final: `N=14` · FALHA = `rlm-qwen3-8b-teste:latest multilingual-e5-small-int8` · AVISO =
+    `whisper-base-int8-ov whisper-small-int8-ov`. `.diff` reverificado (`git apply` +
+    `bash -n` OK); a aprovação cobre a versão reafinada.
+  - **FALTA:** `cifrar_env.sh` (Humano: `APROVADO-cifrar-env` + `.diff` aplicado + rodar,
+    prompt GPG — o `env-20260812.gpg` no HD é de 12/08) · aplicação real dos 2 `.diff` em
+    `scripts/*` (Fase 8, ou "vai" explícito).
   - **Lacuna (não bloqueia):** a fórmula exata do `ir_sha256_xmlbin` do manifesto não está
     registrada (chat 3 não anotou); o teste de restore contorna comparando restaurado vs.
     vivo. Fixar na Fase 8.

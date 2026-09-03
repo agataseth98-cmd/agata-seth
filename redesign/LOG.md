@@ -2831,3 +2831,61 @@ no repo restic do HD (aditiva — sem `forget`/`prune`), no cache
 `~/.agata-backup-staging/p12-cobertura.json`, e em `redesign/`.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 08:50 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · P7-01 reboot confirmado · P7-03 régua P-12 aprovada + reafinada
+
+**1. P7-01 — reboot real, PASS.** Houve reboot de 02→03/09 (boot atual `2026-09-03
+07:06:14`). Conferido no boot 0:
+- `journalctl --user -b 0` e `journalctl -b 0`: **nenhum** "ordering cycle" / "deleted to
+  break ordering cycle".
+- `agata.target` `enabled` + `active`; os 5 membros (`omniroute`, `omniroute-sanitizer`,
+  `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`) todos `active`.
+- `~/.config/systemd/user/default.target.wants/` = só `agata.target` (+ `hermes-gateway`,
+  `psd`) — nenhum membro solto. O endurecimento do `[Install]` (chat 5) segurou o boot.
+- **P7-01 fecha** — o único item pendente (o reboot de confirmação) caiu.
+
+**2. P7-03 — régua do P-12 aprovada pelo Humano.** Criou
+`redesign/propostas/APROVADO-p12-backup-verificavel` (08:41). R1/R2/R3 = os defaults do
+`.diff`. R2 `N=14` mantido.
+
+**3. P7-03 — régua reafinada (ordem do Humano nesta mensagem: "não precisa alterar a menos
+que seja possível otimizar").** `qwen3-30b-a3b` movido de **AVISO → ISENTO**:
+- É o único recurso das listas que é **público E content-imutável**: `blob_sha256`
+  `6c997b8a...` fixado no `manifest.json` + URL HF direta (`unsloth/...resolve/main/...`);
+  o próprio campo `reconstrucao` do manifesto diz *"NÃO precisa de snapshot restic (público,
+  hash fixado)"*.
+- Um arquivo que não pode mudar não precisa de backup *fresco*, só de backup que *exista*.
+  Mantê-lo em AVISO só geraria, a cada `perimetro.sh` após 14 dias, um nag para
+  re-snapshotar 18 GB idênticos — o mesmo antipadrão ("AVISO sempre aceso vira AVISO
+  ignorado") que a `REGUA-P12.md` já cita para FALHA.
+- O snapshot `9433e3b8` (feito no passo 1 do P7-03) **fica no repo como redundância** — só
+  não é rastreado quanto a frescor.
+- Os 2 whisper IR **seguem em AVISO**: o manifesto os marca *"público, sem hash fixado no
+  HF"* → podem driftar, então rastrear frescor tem sentido. Assimetria proposital.
+- Régua final: `P12_N_DIAS=14` · FALHA = `rlm-qwen3-8b-teste:latest multilingual-e5-small-int8`
+  · AVISO = `whisper-base-int8-ov whisper-small-int8-ov`.
+- **A aprovação do Humano cobre a versão reafinada** — ele autorizou a otimização
+  explicitamente nesta mensagem. `APROVADO-p12-backup-verificavel` mantido.
+
+**Verificação da reafinação:** `git apply` do `.diff` modificado no working tree = "Applied
+patch cleanly"; `bash -n scripts/perimetro.sh` (com o patch) = OK; as 3 linhas `P12_*`
+conferidas no resultado; `scripts/perimetro.sh` revertido ao HEAD logo em seguida (árvore
+limpa). Só mudou o conteúdo de 1 linha do `.diff`, não a contagem do hunk.
+
+**Arquivos:** `redesign/propostas/APROVADO-p12-backup-verificavel` (novo, do Humano) ·
+`redesign/propostas/p12-backup-verificavel.diff` (linha `P12_AVISO_SEM_BACKUP` + nota de
+cabeçalho) · `redesign/fase7-hd/REGUA-P12.md` (bloco de reafinação + tabela R1) ·
+`STATUS.md`, `ANCORA.md`, `LOG.md`.
+
+**Estado da Fase 7:** P7-00 ✅ · P7-01 ✅ (enable + regressão corrigida + **reboot
+confirmado**) · P7-03 passada de backup ✅ + régua P-12 aprovada ✅. **Falta:** P7-02 (2
+`sudo` — `P7-02-RUNBOOK.md`) · `cifrar_env.sh` (Humano: `APROVADO-cifrar-env` + rodar, prompt
+GPG) · aplicação real dos 2 `.diff` em `scripts/*` (Fase 8, ou "vai"). Depois: **Fase 8**.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*` (aplicado e
+revertido só para o teste), `.githooks/*`. Sem `sudo`. Nada instalado.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

@@ -14,9 +14,20 @@
 #     data de cobertura mais velha.
 #   - ISENTO: recurso do manifesto fora das duas listas (reconstruivel -- RECONSTRUCAO.md).
 #
-# Verificado nesta sessao (02/09/2026): `bash -n` OK; run completo do perimetro.sh
-# modificado = "10 OK . 0 SKIP . 2 PARCIAL . 0 FALHA" (P-12 PARCIAL, HD ausente);
+# Verificado 02/09/2026: `bash -n` OK; run completo do perimetro.sh modificado =
+# "10 OK . 0 SKIP . 2 PARCIAL . 0 FALHA" (P-12 PARCIAL, HD ausente);
 # `git apply --check` contra o blob 70387a9 = OK.
+# Reafinado 03/09/2026 (chat 6, ordem do Humano "otimizar se der"): qwen3-30b-a3b
+# saiu de P12_AVISO -> ISENTO. E' o unico recurso das listas que e' publico E
+# content-imutavel (blob_sha256 fixado no manifesto, URL HF direta; o proprio
+# manifesto diz "NAO precisa de snapshot restic"). Um arquivo que nao pode mudar
+# nao precisa de backup *fresco*, so de backup que exista -- mante-lo em AVISO so
+# geraria, a cada perimetro.sh apos N dias, um nag para re-snapshotar 18 GB
+# identicos (o "AVISO que fica sempre aceso vira AVISO ignorado"). O snapshot
+# 9433e3b8 feito no P7-03 fica como redundancia. Os whisper IR seguem em AVISO:
+# o manifesto os marca "publico, sem hash fixado no HF" -- podem driftar, entao
+# rastrear frescor tem sentido. `bash -n` do resultado = OK; `git apply --check`
+# contra 70387a9 = OK (so muda o conteudo de 1 linha, nao a contagem do hunk).
 diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
 index 70387a9..7486533
 --- a/scripts/perimetro.sh
@@ -36,7 +47,7 @@ index 70387a9..7486533
 +# mudar SO estas tres linhas; o resto do controle nao muda:
 +P12_N_DIAS=14
 +P12_FALHA_SEM_BACKUP="rlm-qwen3-8b-teste:latest multilingual-e5-small-int8"
-+P12_AVISO_SEM_BACKUP="qwen3-30b-a3b whisper-base-int8-ov whisper-small-int8-ov"
++P12_AVISO_SEM_BACKUP="whisper-base-int8-ov whisper-small-int8-ov"
 +# Recurso do manifesto fora das duas listas == ISENTO (reconstruivel:
 +# 'ollama pull' / HF publico com hash fixado -- models/RECONSTRUCAO.md).
 +# A isencao e' deliberada: P-12 sempre-vermelho vira P-12 ignorado.
