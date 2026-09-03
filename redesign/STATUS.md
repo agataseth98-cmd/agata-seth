@@ -1,17 +1,16 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 ✅ · **P7-01 ✅** (enable + regressão de boot corrigida + reboot real confirmado 03/09) · **P7-03 passada de backup ✅ + régua P-12 aprovada ✅** · **P7-02 hook ✅** (`agata-jogo`, testado); falta: fiar `agata-jogo` nos lançadores (Humano, GUI), `cifrar_env.sh` (Humano, prompt GPG), aplicar os 2 `.diff` em `scripts/*` (Fase 8)). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-03 09:00 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — P7-02 replanejado: **NÃO** instalar Feral GameMode (o CachyOS roda
-`ananicy-cpp`, GameMode brigaria — wiki CachyOS desaconselha). Hook virou o wrapper
-`redesign/systemd/agata-jogo` → `~/.local/bin/agata-jogo` (sem sudo): para `agata.target` +
-`ollama stop` dos modelos ativos → roda o jogo via `game-performance` (wrapper oficial do
-CachyOS) → `trap EXIT` re-sobe. Testado (PASS). `OLLAMA_KEEP_ALIVE` (1 sudo) rebaixado a
-opcional. Respondido ao Humano: `pacman -Syu` **não** remove nossa config (tudo em
-`~/.config`, `~/.local`, `~/.cache`, venv — nada é de pacote; `pacman -Qo` confirma).
-_(entradas anteriores 08:35/08:50: passada de backup do P7-03; reboot confirmou o P7-01;
-régua P-12 aprovada + `qwen3-30b-a3b` → ISENTO.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`d4ad12a`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO, quase fechada — P7-00 ✅ · **P7-01 ✅** (reboot real confirmado 03/09) · **P7-02 hook ✅** (`agata-jogo`, testado) · **P7-03 ✅** (backup + régua P-12 + `.env` cifrado no repo); **falta só:** Humano testar `agata-jogo` num jogo real via lançador · Fase 8 aplicar os 2 `.diff` em `scripts/*`). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-03 09:12 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — Humano rodou `cifrar_env.sh` → `env-20260903.gpg` (conteúdo do `.env`
+de 02/09). Fechados à mão os 2 "FALTA" do script: `MANIFESTO.txt` no HD + `restic backup
+--tag agata-env` (snapshot `9d96c3f7`, `restic check` + restore OK) — replica o
+`cifrar-env.diff`, cuja automação fica pra Fase 8. **P7-03 fechado no que não é Fase 8.**
+_(entradas 09:00/08:50/08:35: P7-02 replanejado sem Feral GameMode — wrapper `agata-jogo`
+(conflito GameMode × `ananicy-cpp` do CachyOS); reboot confirmou o P7-01; passada de backup
++ régua P-12 (`qwen3-30b-a3b` → ISENTO). `pacman -Syu` **não** remove nossa config
+(`pacman -Qo` confirma — tudo em `~/.config`/`~/.local`/`~/.cache`/venv).)_
+ÂNCORA (leve, manual): sobre `redesign` @ **`3043289`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -83,9 +82,15 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
     final: `N=14` · FALHA = `rlm-qwen3-8b-teste:latest multilingual-e5-small-int8` · AVISO =
     `whisper-base-int8-ov whisper-small-int8-ov`. `.diff` reverificado (`git apply` +
     `bash -n` OK); a aprovação cobre a versão reafinada.
-  - **FALTA:** `cifrar_env.sh` (Humano: `APROVADO-cifrar-env` + `.diff` aplicado + rodar,
-    prompt GPG — o `env-20260812.gpg` no HD é de 12/08) · aplicação real dos 2 `.diff` em
-    `scripts/*` (Fase 8, ou "vai" explícito).
+  - **`.env` CIFRADO NO REPO ✅ (chat 6, 03/09):** Humano rodou `sh scripts/cifrar_env.sh`
+    (prompt GPG, verificação por decifração OK) → `env-20260903.gpg` (sha256 `4798f8ac...`,
+    conteúdo do `.env` de 02/09). Fechados à mão os 2 "FALTA" do script: `MANIFESTO.txt` na
+    raiz do HD + `restic backup --tag agata-env` → snapshot `9d96c3f7` (`restic check` +
+    restore OK). Replica o que o `cifrar-env.diff` automatiza — a automação em
+    `scripts/cifrar_env.sh` fica pra Fase 8.
+  - **FALTA (só Fase 8):** aplicar `p12-backup-verificavel.diff` e `cifrar-env.diff` em
+    `scripts/*` (+ `APROVADO-cifrar-env`). Aí o aceite "P-12 vermelho com backup velho,
+    verde com fresco" roda.
   - **Lacuna (não bloqueia):** a fórmula exata do `ir_sha256_xmlbin` do manifesto não está
     registrada (chat 3 não anotou); o teste de restore contorna comparando restaurado vs.
     vivo. Fixar na Fase 8.

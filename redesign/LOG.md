@@ -2988,3 +2988,52 @@ Sem `sudo`. Nada instalado via pacote.
 prompt GPG) · aplicar os 2 `.diff` em `scripts/*` = Fase 8. Depois: **Fase 8**.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 09:12 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · P7-03 — `.env` cifrado no repo restic + MANIFESTO; fecha o P7-03 no que não é Fase 8
+
+**O Humano rodou `sh scripts/cifrar_env.sh`** (prompt GPG 3×, verificação por decifração
+interna = "decifrou idêntico"). Saída: `~/.agata-backup-staging/env-20260903.gpg` +
+cópia solta em `/run/media/orusoua/AgataBkup01/env-20260903.gpg`, sha256
+`4798f8acfb75d260aa836d4964a67e3400fcd9f57fcceda21c68ba0e1752aa4b`. Conteúdo cifrado = o
+`.env` de **02/09 08:59** (chaves de provedor nuvem da Fase 1). O `env-20260812.gpg` estava
+desatualizado.
+
+O script apontou 2 "FALTA" — fechados agora à mão (a automação disso é o
+`cifrar-env.diff`, que toca `scripts/cifrar_env.sh` = **P-8 → Fase 8**):
+
+1. **`MANIFESTO.txt`** — escrito `env-20260903.gpg.MANIFESTO.txt` na raiz do HD, mesmo
+   formato do de 12/08 (o quê, data do conteúdo, sha256, algoritmo, nota de senha fora da
+   máquina, e a diferença: este entrou no repo restic).
+2. **`.gpg` DENTRO do repo restic** — `restic backup --tag agata-env --tag 4798f8ac...`
+   `~/.agata-backup-staging/env-20260903.gpg` → snapshot **`9d96c3f7`** (7,7 KiB).
+   Replica à mão o que o `cifrar-env.diff` automatiza; agora o `restic check` valida o
+   `.gpg` (a cópia solta na raiz do HD, que o `restic check` não vê, continua como
+   redundância).
+   - `restic check --read-data-subset=5%` → **no errors** (9 snapshots, 67 packs).
+   - Teste de restore: `restic restore 9d96c3f7` → sha256 do `.gpg` restaurado =
+     `4798f8ac...` (bate).
+
+**Segredo:** o `.gpg` é ciphertext AES256; a senha não está no repo, no git nem no chat
+(só na cabeça do Humano / gerenciador externo). O `.env` em claro continua **fora** de
+tudo (restic da Fase 0 já o excluía). Invariante "segredo nunca no git/chat" respeitado.
+
+**Estado do P7-03:** passada de backup ✅ · régua P-12 aprovada + reafinada ✅ · `.env`
+cifrado no repo + MANIFESTO ✅. **Só falta a Fase 8:** aplicar `p12-backup-verificavel.diff`
+e `cifrar-env.diff` em `scripts/*` (+ `APROVADO-cifrar-env`).
+
+**Estado da Fase 7:** P7-00 ✅ · P7-01 ✅ (reboot confirmado) · P7-02 hook `agata-jogo` ✅
+(testado; falta o Humano pôr nos lançadores — "guardado para quando for jogar") · P7-03 ✅
+(no que não é Fase 8). **Fecha** quando: (a) o Humano testar o `agata-jogo` num jogo real
+via lançador, e (b) a Fase 8 aplicar o P-12 (aí o aceite "P-12 vermelho/verde" roda). O
+`OLLAMA_KEEP_ALIVE` (1 sudo) segue opcional.
+
+**Arquivos:** `env-20260903.gpg.MANIFESTO.txt` (no HD, fora do git) · snapshot restic
+`9d96c3f7` · `STATUS.md`, `ANCORA.md`, `LOG.md`.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`,
+os `.diff` de `redesign/propostas/`. Sem `sudo`. Nada instalado.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
