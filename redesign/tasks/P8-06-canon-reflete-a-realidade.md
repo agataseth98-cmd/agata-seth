@@ -1,6 +1,6 @@
 # P8-06 — canon reflete a realidade
 
-**Status:** 🔶 **DELTA MAPEADO — 2026-09-03 (chat 6).** `redesign/CANON-DELTA.md` lista
+**Status:** ✅ **FEITO — 2026-09-03 (chat 6), sob regime de exceção.** `redesign/CANON-DELTA.md` lista
 cada mudança em PROJETO/REGRAS/ONDE_ESTAMOS/MEMÓRIAS que o cutover implica. **Nada aplicado**
 ao canon — cada linha passa pela Cadeia A→B→C + autorização do Humano por mudança. Linha
 vermelha; não se toca canon sem isso. Mexe em `REGRAS.md` / `PROJETO.md` / `MEMÓRIAS.md` / `ONDE_ESTAMOS.md`

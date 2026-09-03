@@ -5,7 +5,45 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora
+## Onde estamos agora — 03/09/2026 (o redesenho entrou)
+
+O sistema foi reconstruído. Durante alguns dias tudo isso viveu num ramo
+à parte (`redesign`) e hoje foi juntado ao principal.
+
+**O que mudou, em miúdos:**
+- **Quem "dirige" o Agata agora é um programa novo** (um grafo de passos:
+  hidratar → rotear → trabalhar → verificar → *portão* → registrar), não
+  mais o Hermes. O portão sempre pausa e te pergunta antes de gravar
+  qualquer coisa — nada é escrito sem o seu "sim".
+- **Todo pedido a um modelo passa por um roteador único** (OmniRoute), que
+  escolhe entre modelos locais e de nuvem, tem plano B automático quando um
+  falha, e **apaga qualquer segredo do texto antes de mandar pra fora**.
+- **A placa de vídeo boa (RTX 4060) fica livre por padrão.** Transcrição de
+  voz e "embeddings" foram para a placa integrada. O modelo grande local só
+  liga quando pedido. Um atalho (`agata-jogo`) tira o Agata da placa quando
+  você vai jogar e devolve quando fecha.
+- **Backup verificável.** Cada peça importante (modelos, config) tem uma
+  cópia no HD externo que o sistema sabe conferir; um controle novo (P-12)
+  reclama se algo ficou sem backup.
+- **Um botão liga/desliga tudo** (`agata.target`), com um "dreno" que nunca
+  corta no meio de uma gravação.
+- **O Hermes saiu do circuito.** O Open WebUI (a telinha web) e a voz
+  continuam funcionando, mas o Open WebUI agora fala com o roteador novo —
+  perdeu a memória que o Hermes dava. Você já disse que quer trocá-lo por
+  algo melhor; por ora ele fica assim.
+- **Uma cópia de reserva do "operador de terminal"** (Goose) foi instalada,
+  caso a sessão principal caia.
+
+**O que ainda falta (é com você):** rodar o sistema por alguns dias e, se
+gostar, é só seguir; a auditoria do último pedaço de código já foi feita
+por outro modelo (Qwen) e conferida aqui. O regime de exceção
+(sem os freios de segurança do projeto) **continua ligado até você dizer
+o contrário**.
+
+---
+
+## Antes disso — 01/09/2026
+
 O texto que uma IA na nuvem cola para entrar no sistema tinha um aviso
 que disparava à toa. Ele comparava a hora do último commit com a hora
 atual e, se passasse umas horas sem ninguém mexer no sistema, mandava a

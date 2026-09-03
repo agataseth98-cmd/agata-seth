@@ -3631,3 +3631,40 @@ exceção: `config/agata-consolidacao.service`, `scripts/perimetro.sh` (P-9),
 `scripts/conselho_remoto.py` — todos com `.diff`+`APROVADO-` no branch.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 13:50 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — P8-06 FEITO: canon = realidade (sob exceção)
+
+**Humano:** "regime de exceção, guardrails suspensos até segunda ordem" → autorização para
+editar canon direto. Feito.
+
+- **PROJETO.md** — 6 seções: "O que é" (Agata = espinha determinística + grafo + OmniRoute +
+  governança; **não** mais "sobre Hermes Agent"), "Serviços" (o stack do `agata.target` +
+  portas; `hermes-gateway` `disabled`), "P-9" (lista = 5 membros do `agata.target` +
+  consolidacao.timer + containers; hermes fora), "Memória e hidratação" (loop hidrata por
+  `estado_para_eco.sh` + `query_canon`; `.hermes.md` vira referência; Fase 5 arquivada —
+  injeção venceu), "Interface" (grafo+OmniRoute; Goose fallback; OWUI → `:20127`),
+  "Conselho Remoto" (P1-04: sai pelo OmniRoute, sem chave, combo `conselho` sem tier local),
+  "Estado dos bugs e testes" (a fase + o bug do P-12 + o 504 de cold-start + `hash_ir.sh` +
+  a consolidação que já estava quebrada + `igpu/.venv` -5 GB).
+  Par P-8: `redesign/propostas/canon-fase8-projeto.diff` + `APROVADO-` (o `perimetro.sh`
+  mecânico do P-8 dispara em PROJETO.md staged — commit `--no-verify` sob a exceção, como
+  todo o redesenho; o par acompanha o merge para o registro).
+- **ONDE_ESTAMOS.md** — nova seção "03/09/2026 (o redesenho entrou)", em linguagem para o
+  Humano; a narrativa histórica fica abaixo, como "Antes disso — 01/09/2026".
+- **REGRAS.md — NÃO mudou.** Doutrina universal; o redesenho é implementação de projeto
+  (PROJETO.md). O regime de exceção **continua** (o Humano não reativou os gates), então
+  "estado de exceção acaba / gates de volta" do `CANON-DELTA.md` **não** foi aplicado. Os
+  controles P-10/P-11/P-12 são fatos do `perimetro.sh`, não regras novas de REGRAS.
+- **MEMÓRIAS.md** — entradas **(310)** (Fases 0–7) e **(311)** (Fase 8), append-only, logo
+  abaixo do marcador `ENTRADAS-NOVAS`, organizadas por fase; o `redesign/LOG.md` é o registro
+  fase-a-fase. `perimetro.sh`: P-5 OK (append-only íntegro), P-7 OK.
+
+`perimetro.sh` com o canon novo staged: **P-8 FALHOU** (esperado — PROJETO.md staged sob
+exceção), todos os outros OK/PARCIAL/AVISO. 10 OK · 1 PARCIAL (P-4) · 1 FALHA (P-8, exceção).
+
+**Falta:** P8-07 (o merge real para `main` — o dry-run já deu rc 0) + o S7 independente.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
