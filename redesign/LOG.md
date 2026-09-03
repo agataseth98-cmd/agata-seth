@@ -2642,3 +2642,61 @@ entregues no chat (não rodados por esta sessão).
 · HD amanhã (runbook → destrava H-1 do SILO-HUMANO) · Fase 8.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 21:47 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 5) · P7-01 REGRESSÃO no boot achada e corrigida — `After=default.target` fechava ciclo de ordenação
+
+**Contexto:** o Humano reportou trava geral do sistema + reinício forçado. Investigação da
+trava: boot anterior terminou (forçado) **21:29:31** de 02/09; última linha do journal = um
+terminal Alacritty abrindo. **Sem evidência de causa nos logs** — sem OOM/`killed process`,
+sem `Xid`/`NVRM`, sem panic/oops/BUG, sem soft/hard lockup, sem evento térmico. Coredumps:
+nada no fim do boot -1 (o `pasystray SIGSEGV` que aparece é do boot atual, recorrente,
+inofensivo). Causa da trava = **`lacuna` (não medida)**. O que dá pra dizer: nada aponta
+pro trabalho do Agata, e nada aponta pra outra causa; o timing (`enable` do boot ~21:00 →
+primeiro boot depois trava ~21:29) é coincidência não explicada.
+
+**Regressão achada (esta sim, medida):** no boot atual (0), `systemd --user` detectou **3
+ciclos de ordenação** e quebrou cada um **apagando o job de start** de `openvino-whisper`,
+`openvino-embeddings` e `obsidian-ro-proxy`. No boot só subiram `omniroute` +
+`omniroute-sanitizer` — os dois proxies :20127/:20128. STT (:20130), embeddings (:20134) e
+o proxy read-only do Obsidian (:27125) **não subiram, em silêncio** (nada `failed`).
+
+**Causa-raiz:** as 3 unidades base (Fase 2 / Fase 6) tinham `After=default.target` no
+`[Unit]`. Com `agata.target` `enable`d p/ boot (P7-01), fecha o laço:
+`agata-drain` `After=` \<serviço\> → \<serviço\> `After=default.target` → `default.target`
+puxa/ordena `agata.target` → `agata.target` ⇢ `agata-drain`. Enquanto `agata.target` era só
+manual (`agata up`) não havia a aresta `default.target→agata.target`, e o S7 do chat 4
+passou. `omniroute`/`sanitizer` escaparam por não terem `After=default.target`
+(`omniroute` = `After=network-online.target`; `sanitizer` = `After=omniroute.service`).
+É a **lição 2 do próprio P7-01** ("`enable` honra todo `WantedBy`") por outro caminho.
+
+**Correção (mínima, userspace, sem `sudo`, sem pacote):** removida a linha
+`After=default.target` das 3 unidades base — `~/.config/systemd/user/openvino-whisper.service`,
+`openvino-embeddings.service`, `obsidian-ro-proxy.service` — trocada por um comentário que
+explica o porquê. `[Install] WantedBy=default.target` (inerte, sem symlink) e o drop-in
+`agata.conf` (`PartOf`/`WantedBy=agata.target`) **intocados**. A ordenação dos 3 agora é só
+pela pertença ao `agata.target`. Backup dos 3 originais em `scratchpad/`.
+
+**Verificação:**
+- `systemd-analyze --user verify agata.target` → **rc 0, sem "ordering cycle"**.
+- `systemctl --user daemon-reload` + `restart agata.target` → **os 6 membros `active`**;
+  journal **sem** "deleted to break ordering cycle". Portas :20127 :20128 :20130 :20134
+  :27125 UP. `list-jobs` = "No jobs running".
+- **Dreno intacto:** no `restart`, "Stopping ... dreno do WAL" ocorreu **antes** de parar
+  `sanitizer`/`OmniRoute` — a ordem de shutdown que o P7-01 depende segue válida. WAL
+  limpo → dreno instantâneo.
+- 4060 ociosa (56 MiB / 0 % / 37 °C); STT e embeddings carregaram em `GPU.0` (iGPU), 4060
+  não tocada. `llamacpp-agata` parado (correto). Ollama de produção (:11434) intocado.
+
+**FALTA (o teste que o Humano pediu):** um **reboot real** — confirmar que os 5 serviços
+sobem no boot e o journal não tem "ordering cycle". `restart` + `analyze verify` são forte
+indício mas não substituem o boot (o job de `default.target` só existe no boot).
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, os drop-ins
+`agata.conf`, `agata-drain.service`, `agata.target`. Sem `sudo`, nada instalado.
+
+**Próximo:** reboot de teste (Humano) → se limpo, P7-01 volta a "FEITO + enable OK". Depois:
+P7-02 (2 `sudo`), HD amanhã, régua P-12 (SILO-HUMANO H-1), Fase 8.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
