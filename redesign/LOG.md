@@ -3373,3 +3373,53 @@ travada) · P8-06 🔶 (delta mapeado; canon intocado) · P8-07 depende de 05/06
 `.githooks/*`. Sem `sudo`. Nada instalado nesta entrada.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.
+
+
+---
+
+## 2026-09-03 12:00 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 — revisão + otimizações (fim da rodada "faça tudo")
+
+Revisão de todo o redesenho pedida pelo Humano. `redesign/OTIMIZACOES.md`.
+
+**FEITO (risco zero):**
+- **B1** — `openvino-whisper.service`, `openvino-embeddings.service`, `obsidian-ro-proxy.service`
+  copiadas de `~/.config/systemd/user/` para `redesign/systemd/` (antes só existiam fora do
+  git; o chat 5 as editou e o backup foi pro scratchpad efêmero). Trazem o fix do chat 5.
+  `redesign/systemd/README.md` atualizado.
+- **D1** — varredura do footgun do heredoc: os outros dois `python3 - <<'PY'` do P-12
+  (`linhas=$(...)`, `visto=$(...)`) lêem `sys.argv`/arquivo, sem pipe entrando — limpos.
+  Só o caminho `hd_ok=1` tinha o defeito (corrigido no commit `bc15673`).
+
+**PROPOSTO (o Humano decide — `OTIMIZACOES.md` tem risco/benefício de cada):**
+- **A1** — reconstruir `igpu/.venv` (**6,2 GB**) sem torch-CUDA → **~5 GB de volta**
+  (`redesign/` cai de 6,4 GB p/ ~400 MB). OpenVINO serve na iGPU Intel, não precisa de CUDA.
+- **B2** — pré-aquecer o modelo Ollama no `agata up` (`ExecStartPost` com `curl` de 1 token)
+  → corrige o **504 de cold start** achado no P8-04 (deadline de 15 s do OmniRoute vs. ~30 s
+  de load).
+- **B3** — fixar a fórmula do `ir_sha256_xmlbin` (`models/hash_ir.sh` + nota no manifesto) —
+  hoje o P-12 usa esse hash mas ninguém sabe como foi calculado.
+- **C1** — unir `mcp/.venv` + `grafo/.venv` num só (checar conflito fastmcp×langgraph antes).
+- **C2** — repontar `agata-consolidacao.timer` pro `flows/consolidacao.py` (grafo) — tira
+  uma amarra do Hermes antes do P8-05, userspace, não toca o executor.
+- **D2** — `redesign/grafo/rodar_par.sh` — padroniza o par do paralelo de 7 dias, reduz o
+  atrito do Humano (hoje é comando + parse de JSON à mão).
+
+**Observações sem ação:** `redesign/` no git é pequeno (os 6,4 GB são `.venv` gitignorados);
+socket-activation do whisper/embeddings não vale o risco agora; a trava do chat 4 segue
+`lacuna` não medida.
+
+### Resumo da rodada "faça tudo" (chat 6, Fase 8)
+
+Executado sem trava: P8-00 (inventário/estratégia), P8-03 (evals `fabricacao` 3/3 +
+`hidratacao` PASS), P8-04 (Goose v1.48.0), P8-02 bateria sintética (piso quase todo; 7 dias
+reais abertos), P8-01 pacote de relay, P8-05 inventário, P8-06 CANON-DELTA, otimizações
+B1+D1. **`main` intocado (`4aa90bd`) o tempo todo.**
+
+Travas legítimas (não "risco de crash" — é o que o sistema pede):
+1. P8-01 — relay a um modelo externo + confirmação na Máquina + `APROVADO-` (Humano).
+2. P8-02 — 7 dias de uso real (não se comprime).
+3. P8-05 — resposta do Humano (OWUI? voz?) + P8-02 verde antes de tocar o `hermes-gateway`.
+4. P8-06 — Cadeia A→B→C + autorização do Humano por mudança de canon (linha vermelha).
+5. P8-07 — depois de 05/06; "vai" no `git push origin main` + sessão independente p/ o S7.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit.

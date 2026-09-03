@@ -1,0 +1,24 @@
+[Unit]
+Description=OpenVINO Whisper STT na iGPU (Agata, Fase 2 -- P2-02)
+Documentation=file:///home/orusoua/agata/redesign/igpu/README.md
+# P7-01 fix (02/09): removido After=default.target -- com agata.target enabled p/ boot
+# ele fechava ciclo de ordenacao (agata-drain After= este servico; este After=
+# default.target After= agata.target After= agata-drain). O systemd quebrava o ciclo
+# apagando o job de start deste servico no boot -- subia so omniroute/sanitizer.
+# Ordenacao agora e' pela pertenca a agata.target (WantedBy/PartOf via drop-in agata.conf).
+
+[Service]
+Type=simple
+Environment=OVW_DEVICE=GPU.0
+Environment=OVW_MODEL_DIR=%h/.cache/agata/openvino/whisper/whisper-base-int8-ov
+Environment=OVW_BIND=127.0.0.1:20130
+ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/whisper_server.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+
+# P7-01 fix (02/09): era WantedBy=default.target -- somado ao [Install] do drop-in
+# agata.conf, um `systemctl --user enable` recriava default.target.wants/<unit> e o
+# ciclo de ordenacao voltava. Alinhado ao drop-in: so agata.target.
+[Install]
+WantedBy=agata.target

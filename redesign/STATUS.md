@@ -12,7 +12,7 @@ pipe) corrigido com `subprocess`; `perimetro.sh` 11 controles, vermelho/verde OK
 _(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
 (sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
 régua P-12.)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`77c62d5`**; referência viva = `git rev-parse
+ÂNCORA (leve, manual): sobre `redesign` @ **`1660790`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -61,6 +61,12 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   Cadeia A→B→C + autorização por mudança (linha vermelha).
 - **P8-07** o merge (`--no-ff`, sem force/reset/rebase) + **S7 pós-push por sessão
   independente** + `perimetro.sh` verde com P-12. Fecha o redesenho.
+
+**Otimizações (revisão 03/09 — `redesign/OTIMIZACOES.md`):** B1 ✅ (3 unidades base entraram
+no repo) · D1 ✅ (varredura do footgun do heredoc). Propostas: A1 (igpu venv sem CUDA, ~5 GB) ·
+B2 (pré-aquecer Ollama no `agata up` — corrige 504 de cold start) · B3 (fixar fórmula do
+`ir_sha256_xmlbin`) · C1 (unir venvs mcp+grafo) · C2 (consolidacao.timer → flow do grafo) ·
+D2 (`rodar_par.sh` p/ o paralelo).
 
 **Fase 7 (Liga/desliga) — FECHADA no que dá sem o Humano ao teclado.** P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 backup + régua P-12 + `.env` cifrado no repo FEITO · P7-02 hook `agata-jogo` FEITO. Falta só: Humano testar `agata-jogo` num jogo real (não bloqueia a Fase 8) + `OLLAMA_KEEP_ALIVE` opcional.
 - **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
