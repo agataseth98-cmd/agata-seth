@@ -15,7 +15,7 @@ Mecanismo criado em 20/08/2026 (item 6 do documento do Humano, proposta do Marco
 - entradas de `MEMÓRIAS.md`
 - `ONDE_ESTAMOS.md`
 - `INDICE_MEMORIAS.md`
-- `.hermes.md` (gerado)
+- `.hidrata.md` (gerado)
 - `PROMPT_CARREGAMENTO.md` (movido pra dentro do repo 20/08/2026 — dirige um modelo, mas sempre com Humano lendo a resposta antes de agir, ao contrário de `config/agata-consolidacao.prompt.txt`; ver PROJETO.md, "Quarentena estrutural")
 
 Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não.

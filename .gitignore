@@ -4,6 +4,7 @@ backup/
 *.pyc
 __pycache__/
 .venv/
+# .hermes/ -- dir removido na remocao do Hermes (03/09/2026, (312)); linha mantida so por historico
 .hermes/
 *.secret
 *.key
