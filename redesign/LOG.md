@@ -2759,3 +2759,75 @@ reboot for necessário de qualquer forma). P7-02 = runbook pronto, aguarda os 2 
 Humano. P7-03 = aguarda o HD (amanhã) + régua P-12 (SILO-HUMANO H-1). Depois: Fase 8.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 08:35 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · P7-03 — passada de backup no HD (parte que não precisa do Humano)
+
+**Contexto:** o Humano montou o HD `AgataBkup01` e pediu para prosseguir. Executada a
+passada de backup do runbook `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md`. Os gates que são
+dele — régua do P-12, `cifrar_env.sh`, aplicar os `.diff` em `scripts/*` — **não
+cruzados**; ficam abaixo.
+
+**Pré-checagens (2 achados que encurtaram o trabalho):**
+1. O GGUF do `rlm` em `memoria/missoes/rlm-3caminhos/modelo/rlm-qwen3-8b-v0.1-q4_k_m.gguf`
+   tem `sha256 = c3b6bfbc3a9d36d6...` — idêntico ao `blob_sha256` do manifesto para
+   `rlm-qwen3-8b-teste:latest` e ao nome do blob Ollama. Já estava no snapshot da Fase 0
+   (`c19275ec`, tag `rlm-gguf`). **Dispensa o `sudo` do passo 2b do runbook** — bastou
+   re-etiquetar.
+2. `--host predator` do runbook trocado pelo host real (`cachyos-PHN16-71`) para bater com
+   os 4 snapshots da Fase 0. O P-12 filtra só por tag, nunca por host — escolha sem risco
+   (princípio-espelho: consistência com o que já existe), registrada aqui.
+
+**Feito (repo restic `d0223c4f` em `/run/media/orusoua/AgataBkup01/restic-agata-local`):**
+- `restic backup` (2 tags cada: nome do manifesto + sha256/ir_sha256 do conteúdo atual):
+  | recurso | snapshot | no repo | tempo |
+  |---|---|---|---|
+  | `multilingual-e5-small-int8` | `8c1a077a` | 150 MiB | ~4 s |
+  | `whisper-base-int8-ov` | `485eb078` | 73 MiB | ~2 s |
+  | `whisper-small-int8-ov` | `2ed22f0f` | 231 MiB | ~6 s |
+  | `qwen3-30b-a3b` (GGUF MoE 18 GB) | `9433e3b8` | 17,25 GiB | **7 min 20 s** |
+- `rlm-qwen3-8b-teste:latest`: `restic tag --add "rlm-qwen3-8b-teste:latest" --add
+  "c3b6bfbc..." c19275ec`. **`restic tag` reescreve o snapshot: `c19275ec` -> `4bf31a37`**
+  (mesmo conteúdo/árvore, ID novo). Docs que citam `c19275ec` (P3-02, SILO-HUMANO,
+  REGUA-P12) passam a valer para `4bf31a37`. Tags do `4bf31a37`: `rlm-gguf`,
+  `rlm-qwen3-8b-teste:latest`, `c3b6bfbc...`.
+- `restic check --read-data-subset=10%` -> **`no errors were found`** (135/135 packs, 36 s).
+- **Teste de restore (aceite do ROADMAP):** `restic restore 8c1a077a` para scratch ->
+  `diff -rq` contra a árvore viva que serve em `:20134` = **idêntico byte a byte** (47
+  arquivos). Hash de conteúdo (todos os arquivos, com e sem `model_cache/`) bate nos dois
+  lados: `9f38702d...` / `1eec4704...`.
+- **Cache de cobertura do P-12 semeado:** `python3 redesign/fase7-hd/semear_cache_p12.py`
+  -> `~/.agata-backup-staging/p12-cobertura.json` com os **5** recursos (rlm, MoE, whisper
+  base/small, e5-small), cada um com sha256 + `verificado_em` + snapshot. Os 4 modelos
+  Ollama-registry ficam de fora (ISENTO na régua — `ollama pull` reconstrói).
+
+**Verificação (S7 mínimo):** o aceite do P7-03 tem duas metades. A metade "backup +
+`restic check` + restore num scratch reproduz" -> **PASS** (acima). A metade "P-12
+vermelho com backup velho, verde com fresco" depende do `.diff` aplicado ao
+`perimetro.sh` (P-8 / Fase 8) e da régua do Humano -> ainda aberta.
+
+**Lacuna registrada (não bloqueia):** o `ir_sha256_xmlbin` do manifesto ("hash local dos
+.xml/.bin") não tem o comando exato registrado em lugar nenhum — o chat 3 calculou e não
+anotou a fórmula. Tentativas óbvias (`cat xml bin`, `cat bin xml`, hash-de-hashes) não
+reproduzem. O teste de restore acima contorna isso comparando restaurado vs. vivo direto.
+Vale a Fase 8 fixar a fórmula no manifesto/`RECONSTRUCAO.md`.
+
+**Falta / próximo (tudo do Humano):**
+1. **Régua do P-12 (H-1 do SILO-HUMANO):** R1/R2/R3. Recomendação = os defaults do `.diff`
+   (`N=14`; FALHA = `rlm` + `e5-small`; AVISO = MoE + whisper base/small). Aprova criando
+   `redesign/propostas/APROVADO-p12-backup-verificavel`, ou dá outros números.
+2. **`cifrar_env.sh` (passo 4 do runbook):** `APROVADO-cifrar-env` + `.diff` aplicado a
+   `scripts/cifrar_env.sh` (P-8) + rodar (prompt de senha GPG 2x, Humano ao teclado). O
+   `env-20260812.gpg` no HD é de 12/08 — desatualizado.
+3. **Aplicar os 2 `.diff` em `scripts/*`:** P-8 / Fase 8, ou "vai" explícito. Recomendo
+   deixar para a Fase 8.
+4. Fora do P7-03: P7-02 (2 `sudo`) e o reboot de confirmação do P7-01.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`,
+os `.diff` de `redesign/propostas/` (não aplicados). Sem `sudo`. Nada instalado. Escrita só
+no repo restic do HD (aditiva — sem `forget`/`prune`), no cache
+`~/.agata-backup-staging/p12-cobertura.json`, e em `redesign/`.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.

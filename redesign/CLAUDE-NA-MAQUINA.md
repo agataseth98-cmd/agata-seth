@@ -46,7 +46,10 @@ Mensagens de commit terminam com:
 
 ```
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01WVPMrFVu8ogFonhKnwwGE5
+Claude-Session: https://claude.ai/code/session_01L2xHqCQPKHjBrtVLy8p4gF
 ```
+
+(A linha `Claude-Session` aponta para a sessão que commita — cada chat tem a sua. Chats
+anteriores: chat 5 = `session_0146yf6acFh2rTZJmDE81DHW`.)
 
 Corpo em ASCII (sem acento), como os commits anteriores do branch.

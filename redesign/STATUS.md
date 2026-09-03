@@ -1,13 +1,14 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; **regressão do `enable` no boot corrigida, pende reboot de teste**; prep sem-HD de P7-03 feita; falta: reboot de teste, HD, 2 sudo, régua P-12). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 22:10 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 5) — trava investigada (causa não medida, `lacuna`); regressão do P7-01 no
-boot corrigida (`After=default.target` fechava ciclo) **e endurecida** (`[Install]` das 3
-unidades base alinhado a `agata.target` — footgun da lição 2 desarmado); **S7 PASS**
-(dreno segura 25s com efeito plantado, não corta). `P7-02-RUNBOOK.md` pronto. Reboot real
-adiado pelo Humano.
-ÂNCORA (leve, manual): sobre `redesign` @ **`d065e9f`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; regressão do `enable` no boot corrigida, pende reboot de teste; **P7-03 passada de backup no HD FEITA** — 5 recursos com snapshot, `restic check` verde, restore byte a byte OK, cache do P-12 semeado; falta: reboot de teste, 2 sudo (P7-02), régua P-12 + `cifrar_env` + aplicar `.diff` (Humano)). **Fases 0-6 FECHADAS.**
+ATUALIZADO: 2026-09-03 08:35 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — HD `AgataBkup01` montado; passada de backup do P7-03 executada (parte
+que não precisa do Humano): `restic backup` de e5-small/whisper-base/whisper-small/GGUF MoE
+(18 GB, 7m20s) + re-tag do snapshot do `rlm` (sem sudo — GGUF da `missoes` bate o
+`blob_sha256`); `restic check --read-data-subset=10%` = no errors; teste de restore
+(e5-small) = idêntico byte a byte à árvore viva; `p12-cobertura.json` semeado com 5
+recursos. Régua P-12 / `cifrar_env.sh` / aplicar os `.diff` em `scripts/*` seguem no Humano.
+ÂNCORA (leve, manual): sobre `redesign` @ **`66c55f8`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -31,7 +32,7 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Fase 7 (Liga/desliga) — P7-00 FEITO · prep sem-HD de P7-03 FEITA · P7-01/02 aguardam:**
+**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (pende reboot) · P7-03 passada de backup FEITA · falta: P7-02 (2 sudo) + régua P-12 / `cifrar_env` / aplicar `.diff` (Humano):**
 - **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
   + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
   `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`
@@ -54,16 +55,25 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   (blocos `sudo` prontos + pré-checagens de 02/09 ~22:05: `gamemode` não instalado,
   `ollama.service` sem `OLLAMA_KEEP_ALIVE`, `gamemode.ini.exemplo` já correto).
 - **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:
-  - **PREP FEITA sem o HD (chat 4):** `redesign/propostas/p12-backup-verificavel.diff` (P-12
-    completo, `bash -n` + `git apply --check` + run do perímetro modificado = OK, P-12 dá
-    PARCIAL com o HD fora) · `redesign/propostas/cifrar-env.diff` · `redesign/propostas/README.md`
+  - **PASSADA DE BACKUP FEITA (chat 6, 2026-09-03, HD montado):** 5 recursos do manifesto
+    com snapshot restic tagueado (nome + sha256): `multilingual-e5-small-int8` `8c1a077a` ·
+    `whisper-base-int8-ov` `485eb078` · `whisper-small-int8-ov` `2ed22f0f` · `qwen3-30b-a3b`
+    `9433e3b8` (18 GB, 7m20s) · `rlm-qwen3-8b-teste:latest` = re-tag do snapshot da Fase 0
+    (`c19275ec` → **`4bf31a37`**, sem sudo — o GGUF da `missoes` bate o `blob_sha256`).
+    `restic check --read-data-subset=10%` = **no errors**. Teste de restore (e5-small) =
+    **idêntico byte a byte** à árvore viva de `:20134`. `~/.agata-backup-staging/p12-cobertura.json`
+    semeado (5 recursos). Ver LOG 2026-09-03 ~08:35.
+  - **PREP sem o HD (chat 4), ainda válida:** `redesign/propostas/p12-backup-verificavel.diff`
+    (P-12 completo) · `redesign/propostas/cifrar-env.diff` · `redesign/propostas/README.md`
     · `redesign/fase7-hd/REGUA-P12.md` (R1/R2/R3 — **decisão do Humano**, com recomendação) ·
-    `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md` (runbook: paths+sha256 dos 4 artefatos, `restic
-    check`, restore) · `redesign/fase7-hd/semear_cache_p12.py`.
-  - **FALTA:** o HD (rodar o runbook + `restic check` + restore) · a régua do P-12 está
-    **parada no `redesign/SILO-HUMANO.md` (H-1)** por decisão do Humano — resolve-se no
-    P7-03, com o HD e os snapshots reais na frente (o `.diff` já pronto) · `APROVADO-*` ·
-    aplicação real dos `.diff` em `scripts/*` (Fase 8, ou "vai" explícito).
+    `redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md` · `redesign/fase7-hd/semear_cache_p12.py`.
+  - **FALTA (tudo do Humano):** a régua do P-12 (H-1 do `SILO-HUMANO.md`; recomendação = os
+    defaults do `.diff`, `N=14`) → `APROVADO-p12-backup-verificavel` · `cifrar_env.sh`
+    (`APROVADO-cifrar-env` + `.diff` aplicado + rodar, prompt GPG) · aplicação real dos
+    `.diff` em `scripts/*` (Fase 8, ou "vai" explícito).
+  - **Lacuna (não bloqueia):** a fórmula exata do `ir_sha256_xmlbin` do manifesto não está
+    registrada (chat 3 não anotou); o teste de restore contorna comparando restaurado vs.
+    vivo. Fixar na Fase 8.
 _(Fase 5 = spike RLM ARQUIVADO.)_
 
 _(histórico:)_ **FASE 4 (Grafo) FECHADA** (2026-09-02 ~14:30).
