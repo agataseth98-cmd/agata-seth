@@ -1,16 +1,16 @@
 # STATUS — redesenho do sistema local Agata
 
-FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO, quase fechada — P7-00 ✅ · **P7-01 ✅** (reboot real confirmado 03/09) · **P7-02 hook ✅** (`agata-jogo`, testado) · **P7-03 ✅** (backup + régua P-12 + `.env` cifrado no repo); **falta só:** Humano testar `agata-jogo` num jogo real via lançador · Fase 8 aplicar os 2 `.diff` em `scripts/*`). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-03 09:12 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 6) — Humano rodou `cifrar_env.sh` → `env-20260903.gpg` (conteúdo do `.env`
-de 02/09). Fechados à mão os 2 "FALTA" do script: `MANIFESTO.txt` no HD + `restic backup
---tag agata-env` (snapshot `9d96c3f7`, `restic check` + restore OK) — replica o
-`cifrar-env.diff`, cuja automação fica pra Fase 8. **P7-03 fechado no que não é Fase 8.**
-_(entradas 09:00/08:50/08:35: P7-02 replanejado sem Feral GameMode — wrapper `agata-jogo`
-(conflito GameMode × `ananicy-cpp` do CachyOS); reboot confirmou o P7-01; passada de backup
-+ régua P-12 (`qwen3-30b-a3b` → ISENTO). `pacman -Syu` **não** remove nossa config
-(`pacman -Qo` confirma — tudo em `~/.config`/`~/.local`/`~/.cache`/venv).)_
-ÂNCORA (leve, manual): sobre `redesign` @ **`3043289`**; referência viva = `git rev-parse
+FASE ATUAL: **Fase 8 — Cutover + merge para `main`** (EM ANDAMENTO — P8-00..P8-07 escritos, aguardam revisão do Humano e execução passo a passo). **Fases 0-7 FECHADAS** (Fase 7: falta só o Humano testar `agata-jogo` num jogo real — não bloqueia a Fase 8). **É a primeira vez que `main` muda.**
+ATUALIZADO: 2026-09-03 09:20 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 6) — Humano deu "vai" para a Fase 8. Escritos os 8 arquivos-tarefa
+`redesign/tasks/P8-00..P8-07` no schema. P8-00 mapeia o `git diff main..redesign` real
+(fora de `redesign/`: `.gitignore`, `PROMPT_CARREGAMENTO.md` [EXCLUIR — churn da âncora],
+`models/*`, `scripts/conselho_remoto.py` [sem par P-8 ainda]). Nada aplicado; `main`
+intocado (`4aa90bd`).
+_(entradas 09:12/09:00/08:50/08:35: `.env` cifrado no repo restic; P7-02 wrapper `agata-jogo`
+(sem Feral GameMode — conflito com `ananicy-cpp`); reboot confirmou o P7-01; backup P7-03 +
+régua P-12.)_
+ÂNCORA (leve, manual): sobre `redesign` @ **`07a9087`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
 → commit `4aa90bd`; desreferenciar com `pre-redesign^{commit}`) local + remoto
@@ -34,7 +34,24 @@ escrita/comandos/MCP-write → 403). `obsidian-ro-proxy.service` (sem enable). `
 leitura) · P6-02 `consulta.py` (índice-primeiro, zero vector DB) · P6-03 `flows/consolidacao.py`
 (4 nós, saída só em `propostas/`, nada em canon; alimenta o modelo com títulos reais p/ não
 fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
-**Fase 7 (Liga/desliga) — P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 passada de backup FEITA + régua P-12 aprovada · P7-02 hook FEITO (`agata-jogo`) · falta: fiar `agata-jogo` nos lançadores + `cifrar_env` (Humano) + aplicar `.diff` em `scripts/*` (Fase 8):**
+**Fase 8 (Cutover + merge p/ `main`) — arquivos-tarefa escritos, aguardam revisão + execução:**
+- **P8-00** inventário + estratégia de merge (só doc). Mapeia o `git diff main..redesign`
+  fora de `redesign/`: `.gitignore` (aditivo), `PROMPT_CARREGAMENTO.md` (**excluir** — churn
+  da âncora), `models/*` (Fase 3), `scripts/conselho_remoto.py` (**sem par P-8** — foi
+  `--no-verify` no branch).
+- **P8-01** fechar P-8 de `scripts/*`: aplicar `p12-backup-verificavel.diff` (APROVADO ✅),
+  `cifrar-env.diff` (falta `APROVADO-cifrar-env`), gerar+auditar `conselho-remoto-omniroute.diff`.
+  `perimetro.sh` passa a 11 controles com P-12 vermelho/verde.
+- **P8-02** paralelo N dias (Hermes vs. grafo+OmniRoute, sem desligar nada) → decisão do Humano.
+- **P8-03** reteste de fabricação no caminho novo ((138)/(307) + hidratação), config de cutover.
+- **P8-04** Goose = shell operacional de fallback, apontado pro OmniRoute (instala software → "vai").
+- **P8-05** Hermes sai do loop (grafo+OmniRoute dirige; voz/OWUI ficam à parte se em uso).
+- **P8-06** canon reflete a realidade: `REGRAS`/`PROJETO`/`ONDE_ESTAMOS` pela Cadeia de
+  auditoria em camadas + 2ª opinião; 1 entrada em `MEMÓRIAS.md` por fase (0–8), append-only.
+- **P8-07** o merge (`--no-ff`, sem force/reset/rebase) + **S7 pós-push por sessão
+  independente** + `perimetro.sh` verde com P-12. Fecha o redesenho.
+
+**Fase 7 (Liga/desliga) — FECHADA no que dá sem o Humano ao teclado.** P7-00 FEITO · P7-01 FEITO (reboot confirmado 03/09) · P7-03 backup + régua P-12 + `.env` cifrado no repo FEITO · P7-02 hook `agata-jogo` FEITO. Falta só: Humano testar `agata-jogo` num jogo real (não bloqueia a Fase 8) + `OLLAMA_KEEP_ALIVE` opcional.
 - **P7-01 ✅ FEITO** (2026-09-02 ~21:00) — instalado em `~/.config/systemd/user/` + S7 PASS
   + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
   `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`

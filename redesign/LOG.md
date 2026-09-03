@@ -3037,3 +3037,59 @@ via lançador, e (b) a Fase 8 aplicar o P-12 (aí o aceite "P-12 vermelho/verde"
 os `.diff` de `redesign/propostas/`. Sem `sudo`. Nada instalado.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+
+---
+
+## 2026-09-03 09:20 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 6) · Fase 8 "vai" — arquivos-tarefa P8-00..P8-07
+
+**Humano: "ok, compreendido, vai."** → "vai" para a **Fase 8 (cutover + merge p/ `main`)**.
+Estilo de sempre: arquivos-tarefa primeiro, revisão, execução passo a passo. **Nada
+aplicado; `main` intocado (`4aa90bd`).**
+
+**Levantamento (`git diff main..redesign --stat -- ':!redesign/'`, 03/09):**
+- `.gitignore` (+12, aditivo — vault/venvs/plugin) → merge direto.
+- `PROMPT_CARREGAMENTO.md` (±10) — **só o bloco `ANCORA-SHA`**, reescrito pelo `pre-commit`
+  a cada commit do branch. **EXCLUIR do merge** (`main` tem o seu).
+- `models/manifest.json` + `models/PRUNE.md` + `models/RECONSTRUCAO.md` (Fase 3) → merge direto.
+- `scripts/conselho_remoto.py` (−251/+70, Fase 1 P1-04) — **foi `git commit --no-verify` no
+  branch, nunca passou pelo P-8.** Precisa de par `propostas/` retroativo + Cadeia de
+  auditoria antes de `main`.
+- Goose **não instalado** (`which goose` → nada) — P8-04 instala.
+- `redesign/propostas/`: `p12-backup-verificavel.diff` + `APROVADO-` ✅; `cifrar-env.diff`
+  **sem `APROVADO-`**.
+
+**8 arquivos escritos** (`redesign/tasks/`, schema do `CONTINUIDADE.md`):
+- **P8-00** inventário + estratégia de merge (só doc): o diff real, as pendências por
+  passo, merge `--no-ff` + override da âncora, ordem P8-01→P8-07.
+- **P8-01** fechar P-8 de `scripts/*`: aplicar os `.diff` (P-12, cifrar-env) + gerar e
+  auditar `conselho-remoto-omniroute.diff` pela Cadeia A→B→C. Aceite: `perimetro.sh` 11
+  controles, P-12 vermelho/verde demonstrado.
+- **P8-02** paralelo N dias (Hermes vs. grafo+OmniRoute, sem desligar nada) → planilha
+  append-only `redesign/grafo/paralelo.md` → decisão do Humano (N e critério).
+- **P8-03** reteste de fabricação ((138)/(307) + hidratação) na config de cutover; PASS
+  obrigatório senão a fase pausa.
+- **P8-04** Goose = shell operacional de fallback, apontado pro `:20127`; instala software
+  → "vai". Codex CLI terciário.
+- **P8-05** Hermes sai do loop (grafo+OmniRoute dirige; voz/OWUI à parte se em uso);
+  `.hermes.md` muda de papel. Reversível até P8-07.
+- **P8-06** canon = realidade: `REGRAS`/`PROJETO`/`ONDE_ESTAMOS` pela **Cadeia de auditoria
+  em camadas** (A propõe/testa → B audita → C verifica na Máquina → Humano autoriza) + 2ª
+  opinião; **1 entrada DIÁRIO por fase (0–8) em `MEMÓRIAS.md`**, append-only, no topo;
+  fim do estado de exceção (sem mais `--no-verify`).
+- **P8-07** o merge: `git merge --no-ff redesign` em `main`, override do `PROMPT_CARREGAMENTO.md`,
+  `perimetro.sh` verde com P-12, **S7 pós-push por sessão INDEPENDENTE** (Cadeia item 6 —
+  esta sessão não fecha a Fase 8 sozinha). `pre-redesign` fica como âncora de rollback total.
+
+**Aceite da Fase 8 (ROADMAP):** `perimetro.sh` verde incluindo P-12 · S7 pós-push por
+sessão independente · canon == realidade.
+
+**Pendências para o Humano antes de a execução andar:** revisar os 8 arquivos ·
+`APROVADO-cifrar-env` · N e critério do paralelo (P8-02) · "vai" para instalar o Goose
+(P8-04) e para o `push` final (P8-07). O teste do `agata-jogo` num jogo real (Fase 7) não
+bloqueia a Fase 8, mas convém antes do P8-05.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, `.githooks/*`.
+Sem `sudo`. Nada instalado.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
