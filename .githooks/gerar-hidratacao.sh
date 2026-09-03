@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Regenera ~/agata/.hermes.md e ~/agata/INDICE_MEMORIAS.md a partir de
+# Regenera ~/agata/.hidrata.md e ~/agata/INDICE_MEMORIAS.md a partir de
 # REGRAS.md + PROJETO.md + uma janela de MEMÓRIAS.md.
 # Chamado pelo hook pre-commit. Pode ser rodado manualmente também.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-OUT=".hermes.md"
+OUT=".hidrata.md"
 INDICE="INDICE_MEMORIAS.md"
 # Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
 # decisão (115)). Fica DE FORA de $OUT de propósito: medido rodando os dois
 # lados antes de propor isto -- o índice com palavras-chave inteiro pesa 73%
 # a mais que o índice puro (24K -> 41,5K chars nesta base). Embutir isso em
-# .hermes.md pioraria exatamente o problema que este projeto já brigou pra
+# .hidrata.md pioraria exatamente o problema que este projeto já brigou pra
 # resolver (MEMÓRIAS 103-105, 220: carregador cortando contexto em
 # silêncio) -- então este arquivo fica só em disco, pra `grep` sob demanda
 # de qualquer sessão com Máquina, nunca auto-injetado.
@@ -21,27 +21,27 @@ INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
 # no meio da frase). Acumula entradas completas de trás pra frente até um
 # orçamento de caracteres; nunca corta uma entrada ao meio — se a última
 # entrada sozinha já estourar o orçamento, ela entra inteira mesmo assim.
-# Uniforme hoje (um .hermes.md só, sem silo por modelo — Fase 2 ainda não
-# construída); calibração por modelo de verdade depende dessa fase existir.
+# Uniforme hoje (um .hidrata.md só, sem silo por modelo — Fase 2 ainda não
+# mantem a fronteira de MOD; calibracao por janela do modelo, se preciso.
 JANELA_ORCAMENTO_CHARS=25000
 INDICE_RECENTES_COMPLETAS=30
 INDICE_TETO_ANTIGAS=80
 
 # --- Fase 2 / Bloco 3.1: silos por modelo ------------------------------
-# Modelos-alvo que ganham um .hermes-<modelo>.md PRÓPRIO: a janela de
+# Modelos-alvo que ganham um .hidrata-<modelo>.md PROPRIO: a janela de
 # MEMÓRIAS e as linhas de índice desse arquivo não trazem bloco MOD de
-# OUTRO modelo-alvo. Todo modelo fora desta lista usa o .hermes.md COMUM,
+# OUTRO modelo-alvo. Todo modelo fora desta lista usa o .hidrata.md COMUM,
 # que não traz NENHUM bloco MOD que declare `modelo-alvo:`.
-# Hoje só `claude` tem bloco MOD no canon ((51)); `seth`/`gemini`/`glm`
-# são alvos previsíveis de Fase 3 -- listados para o arquivo já existir
-# com a fronteira certa antes do primeiro MOD sensível ser escrito.
+# Hoje so `claude` tem bloco MOD no canon ((51)); o silo `seth` existe para
+# o seth_gateway injetar a Seth hidratada sem MOD alheio. claude/gemini/glm
+# sairam da lista com a remocao do Hermes (nao ha mais quem os injete local).
 # Efeito de tamanho hoje ≈ nulo (dossiê S1, Achado 4); o valor é a
 # fronteira de confidencialidade, não economia de token.
-# Os .hermes-<modelo>.md NÃO são versionados (ver .gitignore) nem
+# Os .hidrata-<modelo>.md NAO sao versionados (ver .gitignore) nem
 # adicionados pelo pre-commit -- vivem só na árvore da Máquina, o único
-# lugar onde MOD sensível pode aparecer. O .hermes.md comum continua
+# lugar onde MOD sensível pode aparecer. O .hidrata.md comum continua
 # versionado e é o único artefato de hidratação público.
-ALVOS_SILO=(claude seth gemini glm)
+ALVOS_SILO=(seth)   # so o seth_gateway usa; claude/gemini/glm eram do Hermes (removido 03/09/2026, MEMORIAS (312))
 
 # Orçamento de janela por modelo (Regra 8, 3 passadas qwen local 31/08/2026:
 # convergência em "calibrar por janela de contexto do modelo", não valor
@@ -104,7 +104,7 @@ filtrar_mod_por_alvo() {
 # Filtra as linhas de índice (título só, sem corpo) por modelo-alvo,
 # lendo o token do próprio cabeçalho "(n) MOD <modelo>". $1 vazio =
 # arquivo comum (nenhuma linha MOD com modelo nomeado). Roda só na
-# montagem do .hermes*, o INDICE_MEMORIAS*.md em disco fica completo.
+# montagem do .hidrata*, o INDICE_MEMORIAS*.md em disco fica completo.
 filtrar_indice_por_alvo() {
   local alvo="${1:-}"
   awk -v alvo="$alvo" '
@@ -202,7 +202,7 @@ janela_memorias() {
           # caminhando pra trás). Bug real, achado depois de commitar:
           # somar só o tamanho de CADA entrada isolada (sem acumular)
           # nunca estoura o orçamento por entradas pequenas sozinhas --
-          # .hermes.md saiu com o arquivo quase inteiro (868KB em vez de
+          # .hidrata.md saiu com o arquivo quase inteiro (868KB em vez de
           # ~25KB) na primeira rodada real.
           fim=hdr[1]-1
           for (i=1; i<=n; i++) {
@@ -273,7 +273,7 @@ gerar_indice_palavras_chave() {
     echo "abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,"
     echo "deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)."
     echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
-    echo "inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima."
+    echo "inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima."
     echo
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
@@ -294,12 +294,12 @@ gerar_indice_palavras_chave() {
 gerar_indice
 # Fail-soft de propósito: índice de palavras-chave é um extra "nível 0",
 # best-effort -- se quebrar (script ausente, bug, MEMÓRIAS.md sem entrada
-# nenhuma), NÃO pode derrubar a geração de .hermes.md/INDICE_MEMORIAS.md,
+# nenhuma), NAO pode derrubar a geracao de .hidrata.md/INDICE_MEMORIAS.md,
 # que são o caminho crítico de hidratação. Achado testando de propósito
 # antes de propor: sem o `|| ...` abaixo, um `scripts/extrair_palavras_chave.py`
 # ausente ou quebrado travava o hook inteiro (nenhum commit passaria).
 if ! gerar_indice_palavras_chave; then
-  echo "AVISO: geração de $INDICE_CHAVES falhou -- .hermes.md/$INDICE seguem normais, só o índice de palavras-chave (extra, não crítico) ficou de fora desta rodada." >&2
+  echo "AVISO: geracao de $INDICE_CHAVES falhou -- .hidrata.md/$INDICE seguem normais, só o índice de palavras-chave (extra, não crítico) ficou de fora desta rodada." >&2
   rm -f "$INDICE_CHAVES"
 fi
 
@@ -329,7 +329,7 @@ montar_hermes() {
     fi
     echo ""
     echo "Motivo de existir: o Hermes só auto-injeta um de"
-    echo ".hermes.md / AGENTS.md / CLAUDE.md / .cursorrules no prompt de sistema"
+    echo ".hidrata.md (hidratacao local; Hermes nao injeta mais nada) no prompt de sistema"
     echo "(nunca REGRAS.md/PROJETO.md/MEMÓRIAS.md diretamente). Embutir aqui evita depender"
     echo "de tool-call (e do modelo acertar offset/wc -l) no início da sessão."
     echo "-->"
@@ -353,8 +353,8 @@ montar_hermes() {
 montar_hermes "" "$OUT"
 SILO_FILES=()
 for _m in "${ALVOS_SILO[@]}"; do
-  montar_hermes "$_m" ".hermes-${_m}.md"
-  SILO_FILES+=(".hermes-${_m}.md")
+  montar_hermes "$_m" ".hidrata-${_m}.md"
+  SILO_FILES+=(".hidrata-${_m}.md")
 done
 
 checar_reconciliacao || true
@@ -364,7 +364,7 @@ for _f in "${SILO_FILES[@]}"; do
   _silos_txt="${_silos_txt}, ${_f} ($(wc -c < "$_f") bytes)"
 done
 if [ -f "$INDICE_CHAVES" ]; then
-  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hermes.md)${_silos_txt}"
+  echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES ($(wc -c < "$INDICE_CHAVES") bytes, fora de .hidrata.md)${_silos_txt}"
 else
   echo "gerado: $OUT ($(wc -c < "$OUT") bytes), $INDICE ($(wc -c < "$INDICE") bytes), $INDICE_CHAVES: FALHOU nesta rodada, ver aviso acima${_silos_txt}"
 fi

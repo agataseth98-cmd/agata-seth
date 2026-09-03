@@ -461,7 +461,7 @@ p7_citacao() {
 #   QUARENTENA OBRIGATÓRIA -- muda COMPORTAMENTO: REGRAS.md, PROJETO.md,
 #   scripts/*, .githooks/*
 #   SEM quarentena -- só REGISTRA o que já aconteceu: MEMÓRIAS.md,
-#   ONDE_ESTAMOS.md, INDICE_MEMORIAS.md, .hermes.md (gerado)
+#   ONDE_ESTAMOS.md, INDICE_MEMORIAS.md, .hidrata.md (gerado)
 # Motivo da linha: registro errado se corrige com entrada nova -- é pra
 # isso que append-only existe. Comportamento errado, não.
 #
@@ -557,23 +557,23 @@ p8_quarentena() {
 }
 
 # --- P-11 ----------------------------------------------------------------
-# Silos por modelo (.hermes-<modelo>.md) nunca entram no canon. Vêm do
-# hook gerar-hermes-md.sh (Fase 2 / Bloco 3.1), um por modelo-alvo, e
+# Silos por modelo (.hidrata-<modelo>.md) nunca entram no canon. Vêm do
+# hook gerar-hidratacao.sh, um por modelo-alvo, e
 # podem conter bloco MOD sensível -- nonce TES-002 de 3.3 -- num
 # repositório PÚBLICO. A defesa de primeira linha é o `.gitignore`
-# (`.hermes-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
+# (`.hidrata-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
 # o backstop pro caso que nenhum dos dois cobre: `git add -f` manual.
 # Achado da cadeia de auditoria de 3.1 (Camada C, 31/08/2026): `.gitignore`
 # sozinho não é garantia -- `-f` fura, é comportamento padrão do git.
-# Só `.hermes.md` (o comum, sem bloco MOD que declare `modelo-alvo:`) é
+# Só `.hidrata.md` (o comum, sem bloco MOD que declare `modelo-alvo:`) é
 # artefato público. FALHA o commit -- mesma severidade de P-8.
 # Fonte: REGRAS.md, "Princípios" (Segurança) · REGRAS.md, "O Conselho"
 # item 3 · PROJETO.md, "Memória e hidratação" (silos Fase 2).
 _p11_eh_silo() {
-  # `.hermes-<algo>.md` casa; `.hermes.md` (o comum, versionado) NÃO --
-  # não há `-` depois de `.hermes`.
+  # `.hidrata-<algo>.md` casa; `.hidrata.md` (o comum, versionado) NÃO --
+  # não há `-` depois de `.hidrata`.
   case "$1" in
-    .hermes-*.md) return 0 ;;
+    .hidrata-*.md) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -585,7 +585,7 @@ p11_silos_nao_versionados() {
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     if _p11_eh_silo "$f"; then
-      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hermes.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hermes-md.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
       ruim=1
     fi
   done <<< "$staged"
@@ -657,7 +657,7 @@ p9_servicos_declarados() {
 
 p10_vault_derivado() {
   # P-10 (MEMÓRIAS (293)): memoria/obsidian/ é o único derivado gerado FORA do
-  # commit (post-commit, gitignorado) -- .hermes.md e os índices entram no
+  # commit (post-commit, gitignorado) -- .hidrata.md e os índices entram no
   # commit pelo pre-commit e não têm como divergir. Aqui: regenera o vault a
   # partir do conteúdo de HEAD num sandbox e confere byte a byte contra o disco.
   # HEAD dos DOIS lados -- comparar contra o disco staged reprovaria todo commit
@@ -733,7 +733,7 @@ main() {
   CONT_PARCIAL=0
   CONT_FALHA=0
 
-  cabecalho "P-1" "Segredos só em ~/.hermes/.env, fora do repo" "PROJETO, Segurança"
+  cabecalho "P-1" "Segredos só em ~/.config/agata/.env, fora do repo" "PROJETO, Segurança"
   PERIMETRO_ESTADO=""
   checar_segredo; _perimetro_veredito "$?"
   echo
@@ -768,7 +768,7 @@ main() {
   p8_quarentena; _perimetro_veredito "$?"
   echo
 
-  cabecalho "P-11" "Silo por modelo (.hermes-<modelo>.md) nunca entra no canon -- backstop do git add -f" "REGRAS, Princípios (Segurança) · REGRAS, O Conselho item 3 · PROJETO, Memória e hidratação"
+  cabecalho "P-11" "Silo por modelo (.hidrata-<modelo>.md) nunca entra no canon -- backstop do git add -f" "REGRAS, Princípios (Segurança) · REGRAS, O Conselho item 3 · PROJETO, Memória e hidratação"
   PERIMETRO_ESTADO=""
   p11_silos_nao_versionados; _perimetro_veredito "$?"
   echo

@@ -1,8 +1,8 @@
 # PROVEDORES.md — pool de modelos atrás do OmniRoute (Fase 1, P1-03)
 
-## Estado (2026-09-02 ~08:45) — chaves do Humano já estavam em `~/.hermes/.env`
+## Estado (2026-09-02 ~08:45) — chaves do Humano já estavam em `~/.config/agata/.env`
 
-`~/.hermes/.env` já tinha `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`,
+`~/.config/agata/.env` já tinha `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`,
 `GOOGLE_API_KEY`, `ZHIPU_API_KEY`. Registrei os 5 providers no OmniRoute (valores lidos do
 `.env` para env vars, nunca impressos): `groq`, `deepseek`, `openrouter`, `gemini`, `zai`.
 
@@ -55,12 +55,12 @@ desabilita a chave — reativar sempre com `omniroute keys add <prov> --stdin`.
 
 ## (Histórico) plano quando as chaves ainda não existiam
 
-## Comandos (rodar quando as chaves existirem no `~/.hermes/.env`)
+## Comandos (rodar quando as chaves existirem no `~/.config/agata/.env`)
 
 ```fish
 # 1. carregar as chaves no ambiente da sessão que roda o omniroute CLI:
 #    (o OmniRoute lê do ambiente do processo)
-for L in (grep -E '^(GROQ|CEREBRAS|DEEPSEEK|GITHUB_MODELS|OPENROUTER|MISTRAL|ZHIPU|GOOGLE)_' ~/.hermes/.env)
+for L in (grep -E '^(GROQ|CEREBRAS|DEEPSEEK|GITHUB_MODELS|OPENROUTER|MISTRAL|ZHIPU|GOOGLE)_' ~/.config/agata/.env)
     set -x (string split -m1 '=' $L)
 end
 
@@ -116,7 +116,7 @@ interativo trava em shell não-interativo (`exit 13`, "unsettled top-level await
 - Lista curada: `github.com/amardeeplakshkar/awesome-free-llm-apis`
 - Painel de custo/uso: o do próprio OmniRoute (`/dashboard`, "Requests"/"Usage") — **não
   montar dashboard extra** (PESQUISA).
-- Chaves: só em `~/.hermes/.env`, o Humano edita direto, nunca no chat nem no repo. O
+- Chaves: só em `~/.config/agata/.env`, o Humano edita direto, nunca no chat nem no repo. O
   OmniRoute lê do ambiente / do store local dele.
 - Todo egresso passa antes pela sanitização da P1-02 (`sanitizar.py` via policy ou
   `proxy.py`), inclusive nas rotas nuvem.

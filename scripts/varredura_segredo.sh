@@ -26,7 +26,7 @@ PADROES_SEGREDO=(
   '[A-Za-z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)[A-Za-z0-9_]*[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9/+_-]{16,}["'"'"']?'
 )
 
-# P-1 -- "Segredos só em ~/.hermes/.env, fora do repo" (PROJETO, Segurança).
+# P-1 -- "Segredos só em ~/.config/agata/.env, fora do repo" (PROJETO, Segurança).
 # Olha só o que está staged (git diff --cached), que é o que um pre-commit
 # real veria. Padrões de chave conhecidos + heurística genérica. Heurística
 # tem falso positivo/negativo -- rede de segurança adicional, não substitui

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 1. Roda o perimetro (scripts/perimetro.sh, 10 controles P-1..P-10, MEMÓRIAS (191)/(192))
 #    e bloqueia o commit se algum falhar de verdade.
-# 2. Regenera .hermes.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
+# 2. Regenera .hidrata.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
 #    MEMÓRIAS.md mudaram, e inclui os dois no commit.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -12,14 +12,14 @@ if ! bash scripts/perimetro.sh; then
 fi
 
 if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
-  bash .githooks/gerar-hermes-md.sh
+  bash .githooks/gerar-hidratacao.sh
   # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
-  # gerar-hermes-md.sh regenera os três, mas só os dois primeiros entravam
+  # gerar-hidratacao.sh regenera os três, mas só os dois primeiros entravam
   # no commit; o terceiro (rastreado no git) sobrava como modificação não
   # comitada depois de todo commit que tocasse REGRAS/PROJETO/MEMÓRIAS.
   # Achado auditando junto de MEMÓRIAS (271); adicionado se o arquivo
   # existir (geração é fail-soft, ver comentário em gerar-hermes-md.sh).
-  git add .hermes.md INDICE_MEMORIAS.md
+  git add .hidrata.md INDICE_MEMORIAS.md
   [ -f INDICE_MEMORIAS_PALAVRAS-CHAVE.md ] && git add INDICE_MEMORIAS_PALAVRAS-CHAVE.md
 fi
 

@@ -5,8 +5,12 @@ Mesmas entradas de INDICE_MEMORIAS.md, uma linha "  palavras-chave: ..." logo
 abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,
 deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115).
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
-inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
+inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeados em main; Hermes fora do loop; canon atualizado
+  palavras-chave: redesenho, fase, cutover, scripts, canon, mergeados, main, hermes, fora, loop, atualizado
+(310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede de segurança, router, iGPU, modelos, grafo, spike RLM, Obsidian, liga/desliga)
+  palavras-chave: redesenho, sistema, local, agata, fases, rede, segurança, router, igpu, modelos, grafo, spike, rlm, obsidian, liga, desliga
 (309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem de trabalho da auditoria em nuvem (anti-fabricação no carregamento) — 5 acréscimos; §4.2 (REGRAS) fica fora
   palavras-chave: prompt, carregamento, aplicada, seção, ordem, trabalho, auditoria, nuvem, anti, fabricação, acréscimos, regras, fica, fora
 (308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
@@ -63,10 +67,10 @@ inteiro. NÃO entra em .hermes.md -- ver comentário em INDICE_CHAVES acima.
   palavras-chave: esferas, memória, pessoal, projeto, reversão, parcial, assunto, sistema, decisão, humano, seção, camadas, reescrita
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a edição do config.yaml foi real
   palavras-chave: humano, confirmou, conversa, modelos, edição, config, yaml, real
-(281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nunca mais" sai do template da âncora (fecho do achado 3 de (277))
-  palavras-chave: proposta, ancora, defasagem, honesta, aplicada, nunca, sai, template, âncora, fecho, achado
-(280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: nenhum candidato bateu o titular; troca vira fronteira de recusa
-  palavras-chave: frente, bancada, modelos, fechada, decisão, candidato, bateu, titular, troca, vira, fronteira, recusa
+(281) DIÁRIO — 27/08/2026 · Proposta P-8 ancora-defasagem-honesta aplicada: "nun …
+  palavras-chave: proposta, ancora, defasagem, honesta, aplicada, nun
+(280) DIÁRIO — 27/08/2026 · Frente 4 (bancada de modelos) fechada por decisão: n …
+  palavras-chave: frente, bancada, modelos, fechada, decisão
 (279) CORREÇÃO — 27/08/2026 · A entrada (277) fechou o achado 4 no essencial, ma …
   palavras-chave: entrada, fechou, achado, essencial
 (278) DIÁRIO — 27/08/2026 · SOUL.md volta a aparecer não-rastreado a cada boot ( …

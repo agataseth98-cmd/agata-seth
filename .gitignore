@@ -25,13 +25,13 @@ memoria/missoes/
 # decisão deliberada; nunca pública (achado em 15/08/2026, PROJETO item 108)
 memoria/*.md
 
-# Silos por modelo (Fase 2 / Bloco 3.1): .hermes-<modelo>.md são gerados
-# pelo hook gerar-hermes-md.sh, um por modelo-alvo, e podem conter bloco
+# Silos por modelo: .hidrata-<modelo>.md são gerados
+# pelo hook gerar-hidratacao.sh, um por modelo-alvo, e podem conter bloco
 # MOD sensível (nonce TES-002). NUNCA versionados -- repo é público. Só
-# .hermes.md (o comum, sem MOD com modelo-alvo) entra no canon.
-.hermes-*.md
+# .hidrata.md (o comum, sem MOD com modelo-alvo) entra no canon.
+.hidrata-*.md
 
-# SOUL.md — persona do hermes-agent, reescrita automática no boot (default
+# SOUL.md removido na remocao do Hermes (03/09/2026); linha mantida por historico
 # genérico "Nous Research"). Arquivada em MEMÓRIAS (245): não é lida por
 # nenhum mecanismo de hidratação do canon. Fora do índice pra não voltar
 # como ruído não-rastreado a cada reinício.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Cifra ~/.hermes/.env com GPG simétrico (AES256), verifica decifrando, e
+# Cifra ~/.config/agata/.env com GPG simétrico (AES256), verifica decifrando, e
 # copia o resultado pro HD externo se estiver montado.
 #
 # A senha é pedida pelo prompt interativo do gpg (pinentry) — nunca por
@@ -13,14 +13,14 @@ mkdir -p "$STAGING"
 OUT="$STAGING/env-$(date +%Y%m%d).gpg"
 TESTDEC="$STAGING/.env.decrypt_test"
 
-echo "=== Cifrando ~/.hermes/.env (vai pedir a senha DUAS vezes, por prompt) ==="
-gpg --symmetric --cipher-algo AES256 -o "$OUT" ~/.hermes/.env
+echo "=== Cifrando ~/.config/agata/.env (vai pedir a senha DUAS vezes, por prompt) ==="
+gpg --symmetric --cipher-algo AES256 -o "$OUT" ~/.config/agata/.env
 
 echo
 echo "=== Verificando por decifração (vai pedir a senha DE NOVO) ==="
 gpg -d -o "$TESTDEC" "$OUT"
 
-if diff -q ~/.hermes/.env "$TESTDEC" >/dev/null; then
+if diff -q ~/.config/agata/.env "$TESTDEC" >/dev/null; then
   echo "OK — decifrou idêntico ao original."
 else
   echo "FALHOU — o arquivo decifrado é diferente do original. NÃO confie neste .gpg."

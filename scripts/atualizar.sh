@@ -46,10 +46,10 @@ fi
 bash .githooks/gerar-hermes-md.sh
 
 case "$ALVO" in
-  MEMORIA) echo "  MEMÓRIAS.md reconciliado; topo reinjetado em .hermes.md." ;;
-  PROJETO) echo "  PROJETO.md reconciliado; reinjetado em .hermes.md." ;;
-  REGRAS)  echo "  REGRAS.md reconciliado; reinjetado em .hermes.md." ;;
-  TUDO)    echo "  REGRAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hermes.md." ;;
+  MEMORIA) echo "  MEMÓRIAS.md reconciliado; topo reinjetado em .hidrata.md." ;;
+  PROJETO) echo "  PROJETO.md reconciliado; reinjetado em .hidrata.md." ;;
+  REGRAS)  echo "  REGRAS.md reconciliado; reinjetado em .hidrata.md." ;;
+  TUDO)    echo "  REGRAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hidrata.md." ;;
 esac
 
 echo "atualizar.sh: concluído."
