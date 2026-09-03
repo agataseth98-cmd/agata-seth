@@ -1,10 +1,12 @@
 # STATUS — redesenho do sistema local Agata
 
 FASE ATUAL: **Fase 7 — Liga/desliga** (EM ANDAMENTO — P7-00 + **P7-01** feitos; **regressão do `enable` no boot corrigida, pende reboot de teste**; prep sem-HD de P7-03 feita; falta: reboot de teste, HD, 2 sudo, régua P-12). **Fases 0-6 FECHADAS.**
-ATUALIZADO: 2026-09-02 21:47 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
-Máquina — chat 5) — investigada a trava (causa não medida, `lacuna`); achada e corrigida
-regressão do P7-01 no boot (`After=default.target` nas 3 unidades base fechava ciclo de
-ordenação → systemd apagava o start de STT/embeddings/ro-proxy no boot). Pende reboot real.
+ATUALIZADO: 2026-09-02 22:10 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
+Máquina — chat 5) — trava investigada (causa não medida, `lacuna`); regressão do P7-01 no
+boot corrigida (`After=default.target` fechava ciclo) **e endurecida** (`[Install]` das 3
+unidades base alinhado a `agata.target` — footgun da lição 2 desarmado); **S7 PASS**
+(dreno segura 25s com efeito plantado, não corta). `P7-02-RUNBOOK.md` pronto. Reboot real
+adiado pelo Humano.
 ÂNCORA (leve, manual): sobre `redesign` @ **`d065e9f`**; referência viva = `git rev-parse
 origin/redesign`; ver `redesign/ANCORA.md`.
 BASE: `main` @ 4aa90bd (MEMÓRIAS (309)) · tag `pre-redesign` (anotada: objeto-tag `cea5aeb`
@@ -34,17 +36,23 @@ fabricar). `redesign/obsidian/README.md` + `redesign/grafo/flows/README.md`.
   + **`agata.target` `enable`d p/ boot** ("sim" do Humano). Ver "Quadro de posse" e
   `redesign/systemd/README.md`. 3 lições no LOG (systemctl-em-ExecStop deadlocka; `enable`
   honra todo `WantedBy`; teste real acha o que a revisão de papel não acha).
-  - **REGRESSÃO NO BOOT (chat 5, 02/09 ~21:47) — corrigida, pende reboot de teste.** No 1º
-    boot com o `enable`, `systemd --user` achou 3 ciclos de ordenação e quebrou apagando o
-    start de `openvino-whisper` (:20130), `openvino-embeddings` (:20134), `obsidian-ro-proxy`
-    (:27125) — só subiram os 2 proxies do OmniRoute. Causa: `After=default.target` nas 3
-    unidades base (Fase 2/6) fechava laço com `agata-drain` (`After=` os membros) via
-    `agata.target`. **Fix:** removida a linha `After=default.target` das 3 (comentário no
-    lugar); drop-ins e `agata-drain` intocados. `systemd-analyze verify` limpo; `restart
-    agata.target` sobe os 6, sem "ordering cycle"; dreno ainda para antes dos serviços.
-    **Falta:** reboot real (o job de `default.target` só existe no boot).
+  - **REGRESSÃO NO BOOT (chat 5, 02/09) — corrigida + endurecida + S7 PASS. Pende reboot real (adiado).**
+    No 1º boot com o `enable`, `systemd --user` achou 3 ciclos de ordenação e quebrou
+    apagando o start de `openvino-whisper` (:20130), `openvino-embeddings` (:20134),
+    `obsidian-ro-proxy` (:27125) — subiram só os 2 proxies do OmniRoute. Causa:
+    `After=default.target` nas 3 unidades base fechava laço com `agata-drain` (`After=` os
+    membros) via `agata.target`. **Fix:** (a) removida a linha `After=default.target` das 3;
+    (b) `[Install] WantedBy=default.target` → `agata.target` nas 3 (senão um `enable` futuro
+    re-arma o ciclo — footgun da lição 2). Drop-ins, `agata-drain`, `drenar.py` intocados.
+    **Verificado:** `systemd-analyze verify` rc 0; `reenable` → `default.target.wants/` sem
+    nada do Agata; **S7 PASS** (efeito plantado no WAL → dreno segura 25s, loga, não corta,
+    serviços param depois; restart → 6 ativos, 5 portas UP, 4060 56 MiB). LOG 02/09 ~22:10.
+    **Falta:** reboot real (o job de `default.target` só existe no boot) — Humano adiou,
+    "avaliar quando um reboot for necessário de qualquer forma".
 - **P7-02** hook Feral GameMode + `OLLAMA_KEEP_ALIVE` — PENDE do "vai" (`pacman -S gamemode`
-  + drop-in em `ollama.service`, ambos `sudo`).
+  + drop-in em `ollama.service`, ambos `sudo`). **Runbook pronto:** `redesign/tasks/P7-02-RUNBOOK.md`
+  (blocos `sudo` prontos + pré-checagens de 02/09 ~22:05: `gamemode` não instalado,
+  `ollama.service` sem `OLLAMA_KEEP_ALIVE`, `gamemode.ini.exemplo` já correto).
 - **P7-03** restic no HD + timer + **P-12 no `perimetro.sh`** + `cifrar_env.sh`:
   - **PREP FEITA sem o HD (chat 4):** `redesign/propostas/p12-backup-verificavel.diff` (P-12
     completo, `bash -n` + `git apply --check` + run do perímetro modificado = OK, P-12 dá

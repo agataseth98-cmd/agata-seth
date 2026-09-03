@@ -2700,3 +2700,62 @@ indício mas não substituem o boot (o job de `default.target` só existe no boo
 P7-02 (2 `sudo`), HD amanhã, régua P-12 (SILO-HUMANO H-1), Fase 8.
 
 **HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
+
+---
+
+## 2026-09-02 22:10 -03 (relógio da máquina) · sessão Claude (Claude Code, na Máquina — chat 5) · P7-01 fix endurecido + S7 PASS · P7-02 RUNBOOK · P7-03 diffs reconferidos
+
+O Humano: *"Pule o reboot, vamos avaliar quando um reboot real for necessário... seguiremos
+sem prazo... vamos até o final agora."* → segui o cronograma da Fase 7 no que dá sem o
+Humano ao teclado. Os 3 gates reais (2 `sudo`, HD, régua P-12) **continuam intransponíveis
+sozinho** — não os cruzei.
+
+**1. Fix de ordenação endurecido (o footgun da lição 2 estava re-armável).** As 3 unidades
+base ainda tinham `[Install] WantedBy=default.target`. Somado ao `[Install]` do drop-in
+`agata.conf` (`WantedBy=agata.target`), um `systemctl --user enable <unit>` futuro
+recriaria `default.target.wants/<unit>` e **o ciclo voltaria**. Alinhei a base ao drop-in:
+`WantedBy=agata.target` nas 3 (`openvino-whisper`, `openvino-embeddings`,
+`obsidian-ro-proxy`), com comentário. `daemon-reload` + `reenable` das 3 →
+`agata.target.wants/` tem os 6, `default.target.wants/` **sem nada do Agata** (só
+`agata.target`, `hermes-gateway`, `psd`). `systemd-analyze --user verify agata.target` rc 0.
+
+**2. S7 do fix de ordenação — PASS.** Plantei um `intent` sem `done` no
+`~/.cache/agata/grafo/eventos.ndjson` (`thread=P7-01-fix-S7 node=trabalhar passo=1
+chave=efeito-fake`) e `stop agata.target`. Journal:
+- 22:00:59.316 — `Stopping ... dreno do WAL` (agata-drain ExecStop começa).
+- 22:00:59.351 — `dreno: 1 efeito(s) em curso -- aguardando ate 25s`.
+- 22:01:24.359 — após **25s exatos**: `AVISO -- 1 efeito(s) ainda pendente(s)... NAO
+  cortados`, loga `thread=P7-01-fix-S7 ...`, sai 0.
+- 22:01:24.364 — `Stopped ... dreno`; **só então** os 5 serviços começam a parar.
+- 22:01:25.13 — todos parados, `omniroute` limpo (exit 143 via `SuccessExitStatus`).
+A ordem de shutdown do P7-01 (dreno **antes** dos serviços, sem cortar) sobreviveu à
+remoção do `After=default.target`. Limpei o `eventos.ndjson` (não existe, como no início) e
+`start agata.target` → 6 ativos, portas :20127/8/:20130/4/:27125 UP (embeddings `/health`
+200, modelo em `GPU.0`), 4060 em 56 MiB / 0 %. `git status` limpo.
+
+**3. `redesign/tasks/P7-02-RUNBOOK.md` (novo).** Blocos `sudo` prontos pra colar + as
+pré-checagens feitas agora: `gamemode` NÃO instalado; `~/.config/gamemode.ini` não existe
+(o `.exemplo` já está certo); `ollama.service` tem `override.conf` mas **sem**
+`OLLAMA_KEEP_ALIVE`. Método do `OLLAMA_KEEP_ALIVE` por arquivo (`install -Dm644
+/dev/stdin .../agata-keepalive.conf`), sem abrir editor, com verificação e rollback que
+preserva o `override.conf` de produção.
+
+**4. P7-03 `.diff` reconferidos.** `git apply --check` de `p12-backup-verificavel.diff` e
+`cifrar-env.diff` contra o HEAD atual: **ambos aplicam limpo** (`main` @ `4aa90bd`
+inalterado — sem rebase necessário).
+
+**Observação (não é meu, não toquei):** `openvino-embeddings` loga um aviso de tokenizer
+(`incorrect regex pattern` / `fix_mistral_regex`) da Fase 2 P2-03 — o modelo carrega e
+serve (`/health` 200); fica anotado pra Fase 2 revisitar se a qualidade de embedding pesar.
+
+**Não tocado:** `main`, canon, Hermes, Ollama de produção, hooks, `scripts/*`, os drop-ins
+`agata.conf`, `agata-drain.service`, `agata.target`, `drenar.py`. Sem `sudo`, nada
+instalado. Edits só em `~/.config/systemd/user/{openvino-whisper,openvino-embeddings,
+obsidian-ro-proxy}.service` (backup em `scratchpad/`) e em `redesign/`.
+
+**Estado da Fase 7:** P7-01 = FEITO + enable, regressão de boot corrigida e endurecida,
+S7 PASS. **Pende reboot real de confirmação** (o Humano adiou — decidiremos quando um
+reboot for necessário de qualquer forma). P7-02 = runbook pronto, aguarda os 2 `sudo` do
+Humano. P7-03 = aguarda o HD (amanhã) + régua P-12 (SILO-HUMANO H-1). Depois: Fase 8.
+
+**HEAD (redesign) no fim:** ver `git log -1 --oneline HEAD --` após o commit desta entrada.
