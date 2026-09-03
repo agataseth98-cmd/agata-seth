@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parent.parent
 PAT_OLD = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)')
 PAT_NEW = re.compile(r'^\([0-9]+\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO) — [0-9]{2}/[0-9]{2}/[0-9]{4}')
 PAT_MEM_OLD = re.compile(r'^### ([0-9]{4}-[0-9]{2}-[0-9]{2}) \(([0-9]+)\)')
-# Padrão ESTREITO: exatamente o que o gerador (.githooks/gerar-hermes-md.sh,
+# Padrão ESTREITO: exatamente o que o gerador (.githooks/gerar-hidratacao.sh,
 # gerar_indice()) reconhece hoje -- usado só pra testar fidelidade do índice
 # ao gerador (item 4 abaixo). Precisa ser mantido em sincronia manual com os
 # três `grep`/`awk` do gerador sempre que um rótulo novo for reconhecido lá
@@ -99,7 +99,7 @@ def testar_indice(indice_path: Path, memorias_path: Path) -> tuple[bool, list[st
             if n in so_no_largo:
                 rotulo = linha.split("—")[0].split(")", 1)[1].strip()
                 rotulos.append(f"({n}) rótulo '{rotulo}'")
-        falha(msgs, f"gerador (.githooks/gerar-hermes-md.sh, gerar_indice()) usa um padrão "
+        falha(msgs, f"gerador (.githooks/gerar-hidratacao.sh, gerar_indice()) usa um padrão "
                      f"estreito (DIÁRIO|CONSELHO|MOD) que NÃO reconhece {len(so_no_largo)} "
                      f"entrada(s) real(is) de MEMÓRIAS.md, por isso elas nunca chegam ao "
                      f"índice: {', '.join(sorted(rotulos))}. Achado real, pré-existente a "
@@ -157,7 +157,7 @@ def testar_indice(indice_path: Path, memorias_path: Path) -> tuple[bool, list[st
         ok(msgs, "toda linha do índice carrega um número de entrada buscável")
 
     # 4. o gerador continua sendo a fonte exclusiva -- regenera e diffa
-    gerador = REPO / ".githooks" / "gerar-hermes-md.sh"
+    gerador = REPO / ".githooks" / "gerar-hidratacao.sh"
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         # roda gerar_indice() isolado, reimplementando a extração aqui seria duplicação

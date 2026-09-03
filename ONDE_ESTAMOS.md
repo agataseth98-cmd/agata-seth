@@ -477,7 +477,7 @@ separados como pedido.**
 - `propostas/indice-palavras-chave.diff` — script novo
   `scripts/extrair_palavras_chave.py` (tokeniza, tira stopword,
   deduplica — grep, nunca embedding, decisão (115)) + hook
-  `.githooks/gerar-hermes-md.sh` gerando um índice PARALELO
+  `.githooks/gerar-hidratacao.sh` gerando um índice PARALELO
   (`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`) pra busca por assunto.
   **Achado real medindo antes de propor:** o índice com palavras-chave
   pesa 73% a mais que o puro (24K→41,5K chars) — embutir isso em

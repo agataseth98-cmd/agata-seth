@@ -43,7 +43,7 @@ else
   git diff --stat "$ANTES" "$DEPOIS"
 fi
 
-bash .githooks/gerar-hermes-md.sh
+bash .githooks/gerar-hidratacao.sh
 
 case "$ALVO" in
   MEMORIA) echo "  MEMÓRIAS.md reconciliado; topo reinjetado em .hidrata.md." ;;

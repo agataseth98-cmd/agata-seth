@@ -154,7 +154,7 @@ no contexto de nenhum modelo, só o que está no disco/repo.
 de MEMÓRIAS presentes no contexto de um modelo (desde (271): topo do
 corpo, logo após o marcador `ENTRADAS-NOVAS`; antes disso, fim físico).
 Mecanismo real hoje: `.hermes.md`
-único, gerado pelo hook pre-commit (`.githooks/gerar-hermes-md.sh`),
+único, gerado pelo hook pre-commit (`.githooks/gerar-hidratacao.sh`),
 injetado automaticamente no system prompt de sessões dentro do
 Hermes. Fora do Hermes, não há injeção automática -- a sessão precisa
 `carregar` (abaixo) pra chegar lá.

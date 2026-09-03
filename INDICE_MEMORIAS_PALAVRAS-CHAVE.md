@@ -1,4 +1,4 @@
-<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md -- não edite direto. -->
+<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md -- não edite direto. -->
 # Índice de MEMÓRIAS.md, com palavras-chave por entrada
 
 Mesmas entradas de INDICE_MEMORIAS.md, uma linha "  palavras-chave: ..." logo

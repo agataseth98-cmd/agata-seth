@@ -122,7 +122,7 @@ MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
 
 gerar_indice() {
   {
-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md — não edite direto. -->"
+    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md — não edite direto. -->"
     echo "# Índice de MEMÓRIAS.md"
     echo
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
@@ -266,7 +266,7 @@ checar_reconciliacao() {
 
 gerar_indice_palavras_chave() {
   {
-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
+    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
     echo "# Índice de MEMÓRIAS.md, com palavras-chave por entrada"
     echo
     echo "Mesmas entradas de INDICE_MEMORIAS.md, uma linha \"  palavras-chave: ...\" logo"
@@ -313,7 +313,7 @@ montar_hermes() {
   {
     echo "<!--"
     echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
-    echo "Gerado por .githooks/gerar-hermes-md.sh a partir de REGRAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
     echo "Para mudar o conteúdo, edite REGRAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
     echo "o hook pre-commit regenera este arquivo sozinho."
     if [ -n "$modelo" ]; then

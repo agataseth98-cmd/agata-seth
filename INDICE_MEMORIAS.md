@@ -1,4 +1,4 @@
-<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hermes-md.sh a partir de MEMÓRIAS.md — não edite direto. -->
+<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md — não edite direto. -->
 # Índice de MEMÓRIAS.md
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
