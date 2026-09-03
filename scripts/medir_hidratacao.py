@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mede bytes/chars/tokens por bloco de cabeçalho do .hermes.md.
+"""Mede bytes/chars/tokens por bloco de cabeçalho do .hidrata.md.
 
 Uso: python3 scripts/medir_hidratacao.py [--arquivo CAMINHO] [--saida CAMINHO]
 
@@ -24,7 +24,7 @@ from pathlib import Path
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 QWEN_MODEL = "qwen3.5-9b-64k:latest"
-QWEN_NUM_CTX = 65536  # ~/.hermes/config.yaml: model.context_length / ollama_num_ctx
+QWEN_NUM_CTX = 65536  # janela do modelo local (Modelfile -64k)
 
 
 def ollama_version() -> str:
@@ -78,7 +78,7 @@ def split_blocks(text: str) -> list[tuple[str, str]]:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arquivo", default=str(Path(__file__).resolve().parent.parent / ".hermes.md"))
+    ap.add_argument("--arquivo", default=str(Path(__file__).resolve().parent.parent / ".hidrata.md"))
     ap.add_argument("--saida", default=None)
     ap.add_argument("--pular-ollama", action="store_true", help="não chama o Ollama, marca tokens qwen como lacuna")
     args = ap.parse_args()
@@ -95,14 +95,14 @@ def main():
     ov = ollama_version()
 
     lines = []
-    lines.append("# Baseline de hidratação — .hermes.md")
+    lines.append("# Baseline de hidratação — .hidrata.md")
     lines.append("")
     lines.append("Gerado por `scripts/medir_hidratacao.py`. Comandos usados: ver rodapé.")
     lines.append("")
     lines.append("## Metodologia")
     lines.append("- **bytes**: `len(arquivo.read_bytes())` (UTF-8 no disco).")
     lines.append("- **chars**: `len(str)` em Python 3 = contagem de codepoints Unicode. "
-                  "Locale declarado: `LANG=pt_BR.UTF-8`. Verificado contra `LC_ALL=pt_BR.UTF-8 wc -m .hermes.md` "
+                  "Locale declarado: `LANG=pt_BR.UTF-8`. Verificado contra `LC_ALL=pt_BR.UTF-8 wc -m .hidrata.md` "
                   "no arquivo inteiro -- os dois bateram. Ressalva do Humano confirmada: `wc -m` em locale `C` "
                   "conta bytes, não chars (mesmo total que `wc -c`); esta medição usa UTF-8 explicitamente.")
     lines.append(f"- **tokens (qwen3.5-9b-64k)**: `prompt_eval_count` retornado por `POST {OLLAMA_URL}` "

@@ -19,7 +19,7 @@ de o paralelo provar o substituto = risco → parei aqui de propósito.
   (P6-03 já fez `flows/consolidacao.py`), mas o timer ainda aponta pro Hermes.
 - **P-9** (`perimetro.sh`) monitora `hermes-gateway.service`, `open-webui`, `kokoro-tts` —
   se desabilitar o gateway, ajustar o P-9 (senão vira AVISO permanente).
-- **`.hermes.md`** — hidratação primária hoje (`.githooks/gerar-hermes-md.sh`). No cutover
+- **`.hermes.md`** — hidratação primária hoje (`.githooks/gerar-hidratacao.sh`). No cutover
   vira referência; a hidratação do loop é `estado_para_eco.sh` + `query_canon`/`consulta.py`.
 
 ## Passos (quando P8-02 fechar + "vai")
