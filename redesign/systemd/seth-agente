@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Inicia a Seth para AGENTE/CÓDIGO (Goose no terminal). Hidratada pelo :20126.
+set -e
+systemctl --user start agata.target 2>/dev/null || true
+systemctl --user start seth-gateway.service
+# abre um terminal rodando goose (tenta os mais comuns do KDE/CachyOS)
+for T in konsole alacritty kitty gnome-terminal xterm; do
+  command -v "$T" >/dev/null || continue
+  case "$T" in
+    konsole)        exec "$T" -e bash -lc 'goose session' ;;
+    gnome-terminal) exec "$T" -- bash -lc 'goose session' ;;
+    *)              exec "$T" -e bash -lc 'goose session' ;;
+  esac
+done
+echo "nenhum terminal encontrado -- rode: goose session"

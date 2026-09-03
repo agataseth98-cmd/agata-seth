@@ -1,0 +1,14 @@
+[Unit]
+Description=Agata -- seth_gateway: reidrata a Seth antes do OmniRoute (:20126)
+After=omniroute-sanitizer.service
+Requires=omniroute-sanitizer.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
+Environment=SETH_HIDRATA_MODO=compacto
+Restart=on-failure
+RestartSec=3
+
+# Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user start
+# seth-gateway`), nao no boot. Mesma logica do llamacpp-agata / agata-warmup.
