@@ -71,3 +71,9 @@ redesign/grafo/paralelo-runs/
 /timeline.md
 /_LEIA.md
 /moc-*.md
+
+# Nota Diaria do Obsidian (plugin nativo daily-notes, ligado neste vault) --
+# nasce vazia na raiz quando aberta/criada, e' pessoal/de rascunho, nunca
+# canon. Repositorio e' PUBLICO -- sem isto, um "git add -A" descuidado
+# publicaria uma nota pessoal por acidente (achado 04/09, 2026-09-04.md).
+/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md

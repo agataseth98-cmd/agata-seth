@@ -5,7 +5,23 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (auditei um relatório de fora e achei um vazamento de segredo real — já corrigido)
+## Onde estamos agora — 04/09/2026 (o anel de pontos soltos no grafo: quase tudo é o app desatualizado + uma nota diária inofensiva)
+
+**Você mandou outra captura do grafo, com um anel de pontos ainda soltos.**
+Conferi contra o disco de verdade: a lacuna real hoje é de **1 arquivo**, não
+dezenas — o resto que ainda aparece solto na sua tela é o Obsidian com a
+visão desatualizada (a mesma coisa de mais cedo: eu regenero o mapa inteiro
+a cada mudança, e o app às vezes demora a perceber). **Recarregar o
+Obsidian deve resolver a maior parte do que você está vendo.**
+
+**O único arquivo novo de verdade:** o Obsidian tem um recurso próprio,
+"Nota Diária", que cria uma nota vazia com a data de hoje sozinho, sem
+avisar. Não é bug — é o app fazendo o que promete. Mas achei um problema
+pequeno de segurança nisso: diferente das outras sobras que eu já tinha
+blindado, essa não estava protegida contra ser publicada por acidente — e
+seu repositório é público. Corrigi: agora está protegida, igual às outras.
+
+## Antes disso — 04/09/2026 (auditei um relatório de fora e achei um vazamento de segredo real — já corrigido)
 
 **Você colou um relatório de auditoria de outra IA (gpt-5.6-terra) e pediu
 pra eu conferir.** Conferi cada afirmação contra o sistema de verdade, não
