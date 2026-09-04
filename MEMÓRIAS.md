@@ -22,6 +22,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
+
+**Fato.** Na telinha do LibreChat, a Seth só usa a tool `query_canon` quando a conversa roda pelo **agente salvo** ("Seth", `agent_0Kdj6GbqpUe2rgKRIFmvk`, endpoint `agents`) **com `model_parameters.disableStreaming: true`**. Pelo agente **efêmero** (endpoint "Seth" + modelo + MCP ligado no menu "+") a tool aparece como "Cancelado" e a resposta volta vazia (`error:false`, `unfinished:false`, `text:""`).
+
+**Causa-raiz** (verificada na Máquina com um dump temporário no `seth_gateway`, já revertido): o OmniRoute entrega o `function.arguments` da tool-call no **mesmo chunk SSE** que o `finish_reason:"tool_calls"`. O parser de streaming do LibreChat v0.8.7 finaliza a tool ao ver o `finish_reason` e **descarta os `arguments` desse chunk** → `args:""` → chamada inválida. O caminho **não-streaming** devolve o `tool_call` inteiro (`{"doc":"MEMÓRIAS", ...}`) — confirmado por `curl` no `:20126` e no fluxo real. O agente efêmero não carrega `model_parameters`, por isso nele o `disableStreaming` não tem onde morar.
+
+**Correção (só config, zero código):**
+- `~/librechat/.env`: `ENDPOINTS=custom` → `ENDPOINTS=custom,agents` (habilita o endpoint Agents).
+- Agente salvo "Seth": `disableStreaming: true` (fixado pela UI, versão 5, 13:07). Tools ligadas: `query_canon`, `vault_consultar` (as de escrita `memoria_acrescentar`/`diario_anotar` deixadas de fora — Seth em R0 por (315), ligar em passo consciente).
+
+**Verificação real:** conversa em `agent_0Kdj…`, `stream:false` no pedido capturado; a Seth chamou `query_canon` 2× com args reais (`{"doc":"MEMÓRIAS","linhas":"1-20"}`, depois `{"doc":"MEMÓRIAS","grep":"\\(314\\)","contexto":2}`) e respondeu o título correto de (314) pela Regra 1.
+
+**Reversível:** tirar `,agents` do `.env` + `disableStreaming` do agente. Backups: `~/librechat/librechat.yaml.bak-20260904-1230`, `~/librechat/.env.bak-20260904`. Espinha intocada (gateway/sanitizador/OmniRoute/canon-mcp); o dump de diagnóstico no `seth_gateway.py` foi desfeito com `git checkout`.
+
+**Aberto:** `DEBUG_LOGGING=true` ainda no `~/librechat/.env` (temporário, remover); opção de pinar `disableStreaming` de forma versionada via `modelSpecs` no `librechat.yaml`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: dump do `seth_gateway` (`/tmp/seth-last-req.json` + `-resp.txt`, apagados); `curl` streaming vs não-streaming no `:20126`; `mongosh` em `LibreChat.agents`/`.messages`/`.conversations`; `grep` no bundle do client (`disableStreaming`, `com_endpoint_disable_streaming_label`). Autorização: Humano, nesta sessão, regime de exceção — "vai". Turno desta sessão: t≈15 (contado no contexto).
+
 (315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
 
 **Decisão do Humano** (03–04/09/2026), depois de eu (Claude-na-Máquina) ter proposto cortar o acesso da Seth para só-leitura + escrita-append, na sequência de duas tentativas dela — turnos desta sessão, não commitadas — de redigir a (315) anterior com saída de ferramenta **confabulada** (JSON que a tool `canon-mcp` não emite; títulos de entrada e conteúdo de `INICIO.md` inventados), as duas retidas pela Camada C ao rodar as mesmas consultas na Máquina.

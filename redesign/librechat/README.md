@@ -110,6 +110,13 @@ que o container ja tem). Le o vault do Agata pelo proxy read-only `:27125`
   + denylist de sufixos de segredo (`.secret .token .pass .key .gpg .env .pem`) + sem `..`.
 - `SETH_ESCRIBA` (default `http://127.0.0.1:20140`) -- onde as tools de escrita batem.
 
+**Uso obrigatorio pela Seth:** a tool `query_canon` SO FUNCIONA pela lane de **agente
+SALVO** ("Seth", endpoint `agents`) com **`disableStreaming: true`** nos parametros do
+modelo. Pelo agente efemero (endpoint + modelo + MCP no menu "+") a tool volta "Cancelado"
+— bug de parser de stream: os `arguments` da tool-call chegam no mesmo chunk SSE que o
+`finish_reason`, e o LibreChat v0.8.7 descarta esse chunk ao fechar a tool. Ver
+MEMORIAS (316).
+
 ### seth_escriba (:20140) -- canal de escrita append-only da Seth
 
 `redesign/router/seth_escriba.py`, unit `seth-escriba.service` (sob demanda,
