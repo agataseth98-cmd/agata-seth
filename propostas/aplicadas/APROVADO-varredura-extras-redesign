@@ -1,0 +1,5 @@
+Autorização explícita do Humano, 04/09/2026: "mova o que for coerente para extras" --
+mandato direto pra varredura do vault. Este .diff é a única mudança de COMPORTAMENTO
+gerada pela varredura (correção de um comentário/docstring apontando pro caminho antigo
+de um arquivo movido) -- os outros 50 arquivos movidos são .md fora da quarentena P-8.
+Sessão Claude Code na Máquina, mesmo critério de MEMÓRIAS (318)/(319).

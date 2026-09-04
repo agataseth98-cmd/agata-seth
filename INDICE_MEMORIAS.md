@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + achado próprio: buraco no P-8 sobre redesign/router — 6 correções aplicadas, autoaprovação sob ordem explícita
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
 (292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
-(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
+(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + …
 (289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidia …
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o s …
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM in …

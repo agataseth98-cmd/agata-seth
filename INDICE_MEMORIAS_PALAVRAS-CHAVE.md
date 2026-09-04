@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
+  palavras-chave: varredura, pedida, humano, documentos, históricos, redesenho, movidos, pra, extras, arquivo, redesign
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
   palavras-chave: kokoro, dora, inicio, obsidian, era, artefato, órfão, moc, descoberta, pros, documentos, soltos, bugfix, próprio, testado
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + achado próprio: buraco no P-8 sobre redesign/router — 6 correções aplicadas, autoaprovação sob ordem explícita
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: uso, vault, seth, passa, disponível, estimulado, cirúrgico, linha, projeto, item, checagem, prontidão, regras
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: ponteiro em PROJETO.md ("Memória e hidratação"); acesso já disponível (skill não desabilitada, cwd = repo)
   palavras-chave: seth, passa, navegar, vault, obsidian, priori, ponteiro, projeto, memória, hidratação, acesso, disponível, skill, desabilitada, cwd, repo
-(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + regras + PROJETO + canônicos + scripts + controles + propostas) representado e religado; regenerado no post-commit
-  palavras-chave: vault, obsidian, completo, sistema, entradas, regras, projeto, canônicos, scripts, controles, propostas, representado, religado, regenerado, post, commit
+(290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + …
+  palavras-chave: vault, obsidian, completo, sistema, entradas
 (289) DIÁRIO — 27/08/2026 · scripts/gerar_obsidian.py: camada de leitura Obsidia …
   palavras-chave: scripts, gerar, obsidian, camada, leitura, obsidia
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o s …

@@ -22,6 +22,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
+
+**Pedido do Humano, continuação de (319):** "mova o que for coerente para extras."
+
+**Método.** Sobre os ~121 documentos que o MOC novo de (319) tornou achável, separei o que é história fechada do que ainda é referência viva, checando referência real antes de mover cada categoria — não só grep em `.md` (que não quebra por mover), mas em `.py`/`.mjs`/`.yaml` e nos três canônicos, onde uma path errada quebraria de verdade.
+
+**Movidos (50 arquivos, `git mv`, conteúdo intocado — só `README.md` novo, ver abaixo):**
+- `redesign/tasks/P0-*.md` … `P8-*.md` (42) — especificação de cada tarefa das 9 fases, todas fechadas desde o merge de (310)/(311).
+- `redesign/REIDRATACAO-chat-{3,4,6}.md` (3) — handoffs de sessões do redesenho já encerradas.
+- `redesign/AUDITORIA-01.md` (1) — auditoria pontual de uma rodada da Fase 8, achados já incorporados.
+- `redesign/CONSELHO-0{1,2,3}-*.md` (3) — logs de consultas pontuais ao Conselho Remoto durante o redesenho.
+- `redesign/RUNBOOK-fase0-HD.md` (1) — runbook da Fase 0, fechada há muito.
+
+Destino: `extras/arquivo-redesign/` (+ `tasks/` pros 42), com `README.md` novo explicando o que é e por que saiu — mesmo padrão de `extras/arquivo-hermes/README.md`.
+
+**Checados e mantidos no lugar, por referência viva real** (não é lista exaustiva dos ~70 que ficaram, só os que quase entraram): `OTIMIZACOES.md` e `SILO-HUMANO.md` — abertos, decisões pendentes do Humano, não histórico ("nada aqui foi aplicado, exceto o que está ✅ FEITO" / "onde uma decisão que é do Humano espera"); `PESQUISA.md` — citado por `redesign/grafo/adapters/dsh.py` como referência de motivo pro adapter `dsh` (dormente, não removido); `redesign/ROADMAP.md`, `STATUS.md`, `LOG.md`, `CONTINUIDADE.md`, `CLAUDE-NA-MAQUINA.md`, `ANCORA.md`, `ACESSO-GRADUADO.md`, `CANON-DELTA.md` — o "pacote de 4 refs" de retomada + doutrina ativa + roadmap, citados por `redesign/librechat/canon-mcp.mjs` (CANON dict) e por `redesign/CONTINUIDADE.md`.
+
+**Achado colateral, não corrigido aqui (fora de escopo do pedido):** `redesign/librechat/canon-mcp.mjs` mapeia a chave `ROADMAP` pra `"ROADMAP.md"` (raiz) no dict `CANON` — mas o arquivo real é `redesign/ROADMAP.md`; a chave nunca resolveria. Bug pré-existente, não introduzido nem agravado por esta varredura. Fica registrado pra quem for mexer em `canon-mcp.mjs` de novo.
+
+**Único ajuste de comportamento:** um comentário/docstring em `redesign/mcp/servidor.py` apontava `redesign/tasks/P0-02-*.md` — atualizado pro novo caminho no mesmo commit. Único item sob quarentena P-8 desta entrada (os 50 `.md` movidos não são script/config/canon); par `.diff`/`APROVADO-` em `propostas/aplicadas/varredura-extras-redesign`, autorização explícita do Humano ("mova o que for coerente"), mesmo critério de (318)/(319).
+
+**Efeito colateral do próprio processo, registrado:** rodei `gerar_obsidian.py` manualmente contra a árvore de trabalho (ainda não commitada) pra conferir o resultado antes de commitar — isso deixou `memoria/obsidian/` no disco refletindo estado que `HEAD` ainda não tinha, e o P-10 (que compara disco contra `HEAD`) acusou SUSPEITO corretamente. Não era bug no gerador desta vez — era a ordem em que eu testei. Resolvido apagando o vault gerado (gitignorado, sem custo) antes do commit; o `post-commit` recria do zero a partir do `HEAD` novo.
+
+**Verificação final:** `bash scripts/perimetro.sh` → 10 OK · 1 SKIP (P-10, vault ainda não existe até o post-commit) · 1 PARCIAL (P-4, sem sudo) · 0 FALHA antes do commit; reconferido OK real depois do push.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -rl` contra `.py`/`.mjs`/`.yaml`/`REGRAS.md`/`PROJETO.md`/`PROJETO_REFERENCIA.md` pra achar referência real antes de mover cada categoria; leitura de `OTIMIZACOES.md`/`SILO-HUMANO.md`/`dsh.py`/`canon-mcp.mjs` pra decidir o que NÃO mover; `git mv` (histórico preservado) pros 50 arquivos; `git status`/`bash scripts/perimetro.sh` repetido a cada passo. Autorização: Humano, "mova o que for coerente para extras", nesta sessão. Turno desta sessão: t≈61 (contado no contexto).
+
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
 
 **Contexto.** Mesma sessão de (318), continuação na Máquina. Três pedidos do Humano: voz `pf_dora` (pt-BR) faltando no seletor do LibreChat; HD `AgataBkup01` reconectado; "o Início permanece vazio... muitas notas soltas, precisamos fazer uma varredura e tornar tudo consiso e coerente" no vault Obsidian.

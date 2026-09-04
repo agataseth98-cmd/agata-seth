@@ -5,7 +5,7 @@ Expõe as verificações determinísticas READ-ONLY do sistema como tools MCP, p
 que qualquer executor — sessão Claude, Codex, Qwen Coder, Goose, humano — dirija a
 camada de verificação de forma idêntica. É a cola do handoff.
 
-Invariantes (ver redesign/README.md e redesign/tasks/P0-02-*.md):
+Invariantes (ver redesign/README.md e extras/arquivo-redesign/tasks/P0-02-*.md):
 - NENHUMA tool escreve no workspace nem no canon. "read-only" aqui = sem escrita em
   arquivo rastreado / MEMÓRIAS / índice, NÃO "zero escrita no filesystem": git_sync
   faz `git fetch`, que atualiza metadados em .git/ (refs de rastreio, FETCH_HEAD,

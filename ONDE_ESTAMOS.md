@@ -5,7 +5,31 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (voz em português + o vault do Obsidian ficou navegável)
+## Onde estamos agora — 04/09/2026 (varredura: 50 documentos antigos do redesenho arquivados)
+
+**Você pediu: "mova o que for coerente para extras."**
+
+Movi 50 documentos do redesenho do sistema que já cumpriram seu papel — as
+42 especificações de tarefa das fases (todas fechadas), 3 prompts de
+retomada de sessões que já terminaram, 1 auditoria pontual já incorporada,
+3 registros de consulta ao Conselho Remoto, 1 runbook de uma fase antiga —
+pra uma pasta nova, `extras/arquivo-redesign/`, com uma explicação de cada
+grupo. Nenhum conteúdo mudou, só o endereço.
+
+**O que eu NÃO movi, de propósito, porque ainda está em uso:** dois
+documentos de decisões que continuam esperando você (`OTIMIZACOES.md`,
+`SILO-HUMANO.md`), um que outra parte do sistema ainda cita como referência
+(`PESQUISA.md`), e o roteiro/registro principal do redesenho (`ROADMAP.md`,
+`STATUS.md`, `LOG.md` e mais alguns). Só arquivei o que já não tem mais
+função ativa.
+
+**Achado no caminho, não mexido:** um arquivo do sistema (`canon-mcp.mjs`)
+tem uma referência a `ROADMAP.md` que já estava apontando pro lugar errado
+antes de eu mexer em qualquer coisa — não sou eu quebrando, é um erro antigo
+que passou despercebido. Registrado pra quando alguém for arrumar aquele
+arquivo.
+
+## Antes disso — 04/09/2026 (voz em português + o vault do Obsidian ficou navegável)
 
 **Você pediu três coisas: a voz em português (pf_dora) que sumiu do Kokoro, reconferir
 o backup depois de reconectar o HD, e arrumar o Obsidian — a página inicial parecia
