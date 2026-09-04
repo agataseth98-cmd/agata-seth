@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
+  palavras-chave: causa, real, readmes, órfãos, grafo, memoria, missoes, git, separado, invisível, pro, gerador, missões, ligadas, exceto, segunda, camada, venv, apagado, arquivos, pessoais, era, hermes, apagados
 (324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsidian-skills oficial instalado + memorias.base criado · busca semântica segue recusada, com o porquê explicado
   palavras-chave: estado, arte, obsidian, llm, pesquisado, skills, oficial, instalado, memorias, base, criado, busca, semântica, segue, recusada, porquê, explicado
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO.md de (319), agora em timeline.md · READMEs viram wikilink de verdade
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, projeto, documenta, fronteira, real, subir, esfera, allowlist, plano, qwen, existe
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
   palavras-chave: fase, decidida, proposta, avança, camada, consulta, sob, demanda, canon, público, ponte, pro, drive
-(295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
-  palavras-chave: gerador, vault, ganha, nota, gap, aplicado, sob
+(295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293) …
+  palavras-chave: gerador, vault, ganha, nota, gap
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo …
   palavras-chave: carimbo, arvore, suja, contava, arquivo
 (293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de com …

@@ -5,7 +5,35 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (pesquisei o estado da arte 2026 de Obsidian+IA — instalei o que ajuda, expliquei o que não mexi)
+## Onde estamos agora — 04/09/2026 (achei por que tantos READMEs apareciam soltos no grafo — e limpei)
+
+**Você mandou uma captura de tela do grafo do Obsidian perguntando por que
+tantos pontos apareciam soltos, sem ligação com nada.**
+
+**Causa real:** o Obsidian olha **todo arquivo** dentro da pasta do sistema,
+não só o que o `git` principal controla. E dentro de `memoria/missoes/`
+(uma área separada, com histórico próprio, criada de propósito pra ficar
+fora do sistema principal) tinha sobrado um ambiente de teste de
+programação **de 176MB**, de um experimento fechado há duas semanas, cheio
+de manuais de bibliotecas de terceiros — isso sozinho era a maioria dos
+pontos soltos que você via. **Apaguei.**
+
+**Os arquivos de verdade dessa área** (uns 20 — relatórios de missões
+antigas, todos já fechados) eu li e resumi pra você antes de mexer.
+Você decidiu juntar tudo no mapa principal — feito, com uma exceção que
+achei que fazia sentido manter: a pasta mais pessoal de todas
+(`segunda-camada`) continua de fora, porque o próprio sistema já tinha
+essa regra escrita antes de hoje ("modelos que rodam na nuvem não veem
+essa pasta") — e eu rodo na nuvem, mesmo trabalhando na sua máquina. Se
+você quis dizer literalmente tudo mesmo com essa pasta incluída, é só
+avisar.
+
+**Os dois arquivos pessoais que você pediu pra apagar** — mensagens antigas
+de uma versão anterior do sistema (antes do Hermes ser removido) — foram
+apagados como pedido. Nenhum dos dois tinha cópia de segurança em lugar
+nenhum, então essa apagada é definitiva.
+
+## Antes disso — 04/09/2026 (pesquisei o estado da arte 2026 de Obsidian+IA — instalei o que ajuda, expliquei o que não mexi)
 
 **Você pediu pra deixar o Obsidian no estado da arte de 2026, e depois
 perguntou por que a busca "semântica" (a que a maioria dos tutoriais de

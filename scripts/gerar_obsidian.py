@@ -238,7 +238,7 @@ def main():
     # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
     try:
         todos_md = sorted(subprocess.run(
-            ["git", "-C", REPO, "ls-files", "*.md"],
+            ["git", "-c", "core.quotepath=false", "-C", REPO, "ls-files", "*.md"],
             capture_output=True, text=True, check=True).stdout.splitlines())
     except Exception:
         # Sem .git -- só acontece na sandbox do P-10 (checkout de `git archive`,
@@ -604,6 +604,52 @@ def main():
             L.append("")
     escrever("moc-readmes.md", L)
 
+    # -------- moc-missoes.md -- Humano pediu "juntar tudo no grafo" (04/09/2026).
+    # memoria/missoes/ é um repositório git PRÓPRIO, sem remote -- git ls-files
+    # do repo principal nunca o vê; por isso os arquivos daqui ficavam órfãos
+    # no grafo do Obsidian mesmo com o resto do vault linkado. Descoberto via
+    # `git -C memoria/missoes ls-files`, não `os.walk` -- mesma disciplina do
+    # resto do gerador (fonte é o git, não o disco cru).
+    # EXCEÇÃO deliberada: `segunda-camada/` fica de fora -- é a esfera PESSOAL
+    # (mais estrita que a esfera do projeto), e PROJETO.md diz "modelos em
+    # nuvem não veem". Linkar no grafo principal reduziria essa fronteira
+    # justamente pro tipo de sessão (nuvem) que ela existe pra excluir.
+    MISSOES_DIR = os.path.join(REPO, "memoria", "missoes")
+    missoes_md = []
+    if os.path.isdir(MISSOES_DIR):
+        try:
+            saida_git = subprocess.run(
+                ["git", "-c", "core.quotepath=false", "-C", MISSOES_DIR, "ls-files", "*.md"],
+                capture_output=True, text=True, check=True).stdout
+            missoes_md = sorted(
+                p for p in saida_git.splitlines()
+                if not p.startswith("segunda-camada/"))
+        except Exception:
+            missoes_md = []
+    if missoes_md:
+        grupos_missoes = {}
+        for p in missoes_md:
+            partes = p.split("/")
+            chave = partes[0] if len(partes) > 1 else "(raiz de missoes/)"
+            grupos_missoes.setdefault(chave, []).append(p)
+        L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+        L += [f"# MOC — missões ({len(missoes_md)})", "",
+              "> [!warning] `memoria/missoes/` é git próprio, sem remote, "
+              "**gitignorado do repo principal por desenho** (MEMÓRIAS 91/92) "
+              "— nunca sobe pro GitHub público. Linkado aqui por pedido do "
+              "Humano (04/09/2026); continua fora da hidratação automática "
+              "(`.hidrata.md`) — achável, não empurrado. `segunda-camada/` "
+              "(esfera pessoal, mais estrita) fica de fora de propósito: "
+              "PROJETO.md, \"modelos em nuvem não veem\".", ""]
+        for chave in sorted(grupos_missoes):
+            L.append(f"## {chave} ({len(grupos_missoes[chave])})")
+            for p in sorted(grupos_missoes[chave]):
+                caminho_vault = f"memoria/missoes/{p}"
+                L.append(f"- {wikilink_arquivo(caminho_vault, p)}")
+            L.append("")
+        escrever("moc-missoes.md", L)
+        NOTAS.add("moc-missoes")
+
     # -------- painel de estado
     onde = ler(os.path.join(REPO, "ONDE_ESTAMOS.md")) or ""
     m_ult = re.search(r"## Última atualização\n(.+?)(?:\n##|\Z)", onde, re.S)
@@ -690,7 +736,8 @@ def main():
         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
-        f"{link('moc-redesign','Documentos do repositório')}", "",
+        f"{link('moc-redesign','Documentos do repositório')}  ·  "
+        f"{link('moc-missoes','Missões (memoria/missoes/)')}", "",
         "## Como ler o grafo",
         "Cada entrada de MEMÓRIAS é um nó; `(n)` no texto virou aresta. Regras, "
         "scripts, controles e propostas também são nós, ligados pelas entradas que os "

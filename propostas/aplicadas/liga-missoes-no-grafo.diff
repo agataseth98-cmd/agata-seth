@@ -1,0 +1,89 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index af25bff..6a579b6 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -98,7 +98,7 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   saiu (03/09/2026) e o LibreChat foi implantado **sem** RAG por embedding de propósito
+   (`rag_api`/`pgvector` não subidos) — respeita MEMÓRIAS (115)/(293). Janela grande hoje vem
+   do modelo (`auto/*` do OmniRoute), não de recorte por vetor.
+-- **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
++- **`memoria/missoes/` (renomeado de `memoria/projetos/` em 12/08/2026) é um quarto pilar, LOCAL por desenho.** Um arquivo editável por missão, mais `INDICE.md`. Repositório git próprio, sem remote — gitignorado do repo principal (`.gitignore` cobre `*.bundle` em qualquer lugar da árvore, não só a pasta — endurecido depois de um bundle quase vazar um nível acima, MEMÓRIAS (97)/(98)), nunca público, nunca em hidratação. Pesquisado sob demanda por qualquer modelo com acesso à Máquina, não injetado automaticamente. **Desde 04/09/2026 (MEMÓRIAS 325), achável pelo grafo do Obsidian** — `memoria/obsidian/moc-missoes.md`, linkado do `INICIO.md`, lista os arquivos de `memoria/missoes/` (exceto `segunda-camada/`, ver abaixo) como wikilink pro arquivo real. Isso muda achabilidade, não a fronteira: continua fora de `.hidrata.md` (não é empurrado a nenhum modelo), continua gitignorado do repo principal, continua nunca público. `segunda-camada/` (esfera pessoal, "Memória em duas camadas" abaixo) fica de fora do MOC de propósito — "modelos em nuvem não veem" é mais estrito que "sob demanda". Propósito próximo do bg-review desligado, mecanismo distinto em três pontos nomeados — ver `INDICE.md` local e MEMÓRIAS (91)-(95). Ordem do Humano.
+ - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`) — sincronizar contra ele no início de toda sessão, não só na primeira. Achado recorrente com sessões autônomas na nuvem (sem Humano revisando cada resposta): a sincronização falha silenciosamente com frequência — não presuma feita, verifique.
+ - **Fonte canônica (URLs) e atualização:** `https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/{REGRAS,PROJETO,MEMÓRIAS}.md`. Primeira sessão: o Humano envia os 3. Depois: o modelo busca das URLs, seguindo a ordem de verificação de REGRAS.md. `atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>` = git pull + regenerar hidratação. Nunca sobrescreve história; conflito → para e avisa.
+   **Caveat medido, MEMÓRIAS (156):** `raw.githubusercontent.com` é servido por CDN (Fastly) e pode ficar em cache por alguns minutos após um push, mesmo com cache-busting na query string — confirmado ao vivo, ~1-2 min de defasagem. `git ls-remote`/`git ls-tree` (na Máquina) não sofrem disso, por isso são o método 1 em "Verificação de canônico", superior ao raw. Uma sessão só-HTTP (sem Máquina) verificando *logo depois* de um push pode pegar conteúdo stale sem ter como saber — não é falha de sincronização do modelo, é da fonte.
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 6b77e05..dd277da 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -238,7 +238,7 @@ def main():
+     # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
+     try:
+         todos_md = sorted(subprocess.run(
+-            ["git", "-C", REPO, "ls-files", "*.md"],
++            ["git", "-c", "core.quotepath=false", "-C", REPO, "ls-files", "*.md"],
+             capture_output=True, text=True, check=True).stdout.splitlines())
+     except Exception:
+         # Sem .git -- só acontece na sandbox do P-10 (checkout de `git archive`,
+@@ -604,6 +604,52 @@ def main():
+             L.append("")
+     escrever("moc-readmes.md", L)
+ 
++    # -------- moc-missoes.md -- Humano pediu "juntar tudo no grafo" (04/09/2026).
++    # memoria/missoes/ é um repositório git PRÓPRIO, sem remote -- git ls-files
++    # do repo principal nunca o vê; por isso os arquivos daqui ficavam órfãos
++    # no grafo do Obsidian mesmo com o resto do vault linkado. Descoberto via
++    # `git -C memoria/missoes ls-files`, não `os.walk` -- mesma disciplina do
++    # resto do gerador (fonte é o git, não o disco cru).
++    # EXCEÇÃO deliberada: `segunda-camada/` fica de fora -- é a esfera PESSOAL
++    # (mais estrita que a esfera do projeto), e PROJETO.md diz "modelos em
++    # nuvem não veem". Linkar no grafo principal reduziria essa fronteira
++    # justamente pro tipo de sessão (nuvem) que ela existe pra excluir.
++    MISSOES_DIR = os.path.join(REPO, "memoria", "missoes")
++    missoes_md = []
++    if os.path.isdir(MISSOES_DIR):
++        try:
++            saida_git = subprocess.run(
++                ["git", "-c", "core.quotepath=false", "-C", MISSOES_DIR, "ls-files", "*.md"],
++                capture_output=True, text=True, check=True).stdout
++            missoes_md = sorted(
++                p for p in saida_git.splitlines()
++                if not p.startswith("segunda-camada/"))
++        except Exception:
++            missoes_md = []
++    if missoes_md:
++        grupos_missoes = {}
++        for p in missoes_md:
++            partes = p.split("/")
++            chave = partes[0] if len(partes) > 1 else "(raiz de missoes/)"
++            grupos_missoes.setdefault(chave, []).append(p)
++        L = fm({"tipo-nota": "moc", "tags": "[moc]"})
++        L += [f"# MOC — missões ({len(missoes_md)})", "",
++              "> [!warning] `memoria/missoes/` é git próprio, sem remote, "
++              "**gitignorado do repo principal por desenho** (MEMÓRIAS 91/92) "
++              "— nunca sobe pro GitHub público. Linkado aqui por pedido do "
++              "Humano (04/09/2026); continua fora da hidratação automática "
++              "(`.hidrata.md`) — achável, não empurrado. `segunda-camada/` "
++              "(esfera pessoal, mais estrita) fica de fora de propósito: "
++              "PROJETO.md, \"modelos em nuvem não veem\".", ""]
++        for chave in sorted(grupos_missoes):
++            L.append(f"## {chave} ({len(grupos_missoes[chave])})")
++            for p in sorted(grupos_missoes[chave]):
++                caminho_vault = f"memoria/missoes/{p}"
++                L.append(f"- {wikilink_arquivo(caminho_vault, p)}")
++            L.append("")
++        escrever("moc-missoes.md", L)
++        NOTAS.add("moc-missoes")
++
+     # -------- painel de estado
+     onde = ler(os.path.join(REPO, "ONDE_ESTAMOS.md")) or ""
+     m_ult = re.search(r"## Última atualização\n(.+?)(?:\n##|\Z)", onde, re.S)
+@@ -690,7 +736,8 @@ def main():
+         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
+         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
+         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
+-        f"{link('moc-redesign','Documentos do repositório')}", "",
++        f"{link('moc-redesign','Documentos do repositório')}  ·  "
++        f"{link('moc-missoes','Missões (memoria/missoes/)')}", "",
+         "## Como ler o grafo",
+         "Cada entrada de MEMÓRIAS é um nó; `(n)` no texto virou aresta. Regras, "
+         "scripts, controles e propostas também são nós, ligados pelas entradas que os "
