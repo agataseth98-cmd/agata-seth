@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
+  palavras-chave: sincronização, pedida, humano, drift, real, achado, derivados, hidratação, projeto, citar, resolvido, autorização, direta, assumo, risco
 (332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
   palavras-chave: errou, guarda, utf, hidratacao, pendente, aprovada, aplicada, mesmo, dia, desta, auditoria, começar
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: bloco, silos, modelo, aplicado, emenda, camada
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
   palavras-chave: fase, preparada, roteiro, dossiê, item, religado, backup, drenado, correção, autorização, total, risco, assumido
-(303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
-  palavras-chave: fase, sob, risco, assumido, costuras, projeto, regras, ledger, assumo, fecha
+(303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/R …
+  palavras-chave: fase, sob, risco, assumido, costuras, projeto
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era …
   palavras-chave: prompt, carregamento, detector, âncora, velha, era
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a …

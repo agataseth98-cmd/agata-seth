@@ -5,6 +5,21 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 04/09/2026 (você pediu pra sincronizar — achei e corrigi um problema real nos arquivos gerados, com sua autorização)
+
+**Você pediu "sincronizar sistema agata seth".** Rodei o script oficial de sincronização — ele só confere e avisa, nunca publica sozinho. Resultado: o computador já estava em dia com o GitHub, sem nada pendente lá.
+
+**Mas achei um problema real do lado de dentro.** Três arquivos que o sistema gera automaticamente a partir da história (`.hidrata.md` e os dois índices) estavam com uma cópia antiga e incompleta — faltavam dezenas de entradas recentes. Não sei ainda **o quê** causou isso; não inventei uma explicação, só registrei o achado. Como esses arquivos são só um "espelho" gerado da história de verdade (que estava correta), regenerá-los de novo foi seguro — sem risco, sem precisar da sua aprovação, porque não muda nada que você já não tivesse aprovado antes.
+
+**Um segundo achado, esse sim eu te perguntei antes de mexer:** o gerador também avisou que a documentação do estado atual (`PROJETO.md`) estava desatualizada — faltava mencionar 10 coisas que aconteceram hoje (limpeza do cofre de notas, uma ferramenta de busca nova, uma correção de segurança real). Você respondeu "pode resolver essa pendência, eu assumo o risco", e eu atualizei o documento com um resumo de cada uma dessas 10 coisas.
+
+**Como você confere sozinho, se quiser:**
+| O que | Comando | O que esperar |
+|---|---|---|
+| Sincronizado com o GitHub | `cd ~/agata && git status` | "Your branch is up to date with 'origin/main'." |
+| Nada quebrado no sistema | `bash scripts/perimetro.sh \| tail -3` | linha final com "0 FALHA" |
+| A pendência de citação sumiu | `bash .githooks/gerar-hidratacao.sh` | não deve imprimir nenhum "aviso reconciliação" |
+
 ## Onde estamos agora — 04/09/2026 (correção: o item que eu tinha marcado como "pendente de sua aprovação" já estava fechado)
 
 **Você pediu pra eu aprovar o item que eu mesmo deixei em aberto na auditoria
