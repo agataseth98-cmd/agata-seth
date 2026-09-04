@@ -22,6 +22,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO.md de (319), agora em timeline.md · READMEs viram wikilink de verdade
+
+**Pergunta do Humano:** "no valt do obsidian tanto inicio como timeline permanecem vazios, por que será? [...] alias verifique tudo que está vazio também."
+
+**Diagnóstico, não suposição.** `memoria/obsidian/INICIO.md` (1000 bytes) e `memoria/obsidian/timeline.md` (54.964 bytes) estavam corretos no disco e servidos certos pela API real (`curl :27125/vault/memoria/obsidian/INICIO.md` → 200, conteúdo íntegro). O problema: `~/agata/INICIO.md` **e** `~/agata/timeline.md` **na raiz do vault**, os dois com **0 bytes** — o mesmo artefato órfão que o Obsidian já tinha deixado em (319) quando um `[[link]]` não resolve a tempo. `.gitignore` só blindava `/INICIO.md` e `/moc-*.md`; `timeline.md` (e `estado.md`, `_LEIA.md`, que correm o mesmo risco) nunca tinham entrado na lista — o usuário estava vendo a sobra vazia, não a nota real.
+
+**Causa provável do porquê isso se repete:** `gerar_obsidian.py` faz `rm -rf` + recria `memoria/obsidian/` inteiro a cada commit (idempotência determinística, por desenho). Com o Obsidian aberto olhando o vault ao vivo, essa janela de "tudo sumiu, tudo voltou" em ~460 arquivos de uma vez pode fazer um link clicado nesse intervalo resolver pro lugar errado (a raiz, onde o Obsidian cria nota nova por padrão) antes do arquivo real reaparecer no índice. Hoje teve 6 commits em ~1h — bastante janela de sobra. Não corrigido aqui (mudaria a estratégia de geração de reconstrução total pra sincronização incremental — decisão maior, não pedida); mitigação aplicada é a blindagem no `.gitignore`, mais reabrir o arquivo/recarregar o app resolve na hora.
+
+**Varredura geral ("tudo que está vazio"):** nenhuma das 464 notas do vault gerado tem corpo vazio ou suspeito (nenhuma abaixo de 140 bytes). Os únicos 0-byte no repositório inteiro são por desenho — marcadores `APROVADO-*` (conteúdo não importa, só presença, ver REGRAS "Quarentena estrutural") e `.gitkeep`/`py.typed` do ecossistema Python — nada mais.
+
+**Correções aplicadas:**
+1. Removidos os 2 artefatos órfãos (`INICIO.md`, `timeline.md` na raiz, 0 bytes, nunca rastreados).
+2. `.gitignore` ganhou `/estado.md`, `/timeline.md`, `/_LEIA.md` (faltavam; só `/INICIO.md` e `/moc-*.md` existiam) — evita que a mesma classe de artefato seja commitada por engano, embora não evite o artefato aparecer (isso é o Obsidian, fora do meu controle).
+3. **Pedido separado do Humano ("todos os readmes tem que estar linkados óbvio"):** os 3 pontos que apontavam pra arquivo real fora de `memoria/obsidian/` (`moc-redesign.md` e as duas listas de `moc-readmes.md`) usavam link markdown `[texto](../../caminho)` — abre no clique, mas o Obsidian **não conta como aresta** no grafo nem no painel de backlinks. Trocado por `[[caminho/relativo/à/raiz/do/vault|título]]` — wikilink de verdade. Caminho da raiz do vault, não do arquivo atual (evita ambiguidade — 14 arquivos chamados `README.md` tornam `[[README]]` sozinho inválido).
+
+**Verificação:** `python3 scripts/gerar_obsidian.py` rodado, `moc-readmes.md`/`moc-redesign.md` conferidos — `[[redesign/router/README.md|...]]` etc., não mais `[...](../../...)`. `bash scripts/perimetro.sh` → 10 OK · 1 SKIP (P-10 adiado, gerador muda) · 1 PARCIAL (P-4) · 0 FALHA.
+
+Único item sob quarentena P-8: `scripts/gerar_obsidian.py`. `.gitignore` não é coberto pela quarentena (fora da lista de `_p8_eh_comportamento`). Par `.diff`/`APROVADO-` em `propostas/aplicadas/wikilinks-readmes-reais`, autorização explícita via `AskUserQuestion`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl` real na API do Obsidian (`:27125`) pra descartar bug de geração antes de suspeitar do app; `find`/`wc -c` recursivo em todo `memoria/obsidian/` e no repositório inteiro pra achar qualquer coisa vazia; leitura de `.obsidian/workspace.json` pra ver o estado real das abas abertas; `python3 scripts/gerar_obsidian.py` + `grep` pra confirmar os wikilinks novos. Autorização: Humano, pedido direto + `AskUserQuestion` nesta sessão. Turno desta sessão: t≈82 (contado no contexto).
+
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
 
 **Pedido do Humano, fechando a sequência (319)-(321):** um artefato novo resumindo os 14 READMEs e como achá-los, mesma paleta do artefato "Sistema Agata" (arquitetura), e atualizar este último sem apagar o que já tinha.

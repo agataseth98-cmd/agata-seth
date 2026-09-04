@@ -1,0 +1,47 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 51aa444..b7dbe4e 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -107,6 +107,15 @@ def link(base, rotulo=None):
+     return rotulo or base
+ 
+ 
++def wikilink_arquivo(caminho_relativo_ao_repo, rotulo):
++    """Wikilink de verdade pra um arquivo REAL do repositório (fora de
++    memoria/obsidian/) -- caminho relativo à RAIZ DO VAULT (== raiz do repo),
++    não ao arquivo atual. Entra no grafo/backlinks do Obsidian de verdade,
++    diferente de um link markdown [texto](../../caminho) -- que abre, mas o
++    Obsidian não conta como aresta."""
++    return f"[[{caminho_relativo_ao_repo}|{rotulo}]]"
++
++
+ def escrever(rel, linhas):
+     p = os.path.join(SAIDA, rel)
+     os.makedirs(os.path.dirname(p), exist_ok=True)
+@@ -561,7 +570,7 @@ def main():
+     for chave in sorted(grupos):
+         L.append(f"## {chave} ({len(grupos[chave])})")
+         for p in sorted(grupos[chave]):
+-            L.append(f"- [{p}](../../{p})")
++            L.append(f"- {wikilink_arquivo(p, p)}")
+         L.append("")
+     escrever("moc-redesign.md", L)
+ 
+@@ -577,7 +586,7 @@ def main():
+         L.append("")
+         for p in caminhos:
+             titulo, resumo = resumo_readme(os.path.join(REPO, p))
+-            L.append(f"**[{titulo}](../../{p})** — `{p}`")
++            L.append(f"**{wikilink_arquivo(p, titulo)}** — `{p}`")
+             if resumo:
+                 L.append(f"> {resumo}")
+             L.append("")
+@@ -589,7 +598,7 @@ def main():
+         L.append("")
+         for p in extras_achados:
+             titulo, resumo = resumo_readme(os.path.join(REPO, p))
+-            L.append(f"**[{titulo}](../../{p})** — `{p}`")
++            L.append(f"**{wikilink_arquivo(p, titulo)}** — `{p}`")
+             if resumo:
+                 L.append(f"> {resumo}")
+             L.append("")

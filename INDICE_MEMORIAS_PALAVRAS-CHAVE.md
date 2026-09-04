@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO.md de (319), agora em timeline.md · READMEs viram wikilink de verdade
+  palavras-chave: início, timeline, vazios, era, mesmo, bug, inicio, agora, readmes, viram, wikilink, verdade
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
   palavras-chave: artefatos, publicados, agata, documentação, sistema, novo, atualizado, perder, foto
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: gerador, vault, ganha, nota, gap, aplicado, sob
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
   palavras-chave: carimbo, arvore, suja, contava, arquivo, rastreado, fazia, reprovar, sozinho, corrigido, olhar
-(293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
-  palavras-chave: gerador, vault, vira, determinístico, carimbo, commit, lugar, relógio, controle, derivado, confere, fonte, verificar, token, versionado, fronteira, decidida
+(293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de com …
+  palavras-chave: gerador, vault, vira, determinístico, carimbo
 (292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimul …
   palavras-chave: uso, vault, seth, passa, disponível, estimul
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: pont …

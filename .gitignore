@@ -64,6 +64,10 @@ redesign/mcp/.venv/
 redesign/grafo/paralelo-runs/
 
 # artefatos que o Obsidian larga na raiz do vault quando um [[link]] nao resolve
-# (0 byte; o INICIO/moc de verdade estao em memoria/obsidian/, gerados)
+# (0 byte; achado de novo em 04/09 -- timeline.md sofreu o mesmo bug do INICIO.md,
+# so' que sem protecao; as notas de verdade estao em memoria/obsidian/, geradas)
 /INICIO.md
+/estado.md
+/timeline.md
+/_LEIA.md
 /moc-*.md

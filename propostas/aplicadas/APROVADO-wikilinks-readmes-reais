@@ -1,0 +1,6 @@
+Autorização explícita do Humano via AskUserQuestion, 04/09/2026. Pedido: "todos os
+readmes tem que estar linkados óbvio" + achado de INICIO/timeline vazios (raiz stray).
+Fix 1: .gitignore protege timeline.md/estado.md/_LEIA.md contra o mesmo artefato
+órfão que já afetava INICIO.md. Fix 2: os 3 links a arquivo real (moc-redesign,
+moc-readmes x2) viram [[wikilink]] de verdade (caminho relativo à raiz do vault),
+não mais link markdown -- entram no grafo e no painel de backlinks do Obsidian.

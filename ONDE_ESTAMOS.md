@@ -5,7 +5,27 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (dois artefatos: um mapa novo dos READMEs, e a apresentação de arquitetura atualizada)
+## Onde estamos agora — 04/09/2026 (achei por que Início/timeline pareciam vazios — e os READMEs agora ligam de verdade)
+
+**Você perguntou por que Início e a linha do tempo apareciam vazias no
+Obsidian.** Não era bug de geração — as duas páginas de verdade sempre
+tiveram conteúdo. O que você estava vendo era uma cópia fantasma, de 0
+bytes, que o próprio Obsidian cria sozinho quando um link interno não
+acha o destino a tempo (mesma coisa que já tinha acontecido com o Início
+mais cedo hoje — dessa vez pegou a linha do tempo também). Apaguei as
+duas cópias vazias. Se acontecer de novo: feche a aba e reabra o arquivo
+pela busca (Ctrl+O) — a versão de verdade está sempre em
+`memoria/obsidian/`.
+
+**Também conferi tudo mais no vault** — nenhuma das ~460 páginas geradas
+está vazia ou incompleta. Só isso mesmo.
+
+**READMEs agora ligam de verdade.** Antes, os links dos 14 READMEs na
+página nova de ontem abriam o arquivo certo, mas não apareciam no mapa
+de conexões do Obsidian (grafo, painel "o que linka pra cá"). Trocado
+pelo tipo de link que o Obsidian reconhece como conexão de verdade.
+
+## Antes disso — 04/09/2026 (dois artefatos: um mapa novo dos READMEs, e a apresentação de arquitetura atualizada)
 
 **Você pediu um artefato novo resumindo os READMEs, na mesma cor do "Sistema
 Agata", e para atualizar aquele sem perder o que já tinha.**

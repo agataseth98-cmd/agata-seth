@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO.md de (319), agora em timeline.md · READMEs viram wikilink de verdade
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de consulta sob demanda, do canon público, com ponte pro Drive
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293), aplicado sob P-8
 (294) CORREÇÃO — 28/08/2026 · O carimbo `-arvore-suja` de (293) contava arquivo não-rastreado, e isso fazia o P-10 reprovar sozinho; corrigido para olhar só o que é rastreado
-(293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
+(293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de com …
 (292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimul …
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: pont …
 (290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + …
