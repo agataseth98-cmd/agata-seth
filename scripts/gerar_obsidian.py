@@ -309,7 +309,7 @@ def main():
     for b in ["INICIO", "estado", "timeline", "_LEIA",
               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
               "moc-controles", "moc-propostas", "moc-esferas",
-              "moc-redesign", "moc-readmes"]:
+              "moc-redesign", "moc-readmes", "memorias.base"]:
         NOTAS.add(b)
 
     # -------- religação de um corpo de texto
@@ -627,13 +627,63 @@ def main():
           for e in entradas]
     escrever("timeline.md", L)
 
+    # -------- memorias.base (Obsidian Bases -- nativo, sem plugin, sem vetor)
+    # Tabela/cards filtrável e ordenável sobre as entradas, a partir do MESMO
+    # frontmatter que as notas de entradas/ já carregam. Escopo por PASTA
+    # (file.inFolder), não por `tipo-nota` -- propriedade com hífen quebra o
+    # parser de expressão de Bases (não documentado, não arriscado à toa).
+    escrever("memorias.base", [
+        'filters: file.inFolder("memoria/obsidian/entradas")',
+        "",
+        "formulas:",
+        "  citacoes: 'citada_por.length'",
+        "",
+        "properties:",
+        "  entrada:",
+        '    displayName: "#"',
+        "  categoria:",
+        '    displayName: "Tipo"',
+        "  data:",
+        '    displayName: "Data"',
+        "  titulo:",
+        '    displayName: "Título"',
+        "  formula.citacoes:",
+        '    displayName: "Citada por"',
+        "",
+        "views:",
+        "  - type: table",
+        '    name: "Todas as entradas"',
+        "    order:",
+        "      - entrada",
+        "      - categoria",
+        "      - data",
+        "      - titulo",
+        "      - formula.citacoes",
+        "  - type: table",
+        '    name: "Mais citadas"',
+        "    limit: 40",
+        "    order:",
+        "      - entrada",
+        "      - titulo",
+        "      - formula.citacoes",
+        "  - type: cards",
+        '    name: "Por categoria"',
+        "    groupBy:",
+        "      property: categoria",
+        "    order:",
+        "      - entrada",
+        "      - titulo",
+        "      - data",
+    ])
+
     # -------- INICIO + _LEIA
     escrever("INICIO.md", fm({"tipo-nota": "inicio", "canon": yq(CANON), "data": yq(DATA)}) + [
         "# Agata — vault", "",
         "> [!tip] Comece aqui. Tudo abaixo é **gerado** de `MEMÓRIAS.md` + canon; "
         "para corrigir, entrada nova na história, nunca edite aqui.", "",
         "## Painéis",
-        f"- {link('estado','Estado do sistema')}  ·  {link('timeline','Linha do tempo')}",
+        f"- {link('estado','Estado do sistema')}  ·  {link('timeline','Linha do tempo')}  ·  "
+        f"{link('memorias.base','Tabela de MEMÓRIAS (Base)')}",
         "## Mapas",
         f"- {link('moc-memoria','Memória')}  ·  {link('moc-regras','Regras')}  ·  "
         f"{link('moc-projeto','Projeto')}",

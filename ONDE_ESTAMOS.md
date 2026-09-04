@@ -5,7 +5,38 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (achei por que Início/timeline pareciam vazios — e os READMEs agora ligam de verdade)
+## Onde estamos agora — 04/09/2026 (pesquisei o estado da arte 2026 de Obsidian+IA — instalei o que ajuda, expliquei o que não mexi)
+
+**Você pediu pra deixar o Obsidian no estado da arte de 2026, e depois
+perguntou por que a busca "semântica" (a que a maioria dos tutoriais de
+IA+Obsidian usa hoje) tinha sido recusada — com a condição de fazer
+mesmo assim se melhorasse o sistema sem quebrar nada.**
+
+**Instalei duas coisas reais, sem risco:**
+1. **`obsidian-skills`** — pacote oficial da própria empresa do Obsidian
+   (lançado em janeiro/2026), ensina qualquer sessão do Claude Code a
+   usar a formatação certa do Obsidian (notas, tabelas, quadros
+   visuais). Grátis, sem depender de internet depois de instalado.
+2. **Uma tabela nova dentro do Obsidian** (`memorias.base`) — mostra
+   todas as entradas da história do sistema como uma planilha que você
+   pode filtrar e ordenar (por tipo, por data, por quantas vezes uma
+   entrada foi citada por outra) — sem precisar de nenhum plugin extra,
+   é recurso nativo do Obsidian.
+
+**Por que não instalei busca semântica, respondendo sua pergunta:**
+aquilo foi recusado em agosto porque, no tamanho da sua história hoje
+(pouco mais de 270 entradas), a busca por palavra normal
+(a que já existe) é mais precisa, mais barata e mais fácil de conferir
+do que busca por "significado" — e pesquisas de 2026 confirmam o mesmo
+critério: só vale a pena trocar quando o arquivo crescer **dez vezes**
+o tamanho que tinha quando essa decisão foi tomada. Ainda não chegou
+lá (está em 2,3×). Não é "quebraria alguma coisa" — é que a própria
+regra que decidiu isso já disse quando reconsiderar, e ainda não é
+agora. Se você quiser mesmo assim, é só pedir — vira um pedido formal,
+testado três vezes antes de valer, como o sistema já faz pra qualquer
+decisão desse tipo.
+
+## Antes disso — 04/09/2026 (achei por que Início/timeline pareciam vazios — e os READMEs agora ligam de verdade)
 
 **Você perguntou por que Início e a linha do tempo apareciam vazias no
 Obsidian.** Não era bug de geração — as duas páginas de verdade sempre
