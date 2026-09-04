@@ -5,7 +5,38 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (o anel de pontos soltos no grafo: quase tudo é o app desatualizado + uma nota diária inofensiva)
+## Onde estamos agora — 04/09/2026 (achei a causa de verdade do anel de pontos soltos: um pedaço do sistema nunca tinha sido ligado)
+
+**Você me mandou a lista de nomes dos pontos soltos, direto da tela.** Com
+os nomes em mãos, fui atrás de cada um — e a explicação que eu tinha dado
+antes ("é só o Obsidian desatualizado") estava **errada para a maior
+parte deles**. Prefiro te contar isso claramente a deixar por baixo do
+tapete.
+
+**A causa real: 9 documentos importantes nunca tinham sido ligados a nada.**
+`REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `ONDE_ESTAMOS.md` (este arquivo),
+mais quatro outros e a nota `_LEIA` — todos apareciam em vários lugares do
+mapa, mas sempre como texto simples, nunca como um link clicável de
+verdade. Pro Obsidian, texto simples não conta como ligação — por isso
+ficavam soltos no grafo, sempre, não só hoje. Corrigi o gerador do mapa
+para criar o link de verdade nesses 9 lugares e reconstruí tudo. Conferi
+um por um: os 9 agora aparecem ligados.
+
+**3 dos nomes que você viu são soltos de propósito, não bug** — arquivos
+gerados automaticamente (índices, backups) que o sistema deliberadamente
+não lista no mapa, do mesmo jeito que uma pasta de rascunho não entra no
+índice de um livro.
+
+**De brinde, achei e corrigi dois problemas pequenos:** o `PROJETO.md`
+tinha um espaço de tabulação a mais no início, que quebrava o título dele
+no Obsidian (provavelmente o próprio programa salvando sozinho) — corrigido.
+E havia dois arquivos vazios ("Sem título") que o Obsidian criou sozinho na
+pasta principal — apagados.
+
+**Reabra o Obsidian** para ver o grafo com os 9 agora conectados de
+verdade.
+
+## Antes disso — 04/09/2026 (o anel de pontos soltos no grafo: quase tudo é o app desatualizado + uma nota diária inofensiva)
 
 **Você mandou outra captura do grafo, com um anel de pontos ainda soltos.**
 Conferi contra o disco de verdade: a lacuna real hoje é de **1 arquivo**, não

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
+  palavras-chave: achado, real, trás, anel, soltos, canônicos, raiz, leia, nunca, tiveram, wikilink, verdade, errou, diagnóstico, achou, era, cache
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase todo Nota Diária + gerado; blindado contra publicar nota pessoal por acidente
   palavras-chave: grafo, obsidian, anel, pontos, soltos, quase, nota, diária, gerado, blindado, contra, publicar, pessoal, acidente
 (328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra): achado real de vazamento de segredo reproduzido e corrigido; hooks/selftest do proxy eram do ambiente deles, não da Máquina; marcador forjável já era conhecido
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: prompt, carregamento, detector, âncora, velha, era, falso, positivo, trocado, checagem, defasagem, degraus
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
   palavras-chave: passo, post, commit, regenera, índice, derivado, fail, soft, sob
-(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
-  palavras-chave: fase, scripts, preparar, export, indice, versão, exportação, sanitizada, índice, cano, drive, sob, fecha, plano, fases
+(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão …
+  palavras-chave: fase, scripts, preparar, export, indice, versão
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator d …
   palavras-chave: fase, scripts, consultar, indice, extrator
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice …

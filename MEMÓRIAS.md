@@ -22,6 +22,16 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
+
+**Humano colou a lista de nomes soltos da própria tela** (não a captura de tela, o texto). Investiguei cada nome individualmente contra o disco e o gerador, em vez de aceitar a leitura de (329) ("provavelmente cache desatualizado") como fechada.
+
+**Bug estrutural real, não cache.** `REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `PROJETO_REFERENCIA.md`, `CHAVES.md`, `PROCEDIMENTO_LOGIN.md`, `PROMPT_CARREGAMENTO.md` e `_LEIA.md` nunca tinham um `[[wikilink]]` de verdade apontando pra eles em lugar nenhum do vault — só apareciam como texto em `código` (INICIO.md "Fonte da verdade", `moc-regras.md`, `moc-projeto.md`, `moc-memoria.md`, e as notas-espelho de `CANON_INTEIROS`), que o Obsidian não conta como aresta do grafo. `_LEIA.md` nem citado estava. Corrigido em `scripts/gerar_obsidian.py` (6 pontos), sob quarentena P-8: `propostas/wikilinks-canon-raiz-reais.diff` + `APROVADO-wikilinks-canon-raiz-reais`. Vault regenerado; confirmado por grep que os 9 arquivos agora têm `[[wikilink]]` real de pelo menos um lugar.
+
+**3 dos nomes da lista eram exclusão por desenho, não bug:** `insight.md` (esfera pessoal `segunda-camada/`, doutrina de (283)/(286) — modelo em nuvem não vê), `indice_export.md`/`manifesto.md` derivados (`memoria/missoes/agata-sistema/derivado/`, gitignorado dentro do próprio repo de missões, mesmo padrão de `memoria/obsidian/`), `logs/baseline_hidratacao_20260814.md` (`logs/` inteiro gitignorado). Pelo menos 2 outros itens da lista (a task `P3-00-manifesto…`, os índices `INDICE_MEMORIAS*`) já tinham link real no disco no momento da checagem — a leitura de (329) sobre cache estar atrasado no app continua válida pra essa fatia, só não explicava a maioria.
+
+**Achados incidentais, corrigidos no caminho:** `PROJETO.md` tinha 1 caractere de tabulação não commitado antes do título (quebra o H1; provável autosave do próprio Obsidian) — restaurado com `git checkout -- PROJETO.md`, autorizado pelo Humano. Dois artefatos vazios não rastreados que o Obsidian cria sozinho ("Sem título.base", "Sem título.canvas") — apagados, autorizado pelo Humano.
+
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase todo Nota Diária + gerado; blindado contra publicar nota pessoal por acidente
 
 **Pergunta do Humano, com captura de tela nova do grafo mostrando um anel de pontos ainda soltos.** Comparado disco real contra os dois git (principal + `missões`) juntos — não presumido a partir da imagem, que pode estar desatualizada no app.

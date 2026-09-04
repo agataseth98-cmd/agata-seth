@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase todo Nota Diária + gerado; blindado contra publicar nota pessoal por acidente
 (328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra): achado real de vazamento de segredo reproduzido e corrigido; hooks/selftest do proxy eram do ambiente deles, não da Máquina; marcador forjável já era conhecido
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
-(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão de exportação sanitizada do índice, para o cano do Drive, sob P-8 (fecha o plano de 6 fases)
+(300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão …
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator d …
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice …
 (297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do ` …

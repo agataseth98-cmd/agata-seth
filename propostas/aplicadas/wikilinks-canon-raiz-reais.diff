@@ -1,0 +1,63 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index b843d1f..f2af06a 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -405,7 +405,8 @@ def main():
+         linhas = fm({"tipo-nota": "canon", "arquivo": arq, "resumo": yq(desc),
+                      "tags": "[canon/arquivo]"})
+         linhas += [f"# {arq} — {desc}", "",
+-                   "> [!info] Espelho de leitura. Fonte: `../../" + arq + "`. Não editar aqui.",
++                   "> [!info] Espelho de leitura. Fonte: " + wikilink_arquivo(arq, arq) +
++                   ". Não editar aqui.",
+                    "", religar(txt)]
+         escrever(f"canon/{b}.md", linhas)
+ 
+@@ -514,7 +515,8 @@ def main():
+     for e in entradas:
+         por_tipo.setdefault(e["tipo"], []).append(e["num"])
+     L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+-    L += [f"# MOC — memória ({len(entradas)} entradas, ({min(nums)})–({max(nums)}))", ""]
++    L += [f"# MOC — memória ({len(entradas)} entradas, ({min(nums)})–({max(nums)}))", "",
++          f"Fonte: {wikilink_arquivo('MEMÓRIAS.md', 'MEMÓRIAS.md')}.", ""]
+     for tp in sorted(por_tipo):
+         L.append(f"## {tp} ({len(por_tipo[tp])})")
+         L.append(" · ".join(link(ent_base[n]) for n in sorted(por_tipo[tp], reverse=True)))
+@@ -522,14 +524,15 @@ def main():
+     escrever("moc-memoria.md", L)
+ 
+     L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+-    L += ["# MOC — regras", "", "Fonte: `../REGRAS.md`.", ""]
++    L += ["# MOC — regras", "", f"Fonte: {wikilink_arquivo('REGRAS.md', 'REGRAS.md')}.", ""]
+     L += [f"- {link(b, t)}" for t, b in regra_base.items()]
+     escrever("moc-regras.md", L)
+ 
+     L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+-    L += ["# MOC — projeto e referência", "", "## PROJETO.md"]
++    L += ["# MOC — projeto e referência", "",
++          f"## {wikilink_arquivo('PROJETO.md', 'PROJETO.md')}"]
+     L += [f"- {link(b, t)}" for t, b in proj_base.items()]
+-    L += ["", "## PROJETO_REFERENCIA.md"]
++    L += ["", f"## {wikilink_arquivo('PROJETO_REFERENCIA.md', 'PROJETO_REFERENCIA.md')}"]
+     L += [f"- {link(b, t)}" for t, b in ref_base.items()]
+     escrever("moc-projeto.md", L)
+ 
+@@ -748,13 +751,17 @@ def main():
+         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
+         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
+         f"{link('moc-redesign','Documentos do repositório')}  ·  "
+-        f"{link('moc-missoes','Missões (memoria/missoes/)')}", "",
++        f"{link('moc-missoes','Missões (memoria/missoes/)')}  ·  "
++        f"{link('_LEIA','_LEIA — pasta gerada')}", "",
+         "## Como ler o grafo",
+         "Cada entrada de MEMÓRIAS é um nó; `(n)` no texto virou aresta. Regras, "
+         "scripts, controles e propostas também são nós, ligados pelas entradas que os "
+         "citam. Os MOCs são os hubs — comece por eles, não pelo grafo cru.", "",
+         "## Fonte da verdade",
+-        "`../REGRAS.md` · `../PROJETO.md` · `../MEMÓRIAS.md` · `../ONDE_ESTAMOS.md`",
++        f"{wikilink_arquivo('REGRAS.md', 'REGRAS.md')} · "
++        f"{wikilink_arquivo('PROJETO.md', 'PROJETO.md')} · "
++        f"{wikilink_arquivo('MEMÓRIAS.md', 'MEMÓRIAS.md')} · "
++        f"{wikilink_arquivo('ONDE_ESTAMOS.md', 'ONDE_ESTAMOS.md')}",
+     ])
+     escrever("_LEIA.md", [
+         "# _LEIA — pasta gerada", "",
