@@ -17,6 +17,7 @@
 // Fonte versionada: ~/agata/redesign/librechat/canon-mcp.mjs
 
 const PROXY = (process.env.CANON_PROXY || "http://127.0.0.1:27125").replace(/\/$/, "");
+const ESCRIBA = (process.env.SETH_ESCRIBA || "http://127.0.0.1:20140").replace(/\/$/, "");
 const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
 
 const CANON = {
@@ -34,6 +35,7 @@ const DENY = /\.(secret|token|pass|key|gpg|env|pem)$/i;
 function pathOk(p) {
   if (!p || p.includes("..") || p.startsWith("/") || DENY.test(p)) return false;
   if (p.startsWith("memoria/obsidian/")) return true;
+  if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
   return Object.values(CANON).includes(p);
 }
 
@@ -137,22 +139,83 @@ const TOOLS = [
     name: "vault_consultar",
     description:
       "Lê ou lista uma nota DERIVADA do vault Obsidian sob memoria/obsidian/ (estado, timeline, " +
-      "moc-memoria, moc-regras, moc-projeto, moc-controles, entradas/, regras/, controles/, projeto/). " +
-      "É o índice de consulta pontual: entrada antiga fora da janela, backlinks de uma regra, o que faz um script. " +
-      "Passe caminho vazio p/ listar a raiz; um .md p/ ler.",
+      "moc-memoria, moc-regras, moc-projeto, moc-controles, entradas/, regras/, controles/, projeto/), " +
+      "ou o teu próprio SETH-DIARIO.md. É o índice de consulta pontual: entrada antiga fora da janela, " +
+      "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler.",
     inputSchema: {
       type: "object",
       properties: {
-        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); vazio = listar a raiz' },
+        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); "SETH-DIARIO.md" p/ o teu diário; vazio = listar a raiz' },
       },
     },
   },
+  {
+    name: "memoria_acrescentar",
+    description:
+      "ACRESCENTA uma entrada nova a MEMÓRIAS.md, logo abaixo do marcador ENTRADAS-NOVAS. " +
+      "Append-only: NÃO apaga nem altera nada existente (o serviço verifica byte a byte e aborta se não for insert puro). " +
+      "O número (NNN) e a data são do relógio da Máquina — você não os fornece. " +
+      "`corpo` entra como veio: inclua a linha final 'Modelo: ... vetor: ... Autorização: ... Turno: ...' no formato das outras entradas. " +
+      "Só afirme no corpo o que você verificou com query_canon/vault_consultar — o que leu de verdade, não o que supõe. " +
+      "Não commita: a mudança fica no working tree pro Humano revisar.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        titulo: { type: "string", description: "título da entrada (vai depois de 'DIÁRIO — <data> · ')" },
+        corpo: { type: "string", description: "corpo completo da entrada, incluindo a linha 'Modelo: ...' final" },
+      },
+      required: ["titulo", "corpo"],
+    },
+  },
+  {
+    name: "diario_anotar",
+    description:
+      "ANEXA texto ao fim de SETH-DIARIO.md — teu espaço próprio, append-only, fora de MEMÓRIAS e fora do vault derivado. " +
+      "Para rascunho, raciocínio em voz alta, observações sobre teu próprio funcionamento. Não é canon, não passa por portão. " +
+      "Timestamp do relógio da Máquina é acrescentado automaticamente. Não apaga nada.",
+    inputSchema: {
+      type: "object",
+      properties: { texto: { type: "string", description: "o que anexar" } },
+      required: ["texto"],
+    },
+  },
 ];
+
+// ---- escrita APPEND-ONLY (via seth_escriba no host) ---------------------
+async function escriba(rota, payload) {
+  let r;
+  try {
+    r = await fetch(`${ESCRIBA}${rota}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    throw new Error(`seth_escriba (${ESCRIBA}) inacessível: ${e.message}. O Humano precisa subir o serviço (atalho "Seth" ou seth-escriba.service).`);
+  }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `seth_escriba HTTP ${r.status}`);
+  return j;
+}
+
+async function memoriaAcrescentar(a) {
+  if (!a.titulo || !a.corpo) throw new Error("titulo e corpo obrigatórios");
+  const j = await escriba("/memoria", { titulo: a.titulo, corpo: a.corpo });
+  return `${j.header}\n\n${j.nota}`;
+}
+
+async function diarioAnotar(a) {
+  if (!a.texto) throw new Error("texto obrigatório");
+  const j = await escriba("/diario", { texto: a.texto });
+  return `anotado (${j.bytes_add} bytes). ${j.nota}`;
+}
 
 async function callTool(name, args) {
   let text;
   if (name === "query_canon") text = await queryCanon(args);
   else if (name === "vault_consultar") text = await vaultConsultar(args);
+  else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
+  else if (name === "diario_anotar") text = await diarioAnotar(args);
   else throw new Error(`tool desconhecida: ${name}`);
   return { content: [{ type: "text", text }] };
 }

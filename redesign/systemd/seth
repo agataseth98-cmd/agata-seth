@@ -6,7 +6,7 @@ set -e
 LC=~/librechat/docker-compose.yml
 notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
 systemctl --user start agata.target 2>/dev/null || true
-systemctl --user start seth-gateway.service
+systemctl --user start seth-gateway.service seth-escriba.service
 docker compose -f "$LC" up -d >/dev/null 2>&1 || true
 docker start kokoro-tts >/dev/null 2>&1 || true
 # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)

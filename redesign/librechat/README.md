@@ -94,14 +94,41 @@ que o container ja tem). Le o vault do Agata pelo proxy read-only `:27125`
 - `librechat.yaml` -> `mcpServers.canon`, `startup: true` (excecao consciente a
   regra do "sob demanda": e read-only, ~40 MB, e a espinha da hidratacao -- a
   Seth precisa da tool ja na proxima mensagem, nao depois de um toggle na UI).
-- Tools:
+- Tools de LEITURA:
   - `query_canon { doc, grep?, contexto?, linhas? }` -- le REGRAS/PROJETO/MEMORIAS/
     ONDE_ESTAMOS/CHAVES/PROJETO_REFERENCIA/ROADMAP/PROMPT_CARREGAMENTO/INDICE_MEMORIAS
     direto da fonte. MEMORIAS sem grep/linhas devolve so a janela do topo.
   - `vault_consultar { caminho? }` -- le ou lista uma nota derivada sob
-    `memoria/obsidian/` (estado, timeline, moc-*, entradas/, regras/, controles/).
-- Trava: whitelist (so os docs nomeados + `memoria/obsidian/**`) + denylist de
-  sufixos de segredo (`.secret .token .pass .key .gpg .env .pem`) + sem `..`.
+    `memoria/obsidian/` (estado, timeline, moc-*, entradas/, regras/, controles/),
+    ou `SETH-DIARIO.md`.
+- Tools de ESCRITA (APPEND-ONLY -- nunca apagam, ver seth_escriba abaixo):
+  - `memoria_acrescentar { titulo, corpo }` -- insere uma entrada nova em
+    MEMORIAS.md logo abaixo do marcador ENTRADAS-NOVAS. (NNN) e data sao da
+    Maquina. NAO commita -- fica no working tree.
+  - `diario_anotar { texto }` -- anexa ao fim de SETH-DIARIO.md.
+- Trava de leitura: whitelist (docs nomeados + `memoria/obsidian/**` + `SETH-DIARIO.md`)
+  + denylist de sufixos de segredo (`.secret .token .pass .key .gpg .env .pem`) + sem `..`.
+- `SETH_ESCRIBA` (default `http://127.0.0.1:20140`) -- onde as tools de escrita batem.
+
+### seth_escriba (:20140) -- canal de escrita append-only da Seth
+
+`redesign/router/seth_escriba.py`, unit `seth-escriba.service` (sob demanda,
+sobe pelo atalho `seth` junto do gateway). O UNICO caminho de escrita da Seth,
+e so acrescenta:
+
+- `POST /memoria {titulo, corpo}` -- insere bloco novo em MEMORIAS.md abaixo do
+  marcador. Verificacao byte a byte pos-escrita: `depois` == `antes` com
+  exatamente um bloco inserido no offset do marcador; qualquer outra diferenca
+  -> 409, nao grava. (NNN) e data do relogio da Maquina.
+- `POST /diario {texto}` -- append puro ao fim de SETH-DIARIO.md; verifica que
+  `antes` e' prefixo exato de `depois`.
+- SEM PUT/PATCH/DELETE (405). Nao commita, nao faz `git add`. O Humano revisa
+  com `git diff` e commita (ou descarta com `git checkout`).
+
+Autorizado pelo Humano em 03/09/2026 ("corte os acessos dela, menos a memoria e
+obsidian; append only... assumo o risco") depois de duas tentativas da
+Seth-com-tools-de-leitura confabularem a saida (pegas pela camada C).
+`SETH-DIARIO.md` fica na raiz do repo, tracked, NAO derivado, fora do P-10.
 - Editou o `.mjs` ou o bloco? `docker compose -f ~/librechat/docker-compose.yml restart librechat`.
 - Nota: `auto/*` que roteia p/ modelo sem function-calling nao usa a tool naquele
   turno -- prefira `auto/chat` / `auto/claude-sonnet` p/ turnos que consultam canon.

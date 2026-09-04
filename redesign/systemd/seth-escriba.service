@@ -1,0 +1,16 @@
+[Unit]
+Description=Agata -- seth_escriba: canal de escrita APPEND-ONLY da Seth (:20140)
+Documentation=file:///home/orusoua/agata/redesign/router/seth_escriba.py
+# Sob demanda -- sem [Install]. Sobe pelo atalho "Seth" junto do seth-gateway.
+# Nao e' membro do agata.target (nao e' espinha; e' um canal da frente).
+
+[Service]
+Type=simple
+Environment=SETH_ESCRIBA_BIND=127.0.0.1:20140
+Environment=SETH_REPO=%h/agata
+Environment=SETH_ESCRIBA_TZ=America/Sao_Paulo
+ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_escriba.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+# escreve so em MEMÓRIAS.md e SETH-DIARIO.md do repo -- sem ProtectHome

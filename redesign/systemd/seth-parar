@@ -4,5 +4,5 @@
 LC=~/librechat/docker-compose.yml
 docker compose -f "$LC" stop >/dev/null 2>&1 || true
 docker stop kokoro-tts >/dev/null 2>&1 || true
-systemctl --user stop seth-gateway.service 2>/dev/null || true
+systemctl --user stop seth-gateway.service seth-escriba.service 2>/dev/null || true
 notify-send -a Seth "Seth" "frentes parados (espinha segue de pe)" 2>/dev/null || true
