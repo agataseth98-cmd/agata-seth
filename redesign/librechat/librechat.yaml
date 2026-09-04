@@ -13,6 +13,8 @@ version: 1.3.13
 cache: true
 
 interface:
+  mcpServers:
+    use: true
   customWelcome: "Seth -- sistema Agata. Hidratada pelo seth_gateway (:20126). A Regra 1 vale: toda resposta abre com modelo - turno - ultima entrada de MEMORIAS - o que esta quebrado."
   privacyPolicy:
     externalUrl: ""
@@ -78,5 +80,7 @@ mcpServers:
     env:
       CANON_PROXY: http://127.0.0.1:27125
     startup: true   # ligado: read-only, ~40 MB, e a espinha da hidratacao da Seth
+    chatMenu: true
+    serverInstructions: true
     timeout: 30000
     description: "Vault do Agata (canon read-only) via :27125 -- query_canon, vault_consultar"
