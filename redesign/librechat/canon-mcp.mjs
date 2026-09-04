@@ -29,12 +29,15 @@ const CANON = {
   PROCEDIMENTO_LOGIN: "PROCEDIMENTO_LOGIN.md",
   INDICE_MEMORIAS: "INDICE_MEMORIAS.md",
   "INDICE_MEMORIAS_PALAVRAS-CHAVE": "INDICE_MEMORIAS_PALAVRAS-CHAVE.md",
+  ACESSO_GRADUADO: "redesign/ACESSO-GRADUADO.md",
+  "ACESSO-GRADUADO": "redesign/ACESSO-GRADUADO.md",
 };
 const DENY = /\.(secret|token|pass|key|gpg|env|pem)$/i;
 
 function pathOk(p) {
   if (!p || p.includes("..") || p.startsWith("/") || DENY.test(p)) return false;
   if (p.startsWith("memoria/obsidian/")) return true;
+  if (p.startsWith("redesign/") && p.endsWith(".md")) return true;  // docs do redesenho (sem segredo; DENY ainda barra .env/.secret)
   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
   return Object.values(CANON).includes(p);
 }
@@ -104,7 +107,9 @@ async function queryCanon(a) {
 // ---- vault_consultar -------------------------------------------------------
 async function vaultConsultar(a) {
   let p = String(a.caminho || "").trim().replace(/^\/+/, "");
-  if (p && !p.startsWith("memoria/obsidian/")) p = "memoria/obsidian/" + p;
+  const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") ||
+                      p === "SETH-DIARIO.md" || Object.values(CANON).includes(p);
+  if (p && !jaResolvido) p = "memoria/obsidian/" + p;
   if (!p) p = "memoria/obsidian/";
   const { ct, body } = await vaultGet(p);
   if (ct.includes("application/json")) {
