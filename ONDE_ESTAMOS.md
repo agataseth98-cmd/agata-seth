@@ -5,7 +5,20 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (auditei a autoavaliação da Seth sobre a própria memória — a análise dela está certa na essência, mas ela descreveu um pedaço do sistema que já não existe mais)
+## Onde estamos agora — 04/09/2026 (correção: o item que eu tinha marcado como "pendente de sua aprovação" já estava fechado)
+
+**Você pediu pra eu aprovar o item que eu mesmo deixei em aberto na auditoria
+anterior.** Fui conferir antes de mexer — e descobri que **já estava
+aprovado e aplicado**, num commit de mais cedo hoje, antes de eu ter
+começado essa auditoria. Eu tinha lido a entrada antiga (a que abriu o
+pedido) e não conferi se uma entrada mais nova já tinha fechado.
+
+**Não há nada pra você fazer aqui.** O guard contra memória cortada
+silenciosamente já está ativo no sistema desde antes de hoje de manhã.
+Registrei o próprio erro na história (é assim que o sistema funciona:
+corrige-se acrescentando, nunca apagando).
+
+## Antes disso — 04/09/2026 (auditei a autoavaliação da Seth sobre a própria memória — a análise dela está certa na essência, mas ela descreveu um pedaço do sistema que já não existe mais)
 
 **Você me pediu para auditar o que a Seth escreveu sobre as falhas do próprio
 sistema de memória.** Conferi cada ponto dela contra o disco de verdade, um

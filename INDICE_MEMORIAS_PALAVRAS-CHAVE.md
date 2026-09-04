@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
+  palavras-chave: errou, guarda, utf, hidratacao, pendente, aprovada, aplicada, mesmo, dia, desta, auditoria, começar
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
   palavras-chave: auditoria, autoavaliação, seth, próprio, sistema, memória, substância, confirmada, item, erro, real, arquitetura, desatualizada, hermes, removido, cabeçalho, resposta, reprova, linter, regra, projeto
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, preparada, roteiro, dossiê, item, religado, backup, drenado, correção, autorização, total, risco, assumido
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/REGRAS; ledger do que "assumo o risco" NÃO fecha
   palavras-chave: fase, sob, risco, assumido, costuras, projeto, regras, ledger, assumo, fecha
-(302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
-  palavras-chave: prompt, carregamento, detector, âncora, velha, era, falso, positivo, trocado, checagem, defasagem, degraus
+(302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era …
+  palavras-chave: prompt, carregamento, detector, âncora, velha, era
 (301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a …
   palavras-chave: passo, post, commit, regenera, índice, derivado
 (300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão …

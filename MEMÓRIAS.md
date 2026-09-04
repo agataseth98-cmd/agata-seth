@@ -22,6 +22,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
+
+**O que houve.** O Humano leu (331) e disse "pode fechar então", pedindo pra aprovar `propostas/guarda-utf8-hidratacao.diff`, do jeito que (331) descreveu como "risco real e ainda ativo, aguardando `APROVADO-`". Antes de tocar em qualquer coisa, fui conferir o arquivo — e ele não existe mais em `propostas/`, porque **já foi consumido**: `propostas/aplicadas/guarda-utf8-hidratacao.diff` + `propostas/aplicadas/APROVADO-guarda-utf8-hidratacao` existem os dois, aplicados no commit `5096782`, que é (318) — "guarda-utf8-hidratacao (pendente desde (317), aprovada agora junto)", texto exato de (318). **(318) é anterior a (330)/(331)** — a aprovação já estava feita antes mesmo de eu começar a auditoria da Seth.
+
+**Onde a checagem falhou.** Ao escrever (331), citei o estado de (317) (a entrada que abriu a proposta) sem conferir se uma entrada mais recente já a tinha fechado — exatamente o catálogo de falhas de REGRAS.md: "afirmar sobre o mundo lendo só uma fonte, sem checar se foi superada." A proposta nunca esteve pendente durante a auditoria; a frase "fica em aberto... aprovar propostas/guarda-utf8-hidratacao.diff" na resposta ao Humano, e o item correspondente dentro de (331), estavam errados no momento em que foram escritos.
+
+**Verificado agora, antes de registrar esta correção:** `find` confirma os dois arquivos só em `propostas/aplicadas/`, nenhum em `propostas/` (pendente); `grep -n "guarda-utf8\|abort" .githooks/gerar-hidratacao.sh` confirma o guard de fato presente e ativo no script hoje (checagem de `grep -qE`/`awk` com rótulo acentuado de teste, aborta antes de escrever byte nenhum se não casar); `git log -1 -- propostas/aplicadas/APROVADO-guarda-utf8-hidratacao` confirma o commit `5096782`/(318).
+
+**Efeito prático:** nenhum. Não há nada para o Humano aprovar — o item já estava fechado. (331) não é editada (Regra 4); esta entrada é o apontamento.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `find`/`ls` reais em `propostas/` e `propostas/aplicadas/`; leitura do diff aplicado (`.githooks/gerar-hidratacao.sh` real, guard presente); `git log` no arquivo de aprovação pra datar o commit e a entrada. Autorização: correção de erro próprio, mesmo critério já usado em outras entradas desta sessão — registro, não mudança de comportamento. Turno desta sessão: t=4 (contado no contexto).
+
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
 
 **Pedido do Humano:** "Audite a resposta da Seth sobre seu sistema de memórias visto de dentro" — colada uma autoavaliação de 8 itens sobre falhas do sistema de hidratação/memória, com a ressalva honesta da própria Seth de que "não medi nada ao vivo". Tratado como REGRAS manda ("relato de modelo é alegação até a Máquina confirmar"): cada item verificado no disco/git antes de aceitar, não só lido.
