@@ -1,0 +1,121 @@
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index e453134..7a43b17 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -132,6 +132,11 @@ _PROFUNDIDADE_MAX = 12   # payload OpenAI-compat real não passa disso; trava co
+ _NOS_MAX = 20000         # trava contra payload absurdamente grande (nº de chaves/itens visitados)
+ 
+ 
++class _TetoDeVarreduraExcedido(Exception):
++    """Interno: payload profundo/largo demais pra garantir varredura completa —
++    ver achado de (04/09/2026, segunda auditoria) logo abaixo."""
++
++
+ def _campos_texto(payload):
+     """Rende TODA string em qualquer profundidade do payload (dict/list aninhado).
+ 
+@@ -142,13 +147,30 @@ def _campos_texto(payload):
+     módulo); a lista fixa era falha ABERTA pra tudo que não citou. Recursivo,
+     sem lista de campo — nenhum campo novo do formato OpenAI-compat (ou de um
+     provedor) pode reabrir esta lacuna por omissão.
++
++    Achado 2, segunda auditoria (04/09/2026, Camada C — parecer externo
++    verificado e reproduzido antes de aceitar, não só lido): a versão anterior
++    desta função, ao bater o teto de profundidade/nós, fazia `return` em vez
++    de sinalizar — a varredura simplesmente PARAVA ali, sem avisar quem chama,
++    e tudo que ficava além do teto (não visitado) passava como se estivesse
++    limpo. Reproduzido de verdade: segredo no nível 13 (teto=12) e segredo
++    depois do nó 20.001 (teto=20.000) **passavam sem bloquear** — o mesmo
++    payload OpenAI-compat real nunca bate esse teto (comentário abaixo), mas
++    um payload construído de propósito bate, e o teto virava a própria porta
++    de saída do segredo. Corrigido: bater o teto agora LEVANTA
++    `_TetoDeVarreduraExcedido`, que `sanitizar_payload` trata como bloqueio —
++    "não consigo garantir que está limpo" fecha, não abre.
+     """
+     contador = [0]
+ 
+     def _anda(no, caminho, profundidade):
+         contador[0] += 1
+         if contador[0] > _NOS_MAX or profundidade > _PROFUNDIDADE_MAX:
+-            return
++            raise _TetoDeVarreduraExcedido(
++                f"teto de varredura excedido em '{caminho}' "
++                f"(nós={contador[0]}, profundidade={profundidade}) — "
++                f"payload OpenAI-compat real não deveria chegar aqui"
++            )
+         if isinstance(no, str):
+             yield caminho, no
+         elif isinstance(no, dict):
+@@ -163,11 +185,22 @@ def _campos_texto(payload):
+ 
+ 
+ def sanitizar_payload(payload: dict) -> dict:
+-    """Falha FECHADA: casou um padrão ⇒ levanta SegredoNoPayload. Senão, devolve igual."""
++    """Falha FECHADA: casou um padrão OU excedeu o teto de varredura ⇒ levanta
++    SegredoNoPayload. Senão, devolve igual. Ver _TetoDeVarreduraExcedido acima
++    — bater o teto vira bloqueio, nunca passagem silenciosa."""
+     achados = []
+-    for campo, texto in _campos_texto(payload):
+-        for a in varrer(texto):
+-            achados.append({**a, "campo": campo or "(raiz)"})
++    try:
++        for campo, texto in _campos_texto(payload):
++            for a in varrer(texto):
++                achados.append({**a, "campo": campo or "(raiz)"})
++    except _TetoDeVarreduraExcedido as e:
++        achados.append({
++            "padrao_rotulo": "teto-de-varredura-excedido",
++            "padrao": f"profundidade>{_PROFUNDIDADE_MAX} ou nós>{_NOS_MAX}",
++            "trecho_redigido": "(payload não varrido por inteiro — bloqueado por precaução)",
++            "pos": -1,
++            "campo": str(e),
++        })
+     if achados:
+         raise SegredoNoPayload(achados)
+     return payload
+@@ -200,6 +233,13 @@ _FIXTURES_LIMPO = [
+ ]
+ 
+ 
++def _payload_fundo(n: int, folha) -> dict:
++    d = {"valor": folha}
++    for _ in range(n):
++        d = {"nivel": d}
++    return d
++
++
+ def _autoteste() -> int:
+     falhas = 0
+     for esperado, texto in _FIXTURES_CASA:
+@@ -214,6 +254,31 @@ def _autoteste() -> int:
+         ok = not achados
+         print(f"{'PASS' if ok else 'FALHA'}  limpo  {texto!r:50}  -> {[a['padrao_rotulo'] for a in achados] or 'ok'}")
+         falhas += 0 if ok else 1
++
++    # Regressão do achado de auditoria externa (04/09/2026, verificado e
++    # reproduzido antes de aceitar): segredo além do teto de profundidade/nós
++    # tinha que continuar bloqueado, não passar em silêncio porque a
++    # varredura simplesmente parou de olhar.
++    segredo = _fx("AK", "IA", "A" * 16)
++    for nome, payload in [
++        ("profundidade > teto (13 > 12)", _payload_fundo(13, segredo)),
++        ("nós > teto (20001 itens)", {"itens": (["x"] * 20001) + [segredo]}),
++    ]:
++        bloqueou = False
++        try:
++            sanitizar_payload(payload)
++        except SegredoNoPayload:
++            bloqueou = True
++        print(f"{'PASS' if bloqueou else 'FALHA'}  teto-excedido[{nome}]  -> "
++              f"{'bloqueado' if bloqueou else 'PASSOU SEM BLOQUEAR'}")
++        falhas += 0 if bloqueou else 1
++    # controle: payload normal, bem dentro do teto, não pode ser afetado
++    normal = {"model": "auto/chat", "messages": [{"role": "user", "content": "oi"}]}
++    ok = sanitizar_payload(normal) == normal
++    print(f"{'PASS' if ok else 'FALHA'}  teto-excedido[controle: payload normal não bloqueia]  -> "
++          f"{'ok' if ok else 'bloqueou à toa'}")
++    falhas += 0 if ok else 1
++
+     print(f"\n{'AUTOTESTE OK' if not falhas else f'AUTOTESTE FALHOU ({falhas})'}")
+     return 0 if not falhas else 1
+ 

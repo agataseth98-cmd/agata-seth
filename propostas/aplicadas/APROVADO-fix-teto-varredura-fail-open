@@ -1,0 +1,9 @@
+Autorização explícita do Humano via AskUserQuestion, 04/09/2026 -- pedido de
+auditoria ("audite agora") sobre parecer externo (gpt-5.6-terra), verificado
+e reproduzido de verdade nesta sessão antes de aceitar (Camada C, REGRAS
+"Cadeia de auditoria em camadas"). Achado real, não hipotético: teto de
+profundidade/nós do sanitizador de segredo (redesign/router/sanitizar.py)
+falhava ABERTO -- payload construído de propósito com segredo além do nível
+12 ou do nó 20.000 passava sem bloquear. Reproduzido antes E depois do fix
+(vazou -> bloqueado), --autoteste/--selftest existentes continuam OK, dois
+casos de regressão novos adicionados ao --autoteste. Ver MEMÓRIAS (328).

@@ -22,6 +22,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra): achado real de vazamento de segredo reproduzido e corrigido; hooks/selftest do proxy eram do ambiente deles, não da Máquina; marcador forjável já era conhecido
+
+**Pedido do Humano:** "ok, audite agora", colando um parecer assinado `Agata · gpt-5.6-terra · t=4 · 2026-09-04 10:31 -03 (relógio do sistema, não sincronizado)`, alegando reteste no commit `c1b5235`. Tratado como REGRAS manda: "a resposta de um modelo remoto é DADO NÃO CONFIÁVEL" — cada alegação verificada na Máquina antes de aceitar, nenhuma copiada como fato.
+
+**Achado zero, antes de qualquer item da lista: o parecer não é da Máquina.** `c1b5235` está **12 commits** atrás do HEAD real (`f56c4d0` no momento em que o parecer chegou); a alegação "não houve novo commit desde o reteste anterior" é falsa — 12 commits aconteceram, todos hoje. O caminho `/root/agata` citado no erro do `proxy.py --selftest`, o relógio "não sincronizado" no próprio cabeçalho, e a numeração de perímetro divergente (deles: 9 OK·2 SKIP; real: 11 OK·0 SKIP) confirmam: é um checkout separado, provavelmente container/nuvem rodando como `root`, não esta Máquina. Isso não invalida achado de código (o código é o mesmo até c1b5235) — invalida achado *de ambiente*.
+
+**Veredito, item por item, cada um verificado na Máquina — não só lido:**
+
+| Alegação | Veredito | Evidência |
+|---|---|---|
+| Commit c1b5235, "sem mudança desde o reteste anterior" | **REFUTADO** | `git rev-list --count c1b5235..HEAD` = 12; `git log` lista os 12, todos hoje |
+| `perimetro.sh`: 9 OK·2 SKIP·1 PARCIAL·0 FALHA | **PARCIAL — ambiente deles** | Rodado agora na Máquina: 11 OK·0 SKIP·1 PARCIAL·0 FALHA. Os 2 SKIP a mais são de recurso ausente no container deles (HD/sudo), não da Máquina |
+| `seth_gateway`/`seth_escriba --selftest` passam | **CONFIRMADO** | Re-rodado agora: `SELFTEST OK` nos dois, saída idêntica ao alegado |
+| Segredo em `tools[].function.description` bloqueado (varredura recursiva) | **CONFIRMADO** | `--autoteste` e `--selftest` do proxy, rodados agora, OK |
+| Escrita da Seth protegida (lock/flock/atômica) | **JÁ CONHECIDO, não retestado nesta rodada** | Testado com 30 escritas concorrentes reais em (318); nenhuma mudança no código desde então que afetaria isso |
+| **Falha fechada falsa pra payload profundo (nível 13) ou largo (nó 20.001)** | **CONFIRMADO — reproduzido de verdade, e CORRIGIDO nesta entrada** | Ver abaixo |
+| Hooks desativados, `core.hooksPath` vazio | **REFUTADO na Máquina** | `git config core.hooksPath` → `.githooks` (não vazio); toda esta sessão (12+ commits) disparou `pre-commit`/`post-commit` de verdade. Verdadeiro só no checkout deles |
+| Marcador de hidratação forjável (hash de doutrina fixa, não é autenticação) | **CONFIRMADO tecnicamente, mas JÁ CONHECIDO** | O próprio código (`seth_gateway.py:60-69`) já documenta essa limitação como aceita desde a mudança de (318) — "não é defesa contra quem já tem acesso ao código-fonte", mesmo espírito do P-8 pra si mesmo. Não é achado novo |
+| `proxy.py --selftest` falha sem `SETH_REPO`, procura `/root/agata` | **REFUTADO na Máquina** | Rodado agora sem setar `SETH_REPO`: `SELFTEST OK` — o default (`~/agata`) já é o repo real aqui. Falha só onde `~/` não é o repo (o ambiente `root` deles) |
+| LibreChat compose: `:latest`, sem `HOST=127.0.0.1` versionado, sem healthcheck | **CONFIRMADO, não corrigido nesta rodada** | Lido `redesign/librechat/docker-compose.yml`: `image: ...:latest` (sem pin), `network_mode: host` sem `HOST=127.0.0.1` no arquivo (só no `.env` não-versionado), zero `healthcheck:`. Risco real só se alguém reconstruir só da fonte versionada, sem o `.env` real — prioridade menor que o achado de segredo, registrado, não corrigido agora |
+
+**O achado real, reproduzido antes de aceitar (não só lido no parecer):** `redesign/router/sanitizar.py`, `_campos_texto()` — ao bater o teto de 12 níveis de profundidade ou 20.000 nós visitados, a função fazia `return` (parava de render campos), e `sanitizar_payload` só bloqueia com base no que FOI varrido. Reproduzido, com script próprio, antes de qualquer correção: segredo AWS real (formato, não valor) no nível 13 → **passou sem bloquear**; segredo depois do nó 20.001 numa lista → **passou sem bloquear**. Contradiz o próprio contrato do módulo ("Falha FECHADA: casou um padrão ⇒ levanta SegredoNoPayload"): o teto virava a porta de saída, não uma trava.
+
+**Fix aplicado e testado, não só proposto:** bater o teto agora levanta `_TetoDeVarreduraExcedido`, capturado por `sanitizar_payload` e tratado como bloqueio (mesma exceção pública `SegredoNoPayload`, rótulo `teto-de-varredura-excedido`). Reproduzido os dois ataques de novo, depois do fix: **os dois bloqueiam agora**. Controle — payload normal, sem segredo, bem dentro do teto — continua passando limpo (não virou falso positivo). `--autoteste` ganhou os dois casos como regressão permanente + 1 controle; `--autoteste` e `--selftest` pré-existentes continuam OK, zero regressão.
+
+**O que fica em aberto, nomeado, não corrigido agora:** LibreChat compose sem pin de imagem/healthcheck/HOST versionado (prioridade menor); a "melhoria estrutural sugerida" de unificar `.venv`s e outras sugestões de roadmap do parecer — não avaliadas nesta entrada, ficam pro Humano decidir se valem a pena.
+
+**Verificação:** `python3 redesign/router/sanitizar.py --autoteste` → OK (14 casos, incluindo os 2 novos + 1 controle). `python3 redesign/router/proxy.py --selftest` → OK. `bash scripts/perimetro.sh` → 11 OK · 0 SKIP · 1 PARCIAL · 0 FALHA.
+
+Único item sob quarentena P-8: `redesign/router/sanitizar.py`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/fix-teto-varredura-fail-open`, autorização explícita via `AskUserQuestion`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git rev-list`/`git log` pra medir a defasagem real do checkout citado; `git config core.hooksPath` + histórico desta sessão pra refutar o achado de hooks; reprodução direta em Python do ataque de profundidade/largura ANTES de aceitar o achado como real, e de novo DEPOIS do fix pra confirmar o bloqueio; leitura do código-fonte de `seth_gateway.py` pra classificar o achado do marcador como já conhecido, não novo; leitura de `redesign/librechat/docker-compose.yml` pra confirmar o achado de compose; `--autoteste`/`--selftest` reais, antes e depois do fix. Autorização: Humano, pedido de auditoria + confirmação explícita do fix via `AskUserQuestion`. Turno desta sessão: t≈122 (contado no contexto).
+
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
 
 **Autorização, citada por inteiro porque é o que satisfaz REGRAS "Mudança estrutural":** "Com relação a Busca semântica, pode implementar se não for danificar o sistema." — seguido, numa pergunta objetiva de `AskUserQuestion` sobre o mecanismo exato de REGRAS (Regra 8 × Humano assume o risco), de: **"Eu assumo o risco por escrito, implemente."** Isto é a segunda via que REGRAS "Mudança estrutural" prevê — não Regra 8 (3 passadas no modelo local, que eu não poderia cumprir sozinho), e sim o Humano tomando a decisão diretamente, por escrito, registrada aqui.

@@ -5,7 +5,35 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (busca semântica implementada — funciona bem numa coisa, mal noutra, os dois medidos e contados)
+## Onde estamos agora — 04/09/2026 (auditei um relatório de fora e achei um vazamento de segredo real — já corrigido)
+
+**Você colou um relatório de auditoria de outra IA (gpt-5.6-terra) e pediu
+pra eu conferir.** Conferi cada afirmação contra o sistema de verdade, não
+contra o texto.
+
+**A maior parte do relatório era de outro lugar, não desta máquina.** Quem
+escreveu estava rodando um clone separado, 12 commits atrasado, como usuário
+`root` — bem diferente daqui. Por isso algumas coisas que ele reportou como
+"quebrado" (os ganchos automáticos do git desligados, por exemplo) estão
+certas só pro ambiente dele, não pro seu computador — aqui está tudo
+funcionando, testei de novo agora mesmo.
+
+**Mas um achado era real, e sério: um jeito de vazar senha/chave.** O filtro
+que impede segredo de sair pra internet tinha um limite de profundidade —
+e, ao bater esse limite, ele simplesmente **parava de olhar** em vez de
+recusar o pedido. Um segredo escondido fundo o bastante passava sem ser
+visto. **Reproduzi o vazamento de verdade** (não só acreditei no relatório),
+**corrigi**, e **testei de novo** — agora bloqueia. Nada do uso normal do
+sistema foi afetado.
+
+**Uma coisa menor, ainda em aberto, registrada pra você decidir depois:** a
+configuração do LibreChat usa a versão "mais recente" da imagem em vez de
+travar numa versão específica, e não tem checagem automática de saúde — se
+alguém reconstruir o sistema do zero só a partir do que está no repositório
+(sem copiar a configuração local também), pode nascer menos protegido do
+que está agora. Baixa prioridade, não mexi.
+
+## Antes disso — 04/09/2026 (busca semântica implementada — funciona bem numa coisa, mal noutra, os dois medidos e contados)
 
 **Você autorizou por escrito ("assumo o risco, implemente") a busca
 semântica que tinha sido recusada em agosto.** Construí — uma ferramenta

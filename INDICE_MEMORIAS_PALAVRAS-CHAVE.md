@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra): achado real de vazamento de segredo reproduzido e corrigido; hooks/selftest do proxy eram do ambiente deles, não da Máquina; marcador forjável já era conhecido
+  palavras-chave: auditoria, camada, parecer, externo, gpt, terra, achado, real, vazamento, segredo, reproduzido, corrigido, hooks, selftest, proxy, eram, ambiente, deles, máquina, marcador, forjável, era, conhecido
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
   palavras-chave: busca, semântica, implementada, sob, autorização, escrita, humano, ferramenta, secundária, medida, vivo, boa, pra, tema, concreto, fraca, pergunta, abstrata, próprio, sistema
 (326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, scripts, preparar, export, indice, versão, exportação, sanitizada, índice, cano, drive, sob, fecha, plano, fases
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator de trechos do índice para dar a modelo em nuvem, sob P-8
   palavras-chave: fase, scripts, consultar, indice, extrator, trechos, índice, dar, modelo, nuvem, sob
-(298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
-  palavras-chave: fase, scripts, gerar, indice, derivado, índice, canon, público, consulta, externa, opção, sob
+(298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice …
+  palavras-chave: fase, scripts, gerar, indice, derivado, índice
 (297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do ` …
   palavras-chave: fase, projeto, documenta, fronteira, real
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de …
