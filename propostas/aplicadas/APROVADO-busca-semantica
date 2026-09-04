@@ -1,0 +1,11 @@
+Autorização explícita e por escrito do Humano, 04/09/2026: "Com relação a Busca
+semântica, pode implementar se não for danificar o sistema." + confirmação direta
+via AskUserQuestion: "Eu assumo o risco por escrito, implemente." Satisfaz REGRAS
+"Mudança estrutural" (Humano assume o risco por escrito, alternativa à Regra 8).
+scripts/busca_semantica.py -- ferramenta SECUNDÁRIA, sob demanda, nunca injetada
+em hidratação, usa o endpoint de embeddings já em produção (:20134, iGPU, zero
+nuvem). Não substitui grep/query_canon. Testado de verdade: selftest OK,
+reindex real (276 entradas, 33s), duas buscas reais medidas -- uma boa (achou
+os travamentos de suspend corretamente), uma fraca (não achou (115)/(293) nas
+buscas sobre "por que evitar vetor" -- rank 116º/150º de 276). Medição honesta,
+registrada em MEMÓRIAS, não escondida.

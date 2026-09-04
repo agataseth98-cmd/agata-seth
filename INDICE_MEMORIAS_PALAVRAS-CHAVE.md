@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
+  palavras-chave: busca, semântica, implementada, sob, autorização, escrita, humano, ferramenta, secundária, medida, vivo, boa, pra, tema, concreto, fraca, pergunta, abstrata, próprio, sistema
 (326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
   palavras-chave: bugfix, pré, emptivo, moc, missoes, quebraria, commit, futuro, corrigido, dano, acontecer
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, scripts, consultar, indice, extrator, trechos, índice, dar, modelo, nuvem, sob
 (298) DIÁRIO — 28/08/2026 · FASE 5: `scripts/gerar_indice_derivado.py` — índice do canon público para consulta externa (Opção A), sob P-8
   palavras-chave: fase, scripts, gerar, indice, derivado, índice, canon, público, consulta, externa, opção, sob
-(297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do `subir_esfera_projeto.py` (a allowlist do plano do Qwen não existe)
-  palavras-chave: fase, projeto, documenta, fronteira, real, subir, esfera, allowlist, plano, qwen, existe
+(297) DIÁRIO — 28/08/2026 · FASE 4.2: PROJETO.md documenta a fronteira real do ` …
+  palavras-chave: fase, projeto, documenta, fronteira, real
 (296) DIÁRIO — 28/08/2026 · FASE 3 decidida: Proposta 001 avança como camada de …
   palavras-chave: fase, decidida, proposta, avança, camada
 (295) DIÁRIO — 28/08/2026 · Gerador do vault ganha a nota do P-10 — gap de (293) …

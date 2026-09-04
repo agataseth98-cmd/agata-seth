@@ -5,7 +5,35 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (testei o que fiz há pouco e achei que ia quebrar uma checagem no futuro — corrigido antes de acontecer)
+## Onde estamos agora — 04/09/2026 (busca semântica implementada — funciona bem numa coisa, mal noutra, os dois medidos e contados)
+
+**Você autorizou por escrito ("assumo o risco, implemente") a busca
+semântica que tinha sido recusada em agosto.** Construí — uma ferramenta
+nova (`scripts/busca_semantica.py`), separada do resto, que você roda
+quando quiser buscar por "sentido" em vez de palavra exata. Não troca
+nada do que já existe; se você nunca rodar, nada muda.
+
+**Testei de verdade, os dois lados, sem esconder o que não foi bem:**
+- Perguntei "por que o computador trava quando volta de economia de
+  energia" — achou certinho as três anotações da investigação real
+  desse bug, nos três primeiros lugares.
+- Perguntei "por que o sistema prefere busca de texto simples em vez
+  de inteligência artificial" — **não achou** as duas anotações que
+  respondem exatamente essa pergunta, mesmo procurando entre as 30
+  primeiras de 276.
+
+**Por quê:** o motor que roda local (pequeno, de propósito — pra não
+depender de nuvem nem gastar dinheiro) é bom pra achar "quando algo
+aconteceu", fraco pra achar "por que decidimos algo assim" — pergunta
+mais abstrata. É a mesma limitação que já tinha sido medida em agosto
+quando a busca foi recusada da primeira vez — agora confirmada de novo
+com a ferramenta pronta na mão, não só em teoria.
+
+**Fica como ferramenta extra, opcional.** Não substitui a busca de
+palavra exata que o sistema já usa — essa continua sendo a fonte de
+verdade.
+
+## Antes disso — 04/09/2026 (testei o que fiz há pouco e achei que ia quebrar uma checagem no futuro — corrigido antes de acontecer)
 
 Antes de dar por fechado o item anterior (ligar as missões no grafo), testei
 se aquela mudança sobreviveria à checagem automática que confere se o
