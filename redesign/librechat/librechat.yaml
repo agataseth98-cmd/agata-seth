@@ -65,6 +65,7 @@ speech:
         - "am_adam"
         - "am_michael"
         - "bf_emma"
+        - "pf_dora"
 
 # --- MCP: memória local (vault Obsidian, read-only) ------------------------
 # canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.
