@@ -5,7 +5,48 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (auditoria + 6 correções de segurança)
+## Onde estamos agora — 04/09/2026 (voz em português + o vault do Obsidian ficou navegável)
+
+**Você pediu três coisas: a voz em português (pf_dora) que sumiu do Kokoro, reconferir
+o backup depois de reconectar o HD, e arrumar o Obsidian — a página inicial parecia
+vazia e tinha muita nota solta.**
+
+**Voz pf_dora: corrigida.** Ela já existia no motor de voz, só não estava na lista que
+aparece pra você escolher no LibreChat. Acrescentei e testei de verdade (o áudio saiu).
+Reiniciei o LibreChat pra pegar a mudança — já pode escolher ela nas Configurações.
+
+**HD: nada pra fazer.** O backup de quando o HD esteve conectado da última vez (03/09)
+já cobria tudo. Reconectar só deixou o sistema reconferir ao vivo — sem novo envio
+necessário.
+
+**"Início vazio": achei a causa. Não era o gerador, era uma sobra do próprio Obsidian.**
+Toda vez que um link interno não encontra a nota, o Obsidian cria uma páginazinha vazia
+com aquele nome na raiz do cofre — isso já era conhecido e ignorado de propósito. A
+página de verdade (`memoria/obsidian/INICIO.md`) sempre teve conteúdo; era essa sobra
+vazia que estava aberta na sua tela. Apaguei a sobra e reabri a aba na página certa.
+
+**"Muitas notas soltas": achei o motivo — o Obsidian nunca sabia que elas existiam.**
+O gerador do vault só desenhava as notas da história, regras, scripts e propostas —
+nunca soube que existem uns 120 outros documentos (a maioria do redesenho do sistema,
+já parte do dia a dia hoje). Criei uma página nova, "Documentos do repositório", que
+lista todos eles agrupados por pasta, com link direto pro arquivo real. Agora dá pra
+achar qualquer coisa pela página inicial.
+
+**No meio do trabalho, achei e consertei um bug que eu mesmo criei** (a checagem
+automática ia acusar erro no próximo commit por causa da mudança acima) — testado e
+corrigido antes de acontecer de verdade.
+
+**Um deslize meu, registrado sem esconder:** testando esse conserto, cheguei a criar
+um commit de teste pulando a checagem de segurança direto na história principal.
+Percebi antes de publicar, desfiz na hora (nunca chegou a sair da sua máquina) e refiz
+do jeito certo. Não teve efeito nenhum no sistema, mas você merece saber.
+
+**Ficou pra você decidir, não mexi:** três documentos antigos do redesenho
+(`REIDRATACAO-chat-3/4/6.md`) parecem só histórico — arquivo de "retomar a conversa"
+de sessões que já terminaram. Se quiser, posso mover pra `extras/` (onde ficam as
+coisas arquivadas), mas isso é escolha sua.
+
+## Antes disso — 04/09/2026 (auditoria + 6 correções de segurança)
 
 **Você pediu para auditar dois pareceres externos e "resolver todas as
 pendências" — inclusive a voz (Kokoro) que não tocava no LibreChat.**
