@@ -5,7 +5,16 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (achei por que tantos READMEs apareciam soltos no grafo — e limpei)
+## Onde estamos agora — 04/09/2026 (testei o que fiz há pouco e achei que ia quebrar uma checagem no futuro — corrigido antes de acontecer)
+
+Antes de dar por fechado o item anterior (ligar as missões no grafo), testei
+se aquela mudança sobreviveria à checagem automática que confere se o
+"mapa" do Obsidian está correto. Não sobreviveria — ia acusar erro toda vez
+que você commitasse algo, dali pra frente, mesmo estando tudo certo (a
+pasta de missões fica de fora do que essa checagem consegue enxergar
+sozinha). Corrigido antes de virar um alarme falso permanente.
+
+## Antes disso — 04/09/2026 (achei por que tantos READMEs apareciam soltos no grafo — e limpei)
 
 **Você mandou uma captura de tela do grafo do Obsidian perguntando por que
 tantos pontos apareciam soltos, sem ligação com nada.**

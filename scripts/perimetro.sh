@@ -696,16 +696,25 @@ p10_vault_derivado() {
     PERIMETRO_ESTADO="SKIP"; return 0
   fi
 
-  local tmp sha data hreal hesp
+  local tmp sha data hreal hesp missoes_md
   tmp="$(mktemp -d)" || { echo "P-10: mktemp falhou -- pulado."; PERIMETRO_ESTADO="SKIP"; return 0; }
   sha="$(git rev-parse HEAD)"
   data="$(git log -1 --format=%cI)"
+  # memoria/missoes/ é gitignorado do repo principal -- `git archive HEAD`
+  # nunca o inclui, então a sandbox abaixo não o vê. Calculado aqui, no repo
+  # real (que o tem), e repassado por env -- mesmo padrão de AGATA_CANON_SHA.
+  if [ -d memoria/missoes ]; then
+    missoes_md="$(git -c core.quotepath=false -C memoria/missoes ls-files '*.md' 2>/dev/null)"
+  else
+    missoes_md=""
+  fi
   if ! git archive HEAD | tar -x -C "$tmp" 2>/dev/null; then
     rm -rf "$tmp"
     echo "SUSPEITO (P-10): git archive HEAD falhou -- não dá pra conferir o vault."
     return 1
   fi
   if ! ( cd "$tmp" && AGATA_CANON_SHA="$sha" AGATA_CANON_DATA="$data" \
+         AGATA_MISSOES_MD="$missoes_md" \
          python3 scripts/gerar_obsidian.py >/dev/null 2>&1 ); then
     rm -rf "$tmp"
     echo "SUSPEITO (P-10): gerar_obsidian.py falhou ao rodar sobre HEAD -- gerador quebrado."

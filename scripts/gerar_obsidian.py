@@ -614,9 +614,20 @@ def main():
     # (mais estrita que a esfera do projeto), e PROJETO.md diz "modelos em
     # nuvem não veem". Linkar no grafo principal reduziria essa fronteira
     # justamente pro tipo de sessão (nuvem) que ela existe pra excluir.
+    # AGATA_MISSOES_MD (opcional): lista pronta, uma por linha, passada pelo
+    # ambiente -- mesmo padrão de AGATA_CANON_SHA/DATA. Necessário porque
+    # memoria/missoes/ é gitignorado do repo principal: um `git archive HEAD`
+    # (a sandbox do P-10) nunca o contém, então o `os.path.isdir` abaixo dá
+    # falso nesse ambiente e o P-10 acusaria SUSPEITO pra sempre, mesmo com
+    # tudo certo -- achado testando isto, não hipotético. perimetro.sh calcula
+    # a lista no repo real (que o tem) e repassa pra sandbox por variável.
     MISSOES_DIR = os.path.join(REPO, "memoria", "missoes")
     missoes_md = []
-    if os.path.isdir(MISSOES_DIR):
+    if os.environ.get("AGATA_MISSOES_MD") is not None:
+        missoes_md = sorted(
+            p for p in os.environ["AGATA_MISSOES_MD"].splitlines()
+            if p and not p.startswith("segunda-camada/"))
+    elif os.path.isdir(MISSOES_DIR):
         try:
             saida_git = subprocess.run(
                 ["git", "-c", "core.quotepath=false", "-C", MISSOES_DIR, "ls-files", "*.md"],

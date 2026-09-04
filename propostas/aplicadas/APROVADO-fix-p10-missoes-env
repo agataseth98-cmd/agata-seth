@@ -1,0 +1,10 @@
+Bugfix próprio, achado testando o commit anterior (325) antes mesmo de fazer
+push do problema: moc-missoes.md nunca seria reproduzível na sandbox do P-10
+(git archive HEAD não inclui memoria/missoes/, gitignorado do repo principal)
+-- P-10 acusaria SUSPEITO em todo commit futuro, não só uma vez. Corrigido com
+o mesmo padrão já usado pra AGATA_CANON_SHA/DATA: perimetro.sh calcula a lista
+no repo real e repassa por env (AGATA_MISSOES_MD); gerar_obsidian.py usa o env
+quando presente. Testado com git stash create (sem tocar main/hooks): árvore
+do vault sandbox bate byte a byte com o disco. Mesmo critério de autorização
+já usado hoje pra bugfixes próprios (MEMÓRIAS 320/321/323) -- sessão
+Claude Code na Máquina.

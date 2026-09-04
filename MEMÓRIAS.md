@@ -22,6 +22,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
+
+**Achado testando o próprio trabalho de (325), antes de reportar como fechado.** `memoria/missoes/` é gitignorado do repo principal — `git archive HEAD` (o mecanismo que a sandbox do P-10 usa pra regenerar o vault a partir só do que HEAD realmente tem) **nunca inclui essa pasta**. O `moc-missoes.md` novo de (325) dependia de ler esse diretório ao vivo — funciona no disco real, mas é irreproduzível na sandbox. Resultado, sem a correção: P-10 acusaria `SUSPEITO` em **todo commit dali pra frente**, não só uma vez — o tipo de falso positivo permanente que ensina a ignorar o controle.
+
+**Fix, mesmo padrão já usado pra `AGATA_CANON_SHA`/`AGATA_CANON_DATA`:** `scripts/perimetro.sh` calcula `git -c core.quotepath=false -C memoria/missoes ls-files` **no repo real** (que tem a pasta) e repassa o resultado por variável de ambiente (`AGATA_MISSOES_MD`) pra dentro da sandbox; `gerar_obsidian.py` usa esse valor quando presente, só volta a consultar o disco/git ao vivo quando a variável não existe (uso normal, fora da checagem do P-10).
+
+**Testado com `git stash create`** (commit solto, não move HEAD nem branch, não roda hook — mesmo método de (321), pra não repetir o deslize do commit `--no-verify` de mais cedo hoje): árvore completa do vault gerado na sandbox bate nome-a-nome e `moc-missoes.md` bate byte a byte contra o disco real.
+
+Dois arquivos sob quarentena P-8: `scripts/gerar_obsidian.py`, `scripts/perimetro.sh`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/fix-p10-missoes-env`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git archive`/`git stash create` reais pra reproduzir a sandbox do P-10 antes de reportar o achado de (325) como fechado; `diff` byte a byte entre disco e sandbox depois do fix. Autorização: mesmo critério de bugfix próprio já aplicado hoje em (320)/(321)/(323). Turno desta sessão: t≈108 (contado no contexto).
+
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
 
 **Pergunta do Humano, com captura de tela do grafo do Obsidian:** "ainda existem na visualização do gráfico inúmeros Readmes que não estão ligados a nada me diga por quê? Aproveite e verifique os outros arquivos sem ligação e ligue os onde faz mais sentido."

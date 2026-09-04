@@ -1,0 +1,57 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index dd277da..b843d1f 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -614,9 +614,20 @@ def main():
+     # (mais estrita que a esfera do projeto), e PROJETO.md diz "modelos em
+     # nuvem não veem". Linkar no grafo principal reduziria essa fronteira
+     # justamente pro tipo de sessão (nuvem) que ela existe pra excluir.
++    # AGATA_MISSOES_MD (opcional): lista pronta, uma por linha, passada pelo
++    # ambiente -- mesmo padrão de AGATA_CANON_SHA/DATA. Necessário porque
++    # memoria/missoes/ é gitignorado do repo principal: um `git archive HEAD`
++    # (a sandbox do P-10) nunca o contém, então o `os.path.isdir` abaixo dá
++    # falso nesse ambiente e o P-10 acusaria SUSPEITO pra sempre, mesmo com
++    # tudo certo -- achado testando isto, não hipotético. perimetro.sh calcula
++    # a lista no repo real (que o tem) e repassa pra sandbox por variável.
+     MISSOES_DIR = os.path.join(REPO, "memoria", "missoes")
+     missoes_md = []
+-    if os.path.isdir(MISSOES_DIR):
++    if os.environ.get("AGATA_MISSOES_MD") is not None:
++        missoes_md = sorted(
++            p for p in os.environ["AGATA_MISSOES_MD"].splitlines()
++            if p and not p.startswith("segunda-camada/"))
++    elif os.path.isdir(MISSOES_DIR):
+         try:
+             saida_git = subprocess.run(
+                 ["git", "-c", "core.quotepath=false", "-C", MISSOES_DIR, "ls-files", "*.md"],
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 8b48ccf..d84a57a 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -696,16 +696,25 @@ p10_vault_derivado() {
+     PERIMETRO_ESTADO="SKIP"; return 0
+   fi
+ 
+-  local tmp sha data hreal hesp
++  local tmp sha data hreal hesp missoes_md
+   tmp="$(mktemp -d)" || { echo "P-10: mktemp falhou -- pulado."; PERIMETRO_ESTADO="SKIP"; return 0; }
+   sha="$(git rev-parse HEAD)"
+   data="$(git log -1 --format=%cI)"
++  # memoria/missoes/ é gitignorado do repo principal -- `git archive HEAD`
++  # nunca o inclui, então a sandbox abaixo não o vê. Calculado aqui, no repo
++  # real (que o tem), e repassado por env -- mesmo padrão de AGATA_CANON_SHA.
++  if [ -d memoria/missoes ]; then
++    missoes_md="$(git -c core.quotepath=false -C memoria/missoes ls-files '*.md' 2>/dev/null)"
++  else
++    missoes_md=""
++  fi
+   if ! git archive HEAD | tar -x -C "$tmp" 2>/dev/null; then
+     rm -rf "$tmp"
+     echo "SUSPEITO (P-10): git archive HEAD falhou -- não dá pra conferir o vault."
+     return 1
+   fi
+   if ! ( cd "$tmp" && AGATA_CANON_SHA="$sha" AGATA_CANON_DATA="$data" \
++         AGATA_MISSOES_MD="$missoes_md" \
+          python3 scripts/gerar_obsidian.py >/dev/null 2>&1 ); then
+     rm -rf "$tmp"
+     echo "SUSPEITO (P-10): gerar_obsidian.py falhou ao rodar sobre HEAD -- gerador quebrado."
