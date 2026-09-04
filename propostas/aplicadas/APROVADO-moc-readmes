@@ -1,0 +1,7 @@
+Autorização explícita do Humano via AskUserQuestion, 04/09/2026, sessão Claude Code na
+Máquina. Pedido direto: "encontre todos os readmes do Vault e do sistema, organize-os
+da forma mais eficaz e elegante do estado da arte do obsidian". Novo MOC hub-of-hubs
+"READMEs do sistema" (14 arquivos, 3 grupos, título+resumo extraídos do próprio
+arquivo -- nada hardcoded). Junto: bugfix de 'moc-redesign' nunca ter entrado em
+NOTAS, então o link "Documentos do repositório" no INICIO nunca foi wikilink de
+verdade -- achado testando esta mesma mudança. Mesmo critério de MEMÓRIAS (318)-(320).

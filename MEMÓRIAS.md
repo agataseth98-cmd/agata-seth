@@ -22,6 +22,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
+
+**Pedido do Humano, continuação de (319)/(320):** "encontre todos os readmes do Vault e do sistema, organize-os da forma mais eficaz e elegante do estado da arte do obsidian."
+
+**O que existia:** 14 `README.md` rastreados no repositório — `redesign/` e 9 subpastas dele, `propostas/`, `redesign/propostas/`, `extras/arquivo-hermes/`, `extras/arquivo-redesign/`. Nenhum tinha lugar dedicado no vault: cada um só aparecia como uma linha entre os ~120 "documentos soltos" de (319), sem destaque, sem resumo, sem agrupamento por função.
+
+**O que mudou (`scripts/gerar_obsidian.py`):** novo `resumo_readme(path)` — extrai título (H1) e primeiro parágrafo de prosa de qualquer README, pulando linhas isoladas de metadado curto (`**Não é canon.**`) que não formam frase sozinhas, truncando em 280 caracteres. Novo `moc-readmes.md` — "MOC — READMEs do sistema", padrão hub-of-hubs (cada README já é o hub do próprio subsistema; este é o hub deles), 3 grupos: **Espinha em produção** (`redesign/` e os 9 READMEs de subpasta — router, grafo, evals, flows, mcp, librechat, obsidian, igpu, systemd), **Processo e quarentena** (`propostas/README.md`, `redesign/propostas/README.md`), **Arquivo histórico** (`extras/arquivo-hermes`, `extras/arquivo-redesign`). Um quarto grupo, "Não classificado", aparece sozinho se um README novo entrar no repo sem curadoria — não trava, só avisa. Nada hardcoded fora do agrupamento em si: título e resumo sempre vêm do arquivo.
+
+**Bugfix achado testando isto:** o `moc-redesign.md` de (319) nunca foi adicionado ao conjunto `NOTAS` do gerador — a função `link()` só produz `[[wikilink]]` para basenames em `NOTAS`; fora dela, devolve texto puro. Resultado real, confirmado no `INICIO.md` antes do fix: "Documentos do repositório" aparecia como texto solto, não clicável, desde o commit de (319). Corrigido junto com `moc-readmes` (os dois adicionados a `NOTAS`); `INICIO.md` ganhou uma segunda linha em "Mapas" para caber os dois MOCs novos sem espremer a primeira.
+
+**Verificação:** `python3 scripts/gerar_obsidian.py` rodado, `grep` confirma os dois `[[moc-readmes|...]]`/`[[moc-redesign|...]]` como wikilinks reais no `INICIO.md` gerado; conteúdo de `moc-readmes.md` conferido nota a nota contra os 14 arquivos-fonte. `bash scripts/perimetro.sh` → 10 OK · 1 SKIP (P-10, adiado — gerador muda neste commit) · 1 PARCIAL (P-4) · 0 FALHA.
+
+Único item sob quarentena P-8 (só `scripts/gerar_obsidian.py` muda comportamento); par `.diff`/`APROVADO-` em `propostas/aplicadas/moc-readmes`, autorização explícita do Humano via `AskUserQuestion`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura dos 14 READMEs reais antes de desenhar os grupos; `python3 scripts/gerar_obsidian.py` + `grep`/`cat` no vault gerado pra confirmar wikilinks e resumos; `bash scripts/perimetro.sh` repetido. Autorização: Humano, `AskUserQuestion`, nesta sessão. Turno desta sessão: t≈68 (contado no contexto).
+
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
 
 **Pedido do Humano, continuação de (319):** "mova o que for coerente para extras."

@@ -175,6 +175,36 @@ def secoes(texto):
     return out
 
 
+def resumo_readme(path):
+    """Título (H1) + primeiro parágrafo de prosa de um README -- pula linhas
+    de metadado isoladas (`**Não é canon.**`, `**Tarefa:** ...`) que não
+    formam frase por si, pra pegar o parágrafo que explica o "o quê"."""
+    t = ler(path) or ""
+    linhas = t.split("\n")
+    titulo = next((ln[2:].strip() for ln in linhas if ln.startswith("# ")), os.path.basename(path))
+    titulo = re.sub(r"^redesign/\S*\s*—\s*", "", titulo)
+    par, colhendo = [], False
+    for ln in linhas:
+        s = ln.strip()
+        if s.startswith("# "):
+            continue
+        if not s:
+            if colhendo:
+                break
+            continue
+        if s.startswith("##"):
+            break
+        so_negrito_curto = re.fullmatch(r"\*\*[^*]+\*\*[.:]?", s) and len(s) < 40
+        if so_negrito_curto and not colhendo:
+            continue
+        par.append(s)
+        colhendo = True
+    resumo = " ".join(par).strip()
+    if len(resumo) > 280:
+        resumo = resumo[:277].rstrip() + "…"
+    return titulo, resumo
+
+
 def cabecalho_arquivo(path):
     """primeira frase útil de um script: docstring ou 1ª linha de comentário."""
     t = ler(path) or ""
@@ -269,7 +299,8 @@ def main():
 
     for b in ["INICIO", "estado", "timeline", "_LEIA",
               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
-              "moc-controles", "moc-propostas", "moc-esferas"]:
+              "moc-controles", "moc-propostas", "moc-esferas",
+              "moc-redesign", "moc-readmes"]:
         NOTAS.add(b)
 
     # -------- religação de um corpo de texto
@@ -447,6 +478,28 @@ def main():
             chave = partes[0]
         grupos.setdefault(chave, []).append(p)
 
+    # -------- MOC dedicado: todo README.md do repositório, com título +
+    # resumo extraídos do próprio arquivo (hub-of-hubs -- cada README já é
+    # o hub do seu subsistema; este é o hub deles).
+    GRUPO_README = [
+        ("Espinha em produção (redesign/)", (
+            "redesign/README.md", "redesign/router/README.md",
+            "redesign/grafo/README.md", "redesign/grafo/evals/README.md",
+            "redesign/grafo/flows/README.md", "redesign/mcp/README.md",
+            "redesign/librechat/README.md", "redesign/obsidian/README.md",
+            "redesign/igpu/README.md", "redesign/systemd/README.md",
+        )),
+        ("Processo e quarentena", (
+            "propostas/README.md", "redesign/propostas/README.md",
+        )),
+        ("Arquivo histórico (extras/)", (
+            "extras/arquivo-hermes/README.md", "extras/arquivo-redesign/README.md",
+        )),
+    ]
+    readmes_vistos = {p for _, ps in GRUPO_README for p in ps}
+    extras_achados = sorted(p for p in todos_md
+                             if os.path.basename(p) == "README.md" and p not in readmes_vistos)
+
     # -------- MOCs
     por_tipo = {}
     for e in entradas:
@@ -512,6 +565,36 @@ def main():
         L.append("")
     escrever("moc-redesign.md", L)
 
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+    n_readmes = sum(len(ps) for _, ps in GRUPO_README) + len(extras_achados)
+    L += [f"# MOC — READMEs do sistema ({n_readmes})", "",
+          "> [!info] Hub dos hubs. Cada README já é a porta de entrada do seu "
+          "subsistema (a maioria começa com `## Estado`, uma tabela de tarefas "
+          "✅/⏳); esta página só ajuda a achar qual ler primeiro. Título e resumo "
+          "vêm do próprio arquivo — não editar aqui, corrigir na fonte.", ""]
+    for titulo_grupo, caminhos in GRUPO_README:
+        L.append(f"## {titulo_grupo} ({len(caminhos)})")
+        L.append("")
+        for p in caminhos:
+            titulo, resumo = resumo_readme(os.path.join(REPO, p))
+            L.append(f"**[{titulo}](../../{p})** — `{p}`")
+            if resumo:
+                L.append(f"> {resumo}")
+            L.append("")
+        L.append("")
+    if extras_achados:
+        L.append(f"## Não classificado ({len(extras_achados)})")
+        L.append("> [!warning] README novo desde a última curadoria deste MOC — "
+                  "achado por varredura, não posicionado num grupo ainda.")
+        L.append("")
+        for p in extras_achados:
+            titulo, resumo = resumo_readme(os.path.join(REPO, p))
+            L.append(f"**[{titulo}](../../{p})** — `{p}`")
+            if resumo:
+                L.append(f"> {resumo}")
+            L.append("")
+    escrever("moc-readmes.md", L)
+
     # -------- painel de estado
     onde = ler(os.path.join(REPO, "ONDE_ESTAMOS.md")) or ""
     m_ult = re.search(r"## Última atualização\n(.+?)(?:\n##|\Z)", onde, re.S)
@@ -546,7 +629,8 @@ def main():
         f"- {link('moc-memoria','Memória')}  ·  {link('moc-regras','Regras')}  ·  "
         f"{link('moc-projeto','Projeto')}",
         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
-        f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}  ·  "
+        f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
+        f"- {link('moc-readmes','READMEs do sistema')}  ·  "
         f"{link('moc-redesign','Documentos do repositório')}", "",
         "## Como ler o grafo",
         "Cada entrada de MEMÓRIAS é um nó; `(n)` no texto virou aresta. Regras, "

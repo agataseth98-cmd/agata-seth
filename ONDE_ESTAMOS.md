@@ -5,7 +5,23 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (varredura: 50 documentos antigos do redesenho arquivados)
+## Onde estamos agora — 04/09/2026 (os 14 READMEs do sistema ganharam uma página própria no Obsidian)
+
+**Você pediu: "organize os READMEs do jeito mais eficaz e elegante do Obsidian."**
+
+O vault tem 14 arquivos `README.md` — um de cada peça do sistema (o gateway, o
+grafo, o LibreChat, a iGPU, etc). Até agora eles ficavam perdidos entre uma
+centena de outros documentos, sem lugar de destaque. Criei uma página nova,
+"READMEs do sistema", que os agrupa por função — o que está rodando de
+verdade, o que é processo/aprovação, o que é arquivo histórico — com o
+título e o resumo de cada um puxados automaticamente do próprio arquivo
+(nada digitado por mim, então nunca fica desatualizado se o README mudar).
+
+**Achei outro bug meu, da varredura de mais cedo:** o link "Documentos do
+repositório" que criei antes nunca virou link de verdade — parecia clicável
+mas era só texto. Corrigido junto.
+
+## Antes disso — 04/09/2026 (varredura: 50 documentos antigos do redesenho arquivados)
 
 **Você pediu: "mova o que for coerente para extras."**
 
