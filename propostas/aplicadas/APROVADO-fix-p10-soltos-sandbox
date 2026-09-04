@@ -1,0 +1,7 @@
+Autorização explícita do Humano via AskUserQuestion, 04/09/2026, sessão Claude Code na
+Máquina. Corrige bug próprio (mesma sessão): a captura de .md soltos rodava depois das
+notas do próprio gerador já existirem em disco no sandbox do P-10 (sem .git), inflando a
+contagem pra 565; e o fallback sem git usava os.walk sem excluir memoria/obsidian/. Ambos
+corrigidos: captura movida pro topo de main() (memoria/obsidian/ ainda vazio) + exclusão
+explícita como defesa extra. Testado com git stash create (sem tocar main/hooks) -- vault
+sandbox bate byte a byte com o vault do disco.

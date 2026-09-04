@@ -195,6 +195,28 @@ def main():
         shutil.rmtree(SAIDA)
     os.makedirs(SAIDA)
 
+    # Lista de .md rastreados capturada AGORA, com memoria/obsidian/ ainda vazio --
+    # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
+    try:
+        todos_md = sorted(subprocess.run(
+            ["git", "-C", REPO, "ls-files", "*.md"],
+            capture_output=True, text=True, check=True).stdout.splitlines())
+    except Exception:
+        # Sem .git -- só acontece na sandbox do P-10 (checkout de `git archive`,
+        # sem metadado; roda o gerador de novo pra conferir contra o disco real).
+        # os.walk sem filtro é seguro aqui: `git archive` por definição só extrai
+        # arquivo rastreado, e memoria/obsidian/ (gitignorado) nunca é extraído --
+        # exclui mesmo assim, de propósito, caso essa premissa mude um dia.
+        achados = []
+        for raiz, dirs, arquivos in os.walk(REPO):
+            dirs[:] = [d for d in dirs
+                       if d != "__pycache__" and os.path.join(raiz, d) != SAIDA]
+            for a in arquivos:
+                if a.endswith(".md"):
+                    rel = os.path.relpath(os.path.join(raiz, a), REPO)
+                    achados.append(rel.replace(os.sep, "/"))
+        todos_md = sorted(achados)
+
     reg_txt = ler(os.path.join(REPO, "REGRAS.md"))
     proj_txt = ler(os.path.join(REPO, "PROJETO.md"))
     ref_txt = ler(os.path.join(REPO, "PROJETO_REFERENCIA.md"))
@@ -410,14 +432,9 @@ def main():
         escrever(f"controles/{c.lower()}.md", linhas)
 
     # -------- documentos soltos do repositório (fora do que já virou nota estruturada)
+    # `todos_md` já foi capturado no topo de main(), antes de qualquer escrita.
     JA_COBERTOS = {"REGRAS.md", "PROJETO.md", "PROJETO_REFERENCIA.md", "MEMÓRIAS.md"}
     JA_COBERTOS |= {arq for arq, _ in CANON_INTEIROS}
-    try:
-        todos_md = sorted(subprocess.run(
-            ["git", "-C", REPO, "ls-files", "*.md"],
-            capture_output=True, text=True, check=True).stdout.splitlines())
-    except Exception:
-        todos_md = []
     soltos = [p for p in todos_md if p not in JA_COBERTOS]
     grupos = {}
     for p in soltos:
