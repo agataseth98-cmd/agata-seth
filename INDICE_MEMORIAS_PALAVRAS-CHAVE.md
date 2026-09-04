@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
+  palavras-chave: doutrina, acesso, graduado, juiz, seth, caso, especial, registro, responsabilização
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
   palavras-chave: config, fix, modelo, auto, coding, goose, quebrar, primeira, mensagem, correção, survival
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: remoto, ganha, fallback, glm, gemini, indisponível, tenta, flash, falharam, aborta, cai, pro, local
 (286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
   palavras-chave: cano, esfera, projeto, scripts, subir, sobe, arquivo, memoria, missoes, agata, sistema, drive, file, aplicado, sob, risco, assumido, humano, escrito
-(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
-  palavras-chave: sincronização, contas, arquitetura, esferas, credencial, google, conta, projeto, configurada, oauth, escopo, drive, file
+(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas e …
+  palavras-chave: sincronização, contas, arquitetura
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/apli …
   palavras-chave: limpeza, par, esferas, movido, propostas, apli
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + revers …

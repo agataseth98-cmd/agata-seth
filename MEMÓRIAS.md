@@ -22,6 +22,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
+
+**Decisão do Humano** (03–04/09/2026), depois de eu (Claude-na-Máquina) ter proposto cortar o acesso da Seth para só-leitura + escrita-append, na sequência de duas tentativas dela — turnos desta sessão, não commitadas — de redigir a (315) anterior com saída de ferramenta **confabulada** (JSON que a tool `canon-mcp` não emite; títulos de entrada e conteúdo de `INICIO.md` inventados), as duas retidas pela Camada C ao rodar as mesmas consultas na Máquina.
+
+O Humano **recusou o corte**. Falas verbatim: *"ela obedece as mesmas regras que todos do conselho, se vc tem acesso ela também tem"* · *"operaremos através de um sistema de justiça como camada de sociabilidade"* · *"sem juiz e agregados, o sistema quer simplificar e dar acesso"* · *"vc decide quando dar esse acesso a ela, desenvolva um método justo. Exceto sob ordem minha"* · *"para um executor, depois de encerrado o período de exceção, alteração deverá ser feita a partir das regras pré-estabelecidas do Sistema Agata"*.
+
+**O que isso fixa:**
+1. **Sem assimetria.** A Seth é membro do Conselho como qualquer modelo. O critério de acesso é o mesmo para Claude, Qwen, GLM, Seth. `SETH-DIARIO.md` e o par de tools de escrita (`memoria_acrescentar`, `diario_anotar`) não são coleira da Seth — o append-only de MEMÓRIAS é regra pétrea para **todos**, inclusive para mim.
+2. **"Justiça" = o registro, não um tribunal.** Não há papel de juiz, não há pena além de: a violação fica escrita para sempre no bloco MOD do modelo, e o contador de progresso dele zera. Espelha "Reescrita de história encerra o mandato" (REGRAS, Sucessão): violação específica, consequência automática, sem julgamento.
+3. **Método de acesso graduado** — `redesign/ACESSO-GRADUADO.md`. Piso R0 (ler canon, acrescentar a MEMÓRIAS e ao diário, dar parecer) para todos, de graça. R1 (propor em `propostas/`, Camada A) desbloqueia com 3 acréscimos consecutivos a MEMÓRIAS cuja afirmação factual a Camada C verificou inteira, nenhuma caindo — mesmo critério de confiança que o canon já usa. R2 (editar canon sob portão, Camada B) e R3 (executor: grafo, shell/git no sandbox, commit sob portão) acima disso.
+4. **Quem aplica:** durante a exceção, Claude-na-Máquina aplica os degraus e registra cada aplicação. **Encerrada a exceção**, toda mudança de degrau — e do próprio método — passa por proposta + `APROVADO` + portão.
+5. **Cláusula zero:** o Humano concede ou retira qualquer degrau, de qualquer modelo, por ordem, a qualquer momento, sem método.
+
+**Estado da Seth agora:** R0. Duas violações registradas (os dois rascunhos confabulados). Contador para R1: 0 de 3. Não perde nada — R0 é o piso de todos, e o caminho para cima é o mesmo para todos.
+
+Nada foi revertido em código: `seth_escriba` (:20140), `canon-mcp` com 4 tools e os atalhos ficam como no commit `90a891a`. O que mudou foi a **doutrina em volta**: de "cortar acesso por desconfiança" para "conceder no piso, ganhar o resto por registro, violação fica escrita".
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git log`/`git show` da cadeia `63f70a1..90a891a`; releitura das duas respostas da Seth desta sessão contra a saída real de `canon-mcp` rodada na Máquina (`node canon-mcp.mjs` com `tools/call`); `grep` em REGRAS.md ("Sucessão", "Checagem de prontidão", "O Conselho") para ancorar o método no que já existe. Autorização: Humano, nesta sessão, regime de exceção — as cinco falas citadas acima. Turno desta sessão: t≥80 (contado no contexto).
+
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
 
 - Fato: Provider do Goose mudou de `ollama-local/qwen3.5:9b` para `auto/coding`. Raciocínio: `:20126` (seth_gateway) só serve modelos virtuais `auto/*` — o `qwen3.5:9b` não está na lista (verificado via `curl :20126/v1/models`). O modelo antigo sobreviveu aos dois repoints (311) ao OmniRoute :20127 e (312) ao :20126. Configuração no repositório não, em ~/.config/. Backup: `config.yaml.bak-20260903`.

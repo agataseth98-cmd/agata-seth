@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
 (312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/agata/.env` · hidratação renomeada · `seth_gateway` (:20126) + frentes sob demanda + atalhos
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
 (287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
 (286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
-(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
+(285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas e …
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/apli …
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + revers …
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a e …
