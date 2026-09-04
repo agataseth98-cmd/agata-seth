@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")

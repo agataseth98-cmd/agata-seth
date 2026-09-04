@@ -22,6 +22,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
+
+**Pedido do Humano:** avaliar a Seth com base no que já foi verificado hoje, e produzir uma orientação pra ele repassar a ela — não uma nova investigação, síntese do que já está registrado.
+
+**Padrão, sem inventar achado novo:** a Seth acerta consistentemente quando a resposta depende de **ler/repetir um número já medido por outra entrada** — (331) confirmou os dois casos numéricos citados por ela (busca semântica: 0,880/0,853, ranks 116º/150º de 276; numeração pré-(49) não-única) batendo exato com o disco. Ela erra consistentemente quando a resposta depende de **afirmar existência ou estado sem checar**:
+- Formato de Regra 1: reprovou no linter em (331) (turno/citação mal formatados, bloco de prontidão ausente) **e de novo hoje**, categoria diferente do mesmo defeito — o texto "Camada C" citado pelo Humano se assina duas vezes como `t=4` mas cita duas entradas diferentes como "última lida" ((332) e (334)), achado em (335).
+- Arquitetura desatualizada usada para descrever mecanismo: citou `.hermes.md` como ponto único de falha em (331), removido em (312) um dia antes.
+- Fabricação de estrutura inexistente: propôs mover `memoria_old/` ((334)) — pasta que `git log --all` confirma nunca ter existido neste repositório, categoria diferente de "desatualizado" (nunca foi real, não é questão de data).
+- Alegação de execução não verificável: "confirmei eu mesmo" no texto "Camada C" não dá pra confirmar sem saber se veio do chat (`seth_gateway`/LibreChat, sem shell) ou do Goose ("Seth (agente)", com shell real) — `lacuna` nomeada em (335), não resolvida aqui.
+
+**Relevância pro regime de auditoria:** PROJETO.md, "Cérebro" — Seth sob regime desde (140), saída "até o Humano pedir o contrário — evento, não prazo" (141). Nada do padrão de hoje sugere mudar isso; reforça o motivo dele existir — mesmo com raciocínio correto quando parte de fato verificado, ela erra especificamente na categoria que o regime existe pra pegar (afirmar sem checar).
+
+**Entregável:** orientação de ~700 palavras, endereçada à Seth (não ao Humano), citando as quatro falhas acima com evidência e um pedido concreto (rodar `verificar_cabecalho.py` no próprio texto antes de enviar; confirmar existência de arquivo/pasta antes de propor mudança nele; declarar explicitamente quando não tem shell em vez de alegar confirmação). Mostrada inline nesta sessão e salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`, para o Humano copiar e enviar.
+
+**Verificação:** nenhum fato novo — os quatro pontos citam (331)/(334)/(335) e `git log --all -- memoria_old` (repetido, mesmo resultado de antes). `bash scripts/perimetro.sh` → sem FALHA.
+
+Nenhum arquivo de comportamento tocado — só registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura de (331)/(334)/(335) antes de sintetizar, sem reafirmar nada que não estivesse já verificado nelas; nenhum comando novo rodado além de confirmar o arquivo de orientação foi escrito no caminho certo. Autorização: Humano, pedido direto de avaliação + orientação para relay, nesta sessão. Turno desta sessão: t=5 (contado no contexto).
+
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
 
 **O que o Humano apontou, com razão parcial:** "os textos são atuais, os mecanismos de conferência de data e hora não funcionam corretamente... são erráticos a depender de cada modelo e seu ambiente em nuvem" — junto de um segundo texto, assinado "Seth · t=4 · auditar auditor (Camada C)", que refaz a mesma auditoria item a item e chega aos mesmos 10 veredictos de (334).

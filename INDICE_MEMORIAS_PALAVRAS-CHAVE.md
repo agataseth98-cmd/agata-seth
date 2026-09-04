@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
+  palavras-chave: avaliação, capacidades, seth, síntese, pedido, humano, vamos, avaliar, luz, descobertas, hoje, orienta, envio, ela, orientação, escrita, relay, salva, área, trabalho, orientacao
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
   palavras-chave: misturou, fatos, força, diferente, datar, parecer, qwen, parte, sólida, conteúdo, descreve, estado, superado, muda, fraca, texto, escrito, retirada
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
