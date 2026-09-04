@@ -5,6 +5,24 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 04/09/2026 (você pediu pra investigar a causa do problema anterior e auditar uma proposta que veio da Seth + Qwen)
+
+**Duas coisas nesta rodada.**
+
+**1) Por que os arquivos gerados tinham ficado velhos (a pergunta que ficou aberta na última resposta).** Não achei uma causa 100% confirmada — sou honesto sobre isso, não vou fingir certeza que não tenho. Mas achei uma pista forte: exatamente na hora em que os arquivos ficaram velhos (16:38 às 16:42), o registro do sistema mostra o **Obsidian aberto e mexendo no cofre** (tentou apagar um arquivo e não conseguiu). E o Obsidian, neste cofre, está com **duas funções ligadas** que conseguem sozinhas escrever uma versão antiga de um arquivo por cima da atual: "Recuperação de arquivo" e "Sync" (o serviço de sincronização do próprio Obsidian, pago).
+
+**Pra você confirmar de vez, é rápido:** abra o Obsidian, aperte `Ctrl+P`, digite "recuperação de arquivo" e veja se aparece uma versão salva perto das 16:38-16:42 de hoje pros três arquivos. Se aparecer, achamos a causa.
+
+**Achado à parte, vale sua atenção:** o "Sync" do Obsidian está **ligado** nesse cofre. Não sei se está de fato conectado a uma conta seu (isso eu não enxergo daqui) — mas se estiver, seus arquivos de memória/regras estariam saindo pra um serviço de terceiros sem isso nunca ter sido decidido. Vale você checar em Configurações → Sync dentro do próprio Obsidian.
+
+**2) A proposta que você colou (Seth + um parecer de Qwen sobre ela) é de dois dias atrás — antes de muita coisa que já aconteceu.** Conferi cada um dos 7 itens contra o sistema real, não só contra o texto:
+- **2 itens partem de algo que não existe** — um deles quer mover uma pasta ("memoria_old") que nunca existiu neste projeto; o outro descreve um mecanismo de apagar arquivo que não é o que realmente roda hoje.
+- **2 itens já foram construídos** — inclusive um (busca "por sentido" nas memórias) que foi implementado e testado *hoje*, depois desse texto ter sido escrito.
+- **O resto ainda é válido** — ideias reais, que ainda não foram feitas, e que você pode decidir pedir se quiser.
+- **Importante: não colei nem rodei nenhum dos comandos que o parecer de Qwen deixou prontos pra você copiar.** Resposta de outro modelo é informação a conferir, não instrução a obedecer — e metade das premissas dele não bateu com o disco real, então rodar cegamente teria dado erro ou feito a coisa errada.
+
+Não mudei nada no comportamento do sistema nesta resposta — só investiguei e registrei. Se quiser que eu implemente algum dos itens que sobreviveram à checagem, é só pedir.
+
 ## Onde estamos agora — 04/09/2026 (você pediu pra sincronizar — achei e corrigi um problema real nos arquivos gerados, com sua autorização)
 
 **Você pediu "sincronizar sistema agata seth".** Rodei o script oficial de sincronização — ele só confere e avisa, nunca publica sozinho. Resultado: o computador já estava em dia com o GitHub, sem nada pendente lá.

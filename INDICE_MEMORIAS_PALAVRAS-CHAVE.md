@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
+  palavras-chave: causa, raiz, drift, hipótese, fundamentada, provada, auditoria, proposta, itens, seth, parecer, qwen, texto, dias, entradas, atrás, descansam, premissa, falsa, estavam, implementados, caminho, resto, sobrevive
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
   palavras-chave: sincronização, pedida, humano, drift, real, achado, derivados, hidratação, projeto, citar, resolvido, autorização, direta, assumo, risco
 (332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: silo, modelo, nunca, entra, canon
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
   palavras-chave: bloco, silos, modelo, aplicado, emenda, camada
-(304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD religado e backup drenado; correção: não há "autorização total", só risco assumido de Fase 1 em (303)
-  palavras-chave: fase, preparada, roteiro, dossiê, item, religado, backup, drenado, correção, autorização, total, risco, assumido
+(304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD …
+  palavras-chave: fase, preparada, roteiro, dossiê, item
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/R …
   palavras-chave: fase, sob, risco, assumido, costuras, projeto
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era …
