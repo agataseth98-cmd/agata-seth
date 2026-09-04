@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
+  palavras-chave: artefatos, publicados, agata, documentação, sistema, novo, atualizado, perder, foto
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
   palavras-chave: moc, readmes, sistema, vault, hub, hubs, arquivos, bugfix, link, inicio, pra, redesign, nunca, wikilink, verdade
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: carimbo, arvore, suja, contava, arquivo, rastreado, fazia, reprovar, sozinho, corrigido, olhar
 (293) DIÁRIO — 28/08/2026 · Gerador do vault vira determinístico (carimbo de commit no lugar do relógio) + controle P-10 (derivado confere com a fonte) + `verificar_token.py` versionado + fronteira de (115) decidida
   palavras-chave: gerador, vault, vira, determinístico, carimbo, commit, lugar, relógio, controle, derivado, confere, fonte, verificar, token, versionado, fronteira, decidida
-(292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimulado e cirúrgico: linha em PROJETO.md + item na "Checagem de prontidão" do REGRAS.md
-  palavras-chave: uso, vault, seth, passa, disponível, estimulado, cirúrgico, linha, projeto, item, checagem, prontidão, regras
+(292) DIÁRIO — 27/08/2026 · Uso do vault pela Seth passa de disponível a estimul …
+  palavras-chave: uso, vault, seth, passa, disponível, estimul
 (291) DIÁRIO — 27/08/2026 · Seth passa a navegar o vault Obsidian a priori: pont …
   palavras-chave: seth, passa, navegar, vault, obsidian, priori, pont
 (290) DIÁRIO — 27/08/2026 · Vault Obsidian completo: TODO o sistema (entradas + …

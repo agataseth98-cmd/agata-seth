@@ -5,7 +5,27 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (os 14 READMEs do sistema ganharam uma página própria no Obsidian)
+## Onde estamos agora — 04/09/2026 (dois artefatos: um mapa novo dos READMEs, e a apresentação de arquitetura atualizada)
+
+**Você pediu um artefato novo resumindo os READMEs, na mesma cor do "Sistema
+Agata", e para atualizar aquele sem perder o que já tinha.**
+
+**Novo — "Agata — Documentação do Sistema":**
+https://claude.ai/code/artifact/0cda3126-b5b8-4590-ad6d-a10e8bf83094
+Os 14 READMEs, agrupados por função, cada um com um resumo e uma nota de
+"quando vale a pena abrir este". Mesma paleta e tipografia do artefato de
+arquitetura — os dois formam um par.
+
+**Atualizado — "Sistema Agata"** (mesmo link de sempre — nada de novo pra
+guardar):
+https://claude.ai/code/artifact/b969d7fb-017d-442d-a4fa-788d053c3743
+Não apaguei nada do que já estava escrito sobre o dia 03/09 — só acrescentei
+um aviso no topo daquela seção dizendo "isto é a foto de 03/09" e, embaixo,
+o que mudou desde então (a voz nova, os mapas do Obsidian, a faxina).
+Mesmo espírito da história do sistema: corrige-se acrescentando, nunca
+apagando.
+
+## Antes disso — 04/09/2026 (os 14 READMEs do sistema ganharam uma página própria no Obsidian)
 
 **Você pediu: "organize os READMEs do jeito mais eficaz e elegante do Obsidian."**
 

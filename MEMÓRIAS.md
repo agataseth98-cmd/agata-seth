@@ -22,6 +22,20 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
+
+**Pedido do Humano, fechando a sequência (319)-(321):** um artefato novo resumindo os 14 READMEs e como achá-los, mesma paleta do artefato "Sistema Agata" (arquitetura), e atualizar este último sem apagar o que já tinha.
+
+**Não é canon** — artefatos Claude ficam fora do repositório, este registro é só rastreabilidade. Nenhum arquivo do repo mudou nesta entrada.
+
+**Novo: "Agata — Documentação do Sistema"** — `https://claude.ai/code/artifact/0cda3126-b5b8-4590-ad6d-a10e8bf83094`. Reusa a paleta e os tokens exatos do "Sistema Agata" (mesmos `--accent`/`--good`/`--gate`/`--gap`, mesmo par Archivo+IBM Plex Sans+IBM Plex Mono, mesmo componente de TOC fixo + `parthead`). Conteúdo: os 14 READMEs agrupados em produção/processo/histórico (mesmos 3 grupos de `moc-readmes.md`), cada um com título+resumo+"quando ler"; um diagrama mostrando `INICIO.md` → `moc-readmes.md`/`moc-redesign.md`; tabela de consulta rápida; os 4 canônicos que não são README.
+
+**Atualizado: "Sistema Agata"** — mesma URL de sempre (`.../b969d7fb-017d-442d-a4fa-788d053c3743`), sem perder o documento de 03/09. Mudança cirúrgica, no espírito append-only do próprio canon: `meta-row` do topo (HEAD, MEMÓRIA) levado a `e7d2d5c`/(321); a Parte V ("Estado real da máquina — 03/09/2026") ganhou um `callout` de atualização no topo — nada do texto de 03/09 foi apagado ou reescrito, só marcado como "retrato daquela data" e seguido do que mudou (voz `pf_dora`, os 2 MOCs novos do vault, a faxina de 50 documentos, os 2 bugs achados e corrigidos). Rodapé ganhou as duas datas de publicação lado a lado.
+
+**Mecânica de publicação, registrada porque não foi trivial:** a primeira tentativa de repúblicar foi recusada — o sistema exige ter lido o arquivo salvo da versão viva **por inteiro via `Read`**, e a exibição automática do `action: read` anterior não contava como leitura formal. Segunda tentativa (depois de `Read` explícito das 1151 linhas) também foi recusada, dizendo conteúdo idêntico a uma tentativa já recusada — resolvido buscando a URL de novo (`action: read` fresco) e publicando a partir desse fetch. Nenhum conteúdo foi perdido nas tentativas — só a ordem de operações teve que ser exata.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa (1151 linhas) do artefato existente antes de editar; `bash scripts/estado_para_eco.sh` pra HEAD/MEMÓRIA reais no momento da publicação; conferência visual do HTML gerado (tags balanceadas) antes de publicar. Autorização: Humano, pedido direto nesta sessão. Turno desta sessão: t≈75 (contado no contexto).
+
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
 
 **Pedido do Humano, continuação de (319)/(320):** "encontre todos os readmes do Vault e do sistema, organize-os da forma mais eficaz e elegante do estado da arte do obsidian."
