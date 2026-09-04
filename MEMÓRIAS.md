@@ -22,6 +22,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
+
+**Contexto.** Sessão do Claude Code na nuvem (clone fresco do repo, sem a Máquina, sem os hooks instalados), a pedido do Humano: "sincronizar sistema agata" — no sentido do glossário de REGRAS (conferir a cópia contra `origin/main`), não publicar.
+
+**Estado conferido ao vivo:** HEAD do clone = `origin/main` = `3b826f4`; árvore limpa; `sync: PASS · REGRAS=ee559ad1 · MEMÓRIAS=b3c9123a · HEAD=3b826f4` (`scripts/estado_para_eco.sh`, `HASH-ESTADO: bd18a919e9f7`); `scripts/perimetro.sh` = 9 OK · 2 SKIP · 1 PARCIAL · 0 FALHA — os SKIP/PARCIAL são do container (sem `/var/lib/agata/p2-status.json`, sem `memoria/obsidian/` em clone fresco, sem `restic`), não do canon.
+
+**Fato 1 — derivados atrasados.** O commit de (316) (`3b826f4`) tocou só `MEMÓRIAS.md` + dois arquivos do LibreChat. `.hidrata.md`, `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` não foram regenerados (índice parava em (315)), e a âncora de SHA de `PROMPT_CARREGAMENTO.md` ficou em `f19ce6e` — dois commits atrás, não um. Assinatura de commit feito com o `pre-commit` fora do caminho (`core.hooksPath` não apontando para `.githooks/`). É a defasagem que o próprio texto da âncora avisa que pode acontecer "sem aviso" (MEMÓRIAS (277)).
+
+**Fato 2 — o achado que importa.** Rodar `.githooks/gerar-hidratacao.sh` num ambiente **sem locale UTF-8**, ou com **awk não-multibyte** (mawk, padrão em Debian/Ubuntu), não dá erro: gera `.hidrata.md` e `INDICE_MEMORIAS.md` **silenciosamente truncados**. Os rótulos de entrada acentuados (`DIÁRIO`, `CORREÇÃO`) e o travessão do cabeçalho deixam de casar nos regex de `grep -E` e do `awk` da janela; sobram só as entradas escritas **sem acento** pelo Qwen ((260)–(276)), toleradas de propósito desde o par `fix-regex-tolerante-diario-sem-acento`. Medido nesta sessão, não teórico: `LC_ALL=POSIX` + mawk 1.3.4 derrubou o índice de **329 para 78 linhas** e a janela de hidratação de **(316)..(312) para (276)..(264)** — uma hidratação 40 entradas atrasada que se lê perfeitamente coerente. É a classe de falha de MEMÓRIAS (248)-(252), agora com gatilho novo: o ambiente, não o canal.
+
+**O que este commit faz** (só arquivos do grupo "registram" de `propostas/README.md` — P-8 não se aplica a nenhum deles):
+- `.hidrata.md`, `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` regenerados pelo próprio `.githooks/gerar-hidratacao.sh`, sob `LC_ALL=C.utf8` + `gawk` (instalado no container só para isso). Janela volta a (316)..(312); (311) sai por orçamento; (286) passa a truncada por cair fora das 30 mais recentes — comportamento normal do gerador, não perda.
+- Âncora de SHA de `PROMPT_CARREGAMENTO.md` movida para `3b826f4` com `scripts/atualizar_ancora_prompt.py`, exatamente como o `pre-commit` faria.
+- `ONDE_ESTAMOS.md` atualizado no mesmo commit (REGRAS, fechamento de entrada).
+
+**Em quarentena, NÃO aplicado:** `propostas/guarda-utf8-hidratacao.diff` — guarda no topo do gerador que **aborta antes de escrever qualquer byte** se o `grep` ou o `awk` do ambiente não casarem rótulo acentuado (silêncio alto, nunca meia-geração). Testada nos três estados: `LC_ALL=POSIX` → aborta no `grep`; `C.utf8` + mawk → aborta no `awk`; `C.utf8` + gawk → gera byte a byte o que está neste commit. Falta `propostas/APROVADO-guarda-utf8-hidratacao`, que é decisão do Humano — `.githooks/*` é quarentena obrigatória.
+
+**Aberto:** (a) conferir na Máquina se `git config core.hooksPath` aponta para `.githooks/` — não verificável desta sessão, e é a causa provável do Fato 1; (b) `scripts/perimetro.sh` linha 304 morre com `USER: unbound variable` sob `set -u` quando `$USER` não existe no ambiente (container); rodei com `USER` exportado à mão. Correção seria mudança de comportamento em `scripts/*` — proposta separada, não feita aqui.
+
+Modelo: Claude Code (sessão na nuvem, sem a Máquina; identidade de modelo não declarada à sessão — não afirmo qual é) · vetor: `git fetch`/`rev-list` contra `origin`, `scripts/estado_para_eco.sh`, `scripts/perimetro.sh`, `.githooks/gerar-hidratacao.sh` rodado nos três ambientes, `git apply --check` na proposta. Hora: relógio do container (UTC → -03 por deslocamento fixo); `scripts/consultar_horario.py` falhou (`timeapi.io` bloqueado pelo proxy da sessão) — selo: (relógio do container da nuvem, sem verificação externa). Autorização: ordem do Humano nesta sessão ("sincronizar sistema agata"); nada publicado em `main` — entrega em ramo, para o Humano decidir. Turno desta sessão: t≈22 (contado no contexto).
+
 (316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
 
 **Fato.** Na telinha do LibreChat, a Seth só usa a tool `query_canon` quando a conversa roda pelo **agente salvo** ("Seth", `agent_0Kdj6GbqpUe2rgKRIFmvk`, endpoint `agents`) **com `model_parameters.disableStreaming: true`**. Pelo agente **efêmero** (endpoint "Seth" + modelo + MCP ligado no menu "+") a tool aparece como "Cancelado" e a resposta volta vazia (`error:false`, `unfinished:false`, `text:""`).

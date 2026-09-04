@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
+  palavras-chave: sincronização, derivados, memórias, ficaram, commit, atrás, gerador, hidratação, trunca, silêncio, fora, utf
+(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
+  palavras-chave: librechat, tool, query, canon, seth, exige, agente, salvo, disablestreaming, bug, parser, stream, omniroute
 (315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
   palavras-chave: doutrina, acesso, graduado, juiz, seth, caso, especial, registro, responsabilização
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: scripts, gerar, obsidian, camada, leitura, derivada, memórias, nota, atômica, entrada, wikilinks, moc, timeline, aplicado, sob
 (288) DIÁRIO — 27/08/2026 · Ordem permanente do Humano: princípios que guiam o sistema (REGRAS.md) + convenção `extras/` para o não-essencial; docs mortos de jul/2026 arquivados
   palavras-chave: ordem, permanente, humano, princípios, guiam, sistema, regras, convenção, extras, essencial, docs, mortos, jul, arquivados
-(287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM indisponível tenta gemini-2.5-flash uma vez; os dois falharam, aborta (não cai pro local)
-  palavras-chave: remoto, ganha, fallback, glm, gemini, indisponível, tenta, flash, falharam, aborta, cai, pro, local
-(286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_projeto.py — sobe UM arquivo de memoria/missoes/agata-sistema/ para o Drive (drive.file). Aplicado sob P-8, risco assumido pelo Humano por escrito
-  palavras-chave: cano, esfera, projeto, scripts, subir, sobe, arquivo, memoria, missoes, agata, sistema, drive, file, aplicado, sob, risco, assumido, humano, escrito
+(287) DIÁRIO — 27/08/2026 · conselho_remoto.py ganha fallback GLM→Gemini: GLM in …
+  palavras-chave: remoto, ganha, fallback, glm, gemini
+(286) DIÁRIO — 27/08/2026 · Cano da esfera do projeto: scripts/subir_esfera_proj …
+  palavras-chave: cano, esfera, projeto, scripts, subir, proj
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas e …
   palavras-chave: sincronização, contas, arquitetura
 (284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/apli …

@@ -5,7 +5,50 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 03/09/2026 (o redesenho entrou)
+## Onde estamos agora — 04/09/2026
+
+**A Seth está falando com a memória.** A telinha nova (LibreChat) já deixa
+ela consultar o canon sozinha, com a ferramenta `query_canon`. Descobrimos
+que isso só funciona pelo **agente salvo** ("Seth"), com a resposta em
+bloco em vez de palavra-por-palavra — pela conversa avulsa a ferramenta
+era cancelada no meio e voltava vazia. Foi só ajuste de configuração,
+nenhum código mudou, e dá pra desfazer.
+
+**Regra de acesso, decidida por você:** ninguém do conselho é caso
+especial. Todo modelo, a Seth inclusive, começa no mesmo degrau — ler o
+canon, acrescentar (nunca apagar) e opinar — e sobe conforme o registro
+mostra que não inventou nada. Não há juiz: a punição é a violação ficar
+escrita para sempre e o contador voltar a zero. Você concede ou tira
+qualquer degrau por ordem, a qualquer momento.
+
+**A arrumação de hoje (esta sessão, na nuvem).** Você pediu para
+sincronizar o sistema. Achei duas coisas:
+
+1. **Os arquivos "derivados" estavam um passo atrás.** O índice de
+   memórias e o arquivo de hidratação (aquele que um modelo lê para
+   chegar inteiro na conversa) não tinham sido refeitos depois da última
+   anotação. Refiz — agora batem com a memória. A "etiqueta de versão"
+   do texto de carregamento também estava velha; atualizei.
+
+2. **Um defeito silencioso no programa que refaz esses arquivos.** Rodado
+   em um computador configurado em outro idioma/codificação, ele não
+   reclama: entrega um arquivo de hidratação **cortado**, faltando as
+   últimas 40 anotações, com cara de estar certo. É exatamente o tipo de
+   erro que este projeto mais teme — o modelo lê uma história velha e
+   acha que está em dia. Deixei a correção pronta como **proposta**
+   (`propostas/guarda-utf8-hidratacao.diff`): o programa passa a parar e
+   avisar em vez de gerar pela metade. **Não apliquei** — mudança de
+   comportamento espera o seu "sim", que é criar o arquivo
+   `propostas/APROVADO-guarda-utf8-hidratacao`.
+
+**O que é com você:** aprovar (ou não) essa proposta; e conferir, na sua
+máquina, se os "hooks" do git estão ligados (`git config core.hooksPath`
+apontando para `.githooks`) — se não estiverem, é por isso que os
+derivados ficaram para trás sozinhos.
+
+---
+
+## Antes disso — 03/09/2026 (o redesenho entrou)
 
 O sistema foi reconstruído. Durante alguns dias tudo isso viveu num ramo
 à parte (`redesign`) e hoje foi juntado ao principal.
