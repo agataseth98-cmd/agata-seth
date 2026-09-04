@@ -28,7 +28,10 @@ import re
 import subprocess
 import sys
 
-REPO = os.path.expanduser("~/agata")
+# SETH_REPO -- mesma env var que seth_gateway.py/seth_escriba.py já respeitam
+# (achado 04/09/2026: este módulo era o único hardcoded em ~/agata, quebra em
+# qualquer checkout fora do $HOME real de quem roda o processo).
+REPO = os.environ.get("SETH_REPO", os.path.expanduser("~/agata"))
 SH_PADROES = os.path.join(REPO, "scripts", "varredura_segredo.sh")
 
 # ERE POSIX -> Python. `[[:space:]]` em locale C = [ \t\n\r\f\v]. Só esta.
@@ -125,32 +128,38 @@ def varrer(texto: str) -> list[dict]:
     return achados
 
 
-def _campos_texto(payload: dict):
-    """Rende as strings que podem carregar prompt/contexto num payload OpenAI-compat."""
-    if not isinstance(payload, dict):
-        return
-    for chave in ("system", "prompt"):
-        v = payload.get(chave)
-        if isinstance(v, str):
-            yield chave, v
-    msgs = payload.get("messages")
-    if isinstance(msgs, list):
-        for i, msg in enumerate(msgs):
-            if isinstance(msg, dict):
-                c = msg.get("content")
-                if isinstance(c, str):
-                    yield f"messages[{i}].content", c
-                elif isinstance(c, list):  # content parts (multimodal)
-                    for j, parte in enumerate(c):
-                        if isinstance(parte, dict) and isinstance(parte.get("text"), str):
-                            yield f"messages[{i}].content[{j}].text", parte["text"]
-    inp = payload.get("input")
-    if isinstance(inp, str):
-        yield "input", inp
-    elif isinstance(inp, list):
-        for i, v in enumerate(inp):
-            if isinstance(v, str):
-                yield f"input[{i}]", v
+_PROFUNDIDADE_MAX = 12   # payload OpenAI-compat real não passa disso; trava contra recursão patológica
+_NOS_MAX = 20000         # trava contra payload absurdamente grande (nº de chaves/itens visitados)
+
+
+def _campos_texto(payload):
+    """Rende TODA string em qualquer profundidade do payload (dict/list aninhado).
+
+    Achado real (auditoria 04/09/2026, Camada C): a versão anterior só olhava
+    campos fixos (system/prompt/messages[].content/input) — um segredo em
+    `tools[].function.description`, `metadata`, ou qualquer campo custom
+    passava ileso. `sanitizar_payload` promete "falha FECHADA" (docstring do
+    módulo); a lista fixa era falha ABERTA pra tudo que não citou. Recursivo,
+    sem lista de campo — nenhum campo novo do formato OpenAI-compat (ou de um
+    provedor) pode reabrir esta lacuna por omissão.
+    """
+    contador = [0]
+
+    def _anda(no, caminho, profundidade):
+        contador[0] += 1
+        if contador[0] > _NOS_MAX or profundidade > _PROFUNDIDADE_MAX:
+            return
+        if isinstance(no, str):
+            yield caminho, no
+        elif isinstance(no, dict):
+            for k, v in no.items():
+                yield from _anda(v, f"{caminho}.{k}" if caminho else str(k), profundidade + 1)
+        elif isinstance(no, list):
+            for i, v in enumerate(no):
+                yield from _anda(v, f"{caminho}[{i}]", profundidade + 1)
+        # números/bool/None/etc: nada a varrer
+
+    yield from _anda(payload, "", 0)
 
 
 def sanitizar_payload(payload: dict) -> dict:
@@ -158,7 +167,7 @@ def sanitizar_payload(payload: dict) -> dict:
     achados = []
     for campo, texto in _campos_texto(payload):
         for a in varrer(texto):
-            achados.append({**a, "campo": campo})
+            achados.append({**a, "campo": campo or "(raiz)"})
     if achados:
         raise SegredoNoPayload(achados)
     return payload

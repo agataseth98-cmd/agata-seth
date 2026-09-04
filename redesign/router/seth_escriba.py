@@ -32,10 +32,14 @@ Env: SETH_ESCRIBA_BIND (default 127.0.0.1:20140), SETH_REPO (default ~/agata),
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import os
 import re
 import subprocess
+import tempfile
+import threading
+from contextlib import contextmanager
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -49,6 +53,50 @@ MEMORIAS = REPO / "MEMÓRIAS.md"
 DIARIO = REPO / "SETH-DIARIO.md"
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
 MAX_CORPO = 20000  # trava de tamanho por acrescimo
+
+# --- corrida entre chamadas concorrentes (achado 04/09/2026, Camada C) -----
+# ThreadingHTTPServer aceita POST /memoria e POST /diario em paralelo. A
+# versão anterior lia o arquivo, calculava N, e gravava sem nenhum lock: duas
+# chamadas concorrentes podiam ler o mesmo "antes", calcular o mesmo N, e a
+# segunda escrita apagava a entrada que a primeira acabara de gravar -- viola
+# append-only mesmo com a verificação pós-escrita (que comparava o `depois`
+# construído contra si mesmo, nunca relia o disco antes de gravar). Duas
+# travas: (1) um lock por processo serializa as duas rotas entre threads
+# deste servidor; (2) um flock exclusivo no PRÓPRIO arquivo alvo cobre o caso
+# de outro processo (ex.: um commit manual do Humano no mesmo instante)
+# tocando o arquivo ao mesmo tempo. Escrita é sempre por arquivo-temporário +
+# os.replace (atômica no mesmo filesystem) -- nunca write_text direto, que
+# pode deixar o arquivo pela metade se o processo morrer no meio.
+_LOCK_PROCESSO = threading.Lock()
+
+
+@contextmanager
+def _travar_arquivo(caminho: Path):
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(caminho), os.O_RDWR | os.O_CREAT, 0o644)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
+def _escreve_atomico(caminho: Path, conteudo: str) -> None:
+    d = caminho.parent
+    fd, tmp = tempfile.mkstemp(prefix=f".{caminho.name}.", dir=str(d))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(conteudo)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, caminho)  # atômico no mesmo filesystem
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _agora() -> datetime:
@@ -65,27 +113,30 @@ def _acrescenta_memoria(titulo: str, corpo: str) -> dict:
         raise ValueError("titulo e corpo obrigatorios")
     if len(corpo) > MAX_CORPO:
         raise ValueError(f"corpo > {MAX_CORPO} chars")
-    antes = MEMORIAS.read_text(encoding="utf-8")
-    linha_marcador = next((l for l in antes.splitlines() if l.startswith(MARCADOR)), None)
-    if linha_marcador is None:
-        raise RuntimeError("marcador ENTRADAS-NOVAS nao encontrado em MEMORIAS.md")
-    n = _proximo_n(antes)
-    data = _agora().strftime("%d/%m/%Y")
-    header = f"({n}) DIÁRIO — {data} · {titulo.strip()}"
-    bloco = f"\n{header}\n\n{corpo.strip()}\n"
+    with _LOCK_PROCESSO, _travar_arquivo(MEMORIAS):
+        # relê AGORA, dentro da trava -- "antes" de fora da trava seria a
+        # mesma corrida de novo, só que mascarada
+        antes = MEMORIAS.read_text(encoding="utf-8")
+        linha_marcador = next((l for l in antes.splitlines() if l.startswith(MARCADOR)), None)
+        if linha_marcador is None:
+            raise RuntimeError("marcador ENTRADAS-NOVAS nao encontrado em MEMORIAS.md")
+        n = _proximo_n(antes)
+        data = _agora().strftime("%d/%m/%Y")
+        header = f"({n}) DIÁRIO — {data} · {titulo.strip()}"
+        bloco = f"\n{header}\n\n{corpo.strip()}\n"
 
-    corte = antes.index(linha_marcador) + len(linha_marcador) + 1  # +1 = o \n da linha do marcador
-    depois = antes[:corte] + bloco + antes[corte:]
+        corte = antes.index(linha_marcador) + len(linha_marcador) + 1  # +1 = o \n da linha do marcador
+        depois = antes[:corte] + bloco + antes[corte:]
 
-    # --- trava: so um insert no offset do marcador, nada mais mudou ---
-    if depois[:corte] != antes[:corte]:
-        raise RuntimeError("verificacao falhou: conteudo antes do marcador mudou")
-    if depois[corte + len(bloco):] != antes[corte:]:
-        raise RuntimeError("verificacao falhou: conteudo depois do ponto de insercao mudou")
-    if len(depois) != len(antes) + len(bloco):
-        raise RuntimeError("verificacao falhou: tamanho inconsistente")
+        # --- trava de conteúdo: so um insert no offset do marcador, nada mais mudou ---
+        if depois[:corte] != antes[:corte]:
+            raise RuntimeError("verificacao falhou: conteudo antes do marcador mudou")
+        if depois[corte + len(bloco):] != antes[corte:]:
+            raise RuntimeError("verificacao falhou: conteudo depois do ponto de insercao mudou")
+        if len(depois) != len(antes) + len(bloco):
+            raise RuntimeError("verificacao falhou: tamanho inconsistente")
 
-    MEMORIAS.write_text(depois, encoding="utf-8")
+        _escreve_atomico(MEMORIAS, depois)
     return {"ok": True, "entrada": n, "header": header,
             "nota": "gravado no working tree; NAO commitado. Humano: 'git diff MEMÓRIAS.md' e commite quando quiser."}
 
@@ -95,21 +146,26 @@ def _anota_diario(texto: str) -> dict:
         raise ValueError("texto obrigatorio")
     if len(texto) > MAX_CORPO:
         raise ValueError(f"texto > {MAX_CORPO} chars")
-    if not DIARIO.exists():
-        DIARIO.write_text(
-            "# Diário da Seth\n\n"
-            "Espaço próprio da Seth, append-only. Fora do vault derivado (o P-10 não\n"
-            "policia este arquivo) e fora de MEMÓRIAS. Escrito só via `POST /diario`\n"
-            "do seth_escriba; nunca editado nem apagado por ela. Autorizado pelo\n"
-            "Humano: \"append only... quero ver como ela se desenvolve. Eu assumo o risco.\"\n",
-            encoding="utf-8")
-    antes = DIARIO.read_text(encoding="utf-8")
-    ts = _agora().strftime("%Y-%m-%d %H:%M %z")
-    ap = f"\n\n---\n**{ts} (relógio da Máquina)**\n\n{texto.strip()}\n"
-    depois = antes + ap
-    if depois[:len(antes)] != antes:
-        raise RuntimeError("verificacao falhou: append nao e' puro")
-    DIARIO.write_text(depois, encoding="utf-8")
+    with _LOCK_PROCESSO, _travar_arquivo(DIARIO):
+        if not DIARIO.exists():
+            _escreve_atomico(
+                DIARIO,
+                "# Diário da Seth\n\n"
+                "Espaço próprio da Seth, append-only. Fora do vault derivado (o P-10 não\n"
+                "policia este arquivo) e fora de MEMÓRIAS. Escrito só via `POST /diario`\n"
+                "do seth_escriba; nunca editado nem apagado por ela. Autorizado pelo\n"
+                "Humano: \"append only... quero ver como ela se desenvolve. Eu assumo o risco.\"\n")
+        antes = DIARIO.read_text(encoding="utf-8")
+        ts = _agora().strftime("%Y-%m-%d %H:%M %z")
+        ap = f"\n\n---\n**{ts} (relógio da Máquina)**\n\n{texto.strip()}\n"
+        depois = antes + ap
+        # relido AGORA, dentro da trava -- a checagem antiga comparava
+        # `depois` contra si mesmo (sempre verdadeira); esta compara contra
+        # o disco de fato, protege contra escrita concorrente de outro
+        # processo que não passe por este lock (ex.: edição manual).
+        if DIARIO.read_text(encoding="utf-8") != antes:
+            raise RuntimeError("verificacao falhou: arquivo mudou entre leitura e escrita")
+        _escreve_atomico(DIARIO, depois)
     return {"ok": True, "bytes_add": len(ap),
             "nota": "anexado ao fim de SETH-DIARIO.md (working tree; nao commitado)."}
 

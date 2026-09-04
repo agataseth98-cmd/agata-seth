@@ -1,5 +1,13 @@
 # STATUS — redesenho do sistema local Agata
 
+> **Documento histórico, congelado no dia do merge (2026-09-03) — não reflete o estado atual.**
+> Achado de auditoria (04/09/2026, Camada C): a linha abaixo se contradiz na própria frase
+> ("MERGEADO em `main`" e, três orações depois, "`main` intocado") porque foi escrita
+> ATRAVESSANDO o momento do merge e nunca mais atualizada. `main` seguiu evoluindo depois
+> (remoção do Hermes, migração LibreChat, MEMÓRIAS (313)-(317)) e nada disso está aqui.
+> Estado atual: `PROJETO.md` (o que é/como funciona) e `ONDE_ESTAMOS.md` (resumo pro Humano).
+> Este arquivo fica como registro do que aconteceu na Fase 8, não como fonte de verdade viva.
+
 FASE ATUAL: **REDESENHO MERGEADO EM `main` @ `27ad248` (2026-09-03).** Falta só o **S7 pós-push por sessão independente**. _(histórico: Fase 8 — Cutover — P8-00 ✅ · P8-01 🔶 (`.diff` aplicados no branch, P-12 vermelho/verde OK; falta B/C + `APROVADO-` do `conselho-remoto-omniroute.diff`) · **P8-02 🟢 aberto** (N=7+piso, acumula com o uso) · P8-03 aguarda caminho de cutover de pé · **P8-04 ✅** (Goose v1.48.0 instalado) · P8-05/06/07 em cadeia). **Fases 0-7 FECHADAS.** **`main` intocado (`4aa90bd`)** — merge é P8-07.
 ATUALIZADO: 2026-09-03 10:05 -03 (relógio da máquina) · por: sessão Claude (Claude Code, na
 Máquina — chat 6) — **N do paralelo = 7 dias + piso de amostragem** (≥1 par por tipo, ≥1

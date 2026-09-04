@@ -10,7 +10,7 @@ After=omniroute.service omniroute-sanitizer.service openvino-whisper.service ope
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/true
-ExecStop=/home/orusoua/agata/redesign/grafo/.venv/bin/python /home/orusoua/agata/redesign/grafo/drenar.py
+ExecStop=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/drenar.py
 TimeoutStopSec=45
 
 [Install]

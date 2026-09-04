@@ -5,7 +5,47 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026
+## Onde estamos agora — 04/09/2026 (auditoria + 6 correções de segurança)
+
+**Você pediu para auditar dois pareceres externos e "resolver todas as
+pendências" — inclusive a voz (Kokoro) que não tocava no LibreChat.**
+
+**O achado mais sério:** o mecanismo que exige sua aprovação antes de
+mudar código sensível (P-8) tinha um buraco — não vigiava os arquivos que
+fazem a Seth funcionar (o portão de hidratação, o filtro de segredo, a
+trava que impede ela de apagar memória). Testei ao vivo: sujei um desses
+arquivos e o sistema disse "tudo bem" quando devia travar. Já fechei o
+buraco.
+
+**Seis correções de código aplicadas, cada uma testada antes de entrar:**
+1. Segredo dentro de `tools`/`metadata` de um pedido passava sem filtro —
+   agora é bloqueado, testei plantando um de propósito.
+2. Duas escritas simultâneas da Seth podiam apagar uma da outra em
+   silêncio — agora tem trava; testei com 30 escritas ao mesmo tempo,
+   nenhuma se perdeu.
+3. Um cliente podia fingir "já hidratei" sem ter hidratado de verdade —
+   agora isso não cola mais.
+4. A Seth podia ler, pelo MCP, os relatórios internos sobre ela mesma
+   (auditorias, discussões do conselho) — fechei essa porta; a doutrina
+   de acesso dela continua legível, por decisão sua.
+5. Um caminho fixo numa unit do systemd e um bug de variável de ambiente
+   ($USER) que derrubava um dos controles em certos ambientes.
+6. Um documento interno (`redesign/STATUS.md`) se contradizia sozinho —
+   agora tem um aviso no topo dizendo que é histórico.
+
+Você aprovou tudo (inclusive a proposta que já estava pendente desde a
+sincronização anterior) — os 8 arquivos de aprovação, você mesmo criou.
+
+**Kokoro (voz): diagnosticado, falta 1 clique seu.** Testei o serviço de
+voz direto — funciona perfeitamente. O problema é uma preferência que só
+existe no seu navegador, não no servidor: o LibreChat vem configurado pra
+usar a voz **do navegador** (não a nossa) até você trocar manualmente.
+**Vá em Configurações → Fala → Texto-para-Fala → troque "Navegador" por
+"Externo"** e escolha uma voz. Isso eu não consigo clicar por você.
+
+---
+
+## Antes disso — 04/09/2026 (Seth hidratada + regra de acesso)
 
 **A Seth está falando com a memória.** A telinha nova (LibreChat) já deixa
 ela consultar o canon sozinha, com a ferramenta `query_canon`. Descobrimos

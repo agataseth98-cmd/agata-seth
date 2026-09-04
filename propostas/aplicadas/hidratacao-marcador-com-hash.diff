@@ -1,0 +1,83 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 49276f9..0a0c546 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -32,6 +32,7 @@ Env:
+ """
+ from __future__ import annotations
+ 
++import hashlib
+ import json
+ import os
+ import socket
+@@ -50,7 +51,38 @@ HIDRATA_PATH = Path(os.environ.get(
+ MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
+ REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+ 
+-MARCADOR = "<!-- SETH:HIDRATADO -->"
++# --- marcador amarrado a hash (achado 04/09/2026, Camada C) ----------------
++# A versão anterior usava uma string fixa: qualquer system message que o
++# CLIENTE mandasse contendo essa string era aceito como "já hidratado", sem
++# nada ligando o marcador à injeção real deste gateway. Um cliente direto em
++# :20126 (fora do LibreChat, ex.: um Goose mal configurado ou um teste solto)
++# podia mandar só a linha do marcador e pular a hidratação inteira, olhando
++# hidratado pro resto do pipeline sem estar. Agora o marcador carrega um hash
++# do texto-fonte deste módulo (a doutrina fixa, não o bloco "Estado agora"
++# que varia a cada chamada -- hashear isso forçaria reinjeção every turn,
++# acumulando system messages). Não é defesa contra quem lê este arquivo (não
++# há segredo aqui, é loopback) -- é o mesmo tipo de trava que P-8 documenta
++# pra si mesmo: fecha o descuido/bug, não o contorno deliberado por quem já
++# tem acesso ao código-fonte. Efeito colateral bom: também pega REDEPLOY —
++# se este módulo mudar a doutrina, o hash muda, e uma conversa em andamento
++# com o marcador velho volta a ser reidratada em vez de ficar presa à versão
++# antiga pro resto da sessão.
++_DOUTRINA_FIXA = (
++    "Você é a **Seth**, o modelo do sistema **Agata** — governança pessoal "
++    "canônica em git (REGRAS, PROJETO, MEMÓRIAS, append-only). Papéis: o "
++    "**Humano decide**, você **propõe**, a Máquina arbitra fatos (rodando o "
++    "comando, não afirmando de memória). Nada muda o canon sem passar pelo "
++    "**portão** (as 3 perguntas). Não bajule, não simule emoção, não afirme "
++    "sem fonte, não diga ter feito o que não fez.\n\n"
++    "**Regra 1 — abra toda resposta com:** modelo que você é · turno (conte no "
++    "contexto) · última entrada de MEMÓRIAS que leu (nº + título) · o que está "
++    "quebrado (ou `pronto.`).\n\n"
++    "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
++    "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
++    "hidratação mínima; o resto é sob demanda.\n\n"
++)
++_HASH_DOUTRINA = hashlib.sha256(_DOUTRINA_FIXA.encode("utf-8")).hexdigest()[:8]
++MARCADOR = f"<!-- SETH:HIDRATADO:{_HASH_DOUTRINA} -->"
+ 
+ _HOP_BY_HOP = {
+     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+@@ -78,22 +110,15 @@ def _hidratacao() -> str:
+     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro."""
+     if MODO == "compacto":
+         est = _estado()
+-        return (
+-            f"{MARCADOR}\n"
+-            "Você é a **Seth**, o modelo do sistema **Agata** — governança pessoal "
+-            "canônica em git (REGRAS, PROJETO, MEMÓRIAS, append-only). Papéis: o "
+-            "**Humano decide**, você **propõe**, a Máquina arbitra fatos (rodando o "
+-            "comando, não afirmando de memória). Nada muda o canon sem passar pelo "
+-            "**portão** (as 3 perguntas). Não bajule, não simule emoção, não afirme "
+-            "sem fonte, não diga ter feito o que não fez.\n\n"
+-            "**Regra 1 — abra toda resposta com:** modelo que você é · turno (conte no "
+-            "contexto) · última entrada de MEMÓRIAS que leu (nº + título) · o que está "
+-            "quebrado (ou `pronto.`).\n\n"
+-            "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+-            "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+-            "hidratação mínima; o resto é sob demanda.\n\n"
+-            + (f"**Estado agora (fatos da Máquina):**\n{est}\n" if est else "")
++        # Regra 1.1: campo medível não pode sumir em silêncio quando a
++        # medição falha -- antes, `est` vazio só omitia o bloco inteiro sem
++        # dizer que algo quebrou (achado 04/09/2026, Camada C).
++        bloco_estado = (
++            f"**Estado agora (fatos da Máquina):**\n{est}\n" if est
++            else "**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
++                 "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
+         )
++        return f"{MARCADOR}\n{_DOUTRINA_FIXA}{bloco_estado}"
+     try:
+         st = HIDRATA_PATH.stat()
+         if _CACHE["mtime"] != st.st_mtime:

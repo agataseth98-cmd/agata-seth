@@ -1,0 +1,57 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index e48fecb..8b48ccf 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -301,7 +301,12 @@ P12_AVISO_SEM_BACKUP="whisper-base-int8-ov whisper-small-int8-ov"
+ # HD ESTA presente, e reporta PARCIAL com a data mais velha. FALHA so
+ # quando o HD esta montado E um recurso da lista-FALHA nao tem snapshot
+ # para o sha256 atual < N dias.
+-P12_REPO="${AGATA_RESTIC_REPO:-/run/media/$USER/AgataBkup01/restic-agata-local}"
++# ${USER:-...}: achado 04/09/2026 (Camada C) -- sob `set -u`, $USER indefinido
++# (containers/cron/systemd sem login shell) derrubava o script inteiro com
++# "USER: unbound variable" ANTES de rodar qualquer controle -- o guardião de
++# commits falhando por detalhe de ambiente, não por violação real. `id -un`
++# é a mesma informação, sem depender de env var.
++P12_REPO="${AGATA_RESTIC_REPO:-/run/media/${USER:-$(id -un)}/AgataBkup01/restic-agata-local}"
+ P12_PASS="$HOME/.config/agata/restic.pass"
+ P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
+ p12_backup_verificavel() {
+@@ -465,6 +470,17 @@ p7_citacao() {
+ # Motivo da linha: registro errado se corrige com entrada nova -- é pra
+ # isso que append-only existe. Comportamento errado, não.
+ #
++# ACHADO 04/09/2026 (Camada C, auditoria dos pareceres gpt-5.6-terra +
++# Qwen): testado AO VIVO -- sujar redesign/router/seth_escriba.py, `git add`,
++# rodar este script, P-8 respondia "OK", sem SUSPEITO nem FALHA. O padrão
++# abaixo nunca cobriu redesign/router/*.py (gateway, sanitizador, o único
++# caminho de escrita da Seth), redesign/mcp/*.py, redesign/librechat/*.mjs
++# nem redesign/systemd/* -- exatamente o código que faz a sanitização de
++# segredo, o portão de hidratação e a trava de append-only. Uma sessão
++# comprometida (ou um bug) podia reescrever qualquer um deles e commitar sem
++# proposta nem APROVADO-. Ampliado abaixo; teste de regressão fica em
++# propostas/aplicadas/ (o par .diff/APROVADO- que aplicou esta mudança).
++#
+ # Mecanismo: propostas/<nome>.diff (a mudança, cabeçalhos `--- a/` /
+ # `+++ b/` de verdade) + propostas/APROVADO-<nome> (criado pelo Humano
+ # == aprovação). Sem o par cobrindo o caminho staged, o commit FALHA.
+@@ -475,6 +491,7 @@ p7_citacao() {
+ _p8_eh_comportamento() {
+   case "$1" in
+     REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
++    redesign/router/*|redesign/mcp/*|redesign/librechat/*.mjs|redesign/librechat/*.yaml|redesign/systemd/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
+@@ -614,7 +631,11 @@ p11_silos_nao_versionados() {
+ P9_UNIDADES_SISTEMA=("ollama.service")
+ # Fase 8 (redesenho): hermes-gateway saiu do loop (P8-05). O executor agora e' o
+ # grafo + OmniRoute -- os membros do agata.target sao os servicos criticos.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service")
++# seth-gateway/seth-escriba adicionados 04/09/2026 (Camada C): rodam agora
++# (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
++# apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
++# dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
++P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service")
+ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
+ 
+ p9_servicos_declarados() {

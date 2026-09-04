@@ -66,14 +66,17 @@ class _Handler(BaseHTTPRequestHandler):
         n = int(self.headers.get("Content-Length") or 0)
         corpo = self.rfile.read(n) if n else b""
 
-        # só inspeciona se for JSON; corpo não-JSON segue como está (o
-        # sanitizar_payload só entende o shape OpenAI-compat)
-        ctype = (self.headers.get("Content-Type") or "").lower()
-        if "application/json" in ctype and corpo:
+        # Falha FECHADA (docstring do módulo, P1-02): corpo vazio passa (nada
+        # a varrer); todo corpo COM bytes tem que parsear como JSON e ser
+        # varrido -- não-JSON não segue mais "como está" (achado 04/09/2026,
+        # Camada C: a versão anterior deixava passar ileso qualquer corpo que
+        # não fosse `application/json`, contradizendo a própria promessa de
+        # "SÓ ENTÃO repassa" no topo do arquivo).
+        if corpo:
             try:
                 payload = json.loads(corpo)
             except ValueError:
-                return self._erro(400, "corpo marcado como JSON mas não parseia")
+                return self._erro(415, "corpo não é JSON -- este proxy só entende OpenAI-compat; nada foi repassado")
             if isinstance(payload, dict):
                 try:
                     sanitizar.sanitizar_payload(payload)

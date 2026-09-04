@@ -1,0 +1,51 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 5f3bd62..293e053 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -34,10 +34,21 @@ const CANON = {
+ };
+ const DENY = /\.(secret|token|pass|key|gpg|env|pem)$/i;
+ 
++// Achado 04/09/2026 (Camada C): a linha "redesign/ + .md" abaixo liberava
++// QUALQUER doc sob redesign/**/*.md -- inclui AUDITORIA-01.md, LOG.md,
++// CONSELHO-*.md, os pareceres de Camada A/B/C sobre a PRÓPRIA Seth (as
++// discussões de quanto confiar nela, as violações registradas contra ela).
++// Não é vazamento de segredo (DENY ainda barra .env/.secret/.key/.pem), mas
++// é um acoplamento que ninguém pediu: o sujeito da vigilância lendo o
++// dossiê da vigilância por uma porta larga, sem decisão deliberada arquivo
++// por arquivo. ACESSO-GRADUADO.md — o único doc de redesign/ que faz
++// sentido a Seth ler por transparência (é a doutrina que define os graus
++// dela) — já está listado por nome em CANON acima; não precisa da linha
++// larga. Removida; adicione outro doc de redesign/ aqui por nome, um de
++// cada vez, se algum dia fizer sentido.
+ function pathOk(p) {
+   if (!p || p.includes("..") || p.startsWith("/") || DENY.test(p)) return false;
+   if (p.startsWith("memoria/obsidian/")) return true;
+-  if (p.startsWith("redesign/") && p.endsWith(".md")) return true;  // docs do redesenho (sem segredo; DENY ainda barra .env/.secret)
+   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
+   return Object.values(CANON).includes(p);
+ }
+@@ -66,7 +77,22 @@ async function queryCanon(a) {
+   const linhas = body.split("\n");
+ 
+   if (a.grep) {
+-    const re = new RegExp(a.grep, "i");
++    // Achado 04/09/2026 (Camada C): regex do chamador direto no RegExp, sem
++    // teto de tamanho nem proteção contra sintaxe inválida -- um padrão
++    // malformado derrubava a chamada com stack trace bruto (a try/catch do
++    // dispatcher pega, mas com mensagem ruim); um padrão com backtracking
++    // catastrófico (ex.: `(a+)+b`) trava o loop de eventos do Node por essa
++    // chamada. Teto de tamanho reduz a superfície; não elimina o risco de
++    // backtracking (não há sandbox de regex na stdlib do Node) -- limite
++    // aceito e documentado, mesmo espírito de P-8 registrar o que NÃO
++    // resolve, não só o que resolve.
++    if (String(a.grep).length > 200) throw new Error(`grep muito longo (${String(a.grep).length} chars, teto 200) — refine o padrão`);
++    let re;
++    try {
++      re = new RegExp(a.grep, "i");
++    } catch (e) {
++      throw new Error(`grep inválido: ${e.message}`);
++    }
+     const ctx = Math.max(0, Math.min(20, a.contexto ?? 3));
+     const hits = [];
+     linhas.forEach((ln, i) => { if (re.test(ln)) hits.push(i); });
