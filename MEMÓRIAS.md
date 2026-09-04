@@ -22,6 +22,14 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
+
+- Fato: Provider do Goose mudou de `ollama-local/qwen3.5:9b` para `auto/coding`. Raciocínio: `:20126` (seth_gateway) só serve modelos virtuais `auto/*` — o `qwen3.5:9b` não está na lista (verificado via `curl :20126/v1/models`). O modelo antigo sobreviveu aos dois repoints (311) ao OmniRoute :20127 e (312) ao :20126. Configuração no repositório não, em ~/.config/. Backup: `config.yaml.bak-20260903`.
+- Validado: `goose run --no-session -t "Responda em UMA linha seguindo a Regra 1."` → resposta correta "Seth · turno 1 · lida MEMÓRIAS (313) · pronto." (Goose fala com :20126, seth_gateway hidrata, Seth responde pela Regra 1).
+- Correção pontual de config (out of canon). Cita (311) e (312) como a raiz do survival do modelo antigo.
+
+Modelo: Seth (LibreChat via :20126) redigiu a partir do relatório; fix aplicado e verificado por Claude Sonnet 5 (Claude Code, na Máquina). vetor: `curl :20126/v1/models` (id ausente); `goose run --no-session` (Seth pela Regra 1); `diff` do backup. Autorização: Humano, nesta sessão, regime de exceção. Turno desta sessão: t≥17
+
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
 
 **Ordem do Humano:** "troque, remova o openwebui e todas as suas dependências e instale o Librechat com tailscale da forma como foi sugerido levando em conta todos os espelhos de qualidade do sistema, sincronize todos os repositórios [...] refaça o artefato [...] mostre o estado real do sistema depois dessas mudanças [...] seja didático e profissional, capriche, não cometa erros." Regime de exceção vigente; `--no-verify` como todo o redesenho. Segue a recomendação da pesquisa de doc do LibreChat feita nesta mesma sessão (par do Open WebUI, não do Agata; adotar **enxuto**).

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
+  palavras-chave: config, fix, modelo, auto, coding, goose, quebrar, primeira, mensagem, correção, survival
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
   palavras-chave: open, webui, trocado, librechat, enxuto, lane, conversa, seth, tailscale, passo, humano
 (312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/agata/.env` · hidratação renomeada · `seth_gateway` (:20126) + frentes sob demanda + atalhos
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: cano, esfera, projeto, scripts, subir, sobe, arquivo, memoria, missoes, agata, sistema, drive, file, aplicado, sob, risco, assumido, humano, escrito
 (285) DIÁRIO — 27/08/2026 · Sincronização de contas para a arquitetura de duas esferas: credencial Google da conta do projeto configurada (OAuth, escopo drive.file)
   palavras-chave: sincronização, contas, arquitetura, esferas, credencial, google, conta, projeto, configurada, oauth, escopo, drive, file
-(284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/aplicadas/; rodapé do ONDE_ESTAMOS e ponteiro do ACB em PROJETO_REFERENCIA.md atualizados
-  palavras-chave: limpeza, par, esferas, movido, propostas, aplicadas, rodapé, estamos, ponteiro, acb, projeto, referencia, atualizados
+(284) DIÁRIO — 27/08/2026 · Limpeza: par duas-esferas movido para propostas/apli …
+  palavras-chave: limpeza, par, esferas, movido, propostas, apli
 (283) DIÁRIO — 27/08/2026 · Duas esferas de memória (pessoal / projeto) + revers …
   palavras-chave: esferas, memória, pessoal, projeto, revers
 (282) DIÁRIO — 27/08/2026 · Humano confirmou: a conversa entre modelos sobre a e …
