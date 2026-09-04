@@ -409,6 +409,27 @@ def main():
         linhas += ["---", f"< {link('moc-controles','MOC controles')} >"]
         escrever(f"controles/{c.lower()}.md", linhas)
 
+    # -------- documentos soltos do repositório (fora do que já virou nota estruturada)
+    JA_COBERTOS = {"REGRAS.md", "PROJETO.md", "PROJETO_REFERENCIA.md", "MEMÓRIAS.md"}
+    JA_COBERTOS |= {arq for arq, _ in CANON_INTEIROS}
+    try:
+        todos_md = sorted(subprocess.run(
+            ["git", "-C", REPO, "ls-files", "*.md"],
+            capture_output=True, text=True, check=True).stdout.splitlines())
+    except Exception:
+        todos_md = []
+    soltos = [p for p in todos_md if p not in JA_COBERTOS]
+    grupos = {}
+    for p in soltos:
+        partes = p.split("/")
+        if len(partes) == 1:
+            chave = "(raiz)"
+        elif partes[0] == "redesign" and len(partes) > 2:
+            chave = f"redesign/{partes[1]}"
+        else:
+            chave = partes[0]
+        grupos.setdefault(chave, []).append(p)
+
     # -------- MOCs
     por_tipo = {}
     for e in entradas:
@@ -460,6 +481,20 @@ def main():
           "", "Seção canônica: " + link(proj_base.get("Memória em duas camadas", "x"), "PROJETO.md · Memória em duas camadas")]
     escrever("moc-esferas.md", L)
 
+    L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+    L += [f"# MOC — documentos do repositório ({len(soltos)})", "",
+          "> [!info] Todo `.md` versionado que não virou nota estruturada acima "
+          "(não é REGRAS/PROJETO/MEMÓRIAS, seção deles, script, controle ou proposta "
+          "aplicada). Link direto pro arquivo real — clique abre o original, não uma "
+          "cópia. `extras/` é arquivo deliberado (REGRAS, \"Princípios\"), listado "
+          "aqui só para achar, não para ler primeiro.", ""]
+    for chave in sorted(grupos):
+        L.append(f"## {chave} ({len(grupos[chave])})")
+        for p in sorted(grupos[chave]):
+            L.append(f"- [{p}](../../{p})")
+        L.append("")
+    escrever("moc-redesign.md", L)
+
     # -------- painel de estado
     onde = ler(os.path.join(REPO, "ONDE_ESTAMOS.md")) or ""
     m_ult = re.search(r"## Última atualização\n(.+?)(?:\n##|\Z)", onde, re.S)
@@ -494,7 +529,8 @@ def main():
         f"- {link('moc-memoria','Memória')}  ·  {link('moc-regras','Regras')}  ·  "
         f"{link('moc-projeto','Projeto')}",
         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
-        f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}", "",
+        f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}  ·  "
+        f"{link('moc-redesign','Documentos do repositório')}", "",
         "## Como ler o grafo",
         "Cada entrada de MEMÓRIAS é um nó; `(n)` no texto virou aresta. Regras, "
         "scripts, controles e propostas também são nós, ligados pelas entradas que os "
