@@ -81,8 +81,34 @@ Depois: em `~/librechat/.env` trocar `DOMAIN_CLIENT` e `DOMAIN_SERVER` para
 (`docker compose -f ~/librechat/docker-compose.yml up -d --force-recreate librechat`).
 **Nao** usar `tailscale funnel` (isso expoe pra internet).
 
-## MCP (skills/integracoes sob demanda -- futuro)
+## MCP
 
-Cada integracao entra como bloco em `librechat.yaml` -> `mcpServers`, com
-`startup: false` (so inicializa quando o modelo pedir). Transporte recomendado:
-Streamable HTTP. Ver o desenho da arquitetura da Seth.
+### canon (memoria local -- LIGADO)
+
+`canon-mcp.mjs` -- servidor MCP stdio, zero dependencias (so `fetch` do Node,
+que o container ja tem). Le o vault do Agata pelo proxy read-only `:27125`
+(`obsidian-ro-proxy`, que injeta o bearer e bloqueia escrita).
+
+- Runtime: `~/librechat/data/mcp/canon-mcp.mjs` (montado em `/app/data/mcp/`).
+- Fonte versionada: `redesign/librechat/canon-mcp.mjs`.
+- `librechat.yaml` -> `mcpServers.canon`, `startup: true` (excecao consciente a
+  regra do "sob demanda": e read-only, ~40 MB, e a espinha da hidratacao -- a
+  Seth precisa da tool ja na proxima mensagem, nao depois de um toggle na UI).
+- Tools:
+  - `query_canon { doc, grep?, contexto?, linhas? }` -- le REGRAS/PROJETO/MEMORIAS/
+    ONDE_ESTAMOS/CHAVES/PROJETO_REFERENCIA/ROADMAP/PROMPT_CARREGAMENTO/INDICE_MEMORIAS
+    direto da fonte. MEMORIAS sem grep/linhas devolve so a janela do topo.
+  - `vault_consultar { caminho? }` -- le ou lista uma nota derivada sob
+    `memoria/obsidian/` (estado, timeline, moc-*, entradas/, regras/, controles/).
+- Trava: whitelist (so os docs nomeados + `memoria/obsidian/**`) + denylist de
+  sufixos de segredo (`.secret .token .pass .key .gpg .env .pem`) + sem `..`.
+- Editou o `.mjs` ou o bloco? `docker compose -f ~/librechat/docker-compose.yml restart librechat`.
+- Nota: `auto/*` que roteia p/ modelo sem function-calling nao usa a tool naquele
+  turno -- prefira `auto/chat` / `auto/claude-sonnet` p/ turnos que consultam canon.
+
+### integracoes futuras (sob demanda)
+
+browser-use -> Brave, Home Assistant, pontes Discord/WhatsApp: cada uma entra
+como bloco em `librechat.yaml` -> `mcpServers`, com `startup: false` (so
+inicializa quando o modelo pedir). Transporte recomendado: Streamable HTTP.
+Ver o desenho da arquitetura da Seth.

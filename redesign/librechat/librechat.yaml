@@ -63,3 +63,20 @@ speech:
         - "am_adam"
         - "am_michael"
         - "bf_emma"
+
+# --- MCP: memória local (vault Obsidian, read-only) ------------------------
+# canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.
+# Tools: query_canon (docs do canon direto da fonte) · vault_consultar (notas derivadas).
+# startup: false = sob demanda (LibreChat inicializa na 1a chamada). Se a Seth nao
+# achar a tool, virar startup: true -- e read-only, ~30 MB, e a espinha da hidratacao.
+mcpServers:
+  canon:
+    type: stdio
+    command: node
+    args:
+      - /app/data/mcp/canon-mcp.mjs
+    env:
+      CANON_PROXY: http://127.0.0.1:27125
+    startup: true   # ligado: read-only, ~40 MB, e a espinha da hidratacao da Seth
+    timeout: 30000
+    description: "Vault do Agata (canon read-only) via :27125 -- query_canon, vault_consultar"
