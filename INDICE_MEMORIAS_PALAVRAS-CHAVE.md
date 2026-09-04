@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
+  palavras-chave: misturou, fatos, força, diferente, datar, parecer, qwen, parte, sólida, conteúdo, descreve, estado, superado, muda, fraca, texto, escrito, retirada
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
   palavras-chave: causa, raiz, drift, hipótese, fundamentada, provada, auditoria, proposta, itens, seth, parecer, qwen, texto, dias, entradas, atrás, descansam, premissa, falsa, estavam, implementados, caminho, resto, sobrevive
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reteste, tool, calling, pós, lição, fase, zero, fabricação, silos, regridem, falhas, reproduziram
 (306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
   palavras-chave: silo, modelo, nunca, entra, canon
-(305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emenda da Camada B
-  palavras-chave: bloco, silos, modelo, aplicado, emenda, camada
+(305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emen …
+  palavras-chave: bloco, silos, modelo, aplicado, emen
 (304) DIÁRIO — 31/08/2026 · Fase 2 preparada (roteiro + dossiê S1 + item J); HD …
   palavras-chave: fase, preparada, roteiro, dossiê, item
 (303) DIÁRIO — 31/08/2026 · Fase 1 sob risco assumido: costuras K+O em PROJETO/R …

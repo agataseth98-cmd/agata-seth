@@ -5,6 +5,16 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 04/09/2026 (você me corrigiu, e tinha razão em parte — ajustei sem jogar fora o trabalho)
+
+**Você apontou que os textos da Seth/Qwen podiam ser atuais, não de dois dias atrás como eu tinha dito.** Fui conferir minha própria afirmação, não só reafirmar. Achado: eu tinha misturado duas coisas diferentes. A data que usei (do commit `fb5e7e7`, 03/09) prova só **qual era o estado do sistema que o texto descreve** — não prova **quando alguém digitou o texto**. Essas são coisas diferentes, e o histórico do próprio Agata já documenta que hora/data auto-relatada por um modelo é pouco confiável dependendo do ambiente dele — é literalmente o mesmo problema que você descreveu.
+
+**O que muda: só a frase sobre "quando foi escrito".** O que não muda: nenhum dos 10 itens que eu tinha checado no disco — refiz as checagens agora, de novo, e os resultados são os mesmos (a pasta "memoria_old" continua não existindo, a busca semântica continua já implementada, etc.). Essas conclusões nunca dependeram de data nenhuma, só de olhar o disco.
+
+**Sobre o segundo texto que você colou (a "Seth" auditando o parecer de Qwen):** achei uma inconsistência real dentro do próprio texto — ele se assina duas vezes como o mesmo turno, mas cita duas entradas diferentes como "última lida". E não tenho como confirmar daqui se quem escreveu aquilo realmente rodou os comandos que alega ter rodado (depende de qual das duas formas de conversar com a Seth você usou — uma tem acesso a comandos de verdade, a outra não). Registrei os dois pontos como o que são: incerteza real, não acusação.
+
+Tudo isso está registrado em MEMÓRIAS (335), como correção de (334) — é assim que o sistema se corrige, sempre acrescentando, nunca apagando o que ficou errado.
+
 ## Onde estamos agora — 04/09/2026 (você pediu pra investigar a causa do problema anterior e auditar uma proposta que veio da Seth + Qwen)
 
 **Duas coisas nesta rodada.**
