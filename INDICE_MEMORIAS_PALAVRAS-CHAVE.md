@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
+  palavras-chave: auditoria, autoavaliação, seth, próprio, sistema, memória, substância, confirmada, item, erro, real, arquitetura, desatualizada, hermes, removido, cabeçalho, resposta, reprova, linter, regra, projeto
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
   palavras-chave: achado, real, trás, anel, soltos, canônicos, raiz, leia, nunca, tiveram, wikilink, verdade, errou, diagnóstico, achou, era, cache
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase todo Nota Diária + gerado; blindado contra publicar nota pessoal por acidente
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, sob, risco, assumido, costuras, projeto, regras, ledger, assumo, fecha
 (302) DIÁRIO — 28/08/2026 · PROMPT_CARREGAMENTO.md: detector de âncora velha era falso positivo — trocado por checagem de defasagem em 3 degraus (v2)
   palavras-chave: prompt, carregamento, detector, âncora, velha, era, falso, positivo, trocado, checagem, defasagem, degraus
-(301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a cada commit (fail-soft), sob P-8
-  palavras-chave: passo, post, commit, regenera, índice, derivado, fail, soft, sob
+(301) DIÁRIO — 28/08/2026 · Passo 3 no post-commit: regenera o índice derivado a …
+  palavras-chave: passo, post, commit, regenera, índice, derivado
 (300) DIÁRIO — 28/08/2026 · FASE 6: `scripts/preparar_export_indice.py` — versão …
   palavras-chave: fase, scripts, preparar, export, indice, versão
 (299) DIÁRIO — 28/08/2026 · FASE 5.5: `scripts/consultar_indice.py` — extrator d …

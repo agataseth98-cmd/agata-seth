@@ -22,6 +22,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
+
+**Pedido do Humano:** "Audite a resposta da Seth sobre seu sistema de memórias visto de dentro" — colada uma autoavaliação de 8 itens sobre falhas do sistema de hidratação/memória, com a ressalva honesta da própria Seth de que "não medi nada ao vivo". Tratado como REGRAS manda ("relato de modelo é alegação até a Máquina confirmar"): cada item verificado no disco/git antes de aceitar, não só lido.
+
+**Veredito, item por item:**
+
+| Alegação da Seth | Veredito | Evidência |
+|---|---|---|
+| Item 1 — hidratação só injeta a janela do topo, resto é sob demanda | **CONFIRMADO** | REGRAS "Carregar e formatos" + glossário "hidratação" descrevem exatamente isso |
+| Item 2 — busca semântica forte em tema concreto, fraca em pergunta abstrata (0,880 vs 0,853; ranks 116º/150º de 276) | **CONFIRMADO, números exatos** | (327), lido linha a linha, bate byte a byte com os números citados |
+| **Item 3 — "`.hermes.md` é um arquivo único... injetado no system prompt", ponto único de falha** | **REFUTADO na arquitetura atual, achado real por trás** | `~/.hermes/` não existe (`ls` confirma); Hermes foi removido por inteiro em (312), 03/09/2026. O arquivo hoje é `.hidrata.md`/`.hidrata-seth.md`, e desde a Fase 8 ele é `PROJETO.md`, "Memória e hidratação": "**referência** — não é mais a hidratação primária do loop" — quem hidrata hoje é o nó `hidratar` do grafo (`estado_para_eco.sh`) + `query_canon` sob demanda. Para a própria Seth, `seth_gateway` usa modo **compacto** por padrão (cabeçalho curto + estado atual), não o arquivo inteiro — "modo full" é exceção configurada. O bug real que a Seth citou como prova — gerador trunca em silêncio fora de UTF-8 — **existe de verdade e segue sem o guard aplicado** ((317), `propostas/guarda-utf8-hidratacao.diff` ainda sem `APROVADO-`) — o risco descrito é real, o mecanismo descrito está desatualizado |
+| Item 5 — (268) identidade fabricada, (269) timestamp fabricado | **CONFIRMADO** | Conteúdo integral de (268)/(269) lido; bate com o resumo da Seth |
+| Item 6 — numeração pré-(49) não é globalmente única | **CONFIRMADO, quase citação literal** | `INDICE_MEMORIAS.md:4`: "Números antes de (49) não são únicos globalmente" |
+| Item 7 — vault Obsidian `rm -rf` + reconstrução total a cada commit, artefatos-fantasma de 0 bytes | **CONFIRMADO** | (319)/(323), lidas por inteiro, descrevem exatamente esse mecanismo e a correção aplicada |
+| Item 8 — gatilho de reabertura da busca semântica era 10× (118→276 entradas, hoje 2,3×) | **CONFIRMADO, números exatos** | (327) bate com a citação |
+| "MEMÓRIAS.md tem 5.540 linhas" | Aproximação, sem gravidade | `wc -l` real: 5.539 — 1 linha de diferença, não afeta nenhum argumento |
+
+**O achado que a própria auditoria não viu: a resposta dela reprova no próprio linter do projeto.** Rodado `scripts/verificar_cabecalho.py` contra o texto literal da Seth ("Aqui é o Seth, turno 1..." / "Última MEMÓRIA lida: nº 330" / "O que está quebrado: pronto."): duas FALHAs reais — falta `t=<n>` no formato exigido (usou "turno 1", não "t=1 (contado no contexto)"), e a citação de (330) não bate no padrão que o linter e a REGRAS ("Citação de MEMÓRIAS") exigem (`nº 330` em vez de `(330)`). Além disso, sendo a primeira resposta da sessão, faltou o bloco de prontidão inteiro de REGRAS "Carregar e formatos" — nenhuma linha `sync:`, nenhuma hora com selo de origem, nenhuma linha `Nonce:` (nem a declaração "não vejo nonce meu" que o próprio protocolo pede). Nada disso muda a substância da análise — mas é exatamente a classe de falha silenciosa (formato incumprido, sem ninguém notar) que o item 3 da própria Seth descreve como o risco mais sério do sistema. Ironia registrada, não escondida.
+
+**O que fica em aberto, nomeado, não corrigido nesta entrada:** o `guarda-utf8-hidratacao.diff` de (317) segue pendente de `APROVADO-` — é a correção que fecharia o próprio risco que a Seth (corretamente, na essência) apontou no item 3. Decisão de aprovar é do Humano.
+
+**Verificação:** `wc -l MEMÓRIAS.md`; `ls ~/.hermes/` (inexistente); `grep -n` nas entradas (317), (268), (269), (319), (323), (325) e leitura integral de cada uma antes de aceitar como fonte; `grep -n` em `INDICE_MEMORIAS.md` e em `PROJETO.md` ("Memória e hidratação", "Interface") pra confirmar o estado atual contra o citado pela Seth; `python3 scripts/verificar_cabecalho.py` rodado contra o texto literal da resposta da Seth (2 FALHAs reais, reproduzidas). `bash scripts/perimetro.sh` → 11 OK · 0 SKIP · 1 PARCIAL (P-4) · 0 FALHA, nenhum arquivo de comportamento tocado nesta entrada (só registro).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura integral de cada entrada citada antes de aceitar a alegação, não paráfrase; `ls`/`grep`/`wc` reais no disco pra cada afirmação factual; rodada real do linter oficial do projeto contra o texto exato auditado, não uma leitura visual do formato. Autorização: Humano, pedido direto de auditoria nesta sessão. Turno desta sessão: t=2 (contado no contexto).
+
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
 
 **Humano colou a lista de nomes soltos da própria tela** (não a captura de tela, o texto). Investiguei cada nome individualmente contra o disco e o gerador, em vez de aceitar a leitura de (329) ("provavelmente cache desatualizado") como fechada.

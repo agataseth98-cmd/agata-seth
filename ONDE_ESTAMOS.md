@@ -5,7 +5,32 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
-## Onde estamos agora — 04/09/2026 (achei a causa de verdade do anel de pontos soltos: um pedaço do sistema nunca tinha sido ligado)
+## Onde estamos agora — 04/09/2026 (auditei a autoavaliação da Seth sobre a própria memória — a análise dela está certa na essência, mas ela descreveu um pedaço do sistema que já não existe mais)
+
+**Você me pediu para auditar o que a Seth escreveu sobre as falhas do próprio
+sistema de memória.** Conferi cada ponto dela contra o disco de verdade, um
+por um, não só contra o texto.
+
+**A maior parte está certa e bem embasada** — os números que ela citou sobre
+a busca por "sentido" (funciona bem pra fato concreto, mal pra pergunta
+sobre o porquê de uma decisão) e sobre a memória crescendo mais rápido que a
+janela que qualquer modelo enxerga de cara batem exatos com o que já estava
+medido e registrado.
+
+**Um erro real, e instrutivo:** ela descreveu o mecanismo de memória usando
+o nome do sistema antigo (`.hermes.md`), que **não existe mais** — foi
+removido inteiro há um dia. O risco que ela apontou (um bug no gerador
+corromper a memória de todo mundo em silêncio) é real e ainda não tem a
+correção aprovada — só o nome do mecanismo estava desatualizado.
+
+**Achado à parte, meio irônico:** a resposta dela — que fala sobre o risco
+de um sistema falhar em silêncio sem ninguém perceber — **não seguiu o
+próprio formato de identificação que o sistema exige de toda resposta**
+(faltou dizer a hora, faltou confirmar que está em dia com a história).
+Rodei o programa que confere isso automaticamente: reprovou. Registrado,
+sem consertar nada nela — é só um registro de história, não código.
+
+## Antes disso — 04/09/2026 (achei a causa de verdade do anel de pontos soltos: um pedaço do sistema nunca tinha sido ligado)
 
 **Você me mandou a lista de nomes dos pontos soltos, direto da tela.** Com
 os nomes em mãos, fui atrás de cada um — e a explicação que eu tinha dado
