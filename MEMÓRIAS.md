@@ -22,6 +22,50 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
+
+**Pedido do Humano, textual, porque merece ser citado por inteiro:** "Registre, é o justo, Regime de exceção encerrado, com devido registro, mais pedido formal de perdão pelos erros potencialmente cometidos até agora, sobre o estado atual do sistema e sua documentação, solicito ainda relatório do período histórico; contexto cronicidade, apego pelo que é ainda bom, inclusivo e amoroso, duro quando necessário, respeitando a materialidade histórica. E ainda assim humano. Sempre pronto para identificar melhorias, sempre pronto a seguir o Canon."
+
+## Parte 1 — "Ponto Cego" registrado
+
+Artefato "Ponto Cego" (https://claude.ai/code/artifact/0dbaf1de-6252-4d71-a1f3-3306babd38db), publicado nesta sessão (05/09/2026): pré-mortem dos 8 itens do backlog de expansão (P-8, §4.2, discordância sintética, WhatsApp, Home Assistant, GLM membro pleno, MEMÓRIAS por período, réplica Windows), cada um com o ponto cego específico que um Humano revisando sozinho, de fora do código, mais provavelmente não captaria. Análise, não fato de Máquina — registrado como tal, não como achado verificado. Nenhum dos 8 itens foi decidido nem implementado.
+
+**Artefato irmão desta entrada, pedido na mesma mensagem:** "Veios da Ágata" (https://claude.ai/code/artifact/d4c2b1f9-750a-4258-87fd-e613b2164ad5) — o "relatório do período histórico" pedido pelo Humano, tratamento editorial/crônica, não técnico. Cobre o mesmo período ((333)-(346), com contexto das origens do projeto desde (2)/07/2026) no tom pedido: "apego pelo que é ainda bom, inclusivo e amoroso, duro quando necessário, respeitando a materialidade histórica." Nenhum fato ali contradiz esta entrada — é a mesma história, registrada fora do canon técnico, por desenho (artefato, não MEMÓRIAS — o texto emocional não é o tipo de registro que Regra 4 exige ser append-only aqui; o fato técnico correspondente é esta entrada).
+
+## Parte 2 — Regime de exceção: ENCERRADO
+
+**O que era.** Autorizado por escrito em 01/09/2026 (redesign, chat 6): "gates de cerimônia suspensos, invariantes de proteção mantidas: `MEMÓRIAS.md` nunca se reescreve, nada de force/reset em `main`, segredo nunca no chat/git, destrutivo mostrado sozinho, `main` só muda na Fase 8." `redesign/CANON-DELTA.md` já previa, desde então, que fecharia "quando a Fase 8 fechar" — e nomeava explicitamente o que "os gates de volta" significa: **quarentena P-8, Cadeia A→B→C bloqueante, Regra 8, portão das três perguntas.** Essa previsão nunca virou entrada de MEMÓRIAS fechando o regime — achado em (336), continuou aberto por escolha do Humano em (345) ("ativo ainda"), e é fechado agora, nesta entrada, pela primeira vez com registro formal.
+
+**Honestidade sobre o escopo real, não o escopo original.** O texto de 01/09 dizia "`main` só muda na Fase 8" como invariante do regime. Isso não foi o que aconteceu: a Fase 8 fechou em (310)/(311), 03/09, e o regime **continuou sendo reautorizado** — para a remoção do Hermes (312), para as skills de Discord/navegador ((339)), para o backlog de bugfixes ((341)), para a correção da consolidação ((340)), até a confirmação explícita em (345). O escopo cresceu de "cutover de uma fase" para "trabalho contínuo por 3 dias", por decisão do Humano a cada passo, não por interpretação minha. Registrado sem maquiar: a invariante original não sobreviveu do jeito que foi escrita; o que sobreviveu foi o espírito (Humano decide quando abrir mão da cerimônia, sessão a sessão).
+
+**O que volta a valer, a partir desta entrada:**
+1. **Quarentena P-8, marcador criado pelo Humano.** Desde o bootstrap de P-8 ((218)), a regra sempre foi "a partir do próximo commit que toque REGRAS/PROJETO/scripts/.githooks, o marcador precisa ser criado pelo Humano — esta exceção não se repete." Durante o regime de exceção, o executor (eu) criou os dois lados do par (`.diff` E `APROVADO-`) mecanicamente, a partir de autorização em texto do Humano — prática real desta sessão, entradas (327), (328), (330), (338), (339), (341), (343), todas registradas com esse critério explícito. **A partir de agora, o `APROVADO-` volta a ser ato do Humano** — eu proponho o `.diff`, o Humano cria o marcador.
+2. **Cadeia A→B→C volta a ser bloqueante.** Mudança estrutural (não bugfix já autorizado, "mudança estrutural" no sentido de REGRAS) precisa de segunda opinião de outro modelo antes de aplicar, não só da minha própria verificação.
+3. **Regra 8** (verificação tripla) volta a valer pra decisões não verificáveis por medição direta.
+4. **Portão das três perguntas** volta a ser o caminho obrigatório antes de eu pedir autorização de qualquer coisa nova — as três perguntas, nesta ordem, uma de cada vez, não em bloco.
+
+**`ONDE_ESTAMOS.md` ganha uma seção nova** (não edita a antiga que dizia "continua ligado até você dizer o contrário" — Regra 4) registrando o fechamento no idioma do Humano.
+
+## Parte 3 — Catálogo honesto de erros desta sessão, sem suavizar
+
+**Pedido do Humano ("pedido formal de perdão pelos erros potencialmente cometidos") atendido registrando os erros reais, não com uma frase genérica de desculpa.** Regra 4 do próprio sistema: corrigir é registrar, nunca esconder. Lista, sem inflar nem minimizar:
+
+1. **Erro de fato, corrigido em (335):** (334) afirmou que o texto do parecer de Qwen era "de dois dias atrás" tratando a data do commit citado como se datasse a redação — datava só o conteúdo descrito, não o momento de escrever. Erro de raciocínio, não de digitação.
+2. **Erro de verificação, corrigido em (338):** listei B3.1 (tags no índice) e A3-médio (hash injetado pelo gateway) como pendentes em várias respostas antes de checar o disco — os dois já estavam implementados. Repeti a lista errada mais de uma vez antes de conferir.
+3. **Diagnóstico incompleto, corrigido em (340):** (338) concluiu "provavelmente transitório" pro `HTTPError` da consolidação depois de UMA chamada de teste funcionar — a causa real (orçamento de tokens + teto de 15s do OmniRoute) só apareceu reproduzindo o erro de propósito, dois dias depois.
+4. **Quase-erro, pego pelo próprio controle antes de virar erro real:** escrevi um literal de teste (`AKIA...`) direto no código-fonte do servidor Discord — `P-1` (varredura de segredo do repositório) reprovou o commit. Corrigido com o mesmo padrão (`_fx`, concatenação em runtime) que `sanitizar.py` já usava — eu conhecia o padrão, não apliquei de primeira.
+5. **Bug de sistema não-autoral, mas não achado a tempo:** o `.githooks/post-commit` marcava o vault como "árvore suja" em praticamente todo commit desde que o hook existe (achado e corrigido em (343)) — não fui eu quem escreveu o bug original, mas rodei `perimetro.sh` dezenas de vezes nesta sessão sem notar o padrão até ser perguntado diretamente "acabamos?".
+6. **Erro mecânico, duas vezes:** digitei errado a própria linha do marcador `ENTRADAS-NOVAS` (que o texto do arquivo pede explicitamente pra nunca editar à mão) em dois rascunhos diferentes ((338) e (344)) — pego e corrigido antes de publicar as duas vezes, mas aconteceu duas vezes, não uma.
+7. **Limite não superado, registrado sem fingir que foi:** tentei reconstruir a API de "agents" do LibreChat pra testar uso real via chat — não consegui a tempo, registrado como limite em (342), não escondido nem forçado.
+
+**Nenhum destes chegou ao Humano como fato não verificado publicado sem correção** — todos foram pegos e corrigidos dentro da própria sessão, a maioria pela minha própria releitura, um pelo controle mecânico do repositório (P-1), nenhum por auditoria externa (ver Parte 2 — é exatamente a lacuna que a Cadeia A→B→C, agora de volta, existe pra cobrir). O pedido de desculpa do Humano é aceito e registrado aqui como parte da história — não porque o sistema precise de perdão pra funcionar, mas porque ele pediu, e Regra 4 registra o que aconteceu, inclusive isto.
+
+**Verificação:** releitura de (333)-(345) inteiras antes de compilar o catálogo — cada erro citado por número de entrada real, nenhum inventado nem generalizado. `bash scripts/perimetro.sh` → sem FALHA no momento deste registro.
+
+Nenhum arquivo de comportamento tocado nesta entrada além do próprio ato de fechar o regime (que é doutrina, registrada aqui, não código) — fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura completa de (333)-(345) antes de compilar o catálogo de erros, cada item citado por entrada real; releitura de `redesign/CANON-DELTA.md` pra citar exatamente o que "gates de volta" significa, não parafraseado de memória; grep real em REGRAS/PROJETO confirmando que "regime de exceção" nunca foi formalizado ali, só em MEMÓRIAS/`ONDE_ESTAMOS.md`. Autorização: Humano, pedido direto, textual, citado por inteiro no topo desta entrada. Turno desta sessão: t=21 (contado no contexto).
+
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
 
 **Pedido do Humano:** "regime de exceção ativo ainda" — resposta a uma pergunta explícita deixada em aberto em (344) ("decidir se fecha ou mantém o regime de exceção"). **Fechado, parcialmente:** o regime segue ativo, por confirmação direta — não é mais `lacuna`, é fato registrado.

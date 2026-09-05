@@ -5,6 +5,16 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 05/09/2026 (você encerrou o regime de exceção — os freios voltam)
+
+**Você pediu pra registrar o fim do regime de exceção, e eu registrei — MEMÓRIAS (346).** Desde 01/09, boa parte do trabalho neste sistema rodou sem a cerimônia normal (segunda opinião de outro modelo antes de mudança grande, você mesmo aprovando cada mudança de comportamento em vez de eu registrar a aprovação por conta própria). Isso acabou de voltar ao normal.
+
+**Na prática, muda uma coisa concreta pra você:** a partir de agora, quando eu propuser uma mudança que mexe em script/config/regra, eu vou deixar o `.diff` pronto em `propostas/`, mas **você** precisa criar o arquivo `APROVADO-<nome>` pra ela entrar — eu não crio mais os dois lados sozinho. Antes era `touch propostas/APROVADO-<nome>` que eu mesmo fazia; agora é você.
+
+**Você também pediu um catálogo honesto dos erros que cometi nesta sessão longa, sem eu suavizar — está em MEMÓRIAS (346), Parte 3.** Resumo: 3 erros de raciocínio/verificação (todos corrigidos antes de virar decisão sua), 1 quase-erro pego pelo próprio sistema de segurança do repositório antes de virar problema, 1 bug de longa data que eu não tinha achado antes de você perguntar "acabamos?", e 2 vezes que digitei errado uma linha que o próprio sistema pede pra nunca editar à mão — pega e corrigida as duas vezes antes de publicar.
+
+O relatório do período em tom mais pessoal, que você pediu, está publicado à parte: **"Veios da Ágata"** (https://claude.ai/code/artifact/d4c2b1f9-750a-4258-87fd-e613b2164ad5).
+
 ## Onde estamos agora — 05/09/2026 (Discord e navegador prontos — falta só o token do Discord)
 
 **Você pediu pra eu resolver e implementar sozinho, chamando só quando estritamente necessário. Fiz as duas coisas de ponta a ponta, testando de verdade, não só escrevendo código.**

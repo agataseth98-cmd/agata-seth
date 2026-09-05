@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
+  palavras-chave: regime, exceção, encerrado, ordem, humano, gates, voltam, ponto, cego, registrado, canon, catálogo, honesto, erros, cometidos, sessão, suavizar, pedido, desculpa, igual
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
   palavras-chave: regime, exceção, confirmado, ativo, humano, responde, pendências, nomeadas, segunda, parte, pedido, anterior, regiões, confederadas, segue, entender, perguntado, novo, decifrado, adivinhação
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, pareceres, gpt, terra, qwen, achado, próprio, buraco, redesign, router, correções, aplicadas, autoaprovação, sob, ordem, explícita
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
   palavras-chave: sincronização, derivados, memórias, ficaram, commit, atrás, gerador, hidratação, trunca, silêncio, fora, utf
-(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
-  palavras-chave: librechat, tool, query, canon, seth, exige, agente, salvo, disablestreaming, bug, parser, stream, omniroute
+(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente …
+  palavras-chave: librechat, tool, query, canon, seth, exige, agente
 (315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é ca …
   palavras-chave: doutrina, acesso, graduado, juiz, seth
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não que …

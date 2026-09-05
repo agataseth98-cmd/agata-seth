@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + achado próprio: buraco no P-8 sobre redesign/router — 6 correções aplicadas, autoaprovação sob ordem explícita
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
-(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
+(316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente …
 (315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é ca …
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não que …
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de …
