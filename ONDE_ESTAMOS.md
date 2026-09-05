@@ -5,6 +5,33 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 05/09/2026 (Discord e navegador prontos — falta só o token do Discord)
+
+**Você pediu pra eu resolver e implementar sozinho, chamando só quando estritamente necessário. Fiz as duas coisas de ponta a ponta, testando de verdade, não só escrevendo código.**
+
+**1) Ponte com o Discord — pronta, falta só uma coisa que só você pode fazer.** A Seth agora tem duas ferramentas: ler as últimas mensagens de um canal, e enviar uma mensagem (que passa por um filtro que bloqueia qualquer coisa parecida com senha/chave antes de sair). Testei tudo que dava pra testar sem o token: o filtro de segurança bloqueia de verdade um padrão de chave e deixa passar texto normal; o servidor conversa corretamente no protocolo certo.
+
+**O que só você pode fazer, quando quiser usar de verdade:**
+1. Vá em `discord.com/developers/applications`, crie uma aplicação, vá em "Bot", clique "Reset Token" e copie o token.
+2. Convide o bot pro seu servidor/canal (a própria página tem um link de convite, marque as permissões "Read Messages" e "Send Messages").
+3. Abra `~/.config/agata/.env` e adicione a linha `DISCORD_BOT_TOKEN=<o token que você copiou>`.
+
+Depois disso, é só usar — não precisa me chamar de novo pra esse passo.
+
+**2) Controle de navegador — pronto, testado com navegação real.** Troquei a ferramenta que você tinha citado ("browser-use") por outra mais estável (Playwright, a base que aquela usa por baixo) — mesma engine do Brave de verdade, mas API mais confiável. Testei navegando, lendo e tirando print de uma página de verdade. O navegador roda num perfil isolado, criado do zero — nunca o seu perfil do dia a dia, zero senha herdada.
+
+**A parte de "clicar"/"preencher formulário" vem travada por padrão.** Nenhum site pode receber clique ou preenchimento até você liberar o domínio manualmente:
+```fish
+echo "nomedosite.com" >> ~/.config/agata/navegador-dominios-permitidos.txt
+```
+Testei os dois lados: sem nada na lista, o clique é bloqueado de verdade; com o domínio na lista, o clique funciona de verdade.
+
+**Os dois já sobem e descem junto com o resto da Seth** — usar "Seth" e "Parar Seth" como sempre, nada novo pra você lembrar de ligar.
+
+**O que ainda falta, nomeado:** eu testei o protocolo de conversa com as ferramentas diretamente (prova que estão funcionando), mas ainda não testei através de uma conversa de verdade pedindo pra Seth usar isso — vale você experimentar quando quiser. Home Assistant e WhatsApp (as outras duas integrações que estavam na lista original) ficaram de fora desta vez — só fiz o que você pediu agora.
+
+Tudo registrado em MEMÓRIAS (339).
+
 ## Onde estamos agora — 04/09/2026 (você me corrigiu, e tinha razão em parte — ajustei sem jogar fora o trabalho)
 
 **Você apontou que os textos da Seth/Qwen podiam ser atuais, não de dois dias atrás como eu tinha dito.** Fui conferir minha própria afirmação, não só reafirmar. Achado: eu tinha misturado duas coisas diferentes. A data que usei (do commit `fb5e7e7`, 03/09) prova só **qual era o estado do sistema que o texto descreve** — não prova **quando alguém digitou o texto**. Essas são coisas diferentes, e o histórico do próprio Agata já documenta que hora/data auto-relatada por um modelo é pouco confiável dependendo do ambiente dele — é literalmente o mesmo problema que você descreveu.

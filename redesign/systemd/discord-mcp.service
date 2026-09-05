@@ -1,0 +1,12 @@
+[Unit]
+Description=Agata -- servidor MCP da ponte Discord (poll, nao push), :20135
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/agata/redesign/mcp/.venv/bin/python %h/agata/redesign/mcp/discord/servidor.py --http 20135
+Restart=on-failure
+RestartSec=3
+
+# Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
+# start discord-mcp`), nao no boot. Mesma logica do seth-gateway.

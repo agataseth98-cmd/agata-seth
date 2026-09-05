@@ -146,8 +146,18 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
 - **Atalhos** (`~/Área de trabalho/`, ícone `~/Imagens/Ágatha Seth.png`): **Seth** (chat —
   sobe tudo + abre o navegador), **Seth (agente)** (Goose no terminal), **Parar Seth**
   (para os frentes; a espinha `agata.target` segue de pé). Skills/integrações futuras
-  (browser-use, Home Assistant, pontes Discord/WhatsApp) entram **sob demanda**, cada uma
-  como servidor MCP (ver desenho da arquitetura da Seth).
+  (Home Assistant, ponte WhatsApp) entram **sob demanda**, cada uma como servidor MCP (ver
+  desenho da arquitetura da Seth). **Ponte Discord e controle de navegador — implementados
+  05/09/2026, MEMÓRIAS (339):** `redesign/mcp/discord/` (poll, não push; egresso sanitizado
+  por `PADROES_SEGREDO`) e `redesign/mcp/navegador/` (Playwright direto contra Brave real —
+  não `browser-use`, cuja API de classes sumiu na versão avaliada; perfil isolado; escrita
+  travada por allowlist mecânica de domínio, `~/.config/agata/navegador-dominios-permitidos.txt`).
+  Os dois sobem/descem sob demanda via `discord-mcp.service`/`navegador-mcp.service`
+  (`redesign/systemd/`, sem `[Install]`), amarrados ao ciclo de `~/.local/bin/seth`/`seth-parar`.
+  Transporte HTTP (não stdio, diferente do `canon-mcp.mjs`) — os dois rodam no host (Brave
+  real, API do Discord), o LibreChat alcança via `127.0.0.1` porque o container usa
+  `network_mode: host`. `librechat.yaml` ganhou `mcpSettings.allowedDomains: ["127.0.0.1"]`
+  (sem isso o próprio LibreChat bloqueia servidor MCP remoto, guarda contra SSRF).
 
 ## Segurança
 Sandbox sempre. Segredos só em `~/.config/agata/.env`, fora do repo (era `~/.hermes/.env` —

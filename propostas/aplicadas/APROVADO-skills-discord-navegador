@@ -1,0 +1,39 @@
+Autorização do Humano, nesta sessão, em duas etapas:
+
+1. Pedido de desenho: "integração com chats discord e controle do navegador,
+   Unifique tudo em um plano lógico sem inconsistências elegante e otimizado
+   de implementação a luz da direção que o sistema está tomando" -- resultou
+   no plano apresentado (princípios, arquitetura MCP compartilhada, desenho
+   por item, fases D0-D2/N0-N2).
+
+2. Autorização de implementação, resposta direta ao plano: "Perfeito pode
+   integrar resolver da melhor forma para o sistema e implementar em regime
+   de exeção até o fim, me chame apenas quando estritamente necessário,
+   vamos terminar essas tarefas hj" -- e reforçada: "E para fazer tudo das
+   ultimas mensagens deixar o sistema pronto acima do estado da arte, não
+   cometa erros."
+
+Decisões de implementação tomadas sob esta autorização, sem novo pedido ao
+Humano (regime de exceção, "chame só quando necessário"):
+- Escopo: Discord + navegador, não Home Assistant/WhatsApp (o Humano só
+  nomeou os dois nesta rodada).
+- browser-use avaliado e trocado por Playwright direto (API mais estável;
+  browser-use 0.13.10 não expõe mais Agent/Browser) -- mesmo resultado
+  (Brave real, perfil isolado), decisão registrada no topo de servidor.py.
+- Transporte MCP: HTTP (não stdio), pois os dois precisam rodar no host
+  (Brave real; API do Discord) e o LibreChat roda em container -- resolvido
+  e testado ao vivo (handshake MCP real, tools/list real, allowlist de
+  domínio do próprio LibreChat descoberta e corrigida em produção).
+- Portas 20135 (discord) / 20136 (navegador), sob demanda via systemd --user,
+  amarradas ao ciclo de vida de "Seth"/"Parar Seth" já existente.
+- Allowlist mecânica de domínio para escrita no navegador (vazia por padrão
+  = nada escreve) -- decisão de segurança tomada dentro do regime de exceção,
+  não perguntada, porque é a opção mais conservadora disponível, não a que
+  precisaria de autorização extra.
+- Chamado ao Humano só pro que é estritamente impossível sem ele: criar o
+  bot no Discord Developer Portal e colar o token em ~/.config/agata/.env
+  (não posso fazer isso por ele).
+
+Mesmo critério já usado nesta sessão em (327)/(328)/(338): autorização
+explícita em texto do Humano, registro mecânico do par .diff/APROVADO- pelo
+executor -- não autoaprovação por conta própria.

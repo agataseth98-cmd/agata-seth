@@ -7,6 +7,11 @@ LC=~/librechat/docker-compose.yml
 notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
 systemctl --user start agata.target 2>/dev/null || true
 systemctl --user start seth-gateway.service seth-escriba.service
+# Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+# navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+# LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+# o LibreChat nao falha se elas ainda nao responderam, so tenta de novo depois.
+systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || true
 docker compose -f "$LC" up -d >/dev/null 2>&1 || true
 docker start kokoro-tts >/dev/null 2>&1 || true
 # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)

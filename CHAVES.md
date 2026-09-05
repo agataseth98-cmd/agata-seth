@@ -12,6 +12,7 @@ git, no chat, nem em `PROJETO.md`/`MEMÓRIAS.md`. Permissão `600`.
 | `~/.omniroute/.env` | `STORAGE_ENCRYPTION_KEY` do OmniRoute (cifra o `storage.sqlite`) |
 | `~/librechat/.env` | segredos do LibreChat: `CREDS_KEY`, `CREDS_IV`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `MEILI_MASTER_KEY`. Fora do repo, `600`. Gerados na troca Open WebUI → LibreChat (03/09/2026, MEMÓRIAS (313)). Modelo sem-segredo: `redesign/librechat/env.exemplo`. |
 | `~/librechat/PRIMEIRO-ACESSO.txt` | senha do primeiro login do LibreChat (`600`, apagar após trocar no app) |
+| `~/.config/agata/.env` (`DISCORD_BOT_TOKEN`) | token do bot Discord da skill nova (05/09/2026, `redesign/mcp/discord/`). Sem ele, `ler_mensagens`/`enviar_mensagem` retornam erro estruturado, não levantam. Criar em `discord.com/developers/applications` → aplicação → Bot → Reset Token → convidar o bot no servidor/canal desejado (escopo `bot`, permissões `Read Messages`/`Send Messages`). |
 
 ## Como o OmniRoute usa as chaves
 

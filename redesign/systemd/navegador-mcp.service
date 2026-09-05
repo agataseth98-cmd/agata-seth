@@ -1,0 +1,12 @@
+[Unit]
+Description=Agata -- servidor MCP de navegador (Playwright + Brave, perfil isolado), :20136
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/navegador/servidor.py --http 20136
+Restart=on-failure
+RestartSec=3
+
+# Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
+# start navegador-mcp`), nao no boot. Mesma logica do seth-gateway.

@@ -1,0 +1,12 @@
+# Servidor MCP de navegador (skill nova, 05/09/2026) — venv isolado:
+# redesign/mcp/navegador/.venv
+#   python3 -m venv redesign/mcp/navegador/.venv
+#   redesign/mcp/navegador/.venv/bin/pip install -r redesign/mcp/navegador/requisitos.txt
+#
+# browser-use NÃO entra aqui de propósito -- avaliado (0.13.10, testado antes
+# de decidir), a API de classes sumiu do __init__.py nesta versão (virou CLI
+# que roda Python recebido por stdin). Usamos Playwright direto, a engine que
+# o próprio browser-use usa por baixo -- API estável, mesmo resultado (Brave
+# real, perfil isolado). Ver comentário no topo de servidor.py.
+fastmcp==4.0.1
+playwright==1.62.0
