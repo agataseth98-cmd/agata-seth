@@ -1,0 +1,20 @@
+Autorização do Humano, nesta sessão: depois de eu listar os 4 pendentes da
+auditoria do parecer Qwen (B3.1, C1.1, A3-médio, B1.1) e perguntar se devia
+formalizar como propostas/<nome>.diff, o Humano respondeu "pode fazer".
+
+Ao implementar, achei que 2 dos 4 (B3.1 -- tags/sinônimos no índice; A3-médio
+-- hash injetado pelo gateway) JÁ ESTAVAM feitos antes desta sessão (B3.1 =
+INDICE_MEMORIAS_PALAVRAS-CHAVE.md + extrair_palavras_chave.py, já existente;
+A3-médio = seth_gateway.py já injeta HASH-ESTADO desde o commit 5096782/(318),
+04/09 11:43) -- não reimplementados, só confirmados e reportados como erro
+meu de não ter checado antes de listar.
+
+Este par cobre os 2 itens genuinamente novos: C1.1 (IDADE-HIDRATACAO em
+scripts/estado_para_eco.sh + passagem pelo filtro de scripts/redesign/router/
+seth_gateway.py) e B1.1 (resumo de 1 linha das entradas mais antigas que a
+janela cheia, em .githooks/gerar-hidratacao.sh, orçamento à parte, aditivo --
+não toca no algoritmo de acúmulo por orçamento já existente).
+
+Mesmo critério já usado nesta sessão para (327)/(328) etc.: autorização
+explícita em texto do Humano, registro mecânico do par .diff/APROVADO- pelo
+executor -- não autoaprovação por conta própria.

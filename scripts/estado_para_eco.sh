@@ -112,11 +112,36 @@ hash_estado=$(printf '%s\n%s\n%s\n%s\n%s\n' \
   "$head_full" "$topo_linha" "$h_regras" "$h_memorias" "$h_projeto" \
   | sha256sum | cut -c1-12)
 
+# --- IDADE-HIDRATACAO: há quanto tempo .hidrata.md foi gerado (item C1.1,
+# pedido do Humano 05/09/2026 -- distingue "sync PASS" (HEAD bate com o
+# remoto) de "hidratação recente" (o arquivo que o modelo de fato recebeu
+# reflete esse HEAD). As duas coisas podem divergir: sync PASS não prova
+# que .hidrata.md foi regenerado depois do último commit -- só o pre-commit
+# faz isso, e um clone fresco ou uma falha silenciosa do hook deixaria o
+# arquivo velho com HEAD novo. `lacuna` se o arquivo não existir.
+if [ -f .hidrata.md ]; then
+  hidrata_mtime=$(date -r .hidrata.md +%s)
+  agora=$(date +%s)
+  idade_s=$(( agora - hidrata_mtime ))
+  if [ "$idade_s" -lt 0 ]; then
+    idade_hidratacao="lacuna: mtime de .hidrata.md no futuro (relógio da Máquina?) — não confie na idade"
+  elif [ "$idade_s" -lt 3600 ]; then
+    idade_hidratacao="$(( idade_s / 60 ))min atrás"
+  elif [ "$idade_s" -lt 86400 ]; then
+    idade_hidratacao="$(( idade_s / 3600 ))h atrás"
+  else
+    idade_hidratacao="$(( idade_s / 86400 ))d atrás"
+  fi
+else
+  idade_hidratacao="lacuna: .hidrata.md não existe neste checkout"
+fi
+
 cat <<FIM
 --- ESTADO PARA O ECO (fatos da Máquina; não é o eco) ---
 HEAD: $head7 $head_subject
 TOPO-MEMÓRIAS: $topo_linha
 $sync_linha
+IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
 $tes002
 HASH-ESTADO: $hash_estado

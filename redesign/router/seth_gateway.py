@@ -100,7 +100,8 @@ def _estado() -> str:
         r = subprocess.run(["bash", "scripts/estado_para_eco.sh"], cwd=REPO,
                            capture_output=True, text=True, timeout=15)
         linhas = [l for l in r.stdout.splitlines()
-                  if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:", "HASH-ESTADO:"))]
+                  if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
+                                    "IDADE-HIDRATACAO:", "HASH-ESTADO:"))]
         return "\n".join(linhas)
     except Exception:
         return ""

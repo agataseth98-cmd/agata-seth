@@ -26,6 +26,13 @@ INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
 JANELA_ORCAMENTO_CHARS=25000
 INDICE_RECENTES_COMPLETAS=30
 INDICE_TETO_ANTIGAS=80
+# Item B1.1, pedido do Humano 05/09/2026: orçamento À PARTE, só pra um resumo
+# de 1 linha por entrada (reaproveita $INDICE) das entradas mais antigas que
+# a janela de texto integral (`janela_memorias`) já não alcança. Aditivo --
+# nunca substitui texto integral por resumo, só estende o alcance. Não muda
+# `janela_memorias()` nem o algoritmo de acúmulo por orçamento (ver comentário
+# de bug real na função) -- roda depois, sobre o que sobrou de fora.
+JANELA_RESUMO_ANTIGAS_CHARS=8000
 
 # --- Fase 2 / Bloco 3.1: silos por modelo ------------------------------
 # Modelos-alvo que ganham um .hidrata-<modelo>.md PROPRIO: a janela de
@@ -165,6 +172,31 @@ gerar_indice() {
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     fi
   } > "$INDICE"
+}
+
+resumo_entradas_mais_antigas() {
+  # $1 = texto já produzido por janela_memorias() (não recalcula nada dela).
+  # Acha o menor número de entrada presente nesse texto (o "fim" da janela
+  # de texto integral) e lista, 1 linha por entrada, as entradas mais
+  # antigas que isso — reaproveitando $INDICE, que já está no mesmo formato
+  # e ordem. Item B1.1, pedido do Humano 05/09/2026.
+  local texto_janela="$1"
+  local cutoff
+  cutoff=$(printf '%s\n' "$texto_janela" \
+    | grep -oE '^\([0-9]+\)' | tr -d '()' | sort -n | head -1)
+  [ -z "$cutoff" ] && return 0
+  awk -v cutoff="$cutoff" -v budget="$JANELA_RESUMO_ANTIGAS_CHARS" '
+    /^\([0-9]+\)/ {
+      numstr = $0
+      sub(/^\(/, "", numstr); sub(/\).*/, "", numstr)
+      n = numstr + 0
+      if (n < cutoff) {
+        seglen += length($0) + 1
+        if (seglen > budget) exit
+        print
+      }
+    }
+  ' "$INDICE"
 }
 
 janela_memorias() {
@@ -346,7 +378,14 @@ montar_hermes() {
     echo ""
     echo "# MEMÓRIAS.md (janela por entrada inteira, orçamento ${_budget} chars${modelo:+, silo: $modelo})"
     echo ""
-    janela_memorias "$modelo"
+    local _janela_txt
+    _janela_txt="$(janela_memorias "$modelo")"
+    printf '%s\n' "$_janela_txt"
+    echo ""
+    echo "## Entradas mais antigas que a janela acima — resumo de 1 linha cada, orçamento ${JANELA_RESUMO_ANTIGAS_CHARS} chars à parte (item B1.1)"
+    echo "## Isto NÃO é texto integral. Pra ler uma entrada citada aqui por inteiro, peça o número via query_canon/vault_consultar — não afirme conteúdo além do título."
+    echo ""
+    resumo_entradas_mais_antigas "$_janela_txt"
   } > "$out"
 }
 

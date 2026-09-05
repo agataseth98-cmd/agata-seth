@@ -1,0 +1,121 @@
+diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
+index 56abe45..4d858df 100755
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -26,6 +26,13 @@ INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
+ JANELA_ORCAMENTO_CHARS=25000
+ INDICE_RECENTES_COMPLETAS=30
+ INDICE_TETO_ANTIGAS=80
++# Item B1.1, pedido do Humano 05/09/2026: orçamento À PARTE, só pra um resumo
++# de 1 linha por entrada (reaproveita $INDICE) das entradas mais antigas que
++# a janela de texto integral (`janela_memorias`) já não alcança. Aditivo --
++# nunca substitui texto integral por resumo, só estende o alcance. Não muda
++# `janela_memorias()` nem o algoritmo de acúmulo por orçamento (ver comentário
++# de bug real na função) -- roda depois, sobre o que sobrou de fora.
++JANELA_RESUMO_ANTIGAS_CHARS=8000
+ 
+ # --- Fase 2 / Bloco 3.1: silos por modelo ------------------------------
+ # Modelos-alvo que ganham um .hidrata-<modelo>.md PROPRIO: a janela de
+@@ -167,6 +174,31 @@ gerar_indice() {
+   } > "$INDICE"
+ }
+ 
++resumo_entradas_mais_antigas() {
++  # $1 = texto já produzido por janela_memorias() (não recalcula nada dela).
++  # Acha o menor número de entrada presente nesse texto (o "fim" da janela
++  # de texto integral) e lista, 1 linha por entrada, as entradas mais
++  # antigas que isso — reaproveitando $INDICE, que já está no mesmo formato
++  # e ordem. Item B1.1, pedido do Humano 05/09/2026.
++  local texto_janela="$1"
++  local cutoff
++  cutoff=$(printf '%s\n' "$texto_janela" \
++    | grep -oE '^\([0-9]+\)' | tr -d '()' | sort -n | head -1)
++  [ -z "$cutoff" ] && return 0
++  awk -v cutoff="$cutoff" -v budget="$JANELA_RESUMO_ANTIGAS_CHARS" '
++    /^\([0-9]+\)/ {
++      numstr = $0
++      sub(/^\(/, "", numstr); sub(/\).*/, "", numstr)
++      n = numstr + 0
++      if (n < cutoff) {
++        seglen += length($0) + 1
++        if (seglen > budget) exit
++        print
++      }
++    }
++  ' "$INDICE"
++}
++
+ janela_memorias() {
+   local modelo="${1:-}"
+   local budget="$JANELA_ORCAMENTO_CHARS"
+@@ -346,7 +378,14 @@ montar_hermes() {
+     echo ""
+     echo "# MEMÓRIAS.md (janela por entrada inteira, orçamento ${_budget} chars${modelo:+, silo: $modelo})"
+     echo ""
+-    janela_memorias "$modelo"
++    local _janela_txt
++    _janela_txt="$(janela_memorias "$modelo")"
++    printf '%s\n' "$_janela_txt"
++    echo ""
++    echo "## Entradas mais antigas que a janela acima — resumo de 1 linha cada, orçamento ${JANELA_RESUMO_ANTIGAS_CHARS} chars à parte (item B1.1)"
++    echo "## Isto NÃO é texto integral. Pra ler uma entrada citada aqui por inteiro, peça o número via query_canon/vault_consultar — não afirme conteúdo além do título."
++    echo ""
++    resumo_entradas_mais_antigas "$_janela_txt"
+   } > "$out"
+ }
+ 
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 0a0c546..b3e1e12 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -100,7 +100,8 @@ def _estado() -> str:
+         r = subprocess.run(["bash", "scripts/estado_para_eco.sh"], cwd=REPO,
+                            capture_output=True, text=True, timeout=15)
+         linhas = [l for l in r.stdout.splitlines()
+-                  if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:", "HASH-ESTADO:"))]
++                  if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
++                                    "IDADE-HIDRATACAO:", "HASH-ESTADO:"))]
+         return "\n".join(linhas)
+     except Exception:
+         return ""
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 148b45d..f824459 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -112,11 +112,36 @@ hash_estado=$(printf '%s\n%s\n%s\n%s\n%s\n' \
+   "$head_full" "$topo_linha" "$h_regras" "$h_memorias" "$h_projeto" \
+   | sha256sum | cut -c1-12)
+ 
++# --- IDADE-HIDRATACAO: há quanto tempo .hidrata.md foi gerado (item C1.1,
++# pedido do Humano 05/09/2026 -- distingue "sync PASS" (HEAD bate com o
++# remoto) de "hidratação recente" (o arquivo que o modelo de fato recebeu
++# reflete esse HEAD). As duas coisas podem divergir: sync PASS não prova
++# que .hidrata.md foi regenerado depois do último commit -- só o pre-commit
++# faz isso, e um clone fresco ou uma falha silenciosa do hook deixaria o
++# arquivo velho com HEAD novo. `lacuna` se o arquivo não existir.
++if [ -f .hidrata.md ]; then
++  hidrata_mtime=$(date -r .hidrata.md +%s)
++  agora=$(date +%s)
++  idade_s=$(( agora - hidrata_mtime ))
++  if [ "$idade_s" -lt 0 ]; then
++    idade_hidratacao="lacuna: mtime de .hidrata.md no futuro (relógio da Máquina?) — não confie na idade"
++  elif [ "$idade_s" -lt 3600 ]; then
++    idade_hidratacao="$(( idade_s / 60 ))min atrás"
++  elif [ "$idade_s" -lt 86400 ]; then
++    idade_hidratacao="$(( idade_s / 3600 ))h atrás"
++  else
++    idade_hidratacao="$(( idade_s / 86400 ))d atrás"
++  fi
++else
++  idade_hidratacao="lacuna: .hidrata.md não existe neste checkout"
++fi
++
+ cat <<FIM
+ --- ESTADO PARA O ECO (fatos da Máquina; não é o eco) ---
+ HEAD: $head7 $head_subject
+ TOPO-MEMÓRIAS: $topo_linha
+ $sync_linha
++IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+ $tes002
+ HASH-ESTADO: $hash_estado

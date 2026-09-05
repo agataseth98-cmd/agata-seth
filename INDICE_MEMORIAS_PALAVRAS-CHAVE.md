@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parecer Qwen, 2 já estavam feitos (achado corrigindo erro meu) — implementados e testados os 2 reais, C1.1 e B1.1 · investigado o `HTTPError` da consolidação noturna, provavelmente transitório
+  palavras-chave: pode, fazer, pendentes, auditoria, parecer, qwen, estavam, feitos, achado, corrigindo, erro, meu, implementados, testados, reais, investigado, httperror, consolidação, noturna, provavelmente, transitório
 (337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu com um texto fabricado (citação de entrada inexistente, termos sem referente, hora inventada), e se autocorrigiu — a autocorreção foi conferida agora, item por item, e bate com o disco com precisão
   palavras-chave: seth, recebeu, orientação, respondeu, texto, fabricado, citação, entrada, inexistente, termos, referente, hora, inventada, autocorrigiu, autocorreção, conferida, agora, item, bate, disco, precisão
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: redesenho, sistema, local, agata, fases, rede, segurança, router, igpu, modelos, grafo, spike, rlm, obsidian, liga, desliga
 (309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem de trabalho da auditoria em nuvem (anti-fabricação no carregamento) — 5 acréscimos; §4.2 (REGRAS) fica fora
   palavras-chave: prompt, carregamento, aplicada, seção, ordem, trabalho, auditoria, nuvem, anti, fabricação, acréscimos, regras, fica, fora
-(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
-  palavras-chave: bloco, eco, pós, carregar, mecanizado, aplicado, cadeia, completa
+(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v …
+  palavras-chave: bloco, eco, pós, carregar, mecanizado, aplicado
 (307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): …
   palavras-chave: reteste, tool, calling, pós, lição, fase
 (306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon

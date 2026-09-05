@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parecer Qwen, 2 já estavam feitos (achado corrigindo erro meu) — implementados e testados os 2 reais, C1.1 e B1.1 · investigado o `HTTPError` da consolidação noturna, provavelmente transitório
 (337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu com um texto fabricado (citação de entrada inexistente, termos sem referente, hora inventada), e se autocorrigiu — a autocorreção foi conferida agora, item por item, e bate com o disco com precisão
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeados em main; Hermes fora do loop; canon atualizado
 (310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede de segurança, router, iGPU, modelos, grafo, spike RLM, Obsidian, liga/desliga)
 (309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem de trabalho da auditoria em nuvem (anti-fabricação no carregamento) — 5 acréscimos; §4.2 (REGRAS) fica fora
-(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
+(308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v …
 (307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): …
 (306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emen …
