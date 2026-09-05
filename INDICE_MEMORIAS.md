@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um commit atrás de (316) — e o gerador de hidratação trunca em silêncio fora de UTF-8
 (316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
 (315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
-(314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
+(314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não que …
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de …
 (312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/aga …
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeado …

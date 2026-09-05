@@ -22,6 +22,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
+
+**Pedido do Humano:** "Registre esse Check point em memórias" — fechando a sessão longa que foi de (333) a (343): sincronização, auditoria de Seth/Qwen, skills de Discord e navegador, correção da consolidação, fechamento de backlog, e o bug do `post-commit` achado na própria checagem final.
+
+**Estado real, resumido, sem inflar:**
+- `HEAD` = `848f039`, `origin/main` em dia, `bash scripts/perimetro.sh` → 10 OK / 0 FALHA no momento deste registro.
+- Duas skills novas no ar (`discord-mcp.service`, `navegador-mcp.service`, `active`), testadas via `tools/call` real — não só `tools/list`.
+- Um bug real e provavelmente antigo (`post-commit` marcando o vault como "árvore suja" em todo commit por causa de `memoria/sincronizacao.log`) achado e corrigido durante a própria verificação final, não antes.
+- Um bug real na consolidação noturna (causa raiz dupla: orçamento de tokens + teto de 15s do OmniRoute em overload de provedor) corrigido e parcialmente confirmado (2 de 4 temas produziram conteúdo real em teste).
+
+**O que continua SEM prova, dito sem suavizar (resposta à pergunta direta "livre de erros?"):**
+1. Discord nunca testado com token real (só o caminho de erro sem token).
+2. Navegador nunca testado em site complexo, só em `example.com`.
+3. A Seth decidindo chamar uma tool sozinha, numa conversa real do LibreChat, não foi provada — a API de "agents" da versão instalada não foi reconstruída a tempo.
+4. A causa raiz do drift de (333) segue hipótese, nunca confirmada (depende do Humano checar o Obsidian).
+5. **O mais importante, estrutural:** boa parte deste trabalho rodou em regime de exceção, por pedido direto do Humano — sem a Cadeia de auditoria em camadas (segunda opinião de outro modelo) que é a rede de segurança padrão do sistema para mudança estrutural. Um executor só, mesmo verificando com testes reais a cada passo, é uma fonte só.
+
+**Pendências nomeadas, sem mudança de dono:** HD `AgataBkup01` desconectado (P-12 parcial); checar Obsidian (recuperação de arquivo, Sync) — só o Humano, é GUI; decidir sobre Tailscale (achado (340): não instalado); decidir se fecha ou mantém o regime de exceção.
+
+**Oferecido ao Humano, ainda sem resposta no momento deste registro:** preparar um pedido formal pro Conselho Remoto (GLM audita as mudanças de hoje, `scripts/conselho_remoto.py`) — fecharia o item 5 acima, que é o de maior peso estrutural. Não fiz sozinho; é decisão do Humano, mesmo em regime de exceção (auditoria externa não é a mesma classe de decisão que bugfix/implementação já autorizados).
+
+**Verificação:** todos os fatos acima já verificados nas entradas (333)-(343), citadas por número, não reafirmadas de memória — este é um checkpoint de resumo, não uma nova investigação. `bash scripts/perimetro.sh` rodado de novo agora, mesmo resultado.
+
+Nenhum arquivo de comportamento tocado — só registro (checkpoint), fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura de (333)-(343) antes de resumir, sem reafirmar nada não verificado nelas; `bash scripts/perimetro.sh` repetido no momento do registro. Autorização: Humano, "Registre esse Check point em memórias" — registro direto, sem mudança de comportamento. Turno desta sessão: t=17 (contado no contexto).
+
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
 
 **Pedido do Humano:** "Acabamos?" — antes de responder "sim", rodei `perimetro.sh` de verdade (REGRAS Regra 2: não afirme sem medir) em vez de assumir que o último commit tinha deixado tudo limpo.
