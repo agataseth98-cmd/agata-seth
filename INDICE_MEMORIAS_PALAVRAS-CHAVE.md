@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
+  palavras-chave: bug, real, recorrente, githooks, post, commit, achado, checar, acabamos, marcava, vault, árvore, suja, causa, memoria, sincronizacao, log, provavelmente, vinha, acontecendo, desde, sempre, mascarado, meu, próprio, hábito, regenerar, limpo, próximo
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
   palavras-chave: skills, discord, navegador, testadas, tools, call, real, list, testado, deixaram, aberto, fechado, deu, depender, humano
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: doutrina, acesso, graduado, juiz, seth, caso, especial, registro, responsabilização
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
   palavras-chave: config, fix, modelo, auto, coding, goose, quebrar, primeira, mensagem, correção, survival
-(313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
-  palavras-chave: open, webui, trocado, librechat, enxuto, lane, conversa, seth, tailscale, passo, humano
+(313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de …
+  palavras-chave: open, webui, trocado, librechat, enxuto, lane
 (312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/aga …
   palavras-chave: hermes, removido, inteiro, cofre, config, aga
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeado …

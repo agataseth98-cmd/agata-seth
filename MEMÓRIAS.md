@@ -22,6 +22,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
+
+**Pedido do Humano:** "Acabamos?" — antes de responder "sim", rodei `perimetro.sh` de verdade (REGRAS Regra 2: não afirme sem medir) em vez de assumir que o último commit tinha deixado tudo limpo.
+
+**Achado: P-10 reprovou sozinho, sem eu ter editado nada.** Comparei o `memoria/obsidian/INICIO.md` real contra uma regeneração limpa: o carimbo `canon:` do arquivo real tinha `-arvore-suja` grudado no SHA de `dd8048b` (o commit de (342)) — mas eu não tinha editado a árvore de trabalho depois desse commit, só rodado `scripts/sincronizar-estado.sh` (que só ACRESCENTA uma linha em `memoria/sincronizacao.log`, nunca decide nada — REGRAS não violada). **Causa raiz real:** `.githooks/post-commit` chama `gerar_obsidian.py` sem passar `AGATA_CANON_SHA`/`AGATA_CANON_DATA` — o script então infere o SHA rodando `git diff --quiet HEAD` ao vivo, e QUALQUER arquivo rastreado com mudança pendente marca a árvore como "suja", mesmo sendo HEAD (o commit que acabou de ser feito) o estado correto e completo. `memoria/sincronizacao.log` está desenhado pra nunca ser comitado a cada checagem (o próprio script diz "nunca comita nem publica") — então essa condição é quase permanente, não uma exceção.
+
+**Provavelmente não é achado de hoje, é recorrente desde que o hook existe** — só nunca tinha virado uma FALHA visível porque, em toda esta sessão, eu sempre regenerei o vault manualmente (com o truque de stash + sandbox) antes do PRÓXIMO commit, mascarando o sintoma sem nunca achar a causa. Só apareceu agora porque rodei `perimetro.sh` sem ter um commit novo em seguida pra mascarar.
+
+**Corrigido — mesmo padrão que o P-10 já usa pro seu próprio sandbox.** `.githooks/post-commit` agora fixa `AGATA_CANON_SHA="$(git rev-parse HEAD)"` e `AGATA_CANON_DATA="$(git log -1 --format=%cI)"` antes de chamar `gerar_obsidian.py` — o hook já SABE que o vault deve representar o HEAD que acabou de ser feito, não precisa inferir por `git diff`. Testado: regeneração com o comando novo, `sincronizacao.log` ainda sujo, `canon:` saiu **sem** `-arvore-suja`; `bash scripts/perimetro.sh` → 10 OK / 0 FALHA.
+
+**Efeito prático:** os truques manuais de "stash tudo, regenera limpo, unstash" que várias entradas desta sessão ((334), (335), (336), (337), (338), (339), (340), (341)) tiveram que fazer antes de cada commit **não serão mais necessários** daqui pra frente — o próprio post-commit já entrega o vault correto sozinho.
+
+**Verificação:** comparação real disco-vs-sandbox antes de aceitar que havia bug; `bash -n` no hook editado; regeneração real com o comando novo, carimbo conferido sem o sufixo; `bash scripts/perimetro.sh` completo, 0 FALHA, depois do fix.
+
+Um arquivo sob quarentena P-8: `.githooks/post-commit`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/fix-post-commit-arvore-suja`, autorização: achado + correção dentro do regime de exceção já em curso nesta sessão, mesmo critério de (338)-(342) — bugfix de infraestrutura própria, não pedido item a item.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: rodei `perimetro.sh` de verdade antes de responder "acabamos", não assumi; `diff` real entre disco e sandbox pra confirmar o bug antes de mexer no hook; teste real do comando corrigido, carimbo inspecionado byte a byte, não só "rodou sem erro". Autorização: achado durante verificação pedida pelo Humano ("Acabamos?"), correção de bug de infraestrutura dentro do regime de exceção. Turno desta sessão: t=15 (contado no contexto).
+
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
 
 **Pedido do Humano:** "Prossiga" — sem alvo específico; escolhido pelo espelho: fechar a verificação mais concreta que eu mesmo tinha deixado pendente (uso real via chat, achado em (339)).

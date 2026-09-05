@@ -46,8 +46,19 @@ fi
 # 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
 # ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra
 # no commit. Fail-soft: nunca atrapalha o commit (MEMÓRIAS (290)).
+#
+# Achado real, 05/09/2026 (MEMÓRIAS (343)): rodar sem AGATA_CANON_SHA/DATA faz
+# gerar_obsidian.py inferir o SHA via `git diff --quiet HEAD` -- e HEAD aqui é
+# o commit que ACABOU de ser feito, então qualquer arquivo rastreado com
+# mudança pendente e NUNCA comitado de propósito (ex: memoria/sincronizacao.log,
+# que acumula linha a cada checagem de sync) marca o vault inteiro como
+# "-arvore-suja" mesmo ele estando correto. P-10 então reprova sozinho no
+# próximo perimetro.sh, sem nenhuma edição real ter acontecido. Corrigido
+# fixando o SHA/data no HEAD que este hook JÁ SABE que é o certo -- mesmo
+# padrão que o P-10 usa passando as env vars pro extract em sandbox.
 if [ -f scripts/gerar_obsidian.py ]; then
-  if python3 scripts/gerar_obsidian.py >/dev/null 2>&1; then
+  if AGATA_CANON_SHA="$(git rev-parse HEAD)" AGATA_CANON_DATA="$(git log -1 --format=%cI)" \
+     python3 scripts/gerar_obsidian.py >/dev/null 2>&1; then
     echo "post-commit: vault Obsidian regenerado (memoria/obsidian/)"
   else
     echo "post-commit: AVISO — gerar_obsidian.py falhou; vault pode estar desatualizado" >&2
