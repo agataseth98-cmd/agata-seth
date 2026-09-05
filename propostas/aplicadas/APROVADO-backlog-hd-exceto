@@ -1,0 +1,14 @@
+Autorização do Humano, nesta sessão: eu listei 4 itens de backlog (Harness A1,
+pin/healthcheck do LibreChat, limpeza de redesign/STATUS.md, reconciliação de
+PROJETO.md) mais 4 itens que eu não conseguia resolver sozinho (drift do
+Obsidian, Sync do Obsidian, HD desconectado, fechamento do regime de
+exceção), e perguntei se devia entrar nos 4 primeiros.
+
+Resposta do Humano: "Sim, a exceção do HD" -- confirmação direta, excluindo
+só o item que depende do HD físico (que nem estava nos 4 propostos pra
+implementação, já estava na lista do que eu não conseguia fazer sozinho de
+qualquer forma -- interpretado como confirmação geral do lote).
+
+Mesmo critério já usado nesta sessão em (327)/(328)/(338)/(339)/(340):
+autorização explícita em texto do Humano, registro mecânico do par
+.diff/APROVADO- pelo executor -- não autoaprovação por conta própria.

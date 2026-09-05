@@ -38,7 +38,13 @@ services:
 
   librechat:
     container_name: librechat
-    image: ghcr.io/danny-avila/librechat:latest
+    # Pin por digest, não por tag (achado (328), sem pin/healthcheck; corrigido
+    # 05/09/2026, MEMÓRIAS (341)) -- digest da imagem real testada e em uso
+    # nesta Máquina no momento do pin (docker inspect librechat, 05/09/2026).
+    # Subir de propósito, não sem querer: `docker pull ...:latest` +
+    # `docker inspect --format='{{index .RepoDigests 0}}'` pra pegar o novo
+    # digest, testar, só então trocar aqui.
+    image: ghcr.io/danny-avila/librechat@sha256:c5db3331b845e1f289f8d04c0c77936c4bbe372f76730a804abc1c37e44d23a9
     restart: "no"
     network_mode: host
     depends_on:
@@ -54,6 +60,14 @@ services:
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
       - ./data:/app/data
+    healthcheck:
+      # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber
+      # quando abrir o navegador -- reusado aqui, não inventado.
+      test: ["CMD", "wget", "-qO-", "--timeout=3", "http://127.0.0.1:3080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
 networks:
   librechat:

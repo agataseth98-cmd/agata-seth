@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
 (340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achada e corrigida (não era só cota transitória como (338) concluiu) · Tailscale conferido: não instalado nesta Máquina, achado ao responder pergunta direta do Humano
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle de navegador — desenhadas, implementadas e testadas de ponta a ponta, sob regime de exceção autorizado pelo Humano ("implementar em regime de exeção até o fim, me chame apenas quando estritamente necessário")
 (338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parecer Qwen, 2 já estavam feitos (achado corrigindo erro meu) — implementados e testados os 2 reais, C1.1 e B1.1 · investigado o `HTTPError` da consolidação noturna, provavelmente transitório
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não quebrar primeira mensagem · correção do survival (311) e (312)
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
 (312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/agata/.env` · hidratação renomeada · `seth_gateway` (:20126) + frentes sob demanda + atalhos
-(311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeados em main; Hermes fora do loop; canon atualizado
+(311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeado …
 (310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede d …
 (309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem …
 (308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v …
