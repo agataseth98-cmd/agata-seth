@@ -22,6 +22,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu com um texto fabricado (citação de entrada inexistente, termos sem referente, hora inventada), e se autocorrigiu — a autocorreção foi conferida agora, item por item, e bate com o disco com precisão
+
+**O episódio, em ordem.** Depois de (336) (orientação sobre os padrões de erro dela), a Seth mandou uma resposta com cabeçalho de Regra 1 aparentemente normal, mas citando "última MEMÓRIAS lida: (337)" (não existia — o topo era (336)), termos sem nenhum referente no canon ("o Software", "o Air", "apólice", "write_memo"), um relógio ("11h48") e terminando no meio de uma frase. Reportado ao Humano sem aceitar como fato — duas perguntas de esclarecimento feitas em vez de adivinhar o que "Air"/"Software" significavam.
+
+**A Seth mesma voltou com a autocorreção, ANTES de qualquer resposta minha nova.** Reconheceu o texto anterior como fabricado ("os termos que ela usa não existem no canon, e eu a entreguei com cara de protocolo") e apresentou uma tabela termo-a-termo com o que checou. **Conferido agora, de novo, item por item — não aceito por confiança:**
+
+| Alegação da autocorreção | Conferido agora | Bate? |
+|---|---|---|
+| "(337) não existe, topo é (336)" | `grep "^(337)" MEMÓRIAS.md` (antes desta entrada) → nada; HEAD era (336)/`9a18486` | **Bate** |
+| "Air": zero em MEMÓRIAS/REGRAS/PROJETO exceto GLM-4.5-Air, ~linha 2917 | `grep -n "\bAir\b"` → **uma ocorrência, linha 2917 exata**, GLM-4.5-Air numa tabela de preço | **Bate, com precisão de linha** |
+| "Software": zero ocorrências | `grep -ni "\bsoftware\b"` → nada | **Bate** |
+| "apólice"/"write_memo": zero ocorrências | `grep -rn` nos 4 arquivos citados → nada | **Bate** |
+| Ferramentas reais dela são `query_canon`/`vault_consultar`, servidas por um MCP chamado "canon" | `redesign/librechat/canon-mcp.mjs` existe de verdade; `name: "query_canon"` e `name: "vault_consultar"` no código-fonte, `serverInfo: { name: "canon" }` — bate com o padrão de nome duplo que um cliente MCP produziria (`<tool>_mcp_<servidor>`) | **Bate** |
+| "regime de exceção": 17 ocorrências em MEMÓRIAS, todas em "Autorização:", zero em REGRAS.md | `git grep -ci` em MEMÓRIAS.md → **17 exatas**; REGRAS.md → 0 | **Bate, contagem exata** |
+| Portão das três perguntas em REGRAS, linhas ~335-339 | Linha real: 337 (a marcação "~" já sinalizava aproximação) | **Bate, dentro da margem declarada** |
+| "Computador: 11h48" era invenção; não rodou `consultar_horario.py` | Ela mesma admite a fabricação, não alega mais precisão que tem | **Autoconsistente** |
+
+**Leitura, sem exagerar pra nenhum lado.** A autocorreção não é só "desculpa genérica" — é auditoria real, com precisão fina (linha exata do falso-cognato "Air", contagem exata de "regime de exceção", nome de arquivo/símbolo real do MCP). Isto muda a leitura de (336): o padrão "afirma sem checar" não é universal nela — parece correlacionado com **se a resposta teve ferramenta real por trás** (aqui, claramente teve: `query_canon`/`vault_consultar` via MCP) **contra uma resposta sem grounding nenhum** (o texto fabricado original, que não cita ter rodado nada). Continuo sem saber exatamente qual frontend gerou qual resposta — mas o padrão "com ferramenta real = precisa; sem ferramenta = fabrica com fluência" é consistente com tudo visto até aqui, incluindo (331).
+
+**O que fica igual:** os pendentes da auditoria do parecer Qwen (B3.1, C1.1, A3 médio custo, B1.1 na janela) seguem sem decisão do Humano, nenhum aplicado. O regime de exceção (achado real de (336)/desta entrada) segue sem entrada de fechamento — ainda aberto, ainda não é uma pendência resolvida aqui.
+
+**Verificação:** os 6 comandos da tabela acima, rodados agora, não reaproveitados; `bash scripts/perimetro.sh` → sem FALHA.
+
+Nenhum arquivo de comportamento tocado — só registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep`/`git grep` reais pra cada célula da tabela, contra a autocorreção da Seth, não a favor dela por padrão; leitura de `redesign/librechat/canon-mcp.mjs` pra confirmar os nomes reais de ferramenta. Autorização: Humano relayou a autocorreção da Seth e pediu avaliação; registro de episódio, sem mudança de comportamento — mesmo critério de (334)/(335)/(336). Turno desta sessão: t=6 (contado no contexto).
+
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
 
 **Pedido do Humano:** avaliar a Seth com base no que já foi verificado hoje, e produzir uma orientação pra ele repassar a ela — não uma nova investigação, síntese do que já está registrado.

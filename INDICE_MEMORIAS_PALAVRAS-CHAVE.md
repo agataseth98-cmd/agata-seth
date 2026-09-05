@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu com um texto fabricado (citação de entrada inexistente, termos sem referente, hora inventada), e se autocorrigiu — a autocorreção foi conferida agora, item por item, e bate com o disco com precisão
+  palavras-chave: seth, recebeu, orientação, respondeu, texto, fabricado, citação, entrada, inexistente, termos, referente, hora, inventada, autocorrigiu, autocorreção, conferida, agora, item, bate, disco, precisão
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
   palavras-chave: avaliação, capacidades, seth, síntese, pedido, humano, vamos, avaliar, luz, descobertas, hoje, orienta, envio, ela, orientação, escrita, relay, salva, área, trabalho, orientacao
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: prompt, carregamento, aplicada, seção, ordem, trabalho, auditoria, nuvem, anti, fabricação, acréscimos, regras, fica, fora
 (308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v2, cadeia A/B/C completa
   palavras-chave: bloco, eco, pós, carregar, mecanizado, aplicado, cadeia, completa
-(307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): zero fabricação, silos não regridem, as falhas de (138) não reproduziram
-  palavras-chave: reteste, tool, calling, pós, lição, fase, zero, fabricação, silos, regridem, falhas, reproduziram
+(307) DIÁRIO — 31/08/2026 · Reteste de tool-calling pós-3.1 ("lição da Fase 2"): …
+  palavras-chave: reteste, tool, calling, pós, lição, fase
 (306) DIÁRIO — 31/08/2026 · P-11: silo por modelo nunca entra no canon
   palavras-chave: silo, modelo, nunca, entra, canon
 (305) DIÁRIO — 31/08/2026 · Bloco 3.1 (silos por modelo) aplicado — v2, com emen …
