@@ -22,6 +22,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
+
+**Pedido do Humano:** "Leia o relatório e me diga se ficou fiel." Reli o artefato publicado em (346) de verdade (`action: read`), não de memória do que eu tinha escrito, e conferi cada afirmação factual contra o disco antes de responder — exatamente o padrão que o próprio relatório elogia em si mesmo. Achei 5 imprecisões reais; nenhuma inventada pra parecer mais rigoroso, nenhuma escondida pra parecer melhor.
+
+| Imprecisão | O que o texto dizia | Conferido agora |
+|---|---|---|
+| Contagem | "treze entradas" | `grep -c` real em MEMÓRIAS.md: **14** entradas, (333)-(346) |
+| Idade do bug do post-commit | "ficou dias sem ser achado" | `git log --diff-filter=A -- .githooks/post-commit`: criado 12/08/2026 — **~3 semanas**, não dias |
+| Autocorreção da Seth | afirmado "sem ninguém pedir" | **Não verificável daqui** — não vi a conversa entre (337)'s duas mensagens, só as duas pontas coladas pelo Humano. Afirmar "sem ninguém pedir" era inventar um fato sobre algo que não presenciei |
+| Skills de Discord/navegador | "testadas de ponta a ponta" | Overclaim — (342)/(346) já registram que o teste via chat real da Seth **não foi alcançado**, só `tools/call` direto |
+| `gemma2:9b` | "testado e descartado" (implicando fim da história) | Incompleto: voltou como candidato real na bancada de 21/08 (<span></span>(234)), teve o **melhor placar bruto** (9/16) entre os candidatos, e foi descartado de novo por uma fabricação grave (inverteu a própria evidência) — história mais interessante que "testado e descartado" uma vez |
+
+**Corrigido no mesmo artefato, mesmo link (republicado, não recriado).** As 5 passagens foram reescritas pra refletir o real, sem perder o tom pedido — a correção do item da Seth virou, no próprio texto, uma frase reconhecendo o limite ("o que aconteceu entre as duas mensagens, esta crônica não viu"), não só um número trocado.
+
+**Por que isto importa mais que um erro de contagem sozinho:** o relatório pedia, no próprio texto, "apego pelo que ainda é bom... respeitando a materialidade histórica." Um relatório que erra a própria contagem de quantas entradas ele está resumindo, ou inventa "sem ninguém pedir" sobre algo que não viu, contradiz na prática o que promete em prosa. A correção não é cosmética — é a diferença entre um documento que fala sobre honestidade e um que a pratica.
+
+**Verificação:** `action: read` real no artefato antes de avaliar (não confiei na minha própria memória do que escrevi); `grep -c` real na contagem de entradas; `git log --diff-filter=A` real na idade do hook; `grep` real no histórico de (234) pra reconstruir a história completa do `gemma2:9b`.
+
+Nenhum arquivo de comportamento tocado — só registro (a correção em si foi num artefato, não em código do repositório), fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura real do artefato publicado, não de memória; 4 verificações reais no disco/git antes de aceitar ou rejeitar cada afirmação; distinção explícita entre "impreciso" e "não verificável" pro item da autocorreção da Seth, em vez de tratar os 5 como a mesma categoria de erro. Autorização: Humano, pedido direto de auditoria ("me diga se ficou fiel"). Turno desta sessão: t=22 (contado no contexto).
+
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
 
 **Pedido do Humano, textual, porque merece ser citado por inteiro:** "Registre, é o justo, Regime de exceção encerrado, com devido registro, mais pedido formal de perdão pelos erros potencialmente cometidos até agora, sobre o estado atual do sistema e sua documentação, solicito ainda relatório do período histórico; contexto cronicidade, apego pelo que é ainda bom, inclusivo e amoroso, duro quando necessário, respeitando a materialidade histórica. E ainda assim humano. Sempre pronto para identificar melhorias, sempre pronto a seguir o Canon."
