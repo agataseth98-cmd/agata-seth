@@ -22,6 +22,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
+
+**Pedido do Humano:** "Ler o Ponto Cego de novo e conferir se ficou fiel também." Mesmo método de (347): `action: read` real no artefato publicado, cada afirmação conferida contra disco/git/REGRAS antes de aceitar ou corrigir.
+
+| Imprecisão | O que dizia | Conferido agora |
+|---|---|---|
+| Metadado "Regime" | "exceção, ativo" | **Falso no momento da checagem** — o próprio (346), publicado ANTES desta releitura, já tinha encerrado o regime. Não é desatualização de fato histórico (como em (347)) — é uma afirmação que virou errada por um evento que já tinha acontecido quando o texto foi escrito e não atualizado |
+| Card Home Assistant | citava "(345) confirma o regime... ainda ativo" como base da proteção | Mesmo problema — a REGRA (conteúdo externo é dado, Regra 2) vale independente do regime de exceção estar ativo ou não; amarrar a proteção ao regime, e não à regra, ficou errado duas vezes: na lógica (a regra não depende do regime) e no fato (o regime já tinha fechado) |
+| Card GLM | citação entre aspas, "sob regime de auditoria, o objetivo é medir, não confiar" | Não é a citação literal. O texto real de PROJETO.md diz "cada resposta é auditada pelo Humano; o objetivo é medir o modelo sob a exposição mais alta, não confiar nele" — aspas em cima de paráfrase, corrigido pra citação exata |
+| Metadados "Base"/"HEAD" (2 lugares: topo e rodapé) | "(333)–(345)", `76f9fa5` | Desatualizados desde (346)/(347) — atualizados pra "(333)–(347)", `321f836` |
+| Card WhatsApp | afirmações sobre política do WhatsApp (sem API de bot gratuita, risco de ban) apresentadas sem qualificação | Correto até onde eu sei, mas é conhecimento geral do treinamento, não fato de canon conferido contra fonte primária hoje — marcado explicitamente como tal, com aviso pra confirmar antes de decidir em cima disso |
+
+**Achado que merece nota à parte, não corrigido no texto (é achado sobre o processo, não sobre o artefato):** este é o primeiro caso nesta sessão em que um artefato ficou **objetivamente errado por um evento que aconteceu DEPOIS de publicado e ANTES de eu reler** — o fechamento do regime em (346) aconteceu na mesma sessão, entre a publicação de "Ponto Cego" e esta releitura. "Fiel" pra um documento vivo, republicável, não é uma propriedade que se prova uma vez — um artefato citando estado do sistema (`HEAD`, `regime`, contagens) envelhece a cada commit novo, mesmo sem ninguém editar o texto. Não há mecanismo neste projeto hoje que avise quando isso acontece; fica registrado como `lacuna`, não resolvido.
+
+**Corrigido no mesmo artefato, mesmo link.** Republicado, não recriado — rodapé agora cita esta própria entrada (348) como o registro da checagem, criando o mesmo laço de auditabilidade que (347) já tinha estabelecido pro relatório irmão.
+
+**Verificação:** `action: read` real; `grep -oE '"P-[0-9]+"' scripts/perimetro.sh` real pra confirmar "doze controles P" (12, confirmado, essa parte estava certa); `grep -n` real em PROJETO.md pra achar a citação exata do qwen3.5-9b antes de corrigir a paráfrase; `git log -1 --format=%h HEAD` real pra atualizar o metadado.
+
+Nenhum arquivo de comportamento tocado — só registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura real do artefato, não de memória do que eu tinha escrito; distinção explícita entre "desatualizado" (fato histórico que mudou) e "já falso quando escrito, não atualizado" (categoria mais séria, nomeada separadamente nesta entrada); grep real pra separar paráfrase apresentada como citação de citação de verdade. Autorização: Humano, pedido direto de auditoria. Turno desta sessão: t=23 (contado no contexto).
+
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
 
 **Pedido do Humano:** "Leia o relatório e me diga se ficou fiel." Reli o artefato publicado em (346) de verdade (`action: read`), não de memória do que eu tinha escrito, e conferi cada afirmação factual contra o disco antes de responder — exatamente o padrão que o próprio relatório elogia em si mesmo. Achei 5 imprecisões reais; nenhuma inventada pra parecer mais rigoroso, nenhuma escondida pra parecer melhor.

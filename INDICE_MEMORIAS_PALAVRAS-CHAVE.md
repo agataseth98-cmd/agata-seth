@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
+  palavras-chave: ponto, cego, registrado, reconferido, pedido, humano, achadas, imprecisões, delas, falsa, momento, checagem, desatualizada, dizia, regime, exceção, ativo, próprio, ter, encerrado
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
   palavras-chave: veios, ágata, registrado, tinha, imprecisões, reais, achadas, relendo, propósito, pedido, humano, leia, relatório, diga, ficou, fiel, corrigidas, mesmo, artefato
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: varredura, pedida, humano, documentos, históricos, redesenho, movidos, pra, extras, arquivo, redesign
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
   palavras-chave: kokoro, dora, inicio, obsidian, era, artefato, órfão, moc, descoberta, pros, documentos, soltos, bugfix, próprio, testado
-(318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + achado próprio: buraco no P-8 sobre redesign/router — 6 correções aplicadas, autoaprovação sob ordem explícita
-  palavras-chave: auditoria, pareceres, gpt, terra, qwen, achado, próprio, buraco, redesign, router, correções, aplicadas, autoaprovação, sob, ordem, explícita
+(318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + …
+  palavras-chave: auditoria, pareceres, gpt, terra, qwen
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um c …
   palavras-chave: sincronização, derivados, memórias, ficaram
 (316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente …
