@@ -36,17 +36,42 @@ DB = DIR_ESTADO / "checkpoints.sqlite"
 TEMAS_PADRAO = ["presence_penalty", "TES-002 nonce", "num_ctx 16814", "âncora sha"]
 
 
-def _modelo(pergunta, rota="conselho", timeout=120):
+def _modelo(pergunta, rota="conselho", timeout=120, tentativas=3):
+    # Causa raiz real do `HTTPError` de (338)/(339), medida ao vivo em
+    # 05/09/2026, NÃO era só cota transitória como (338) concluiu -- são dois
+    # problemas empilhados:
+    # (1) `max_tokens=700` era baixo demais: gemini-2.5-flash (combo
+    #     `conselho`, fallback) gasta boa parte do orçamento em "reasoning"
+    #     antes de responder -- medido: 671/700 tokens foram raciocínio, só
+    #     25 sobraram pra conteúdo visível. Subido pra 3000.
+    # (2) zai/glm-4.7-flash (o principal da combo) tem overload real
+    #     ocasional (HTTP 529, "temporarily overloaded"), e o fallback pro
+    #     gemini às vezes estoura o teto de espera LOCAL do OmniRoute
+    #     (`resilienceSettings.requestQueue.maxWaitMs=15000`, o mesmo teto já
+    #     documentado em (310)/(311) pro cold-start do Ollama, aqui batendo
+    #     em latência de reasoning do Gemini) -> 504. Medido 2/3 chamadas OK,
+    #     1/3 estourou aos ~15,9s -- intermitente de verdade, não sempre.
+    # Mitigação aqui, escopo estreito (só este script, não mexe no
+    # OmniRoute): retentativa curta. Mudar o teto de 15s do OmniRoute é
+    # mudança de infraestrutura compartilhada, fora do escopo desta função.
     body = json.dumps({"model": rota, "messages": [{"role": "user", "content": pergunta}],
-                       "max_tokens": 700, "stream": False}).encode()
+                       "max_tokens": 3000, "stream": False}).encode()
     req = urllib.request.Request(f"{PROXY}/v1/chat/completions", data=body,
                                  headers={"content-type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            d = json.loads(r.read())
-        return d["choices"][0]["message"].get("content") or ""
-    except Exception as e:  # noqa: BLE001
-        return f"(sem modelo: {type(e).__name__})"
+    ultimo_erro = "sem tentativa"
+    for tentativa in range(1, tentativas + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                d = json.loads(r.read())
+            conteudo = d["choices"][0]["message"].get("content") or ""
+            if conteudo:
+                return conteudo
+            ultimo_erro = "resposta vazia (reasoning consumiu o orçamento)"
+        except Exception as e:  # noqa: BLE001
+            ultimo_erro = f"{type(e).__name__}: {e}"
+        if tentativa < tentativas:
+            time.sleep(2 * tentativa)
+    return f"(sem modelo após {tentativas} tentativas: {ultimo_erro})"
 
 
 # --------------------------------------------------------------------------- nós

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achada e corrigida (não era só cota transitória como (338) concluiu) · Tailscale conferido: não instalado nesta Máquina, achado ao responder pergunta direta do Humano
+  palavras-chave: causa, raiz, real, httperror, consolidação, achada, corrigida, era, cota, transitória, concluiu, tailscale, conferido, instalado, máquina, achado, responder, pergunta, direta, humano
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle de navegador — desenhadas, implementadas e testadas de ponta a ponta, sob regime de exceção autorizado pelo Humano ("implementar em regime de exeção até o fim, me chame apenas quando estritamente necessário")
   palavras-chave: skills, novas, seth, ponte, discord, controle, navegador, desenhadas, implementadas, testadas, ponta, sob, regime, exceção, autorizado, humano, implementar, exeção, fim, chame, apenas, estritamente, necessário
 (338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parecer Qwen, 2 já estavam feitos (achado corrigindo erro meu) — implementados e testados os 2 reais, C1.1 e B1.1 · investigado o `HTTPError` da consolidação noturna, provavelmente transitório
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: hermes, removido, inteiro, cofre, config, agata, env, hidratação, renomeada, seth, gateway, frentes, sob, demanda, atalhos
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeados em main; Hermes fora do loop; canon atualizado
   palavras-chave: redesenho, fase, cutover, scripts, canon, mergeados, main, hermes, fora, loop, atualizado
-(310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede de segurança, router, iGPU, modelos, grafo, spike RLM, Obsidian, liga/desliga)
-  palavras-chave: redesenho, sistema, local, agata, fases, rede, segurança, router, igpu, modelos, grafo, spike, rlm, obsidian, liga, desliga
+(310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede d …
+  palavras-chave: redesenho, sistema, local, agata, fases, rede
 (309) DIÁRIO — 01/09/2026 · PROMPT_CARREGAMENTO.md: aplicada a seção 2 da ordem …
   palavras-chave: prompt, carregamento, aplicada, seção, ordem
 (308) DIÁRIO — 31/08/2026 · Bloco 3.2 (eco pós-carregar mecanizado) aplicado — v …
