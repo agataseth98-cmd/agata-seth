@@ -22,6 +22,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
+
+**Pedido do Humano:** "regime de exceção ativo ainda" — resposta a uma pergunta explícita deixada em aberto em (344) ("decidir se fecha ou mantém o regime de exceção"). **Fechado, parcialmente:** o regime segue ativo, por confirmação direta — não é mais `lacuna`, é fato registrado.
+
+**O que não ficou claro, e continua não ficando — registrado com honestidade, não decifrado por adivinhação.** A frase anterior do Humano ("me avise com chegar a todas as regiões confederadas no território da internet em 2026") e a frase desta mensagem ("Como é a palavra que resolve sua dúvida") não batem com nenhum termo do canon (REGRAS/PROJETO/MEMÓRIAS) nem com nenhum mecanismo real deste sistema. Perguntei uma vez em texto simples, a resposta não esclareceu — perguntei de novo, mais estreito, em vez de tentar decifrar uma terceira vez sozinho. REGRAS Regra 2: sem verificação, `lacuna`, nunca suposição como fato — vale também pra "entender o que o Humano quis dizer", não só pra fato técnico.
+
+**Verificação:** nenhuma — é registro de uma confirmação direta do Humano, não achado de Máquina.
+
+Nenhum arquivo de comportamento tocado — só registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: releitura literal das duas mensagens do Humano antes de registrar "não entendi" pela segunda vez, em vez de forçar uma leitura. Autorização: Humano, confirmação direta sobre o regime de exceção; a parte não entendida não foi executada. Turno desta sessão: t=18 (contado no contexto).
+
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
 
 **Pedido do Humano:** "Registre esse Check point em memórias" — fechando a sessão longa que foi de (333) a (343): sincronização, auditoria de Seth/Qwen, skills de Discord e navegador, correção da consolidação, fechamento de backlog, e o bug do `post-commit` achado na própria checagem final.

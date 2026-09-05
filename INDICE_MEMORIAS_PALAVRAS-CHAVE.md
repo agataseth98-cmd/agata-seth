@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
+  palavras-chave: regime, exceção, confirmado, ativo, humano, responde, pendências, nomeadas, segunda, parte, pedido, anterior, regiões, confederadas, segue, entender, perguntado, novo, decifrado, adivinhação
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
   palavras-chave: checkpoint, fim, sessão, começou, sincronizar, sistema, agata, seth, estado, real, verificado, continua, prova, pedido, explícito, auditoria, externa
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: sincronização, derivados, memórias, ficaram, commit, atrás, gerador, hidratação, trunca, silêncio, fora, utf
 (316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente SALVO + `disableStreaming` — bug de parser de stream do OmniRoute↔LibreChat
   palavras-chave: librechat, tool, query, canon, seth, exige, agente, salvo, disablestreaming, bug, parser, stream, omniroute
-(315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é caso especial · o registro é a responsabilização
-  palavras-chave: doutrina, acesso, graduado, juiz, seth, caso, especial, registro, responsabilização
+(315) DIÁRIO — 04/09/2026 · Doutrina: acesso graduado sem juiz · a Seth não é ca …
+  palavras-chave: doutrina, acesso, graduado, juiz, seth
 (314) DIÁRIO — 03/09/2026 · Config fix: modelo auto/coding no Goose para não que …
   palavras-chave: config, fix, modelo, auto, coding, goose
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de …
