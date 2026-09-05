@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
+  palavras-chave: skills, discord, navegador, testadas, tools, call, real, list, testado, deixaram, aberto, fechado, deu, depender, humano
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
   palavras-chave: fechamento, backlog, pedido, humano, sim, exceção, pin, healthcheck, librechat, harness, achado, obsoleto, implementado, reconciliação, projeto, redesign, status, estava, avisado, nada, fazer
 (340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achada e corrigida (não era só cota transitória como (338) concluiu) · Tailscale conferido: não instalado nesta Máquina, achado ao responder pergunta direta do Humano
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: config, fix, modelo, auto, coding, goose, quebrar, primeira, mensagem, correção, survival
 (313) DIÁRIO — 03/09/2026 · Open WebUI trocado por LibreChat (enxuto) · lane de conversa da Seth · Tailscale = passo do Humano
   palavras-chave: open, webui, trocado, librechat, enxuto, lane, conversa, seth, tailscale, passo, humano
-(312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/agata/.env` · hidratação renomeada · `seth_gateway` (:20126) + frentes sob demanda + atalhos
-  palavras-chave: hermes, removido, inteiro, cofre, config, agata, env, hidratação, renomeada, seth, gateway, frentes, sob, demanda, atalhos
+(312) DIÁRIO — 03/09/2026 · Hermes removido por inteiro · cofre → `~/.config/aga …
+  palavras-chave: hermes, removido, inteiro, cofre, config, aga
 (311) DIÁRIO — 03/09/2026 · Redesenho — Fase 8 (cutover): scripts/canon mergeado …
   palavras-chave: redesenho, fase, cutover, scripts, canon, mergeado
 (310) DIÁRIO — 03/09/2026 · Redesenho do sistema local Agata — Fases 0–7 (rede d …

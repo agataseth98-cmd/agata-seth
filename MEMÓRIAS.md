@@ -22,6 +22,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
+
+**Pedido do Humano:** "Prossiga" — sem alvo específico; escolhido pelo espelho: fechar a verificação mais concreta que eu mesmo tinha deixado pendente (uso real via chat, achado em (339)).
+
+**Tentativa de teste ponta a ponta via LibreChat, honesta sobre o limite achado.** Logei de verdade na API do LibreChat (`/api/auth/login`, JWT real). Tentei mandar mensagem pra Seth via `/api/ask/custom` (padrão de versões antigas do LibreChat) — **não existe nesta versão**: `docker exec ... find routes -iname '*ask*'` não achou nada; a versão instalada (1.3.13, capacidades `deferred_tools`/`agents` no `/api/endpoints`) migrou pra uma arquitetura de "agents" que não reconstruí a tempo sem documentação. **Não forcei uma simulação falsa** — registrado como limite real, não escondido.
+
+**Verificação que consegui fechar de verdade: `tools/call` completo, protocolo MCP real, nos dois servidores.** Não é só `tools/list` (que só prova que o schema existe) — é a chamada de verdade, com argumento real, resposta real:
+- **Navegador:** `navegar(url=https://example.com)` → conteúdo real (`titulo: "Example Domain"`, `status_http: 200`); `ler_pagina()` → texto real da página; `fechar_navegador()` → `{"fechado":true}`. Os três, na mesma sessão MCP, em sequência — prova que o estado do navegador persiste entre chamadas como desenhado.
+- **Discord:** `ler_mensagens(canal_id="123456")` sem token configurado → erro estruturado exato como desenhado (`{"mensagens":[],"erro":"lacuna: DISCORD_BOT_TOKEN não configurado..."}`), não uma exceção crua — prova que o caminho de falha gracioso funciona de verdade, não só em teoria.
+
+**O que ainda fica sem prova de ponta a ponta:** o modelo (Seth) DECIDINDO chamar a tool a partir de linguagem natural, dentro do LibreChat de verdade — isso só uma sessão de chat real (ou reconstruir a API de agents do LibreChat, não tentado a fundo) prova. A camada que eu consegui verificar (o servidor MCP resposta corretamente a uma chamada real) é a mesma camada que o LibreChat chama por baixo — alta confiança, não é prova completa.
+
+**Verificação:** `curl` real com handshake MCP completo (`initialize`→`notifications/initialized`→`tools/call`) contra os dois servidores, 4 chamadas reais, todas com resultado esperado; login real na API do LibreChat, tentativa real de endpoint (não simulada), erro real registrado quando não funcionou. `systemctl --user is-active` dos dois serviços → `active`. `bash scripts/perimetro.sh` → sem FALHA (nada de comportamento mudou nesta entrada).
+
+Nenhum arquivo de comportamento tocado — só verificação e registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl`/JWT real contra a API do LibreChat, não assumida; busca real no código-fonte do container (`find routes`) antes de concluir que o endpoint antigo não existe, não adivinhado depois de 1 tentativa; `tools/call` real com resultado inspecionado campo a campo nos dois servidores. Autorização: Humano, "Prossiga" — ação escolhida pelo espelho (fechar a verificação mais concreta em aberto), sem mudança de comportamento, sem necessidade de perguntar. Turno desta sessão: t=14 (contado no contexto).
+
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
 
 **Pedido do Humano:** "Sim, a exceção do HD" — confirmando os 4 itens do backlog levantado na resposta anterior (Harness A1, pin/healthcheck do LibreChat, limpeza do `redesign/STATUS.md`, reconciliação de PROJETO.md), excluindo só o que depende do HD desconectado.
