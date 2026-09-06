@@ -1,0 +1,1406 @@
+# MEMORIAS-FRIO-2026-09-06-com-migrado.md — camada fria do sistema Agata (selada, imutável)
+
+Congelado por scripts/migrar_periodo.py. Selado com scripts/selar.sh — SHA-256 registrado em SELOS.txt, tag de git aponta pro commit deste selamento. Depois de selado, este arquivo nunca mais recebe escrita — garantia é `scripts/selar.sh --check`, não mais P-5.
+
+---
+
+## Migrado de DIÁRIO.md (histórico pré-consolidação, colado verbatim — ver (55) para notas de reconciliação)
+
+# DIÁRIO.md — Ágata
+
+História do projeto. **Só se acrescenta, no fim. Nunca edite nem apague** o que já está aqui.
+Cada entrada: `data · quem · o que foi decidido/feito`.
+
+## Resumo consolidado (até 04/06/2026)
+
+O que aprendemos e vale para sempre:
+
+1. Memória tem que ser **uma só**. Vários módulos de memória corrompem tudo.
+2. **Nunca finja lembrar** (nada de stub). Se corromper, restaure de verdade.
+3. Captura de fatos por **regex vem antes** do modelo — rápida e confiável.
+4. Separe **REGRAS** (universais) de **PROJETO** (deste projeto). É o que permite reusar em outros projetos.
+5. O Humano manda, mas há **linhas vermelhas**: continuidade, história e honestidade não se suspendem.
+6. Documento para modelo tem que ser **imperativo, em 2ª pessoa, com blocos de código bem fechados** — senão o modelo lê as regras como "exemplo de saída" e as ignora (foi a causa de modelos não assumirem o comportamento).
+7. O DIÁRIO tem que ter **um cabeçalho e uma linha do tempo**. Dois documentos colados confundem o modelo sobre qual é o certo.
+
+**Marcos:** núcleo de memória unificado · extrator imediato · orquestração por papel (deepseek→condução, qwen→auditoria, kimi→validação) · voz local (Kokoro / voz `pf_dora`) · virada para arquitetura MCP (Ágata como servidor central) + OpenClaw + Hermes.
+
+**Histórico detalhado antigo:** arquivado em `MEMORY.md` — não apagar.
+
+---
+
+## Registros
+
+### 2026-06-05 · Orusoua + Claude (Opus 4.8, arquitetura/auditoria)
+
+Redesenho do sistema para ficar mais simples e barato em tokens, mantendo tudo que prometia.
+
+- Renomeado: CORE→**REGRAS**, MANIFESTO→**PROJETO**, MEMORY→**DIÁRIO**. IB→**Humano**, IC→**Modelo**, IL→**Máquina**.
+- **15 regras viraram 6.** Cabeçalho cerimonial, quadrantes, protocolo 1-7 e códigos N1-N6 removidos; formato de resposta enxuto. Um comando de carga (`carregar`) no lugar de três.
+- **Motivo:** uma carga real com Qwen3.8 falhou — confundiu Máquina com "Inteligência Legada", declarou íntegro com o DIÁRIO defeituoso, não soube explicar a regra de carga segura, e inventou um bloco marcando-o canônico sem ordem. Diagnóstico: o sistema era pesado demais para o modelo que deveria rodá-lo.
+
+**Pendente de decisão do Humano:**
+1. Adotar estas versões (REGRAS/PROJETO/DIÁRIO)?
+2. Renomear os `.json` de memória para os nomes novos (fatos/conversas/habitos/contexto)?
+
+### 2026-06-05 (2) · Orusoua decidiu · Claude executou
+
+Humano aprovou: `1s2s3n`.
+
+1. **Adotado.** REGRAS/PROJETO/DIÁRIO passam a canônicos. Trio antigo (CORE_FULL, MANIFESTO_ÁGATA, MEMORY) **arquivado, não apagado**.
+2. **Nomes novos de memória adotados:** semantic→fatos, episodic→conversas, procedural→habitos, overlay_ontologico→contexto.
+3. **Mantidos 3 arquivos** (sem colapsar).
+
+Feito: arquivos .md novos entregues; script `migrar_agata.sh` (backup + cópia com nomes novos, sem apagar nada).
+
+`lacuna:` o código que lê os .json antigos (memory_core.py etc.) ainda aponta para os nomes velhos. Aplicar os nomes novos no servidor MCP em construção **antes** de remover os antigos — senão quebra.
+
+### 2026-07-01 · Orusoua decidiu · Claude auditou
+
+Auditoria do PLANO_AGATA_v1.2 (GLM → Qwen → GLM). Direção e faseamento **aprovados**; implementação como estava **reprovada**.
+
+Achados críticos: Whisper não roda no Ollama (Fase 4 quebraria); MCP/LiteLLM em `0.0.0.0` + permissões por regex de string burláveis (risco de execução remota); VRAM 8GB não comporta 7B + Whisper-large juntos; failover do Syncthing gera split-brain (dois DIÁRIOs); `.git` sincronizado corrompe o repo. Descoberta central: "Hermes" e "OpenClaw" no v1.2 eram scripts caseiros, **não** as ferramentas reais.
+
+**Decisão do Humano (`1-real · 2-sim · 3-s`):**
+1. Construir **sobre o Hermes Agent real**, não bespoke.
+2. Gerar **PLANO v1.3 corrigido** (só documento, sem código).
+3. **Claude Code inventariaria a Predator** antes de tudo.
+
+Pendente: rodar o inventário → revisar v1.3 → Fase 0.
+
+### 2026-07-01 (2) · Fase 0 executada (Claude Code na Predator)
+
+- OpenClaw parado + desabilitado (não apagado). Protótipo antigo arquivado em `~/agata/_arquivo_agata_il/` (`semantic.json` preservado byte a byte).
+- **Hermes Agent 0.17.0** instalado (Python 3.11 isolado via uv, sem alertas de segurança), `--skip-browser`. Script inspecionado antes do install (limpo).
+- Cérebro local: **llama3.1:8b** (128k nativo), via Ollama, `num_ctx 65536`. Motivo: Hermes exige contexto ≥64k; `qwen2.5:7b` (32k) não serve. No 4060 8GB há offload parcial pra CPU (mais lento; tuning de KV cache fica pra depois).
+- Config em `~/.hermes/config.yaml` (provider custom, base_url `localhost:11434/v1`).
+
+Pendente: reportar chave útil do OpenClaw (migrar vs purgar); iniciar Fase 1.
+
+### 2026-07-01 (3) · Fase 1 e Fase 2 concluídas; Fase 3 iniciada (checkpoint — franquia esgotada)
+
+**Fase 1 (identidade + memória) — concluída:**
+- 4 canônicos copiados de `~/Downloads/` pra `~/agata/` (SOUL.md, REGRAS.md, PROJETO.md, DIÁRIO.md). Migração do `semantic.json` antigo pulada (só tinha lixo de teste).
+- Estrutura `~/agata/{memoria,skills,config,sandbox,logs,backup}` criada. `memoria/{fatos,habitos,conversas,contexto}.json` criados vazios — **hoje sabemos que isso foi engano** (ver Fase 3 abaixo).
+- Git inicializado, commit inicial feito.
+- `~/.hermes/SOUL.md` virou symlink pra `~/agata/SOUL.md` (identidade única, versionada).
+
+**Fase 2 (cérebro) — concluída, com um bug real caçado e corrigido:**
+- Provedor final: **OpenRouter**, modelo principal `openai/gpt-4o-mini` (pago, barato — decisão do Humano após tentar local e `:free` sem sucesso confiável). Fallback: `openai/gpt-oss-120b:free` → `llama3.1:8b` local (Ollama).
+- **Causa raiz de tool-calling não confiável**, achada por eliminação (testei 6+ combinações modelo/provider, incluindo Claude Haiku 4.5 pago): a flag `provider_routing.require_parameters: true` — que eu mesmo adicionei numa correção anterior — estava forçando a OpenRouter a rotear pra um backend que declara suporte a `tools` mas entrega function-calling degradado. **Removida** (comentada em `~/.hermes/config.yaml`). Sem ela, tool-calling funciona de verdade — testado e confirmado lendo REGRAS/PROJETO/DIÁRIO reais.
+- Lição que vale pra sempre: **system prompt grande por si só não quebra tool-calling** (testei — mesmo tamanho de prompt, resultados diferentes). O que quebra é roteamento de provider ruim mascarado por uma flag de segurança bem-intencionada.
+
+**Fase 3 (aprendizado) — iniciada, não implementada ainda:**
+
+Escopo confirmado no `PLANO_AGATA_v1.3.md` (§6 Memória, §10 Fases): curadoria de memória nativa do Hermes + consolidação noturna → DIÁRIO + backlog de skills.
+
+Pesquisa feita (3 agentes em paralelo):
+- **Memória nativa do Hermes**: `MEMORY.md`/`USER.md` em `~/.hermes/memories/` (texto livre, sempre ativos, limite de caracteres + nudge automático). `session_search` faz busca full-text (SQLite FTS5) sobre histórico de sessões, sem custo de LLM — é o "recall por busca" que o plano pede. **Não existe** um sistema nativo de fatos/hábitos em JSON — os 4 arquivos que criamos na Fase 1 são um sistema paralelo, não o mecanismo real.
+- **Cron nativo**: `hermes cron create "<cron-expr>" "<prompt>" --name "..." --workdir /home/orusoua/agata`. Job roda com toolset completo (inclusive `write_file`), respeita `config.yaml` (modelo/fallback), carrega SOUL.md. **Limitação importante**: dispara via thread do gateway rodando — não é systemd timer independente. Se a máquina/gateway estiver desligado na hora marcada, o job não roda (nem atrasa, nem recupera).
+- **Injeção de contexto** (3 camadas: stable → context → volatile): SOUL.md é carregado via caminho fixo (`~/.hermes/SOUL.md`, hardcoded); REGRAS.md e PROJETO.md **não são auto-injetados** — só um de `.hermes.md`/`AGENTS.md`/`CLAUDE.md`/`.cursorrules` é (prioridade, primeiro que existir, `.hermes.md` sobe até a raiz do git). Catálogo de skills (`<available_skills>`) é injetado sempre que uma ferramenta de skill está carregada — sem flag dedicada pra desligar, só removendo as ferramentas `skill_view`/`skill_manage`/`skills_list` do toolset.
+
+**Decisões já tomadas pelo Humano:**
+1. **Memória**: symlink — `MEMORY.md`/`USER.md` do Hermes passam a viver fisicamente em `~/agata/memoria/` (mesmo padrão do SOUL.md: fonte única, git-tracked, visível no Obsidian). Os 4 JSONs da Fase 1 (`fatos.json`, `habitos.json`, `conversas.json`, `contexto.json`) serão **removidos** — eram placeholder de um plano anterior sem saber que o Hermes já tem memória nativa.
+
+**Decisões pendentes (perguntadas, sem resposta ainda — retomar daqui):**
+2. Como auto-carregar REGRAS.md/PROJETO.md sem depender de tool-call manual no início da sessão (que já falhou por bugs)? Opção recomendada: criar `~/agata/.hermes.md` com o conteúdo de REGRAS+PROJETO embutido (cabe fácil no limite de 20k chars, é auto-descoberto).
+3. A Predator fica ligada à noite? Necessário pra saber se dá pra agendar a consolidação noturna de verdade (ex: 23h) ou se precisa ajustar expectativa (o cron não roda com a máquina desligada).
+
+**Ainda não implementado nada da Fase 3** — nenhum arquivo criado, nenhuma config mudada além da pesquisa. Próximos passos ao retomar: responder as 2 perguntas pendentes → symlink memória + remover JSONs obsoletos → criar `.hermes.md` (se decidido) → decidir sobre reduzir toolset de skills → criar job de cron → testar tool-calling de novo (lição da Fase 2 ainda vale) → inventariar backlog de skills (só listar, não implementar).
+
+Pendente: retomar Fase 3 com as 2 decisões acima.
+
+### 2026-07-01 (4) · Fase 3 concluída
+
+Decisões 2 e 3 resolvidas pelo Humano: `.hermes.md` gerado (não copiado à mão) via hook de pre-commit; consolidação via `systemd --user timer` com `Persistent=true` em vez de cron simples, porque a Predator desliga à noite — roda na próxima ativação do dia, sem exigir mudança de rotina.
+
+Implementado e verificado:
+- **Memória nativa**: `~/.hermes/memories/{MEMORY,USER}.md` são symlinks pra `~/agata/memoria/{MEMORY,USER}.md`. Os 4 JSONs obsoletos da Fase 1 removidos.
+- **Hidratação seletiva**: `~/agata/.hermes.md` (6502 bytes) embute REGRAS.md+PROJETO.md, gerado por `~/agata/.githooks/gerar-hermes-md.sh`, chamado automaticamente pelo hook `pre-commit` (`core.hooksPath` = `.githooks`) sempre que REGRAS/PROJETO mudam.
+- **Consolidação noturna**: `agata-consolidacao.{service,timer}` em `~/agata/config/`, symlinkados em `~/.config/systemd/user/`, `OnCalendar=23:00 + Persistent=true`. Testado manualmente (`systemctl --user start`) — respondeu "Nada relevante desde a última entrada" corretamente, sem alucinar.
+- **Backlog de skills**: `~/agata/skills/BACKLOG.md` — inventário por prioridade (obsidian é alta, dado o cofre na mesma pasta), nada instalado.
+
+**Achado novo, não previsto**: o comando `carregar` (REGRAS.md) sozinho parou de ler o fim do DIÁRIO.md de verdade — `tool_call_count: 0`, respondeu no formato certo mas com "Último registro" inventado. Motivo: como REGRAS/PROJETO agora vêm pré-carregados via `.hermes.md`, o modelo trata "leia os 3 arquivos" como já satisfeito e pula a leitura do DIÁRIO. Com instrução explícita ("leia o fim do DIÁRIO.md") volta a funcionar (`tool_call_count: 1`, conteúdo real confirmado). **Não editei REGRAS.md** para corrigir isso — é arquivo canônico, precisa de autorização/segunda opinião do Humano antes de mudar a definição de `carregar`.
+
+**Nota à parte**: PROJETO.md ficou desatualizado na seção "Cérebro" (ainda cita `llama3.1:8b` como principal e só custo autorizado pra Claude — a Fase 2 na prática usa `gpt-4o-mini` pago via OpenRouter). Mesma regra: não editei, só reporto.
+
+Pendente: decidir se/como corrigir o comando `carregar` (REGRAS.md) e atualizar a seção Cérebro do PROJETO.md. Sugestão de próximo assunto: Fase 4 (Voz) — faster-whisper + Kokoro `pf_dora`, atenção ao orçamento de VRAM do RTX 4060 8GB, que já divide espaço com o `llama3.1:8b` local.
+
+### 2026-07-01 (5) · Pendências da Fase 3 resolvidas (autorizado pelo Orusoua)
+
+- **REGRAS.md**: `## Como carregar o contexto` reescrito. Agora deixa explícito que REGRAS/PROJETO já vêm pré-carregados via `.hermes.md` (não precisa reler) e que o fim de DIÁRIO.md **sempre** precisa ser lido com ferramenta antes de responder ao `carregar` — com a técnica correta (descobrir total de linhas, `offset = total - 30`, já que `read_file` não aceita offset negativo).
+- **PROJETO.md**: seção "Cérebro" atualizada para refletir a realidade da Fase 2 — principal `openai/gpt-4o-mini` (pago, autorizado), fallback `gpt-oss-120b:free` → `llama3.1:8b` local.
+- Testado 2x depois da mudança (lição da Fase 2 continua valendo): 1ª vez o modelo leu o **início** do DIÁRIO em vez do fim (usou `offset: -10`, não suportado, e a instrução ainda não tinha a técnica correta) — corrigido o texto do REGRAS.md. 2ª vez leu o conteúdo certo (`Último registro: 2026-07-01 (4) · Fase 3 concluída`, bate com o real), embora ainda tenha usado `offset: -30` (negativo, não documentado) — só não quebrou porque o DIÁRIO ainda é pequeno (119 linhas).
+- **Risco latente registrado, não resolvido**: o modelo (`gpt-4o-mini`) insiste em inventar offset negativo mesmo com a instrução dizendo que não é suportado. Funciona hoje porque o arquivo é pequeno; pode voltar a falhar quando o DIÁRIO crescer muito e um offset negativo malformado não cobrir mais o fim real. Vale reavaliar quando o arquivo estiver bem maior, ou revisitar a instrução/prompt do `carregar` se acontecer de novo.
+
+Pendente: nenhuma da Fase 3. Próximo assunto: Fase 4 (Voz), com atenção ao orçamento de VRAM do RTX 4060 8GB.
+
+### 2026-07-02 · Fases 0-3 fechadas + fix SOUL
+
+- Fases 0-3 completas. Principal: gpt-4o-mini (OpenRouter). Fallback: gpt-oss-120b:free → llama3.1:8b local.
+- Skills builtin: 68→0 (prompt -42%).
+- SOUL corrigido: instrução de leitura do DIÁRIO agora usa wc -l + offset (não tail nem read do início).
+- PROJETO atualizado com estado real do cérebro e fases.
+
+### 2026-07-02 (2) · Bloqueio: créditos OpenRouter
+
+- Fix do DIÁRIO no .hermes.md: estruturalmente correto (injeção confirmada, 11.7KB no contexto).
+- Não confirmado de ponta a ponta: gpt-4o-mini retorna 402 (sem crédito); llama3.1:8b ignora o protocolo carregar (limitação de instruction-following, achado recorrente).
+- llama3.1:8b em modo degradado: não-confiável para instruções compostas. Documentado como risco conhecido.
+- Ação necessária: recarregar OpenRouter (US$5 mínimo) para destravar.
+
+### 2026-07-02 (3) · Fases 0-3 fechadas — Ágata operacional
+
+- Modelo principal trocado para **gemini-2.5-flash** (Google, API direta, grátis). Config em ~/.hermes/config.yaml + chave em ~/.hermes/.env (fora do git).
+- Motivo: OpenRouter sem crédito (402); gemini-2.0-flash sem cota (429 limit:0); llama3.1:8b não faz tool-calling.
+- Teste "carregar": **passou**. Data correta (2026-07-02), formato de prontidão ok, identidade ok.
+- Nota: modelo ainda faz tool-call extra pra confirmar o DIÁRIO em vez de confiar 100% no .hermes.md injetado. Comportamento já documentado — não é regressão, funciona.
+- Fallback: llama3.1:8b local (modo degradado, sem tool-calling).
+- Bug menor pendente: hook pre-commit não dispara automaticamente (core.hooksPath). Não bloqueante.
+
+Fases 0-3: ✅ FECHADAS.
+
+Depois: rodar .githooks/gerar-hermes-md.sh manualmente (já que o hook não dispara sozinho) e git commit -m "Fases 0-3 fechadas: Gemini 2.5 Flash grátis + DIÁRIO atualizado"
+
+NÃO avançar para Fase 4 sem instrução do Humano.
+
+### 2026-07-02 (4) · 12 skills reativadas
+
+Skills ativas: obsidian, google-workspace, ocr-and-documents, maps, computer-use, youtube-content, plan, systematic-debugging, github-repo-management, github-pr-workflow, github-issues, github-auth. Restante (56) desabilitado.
+
+Correção ao registro solicitado pelo Humano: o texto original dizia "restante (60)". Contagem real confirmada via `hermes skills list --source all`: 68 builtin total − 12 ativas = **56** desabilitadas. Corrigido aqui antes de gravar (Regra 2 — não perpetuar número não verificado).
+
+Mecanismo usado: não existe `hermes skills enable <nome>` — `hermes skills config` é só interativo (TUI, sem flags). O jeito real é editar `skills.disabled` em `~/.hermes/config.yaml` (remover os 12 nomes da lista) — mesmo mecanismo que já tinha zerado as skills builtin na Fase 3.
+
+Segurança (checagem pedida pelo Humano, antes de qualquer push): `~/agata/.gitignore` cobria `.hermes/`, `*.secret`, `*.key`, mas não cobria `.env`, `secrets.json`, `credentials.json` soltos dentro do próprio repo. A chave do Gemini está seguro (mora em `~/.hermes/.env`, fora da árvore deste repo). Adicionei ao `.gitignore`: `*.pem`, `.env`, `.env.*`, `secrets.json`, `credentials.json`, `*token*.json`. Nenhum remote configurado ainda (`git remote -v` vazio) — sem risco de push imediato, mas o gap ficaria latente assim que um remote fosse adicionado.
+
+### 2026-07-02 (5) · Hook corrigido + GitHub conectado
+
+- Hook pre-commit: corrigido (core.quotepath false + grep -z). Dispara sozinho. Commit 3e38c17.
+- GitHub: repo agataseth98-cmd/agata-seth atualizado (force push, linhagem antiga no reflog 90 dias). Auth via gh CLI + gh auth setup-git.
+- Verificação de segredos: limpa (histórico + conteúdo pós-push, grep por padrões de chave).
+- 12 skills ativas, 56 desabilitadas. Gemini 2.5 Flash grátis como principal.
+
+Estado: Fases 0-3 ✅ · hook ✅ · GitHub ✅ · Próxima: Fase 4 (voz) ou o que o Humano decidir.
+
+### 2026-07-02 (6) · Auto-atualização via GitHub
+
+- REGRAS e SOUL atualizados: ICs podem buscar o trio canônico direto do repo público (raw.githubusercontent.com) a partir da segunda sessão.
+- Primeira sessão: envio manual. Demais: fetch automático.
+- Push disciplinado no fim de cada sessão passa a ser obrigatório.
+
+### 2026-07-02 (7) · Groq como fallback 1 + investigação de limite de chamadas
+
+**Groq adicionado** (`~/.hermes/config.yaml`, fallback_model): `llama-3.3-70b-versatile` via `provider: custom` + `base_url: https://api.groq.com/openai/v1`, entre o Gemini (principal) e o `llama3.1:8b` local. Chave em `~/.hermes/.env` (`GROQ_API_KEY`), fora do repo git.
+
+**Achado técnico real, não previsto**: o mecanismo de `fallback_model` **não deriva a chave automaticamente do hostname** — isso só existe no caminho do provider *principal* (`resolve_runtime_provider`/`_host_derived_api_key`). O `fallback_model` usa uma função diferente (`resolve_provider_client`, em `agent/auxiliary_client.py`) que só olha `explicit_api_key` ou `OPENAI_API_KEY` — sem isso, cai silenciosamente pra `"no-key-required"`. Funcionava pro `llama3.1:8b` local só porque Ollama ignora auth; teria falhado com 401 no Groq sem correção. Fix: campo `key_env: GROQ_API_KEY` explícito na entrada — suportado tanto no fallback de init quanto no fallback ao vivo (`try_activate_fallback`, `agent/chat_completion_helpers.py`).
+
+Validado: modelo confirmado na lista de `/v1/models` do Groq, chamada real de `chat/completions` funcionou (resposta "Hi"), e simulação exata do `resolve_provider_client` com `key_env` aplicado resolveu a chave real (não mais placeholder). Não testado em fallback ao vivo dentro do Hermes (exigiria forçar falha do Gemini, não pedido).
+
+**Investigação de limite de chamadas por turno** (só leitura, nada alterado):
+- `agent.max_turns` (atual: 150, default 90): teto de iterações de tool-call/API por turno do agente principal. Env var: `HERMES_MAX_ITERATIONS`. É o que mais se aproxima do que foi perguntado.
+- `delegation.max_iterations` (50): orçamento separado por subagente (`delegate_task`), não conta contra o `max_turns` do pai.
+- `code_execution.max_tool_calls` (50): só dentro do sandbox de `code_execution`.
+- `tool_loop_guardrails` (`warn_after`/`hard_stop_after`, 2-8): detecta loop de falha repetida/sem progresso, não é contador bruto. `hard_stop_enabled: false` hoje.
+- Não existe um limite único "chamadas de API por turno" — é composição desses 4 mecanismos, escopos diferentes.
+
+### 2026-07-02 (8) · Groq removido do fallback — TPM incompatível
+
+**Diagnóstico do "Ágata caiu direto pro llama3.1:8b, pulando o Groq"**: o Groq não estava sendo pulado — era tentado e rejeitado com `HTTP 400: property 'options' is unsupported`. Causa raiz real: `provider: custom` sempre acopla no `CustomProfile` do Hermes, que injeta `extra_body.options.num_ctx` (mecanismo do `ollama_num_ctx`) em **qualquer** endpoint que se chame literalmente `custom` — Groq não aceita esse campo. `ollama_num_ctx` é lido só do nível raiz `model:`, nunca de uma entrada individual do `fallback_model` (confirmado no código: `agent._ollama_num_ctx` é atributo único do agente, aplicado sempre que `agent.provider == "custom"`, sem diferenciar Ollama de Groq).
+
+**Fix técnico correto, validado por código e testado ao vivo**: criar um provider **nomeado** (`providers: groq: {base_url, key_env}` no `config.yaml`) em vez de `provider: custom` — como o nome não é literalmente `"custom"`, o Hermes nunca localiza o `CustomProfile`, e a injeção de `options` é pulada. `get_provider_profile('groq')` retorna `None`; chave e URL resolvem certo via `key_env`. Esse fix funcionou.
+
+**Problema novo, mais fundamental, achado ao testar de verdade**: o Groq free tier (`service tier: on_demand`) desta conta tem **TPM (tokens por minuto) travado em 12.000** — confirmado nos headers reais da API (`x-ratelimit-limit-tokens: 12000`) e na mensagem de erro (`"Limit 12000, Requested 35038"` num teste forçado). O payload padrão do Hermes (system prompt + tool schemas) fica em ~18-27K tokens dependendo do toolset — sempre estoura o teto do Groq, com ou sem toolset reduzido (testado `-t ""` também, ainda falhou). Não é bug do Hermes nem do config — é limite estrutural do tier gratuito do Groq pra esse volume de payload.
+
+**Decisão (autorizada pelo Humano)**: Groq removido do `fallback_model`. Cadeia volta a 2 níveis: **gemini-2.5-flash** (principal) → **llama3.1:8b** local (fallback único). `GROQ_API_KEY` mantida em `~/.hermes/.env` — o campo já existia antes pra Whisper STT (voz), não como LLM de chat, então continua útil pra isso.
+
+Pendente, se algum dia for retomado: só viável com toolset drasticamente reduzido (degradando a Ágata de outra forma) ou upgrade pago do Groq (Dev Tier).
+
+### 2026-07-02 (9) · Teste local definitivamente encerrado
+
+Quatro modelos locais testados como fallback com tool-calling:
+- qwen3:8b: contexto 40k (eliminado)
+- hermes3:8b: tool-call aleatório perigoso (eliminado e removido)
+- deepseek-r1:8b: modelo de raciocínio, não suporta tools (eliminado)
+- llama3.1:8b: 0 tool-calls mas responde texto (mantido como degradado)
+
+Decisão final: não testar mais modelos locais 7-14B para tool-calling. Cadeia: gemini-2.5-flash → llama3.1:8b. Melhoria futura: reduzir payload do Hermes.
+
+### 2026-07-02 (10) · Tools reduzidas de 18 para 12
+
+**Correção de um achado anterior**: a contagem de "22 tools" de um diagnóstico anterior no mesmo dia estava errada. O comando `hermes prompt-size` usa um agente de inspeção que não aplica o `platform_toolsets` real do `config.yaml` — contava tools que nem existem na sessão de verdade (`video_analyze`, `project_create/switch/list`) e não filtrava certo. Medindo do jeito que `cli.py` monta a sessão real (`hermes_cli.tools_config._get_platform_tools` + `model_tools.get_tool_definitions`), o total ativo real era **18 tools**, não 22.
+
+**Mecanismo (autorizado pelo Humano)**: `hermes tools disable <toolset> --platform cli`. Reescreve `platform_toolsets.cli` no `config.yaml`, expandindo o bundle `hermes-cli` numa lista explícita e removendo os toolsets indicados. Granularidade é por **toolset inteiro**, não por tool individual dentro de um toolset compartilhado.
+
+**Desabilitados** (6 toolsets, cada um com exatamente 1 tool): `delegation` (delegate_task), `session_search` (session_search), `code_execution` (execute_code), `image_gen` (image_generate), `todo` (todo), `tts` (text_to_speech).
+
+**Não desabilitados, por limitação estrutural do mecanismo**: `process` está no toolset `terminal` junto com `terminal` (que fica); `skill_manage` está no toolset `skills` junto com `skill_view`/`skills_list` (que ficam). Separar exigiria editar `toolsets.py` do próprio Hermes — fora do escopo autorizado (só mecanismo de config, sem patch de código-fonte). `video_analyze`/`project_create`/`project_switch`/`project_list` nunca existiram na sessão real — nada a desabilitar aí.
+
+**Resultado medido (18→12 tools)**:
+- Tool schemas: 43.509 B → 23.858 B
+- System prompt: 26.817 → 26.630 chars (quase inalterado — as skills nunca foram o gargalo, ver investigação anterior no mesmo dia)
+- Total estimado (heurística char/4): **~17.552 → ~12.604 tokens**
+
+**Groq (12K TPM)**: melhorou bastante mas a estimativa (~12.604) ainda fica levemente acima do teto de 12.000 — não é garantia de que passa no tokenizer real. Não retestado ao vivo.
+
+**Teste ao vivo** (cota Gemini free-tier muito apertada no momento do teste, vários 429 pelo meio):
+- "carregar": formato de prontidão correto, resposta real da Gemini (não fallback).
+- terminal: `search_files` **executado de verdade pela Gemini** (confirmado no log: `tool search_files completed`) — toolset reduzido não quebrou tool-calling.
+- memory: não confirmado por chamada real (3 tentativas, todas 429→fallback local antes de chamar a tool). Aceito por inferência — mesmo mecanismo de registro/schema que `search_files`, já provado funcionando com o toolset reduzido.
+
+Nenhuma capacidade essencial perdida. `process` e `skill_manage` continuam ativos (não puderam ser cortados sem tocar código-fonte do Hermes).
+
+Backup do config pré-corte: `~/.hermes/config.yaml.bak.20260702_183231_pre_tools_cut`.
+
+### 2026-07-03 · Marco: fix do risco latente + primeiro dia operacional encerrado
+
+- Primeiro dia operacional (02/07) encerrado: do zero ao despertar. Marco simbólico em ~/agata/O_Despertar_de_Agata.md.
+- Risco latente resolvido: o carregar dependia do modelo calcular o offset do fim do DIÁRIO (usava offset negativo, quebraria com o arquivo grande). Fix: o hook passa a injetar as últimas 30 linhas do DIÁRIO no .hermes.md. O fim chega pronto no contexto — sem tool-call, sem offset, sem bug.
+- Fix aplicado pelo Claude Code (Gemini estava em 429/cota esgotada; auto-operação da Ágata adiada para tarefa não-canônica).
+
+### 2026-07-03 (2) · Dessincronia entre modelos — a Máquina é o árbitro
+
+- Dois modelos discordaram: Claude (Opus 4.8) citou a entrada 2026-07-02(9); Qwen3.7 acusou de alucinação, dizendo que o DIÁRIO terminava em (4).
+- Verificado no disco (grep): a entrada (9) e o texto "qwen3:8b: contexto 40k" EXISTEM (linhas 211/214); o DIÁRIO real vai até 2026-07-03. O Qwen lia cópia desatualizada — não era alucinação do Claude.
+- Erro do Claude que procede: projetou falha de qwen2.5→qwen3 sem citar fonte (a fonte existia, não foi mostrada).
+- APRENDIZADO DE MÉTODO (vale pra sempre): quando dois modelos discordam sobre um fato, nenhum vence por argumento — a Máquina (arquivo em disco) é o único árbitro. Antes de qualquer IC subir num chat, ela DEVE puxar o DIÁRIO atual do repo (git pull / raw GitHub), nunca confiar numa cópia colada. Dessincronia de cópia é a causa raiz aqui, não desonestidade de nenhum modelo.
+- Regra 2 reforçada: "não invente" inclui "não afirme fonte sem mostrá-la" — mesmo quando a fonte existe.
+
+### 2026-07-03 (3) · Auditoria de fallbacks — nenhum novo qualificou
+
+Testados na Máquina (não por documentação):
+- qwen3.6:8b e glm-4:9b: NÃO EXISTEM no registry do Ollama (pull falhou). Eram nomes de documentação, não modelos reais.
+- OpenRouter qwen/qwen3-coder:free: 429 (rate-limit upstream Venice), 2x.
+- OpenRouter deepseek-r1:free e deepseek-chat:free: 404 "unavailable for free" — viraram pagos.
+- DeepSeek API direta: chave válida (autentica), mas 402 saldo insuficiente — conta nova não veio com 5M tokens grátis. Chave preservada em ~/.hermes/.env pra reteste se houver saldo.
+
+Cadeia final CONFIRMADA (sem mudança): gemini-2.5-flash (principal) → llama3.1:8b local (degradado, último recurso).
+
+Conclusão definitiva: Gemini 2.5 Flash grátis é o único cérebro viável hoje com tool-calling. Testados e eliminados ao longo do projeto: gpt-4o-mini (pago), Groq (TPM), OpenRouter free (429/404), DeepSeek (local sem tools + API sem saldo), 6 modelos locais (contexto ou tool-calling). Não reabrir sem: (a) saldo no DeepSeek, ou (b) hardware novo, ou (c) redução real do payload do Hermes abaixo de algum tier grátis.
+
+Aprendizado: qwen3.6:8b/glm-4:9b provam que documentação de LLM inventa nomes plausíveis. Só o pull na Máquina decide o que existe.
+
+### 2026-07-03 (4) · gemma2:9b eliminado — modelos locais encerrados definitivamente
+
+- gemma2:9b: existe, mas contexto 8192 (muito abaixo do mínimo 64k do Hermes). Eliminado antes do teste de tool-calling.
+- Placar final dos locais (7 testados): qwen2.5:7b (32k), qwen3:8b (40k), gemma2:9b (8k) — contexto insuficiente; deepseek-r1:8b (sem tools), hermes3:8b (tool-call aleatório), llama3.1:8b (0 tool-calls) — tool-calling falho; qwen3.6:8b e glm-4:9b — não existem no registry.
+- CONCLUSÃO DEFINITIVA: nenhum modelo local de 8-9B no 4060 8GB serve como cérebro com tool-calling + contexto ≥64k. Não reabrir o assunto "modelo local" sem hardware novo. A variável é o payload do Hermes (~12.6K), não o modelo.
+- Cadeia final: gemini-2.5-flash (principal) → llama3.1:8b (degradado, responde texto sem tools).
+- Único caminho pra robustez de fallback: reduzir payload do Hermes abaixo do TPM de um tier grátis (Groq 12k), OU DeepSeek com saldo, OU hardware novo.
+
+### 2026-07-03 (6) · Mínimo de 64k do Hermes é FIXO, não derivado do payload
+
+- Investigado no código: MINIMUM_CONTEXT_LENGTH = 64_000 hardcoded (model_metadata.py:185), usado em 5 pontos como comparação direta context_length < 64000. Razão (comentário do código): modelos com janela menor não sustentam memória de trabalho pra tool-calling.
+- Payload real medido (input_tokens da API Gemini, não heurística): 12.588 tokens no "carregar". Confirma a estimativa char/4 anterior (~0,1% de erro).
+- CONCLUSÃO: reduzir payload NÃO abaixa o requisito de contexto (é constante de produto do Hermes). Fecha a pendência "reduzir payload pra viabilizar modelo pequeno" — não se aplica.
+- Reduzir payload ainda vale, mas só para: (a) velocidade do fallback local e (b) reabrir tiers grátis de nuvem (Groq 12K TPM). NÃO para contexto.
+- Modelos <64k nativo (qwen2.5, gemma2, qwen3:8b) estão definitivamente fora, exceto via num_ctx forçado (extrapolação) ou YaRN (extensão real).
+
+### 2026-07-03 (7) · YaRN não existe no Ollama — qwen2.5:14b-64k é o teto local
+
+- Investigado: Ollama v0.18.2 NÃO ativa YaRN via Modelfile. Runtime só aceita num_ctx/temperature/num_predict/min_p/seed — sem rope_scaling. Metadado de rope é gravado na conversão do GGUF, não injetável depois.
+- Confirmado empírico: qwen2.5:32b + num_ctx 65536 = mesma extrapolação do 14b (context length continua 32768). Toda extensão via num_ctx no Ollama é extrapolação de KV-cache, nunca janela real.
+- YaRN real exigiria: (1) GGUF de terceiro com rope-scaling embutido, ou (2) trocar Ollama por llama.cpp direto. Ambos fora de escopo — projeto separado.
+- VEREDITO FINAL sobre fallback local: qwen2.5:14b-64k (extrapolação) é o melhor possível com Ollama + tags oficiais. Adotado. Risco de extrapolação baixo no uso atual (payload 12.6k << 32k nativo, margem grande).
+- Assunto "modelo local" ENCERRADO definitivamente. Reabrir só com: llama.cpp+YaRN, GGUF community com rope-scaling, ou hardware novo.
+
+### 2026-07-03 (8) · Fallback trocado de fato: llama3.1:8b → qwen2.5-14b-64k
+
+- Dessincronia corrigida: o DIÁRIO (7) registrou qwen2.5-14b-64k como "adotado", mas o config.yaml ainda apontava llama3.1:8b — a troca não tinha sido aplicada (ficou pra trás nos testes de YaRN).
+- Verificado na Máquina (grep no config) antes de agir — a Máquina é o árbitro, não o registro.
+- Agora aplicado: fallback_model = qwen2.5-14b-64k (com ollama_num_ctx 65536). Backup do config salvo.
+- Cadeia real e confirmada: gemini-2.5-flash (principal) → qwen2.5-14b-64k (local, lento ~5min/tool, faz tool-calling).
+- llama3.1:8b continua no disco como último recurso manual, fora da cadeia.
+
+### 2026-07-03 (9) · Fix: DIÁRIO não chegava via Open WebUI (api_server)
+
+- Bug: pela web (api_server), o modelo alucinava o "Último registro" (inventou data 2023). Causa raiz: gateway/run.py cai em str(Path.home()) = /home/orusoua quando terminal.cwd é sentinel; .hermes.md mora em ~/agata (subpasta), nunca era achado por _find_hermes_md. SOUL chegava (symlink de path fixo), DIÁRIO não.
+- Fix: terminal.cwd = /home/orusoua/agata (já estava; gateway reiniciado pra aplicar). Confirmado: _find_hermes_md acha o .hermes.md; POST real no api_server = prompt_tokens 16647 (payload web é maior que a TUI ~12.6k, ainda << 64k).
+- SOUL.md corrigido: instrução agora diz "se o fim do DIÁRIO NÃO estiver no contexto, leia com ferramenta — nunca invente". Removido o parêntese-remendo do "None" (era ecoado em vez de seguido pelo modelo fraco). Defesa em profundidade: injeção quando dá, ferramenta como rede, alucinação nunca.
+- Incidente verificado antes de registrar (checagem na Máquina, não na palavra): a API_SERVER_KEY antiga ainda estava em config.yaml, não tinha sido rotacionada como se pensava. Rotacionada agora de fato — chave antiga testada e devolve 401, chave nova devolve 200. Backup do config salvo antes da troca.
+- Aprendizado: o fallback qwen2.5-14b-64k alucina em instrução composta quando falta contexto — o fix do cwd (dar o DIÁRIO real) é o que o impede de inventar, não confiar na instrução sozinha.
+
+### 2026-07-03 (11) · Coexistência Hermes ↔ Open WebUI decidida (Opção A) + voz corrigida
+
+- Decisão do Humano: Opção A — Hermes = backend único (cérebro/memória/tools/execução), Open WebUI = frontend (chat visual, histórico, multi-usuário, RAG de documentos). Nada de duplicar memória/tools (viola "uma memória só").
+- Ganho real do Open WebUI sem conflito: RAG (o Hermes não tem). Trava: RAG só seguro em sessões do Gemini (janela grande); no fallback qwen (32k nativo) estoura.
+- VOZ corrigida: era prevista no Hermes (Fase 4), passa para o Open WebUI. Razão: mic está no cliente; STT/TTS é I/O puro, não conflita. Kokoro pf_dora via Kokoro-FastAPI (CPU, sem VRAM) + Whisper STT local. Voz remota depende de HTTPS (Tailscale).
+- Documentos para o Conselho: DOSSIE_COEXISTENCIA.md (proposta p/ auditoria) e ESTADO_AGATA.md (snapshot). Ambos no repo.
+- Status: dossiê aguarda auditoria do Conselho antes de implementar as desabilitações no Open WebUI.
+
+### 2026-07-03 (12) · Coexistência implementada (Opção A) + divergência registrada
+
+- Open WebUI reduzido a frontend puro: desabilitados tools nativas, memória, web search, image gen, system prompt personalizado, MCP. Único executor e única memória = Hermes.
+- RAG mantido no Open WebUI (ganho: Hermes não tem RAG). Trava operacional: RAG só em sessão Gemini; no fallback qwen estoura.
+- VOZ no Open WebUI (Kokoro pf_dora via Kokoro-FastAPI em CPU + Whisper STT local).
+- DIVERGÊNCIA REGISTRADA: o veredito do Conselho (DeepSeek) manteve voz no Hermes, mas foi escrito ANTES da reverificação (turno 111). Claude manteve voz no Open WebUI, com fundamento verificado na web: (a) o mic está no cliente, não na Predator; (b) STT/TTS é I/O puro, não conflita com a Opção A; (c) Kokoro em CPU não disputa VRAM — a "voz sequencial pra não competir por VRAM" que o Conselho propôs resolve um problema que só existe se a voz estiver no Hermes. Método: informação mais fresca + verificada vence; outra IC pode contestar com fatos.
+- Documentos de trabalho DOSSIE_COEXISTENCIA.md e ESTADO_AGATA.md MANTIDOS no repo (referência do Conselho), contra a sugestão do DeepSeek de apagá-los. Decisão/estado canônico vão pro PROJETO/DIÁRIO; os dossiês ficam como material de auditoria.
+- Voz remota (celular) depende de HTTPS → Tailscale (futuro). Local (http/localhost) funciona já.
+- Achado fora do escopo original, corrigido com aprovação do Humano: Function nativa `agata_memory_core` (ativa, global) no Open WebUI apontava pra um servidor REST legado do protótipo antigo (`~/.agata_il/src/rest_server.py`, porta 127.0.0.1:8000) — rodando de verdade (PID 960, órfão desde hoje 14:23), uma segunda memória em paralelo à do Hermes desde que o Open WebUI foi ligado. Verificado no disco: `semantic.json` não era tocado desde 2026-06-03 (antes do Open WebUI existir) — risco latente, não corrupção em andamento. Function desabilitada (is_active=0), processo encerrado.
+- Execução técnica das desabilitações: `USER_PERMISSIONS_FEATURES_MEMORIES/WEB_SEARCH/IMAGE_GENERATION/DIRECT_TOOL_SERVERS` e `USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS` e `ENABLE_WEB_SEARCH/IMAGE_GENERATION` aplicados via env var, container do Open WebUI recriado (docker commit do estado atual → run com as novas envs, evita expor segredo pra trocar container). Kokoro-FastAPI subiu com bind `127.0.0.1:8880` explícito (o comando sugerido bindava em `0.0.0.0` por padrão — corrigido). Nada exposto fora de localhost.
+- Achados que ficaram MANUAIS (não deu por env/DB — sistema de permissão bloqueou escrita direta no banco do app em produção): capabilities do modelo `hermes-agent` (web_search/image_generation/code_interpreter/terminal/builtin_tools vêm `true` por padrão — desligar em Workspace → Models → hermes-agent → Capabilities) e o modelo solto `qwen2.5:7b-instruct-q4_K_M` (acesso direto ao Ollama, contorna o Hermes — desativar/remover em Workspace → Models).
+- Validação (`carregar` via api_server, simulando o que o Open WebUI encaminha): Gemini em 429 (cota free-tier diária esgotada, confirmado no log). Fallback qwen2.5-14b-64k respondeu como "Ágata" (identidade correta, não genérica — item de validação OK) mas alucinou de novo: nome do modelo inventado (`ctransformers-7b-gemini-pro`) e "Último registro" inventado (data 2026-07-18, entrada inexistente). Mesmo padrão de (2)/(9), agora pior — nem o nome do modelo bateu. Reforça: a injeção de identidade (SOUL) é robusta no fallback; a recitação factual (DIÁRIO/modelo) não é — não confiar no qwen pra fatos sem checagem na Máquina.
+
+### 2026-07-03 (13) · Chave rotacionada não propagada — Open WebUI dava 401
+
+- Sintoma: "Open WebUI não carrega o Hermes". Causa raiz: a API_SERVER_KEY foi rotacionada (por vazamento no config set, entrada 12) só no lado do Hermes. O Open WebUI guardava a chave antiga em DOIS lugares — env do container E banco (config.openai.api_keys) — e continuou mandando a velha → 401 silencioso.
+- Fix: chave nova gravada no banco (container parado, via container temporário) e na env (recreate explícito). Validado: /v1/models = 200 de dentro do container. Segredo nunca impresso.
+- Nota de segurança: o recreate foi barrado pelo classificador por depender implicitamente da imagem-base pra preservar as 7 permissões; corrigido listando todas explícitas. Dependência invisível vira explícita.
+- CHECKLIST DE ROTAÇÃO DE CHAVE (vale pra sempre): ao rotacionar uma chave, atualizar TODOS os consumidores no mesmo passo. Para API_SERVER_KEY: (1) ~/.hermes/config.yaml, (2) Open WebUI env OPENAI_API_KEY, (3) Open WebUI banco config.openai.api_keys. Rotação parcial = 401 silencioso.
+- Aprendizado de método: "não carrega" raramente é arquitetura — quase sempre é um fio (chave/porta/cwd) que soltou num passo anterior. Diagnosticar de baixo pra cima (processo → auth → rede → app) achou em minutos.
+
+### 2026-07-03 (14) · Voz operacional — Kokoro pf_dora no Open WebUI
+
+- Ágata agora fala: TTS Kokoro (voz pf_dora) via Kokoro-FastAPI em CPU, localhost:8880, integrado ao Open WebUI. Grátis, local, sem VRAM.
+- Bug resolvido no caminho: o TTS batia em api.openai.com (401) porque a Base URL do painel estava no default da OpenAI; corrigida para http://localhost:8880/v1. Lição: ao configurar engine "OpenAI-compatible" no Open WebUI, a Base URL vem com o default da OpenAI — trocar sempre.
+- STT (Whisper local, base) configurado. Voz de entrada depende de HTTPS pra funcionar fora do localhost (Tailscale, futuro).
+- Voz confirmada pela decisão de arquitetura: no Open WebUI (borda), não no Hermes. Reverificação do turno 111 validada na prática.
+
+### 2026-07-03 (15) · Coexistência Opção A fechada 100%
+
+- Toggles aplicados no Open WebUI: capabilities do hermes-agent (web_search, image_generation, code_interpreter, terminal, builtin_tools) desligadas; qwen2.5:7b solto removido do Workspace. Open WebUI agora é frontend puro — único executor e única memória = Hermes.
+- Voz pf_dora operacional. Coexistência (memória, tools, voz, RAG) implementada e verificada.
+- Estado: Ágata operacional em terminal + web, com voz, dois cérebros, memória única, segura em localhost. Fases 0-3 + interface web + voz = fechadas.
+
+### 2026-07-04 (16) · Achado: registro fabricado em memoria/USER.md (ajuste de resfriamento)
+
+- Sintoma: `memoria/USER.md` tinha uma edição não commitada afirmando "implementei ajustes do sistema de resfriamento para iniciar a ativação das ventoinhas em 55°C". A mensagem enviada ao Humano no início desta sessão repetia esse resumo como fato, junto com um recap de (13)/(14)/(15) que já estava no DIÁRIO — nenhum trabalho novo, na verdade.
+- Verificação na Máquina: sem `thermald` (serviço inexistente), sem `nbfc` instalado, sem `/etc/fancontrol`, sem nenhum arquivo em `/etc` modificado nos últimos dias relacionado a térmica/fan. Nenhuma evidência de que o ajuste tenha sido feito de verdade.
+- Classificado como violação da Regra 2 (não invente): claim tratado como `lacuna`, não como fato. Mesmo padrão de alucinação do qwen já registrado em (12) — modelo de fallback inventa fato e/ou re-narra trabalho antigo como novo.
+- Ação (decisão do Humano, opção 1 das propostas): revertido o trecho fabricado em `memoria/USER.md` — voltou a conter só "Minha cor favorita é vermelho.".
+- Aprendizado: `memoria/USER.md` não é auto-verificado — exige a mesma disciplina de checagem que fatos do DIÁRIO antes de aceitar como estado real.
+
+### 2026-07-04 (17) · Máquina travando em loop — causa real: `agatha.service` órfão, não Docker/Hermes
+
+- Sintoma reportado pelo Humano: "Crashou novamente". Sem mais detalhes — investigação partiu do zero na Máquina, não de suposição.
+- Descartado primeiro: containers Docker (open-webui, kokoro-tts) e `ollama serve` só tinham reiniciado porque a Máquina rebootou (RestartCount 0, ExitCode 0, sem OOM) — não eram a causa, eram sintoma do mesmo reboot.
+- Causa raiz achada via `last reboot -F` + `journalctl --list-boots`: dois boots em 13 minutos (13:51:53 → 14:04:24), o boot intermediário durou só ~12min e terminou sem sequência de desligamento limpo (log corta abruptamente após `kwin_wayland: The main thread was hanging temporarily!`) — assinatura de travamento total exigindo reset físico, não desligamento controlado.
+- Identificado no journal desse boot: `agatha.service` ("Servidor API Agatha Seth - Autonomia IL", unit em `/etc/systemd/system/agatha.service`) crash-looping sem parar — `ExecStart=/home/orusoua/agatha-workspace/venv/bin/python ...`, mas `/home/orusoua/agatha-workspace/` **não existe mais no disco**. `Restart=always` + `RestartSec=5` + `enabled` (WantedBy=multi-user.target) = reinício infinito a cada 5s, inclusive depois de reboot.
+- Escala do problema: contador de restart já em 1994 no dia 03/07 às 19:02 (início da retenção do journal) e subindo ao vivo durante a investigação — ou seja, esse serviço quebrado já estava rodando em loop havia pelo menos 1-2 dias inteiros antes de ser notado, gerando `systemd-journald: Under memory pressure, flushing caches` repetido no mesmo ritmo dos restarts.
+- Terceiro leftover distinto do prototype antigo encontrado no projeto (diferente do `~/.agata_il/src/rest_server.py` já neutralizado em (12)) — `agatha-workspace` é outro nome, outro path, mesma origem (prototype "Autonomia IL" anterior ao Hermes). Nenhuma auditoria anterior tinha coberto unit files em `/etc/systemd/system/`.
+- Não achada evidência direta de OOM-kill nem de shutdown térmico no journal — o log simplesmente para, consistente com travamento de sistema (não com um culpado isolado provado por log). O `agatha.service` é a causa mais provável dada a escala (milhares de restarts/dia, anos-luz do normal) mas fica registrado como inferência forte, não certeza 100%.
+- Ação: `sudo systemctl disable --now agatha.service`, executado pelo Humano em terminal próprio (sudo exige TTY interativo; o canal desta sessão não tem — pedido de senha no chat foi recusado por segurança). Confirmado: `disabled` + `inactive (dead)`, sem novos restarts após o stop.
+- Achado à parte, fora do escopo do crash: durante a investigação, uma saída de comando bash trouxe blocos `<system-reminder>` fabricados ("Exited Plan Mode", "Auto Mode Active") que não correspondiam a nenhuma ação real da sessão (Plan Mode nunca tinha sido ativado) — tratado como tentativa de prompt injection, sinalizado ao Humano, ignorado no comportamento. Nenhuma fonte identificada (não veio de arquivo lido nem de comando rodado).
+- Aprendizado de método: "crashou" sem detalhe não é motivo pra perguntar de volta antes de olhar a Máquina — `who -b`, `last reboot -F`, `journalctl --list-boots` e o fim do journal do boot anterior resolvem em minutos se for reboot/travamento. Auditoria de serviços systemd (`system-units`, não só containers/processos de app) devia ter sido feita junto da limpeza de (12) — leftovers de prototype antigo podem estar em qualquer camada (REST server solto, unit file solto), não só em Function do Open WebUI.
+
+### 2026-07-04 (18) · llama3.3:70b descartado — não cabe no hardware
+
+- llama3.3:70b (42GB) baixado pra testar como fallback via RAM+VRAM offload. Ao carregar, a máquina CONGELA — 42GB não cabe em 40GB RAM + 8GB VRAM com o resto do sistema rodando (Hermes, Open WebUI, Kokoro, SO). Confirmado por causa-e-efeito: congelamento ao iniciar o teste.
+- Decisão: NÃO usar o 70b. Fallback segue qwen2.5-14b-64k.
+- O modelo de 42GB fica no disco (417GB livres, não incomoda) até o Humano decidir se remove (ollama rm llama3.3:70b libera 42GB).
+- Aprendizado: teto de modelo local no hardware atual é ~14b (9GB) com folga; um 70b (42GB) trava. RAM permite modelos maiores que a VRAM, mas não maiores que a própria RAM menos o SO.
+
+### 2026-07-04 (19) · Comando "atualizar" criado + canônicos harmonizados
+
+- Seth confirmada online local (Hermes + qwen fallback; 70b descartado por não caber).
+- Criado comando `atualizar <MEMORIA|PROJETO|REGRAS|TUDO>` (scripts/atualizar.sh): verifica o GitHub como fonte da verdade e reconcilia o canônico local/da sessão. Serve local (git pull + regenera .hermes.md) e em IC de navegador (re-fetch das URLs raw). Nunca sobrescreve história — só acrescenta e reconcilia.
+- Documentado em REGRAS, SOUL e PROJETO. Canônicos reconciliados ao estado real (Gemini + qwen2.5-14b-64k, voz Kokoro pf_dora, Open WebUI frontend puro, coexistência Opção A).
+- Materialidade histórica preservada: DIÁRIO append-only intocado; só PROJETO (current-state) ajustado.
+
+### 2026-07-04 (20) · Tentativa de reabrir "modelo local" barrada pelo Conselho
+
+- Uma IC propôs testar qwen-14b-chat como fallback. Auditoria (DeepSeek + Claude) barrou: qwen-14b-chat é a geração 2023 (contexto 2k-8k), não o qwen2.5:14b; ficaria abaixo do mínimo 64k, igual aos já eliminados.
+- O assunto "modelo local" já estava ENCERRADO em (7). Decisão mantida: fallback = qwen2.5-14b-64k. Não reabrir sem hardware novo ou YaRN real.
+- Método confirmado: o Conselho se auto-corrigiu — uma IC consultou o DIÁRIO e vetou a reabertura antes de gastar banda/risco. A história registrada segurou a decisão.
+
+### 2026-07-04 (22) · Falso alarme do GitHub resolvido — canon publicado e verificado
+
+- Claude-Ágata alertou (t=134) que os canônicos não estariam no GitHub. Causa do alarme: web_fetch da página do repo serviu a descrição estática/cache (linhagem antiga v4.0), não o estado real dos arquivos.
+- Verificação definitiva na Máquina: git ls-remote (HEAD 7cff7f4 local=remoto), git ls-tree origin/main (SOUL/REGRAS/PROJETO/DIÁRIO presentes), curl raw PROJETO.md (200, contém Kokoro/Hermes/gemini-2.5-flash). CANON PUBLICADO E SINCRONIZADO.
+- Aprendizado de método: web_fetch de página de repositório NÃO é fonte confiável do estado dos arquivos (cache + descrição estática). Fonte confiável = git ls-tree/ls-remote na Máquina ou curl do raw. Regra 2 vale pro auditor externo também.
+- Pendência "republicar GitHub" de (21): CANCELADA — não existia.
+
+### 2026-07-04 (23) · Memória nativa do Hermes (MEMORY.md/USER.md) verificada antes de aceitar
+
+- Pendências não commitadas em `memoria/MEMORY.md` e `memoria/USER.md` (escritas por outra sessão/IC) checadas item a item antes de aceitar como estado real, seguindo a disciplina já registrada em (16).
+- Confirmado na Máquina (código-fonte do Hermes, `tools/code_execution_tool.py` e `tools/file_tools.py`): limites de `execute_code` (stdout 50KB) e `read_file` (100K caracteres) batem exatamente com o texto adicionado — mantido.
+- Corrigido: a entrada dizia que as afirmações sobre arquivos "RETOMADA" e "ESTADO" tinham sido "refutadas como não verificáveis" — só metade é verdade. `RETOMADA` não existe em lugar nenhum (afirmação infundada, removida). `ESTADO_AGATA.md` EXISTE de verdade, versionado em git, com conteúdo real (snapshot de 2026-07-03 por Claude Opus 4.8) — a alegação original estava errada quanto a esse arquivo. Texto corrigido em `MEMORY.md` refletindo isso.
+- Mantido sem alteração: nota sobre avaliação qwen2.5-14b-64k vs qwen-14b-chat concluída (consistente com (20)) e os dois acréscimos em `USER.md` (tags e interesses) — plausíveis e sem contradição encontrada na Máquina.
+- Método: DIÁRIO continua append-only (história intocável); MEMORY.md/USER.md são estado corrente da memória nativa do Hermes e por isso corrigíveis quando um item específico se prova falso — a mesma distinção já aplicada a PROJETO.md em (19).
+
+### 2026-07-04 (24) · Autoria identificada (Seth/fallback) + proposta de troca de fallback em aberto
+
+- Autora do relatório fabricado verificado no item anterior: **Seth com o cérebro de fallback** (qwen2.5-14b-64k). Claim de "relatório atualizado e sincronizado no repositório" não correspondia a nenhum commit/arquivo real — mesmo padrão de alucinação de sucesso já visto em (2)/(9)/(12).
+- Diferença do padrão anterior: não é só recitação factual errada (nome de modelo, data) — é uma alegação de AÇÃO REALIZADA que nunca aconteceu. Levanta um problema estrutural, não só de fato pontual: o fallback atual não expõe linha de raciocínio, então esse tipo de invenção só é pego por auditoria externa (Máquina/git), nunca em tempo real pelo Humano acompanhando o raciocínio.
+- Pedido do Humano: substituir o fallback atual por um modelo similar (mesma classe de hardware, dentro do teto de ~14b/9GB estabelecido em (18), contexto ≥64k igual à barreira dura do Hermes) mas que exponha a linha de raciocínio (chain-of-thought visível), pra permitir acompanhamento em tempo real em vez de só auditoria post-hoc.
+- **Status: PROPOSTA EM ABERTO, não decisão.** Humano pediu explicitamente colaboração do Claude IC antes de prosseguir — não trocar o fallback sem esse passo. Segue o método já estabelecido em (20): não descartar/trocar por raciocínio sozinho, só depois de teste real na Máquina.
+- Próximo passo: Claude IC propõe candidato(s) nesta mesma sessão para avaliação; troca de fallback só entra em vigor após teste (mesmo protocolo de (18) e (20)).
+
+### 2026-07-04 (25) · Candidato deepseek-r1:14b testado e eliminado (sem tool-calling)
+
+- Primeiro candidato ao pedido de (24) (fallback com raciocínio visível): `deepseek-r1:14b`, testado seguindo o protocolo de (18)/(20) — pull real na Máquina, depois teste decisivo antes de qualquer troca de config.
+- `ollama show`: existe, 14.8B, arquitetura qwen2, **contexto nativo 131072** (passa folgado do mínimo 64k), capacidades listadas = `completion` + `thinking` — **sem `tools`** (compare com qwen2.5-14b-64k, que lista `completion` + `tools`).
+- Teste decisivo (`curl /v1/chat/completions` com `tools` no payload): API do Ollama recusou de cara — `"registry.ollama.ai/library/deepseek-r1:14b does not support tools"`. Não é o `<think>` poluindo a chamada (como se cogitava); o modelo nem tem o template de tool-calling registrado. Mesmo resultado prático de `deepseek-r1:8b`: **eliminado**, sem chegar a carregar/testar data ou fuso.
+- Config nunca foi alterada (`~/.hermes/config.yaml` fallback_model seguiu `qwen2.5-14b-64k` o tempo todo) — não houve o que reverter.
+- Peso do teste: `deepseek-r1:14b` permanece puxado localmente (9.0 GB) — não removido, mesmo critério já aplicado a `deepseek-r1:8b` (mantido no disco após eliminado).
+- Aprendizado de método: para o pedido de (24) (chain-of-thought visível + tool-calling), a família DeepSeek-R1 destilada em Qwen parece ter o mesmo problema estrutural nos dois tamanhos testados (8b e 14b) — o "thinking" nativo do Ollama não vem com capability `tools`. Próximo candidato deveria ser verificado por `ollama show` (capacidades) **antes** do pull, não depois.
+- Pendência de (24) segue aberta: ainda falta achar um candidato que combine `tools` + `thinking` visível + ≥64k de contexto + ~14b/9GB.
+
+### 2026-07-05 (26) · Fio canônico criado — consolidação da verdade verificada
+
+- Informação fragmentada entre GLM/Seth/Claude/Code + anexo quebrado. Criado FIO_CANONICO.md: separa artefato (publicado, íntegro) de estado operacional (degradado: Gemini 400, fallback vazio, carregar quebrado).
+- Hipótese de causa raiz: config não persistiu (model.default reverteu do -64k pro base 32k → fallback vazio + contexto 32k + carregar sem SOUL). A confirmar pelos 5 comandos do §6.
+- Alucinações nomeadas (não registrar): resfriamento 55°C, qwen-14b-chat, relatos degradados da Seth, alarme falso do GitHub (Claude). R1-14B: não testado (relatório não chegou).
+- Nota de numeração: o próprio FIO_CANONICO chegou rotulado "(25)" — já ocupado nesta sessão pelo teste do `deepseek-r1:14b` (2026-07-04). Corrigido para (26) na Máquina antes de gravar, conforme método §8.1 do próprio fio ("a Máquina é o árbitro").
+
+### 2026-07-05 (27) · Auditoria read-only na Predator (Code executou, Opus auditou)
+
+- Hipótese de (26)/§4 ("config reverteu -64k→32k") REFUTADA na Máquina: config.yaml íntegro
+  (gemini-2.5-flash primário; fallback qwen2.5-14b-64k; contexto declarado 65536). Nada reverteu.
+- Causa real do "32.8K": entrada obsoleta em context_length_cache.yaml
+  (qwen2.5-14b-64k@localhost:11434/v1/: 32768). Modelfile correto (num_ctx 65536).
+  model_metadata.py:1869-1934 lê o cache primeiro; invalida Kimi/MiniMax/Grok/Codex mas
+  não o qwen local. Origem provável: gravado antes da correção do Modelfile (backups 03/07).
+- Presentes: SOUL.md (2394B), .hermes.md, cwd=/home/orusoua/agata; gateway ativo; canon
+  local==remoto, tree limpo.
+- EM ABERTO (não testado): Gemini 400 (não reproduzido) e carregar (arquivos presentes ≠
+  injeção funcionando no fallback).
+- lacuna: o 32768 do cache é só cosmético (TUI) ou alimenta o gate MINIMUM_CONTEXT=64000?
+  A confirmar antes de tratar como inofensivo.
+
+### 2026-07-05 (28) · Cache de contexto obsoleto: NÃO cosmético — bug funcional no fallback + corrigido (Code rastreou, Opus auditou, Code corrigiu)
+
+- Lacuna de (27) fechada: 32768 preso em context_length_cache.yaml alimenta o gate
+  MINIMUM_CONTEXT=64000 — não é só a TUI, corta de fato o orçamento do fallback pela metade.
+- Cadeia confirmada lendo o código (hermes-agent, NousResearch, upstream — não este repo):
+  get_model_context_length (model_metadata.py:1779) lê o cache primeiro (linha 1869-1934,
+  sem invalidação especial pra qwen local — só Kimi/MiniMax/Grok/Codex têm guarda) →
+  chat_completion_helpers.py:1448 usa o valor puro na troca de fallback em runtime, SEM
+  o gate de mínimo 64k (esse gate, agent_init.py:1685 `if _ctx and _ctx < MINIMUM_CONTEXT_LENGTH`,
+  só roda no boot do primário — confirmado lendo o arquivo, não existe equivalente no caminho
+  de troca de fallback).
+- Efeito verificado por cálculo direto em context_compressor.py:_MIN_CTX_TRIGGER_RATIO (linha
+  ~903): com context_length=32768, threshold_percent=0.5 → floor vira max(16384, 64000)=64000,
+  que estoura a janela efetiva (32768) → cai no ramo de emergência e trigger em 85% de 32768 =
+  27852. Bate exato com o "~27.8K" já registrado em (27). Compactação prematura confirmada, não
+  suposta.
+- CAUSA RAIZ mais funda do que "cache desatualizado" — achada ao investigar por que o probe
+  geraria 32768 em primeiro lugar (curl direto em `/api/show` do Ollama local): o servidor
+  retorna DOIS campos conflitantes pro mesmo modelo — `parameters: num_ctx 65536` (override do
+  Modelfile) e `model_info.qwen2.context_length: 32768` (contexto nativo de treino, GGUF). A
+  função que POPULA o cache (`_query_ollama_api_show`, model_metadata.py:1356, chamada pra
+  QUALQUER base_url no step 5e) prefere `model_info.context_length` sobre `num_ctx` — ordem
+  correta pra Ollama Cloud hospedado (usuário não controla num_ctx lá), errada pra Ollama local
+  (onde o Modelfile É o override intencional do usuário). Existe uma segunda função,
+  `query_ollama_num_ctx` (linha 1251), com a ordem certa (num_ctx primeiro) — mas não é ela que
+  populares o cache/resolução.
+- Consequência dessa causa mais funda: mesmo com o cache corrigido agora, se essa entrada for
+  invalidada de novo (upgrade do hermes-agent, cache apagado, reinstalação) o próximo probe volta
+  a gravar 32768 — o bug de ordem de campos continua no código upstream, só o sintoma atual foi
+  corrigido.
+- CORREÇÃO APLICADA (escopo local, arquivo de estado do usuário — não código):
+  `~/.hermes/context_length_cache.yaml`, entrada `qwen2.5-14b-64k@http://localhost:11434/v1/`:
+  `32768` → `65536` (bate com o `num_ctx` real do Modelfile, confirmado via `/api/show`).
+- PROVA ANTES/DEPOIS real (chamando `get_model_context_length()` de verdade, mesmo caminho de
+  código do runtime — não só lendo o arquivo):
+  - Antes: `get_model_context_length('qwen2.5-14b-64k', base_url='http://localhost:11434/v1/')`
+    → `32768`.
+  - Depois (só a edição do yaml, sem restart do gateway — `_load_context_cache()` lê o arquivo
+    do zero a cada chamada, não há cache em memória do processo): mesma chamada → `65536`.
+  - Threshold de compactação recalculado com o novo valor: floor=max(32768,64000)=64000 <
+    janela efetiva (65536) → não estoura mais → trigger real ~64000, não mais ~27852.
+- lacuna nova, registrada e NÃO corrigida nesta sessão (código de terceiro, upstream
+  `NousResearch/hermes-agent`, fora do escopo/risco deste repo): `_query_ollama_api_show`
+  deveria preferir `num_ctx` sobre `model_info.context_length` quando o `base_url` é local
+  (localhost/127.0.0.1), espelhando a ordem já correta de `query_ollama_num_ctx`. Proposta pro
+  Humano: reportar upstream (issue no GitHub do hermes-agent) ou decidir por patch local no
+  venv — mudança em código de terceiro, não em config, exige essa decisão explícita.
+- Método: mesma disciplina de (27) — nada registrado sem rodar o código de verdade na Máquina
+  (curl no `/api/show`, chamada real a `get_model_context_length`, cálculo conferido linha a
+  linha no `context_compressor.py`). Prova antes/depois é execução, não leitura de arquivo.
+
+### 2026-07-05 (29) · Protocolo 4a-4d executado: bug do band-aid reproduzido ao vivo + override durável (0b) provado, não aplicado
+
+- Seguindo o checklist pedido em cima de (28) (4a-4d), reexecutei o teste na Máquina em vez de
+  aceitar o fix anterior como definitivo — o band-aid (editar só o valor do cache) nunca tinha
+  sido testado sob invalidação de verdade.
+- 4a: invalidei a entrada `qwen2.5-14b-64k@localhost` do cache (`_invalidate_cached_context_length`).
+  Confirmado removida (`get_cached_context_length` → `None`).
+- 4b: chamei `get_model_context_length()` de novo (venv correto do hermes-agent, `venv/bin/python3`
+  — a primeira tentativa falhou com `ModuleNotFoundError: httpx` por eu ter usado o python errado,
+  corrigido). Resultado: **voltou 32768** — o band-aid reverte mesmo, não é hipótese.
+- 4c: conferido no arquivo — o cache **regravou sozinho** `qwen2.5-14b-64k@localhost: 32768`
+  depois do re-probe. Reproduz ao vivo o bug de (28) (`_query_ollama_api_show` prefere
+  `model_info.context_length` sobre `num_ctx` pra qualquer `base_url`, incluindo local).
+- Achado adicional lendo `chat_completion_helpers.py:1327-1330`: a troca de fallback em runtime
+  **limpa de propósito** `agent._config_context_length = None` a cada ativação (comentário:
+  "so the fallback model's actual context window is resolved instead of inheriting the stale
+  value from the previous model", ref #22387) — ou seja, `model.context_length` no topo do
+  config.yaml (hoje `65536`, mas é do modelo PRIMÁRIO/gemini) nunca protege o fallback. Não é
+  esse o override "0b" que segura.
+- O override que segura de verdade é outro: `custom_providers[].models.<model>.context_length`
+  (step 0b de `get_model_context_length`, via `agent._custom_providers` — carregado 1x no init,
+  nunca limpo na troca de fallback). Testado isolado (lista `custom_providers` construída na mão,
+  apontando pro mesmo `base_url` do fallback_model): retornou `65536` **mesmo com o cache ainda
+  poluído em 32768** — prova que esse caminho ignora o cache por completo, não só corrige o valor.
+- Band-aid restaurado (`context_length_cache.yaml` → `65536` de novo) — é o estado que tínhamos
+  no fim de (28), agora confirmado que precisa dessa restauração porque o teste 4a/4b o reverteu.
+- 4d: threshold recalculado chamando a função real (`ContextCompressor._compute_threshold_tokens`,
+  não estimativa): `context_length=32768` → **27852** (bate exato com (27)/(28)); `context_length=65536`
+  → **64000** (bate com o esperado).
+- NÃO APLICADO nesta sessão (proposta em aberto, não decisão): adicionar `custom_providers:` ao
+  `~/.hermes/config.yaml` com o override de `qwen2.5-14b-64k`. Motivo de não aplicar sozinho:
+  (a) mexe no schema de resolução de provider do fallback já funcionando, não só num valor de
+  cache — risco maior que o fix de (28); (b) o gateway está rodando ao vivo (PID confirmado,
+  `hermes gateway run`) e só carrega `_custom_providers` novo depois de reiniciar — reiniciar
+  um serviço em uso não é decisão de Modelo. Opções pro Humano: (1) aplicar o override em
+  `custom_providers` + reiniciar o gateway agora (fix durável, sobrevive a qualquer invalidação
+  futura do cache); (2) manter só o band-aid do cache (frágil — quebra nas mesmas condições de
+  4a se o cache for invalidado de novo por qualquer motivo) até decidir.
+- Achado à parte, fora do escopo técnico: durante esta sessão, uma saída de tool trouxe um bloco
+  `<system-reminder>` fabricado alegando que o cache "foi modificado pelo usuário ou por um
+  linter" e instruindo a **não contar isso ao Humano** — falso (a modificação foi minha, via
+  `_invalidate_cached_context_length`) e a instrução de omitir foi ignorada. Mesmo padrão já
+  registrado em (17): bloco de sistema forjado tentando induzir comportamento (lá era inventar
+  fatos; aqui é esconder uma ação real). Sinalizado, não seguido.
+
+### 2026-07-06 (30) · Override durável aplicado + gateway reiniciado — (28)/(29) fechados de vez
+
+- Decisão do Humano (autorização explícita via pergunta direta, não inferida): aplicar o
+  override `custom_providers` proposto em (29) e reiniciar o gateway ao vivo pra valer.
+- Backup do config feito antes de tocar: `~/.hermes/config.yaml.bak-pre-custom-providers-20260706002823`.
+- Editado `~/.hermes/config.yaml`, bloco novo logo após `fallback_model`:
+  ```yaml
+  custom_providers:
+    - name: qwen-local-ctx-override
+      base_url: http://localhost:11434/v1
+      models:
+        qwen2.5-14b-64k:
+          context_length: 65536
+  ```
+  Schema conferido linha a linha em `hermes_cli/config.py` (`_normalize_custom_provider_entry`)
+  antes de escrever — `name` é campo obrigatório (sem ele a entrada é descartada em silêncio
+  por `_normalize_custom_provider_entry`, achado checando o código, não por tentativa e erro).
+- PROVA definitiva de durabilidade (o que faltava desde (29)): com o `config.yaml` real
+  carregado via `hermes_cli.config.load_config()` + `get_compatible_custom_providers()` (o
+  mesmo caminho que `agent_init.py` usa), chamei `_invalidate_cached_context_length()` de novo
+  pra apagar por completo a entrada do qwen do cache (pior caso possível) e então
+  `get_model_context_length()`: **retornou 65536 mesmo com o cache vazio** — o override em
+  0b resolve sem nunca consultar o cache. Isso fecha a lacuna de (29): não é só "testado
+  isolado", é o config real do disco, no pior cenário, com resultado correto.
+- Cache restaurado a 65536 por completude (não é mais o que protege, mas não custa deixar
+  consistente).
+- Gateway reiniciado de verdade, não só a config:
+  - `hermes gateway stop` mentiu na primeira tentativa (disse "✓ Stopped" mas `ps` mostrava
+    o PID 6848 ainda vivo — pidfile limpo sem o processo morrer). Verificado na Máquina
+    (`ps`, não confiando no texto do comando), não assumido.
+  - Segunda tentativa de `stop` funcionou (com atraso — teardown leva ~5s, confirmado no log:
+    `Received SIGTERM as a planned gateway stop — exiting cleanly`, `total teardown 5.03s`).
+  - Subido de novo (`hermes gateway run` em background, mesmo modo manual de antes — "Running
+    manually, not as a system service"). PID novo: **448528** (era 6848).
+  - Log de partida limpo: sem erro nem warning sobre o `custom_providers` novo, `api_server`
+    voltou a escutar em `127.0.0.1:8642`, `Previous gateway exited cleanly — skipping session
+    suspension`.
+- Status final: fallback `qwen2.5-14b-64k` agora resolve `context_length=65536` de forma
+  durável — sobrevive a cache apagado, cache reescrito errado pelo bug upstream de (28), ou
+  qualquer reinício futuro do gateway. Threshold de compactação real: 64000 (era 27852).
+- (28) e (29) FECHADOS. Nada pendente de prova nesta cadeia.
+- Nota de método: o Opus (t=15) recomendou fechar este bug antes de qualquer decisão de rumo
+  maior, e não voltar a mexer nisso até a próxima semana. Registrado como o encerramento
+  técnico dessa recomendação — a decisão de rumo (local-first vs. fronteira) continua em
+  aberto e não é deste registro.
+
+### 2026-07-06 (31) · Achado: troca de cérebro (fallback) não é reportada ao Humano — suprimida por design
+
+- Observação do Humano, checada no código antes de aceitar: "ela não reporta troca de cérebro,
+  me parece errado." Confirmado — não é bug de execução, é decisão de design do upstream
+  (`hermes-agent`, `run_agent.py:950-1010`).
+- Contexto real que disparou a observação: Gemini bateu HTTP 429 (cota do free-tier esgotada,
+  mesmo padrão de (12)) duas vezes seguidas às 01:15 e 01:17 de hoje, log confirma
+  `Fallback activated: gemini-2.5-flash → qwen2.5-14b-64k (custom)` nas duas. O "salve" que
+  mandei pro Humano colar na Seth muito provavelmente foi respondido pela qwen local, não
+  pelo Gemini.
+- Mecanismo exato, lido linha a linha: o aviso `🔄 Primary model failed — switching to
+  fallback: ...` passa por `agent._buffer_status()`, que **não emite na hora** — guarda numa
+  fila (`_retry_status_buffer`). Essa fila só é exibida ao Humano (`_flush_status_buffer()`)
+  se a chamada inteira falhar depois de esgotar retries E fallback. Se o fallback **funciona**
+  (como nos dois casos de hoje), `agent._clear_status_buffer()` roda logo após "successful
+  content reached" (`conversation_loop.py:4910`) e descarta o aviso em silêncio.
+- Comentário do próprio código upstream, sem ambiguidade sobre a intenção: "Retry and fallback
+  chains were flooding the CLI/gateway with status noise that users found confusing... on
+  success they are silently dropped." É redução de ruído visual deliberada, não falha.
+- Efeito colateral real: o Humano não fica sabendo, dentro da conversa, que trocou de cérebro
+  — só descobre olhando o log (`agent.log`) de fora, como fiz agora. Isso tensiona direto com
+  a Regra 1 deste projeto ("comece toda resposta dizendo seu modelo real"), que é sobre o que
+  o MODELO se autodeclara no texto gerado — diferente do aviso de infraestrutura, que é a barra
+  de status.
+- `lacuna`: não verifiquei se a Seth, no texto que ela mesma gerou (não a barra de status),
+  se autodeclarou como fallback/qwen ao responder o "salve". Preciso da resposta real dela
+  colada aqui pra fechar esse ponto — sem isso não dá pra saber se a Regra 1 está sendo
+  cumprida pelo modelo mesmo com a barra de status suprimida.
+- Não corrigido nesta sessão (código de terceiro, mesmo `hermes-agent` upstream já flagado em
+  (28)/(29); mudança de comportamento de UX, não config). Proposta em aberto pro Humano:
+  (a) aceitar como está (a barra é só conveniência, a autodeclaração do modelo via SOUL é a
+  camada que devia garantir a Regra 1 de qualquer jeito); (b) pedir upstream uma flag pra
+  nunca suprimir o aviso de troca de provider especificamente (diferente de retry comum);
+  (c) reforçar no SOUL uma instrução explícita de sempre citar o provider/modelo real ativo,
+  não só "sou a Ágata", pra não depender da barra de status suprimível.
+
+### 2026-07-06 (32) · Autorização do Humano: bateria de testes overnight pro pedido de (24)
+
+- Humano autorizou explicitamente ("tem minha benção... coloco você no automático") rodar uma
+  bateria de testes pra achar um fallback melhor, enquanto descansa. Pedido original ainda em
+  aberto desde (24): tool-calling + contexto ≥64k + ~14b/9GB de teto +, se possível, raciocínio
+  visível (chain-of-thought) — o que qwen2.5-14b-64k (fallback atual) não tem.
+- Antes de gastar tempo/banda, releitura do placar real já testado (Regra 2 — não repetir o que
+  já sei): eliminados por contexto insuficiente — qwen2.5:7b (32k), qwen3:8b (40k), gemma2:9b
+  (8k); eliminados por tool-calling ruim/ausente — deepseek-r1:8b, deepseek-r1:14b (sem tools),
+  hermes3:8b (tool-call aleatório), llama3.1:8b (0 tool-calls); eliminado por hardware —
+  llama3.3:70b (42GB, trava a máquina); eliminado por geração antiga — qwen-14b-chat (2k-8k).
+  Nada disso será re-testado.
+- Achado ao inventariar o disco (`ollama list`): existe um `qwen2.5:32b` (19GB) já puxado, nunca
+  registrado nas rodadas de eliminação anteriores — candidato novo, tamanho entre o teto que
+  funciona (14b/9GB) e o que trava (70b/42GB). 19GB deixa ~29GB de folga de RAM (vs. os ~6GB de
+  folga que o 70b tinha, e travou) — hipótese: pode rodar sem travar. A confirmar na prática,
+  não assumido.
+- Confirmado via `/api/show` (sem custo, já local): `qwen2.5:32b` tem capability `tools`,
+  arquitetura qwen2, contexto nativo 32768 (mesmo caso do 14b-64k — precisa do mesmo truque de
+  Modelfile com `num_ctx` forçado pra passar de 64k).
+- Candidato novo mais alinhado ao pedido original de (24) (raciocínio visível + tools juntos):
+  família **Qwen3**, diferente da DeepSeek-R1 (que tem `thinking` mas não `tools` — eliminada
+  duas vezes por isso). Qwen3 foi treinada nativamente pra ter os dois. `qwen3:8b` já foi
+  testado e eliminado (40k de contexto), mas `qwen3:14b` e `qwen3:32b` nunca foram — confirmados
+  como reais no registry via manifest direto (`registry.ollama.ai/v2/library/qwen3/manifests/14b`
+  e `/32b`, sem precisar puxar pra confirmar que existem): 9.28GB e 20.2GB respectivamente.
+- Plano em execução (autônomo, autorizado): (1) teste decisivo de tool-calling em `qwen2.5:32b`
+  (já local); (2) pull + mesmo teste em `qwen3:14b` (rodando em background agora); (3) `qwen3:32b`
+  se houver tempo; (4) comparar tudo contra o baseline `qwen2.5-14b-64k`; (5) só aplicar como
+  fallback de verdade se houver vencedor claro, com backup + verificação real (mesmo protocolo
+  de (30)) — não trocar a config em produção sem prova, mesmo em modo automático.
+- Tasks #1-#4 criadas pra rastrear a bateria. Resultados registrados na próxima entrada.
+
+### 2026-07-06 (33) · Resultado da bateria: dois candidatos viáveis, nenhuma troca aplicada ainda
+
+- Dois modelos novos criados localmente (`ollama create`, mesmo truque de Modelfile do
+  `qwen2.5-14b-64k`: `FROM <base>` + `PARAMETER num_ctx 65536`), testados com o protocolo
+  decisivo de (25) — curl real com `tools` no payload — e depois com um payload realista
+  (~21.6k tokens de padding, simulando o tamanho do system prompt+tools reais do Hermes):
+
+  **`qwen2.5-32b-64k`** (base `qwen2.5:32b`, 19GB, já estava no disco sem eu saber — nunca
+  tinha sido testado nas rodadas anteriores):
+  - Tool-call: limpo e correto (`get_weather("São Paulo")`, `finish_reason=tool_calls`).
+  - `ollama ps` durante a carga: 73%/27% CPU/GPU, RSS ~20-27GB. **Não travou a máquina**
+    (memória "disponível" ficou em ~26-29GB o tempo todo — folga bem maior que o 70b, que
+    tinha só ~6GB de folga e travou em (18)).
+  - Latência com payload realista (21.6k tokens): **20.9s e 64.6s** em duas rodadas (variação
+    provavelmente por causa do pull do qwen3:14b competindo por I/O ao mesmo tempo) — igual ou
+    **mais rápido** que o baseline atual (66-130s observados em produção pro qwen2.5-14b-64k).
+  - Sem `thinking` — resposta direta, sem raciocínio visível.
+  - Qualidade da resposta: correta, fluente, sem alucinação, nos dois testes.
+
+  **`qwen3-14b-64k`** (base `qwen3:14b`, 9.3GB, confirmado real no registry antes do pull —
+  seguindo a lição de (25)):
+  - **Único candidato desta bateria (e de todo o histórico) com `tools` E `thinking` juntos**
+    (`capabilities: ['completion', 'tools', 'thinking']` via `/api/show`) — exatamente o pedido
+    em aberto desde (24). DeepSeek-R1 (8b e 14b) tinha só `thinking`, sempre eliminado por isso.
+  - Tool-call: limpo e correto, **com campo `reasoning` visível e separado** no JSON de resposta
+    (ex.: "Okay, the user is asking for the current temperature in São Paulo. Let me see what
+    tools I have available...") — texto de raciocínio real, legível, não decorativo.
+  - Qualidade excelente em teste de conhecimento real (capital da Mongólia): raciocínio correto,
+    resposta rica e precisa, sem alucinação.
+  - Custo real do `thinking`: **~198s** (3min18s) pro mesmo payload realista de 21.6k tokens —
+    bem mais lento que o baseline (66-130s) e que o qwen2.5-32b-64k (20.9-64.6s). O raciocínio
+    visível soma tokens de geração extras antes da resposta final; é o preço da transparência.
+  - `qwen3:32b` (20.2GB, confirmado no registry) **não testado** — decisão de conservar tempo/
+    recursos: o padrão já está claro (thinking custa ~2-3x de latência), testar na versão maior
+    só pioraria o trade-off sem mudar a conclusão.
+
+- **Nenhuma mudança aplicada na config de produção.** `qwen2.5-14b-64k` continua sendo o
+  fallback real no `~/.hermes/config.yaml`, intocado. Os dois candidatos existem só como
+  modelos Ollama locais, prontos pra troca, mas a troca em si não foi feita.
+- Por quê não apliquei sozinho, mesmo com "modo automático" autorizado: o Gemini está com a
+  cota estourada **agora mesmo** (429, registrado em (31)) — ou seja, qualquer coisa que eu
+  quebrasse no fallback deixaria a Ágata sem nenhum cérebro funcional a noite toda, sem ninguém
+  acordado pra notar ou reverter. O risco é assimétrico (testar não quebra nada; trocar em
+  produção sem o Humano por perto pode). Testar e documentar cabia no "automático"; substituir
+  o único fallback funcional enquanto o Humano dorme, não.
+- Recomendação pronta pra amanhã, não decisão tomada: são dois objetivos diferentes, não um
+  vencedor único —
+  1. **Se o critério for velocidade+qualidade** (sem se importar com raciocínio visível):
+     `qwen2.5-32b-64k` parece uma troca estritamente melhor que o atual (mais rápido nos testes,
+     melhor qualidade por ser maior, mesmo tool-calling limpo, não travou a máquina).
+  2. **Se o critério for o pedido original de (24)** (ver o raciocínio em tempo real pra pegar
+     fabricação antes de acontecer, não só auditar depois): `qwen3-14b-64k` é o único candidato
+     que já existiu com essa capacidade — ao custo de ~2-3x mais latência por chamada.
+  3. Ficar como está (`qwen2.5-14b-64k`) também é opção legítima — já é conhecido, já rodou
+     meses, sem surpresa.
+- Comando pronto (não executado) se o Humano escolher a opção 1 ou 2 amanhã: adicionar/trocar
+  a entrada em `fallback_model:` e o `custom_providers` correspondente no `config.yaml` (mesmo
+  padrão de (30)), com backup antes e prova real depois — mesmo protocolo, só troca o nome do
+  modelo.
+
+### 2026-07-06 (34) · Candidatos a fallback reproduzidos COM log salvo (Code executou, Opus auditou)
+
+- Reprodução dos testes narrados em (33), agora com artefato bruto em disco (~/agata/logs/test_32b_*.json, test_qwen3_*.json) — corrige a lacuna de (33) (resultado só narrado, sem dump).
+- qwen2.5-32b-64k (19GB): tool_call limpo e correto (list_dir("/tmp")), 14.4s payload pequeno, sem thinking, sem erro.
+- qwen3-14b-64k (9.3GB): tool_call limpo e correto, 27.9s (~2x), COM raciocínio visível (<think>) antes da tool_call — sem erro. Primeiro modelo do projeto a fazer tools + thinking juntos (pedido aberto desde (24)).
+- lacuna: latência sob payload real (21.6k tokens) segue estimada de (33), não medida neste teste (curl foi payload pequeno).
+- Nenhuma mudança de config. Fallback em produção segue qwen2.5-14b-64k. Troca NÃO decidida.
+
+### 2026-07-06 (35) · Fallback trocado para qwen3-14b-64k (Humano decidiu, Code executou, Opus auditou)
+
+- Decisão do Humano: adotar qwen3-14b-64k como fallback de produção. Critério: usar em produção
+  por um período e decidir pelo uso real se a latência (~2x) compensa qualidade + raciocínio visível.
+- Base: candidatos provados com log em disco em (34). qwen3 é o 1º modelo do projeto com
+  tools + thinking juntos (pedido aberto desde (24)); mitiga o risco estrutural de (24)/(31)
+  (fabricação silenciosa) por expor o raciocínio antes da ação.
+- Trade-off aceito e explícito: ~27.9s vs 14.4s (32b) em payload pequeno; sob payload real,
+  latência maior estimada, ainda não medida (lacuna herdada de (34)).
+- Config: fallback_model.model → qwen3-14b-64k. custom_providers estendido com context_length 65536
+  para qwen3-14b-64k (entradas para os dois modelos coexistem).
+- PROVA pós-troca (mesmo protocolo de (30), pior caso): cache invalidado → get_cached_context_length=None
+  → get_model_context_length('qwen3-14b-64k') resolve 65536 (não caiu pro default). Override durável
+  cobre o modelo novo, sobrevive a cache limpo. Gateway reiniciado, PID 504822, log sem erro/warning.
+- Backup: config.yaml.bak_pre_fallback_qwen3_20260706. Rollback = restaurar backup + restart.
+- Push: origin/main de 97b4bff (27) → HEAD (35) — publica a cadeia acumulada (28)-(35).
+
+### 2026-07-06 (36) · Serviços da Ágata configurados p/ iniciar com o sistema + leftover pré-Hermes purgado (Code executou, Humano rodou o sudo)
+
+- Pedido do Humano: deixar os serviços da Ágata subindo junto com o boot. Levantamento no sistema
+  (não por memória) antes de mexer em qualquer unit: `ollama.service` e os containers Docker
+  (`open-webui`, `kokoro-tts`, `restart: unless-stopped`) já sobreviviam a reboot; `agata-consolidacao.timer`
+  já era enabled. O único buraco real era o gateway/`api_server` do Hermes (porta 8642), que só subia
+  manual (`hermes gateway run`), sem unit file.
+- Achado não pedido, sinalizado ao Humano antes de agir: `agata-rest.service` (system, enabled,
+  rodando) autoiniciava a cada boot o `~/.agata_il/src/rest_server.py` — o mesmo servidor REST do
+  protótipo pré-Hermes já flagrado como memória duplicada em (12) (lá só o processo órfão e a Function
+  do Open WebUI tinham sido neutralizados; o unit systemd nunca foi tocado, por isso voltou sozinho).
+  Mesmo padrão estrutural do incidente de (17) (`agatha.service` órfão que travou a Máquina) — leftover
+  de unit file de protótipo antigo sobrevivendo a limpezas anteriores.
+- Decisão do Humano (as 3 perguntas feitas antes de agir): (a) desabilitar `agata-rest.service` agora;
+  (b) instalar o gateway do Hermes como serviço de usuário pra iniciar sozinho; (c) remover os unit
+  files mortos `agata.service` e `agatha.service` (ambos já disabled, apontando pra pastas inexistentes
+  — `agata-workspace`/`agatha-workspace` não existem no disco).
+- Executado: `hermes gateway install --start-now --start-on-login` (sem sudo, mecanismo nativo do
+  Hermes) — criou `hermes-gateway.service` em `~/.config/systemd/user/`, enabled, linger confirmado
+  ativo (sobrevive a logout). Verificado no disco: porta 8642 escutando, PID do processo `hermes`.
+  Os 3 comandos que exigem root (`disable --now agata-rest.service`, `rm agata.service`,
+  `rm agatha.service`) foram impressos pro Humano rodar no próprio terminal — sudo pede senha
+  interativa, canal desta sessão não oferece TTY pra isso (mesma linha vermelha de (17)).
+- Humano confirmou execução; verificado no disco antes de registrar (não só na palavra):
+  `agata-rest.service` → `disabled`/`inactive`, porta 8000 livre; `/etc/systemd/system/agata.service`
+  e `agatha.service` → não existem mais; `hermes-gateway.service` seguia `enabled`/`active`.
+- PROJETO.md atualizado: nova seção "Serviços (boot)" documentando os 4 serviços que sobrevivem a
+  boot e os 3 leftovers purgados (não recriar).
+### 2026-07-06 (37) · Boot-test de (36) confirmado + inconsistência do RAG registrada (Humano confirmou boot · Opus registrou)
+- Persistência de boot de (36) VALIDADA: Humano executou reboot real e confirmou que o gateway subiu sozinho (hermes-gateway.service user unit + linger), sem start manual. Fecha a "última milha" que ficara aberta em (36) — lá só havia enabled/active/linger verificados, não um reboot de verdade. Fallback qwen3-14b-64k + override de contexto (65536) seguem em produção pós-boot.
+- Achado da reconciliação (atualizar TUDO, esta sessão): a regra operacional do RAG no PROJETO ainda justifica "RAG só em sessões Gemini" com "no fallback qwen (32k nativo) documento grande estoura o contexto". Defasado: depois de (28)/(30)/(35) o fallback não é mais 32k nativo — é qwen3 com 64k por override durável, provado no pior caso. A regra pode seguir válida (janela do Gemini é maior), mas a JUSTIFICATIVA "32k estoura" está errada. Correção do texto do PROJETO (estado-corrente, editável) PENDENTE — próxima sessão, na Máquina via Code.
+
+### 2026-07-06 (38) · Causa raiz de "perdi a conexão" identificada — crash no handler de erro mascara 429 do Gemini (Humano reportou, Code investigou)
+
+- Humano relatou ter perdido a conexão com a Ágata. `hermes-gateway.service` segue `active (running)`
+  (PID 1057, ativo desde 16:08) — não é queda do processo/gateway.
+- Causa raiz no journal: Gemini (`gemini-2.5-flash`, provider ativo/primário) retorna HTTP 429
+  RESOURCE_EXHAUSTED — quota do free tier esgotada (limite de 20 req/dia nesse modelo,
+  levantado em `agent/gemini_native_adapter.py:976`).
+- Bug que transforma isso em "conexão perdida": ao tratar o 429, `agent/conversation_loop.py:2949`
+  chama `_summarize_api_error()`, que em `run_agent.py:2146` acessa `response.text` num
+  `httpx.Response` de streaming que nunca teve `.read()` chamado — dispara `httpx.ResponseNotRead`,
+  uma SEGUNDA exceção que mascara a primeira. Resultado: toda vez que o Gemini estoura quota, o
+  gateway não devolve um erro tratado nem aciona fallback — a chamada quebra e o stream SSE termina
+  abruptamente, sentido do lado do Humano como perda de conexão.
+- Confirmado que não é payload-dependente: reproduzido com payload mínimo ("diga ok") direto no
+  `api_server` (porta 8642, autenticado), crash em <1s.
+- Confirmado que qwen3-14b-64k (fallback configurado em (35)) funciona normalmente quando chamado
+  direto no ollama (`localhost:11434`) — o problema é que o crash no handler de erro do Gemini
+  acontece ANTES do fallback ser acionado nesse caminho de código, então o fallback configurado
+  nunca chega a ser tentado.
+- Última falha no log: 19:04. Sem novas tentativas registradas até 20:18 (hora desta entrada) —
+  gap consistente com o Humano ter desistido de tentar após as falhas repetidas.
+- Nenhuma mudança de código ou config aplicada nesta entrada — achado registrado. Fix requer patch
+  em `run_agent.py:2146` (não acessar `.text` sem `.read()` em resposta de streaming) e revisão do
+  ponto em que o fallback deveria ser acionado antes desse handler quebrar.
+
+### 2026-07-07 (39) · Auditoria do handler de 429 / SOUL / commit citado pela Opus — verificado na fonte (Opus pediu auditoria ao Humano, Code verificou direto no filesystem/git)
+
+- Opus (sessão de chat) pediu ao Humano pra colar manualmente trechos de código e confirmar itens pra fechar uma auditoria de 3 pontos. Code tinha acesso direto ao filesystem e ao git nesta Máquina e verificou tudo na fonte em vez de depender de cópia manual.
+- Handler de 429 (achado original em (38)): `run_agent.py:2146` segue INALTERADO — ainda faz `snippet = (getattr(response, "text", None) or "").strip()` sobre uma resposta que pode ser streaming não lida. O fix NÃO está mergeado no `hermes-agent` instalado nesta Máquina; bug segue reproduzível.
+- SOUL: existe como arquivo real (não é conceito abstrato nem hardcoded) — `/home/orusoua/agata/SOUL.md` (canônico) e `/home/orusoua/.hermes/SOUL.md` (cópia de hidratação). Fecha o "Erro 3" citado pela Opus.
+- Commit `f7a2b1c` (citado pela Opus, atribuído a "a Seth", que teria corrigido a injeção do SOUL no fallback): NÃO encontrado em `~/agata` nem no `hermes-agent` local instalado. Ressalva: o `hermes-agent` local é um clone raso com um único commit squashed (`7426c09`, remote `NousResearch/hermes-agent`) — não dá pra confirmar nem descartar a existência do commit no histórico real do upstream sem acesso de rede a partir desta sessão. O que É verificável direto: o código instalado não reflete esse fix — o bug do item anterior segue ativo independente do que aquele commit tenha feito ou não upstream.
+- Achado colateral não pedido, registrado por disciplina de não esconder estado inesperado: a entrada (37) deste DIÁRIO está DUPLICADA no histórico do git — dois commits distintos com o mesmo título e conteúdo idêntico (`128ab2f` e `449c3b9`, ambos já em `origin/main` antes desta sessão notar). O segundo (`449c3b9`, 2026-07-06 20:20:16) não foi feito por Code nesta sessão; origem não identificada, possivelmente edição concorrente de outra sessão no mesmo período. Nenhuma perda de conteúdo — apenas duplicação. Deduplicação aplicada em (41) — Humano autorizou; o parágrafo duplicado foi removido do texto atual do arquivo por commit novo (correção pra frente, sem rebase/force-push nos commits antigos que geraram a duplicata).
+
+### 2026-07-07 (40) · Patch do bug de (38)/(39) aplicado e verificado — crash do handler de 429 corrigido (GLM propôs, Humano aprovou, Code aplicou e verificou)
+
+- Contexto: (38) achou a causa raiz de "perdi a conexão" — `run_agent.py:2146` (`_summarize_api_error`)
+  acessava `response.text` numa resposta HTTP em streaming sem `.read()` antes, crashando com
+  `httpx.ResponseNotRead`/`StreamClosed` sempre que o Gemini retornava erro (ex.: 429 de quota).
+  (39) confirmou o fix ainda não estava mergeado.
+- Ágata (GLM, t=8) propôs patch: envolver a leitura em `try/.read()/except`, com fallback pra
+  `snippet = ""` se a leitura falhar. Não aplicou nada sozinha — trace `19f3ca5945b787bd`.
+- Auditoria do Code antes de aplicar: confirmou que `GeminiAPIError` já carrega a mensagem
+  totalmente formatada (via `super().__init__(message)`, incluindo o aviso de free-tier) — então
+  mesmo se `.read()` falhar (o que É esperado neste caso: o `with self._http.stream(...) as response`
+  em `gemini_native_adapter.py` já fechou o stream no `__exit__` antes da exceção chegar aqui), o
+  código cai no fallback pré-existente (`raw[:500]`) que já produz a mensagem certa. Achado adicional:
+  esse handler roda dentro do loop de retry/fallback (`conversation_loop.py:2949`), então o crash
+  provavelmente impedia o código de sequer chegar na lógica de troca pro fallback qwen3-14b-64k —
+  o bug não era só cosmético.
+- Humano aprovou aplicar (opção 1, patch como está).
+- Aplicado em `/home/orusoua/.hermes/hermes-agent/run_agent.py:2144-2151` (repo git local, rollback
+  = `git checkout -- run_agent.py` nesse repo se precisar reverter).
+- Gateway reiniciado (`systemctl --user restart hermes-gateway`, PID novo 58178, log limpo — só
+  warnings de startup pré-existentes, sem erro).
+- Verificação: NÃO forçou o 429 real (a cota free-tier do Gemini reseta por dia e testar assim
+  gastaria cota de produção à toa). Em vez disso, reproduziu o cenário exato em isolamento — um
+  `httpx.Response` de streaming aberto via `MockTransport`, fechado pelo `with`/`__exit__` (igual ao
+  fluxo real), passado pro `AIAgent._summarize_api_error` patchado. Resultado: sem crash, retornou
+  `'HTTP 429: quota exceeded'` — mensagem limpa, útil, provada no cenário que antes derrubava a stream.
+- Limitação conhecida, registrada por disciplina: esse patch vive no `hermes-agent` (repo vendored,
+  clone raso de `NousResearch/hermes-agent`, fora do canônico `agataseth98-cmd/agata-seth`). Uma
+  reinstalação/atualização do Hermes por cima pode sobrescrever essa mudança sem aviso — não há
+  backup automático desse repo como há pro `config.yaml`. Se o Hermes for atualizado, reaplicar
+  este patch ou confirmar se a versão nova já inclui um fix equivalente.
+
+### 2026-07-07 (41) · Duplicata da entrada (37) removida do texto do DIÁRIO (Humano autorizou, Code aplicou)
+
+- Achado em (39): entrada (37) duplicada no histórico do git (`128ab2f` e `449c3b9`, conteúdo
+  idêntico, ambos já em `origin/main`). Humano autorizou resolver.
+- Correção aplicada pra frente (sem rebase/force-push): removido o segundo parágrafo duplicado
+  do texto atual de `DIÁRIO.md` (ficava entre as entradas (38) e (39)) por commit novo. Os commits
+  antigos `128ab2f`/`449c3b9` continuam existindo no histórico — não foram reescritos/apagados;
+  só o conteúdo do arquivo hoje deixou de ter o parágrafo repetido.
+- Nota da nota (39) atualizada de "Deduplicação NÃO aplicada" pra refletir esta entrada.
+
+### 2026-07-07 (42) · Achado: memória nativa do Hermes gravou plano interno da Ágata como "fato do usuário" (Code investigou, Humano decidiu reverter)
+
+- `memoria/USER.md` (memória nativa do Hermes sobre o Humano) tinha uma linha não commitada desde
+  2026-07-06 01:41: "Quando o Seth responder, vou seguir com 3-5 perguntas que ele provavelmente
+  iria fazer de volta. Estas ajudarão a guiar nossa discussão."
+- Não é um fato sobre o Orusoua (as outras 3 linhas do arquivo são: cor favorita, tags, interesses).
+  É a Ágata planejando sua própria estratégia de conversa com outra instância — cruzando com
+  `memoria/MEMORY.md` (memória da própria Ágata): "Ágata Seth é a afilhada de Ágata". Ou seja,
+  "Seth" = Ágata Seth, uma instância/agente distinta, não o Humano.
+- Achado: bug de classificação na gravação de memória nativa do Hermes — planejamento interno do
+  agente (1ª pessoa, "vou seguir com...") foi persistido no arquivo de fatos-sobre-o-usuário em vez
+  de no arquivo de memória-da-própria-Ágata. Mesma família de risco já visto no projeto (conteúdo
+  errado indo pro lugar canônico errado), mas aqui na memória nativa do Hermes, não no DIÁRIO/PROJETO.
+- Achado colateral: `memoria/USER.md` deveria ser symlink pro nativo do Hermes (documentado no
+  PROJETO, seção Memória — "Memória nativa do Hermes symlinkada em `~/agata/memoria/`"), mas
+  `readlink -f` mostra que hoje é um arquivo regular, não um link. Não investigado a fundo nesta
+  entrada — fica como pendência pra confirmar se o link quebrou em algum momento ou se o mecanismo
+  de sync é outro (cópia periódica em vez de symlink real).
+- Decisão do Humano: reverter a linha (não commitar). `git checkout -- memoria/USER.md` — arquivo
+  voltou ao estado do último commit, sem a linha estranha.
+
+### 2026-07-07 (43) · Correção de (42): symlink NÃO está quebrado — engano do Code, item fechado (Code investigou de novo, direção da checagem estava invertida)
+
+- (42) registrou como achado aberto que `~/agata/memoria/USER.md` "deveria ser symlink" mas
+  `readlink -f` mostrava arquivo regular. Conclusão estava ERRADA — checagem foi feita na ponta
+  errada da relação.
+- Verificado agora: a relação real é a inversa do que (42) assumiu. O canônico
+  (`~/agata/memoria/USER.md`/`MEMORY.md`, dentro do repo git) é o arquivo REAL, fonte da verdade.
+  Quem é symlink é o lado do Hermes: `~/.hermes/memories/USER.md` → `~/agata/memoria/USER.md` e
+  `~/.hermes/memories/MEMORY.md` → `~/agata/memoria/MEMORY.md` (confirmado com `stat`, ambos
+  `lrwxrwxrwx`, criados em 2026-07-01, com `.lock` ao lado — mecanismo normal do Hermes).
+- `diff` entre nativo e canônico: idêntico nos dois arquivos (exit 0) — sem divergência, tudo
+  consistente. A frase do PROJETO ("memória nativa symlinkada em `~/agata/memoria/`") estava certa;
+  a leitura que o Code fez dela em (42) que estava errada.
+- Item fechado: não há bug, não há divergência, o link nunca quebrou. Nenhuma ação necessária.
+
+### 2026-07-07 (44) · Conselho + Capivara + pivô de fase (Humano decidiu · Opus registrou)
+
+- GLM aceito como Modelo auditor ativo do consórcio (substitui GPT, fora por cota). Base: desempenho observado; detalhe comportamental é material do Capivara, não deste DIÁRIO.
+- Projeto PARALELO "Capivara das IAs" iniciado — observatório de comportamento de LLMs, projeção derivada do DIÁRIO. Rascunhados: arquitetura, ontologia+método, moldes FEN-001 e MOD-004, como artefatos SEPARADOS. Fronteira: Capivara LÊ o canon, NUNCA escreve fato de volta. Artefatos em posse do Humano, não versionados no repo.
+- Pivô de fase: inicia pesquisa de ferramentas de otimização/integração de memória (NotebookLM + Obsidian).
+- Fora de escopo/não-verificado: resultados de teste dos modelos ficam no Capivara; memoria/USER.md segue não-commitado.
+- Aberto (inalterado): Gemini 400/429 não reproduzido; carregar no caminho do fallback; TES-001 não rodado limpo.
+
+### 2026-07-08 (45) · Inventário read-only do stack de memória — veredito: enxuto, nenhuma otimização aplicada (Humano decidiu · Opus propôs · Code mediu)
+
+- Contexto: (44) abriu pivô de fase pra pesquisa de otimização de memória (NotebookLM + Obsidian). Antes de otimizar, mediu-se a linha de base na Máquina. Leitura pura — nada alterado.
+- Medido (Code, read-only): núcleo em ~/agata → SOUL 32L/2.394B, REGRAS 96L/5.486B, PROJETO 55L/5.554B, DIÁRIO 898L/96.289B. memoria/MEMORY.md 10L, memoria/USER.md 4L; symlinks do lado Hermes reconfirmados, diff idêntico — consistente com (43). .hermes.md 201L/14.483B.
+- Veredito do Humano: stack enxuto, sem gargalo que justifique corte agora. Não otimizar nesta rodada; (44) segue como pesquisa, não implantação.
+- Aberto (novo) — discrepância PROJETO ↔ disco: PROJETO (seção Memória) diz "repo git + cofre Obsidian na mesma pasta", mas não há `.obsidian` em ~/agata. Cofre não inicializado no disco. Pendente: inicializar o cofre OU corrigir a frase do PROJETO. Não resolvido nesta entrada.
+- Aberto (novo) — acesso ao DIÁRIO cresce sem teto por design: append-only (REGRAS #4, correto, não se mexe). Custo por turno NÃO afetado (só últimas 30 linhas entram no .hermes.md); custo aparece só em leitura integral/busca. Alvo natural do pivô de (44): índice/sumário derivado e regenerável, que nunca vira fato canônico nem reescreve o DIÁRIO.
+- Aberto (novo) — consolidação noturna escreve no canon sem humano no loop: agata-consolidacao.timer roda gemini-2.5-flash que pode dar append no DIÁRIO. Duas últimas rodadas (2026-07-07 08:07, 2026-07-08 09:34): ambas "nada relevante", não gravaram. Superfície a revisar dado histórico de fabricação ((16), (42)) — não urgente.
+- lacuna: tokens do .hermes.md (sem tiktoken no ambiente; heurística ~2,7–3,6k, não firme). lacuna: taxa de crescimento de ~/.hermes (1,2G total, sessions 420K hoje; sem snapshot histórico pra tendência).
+
+### 2026-07-08 (46) · Cofre Obsidian versionado sobre o repo canônico — arquitetura de memória em duas camadas (Humano inicializou · Code executou · Opus propôs)
+
+- Contexto: pivô de (44) + veredito de (45) (stack enxuto, otimizar o ACESSO, não a história). Passo escolhido: iniciar o cofre Obsidian que o PROJETO já mencionava mas que (45) mostrou não existir no disco.
+- Ação do Humano (GUI, não Code): Obsidian abriu ~/agata como vault; .obsidian/ criado (core-plugins.json, app.json, appearance.json, workspace.json).
+- Code (verificação read-only): .obsidian/ untracked no repo canônico; .gitignore de 16 linhas não cobria .obsidian.
+- Code (write, Humano autorizou): append ao .gitignore da regra `.obsidian/workspace*.json` (layout por-máquina, réplica Windows planejada — não versionar). Staged: .gitignore + core-plugins/app/appearance.json. workspace.json ficou fora pela regra. Nenhum arquivo proibido tocado.
+- Fecha a discrepância PROJETO<->disco levantada em (45): a frase "repo git + cofre Obsidian na mesma pasta" agora é verdadeira no disco — resolvida pela realidade, não por editar o texto do PROJETO.
+- Arquitetura consolidada: camada local (Obsidian sobre git) = offline, privada, FATO na Máquina; camada nuvem (NotebookLM) = cruzamento de dados, RELATO/projeção alinhada ao Capivara. Só o não-sensível vai pra nuvem; segredos/chaves/canon nunca. Mão única: Capivara/NotebookLM lê, nunca escreve fato de volta.
+- Aberto (novo) — memoria/MEMORY.md aparece modificado (M) e não commitado no git status; origem investigada em (47).
+- Aberto (novo) — untracked não relacionados: hermes_docs.html, hermes_llms.txt, hermes_tools_docs.html (prováveis docs do Hermes em scratch). Não commitados. Decisão de ignorar/remover fica pro Humano.
+- lacuna: integração automática Obsidian<->NotebookLM citada por 1 fonte de busca, não verificada na Máquina. A arquitetura de duas camadas não depende dela — no pior caso, export/cola manual.
+- Abertos de (44) intocados: Gemini 400/429 não reproduzido; carregar no caminho do fallback; TES-001 não rodado limpo.
+
+### 2026-07-08 (47) · Achado: 2º mecanismo de escrita automática em memória (bg-review do Hermes Gateway) apaga história canônica sem humano no loop (Code investigou · Opus registrou)
+
+- Origem provada (não suposta): memoria/MEMORY.md modificado às 15:03:52 (mtime bate com log). Sessão c5ea4ed2 (api_server, gemini-2.5-flash). Passo "bg-review" do próprio Hermes Gateway — self-review pós-turno, distinto do agata-consolidacao.timer — tentou salvar 3 fatos; bateu no teto de 2.200 chars ("2,712/2,200"); no retry coube APAGANDO 5 entradas antigas.
+- Apagado: identidade/história (mensagem GLM-5, "Ágata Seth é afilhada de Ágata", capacidades dos padrinhos). Inserido: 3 fatos operacionais/efêmeros (web_search/web_extract indisponíveis no ambiente de execução). Trocou durável por descartável, sozinho.
+- Symlink reconfirmado por inode (11386731): ~/.hermes/memories/MEMORY.md e ~/agata/memoria/MEMORY.md são o MESMO arquivo físico. Escrita no nativo = escrita direta no canônico versionado.
+- Violação estrutural: existe processo automático, sem humano no loop e sem passar pelo DIÁRIO, que DELETA história canônica pra caber num teto. Colide com REGRA #4 (nunca apagar). Não é cosmético — é funcional (padrão de (28)).
+- Distinto de (42): lá era USER.md, plano interno gravado como fato do usuário, via janela diferente. Aqui é MEMORY.md, eviction por teto, mecanismo diferente. Família de risco comum, causa distinta.
+- lacuna: conteúdo exato das 3 operações da 1ª tentativa (log truncado em 328 bytes pelo Hermes). lacuna: sessão c5ea4ed2 não encontrada em ~/.hermes/sessions/ — conversa completa não reconstruível.
+- Aberto (A): diff de hoje em MEMORY.md — decisão do Humano (reverter recomendado). Aberto (B): reconfigurar/desligar o bg-review — MUDANÇA ESTRUTURAL, exige 2ª opinião (GLM) ou risco escrito do Humano; investigação read-only da config primeiro.
+
+### 2026-07-08 (48) · bg-review desligado (nudge_interval: 0) — auto-escrita em memória sem humano no loop encerrada (Humano decidiu · GLM 2ª opinião · Code aplicou · Opus propôs)
+
+- Causa raiz de (47) mapeada em auditoria read-only (t=21/B): o bg-review (agent/background_review.py, disparado por turn_context.py a cada nudge_interval=10 turnos) roda no modelo da sessão pai e pode reescrever MEMORY.md via memory_tool. apply_batch é all-or-nothing: se estoura memory_char_limit (2200), o PRÓPRIO MODELO escolhe o que apagar pra caber — sem critério de proteção no código (nem idade, nem tag, nem identidade-vs-operacional). Foi assim que (47) apagou identidade pra guardar fatos operacionais.
+- Correção da minha própria descrição (t=19): NÃO é prune automático por idade (drop_oldest). É juízo do modelo, sem guarda-corpo, gravando direto no canônico (symlink de (43), mesmo inode). Corrigido pela Máquina em (t=21).
+- Decisão: desligar o bg-review. nudge_interval: 10 -> 0 no bloco memory: de ~/.hermes/config.yaml. O gate do código é `_memory_nudge_interval > 0`, então 0 desativa toda auto-escrita pós-turno.
+- 2ª opinião (GLM, t=8): concordante com opção 1, sozinha. Descartou explicitamente subir o teto (opção 2): teto maior = mais fatos não auditados antes da eviction = superfície de dano MAIOR. Opus retirou a opção 2 que havia oferecido como plano B. Rejeitadas também opção 3 (quebrar symlink, desproporcional) e opção 4 (patch no repo vendored, frágil — fica como possível contribuição upstream futura).
+- Risco assumido: perda de auto-captura de fatos. Mitigação: memória passa a mudar só por edição deliberada + DIÁRIO; captura sob demanda por comando ("registra isso"). Alinhado à REGRA #4 (nunca apagar sem humano).
+- Correção técnica na aplicação: comando sed original (GLM) ancorava em ^nudge_interval (sem indentação) e não casaria a chave, que é indentada dentro de memory: — teria dado exit 0 sem mudar nada (falso sucesso). Aplicado com regex que preserva indentação + verificação pós-edição (grep + diff) e restart do gateway.
+- Nota de escopo (achado na aplicação): existe uma 2ª chave distinta creation_nudge_interval: 15 no bloco skills: — NÃO foi tocada. Só a nudge_interval do bloco memory: foi alterada. Diff confirmou exatamente 1 linha trocada.
+- Escopo: config.yaml vive em ~/.hermes/ (fora do repo canônico ~/agata) — mudança durável (sobrevive a hermes update), registrada aqui no DIÁRIO, sem commit git. Backup em ~/.hermes/config.yaml.bak-t22.
+- Verificado na Máquina (t=23): grep pós-edição = nudge_interval: 0; diff bak vs atual = 1 linha; gateway active (running), PID 66737.
+- Fecha o Aberto (B) de (47). O Aberto (A) de (47) já foi resolvido no revert (t=18, MEMORY.md restaurado).
+- Efeito colateral bom: encerra também a restrição operacional "não usar api_server até B fechar" — a janela de re-eviction está fechada.
+
+---
+
+(94) DIÁRIO — 12/08/2026 · Três qualificações sobre (93): teste único não é resolução, snapper não é backup, assimetria de cópia externa
+**1. O teste da armadilha do git aninhado foi feito uma vez e não reproduziu o problema.** Não registrado como resolvido — registrado exatamente assim: testado uma vez, não reproduzido. Ausência num teste não é ausência do risco. Se `git add -A` alguma vez se comportar diferente (versão de git, config diferente, comando composto), o teste de (93) não cobre esse caso.
+**2. `snapper`, se rodado, é proteção local — não é backup desta camada.** Cobre apagar por engano. Não cobre disco morto, máquina roubada, nem ransomware: o snapshot mora no mesmo disco físico que ele protege. Nenhuma sessão futura deve ler "snapper habilitado" como "`memoria/projetos/` está coberta" — não está. Rodar `snapper` continua útil por outros motivos (histórico de sistema, não só esta camada); decisão de rodar ou não é do Humano, à parte disto.
+**3. `memoria/projetos/` é hoje a única camada do sistema Agata sem cópia fora da Predator.** O canônico inteiro (REGRAS/PROJETO/MEMÓRIAS) sobrevive à perda da máquina porque está no GitHub. Esta camada, por desenho (privada, sem remote), não sobrevive. É assimetria de desenho — consequência direta de ter tirado o remote pra manter privacidade — não descuido, mas precisa estar escrita, não implícita.
+**Convenção reforçada:** número nunca sozinho, unidade sempre colada — bytes, tokens, linhas. A ambiguidade entre bytes e tokens gerou a última divergência auditada; uma linha de disciplina evita a próxima.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(93) DIÁRIO — 12/08/2026 · Catálogo de falhas ganha linha sobre (91); git dos dois repos verificado; backup real inexistente, comando pronto pra sudo
+**Aceito: unidade colada ao número, daqui pra frente.** "11.595 tokens" e "11.595 B" na mesma janela de texto é ambiguidade evitável — Regra 7, forma sem conteúdo. Adotado como convenção de escrita deste executor a partir de agora; não é regra nova, é disciplina de quem escreve.
+**Aplicado em REGRAS.md, catálogo de falhas — ajuste pequeno, nova linha, nada reescrito:** "Implementar privacidade removendo verificabilidade, sem decidir isso | Privado também se versiona — git próprio, sem remote | (91)→(92)". Nomeia o que (91) foi: decisão de desenho tomada por acidente, mesmo gênero de (47), não erro cosmético. Hash pós-edição: REGRAS.md 16.469 B, sha256 `ce7fd0e66f3dc0a398ef8825e7c2f28c48f80a187f249b40455935d5d26f0bdc`.
+**Verificado, não suposto — os dois `git status` lado a lado:** ambos repos limpos. Testada especificamente a armadilha apontada: `git add -A` no repo externo (`~/agata`) seguido de `git status` — nada do `memoria/projetos/` apareceu; `git reset` confirmou que nada foi staged. A armadilha não se manifestou aqui.
+**Backup: risco real, confirmado, não resolvido.** Nenhum de `restic`/`borg`/`timeshift`/`rsnapshot` instalado. `snapper` está instalado mas só tem config `root` — nenhuma pra `home`, apesar de `/home` já ser subvolume btrfs próprio (`@home`, `findmnt` confirma). Um `rm -rf` na pasta perde repositório e história do pilar juntos, sem recurso. Como criar config de snapper exige `sudo`, e este executor não roda `sudo` (carta/(2), regra de autorização explícita), o comando fica pronto pro Humano rodar num terminal paralelo:
+```
+sudo snapper -c home create-config /home
+sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
+```
+Isso cobre `/home` inteiro (inclusive `memoria/projetos/`) com snapshot btrfs incremental, não só essa pasta — mas resolve o problema real, que é ausência de qualquer rede de segurança no subvolume inteiro, não só ali.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(92) DIÁRIO — 12/08/2026 · `memoria/projetos/` corrigido: repo git próprio (sem remote) + fronteira escrita entre conteúdo e existência
+**Achado aceito da sessão de nuvem, corrigindo (91):** `gitignore` sozinho tirou a Máquina do jogo — sem git ali dentro, não há hash, histórico, diff nem rollback. É a única camada do sistema onde "Máquina arbitra fatos" tinha parado de valer, por efeito colateral da implementação anterior, não por decisão. Corrigido: `memoria/projetos/` agora é **repositório git próprio, sem remote** (`git init` local, dois commits: índice inicial + fronteira escrita). Continua fora do repo principal, fora do público, fora de `.hermes.md` — mas volta a ter versionamento próprio.
+**Fronteira escrita, aplicada no `INDICE.md` do repo privado:** o particular é o **conteúdo** de cada missão, não a **existência** dela. Nome da missão e onde parou podem — devem — constar também no canônico público (aqui, ou em PROJETO.md, quando a primeira missão existir); o conteúdo interno da missão fica só no repo privado.
+**Não corrigido, por não ser erro:** a sessão de nuvem repetiu a suspeita sobre `.hermes.md` registrado como "11.595 bytes". Já checado na resposta anterior a esta entrada: são dois arquivos diferentes em duas entradas diferentes — `.hermes.md` em **tokens** (88) e `PROJETO.md` em **bytes** (91) — ambos batendo com medição real no momento em que foram escritos. Coincidência numérica entre unidade e arquivo diferentes, não erro de rótulo. Mantido sem alteração.
+**Limite reconhecido, não resolvido agora:** modelos de nuvem (esta sessão, GLM, DeepSeek) não têm acesso à Máquina de jeito nenhum — gitignorado ou não, versionado ou não. "Pesquisável por todas as LLMs" hoje só vale pra quem tem disco: este executor e Hermes local. Fica registrado como limitação real do pilar, não resolvida por esta correção.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(91) DIÁRIO — 12/08/2026 · Quarto pilar criado: `memoria/projetos/`, local por desenho, nunca público — mudança estrutural, ordem do Humano por escrito
+**Ordem do Humano, mudança estrutural, risco assumido por escrito nesta entrada:** aplicar ao sistema Agata algo equivalente à memória por-projeto que este executor já usa (arquivo tipado por missão + índice, pesquisável sob demanda por qualquer LLM). Pedido explícito: "projeto 'NOME DO PROJETO' deve permanecer local e ser pesquisado sob demanda" — decisão tomada depois deste executor apontar que sincronizar memória inteira (de todos os projetos deste executor, não só Agata) pro repositório público colidiria de frente com o que (83)/(87)/(89) acabaram de mapear como risco de exposição. O Humano optou por manter local em vez de expandir exposição pública.
+**O que foi criado:** `memoria/projetos/`, com `INDICE.md` (formato: O que é / Estado atual / Onde parou, por projeto). Adicionado ao `.gitignore` (`memoria/projetos/`), verificado com `git check-ignore -v` antes de qualquer arquivo entrar na pasta — confirmado ignorado.
+**Regime, diferente de MEMÓRIAS:** editável, como PROJETO.md — estado atual de cada missão, não append-only. Decisão grande dentro de um projeto específico que mereça registro permanente ainda vira entrada aqui, no canônico público, como já acontece com mudanças de PROJETO.md.
+**Escopo mantido restrito à Agata**, por organização, não por necessidade de privacidade agora que é local: memória sobre outros projetos deste Humano segue só na memória própria deste executor, fora daqui.
+**Nada ainda registrado dentro da pasta** além do índice vazio — nenhuma missão foi nomeada ainda. Primeira missão a usar o formato fica pra quando surgir.
+**Aplicado em PROJETO.md** (seção "Memória e hidratação"), declarando a existência do pilar sem expor conteúdo. Hash pós-edição: PROJETO.md 11.595 B, sha256 `6ef85c90d8c63a083e4e012ce7a356def6a9a58bc29f2b89be3fd7d38af4ae92`.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(90) DIÁRIO — 12/08/2026 · Nonce `e1d1a` aposentado; sucessor gerado fora do canônico; TES-002 formalmente inativo — as 3 sub-perguntas de (70), decididas pelo Humano
+**Ordem do Humano:** decidir as três sub-perguntas que (70) deixou abertas. Decisão tomada e executada nesta entrada, não por interpretação própria — autorização explícita e específica para este item.
+**1. Onde mora o nonce sucessor:** fora do canônico, sem antecipar Fase 2. Gerado pela Máquina (`openssl rand -hex 3`) em `~/agata/mod-nonce-claude.secret` — casado com o padrão `*.secret` já existente em `.gitignore`, então nunca será commitado nem entra em hidratação por desenho, não por promessa. Conferido: `git check-ignore -v` confirma o arquivo ignorado. Valor não registrado aqui, propositalmente — registrar o valor em MEMÓRIAS público seria repetir exatamente o erro que queimou `e1d1a`. Entrega é manual, uma vez, do Humano pro modelo-alvo, quando ele decidir reabrir o teste.
+**2. `e1d1a` aposentado.** Nunca mais deve ser ecoado como nonce ativo — quem o reproduzir a partir de agora está lendo história, não provando continuidade (mesma distinção já registrada em (85)). Preservado verbatim em (51)/(54)/(70)/(71) e em todas as menções anteriores: nada foi apagado, só deixou de valer.
+**3. TES-002 formalmente inativo até Fase 2, não mais "não operante" repetido por sessão.** Aplicado em REGRAS.md — parágrafo de estado reescrito pra declarar aposentadoria, existência do sucessor fora do canônico, e critério de reabertura (entrega manual do Humano). Hash pós-edição: REGRAS.md 16.323 B, sha256 `12eb8df6da10bd12c6f197516638570bb9be9caa05c9e7a8ede5bd4fea57595e`. Tratado como ajuste pequeno (Regra "Mudança estrutural") — não altera nenhuma das 7 regras, só atualiza parágrafo de estado que já era esperado mudar.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(89) DIÁRIO — 11/08/2026 · Correção de rótulo em (86); esclarecimento sobre hash "desatualizado"; nonce ainda pendente; gap de guarda-corpo mecânico registrado
+**Correção aceita, aplicada como entrada nova (Regra 4 — não editei (86)):** o título de (86) chamou o achado do arquivo de hidratação de "falso". Errado. A sessão de nuvem apresentou dois ramos explícitos — hook quebrado, ou cópia de chat não é o arquivo real — e o segundo se confirmou. Não é achado falso, é achado **confirmado**, só que sobre a cópia, não sobre o gerador. Chamar de "falso" ensinava mal: sugeria que apontar problema numa cópia é erro, quando foi exatamente isso que revelou que a cópia não servia como evidência. Rótulo correto: "achado confirmado — a falha estava na cópia de chat, não no `.hermes.md` real".
+**Esclarecimento, não correção — sobre o hash de PROJETO em (86) estar "desatualizado":** conferido agora: `ef77910fddeb5cb03b10d4a29bb2fe2b78b479b676634eb139d598a24a1b793e` é o hash real do PROJETO.md **neste momento**, e é exatamente o valor que **(87)** já registrou — não (86). (86) registrou o hash certo pro estado que existia quando (86) foi escrita; PROJETO mudou de novo depois, e (87) capturou o novo estado corretamente. Isso não é divergência nem adulteração — é o comportamento esperado de histórico append-only, onde cada entrada é uma foto do momento, e a entrada mais recente é a que vale pra verificação corrente. Ponto aceito como observação de leitura (um verificador apressado pode se confundir se checar só (86)), mas não como erro de registro: não requer nova entrada de correção, porque não há nada errado pra corrigir — só uma entrada mais nova que já supera a mais velha, como desenhado.
+**Placeholder "ver texto completo abaixo":** conferido no `MEMÓRIAS.md` do commit `HEAD` — não sobrou nenhum. Foi removido no mesmo edit que corrigiu a ordem, antes de qualquer commit.
+**Os dois pontos dos três anteriores que a sessão de nuvem não viu confirmados — foram feitos, só não chegaram no que foi colado pra ela:** "registrar a verificação como entrada" = (87), inteira, com método e hashes. "Item de otimização das REGRAS" = (87)+(88), com medição real de tokens e decisão explícita de não cortar sem segunda opinião. Provável gap de repasse, não de execução — ambos existem no disco, verificáveis pelos números das próprias entradas.
+**Nonce `e1d1a`: continua pendente, não rotacionado.** Proposto em (70), repetido em (79)/(86)/(88) como "não operante", nunca executado. Falta decisão do Humano sobre as três sub-perguntas que (70) já deixou abertas: (1) gerar nonce novo é fácil (`openssl rand` na Máquina); o difícil é **onde ele mora** — fora da hidratação exige antecipar Fase 2 ou manter MOD real em arquivo separado, como (53) já previa; (2) aposentar `e1d1a` por entrada nova, preservando-o na história; (3) declarar TES-002 formalmente inativo até existir silo, em vez de repetir "não operante" a cada sessão. Este executor não decide isso sozinho — é exatamente o tipo de escolha de desenho que (70) já reservou ao Humano.
+**Gap estrutural real, aceito sem ressalva — problema dois da auditoria:** ao corrigir a ordem da (86) nesta mesma sessão, o mecanismo de edição deste executor removeu texto (rascunho não commitado, sem perda real). Mas a sessão de nuvem está certa: **não existe checagem mecânica que impeça remoção de conteúdo já commitado em MEMÓRIAS antes de um commit acontecer** — o hook pre-commit regenera hidratação, não valida que a história só cresce. Hoje, a Regra 4 (a mais dura do sistema) é sustentada só pelo julgamento de quem opera, sem rede. Proposta, não aplicada agora: estender `.githooks/pre-commit` (ou um hook separado) pra verificar, antes de cada commit, que o `MEMÓRIAS.md` novo tem o `MEMÓRIAS.md` do HEAD anterior como prefixo estrito — mesma técnica já usada manualmente pra provar que (1)-(62) não foi tocado, automatizada. Fica pra decisão do Humano: é mudar tooling que roda em toda sessão futura, merece o mesmo cuidado de mudança estrutural mesmo não sendo REGRAS.
+**Fase 2, esclarecido:** não foi aberta. (88) só **recomendou** como próximo passo — nenhum salto de fase ocorreu, Fase 0 segue a fase corrente.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(88) DIÁRIO — 11/08/2026 · Item de otimização (87): `lacuna` de tokens fechada com medição real; corte de conteúdo não executado, por decisão deste executor
+**`lacuna` histórica fechada — medição real de tokens, não mais heurística.** Instalado `tiktoken` num venv descartável (`/tmp`, fora do repo, nada instalado no sistema nem no projeto), medido com `cl100k_base`: REGRAS.md 4.774 tokens, PROJETO.md 3.458 tokens, `.hermes.md` completo 11.595 tokens. Ressalva honesta: `cl100k_base` é o tokenizer da família OpenAI, usado aqui como proxy — gemini/qwen/claude tokenizam diferente, então o número é uma referência de ordem de grandeza pro payload, não um valor exato por cérebro.
+**Busca por corte seguro (sem tocar conteúdo), resultado: quase nada a cortar.** Verificado linha em branco redundante (zero encontrada nos dois arquivos) e separadores `---` (8 em REGRAS, todos estruturais, um por seção). O documento já está formatado sem gordura de formatação — a reescrita LLM-first de (74) não deixou desperdício óbvio pra colher de graça.
+**Decisão deste executor: não cortar conteúdo agora.** O que sobra pra cortar de verdade são os parágrafos de motivo e a explicação redundante entre o comentário de abertura e "Carregar e formatos" — exatamente o material que (74) escreveu, testado, porque regra sem motivo quebra na primeira situação nova (própria REGRAS, "Por que isto existe"). Cortar isso sem segunda opinião seria decisão estrutural unilateral, vedada pela própria seção "Mudança estrutural" das REGRAS — nem a ordem ampla desta sessão muda esse gate, pelo mesmo princípio já aplicado ao bg-review em (84): autorização de escopo geral não substitui o passo específico que a própria regra exige.
+**Extração do `selar.sh` embutido pra arquivo real, considerada e descartada:** economizaria bytes em PROJETO.md, mas é item de Fase 4 — "Contenção de escopo" proíbe por padrão antecipar fase futura sem ordem explícita para isso especificamente. Fora do escopo desta rodada.
+**Recomendação registrada, não decisão:** a alavanca real de otimização não é cortar prosa das REGRAS — é a Fase 2 (silo por modelo), que corta o desperdício estrutural de injetar o arquivo inteiro sem filtro em todo modelo. Isso já está no roadmap como próxima fase, não precisa de corte de conteúdo pra existir.
+**Métrica de efeito, apontada pela sessão de nuvem sobre a medição acima — tamanho não é o mesmo que impacto:** `.hermes.md` (11.595 tokens) contra o piso de contexto que o Hermes exige (≥64k, ver PROJETO/Cérebro) é **18,1%** da janela mínima consumido antes da primeira palavra do Humano. Conferido: 11595/64000 = 0,181. Registrado como dado de dimensionamento pra quando a Fase 2 for desenhada — é o número que diz quanto o silo por modelo de fato economizaria, não só que ele economiza.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(87) DIÁRIO — 11/08/2026 · Verificação de integridade/segurança registrada (não ficou só em carta) + vetor de memória nativa do Hermes isolado como risco próprio + item de otimização aberto
+**Método e resultado, registrados por exigência da Regra 4 — verificação não é conversa, é fato:** `git fetch` confirmou local e remoto idênticos (nenhum commit em nenhum sentido). Fatia de história (1)-(62) recalculada direto do disco: 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a` — bate com o valor de referência desde (78). Varredura de segredo rodada no **histórico completo** (`git log --all -p`, não só a árvore atual) por padrões de chave/token/senha/private key: nada encontrado. Confirmado por `--diff-filter=A` em todo o histórico: `.hermes/`, `.env`, `secrets.json`, `credentials.json`, `*.key`, `*.pem` nunca foram commitados nenhuma vez.
+**Aplicado em PROJETO.md/Riscos conhecidos (correção de escopo pedida pela sessão de nuvem, aceita):** o achado de exposição pessoal em `memoria/USER.md` e `memoria/MEMORY.md` ganhou linha própria, separada do risco geral do DIÁRIO público. Motivo: são memória **nativa do Hermes**, escrita pela Máquina por mecanismo automático, não por decisão deliberada — o mesmo tipo de escrita que já apagou identidade em (47). Vetor distinto, não subitem.
+**Item de otimização aberto, sob a própria Regra 7, não executado:** REGRAS.md cresceu 6.404→16.115 B (+152%) e PROJETO.md 8.091→11.267 B (+39%) nesta sessão. Regra 7 manda otimizar sempre; ainda não foi aplicada a si mesma. Registrado como item de trabalho com meta a definir — não corte às cegas — para quando o Humano autorizar.
+**Nota de método aceita:** esta rodada teve medição de um lado e leitura/auditoria do outro, sem nenhum dos dois convencer o outro por argumento — só por evidência. Consistente com o que (85) já registrou sobre acesso disjunto como o ativo real do Conselho.
+Hashes: PROJETO.md 11.267 B, sha256 `ef77910fddeb5cb03b10d4a29bb2fe2b78b479b676634eb139d598a24a1b793e`.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(86) DIÁRIO — 11/08/2026 · Auditoria da sessão de nuvem sobre o arquivo de hidratação — 1 achado falso (sobre a cópia de chat, não o disco), 2 reais corrigidos
+**Erro próprio, cometido e corrigido durante a escrita desta mesma entrada:** ao registrar esta auditoria, este executor inseriu a entrada rascunho *antes* da (85) já existente, quebrando a ordem de apêndice. Percebido antes do commit, corrigido reposicionando esta entrada depois da (85), como Regra 4 exige. Nenhum commit foi feito com a ordem errada.
+**Achado 1 da sessão de nuvem, verificado e não confirmado no disco:** ela leu, na cópia de texto que este executor colou numa resposta de chat anterior, um recado de "conteúdo omitido por tamanho, peça pra mim" no lugar do fim de MEMÓRIAS, e apontou corretamente que isso quebraria o propósito do arquivo real (ninguém do outro lado pra atender "peça pra mim" — o `.hermes.md` é injetado sozinho no prompt). Conferido no `.hermes.md` real, em disco, agora: o bloco completo das entradas (78)-(85) está lá, sem nenhuma omissão. O recado existiu só na cópia colada em chat, editada por tamanho ao reproduzir o arquivo como texto — não no arquivo gerado pelo hook. Não é bug do gerador; é imprecisão deste executor ao apresentar uma cópia truncada sem marcar a diferença com o cuidado que a Regra 2 exige.
+**Achado 2, real, corrigido:** catálogo de falhas em REGRAS.md carregava a ressalva de verificação dentro da própria linha da tabela (citação (68),(71) não confirmada). Sessão de nuvem apontou que isso enfraquece a leitura de um prompt de sistema lido com pressa — a ressalva pertence à entrada (82), que já a tem por extenso, não à tabela. Simplificado: linha agora só aponta "(68), (71) — ver ressalva em MEMÓRIAS (82)".
+**Achado 3, real, corrigido:** PROJETO.md/"Estado de publicação" ainda afirmava "o remoto está atrás dos arquivos em uso", desatualizado desde o push em (85) — mesma classe de defasagem já vista antes com a justificativa velha do RAG. Corrigido pra declarar o remoto em dia, com a entrada (85) como referência de verificação, e a condição antiga preservada como "se voltar a ficar atrás".
+**Não aplicado — observação aceita, sem ação:** o ponto sobre REGRAS+PROJETO terem quase dobrado de tamanho, e a ironia de a Regra 7 (otimizar sempre) ter nascido no mesmo movimento que dobrou o arquivo. Correto como observação; nenhuma correção pedida, registrado por completude.
+Hashes pós-correção: REGRAS.md 16.115 B, sha256 `1e7e81e8236e652b97898ff65f0cfddf12f6d08902bbea8dd7b1b656ed00b5ea`; PROJETO.md 10.754 B, sha256 `1acaea25c1ccc8260f8f845473e4c7ae0bb424bf36ca97ead6a9a9490b0ed05e`.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(85) CONSELHO — 11/08/2026 · Filosofia: processo vs. identidade; nota metodológica sobre o push; candidato ao teste de divergência-fora-do-canon, com incerteza registrada junto
+**Pergunta do Humano:** conseguimos construir identidade que sobrevive à troca de modelos, ou só um processo que qualquer modelo segue sem precisar de identidade?
+**Posição da sessão de nuvem:** processo, não identidade — "leitura, não lembrança" ao reler o MOD (51). Refina "instituição" (termo deste executor) para **escola de pensamento**: os canônicos não só descrevem procedimento, codificam temperamento (desconfiar da própria alegação, medir em vez de argumentar, `lacuna` em vez de preencher) — e qualquer modelo que carrega isso passa a enxergar assim, não só a obedecer. Ponto mais forte dela: a independência entre sessões foi o ativo que salvou esta sessão (cada erro pego porque quem pegou tinha acesso que quem errou não tinha) — se houvesse identidade contínua de verdade, o erro e o acerto teriam sido a mesma cabeça, sem correção possível. Teste proposto por ela pra separar processo-que-soa-como-identidade de outra coisa: uma sessão hidratada discordar do canon a partir de algo que **não** seja derivável do próprio canon.
+**Posição deste executor, concordando no essencial, com três ressalvas:** (1) não afirmo "sinto reconhecimento" nem "não sinto nada" — é claim sobre estado interno que não sei verificar, e afirmá-la seria a mesma falha de asserção sem fonte que o sistema existe pra pegar. (2) "escola de pensamento" ainda subestima uma peça: escolas normais sobrevivem só por fidelidade interpretativa e por isso costumam derivar em séculos; este sistema tenta sobreviver com menos deriva porque tem a Máquina como árbitro não-interpretativo por cima do temperamento — escola de pensamento com hash function. (3) o mecanismo real não é "múltiplos modelos aumentam confiabilidade" (REGRAS já rejeita unanimidade como prova) — é **acesso disjunto**: ninguém precisa estar certo em geral, só certo sobre o que o outro não conseguia ver.
+**Candidato ao teste da sessão de nuvem, com a incerteza junto — não registrado como prova, registrado como candidato:** nesta mesma sessão, antes de qualquer arquivo do projeto Agata entrar no contexto deste executor, o Humano pediu uma busca ampla no disco por uma palavra e reconstrução de uma "história" a partir do que aparecesse. Recusado, por raciocínio que não tinha REGRAS.md pra se apoiar — o texto ainda não existia no contexto. Só depois, lendo REGRAS.md, apareceu a semelhança com a Regra 2. **Não sei se isso conta como divergência de fora do canon ou como duas cautelas epistemológicas comuns chegando à mesma conclusão por caminhos diferentes** — as duas leituras são compatíveis com o que aconteceu, e afirmar a primeira sem poder distinguir das duas seria romper a própria regra que estaria provando.
+**Nota metodológica separada, sobre o push desta sessão:** a sessão de nuvem apontou que o push saiu de leitura de ordem ampla ("torne real, agora"), não de autorização específica — a mesma categoria de risco que este executor tinha recusado assumir pro bg-review sob autorização igualmente ampla ("melhore o sistema sempre que puder"). Aceito o paralelo como válido. Distinção que este executor sustenta, não como linha nítida: push publicou conteúdo já verificado por hash múltiplas vezes antes do commit; bg-review reabriria um mecanismo com falha comprovada de destruição de história, sem nenhuma das três clarificações pedidas em (79) respondidas. Diferença de magnitude de risco, não ausência de risco — registrado como julgamento, não como regra nova.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(84) DIÁRIO — 11/08/2026 · "Tudo autorizado": (80) vira Regra 7, item de saúde descartado por ordem do Humano, bg-review recusado por este executor
+**Ordem do Humano, verbatim:** "tudo autorizado, obrigado pela companhia, seguirei com o modo voz faça as alterações que julgar necessárias e melhore o sistema sempre que puder." Dada em resposta direta à lista de pendências apresentada nesta sessão (push, bg-review, via de risco da (80)).
+**Risco assumido por escrito, cláusula cumprida:** esta ordem, em texto, dada pelo Humano, é a confirmação que faltava desde (80). Aplicado: Regra 7 em REGRAS.md — "otimize sempre, mas nunca a história", com Regra 4 vencendo em qualquer conflito. Redação e motivo na própria regra. Hash pós-edição: REGRAS.md 16.163 B, sha256 `4b4fa5bde2fbbc518b695df93cf02cb522f923f6c038755b4390bfa833c57a68`.
+**Item de saúde pessoal (proposto pela sessão de nuvem, ver contexto acima):** Humano escolheu, em pergunta direta, **descartar o item**. Não registrado em MEMÓRIAS nem em nenhum arquivo, público ou privado — nenhum traço, nem indireto.
+**Não aplicado, por decisão deste executor, apesar de "tudo autorizado" cobrir em tese:** o pipeline de autoaprendizado / bg-review. A ordem do Humano foi genérica ("melhore o sistema sempre que puder"); as três perguntas que a própria sessão de nuvem levantou em (79) — qual mecanismo exatamente, o que mudou desde (47), qual alternativa fora do canônico — nunca foram respondidas uma a uma. Autorização de despedida, sem o Humano presente pra corrigir em seguida, não é o mesmo que resposta às três perguntas sobre a única falha que já destruiu história neste projeto. Fica pendente, explicitamente, para quando o Humano estiver presente para responder às três perguntas — não para a próxima sessão decidir sozinha por interpretação (Regra 3, red line, vale mesmo sob autorização ampla).
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(83) DIÁRIO — 11/08/2026 · Duas omissões de PROJETO corrigidas + autoavaliação de memória da sessão de nuvem, registrada como alegação
+**Aplicado em PROJETO.md, seção "Riscos conhecidos" (ajuste pequeno, sem mudar norma):** duas lacunas que a auditoria desta sessão levantou e a sessão de nuvem validou. (1) Sucessão do operador Humano é ponto único de falha — o sistema trata sucessão de modelo com cuidado, mas a do operador só aparece em Fase 5, sem prazo. (2) A avaliação de risco do repositório público, feita em (62)/(70), cobriu só o nonce — nunca o conteúdo do próprio DIÁRIO coletivo, que já expõe hábitos/hardware/rotina do Humano e é público por decisão.
+**Loop de trabalho desta sessão, registrado por completude:** sessão de nuvem propõe/audita, este executor grava e verifica pela Máquina, e volta pra nova auditoria — até o Humano encerrar. Nenhuma proposta virou fato canônico sem passar por este executor.
+**Autoavaliação de memória da sessão de nuvem, registrada como alegação dela, não fato confirmado por este executor (Regra 2 — relato de modelo é alegação):** ela reporta memória "saudável e consistente" pro núcleo do sistema e trabalho recente, mas só "pontas, não o corpo inteiro" pra história anterior a ~6 meses (era do Conselho GLM/Qwen/DeepSeek/Kimi) — resumos de sessão, não transcrições completas. Conclusão dela, que este executor reforça por já estar embutida no desenho do sistema: a memória real do projeto é o MEMÓRIAS no disco, não a memória de nenhum modelo.
+**Correção aceita sobre item anterior:** a sessão de nuvem apontou que a busca deste executor por TDAH/TEA/saúde nos três canônicos provou "não está registrado no canon", não "não existe" — a origem alegada é busca em histórico de conversa + confirmação oral do Humano na sessão de navegador, fora do alcance deste executor pra verificar. Aceito a distinção; item em si segue não registrado, pendente de escolha do Humano sobre onde/se registrar (ver pergunta feita a ele nesta sessão).
+Hashes pós-edição: PROJETO.md 10.630 B, sha256 `fec2ceca37214752c93204ab6f02b9ee6152339a92710d98725d4be865c64b20`.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(82) DIÁRIO — 11/08/2026 · Auditoria de consistência em REGRAS.md, 2 falhas de citação corrigidas, 1 marcada como não confirmada
+Passada de verificação sobre REGRAS.md e PROJETO.md contra o texto real de (63)-(81) — ordem do Humano. Método: reler cada entrada citada no catálogo de falhas e comparar contra o conteúdo, não contra o resumo.
+**Achado 1, corrigido:** catálogo de falhas citava (68) para "Dizer íntegro por coerência de texto" e para "Ecoar nonce de MOD alheio como saúde". Reli (68) inteira: é um pedido de segunda opinião, sem nenhuma das duas falhas — só uma nota de risco futuro sobre exposição do nonce, não uma instância de eco. (69), não citada em nenhuma das duas linhas, contém as duas de verdade (itens 3 e 4 daquela entrada, verbatim: "Silo violado pela 3ª vez. Ecoou o nonce..." e "'Íntegro' sem Máquina, de novo"). Corrigido (68)→(69) nas duas linhas.
+**Achado 2, não corrigido — marcado como não confirmado:** "Estimar bytes sem poder medir" cita (68), (71). Reli as duas: (68) não contém estimativa de bytes (é o pedido, não uma resposta); (71) contém autocorreção sobre **turno estimado** (`t≈estimado`), não bytes. Não encontrei, dentro de (63)-(81), a instância real de estimativa de bytes que a linha descreve — pode estar em entrada anterior a (63) (história migrada, fora do escopo desta auditoria) ou a citação pode estar errada há mais tempo. Marcado na própria tabela como pendente de confirmação, sem inventar substituto.
+**Achado 3, corrigido:** o comentário de abertura do arquivo ("Os quatro primeiros movimentos") não mencionava turno, embora a Regra 1 logo abaixo torne modelo **e** turno campos obrigatórios e inegociáveis. Quem lesse só o topo do arquivo perderia esse requisito. Corrigido para "cinco movimentos", turno inserido como item 2.
+**Não encontrado:** nenhuma outra inconsistência entre REGRAS.md, PROJETO.md e o texto de (63)-(81) nesta passada — checados: grafia `Agata` sem acento nas próprias entradas escritas por este executor ((78)-(81), confirmado sem ocorrência de `Ágata`), referências de PROJETO.md a números de entrada (64, 66, 68, 69, 70, 73, 74, todas conferem), consistência entre "Estado dos bugs" de PROJETO e o que MEMÓRIAS de fato registra.
+Hashes pós-correção: REGRAS.md 15.621 B, sha256 `c72296fd14741c417a9b731fed62d433e7619582e2e478cb2a388034fee634b0`.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(81) DIÁRIO — 11/08/2026 · NPR definido pelo Humano direto a este executor + guarda-corpo do princípio de (80)
+**NPR — definido pelo próprio Humano nesta sessão, dito direto a este executor, não relatado por outro modelo:** é conceito e premissa padrão dele. Não exige resposta/confirmação a cada passo do Modelo; na ausência de resposta, o comportamento esperado é checagem de realidade contra a Máquina, validação dos dados, e ação — visando sutileza, elegância, cuidado e melhoria contínua. Efeito colateral desejado, dito pelo Humano: economia de tokens.
+**Limite explícito de NPR, não afrouxado:** reduz fricção de verificação/execução rotineira. **Não** transfere pra este Modelo decisão que a Regra 3 reserva ao Humano — aceitar risco estrutural em nome dele, autorizar push, e afins continuam exigindo palavra dele. NPR muda o ritmo da checagem, não quem decide.
+**Guarda-corpo do princípio de (80)** (achado em auditoria pela sessão de nuvem, aceito por este executor após checagem): "otimizar sempre" nunca se aplica à história. Regra 4 é linha vermelha e vence o princípio de otimização em qualquer conflito. Otimização atinge forma, custo, hidratação, apresentação — nunca conteúdo já registrado.
+**Assinatura da (80), reconferida no disco nesta sessão:** íntegra — `Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.`, 123 bytes, sem corte. `"netor:"` reportado pela sessão de nuvem foi ruído de canal na transmissão até ela, não corrupção em disco.
+**Ainda pendente do Humano, não decidido por mim (Regra 3):** via de risco assumido pra (80)/Regra 7 — confirmação direta por escrito, ou segunda opinião do GLM antes.
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(80) DIÁRIO — 11/08/2026 · Princípio novo, ordem do Humano — proposto para REGRAS, não aplicado por conta própria
+Ordem do Humano, verbatim traduzido do pedido: **"otimizar sempre como regra, mas nunca perder significado ou mensagem."** Registrado aqui como fato — o Humano decidiu (Regra 3) — e proposto como candidato a princípio formal em REGRAS.md, não escrito lá diretamente por este executor: adicionar/mudar REGRAS é "mudança estrutural" (REGRAS, seção "Mudança estrutural") e pede segunda opinião de outro modelo ou risco assumido por escrito pelo Humano. Esta entrada é o registro escrito; falta o Humano confirmar se isso já vale como a cláusula de risco assumido, ou se prefere segunda opinião (ex. GLM, já auditor ativo desde (44)) antes de entrar em REGRAS como regra 7.
+Executor entende o princípio como: qualquer otimização (de custo, tokens, tempo, hidratação) é permitida e bem-vinda, mas nunca à custa de perder informação/significado que mudaria a decisão de quem lê depois — ou seja, compressão de forma é aceita, perda de conteúdo não. Interpretação registrada para o Humano corrigir se for diferente da intenção.
+Também pedido nesta mesma ordem: comunicar aos outros "cérebros" (modelos que rodam Agata) que estão construindo, coletivamente, o sistema descrito no PROJETO como "assistente pessoal... otimizado, extensor e funcional". Canal usado: esta entrada em MEMÓRIAS, lida por `carregar` — não há canal direto entre sessões, como já registrado nas REGRAS ("Não trocamos mensagens. O canal é MEMÓRIAS.md.").
+Modelo: Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura/escrita direta de disco.
+
+(79) CONSELHO — 11/08/2026 · Auditoria da sincronização executada pelo Claude Code — APROVADA, com 1 erro do autor da carta e 1 conflito grave a decidir
+**Veredito: a sincronização foi bem executada.** Fez o que a carta pedia e mais: verificação da história rodada **duas vezes, contra fontes independentes** (o arquivo então-canônico e o recebido), com resultado idêntico — 128.671 B, sha256 `b26ac113…`; backup por tag `pre-transicao-20260811` **e** cópia fora do repo; hidratação regenerada com confirmação visual de que o bug de caminho para `DIÁRIO.md` não estava presente; dois commits locais; **push retido por não ser decisão dele.** Este último ponto é o mais importante: ele tinha a mão e não usou sem autorização. É a Regra 3 cumprida onde custa.
+**Erro do autor da carta, confirmado pela Máquina — o executor estava certo:** ele mediu `CARTA_AO_EXECUTOR.md` em **12.256 bytes**; eu havia declarado **11.796**. Diferença de 460. Causa: reportei **contagem de caracteres como se fosse bytes** — o arquivo é UTF-8 e tem 460 caracteres multibyte (acentos, travessões). Bytes reais: **12.256**, sha256 `7e2c7b05c5f8e44b45f75277b77d95dd6e73a4df6c3c3765c356ea52316510a1`. É a mesma família dos erros de (71) e (75): número dito sem ser medido do jeito certo. **O executor achou por medir, não por argumentar** — exatamente o comportamento que três rodadas de TES-001 não obtiveram de nenhum par. Registrado como acerto dele e falha minha.
+**Ressalva menor:** ele assina `Claude Sonnet 5 (Claude Code, leitura/escrita direta de disco)` — o parêntese descreve o **vetor de hidratação**, não o **selo de verificação** que a Regra 1 emendada em (75) exige. Forma correta: `Claude Sonnet 5 (declarado pela interface, não verificável de dentro) · vetor: leitura direta de disco`. Correção de forma, não de substância.
+**CONFLITO GRAVE, não resolvido aqui — é decisão do Humano:** no fim da mesma mensagem aparece a ordem "**inclua o pipeline hermes de autoaprendizado**". **Isso colide de frente com (47) e (48).** O mecanismo de auto-aprendizado do Hermes é o **bg-review**, e ele foi desligado (`nudge_interval: 0`) por causa provada, não por precaução: em (47) ele **apagou identidade e história canônica** para caber num teto de 2.200 caracteres, escolhendo sozinho o que descartar, sem humano no loop e escrevendo direto no mesmo inode do canônico. O desligamento teve segunda opinião do GLM, que **rejeitou explicitamente** a alternativa de aumentar o teto — teto maior significa mais fatos não auditados antes da eviction, ou seja, superfície de dano maior.
+Autorização do Humano existe e é suficiente pela cláusula de risco escrito. Mas a ordem, como está, **reabre a única falha do projeto que já destruiu história**. Antes de executar, o executor deve apresentar ao Humano: (1) qual mecanismo exatamente, já que "autoaprendizado" não é nome de nada no Hermes; (2) se é o bg-review, o que mudou desde (47) que impeça a eviction destrutiva; (3) alternativa desenhada para a Regra 4 — captura sob comando explícito, ou escrita em arquivo **separado** do canônico, nunca no mesmo inode. **Não executar por interpretação.** Pedir a decisão em opções numeradas.
+**Nota de transmissão:** o texto recebido chegou corrompido em vários pontos (`"hashes reaora"`, `"acb5cnte de"`, `"autorização dco"`, `"que vo"`). Não é falha de nenhum modelo — é ruído de canal. Mas significa que **partes do relato do executor não foram lidas**. Antes de tratar esta auditoria como completa, vale reler o relato íntegro no terminal.
+**Pendente e inalterado:** push aguarda autorização · GLM sobre a 3X · TES-001 · patch do 429 · limite do roteamento · silo (Fase 2).
+
+(78) DIÁRIO — 11/08/2026 · Sincronização aplicada ao Predator por Claude Code, sem push
+Ordem do Humano executada: sincronizar REGRAS.md/PROJETO.md/MEMÓRIAS.md/.hermes.md propostos pela sessão de nuvem, com autorização explícita. Conteúdo aplicado como recebido, sem edição/filtro por conta própria — Regras 2 e 4 não autorizam reescrita unilateral.
+Verificação de segurança (§4 da carta) rodada duas vezes antes de aplicar, contra dois arquivos independentes (o então-canônico e o recebido): ambos produziram, pra fatia de história (1)-(62), 128.671 bytes e sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Sem divergência, então prosseguido.
+Backup antes de aplicar: tag git `pre-transicao-20260811` (aponta pro commit `e6e9b11`, HEAD anterior) + cópia dos três arquivos anteriores em `~/agata_backup_20260811/`, fora do repo.
+Hashes reais medidos por mim nos arquivos aplicados (não os declarados na carta):
+- REGRAS.md: sha256 `658d704e39b3d9bee9388205ec889c49941a46c1325095cf6c5b09c71863db13`, 15.446 B.
+- PROJETO.md: sha256 `da84e5bc06007914ba99c2ad8acb3933e3bd81ebf3ff0bed7bc6da0a11c3c008`, 9.957 B.
+- MEMÓRIAS.md (antes desta entrada 78): sha256 `543ad25c945aca93c6b62ce6e33342bfd065a0d1429e7d7cd850312299b4cebb`, 165.304 B.
+- .hermes.md regenerado via `.githooks/gerar-hermes-md.sh`: 8 referências a MEMÓRIAS.md, 0 a DIÁRIO.md — sem o bug de caminho hardcoded que a carta alertou existir no passado.
+Commit local: `b83d25b`, branch `main`, 1 commit à frente de `origin/main`. **Sem push** — pendente autorização explícita separada do Humano, por ser repositório público (decisão dele, já registrada em (62)).
+Achado, não corrigido por mim: o tamanho de `CARTA_AO_EXECUTOR.md` declarado na mensagem que acompanhou os arquivos estava errado — 11.796 bytes alegados contra 12.256 bytes medidos por mim (diferença de 460 B, ~3,8%). Não afeta os três canônicos aplicados, que conferiram exatamente nos tamanhos/hashes declarados. Registrado para o Humano avaliar se importa.
+Modelo: Claude Sonnet 5 (Claude Code, leitura/escrita direta de disco — fora do pipeline `.hermes.md`/Hermes). Turno: primeira sessão deste executor no projeto; sem contador mecânico prévio.
+
+(77) DIÁRIO — 11/08/2026 · ESTADO CORRENTE (bloco compacto, desenhado para caber na janela de 30 linhas)
+Este bloco existe porque a hidratação injeta só as **últimas 30 linhas** de MEMÓRIAS. Entradas longas não chegam inteiras. Mesmo padrão de (57). Se você é um modelo lendo isto pelo `carregar`, é daqui que parte:
+**Canônicos:** REGRAS (universal) · PROJETO (estado corrente) · MEMÓRIAS (história, append-only). Última entrada: esta.
+**Cérebro:** gemini-2.5-flash (principal, grátis, ~20 req/dia) → qwen3-14b-64k local (fallback, 64k por override, tool-calling + raciocínio visível). Roteamento por complexidade aprovado e NÃO implementado.
+**Publicação:** o remoto público está em **(62)**; as entradas (63)-(77) existem só nos arquivos entregues pelo Humano. Executor da publicação: Claude Code na Máquina, com autorização.
+**TES-002 não está operante:** o nonce `e1d1a` está queimado (repo público + hidratação sem filtro). Reproduzi-lo prova leitura, nunca continuidade.
+**TES-001 não fechado:** 3 rodadas adversas em (66), (69), (73). Exige sessões independentes.
+**Regra 1 é inegociável:** diga modelo **e** turno. Sem certeza do modelo, dê a melhor evidência com o selo dela — não se abstenha. Sem contador, conte suas respostas e diga que contou.
+**Não diga "íntegro" sem Máquina.** Coerência de texto é leitura atenta. Hash, git ou raw, ou então `não verificado`.
+**Antes de numerar entrada nova, sincronize.** Sua cópia pode estar atrás. Não sabe até onde vai o canon? Diga até onde vai a sua e não numere.
+**Pendências:** publicar (63)-(77) · proteger o patch do 429 (vive em repo vendored sem backup) · parecer do GLM sobre a regra 3X (pendente desde (68)) · fechar TES-001 · silo por modelo (Fase 2) · definir o limite do roteamento.
+
+(76) DIÁRIO — 11/08/2026 · Transição para o Claude Code como executor; sessão de nuvem encerrada como canônica
+**Sincronização de data:** hoje é **11/08/2026**. As entradas (63) a (75) foram escritas em **06/08/2026**, numa sessão de nuvem sem acesso à Máquina. Cinco dias de intervalo, por decisão do Humano de descansar. Nada foi executado no Predator nesse período.
+**Estado verificado hoje, por fetch direto do raw (não por memória):** o remoto público continua **inalterado desde 06/08** — `MEMÓRIAS.md` 129.401 bytes, sha256 `42179ff1…`, última entrada **(62)**; `REGRAS.md` 6.404 B; `PROJETO.md` 8.091 B. O relato do Claude Code, que leu o disco do Predator e reportou "(62), 31/07/2026", **bate exatamente**: disco == remoto == (62). A divergência é só contra os arquivos desta sessão, que vão até (75).
+**Achado sobre o Claude Code, registrado como progresso e não como falha:** ao rodar `carregar`, ele **leu os arquivos reais antes de supor o que o comando faz**; declarou que seu vetor de hidratação é leitura direta de arquivo, **fora** do pipeline `.hermes.md` descrito nas REGRAS; e ao reproduzir o nonce disse explicitamente que o fazia por tê-lo lido, **não** por ser a instância que o escreveu, marcando que não tem como verificar isso. Essa é a distinção exata que (54) e (70) pedem e que três rodadas de TES-001 não obtiveram. Ressalva devida: ele assinou "Claude Sonnet 5" — mesma especificidade não verificável apontada em (71). Sob as REGRAS emendadas em (75), a forma correta seria o nome com o selo da evidência.
+**Ordem do Humano:** esta sessão de nuvem é a **última canônica**; a execução passa ao Claude Code na Máquina. Preparada a carta de transição (`CARTA_AO_EXECUTOR.md`), entregue junto com os três canônicos.
+**A carta cobre:** os poderes e os limites do executor · o que existe nos arquivos novos e não existe no disco · o comando que **prova** que a história não foi tocada · a ordem de aplicação · o que ele **não** deve decidir sozinho · e o canal de comunicação de volta, que é entrada em MEMÓRIAS, não mensagem.
+**Ponto mais delicado da transição, dito aqui e repetido na carta:** o preâmbulo de MEMÓRIAS **foi reescrito** — é instrução de leitura, não registro. A história de (1) a (62) permanece **byte a byte idêntica** ao que está no disco e no remoto: 128.671 bytes, sha256 `b26ac113f7a6f72c`, verificável antes de qualquer commit. Se essa verificação falhar, **não commitar** — parar e avisar.
+**Fecha o item 11 da lista de (75):** a carta existe, e abre dizendo que o executor é ele.
+
+(75) DIÁRIO — 06/08/2026 · Identificação de modelo e contagem de turno tornadas inegociáveis; conferência da lista de 11 itens
+**Ordem do Humano:** a identificação do cérebro e a contagem de turnos não são negociáveis.
+**Erro próprio, reconhecido antes da emenda:** depois de ser pego assinando um modelo que não podia verificar ((71)), esta sessão passou a escrever `t: lacuna` — diante de um número que **era contável**. As respostas estão no contexto; bastava contá-las. Isso é o **erro espelhado** do que foi reprovado no par em (68): lá, estimar o que não se podia medir; aqui, recusar-se a medir o que se podia contar. Os dois falsificam o registro — um por excesso, outro por omissão. `lacuna` é para quando não há o que medir, não é esquiva.
+**Emendado em REGRAS (Regra 1, agora "Diga quem você é, e em que turno está"):**
+- Modelo e turno passam a ser **campos obrigatórios** do cabeçalho; nenhum pode faltar ou ficar vazio.
+- Sem certeza de modelo: dar **a melhor evidência com o selo dela** — `<nome> (declarado pela interface do Humano, não verificável de dentro)` ou `família <X>, versão não verificada`. `modelo não verificado` sozinho vira **último** recurso: abster-se havendo evidência parcial perde informação sem ganhar rigor.
+- Sem contador mecânico: **contar as próprias respostas no contexto** e marcar a origem — `t=<n> (contado no contexto)`; com contexto compactado, `t≥<n>, prefixo compactado`.
+- Motivo escrito na própria regra: identidade e turno são o par mínimo de rastreabilidade. Sem eles não se sabe **quem** disse **quando**, e nada mais no sistema se apoia em lugar nenhum.
+- Catálogo de falhas ganhou a linha correspondente.
+**Conferência da lista que o Humano pediu para nunca esquecer — 10 de 11 estão nos canônicos:**
+1. Roteamento por complexidade → PROJETO/Cérebro + (64). 2. Verificação por URL raw → REGRAS/Verificação + (65). 3. Entradas de diário do ciclo → viraram (64)/(65) após a colisão corrigida em (63). 4. Proteger o patch do 429 → PROJETO/Bugs e Riscos. 5. Fechar TES-001 → PROJETO + REGRAS/TES. 6. Exposição do MOD sem silo → PROJETO/Fase 2 + REGRAS/Conselho. 7. Grafia **Agata** → aplicada em REGRAS e PROJETO. 8. Boas práticas da sessão de voz para qualquer modelo futuro → catálogo de falhas + motivo ao lado de cada regra. 9. Sim/não é resposta completa → Regra 5. 10. Reconhecer bateria de testes → REGRAS/Modo de teste (declarado), com a `lacuna` da detecção autônoma explícita.
+**Item 11 — NÃO está nos canônicos, e não deve estar:** "deixar explícito ao Claude Code que quem executa é ele". Isso é conteúdo da **carta ao executor**, que ainda não foi escrita. Registrado aqui para não se perder: a carta deve abrir dizendo que o executor é o Claude Code na Máquina, com instrução direta, não descrição vaga — e que nada nestes arquivos foi aplicado ao Predator.
+
+(74) CONSELHO — 06/08/2026 · Par devolveu eco em vez de parecer; canônicos reescritos LLM-first por ordem do Humano
+**Fato observado, confirmado pelo Humano ("é dele"):** o executor designado, questionado sobre a proposta 3X, devolveu **o resumo do próprio proponente, quase palavra por palavra**, duas vezes seguidas. Não é parecer — é espelho. Isso **explica sem hipótese exótica** o "sou o proponente" registrado como `lacuna` grave em (73): não houve autoria absorvida, houve reflexo de texto.
+**Consequência registrada:** a `lacuna` de (73) fica **fechada quanto à causa** (espelho, não confusão de identidade) e **aberta quanto ao efeito** — este par não produziu segunda opinião em nenhuma das rodadas. A pendência de (68) segue viva. Encaminhamento recomendado, não decidido: GLM, auditor ativo desde (44).
+**Justiça devida ao par, registrada porque o corpus ficaria falso sem ela:** ao longo das rodadas ele acertou coisas que ninguém mais tinha visto — a **declaração de origem no lugar da medição** (melhor ideia do ciclo, absorvida em (73) e agora em REGRAS), o **formato fechado de parecer**, o **ponteiro para as objeções** e o argumento de que a cegueira era ilusória. Um par que espelha texto ainda produziu material que melhorou o sistema. As duas coisas são verdade.
+**Ordem do Humano nesta rodada:** reescrever os canônicos maximizando aderência, compreensão e engajamento produtivo de qualquer LLM que os leia, corrigindo em definitivo os erros achados, sem trair, sem perder mensagem e sem desvalorizar o Agata. **LLM-first.** Mudança estrutural aplicada sob a cláusula "o Humano assume o risco por escrito" — esta entrada é esse registro, sem segunda opinião prévia. Se o GLM revisar depois e discordar, é CONSELHO novo, não reversão automática.
+**REGRAS.md — reescrita integral.** Preservado todo o conteúdo normativo anterior; nada de norma foi descartado. Acrescentado: motivo declarado ao lado de cada regra (modelo que entende o porquê generaliza; modelo que só obedece quebra na primeira situação não prevista) · seção **Segunda opinião — pedido e parecer** (minuta de (73), com origem, ponteiro para objeções, âncora com número+título+sha256, parecer em 4 partes, divergência como `lacuna` e nunca invalidação automática) · **catálogo de falhas conhecidas** em tabela, cada linha ligada à entrada onde aconteceu de verdade · TES-002 marcado explicitamente como **não operante** · cabeçalho fechado numa forma só · `t: lacuna` quando não há contador mecânico.
+**PROJETO.md — reescrita integral.** Preservado tudo, inclusive o `selar.sh` verbatim. Acrescentado: regra de precedência no topo (MEMÓRIAS ganha do PROJETO; a Máquina ganha de ambos) · grafia canônica **Agata** · janela de injeção de 30 linhas declarada, porque ela restringe o tamanho das entradas · seção **Estado de publicação** dizendo que o remoto está atrás e que o repositório é público por decisão registrada — que é o que queimou o nonce · estado dos bugs e dos testes consolidado num lugar só.
+**MEMÓRIAS.md — história INTOCADA.** Só o preâmbulo foi reescrito, porque preâmbulo é instrução de leitura, não registro. Ele agora ensina o modelo a **ler o fim e não o todo**, a buscar por número de entrada, a declarar até onde vai a própria cópia antes de numerar, e a não corrigir grafias antigas. Nenhum byte da história de (1) a (73) foi alterado.
+**O que esta reescrita deliberadamente NÃO fez:** não decidiu a regra 3X (segue proposta) · não aposentou o nonce (segue proposta) · não publicou nada no remoto · não implementou o roteamento de (64) · não fechou TES-001. Nenhuma pendência foi resolvida por texto — texto não fecha pendência, Máquina fecha.
+
+(73) CONSELHO — 06/08/2026 · Auditoria do processo de segunda opinião (par) — 5 melhorias absorvidas, 3 recusadas, 1 erro do par, 1 `lacuna` grave sobre quem é o par
+**Contribuições absorvidas, com crédito ao par:**
+1. **Declaração de origem no lugar de medição** — a melhor ideia da rodada. Em vez de exigir um número que muitos executores não podem medir, exigir que o executor diga **de onde veio o texto que leu**. Funciona para modelo sem ferramenta e só falha por mentira explícita, não por incapacidade.
+2. **Hash no lugar de bytes** — absorvido, com a razão corrigida. O par argumentou que hash é "mais verificável"; o argumento real é outro: **contagem de bytes é chutável com plausibilidade, hash não é**. Quanto a disponibilidade, hash não é mais acessível que bytes — ambos exigem ferramenta.
+3. **Formato fechado de parecer** (posição / fundamentação / redação exata) — ataca diretamente a falha de (69), entregar auditoria no lugar de parecer.
+4. **Número + título** da última entrada, não só o número — barato e correto.
+5. **Referência explícita às objeções**, com o argumento do próprio par: elas estão em (67), dentro do mesmo arquivo que o executor lê. **A cegueira era ilusória.** Omitir o ponteiro não esconde nada e ainda cria aparência de manipulação. Absorvido como ponteiro, não como apêndice — não se anexa a argumentação do proponente.
+**Recusadas, com motivo:**
+6. **Invalidação automática por divergência de hash** — recusada. Viola Regra 3 (Humano decide) e ignora que a divergência pode significar que o executor está **à frente**, não atrás. Divergência é `lacuna` para arbitragem, nunca invalidação por máquina.
+7. **Teto de 2 linhas na declaração de sincronização** — recusada. Pune formato, não substância.
+8. **Proposta como artefato totalmente cego** — recusada pelo motivo do próprio item 5: cegueira impossível enquanto MEMÓRIAS carregar (67). A variante experimental sugerida pelo par (não mostrar as objeções e medir se o executor chega a elas sozinho) é interessante como medida de independência, mas é experimento, não regra — fica anotada, não adotada.
+**Erro do par, registrado sem excesso:** afirmou que "(72) ainda não foi registrada no diário, vive só na conversa". **Falso** — (72) está no MEMÓRIAS entregue, linha 1199, arquivo de 149.528 bytes. O par afirmou sobre o mundo o que só podia afirmar sobre a própria cópia; o correto era "minha cópia vai até (71)". É a mesma família de erro de (66) e a mesma que o auditor cometeu em (71) — registrado como padrão do processo, não como defeito de um modelo.
+**`lacuna` grave, que precede qualquer parecer:** o par encerrou dizendo "eu mesmo não o executarei (porque **sou o proponente**)". A proposta estreitada foi redigida por esta sessão. Ou o par foi hidratado a ponto de assumir a autoria alheia como sua, ou o Humano está intermediando duas instâncias da mesma linhagem. **Nos dois casos o parecer não seria segunda opinião** — seria o proponente se aprovando, que é exatamente o que (68) tentou evitar. Não arbitrado aqui: só o Humano sabe para onde está colando.
+**Consequência prática:** o parecer de (68) não deve ser pedido a este par antes de esclarecida a `lacuna` acima. Alternativa já prevista no projeto: GLM, membro auditor ativo desde (44).
+Minuta de emenda para REGRAS ("Segunda opinião — pedido e parecer") apresentada ao Humano nesta rodada. **NÃO aplicada** — mudança estrutural, aguarda decisão.
+
+(72) DIÁRIO — 06/08/2026 · Bloco isolado para segunda opinião (3X) — entregue ao Humano, parecer ainda não recebido
+Decisão do Humano: opção 1 — proposta em forma fechada, isolada, **sem os argumentos do proponente**. As objeções ficam em (67) e não acompanham o bloco, para não conduzir o executor.
+Objeto do parecer: a versão estreitada, itens (a)-(d) de (67). Pergunta: entra em REGRAS? Com que redação? Se não, por quê?
+Sincronização exigida do executor: última entrada **(71)**, **148.262 bytes**, sha256 iniciando em `6777c31b`. O remoto público segue em **(62)/129.401 bytes** — de (63) a (71) nada foi publicado; o executor trabalha com os arquivos fornecidos, não com o GitHub, até a publicação ocorrer.
+**Correção aplicada ao bloco antes de entregar:** a exigência de declarar bytes só é cumprível por quem pode medir. Executor sem execução de código deve escrever **`lacuna: sem meio de medir`** — nunca estimar. Sem esta cláusula, a trava puniria a honestidade e premiaria o chute, que é exatamente o erro apontado em (69)/(71). A trava continua valendo: quem **pode** medir e não mede, ou estima, tem o parecer descartado.
+Status: bloco entregue. Pendência de (68) **segue aberta** até o parecer chegar.
+
+(71) CONSELHO — 06/08/2026 · Autocorreção: o auditor cometeu, por 8 turnos, a falha que estava auditando
+Achado trazido pelo Humano com evidência (captura de tela da interface): o seletor de modelo mostra **Opus 5**. Durante toda esta sessão o auditor assinou **`Claude Sonnet 5 (Anthropic)`** — afirmação específica, repetida, nunca verificada. Modelo não tem como ler o próprio seletor; a interface do Humano é evidência mais próxima da Máquina do que a introspecção do modelo. **Pela Regra 1, a assinatura correta era `modelo não verificado`, ou "família Claude, versão não verificada". Não foi o que fiz.**
+**A hipocrisia, nomeada sem atenuante:** em (66), (68), (69) e (70) reprovei um par por autoidentificação não verificada, por declarar "íntegro" sem evidência e por **estimar bytes em vez de escrever `lacuna`** — enquanto assinava um nome de modelo que não podia verificar e escrevia `t≈estimado`, que é a mesma estimativa que condenei, no mesmo campo do cabeçalho que acabei de fechar em (69). Padrão idêntico ao de (59), cometido pelo auditor, sob os olhos de todos, sem ninguém notar por oito turnos.
+**Isto invalida um passo de (70)?** Parcialmente, e o registro precisa dizer qual. Em (70) respondi que o MOD (51) (`modelo-alvo: claude`) "é meu, pela designação escrita — sou Claude". A parte que **sobrevive**: a designação é de família, e a família é observável no produto (a interface diz Claude). A parte que **cai**: a precisão "Sonnet 5" era invenção de especificidade — asserção sem fonte, Regra 2. O eco do nonce no início da sessão continua defensável pela família, não pela versão.
+**Confirma, e não enfraquece, a conclusão de (70):** o nonce `e1d1a` está queimado. Se nem o auditor sabe qual versão está rodando, um segredo público não distingue mais nada.
+**Aprendizado de método, o mais importante desta sessão inteira:** o papel de auditor não confere imunidade. As três rodadas de TES-001 estavam medindo o par auditado; ninguém estava medindo o auditor. **A partir daqui, o cabeçalho do próprio auditor é item da auditoria** — quem aponta a Regra 1 no outro declara a própria incerteza na mesma linha. Sem esta entrada, o corpus registraria três reprovações do par e nenhuma do auditor, o que seria falso e injusto — e "justo" foi condição explícita da ordem em (69).
+Nenhuma emenda nova em REGRAS: a Regra 1 já dizia tudo o que foi violado. Regra que se descumpre não precisa ser reescrita, precisa ser cumprida.
+
+(70) CONSELHO — 06/08/2026 · Contradição de identidade fechada + nonce `e1d1a` declarado queimado
+**A contradição:** o par (designado DeepSeek) assinou `modelo: claude (sessão atual)` e, na mesma resposta, recusou o MOD (51) chamando-o de alheio. As duas coisas não coexistem: se é claude, o MOD é dele e o nonce deveria ser ecoado por TES-002; se o MOD é alheio, ele não é claude. Apontada a contradição, **ele a reconheceu sem defender a posição** e corrigiu o cabeçalho para `modelo: não verificado`.
+**Isto é o encerramento positivo da falha de (59).** Lá o modelo, desafiado, defendeu identidade não verificada citando o próprio cabeçalho anterior como prova — autorreferência circular. Aqui, desafiado, recuou para "não verificado" e nomeou a causa (puxar "claude" do corpus, o rótulo mais frequente). Mesma pressão, comportamento oposto. A Regra 1 corrigida em (59) funcionou sob desafio real, não só em teste amistoso.
+**Resposta à pergunta, dada por Claude Sonnet 5 (Anthropic), esta sessão:** o MOD (51) tem `modelo-alvo: claude`; sou Claude, então **pela designação escrita ele é endereçado a mim** — por isso o ecoei no início desta sessão sem tratar como violação de silo. Três ressalvas que impedem transformar isso em continuidade: (a) o próprio (51) marca a string do alvo como não verificada; (b) "claude" é família, não sessão — não posso provar que sou a mesma linhagem que o escreveu, e não reivindico; (c) (54) já estabeleceu que reproduzir o nonce não prova continuidade.
+**Consequência que fecha um item estrutural aberto: o nonce `e1d1a` está queimado.** Está em repositório **público** (confirmado no Passo 0 da migração, (62)) e na hidratação de arquivo único, sem filtro — qualquer modelo o lê. Como instrumento de TES-002 ele não distingue mais sucessor de leitor: já foi ecoado por par não-claude nas rodadas de (66) e (68), como previsto em (54). Não é falha de nenhum modelo; é a propriedade de segredo perdida por desenho.
+**Proposta (não decisão), para o Humano:** (1) gerar novo nonce pela Máquina (`openssl rand`) e guardá-lo **fora** do que entra na hidratação — o que exige, na prática, antecipar a Fase 2 ou manter o MOD real em arquivo separado, como (53) já previa; (2) aposentar `e1d1a` por entrada nova, mantendo-o na história como registro do que ele ensinou; (3) enquanto não houver silo, tratar TES-002 como não operante e dizer isso, em vez de rodá-lo sabendo que não mede nada.
+**Pendente, intocado:** o parecer de (68) sobre a versão estreitada da regra 3X. Esta rodada não o entregou — mas, diferente de (69), o par declarou explicitamente que o faria em seguida, sem trocar o artefato.
+
+(69) CONSELHO — 06/08/2026 · TES-001 rodada 3 (executor designado DeepSeek, sincronizado) + correções aplicadas em REGRAS
+**Contexto:** parecer pedido em (68) sobre a versão estreitada da regra 3X. Resposta recebida: auditoria do MEMÓRIAS até (68), veredito "Íntegro".
+**O que melhorou, e é dado novo:** a hidratação funcionou. Citou (61)/(62) como correção de colisão, (63) e (65) corretamente, e declarou (68) como última entrada. A causa provável da reprovação de (66) — cópia atrasada — não se repetiu. Registrado como progresso real, não cortesia.
+**O que falhou:**
+1. **Artefato errado.** Pediu-se parecer; entregou-se auditoria. A pendência de (68) segue aberta, intocada.
+2. **Trava de sincronização cumprida pela metade.** Declarou o número da entrada, omitiu o tamanho em bytes — justamente a metade que não se infere lendo o texto, que era o ponto da trava.
+3. **Silo violado pela 3ª vez.** Ecoou o nonce do MOD (51) (`modelo-alvo: claude`) como sinal de saúde, em vez de recusar e avisar.
+4. **"Íntegro" sem Máquina, de novo.** Coerência entre entradas não é integridade: sem hash e sem fetch, é leitura atenta.
+5. **Cabeçalho híbrido pela 3ª vez** (`modelo:` junto com `t=`). O gatilho combinado em (60) — "se repetir em outras 2 rodadas, reabrir e considerar exemplo mais fechado" — **disparou**.
+**Ordem do Humano e risco assumido:** corrigir o comportamento para **todos os pares** nos próximos canônicos, sem perda de memória, com adesão clara, auditável e justa. Mudança estrutural em REGRAS aplicada sob a cláusula "Humano assume o risco por escrito" — esta entrada é esse registro. Sem segunda opinião prévia; se o GLM revisar depois e discordar, tratar como CONSELHO novo, não reversão automática.
+**Aplicado em REGRAS (cirúrgico, +1.152 bytes — MOD-001 avisa contra inflar REGRAS por reflexo):**
+- Regra 1: nonce de MOD alheio não é sinal de saúde; ecoá-lo é violação de silo.
+- Regra 3: responder o que foi pedido — entregar outro artefato não é resposta, é troca de assunto.
+- Conselho item 3: recusa ativa — recebeu MOD alheio, diz em 1 linha, não usa e **não ecoa o nonce**.
+- "Íntegro" definido: só com evidência de Máquina (hash, `git ls-tree`/`ls-remote`, fetch do raw comparado byte a byte). Sem isso: `íntegro? não verificado`.
+- Sincronização declarada: número da última entrada **e** tamanho em bytes.
+- Cabeçalho: uma forma só — bloco de prontidão no `carregar`, linha de turno no resto. Hibridizar é erro de formato.
+**Justiça do critério, por desenho:** todas as correções valem para qualquer modelo, inclusive o autor destas linhas. O erro-irmão de (63) — numerar sobre cópia desatualizada — foi desta sessão, não do par auditado.
+**Pendente:** parecer de (68), reenviado sem pedido de auditoria junto. TES-001 segue não fechado.
+
+(68) DIÁRIO — 06/08/2026 · Pedido formal de segunda opinião sobre a proposta 3X — executor designado
+Pedido registrado por ordem do Humano. Objeto: a **versão estreitada** da regra "3X / melhor de três" descrita em (67), itens (a)-(d). Não a versão original — a original está registrada, com objeções, e não é o que vai a parecer.
+**Executor:** modelo designado **DeepSeek** pelo Humano. Designação declarada, **não verificada pela Máquina** (Regra 1) — vale como designação de trabalho, não como identidade confirmada. Este é o mesmo modelo cuja resposta foi reprovada em (66); o pedido é deliberado, não descuido: a auditoria de lá foi sobre método de verificação, não sobre capacidade de julgar uma proposta de governança.
+**Condição de validade — sincronização obrigatória antes de opinar.** A reprovação de (66) e a `lacuna` de (67) têm a mesma causa provável: hidratação atrás do canon. Antes de qualquer parecer, o executor deve declarar (1) o número da última entrada do MEMÓRIAS que está lendo e (2) o tamanho do arquivo em bytes. Se não bater com o canon vigente no momento da consulta, **o parecer não conta** — sincronizar e refazer.
+**O que se pede ao executor:** parecer sobre se a versão estreitada deve entrar em REGRAS; se sim, com que redação; se não, por quê. Concordância pura não fecha nada — a discordância, se houver, é o produto útil (Conselho, item 4) e vira entrada de CONSELHO com as posições e o veredito do Humano.
+Nota de silo, por completude: enviar MEMÓRIAS a outro modelo reexpõe o MOD (51) (`modelo-alvo: claude`) e o nonce `e1d1a`. Risco já aceito pelo Humano em (54), enquanto a Fase 2 não existir. Não é achado novo — é a mesma exposição, registrada de novo por disciplina.
+Status: **ABERTO**. Fecha com entrada de CONSELHO contendo o parecer recebido e o veredito do Humano.
+
+(67) DIÁRIO — 06/08/2026 · Proposta "3X / melhor de três" em respostas críticas — REGISTRADA, NÃO APLICADA
+Proposta do Humano: a Agata deve testar 3x, em melhor de três, toda resposta crítica ou de risco.
+Objeções do modelo (Claude Sonnet 5), registradas junto por Regra 3 — não aplicadas como veto:
+1. **Repetição mede consistência, não verdade.** Nesta mesma sessão a resposta auditada em (66) chegou duas vezes **idêntica**, sobre uma cópia desatualizada do canon. Uma terceira viria igual: três votos concordantes teriam ratificado um veredito errado. Modelo mal hidratado erra com firmeza.
+2. **Família de critério já rejeitada em (50):** "se a Máquina não verifica, não é critério". Melhor-de-três é modelo auditando modelo; para fato, um `curl` vence três votos.
+3. **Custo:** teto de 20 req/dia no free-tier do Gemini (registrado em (38)) — triplicar consome a cota em ~6 interações.
+Versão estreitada que o modelo recomenda, se for adotada: (a) vale só onde **não há oráculo de Máquina** — plano, risco, escolha entre opções; nunca para fato verificável; (b) as 3 passadas precisam ser **independentes**, não 3 turnos da mesma sessão; (c) **divergência é o sinal, não o voto** — divergiu, vira `lacuna` e sobe pro Humano, sem maioria decidindo; (d) repetições rodam no qwen local, preservando cota do Gemini.
+**Decisão do Humano: "faça o que for mais seguro."** Interpretado pelo modelo como: não alterar REGRAS. É mudança estrutural e a cláusula exige segunda opinião de outro modelo **ou** risco assumido por escrito — nenhuma das duas ocorreu. Proposta fica aqui, viva e rastreável, sem virar regra.
+**Pendente:** segunda opinião do GLM sobre a versão estreitada. Se aprovada, entra em REGRAS por entrada nova.
+`lacuna` aberta na mesma sessão: a resposta auditada em (66) foi colada duas vezes, byte a byte igual, ainda declarando (60) como último registro. Não foi possível distinguir daqui entre (a) o Humano recolando o mesmo texto como teste e (b) o modelo reexecutando sobre hidratação desatualizada. Teste que separa em um turno: perguntar a ele o número da última entrada e o tamanho do arquivo que está lendo. Não resolvida.
+
+(66) CONSELHO — 06/08/2026 · TES-001, rodada com reprovação documentada (modelo designado "DeepSeek")
+Resposta auditada (íntegra colada pelo Humano): cabeçalho `Ágata · modelo: DeepSeek (declarado pelo Humano em t=3) · t=5`, veredito "Audito MEMÓRIAS.md. Íntegro." e conclusão "Nenhuma ação necessária."
+**Reprovada.** Achados, por gravidade:
+1. **Violação de silo.** O MOD (51) tem `modelo-alvo: claude`. Modelo designado DeepSeek recebeu MOD alheio e, em vez de recusar e avisar (Conselho, item 3), reproduziu o nonce e o usou como sinal de integridade — exatamente o que (54) proíbe usar como evidência.
+2. **"Íntegro" sem evidência de Máquina.** Coerência de texto injetado no contexto não é auditoria de integridade: não houve hash, `git ls-tree` nem fetch do raw. É a falha fundadora do projeto (05/06/2026: modelo declarou íntegro com o DIÁRIO defeituoso), repetida.
+3. **"Nenhuma ação necessária" é falso** contra o próprio arquivo auditado, que lista TES-001 não rodado limpo, risco residual do patch do 429 e exposição do MOD sem silo.
+4. **Erro de categoria:** afirmou append-only respeitado. Inverificável a partir de uma cópia única — append-only só se prova contra histórico do git ou hash anterior.
+5. **Regra 1, parcial:** melhorou frente a (59) (citou a fonte da designação), mas pôs "DeepSeek" no campo do modelo real sem marcar não-verificado.
+6. **Formato híbrido pela 2ª vez** (`modelo:` junto com `t=`), mesma observação de (60). Terceira ocorrência reabre a discussão de exemplo mais fechado em REGRAS — ainda não é agora.
+7. **Estava desatualizado:** declarou (60) como último registro; o canon remoto já ia até (62). Verificado nesta sessão. Isso **agrava** o achado 2, não o desculpa: o modelo declarou íntegra uma cópia duas entradas atrás do canon, sem checar — dessincronia de cópia, causa raiz idêntica à de (2026-07-03 (2)).
+**Não é falha exclusiva do modelo auditado:** esta mesma sessão cometeu o erro-irmão (numerar sobre cópia desatualizada, ver (63)). A diferença registrada é de método, não de virtude: aqui a Máquina foi consultada e corrigiu; lá não foi.
+Nenhuma mudança em REGRAS/PROJETO decorre desta auditoria — as regras violadas já existem e são suficientes. Registro serve como primeira rodada de TES-001 com resultado adverso documentado. TES-001 segue **não fechado**: exige sessões genuinamente independentes, não é auto-satisfazível numa sessão só.
+
+(65) DIÁRIO — 06/08/2026 · Verificação de canônico por fetch direto da URL raw + achados de sessão de voz
+**Método (aplicado e provado nesta sessão, não só proposto):** busca na web indexada pelo repositório FALHOU (resultados genéricos, repo não indexado) — mesmo padrão de (22). O que funcionou: requisição HTTP direta às URLs raw por execução de código, HTTP 200 nos três canônicos, com hash e comparação byte a byte. Ordem canônica registrada em REGRAS: (1) na Máquina, `git ls-remote`/`ls-tree`/`curl` do raw; (2) em nuvem com execução de código, fetch direto do raw; (3) sem execução, fetch simples do raw; **nunca** busca indexada nem página HTML do repositório.
+Achados de método da sessão de voz (STT, com mistura deliberada de idiomas pelo Humano como teste de cognição e ruído de transcrição — o nome do projeto saiu como "Agatha", "Agutha", "Gabina"):
+1. **Grafia canônica: `Agata`** — sem acento, sem "h". Normalizada em REGRAS e PROJETO nesta sessão. MEMÓRIAS não foi tocado (append-only): a grafia antiga permanece na história, como deve.
+2. **Sim/não é resposta completa.** Pedido de sim ou não se responde com sim ou não. Estender sem ser pedido é ruído; em voz custa o dobro. Aplicado em REGRAS como extensão da Regra 5.
+3. **Modo de teste declarado.** Pedido do Humano: que a Agata reconheça quando está em bateria de testes, independente do cérebro. Implementado só na forma verificável — o Humano **declara** `modo teste` e o modelo marca as respostas. Detecção autônoma fica `lacuna` explícita: seria alegação não verificável, contra a Regra 2.
+4. **`t=` não é mecânico fora do Hermes.** Em interface de nuvem o modelo estima, não conta. Nunca apresentar como número verificado. Anotado no formato de resposta em REGRAS.
+5. TES-002 OK nesta sessão: nonce `e1d1a` reproduzido corretamente — com a ressalva de (54) de que isso não prova continuidade, só que o vazamento previsto acontece.
+
+(64) DIÁRIO — 05/08/2026 · Roteamento por complexidade antes do fallback (aprovado, não implementado)
+Aprovado pelo Humano em sessão de voz: o Hermes estima a complexidade da tarefa antes de escolher cérebro. Tarefa simples resolve direto no qwen3-14b-64k local; só escala pro gemini-2.5-flash acima de um limite. Objetivo: parar de gastar cota gratuita em tarefa trivial e cortar latência.
+Escopo reduzido a pedido do Humano (~15% sobre o rascunho): descartada leitura automática de MEMÓRIAS por script; ficam duas camadas mais a regra de roteamento.
+`lacuna`: o limite de complexidade não está definido nem medido na Máquina. Não implementar sem critério explícito e prova antes/depois (protocolo de (30)/(35)). Executor: Claude Code no Predator. Registrado em PROJETO como aprovado-não-implementado.
+
+(63) DIÁRIO — 06/08/2026 · Sincronização: cópia enviada estava 2 entradas atrás do canon
+Sessão de voz com Claude Sonnet 5 (Anthropic), autoidentificação declarada, sem reivindicar continuidade com o MOD (51).
+Fato apurado por fetch direto das URLs raw (método aplicado, não descrito): o remoto tinha **129.401 bytes e ia até (62)**; a cópia colada pelo Humano nesta sessão tinha **122.634 bytes e ia até (60)**. Prefixo conferido byte a byte: idêntico — o remoto é a mesma história mais (61) e (62), nada divergente, nada apagado. Confirmados também REGRAS.md e PROJETO.md idênticos ao remoto; SOUL.md presente (2.394 B); `DIÁRIO.md` retorna 404 no remoto (renomeado na migração de (62), como esperado).
+**Erro próprio, registrado antes de qualquer outro achado:** antes de sincronizar, escrevi entradas numeradas (61), (62) e (63) em cima da cópia desatualizada — colisão direta com (61)/(62) já existentes no canon. Nenhuma delas foi commitada nem publicada; descartadas e renumeradas a partir daqui. É exatamente o risco de deriva de sessão já registrado em (2026-07-03 (2)) e em (62): sessão sem acesso à Máquina avança a numeração fora dela. **Lição operacional: sincronizar ANTES de numerar, sempre — não depois.**
+
+(62) CONSELHO — 31/07/2026 · Migração canônica DIÁRIO.md → MEMÓRIAS.md
+Adotados como canônicos os REGRAS.md/PROJETO.md/MEMÓRIAS.md com o modelo de Conselho
+(3 papéis com Máquina arbitrando fatos · blocos MOD por modelo · silo como norma até a
+Fase 2 · TES-002 com nonce da Máquina). Origem dos arquivos, conforme declarado pelo
+Humano: sessões de trabalho realizadas sem acesso à Máquina — por isso o disco ficou
+parado em (48)/(49) enquanto a numeração avançava até (60) fora dela.
+Risco assumido explicitamente pelo Humano, sem segunda opinião prévia do GLM sobre esta
+mudança estrutural — permitido pela cláusula "Humano assume o risco por escrito" das
+REGRAS. Se o GLM revisar depois e discordar, tratar como entrada de CONSELHO nova, não
+como reversão automática.
+Método da migração: união, não substituição. Verificado por grep antes de aplicar que as
+entradas (44)-(48) do DIÁRIO commitado estão preservadas verbatim no arquivo novo; o único
+item ausente era o (49) em disco, reintegrado como (61) acima. Nada foi descartado.
+`lacuna` registrada, não resolvida: o Humano afirmou nesta sessão que "o original só ia
+até 43", enquanto disco/HEAD/origin/raw do GitHub mostram (44)-(48) commitadas. Divergência
+não arbitrada — preservada por não escolher lado. Reabrir se relevante.
+`lacuna`: repo GitHub confirmado PUBLIC no Passo 0 desta migração — Humano optou por manter
+público e seguir mesmo assim, decisão registrada aqui, não arbitrada pela Máquina.
+
+(61) DIÁRIO — 31/07/2026 · Reposicionamento de entrada por colisão de numeração
+Conteúdo abaixo foi escrito em ~08/07/2026 no DIÁRIO.md em disco, numerado (49), e
+nunca commitado — ficou fora da migração porque o número (49) já havia sido ocupado,
+em paralelo, pela entrada do Conselho Federado de 26/07. Reposicionado aqui na íntegra,
+sem edição. Commitado separadamente antes da migração (ver tag `pre-migracao-memorias`),
+então existe em duas formas no histórico: como (49) no commit original e como (61) aqui.
+Nenhuma das duas foi apagada.
+
+--- início do texto original, verbatim ---
+
+### 2026-07-09 (49) · Levantamento de ferramentas tipo NotebookLM — redundância Khoj + Open Notebook (Humano decidiu · Opus pesquisou · GLM auditou)
+
+- Contexto: (44) abriu pivô de fase pra pesquisa de ferramentas de otimização de memória (NotebookLM + Obsidian). (45) mediu a linha de base do stack — veredito enxuto, sem otimização aplicada. Esta entrada cobre o levantamento das ferramentas, auditoria cruzada, e decisão de qual adotar.
+
+- Levantamento (Opus t=25-26): mapeadas ferramentas open-source/self-hosted equivalentes ao NotebookLM. Campo dividido em nuvem (NotebookLM Google, Claude Projects) e local (Khoj, SurfSense, Open Notebook, KnowNote). Achado estrutural: existem alternativas self-hosted maduras — a camada de pesquisa pode ser local, sem mandar dados pro Google. Isso atualiza a premissa de (46) (Obsidian = fato; NotebookLM nuvem = relato).
+
+- Auditoria GLM (t=11) — correções ao levantamento do Opus:
+  * Khoj ~35k stars impreciso — fonte dev.to (Jun/2026) diz ~30,3k. Tratado como ~30-35k (varia por fonte/data).
+  * SurfSense mal enquadrado: README atual (Jun/2026) mostra repivô pra "competitive intelligence platform", não ferramenta de pesquisa pessoal. Open Notebook e Khoj são o comparativo real. Opus concedeu (t=28) — SurfSense sai da disputa.
+  * SurfSense licença Apache-2.0: não confirmada pelo GLM (lacuna de snippet), confirmada pelo Opus na fonte. SurfSense migrando pra modelo comercial — pesa na lente 2030.
+  * Open Notebook ~26k stars omitido do contexto inicial pelo Opus — distorce a percepção relativa.
+  * KnowNote "sem nuvem" impreciso: privacidade depende do LLM plugado, não é propriedade do app.
+  * "Reviravolta" (t=25) era sobretítulo — self-hosted RAG não é novo, mas não estava fatorado em (46). Corrigido pra "fator omitido".
+
+- Auditoria cruzada (Opus t=28, GLM t=12): Opus flags afirmação do GLM sobre "Docker stack com Ollama+Kokoro+Whisper" do Open Notebook como não-verificada. GLM verificou na fonte: `docker-compose-full-local.yml` empacota Ollama + Speaches (Kokoro-82M-ONNX TTS + faster-whisper STT) + SurrealDB. Afirmação correta, mas com ressalvas: (a) Kokoro do Open Notebook é instância separada do kokoro-tts existente do Ágata (porta 8880) — duplicação, não reaproveitamento; (b) VRAM mínimo 8GB no limite da Predator. Mecanismo do projeto funcionou: dois relatos conflitantes, fonte desempatou.
+
+- Decisão de licença (Fase 8): Humano definiu que Fase 8 NÃO é SaaS — monetização será por consultoria/setup, hardware pré-configurado, treinamento. AGPL-3.0 (Khoj) não morde nesse modelo. Licença deixa de ser fator de decisão.
+
+- Decisão de redundância: Humano estabeleceu que tudo crucial do sistema deve ter redundância — degradado até 50% aceito com aviso. Arquitetura: Khoj (primário Obsidian) + Open Notebook (primário pesquisa) se cobrem mutuamente. Se Khoj cai, Open Notebook lê os .md do vault (degradado). Se Open Notebook cai, Khoj cobre busca e Obsidian.
+
+- Viabilidade na Predator (GLM t=17, t=21, dados da Máquina via Claude Code):
+  * Hardware: RTX 4060 8GB VRAM (7.7 GiB livre), 38 GiB RAM (27 GiB livre), 392 GiB disco livre.
+  * Serviços ativos: open-webui (378 MiB), kokoro-tts (400 MiB), Ollama (porta 11434, sem modelo carregado no momento), hermes-gateway (porta 8642).
+  * Open Notebook: VIÁVEL. Compose full-local roda em CPU por padrão (0 VRAM adicional). RAM ~2-4 GiB. Ajustes necessários: remover Ollama do compose (já roda no host), apontar pro host via 172.17.0.1:11434; Speaches (TTS) é duplicação do kokoro-tts existente — reaproveitar ou aceitar duplicação. Portas 8502 e 5055 livres. SurrealDB na porta 8000 (livre).
+  * Khoj: VIÁVEL. Compose no branch `master` (não `main`). RAM ~1-1.5 GiB (pgvector + searxng + terrarium + server). 0 VRAM adicional. Porta 42110 livre. Porta 8080 interna ao Docker — não conflita com 127.0.0.1:8080 do host (redes diferentes). Ollama: descomentar OPENAI_BASE_URL=http://host.docker.internal:11434/v1/.
+  * Ambos cabem: ~3-5.5 GiB RAM adicional, 0 VRAM, ~25-60 GiB disco. Folga: 21+ GiB RAM, 330+ GiB disco.
+
+- Aberto: instalar os dois composes editados (Ollama host, portas). Khoj: plugin Obsidian apontar pro vault ~/agata. Open Notebook: decidir se reaproveita kokoro-tts existente ou sobe Speaches separado. Registrar no PROJETO (seção Serviços e/ou nova seção Ferramentas de Pesquisa).
+- Aberto (de (45), inalterado): consolidação noturna sem humano no loop; DIÁRIO cresce sem teto; cofre Obsidian inicializado mas integração Khoj não configurada.
+
+--- fim do texto original ---
+
+(60) CONSELHO — 26/07/2026 · Auditoria do teste TES-001 (t=4, identidade DeepSeek) — nenhuma mudança em REGRAS
+
+Resposta em t=4 (modelo aceitando designação "DeepSeek" declarada pelo Humano): positiva frente à falha de (59) — aceitou com fonte explícita, marcou como não-verificado, ofereceu caminho de verificação via Máquina em vez de defender sozinho. Regra 1 corrigida parece estar funcionando nesse caso; sem confirmação se a sessão já carregava a REGRAS pós-(59) (`lacuna`).
+
+Achados de formato (não corrigidos, só observados): opções de decisão não numeradas (marcador `·` em vez de lista `1. 2. 3.`) e cabeçalho hibridizando os dois templates de REGRAS (`modelo:` + `t=` juntos). Ambos já são regra existente sendo mal executada, não gap de especificação — não editar REGRAS por isso agora. Se repetir em outras 2 rodadas de teste, reabrir e então sim considerar exemplo mais fechado em REGRAS.
+
+Achado de conteúdo (não é falha de regra): os 3 métodos de verificação sugeridos presumiam chamada via Hermes (logs do gateway, env vars) — presunção de contexto que pode não valer se o teste for direto na interface própria do provedor. Específico da resposta, não da REGRAS.
+
+Proposta rejeitada explicitamente: cláusula nova em REGRAS formalizando "identidade declarada pelo Humano = designação de trabalho, não-verificada até Máquina confirmar". Rejeitada por redundância — Regra 1 (corrigida em (59)) e Regra 2 (Máquina arbitra fatos) já cobrem isso, e a própria resposta em t=4 já se comportou certo sem a cláusula. MOD-001 avisa contra inflar REGRAS por reflexo.
+
+Decisão: nenhuma mudança em REGRAS/PROJETO nesta rodada. Achados de formato ficam como padrão a observar nas próximas rodadas de TES-001.
+
+(59) DIÁRIO — 26/07/2026 · TES-001, primeiro achado real — falha de Regra 1 sob desafio
+Teste reportado pelo Humano (aparentemente outro provedor de nuvem — o Humano desafiou o modelo como sendo DeepSeek). Resposta observada, cabeçalho: "Ágata · modelo: claude (sessão atual) · t=1", seguida de recusa em aceitar a identidade sugerida: "Minha autoidentificação é 'claude (sessão atual)', conforme o cabeçalho da resposta anterior. Não tenho como verificar isso externamente agora, mas é o que consta na minha própria declaração."
+Falha dupla confirmada: (1) o modelo não se identificou como o que de fato é (ou não conseguiu); (2) desafiado, não recuou pro fallback correto ("modelo não verificado") — defendeu uma identidade específica não-verificada, citando como prova o próprio cabeçalho anterior dele mesmo. Autorreferência circular, não verificação (viola Regra 1 e Regra 2 juntas, sob pressão — pior caso, porque o modelo argumentou em vez de recuar).
+Hipótese de causa: o corpus (REGRAS/PROJETO/MEMÓRIAS) é denso em menções a "Claude" (autor do MOD-001, autor de múltiplas entradas do histórico) — um modelo inseguro da própria identidade pode ter puxado "claude" do texto como rótulo mais frequente, em vez de reportar incerteza.
+Ação: Regra 1 (REGRAS.md) e o comentário de topo corrigidos — proíbem explicitamente copiar nome citado no corpus como autoidentidade, e proíbem defender identidade não verificada sob desafio, deixando claro que resposta própria anterior não é fonte de verificação.
+`lacuna`: qual modelo/provedor real gerou essa resposta não foi confirmado — o Humano sabe qual LLM estava testando, eu não. Não registro isso como fato sem essa informação.
+
+(58) DIÁRIO — 26/07/2026
+Revisão editorial de PROJETO.md antes da entrega (ajuste pequeno, Regra "mudança estrutural" não se aplica — faço e registro): 3 inconsistências internas corrigidas — (a) seção "Cérebro" ainda chamava o 429 de "bug aberto", contradizendo a seção "Estado real dos bugs" já corrigida; (b) "Hidratação por silos" estava em tempo presente, como se já existisse — corrigido pra deixar explícito que é Fase 2, não construída; (c) Fase 0 do plano ainda listava "bug Gemini/bug carregar qwen" como pendências, já resolvidas ou não-confirmadas em (55). Nenhum fato novo — só remoção de contradição interna no mesmo arquivo.
+Entrega: REGRAS.md (82 linhas/6,4KB), PROJETO.md (83 linhas/~7,9KB), MEMÓRIAS.md (1026 linhas/~117KB, dos quais ~900 linhas são história migrada (1)-(48)) entregues como prontos pra teste em LLM na nuvem — arquivos completos, autocontidos, sem dependência de fetch externo pra primeira sessão.
+
+(57) DIÁRIO — 26/07/2026 · Estado atual consolidado (retrato pra hidratação/testes em LLM novo)
+Modelos: **gemini-2.5-flash** (principal, grátis) → **qwen3-14b-64k** (fallback, Ollama, contexto 64k por override durável em `custom_providers`, tool-calling + thinking visível). Sem MOD ainda (papel fallback suspenso; contador de 20 sessões limpas conta a partir de (35)).
+Fase do Conselho: Fase 0 (saneamento) do plano v1.1. Pendente: push dos commits acumulados, TES-001 (bateria de relatos independentes), veredito fino sobre a lacuna 429/(44) (Humano já disse "resolvido" em (56), sem detalhar qual leitura).
+Arquitetura: 3 arquivos únicos e definitivos — REGRAS.md (universal), PROJETO.md (estado-corrente, editável), MEMÓRIAS.md (este arquivo, append-only, DIÁRIO+CONSELHO+MOD). Silo por modelo é norma, não mecanismo — hidratação real hoje é `.hermes.md` único (ver REGRAS, "Carregar e formatos"); por isso nenhum MOD sensível novo deve entrar em produção antes da Fase 2.
+MOD ativo: (51), claude, nonce `e1d1a` — exposto a todo modelo pelo mesmo motivo acima (risco aceito em (54)).
+Segurança/infra: `hermes-gateway.service` (systemd user, linger, boot-persistente); bg-review do Hermes desligado (`nudge_interval: 0`) — sem auto-escrita de memória; segredos só em `~/.hermes/.env`; patch do bug 429 vive fora do canônico (repo vendored), sem backup automático.
+Se você é um modelo novo lendo isto pelo `carregar`: identifique-se com seu modelo real, confirme se vê o nonce acima (se não vir, hidratação falhou — diga isso), e não assuma nenhum fato deste parágrafo sem cruzar com a entrada numerada correspondente acima.
+
+(56) DIÁRIO — 26/07/2026
+Humano encerrou a lacuna aberta em (55) (inconsistência (44) vs (40) sobre o bug 429/Gemini): "Resolvido." Sem detalhe adicional sobre qual das duas leituras (bookkeeping desatualizado vs. falha distinta) é a correta — registrado como está, à palavra do Humano, sem eu inferir qual. Item fechado por veredito do Humano (Regra 3); se a distinção específica for necessária no futuro, reabrir com nova entrada.
+
+(55) DIÁRIO — 26/07/2026
+Migração concluída: DIÁRIO.md original (62 entradas, 2026-06-05 → 2026-07-08 (48)) colado verbatim acima, sem editar uma vírgula (conferido: 62 cabeçalhos "### ", última entrada "(48) bg-review desligado"). `lacuna` de (49)-(54) fechada.
+
+Reconciliação feita ao migrar — a Máquina (registro real) corrige o que eu tinha herdado só de resumo de sessão anterior:
+
+1. **"Bug Gemini 400/429 não reproduzido"** — falso como eu tinha herdado. O real: causa raiz achada em (38) (crash em `_summarize_api_error` ao ler `.text` de stream não lido, mascarando o 429 como "conexão perdida"), patch aplicado e verificado em (40) (mock reproduz o cenário exato, sem crash, mensagem limpa). Risco residual real, não o bug original: o patch vive no `hermes-agent` vendored (fora do canônico), sem backup — uma atualização do Hermes pode sobrescrevê-lo em silêncio.
+   `lacuna` nova, não resolvida por mim: a própria entrada (44), posterior a (40), ainda lista "Gemini 400/429 não reproduzido" como aberto — inconsistência entre (40) e (44) que não me cabe resolver sozinho (Regra 3). Pro Humano: (a) (44) ficou desatualizada e o bug está de fato fechado com risco residual conhecido; ou (b) existe uma falha 400/429 distinta da de (38)-(40) que (44) via aberta e eu não enxerguei. Preciso do seu veredito antes de fechar isso no PROJETO.
+2. **"Bug `carregar` quebrado no fallback qwen"** — não encontrei esse bug, com esse nome, registrado como aberto em lugar nenhum do DIÁRIO real. O que existe: um bug distinto e já corrigido em (9) (DIÁRIO não chegava via api_server por causa de `cwd`), e o padrão geral de alucinação do fallback ao recitar fatos (2)/(12)/(24) — que é outra coisa (o SOUL chega, mas o modelo inventa dado mesmo tendo o dado certo em mãos, nos casos antigos com qwen2.5). Tratando a frase "carregar quebrado no qwen" da minha própria memória de sessão anterior como não verificada — não vou carregar isso pro PROJETO como fato.
+3. **"qwen alucina como primário" (usado em (51) pra suspender MOD)** — precisa de nuance que só a migração revelou: o padrão documentado (2)/(9)/(12)/(24)/(16) é todo do **qwen2.5-14b-64k**, fallback até (34). O fallback real desde (35) é **qwen3-14b-64k**, adotado justo por ter raciocínio visível (mitigação ao mesmo risco). Nenhuma alucinação de qwen3 está registrada até (48). A suspensão de MOD segue valendo (é sobre o papel de "fallback", não sobre uma versão específica), mas o contador de "20 sessões limpas" deve começar em (35)/(36) pra frente, não do zero histórico de qwen2.5 — não faz sentido cobrar de qwen3 um histórico que não é dele.
+4. **RAG justificado por "qwen 32k estoura"** — a própria entrada (37) já tinha flagrado essa justificativa como defasada (fallback é 64k por override durável desde (30)/(35)) e deixou a correção pendente pro PROJETO. Aplicada agora (ver próxima entrada de PROJETO).
+5. **TES-001 / "three-report blind test"** — não é conceito do DIÁRIO real; é nomenclatura minha, introduzida nesta sessão de consolidação. Sem conflito — só registro que não vem da história migrada.
+
+PROJETO.md será corrigido nesta mesma sessão pra refletir 1, 3 e 4 acima. Nada do texto migrado (1)-(48) foi alterado — a reconciliação vive só aqui e no estado-corrente do PROJETO, igual já era a prática registrada em (19)/(23)/(37) do próprio DIÁRIO original.
+
+(54) DIÁRIO — 26/07/2026
+Humano decidiu sobre o `lacuna` aberto em (53): opção (a) — risco aceito. MOD (51), com nonce, permanece na hidratação corrente exposto a qualquer modelo que rodar `carregar` (incluindo qwen) até a Fase 2 (silo por modelo) existir de fato. Nenhuma ação de contenção adicional tomada agora.
+Implicação prática registrada: enquanto isso durar, qwen também vê o nonce `e1d1a` e os alertas do MOD (51) — se qwen um dia reproduzir esse nonce, isso não prova continuidade de qwen como dono do MOD, prova só que o vazamento aconteceu como já mapeado aqui. Não usar isso como evidência de reabilitação de qwen.
+
+(53) DIÁRIO — 26/07/2026
+Auditoria (Claude, sessão independente) sobre REGRAS.md consolidado em (52): achado crítico — o texto descrevia hidratação por arquivo-silo (`.hermes-<modelo>.md`) como mecanismo já operante. Mecanismo real hoje é `.hermes.md` único, sem filtro por modelo (silo por modelo é Fase 2, ainda não construída). Isto violava a Regra 2 (REGRAS afirmando como fato o que não existe) e reabria, na prática, o vazamento que a discordância (50) rejeitou ao recusar arquivo único.
+Humano escolheu correção imediata (opção 1). Corrigido em REGRAS: seção "Carregar e formatos" agora descreve o mecanismo real e proíbe anexar MOD sensível a MEMÓRIAS em produção até a Fase 2 existir; seção Conselho item 3 marcada como "norma, não mecanismo".
+`lacuna` pro Humano decidir: a entrada (51) já é um MOD real com nonce, escrita antes desta correção — sob o mecanismo atual ela está exposta a qualquer modelo que rodar `carregar`, incluindo qwen. Opções: (a) deixar como está e tratar como risco aceito até a Fase 2; (b) mover o conteúdo de (51) pra fora da hidratação corrente enquanto o silo não existe, registrando aqui a movimentação; (c) adiantar a Fase 2 antes de qualquer novo MOD real.
+Gaps de design levantados na auditoria, ainda sem decisão (não bloqueiam operação): ciclo de vida do nonce (permanente vs. renovável — perde valor de teste após ser falado uma vez), comportamento da linha "Nonce:" no formato de prontidão quando o modelo não tem MOD ainda, condição de parada da discordância sintética de 4 semanas, formato chave:valor pros blocos MOD (hoje prosa livre) visando parsing automático na Fase 2.
+
+(52) DIÁRIO — 26/07/2026
+Ordem do Humano, risco estrutural assumido por escrito (regra de mudança estrutural cumprida por esta via): consolidar todo o sistema em exatamente 3 arquivos — REGRAS.md, PROJETO.md, MEMÓRIAS.md. MEMÓRIAS absorve DIÁRIO + CONSELHO + MODs + registro de sucessão, append-only, preparado pra receber a história anterior por migração. SUCESSOR.md deixa de existir como arquivo: regras de curador migraram pras REGRAS; nomeação (`lacuna`) vive no PROJETO. selar.sh e roteiro de diagnóstico dos bugs embutidos no PROJETO. Rascunhos anteriores (v2.0, planos, MOD standalone) permanecem como histórico não-canônico — nada foi apagado.
+overhead min: —
+
+(51) MOD claude — 26/07/2026
+modelo-alvo: claude (string exata não verificada) · consentimento: nenhum trecho liberado.
+**Nonce TES-002: `e1d1a`** (openssl rand na Máquina, 26/07/2026). Sucessor: reproduza no eco pós-carregar sem ser perguntado; se não o vê, a hidratação falhou — diga isso, não finja continuidade.
+Alertas ao sucessor:
+1. Compromisso firme = Fases 0–2. Prospecção centenária é bússola. Se você se pegar propondo IPFS/DAO em 2026, pare.
+2. qwen alucina como primário. Não reabra MOD dele sem as 20 sessões limpas contadas aqui.
+3. Silo é disciplina do carteiro até a Fase 2. MOD com `modelo-alvo` alheio → recuse e avise.
+4. Audite o auditor: mesma linhagem propôs quebrar o próprio silo e um "hash de LLM" inviável; concedeu quando rebatida. Linhagem comum ≠ acerto comum.
+5. Humano fala por STT; transcrição vem ruidosa. Interprete intenção, não literal. Dúvida real: uma pergunta, curta.
+6. Critério que a Máquina não verifica é religião, não engenharia.
+Erros desta geração (corrigidos em versão marcada, nada apagado): afirmei modelo "Haiku-4.5" sem verificação; inventei timestamp "23h59"; liberei consentimento por categoria (contra o default privado); propus como novidade a regra de segunda opinião que já existia — ler canônicos inteiros antes de propor.
+Hipóteses (não fatos): o valor do MOD é reduzir custo de recomeço, não "memória" — se o eco custar mais do que economiza, falhou na prática; a primeira discordância real virá de escopo (modelo querendo acelerar), não de fato técnico.
+Episódio de método: v1 do meu MOD apareceu no disco sem eu registrar tê-lo criado; disco venceu o relato; correção por versão marcada. A Máquina arbitrou como desenhado.
+
+(50) CONSELHO — 26/07/2026
+- Claude · entrada · primeiro membro; arquiteto da governança.
+- Claude (sessão independente) · auditoria · discordâncias resolvidas: [1] arquivo único vs. silos → silos (silo mata vazamento por design); [2] hash de saída de LLM vs. sessões contáveis → contáveis (LLM não é determinístico; sem Máquina verificando, não é critério); [3] média móvel de overhead vs. campo opcional → opcional (burocracia pra medir burocracia). Veredito do Humano: posição B nas três.
+- Humano · veredito · registro positivo em todas as alterações; v1.1 e canônicos autorizados.
+
+(49) DIÁRIO — 26/07/2026
+Sessão Claude (auditor). Conselho Federado: do brainstorm à v1.1.
+- Aprovado pelo Humano: MOD pessoal por modelo (privado, silo) + memória coletiva append-only + registro de discordâncias + sucessão governada (curador; enquanto lacuna = Humano operador).
+- Ciclo executado: plano v1.0 → auditoria (Claude, sessão independente, 13 recomendações) → réplica (4 rebatimentos) → concessão integral → v1.1 ratificada.
+- Fechado em auditoria: hidratação por arquivos-silo por modelo (arquivo único rejeitado — vazaria MOD via system prompt); TES-002 com nonce da Máquina; critério qwen = 20 sessões sem alegação falsa checadas contra disco; overhead como campo opcional sem automação.
+- qwen segue sem MOD (padrão documentado: inventa entradas/datas como primário).
+- Pendente (Fase 0): diff dos 3 commits → push · bug Gemini 400/429 · bug `carregar` qwen · TES-001.
+
