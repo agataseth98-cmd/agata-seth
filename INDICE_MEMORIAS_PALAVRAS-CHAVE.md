@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
+  palavras-chave: hipótese, causa, drift, refutada, humano, checando, verdade, app, snapshot, recuperação, arquivo, horário, achado, raiz, volta, lacuna, decidida, adivinhação, obsidian, sync, confirmado, desconectado, fecha, risco, exposição, levantado
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
   palavras-chave: ponto, cego, registrado, reconferido, pedido, humano, achadas, imprecisões, delas, falsa, momento, checagem, desatualizada, dizia, regime, exceção, ativo, próprio, ter, encerrado
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: moc, readmes, sistema, vault, hub, hubs, arquivos, bugfix, link, inicio, pra, redesign, nunca, wikilink, verdade
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
   palavras-chave: varredura, pedida, humano, documentos, históricos, redesenho, movidos, pra, extras, arquivo, redesign
-(319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
-  palavras-chave: kokoro, dora, inicio, obsidian, era, artefato, órfão, moc, descoberta, pros, documentos, soltos, bugfix, próprio, testado
+(319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato …
+  palavras-chave: kokoro, dora, inicio, obsidian, era, artefato
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + …
   palavras-chave: auditoria, pareceres, gpt, terra, qwen
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um c …

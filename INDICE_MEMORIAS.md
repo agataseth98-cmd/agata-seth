@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
-(319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato órfão + MOC de descoberta pros documentos soltos (com bugfix próprio testado)
+(319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato …
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + …
 (317) DIÁRIO — 04/09/2026 · Sincronização: os derivados de MEMÓRIAS ficaram um c …
 (316) DIÁRIO — 04/09/2026 · LibreChat: a tool `query_canon` da Seth exige agente …

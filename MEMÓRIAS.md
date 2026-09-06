@@ -22,6 +22,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
+
+**Pedido do Humano:** seguindo o resumo de pendências, foi checar pessoalmente os dois itens que só ele podia checar (GUI do Obsidian) — "Não achei snapshot nenhum, Sync está desconectado."
+
+**Hipótese refutada, não confirmada — registrado como o que é.** (333) levantou "Recuperação de arquivo do Obsidian" como hipótese mais provável pro drift dos 3 arquivos de hidratação (04/09, 16:38-16:42); (336)/(341) repetiram a recomendação de checar. O Humano checou agora: **nenhum snapshot no horário do achado, em nenhum dos três arquivos.** Isto não prova que a causa era outra coisa — prova que **não era esta**. Duas hipóteses formuladas em (333) (file-recovery, Sync) estão descartadas agora; nenhuma nova foi levantada. **Causa raiz volta a `lacuna: não determinada`**, honestamente, sem forçar um culpado só pra fechar o caso.
+
+**Obsidian Sync — desconectado, confirmado.** Fecha o achado incidental de (336)/(341) ("Sync ligado, não sei se conectado a conta") — está ligado como plugin (`core-plugins.json` confirma), mas sem conta ativa. Nenhum dado do canon saiu por esse caminho.
+
+**O que fica, sem mais pista pra seguir agora:** se o drift não se repetir, fica como incidente isolado e sem causa provada — REGRAS Regra 2 não permite inventar uma pra fechar bonito. Se se repetir, os dois suspeitos mais fortes já foram eliminados, o que estreita a busca da próxima vez.
+
+**Verificação:** relato direto do Humano, checando a Máquina que só ele acessa (GUI) — mesma classe de "relato até a Máquina confirmar" que REGRAS pede pra qualquer executor, aplicada aqui ao próprio Humano checando algo que eu não alcanço.
+
+Nenhum arquivo de comportamento tocado — só registro, fora da quarentena P-8.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: nenhuma verificação própria possível (GUI fora do meu alcance) — registro fiel do relato do Humano, sem inflar pra "causa confirmada" o que é só "duas hipóteses eliminadas". Autorização: Humano, relato direto do que checou. Turno desta sessão: t=26 (contado no contexto).
+
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
 
 **Pedido do Humano:** "Ler o Ponto Cego de novo e conferir se ficou fiel também." Mesmo método de (347): `action: read` real no artefato publicado, cada afirmação conferida contra disco/git/REGRAS antes de aceitar ou corrigir.
