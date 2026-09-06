@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado em (355)): checagem mecânica do relógio de 4 semanas (P-13) implementada + convenção `SINTÉTICO: true` documentada em REGRAS.md — achado, no caminho, que uma estimativa anterior de urgência estava errada
+  palavras-chave: discordância, sintética, item, backlog, reordenado, checagem, mecânica, relógio, semanas, implementada, convenção, sintético, true, documentada, regras, achado, caminho, estimativa, anterior, urgência, estava, errada
 (355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
   palavras-chave: item, glm, membro, pleno, ponto, cego, fechado, implementar, superado, própria, decisão, whatsapp, removido, backlog, ordem, humano, itens, restantes, redefinida, memórias, período, sobe, posição
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, camada, parecer, externo, gpt, terra, achado, real, vazamento, segredo, reproduzido, corrigido, hooks, selftest, proxy, eram, ambiente, deles, máquina, marcador, forjável, era, conhecido
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
   palavras-chave: busca, semântica, implementada, sob, autorização, escrita, humano, ferramenta, secundária, medida, vivo, boa, pra, tema, concreto, fraca, pergunta, abstrata, próprio, sistema
-(326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
-  palavras-chave: bugfix, pré, emptivo, moc, missoes, quebraria, commit, futuro, corrigido, dano, acontecer
+(326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebrari …
+  palavras-chave: bugfix, pré, emptivo, moc, missoes, quebrari
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/miss …
   palavras-chave: causa, real, readmes, órfãos, grafo, memoria, miss
 (324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsi …

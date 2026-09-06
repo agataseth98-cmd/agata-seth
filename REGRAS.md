@@ -308,6 +308,8 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
 
 **Enquanto a Fase 2 não existir:** nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos. MOD real fica em arquivo separado ou permanece rascunho não canônico.
 
+**Marca estrutural de discordância sintética (item 4, checagem mecânica em `scripts/checar_discordancia.sh`, P-13):** quando o relógio de 4 semanas dispara e uma discordância é provocada de propósito (não espontânea), a entrada de MEMÓRIAS que a registra carrega um campo literal e greppável, nunca só prosa solta: `SINTÉTICO: true`, numa linha própria, perto do bloco `Modelo: ... vetor: ...` de fechamento da entrada. Ausência do campo é o padrão até aqui — discordância espontânea, achada no processo. Presença marca que ela foi provocada por ordem do relógio de P-13, não por desacordo real encontrado sozinho. Nunca marcar `SINTÉTICO: true` numa discordância que já nasceu espontânea só pra "contar" pro relógio — isso inverteria o propósito do controle, trocando fricção real por teatro de fricção. Como provocar uma (o quê perguntar, a quem) é julgamento editorial de cada vez, fora do escopo desta convenção — aqui só se define o formato de registro, não o método de provocação.
+
 ---
 
 ## Continuidade mecânica (TES)

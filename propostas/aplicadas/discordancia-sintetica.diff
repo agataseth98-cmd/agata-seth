@@ -1,0 +1,127 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 53c33e9..481223f 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -308,6 +308,8 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
+ 
+ **Enquanto a Fase 2 não existir:** nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos. MOD real fica em arquivo separado ou permanece rascunho não canônico.
+ 
++**Marca estrutural de discordância sintética (item 4, checagem mecânica em `scripts/checar_discordancia.sh`, P-13):** quando o relógio de 4 semanas dispara e uma discordância é provocada de propósito (não espontânea), a entrada de MEMÓRIAS que a registra carrega um campo literal e greppável, nunca só prosa solta: `SINTÉTICO: true`, numa linha própria, perto do bloco `Modelo: ... vetor: ...` de fechamento da entrada. Ausência do campo é o padrão até aqui — discordância espontânea, achada no processo. Presença marca que ela foi provocada por ordem do relógio de P-13, não por desacordo real encontrado sozinho. Nunca marcar `SINTÉTICO: true` numa discordância que já nasceu espontânea só pra "contar" pro relógio — isso inverteria o propósito do controle, trocando fricção real por teatro de fricção. Como provocar uma (o quê perguntar, a quem) é julgamento editorial de cada vez, fora do escopo desta convenção — aqui só se define o formato de registro, não o método de provocação.
++
+ ---
+ 
+ ## Continuidade mecânica (TES)
+diff --git a/scripts/checar_discordancia.sh b/scripts/checar_discordancia.sh
+new file mode 100755
+index 0000000..5f747cf
+--- /dev/null
++++ b/scripts/checar_discordancia.sh
+@@ -0,0 +1,83 @@
++#!/usr/bin/env bash
++# P-13, autorizado pelo Humano ("Autorizado, vai.") como item 2 do backlog
++# "Ponto Cego" reordenado em MEMÓRIAS (355). Cobre REGRAS.md, Regra 4,
++# item 4: "Sem discordância real em 4 semanas -> provocar uma `sintética`,
++# marcada como tal."
++#
++# Detecção puramente MECÂNICA -- acha a data, não decide se falta
++# discordância de verdade nem como provocar uma. Isso é julgamento
++# editorial, fora de escopo aqui por ordem do Humano (item explicitamente
++# excluído ao autorizar este script).
++#
++# Fonte de sinal: entradas rotuladas CONSELHO cujo corpo contém a raiz
++# "discord" (discordância/discordâncias/discorda/discordou/discordante --
++# a raiz não colide com "concordância"/"concorda", que não contêm
++# "discord"). Não basta existir uma entrada CONSELHO qualquer -- a
++# definição em MEMÓRIAS.md ("Como ler este arquivo") diz que CONSELHO
++# cobre entrada, saída OU discordância de modelo; convergência pura
++# (ex.: (276)) não conta pro relógio da Regra 4.
++#
++# AVISA, nunca falha -- mesma doutrina de P-6/P-9: um relógio de atrito
++# saudável não é motivo pra travar a escrita do canon.
++set -uo pipefail
++
++# checar_discordancia [MEMÓRIAS.md]
++checar_discordancia() {
++  local memorias="${1:-MEMÓRIAS.md}"
++  [ -f "$memorias" ] || return 0
++  python3 - "$memorias" <<'PYEOF'
++import re, sys
++from datetime import date
++
++memorias_path = sys.argv[1]
++with open(memorias_path, encoding='utf-8') as f:
++    memorias = f.read()
++
++padrao_entrada = re.compile(
++    r'^\((\d+)\) CONSELHO — (\d{2})/(\d{2})/(\d{4})\b.*$', re.MULTILINE
++)
++posicoes = [(m.start(), m) for m in padrao_entrada.finditer(memorias)]
++
++candidatas = []
++for i, (pos, m) in enumerate(posicoes):
++    fim = posicoes[i + 1][0] if i + 1 < len(posicoes) else len(memorias)
++    corpo = memorias[pos:fim]
++    if re.search(r'discord', corpo, re.IGNORECASE):
++        n = int(m.group(1))
++        dia, mes, ano = int(m.group(2)), int(m.group(3)), int(m.group(4))
++        candidatas.append((n, dia, mes, ano))
++
++if not candidatas:
++    # Bootstrap: nenhuma discordância real jamais registrada -- não dá pra
++    # medir um relógio sem primeiro dado. Silencioso de propósito, mesma
++    # lógica do bootstrap de P-10.
++    sys.exit(0)
++
++n, dia, mes, ano = max(candidatas, key=lambda t: t[0])
++try:
++    data_entrada = date(ano, mes, dia)
++except ValueError:
++    # Data malformada na própria entrada -- não é o que este controle audita.
++    sys.exit(0)
++
++dias = (date.today() - data_entrada).days
++if dias >= 28:
++    print(
++        f"AVISO (P-13): última discordância real registrada em CONSELHO foi "
++        f"({n}), {dia:02d}/{mes:02d}/{ano} -- {dias} dias atrás, >= 28 "
++        f"(REGRAS.md, Regra 4, item 4). Por que importa: sem atrito real "
++        f"por 4 semanas o canon corre o risco de virar eco entre modelos, "
++        f"sem ninguém contestando nada de verdade. O que fazer: provocar "
++        f"uma discordância SINTÉTICA e registrar como entrada CONSELHO "
++        f"marcada como tal (ver convenção estrutural em REGRAS.md) -- "
++        f"nunca disfarçada de discordância real."
++    )
++    sys.exit(1)
++sys.exit(0)
++PYEOF
++}
++
++if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
++  checar_discordancia "${1:-MEMÓRIAS.md}"
++  exit $?
++fi
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 061409a..f4922d6 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -34,6 +34,7 @@ set -uo pipefail
+ _PERIMETRO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ source "$_PERIMETRO_DIR/varredura_segredo.sh"
+ source "$_PERIMETRO_DIR/checar_citacao.sh"
++source "$_PERIMETRO_DIR/checar_discordancia.sh"
+ 
+ cabecalho() {
+   echo "=== $1 ==="
+@@ -832,6 +833,12 @@ main() {
+   p12_backup_verificavel; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-13" "Sem discordância real entre modelos em 4 semanas -> provocar sintética, marcada como tal" "REGRAS, Regra 4, item 4"
++  checar_discordancia
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
+   return "$FALHOU"
+ }

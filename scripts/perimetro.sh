@@ -34,6 +34,7 @@ set -uo pipefail
 _PERIMETRO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_PERIMETRO_DIR/varredura_segredo.sh"
 source "$_PERIMETRO_DIR/checar_citacao.sh"
+source "$_PERIMETRO_DIR/checar_discordancia.sh"
 
 cabecalho() {
   echo "=== $1 ==="
@@ -830,6 +831,12 @@ main() {
   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
   PERIMETRO_ESTADO=""
   p12_backup_verificavel; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-13" "Sem discordância real entre modelos em 4 semanas -> provocar sintética, marcada como tal" "REGRAS, Regra 4, item 4"
+  checar_discordancia
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
   echo
 
   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
