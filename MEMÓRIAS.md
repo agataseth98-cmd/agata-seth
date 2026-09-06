@@ -22,6 +22,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
+
+**Pedido do Humano:** "manda" (o §4.2), depois "Aprovado, manda" (o texto que redigi), depois "Sim, aplica" (a emenda). Três autorizações distintas, cada uma sobre um artefato diferente — pedido do parecer, aceite do parecer, aplicação da emenda.
+
+**Achado real antes de mandar: o texto do §4.2 não existe em lugar nenhum do repositório.** Procurado em REGRAS.md, `redesign/CANON-DELTA.md`, MEMÓRIAS, `extras/arquivo-redesign/AUDITORIA-01.md`, `redesign/LOG.md` — todo lugar só tem o PONTEIRO ("§4.2, armadilha de string do selo declarado pela interface, item aberto de (309)"), nunca o texto proposto de verdade. Ficou no documento externo da auditoria em nuvem de 01/09, nunca salvo no repo. Não mandei nada sem ter o texto — redigi um, com autorização explícita do Humano pra essa via específica.
+
+**Texto redigido, revisado pelo Humano antes de sair.** Baseado no que os ponteiros descreviam: a "armadilha" é presença OU ausência da string retirada (`declarado pela interface, não verificável de dentro`) sendo lida como sinal de cuidado — nos dois sentidos, os dois são engano.
+
+**Pedido formal montado no formato exato que REGRAS "Segunda opinião" exige** — proposta em itens, ponteiro pra objeções conhecidas (nenhuma registrada, primeira formalização), âncora de versão (última MEMÓRIAS lida + sha256 real de REGRAS.md no momento do pedido).
+
+**A rotação de (352)/(353) travou de verdade, duas vezes seguidas — mesmo bug de (340), reproduzido, não hipotético.** Escolheu Gemini as duas vezes (contagem empatada, ordem do roster) e as duas vezes bateu no teto de 15s do OmniRoute (`RATE_LIMIT_EXECUTION_TIMEOUT`, HTTP 504) — o mesmo achado já registrado, agora confirmando que não foi acaso daquela vez. **Contornado manualmente, transparente, sem mudar a lógica de rotação nem penalizar o Gemini** (a falha dele não é culpa de ninguém — é o teto de infraestrutura) — chamei `openrouter/minimax/minimax-m3:free` direto, fora do fluxo automático do script, documentado como bypass manual no próprio registro `.json` salvo.
+
+**Parecer recebido de MiniMax-M3 — auditado antes de aceitar, não aceito por confiança.** "Concorda com ressalva": os 3 pontos centrais da proposta validados (não revive a exigência; identifica o risco nos dois sentidos; ancora identidade onde Regra 1 já ancora). **A ressalva achou um erro real meu:** eu tinha escrito "centenas de entradas históricas" sem contar — `grep -c` real: **87 ocorrências**, não centenas. O modelo remoto pegou uma alegação minha não verificada antes de eu mesmo checar. Emenda proposta ("um volume substancial" em vez de "centenas") aceita depois de confirmar o erro, não antes.
+
+**Aplicado em REGRAS.md**, logo após o parágrafo *Motivo* de Regra 1 — mesmo lugar sugerido na proposta original, com a ressalva do próprio MiniMax sobre "onde exatamente" respondida citando o parágrafo específico.
+
+**Verificação:** busca real em 5 lugares do repositório antes de declarar o texto do §4.2 ausente; formato do pedido conferido contra REGRAS "Segunda opinião" linha a linha antes de mandar; `grep -c` real antes de aceitar a emenda, não confiado no parecer nem na própria memória; `bash scripts/perimetro.sh` → sem FALHA.
+
+Um arquivo sob quarentena P-8: `REGRAS.md`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/secao-4-2-armadilha-selo` — `APROVADO-` criado pelo Humano.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: busca real em 5 arquivos antes de declarar o §4.2 ausente, não assumido; pedido formal montado seguindo REGRAS "Segunda opinião" linha a linha, não de memória; `grep -c` real antes de aceitar a emenda do parecer — a ressalva dele só virou mudança depois de eu confirmar que ele tinha razão, não porque veio de fora. Autorização: Humano, três confirmações distintas ao longo do processo, citadas no topo desta entrada. Turno desta sessão: t=33 (contado no contexto).
+
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
 
 **Pedido do Humano, depois de esclarecer que era "Groq" e não "Grok" (xAI):** "confirme Groq e de um acesso a ele."

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
 (326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
-(324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsidian-skills oficial instalado + memorias.base criado · busca semântica segue recusada, com o porquê explicado
+(324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsi …
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO …
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do …
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 …

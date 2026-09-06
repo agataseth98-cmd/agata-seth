@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
+  palavras-chave: item, ponto, cego, fechado, aberto, desde, redigido, mandado, pra, segunda, opinião, rotação, nova, auditado, aceitar, achou, erro, real, meu, aplicado, regras, emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
   palavras-chave: groq, confirmado, free, tier, real, websearch, memória, treino, somado, roster, remoto, modelos, rotação
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: bugfix, pré, emptivo, moc, missoes, quebraria, commit, futuro, corrigido, dano, acontecer
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
   palavras-chave: causa, real, readmes, órfãos, grafo, memoria, missoes, git, separado, invisível, pro, gerador, missões, ligadas, exceto, segunda, camada, venv, apagado, arquivos, pessoais, era, hermes, apagados
-(324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsidian-skills oficial instalado + memorias.base criado · busca semântica segue recusada, com o porquê explicado
-  palavras-chave: estado, arte, obsidian, llm, pesquisado, skills, oficial, instalado, memorias, base, criado, busca, semântica, segue, recusada, porquê, explicado
+(324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsi …
+  palavras-chave: estado, arte, obsidian, llm, pesquisado, obsi
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO …
   palavras-chave: início, timeline, vazios, era, mesmo, bug, inicio
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do …
