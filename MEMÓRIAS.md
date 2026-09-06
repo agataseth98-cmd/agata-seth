@@ -22,6 +22,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
+
+**Pedido do Humano:** primeira das 8 decisões de expansão, na ordem que o próprio Ponto Cego recomendou. "Varredura primeiro" — pedido antes de qualquer mudança.
+
+**Achado corrigindo a própria proposta, antes de aplicar.** Minha primeira ideia (`redesign/grafo/*` inteiro) pegaria 22 arquivos, 5 deles documentação (`README.md`, `DURABILIDADE.md`, `dsh.md`, `paralelo.md`, `evals/README.md`) — exatamente o risco de "commit legítimo travado sem aviso" que o próprio Ponto Cego nomeou pra este item. Testado de verdade (`case` do bash casa `/` dentro de `*`, confirmado com teste isolado antes de propor): `redesign/grafo/*.py`/`*.sh` cobre subpasta (`flows/consolidacao.py` bate) sem pegar `.md`/`.gbnf`.
+
+**Varredura real, mostrada ao Humano antes de qualquer edição:** 17 arquivos passariam a exigir aprovação (16 `.py`/`.sh` em `redesign/grafo/`, 1 `.yml` em `redesign/librechat/`) — nenhum com par `.diff`/`APROVADO-` prévio, confirmado um a um, então nenhum trava retroativamente commits já feitos.
+
+**Aplicado, testado, aprovado pelo Humano — regime normal cumprido do início ao fim.** `_p8_eh_comportamento()` em `scripts/perimetro.sh` ganhou o padrão novo. Testado antes de pedir aprovação: `redesign/grafo/flows/consolidacao.py`/`rodar_par.sh`/`redesign/librechat/docker-compose.yml` → "EXIGE aprovação"; `redesign/grafo/README.md`/`envelope.gbnf` → "livre" — os dois lados confirmados, não só o caminho feliz. `.diff` preparado por mim; `APROVADO-fecha-lacunas-p8` criado pelo Humano (confirmado no disco antes de eu prosseguir, dois "pode"/"vai" do Humano não foram aceitos como equivalente ao arquivo até o arquivo existir de verdade).
+
+**Verificação:** `git ls-files` real pra listar os 22 vs. os 17; teste isolado do `case` do bash antes de propor o padrão; `_p8_eh_comportamento` chamada real (fonte da função, não reimplementação) pra confirmar os dois lados depois de aplicar; `ls -la` real no marcador antes de seguir, duas vezes (a primeira ainda não existia). `bash scripts/perimetro.sh` → sem FALHA.
+
+Um arquivo sob quarentena P-8: `scripts/perimetro.sh`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/fecha-lacunas-p8` — `APROVADO-` criado pelo Humano, segundo caso desde (346) (o primeiro foi o Tailscale, (350)).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git ls-files` real com os dois padrões antes de decidir qual propor; teste isolado do padrão bash antes de aplicar no arquivo real; chamada real da função (via `source` do trecho, não reescrita) pra confirmar os dois lados do comportamento; `ls -la` real no marcador, sem aceitar "pode"/"vai" como substituto do arquivo. Autorização: Humano, "Autorizado, pode aplicar" seguido do `APROVADO-` real. Turno desta sessão: t=30 (contado no contexto).
+
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
 
 **Pedido do Humano:** "Não vamos nunca deixar nada para depois, Tailscale instalado, logado e funcional." Guiado passo a passo — cada comando com `sudo` ou login interativo, o Humano rodou; cada verificação depois, eu rodei e conferi antes de dizer "confirmado".

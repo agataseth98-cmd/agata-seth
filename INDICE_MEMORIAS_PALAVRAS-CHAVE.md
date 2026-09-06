@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
+  palavras-chave: item, ponto, cego, fechado, lacunas, redesign, grafo, librechat, yml, cobertas, varredura, real, mostrou, arquivos, afetados, trava, retroativo
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
   palavras-chave: tailscale, instalado, logado, publicando, librechat, verdade, primeira, mudança, estrutural, sob, regime, normal, desde, fechamento, par, diff, aprovado, criado, humano, mim
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: início, timeline, vazios, era, mesmo, bug, inicio, agora, readmes, viram, wikilink, verdade
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
   palavras-chave: artefatos, publicados, agata, documentação, sistema, novo, atualizado, perder, foto
-(321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
-  palavras-chave: moc, readmes, sistema, vault, hub, hubs, arquivos, bugfix, link, inicio, pra, redesign, nunca, wikilink, verdade
+(321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 …
+  palavras-chave: moc, readmes, sistema, vault, hub, hubs
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históric …
   palavras-chave: varredura, pedida, humano, documentos, históric
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato …

@@ -1,0 +1,18 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index d84a57a..061409a 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -492,6 +492,13 @@ _p8_eh_comportamento() {
+   case "$1" in
+     REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
+     redesign/router/*|redesign/mcp/*|redesign/librechat/*.mjs|redesign/librechat/*.yaml|redesign/systemd/*) return 0 ;;
++    # Lacuna achada em (340)/(341), fechada 06/09/2026: redesign/grafo/* (nó real
++    # do loop de governança) e redesign/librechat/*.yml (docker-compose, só .yaml
++    # estava coberto) mudavam comportamento sem quarentena. *.py/*.sh cobre
++    # subpasta também (case casa "/"); *.md/*.gbnf ficam de fora de propósito --
++    # varredura real mostrou 17 arquivos afetados, nenhum com aprovação prévia,
++    # nenhum trava retroativo. Autorização do Humano, texto explícito.
++    redesign/grafo/*.py|redesign/grafo/*.sh|redesign/librechat/*.yml) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
