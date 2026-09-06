@@ -22,6 +22,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
+
+**Pedido do Humano:** "removemos o whatsapp e faremos o restante, e subiremos memórias por periodo uma posição, vai" — confirmando também o fechamento do item GLM proposto na resposta anterior.
+
+**GLM membro pleno — fechado por contradição doutrinária, não por falta de tempo.** O item original (Fase 3 do "Plano vigente", `PROJETO.md`) pedia promover GLM a membro pleno do Conselho — bloco MOD próprio, hidratação completa, entrando no contexto de outros modelos. A decisão registrada em (352) ("ninguém tem papel fixo... revogo GLM... rotação justa entre modelos grátis") vai na direção contrária: nenhum modelo específico é promovido, todos competem pela vez. Implementar "GLM membro pleno" agora contradiria a própria doutrina que o Humano acabou de fixar no mesmo dia — fechado sem implementar, `PROJETO.md` marcado `[SUPERADO]`, texto original riscado (não apagado — Regra 4), motivo registrado ali mesmo.
+
+**WhatsApp removido do backlog, por ordem direta.** Não implementado, não fica mais como pendência — o achado do "Ponto Cego" sobre risco de ban de conta pessoal (sem API oficial gratuita, ao contrário do Discord) segue registrado ali como o motivo mais provável da remoção, não confirmado como causa explícita nesta mensagem do Humano — não presumo o porquê além do que foi dito.
+
+**Ordem dos 5 itens restantes, atualizada:** discordância sintética → **MEMÓRIAS por período** (subiu de 4º pra 3º lugar) → Home Assistant → réplica Windows. Home Assistant desceu uma posição, réplica Windows continua por último.
+
+**Verificação:** `bash scripts/perimetro.sh` → sem FALHA. Nenhuma verificação de Máquina aplicável além disso — é registro de decisão do Humano, não achado técnico.
+
+Um arquivo sob quarentena P-8: `PROJETO.md`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/fecha-glm-membro-pleno` — `APROVADO-` criado pelo Humano.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: nenhuma verificação técnica nesta entrada além do perímetro — é registro fiel de decisão do Humano, sem inferir motivo além do dito. Autorização: Humano, "vai" confirmando a proposta anterior + a reordenação nova. Turno desta sessão: t=34 (contado no contexto).
+
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
 
 **Pedido do Humano:** "manda" (o §4.2), depois "Aprovado, manda" (o texto que redigi), depois "Sim, aplica" (a emenda). Três autorizações distintas, cada uma sobre um artefato diferente — pedido do parecer, aceite do parecer, aplicação da emenda.

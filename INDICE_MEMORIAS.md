@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra): achado real de vazamento de segredo reproduzido e corrigido; hooks/selftest do proxy eram do ambiente deles, não da Máquina; marcador forjável já era conhecido
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita do Humano — ferramenta secundária, medida ao vivo: boa pra tema concreto, fraca pra pergunta abstrata sobre o próprio sistema
 (326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
-(325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
+(325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/miss …
 (324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsi …
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO …
 (322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do …

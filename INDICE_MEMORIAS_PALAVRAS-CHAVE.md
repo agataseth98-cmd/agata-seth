@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
+  palavras-chave: item, glm, membro, pleno, ponto, cego, fechado, implementar, superado, própria, decisão, whatsapp, removido, backlog, ordem, humano, itens, restantes, redefinida, memórias, período, sobe, posição
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
   palavras-chave: item, ponto, cego, fechado, aberto, desde, redigido, mandado, pra, segunda, opinião, rotação, nova, auditado, aceitar, achou, erro, real, meu, aplicado, regras, emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: busca, semântica, implementada, sob, autorização, escrita, humano, ferramenta, secundária, medida, vivo, boa, pra, tema, concreto, fraca, pergunta, abstrata, próprio, sistema
 (326) DIÁRIO — 04/09/2026 · Bugfix pré-emptivo: moc-missoes.md de (325) quebraria o P-10 em todo commit futuro — corrigido antes do dano acontecer
   palavras-chave: bugfix, pré, emptivo, moc, missoes, quebraria, commit, futuro, corrigido, dano, acontecer
-(325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
-  palavras-chave: causa, real, readmes, órfãos, grafo, memoria, missoes, git, separado, invisível, pro, gerador, missões, ligadas, exceto, segunda, camada, venv, apagado, arquivos, pessoais, era, hermes, apagados
+(325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/miss …
+  palavras-chave: causa, real, readmes, órfãos, grafo, memoria, miss
 (324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsi …
   palavras-chave: estado, arte, obsidian, llm, pesquisado, obsi
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO …
