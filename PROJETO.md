@@ -302,7 +302,7 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
 - **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
 - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
 - **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
-- **Fase 3:** GLM membro pleno (MOD-002) · válvula de discordância sintética.
+- **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · válvula de discordância sintética.
 - **Fase 4:** MEMÓRIAS por período (hot/warm/cold) · congelar a ~500 linhas com `git tag` + SHA-256 · `selar.sh --check` · Capivara com consentimento por trecho.
 - **Fase 5 (sem prazo):** espelho IPFS, curador nomeado, DAO.
 
