@@ -22,6 +22,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
+
+**Pedido do Humano, depois de esclarecer que era "Groq" e não "Grok" (xAI):** "confirme Groq e de um acesso a ele."
+
+**Confirmado de verdade, não de memória de treino — achado que valia a pena checar.** Meu corte de conhecimento é janeiro/2026; "hoje" é setembro/2026, 8 meses de distância — tempo o bastante pra uma política de free tier mudar. Rodei `WebSearch` (não assumi do que já sabia): Groq **tem free tier real, sem cartão** — 30 requisições/minuto, 6.000 tokens/minuto, 14.400 requisições/dia por organização, cobre **todos** os modelos suportados, incluindo `gpt-oss-120b` (o que já está registrado no OmniRoute desde P1-03). Fontes: eesel.ai/blog/groq-pricing, cloudzero.com/blog/groq-pricing, tokenmix.ai/blog/groq-api-pricing.
+
+**Somado ao roster de (352).** `ROSTER` em `scripts/conselho_remoto.py` ganhou `groq/openai/gpt-oss-120b`, quarta entrada. Testado offline, 5 chamadas seguidas num estado temporário: os 4 modelos passam uma vez cada (round-robin correto), o 5º volta pro primeiro do roster — mesmo comportamento de (352), agora com 4 em vez de 3.
+
+**`PROJETO.md` atualizado no mesmo lugar da entrada anterior** — a nota "Groq considerado, free tier não confirmado" virou "Groq confirmado 06/09/2026 via WebSearch real... fontes em MEMÓRIAS (353)".
+
+**Sobre reaproveitar a aprovação de (352):** o `.diff` que o Humano tinha aprovado (`propostas/APROVADO-rotacao-conselho-remoto`) foi escrito ANTES desta adição — o conteúdo do par mudou depois do `touch`. Não tratei o marcador antigo como cobrindo a mudança nova por conta própria: regenerei o `.diff` com o conteúdo atual (rotação de 3 + Groq juntos, ainda não commitados desde (352)) e pedi confirmação de novo, mesmo nome de marcador — proporcional ao risco (mesma mecânica já aprovada, um item a mais no roster), não uma dança de portão nova do zero, mas também não uma reaprovação silenciosa.
+
+**Verificação:** `WebSearch` real, 3 fontes cruzadas, não uma só; teste offline da rotação com 4 entradas, 5 chamadas, resultado conferido linha a linha.
+
+Dois arquivos sob quarentena P-8, mesmo par de (352) ainda pendente: `scripts/conselho_remoto.py`, `PROJETO.md`. `.diff` regenerado em `propostas/rotacao-conselho-remoto.diff`; `APROVADO-` pedido de novo ao Humano antes de commitar.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `WebSearch` real em vez de responder da memória de treino, justificado pela distância real entre o corte de conhecimento e a data de hoje; teste offline real da rotação de 4 antes de considerar pronto; decisão explícita de não reaproveitar uma aprovação cujo conteúdo mudou, registrada como tal. Autorização: Humano, "confirme Groq e de um acesso a ele" — a confirmação em si (WebSearch) não precisava de portão (é investigação, não mudança); a mudança de código pede reconfirmação do `APROVADO-`. Turno desta sessão: t=32 (contado no contexto).
+
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
 
 **Pedido do Humano, que começou como resposta ao item 2 do Ponto Cego (§4.2) e virou decisão maior:** "ninguém tem papel fixo, o sistema tem razão, revogo GLM" — depois, especificando: "deve ser decidido entre modelos gratuitos sob um regime de regras justas de rotatividade."
