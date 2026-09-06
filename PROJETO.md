@@ -14,11 +14,19 @@ são trabalhadores substituíveis; nenhuma ferramenta É o sistema. Hermes-gatew
 (desabilitado); **LibreChat** (lane de conversa, aponta no `seth_gateway` `:20126`) e a voz
 (kokoro-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
 Tailscale serve, nunca internet pública. (Open WebUI foi trocado por LibreChat em
-2026-09-03, MEMÓRIAS (313).) **Tailscale não está instalado nesta Máquina (achado
-05/09/2026, MEMÓRIAS (340), conferido com `which`/`pacman -Qi`/`systemctl status`, os três
-negativos) — o texto acima descreve o desenho pretendido, não um mecanismo ativo hoje.
-Mesma classe de lacuna que (126) já corrigiu uma vez para a autenticação; desta vez é sobre
-existência do programa.** `lacuna`: instalar/configurar fica pro Humano decidir.
+2026-09-03, MEMÓRIAS (313).) **Tailscale instalado e funcional (06/09/2026, MEMÓRIAS
+(350)):** `tailscale` 1.102.3, `tailscaled` ativo/habilitado, logado (`agata.seth98@`,
+IP `100.89.222.23`), `tailscale serve --bg 3080` publica o LibreChat em
+`https://cachyos-phn16-71.tailcb3be2.ts.net/` — só no tailnet, nunca `funnel` (que
+exporia pra internet pública). `~/librechat/.env`: `DOMAIN_CLIENT`/`DOMAIN_SERVER`
+apontam pro hostname do tailnet, `TRUST_PROXY=1`. Testado ao vivo: `/health` responde
+200 local e pelo tailnet, sem erro de proxy no log. **Achado incidental, não
+bloqueante:** health check do próprio `tailscale status` avisa que `systemd-resolved`
+e `NetworkManager` estão "wired together incorrectly" — MagicDNS (resolver o nome
+curto sem o domínio `.ts.net` inteiro) pode não funcionar; não impede acesso pelo
+hostname completo nem pelo IP, não investigado a fundo. Histórico da lacuna anterior
+(não instalado, achado em (340)): estava correto quando escrito, corrigido aqui, não
+apagado — MEMÓRIAS (350) registra a instalação passo a passo.
 
 Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada usa grafias antigas; não se corrige história.
 
