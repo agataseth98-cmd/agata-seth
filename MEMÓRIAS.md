@@ -22,6 +22,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
+
+**Pedido do Humano, que começou como resposta ao item 2 do Ponto Cego (§4.2) e virou decisão maior:** "ninguém tem papel fixo, o sistema tem razão, revogo GLM" — depois, especificando: "deve ser decidido entre modelos gratuitos sob um regime de regras justas de rotatividade."
+
+**A decisão aplica o próprio princípio-espelho do sistema a si mesma.** `redesign/ROADMAP.md` já dizia, desde a Fase 0 do redesenho: "os modelos são trabalhadores substituíveis; nenhuma ferramenta É o sistema." Até agora isso valia pra Hermes (removido em (312)), pra Open WebUI (trocado em (313)) — mas o GLM, como modelo do Conselho Remoto, tinha um papel fixo desde (182)/(206), nunca revisto sob esse princípio. O Humano fechou a lacuna.
+
+**Investigado antes de desenhar — o pool real do OmniRoute, não assumido.** `redesign/router/PROVEDORES.md` mostra que "Conselho" hoje é prioridade fixa (`zai/glm-4.7-flash → gemini/gemini-2.5-flash`, `strategy=priority`), não rotação — mudar de verdade exigia sair da combo, não só trocar um nome. Candidatos com free tier **confirmado** no canon: `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `openrouter/minimax/minimax-m3:free`. Groq (`groq/openai/gpt-oss-120b`) considerado e **deixado de fora** — free tier não confirmado explicitamente em `PROVEDORES.md`, perguntado ao Humano antes de incluir, não presumido.
+
+**Desenho, autorizado depois do portão das três perguntas (reversibilidade/alcance/silêncio, todas respondidas antes do "autorizado"):** `scripts/conselho_remoto.py` ganhou `ROSTER` (os 3 modelos), `escolher_modelo()` (menos usos bem-sucedidos primeiro, empate por ordem fixa do roster — determinístico, nunca aleatório, auditável), `_registrar_sucesso()` (só conta ponto se a chamada realmente teve sucesso — falha não penaliza, pra não afundar um modelo bom por um erro de rede isolado). Estado em `memoria/missoes/conselho-remoto/rotacao-estado.json` (mesma pasta que já guarda o backoff, local, gitignorado). **Invariante do script preservado, não quebrado:** continua UMA chamada externa por invocação — se o escolhido falhar, aborta como sempre abortou, não laça pra outro sozinho.
+
+**Testado em duas camadas, não só "deve funcionar":**
+1. **Lógica isolada, offline:** 4 chamadas seguidas de `escolher_modelo()`/`_registrar_sucesso()` num estado temporário — confirmado round-robin correto (zero→zero→zero→GLM, depois pula pro próximo cada vez, empate volta pro início do roster).
+2. **Chamada real, com pedido de verdade:** rodei o script com um pedido de teste real — escolheu GLM (todos zerados), chamou o OmniRoute de verdade (`zai/glm-4.7-flash` direto, não mais a combo), recebeu resposta real (51+9=60 tokens, US$0), gravou o estado real (`{"zai/glm-4.7-flash": 1, "gemini/...": 0, "openrouter/...": 0}`). O "FORA DO FORMATO" que saiu depois é esperado — o pedido de teste não tinha as 4 partes de um parecer de verdade, não é falha do mecanismo de rotação.
+
+**`PROJETO.md` atualizado, história preservada, não editada.** O parágrafo "Modelo escolhido: GLM-4.7-Flash" de 17/08 continua ali, verbatim — é fato histórico de quando a escolha foi feita, Regra 4 não permite apagar. Um parágrafo novo, antes dele, explica que foi superado por esta decisão, com a ordem do Humano citada.
+
+**O que fica em aberto, nomeado:** Groq entra no roster se/quando o Humano confirmar o free tier dele — item separado, não decidido aqui.
+
+**Verificação:** `py_compile` real; teste isolado da lógica de rotação (4 chamadas, estado temporário, resultado conferido linha a linha); chamada real ao OmniRoute com pedido de teste, estado de rotação real inspecionado depois; `bash scripts/perimetro.sh` → sem FALHA.
+
+Dois arquivos sob quarentena P-8: `scripts/conselho_remoto.py`, `PROJETO.md`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/rotacao-conselho-remoto` — `APROVADO-` criado pelo Humano, terceiro caso desde (346).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura real de `redesign/router/PROVEDORES.md` antes de desenhar o roster, não assumido de memória; teste isolado da função de rotação antes de rodar contra o sistema real; chamada real ao OmniRoute (não simulada) com inspeção do estado de rotação real depois. Autorização: Humano, "ninguém tem papel fixo... revogo GLM" + "decidido entre modelos gratuitos sob regime de rotatividade justa" + "Autorizado, aplica" depois do portão. Turno desta sessão: t=31 (contado no contexto).
+
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
 
 **Pedido do Humano:** primeira das 8 decisões de expansão, na ordem que o próprio Ponto Cego recomendou. "Varredura primeiro" — pedido antes de qualquer mudança.

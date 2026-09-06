@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Númer
 (325) DIÁRIO — 04/09/2026 · Causa real dos READMEs órfãos no grafo: memoria/missoes/ é git separado, invisível pro gerador · missões ligadas (exceto segunda-camada/) · venv de 176MB apagado · arquivos pessoais da era Hermes apagados
 (324) DIÁRIO — 04/09/2026 · Estado da arte 2026 do Obsidian+LLM pesquisado: obsidian-skills oficial instalado + memorias.base criado · busca semântica segue recusada, com o porquê explicado
 (323) DIÁRIO — 04/09/2026 · "Início e timeline vazios" era o mesmo bug do INICIO.md de (319), agora em timeline.md · READMEs viram wikilink de verdade
-(322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do Sistema" (novo) e "Sistema Agata" atualizado sem perder a foto de 03/09
+(322) DIÁRIO — 04/09/2026 · Dois artefatos publicados: "Agata — Documentação do …
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 …
 (320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históric …
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato …
