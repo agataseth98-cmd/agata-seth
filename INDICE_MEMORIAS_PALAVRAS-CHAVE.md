@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
+  palavras-chave: tailscale, instalado, logado, publicando, librechat, verdade, primeira, mudança, estrutural, sob, regime, normal, desde, fechamento, par, diff, aprovado, criado, humano, mim
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
   palavras-chave: hipótese, causa, drift, refutada, humano, checando, verdade, app, snapshot, recuperação, arquivo, horário, achado, raiz, volta, lacuna, decidida, adivinhação, obsidian, sync, confirmado, desconectado, fecha, risco, exposição, levantado
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: artefatos, publicados, agata, documentação, sistema, novo, atualizado, perder, foto
 (321) DIÁRIO — 04/09/2026 · MOC "READMEs do sistema" no vault (hub dos hubs, 14 arquivos) + bugfix: link do INICIO pra moc-redesign nunca foi wikilink de verdade
   palavras-chave: moc, readmes, sistema, vault, hub, hubs, arquivos, bugfix, link, inicio, pra, redesign, nunca, wikilink, verdade
-(320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históricos do redesenho movidos pra extras/arquivo-redesign/
-  palavras-chave: varredura, pedida, humano, documentos, históricos, redesenho, movidos, pra, extras, arquivo, redesign
+(320) DIÁRIO — 04/09/2026 · Varredura pedida pelo Humano: 50 documentos históric …
+  palavras-chave: varredura, pedida, humano, documentos, históric
 (319) DIÁRIO — 04/09/2026 · Kokoro pf_dora + INICIO.md do Obsidian era artefato …
   palavras-chave: kokoro, dora, inicio, obsidian, era, artefato
 (318) DIÁRIO — 04/09/2026 · Auditoria de dois pareceres (gpt-5.6-terra, Qwen) + …

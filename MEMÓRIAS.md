@@ -22,6 +22,29 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
 
+(350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
+
+**Pedido do Humano:** "Não vamos nunca deixar nada para depois, Tailscale instalado, logado e funcional." Guiado passo a passo — cada comando com `sudo` ou login interativo, o Humano rodou; cada verificação depois, eu rodei e conferi antes de dizer "confirmado".
+
+**Passo a passo, cada um verificado antes do próximo, não só assumido:**
+1. `sudo pacman -S tailscale` (Humano) → `pacman -Qi tailscale` real: `1.102.3-1.1`, instalado.
+2. `sudo systemctl enable --now tailscaled` (Humano) → `systemctl is-active`/`is-enabled`: `active`/`enabled`.
+3. `sudo tailscale up` (Humano, login interativo no navegador) → `tailscale status`: `100.89.222.23`, `agata.seth98@`, logado.
+4. `sudo tailscale set --operator=orusoua` (Humano — `sudo -n` sem senha em cache falhou aqui, tentei antes de pedir, não assumi que eu conseguiria) → confirmado no JSON de status.
+5. `tailscale serve --bg 3080` (eu, sem sudo, já habilitado o operador) → primeira tentativa: bloqueada, "Serve is not enabled on your tailnet" — recurso de CONTA, não de dispositivo. Humano habilitou no painel (`login.tailscale.com/f/serve?...`). Segunda tentativa → `https://cachyos-phn16-71.tailcb3be2.ts.net/`, publicado.
+6. `~/librechat/.env`: `DOMAIN_CLIENT`/`DOMAIN_SERVER` trocados pro hostname do tailnet, `TRUST_PROXY=1` acrescentado — editado por mim (arquivo local, fora do git, mesma convenção de `CHAVES.md`).
+7. `docker compose up -d --force-recreate librechat` — recriado, testado: `/health` → 200 local **e** pelo tailnet, sem erro de proxy no log.
+
+**Achado incidental, não bloqueante:** o próprio `tailscale status` avisa que `systemd-resolved`/`NetworkManager` estão "wired together incorrectly" — MagicDNS pode não resolver o nome curto. Não impede o acesso (hostname completo e IP funcionam); não investigado a fundo, registrado como está.
+
+**Primeira mudança estrutural desde o fechamento do regime de exceção em (346), sob o regime que voltou.** `PROJETO.md` mudou (linha do Tailscale corrigida de "não instalado" pra "instalado e funcional") — arquivo sob quarentena P-8. Seguindo o que (346) registrou: eu preparei o `.diff`, mas **não criei o `APROVADO-` sozinho** — pedi pro Humano criar, mesmo em regime de exceção fechado sendo mais lento. `propostas/aplicadas/tailscale-instalado.diff` + `propostas/aplicadas/APROVADO-tailscale-instalado` (criado pelo Humano).
+
+**Verificação:** cada um dos 7 passos, checado com comando real antes de avançar pro próximo — nenhum "deve ter funcionado" sem `tailscale status`/`systemctl`/`curl` confirmando. `bash scripts/perimetro.sh` → sem FALHA.
+
+Um arquivo sob quarentena P-8: `PROJETO.md`. Par `.diff`/`APROVADO-` em `propostas/aplicadas/tailscale-instalado` — `APROVADO-` criado pelo Humano, não pelo executor, primeiro caso desde (346).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `pacman -Qi`/`systemctl is-active`/`is-enabled`/`tailscale status`/`curl` reais depois de cada passo, nunca aceito "feito" do Humano sem conferir o que dava pra conferir; `sudo -n` tentado e rejeitado antes de pedir ajuda, não presumido de antemão. Autorização: Humano, pedido direto, "não vamos deixar nada pra depois". Turno desta sessão: t=27 (contado no contexto).
+
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
 
 **Pedido do Humano:** seguindo o resumo de pendências, foi checar pessoalmente os dois itens que só ele podia checar (GUI do Obsidian) — "Não achei snapshot nenhum, Sync está desconectado."
