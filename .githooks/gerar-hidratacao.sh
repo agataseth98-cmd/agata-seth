@@ -160,14 +160,24 @@ gerar_indice() {
     # no arquivo físico (mais recente primeiro) e o bloco migrado (mais
     # antigo) por último -- a concatenação abaixo espelha isso, condicional
     # ao marcador existir. Antes da migração, ordem original preservada.
+    #
+    # `|| true` no grep do bloco migrado (aqui e nas outras 3 ocorrências
+    # deste padrão no arquivo): achado real, MEMÓRIAS por período (357) --
+    # o bloco migrado pode ter saído fisicamente de MEMÓRIAS.md (quente),
+    # relocado pro chunk frio mais antigo. Zero match aqui é ESPERADO
+    # depois daquela migração, não erro -- sem o guard, `grep` sem match
+    # sai 1, o pipe encosta em `set -o pipefail`, e `set -e` abortava o
+    # hook inteiro (achado travando o primeiro commit real depois da
+    # migração -- pre-commit falhava sem imprimir nada depois do
+    # `RESULTADO GERAL: OK` do perimetro.sh, silencioso até rodar com `-x`).
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     else
       {
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     fi
@@ -310,12 +320,12 @@ gerar_indice_palavras_chave() {
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py
     else
       {
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
+        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py

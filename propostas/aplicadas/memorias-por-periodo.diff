@@ -1,0 +1,857 @@
+diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
+index 4d858df..633555e 100755
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -160,14 +160,24 @@ gerar_indice() {
+     # no arquivo físico (mais recente primeiro) e o bloco migrado (mais
+     # antigo) por último -- a concatenação abaixo espelha isso, condicional
+     # ao marcador existir. Antes da migração, ordem original preservada.
++    #
++    # `|| true` no grep do bloco migrado (aqui e nas outras 3 ocorrências
++    # deste padrão no arquivo): achado real, MEMÓRIAS por período (357) --
++    # o bloco migrado pode ter saído fisicamente de MEMÓRIAS.md (quente),
++    # relocado pro chunk frio mais antigo. Zero match aqui é ESPERADO
++    # depois daquela migração, não erro -- sem o guard, `grep` sem match
++    # sai 1, o pipe encosta em `set -o pipefail`, e `set -e` abortava o
++    # hook inteiro (achado travando o primeiro commit real depois da
++    # migração -- pre-commit falhava sem imprimir nada depois do
++    # `RESULTADO GERAL: OK` do perimetro.sh, silencioso até rodar com `-x`).
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
+     else
+       {
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
+     fi
+@@ -310,12 +320,12 @@ gerar_indice_palavras_chave() {
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+         | python3 scripts/extrair_palavras_chave.py
+     else
+       {
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //'
++        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+         grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+         | python3 scripts/extrair_palavras_chave.py
+diff --git a/PROJETO.md b/PROJETO.md
+index 85fcc91..b30fc1d 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -302,8 +302,8 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
+ - **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
+ - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+ - **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
+-- **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · válvula de discordância sintética.
+-- **Fase 4:** MEMÓRIAS por período (hot/warm/cold) · congelar a ~500 linhas com `git tag` + SHA-256 · `selar.sh --check` · Capivara com consentimento por trecho.
++- **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · ~~válvula de discordância sintética~~ **[IMPLEMENTADO 06/09/2026, MEMÓRIAS (356)]** — `scripts/checar_discordancia.sh`, P-13.
++- **Fase 4: MEMÓRIAS por período — [IMPLEMENTADO 06/09/2026, MEMÓRIAS (357)], período de aderência até 04/10/2026.** Quente (`MEMÓRIAS.md`) / morno (`MEMORIAS-MORNO.md`) / frio (`MEMORIAS-FRIO-<data>[-N].md`, congelado a ~500 linhas, `git tag` + SHA-256 via `scripts/selar.sh`, `--check` agora é P-14). Migração e verificação: `scripts/migrar_periodo.py` + `scripts/verificar_migracao_periodo.py`. P-5 e P-7 já cobrem as três camadas; **fila de aderência** (dentro da janela, não bug ainda): `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`, `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py`, `scripts/consultar_indice.py`, `scripts/gerar_indice_derivado.py` — todos ainda leem só `MEMÓRIAS.md`, resultado sobre história relocada fica incompleto até serem atualizados. **Capivara com consentimento por trecho:** ainda não implementado — Capivara é projeto externo, à parte, sem acesso desenhado ainda; fica pra depois da janela de aderência, item novo, não coberto por esta rodada.
+ - **Fase 5 (sem prazo):** espelho IPFS, curador nomeado, DAO.
+ 
+ **Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
+diff --git a/scripts/migrar_periodo.py b/scripts/migrar_periodo.py
+new file mode 100644
+index 0000000..6b6d5b4
+--- /dev/null
++++ b/scripts/migrar_periodo.py
+@@ -0,0 +1,230 @@
++#!/usr/bin/env python3
++"""PROTÓTIPO, teste em clone descartável -- item "MEMÓRIAS por período" do
++backlog "Ponto Cego", autorizado pelo Humano ("Autorizado, vai.") só pra
++construir e testar o par gerar+verificar, NADA ainda no repositório real.
++
++Move entradas de MEMÓRIAS.md (quente) pra MEMORIAS-MORNO.md (morno) quando
++saem do orçamento de caracteres que a hidratação já usa de verdade
++(`JANELA_ORCAMENTO_CHARS`, `.githooks/gerar-hidratacao.sh` -- lido do
++arquivo real, nunca copiado a mão, pra não haver deriva entre os dois
++números). Quando morno ultrapassa ~500 linhas (linha única do PROJETO.md,
++Fase 4), congela o trecho mais ANTIGO dele (as entradas que já eram as
++mais antigas de morno) num chunk frio novo, selado com scripts/selar.sh
++(SHA-256 em SELOS.txt) e uma tag de git.
++
++Nunca corta uma entrada ao meio -- cada corte é em fronteira de entrada,
++igual a toda janela deste sistema (mesmo princípio de
++`.githooks/gerar-hidratacao.sh`, `janela_memorias`).
++
++Cada chamada é DELIBERADA: move o que precisa mover nesta passada só, não
++tenta prever passadas futuras. Rodar de novo processa o que ainda resta
++(morno pode continuar acima do teto depois de uma passada, se o histórico
++acumulado for grande -- bootstrap tem essa forma, dia a dia normal não).
++
++Uso: migrar_periodo.py [--aplicar] (sem --aplicar, só relata o que faria)
++"""
++import argparse
++import hashlib
++import re
++import sys
++from datetime import datetime, timezone
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parent.parent
++MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
++PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
++PADRAO_ENTRADA = re.compile(
++    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
++    re.MULTILINE,
++)
++TETO_LINHAS_FRIO = 500
++
++
++def ler_orcamento_quente() -> int:
++    """Lê JANELA_ORCAMENTO_CHARS de .githooks/gerar-hidratacao.sh -- fonte
++    única, evita o número duplicado (e divergente) em dois arquivos."""
++    texto = (RAIZ / ".githooks/gerar-hidratacao.sh").read_text(encoding="utf-8")
++    m = re.search(r"^JANELA_ORCAMENTO_CHARS=(\d+)", texto, re.MULTILINE)
++    if not m:
++        raise SystemExit("JANELA_ORCAMENTO_CHARS não encontrado em gerar-hidratacao.sh -- não presumo o valor.")
++    return int(m.group(1))
++
++
++def dividir(texto: str):
++    """Mesma lógica de scripts/verificar_migracao_memorias.py -- ver lá os
++    comentários de cada achado real por trás de cada decisão de parsing."""
++    matches = list(PADRAO_ENTRADA.finditer(texto))
++    migrados = list(PADRAO_MIGRADO.finditer(texto))
++    if len(migrados) > 1:
++        raise SystemExit(f"{len(migrados)} headings de bloco migrado -- ambíguo, abortando.")
++    idx_migrado = migrados[0].start() if migrados else -1
++    if not matches:
++        return (texto[idx_migrado:], []) if idx_migrado != -1 else (None, [])
++    cortes_set = {m.start() for m in matches}
++    if idx_migrado != -1:
++        cortes_set.add(idx_migrado)
++    cortes = sorted(cortes_set) + [len(texto)]
++    bloco_migrado, entradas = None, []
++    for inicio, fim in zip(cortes, cortes[1:]):
++        pedaco = texto[inicio:fim]
++        if inicio == idx_migrado:
++            bloco_migrado = pedaco
++        else:
++            entradas.append(pedaco)
++    return bloco_migrado, entradas
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--aplicar", action="store_true", help="escreve os arquivos; sem isso só relata")
++    args = ap.parse_args()
++
++    caminho_quente = RAIZ / "MEMÓRIAS.md"
++    texto_quente = caminho_quente.read_text(encoding="utf-8")
++
++    pos_marcador = texto_quente.index(MARCADOR)
++    fim_linha_marcador = texto_quente.index("\n", pos_marcador) + 1
++    cabecalho = texto_quente[:fim_linha_marcador]
++    corpo = texto_quente[fim_linha_marcador:]
++
++    bloco_migrado, entradas = dividir(corpo)
++    bloco_migrado_novo_de_quente = bloco_migrado is not None
++    # Bloco migrado é sempre o conteúdo mais antigo de todos -- fica de fora
++    # da lista de entradas datadas, tratado à parte, sempre destinado ao
++    # chunk frio mais antigo (nunca compete por espaço em quente/morno).
++
++    orcamento = ler_orcamento_quente()
++    acumulado = 0
++    corte = len(entradas)
++    for i, e in enumerate(entradas):
++        if acumulado + len(e) > orcamento and i > 0:
++            corte = i
++            break
++        acumulado += len(e)
++    entradas_quente = entradas[:corte]
++    entradas_envelhecidas = entradas[corte:]
++
++    print(f"orçamento quente (lido de gerar-hidratacao.sh): {orcamento} chars")
++    print(f"entradas totais após marcador: {len(entradas)}")
++    print(f"ficam em quente: {len(entradas_quente)} ({acumulado} chars)")
++    print(f"saem pra morno nesta passada: {len(entradas_envelhecidas)}")
++    if bloco_migrado:
++        print(f"bloco migrado: {len(bloco_migrado)} chars, {bloco_migrado.count(chr(10))} linhas -- vai pro chunk frio mais antigo")
++
++    caminho_morno = RAIZ / "MEMORIAS-MORNO.md"
++    if caminho_morno.exists():
++        texto_morno_antigo = caminho_morno.read_text(encoding="utf-8")
++        pos_m = texto_morno_antigo.index(MARCADOR)
++        fim_m = texto_morno_antigo.index("\n", pos_m) + 1
++        cabecalho_morno = texto_morno_antigo[:fim_m]
++        corpo_morno_antigo = texto_morno_antigo[fim_m:]
++        bloco_migrado_morno_antigo, entradas_morno_antigas = dividir(corpo_morno_antigo)
++        if bloco_migrado_morno_antigo is not None:
++            if bloco_migrado is not None:
++                raise SystemExit("bloco migrado já existe em morno E teria que entrar de novo -- duplicação, abortando.")
++            bloco_migrado = bloco_migrado_morno_antigo
++    else:
++        cabecalho_morno = (
++            "# MEMORIAS-MORNO.md — camada morna do sistema Agata\n\n"
++            "Gerado por scripts/migrar_periodo.py a partir de MEMÓRIAS.md (quente) quando entradas "
++            "saem do orçamento de hidratação. Mesma garantia de MEMÓRIAS.md (Regra 4, append-only) — "
++            "só muda ONDE a entrada mora, nunca o conteúdo dela. Ver REGRAS.md, \"Como ler este arquivo\".\n\n"
++            "---\n\n"
++            f"{MARCADOR} -- não editar esta linha à mão) -->\n"
++        )
++        entradas_morno_antigas = []
++
++    # Morno cresce pelo topo, igual quente: entrada recém-envelhecida entra
++    # logo abaixo do marcador, mais recente primeiro -- entradas_envelhecidas
++    # já vem nessa ordem (era o final de quente, que também é top-down).
++    entradas_morno_nova = entradas_envelhecidas + entradas_morno_antigas
++
++    # Congelamento: corta o trecho mais ANTIGO de morno (fim da lista) em
++    # blocos de ~500 linhas, fronteira sempre em entrada inteira -- nunca no
++    # meio. Acumula do fim pra trás até estourar o teto.
++    #
++    # Achado real testando (357): se o total de morno JAMAIS estoura o teto,
++    # o laço original chegava a i=0 sem nunca disparar o `break` -- e
++    # `corte_frio` ficava em 0, congelando TUDO (mesmo 2 entradas, 42
++    # linhas, bem abaixo de 500). Efeito: morno nunca conseguia reter um
++    # resíduo pequeno, sempre drenava a zero -- justamente o oposto de "só
++    # congela quando esfria de verdade". Corrigido: só entra no corte se o
++    # total realmente ultrapassa o teto; do contrário nada congela.
++    total_linhas = sum(e.count("\n") + 1 for e in entradas_morno_nova)
++    corte_frio = len(entradas_morno_nova)
++    if total_linhas > TETO_LINHAS_FRIO:
++        linhas_acc = 0
++        for i in range(len(entradas_morno_nova) - 1, -1, -1):
++            linhas_e = entradas_morno_nova[i].count("\n") + 1
++            if linhas_acc + linhas_e > TETO_LINHAS_FRIO and linhas_acc > 0:
++                break
++            linhas_acc += linhas_e
++            corte_frio = i
++    entradas_frio_novas = entradas_morno_nova[corte_frio:]
++    entradas_morno_final = entradas_morno_nova[:corte_frio]
++
++    print(f"morno final: {len(entradas_morno_final)} entradas")
++    if entradas_frio_novas:
++        print(f"congela pra frio nesta passada: {len(entradas_frio_novas)} entradas ({linhas_acc} linhas)")
++    else:
++        print("nada atinge o teto de congelamento ainda")
++
++    mudou = bool(entradas_envelhecidas) or bool(entradas_frio_novas) or bloco_migrado_novo_de_quente
++    if not mudou:
++        print("\nnada a migrar -- quente já cabe no orçamento e morno não atinge o teto de congelamento.")
++        return
++
++    if not args.aplicar:
++        print("\n(--aplicar não passado -- nada escrito no disco)")
++        return
++
++    novo_quente = cabecalho + "".join(entradas_quente)
++    caminho_quente.write_text(novo_quente, encoding="utf-8")
++
++    novo_morno = cabecalho_morno + "".join(entradas_morno_final)
++    caminho_morno.write_text(novo_morno, encoding="utf-8")
++
++    if entradas_frio_novas or bloco_migrado_novo_de_quente:
++        data_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
++        conteudo_frio_partes = []
++        nome_extra = ""
++        if bloco_migrado_novo_de_quente:
++            conteudo_frio_partes.append(bloco_migrado)
++            nome_extra = "-com-migrado"
++        conteudo_frio_partes.extend(entradas_frio_novas)
++
++        # Mais de um chunk pode congelar no mesmo dia (bootstrap com muito
++        # histórico acumulado, várias passadas seguidas) -- sufixo -N evita
++        # colidir e sobrescrever um chunk já selado. Achado testando de
++        # verdade: a primeira versão deste script sobrescrevia o chunk do
++        # dia anterior sem aviso na segunda passada do mesmo dia.
++        seq = 1
++        while True:
++            sufixo_seq = "" if seq == 1 else f"-{seq}"
++            nome_chunk = f"MEMORIAS-FRIO-{data_str}{sufixo_seq}{nome_extra}.md"
++            caminho_frio = RAIZ / nome_chunk
++            if not caminho_frio.exists():
++                break
++            seq += 1
++
++        cabecalho_frio = (
++            f"# {nome_chunk} — camada fria do sistema Agata (selada, imutável)\n\n"
++            "Congelado por scripts/migrar_periodo.py. Selado com scripts/selar.sh — "
++            "SHA-256 registrado em SELOS.txt, tag de git aponta pro commit deste selamento. "
++            "Depois de selado, este arquivo nunca mais recebe escrita — garantia é "
++            "`scripts/selar.sh --check`, não mais P-5.\n\n---\n\n"
++        )
++        caminho_frio.write_text(cabecalho_frio + "".join(conteudo_frio_partes), encoding="utf-8")
++        print(f"chunk frio escrito: {nome_chunk}")
++
++        hash_frio = hashlib.sha256(caminho_frio.read_bytes()).hexdigest()
++        data_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
++        with open(RAIZ / "SELOS.txt", "a", encoding="utf-8") as f:
++            f.write(f"{hash_frio} {nome_chunk} {data_iso}\n")
++        print(f"selo registrado em SELOS.txt: {hash_frio}")
++
++    print("\naplicado.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index f4922d6..49e840f 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -51,13 +51,23 @@ _P5_MARCADOR="<!-- ENTRADAS-NOVAS:AQUI"
+ # poder citar qual marca disparou o ramo de permutação no aviso.
+ _p5_migracao_pendente() {
+   local diretorio arq
++  # PERIODO (Fase 4, MEMÓRIAS (357)): mecanismo RECORRENTE, ao contrário do
++  # de (271) (uso único histórico) -- por isso pode continuar sendo achado
++  # em propostas/aplicadas/ pra sempre sem risco: quem chama esta função
++  # pra decidir o ramo PERIODO (`p5_append_only`) só olha pra marca DEPOIS
++  # de o crescimento ordinário já ter falhado de verdade (quente/morno
++  # encolheram), e mesmo assim quem prova que a migração é legítima é
++  # `verificar_migracao_periodo.py` (byte a byte), não a marca sozinha.
++  # Achado real, corrigido: uma versão anterior restringia a marca PERIODO
++  # a só contar em propostas/ (pendente) -- resolvia o "nunca expira", mas
++  # quebrava o padrão de sempre (marca commitada em aplicadas/ junto com o
++  # resto) para o SEGUNDO corte de período. A ordem de decisão em
++  # `p5_append_only` (ordinário primeiro) já resolve o "nunca expira" sem
++  # precisar desta restrição.
+   for diretorio in propostas propostas/aplicadas; do
+     [ -d "$diretorio" ] || continue
+     for arq in "$diretorio"/MIGRACAO-P5-*; do
+-      if [ -e "$arq" ]; then
+-        echo "$arq"
+-        return 0
+-      fi
++      [ -e "$arq" ] && { echo "$arq"; return 0; }
+     done
+   done
+   return 1
+@@ -133,69 +143,51 @@ p4_bind() {
+ 
+ # --- P-5 -----------------------------------------------------------------
+ # "Registre e nunca apague" (REGRAS, Regra 4 -- linha vermelha). O
+-# controle mais forte do sistema. Compara o MEMÓRIAS.md staged (o que vai
+-# virar o próximo commit) contra o MEMÓRIAS.md do commit anterior (HEAD)
+-# -- não contra memória do executor.
++# controle mais forte do sistema. Compara os arquivos de camada quente/morna
++# staged (o que vai virar o próximo commit) contra a versão do commit
++# anterior (HEAD) -- não contra memória do executor.
+ #
+ # Desde MEMÓRIAS (271), 26/08/2026: MEMÓRIAS.md cresce pelo TOPO do corpo
+-# (logo após o marcador ENTRADAS-NOVAS), não mais pelo fim físico --
+-# decisão do Humano, mudança estrutural documentada naquela entrada,
+-# portão das três perguntas cumprido. A checagem tem três ramos, nesta
+-# ordem de prioridade:
+-#   1. Marca de migração presente (propostas*/MIGRACAO-P5-<nome>) --
+-#      checagem de PERMUTAÇÃO via scripts/verificar_migracao_memorias.py:
+-#      mesmo conjunto de blocos byte-idênticos, só reordenados. Único uso
+-#      esperado: a própria migração de (271). Marca é de uso único, mesmo
+-#      padrão de risco aceito de P-8 (Humano cria o arquivo -- ameaça é
+-#      desatenção, não contorno deliberado).
+-#   2. HEAD já tem o marcador ENTRADAS-NOVAS -- formato novo em vigor:
+-#      corpo após o marcador tem que ser SUFIXO não-encolhido do novo.
+-#      Mesma força de garantia do sufixo original, direção invertida.
+-#   3. HEAD sem marcador e sem marca de migração -- formato antigo ainda
+-#      em vigor: checagem original, prefixo byte-exato (crescimento pelo
+-#      fim). É o ramo que roda em todo commit até a migração acontecer.
+-p5_append_only() {
+-  if ! git rev-parse HEAD >/dev/null 2>&1; then
+-    return 0
+-  fi
+-  # Achado real ao testar (15/08/2026): a primeira versão passava o
+-  # conteúdo inteiro do MEMÓRIAS.md (500 KB+) como argumento de linha de
+-  # comando pro python3 -- estourou ARG_MAX ("Lista de argumentos muito
+-  # longa"). Corrigido: escreve em arquivo temporário, python lê do
+-  # arquivo, só o caminho (curto) vira argv.
+-  # Achado real ao testar (15/08/2026): `trap ... RETURN` dentro desta
+-  # função não fica limitada a ela -- o bash não escopa isso por chamada,
+-  # e o trap disparava de novo no retorno da PRÓXIMA função (cabecalho,
+-  # p6_backup_pendente...), quando $tmp_antigo/$tmp_novo já tinham saído
+-  # de escopo, estourando "variável não associada" sob `set -u`.
+-  # Corrigido: limpeza explícita em cada saída, sem trap.
+-  local tmp_antigo tmp_novo codigo marca_migracao
++# (logo após o marcador ENTRADAS-NOVAS). Desde "MEMÓRIAS por período"
++# (Fase 4, MEMÓRIAS (357)): MEMORIAS-MORNO.md existe como segunda camada,
++# mesma disciplina de crescimento por topo, e um chunk MEMORIAS-FRIO-*.md
++# uma vez selado não é mais protegido por P-5 -- vira P-14
++# (imutabilidade total, nunca mais escrita nenhuma, nem por sufixo).
++#
++# Ramos, nesta ordem de prioridade:
++#   0. Marca de migração de PERÍODO presente (propostas*/MIGRACAO-P5-PERIODO-<nome>)
++#      -- checagem de PERMUTAÇÃO entre CAMADAS via
++#      scripts/verificar_migracao_periodo.py: união de quente+morno (HEAD)
++#      == união de quente+morno+frio-novo (staged), byte-idêntico, só
++#      realocado. Cada corte de período usa esta marca -- não é uso único
++#      como o item 1 abaixo, é o mecanismo recorrente da Fase 4.
++#   1. Marca de migração ANTIGA presente (MIGRACAO-P5-<nome>, sem
++#      "PERIODO") -- checagem de PERMUTAÇÃO só de MEMÓRIAS.md via
++#      scripts/verificar_migracao_memorias.py. Único uso esperado: a
++#      migração de (271). Preservado por compatibilidade histórica.
++#   2. Sem marca: roda o sufixo/prefixo normal (_p5_checar_sufixo, abaixo)
++#      pra MEMÓRIAS.md E, se já existir no HEAD, pra MEMORIAS-MORNO.md --
++#      as duas independentemente, as duas têm que passar.
++_p5_checar_sufixo() {
++  local caminho="$1" rotulo="$2"
++  local tmp_antigo tmp_novo codigo
+   tmp_antigo="$(mktemp)"
+   tmp_novo="$(mktemp)"
+-  if ! git show HEAD:MEMÓRIAS.md > "$tmp_antigo" 2>/dev/null; then
++  if ! git show "HEAD:$caminho" > "$tmp_antigo" 2>/dev/null; then
++    # Arquivo não existia no HEAD (ex.: MEMORIAS-MORNO.md antes da
++    # primeira migração de período) -- nada a proteger ainda, ele nasce
++    # com o primeiro commit que o cria, fora do escopo deste controle.
+     rm -f "$tmp_antigo" "$tmp_novo"
+     return 0
+   fi
+-  if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
+-    cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
++  if ! git show ":$caminho" > "$tmp_novo" 2>/dev/null; then
++    cat "$caminho" > "$tmp_novo" 2>/dev/null
+   fi
+-
+-  marca_migracao="$(_p5_migracao_pendente)" || true
+-  if [ -n "$marca_migracao" ]; then
+-    echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
+-    if python3 "$_PERIMETRO_DIR/verificar_migracao_memorias.py" "$tmp_antigo" "$tmp_novo"; then
+-      codigo=0
+-    else
+-      codigo=1
+-    fi
+-    rm -f "$tmp_antigo" "$tmp_novo"
+-    return "$codigo"
+-  fi
+-
+   if grep -qF "$_P5_MARCADOR" "$tmp_antigo"; then
+-    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
++    python3 - "$tmp_antigo" "$tmp_novo" "$rotulo" <<'PYEOF'
+ import sys
+ MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI".encode("utf-8")
++rotulo = sys.argv[3]
+ with open(sys.argv[1], 'rb') as f:
+     antigo = f.read()
+ with open(sys.argv[2], 'rb') as f:
+@@ -203,38 +195,39 @@ with open(sys.argv[2], 'rb') as f:
+ i_antigo = antigo.find(MARCADOR)
+ i_novo = novo.find(MARCADOR)
+ if i_antigo == -1:
+-    print("SUSPEITO (P-5): marcador ENTRADAS-NOVAS não achado no commit anterior apesar do grep externo achar -- inconsistência, restaure antes de comitar.")
++    print(f"SUSPEITO (P-5): marcador ENTRADAS-NOVAS não achado no commit anterior de {rotulo} apesar do grep externo achar -- inconsistência, restaure antes de comitar.")
+     sys.exit(1)
+ if i_novo == -1:
+-    print("SUSPEITO (P-5, nunca se apaga história): marcador ENTRADAS-NOVAS existia no commit anterior e sumiu no staged -- não se apaga a âncora de append-only.")
++    print(f"SUSPEITO (P-5, nunca se apaga história): marcador ENTRADAS-NOVAS existia no commit anterior de {rotulo} e sumiu no staged -- não se apaga a âncora de append-only.")
+     sys.exit(1)
+ fim_linha_antigo = antigo.find(b'\n', i_antigo) + 1
+ fim_linha_novo = novo.find(b'\n', i_novo) + 1
+ corpo_antigo = antigo[fim_linha_antigo:]
+ corpo_novo = novo[fim_linha_novo:]
+ if len(corpo_novo) < len(corpo_antigo):
+-    print(f"SUSPEITO (P-5, nunca se apaga história): corpo de MEMÓRIAS.md ENCOLHEU -- {len(corpo_antigo)} bytes no commit anterior, {len(corpo_novo)} agora. Alguma entrada foi removida. Restaure o arquivo antes de comitar.")
++    print(f"SUSPEITO (P-5, nunca se apaga história): corpo de {rotulo} ENCOLHEU -- {len(corpo_antigo)} bytes no commit anterior, {len(corpo_novo)} agora. Alguma entrada foi removida (ou precisa da marca de migração de período). Restaure antes de comitar.")
+     sys.exit(1)
+ if not corpo_novo.endswith(corpo_antigo):
+-    print("SUSPEITO (P-5, nunca se apaga história): o conteúdo antigo não é mais um SUFIXO do novo -- uma entrada já registrada foi alterada, ou a entrada nova não entrou logo após o marcador. Restaure o arquivo antes de comitar.")
++    print(f"SUSPEITO (P-5, nunca se apaga história): o conteúdo antigo de {rotulo} não é mais um SUFIXO do novo -- uma entrada já registrada foi alterada, ou a entrada nova não entrou logo após o marcador. Restaure antes de comitar.")
+     sys.exit(1)
+ sys.exit(0)
+ PYEOF
+     codigo=$?
+   else
+-    python3 - "$tmp_antigo" "$tmp_novo" <<'PYEOF'
++    python3 - "$tmp_antigo" "$tmp_novo" "$rotulo" <<'PYEOF'
+ import sys
++rotulo = sys.argv[3]
+ with open(sys.argv[1], 'rb') as f:
+     antigo = f.read()
+ with open(sys.argv[2], 'rb') as f:
+     novo = f.read()
+ if len(novo) < len(antigo):
+-    print(f"SUSPEITO (P-5, nunca se apaga história): MEMÓRIAS.md ENCOLHEU -- {len(antigo)} bytes no commit anterior, {len(novo)} agora. Alguma linha foi removida. Restaure o arquivo antes de comitar.")
++    print(f"SUSPEITO (P-5, nunca se apaga história): {rotulo} ENCOLHEU -- {len(antigo)} bytes no commit anterior, {len(novo)} agora. Alguma linha foi removida. Restaure antes de comitar.")
+     sys.exit(1)
+ if novo[:len(antigo)] != antigo:
+     for i, (a, b) in enumerate(zip(antigo, novo)):
+         if a != b:
+-            print(f"SUSPEITO (P-5, nunca se apaga história): byte mudou no offset {i} -- MEMÓRIAS.md não é mais append-only. Um trecho antigo foi alterado. Restaure o arquivo antes de comitar.")
++            print(f"SUSPEITO (P-5, nunca se apaga história): byte mudou no offset {i} de {rotulo} -- não é mais append-only. Um trecho antigo foi alterado. Restaure antes de comitar.")
+             print(f"  antigo: ...{antigo[max(0,i-40):i+40]!r}...")
+             print(f"  novo:   ...{novo[max(0,i-40):i+40]!r}...")
+             break
+@@ -247,6 +240,109 @@ PYEOF
+   return "$codigo"
+ }
+ 
++# Checagem de PERMUTAÇÃO entre camadas pra migração de período: união de
++# {MEMÓRIAS.md, MEMORIAS-MORNO.md} no HEAD (as que existirem) tem que
++# bater, byte a byte, com a união de {MEMÓRIAS.md, MEMORIAS-MORNO.md,
++# todo MEMORIAS-FRIO-*.md ADICIONADO nesta commit} no staged. Chunk frio
++# já existente no HEAD nunca entra aqui -- depois de selado é P-14, não
++# P-5 (nunca deveria mudar de novo).
++_p5_periodo_verificar() {
++  local -a antes=() depois=()
++  local f tmp staged_frio
++  for f in "MEMÓRIAS.md" "MEMORIAS-MORNO.md"; do
++    if git show "HEAD:$f" >/dev/null 2>&1; then
++      tmp="$(mktemp)"; git show "HEAD:$f" > "$tmp"; antes+=("$tmp")
++    fi
++    if git show ":$f" >/dev/null 2>&1; then
++      tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")
++    fi
++  done
++  staged_frio="$(git diff --cached --name-only --diff-filter=A -- 'MEMORIAS-FRIO-*.md' 2>/dev/null)"
++  while IFS= read -r f; do
++    [ -z "$f" ] && continue
++    tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")
++  done <<< "$staged_frio"
++
++  if [ "${#antes[@]}" -eq 0 ]; then
++    echo "SUSPEITO (P-5, período): marca de migração presente mas nenhum arquivo de quente/morno achado no HEAD -- nada a comparar, restaure antes de comitar."
++    rm -f "${depois[@]}"
++    return 1
++  fi
++  python3 "$_PERIMETRO_DIR/verificar_migracao_periodo.py" --antes "${antes[@]}" --depois "${depois[@]}"
++  local codigo=$?
++  rm -f "${antes[@]}" "${depois[@]}"
++  return "$codigo"
++}
++
++p5_append_only() {
++  if ! git rev-parse HEAD >/dev/null 2>&1; then
++    return 0
++  fi
++  # Achado real ao testar (15/08/2026): `trap ... RETURN` dentro de uma
++  # função não fica limitada a ela -- o bash não escopa isso por chamada.
++  # Corrigido: limpeza explícita em cada saída, sem trap (vale pros
++  # helpers acima também).
++  #
++  # (271), sem PERIODO no nome: branch histórico, prioridade sobre o resto,
++  # comportamento intocado desde sempre -- reordenação de MEMÓRIAS.md não é
++  # suficiente-crescimento, tem que ir direto pra permutação.
++  local marca_migracao
++  marca_migracao="$(_p5_migracao_pendente)" || true
++  if [ -n "$marca_migracao" ] && [[ "$marca_migracao" != *PERIODO* ]]; then
++    echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
++    local tmp_antigo tmp_novo codigo
++    tmp_antigo="$(mktemp)"; tmp_novo="$(mktemp)"
++    if ! git show HEAD:MEMÓRIAS.md > "$tmp_antigo" 2>/dev/null; then
++      rm -f "$tmp_antigo" "$tmp_novo"; return 0
++    fi
++    if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
++      cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
++    fi
++    if python3 "$_PERIMETRO_DIR/verificar_migracao_memorias.py" "$tmp_antigo" "$tmp_novo"; then
++      codigo=0
++    else
++      codigo=1
++    fi
++    rm -f "$tmp_antigo" "$tmp_novo"
++    return "$codigo"
++  fi
++
++  # PERIODO (Fase 4): ao contrário de (271), tenta o crescimento ORDINÁRIO
++  # primeiro -- quente/morno crescendo normalmente (entrada nova) não
++  # precisa de marca nenhuma, igual a todo commit de sempre. Só cai pra
++  # permutação entre camadas se o crescimento ordinário genuinamente
++  # falhar (encolheu de verdade -- migração real aconteceu). Achado
++  # preparando o segundo corte de período: a versão anterior dava
++  # prioridade à marca ANTES de tentar o ordinário, e uma marca antiga
++  # esquecida em propostas/aplicadas/ forçava todo commit seguinte (mesmo
++  # um sem migração nenhuma, só entrada nova) pela checagem de permutação
++  # estrita, reprovando por "conteúdo novo". Nesta ordem, uma marca velha
++  # nunca atrapalha um commit ordinário -- e quando a permutação É
++  # necessária, o verificador (byte a byte) continua sendo a rede de
++  # segurança real, não a marca.
++  # Tentativa silenciosa primeiro -- saída só é impressa se for mesmo o
++  # veredito final (senão, "ENCOLHEU" apareceria no log de um commit que
++  # vai passar de qualquer jeito pela permutação, achado mais confuso que
++  # útil de propósito).
++  local saida_quente saida_morno cod_quente cod_morno
++  saida_quente="$(_p5_checar_sufixo "MEMÓRIAS.md" "MEMÓRIAS.md (quente)" 2>&1)"; cod_quente=$?
++  saida_morno="$(_p5_checar_sufixo "MEMORIAS-MORNO.md" "MEMORIAS-MORNO.md (morno)" 2>&1)"; cod_morno=$?
++  if [ "$cod_quente" -eq 0 ] && [ "$cod_morno" -eq 0 ]; then
++    return 0
++  fi
++  if [ -n "$marca_migracao" ]; then
++    echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
++    _p5_periodo_verificar
++    return $?
++  fi
++  [ -n "$saida_quente" ] && echo "$saida_quente"
++  [ -n "$saida_morno" ] && echo "$saida_morno"
++  local ruim=0
++  [ "$cod_quente" -eq 0 ] || ruim=1
++  [ "$cod_morno" -eq 0 ] || ruim=1
++  return "$ruim"
++}
++
+ # --- P-6 -----------------------------------------------------------------
+ # "Cópia da história fora desta máquina" (PROJETO, Riscos conhecidos).
+ # AVISA, nunca falha -- o incidente real de hoje foi o marcador acumulando
+@@ -413,6 +509,39 @@ PY
+   return 0
+ }
+ 
++# --- P-14 -----------------------------------------------------------------
++# "Depois de selado, imutável" (MEMÓRIAS por período, Fase 4, MEMÓRIAS
++# (357)). Um chunk MEMORIAS-FRIO-*.md listado em SELOS.txt nunca mais
++# recebe escrita nenhuma -- nem sequer voltar a aparecer staged. Diferente
++# de P-5 (que permite crescer): aqui a garantia é imutabilidade TOTAL.
++# FALHA-class, mesma severidade de P-8 -- violar um selo é o mesmo tipo de
++# "história editada" que Regra 4 existe pra impedir, só que na camada fria.
++p14_frio_imutavel() {
++  [ -f SELOS.txt ] || return 0
++  local ruim=0 arquivo staged tmp_saida
++  # Só é violação re-tocar um chunk que JÁ existia selado num commit
++  # ANTERIOR -- na própria commit que cria e sela o chunk pela primeira
++  # vez, ele necessariamente aparece staged, e isso é normal (mesmo
++  # bootstrap de P-8: aprovar e criar acontecem juntos). `git diff --cached
++  # --diff-filter=M` restringe a MODIFICADO, nunca ADICIONADO.
++  staged="$(git diff --cached --name-only --diff-filter=M)"
++  while read -r _ arquivo _; do
++    [ -z "$arquivo" ] && continue
++    if echo "$staged" | grep -qxF "$arquivo"; then
++      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece MODIFICADO e staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
++      ruim=1
++    fi
++  done < SELOS.txt
++  tmp_saida="$(mktemp)"
++  if ! bash "$_PERIMETRO_DIR/selar.sh" --check > "$tmp_saida" 2>&1; then
++    echo "SUSPEITO (P-14): 'scripts/selar.sh --check' reprovou -- ao menos um chunk frio foi alterado depois de selado:"
++    sed 's/^/  /' "$tmp_saida"
++    ruim=1
++  fi
++  rm -f "$tmp_saida"
++  return "$ruim"
++}
++
+ # --- P-7 -----------------------------------------------------------------
+ # Citação de MEMÓRIAS aponta pra entrada real, não fabricada (REGRAS,
+ # "Citação de MEMÓRIAS -- primeira referência"). Checa só o que esta
+@@ -442,16 +571,34 @@ p7_citacao() {
+     PERIMETRO_ESTADO="SKIP"
+     return 0
+   fi
+-  local tmp_novo tmp_diff codigo
++  local tmp_novo tmp_diff tmp_combinado codigo f
+   tmp_novo="$(mktemp)"
+   tmp_diff="$(mktemp)"
++  tmp_combinado="$(mktemp)"
+   if ! git show :MEMÓRIAS.md > "$tmp_novo" 2>/dev/null; then
+     cat MEMÓRIAS.md > "$tmp_novo" 2>/dev/null
+   fi
++  # Desde a "MEMÓRIAS por período" (Fase 4): quente (MEMÓRIAS.md) só tem
++  # as entradas recentes -- uma citação nova pode apontar pra uma entrada
++  # que já migrou pra morno ou foi congelada em frio. Sem isto, P-7
++  # reprovaria como "não existe" toda citação a história relocada -- falso
++  # positivo, não achado real. O universo de busca junta as três camadas;
++  # o DIFF checado continua sendo só o que entrou em quente (só lá se
++  # escreve entrada nova).
++  cat "$tmp_novo" > "$tmp_combinado"
++  if git show :MEMORIAS-MORNO.md > /dev/null 2>&1; then
++    git show :MEMORIAS-MORNO.md >> "$tmp_combinado"
++  elif [ -f MEMORIAS-MORNO.md ]; then
++    cat MEMORIAS-MORNO.md >> "$tmp_combinado"
++  fi
++  for f in MEMORIAS-FRIO-*.md; do
++    [ -e "$f" ] || continue
++    cat "$f" >> "$tmp_combinado"
++  done
+   git diff --cached -U0 -- MEMÓRIAS.md 2>/dev/null | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^\+//' > "$tmp_diff"
+-  checar_citacao "$tmp_diff" "$tmp_novo"
++  checar_citacao "$tmp_diff" "$tmp_combinado"
+   codigo=$?
+-  rm -f "$tmp_novo" "$tmp_diff"
++  rm -f "$tmp_novo" "$tmp_diff" "$tmp_combinado"
+   return "$codigo"
+ }
+ 
+@@ -839,6 +986,11 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-14" "Chunk frio (MEMORIAS-FRIO-*.md), depois de selado, imutável" "MEMÓRIAS por período (Fase 4), MEMÓRIAS (357)"
++  PERIMETRO_ESTADO=""
++  p14_frio_imutavel; _perimetro_veredito "$?"
++  echo
++
+   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
+   return "$FALHOU"
+ }
+diff --git a/scripts/verificar_migracao_periodo.py b/scripts/verificar_migracao_periodo.py
+new file mode 100644
+index 0000000..534f8f8
+--- /dev/null
++++ b/scripts/verificar_migracao_periodo.py
+@@ -0,0 +1,171 @@
++#!/usr/bin/env python3
++"""PROTÓTIPO, ainda em teste de clone descartável -- generaliza
++scripts/verificar_migracao_memorias.py (MEMÓRIAS (271)) pra N arquivos de
++cada lado, em vez de exatamente 1-pra-1. Mesma garantia, mesmo algoritmo:
++o CONJUNTO de blocos de conteúdo (o bloco "Migrado de DIÁRIO.md", atômico,
++mais cada entrada "(n) TIPO — data") tem que existir, byte-idêntico, dos
++dois lados. Nada perdido, nada alterado, nada acrescentado além de
++reordenação/relocação entre arquivos.
++
++Uso: verificar_migracao_periodo.py --antes A1.md [A2.md ...] --depois D1.md [D2.md ...]
++Saída: PASS ou FALHA com diagnóstico. Exit 0 = PASS, 1 = FALHA.
++"""
++import argparse
++import re
++import sys
++
++PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
++PADRAO_ENTRADA = re.compile(
++    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
++    re.MULTILINE,
++)
++
++
++def dividir(texto: str):
++    """Copiado verbatim da lógica de verificar_migracao_memorias.py -- ver
++    aquele arquivo pros comentários que explicam cada achado real por trás
++    de cada decisão de parsing (posição-agnóstico do bloco migrado, âncora
++    em início de linha, entrada nunca resplitada por heading interno)."""
++    matches = list(PADRAO_ENTRADA.finditer(texto))
++    migrados = list(PADRAO_MIGRADO.finditer(texto))
++    if len(migrados) > 1:
++        raise SystemExit(
++            f"{len(migrados)} linhas batem com o heading do bloco migrado (esperado 0 ou 1) -- "
++            "ambíguo, não presumo qual é o real. Abortando."
++        )
++    idx_migrado = migrados[0].start() if migrados else -1
++    if not matches:
++        if idx_migrado == -1:
++            return None, []
++        return texto[idx_migrado:], []
++    cortes_set = {m.start() for m in matches}
++    if idx_migrado != -1:
++        cortes_set.add(idx_migrado)
++    cortes = sorted(cortes_set) + [len(texto)]
++    bloco_migrado = None
++    entradas = []
++    for inicio, fim in zip(cortes, cortes[1:]):
++        pedaco = texto[inicio:fim]
++        if inicio == idx_migrado:
++            bloco_migrado = pedaco
++        else:
++            entradas.append(pedaco)
++    return bloco_migrado, entradas
++
++
++def normalizar(entrada: str) -> str:
++    return entrada.rstrip()
++
++
++def coletar(caminhos: list[str]):
++    """Lê N arquivos, retorna (bloco_migrado_ou_None, todas_entradas). O
++    bloco migrado só pode aparecer em NO MÁXIMO UM dos arquivos do grupo --
++    aparecer em dois seria duplicação real, marcado como falha."""
++    bloco = None
++    origem_bloco = None
++    entradas = []
++    for caminho in caminhos:
++        with open(caminho, encoding="utf-8") as f:
++            texto = f.read()
++        b, es = dividir(texto)
++        if b is not None:
++            if bloco is not None:
++                raise SystemExit(
++                    f"bloco 'Migrado de DIÁRIO.md' aparece em mais de um arquivo do grupo "
++                    f"({origem_bloco!r} e {caminho!r}) -- duplicação real, abortando."
++                )
++            bloco = b
++            origem_bloco = caminho
++        entradas.extend(es)
++    return bloco, entradas
++
++
++PADRAO_NUMERO = re.compile(r'^\((\d+)\)')
++
++
++def _indexar_por_numero(entradas: list[str]) -> dict[int, list[str]]:
++    """Agrupa entradas normalizadas pelo número -- (49)+ é único globalmente
++    (REGRAS.md), então cada chave normalmente tem 1 só valor; mais de um é
++    achado (duplicação), não presumido como bug automático de outra causa."""
++    idx: dict[int, list[str]] = {}
++    for e in entradas:
++        e_norm = normalizar(e)
++        m = PADRAO_NUMERO.match(e_norm)
++        if not m:
++            continue
++        n = int(m.group(1))
++        idx.setdefault(n, []).append(e_norm)
++    return idx
++
++
++def verificar(antes_caminhos: list[str], depois_caminhos: list[str]) -> tuple[list[str], list[int]]:
++    """Permutação por NÚMERO, não por string inteira -- achado real
++    (MEMÓRIAS (357), segundo commit da própria migração de período):
++    exigir multiset EXATO entre antes/depois reprova todo commit que
++    combine relocação de história com uma entrada genuinamente nova (o
++    caso normal -- o registro da migração É uma entrada nova, no mesmo
++    commit que a aplica). Uma entrada com número que NÃO existe em ANTES
++    é conteúdo novo legítimo, mesma coisa que o crescimento normal de
++    quente já permite fora de marca nenhuma -- não é falha. O que continua
++    proibido: número que existia em ANTES sumir, mudar de conteúdo, ou
++    duplicar."""
++    falhas: list[str] = []
++    bloco_antes, entradas_antes = coletar(antes_caminhos)
++    bloco_depois, entradas_depois = coletar(depois_caminhos)
++
++    if bloco_antes is not None:
++        if bloco_depois is None:
++            falhas.append("bloco 'Migrado de DIÁRIO.md' existia no conjunto ANTES e sumiu no DEPOIS")
++        elif bloco_antes != bloco_depois:
++            falhas.append(
++                "bloco 'Migrado de DIÁRIO.md' mudou de CONTEÚDO -- só pode mudar de posição/arquivo, nunca de byte"
++            )
++    elif bloco_depois is not None:
++        falhas.append("bloco 'Migrado de DIÁRIO.md' não existia no conjunto ANTES e apareceu no DEPOIS -- invenção")
++
++    idx_antes = _indexar_por_numero(entradas_antes)
++    idx_depois = _indexar_por_numero(entradas_depois)
++
++    for n, blocos in idx_antes.items():
++        if n not in idx_depois:
++            falhas.append(f"entrada ({n}) existia no ANTES e sumiu no DEPOIS -- perdida, restaure antes de comitar.")
++            continue
++        restantes = list(idx_depois[n])
++        for b in blocos:
++            if b in restantes:
++                restantes.remove(b)
++            else:
++                titulo = b.splitlines()[0][:90]
++                falhas.append(f"entrada ({n}) mudou de CONTEÚDO entre ANTES e DEPOIS: {titulo!r}")
++        if restantes:
++            falhas.append(f"entrada ({n}) aparece MAIS VEZES no DEPOIS do que no ANTES -- duplicação inesperada.")
++
++    novos = sorted(n for n in idx_depois if n not in idx_antes)
++    return falhas, novos
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--antes", nargs="+", required=True)
++    ap.add_argument("--depois", nargs="+", required=True)
++    args = ap.parse_args()
++
++    falhas, novos = verificar(args.antes, args.depois)
++    if falhas:
++        print("FALHA (verificar_migracao_periodo):")
++        for f in falhas:
++            print(f"  - {f}")
++        sys.exit(1)
++
++    _, entradas_antes = coletar(args.antes)
++    extra = f" + {len(novos)} entrada(s) nova(s) genuína(s) {novos}" if novos else ""
++    print(
++        f"PASS: {len(entradas_antes)} entradas + bloco migrado (se houver) do ANTES, todas "
++        f"byte-idênticas no DEPOIS (realocadas, nunca alteradas){extra}, entre os "
++        f"{len(args.antes)} arquivo(s) ANTES e os {len(args.depois)} arquivo(s) DEPOIS."
++    )
++    sys.exit(0)
++
++
++if __name__ == "__main__":
++    main()
