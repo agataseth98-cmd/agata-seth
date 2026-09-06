@@ -5,11 +5,23 @@ UMA tarefa: enviar um pedido de parecer ja escrito pelo Humano a UM modelo
 remoto, guardar a resposta crua. Nada alem disso -- ver REGRAS "Segunda
 opiniao" e PROJETO "Conselho Remoto".
 
-Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute
--- combo `conselho` (glm-4.7-flash -> gemini-2.5-flash) -- ATRAVES do proxy de
-sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le mais chave nenhuma
-e NAO faz backoff proprio: o fallback GLM->Gemini, o circuit breaker e o
-cooldown 429 sao todos do OmniRoute agora.
+Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
+ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
+mais chave nenhuma e NAO faz backoff proprio: o circuit breaker e o cooldown
+429 sao do OmniRoute.
+
+ROTACAO JUSTA (06/09/2026, ordem do Humano: "ninguem tem papel fixo... revogo
+GLM... deve ser decidido entre modelos gratuitos sob um regime de regras
+justas de rotatividade"). Ate aqui a combo `conselho` era prioridade fixa
+(GLM sempre primeiro). Agora este script escolhe, a cada chamada, o modelo
+com MENOS usos bem-sucedidos entre o roster gratuito (ROSTER abaixo), envia
+o pedido direto pro raw model id escolhido (nao mais pela combo), e conta o
+uso em ROTACAO_ESTADO só se a chamada tiver sucesso. Continua **UMA chamada
+externa por invocacao** (o invariante do script nao mudou) -- se a escolhida
+falhar, o script ABORTA como sempre fazia; nao laca entre modelos sozinho.
+Rodar de novo escolhe outro (o que falhou nao teve uso contado, entao ainda
+compete pela vez -- nao criei penalidade por falha, so recompensa por
+sucesso, pra nao afundar um modelo bom que teve 1 erro de rede).
 
 O QUE NAO MUDOU (a razao do script existir):
   - so material do repo PUBLICO sai: checar_conteudo_privado trava memoria/missoes
@@ -48,12 +60,56 @@ from datetime import datetime, timezone
 SANITIZADOR_ENDPOINT = os.environ.get(
     "CONSELHO_ENDPOINT", "http://127.0.0.1:20127/v1/chat/completions"
 )
-COMBO = "conselho"   # combo do OmniRoute: glm-4.7-flash -> gemini-2.5-flash
+COMBO = "conselho"   # legado -- so usado se ROSTER ficar vazio (nunca deveria)
 
 DESTINO_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "memoria", "missoes", "conselho-remoto",
 )
+
+# Roster da rotação justa -- só modelos com free tier CONFIRMADO. Groq
+# (`groq/openai/gpt-oss-120b`) entrou em 06/09/2026 depois de confirmar de
+# verdade (WebSearch, não memória de treino): free tier real, sem cartão, 30
+# req/min, 14.400 req/dia, cobre todos os modelos incl. gpt-oss-120b -- fontes
+# em MEMÓRIAS (353). Ordem = desempate quando dois modelos têm a mesma
+# contagem (determinístico, não aleatório -- auditável).
+ROSTER = [
+    "zai/glm-4.7-flash",
+    "gemini/gemini-2.5-flash",
+    "openrouter/minimax/minimax-m3:free",
+    "groq/openai/gpt-oss-120b",
+]
+ROTACAO_ESTADO = os.path.join(DESTINO_DIR, "rotacao-estado.json")
+
+
+def _carregar_rotacao():
+    """Contagem de usos BEM-SUCEDIDOS por modelo do ROSTER. Modelo novo no
+    ROSTER que nunca apareceu no arquivo entra com 0 -- nunca levanta."""
+    estado = {}
+    if os.path.isfile(ROTACAO_ESTADO):
+        try:
+            with open(ROTACAO_ESTADO, encoding="utf-8") as f:
+                estado = json.load(f)
+        except Exception:  # noqa: BLE001 -- arquivo corrompido não trava a escolha
+            estado = {}
+    return {m: int(estado.get(m, 0)) for m in ROSTER}
+
+
+def escolher_modelo():
+    """Menos usado primeiro; empate quebrado pela ordem fixa do ROSTER
+    (determinístico -- a mesma contagem sempre escolhe o mesmo, auditável)."""
+    estado = _carregar_rotacao()
+    return min(ROSTER, key=lambda m: (estado[m], ROSTER.index(m)))
+
+
+def _registrar_sucesso(modelo_escolhido):
+    """Só chamada depois de confirmar sucesso -- falha não penaliza."""
+    estado = _carregar_rotacao()
+    if modelo_escolhido in estado:
+        estado[modelo_escolhido] += 1
+    os.makedirs(DESTINO_DIR, exist_ok=True)
+    with open(ROTACAO_ESTADO, "w", encoding="utf-8") as f:
+        json.dump(estado, f, ensure_ascii=False, indent=2)
 
 # Tetos, primeiro corte -- ajustavel pelo Humano, nao um numero canonizado.
 TETO_CHARS_PEDIDO = 60_000   # heuristica pre-envio -- nao ha tokenizador local
@@ -104,11 +160,12 @@ def checar_formato_parecer(texto):
     return faltando
 
 
-def enviar_omniroute(pedido_texto):
+def enviar_omniroute(pedido_texto, modelo):
     """UMA chamada. POST no proxy de sanitizacao, que scrub-a o pedido e repassa
-    ao OmniRoute na combo `conselho`. Devolve o JSON cru (shape OpenAI-compat)."""
+    ao OmniRoute pro `modelo` raw escolhido pela rotação (não mais uma combo
+    de prioridade fixa). Devolve o JSON cru (shape OpenAI-compat)."""
     payload = {
-        "model": COMBO,
+        "model": modelo,
         "messages": [{"role": "user", "content": pedido_texto}],
         "max_tokens": TETO_TOKENS_SAIDA,
     }
@@ -164,9 +221,12 @@ def main():
         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
         return 1
 
+    modelo_escolhido = escolher_modelo()
+    print(f"Rotação escolheu: {modelo_escolhido} (menos usos bem-sucedidos no roster)")
+
     inicio = time.time()
     try:
-        resposta = enviar_omniroute(pedido_texto)
+        resposta = enviar_omniroute(pedido_texto, modelo_escolhido)
     except urllib.error.HTTPError as e:
         corpo_erro = e.read().decode("utf-8", errors="replace")
         if e.code == 422 and "secret_blocked_before_egress" in corpo_erro:
@@ -185,7 +245,8 @@ def main():
 
     duracao_s = round(time.time() - inicio, 1)
     conteudo, tokens_entrada, tokens_saida, tokens_total = _normalizar(resposta)
-    modelo_usado = resposta.get("model") or COMBO
+    modelo_usado = resposta.get("model") or modelo_escolhido
+    _registrar_sucesso(modelo_escolhido)  # só chega aqui se enviar_omniroute não levantou
     custo_usd = round(
         tokens_entrada * PRECO_ENTRADA_POR_TOKEN_USD
         + tokens_saida * PRECO_SAIDA_POR_TOKEN_USD,
@@ -200,7 +261,7 @@ def main():
     registro = {
         "data": agora.isoformat(),
         "via": "omniroute",
-        "combo": COMBO,
+        "rotacao_escolheu": modelo_escolhido,
         "modelo": modelo_usado,
         "provider": _provider_do_modelo(modelo_usado),
         "duracao_s": duracao_s,
