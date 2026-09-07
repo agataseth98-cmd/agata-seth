@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
-(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
+(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pen …
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio s …
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos …
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase t …

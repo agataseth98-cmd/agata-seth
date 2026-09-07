@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
+  palavras-chave: causa, raiz, real, omniroute, achada, reproduzida, teto, exposto, curto, próprio, timeout, detecção, conexão, morta, cliente, http, interno, auto, recuperação, nunca, tem, tempo, terminar, pedido, ter, sido, marcado, falho, bug, agata, mitigação, tentada, refutada, corrigida, fora, nosso, controle
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
   palavras-chave: projeto, estado, bugs, testes, registrada, rodada, tes, glm, assinou, claude, sonnet, adversa, volta, três, adversas, quatro
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, drift, hipótese, fundamentada, provada, auditoria, proposta, itens, seth, parecer, qwen, texto, dias, entradas, atrás, descansam, premissa, falsa, estavam, implementados, caminho, resto, sobrevive
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
   palavras-chave: sincronização, pedida, humano, drift, real, achado, derivados, hidratação, projeto, citar, resolvido, autorização, direta, assumo, risco
-(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
-  palavras-chave: errou, guarda, utf, hidratacao, pendente, aprovada, aplicada, mesmo, dia, desta, auditoria, começar
+(332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pen …
+  palavras-chave: errou, guarda, utf, hidratacao, pen
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio s …
   palavras-chave: auditoria, autoavaliação, seth, próprio
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos …
