@@ -39,10 +39,30 @@ fornecedor/vendor.
 | OpenRouter/Minimax | `openrouter/minimax/minimax-m3:free` | nuvem, via OmniRoute | não |
 | Local/Ollama | `qwen3.5-9b-64k` (Seth), `llama3.1:8b` (último recurso) | esta Máquina | sim, sempre |
 | Anthropic/Claude | esta sessão (Claude Code) e qualquer sessão Claude em nuvem | ambas as formas existem hoje | **depende — ver pergunta 1 abaixo** |
+| OpenAI/GPT | sessão que o Humano chama "GPT Luna" (fora do roster de `conselho_remoto.py`; já citada em REGRAS.md, catálogo, "hora repetida", 23/08/2026) | nuvem, fora do OmniRoute/roster hoje — consultada à mão pelo Humano | não |
 
-As primeiras quatro já são "uma chamada externa, sem Máquina, via `conselho_remoto.py`"
-— encaixam sem atrito. Local e Claude são estruturalmente diferentes dos outros
-quatro (ver perguntas 1 e 2).
+**Achado ao receber o primeiro parecer (07/09/2026): esta família não estava
+na taxonomia original** — corrigido aqui, não apagado o erro (Regra 4 não
+vale pra este dossiê, que não é canon, mas o hábito de não esconder erro sim).
+Ficou de fora do roster automático de `conselho_remoto.py` até aqui; se
+"todas as LLMs a que temos acesso" incluir esta família, o roster também
+precisa crescer, não só a lógica de rotação.
+
+As quatro primeiras (Google/Zhipu/Groq/Minimax) já são "uma chamada externa,
+sem Máquina, via `conselho_remoto.py`" — encaixam sem atrito. Local, Claude e
+OpenAI/GPT são estruturalmente diferentes das outras (ver perguntas 1 e 2;
+OpenAI/GPT se encaixa como as quatro primeiras — sem Máquina — mas ainda fora
+do mecanismo automático).
+
+## Pareceres recebidos
+
+- **GPT Luna, 07/09/2026** (relatado à mão pelo Humano, não via
+  `conselho_remoto.py`) — condicional; separa rotação de silo; opção (a) pra
+  Claude; Seth fora da rotação-nuvem por enquanto; exige entrada própria em
+  MEMÓRIAS se Seth sair do regime fixo; MOD por modelo, rotação por família
+  (duas decisões, não uma). Texto completo, com auditoria desta sessão:
+  `memoria/missoes/conselho-remoto/20260907-parecer-gpt-luna-rotacao-por-familia.md`
+  (repositório local de `missoes`, sem remote — não sobe pro GitHub público).
 
 ## Perguntas em aberto — preciso da sua decisão antes de desenhar o mecanismo
 
