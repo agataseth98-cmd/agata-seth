@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reordenado em (355)) implementada — quente/morno/frio, testado num clone descartável antes de tocar o canon real, cinco bugs achados e corrigidos no processo, corte final reformulado a pedido do Humano (quente começa vazio, esta entrada é o marco zero); período de aderência de 4 semanas registrado
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado nos derivados de hidratação + PROJETO.md sem citar (323)-(332) — resolvido, autorização direta do Humano ("assumo o risco")
 (332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
 (331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
-(330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
+(330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos …
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase t …
 (328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra …
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita …
