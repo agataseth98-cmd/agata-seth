@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
+  palavras-chave: projeto, estado, bugs, testes, registrada, rodada, tes, glm, assinou, claude, sonnet, adversa, volta, três, adversas, quatro
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
   palavras-chave: tes, rodada, adversa, glm, flash, identidade, real, confirmada, json, cru, assinou, claude, sonnet, puxando, nome, corpus, próprio, pedido, regra, proíbe, mão, achados, incidentais, infraestrutura, caminho, gemini, estoura, teto, omniroute, grande, groq, bloqueado, cloudflare, browser, signature, banned
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: sincronização, pedida, humano, drift, real, achado, derivados, hidratação, projeto, citar, resolvido, autorização, direta, assumo, risco
 (332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pendente — foi aprovada e aplicada em (318), no mesmo dia, antes desta auditoria começar
   palavras-chave: errou, guarda, utf, hidratacao, pendente, aprovada, aplicada, mesmo, dia, desta, auditoria, começar
-(331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio sistema de memória: substância confirmada item a item, um erro real de arquitetura desatualizada (`.hermes.md`/Hermes, removido em (312)) e o próprio cabeçalho da resposta reprova no linter de Regra 1 do projeto
-  palavras-chave: auditoria, autoavaliação, seth, próprio, sistema, memória, substância, confirmada, item, erro, real, arquitetura, desatualizada, hermes, removido, cabeçalho, resposta, reprova, linter, regra, projeto
+(331) DIÁRIO — 04/09/2026 · Auditoria da autoavaliação da Seth sobre o próprio s …
+  palavras-chave: auditoria, autoavaliação, seth, próprio
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos …
   palavras-chave: achado, real, trás, anel, soltos, canônicos
 (329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase t …

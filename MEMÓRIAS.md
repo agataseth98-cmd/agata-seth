@@ -28,6 +28,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
+
+Par `.diff`/`APROVADO-` em `propostas/aplicadas/projeto-tes001-rodada5` — `.diff` preparado por mim, `APROVADO-` criado pelo Humano.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` contra HEAD antes de propor; `bash scripts/perimetro.sh` depois de aplicar. Autorização: Humano, criação do `APROVADO-` pelo próprio Humano.
+
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
 
 **Pedido do Humano:** "rodar TES-001 de novo agora que a fila fechou" → payload grande travou (Gemini, 504 duas vezes) → "Encolhe o pedido e tenta de novo" → payload menor ainda travou, mas por outro motivo (Groq, 403 do Cloudflare, achado novo, não de tamanho) → "tenta a opção 1 com o glm" (chamada avulsa fora da rotação automática, direto pro `zai/glm-4.7-flash`, sem editar `scripts/conselho_remoto.py`).
