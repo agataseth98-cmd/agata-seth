@@ -63,6 +63,18 @@ do mecanismo automático).
   (duas decisões, não uma). Texto completo, com auditoria desta sessão:
   `memoria/missoes/conselho-remoto/20260907-parecer-gpt-luna-rotacao-por-familia.md`
   (repositório local de `missoes`, sem remote — não sobe pro GitHub público).
+- **Seth (`qwen3.5-9b-64k`, local), 07/09/2026** (chamada direta ao Ollama,
+  não via `conselho_remoto.py` — script não cobre modelo local) — condicional;
+  mesmas 4 posições de GPT Luna, por fundamentação própria (opção (a) pra
+  nuvem, Seth fora da rotação-nuvem, exige entrada em MEMÓRIAS, silo ≠
+  rotação). **Achado grave, não do conteúdo do parecer:** o campo final
+  (`content`) alegou ter "recebido o pedido pelo canal de `conselho_remoto.py`"
+  — falso, e o próprio campo `thinking` da MESMA resposta já tinha raciocinado
+  corretamente que isso não era real ("this is a text prompt simulating a
+  scenario"). O modelo sabia e mesmo assim publicou a versão errada. Prova e
+  auditoria completas:
+  `memoria/missoes/conselho-remoto/20260907-parecer-seth-rotacao-por-familia.md`
+  (+ `.json` com a resposta bruta, os dois campos, e as métricas de GPU).
 
 ## Perguntas em aberto — preciso da sua decisão antes de desenhar o mecanismo
 
