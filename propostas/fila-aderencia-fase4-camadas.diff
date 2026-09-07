@@ -1,0 +1,637 @@
+diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
+index 633555e..58094e6 100755
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -127,13 +127,70 @@ filtrar_indice_por_alvo() {
+ # nunca presumem qual está em vigor.
+ MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
+ 
++# Fase 4 (MEMÓRIAS (357)) / fila de aderência: MEMÓRIAS.md (quente) deixou de
++# ser a única camada -- MEMORIAS-MORNO.md (morno) e os chunks selados
++# MEMORIAS-FRIO-*.md (frio) também guardam entradas reais. Sem isto, o índice
++# só enxergava quente -- depois da migração de (357), quente ficou reduzido
++# ao marco zero (uma entrada só) e o índice praticamente sumia.
++#
++# Lista os chunks frios do MAIS pro MENOS recente. Regra de ordem, achada
++# lendo scripts/migrar_periodo.py: cada passada congela o trecho mais ANTIGO
++# de morno; `-com-migrado` é sempre a passada mais antiga de um dia (o bloco
++# migrado só pode sair junto da primeira vez que sobra desse dia), o chunk
++# SEM sufixo numérico é a próxima (seq=1 sem "-N"), e -2/-3/... crescem na
++# ordem em que foram congelados -- ou seja, MAIS recente primeiro é: maior
++# sufixo primeiro, depois sem sufixo, depois "-com-migrado", por data mais
++# recente primeiro entre dias distintos. Verificado contra o conteúdo real
++# dos 11 chunks existentes em 06/09/2026 (primeira/última entrada de cada
++# um), não só deduzido do código.
++listar_frio_recente_primeiro() {
++  local f data seq chave
++  for f in MEMORIAS-FRIO-*.md; do
++    [ -f "$f" ] || continue
++    if [[ "$f" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
++      data="${BASH_REMATCH[1]}"
++      if [ -n "${BASH_REMATCH[4]:-}" ]; then
++        seq=0
++      else
++        seq="${BASH_REMATCH[3]:-1}"
++      fi
++    else
++      data="0000-00-00"; seq=1
++    fi
++    printf -v chave '%s\t%05d\t%s' "$data" "$seq" "$f"
++    echo "$chave"
++  done | sort -t $'\t' -k1,1r -k2,2nr | cut -f3
++}
++
++# Uma linha por entrada, camada por camada (quente -> morno -> frio,
++# mais recente primeiro em cada uma), pro padrão de duas resoluções em
++# scripts/compactar_indice.py (N primeiras completas, resto truncado) --
++# a ordem entre camadas importa de verdade aqui, não é só estética.
++_grep_entradas_modernas_todas_camadas() {
++  grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
++  [ -f MEMORIAS-MORNO.md ] && grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMORIAS-MORNO.md
++  while IFS= read -r _frio; do
++    grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' "$_frio"
++  done < <(listar_frio_recente_primeiro)
++}
++
++# Linhas do formato antigo (pré-numeração unificada, "### data (n)"), hoje só
++# dentro do bloco migrado -- vive em qualquer camada onde o bloco parar
++# (frio, depois de (357); podia ser quente, antes). Ordem entre camadas não
++# importa aqui: scripts/compactar_indice.py já trata este grupo como o mais
++# antigo, sempre depois do grupo moderno acima, então não compete pelas N
++# primeiras vagas completas.
++_grep_entradas_antigas_todas_camadas() {
++  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
++}
++
+ gerar_indice() {
+   {
+-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md — não edite direto. -->"
++    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md + MEMORIAS-MORNO.md + MEMORIAS-FRIO-*.md — não edite direto. -->"
+     echo "# Índice de MEMÓRIAS.md"
+     echo
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+-      echo "Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
++      echo "Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
+     else
+       echo "Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
+     fi
+@@ -172,8 +229,8 @@ gerar_indice() {
+     # `RESULTADO GERAL: OK` do perimetro.sh, silencioso até rodar com `-x`).
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+-        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
++        _grep_entradas_modernas_todas_camadas
++        _grep_entradas_antigas_todas_camadas
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
+     else
+       {
+@@ -308,10 +365,10 @@ checar_reconciliacao() {
+ 
+ gerar_indice_palavras_chave() {
+   {
+-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
++    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md + MEMORIAS-MORNO.md + MEMORIAS-FRIO-*.md -- não edite direto. -->"
+     echo "# Índice de MEMÓRIAS.md, com palavras-chave por entrada"
+     echo
+-    echo "Mesmas entradas de INDICE_MEMORIAS.md, uma linha \"  palavras-chave: ...\" logo"
++    echo "Mesmas entradas de INDICE_MEMORIAS.md (quente + morno + frio, Fase 4), uma linha \"  palavras-chave: ...\" logo"
+     echo "abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,"
+     echo "deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)."
+     echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
+@@ -319,8 +376,8 @@ gerar_indice_palavras_chave() {
+     echo
+     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
+       {
+-        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
++        _grep_entradas_modernas_todas_camadas
++        _grep_entradas_antigas_todas_camadas
+       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
+         | python3 scripts/extrair_palavras_chave.py
+     else
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index 5e99414..6377bc2 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -47,6 +47,7 @@ import urllib.request
+ 
+ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
++MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
+ EMBED_URL = os.environ.get("AGATA_EMBED_URL", "http://127.0.0.1:20134/embed")
+ CACHE_DIR = os.environ.get(
+     "AGATA_BUSCA_CACHE", os.path.expanduser("~/.cache/agata/busca_semantica")
+@@ -57,24 +58,31 @@ FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
+ CAB_ENTRADA = re.compile(
+     r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+(.*)$"
+ )
++FRIO_NOME = re.compile(
++    r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"
++)
+ 
+ 
+-def _sha256(path):
+-    h = hashlib.sha256()
+-    with open(path, "rb") as f:
+-        for chunk in iter(lambda: f.read(65536), b""):
+-            h.update(chunk)
+-    return h.hexdigest()
++def _camadas_frio_recente_primeiro():
++    """Mesma regra de ordem de scripts/gerar_indice_derivado.py e
++    .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): mais recente
++    primeiro é maior sufixo primeiro, depois sem sufixo, depois
++    "-com-migrado"; datas mais recentes primeiro entre dias distintos."""
++    achados = []
++    for nome in os.listdir(REPO):
++        m = FRIO_NOME.match(nome)
++        if not m:
++            continue
++        data, seq_str, com_migrado = m.groups()
++        seq = 0 if com_migrado else int(seq_str or 1)
++        achados.append((data, seq, nome))
++    achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
++    return [os.path.join(REPO, nome) for _, _, nome in achados]
+ 
+ 
+-def _parse_entradas(texto):
+-    ini = texto.find(MARCADOR)
+-    if ini == -1:
+-        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMÓRIAS.md.")
+-    corpo = texto[texto.find("\n", ini) + 1:]
+-    m = FIM_MODERNO.search(corpo)
+-    if m:
+-        corpo = corpo[:m.start()]
++def _parse_entradas_bloco(corpo):
++    """Quebra um corpo de texto (já recortado pra ficar só no formato
++    moderno) em entradas -- núcleo compartilhado por camada com/sem marcador."""
+     entradas, atual = [], None
+     for ln in corpo.split("\n"):
+         mm = CAB_ENTRADA.match(ln)
+@@ -94,6 +102,68 @@ def _parse_entradas(texto):
+     return entradas
+ 
+ 
++def _parse_entradas(texto):
++    """Camada quente (MEMÓRIAS.md) -- exige o marcador, corta no bloco
++    migrado, se ainda estiver ali."""
++    ini = texto.find(MARCADOR)
++    if ini == -1:
++        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMÓRIAS.md.")
++    corpo = texto[texto.find("\n", ini) + 1:]
++    m = FIM_MODERNO.search(corpo)
++    if m:
++        corpo = corpo[:m.start()]
++    return _parse_entradas_bloco(corpo)
++
++
++def _parse_entradas_morno(texto):
++    """Camada morna (MEMORIAS-MORNO.md) -- mesma disciplina de quente."""
++    ini = texto.find(MARCADOR)
++    if ini == -1:
++        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMORIAS-MORNO.md.")
++    corpo = texto[texto.find("\n", ini) + 1:]
++    m = FIM_MODERNO.search(corpo)
++    if m:
++        corpo = corpo[:m.start()]
++    return _parse_entradas_bloco(corpo)
++
++
++def _parse_entradas_frio(texto):
++    """Um chunk frio não tem marcador (já vem congelado) e NÃO corta em
++    FIM_MODERNO: achado testando de verdade (mesmo achado registrado em
++    gerar_indice_derivado.py) -- MEMORIAS-FRIO-*-com-migrado.md tem o
++    heading "## Migrado de DIÁRIO.md" perto do TOPO do arquivo, com entradas
++    modernas espalhadas antes e depois dele; cortar ali descartaria quase
++    todo o conteúdo moderno do chunk. Lido inteiro, CAB_ENTRADA não bate no
++    formato antigo ("### data (n)") do bloco migrado."""
++    return _parse_entradas_bloco(texto)
++
++
++def _todas_entradas_todas_camadas():
++    """Quente + morno (se existir) + frio (mais recente primeiro), mesma
++    ordem/regra de gerar_indice_derivado.py e gerar-hidratacao.sh (Fase 4,
++    MEMÓRIAS (357)). Devolve (entradas, {caminho: texto})."""
++    textos = {MEMORIAS: open(MEMORIAS, encoding="utf-8").read()}
++    entradas = list(_parse_entradas(textos[MEMORIAS]))
++    if os.path.isfile(MORNO):
++        textos[MORNO] = open(MORNO, encoding="utf-8").read()
++        entradas += _parse_entradas_morno(textos[MORNO])
++    for caminho in _camadas_frio_recente_primeiro():
++        textos[caminho] = open(caminho, encoding="utf-8").read()
++        entradas += _parse_entradas_frio(textos[caminho])
++    return entradas, textos
++
++
++def _hash_camadas(textos):
++    """Hash combinado, independente da ordem de iteração, das camadas de
++    memória lidas -- detecta índice desatualizado sem depender só de
++    MEMÓRIAS.md (Fase 4: mudança em morno/frio também invalida o índice)."""
++    h = hashlib.sha256()
++    for caminho in sorted(textos):
++        h.update(os.path.basename(caminho).encode("utf-8"))
++        h.update(textos[caminho].encode("utf-8"))
++    return h.hexdigest()
++
++
+ def _embed(textos, input_type):
+     payload = json.dumps({"input": textos, "input_type": input_type}).encode()
+     req = urllib.request.Request(
+@@ -119,23 +189,25 @@ def _cos(a, b):
+ def reindex():
+     if not os.path.isfile(MEMORIAS):
+         sys.exit("ERRO: MEMÓRIAS.md não encontrado — rode a partir da raiz do repositório.")
+-    texto = open(MEMORIAS, encoding="utf-8").read()
+-    entradas = _parse_entradas(texto)
++    entradas, textos = _todas_entradas_todas_camadas()
+     if not entradas:
+-        sys.exit("ERRO: nenhuma entrada achada — MEMÓRIAS.md vazio ou marcador quebrado?")
+-    textos = [
++        sys.exit("ERRO: nenhuma entrada achada — camadas de memória vazias ou marcador quebrado?")
++    camadas_nomes = [os.path.basename(c) for c in textos]
++    textos_embed = [
+         f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
+         for e in entradas
+     ]
+-    print(f"Indexando {len(entradas)} entradas via {EMBED_URL} (iGPU) ...", file=sys.stderr)
++    print(f"Indexando {len(entradas)} entradas ({', '.join(sorted(camadas_nomes))}) "
++          f"via {EMBED_URL} (iGPU) ...", file=sys.stderr)
+     vetores = []
+     LOTE = 16
+-    for i in range(0, len(textos), LOTE):
+-        vetores.extend(_embed(textos[i:i + LOTE], "passage"))
+-        print(f"  {min(i + LOTE, len(textos))}/{len(textos)}", file=sys.stderr)
++    for i in range(0, len(textos_embed), LOTE):
++        vetores.extend(_embed(textos_embed[i:i + LOTE], "passage"))
++        print(f"  {min(i + LOTE, len(textos_embed))}/{len(textos_embed)}", file=sys.stderr)
+     os.makedirs(CACHE_DIR, exist_ok=True)
+     payload = {
+-        "memorias_sha256": _sha256(MEMORIAS),
++        "camadas_sha256": _hash_camadas(textos),
++        "camadas": sorted(camadas_nomes),
+         "modelo": "multilingual-e5-small",
+         "dim": len(vetores[0]) if vetores else 0,
+         "entradas": [
+@@ -154,9 +226,15 @@ def buscar(query, n):
+     if not os.path.isfile(VETORES_PATH):
+         sys.exit(f"ERRO: índice não existe ainda — rode '{sys.argv[0]} --reindex' primeiro.")
+     idx = json.load(open(VETORES_PATH, encoding="utf-8"))
+-    if os.path.isfile(MEMORIAS) and idx.get("memorias_sha256") != _sha256(MEMORIAS):
+-        print("AVISO: MEMÓRIAS.md mudou desde o último --reindex — resultado pode estar "
+-              "desatualizado. Rode --reindex pra atualizar.", file=sys.stderr)
++    if "camadas_sha256" not in idx:
++        print("AVISO: índice foi gravado por uma versão anterior (só quente, pré-Fase 4) — "
++              "rode --reindex pra cobrir quente+morno+frio.", file=sys.stderr)
++    elif os.path.isfile(MEMORIAS):
++        _, textos_atuais = _todas_entradas_todas_camadas()
++        if idx.get("camadas_sha256") != _hash_camadas(textos_atuais):
++            print("AVISO: alguma camada de memória (quente/morno/frio) mudou desde o último "
++                  "--reindex — resultado pode estar desatualizado. Rode --reindex pra atualizar.",
++                  file=sys.stderr)
+     qvec = _embed([query], "query")[0]
+     ranking = sorted(
+         idx["entradas"],
+diff --git a/scripts/gerar_indice_derivado.py b/scripts/gerar_indice_derivado.py
+index 01a759d..00730c3 100644
+--- a/scripts/gerar_indice_derivado.py
++++ b/scripts/gerar_indice_derivado.py
+@@ -1,10 +1,12 @@
+ #!/usr/bin/env python3
+ """Gera o índice derivado do canon público, para consulta externa (NotebookLM).
+ 
+-Lê SOMENTE três arquivos, no topo do repositório: REGRAS.md, PROJETO.md,
+-MEMÓRIAS.md. NUNCA lê de memoria/missoes/ -- nem a esfera pessoal
+-(segunda-camada), nem a de projeto (agata-sistema). A garantia é o conjunto
+-de entrada fixo abaixo (FONTES) e a reconstrução byte a byte no fim.
++Lê REGRAS.md, PROJETO.md e as camadas de MEMÓRIAS -- quente (MEMÓRIAS.md),
++morno (MEMORIAS-MORNO.md, se existir) e frio (MEMORIAS-FRIO-*.md, chunks
++selados -- Fase 4, MEMÓRIAS (357)) --, todas no topo do repositório. NUNCA lê
++de memoria/missoes/ -- nem a esfera pessoal (segunda-camada), nem a de
++projeto (agata-sistema). A garantia é o conjunto de entrada fixo abaixo
++(FONTES + camadas extra de memória) e a reconstrução byte a byte no fim.
+ 
+ Escreve em memoria/missoes/agata-sistema/derivado/ (dentro de agata-sistema/
+ para o subir_esfera_projeto.py conseguir subir; memoria/missoes/ é gitignorado
+@@ -12,19 +14,23 @@ do repo principal):
+   - indice.md    -- Opção A de MEMÓRIAS (296)/(298):
+                     Parte 1: REGRAS.md na íntegra
+                     Parte 2: PROJETO.md na íntegra
+-                    Parte 3: só as linhas de título das entradas de MEMÓRIAS
+-                             (nº + tipo + data + título), mais recente primeiro,
+-                             sem corpo de entrada.
+-  - manifesto.md -- sha256 das 3 fontes + do indice.md, no commit de referência.
++                    Parte 3: só as linhas de título das entradas de MEMÓRIAS --
++                             quente + morno + frio (Fase 4) -- (nº + tipo +
++                             data + título), mais recente primeiro (camada por
++                             camada), sem corpo de entrada.
++  - manifesto.md -- sha256 de REGRAS/PROJETO + de cada camada de memória lida
++                    + do indice.md, no commit de referência.
+ 
+ Determinístico: carimbo de commit (git), não relógio de parede. Override por
+ AGATA_CANON_SHA / AGATA_CANON_DATA no ambiente (para rodar sobre um extract
+ sem .git, mesmo padrão de gerar_obsidian.py).
+ 
+ Verificação embutida antes de escrever (aborta, nada é gravado):
+-  1. as fontes são exatamente as 3 e cada uma é filha direta da raiz do repo;
++  1. as fontes são exatamente REGRAS/PROJETO + as camadas de memória achadas
++     no disco, cada uma filha direta da raiz do repo;
+   2. REGRAS.md e PROJETO.md aparecem no indice.md como bloco verbatim contíguo;
+-  3. cada linha de título da Parte 3 é uma linha verbatim de MEMÓRIAS.md;
++  3. cada linha de título da Parte 3 é uma linha verbatim de alguma camada de
++     memória lida (quente, morno ou um chunk frio);
+   4. indice.md == HEADER + REGRAS + SEP + PROJETO + SEP + títulos  (byte a byte)
+      -- prova de que não há nada além do boilerplate fixo e do canon.
+ """
+@@ -44,10 +50,37 @@ FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
+ CAB_ENTRADA = re.compile(
+     r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+.*$"
+ )
++FRIO_NOME = re.compile(
++    r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"
++)
+ 
+ SEP = "\n\n" + "=" * 64 + "\n"
+ 
+ 
++def camadas_frio_recente_primeiro():
++    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
++    recente. Mesma regra de ordem do .githooks/gerar-hidratacao.sh (Fase 4,
++    MEMÓRIAS (357)): cada passada de scripts/migrar_periodo.py congela o
++    trecho mais ANTIGO de morno -- "-com-migrado" é sempre a primeira passada
++    de um dia (carrega o bloco migrado, se sobrar naquele momento), o chunk
++    SEM sufixo numérico é a segunda, "-2"/"-3"/... crescem na ordem em que
++    foram congelados. Mais recente primeiro = maior sufixo primeiro, depois
++    sem sufixo, depois "-com-migrado"; entre dias distintos, data mais
++    recente primeiro. Verificado contra o conteúdo real dos 11 chunks
++    existentes em 06/09/2026 (primeira/última entrada de cada um), não só
++    deduzido do código."""
++    achados = []
++    for nome in os.listdir(REPO):
++        m = FRIO_NOME.match(nome)
++        if not m:
++            continue
++        data, seq_str, com_migrado = m.groups()
++        seq = 0 if com_migrado else int(seq_str or 1)
++        achados.append((data, seq, nome))
++    achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
++    return [nome for _, _, nome in achados]
++
++
+ def abortar(msg):
+     print(f"ABORTADO: {msg}", file=sys.stderr)
+     sys.exit(1)
+@@ -67,28 +100,49 @@ def carimbo():
+     return sha, (data or "(data indisponível)")
+ 
+ 
+-def linhas_titulo(mem_txt):
+-    """As linhas de título das entradas modernas, na ordem do arquivo
+-    (mais recente primeiro, desde MEMÓRIAS (271))."""
+-    ini = mem_txt.find(MARCADOR)
+-    if ini == -1:
+-        abortar("marcador ENTRADAS-NOVAS não achado em MEMÓRIAS.md.")
+-    corpo = mem_txt[mem_txt.find("\n", ini) + 1:]
+-    m = FIM_MODERNO.search(corpo)
+-    if m:
+-        corpo = corpo[:m.start()]
++def linhas_titulo_camada_moderna(texto, exige_marcador):
++    """As linhas de título das entradas modernas de UMA camada, na ordem do
++    arquivo (mais recente primeiro, desde MEMÓRIAS (271)). Quente/morno
++    exigem o marcador ENTRADAS-NOVAS e cortam no bloco migrado -- lá esse
++    heading marca sempre o FIM físico do corpo moderno, com o bloco antigo
++    depois dele.
++
++    Um chunk frio não tem marcador (é congelado, já veio pronto da
++    migração) -- e NÃO corta em FIM_MODERNO: achado testando de verdade,
++    `MEMORIAS-FRIO-*-com-migrado.md` tem esse mesmo heading perto do TOPO do
++    arquivo (ele rotula o bloco migrado que fica logo depois), com entradas
++    numeradas modernas espalhadas ANTES E DEPOIS dele -- cortar ali
++    descartaria quase todo o conteúdo moderno do chunk. Lido inteiro, o
++    CAB_ENTRADA simplesmente não bate nas linhas do formato antigo ("### data
++    (n)") do bloco migrado, que ficam de fora sem precisar de corte
++    explícito."""
++    if exige_marcador:
++        ini = texto.find(MARCADOR)
++        if ini == -1:
++            abortar("marcador ENTRADAS-NOVAS não achado numa camada quente/morno.")
++        corpo = texto[texto.find("\n", ini) + 1:]
++        m = FIM_MODERNO.search(corpo)
++        if m:
++            corpo = corpo[:m.start()]
++    else:
++        corpo = texto
+     return [ln for ln in corpo.split("\n") if CAB_ENTRADA.match(ln)]
+ 
+ 
+ def main():
+-    # 1. conjunto de entrada fixo, cada fonte filha direta da raiz do repo
+-    caminhos = {}
+-    for nome in FONTES:
+-        p = os.path.join(REPO, nome)
++    # 1. conjunto de entrada fixo: REGRAS/PROJETO + quente, cada um filha
++    # direta da raiz do repo -- mais as camadas extra de memória (morno, se
++    # existir, e todo chunk frio achado no disco), sob a mesma checagem.
++    def validar_filha_direta(nome, p):
+         if os.path.dirname(os.path.realpath(p)) != os.path.realpath(REPO):
+             abortar(f"fonte {nome} não é filha direta da raiz do repo.")
+         if PROIBIDO in os.path.realpath(p):
+             abortar(f"fonte {nome} resolve para dentro de {PROIBIDO}/ -- proibido.")
++
++    caminhos = {}
++    for nome in FONTES:
++        p = os.path.join(REPO, nome)
++        validar_filha_direta(nome, p)
+         if not os.path.isfile(p):
+             abortar(f"fonte ausente: {p}")
+         caminhos[nome] = p
+@@ -97,12 +151,30 @@ def main():
+     projeto = open(caminhos["PROJETO.md"], encoding="utf-8").read()
+     mem_txt = open(caminhos["MEMÓRIAS.md"], encoding="utf-8").read()
+ 
++    # Camadas extra de memória (Fase 4, MEMÓRIAS (357)): morno + frio, mais
++    # recente primeiro. Ausência de morno é normal logo após uma migração
++    # (pode nascer vazio) -- não é erro, só não entra.
++    camadas_extra_nomes = []
++    if os.path.isfile(os.path.join(REPO, "MEMORIAS-MORNO.md")):
++        camadas_extra_nomes.append("MEMORIAS-MORNO.md")
++    camadas_extra_nomes.extend(camadas_frio_recente_primeiro())
++
++    camadas_extra_txt = {}
++    for nome in camadas_extra_nomes:
++        p = os.path.join(REPO, nome)
++        validar_filha_direta(nome, p)
++        camadas_extra_txt[nome] = open(p, encoding="utf-8").read()
++
+     sha, data = carimbo()
+-    titulos = linhas_titulo(mem_txt)
++    titulos = linhas_titulo_camada_moderna(mem_txt, exige_marcador=True)
++    for nome in camadas_extra_nomes:
++        exige = (nome == "MEMORIAS-MORNO.md")
++        titulos += linhas_titulo_camada_moderna(camadas_extra_txt[nome], exige_marcador=exige)
+ 
++    fontes_citadas = ", ".join(("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md") + tuple(camadas_extra_nomes))
+     header = (
+         "---\n"
+-        "gerado-de: canon público do sistema Agata (REGRAS.md, PROJETO.md, MEMÓRIAS.md)\n"
++        f"gerado-de: canon público do sistema Agata ({fontes_citadas})\n"
+         f"canon: {sha}\n"
+         f"data: {data}\n"
+         "nota: camada de leitura derivada, só-leitura. Não é canon. "
+@@ -110,11 +182,12 @@ def main():
+         "---\n\n"
+         "# Índice derivado — canon público do Agata\n\n"
+         "Mapa para consulta externa. Três partes: as regras na íntegra, o estado\n"
+-        "atual na íntegra, e a linha do tempo das entradas de memória (só os\n"
++        "atual na íntegra, e a linha do tempo das entradas de memória -- quente +\n"
++        "morno + frio (Fase 4) -- (só os\n"
+         f"títulos). Gerado do commit `{sha}` ({data}). Hashes em `manifesto.md`.\n"
+     )
+     parte3_cab = (
+-        "## PARTE 3 — MEMÓRIAS.md (linha do tempo, só títulos, mais recente primeiro)\n"
++        "## PARTE 3 — MEMÓRIAS (linha do tempo, quente+morno+frio, só títulos, mais recente primeiro)\n"
+         f"{len(titulos)} entradas.\n\n"
+     )
+     indice = (
+@@ -130,9 +203,11 @@ def main():
+     if projeto not in indice:
+         abortar("PROJETO.md não aparece verbatim no índice.")
+     linhas_mem = set(mem_txt.split("\n"))
++    for txt_extra in camadas_extra_txt.values():
++        linhas_mem |= set(txt_extra.split("\n"))
+     for t in titulos:
+         if t not in linhas_mem:
+-            abortar(f"linha de título não é verbatim de MEMÓRIAS.md: {t[:60]}")
++            abortar(f"linha de título não é verbatim de nenhuma camada de memória lida: {t[:60]}")
+     reconstruido = (
+         header
+         + SEP + "## PARTE 1 — REGRAS.md (íntegra)\n\n" + regras
+@@ -145,6 +220,10 @@ def main():
+     def h(s):
+         return hashlib.sha256(s.encode("utf-8")).hexdigest()
+ 
++    linhas_fontes = [f"  REGRAS.md    {h(regras)}\n", f"  PROJETO.md   {h(projeto)}\n",
++                     f"  MEMÓRIAS.md  {h(mem_txt)}\n"]
++    for nome in camadas_extra_nomes:
++        linhas_fontes.append(f"  {nome}  {h(camadas_extra_txt[nome])}\n")
+     manifesto = (
+         "---\n"
+         "tipo: manifesto do índice derivado\n"
+@@ -153,13 +232,11 @@ def main():
+         "---\n\n"
+         "# Manifesto — índice derivado do canon público\n\n"
+         f"Fontes (sha256, no commit {sha}):\n"
+-        f"  REGRAS.md    {h(regras)}\n"
+-        f"  PROJETO.md   {h(projeto)}\n"
+-        f"  MEMÓRIAS.md  {h(mem_txt)}\n\n"
++        + "".join(linhas_fontes) + "\n"
+         "Saída:\n"
+         f"  indice.md    {h(indice)}   (Parte 3: {len(titulos)} linhas de título)\n\n"
+         "Regenerar: python3 scripts/gerar_indice_derivado.py\n"
+-        "Conferir : sha256sum das 3 fontes bate com os valores acima.\n"
++        "Conferir : sha256sum das fontes acima bate com os valores acima.\n"
+     )
+ 
+     os.makedirs(SAIDA_DIR, exist_ok=True)
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index f2af06a..067fced 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -52,11 +52,15 @@ def _canon():
+ CANON, DATA = _canon()
+ 
+ MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
++MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
+ MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
+ FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
+ CAB_ENTRADA = re.compile(
+     r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+(.*)$"
+ )
++FRIO_NOME = re.compile(
++    r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"
++)
+ REF_ENTRADA = re.compile(r"\((\d{1,3})\)")
+ REF_REGRA = re.compile(r"\bRegra\s+(\d+(?:\.\d+)?)\b")
+ REF_CONTROLE = re.compile(r"\bP-([1-9])\b")
+@@ -168,6 +172,72 @@ def parse_entradas(texto):
+     return entradas
+ 
+ 
++def camadas_frio_recente_primeiro():
++    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
++    recente -- mesma regra usada em scripts/gerar_indice_derivado.py e
++    .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): maior sufixo
++    primeiro, depois sem sufixo, depois "-com-migrado"; datas mais recentes
++    primeiro entre dias distintos. Verificado contra o conteúdo real dos 11
++    chunks existentes em 06/09/2026 (primeira/última entrada de cada um)."""
++    achados = []
++    for nome in os.listdir(REPO):
++        m = FRIO_NOME.match(nome)
++        if not m:
++            continue
++        data, seq_str, com_migrado = m.groups()
++        seq = 0 if com_migrado else int(seq_str or 1)
++        achados.append((data, seq, nome))
++    achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
++    return [nome for _, _, nome in achados]
++
++
++def parse_entradas_morno(texto):
++    """Camada morna (MEMORIAS-MORNO.md) -- mesma disciplina de quente
++    (marcador ENTRADAS-NOVAS obrigatório, mesmo corte no bloco migrado)."""
++    return parse_entradas(texto)
++
++
++def parse_entradas_frio(texto):
++    """Um chunk frio não tem marcador (já vem congelado) e NÃO corta em
++    FIM_MODERNO: achado testando de verdade (mesmo achado de
++    gerar_indice_derivado.py) -- MEMORIAS-FRIO-*-com-migrado.md tem o
++    heading "## Migrado de DIÁRIO.md" perto do TOPO do arquivo, com entradas
++    modernas espalhadas antes e depois dele; cortar ali descartaria quase
++    todo o conteúdo moderno do chunk. Lido inteiro, CAB_ENTRADA não bate no
++    formato antigo ("### data (n)") do bloco migrado, que fica de fora sem
++    corte explícito."""
++    entradas, atual = [], None
++    for ln in texto.split("\n"):
++        mm = CAB_ENTRADA.match(ln)
++        if mm:
++            if atual:
++                entradas.append(atual)
++            num, tipo, resto = int(mm.group(1)), mm.group(2).strip(), mm.group(3).strip()
++            data, titulo = "", resto
++            pm = re.match(r"(\d{2}/\d{2}/\d{4})\s*(?:·\s*(.*))?$", resto)
++            if pm:
++                data, titulo = pm.group(1), (pm.group(2) or "").strip()
++            atual = {"num": num, "tipo": tipo, "data": data, "titulo": titulo, "linhas": []}
++        elif atual is not None:
++            atual["linhas"].append(ln)
++    if atual:
++        entradas.append(atual)
++    return entradas
++
++
++def todas_entradas_todas_camadas():
++    """Quente + morno (se existir) + frio (mais recente primeiro) -- mesma
++    ordem/regra de gerar_indice_derivado.py e gerar-hidratacao.sh (Fase 4,
++    MEMÓRIAS (357)). Uma nota por entrada em memoria/obsidian/entradas/,
++    independente de qual arquivo físico a guarda hoje."""
++    entradas = list(parse_entradas(ler(MEMORIAS)))
++    if os.path.isfile(MORNO):
++        entradas += parse_entradas_morno(ler(MORNO))
++    for nome in camadas_frio_recente_primeiro():
++        entradas += parse_entradas_frio(ler(os.path.join(REPO, nome)))
++    return entradas
++
++
+ def secoes(texto):
+     """divide um markdown em (titulo, corpo) por heading ^## ."""
+     out = []
+@@ -259,8 +329,7 @@ def main():
+     reg_txt = ler(os.path.join(REPO, "REGRAS.md"))
+     proj_txt = ler(os.path.join(REPO, "PROJETO.md"))
+     ref_txt = ler(os.path.join(REPO, "PROJETO_REFERENCIA.md"))
+-    mem_txt = ler(MEMORIAS)
+-    entradas = parse_entradas(mem_txt)
++    entradas = todas_entradas_todas_camadas()
+     nums = {e["num"] for e in entradas}
+ 
+     # -------- registrar basenames (para linkar só o que existe)
