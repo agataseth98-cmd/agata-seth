@@ -15,6 +15,8 @@ Esta página é só para você — não para os modelos.
 
 **Pra você conferir, se quiser:** `git log --oneline -3` mostra os três commits (a proposta, e agora a aplicação); `bash scripts/perimetro.sh` (dentro de `~/agata`) deve terminar em `RESULTADO GERAL: OK`.
 
+**Ponta solta fechada:** faltava atualizar uma linha do `PROJETO.md` dizendo que essa fila estava pronta (antes dizia "pendente"). Mesmo comando de aprovação, mesmo caminho — feito.
+
 ## Onde estamos agora — 05/09/2026 (você encerrou o regime de exceção — os freios voltam)
 
 **Você pediu pra registrar o fim do regime de exceção, e eu registrei — MEMÓRIAS (346).** Desde 01/09, boa parte do trabalho neste sistema rodou sem a cerimônia normal (segunda opinião de outro modelo antes de mudança grande, você mesmo aprovando cada mudança de comportamento em vez de eu registrar a aprovação por conta própria). Isso acabou de voltar ao normal.

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
+  palavras-chave: projeto, fase, linha, fila, aderência, atualizada, dentro, janela, bug, pra, fechada, memórias, mudança, forma, apresentação, regra, conteúdo, novo, ficou, fora, commit, engano, meu, pegou, tinha, editado, aprovação, própria, revertido, commitar
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
   palavras-chave: fila, aderência, memórias, período, quente, morno, frio, fechada, índice, vault, obsidian, busca, semântica, derivado, agora, cobrem, três, camadas, bug, real, achado, testando, corte, bloco, migrado, aplicado, engano, chunk, corrigido, propor
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reordenado em (355)) implementada — quente/morno/frio, testado num clone descartável antes de tocar o canon real, cinco bugs achados e corrigidos no processo, corte final reformulado a pedido do Humano (quente começa vazio, esta entrada é o marco zero); período de aderência de 4 semanas registrado
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, autoavaliação, seth, próprio, sistema, memória, substância, confirmada, item, erro, real, arquitetura, desatualizada, hermes, removido, cabeçalho, resposta, reprova, linter, regra, projeto
 (330) DIÁRIO — 04/09/2026 · Achado real por trás do anel de soltos: 8 canônicos da raiz + _LEIA.md nunca tiveram wikilink de verdade — (329) errou o diagnóstico (achou que era só cache)
   palavras-chave: achado, real, trás, anel, soltos, canônicos, raiz, leia, nunca, tiveram, wikilink, verdade, errou, diagnóstico, achou, era, cache
-(329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase todo Nota Diária + gerado; blindado contra publicar nota pessoal por acidente
-  palavras-chave: grafo, obsidian, anel, pontos, soltos, quase, nota, diária, gerado, blindado, contra, publicar, pessoal, acidente
+(329) DIÁRIO — 04/09/2026 · Grafo do Obsidian: o anel de pontos soltos é quase t …
+  palavras-chave: grafo, obsidian, anel, pontos, soltos, quase
 (328) DIÁRIO — 04/09/2026 · Auditoria Camada C de parecer externo (gpt-5.6-terra …
   palavras-chave: auditoria, camada, parecer, externo, gpt, terra
 (327) DIÁRIO — 04/09/2026 · Busca semântica implementada sob autorização escrita …

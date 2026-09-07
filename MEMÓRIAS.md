@@ -28,6 +28,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
+
+Par `.diff`/`APROVADO-` em `propostas/aplicadas/projeto-fila-aderencia-fase4-status` — `.diff` preparado por mim, `APROVADO-` criado pelo Humano.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` contra HEAD antes de propor; `bash scripts/perimetro.sh` depois de aplicar. Autorização: Humano, "Pode empurrar, e prepara o diff do PROJETO.md" (pedido) + criação do `APROVADO-` pelo próprio Humano (aplicação).
+
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
 
 **Pedido do Humano:** "Siga até onde precisar de minha atenção" — depois de eu ter arrumado duas branches `claude/` obsoletas do repositório (sem trabalho próprio, absorvidas em `main`) e apagado a branch `redesign` (já mergeada, também sem trabalho próprio). Escopo da fila confirmado por pergunta direta: "Quente + morno + frio (tudo)", não só quente+morno.
