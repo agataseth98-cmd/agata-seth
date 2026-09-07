@@ -52,10 +52,14 @@ def _canon():
 CANON, DATA = _canon()
 
 MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
+MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
 CAB_ENTRADA = re.compile(
     r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+(.*)$"
+)
+FRIO_NOME = re.compile(
+    r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"
 )
 REF_ENTRADA = re.compile(r"\((\d{1,3})\)")
 REF_REGRA = re.compile(r"\bRegra\s+(\d+(?:\.\d+)?)\b")
@@ -168,6 +172,72 @@ def parse_entradas(texto):
     return entradas
 
 
+def camadas_frio_recente_primeiro():
+    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
+    recente -- mesma regra usada em scripts/gerar_indice_derivado.py e
+    .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): maior sufixo
+    primeiro, depois sem sufixo, depois "-com-migrado"; datas mais recentes
+    primeiro entre dias distintos. Verificado contra o conteúdo real dos 11
+    chunks existentes em 06/09/2026 (primeira/última entrada de cada um)."""
+    achados = []
+    for nome in os.listdir(REPO):
+        m = FRIO_NOME.match(nome)
+        if not m:
+            continue
+        data, seq_str, com_migrado = m.groups()
+        seq = 0 if com_migrado else int(seq_str or 1)
+        achados.append((data, seq, nome))
+    achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
+    return [nome for _, _, nome in achados]
+
+
+def parse_entradas_morno(texto):
+    """Camada morna (MEMORIAS-MORNO.md) -- mesma disciplina de quente
+    (marcador ENTRADAS-NOVAS obrigatório, mesmo corte no bloco migrado)."""
+    return parse_entradas(texto)
+
+
+def parse_entradas_frio(texto):
+    """Um chunk frio não tem marcador (já vem congelado) e NÃO corta em
+    FIM_MODERNO: achado testando de verdade (mesmo achado de
+    gerar_indice_derivado.py) -- MEMORIAS-FRIO-*-com-migrado.md tem o
+    heading "## Migrado de DIÁRIO.md" perto do TOPO do arquivo, com entradas
+    modernas espalhadas antes e depois dele; cortar ali descartaria quase
+    todo o conteúdo moderno do chunk. Lido inteiro, CAB_ENTRADA não bate no
+    formato antigo ("### data (n)") do bloco migrado, que fica de fora sem
+    corte explícito."""
+    entradas, atual = [], None
+    for ln in texto.split("\n"):
+        mm = CAB_ENTRADA.match(ln)
+        if mm:
+            if atual:
+                entradas.append(atual)
+            num, tipo, resto = int(mm.group(1)), mm.group(2).strip(), mm.group(3).strip()
+            data, titulo = "", resto
+            pm = re.match(r"(\d{2}/\d{2}/\d{4})\s*(?:·\s*(.*))?$", resto)
+            if pm:
+                data, titulo = pm.group(1), (pm.group(2) or "").strip()
+            atual = {"num": num, "tipo": tipo, "data": data, "titulo": titulo, "linhas": []}
+        elif atual is not None:
+            atual["linhas"].append(ln)
+    if atual:
+        entradas.append(atual)
+    return entradas
+
+
+def todas_entradas_todas_camadas():
+    """Quente + morno (se existir) + frio (mais recente primeiro) -- mesma
+    ordem/regra de gerar_indice_derivado.py e gerar-hidratacao.sh (Fase 4,
+    MEMÓRIAS (357)). Uma nota por entrada em memoria/obsidian/entradas/,
+    independente de qual arquivo físico a guarda hoje."""
+    entradas = list(parse_entradas(ler(MEMORIAS)))
+    if os.path.isfile(MORNO):
+        entradas += parse_entradas_morno(ler(MORNO))
+    for nome in camadas_frio_recente_primeiro():
+        entradas += parse_entradas_frio(ler(os.path.join(REPO, nome)))
+    return entradas
+
+
 def secoes(texto):
     """divide um markdown em (titulo, corpo) por heading ^## ."""
     out = []
@@ -259,8 +329,7 @@ def main():
     reg_txt = ler(os.path.join(REPO, "REGRAS.md"))
     proj_txt = ler(os.path.join(REPO, "PROJETO.md"))
     ref_txt = ler(os.path.join(REPO, "PROJETO_REFERENCIA.md"))
-    mem_txt = ler(MEMORIAS)
-    entradas = parse_entradas(mem_txt)
+    entradas = todas_entradas_todas_camadas()
     nums = {e["num"] for e in entradas}
 
     # -------- registrar basenames (para linkar só o que existe)

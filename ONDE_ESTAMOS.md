@@ -5,6 +5,16 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos.
 
+## Onde estamos agora — 06/09/2026 (índice, vault e busca voltaram a enxergar a história toda)
+
+**Contexto que você não viu registrado aqui ainda:** desde ontem (05/09) até hoje, uma sessão anterior reorganizou `MEMÓRIAS.md` em três "temperaturas" — quente (o que é recente, pequeno), morno (o que esfriou um pouco) e frio (histórico antigo, congelado e travado contra edição). Isso é bom pro tamanho do arquivo que os modelos carregam a cada conversa, mas quebrou de lado quatro ferramentas que ainda só sabiam olhar pra "quente": o índice de busca (`INDICE_MEMORIAS.md`), o cofre de notas do Obsidian, a busca por assunto/sentido, e o índice que alimenta o NotebookLM.
+
+**O que eu fiz agora, com sua autorização ("Quente + morno + frio (tudo)"):** consertei as quatro ferramentas pra olharem as três temperaturas juntas, na ordem certa (mais recente primeiro). Testei tudo de verdade num clone descartável do repositório antes de mexer nos arquivos de verdade — inclusive rodei uma busca real ("bug de num_ctx do Ollama") e confirmei que ela agora acha entradas antigas que antes tinham ficado invisíveis pro índice. Achei e corrigi um bug real no meio do teste (um corte de texto que, num dos arquivos congelados, estava apagando quase tudo por engano).
+
+**Como isso chegou no sistema de verdade, passo a passo:** eu não apliquei nada sozinho. Preparei a mudança como um arquivo de "proposta" (`.diff`) e pedi sua aprovação. Você me pediu pra eu mesmo criar o arquivo de aprovação — recusei, porque esse é justamente o freio que te protege de eu mudar comportamento do sistema sem você perceber. Te expliquei o comando (`touch ...`), você rodou, e só depois eu apliquei a mudança de verdade.
+
+**Pra você conferir, se quiser:** `git log --oneline -3` mostra os três commits (a proposta, e agora a aplicação); `bash scripts/perimetro.sh` (dentro de `~/agata`) deve terminar em `RESULTADO GERAL: OK`.
+
 ## Onde estamos agora — 05/09/2026 (você encerrou o regime de exceção — os freios voltam)
 
 **Você pediu pra registrar o fim do regime de exceção, e eu registrei — MEMÓRIAS (346).** Desde 01/09, boa parte do trabalho neste sistema rodou sem a cerimônia normal (segunda opinião de outro modelo antes de mudança grande, você mesmo aprovando cada mudança de comportamento em vez de eu registrar a aprovação por conta própria). Isso acabou de voltar ao normal.

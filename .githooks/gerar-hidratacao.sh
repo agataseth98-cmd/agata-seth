@@ -127,13 +127,70 @@ filtrar_indice_por_alvo() {
 # nunca presumem qual está em vigor.
 MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
 
+# Fase 4 (MEMÓRIAS (357)) / fila de aderência: MEMÓRIAS.md (quente) deixou de
+# ser a única camada -- MEMORIAS-MORNO.md (morno) e os chunks selados
+# MEMORIAS-FRIO-*.md (frio) também guardam entradas reais. Sem isto, o índice
+# só enxergava quente -- depois da migração de (357), quente ficou reduzido
+# ao marco zero (uma entrada só) e o índice praticamente sumia.
+#
+# Lista os chunks frios do MAIS pro MENOS recente. Regra de ordem, achada
+# lendo scripts/migrar_periodo.py: cada passada congela o trecho mais ANTIGO
+# de morno; `-com-migrado` é sempre a passada mais antiga de um dia (o bloco
+# migrado só pode sair junto da primeira vez que sobra desse dia), o chunk
+# SEM sufixo numérico é a próxima (seq=1 sem "-N"), e -2/-3/... crescem na
+# ordem em que foram congelados -- ou seja, MAIS recente primeiro é: maior
+# sufixo primeiro, depois sem sufixo, depois "-com-migrado", por data mais
+# recente primeiro entre dias distintos. Verificado contra o conteúdo real
+# dos 11 chunks existentes em 06/09/2026 (primeira/última entrada de cada
+# um), não só deduzido do código.
+listar_frio_recente_primeiro() {
+  local f data seq chave
+  for f in MEMORIAS-FRIO-*.md; do
+    [ -f "$f" ] || continue
+    if [[ "$f" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
+      data="${BASH_REMATCH[1]}"
+      if [ -n "${BASH_REMATCH[4]:-}" ]; then
+        seq=0
+      else
+        seq="${BASH_REMATCH[3]:-1}"
+      fi
+    else
+      data="0000-00-00"; seq=1
+    fi
+    printf -v chave '%s\t%05d\t%s' "$data" "$seq" "$f"
+    echo "$chave"
+  done | sort -t $'\t' -k1,1r -k2,2nr | cut -f3
+}
+
+# Uma linha por entrada, camada por camada (quente -> morno -> frio,
+# mais recente primeiro em cada uma), pro padrão de duas resoluções em
+# scripts/compactar_indice.py (N primeiras completas, resto truncado) --
+# a ordem entre camadas importa de verdade aqui, não é só estética.
+_grep_entradas_modernas_todas_camadas() {
+  grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+  [ -f MEMORIAS-MORNO.md ] && grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMORIAS-MORNO.md
+  while IFS= read -r _frio; do
+    grep -hE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' "$_frio"
+  done < <(listar_frio_recente_primeiro)
+}
+
+# Linhas do formato antigo (pré-numeração unificada, "### data (n)"), hoje só
+# dentro do bloco migrado -- vive em qualquer camada onde o bloco parar
+# (frio, depois de (357); podia ser quente, antes). Ordem entre camadas não
+# importa aqui: scripts/compactar_indice.py já trata este grupo como o mais
+# antigo, sempre depois do grupo moderno acima, então não compete pelas N
+# primeiras vagas completas.
+_grep_entradas_antigas_todas_camadas() {
+  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
+}
+
 gerar_indice() {
   {
-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md — não edite direto. -->"
+    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md + MEMORIAS-MORNO.md + MEMORIAS-FRIO-*.md — não edite direto. -->"
     echo "# Índice de MEMÓRIAS.md"
     echo
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
-      echo "Uma linha por entrada, da mais recente pra mais antiga (MEMÓRIAS (271)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
+      echo "Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
     else
       echo "Uma linha por entrada, na ordem em que aparecem no arquivo. Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número."
     fi
@@ -172,8 +229,8 @@ gerar_indice() {
     # `RESULTADO GERAL: OK` do perimetro.sh, silencioso até rodar com `-x`).
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
-        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+        _grep_entradas_modernas_todas_camadas
+        _grep_entradas_antigas_todas_camadas
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     else
       {
@@ -308,10 +365,10 @@ checar_reconciliacao() {
 
 gerar_indice_palavras_chave() {
   {
-    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md -- não edite direto. -->"
+    echo "<!-- GERADO AUTOMATICAMENTE por .githooks/gerar-hidratacao.sh a partir de MEMÓRIAS.md + MEMORIAS-MORNO.md + MEMORIAS-FRIO-*.md -- não edite direto. -->"
     echo "# Índice de MEMÓRIAS.md, com palavras-chave por entrada"
     echo
-    echo "Mesmas entradas de INDICE_MEMORIAS.md, uma linha \"  palavras-chave: ...\" logo"
+    echo "Mesmas entradas de INDICE_MEMORIAS.md (quente + morno + frio, Fase 4), uma linha \"  palavras-chave: ...\" logo"
     echo "abaixo de cada título. Extração puramente mecânica (tokeniza, tira stopword,"
     echo "deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)."
     echo "Pensado pra \`grep -i <termo>\` achar entrada por assunto sem reler o índice"
@@ -319,8 +376,8 @@ gerar_indice_palavras_chave() {
     echo
     if grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md; then
       {
-        grep -E '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
-        grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
+        _grep_entradas_modernas_todas_camadas
+        _grep_entradas_antigas_todas_camadas
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py
     else

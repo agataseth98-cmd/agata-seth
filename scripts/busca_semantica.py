@@ -47,6 +47,7 @@ import urllib.request
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
+MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
 EMBED_URL = os.environ.get("AGATA_EMBED_URL", "http://127.0.0.1:20134/embed")
 CACHE_DIR = os.environ.get(
     "AGATA_BUSCA_CACHE", os.path.expanduser("~/.cache/agata/busca_semantica")
@@ -57,24 +58,31 @@ FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
 CAB_ENTRADA = re.compile(
     r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+(.*)$"
 )
+FRIO_NOME = re.compile(
+    r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"
+)
 
 
-def _sha256(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()
+def _camadas_frio_recente_primeiro():
+    """Mesma regra de ordem de scripts/gerar_indice_derivado.py e
+    .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): mais recente
+    primeiro é maior sufixo primeiro, depois sem sufixo, depois
+    "-com-migrado"; datas mais recentes primeiro entre dias distintos."""
+    achados = []
+    for nome in os.listdir(REPO):
+        m = FRIO_NOME.match(nome)
+        if not m:
+            continue
+        data, seq_str, com_migrado = m.groups()
+        seq = 0 if com_migrado else int(seq_str or 1)
+        achados.append((data, seq, nome))
+    achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
+    return [os.path.join(REPO, nome) for _, _, nome in achados]
 
 
-def _parse_entradas(texto):
-    ini = texto.find(MARCADOR)
-    if ini == -1:
-        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMÓRIAS.md.")
-    corpo = texto[texto.find("\n", ini) + 1:]
-    m = FIM_MODERNO.search(corpo)
-    if m:
-        corpo = corpo[:m.start()]
+def _parse_entradas_bloco(corpo):
+    """Quebra um corpo de texto (já recortado pra ficar só no formato
+    moderno) em entradas -- núcleo compartilhado por camada com/sem marcador."""
     entradas, atual = [], None
     for ln in corpo.split("\n"):
         mm = CAB_ENTRADA.match(ln)
@@ -92,6 +100,68 @@ def _parse_entradas(texto):
     if atual:
         entradas.append(atual)
     return entradas
+
+
+def _parse_entradas(texto):
+    """Camada quente (MEMÓRIAS.md) -- exige o marcador, corta no bloco
+    migrado, se ainda estiver ali."""
+    ini = texto.find(MARCADOR)
+    if ini == -1:
+        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMÓRIAS.md.")
+    corpo = texto[texto.find("\n", ini) + 1:]
+    m = FIM_MODERNO.search(corpo)
+    if m:
+        corpo = corpo[:m.start()]
+    return _parse_entradas_bloco(corpo)
+
+
+def _parse_entradas_morno(texto):
+    """Camada morna (MEMORIAS-MORNO.md) -- mesma disciplina de quente."""
+    ini = texto.find(MARCADOR)
+    if ini == -1:
+        sys.exit("ERRO: marcador ENTRADAS-NOVAS não achado em MEMORIAS-MORNO.md.")
+    corpo = texto[texto.find("\n", ini) + 1:]
+    m = FIM_MODERNO.search(corpo)
+    if m:
+        corpo = corpo[:m.start()]
+    return _parse_entradas_bloco(corpo)
+
+
+def _parse_entradas_frio(texto):
+    """Um chunk frio não tem marcador (já vem congelado) e NÃO corta em
+    FIM_MODERNO: achado testando de verdade (mesmo achado registrado em
+    gerar_indice_derivado.py) -- MEMORIAS-FRIO-*-com-migrado.md tem o
+    heading "## Migrado de DIÁRIO.md" perto do TOPO do arquivo, com entradas
+    modernas espalhadas antes e depois dele; cortar ali descartaria quase
+    todo o conteúdo moderno do chunk. Lido inteiro, CAB_ENTRADA não bate no
+    formato antigo ("### data (n)") do bloco migrado."""
+    return _parse_entradas_bloco(texto)
+
+
+def _todas_entradas_todas_camadas():
+    """Quente + morno (se existir) + frio (mais recente primeiro), mesma
+    ordem/regra de gerar_indice_derivado.py e gerar-hidratacao.sh (Fase 4,
+    MEMÓRIAS (357)). Devolve (entradas, {caminho: texto})."""
+    textos = {MEMORIAS: open(MEMORIAS, encoding="utf-8").read()}
+    entradas = list(_parse_entradas(textos[MEMORIAS]))
+    if os.path.isfile(MORNO):
+        textos[MORNO] = open(MORNO, encoding="utf-8").read()
+        entradas += _parse_entradas_morno(textos[MORNO])
+    for caminho in _camadas_frio_recente_primeiro():
+        textos[caminho] = open(caminho, encoding="utf-8").read()
+        entradas += _parse_entradas_frio(textos[caminho])
+    return entradas, textos
+
+
+def _hash_camadas(textos):
+    """Hash combinado, independente da ordem de iteração, das camadas de
+    memória lidas -- detecta índice desatualizado sem depender só de
+    MEMÓRIAS.md (Fase 4: mudança em morno/frio também invalida o índice)."""
+    h = hashlib.sha256()
+    for caminho in sorted(textos):
+        h.update(os.path.basename(caminho).encode("utf-8"))
+        h.update(textos[caminho].encode("utf-8"))
+    return h.hexdigest()
 
 
 def _embed(textos, input_type):
@@ -119,23 +189,25 @@ def _cos(a, b):
 def reindex():
     if not os.path.isfile(MEMORIAS):
         sys.exit("ERRO: MEMÓRIAS.md não encontrado — rode a partir da raiz do repositório.")
-    texto = open(MEMORIAS, encoding="utf-8").read()
-    entradas = _parse_entradas(texto)
+    entradas, textos = _todas_entradas_todas_camadas()
     if not entradas:
-        sys.exit("ERRO: nenhuma entrada achada — MEMÓRIAS.md vazio ou marcador quebrado?")
-    textos = [
+        sys.exit("ERRO: nenhuma entrada achada — camadas de memória vazias ou marcador quebrado?")
+    camadas_nomes = [os.path.basename(c) for c in textos]
+    textos_embed = [
         f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
         for e in entradas
     ]
-    print(f"Indexando {len(entradas)} entradas via {EMBED_URL} (iGPU) ...", file=sys.stderr)
+    print(f"Indexando {len(entradas)} entradas ({', '.join(sorted(camadas_nomes))}) "
+          f"via {EMBED_URL} (iGPU) ...", file=sys.stderr)
     vetores = []
     LOTE = 16
-    for i in range(0, len(textos), LOTE):
-        vetores.extend(_embed(textos[i:i + LOTE], "passage"))
-        print(f"  {min(i + LOTE, len(textos))}/{len(textos)}", file=sys.stderr)
+    for i in range(0, len(textos_embed), LOTE):
+        vetores.extend(_embed(textos_embed[i:i + LOTE], "passage"))
+        print(f"  {min(i + LOTE, len(textos_embed))}/{len(textos_embed)}", file=sys.stderr)
     os.makedirs(CACHE_DIR, exist_ok=True)
     payload = {
-        "memorias_sha256": _sha256(MEMORIAS),
+        "camadas_sha256": _hash_camadas(textos),
+        "camadas": sorted(camadas_nomes),
         "modelo": "multilingual-e5-small",
         "dim": len(vetores[0]) if vetores else 0,
         "entradas": [
@@ -154,9 +226,15 @@ def buscar(query, n):
     if not os.path.isfile(VETORES_PATH):
         sys.exit(f"ERRO: índice não existe ainda — rode '{sys.argv[0]} --reindex' primeiro.")
     idx = json.load(open(VETORES_PATH, encoding="utf-8"))
-    if os.path.isfile(MEMORIAS) and idx.get("memorias_sha256") != _sha256(MEMORIAS):
-        print("AVISO: MEMÓRIAS.md mudou desde o último --reindex — resultado pode estar "
-              "desatualizado. Rode --reindex pra atualizar.", file=sys.stderr)
+    if "camadas_sha256" not in idx:
+        print("AVISO: índice foi gravado por uma versão anterior (só quente, pré-Fase 4) — "
+              "rode --reindex pra cobrir quente+morno+frio.", file=sys.stderr)
+    elif os.path.isfile(MEMORIAS):
+        _, textos_atuais = _todas_entradas_todas_camadas()
+        if idx.get("camadas_sha256") != _hash_camadas(textos_atuais):
+            print("AVISO: alguma camada de memória (quente/morno/frio) mudou desde o último "
+                  "--reindex — resultado pode estar desatualizado. Rode --reindex pra atualizar.",
+                  file=sys.stderr)
     qvec = _embed([query], "query")[0]
     ranking = sorted(
         idx["entradas"],
