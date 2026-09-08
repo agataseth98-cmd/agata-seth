@@ -1,0 +1,33 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index a8cfb45..a74cbdf 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -130,8 +130,9 @@ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeç
+ - Selo: (relógio da Máquina)
+ - Se não sincronizado: usar date com selo (relógio do sistema, não sincronizado)
+ 
+-**Fallback universal:**
+-Se API falhar ou NTP indisponível, usar hora disponível com selo (não verificada).
++**Fallback universal (lista autoritativa dos selos — o resumo em "Selo de origem da hora" segue esta):**
++- API falhou ou NTP indisponível, **mas há alguma hora a medir** (relógio do sistema, hora que a interface mostra): usá-la com selo `(não verificada)` — fonte fraca, não confirmada.
++- **Não há relógio nenhum a medir** (sem shell, sem hora do Humano, sem interface confiável): selo `lacuna: sem relógio` — fonte nenhuma, nada a preencher. Mesmo selo do resumo; preencher campo que não se pode medir é a falha de (68)/(71).
+ 
+ **Proibido:** herdar hora de cabeçalho anterior, inventar hora, deixar campo em branco.
+ 
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index ca8d03b..1a1ee03 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -425,7 +425,11 @@ def _salvar(caminho_pedido, modelo_escolhido, resposta, conteudo, duracao_s, ext
+     registro = {
+         "data": agora.isoformat(), "via": "omniroute",
+         "rotacao_escolheu": modelo_escolhido, "modelo": modelo_usado,
+-        "provider": _provider_do_modelo(modelo_usado), "familia": _familia(modelo_usado),
++        # provider/familia SEMPRE do id do ROSTER (modelo_escolhido), não do
++        # `model` cru da resposta (MEMÓRIAS (384)): a API devolve p.ex.
++        # `ministral-8b-latest` sem o prefixo `mistral/`, e "mistral" não é
++        # substring de "ministral" -> _familia/_provider davam "?" no registro.
++        "provider": _provider_do_modelo(modelo_escolhido), "familia": _familia(modelo_escolhido),
+         "duracao_s": duracao_s, "tokens_entrada": te, "tokens_saida": ts,
+         "tokens_total": te + ts,
+         "pedido_arquivo": os.path.abspath(caminho_pedido),

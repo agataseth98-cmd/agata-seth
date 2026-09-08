@@ -425,7 +425,11 @@ def _salvar(caminho_pedido, modelo_escolhido, resposta, conteudo, duracao_s, ext
     registro = {
         "data": agora.isoformat(), "via": "omniroute",
         "rotacao_escolheu": modelo_escolhido, "modelo": modelo_usado,
-        "provider": _provider_do_modelo(modelo_usado), "familia": _familia(modelo_usado),
+        # provider/familia SEMPRE do id do ROSTER (modelo_escolhido), não do
+        # `model` cru da resposta (MEMÓRIAS (384)): a API devolve p.ex.
+        # `ministral-8b-latest` sem o prefixo `mistral/`, e "mistral" não é
+        # substring de "ministral" -> _familia/_provider davam "?" no registro.
+        "provider": _provider_do_modelo(modelo_escolhido), "familia": _familia(modelo_escolhido),
         "duracao_s": duracao_s, "tokens_entrada": te, "tokens_saida": ts,
         "tokens_total": te + ts,
         "pedido_arquivo": os.path.abspath(caminho_pedido),

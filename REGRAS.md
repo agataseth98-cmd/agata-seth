@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5c4e74daa4cac585e7615cad3cf6d054fa33e4e6
-  Escrito em: 08/09/2026 16:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2b0e58ace7a939d38cb17c7405d36e85bf6c1131
+  Escrito em: 08/09/2026 16:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -130,8 +130,9 @@ Todo modelo deve medir o horário de Brasília (America/Sao_Paulo) a cada cabeç
 - Selo: (relógio da Máquina)
 - Se não sincronizado: usar date com selo (relógio do sistema, não sincronizado)
 
-**Fallback universal:**
-Se API falhar ou NTP indisponível, usar hora disponível com selo (não verificada).
+**Fallback universal (lista autoritativa dos selos — o resumo em "Selo de origem da hora" segue esta):**
+- API falhou ou NTP indisponível, **mas há alguma hora a medir** (relógio do sistema, hora que a interface mostra): usá-la com selo `(não verificada)` — fonte fraca, não confirmada.
+- **Não há relógio nenhum a medir** (sem shell, sem hora do Humano, sem interface confiável): selo `lacuna: sem relógio` — fonte nenhuma, nada a preencher. Mesmo selo do resumo; preencher campo que não se pode medir é a falha de (68)/(71).
 
 **Proibido:** herdar hora de cabeçalho anterior, inventar hora, deixar campo em branco.
 

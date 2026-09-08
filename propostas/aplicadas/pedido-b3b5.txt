@@ -1,0 +1,77 @@
+PEDIDO DE SEGUNDA OPINIÃO — sistema Agata, mudança em REGRAS.md
+
+Contexto (você não tem acesso à máquina; responda só com o que está aqui):
+O Agata é um sistema canon-driven multi-modelo. REGRAS.md é universal e mudá-lo
+exige segunda opinião de outro modelo OU risco assumido por escrito. Dois itens
+de backlog antigos (B3 e B5) foram reavaliados e quase tudo já estava feito.
+Sobrou UM ponto real e pequeno, mais um sanity-check. Preciso do seu parecer.
+
+================================================================================
+PONTO 1 (o que muda REGRAS) — divergência de vocabulário no "selo de origem da hora"
+
+Hoje REGRAS.md tem o selo da hora descrito em DOIS lugares:
+
+(A) Na "Regra 1.1" (procedimento completo), o trecho de fallback diz, textual:
+    "- Sem script executável e sem hora do Humano: usar a hora que a interface
+       mostra, selo `(informado pela interface)`"
+    "**Fallback universal:** Se API falhar ou NTP indisponível, usar hora
+       disponível com selo (não verificada)."
+    Selos que a Regra 1.1 nomeia: `(relógio da Máquina)`,
+    `(relógio do sistema, não sincronizado)`, `(informado pela interface)`,
+    `(não verificada)`.
+
+(B) Num resumo mais abaixo ("Selo de origem da hora, obrigatório"), o texto diz:
+    "`(relógio da Máquina)` quando medido · `(informado pela interface)` quando
+     não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir.
+     ... O procedimento completo e o conjunto de selos são os da Regra 1.1; esta
+     linha é resumo, e em divergência vale a Regra 1.1."
+
+Problema: (B) usa `lacuna: sem relógio` para o caso "não há nada a medir";
+(A) usa `(não verificada)` para o caso equivalente ("API falhou / NTP
+indisponível"), e a Regra 1.1 NÃO lista `lacuna: sem relógio` entre os selos
+dela. Já existe cláusula de desempate ("em divergência vale a Regra 1.1"), então
+na prática nada quebra — mas a fonte autoritativa (1.1) não enumera o selo que o
+resumo usa.
+
+Proposta concreta: acrescentar `lacuna: sem relógio` à lista de selos da Regra
+1.1, para o caso "não há relógio nenhum a medir" (sessão sem shell, sem hora do
+Humano, sem interface confiável), deixando `(não verificada)` para "havia uma
+fonte mas ela é fraca/não confirmada". Ou seja: distinguir "fonte fraca"
+(`não verificada`) de "fonte nenhuma" (`lacuna: sem relógio`), alinhando 1.1
+com o resumo.
+
+Perguntas:
+1. Essa distinção (fonte fraca vs. fonte nenhuma) é uma melhora real, ou é
+   granularidade a mais que ninguém vai usar direito?
+2. Há risco de a mudança tornar as duas seções MENOS coerentes, não mais?
+3. Alguma redação melhor do que "acrescentar `lacuna: sem relógio` à Regra 1.1"?
+
+================================================================================
+PONTO 2 (sanity-check, NÃO muda REGRAS) — 4ª pergunta na Checagem de prontidão?
+
+Um item de backlog (de 25/08/2026) propunha uma 4ª pergunta na "Checagem de
+prontidão (o modelo, para si)": algo como "sei que o que estou lendo é fresco,
+por SHA ou por carimbo?".
+
+Desde então, duas coisas já foram implementadas:
+- Um bloco de âncora de SHA no topo de REGRAS.md, PROJETO.md e MEMÓRIAS.md: o
+  MESMO SHA do commit anterior é gravado nos três; um leitor offline compara os
+  três e, se divergirem, a cópia veio de commits diferentes.
+- Um bloco `sync:` obrigatório no cabeçalho, com três formas: `sync: PASS`
+  (exige hash/git ao vivo), `sync: FALHA`, `sync: não verificado · lacuna:
+  <motivo>`. Ele já governa "minha cópia está fresca?".
+
+Minha conclusão: a 4ª pergunta seria redundante — `sync:` + a âncora de SHA já
+cobrem "frescor", e a Checagem de prontidão é sobre POSTURA (sou Modelo, não
+decido, sei onde está o topo), não sobre frescor de dados. Você concorda que
+adicionar a 4ª pergunta duplicaria o `sync:`, ou vê valor em tê-la mesmo assim?
+
+================================================================================
+FORMATO DA RESPOSTA (obrigatório, 4 partes rotuladas):
+
+Origem: (de onde você tira sua posição — o texto acima, princípios gerais de
+        design de sistema, etc.)
+Posição: (sua recomendação direta para o Ponto 1 e para o Ponto 2)
+Fundamentação: (o porquê, curto)
+Emenda: (qualquer ajuste de redação que você proporia; se nenhum, escreva
+        "sem emenda")

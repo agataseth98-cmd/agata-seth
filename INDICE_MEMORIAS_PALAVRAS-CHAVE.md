@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
+  palavras-chave: fechados, parecer, remoto, alinhamento, regras, sanity, check, item, fork, pós
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
   palavras-chave: aposentado, roteamento, complexidade, aprovado, nunca, implementado, item, fork, pós
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, glm, membro, pleno, ponto, cego, fechado, implementar, superado, própria, decisão, whatsapp, removido, backlog, ordem, humano, itens, restantes, redefinida, memórias, período, sobe, posição
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
   palavras-chave: item, ponto, cego, fechado, aberto, desde, redigido, mandado, pra, segunda, opinião, rotação, nova, auditado, aceitar, achou, erro, real, meu, aplicado, regras, emenda
-(353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
-  palavras-chave: groq, confirmado, free, tier, real, websearch, memória, treino, somado, roster, remoto, modelos, rotação
+(353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não …
+  palavras-chave: groq, confirmado, free, tier, real, websearch
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — o …
   palavras-chave: glm, revogado, modelo, fixo, remoto
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em ` …

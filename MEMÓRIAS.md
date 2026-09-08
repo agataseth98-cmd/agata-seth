@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5c4e74daa4cac585e7615cad3cf6d054fa33e4e6
-  Escrito em: 08/09/2026 16:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2b0e58ace7a939d38cb17c7405d36e85bf6c1131
+  Escrito em: 08/09/2026 16:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c4e74daa4cac585e7615cad3cf6d054fa33e4e6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
+
+**Reavaliação:** os dois itens de backlog eram bem menores do que o texto sugeria.
+- **B5 (2 pendentes de (253)):** #3 (carimbo de frescor comparável offline nos 3 canônicos) **já feito pela (378)** — é o bloco `ANCORA-SHA` dos preâmbulos. #4 (4ª pergunta na Checagem de prontidão sobre frescor) → **não vai entrar**: `sync:` + a âncora de (378) já cobrem frescor, e a Checagem de prontidão é sobre postura, não dados. **B5 fecha sem tocar REGRAS.**
+- **B3 (2 costuras em REGRAS):** (b) "Última entrada: (n)" sob `sync` não verificado **já resolvido** — linha 215 diz explícito que sob `sync: não verificado` a linha é "até onde a minha cópia alcança". (a) selo de origem da hora com vocabulário divergente = **o único item vivo**.
+
+**Segunda opinião (REGRAS = mudança estrutural):** pedido escrito rodado pelo `scripts/conselho_remoto.py` → rotação por família de (381) escolheu `mistral/ministral-8b-latest` (família mistral, menos usada); o `rotacao-estado.json` migrou pro formato de família em produção sozinho. Parecer 4-partes, sem alegação de identidade falsa, auditado contra o catálogo de falhas (nada fabricado). Registro em `memoria/missoes/conselho-remoto/20260908-162418-ministral-8b-latest.json`.
+- **Ponto 1:** aprovou acrescentar `lacuna: sem relógio` à Regra 1.1, distinguindo fonte fraca (`não verificada`) de fonte nenhuma (`lacuna: sem relógio`). Sem risco de incoerência — unifica os dois textos.
+- **Ponto 2:** rejeitou a 4ª pergunta como redundante com `sync:` + âncora. Confirma a conclusão de B5 #4.
+- A emenda do parecer sugeria também reescrever a cláusula de desempate do resumo — **não adotado** ("não infle REGRAS por reflexo"; a cláusula atual "em divergência vale a Regra 1.1" já basta).
+
+**Mudou (proposta `b3-selo-hora-e-familia-registro`, 2 arquivos quarentena, 1 assinatura):**
+- `REGRAS.md` Regra 1.1 — "Fallback universal" vira a **lista autoritativa** dos selos: `(não verificada)` quando há hora fraca a medir; `lacuna: sem relógio` quando não há relógio nenhum. Alinha com o resumo "Selo de origem da hora".
+- `scripts/conselho_remoto.py` — `_salvar` deriva `provider`/`familia` do id do ROSTER (`modelo_escolhido`), não do `model` cru da resposta. Bug cosmético achado neste parecer: a API devolveu `ministral-8b-latest` sem o prefixo `mistral/`, e "mistral" não é substring de "ministral" → o registro `.json` gravava `familia: ?`/`provider: ?`. Rotação, P-15 e breaker não eram afetados (usam o id do ROSTER).
+
+Pares `.diff`/`APROVADO-` em `propostas/aplicadas/`. Pedido de parecer em `propostas/aplicadas/pedido-b3b5.txt`. `backlog.md` B3 e B5 fechados.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: textos originais de (253) lidos no chunk FRIO; REGRAS.md linhas 215 e 214 conferidas pra provar que (b) e o carimbo de (253)#3 já estavam feitos; `git apply --check` limpo contra `2b0e58a`; `_familia`/`_provider_do_modelo` do id do ROSTER testados = `mistral`/`mistral`; parecer conferido campo a campo contra `resposta_crua.model`/`.id` e o catálogo; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano — "A" (puxar 2ª opinião pelo Conselho) + `APROVADO-b3-selo-hora-e-familia-registro` assinado.
+
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
 
 **Por quê:** o desenho de (64) supunha Gemini como principal, rotear pergunta simples → modelo barato. A (140) inverteu — Seth (`qwen3.5-9b-64k` local) é o titular, "simples → local" já é o default, e o "complexo → forte" automático que (64) previa perdeu o sentido. O sistema já roteia por adequação de três formas: Seth local como cérebro padrão; Conselho Remoto invocado de propósito pra segunda opinião; `auto/*` do OmniRoute escolhendo modelo por tarefa no caminho da Seth. Um classificador de complexidade + router novo seria cano a mais competindo com isso — contra "Elegância e eficiência" (Princípios). Se surgir necessidade concreta no futuro (Seth lenta pra trivialidade, escalonamento automático pra modelo maior), é proposta nova com premissa nova, não ressurreição desta.

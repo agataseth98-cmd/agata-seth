@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 16:27 -0300.
+Motivo: B3(a): lacuna: sem rel'ogio entra na lista de selos da Regra 1.1 (parecer do Conselho, ministral-8b); + fix cosmetico do campo familia/provider no registro .json do Conselho
+nome: b3-selo-hora-e-familia-registro
+diff-sha256: e2db109bae0e6b2303e612a27b58422435bfab60a6aa9be0689df500e0c544fa
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQJtUKNXplQQYyW7u78jcrtUr47aiW3CBUPRTOC3mkOcau7
+c+CJ5Nb/qYkzOO5Pfa8H+dH0aYh8Y7knRV+sL8CQs=
+-----END SSH SIGNATURE-----

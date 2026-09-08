@@ -25,9 +25,9 @@ segue é a lista completa.
 |---|---|---|---|
 | B1 | **Reorg do `redesign/`** — separar código vivo (grafo, router, mcp, systemd, librechat) de documento de projeto fechado. | Só flagueado. | Grande; toca caminhos quarentenados (imports, units systemd apontam pros caminhos antigos). Exige proposta cuidadosa + aprovação assinada. |
 | B2 | **Rotação por família** (`propostas/dossie-rotacao-por-familia.md`, 07/09) | **Parte 1 FEITA — MEMÓRIAS (381).** 4 perguntas respondidas; `conselho_remoto.py` rotaciona por família + `REGRAS.md` "O Conselho" item 3. **Resta:** mecanizar Cadeia de auditoria A/B/C (hoje norma) + rename do arquivo de silo (sem efeito hoje). | — |
-| B3 | **Duas costuras em REGRAS.md** (item O do backlog velho) — (a) selo de origem da hora com dois nomes em seções diferentes; (b) "Última entrada: (n)" pede afirmação seca mesmo sob `sync: não verificado`. | Identificado, não redigido. | REGRAS = "Mudança estrutural": **segunda opinião de outro modelo OU você assumir o risco por escrito**. Posso puxar a segunda opinião via `scripts/conselho_remoto.py`. |
+| B3 | **Duas costuras em REGRAS.md** | **FECHADO — MEMÓRIAS (384).** (b) já resolvido na linha 215 (nada a fazer). (a) alinhado: `lacuna: sem relógio` entra na lista de selos da Regra 1.1, com parecer do Conselho (ministral-8b). | — |
 | B4 | **Roteamento por complexidade** (MEMÓRIAS (64)) | **APOSENTADO — MEMÓRIAS (383).** Premissa (Gemini principal) morta pela (140); sistema já roteia por adequação. Necessidade futura = proposta nova. | — |
-| B5 | **Melhorias de catálogo pendentes de (253)** — 2 sugestões de "Ágata Opus" ao catálogo de falhas de REGRAS.md, retidas por exigirem segunda opinião. | Pendente desde 25/08. | Mesma regra do B3. |
+| B5 | **Pendentes de (253)** — #3 carimbo de frescor nos 3 canônicos; #4 4ª pergunta na Checagem de prontidão. | **FECHADO — MEMÓRIAS (384).** #3 já feito pela (378) (bloco ANCORA-SHA). #4 não entra: `sync:` + âncora já cobrem frescor; prontidão é postura, não dados (parecer do Conselho concordou). | — |
 
 ## C — precisa de sessões de IA independentes (por desenho, não dá do executor local)
 
