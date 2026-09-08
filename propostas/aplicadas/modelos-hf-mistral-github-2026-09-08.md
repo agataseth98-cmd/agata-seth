@@ -73,3 +73,17 @@ mistral/ministral-8b-latest                    (mistral)        NOVO
 
 5 famílias independentes, breaker + rotação justa. Fecha o AVISO recorrente
 do P-15.
+
+## Teste de fumaça pós-commit (MEMÓRIAS (380)) — o que rodou de verdade
+
+Rodei `conselho_remoto.py` e depois um teste por-modelo pelo `:20127`:
+
+| Modelo | Estado real 08/09 ~16:00 |
+|---|---|
+| `zai/glm-4.7-flash` | ✅ confiável, 200 com `thinking` |
+| `gemini/gemini-2.5-flash` | ⚠️ funciona, mas a conexão do OmniRoute entrou em `model_cooldown` de tanto teste hoje — transitório |
+| `cerebras/gemma-4-31b` | ❌ **Cloudflare Error 1010 `browser_signature_banned` em `api.cerebras.ai`**, `retryable:false` ("Do not retry — your user-agent has been banned by the site owner"). No log do OmniRoute desde ~13:19 local — **não foi o nosso teste**, é ban de assinatura no cliente HTTP do OmniRoute, mesma classe do Groq (374). Efetivamente morto via OmniRoute enquanto durar. |
+| `huggingface/…Llama-3.3-70B` | ✅ 200 em chamada espaçada; só dá 403 sob rajada (challenge de rate do Cloudflare em `router.huggingface.co`, que passa) — o breaker absorve |
+| `mistral/ministral-8b-latest` | ✅ confiável, 200 sem `thinking` (o fix de (380) tirou o 422) |
+
+**Efeito líquido:** roster de 5, **4 famílias funcionando** (zai, gemini, huggingface, mistral) — já mais que suficiente pro P-15 (≥2/24h). `cerebras` fica no roster mas cada rotação que cai nele = falha garantida + cooldown; o breaker sobe o cooldown exponencial até 6h e a rotação para de escolhê-lo na prática. **Rechecar `cerebras` em ~1 dia** — bans 1010 do Cloudflare às vezes são temporários. Se não voltar, sai do ROSTER por proposta.
