@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
+  palavras-chave: relógio, code, errado, investigado, máquina, certo, quem, fabricou, hora, fui, executor, cabeçalho, desta, sessão, falha, regra, pega, humano
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
   palavras-chave: reorg, redesign, parte, docs, readme, estava, mentindo, planejamento, arquivados, item, fork, pós, código, fica, pra, ordem, humano
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: memórias, período, fase, item, backlog, reordenado, implementada, quente, morno, frio, testado, clone, descartável, tocar, canon, real, cinco, bugs, achados, corrigidos, processo, corte, final, reformulado, pedido, humano, começa, vazio, entrada, marco, zero, aderência, semanas, registrado
 (356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado em (355)): checagem mecânica do relógio de 4 semanas (P-13) implementada + convenção `SINTÉTICO: true` documentada em REGRAS.md — achado, no caminho, que uma estimativa anterior de urgência estava errada
   palavras-chave: discordância, sintética, item, backlog, reordenado, checagem, mecânica, relógio, semanas, implementada, convenção, sintético, true, documentada, regras, achado, caminho, estimativa, anterior, urgência, estava, errada
-(355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
-  palavras-chave: item, glm, membro, pleno, ponto, cego, fechado, implementar, superado, própria, decisão, whatsapp, removido, backlog, ordem, humano, itens, restantes, redefinida, memórias, período, sobe, posição
+(355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem im …
+  palavras-chave: item, glm, membro, pleno, ponto, cego, fechado
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto d …
   palavras-chave: item, ponto, cego, fechado, aberto
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não …

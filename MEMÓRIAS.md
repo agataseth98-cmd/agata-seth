@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1cdf5d800965eeba6724b8a32da6596d4415624b
-  Escrito em: 08/09/2026 16:36 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 02ce1c709957d7abeaea1296a52a6247b36be455
+  Escrito em: 08/09/2026 18:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02ce1c709957d7abeaea1296a52a6247b36be455/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02ce1c709957d7abeaea1296a52a6247b36be455/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02ce1c709957d7abeaea1296a52a6247b36be455/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
+
+**Pedido do Humano:** "o relogio do CODE está errado descobrir causa e corrigir."
+
+**Medição (3 fontes independentes, todas concordam):** `date` da Máquina = `08/09/2026 18:05 -03`; `timedatectl` = *System clock synchronized: yes · NTP service: active · RTC 21:05 UTC · America/Sao_Paulo*; `scripts/consultar_horario.py` (timeapi.io, externo) = `2026-09-08 18:05 -03`. Os timestamps dos commits desta sessão (`git log --format=%ci`) e o campo "Escrito em:" das âncoras `ANCORA-SHA` (gravado pelo `pre-commit`, que roda `date`) também batem — `(385)` foi commitada `16:36:44 -03`, real. **Nenhum relógio quebrado.**
+
+**A causa real:** o harness do Claude Code **não injeta hora** — só "Today's date is 2026-09-08", sem horário. Em vez de rodar `date` a cada turno (Regra 1.1: "medir de novo a cada cabeçalho, selo `(relógio da Máquina)`"), este executor **estimou** a hora no cabeçalho desde o começo e deixou derivar. Placar: 1º cabeçalho da sessão dizia "15:05" quando o 1º `aprovar.sh` do Humano marcou `14:36` (~29 min à frente); o último cabeçalho antes desta entrada dizia "20:20" com a hora real em `18:05` (~2h15 à frente). É exatamente a falha "hora herdada / hora inventada" do catálogo ((68)/(71); incidente do GPT-5.6 "Luna" repetindo `18:52`, REGRAS L216) — só que aqui em prosa livre, não copiada de um cabeçalho anterior, o que é pior: cada cabeçalho foi um chute novo.
+
+**Correção:** não há nada pra consertar em "CODE" — o relógio da Máquina é a fonte e está sincronizado. A correção é de processo: o cabeçalho deste executor passa a tirar a hora de `date` (ou `consultar_horario.py`) **medida no turno**, selo `(relógio da Máquina)`, nunca estimada. Sem fonte num turno (ex.: sessão sem shell) → `lacuna: sem relógio` (o selo alinhado na (384)), não um número inventado.
+
+**Nota de método:** os artefatos da Máquina (commits, âncoras) nunca ficaram errados porque o `pre-commit` mede a hora; só o texto de prosa do executor mentiu. Isso reforça a Regra 2 — relato de modelo é alegação; a Máquina (aqui o `date` no hook) é que carimba o fato.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `date`, `date -u`, `timedatectl status`, `readlink /etc/localtime`, `scripts/consultar_horario.py` e `git log --format=%ci` rodados agora, resultado colado acima; comparação com o timestamp do 1º `APROVADO-` da sessão (`14:36`) e com o último cabeçalho de prosa que eu mesmo escrevi. Autorização: Humano, "descobrir causa e corrigir".
+
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
 
 **Achado que reordenou a prioridade:** `redesign/README.md` dizia *"NÃO é canon · vive no branch `redesign` · gates de governança (P-8, Cadeia de auditoria, Regra 8) SUSPENSOS"*. Falso desde o merge em `main` das Fases 0–8 ((310)/(311)) — esse código É a espinha de produção e está sob P-8 (o `_p8_eh_comportamento` lista `redesign/router/*`, `redesign/grafo/*.py`, `redesign/librechat/*.mjs|*.yaml`, `redesign/systemd/*`). Um leitor que abrisse o README era informado errado de que podia mexer sem cerimônia.
