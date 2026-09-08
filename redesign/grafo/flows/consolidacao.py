@@ -63,6 +63,12 @@ MIN_NOVAS = 2    # tema so consolida se >= 2 entradas novas (desde o marcador) o
 OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")
 MODELO_LOCAL = os.environ.get("AGATA_CONSOLIDACAO_MODELO", "qwen3.5-9b-64k:latest")
 
+# Temas do modo manual (--temas). Global de modulo porque `Estado` (TypedDict do
+# LangGraph) descarta chave nao declarada no graph.invoke -- `s.get("_temas")`
+# vinha sempre vazio (bug achado em MEMORIAS (373)). `run()` seta isto antes do
+# invoke; `orientar` le daqui primeiro.
+_TEMAS_MANUAL = None
+
 
 def _modelo(pergunta, timeout=240, tentativas=2):
     """Modelo LOCAL (Ollama :11434) desde (371). A combo remota `conselho` do
@@ -212,7 +218,7 @@ def orientar(s: Estado) -> dict:
     `(NNN)`): o `consolidar` redige a partir do TEXTO real, nao dos numeros -- senao fabrica
     (a falha de MEMORIAS (138))."""
     repo = Path(s["repo"])
-    manual = list(s.get("_temas") or [])
+    manual = list(_TEMAS_MANUAL or s.get("_temas") or [])
     if manual:
         temas, novas = manual, []
     else:
@@ -335,6 +341,8 @@ def build():
 
 
 def run(repo, temas=None):
+    global _TEMAS_MANUAL
+    _TEMAS_MANUAL = list(temas) if temas else None
     DIR_ESTADO.mkdir(parents=True, exist_ok=True)
     graph, cm = build()
     try:

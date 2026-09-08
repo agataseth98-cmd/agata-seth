@@ -28,6 +28,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/fix-consolidacao-temas-manual`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `orientar` chamado direto (bug confirmado) e via `run()` com stub de modelo (fix confirmado — `"(--temas manual)"` no log); `py_compile`; assinatura verificada contra `.allowed_signers`; `p8_quarentena`. Autorização: Humano, aprovação assinada.
+
 (374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os problemas da abordagem "modelos externos grátis", depois de o roster inteiro cair no mesmo dia (Groq 403 Cloudflare `browser_signature_banned` persistente; MiniMax 404; Gemini 504 + queima o orçamento de tokens em reasoning e devolve vazio; z.ai 529). `scripts/conselho_remoto.py` + `scripts/perimetro.sh`.
 
 **Pedido do Humano:** "mapear todos os modelos gratuitos... é fundamental" → "quero que o sistema se proteja automaticamente de todos os problemas que essa abordagem significa" → "concordo com tudo, vamos fazer" → aprovação assinada.

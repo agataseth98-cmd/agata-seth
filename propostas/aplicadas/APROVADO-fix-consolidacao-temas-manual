@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 13:50 -0300.
+Motivo: consolidacao --temas manual propaga pelo grafo
+nome: fix-consolidacao-temas-manual
+diff-sha256: 26b78bb745a4646ab038f55f92704858753898e1e05e12e4f89ec572f2e0fe56
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQAmbTfphD+SoQY2MsPyHM66MC1RgKrbmbI+/NrawC/hx28
+YNuxFxPcILwGCKfwiVrOQCkkeLCMdw7dLZI/UAGwM=
+-----END SSH SIGNATURE-----

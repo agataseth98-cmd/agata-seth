@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
+  palavras-chave: redesign, grafo, flows, consolidacao, modo, manual, temas, volta, funcionar, estado, typeddict, langgraph, descartava, chave, graph, invoke, run, agora, seta, global, módulo, orientar, primeiro, bug, achado, testando, geração, sob, demanda, presence, penalty
 (374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os problemas da abordagem "modelos externos grátis", depois de o roster inteiro cair no mesmo dia (Groq 403 Cloudflare `browser_signature_banned` persistente; MiniMax 404; Gemini 504 + queima o orçamento de tokens em reasoning e devolve vazio; z.ai 529). `scripts/conselho_remoto.py` + `scripts/perimetro.sh`.
   palavras-chave: camada, proteção, remoto, contra, problemas, abordagem, modelos, externos, grátis, roster, inteiro, cair, mesmo, dia, groq, cloudflare, browser, signature, banned, persistente, minimax, gemini, queima, orçamento, tokens, reasoning, devolve, vazio, scripts, perimetro
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: veios, ágata, registrado, tinha, imprecisões, reais, achadas, relendo, propósito, pedido, humano, leia, relatório, diga, ficou, fiel, corrigidas, mesmo, artefato
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os gates voltam; "Ponto Cego" registrado no canon; catálogo honesto dos erros cometidos nesta sessão, sem suavizar, com o pedido de desculpa do Humano registrado por igual
   palavras-chave: regime, exceção, encerrado, ordem, humano, gates, voltam, ponto, cego, registrado, canon, catálogo, honesto, erros, cometidos, sessão, suavizar, pedido, desculpa, igual
-(345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
-  palavras-chave: regime, exceção, confirmado, ativo, humano, responde, pendências, nomeadas, segunda, parte, pedido, anterior, regiões, confederadas, segue, entender, perguntado, novo, decifrado, adivinhação
+(345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — res …
+  palavras-chave: regime, exceção, confirmado, ativo, humano, res
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincroni …
   palavras-chave: checkpoint, fim, sessão, começou, sincroni
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` a …
