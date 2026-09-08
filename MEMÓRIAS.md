@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fecf3f38e5f35a167a3a350f49110fa68151377b
-  Escrito em: 08/09/2026 16:15 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 33d4389a6001c84b4ab6da39e6735ef992e814da
+  Escrito em: 08/09/2026 16:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fecf3f38e5f35a167a3a350f49110fa68151377b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fecf3f38e5f35a167a3a350f49110fa68151377b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fecf3f38e5f35a167a3a350f49110fa68151377b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33d4389a6001c84b4ab6da39e6735ef992e814da/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33d4389a6001c84b4ab6da39e6735ef992e814da/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33d4389a6001c84b4ab6da39e6735ef992e814da/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
+
+Fechado: `presence_penalty` **não** é causa isolada de corte no meio da geração — a (154) já reproduziu 3/3 rodadas completas com o controle em 1.5. Os parâmetros de (135) (penalty 1.5, `num_ctx` 65536) seguem válidos. (151)-(153) ficam no registro como a hipótese que a (154) refutou; nada apagado (Regra 4). (172) tem conteúdo truncado — não conclui nada sozinha.
+
+Primeira saída aproveitada da consolidação reformulada em (371)/(375): rascunho gerado por `redesign/grafo/flows/consolidacao.py` (chamada direta, antes do fix do `--temas` de (373)), passou no portão mecânico de (371), texto enxugado à mão e aprovado pelo Humano (opção A, P-8). Rascunho original em `propostas/aplicadas/consolidacao-presence-penalty-2026-09-08.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: refs conferidas contra o índice pela pipeline + P-7 no pre-commit; síntese não acrescenta fato novo, é sinalizador de achabilidade apontando pra (154). Autorização: Humano, "A".
+
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
 
 **Pedido do Humano (06/09):** "todas as LLMs a que temos acesso devem rotacionar entre as funções com silo próprio por família não modelo". O dossiê `propostas/dossie-rotacao-por-familia.md` levantou 4 perguntas; respostas do Humano nesta sessão:
