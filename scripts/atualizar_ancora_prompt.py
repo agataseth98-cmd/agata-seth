@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Atualiza só o bloco delimitado ANCORA-SHA em PROMPT_CARREGAMENTO.md
--- item 2, 20/08/2026, ordem do Humano. Chamado por .githooks/pre-commit,
-antes do commit existir.
+"""Atualiza só o bloco delimitado ANCORA-SHA num arquivo -- item 2,
+20/08/2026, ordem do Humano. Chamado por .githooks/pre-commit, antes do
+commit existir. Desde MEMÓRIAS (378) vale também pro PREÂMBULO de REGRAS.md,
+PROJETO.md e MEMÓRIAS.md (não só PROMPT_CARREGAMENTO.md): um leitor offline
+compara o SHA entre os três.
 
 Limite conhecido, aceito por decisão do Humano: um commit não pode
 embutir o próprio SHA (problema de auto-referência). O valor escrito

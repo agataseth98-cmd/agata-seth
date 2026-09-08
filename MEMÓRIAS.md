@@ -25,9 +25,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
+<!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f36fca2be0977e1f125be254ffde540edfd646ee
+  Escrito em: 08/09/2026 14:42 -03
+  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f36fca2be0977e1f125be254ffde540edfd646ee/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f36fca2be0977e1f125be254ffde540edfd646ee/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f36fca2be0977e1f125be254ffde540edfd646ee/MEMÓRIAS.md
+<!-- ANCORA-SHA:FIM -->
+<!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
+
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
+
+**Pedido do Humano:** fechar o B5 "de forma didática quando for a minha vez"; "eu assumo o risco" já dado para mexer em REGRAS; aprovação assinada `APROVADO-ancora-sha-canon` (`ssh-keygen -Y verify` OK contra `HEAD:propostas/.allowed_signers`, `diff-sha256` conferido).
+
+**O que mudou:**
+- `.githooks/pre-commit` — depois do passo da âncora do `PROMPT_CARREGAMENTO.md`, dentro do mesmo `if [ -n "$HEAD_ANTERIOR" ]`, um laço `for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md` chama `scripts/atualizar_ancora_prompt.py "$_canon" "$HEAD_ANTERIOR" "$AGORA"` + `git add`. Mesma regra fail-soft (AVISO em stderr, nunca bloqueia).
+- Preâmbulo dos três: bloco `<!-- ANCORA-SHA:INICIO ... FIM -->` (placeholder até o 1º commit depois desta linha) + comentário de máquina explicando o uso. Em MEMÓRIAS.md fica **acima** do marcador `ENTRADAS-NOVAS` — zona que o P-5 (`_p5_checar_sufixo`) não policia, só o corpo de entradas; verificado lendo o controle.
+- `scripts/atualizar_ancora_prompt.py` — docstring passa a dizer que vale pro preâmbulo dos três canônicos, não só `PROMPT_CARREGAMENTO.md`. Lógica intocada (mesmo regex `ANCORA-SHA:INICIO ... FIM`, DOTALL, `count=1`, idempotente).
+
+**Pra que serve:** um leitor OFFLINE (modelo na nuvem que recebeu os três arquivos por um canal qualquer) compara o SHA entre REGRAS/PROJETO/MEMÓRIAS. Se os três não baterem, o canal serviu arquivos de commits diferentes — a cópia é inconsistente, e isso se descobre sem internet e sem endpoint de API (que pode estar bloqueado). Conteúdo endereçado por hash + as 3 URLs raw pinadas no SHA (já geradas pelo mesmo bloco) eliminam a classe "canal servindo estado antigo sem carimbo".
+
+**Limite conhecido, no próprio texto do bloco:** um commit não embute o próprio SHA (auto-referência) → o valor é sempre o do HEAD ANTERIOR, normalmente 1 commit atrasado; mais se o passo fail-soft falhar. Campo `Escrito em:` é o detector. Nota de bootstrap: `.hidrata.md` recebe o carimbo 1 commit depois desta entrada, porque `gerar-hidratacao.sh` roda antes do passo da âncora no hook.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/ancora-sha-canon`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` limpo contra `f36fca2`; `python3 -c import` / `bash -n` nos 5 arquivos; script testado em cópias reais dos três canônicos (preenche SHA + `Escrito em:` + 3 URLs, idempotente, marcador `ENTRADAS-NOVAS` + corpo de entradas intactos); `_p5_checar_sufixo` lido e confirmado que só ancora no marcador; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "eu assumo o risco" + `APROVADO-ancora-sha-canon` assinado.
+
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
 
 **Pedido do Humano:** "tenha uma rotina de pesquisa e implementação de modelos gratuitos automática também" → o desenho ficou: pesquisa automática **sim**, implementação **não** (viola P-8 e a Regra 3; integrar endpoint de rede descoberto na web num sistema rodando é a classe "cadeia de suprimento", recusada) → "concordo com tudo" → "tudo assinado".

@@ -38,5 +38,18 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
     else
       echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em PROMPT_CARREGAMENTO.md" >&2
     fi
+    # Âncora de SHA também no PREÂMBULO de REGRAS/PROJETO/MEMÓRIAS (MEMÓRIAS
+    # (378), resolução do B5): um leitor offline compara o SHA entre os três
+    # -- divergiu, a cópia veio de commits diferentes (canal serviu um velho
+    # e um novo). O bloco fica ACIMA do marcador ENTRADAS-NOVAS em MEMÓRIAS.md,
+    # que o P-5 não policia (só o corpo de entradas). Mesma regra fail-soft.
+    for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
+      [ -f "$_canon" ] || continue
+      if python3 scripts/atualizar_ancora_prompt.py "$_canon" "$HEAD_ANTERIOR" "$AGORA"; then
+        git add "$_canon"
+      else
+        echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em $_canon" >&2
+      fi
+    done
   fi
 fi
