@@ -28,6 +28,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da aprovação assinada de (366)) entra na quarentena P-8, e `_p8_assinatura_ok` passa a verificar contra a versão de `HEAD:`, nunca a working-tree — uma troca de `.allowed_signers` staged não autoaprova a própria troca. Rotação de chave = assinar o `.diff` da rotação com a chave atual. `scripts/aprovar.sh` corrigido no mesmo commit (assina lendo de arquivo + `SSH_ASKPASS_REQUIRE=never`; a forma antiga por pipe pro stdin falhava porque o `ssh-keygen` mandava a passphrase pro `/usr/lib/ssh/ssh-askpass`, inexistente nesta Máquina).
+
+**Pedido do Humano:** "prossegue" (depois de conferir que `.allowed_signers` bate com a chave pública dele) → aprovou assinando.
+
+**O que entrou:**
+- `scripts/perimetro.sh`: `propostas/.allowed_signers` no `_p8_eh_comportamento`; `_p8_assinatura_ok` reescrito — raiz de confiança lida de `git show HEAD:propostas/.allowed_signers`, fallback pro working-tree só se `HEAD:` não existir (bootstrap, já passado), limpeza única no fim.
+- `scripts/aprovar.sh`: assina via `ssh-keygen -Y sign ... ARQUIVO` (stdin livre pro prompt) + `export SSH_ASKPASS_REQUIRE=never`.
+- `PROJETO.md`/`propostas/README.md`: texto e ressalvas atualizados.
+
+**Testado, clone descartável, 4 cenários:** mudança estrutural normal assinada com a chave atual → passa; troca `.allowed_signers` p/ chave do atacante + aprovação assinada com a chave do atacante → FALHA ("chave não confere com HEAD"); rotação legítima (`.allowed_signers` p/ chave nova, aprovação assinada com a atual) → passa; `.allowed_signers` staged sem aprovação → FALHA (quarentena). Na Máquina real: `p8_quarentena` exit 0 na árvore staged; `aprovar.sh` novo assinou com chave protegida por passphrase (via agent).
+
+**Bootstrap:** aprovado pela ponte `assina.sh` (não versionada, `/tmp`), porque o `aprovar.sh` corrigido só entra neste commit. Verificado pelo `perimetro.sh` novo no pre-commit.
+
+**Ainda aceito, no PROJETO:** o Humano aprovar às cegas um `.diff` de rotação malicioso; chave privada mal guardada.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/allowed-signers-quarentena`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` antes de aplicar; assinatura do Humano verificada à mão contra `.allowed_signers` antes e depois de mover o par; `bash -n` nos dois scripts; 4 cenários em clone descartável (1 positivo, 1 rotação, 2 ataques); `p8_quarentena` na árvore staged real; `perimetro.sh` novo confirmou a assinatura no pre-commit. Autorização: Humano, "prossegue" + aprovação assinada.
+
 (366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
 
 **Pedido do Humano:** "podemos usar a senha sim, como funcionaria?" → depois de eu explicar → "escreve como proposta" → leu → aprovou assinando (bootstrap manual, chave recém-gerada).

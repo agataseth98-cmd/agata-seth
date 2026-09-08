@@ -639,6 +639,11 @@ p7_citacao() {
 _p8_eh_comportamento() {
   case "$1" in
     REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
+    # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
+    # é mudança de comportamento tanto quanto trocar um script. A
+    # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a
+    # working-tree -- uma troca staged não autoaprova a própria troca.
+    propostas/.allowed_signers) return 0 ;;
     redesign/router/*|redesign/mcp/*|redesign/librechat/*.mjs|redesign/librechat/*.yaml|redesign/systemd/*) return 0 ;;
     # Lacuna achada em (340)/(341), fechada 06/09/2026: redesign/grafo/* (nó real
     # do loop de governança) e redesign/librechat/*.yml (docker-compose, só .yaml
@@ -662,31 +667,47 @@ _p8_assinatura_ok() {
   # assinado quebra a verificação. Verificar não precisa da passphrase;
   # só assinar (scripts/aprovar.sh, mão do Humano) precisa.
   local aprovado="$1" diff_abs="$2" nome="$3"
-  local signers="$(pwd)/propostas/.allowed_signers"
-  [ -f "$signers" ] || return 0
-  if ! command -v ssh-keygen >/dev/null 2>&1; then
-    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
-    return 1
+  local signers signers_tmp="" sig="" rc=1
+
+  # Raiz de confiança = a versão JÁ COMMITADA de propostas/.allowed_signers
+  # (HEAD:), nunca a working-tree -- senão uma troca de .allowed_signers
+  # staged no mesmo commit poderia autoaprovar a própria troca. Rotação de
+  # chave: assina-se o .diff da rotação com a chave ATUAL (a de HEAD), que
+  # é o que esta verificação usa. Primeiro commit que introduziu
+  # .allowed_signers não tinha HEAD: -> caía no working-tree (bootstrap).
+  if git cat-file -e HEAD:propostas/.allowed_signers 2>/dev/null; then
+    signers_tmp="$(mktemp)"
+    git show HEAD:propostas/.allowed_signers > "$signers_tmp" 2>/dev/null
+    signers="$signers_tmp"
+  elif [ -f "$(pwd)/propostas/.allowed_signers" ]; then
+    signers="$(pwd)/propostas/.allowed_signers"
+  else
+    return 0   # nem HEAD: nem working-tree -> modo compat (par de chaves ainda não existe)
   fi
-  local dsha msg sig rc
+
+  local dsha msg
   dsha="$(sha256sum "$diff_abs" | awk '{print $1}')"
   msg="$(printf '%s  %s' "$dsha" "$nome")"
-  if ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
+
+  if ! command -v ssh-keygen >/dev/null 2>&1; then
+    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
+  elif ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
     echo "P-8: $aprovado -- linha 'diff-sha256:' ausente ou diferente do .diff atual (diff editado depois de assinado?)"
-    return 1
+  else
+    sig="$(mktemp)"
+    awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
+    if ! [ -s "$sig" ]; then
+      echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
+    elif printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
+           -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1; then
+      rc=0
+    else
+      echo "P-8: assinatura inválida em $aprovado (chave não confere com a raiz de confiança em HEAD:propostas/.allowed_signers, ou mensagem adulterada)"
+    fi
   fi
-  sig="$(mktemp)" || return 1
-  awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
-  if ! [ -s "$sig" ]; then
-    rm -f "$sig"
-    echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
-    return 1
-  fi
-  printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
-    -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1
-  rc=$?
-  rm -f "$sig"
-  [ "$rc" -eq 0 ] || echo "P-8: assinatura inválida em $aprovado (chave não confere com propostas/.allowed_signers, ou mensagem adulterada)"
+
+  [ -n "$sig" ] && rm -f "$sig"
+  [ -n "$signers_tmp" ] && rm -f "$signers_tmp"
   return "$rc"
 }
 

@@ -1,0 +1,141 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index f2c26e6..252b39b 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -236,11 +236,11 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
+ 
+ **Testado, positivo e negativo, taxa de falso positivo relatada antes de habilitar (MEMÓRIAS (218)):** 6 casos rodados contra um clone descartável antes do commit real — arquivo de comportamento staged sem aprovação (falha), com aprovação cobrindo o caminho (passa), arquivo de registro (MEMÓRIAS/ONDE_ESTAMOS) sem aprovação nenhuma (passa, nunca deveria travar), mistura de um aprovado + um não aprovado no mesmo commit (falha citando só o não aprovado), aprovação já movida pra `aplicadas/` no mesmo commit que ela autoriza (passa), e o caso negativo básico repetido depois da correção (falha). Zero falsos positivos e zero falsos negativos nos 6 casos.
+ 
+-**Aprovação assinada, desde MEMÓRIAS (366).** A chave pública do Humano fica em `propostas/.allowed_signers` (formato `ssh-keygen -Y verify`); a privada em `~/.config/agata/aprovacao_ed25519`, protegida por passphrase, nunca no repo. `scripts/aprovar.sh` assina a mensagem `"<sha256 do .diff>  <nome>"` (namespace `agata-aprovacao-p8`) e grava a assinatura dentro do `APROVADO-<nome>`. `scripts/perimetro.sh`, P-8: recomputa o sha256 do `.diff`, exige a linha `diff-sha256:` batendo, e roda `ssh-keygen -Y verify` — verificar não precisa da passphrase, só assinar. Sem `propostas/.allowed_signers` no repo a assinatura não é exigida (modo compat da janela antes do par de chaves existir). Fecha do risco residual abaixo: forjar uma aprovação deixa de ser um `touch` — passa a exigir a chave privada do Humano. NÃO fecha: `propostas/.allowed_signers` (a raiz de confiança) não está sob quarentena — trocá-la é mudança visível no `.diff` que o Humano revisa, e endurecer esse caminho (verificar a troca contra a chave antiga) é follow-up nomeado, não feito aqui.
++**Aprovação assinada, desde MEMÓRIAS (366).** A chave pública do Humano fica em `propostas/.allowed_signers` (formato `ssh-keygen -Y verify`); a privada em `~/.config/agata/aprovacao_ed25519`, protegida por passphrase, nunca no repo. `scripts/aprovar.sh` assina a mensagem `"<sha256 do .diff>  <nome>"` (namespace `agata-aprovacao-p8`) e grava a assinatura dentro do `APROVADO-<nome>`. `scripts/perimetro.sh`, P-8: recomputa o sha256 do `.diff`, exige a linha `diff-sha256:` batendo, e roda `ssh-keygen -Y verify` — verificar não precisa da passphrase, só assinar. Sem `propostas/.allowed_signers` no repo a assinatura não é exigida (modo compat da janela antes do par de chaves existir). Fecha do risco residual abaixo: forjar uma aprovação deixa de ser um `touch` — passa a exigir a chave privada do Humano. **Desde MEMÓRIAS (367) a própria raiz de confiança está sob quarentena:** `propostas/.allowed_signers` é arquivo "muda comportamento" (P-8), e `_p8_assinatura_ok` verifica sempre contra a versão de `HEAD:` de `.allowed_signers`, nunca a working-tree — uma troca staged não autoaprova a própria troca. Rotação de chave: assina-se o `.diff` da rotação com a chave **atual** (a de `HEAD`), o commit entra, a nova chave passa a valer do commit seguinte. Continua fora do alcance de P-8: o modo compat da janela sem `.allowed_signers` (já passada), e chave privada mal guardada.
+ 
+ **Bootstrap, registrado sem suavizar.** Esta própria mudança toca `scripts/perimetro.sh` e `PROJETO.md` — ordem do Humano, ela é a primeira candidata a passar pela própria quarentena, depois de P-8 existir, aplicada antes de ligar P-8 (não havia como pedir aprovação a um mecanismo que ainda não existia). O par `propostas/aplicadas/quarentena-p8.diff` / `propostas/aplicadas/APROVADO-quarentena-p8` deste commit foi criado pelo próprio executor, sob ordem escrita direta e datada do Humano no documento de 20/08/2026 — não é o executor se autoaprovando por conta própria; a aprovação já existia em texto, este é só o registro mecânico dela. **A partir do próximo commit que toque REGRAS/PROJETO/scripts/.githooks, o marcador precisa vir do Humano — à mão ou colando `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) — nunca do executor; esta exceção não se repete.**
+ 
+-**Risco residual, não suavizado.** O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Colar `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) pôs o ato no histórico do shell do Humano em vez de numa alegação do executor. **Desde MEMÓRIAS (366) a brecha do "executor cria o arquivo" está estreitada:** com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>`, e assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase) — o executor não a produz. Resta aceito: (i) a raiz de confiança `propostas/.allowed_signers` não está sob quarentena; (ii) na janela sem `.allowed_signers`, o modo compat aceita marcador sem assinatura; (iii) chave privada mal guardada. Custo do ganho: o Humano digita a passphrase a cada mudança estrutural.
++**Risco residual, não suavizado.** O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Colar `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) pôs o ato no histórico do shell do Humano em vez de numa alegação do executor. **Desde MEMÓRIAS (366) a brecha do "executor cria o arquivo" está estreitada:** com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>`, e assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase) — o executor não a produz. Resta aceito: (i) desde MEMÓRIAS (367) a raiz de confiança `propostas/.allowed_signers` está sob quarentena e verificada contra `HEAD:` — sobra o caso de o Humano aprovar às cegas um `.diff` de rotação malicioso; (ii) na janela sem `.allowed_signers` (já passada), o modo compat aceitava marcador sem assinatura; (iii) chave privada mal guardada. Custo do ganho: o Humano digita a passphrase a cada mudança estrutural.
+ 
+ ## Doutrina de defesa proporcional
+ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra decidir se e como reagir a um achado de segurança/robustez — não regra universal de REGRAS.md, é ferramenta de decisão situacional do Humano (Regra 3).
+diff --git a/propostas/README.md b/propostas/README.md
+index 47743c2..5897cc9 100644
+--- a/propostas/README.md
++++ b/propostas/README.md
+@@ -32,4 +32,4 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
+ 
+ ## Risco residual (não suavizado)
+ 
+-O marcador de aprovação era um arquivo que o próprio executor tinha permissão técnica de criar. **Desde MEMÓRIAS (366)**, com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>` — assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase), que o executor não produz. Continua aceito, sem suavizar: (i) `propostas/.allowed_signers` (a raiz de confiança) não está sob quarentena — trocá-la aparece no `.diff` que o Humano revisa, mas P-8 não a protege por assinatura ainda; (ii) na janela sem `.allowed_signers`, o modo compat aceita marcador sem assinatura; (iii) chave privada mal guardada quebra tudo. O que P-8 sempre cobriu — automação/desatenção agindo sem ninguém ver (caso de 18/08/2026, MEMÓRIAS (214)) — segue coberto. Custo: o Humano digita a passphrase a cada mudança estrutural.
++O marcador de aprovação era um arquivo que o próprio executor tinha permissão técnica de criar. **Desde MEMÓRIAS (366)**, com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>` — assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase), que o executor não produz. Desde MEMÓRIAS (367) a raiz de confiança `propostas/.allowed_signers` também está sob quarentena, e `_p8_assinatura_ok` a verifica sempre contra a versão de `HEAD:` (nunca a working-tree) — uma troca staged não autoaprova a própria troca; rotação = assinar o `.diff` da rotação com a chave atual. Continua aceito, sem suavizar: (i) o Humano aprovar às cegas um `.diff` de rotação malicioso; (ii) na janela sem `.allowed_signers` (já passada), o modo compat aceitava marcador sem assinatura; (iii) chave privada mal guardada quebra tudo. O que P-8 sempre cobriu — automação/desatenção agindo sem ninguém ver (caso de 18/08/2026, MEMÓRIAS (214)) — segue coberto. Custo: o Humano digita a passphrase a cada mudança estrutural.
+diff --git a/scripts/aprovar.sh b/scripts/aprovar.sh
+index 64aebe6..fbf968f 100755
+--- a/scripts/aprovar.sh
++++ b/scripts/aprovar.sh
+@@ -45,11 +45,22 @@ tmp="$(mktemp)"
+ } > "$tmp"
+ 
+ if [ -f "$chave" ]; then
+-  if ! printf '%s' "$msg" | ssh-keygen -Y sign -f "$chave" -n "$ns" >> "$tmp"; then
+-    rm -f "$tmp"
++  # Mensagem num arquivo, não em pipe pra stdin: assim o stdin fica livre
++  # pro prompt de passphrase do ssh-keygen (pipe + prompt já falhou na
++  # prática, MEMÓRIAS (366)/(367)). `-Y sign ... FILE` gera FILE.sig.
++  # SSH_ASKPASS_REQUIRE=never: pede a passphrase no terminal, nunca via
++  # /usr/lib/ssh/ssh-askpass (não existe nesta Máquina). Chave no ssh-agent
++  # dispensa o prompt.
++  export SSH_ASKPASS_REQUIRE=never
++  msgfile="$(mktemp)"
++  printf '%s' "$msg" > "$msgfile"
++  if ! ssh-keygen -Y sign -f "$chave" -n "$ns" "$msgfile"; then
++    rm -f "$tmp" "$msgfile" "$msgfile.sig"
+     echo "ERRO: assinatura falhou -- propostas/APROVADO-$nome NÃO criado." >&2
+     exit 1
+   fi
++  cat "$msgfile.sig" >> "$tmp"
++  rm -f "$msgfile" "$msgfile.sig"
+   mv "$tmp" "$alvo"
+   echo "criado e ASSINADO: propostas/APROVADO-$nome"
+ else
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index ab29247..2cb0d8f 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -639,6 +639,11 @@ p7_citacao() {
+ _p8_eh_comportamento() {
+   case "$1" in
+     REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
++    # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
++    # é mudança de comportamento tanto quanto trocar um script. A
++    # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a
++    # working-tree -- uma troca staged não autoaprova a própria troca.
++    propostas/.allowed_signers) return 0 ;;
+     redesign/router/*|redesign/mcp/*|redesign/librechat/*.mjs|redesign/librechat/*.yaml|redesign/systemd/*) return 0 ;;
+     # Lacuna achada em (340)/(341), fechada 06/09/2026: redesign/grafo/* (nó real
+     # do loop de governança) e redesign/librechat/*.yml (docker-compose, só .yaml
+@@ -662,31 +667,47 @@ _p8_assinatura_ok() {
+   # assinado quebra a verificação. Verificar não precisa da passphrase;
+   # só assinar (scripts/aprovar.sh, mão do Humano) precisa.
+   local aprovado="$1" diff_abs="$2" nome="$3"
+-  local signers="$(pwd)/propostas/.allowed_signers"
+-  [ -f "$signers" ] || return 0
+-  if ! command -v ssh-keygen >/dev/null 2>&1; then
+-    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
+-    return 1
++  local signers signers_tmp="" sig="" rc=1
++
++  # Raiz de confiança = a versão JÁ COMMITADA de propostas/.allowed_signers
++  # (HEAD:), nunca a working-tree -- senão uma troca de .allowed_signers
++  # staged no mesmo commit poderia autoaprovar a própria troca. Rotação de
++  # chave: assina-se o .diff da rotação com a chave ATUAL (a de HEAD), que
++  # é o que esta verificação usa. Primeiro commit que introduziu
++  # .allowed_signers não tinha HEAD: -> caía no working-tree (bootstrap).
++  if git cat-file -e HEAD:propostas/.allowed_signers 2>/dev/null; then
++    signers_tmp="$(mktemp)"
++    git show HEAD:propostas/.allowed_signers > "$signers_tmp" 2>/dev/null
++    signers="$signers_tmp"
++  elif [ -f "$(pwd)/propostas/.allowed_signers" ]; then
++    signers="$(pwd)/propostas/.allowed_signers"
++  else
++    return 0   # nem HEAD: nem working-tree -> modo compat (par de chaves ainda não existe)
+   fi
+-  local dsha msg sig rc
++
++  local dsha msg
+   dsha="$(sha256sum "$diff_abs" | awk '{print $1}')"
+   msg="$(printf '%s  %s' "$dsha" "$nome")"
+-  if ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
++
++  if ! command -v ssh-keygen >/dev/null 2>&1; then
++    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
++  elif ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
+     echo "P-8: $aprovado -- linha 'diff-sha256:' ausente ou diferente do .diff atual (diff editado depois de assinado?)"
+-    return 1
+-  fi
+-  sig="$(mktemp)" || return 1
+-  awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
+-  if ! [ -s "$sig" ]; then
+-    rm -f "$sig"
+-    echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
+-    return 1
++  else
++    sig="$(mktemp)"
++    awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
++    if ! [ -s "$sig" ]; then
++      echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
++    elif printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
++           -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1; then
++      rc=0
++    else
++      echo "P-8: assinatura inválida em $aprovado (chave não confere com a raiz de confiança em HEAD:propostas/.allowed_signers, ou mensagem adulterada)"
++    fi
+   fi
+-  printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
+-    -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1
+-  rc=$?
+-  rm -f "$sig"
+-  [ "$rc" -eq 0 ] || echo "P-8: assinatura inválida em $aprovado (chave não confere com propostas/.allowed_signers, ou mensagem adulterada)"
++
++  [ -n "$sig" ] && rm -f "$sig"
++  [ -n "$signers_tmp" ] && rm -f "$signers_tmp"
+   return "$rc"
+ }
+ 

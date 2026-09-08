@@ -45,11 +45,22 @@ tmp="$(mktemp)"
 } > "$tmp"
 
 if [ -f "$chave" ]; then
-  if ! printf '%s' "$msg" | ssh-keygen -Y sign -f "$chave" -n "$ns" >> "$tmp"; then
-    rm -f "$tmp"
+  # Mensagem num arquivo, não em pipe pra stdin: assim o stdin fica livre
+  # pro prompt de passphrase do ssh-keygen (pipe + prompt já falhou na
+  # prática, MEMÓRIAS (366)/(367)). `-Y sign ... FILE` gera FILE.sig.
+  # SSH_ASKPASS_REQUIRE=never: pede a passphrase no terminal, nunca via
+  # /usr/lib/ssh/ssh-askpass (não existe nesta Máquina). Chave no ssh-agent
+  # dispensa o prompt.
+  export SSH_ASKPASS_REQUIRE=never
+  msgfile="$(mktemp)"
+  printf '%s' "$msg" > "$msgfile"
+  if ! ssh-keygen -Y sign -f "$chave" -n "$ns" "$msgfile"; then
+    rm -f "$tmp" "$msgfile" "$msgfile.sig"
     echo "ERRO: assinatura falhou -- propostas/APROVADO-$nome NÃO criado." >&2
     exit 1
   fi
+  cat "$msgfile.sig" >> "$tmp"
+  rm -f "$msgfile" "$msgfile.sig"
   mv "$tmp" "$alvo"
   echo "criado e ASSINADO: propostas/APROVADO-$nome"
 else

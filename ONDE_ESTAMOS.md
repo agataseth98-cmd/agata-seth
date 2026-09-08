@@ -1506,7 +1506,17 @@ antes de ligar (o certo passa; aprovação sem assinatura, com assinatura
 errada, ou com o diff mexido depois de assinado, todas falham). Registro
 completo na memória (entrada 366).
 
-O que continua frágil, e está escrito sem enfeite no documento técnico:
-trocar a lista de chaves confiáveis ainda não exige assinatura (aparece
-no diff que você revisa, mas não é barrado sozinho). É o próximo aperto,
-quando você quiser.
+Você mandou prosseguir e aprovou o próximo aperto: agora trocar a lista de
+chaves confiáveis também exige assinatura — e a verificação usa sempre a
+versão da lista que já está no repositório, não a que está sendo mexida.
+Então ninguém troca a lista e assina a própria troca com a chave nova.
+Rotação legítima existe: se um dia você quiser trocar de chave, assina a
+troca com a chave atual. Testei quatro cenários (o normal passa; a rotação
+legítima passa; a troca maliciosa e a lista sem aprovação, as duas
+falham). Também consertei o `aprovar.sh`, que estava falhando ao pedir a
+senha da chave — agora pede direto no terminal. Registro na memória
+(entrada 367).
+
+O que ainda depende de você prestar atenção: aprovar de olhos fechados um
+diff de troca de chave que fosse malicioso. E, como sempre, guardar bem a
+chave privada.
