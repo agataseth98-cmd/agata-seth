@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1411adf96aa2c2289057453753a803379040849c
-  Escrito em: 08/09/2026 15:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a62bda271770a7e3924639478e32e0038ca07b2d
+  Escrito em: 08/09/2026 15:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1411adf96aa2c2289057453753a803379040849c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1411adf96aa2c2289057453753a803379040849c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1411adf96aa2c2289057453753a803379040849c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a62bda271770a7e3924639478e32e0038ca07b2d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a62bda271770a7e3924639478e32e0038ca07b2d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a62bda271770a7e3924639478e32e0038ca07b2d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
+
+**Como apareceu:** rodei `conselho_remoto.py` de verdade com os 5 do roster. `cerebras/gemma-4-31b` → `400 thinking: property 'thinking' is unsupported`; `mistral/ministral-8b-latest` → `422 extra_forbidden: body.thinking`; `gemini` respondeu; `huggingface` deu `403` Cloudflare 1010 **só em rajada** (3 chamadas coladas — espaçado dá 200; o breaker absorve, não é bug nosso).
+
+**Causa:** `enviar_omniroute` punha `"thinking": {"type": "disabled"}` (existe desde (212), pra travar o loop de raciocínio do GLM) em **toda** chamada. `cerebras` e `mistral` recusam o campo — isso já quebrava o `cerebras` silenciosamente **antes de (379)**; com 5 no roster, 3 ficariam em cooldown perpétuo e o ganho de (379) sumia (P-15 seguiria amarelo).
+
+**Correção (proposta `conselho-thinking-por-provedor`, 1 arquivo quarentena, 1 assinatura):** `scripts/conselho_remoto.py` — `DESABILITAR_THINKING` continua `True` mas o campo só entra se `modelo.startswith(THINKING_DISABLED_PREFIXOS)` = `("zai/", "gemini/")` (os que aceitam **e** de fato precisam; Gemini aceita mas raciocina mesmo assim — aí quem barra é o `_portao_resposta`). Pros outros, o portão de resposta segue como rede contra reasoning-burn.
+
+**Verificado ao vivo pelo :20127:** `zai/glm-4.7-flash` 200 **com** o campo; `cerebras/gemma-4-31b` e `mistral/ministral-8b-latest` 200 **sem** o campo; `huggingface` 200 (aceita e ignora). Teste de fumaça completo do roster refeito depois do commit.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/conselho-thinking-por-provedor`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `importlib` carrega o script e confirma `THINKING_DISABLED_PREFIXOS`; `git apply --check` limpo contra `a62bda2`; chamadas reais 200 nos 3 cenários (zai com, cerebras/mistral sem); assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, `APROVADO-conselho-thinking-por-provedor` assinado.
+
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
 
 **Pedido do Humano:** "vamos colocar todos os modelos gratuitos encontrados em fallback de todas as partes do sistema, seth e conselho remoto etc." → pôs 3 chaves em `~/.config/agata/.env` → aprovação assinada `APROVADO-roster-huggingface-mistral` (`ssh-keygen -Y verify` OK contra `HEAD:propostas/.allowed_signers`, `diff-sha256` conferido).

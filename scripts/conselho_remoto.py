@@ -230,6 +230,14 @@ TETO_TOKENS_SAIDA = 4_000    # vira max_tokens no pedido -- teto mecanico
 # OmniRoute repassa se o provedor aceitar. Se o loop voltar apesar disso, e
 # follow-up de P1-04 (config no lado do OmniRoute).
 DESABILITAR_THINKING = True
+# ...mas o campo `thinking` no topo do payload SO vai pros provedores que (a) o
+# aceitam e (b) de fato entram em loop de raciocinio sem ele. Medido 08/09
+# (MEMÓRIAS (379)) ao vivo pelo :20127: `cerebras/*` rejeita (400
+# wrong_api_format), `mistral/*` rejeita (422 extra_forbidden), `huggingface/*`
+# aceita mas ignora. Mandar pra todos punha 3 dos 5 do ROSTER em cooldown
+# permanente e esvaziava o ganho de (379). Pros modelos que NAO recebem o flag,
+# quem protege contra reasoning-burn e' o _portao_resposta (rejeita e penaliza).
+THINKING_DISABLED_PREFIXOS = ("zai/", "gemini/")
 PRECO_ENTRADA_POR_TOKEN_USD = 0.0   # grátis nesta camada; formula pronta p/ quando nao for
 PRECO_SAIDA_POR_TOKEN_USD = 0.0     # o custo real agora sai de `omniroute cost`
 
@@ -278,10 +286,11 @@ def enviar_omniroute(pedido_texto, modelo):
         "messages": [{"role": "user", "content": pedido_texto}],
         "max_tokens": MAX_TOKENS_POR_MODELO.get(modelo, TETO_TOKENS_SAIDA),
     }
-    if DESABILITAR_THINKING:
-        # Alguns provedores ignoram (medido em (374): Gemini 2.5-flash raciocina
-        # mesmo assim). Manda-se do mesmo jeito -- quem protege é o portão de
-        # resposta, não este flag.
+    if DESABILITAR_THINKING and modelo.startswith(THINKING_DISABLED_PREFIXOS):
+        # Só zai/ e gemini/ (ver THINKING_DISABLED_PREFIXOS). Gemini aceita o
+        # campo mas raciocina mesmo assim (374) -- quem protege aí é o portão
+        # de resposta, não este flag. cerebras/mistral/huggingface NÃO recebem:
+        # rejeitam o campo ou o ignoram (379).
         payload["thinking"] = {"type": "disabled"}
     corpo = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
