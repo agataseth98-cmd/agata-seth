@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
-(342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
+(342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call …
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a ex …
 (340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achad …
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle …

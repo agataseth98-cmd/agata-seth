@@ -28,6 +28,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
+
+**Pedido do Humano:** "vamos fazer tudo que está pendente para entrarmos em fase de refinamento, me apresente lista de absolutamente tudo que está em aberto e prompt para autorizar timer religado."
+
+**Varredura do backlog — o que a era Hermes deixou obsoleto:** `plano-execucao-backlog.md` (28/08, HEAD `018b40a`), `roteiro-fase2.md` (31/08) e os dois dossiês de silo (31/08) foram todos escritos contra o Hermes (`~/.hermes/`, `hermes-gateway`, `.githooks/gerar-hermes-md.sh`, `agent/prompt_builder.py`) — removido em 03/09 ((312)). Não são checklist executável; arquivados. O que sobrevive:
+- **Fase 2 já está feita ou fora do meu alcance:** eco pós-carregar mecanizado = (308), `scripts/estado_para_eco.sh`; geração de silo por modelo = Bloco 3.1, `.githooks/gerar-hidratacao.sh` gera `.hidrata-seth.md` pro `ALVOS_SILO=(seth)` (claude/gemini/glm eram do Hermes). TES-002 reabrir depende do Humano entregar nonce; TES-001 fechar exige sessões independentes.
+- **Aberto de verdade:** reorg de `redesign/` (vivo vs. doc concluída); `dossie-rotacao-por-familia.md` (07/09, ainda vale — decisão do Humano, inclui se a Seth rotaciona); duas costuras em REGRAS.md (item O — exige segunda opinião); backup do bundle `memoria/missoes` no HD (dreno pendente).
+
+**`propostas/` pendentes agora:** só `.allowed_signers`, `README.md` e `dossie-rotacao-por-familia.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git ls-files` + leitura de `PROJETO.md` "Plano vigente"/"Estado dos bugs", `.githooks/gerar-hidratacao.sh`, os 5 docs de backlog e `REGRAS.md` "Eco pós-carregar"; `wc -l ONDE_ESTAMOS.md` antes/depois; `git mv` (arquivos não-quarentenados). Autorização: Humano, "vamos fazer tudo que está pendente...".
+
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
 - **Seleção dirigida pela mudança:** marcador em `~/.cache/agata/consolidacao/marcador.json`; pool de temas curado em `redesign/grafo/flows/temas-consolidacao.txt` (`.txt`, **fora da quarentena** — o Humano edita direto). Um tema só entra no run se ≥2 entradas mais novas que o marcador o citam (chave do índice ou substring do título). Noite sem movimento → nenhum arquivo escrito. Acaba o re-consolidar os mesmos 4 temas fixos toda noite.
 - **Portão mecânico antes de escrever:** rejeita saída vazia/curta, padrão de erro (`sem modelo`, `HTTPError`…), `(NNN)` fora do conjunto de refs do tema, ou zero citações. Reprovado → nada em `propostas/`, uma linha em `~/.cache/agata/consolidacao/reprovados.log`.
