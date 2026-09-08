@@ -1,0 +1,9 @@
+[Unit]
+Description=Ágata — dispara a pesquisa semanal do pool de modelos gratuitos (com recuperação se a máquina estava desligada)
+
+[Timer]
+OnCalendar=Sun *-*-* 22:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

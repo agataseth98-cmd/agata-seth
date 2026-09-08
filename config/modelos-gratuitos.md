@@ -56,3 +56,15 @@ Depois da chave: configurar o provedor no OmniRoute (Provedores → Adicionar),
 
 Descartados por não serem free tier de verdade: SambaNova / Fireworks / AI21
 (créditos que expiram). Cohere: só avaliação (1.000 chamadas/mês).
+
+---
+
+## Rotina de pesquisa/saúde (MEMÓRIAS (377))
+
+`scripts/pesquisar_modelos_gratuitos.py`, semanal via
+`config/agata-pesquisa-modelos.timer` (domingo 22:00). Read-only: re-testa o
+pool + o ROSTER + os modelos do OmniRoute fora do pool, dispara o Discovery do
+OmniRoute, e — **só se algo mudou** — escreve `propostas/modelos-gratuitos-<data>.md`
+com um rascunho de ROSTER e o lembrete das famílias que precisam de chave.
+**Nunca implementa.** O Humano aplica à mão (este .md + `ROSTER` por proposta
+assinada + OmniRoute pela UI).

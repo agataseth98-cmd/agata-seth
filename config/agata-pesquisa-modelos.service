@@ -1,0 +1,14 @@
+[Unit]
+Description=Ágata — pesquisa/saúde semanal do pool de modelos gratuitos (MEMÓRIAS (377))
+# Só sonda e, se algo mudou, escreve UMA proposta em propostas/. Nunca implementa.
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+ExecStart=/usr/bin/python3 %h/agata/scripts/pesquisar_modelos_gratuitos.py --repo %h/agata
+ProtectSystem=strict
+ProtectHome=read-only
+# escreve só a proposta (propostas/) e o estado/log (~/.cache/agata/)
+ReadWritePaths=%h/agata/propostas %h/.cache/agata
+Restart=on-failure
+RestartSec=60

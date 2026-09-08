@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 14:17 -0300.
+Motivo: rotina semanal read-only de pesquisa/saude do pool de modelos gratuitos
+nome: rotina-pesquisa-modelos
+diff-sha256: c5e8b2f865e7e1d99b472db3a4fe326884689c04b2bafaa37ea2e381b0745920
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQBVZ5O77POfaR0kJljQ7mLVasPD86cDqInSKFHtNVNG1dg
+OiS2ZVNnRuBBSqq2U0s8AkXngT0t8kl2qSYZznqA4=
+-----END SSH SIGNATURE-----

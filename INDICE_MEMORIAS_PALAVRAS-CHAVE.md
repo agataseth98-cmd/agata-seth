@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
+  palavras-chave: rotina, semanal, pesquisa, saúde, pool, modelos, gratuitos, proposta, leva, scripts, pesquisar, config, agata, service, timer, domingo, perimetro, nota
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openrouter/auto` **sai** do roster do Conselho Remoto — é produto PAGO ("Auto Best Available" da OpenRouter; o painel de Combos do OmniRoute avisa), tinha entrado por engano em (374); roster fica `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`. (b) `config/modelos-gratuitos.md` novo — fonte única de verdade (confirmado / fora e por quê / candidatos com chave). (c) Seth (LibreChat) ganha `auto/best-free` como default — meta-roteador do OmniRoute que só usa provedores grátis, cascata até o local.
   palavras-chave: pool, modelos, gratuitos, três, mudanças, openrouter, auto, sai, roster, remoto, produto, pago, best, available, painel, combos, omniroute, avisa, tinha, entrado, engano, fica, zai, glm, flash, gemini, cerebras, gemma, config, novo, fonte, única, verdade, confirmado, fora, quê, candidatos, chave, seth, librechat, ganha, free, default, meta, roteador, usa, provedores, grátis, cascata, local
 (375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: hipótese, causa, drift, refutada, humano, checando, verdade, app, snapshot, recuperação, arquivo, horário, achado, raiz, volta, lacuna, decidida, adivinhação, obsidian, sync, confirmado, desconectado, fecha, risco, exposição, levantado
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a pedido do Humano — achadas 6 imprecisões, uma delas já FALSA no momento da checagem (não só desatualizada): dizia "regime de exceção ativo" depois do próprio (346) já ter encerrado o regime
   palavras-chave: ponto, cego, registrado, reconferido, pedido, humano, achadas, imprecisões, delas, falsa, momento, checagem, desatualizada, dizia, regime, exceção, ativo, próprio, ter, encerrado
-(347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imprecisões reais — achadas relendo de propósito, a pedido do Humano ("leia o relatório e me diga se ficou fiel"), corrigidas no mesmo artefato
-  palavras-chave: veios, ágata, registrado, tinha, imprecisões, reais, achadas, relendo, propósito, pedido, humano, leia, relatório, diga, ficou, fiel, corrigidas, mesmo, artefato
+(347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imp …
+  palavras-chave: veios, ágata, registrado, tinha, imp
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os …
   palavras-chave: regime, exceção, encerrado, ordem, humano
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — res …

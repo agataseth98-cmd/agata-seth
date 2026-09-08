@@ -28,6 +28,21 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
+
+**Pedido do Humano:** "tenha uma rotina de pesquisa e implementação de modelos gratuitos automática também" → o desenho ficou: pesquisa automática **sim**, implementação **não** (viola P-8 e a Regra 3; integrar endpoint de rede descoberto na web num sistema rodando é a classe "cadeia de suprimento", recusada) → "concordo com tudo" → "tudo assinado".
+
+**O que a rotina faz, tudo read-only:** re-testa o pool (`config/modelos-gratuitos.md`) + o `ROSTER` do `conselho_remoto.py` + os modelos do OmniRoute fora do pool (1 chamada mínima cada via `:20127`); dispara o **Discovery do próprio OmniRoute** (`POST /api/discovery/scan`); compara com o último run; **só se algo mudou** escreve `propostas/modelos-gratuitos-<data>.md` com rascunho de `ROSTER` + lembrete das famílias que precisam de chave (Mistral, GitHub Models, HuggingFace). **Nunca edita nada** — o Humano aplica à mão.
+
+**Também nesta sessão, pelo Brave / `storage.sqlite` (autorizado):**
+- OmniRoute → Global Routing → **"Reasoning token buffer" ON** (`comboDefaults.reasoningTokenBufferEnabled: true`) — folga de `max_tokens` automática pros modelos que queimam reasoning quando roteados por combo.
+- `settings.hidePaidModels = true` no `storage.sqlite` (backup antes; `_settingsRevision` 132→133) — tira modelos pagos da seleção automática do `auto/*` e das listas da UI. O `/v1/models` cru ainda lista tudo (esse endpoint não filtra), mas o roteador e as dropdowns respeitam.
+- Timer `agata-pesquisa-modelos` linkado e ligado — 1º run domingo 13/09 22:00.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/rotina-pesquisa-modelos`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `py_compile` + `bash -n` + `systemd-analyze verify` + `p8_quarentena`; `_pool_confirmado`/`_roster_conselho` testadas contra os arquivos reais; `/api/discovery/scan` confirmado no routes-manifest do OmniRoute; `hidePaidModels` gravado no namespace `settings` (igual aos outros booleanos) com backup do `storage.sqlite` antes; assinatura verificada contra `.allowed_signers`. Autorização: Humano, "concordo com tudo" + aprovação assinada + "autorizado setar por booleano".
+
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openrouter/auto` **sai** do roster do Conselho Remoto — é produto PAGO ("Auto Best Available" da OpenRouter; o painel de Combos do OmniRoute avisa), tinha entrado por engano em (374); roster fica `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`. (b) `config/modelos-gratuitos.md` novo — fonte única de verdade (confirmado / fora e por quê / candidatos com chave). (c) Seth (LibreChat) ganha `auto/best-free` como default — meta-roteador do OmniRoute que só usa provedores grátis, cascata até o local.
 
 **Pedido do Humano:** "vamos colocar todos os modelos gratuitos encontrados em fallback de todas as partes do sistema, seth e conselho remoto etc." → "autorizo tudo" → duas aprovações assinadas.
