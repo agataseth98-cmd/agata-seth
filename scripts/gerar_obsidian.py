@@ -398,7 +398,7 @@ def main():
     for b in ["INICIO", "estado", "timeline", "_LEIA",
               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
               "moc-controles", "moc-propostas", "moc-esferas",
-              "moc-redesign", "moc-readmes", "memorias.base"]:
+              "moc-documentos", "moc-readmes", "memorias.base"]:
         NOTAS.add(b)
 
     # -------- religação de um corpo de texto
@@ -679,7 +679,7 @@ def main():
         for p in sorted(grupos[chave]):
             L.append(f"- {wikilink_arquivo(p, p)}")
         L.append("")
-    escrever("moc-redesign.md", L)
+    escrever("moc-documentos.md", L)  # (369): era "moc-redesign.md" -- nome não batia com o H1
 
     L = fm({"tipo-nota": "moc", "tags": "[moc]"})
     n_readmes = sum(len(ps) for _, ps in GRUPO_README) + len(extras_achados)
@@ -854,7 +854,7 @@ def main():
         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
-        f"{link('moc-redesign','Documentos do repositório')}  ·  "
+        f"{link('moc-documentos','Documentos do repositório')}  ·  "
         f"{link('moc-missoes','Missões (memoria/missoes/)')}  ·  "
         f"{link('_LEIA','_LEIA — pasta gerada')}", "",
         "## Como ler o grafo",

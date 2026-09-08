@@ -28,6 +28,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/sanitiza-cosmeticos`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check`; `ast.parse` nos dois arquivos + gerador rodado de verdade (545 notas; `moc-documentos.md` presente, `moc-redesign.md` some, `INICIO` aponta pro nome novo); assinatura do Humano verificada contra `.allowed_signers` antes de aplicar. Autorização: Humano, aprovação assinada (`APROVADO-sanitiza-cosmeticos`).
+
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
 
 **Pedido do Humano:** "corrija o que for necessário já autorizei no Terminal" — aprovação assinada de `obsidian-frio-nao-orfao`.

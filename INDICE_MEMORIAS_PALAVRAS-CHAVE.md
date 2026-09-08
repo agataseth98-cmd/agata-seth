@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
+  palavras-chave: cosméticos, sanitização, parte, tocava, scripts, gerar, obsidian, moc, documentos, repositório, era, gravado, nome, arquivo, redesign, batia, agora, pontos, registro, notas, escrever, link, inicio, busca, semantica, docstring, atualizada, pro, caminho, novo, spike, rlm, extras, movido
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
   palavras-chave: scripts, gerar, obsidian, camadas, morna, fria, deixam, folhas, órfãs, grafo, vault, parte, sanitização, moc, memoria, ganha, seção, físicas, ligando, memorias, morno, chunks, frio, faixa, entradas, guarda, saem, lista, genérica, documentos, soltos
 (368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: skills, discord, navegador, testadas, tools, call, real, list, testado, deixaram, aberto, fechado, deu, depender, humano
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
   palavras-chave: fechamento, backlog, pedido, humano, sim, exceção, pin, healthcheck, librechat, harness, achado, obsoleto, implementado, reconciliação, projeto, redesign, status, estava, avisado, nada, fazer
-(340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achada e corrigida (não era só cota transitória como (338) concluiu) · Tailscale conferido: não instalado nesta Máquina, achado ao responder pergunta direta do Humano
-  palavras-chave: causa, raiz, real, httperror, consolidação, achada, corrigida, era, cota, transitória, concluiu, tailscale, conferido, instalado, máquina, achado, responder, pergunta, direta, humano
+(340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achad …
+  palavras-chave: causa, raiz, real, httperror, consolidação, achad
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle …
   palavras-chave: skills, novas, seth, ponte, discord, controle
 (338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parece …

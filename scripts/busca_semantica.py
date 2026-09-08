@@ -13,8 +13,9 @@ caso que grep estruturalmente não cobre. Autorizado pelo Humano em
 04/09/2026 ("Eu assumo o risco por escrito, implemente") depois de pergunta
 direta sobre o porquê da recusa original — ver MEMÓRIAS (324)/(327).
 
-**Achado relevante, não escondido:** o spike RLM (P5-01, redesign/rlm/,
-02/09/2026) testou embedding como FALLBACK de busca dentro do loop de
+**Achado relevante, não escondido:** o spike RLM (P5-01, arquivado em
+extras/arquivo-redesign/rlm/ na sanitização de (368), originalmente
+redesign/rlm/, 02/09/2026) testou embedding como FALLBACK de busca dentro do loop de
 consulta e mediu resultado pior que grep puro (3/13 limpo vs 9/14 da
 injeção) — mas aquele teste usava embedding DENTRO do loop de raciocínio do
 modelo, tentando substituir grep. Este script é outra forma: um ranking

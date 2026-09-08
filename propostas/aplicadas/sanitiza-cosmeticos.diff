@@ -1,0 +1,47 @@
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index 6377bc2..75e828f 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -13,8 +13,9 @@ caso que grep estruturalmente não cobre. Autorizado pelo Humano em
+ 04/09/2026 ("Eu assumo o risco por escrito, implemente") depois de pergunta
+ direta sobre o porquê da recusa original — ver MEMÓRIAS (324)/(327).
+ 
+-**Achado relevante, não escondido:** o spike RLM (P5-01, redesign/rlm/,
+-02/09/2026) testou embedding como FALLBACK de busca dentro do loop de
++**Achado relevante, não escondido:** o spike RLM (P5-01, arquivado em
++extras/arquivo-redesign/rlm/ na sanitização de (368), originalmente
++redesign/rlm/, 02/09/2026) testou embedding como FALLBACK de busca dentro do loop de
+ consulta e mediu resultado pior que grep puro (3/13 limpo vs 9/14 da
+ injeção) — mas aquele teste usava embedding DENTRO do loop de raciocínio do
+ modelo, tentando substituir grep. Este script é outra forma: um ranking
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 417f631..bbd6e7a 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -398,7 +398,7 @@ def main():
+     for b in ["INICIO", "estado", "timeline", "_LEIA",
+               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
+               "moc-controles", "moc-propostas", "moc-esferas",
+-              "moc-redesign", "moc-readmes", "memorias.base"]:
++              "moc-documentos", "moc-readmes", "memorias.base"]:
+         NOTAS.add(b)
+ 
+     # -------- religação de um corpo de texto
+@@ -679,7 +679,7 @@ def main():
+         for p in sorted(grupos[chave]):
+             L.append(f"- {wikilink_arquivo(p, p)}")
+         L.append("")
+-    escrever("moc-redesign.md", L)
++    escrever("moc-documentos.md", L)  # (369): era "moc-redesign.md" -- nome não batia com o H1
+ 
+     L = fm({"tipo-nota": "moc", "tags": "[moc]"})
+     n_readmes = sum(len(ps) for _, ps in GRUPO_README) + len(extras_achados)
+@@ -854,7 +854,7 @@ def main():
+         f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
+         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
+         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
+-        f"{link('moc-redesign','Documentos do repositório')}  ·  "
++        f"{link('moc-documentos','Documentos do repositório')}  ·  "
+         f"{link('moc-missoes','Missões (memoria/missoes/)')}  ·  "
+         f"{link('_LEIA','_LEIA — pasta gerada')}", "",
+         "## Como ler o grafo",
