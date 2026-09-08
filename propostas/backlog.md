@@ -51,3 +51,8 @@ segue é a lista completa.
 - Detector de âncora velha como falso positivo — PROMPT_CARREGAMENTO.md reescrito (CHECAGEM DE DEFASAGEM, 3 degraus).
 - Consolidação noturna — reformulada em (371).
 - `ONDE_ESTAMOS.md` acima do teto — cortado em (372).
+- Carimbo de "frescor" de (253) (a variante com contador numérico e sub-itens
+  3-A/3-B) — **resolvido em (378)**: o parecer do GLM mandou eliminar o contador
+  novo e reusar o SHA que já existe; feito, o bloco `ANCORA-SHA` agora vai também
+  no preâmbulo de REGRAS/PROJETO/MEMÓRIAS. As 2 sugestões de catálogo de (253)
+  (linha B5 acima) são item à parte e seguem em aberto.
