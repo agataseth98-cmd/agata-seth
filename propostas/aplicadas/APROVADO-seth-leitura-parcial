@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 19:51 -0300.
+Motivo: auditoria teste 2 da Seth: canon-mcp poe total+intervalo na 1a linha da listagem de diretorio; _DOUTRINA_FIXA ganha regra de leitura parcial (F-1), refino do turno pos-compactacao (F-2) e sync PASS envelhecido (F-3)
+nome: seth-leitura-parcial
+diff-sha256: 5c706ba3fdadfec161acadcd450bef8e9719f25e1bcb5ebea2cb50d7ae580524
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQDX5H4XUgctpXY5ZuOWhZea2mIiNmMsN1nTC/ZHeIRR8Ui
+tnFSccQhLUHo9U1ukiRmETYqW0qAU/gVwDD9kzQQA=
+-----END SSH SIGNATURE-----

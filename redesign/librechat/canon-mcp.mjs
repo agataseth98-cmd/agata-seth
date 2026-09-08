@@ -141,7 +141,24 @@ async function vaultConsultar(a) {
   if (ct.includes("application/json")) {
     try {
       const j = JSON.parse(body);
-      if (Array.isArray(j.files)) return `${p} (diretório):\n` + j.files.map((f) => "  " + f).join("\n");
+      if (Array.isArray(j.files)) {
+        // MEMÓRIAS (389): o cabeçalho carrega o TOTAL e o de-X-a-Y na PRIMEIRA
+        // linha, pra sobreviver a truncamento/resumo (uma sessão da Seth leu a
+        // cauda de uma listagem cortada como "fim da lista" e afirmou uma
+        // discrepância falsa como fato -- (388) auditoria). E a listagem passa
+        // por clamp com nota que manda NÃO concluir o fim da lista.
+        const fs = j.files.slice().sort();
+        const primeiro = fs[0] || "—";
+        const ultimo = fs[fs.length - 1] || "—";
+        const cabec =
+          `${p} (diretório) — ${fs.length} item(ns), de ${primeiro} a ${ultimo}.\n` +
+          `Se esta resposta for cortada ou resumida, o intervalo REAL é o "de X a Y" ` +
+          `acima — NÃO conclua o fim da lista pela última linha visível.\n\n`;
+        return clamp(
+          cabec + fs.map((f) => "  " + f).join("\n"),
+          "LISTAGEM DE DIRETÓRIO TRUNCADA — use o total e o 'de X a Y' do cabeçalho, ou peça um sub-caminho",
+        );
+      }
     } catch { /* cai no texto cru */ }
   }
   return clamp(`${p}:\n\n${body}`, "abra um arquivo específico");

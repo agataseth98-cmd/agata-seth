@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
-(358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
+(358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, qu …
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reor …
 (356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado …
 (355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem im …

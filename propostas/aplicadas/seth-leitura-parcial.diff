@@ -1,0 +1,57 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 293e053..aafb472 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -141,7 +141,24 @@ async function vaultConsultar(a) {
+   if (ct.includes("application/json")) {
+     try {
+       const j = JSON.parse(body);
+-      if (Array.isArray(j.files)) return `${p} (diretório):\n` + j.files.map((f) => "  " + f).join("\n");
++      if (Array.isArray(j.files)) {
++        // MEMÓRIAS (389): o cabeçalho carrega o TOTAL e o de-X-a-Y na PRIMEIRA
++        // linha, pra sobreviver a truncamento/resumo (uma sessão da Seth leu a
++        // cauda de uma listagem cortada como "fim da lista" e afirmou uma
++        // discrepância falsa como fato -- (388) auditoria). E a listagem passa
++        // por clamp com nota que manda NÃO concluir o fim da lista.
++        const fs = j.files.slice().sort();
++        const primeiro = fs[0] || "—";
++        const ultimo = fs[fs.length - 1] || "—";
++        const cabec =
++          `${p} (diretório) — ${fs.length} item(ns), de ${primeiro} a ${ultimo}.\n` +
++          `Se esta resposta for cortada ou resumida, o intervalo REAL é o "de X a Y" ` +
++          `acima — NÃO conclua o fim da lista pela última linha visível.\n\n`;
++        return clamp(
++          cabec + fs.map((f) => "  " + f).join("\n"),
++          "LISTAGEM DE DIRETÓRIO TRUNCADA — use o total e o 'de X a Y' do cabeçalho, ou peça um sub-caminho",
++        );
++      }
+     } catch { /* cai no texto cru */ }
+   }
+   return clamp(`${p}:\n\n${body}`, "abra um arquivo específico");
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index a5b5e85..760cead 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -81,10 +81,19 @@ _DOUTRINA_FIXA = (
+     "— **hora:** você não tem relógio de dentro → selo `lacuna: sem relógio` "
+     "(Regra 1.1). Nunca invente hora nem repita a do cabeçalho anterior.\n"
+     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
+-    "não o par pergunta-resposta). Parte do contexto foi resumida/compactada? "
+-    "`t≥<n> (prefixo compactado)`. Não use contador de outra sessão.\n"
++    "não o par pergunta-resposta). Contexto compactado/resumido: se o resumo "
++    "preserva a contagem de turnos, `t=<n> (contagem do resumo)`; se a contagem "
++    "se perdeu, `t≥<n> (prefixo compactado)`. Não use contador de outra sessão.\n"
+     "— **sync:** carregue a linha `sync:` do bloco de estado em TODO cabeçalho; "
+-    "se ela não veio, `sync: não verificado`.\n\n"
++    "se ela não veio, `sync: não verificado`. Se o bloco de estado traz "
++    "`IDADE-HIDRATACAO` acima de ~15 min, anexe: `sync: PASS (hidratação ~Xmin, "
++    "não re-medido)` — um PASS antigo que você não pode re-medir não é um PASS ao "
++    "vivo.\n\n"
++    "**Leitura parcial (Regra 2):** resultado de tool que diga 'cortado', "
++    "'truncado', 'resumido', ou uma listagem SEM total explícito: NUNCA afirme o "
++    "fim da lista, o intervalo, nem 'vai até X'. É `lacuna: leitura parcial` — "
++    "peça a continuação, um sub-caminho, ou o total. O mesmo vale pro que sobra "
++    "de um tool-result depois de uma compactação.\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+     "hidratação mínima; o resto é sob demanda.\n\n"

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
+  palavras-chave: auditoria, teste, seth, falha, real, leitura, parcial, virou, fato, conserto, lados, canon, mcp, mjs, doutrina, fixa, pedido, humano, audite, rigor, pesquisa, científica, refaça
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
   palavras-chave: cabeçalho, seth, doutrina, injetada, ganha, formato, selo, hora, regra, compactação, pontos, teste, desta, sessão
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: tes, rodada, adversa, glm, flash, identidade, real, confirmada, json, cru, assinou, claude, sonnet, puxando, nome, corpus, próprio, pedido, regra, proíbe, mão, achados, incidentais, infraestrutura, caminho, gemini, estoura, teto, omniroute, grande, groq, bloqueado, cloudflare, browser, signature, banned
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
   palavras-chave: projeto, fase, linha, fila, aderência, atualizada, dentro, janela, bug, pra, fechada, memórias, mudança, forma, apresentação, regra, conteúdo, novo, ficou, fora, commit, engano, meu, pegou, tinha, editado, aprovação, própria, revertido, commitar
-(358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
-  palavras-chave: fila, aderência, memórias, período, quente, morno, frio, fechada, índice, vault, obsidian, busca, semântica, derivado, agora, cobrem, três, camadas, bug, real, achado, testando, corte, bloco, migrado, aplicado, engano, chunk, corrigido, propor
+(358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, qu …
+  palavras-chave: fila, aderência, memórias, período
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reor …
   palavras-chave: memórias, período, fase, item, backlog, reor
 (356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado …
