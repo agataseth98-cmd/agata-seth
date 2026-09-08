@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
+  palavras-chave: consolidação, noturna, reformulada, opção, explicação, nunca, ter, produzido, nada, aproveitável, semana, redesign, grafo, flows, consolidacao
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
   palavras-chave: cosméticos, sanitização, parte, tocava, scripts, gerar, obsidian, moc, documentos, repositório, era, gravado, nome, arquivo, redesign, batia, agora, pontos, registro, notas, escrever, link, inicio, busca, semantica, docstring, atualizada, pro, caminho, novo, spike, rlm, extras, movido
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: bug, real, recorrente, githooks, post, commit, achado, checar, acabamos, marcava, vault, árvore, suja, causa, memoria, sincronizacao, log, provavelmente, vinha, acontecendo, desde, sempre, mascarado, meu, próprio, hábito, regenerar, limpo, próximo
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call` real (não só `tools/list`) — o "não testado" que (339)/(341) deixaram em aberto, fechado até onde deu sem depender do Humano
   palavras-chave: skills, discord, navegador, testadas, tools, call, real, list, testado, deixaram, aberto, fechado, deu, depender, humano
-(341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a exceção do HD"): pin+healthcheck do LibreChat, Harness A1 achado obsoleto (não implementado), reconciliação de (333)-(340) em PROJETO.md — `redesign/STATUS.md` já estava avisado, nada a fazer
-  palavras-chave: fechamento, backlog, pedido, humano, sim, exceção, pin, healthcheck, librechat, harness, achado, obsoleto, implementado, reconciliação, projeto, redesign, status, estava, avisado, nada, fazer
+(341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a ex …
+  palavras-chave: fechamento, backlog, pedido, humano, sim
 (340) DIÁRIO — 05/09/2026 · Causa raiz real do `HTTPError` da consolidação achad …
   palavras-chave: causa, raiz, real, httperror, consolidação, achad
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle …

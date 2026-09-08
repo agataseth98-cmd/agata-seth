@@ -1,0 +1,16 @@
+# Pool de temas da consolidacao noturna (redesign/grafo/flows/consolidacao.py).
+# Um tema por linha. `#` comenta. Vazio = ignorado.
+#
+# Nao e' .py nem .sh -> FORA da quarentena P-8: acrescente/remova um tema
+# editando este arquivo direto, sem proposta. O que a maquina decide sozinha
+# e' QUANDO consolidar cada um (so quando >= 2 entradas novas o citam desde o
+# ultimo run) -- nunca re-consolida um tema que nao mexeu.
+#
+# Criado em MEMORIAS (371).
+
+presence_penalty
+TES-002 nonce
+num_ctx 16814
+âncora sha
+OmniRoute 504
+aprovação assinada P-8

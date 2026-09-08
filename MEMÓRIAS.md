@@ -28,6 +28,19 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
+- **Seleção dirigida pela mudança:** marcador em `~/.cache/agata/consolidacao/marcador.json`; pool de temas curado em `redesign/grafo/flows/temas-consolidacao.txt` (`.txt`, **fora da quarentena** — o Humano edita direto). Um tema só entra no run se ≥2 entradas mais novas que o marcador o citam (chave do índice ou substring do título). Noite sem movimento → nenhum arquivo escrito. Acaba o re-consolidar os mesmos 4 temas fixos toda noite.
+- **Portão mecânico antes de escrever:** rejeita saída vazia/curta, padrão de erro (`sem modelo`, `HTTPError`…), `(NNN)` fora do conjunto de refs do tema, ou zero citações. Reprovado → nada em `propostas/`, uma linha em `~/.cache/agata/consolidacao/reprovados.log`.
+- **Modelo local** (`qwen3.5-9b-64k` via Ollama `:11434`) no lugar da combo remota `conselho` do OmniRoute (429/504/529 crônicos eram a causa de a maioria das saídas nem existir). O portão é o que protege o canon agora, não a qualidade do provedor.
+
+**Testado (venv do grafo, de verdade):** seleção — desde (370) `[]`, desde (362) `['TES-002 nonce','OmniRoute 504','aprovação assinada P-8']`, sem ruído; portão — erro-string e `(999)` fora do conjunto rejeitados, texto bom passa; run manual end-to-end com o modelo local escreveu a proposta de `presence_penalty` e ela estava **correta** ("o parâmetro não é causa isolada, controle com 1.5 não reproduz (154)") — o oposto da versão remota que invertia a lógica, a que fez arquivar o lote em (368).
+
+**Na aplicação:** marcador semeado com a entrada mais recente pra o 1º run automático não disparar burst retroativo. Timer segue **desligado** desde (368) — o Humano reativa: `systemctl --user link config/agata-consolidacao.timer && systemctl --user enable --now agata-consolidacao.timer`.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/consertar-consolidacao`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `py_compile`; testes das funções puras (`_temas_do_que_mudou`, `_portao`, `_indice`) contra o índice real; run manual end-to-end com Ollama de verdade, saída conferida contra (152)/(154); `git apply --check`; assinatura verificada contra `.allowed_signers`; `p8_quarentena` na árvore staged. Autorização: Humano, "Faça segundo sua recomendação" + aprovação assinada (`APROVADO-consertar-consolidacao`).
+
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
 
 Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/sanitiza-cosmeticos`.

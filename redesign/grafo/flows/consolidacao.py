@@ -10,8 +10,25 @@ P6-03 -- consolidacao noturna como flow do grafo. Fecha a Fase 6.
 - `podar` propoe ARQUIVAR entradas redundantes -- nunca apaga (Regra 4).
 - sem portao de commit automatico: a saida e' arquivo em `propostas/`, o Humano decide (P-8).
 
+Reformulado em MEMORIAS (371) (opcao 2 da explicacao de (370)), depois de a
+versao anterior nunca ter produzido nada aproveitavel em ~1 semana:
+- SELECAO dirigida pela MUDANCA, nao mais os 4 temas fixos re-rodados toda noite.
+  O pool de temas e' dado (`temas-consolidacao.txt`, um por linha, curado pelo
+  Humano, FORA da quarentena por nao ser .py/.sh). Um tema so entra no run se
+  >= MIN_NOVAS entradas mais novas que o marcador do ultimo run o citam (chave
+  do INDICE_MEMORIAS_PALAVRAS-CHAVE.md ou substring do titulo). Marcador em
+  ~/.cache/agata/consolidacao/marcador.json avanca so em modo automatico.
+  Nada citando um tema do pool -> nenhum arquivo escrito.
+- PORTAO DE QUALIDADE mecanico ANTES de escrever: rejeita saida vazia/erro/curta,
+  ou que cite `(NNN)` fora do conjunto de refs do tema, ou que nao cite nenhuma.
+  Reprovado -> nao escreve `.md`, registra em
+  ~/.cache/agata/consolidacao/reprovados.log. Garbage nunca chega a triagem.
+- MODELO LOCAL (Ollama :11434) no lugar da combo remota `conselho` do OmniRoute
+  (429/504/529 cronicos eram a causa de a maioria das saidas nem existir).
+
 Uso:
-  consolidacao.py --repo <dir> [--temas "presence_penalty;TES-002 nonce;num_ctx 16814"]
+  consolidacao.py --repo <dir> [--temas "presence_penalty;TES-002 nonce"]
+  (com --temas explicito roda mesmo sem "mudanca" -- modo manual.)
 """
 import json
 import os
@@ -30,58 +47,176 @@ from estado import Estado                        # noqa: E402
 from durabilidade import WAL, idem_key           # noqa: E402
 import consulta as C                             # noqa: E402
 
-PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
 DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/consolidacao"))
 DB = DIR_ESTADO / "checkpoints.sqlite"
+MARCADOR = DIR_ESTADO / "marcador.json"
+REPROVADOS = DIR_ESTADO / "reprovados.log"
+IDX_CHAVES = "INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
+# Pool de temas curado pelo Humano -- um por linha, `#` comenta. NAO e' `.py`
+# nem `.sh`, entao fica FORA da quarentena P-8: o Humano acrescenta um tema
+# editando o arquivo direto, sem proposta. Selecao e' que e' automatica
+# (so consolida tema que MEXEU), o pool e' dado, nao logica.
+TEMAS_TXT = HERE / "temas-consolidacao.txt"
 TEMAS_PADRAO = ["presence_penalty", "TES-002 nonce", "num_ctx 16814", "âncora sha"]
+MIN_NOVAS = 2    # tema so consolida se >= 2 entradas novas (desde o marcador) o citam
+
+OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")
+MODELO_LOCAL = os.environ.get("AGATA_CONSOLIDACAO_MODELO", "qwen3.5-9b-64k:latest")
 
 
-def _modelo(pergunta, rota="conselho", timeout=120, tentativas=3):
-    # Causa raiz real do `HTTPError` de (338)/(339), medida ao vivo em
-    # 05/09/2026, NÃO era só cota transitória como (338) concluiu -- são dois
-    # problemas empilhados:
-    # (1) `max_tokens=700` era baixo demais: gemini-2.5-flash (combo
-    #     `conselho`, fallback) gasta boa parte do orçamento em "reasoning"
-    #     antes de responder -- medido: 671/700 tokens foram raciocínio, só
-    #     25 sobraram pra conteúdo visível. Subido pra 3000.
-    # (2) zai/glm-4.7-flash (o principal da combo) tem overload real
-    #     ocasional (HTTP 529, "temporarily overloaded"), e o fallback pro
-    #     gemini às vezes estoura o teto de espera LOCAL do OmniRoute
-    #     (`resilienceSettings.requestQueue.maxWaitMs=15000`, o mesmo teto já
-    #     documentado em (310)/(311) pro cold-start do Ollama, aqui batendo
-    #     em latência de reasoning do Gemini) -> 504. Medido 2/3 chamadas OK,
-    #     1/3 estourou aos ~15,9s -- intermitente de verdade, não sempre.
-    # Mitigação aqui, escopo estreito (só este script, não mexe no
-    # OmniRoute): retentativa curta. Mudar o teto de 15s do OmniRoute é
-    # mudança de infraestrutura compartilhada, fora do escopo desta função.
-    body = json.dumps({"model": rota, "messages": [{"role": "user", "content": pergunta}],
-                       "max_tokens": 3000, "stream": False}).encode()
-    req = urllib.request.Request(f"{PROXY}/v1/chat/completions", data=body,
+def _modelo(pergunta, timeout=240, tentativas=2):
+    """Modelo LOCAL (Ollama :11434) desde (371). A combo remota `conselho` do
+    OmniRoute (429/504/529 cronicos) era a razao de a consolidacao nunca ter
+    produzido nada -- MEMORIAS (368). Local = transporte confiavel; quem
+    protege o canon agora e' o portao mecanico em `consolidar`, nao a
+    qualidade do provedor. Erro vira string -- o portao a rejeita."""
+    body = json.dumps({"model": MODELO_LOCAL, "prompt": pergunta, "stream": False,
+                       "options": {"temperature": 0.2}}).encode()
+    req = urllib.request.Request(OLLAMA, data=body,
                                  headers={"content-type": "application/json"})
     ultimo_erro = "sem tentativa"
     for tentativa in range(1, tentativas + 1):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 d = json.loads(r.read())
-            conteudo = d["choices"][0]["message"].get("content") or ""
+            conteudo = (d.get("response") or "").strip()
             if conteudo:
                 return conteudo
-            ultimo_erro = "resposta vazia (reasoning consumiu o orçamento)"
+            ultimo_erro = "resposta vazia do modelo local"
         except Exception as e:  # noqa: BLE001
             ultimo_erro = f"{type(e).__name__}: {e}"
         if tentativa < tentativas:
-            time.sleep(2 * tentativa)
-    return f"(sem modelo após {tentativas} tentativas: {ultimo_erro})"
+            time.sleep(3 * tentativa)
+    return f"(sem modelo local após {tentativas} tentativas: {ultimo_erro})"
+
+
+# ---------------------------------------------------- marcador + temas do que mudou
+def _canon_sha(repo):
+    try:
+        return subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, timeout=10).stdout.strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def _ler_marcador():
+    try:
+        return json.loads(MARCADOR.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {"ultimo_num": 0, "sha": ""}
+
+
+def _gravar_marcador(ultimo_num, sha):
+    MARCADOR.parent.mkdir(parents=True, exist_ok=True)
+    MARCADOR.write_text(
+        json.dumps({"ultimo_num": ultimo_num, "sha": sha,
+                    "quando": date.today().isoformat()}, ensure_ascii=False, indent=2),
+        encoding="utf-8")
+
+
+_CAB_IDX = re.compile(r"^\((\d+)\)\s+(.*)$")
+_CHAVE_LINHA = re.compile(r"^\s*palavras-chave:\s*(.+)$", re.I)
+
+
+def _indice(repo):
+    """{num: {"titulo": str, "chaves": set}} do INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+    (gerado do canon quente+morno+frio pelo hook de hidratacao)."""
+    p = Path(repo) / IDX_CHAVES
+    txt = p.read_text(encoding="utf-8") if p.is_file() else ""
+    por_num, atual = {}, None
+    for ln in txt.split("\n"):
+        m = _CAB_IDX.match(ln)
+        if m:
+            atual = int(m.group(1))
+            por_num[atual] = {"titulo": m.group(2).lower(), "chaves": set()}
+            continue
+        mk = _CHAVE_LINHA.match(ln)
+        if mk and atual is not None:
+            for w in re.split(r"[,\s]+", mk.group(1).strip()):
+                w = w.strip().lower()
+                if len(w) >= 3:
+                    por_num[atual]["chaves"].add(w)
+    return por_num
+
+
+def _pool_temas():
+    """Pool curado -- TEMAS_TXT (uma linha por tema, `#` comenta); TEMAS_PADRAO
+    se o arquivo nao existir."""
+    if TEMAS_TXT.is_file():
+        linhas = [ln.split("#", 1)[0].strip()
+                  for ln in TEMAS_TXT.read_text(encoding="utf-8").splitlines()]
+        temas = [ln for ln in linhas if ln]
+        if temas:
+            return temas
+    return list(TEMAS_PADRAO)
+
+
+def _cita(tema, ent):
+    """A entrada (dict do _indice) fala desse tema? Casa se qualquer palavra do
+    tema (>=3 letras) esta nas chaves OU e' substring do titulo."""
+    for w in re.split(r"[^0-9A-Za-zÀ-ÿ]+", tema.lower()):
+        if len(w) >= 3 and (w in ent["chaves"] or w in ent["titulo"]):
+            return True
+    return False
+
+
+def _temas_do_que_mudou(repo, desde_num):
+    """Do pool curado, so os temas que >= MIN_NOVAS entradas com num > desde_num
+    citam. Selecao dirigida pela mudanca; pool e' dado. Devolve (temas, novos)."""
+    idx = _indice(repo)
+    if not idx:
+        return list(TEMAS_PADRAO), []
+    novas = sorted(n for n in idx if n > desde_num)
+    if len(novas) < MIN_NOVAS:
+        return [], novas
+    temas = []
+    for tema in _pool_temas():
+        if sum(1 for n in novas if _cita(tema, idx[n])) >= MIN_NOVAS:
+            temas.append(tema)
+    return temas, novas
+
+
+# ------------------------------------------------------------------ portao
+def _portao(corpo, refs_validas):
+    """(ok, motivo) -- checagem MECANICA antes de escrever qualquer arquivo."""
+    c = (corpo or "").strip()
+    if len(c) < 40:
+        return False, f"saida curta demais ({len(c)} chars)"
+    baixo = c.lower()
+    for ruim in ("sem modelo", "httperror", "http error", "traceback (most recent"):
+        if ruim in baixo:
+            return False, f"saida bate padrao de erro ({ruim!r})"
+    citadas = set(re.findall(r"\((\d{1,4})\)", c))
+    validas = {re.sub(r"\D", "", r) for r in refs_validas}
+    fora = sorted(citadas - validas, key=lambda x: int(x))
+    if fora:
+        return False, f"cita refs fora do conjunto do tema: {fora}"
+    if not citadas:
+        return False, "nao cita ref nenhuma (nao consolida nada)"
+    return True, "ok"
+
+
+def _log_reprovado(tema, dia, motivo, corpo):
+    REPROVADOS.parent.mkdir(parents=True, exist_ok=True)
+    resumo = " ".join((corpo or "").strip().split())[:300]
+    with open(REPROVADOS, "a", encoding="utf-8") as f:
+        f.write(f"[{dia}] {tema} :: {motivo}\n    saida: {resumo}\n")
 
 
 # --------------------------------------------------------------------------- nós
 def orientar(s: Estado) -> dict:
-    """Lista temas candidatos + refs + TITULO de cada ref (consulta.py). Sem modelo.
+    """Temas do que MUDOU desde o marcador (ou --temas explicito = modo manual)
+    + refs + TITULO de cada ref (consulta.py). Sem modelo.
 
     Guarda o titulo de cada entrada (o `query_canon` de MEMORIAS ja devolve o titulo com
     `(NNN)`): o `consolidar` redige a partir do TEXTO real, nao dos numeros -- senao fabrica
     (a falha de MEMORIAS (138))."""
-    temas = s.get("_temas") or TEMAS_PADRAO
+    repo = Path(s["repo"])
+    manual = list(s.get("_temas") or [])
+    if manual:
+        temas, novas = manual, []
+    else:
+        temas, novas = _temas_do_que_mudou(repo, _ler_marcador().get("ultimo_num", 0))
     achados = {}
     for t in temas:
         r = C.consultar(t.split(), via="ambos")
@@ -98,8 +233,9 @@ def orientar(s: Estado) -> dict:
                       "n_canon": len(r["query_canon"]["hits"]),
                       "n_mcp": len(r["mcp"]["hits"])}
     return {"trabalho": json.dumps(achados, ensure_ascii=False),
-            "eventos": [f"orientar:{len(temas)}temas"],
-            "decisao_log": [f"temas candidatos: {list(achados)}"]}
+            "eventos": [f"orientar:{len(achados)}temas ({len(novas)} entradas novas)"],
+            "decisao_log": [f"temas do que mudou: {list(achados)}"
+                            + (" (--temas manual)" if manual else "")]}
 
 
 def juntar(s: Estado) -> dict:
@@ -128,7 +264,6 @@ def consolidar(s: Estado) -> dict:
         if alvo.exists():
             escritos.append((str(alvo.relative_to(repo)), "ja_existe"))
             continue
-        wal.intent("consolidacao", "consolidar", slug, chave)
         titulos_txt = "\n".join(f"  {ref}: {a['titulos'].get(ref, '(titulo indisponivel)')}"
                                 for ref in a["refs"])
         pedido = (
@@ -138,13 +273,24 @@ def consolidar(s: Estado) -> dict:
             f"Baseie-se SO nesses titulos. Em <= 12 linhas: (1) o estado consolidado do tema "
             f"numa frase; (2) o que cada '(NNN)' acrescenta (use so os titulos acima); "
             f"(3) se algum titulo sugere que outro ficou obsoleto/redundante, aponte (sem "
-            f"apagar). NAO invente refs, numeros nem conteudo alem dos titulos dados. Se um "
-            f"titulo nao for claro, diga 'titulo insuficiente' em vez de supor.")
+            f"apagar). Cite os numeros no formato (NNN). NAO invente refs, numeros nem "
+            f"conteudo alem dos titulos dados. Se um titulo nao for claro, diga 'titulo "
+            f"insuficiente' em vez de supor.")
         corpo = _modelo(pedido)
+
+        # PORTAO (MEMORIAS (371)): so escreve `.md` se passar. Reprovado -> log,
+        # nenhum arquivo em propostas/ -- garbage nao chega a triagem.
+        ok, motivo = _portao(corpo, a["refs"])
+        if not ok:
+            _log_reprovado(tema, hoje, motivo, corpo)
+            escritos.append((f"consolidacao-{slug}-{hoje}", f"reprovado: {motivo}"))
+            continue
+
+        wal.intent("consolidacao", "consolidar", slug, chave)
         texto = (f"# Proposta de consolidacao — {tema}\n\n"
                  f"_Gerada por redesign/grafo/flows/consolidacao.py em {hoje}. NAO e' canon. "
                  f"O Humano decide (P-8). Se aprovada, vira ENTRADA NOVA em MEMORIAS "
-                 f"(append-only), nunca edicao._\n\n"
+                 f"(append-only), nunca edicao. Passou no portao mecanico de (371)._\n\n"
                  f"**Refs:** {', '.join(a['refs'])}\n\n{corpo.strip()}\n")
         alvo.parent.mkdir(parents=True, exist_ok=True)
         with open(alvo, "w", encoding="utf-8") as f:
@@ -203,6 +349,9 @@ def run(repo, temas=None):
                           "diff_proposto": out["diff_proposto"],
                           "poda": out["portao"].get("poda_proposta", "")[:400]},
                          ensure_ascii=False, indent=2))
+        if not temas:  # modo automatico: avanca o marcador pro estado atual do canon
+            idx = _indice(repo)
+            _gravar_marcador(max(idx) if idx else 0, _canon_sha(repo))
     finally:
         cm.__exit__(None, None, None)
 

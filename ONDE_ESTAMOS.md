@@ -1550,3 +1550,17 @@ Você aprovou a correção dos arquivos da memória "fria" no Obsidian: agora
 o mapa da memória tem uma seção listando cada arquivo físico (morno e
 frio) com a faixa de entradas que ele guarda, então eles param de
 aparecer soltos no grafo. Entrada 369.
+
+Sobre a consolidação noturna (aquela que você mandou explicar): você
+escolheu consertar em vez de apagar. Feito. Agora ela: (a) só mexe num
+tema quando esse tema realmente ganhou entradas novas — nada de repetir
+os mesmos quatro toda noite; (b) tem um filtro mecânico que joga fora
+resumo vazio, com erro, ou que invente número de entrada, antes de virar
+arquivo; (c) usa o modelo local, não os provedores de fora que viviam
+falhando. Testei de ponta a ponta e, desta vez, o resumo que ela gerou
+sobre o `presence_penalty` saiu certo. A lista de temas fica num arquivo
+de texto simples que você edita à mão pra adicionar ou tirar assunto.
+Entrada 371.
+
+O robô continua desligado — quando quiser religar, o comando está na
+entrada 371.
