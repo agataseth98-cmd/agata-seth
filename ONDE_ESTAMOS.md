@@ -1453,3 +1453,29 @@ você aprovou.
 Falta o teste que vale: colar o texto novo numa IA na nuvem sem ajuda
 nenhuma e ver se ela chega sozinha na entrada mais recente da história,
 com quem confere segurando o gabarito.
+
+--- 08/09/2026 ---
+Você mandou continuar e depois configurar o OmniRoute pelo navegador.
+
+O OmniRoute é a peça que leva os pedidos para as IAs de fora. Nos
+últimos dias ele vinha cortando pedidos com um erro "504" mesmo quando o
+provedor estava no ar. A sessão anterior achou o motivo: ele desiste do
+pedido em 15 segundos, mas a própria recuperação interna dele demora 30
+— não dá tempo de terminar. É defeito do OmniRoute, não do nosso sistema.
+
+Abri a tela de configuração do OmniRoute no Brave e subi esse limite de
+15 para 45 segundos. Reiniciei o serviço e testei com dois provedores: o
+Gemini respondeu em 2 segundos; o outro (GLM) demorou 45 segundos mas
+respondeu — antes, esse mesmo pedido teria dado o erro. O log do
+OmniRoute mostra a recuperação interna acontecendo aos 30 segundos,
+exatamente como a sessão anterior previu.
+
+Isso não conserta o defeito de fundo (a conexão ainda trava por 30
+segundos a cada chamada), só dá tempo do OmniRoute se recuperar sozinho
+em vez de cortar. Na prática: uma chamada isolada pode ficar lenta, mas
+não falha mais.
+
+Registrei tudo na memória (entrada 363). Falta você aprovar o texto que
+descreve isso no documento técnico de estado: crie o arquivo vazio
+"propostas/APROVADO-projeto-omniroute-504-causa-raiz" e eu aplico a
+mudança e fecho.

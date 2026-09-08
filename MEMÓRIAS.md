@@ -28,6 +28,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
+
+**Pedido do Humano:** "vc ia acessar o navegador Brave e configurar o omnirout" → depois "todos" (aplicar + reiniciar + testar ao vivo + registrar).
+
+**O que foi feito, cada passo verificado na Máquina:**
+1. Brave (perfil isolado do MCP `agata-navegador`, `127.0.0.1` na allowlist) → `http://127.0.0.1:20128/dashboard/settings/resilience` → card *Request Queue & Rate* → campo "Tempo máximo de espera na fila" de `15000` pra `45000`, Salvar. Toast "Configurações salvas com sucesso". O card "Auto-desativar contas banidas" foi aberto e cancelado sem alteração no caminho (a ferramenta de clique do MCP não distingue os 8 botões "Editar" idênticos da página) — conferido depois: limite segue 3, toggle off, nenhuma conexão desativada (`GET /api/resilience/connections` todas `healthy`).
+2. `GET /api/resilience`: `requestQueue.maxWaitMs: 45000`; todo o resto do bloco byte a byte igual ao estado capturado antes da mudança.
+3. `systemctl --user restart omniroute` — subiu limpo (HTTP 307 → /dashboard na 1ª tentativa); `GET /api/resilience` relido depois do restart: `45000` persistiu.
+4. Teste ao vivo, `curl` pelo proxy de sanitização `:20127` (mesmo egresso do `conselho_remoto.py`), pedido mínimo ("responda só: pong"), sem tocar a rotação justa nem gravar `.json` de conselho:
+   - `gemini/gemini-2.5-flash`: HTTP 200, 1,9s, "pong".
+   - `zai/glm-4.7-flash`: HTTP 200, 45s, "pong". O `~/.omniroute/logs/application/app.log` registrou às 11:29:52Z (exatamente 30s depois do POST às 11:29:22Z) `[ProxyFetch] Direct response-start timeout (30000ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: api.z.ai`, seguido de 3 ciclos `COOLDOWN_RETRY` e a resposta chegando ~11:30:07Z. Com o teto antigo (15000ms) essa mesma chamada teria virado `504` — é a confirmação viva do mecanismo que (362) diagnosticou por leitura do bundle.
+
+**O que isto NÃO resolve:** a conexão pooled pro `api.z.ai` ainda trava ~30s a cada chamada (o timeout de 30s dispara toda vez) — bug do produto de terceiros, `omniroute`, fora de P-8 e do nosso controle. A mitigação só garante que a auto-recuperação do próprio OmniRoute (trocar de dispatcher) tem tempo de terminar. Efeito residual: chamada isolada a um provedor pode ficar lenta (~45s) mas não falha; combos `auto/*` trocam de provedor no fallback e sofrem menos.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: mudança feita pela UI do produto (não escrita direta no `storage.sqlite`, conforme a ressalva de (362)); `GET /api/resilience` capturado antes, depois e de novo depois do restart, comparado campo a campo; `/api/resilience/connections` conferido intacto; teste ao vivo por `curl` cru pelo `:20127` pra não poluir a rotação de `conselho_remoto.py`; `app.log` lido pra confirmar a linha de timeout de 30s e o ciclo de retry; ações de navegador registradas em `~/.cache/agata/navegador-log.jsonl`. Autorização: Humano, "vc ia acessar o navegador Brave e configurar o omnirout" + "todos".
+
 (362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
 
 **Pedido do Humano:** "roda no Gemini também" (pedido de parecer sobre rotação-por-família) → travou com `504` duas vezes, pedido pequeno (5,6KB), derrubando a hipótese de tamanho de (360). "opção 3, investiga o OmniRoute e depois prosseguimos."
