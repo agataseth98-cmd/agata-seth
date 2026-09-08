@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
+  palavras-chave: varredura, memórias, camadas, propostas, itens, aberto, tivessem, escapado, entrar, fase, refinamento, nada, novo, executável, marcadores, pendente, quase, pré, remoção, hermes, fechados, backlog, consolidado, substitui, docs, era, arquivados
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
   palavras-chave: rumo, fase, refinamento, estamos, linhas, acima, teto, tela, regra, item, backlog, reescrito, pra, cópia, integral, extras, arquivo, ate, documentos, planejamento, era, hermes, removido, arquivados, propostas, plano, execucao, roteiro, dossie, selecao, silo, gateway, dimensionamento
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: regime, exceção, confirmado, ativo, humano, responde, pendências, nomeadas, segunda, parte, pedido, anterior, regiões, confederadas, segue, entender, perguntado, novo, decifrado, adivinhação
 (344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
   palavras-chave: checkpoint, fim, sessão, começou, sincronizar, sistema, agata, seth, estado, real, verificado, continua, prova, pedido, explícito, auditoria, externa
-(343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` achado ao checar "acabamos?": todo post-commit marcava o vault como "árvore suja" por causa do `memoria/sincronizacao.log` — provavelmente vinha acontecendo desde sempre, mascarado pelo meu próprio hábito de regenerar limpo antes do próximo commit
-  palavras-chave: bug, real, recorrente, githooks, post, commit, achado, checar, acabamos, marcava, vault, árvore, suja, causa, memoria, sincronizacao, log, provavelmente, vinha, acontecendo, desde, sempre, mascarado, meu, próprio, hábito, regenerar, limpo, próximo
+(343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` a …
+  palavras-chave: bug, real, recorrente, githooks, post, commit
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call …
   palavras-chave: skills, discord, navegador, testadas, tools, call
 (341) DIÁRIO — 05/09/2026 · Fechamento do backlog pedido pelo Humano ("sim, a ex …

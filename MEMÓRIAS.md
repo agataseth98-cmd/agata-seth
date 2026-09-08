@@ -28,6 +28,20 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
+
+**Pedido do Humano:** "vasculhe as memórias em busca de mais propostas e envie as para o local correto, as outras propostas estão autorizadas, organize a ordem e vamos iniciar."
+
+**Feito nesta sessão:** timer `agata-consolidacao` religado (`systemctl --user link` + `enable --now`; marcador em 371, 1º run inócuo); bundle `memoria/missoes` gravado no HD (`/run/media/.../agata-missoes-20260907-114331-5ede38a.bundle`, marcador removido, P-6 sem AVISO); `presence_penalty` consolidado sob demanda → `propostas/consolidacao-presence-penalty-2026-09-08.md`, aguarda decisão do Humano (passou no portão; substância correta: "não é causa isolada, (154) corrige (151)-(153)").
+
+**Achados da varredura, no backlog:** (253) tinha 2 melhorias de catálogo retidas por exigirem segunda opinião; (64) "roteamento por complexidade" aprovado mas com premissa vencida por (140) (Seth local titular, não Gemini). Ambos categoria B (decisão do Humano).
+
+**Bug pequeno achado testando:** `consolidacao.py --temas` (modo manual) não propaga pelo grafo — o `Estado` (TypedDict) do LangGraph descarta a chave `_temas` não declarada no `graph.invoke`. Chamada direta às funções funciona (foi como gerei o `presence_penalty`). Fix: global de módulo ou env var em `orientar` — item D1 do backlog, proposta assinada.
+
+**Ordem pra fase de refinamento:** B1 (reorg `redesign/`) → D1 (fix `--temas`) → B3/B5 (costuras REGRAS + catálogo, com segunda opinião via `conselho_remoto.py` ou risco assumido) → B2 (rotação por família — decisão do Humano, inclui se a Seth rotaciona) → B4 (roteamento — redesenhar ou aposentar). C1/C2 (TES) em paralelo, quando o Humano acionar sessões independentes.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -hnE` por marcadores de pendência nas 3 camadas de MEMÓRIAS cruzado com PROJETO.md "Estado dos bugs"/"Plano vigente" e `.githooks/gerar-hidratacao.sh`; `orientar` chamado direto pra confirmar o bug do `--temas`; `presence_penalty` gerado por chamada direta às funções do flow + portão; `systemctl --user list-timers` e `perimetro.sh` P-6 conferidos depois. Autorização: Humano, "vasculhe as memórias... as outras propostas estão autorizadas, organize a ordem e vamos iniciar".
+
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
 
 **Pedido do Humano:** "vamos fazer tudo que está pendente para entrarmos em fase de refinamento, me apresente lista de absolutamente tudo que está em aberto e prompt para autorizar timer religado."
