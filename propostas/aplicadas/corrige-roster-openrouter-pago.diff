@@ -1,0 +1,25 @@
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 193a91c..583283f 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -86,8 +86,10 @@ DESTINO_DIR = os.path.join(
+ #    OmniRoute como bot (403 browser_signature_banned, PERSISTENTE); e gpt-oss
+ #    queima o orçamento de tokens em "reasoning" e devolve vazio.
+ #  - fora: `openrouter/minimax/minimax-m3:free` -- rota 404 (modelo saiu do free
+-#    tier). Trocado por `openrouter/auto` (meta-roteador, único openrouter que o
+-#    OmniRoute conhece).
++#    tier). OpenRouter fica SEM entrada: `openrouter/auto` e' produto PAGO
++#    ("Auto Best Available"), nao um alias grátis do OmniRoute (o proprio painel
++#    de Combos avisa) -- MEMÓRIAS (376). Um modelo `openrouter/<x>:free` volta ao
++#    roster quando confirmado ao vivo.
+ #  - dentro: `cerebras/gemma-4-31b` -- testado ao vivo em (374): 200, finish=stop,
+ #    zero reasoning tokens, limpo.
+ # Ordem = desempate determinístico quando a contagem empata.
+@@ -95,7 +97,6 @@ ROSTER = [
+     "zai/glm-4.7-flash",
+     "gemini/gemini-2.5-flash",
+     "cerebras/gemma-4-31b",
+-    "openrouter/auto",
+ ]
+ # Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
+ # teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini

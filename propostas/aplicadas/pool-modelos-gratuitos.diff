@@ -1,0 +1,94 @@
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+new file mode 100644
+index 0000000..46b4acb
+--- /dev/null
++++ b/config/modelos-gratuitos.md
+@@ -0,0 +1,58 @@
++# Pool de modelos gratuitos — fonte única de verdade
++
++Criado em MEMÓRIAS (376). Este arquivo é a lista de referência dos modelos
++gratuitos que o sistema usa como fallback. **Não é executado por nada** — é o
++documento que o Humano mantém em sincronia com os dois mecanismos que de fato
++roteiam:
++
++1. **Seth / uso geral** → LibreChat aponta pros meta-roteadores `auto/*` do
++   OmniRoute (`redesign/librechat/librechat.yaml`), default `auto/best-free`.
++   O `auto/*` faz cascata sozinho a partir dos provedores conectados no
++   OmniRoute. Config do roteador: OmniRoute → Configurações → Global Routing
++   (ligar **"Reasoning token buffer"** resolve o caso do modelo queimar o
++   orçamento em reasoning e devolver vazio; **"Hide paid models"** tira
++   Claude/GPT/`openrouter/auto` da seleção automática).
++2. **Conselho Remoto** → roster próprio em `scripts/conselho_remoto.py`
++   (`ROSTER`), com rotação justa + circuit breaker + portão + fallback local
++   (MEMÓRIAS (374)). NÃO usa combo (decisão de (352): ninguém tem papel fixo).
++
++Trocar o pool = editar este arquivo + a `ROSTER` do `conselho_remoto.py` (por
++proposta assinada) + os combos/roteador do OmniRoute (pela UI). O OmniRoute é
++produto de terceiros — não dá pra sincronizar automático; este .md é o elo.
++
++---
++
++## Confirmado funcionando (testado ao vivo em 08/09/2026)
++
++| Modelo (id OmniRoute) | Família | Nota |
++|---|---|---|
++| `cerebras/gemma-4-31b` | Cerebras | limpo (200, finish=stop, zero reasoning). Melhor aposta hoje. |
++| `zai/glm-4.7-flash` | Zhipu | funciona quando a z.ai não está em 529 (sobrecarga transitória). |
++| `gemini/gemini-2.5-flash` | Google | degradado (504 intermitente + ignora `thinking:disabled` e queima reasoning). Só com `max_tokens ≥ 10000`. |
++| `qwen3.5-9b-64k` (Ollama :11434) | Local | fallback final, sempre disponível. Não é opinião de família independente. |
++| `llamacpp-local/qwen3-30b-a3b` | Local | MoE, fallback local alternativo. |
++
++## Fora — não usar
++
++| Modelo | Motivo |
++|---|---|
++| `groq/openai/gpt-oss-*` | Cloudflare fichou o cliente do OmniRoute como bot (`403 browser_signature_banned`), persistente; e gpt-oss queima reasoning. |
++| `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
++| `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
++| `cerebras/gpt-oss-120b` | queima o orçamento em reasoning e devolve vazio. |
++
++## Candidatos — precisam de chave do Humano em `~/.config/agata/.env`
++
++Depois da chave: configurar o provedor no OmniRoute (Provedores → Adicionar),
++1 chamada de teste ao vivo, e então entrar no `auto/*` / `ROSTER` por proposta.
++
++| Provedor | Família | Free tier (set/2026) | OpenAI-compat |
++|---|---|---|---|
++| **Mistral AI** | Mistral | free mode, sem cartão, limites por workspace | sim |
++| **GitHub Models** | GitHub | 15 RPM · 150 RPD, sem cartão; hospeda GPT-4o/Claude/Llama grátis | sim |
++| **HuggingFace Inference** | HuggingFace | Serverless: ~centenas req/hora, modelos < ~10B, limites não publicados; Inference Providers com crédito pequeno | sim (Inference Providers) |
++| Cloudflare Workers AI | Cloudflare | 10.000 neurons/dia | parcial |
++| NVIDIA NIM | NVIDIA | prototipagem, sem limite publicado | parcial |
++
++Descartados por não serem free tier de verdade: SambaNova / Fireworks / AI21
++(créditos que expiram). Cohere: só avaliação (1.000 chamadas/mês).
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 513e795..869c808 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -40,16 +40,23 @@ endpoints:
+     - name: "Seth"
+       apiKey: "loopback-sem-chave"
+       baseURL: "http://127.0.0.1:20126/v1"
++      # `auto/*` sao meta-roteadores do OmniRoute com fallback embutido (nao os
++      # combos custom). `auto/best-free` = so provedores GRATIS confirmados, com
++      # cascata ate o modelo local -- e' o default da Seth desde MEMÓRIAS (376),
++      # pra ela nunca ficar sem resposta quando um provedor grátis cai (o dia
++      # inteiro de 08/09 os 4 caíram). Os `auto/claude-*` sao PAGOS -- deixados
++      # na lista mas nunca como default.
+       models:
+         default:
++          - "auto/best-free"
+           - "auto/chat"
+           - "auto/smart"
+           - "auto/cheap"
+-          - "auto/claude-sonnet"
+-          - "auto/claude-opus"
+           - "auto/reasoning"
+           - "auto/coding"
+           - "auto/vision"
++          - "auto/claude-sonnet"
++          - "auto/claude-opus"
+         fetch: true
+       titleConvo: true
+       titleModel: "auto/fast"

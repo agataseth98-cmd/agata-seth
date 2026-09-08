@@ -28,6 +28,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openrouter/auto` **sai** do roster do Conselho Remoto — é produto PAGO ("Auto Best Available" da OpenRouter; o painel de Combos do OmniRoute avisa), tinha entrado por engano em (374); roster fica `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`. (b) `config/modelos-gratuitos.md` novo — fonte única de verdade (confirmado / fora e por quê / candidatos com chave). (c) Seth (LibreChat) ganha `auto/best-free` como default — meta-roteador do OmniRoute que só usa provedores grátis, cascata até o local.
+
+**Pedido do Humano:** "vamos colocar todos os modelos gratuitos encontrados em fallback de todas as partes do sistema, seth e conselho remoto etc." → "autorizo tudo" → duas aprovações assinadas.
+
+**Investigação do OmniRoute:** os meta-roteadores `auto/*` (que a Seth usa via LibreChat) são um roteador zero-config **separado** dos combos custom (`conselho`/`cheap`/`auto`), que têm entradas mortas (Groq 403, minimax 404, cerebras/gpt-oss reasoning-burn) mas quase ninguém chama. HuggingFace tem free tier real mas modesto (~centenas req/hora, modelos < ~10B). Mistral e GitHub Models são candidatos fortes — faltam chaves do Humano.
+
+**Dois pares `.diff`/`APROVADO-` assinados** em `propostas/aplicadas/`: `corrige-roster-openrouter-pago`, `pool-modelos-gratuitos`.
+
+**A fazer (mesma leva):** toggles do OmniRoute (Reasoning token buffer + Hide paid models) pelo Brave; Proposta B (rotina semanal de pesquisa); integrar Mistral/GitHub/HF quando o Humano puser as chaves em `~/.config/agata/.env`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `/api/models` e `/api/combos` do OmniRoute lidos; `auto/best-free` testado ao vivo (resolveu pra `gemma-4-31b`, limpo); painel de Combos leu que `openrouter/auto` é pago; `py_compile` + `yaml.safe_load` + `p8_quarentena`; as duas assinaturas verificadas contra `.allowed_signers`. Autorização: Humano, "autorizo tudo" + duas aprovações assinadas.
+
 (375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
 
 Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/fix-consolidacao-temas-manual`.

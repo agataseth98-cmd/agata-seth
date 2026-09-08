@@ -40,16 +40,23 @@ endpoints:
     - name: "Seth"
       apiKey: "loopback-sem-chave"
       baseURL: "http://127.0.0.1:20126/v1"
+      # `auto/*` sao meta-roteadores do OmniRoute com fallback embutido (nao os
+      # combos custom). `auto/best-free` = so provedores GRATIS confirmados, com
+      # cascata ate o modelo local -- e' o default da Seth desde MEMÓRIAS (376),
+      # pra ela nunca ficar sem resposta quando um provedor grátis cai (o dia
+      # inteiro de 08/09 os 4 caíram). Os `auto/claude-*` sao PAGOS -- deixados
+      # na lista mas nunca como default.
       models:
         default:
+          - "auto/best-free"
           - "auto/chat"
           - "auto/smart"
           - "auto/cheap"
-          - "auto/claude-sonnet"
-          - "auto/claude-opus"
           - "auto/reasoning"
           - "auto/coding"
           - "auto/vision"
+          - "auto/claude-sonnet"
+          - "auto/claude-opus"
         fetch: true
       titleConvo: true
       titleModel: "auto/fast"
