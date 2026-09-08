@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os problemas da abordagem "modelos externos grátis", depois de o roster inteiro cair no mesmo dia (Groq 403 Cloudflare `browser_signature_banned` persistente; MiniMax 404; Gemini 504 + queima o orçamento de tokens em reasoning e devolve vazio; z.ai 529). `scripts/conselho_remoto.py` + `scripts/perimetro.sh`.
+  palavras-chave: camada, proteção, remoto, contra, problemas, abordagem, modelos, externos, grátis, roster, inteiro, cair, mesmo, dia, groq, cloudflare, browser, signature, banned, persistente, minimax, gemini, queima, orçamento, tokens, reasoning, devolve, vazio, scripts, perimetro
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
   palavras-chave: varredura, memórias, camadas, propostas, itens, aberto, tivessem, escapado, entrar, fase, refinamento, nada, novo, executável, marcadores, pendente, quase, pré, remoção, hermes, fechados, backlog, consolidado, substitui, docs, era, arquivados
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: regime, exceção, encerrado, ordem, humano, gates, voltam, ponto, cego, registrado, canon, catálogo, honesto, erros, cometidos, sessão, suavizar, pedido, desculpa, igual
 (345) DIÁRIO — 05/09/2026 · Regime de exceção confirmado ativo pelo Humano — responde a uma das pendências nomeadas em (344); a segunda parte do pedido anterior ("regiões confederadas...") segue sem entender, perguntado de novo, não decifrado por adivinhação
   palavras-chave: regime, exceção, confirmado, ativo, humano, responde, pendências, nomeadas, segunda, parte, pedido, anterior, regiões, confederadas, segue, entender, perguntado, novo, decifrado, adivinhação
-(344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincronizar sistema agata seth": estado real, o que foi verificado, o que continua sem prova, pedido explícito de auditoria externa
-  palavras-chave: checkpoint, fim, sessão, começou, sincronizar, sistema, agata, seth, estado, real, verificado, continua, prova, pedido, explícito, auditoria, externa
+(344) DIÁRIO — 05/09/2026 · CHECKPOINT — fim da sessão que começou com "sincroni …
+  palavras-chave: checkpoint, fim, sessão, começou, sincroni
 (343) CORREÇÃO — 05/09/2026 · Bug real e recorrente no `.githooks/post-commit` a …
   palavras-chave: bug, real, recorrente, githooks, post, commit
 (342) DIÁRIO — 05/09/2026 · Skills de Discord/navegador testadas via `tools/call …

@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 13:47 -0300.
+Motivo: breaker portao fallback local P-15
+nome: protecao-conselho-remoto
+diff-sha256: e9a7b5200202e19f6f97feff53c770c23c49bb4cd17af0eb637c8e009c544ca3
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQF2zMMiZf1qy953UedAuIyzlh/yJmnfNAvbwkxLS+tC4M9
+rH4papsFvgo4sfAQg/79nB9Uuv7Q5Rw5b3kQpNngA=
+-----END SSH SIGNATURE-----

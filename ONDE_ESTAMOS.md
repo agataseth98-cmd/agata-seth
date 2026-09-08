@@ -47,6 +47,22 @@ Entradas 369, 370.
   à mão a um modelo-alvo quando decidir.
 - **`presence_penalty` na memória** — sob demanda: `consolidacao.py
   --temas "presence_penalty"` gera o resumo, você revisa e aprova.
-- **Backup no HD** — o bundle de `memoria/missoes` está pendente de
-  gravar no HD externo (o do repositório principal já grava). Rodar o
-  dreno quando o HD estiver montado.
+- **Rotina de pesquisa de modelos gratuitos** (Proposta B) — job semanal
+  que pesquisa, testa e escreve uma proposta; **implementação continua
+  manual e assinada** (a Máquina não integra endpoint da web sozinha).
+- **Âncora de frescor** (Proposta C) — ligar o carimbo de SHA que já
+  existe no prompt de carregamento também no topo de REGRAS/PROJETO/
+  MEMÓRIAS, pra um leitor offline saber se os três são do mesmo commit.
+
+## Feito hoje que fecha esta rodada
+
+- **Camada de proteção dos modelos externos** (entrada 374): quando um
+  provedor grátis cai (aconteceu com os quatro no mesmo dia), o sistema
+  agora se recupera sozinho — põe o provedor de castigo, rejeita resposta
+  vazia ou truncada, tenta o próximo, e no fim cai no modelo local com
+  aviso de que não é opinião externa de verdade. Um alarme novo (P-15)
+  avisa se a camada externa está degradada. Investiguei a causa: são os
+  provedores, não a nossa máquina nem a rede; a Seth (cérebro local) não
+  é afetada.
+- Backup do `memoria/missoes` gravado no HD. Timer da consolidação
+  religado.

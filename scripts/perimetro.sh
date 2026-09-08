@@ -853,6 +853,30 @@ P9_UNIDADES_SISTEMA=("ollama.service")
 P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service")
 P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
 
+# --- P-15 --------------------------------------------------------------------
+# Saúde do roster do Conselho Remoto (MEMÓRIAS (374)). scripts/conselho_remoto.py
+# escreve `memoria/missoes/conselho-remoto/sucessos.log`: uma linha
+# `<epoch>\t<modelo>\t<familia>` por chamada bem-sucedida. AVISO (nunca FALHA)
+# se menos de 2 FAMILIAS distintas responderam nas ultimas 24h -- sinal de que a
+# camada externa esta degradada e o sistema pode estar andando com fallback
+# local. Nunca falha o commit (a camada local basta pra operar).
+p15_roster_remoto() {
+  local log="$_PERIMETRO_DIR/../memoria/missoes/conselho-remoto/sucessos.log"
+  if [ ! -f "$log" ]; then
+    echo "sem historico de sucesso do Conselho Remoto ainda -- nada a avaliar (nao e problema)"
+    return 0
+  fi
+  local corte fams
+  corte=$(( $(date +%s) - 86400 ))
+  fams=$(awk -F'\t' -v c="$corte" 'NF>=3 && ($1 + 0) >= c {print $3}' "$log" | sort -u | grep -c .)
+  if [ "${fams:-0}" -lt 2 ]; then
+    echo "AVISO (P-15): so ${fams:-0} familia(s) do roster remoto teve(tiveram) sucesso nas ultimas 24h. A segunda opiniao externa pode estar degradada -- o sistema pode estar andando com fallback local. Nao falha o commit; olhe scripts/conselho_remoto.py e o OmniRoute."
+  else
+    echo "roster remoto OK -- $fams familias com sucesso nas ultimas 24h"
+  fi
+  return 0
+}
+
 p9_servicos_declarados() {
   local avisos=0 u estado habilitada rodando
   for u in "${P9_UNIDADES_SISTEMA[@]}"; do
@@ -1049,6 +1073,12 @@ main() {
   cabecalho "P-14" "Chunk frio (MEMORIAS-FRIO-*.md), depois de selado, imutável" "MEMÓRIAS por período (Fase 4), MEMÓRIAS (357)"
   PERIMETRO_ESTADO=""
   p14_frio_imutavel; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-15" "Saúde do roster do Conselho Remoto -- < 2 famílias com sucesso em 24h vira AVISO" "MEMÓRIAS (374); scripts/conselho_remoto.py"
+  p15_roster_remoto
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
   echo
 
   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="

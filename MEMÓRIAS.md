@@ -28,6 +28,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os problemas da abordagem "modelos externos grátis", depois de o roster inteiro cair no mesmo dia (Groq 403 Cloudflare `browser_signature_banned` persistente; MiniMax 404; Gemini 504 + queima o orçamento de tokens em reasoning e devolve vazio; z.ai 529). `scripts/conselho_remoto.py` + `scripts/perimetro.sh`.
+
+**Pedido do Humano:** "mapear todos os modelos gratuitos... é fundamental" → "quero que o sistema se proteja automaticamente de todos os problemas que essa abordagem significa" → "concordo com tudo, vamos fazer" → aprovação assinada.
+
+**Investigação — não é a Máquina nem a rede:** egresso cru pros 5 hosts de provedor responde rápido; OmniRoute e o proxy `:20127` de pé; `qwen3.5-9b-64k` local 100% saudável. As falhas são todas do lado dos provedores. A Seth não é afetada no cérebro (local), mas o caminho dela até modelo externo é o mesmo cano — roster fora, Seth também não alcança.
+
+**O que entrou:**
+- **Circuit breaker por modelo:** falha de transporte OU rejeição no portão → cooldown exponencial (5min→10→20…, teto 6h); a rotação pula quem está em cooldown; sucesso zera. Fecha o bug de (360).
+- **Portão de resposta** (`_portao_resposta`): rejeita conteúdo vazio, `reasoning_tokens ≈ completion_tokens` (Gemini/gpt-oss), resposta < 80 chars. Rejeitada = mesma penalidade de falha.
+- **Laço entre disponíveis:** tenta cada modelo fora de cooldown até um passar; ainda 1 chamada bem-sucedida por invocação.
+- **Fallback local automático:** roster remoto todo fora/rejeitado → 1 chamada ao `qwen3.5-9b-64k`, registrada com `fallback_local: true` + banner "NÃO é família independente". Antes era decisão do Humano (276); agora automático mas rotulado sem disfarce.
+- **Checagem de identidade:** resposta assina nome ≠ `resposta_crua.model` → `IDENTIDADE SUSPEITA` no registro (não bloqueia; TES-001).
+- **Roster revisto:** fora Groq (403 persistente) e `minimax:free` (404); dentro `cerebras/gemma-4-31b` (testado ao vivo: 200, finish=stop, zero reasoning); Gemini com `max_tokens=12000`; `openrouter/auto` no lugar do minimax.
+- **P-15** (`perimetro.sh`): AVISO (nunca FALHA) se < 2 famílias tiveram sucesso em 24h — lê `memoria/missoes/conselho-remoto/sucessos.log`.
+
+**Testado end-to-end ao vivo contra o roster degradado:** gemma → 403 → cooldown; openrouter/auto → portão pegou vazio (reasoning 4000/4000) → cooldown; gemini → 504 → cooldown; glm-4.7-flash → guardado, 2246 tok, 28,7s, Formato OK. `breaker.json` gravou os 3 cooldowns; `sucessos.log` gravou o GLM; P-15 no perímetro (13 OK · 0 FALHA). Fallback local testado à parte.
+
+**Achados pro backlog:** Gemini via OmniRoute ignora `thinking:disabled`; rota do MiniMax no OmniRoute é 404; Cerebras alterna 200/403 (Cloudflare inconsistente). Mistral e GitHub Models (famílias novas, compat, grátis) ficam pra Proposta B + config manual do OmniRoute.
+
+**B5 (segunda opinião via GLM, pelo caminho que esta camada destravou):** parecer "Discordo — eliminar 3-A e 3-B" — a âncora de SHA já é a prova; carimbo numérico faz o leitor comparar números em vez de confiar no hash. Recomendação alinhada: ligar a âncora-SHA existente em REGRAS/PROJETO/MEMÓRIAS (Proposta C, pendente).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/protecao-conselho-remoto`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl` cru pros 5 hosts + `app.log` do OmniRoute pra isolar provedor de infra; testes unitários das funções puras (`_portao_resposta`, `_checar_identidade`, `_familia`, breaker); run end-to-end real contra o roster degradado; `cerebras/gemma-4-31b` testado ao vivo antes de entrar; `bash -n` + `py_compile` + `p8_quarentena` + `perimetro.sh` completo; assinatura verificada contra `.allowed_signers`. Autorização: Humano, "concordo com tudo, vamos fazer" + aprovação assinada.
+
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
 
 **Pedido do Humano:** "vasculhe as memórias em busca de mais propostas e envie as para o local correto, as outras propostas estão autorizadas, organize a ordem e vamos iniciar."

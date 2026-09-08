@@ -7,28 +7,41 @@ opiniao" e PROJETO "Conselho Remoto".
 
 Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
 ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
-mais chave nenhuma e NAO faz backoff proprio: o circuit breaker e o cooldown
-429 sao do OmniRoute.
+mais chave nenhuma.
 
 ROTACAO JUSTA (06/09/2026, ordem do Humano: "ninguem tem papel fixo... revogo
 GLM... deve ser decidido entre modelos gratuitos sob um regime de regras
-justas de rotatividade"). Ate aqui a combo `conselho` era prioridade fixa
-(GLM sempre primeiro). Agora este script escolhe, a cada chamada, o modelo
-com MENOS usos bem-sucedidos entre o roster gratuito (ROSTER abaixo), envia
-o pedido direto pro raw model id escolhido (nao mais pela combo), e conta o
-uso em ROTACAO_ESTADO só se a chamada tiver sucesso. Continua **UMA chamada
-externa por invocacao** (o invariante do script nao mudou) -- se a escolhida
-falhar, o script ABORTA como sempre fazia; nao laca entre modelos sozinho.
-Rodar de novo escolhe outro (o que falhou nao teve uso contado, entao ainda
-compete pela vez -- nao criei penalidade por falha, so recompensa por
-sucesso, pra nao afundar um modelo bom que teve 1 erro de rede).
+justas de rotatividade"). Escolhe, a cada chamada, o modelo com MENOS usos
+bem-sucedidos entre os DISPONIVEIS do roster gratuito (ROSTER abaixo).
+
+CAMADA DE PROTECAO (MEMORIAS (374), depois de o roster inteiro cair no mesmo
+dia -- 403 Cloudflare no Groq, 404 no MiniMax, 504/reasoning-burn no Gemini,
+529 na z.ai):
+  - CIRCUIT BREAKER por modelo: falha de transporte OU rejeicao no portao ->
+    cooldown exponencial (5min, 10, 20... teto 6h); a rotacao PULA quem esta
+    em cooldown. Fecha o bug de (360) (modelo que sempre falha ficava "menos
+    usado" pra sempre). Sucesso zera o breaker daquele modelo.
+  - PORTAO DE RESPOSTA (_portao_resposta): rejeita resposta vazia, truncada
+    por reasoning-burn (reasoning_tokens ~ completion_tokens), ou curta demais.
+    Rejeitada vale a mesma penalidade de uma falha de rede.
+  - LACA entre os modelos disponiveis numa invocacao (era: 1 tiro so). Ainda
+    UMA chamada BEM-SUCEDIDA por invocacao -- para no 1o que passa no portao.
+  - FALLBACK LOCAL automatico: roster remoto inteiro fora/rejeitado -> UMA
+    chamada ao qwen local, registrada com `fallback_local: true` e aviso de
+    que NAO e opiniao de familia independente. Antes de (374) isso era
+    "decisao do Humano" (276); agora e automatico mas rotulado sem disfarce.
+  - CHECAGEM DE IDENTIDADE: se a resposta assina um nome != resposta_crua.model
+    -> `IDENTIDADE SUSPEITA` no registro (nao bloqueia; TES-001, catalogo).
+  - P-15 (perimetro.sh) le SUCESSOS_LOG: AVISO se < 2 familias tiveram sucesso
+    em 24h.
 
 O QUE NAO MUDOU (a razao do script existir):
   - so material do repo PUBLICO sai: checar_conteudo_privado trava memoria/missoes
   - teto de tamanho do pedido (heuristica pre-envio)
-  - UMA chamada externa por invocacao -- sem laco, sem encadear
-  - os provedores externos esgotaram -> ABORTA. Cair pro modelo local segue
-    sendo decisao do Humano caso a caso (MEMÓRIAS (276)).
+  - o proxy de sanitizacao :20127 continua barrando segredo antes do egresso
+  - o fallback local (antes decisao do Humano caso a caso, MEMÓRIAS (276)) agora
+    e automatico QUANDO o roster remoto inteiro cai -- mas rotulado sem disfarce
+    (ver CAMADA DE PROTECAO acima); o Humano decide o que fazer com ele.
   - nao escreve MEMORIAS/PROJETO/REGRAS; nao interpreta, resume nem julga
   - guarda a resposta crua; so relata "fora do formato" quando aplicavel
 
@@ -67,19 +80,38 @@ DESTINO_DIR = os.path.join(
     "memoria", "missoes", "conselho-remoto",
 )
 
-# Roster da rotação justa -- só modelos com free tier CONFIRMADO. Groq
-# (`groq/openai/gpt-oss-120b`) entrou em 06/09/2026 depois de confirmar de
-# verdade (WebSearch, não memória de treino): free tier real, sem cartão, 30
-# req/min, 14.400 req/dia, cobre todos os modelos incl. gpt-oss-120b -- fontes
-# em MEMÓRIAS (353). Ordem = desempate quando dois modelos têm a mesma
-# contagem (determinístico, não aleatório -- auditável).
+# Roster da rotação justa -- só modelos com free tier CONFIRMADO e testado ao
+# vivo. Revisto em MEMÓRIAS (374) depois de o roster inteiro cair no mesmo dia:
+#  - fora: `groq/openai/gpt-oss-120b` -- Cloudflare fichou o cliente HTTP do
+#    OmniRoute como bot (403 browser_signature_banned, PERSISTENTE); e gpt-oss
+#    queima o orçamento de tokens em "reasoning" e devolve vazio.
+#  - fora: `openrouter/minimax/minimax-m3:free` -- rota 404 (modelo saiu do free
+#    tier). Trocado por `openrouter/auto` (meta-roteador, único openrouter que o
+#    OmniRoute conhece).
+#  - dentro: `cerebras/gemma-4-31b` -- testado ao vivo em (374): 200, finish=stop,
+#    zero reasoning tokens, limpo.
+# Ordem = desempate determinístico quando a contagem empata.
 ROSTER = [
     "zai/glm-4.7-flash",
     "gemini/gemini-2.5-flash",
-    "openrouter/minimax/minimax-m3:free",
-    "groq/openai/gpt-oss-120b",
+    "cerebras/gemma-4-31b",
+    "openrouter/auto",
 ]
+# Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
+# teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini
+# 2.5-flash queimou 3836/3996 tokens em reasoning e truncou). Default = TETO.
+MAX_TOKENS_POR_MODELO = {
+    "gemini/gemini-2.5-flash": 12_000,
+}
 ROTACAO_ESTADO = os.path.join(DESTINO_DIR, "rotacao-estado.json")
+BREAKER_ESTADO = os.path.join(DESTINO_DIR, "breaker.json")
+SUCESSOS_LOG = os.path.join(DESTINO_DIR, "sucessos.log")   # P-15 lê daqui
+BREAKER_BASE_S = 300        # 1ª falha -> 5 min de cooldown
+BREAKER_MAX_S = 6 * 3600    # teto do backoff exponencial
+MIN_CHARS_RESPOSTA = 80     # abaixo disso a resposta não consolida nada
+# Fallback local quando o roster remoto inteiro está indisponível/rejeitado.
+FALLBACK_OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")
+FALLBACK_MODELO = os.environ.get("AGATA_FALLBACK_MODELO", "qwen3.5-9b-64k:latest")
 
 
 def _carregar_rotacao():
@@ -95,21 +127,81 @@ def _carregar_rotacao():
     return {m: int(estado.get(m, 0)) for m in ROSTER}
 
 
+# --- circuit breaker por modelo (MEMÓRIAS (374)) -----------------------------
+# Fecha o bug de (360): um modelo que sempre falha ficava "menos usado" pra
+# sempre e era escolhido em loop. Agora falha gera cooldown exponencial e a
+# rotação PULA quem está em cooldown.
+def _carregar_breaker():
+    try:
+        with open(BREAKER_ESTADO, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _gravar_breaker(b):
+    os.makedirs(DESTINO_DIR, exist_ok=True)
+    with open(BREAKER_ESTADO, "w", encoding="utf-8") as f:
+        json.dump(b, f, ensure_ascii=False, indent=2)
+
+
+def _registrar_falha(modelo):
+    """Falha de transporte OU rejeição no portão -- vale a mesma penalidade."""
+    b = _carregar_breaker()
+    e = b.get(modelo, {"fails": 0, "cooldown_ate": 0})
+    e["fails"] = int(e.get("fails", 0)) + 1
+    espera = min(BREAKER_BASE_S * (2 ** (e["fails"] - 1)), BREAKER_MAX_S)
+    e["cooldown_ate"] = time.time() + espera
+    b[modelo] = e
+    _gravar_breaker(b)
+    return int(espera)
+
+
+def _familia(modelo):
+    m = (modelo or "").lower()
+    for chave, fam in (("glm", "zhipu"), ("zai", "zhipu"), ("gemini", "google"),
+                       ("cerebras", "cerebras"), ("groq", "groq"),
+                       ("openrouter", "openrouter"), ("qwen", "local"),
+                       ("llama", "local"), ("minimax", "openrouter")):
+        if chave in m:
+            return fam
+    return "?"
+
+
+def _disponiveis():
+    """ROSTER menos os modelos em cooldown ativo."""
+    b = _carregar_breaker()
+    agora = time.time()
+    return [m for m in ROSTER if float(b.get(m, {}).get("cooldown_ate", 0)) <= agora]
+
+
 def escolher_modelo():
-    """Menos usado primeiro; empate quebrado pela ordem fixa do ROSTER
-    (determinístico -- a mesma contagem sempre escolhe o mesmo, auditável)."""
+    """Menos usado primeiro, ENTRE os disponíveis (fora de cooldown). Empate
+    quebrado pela ordem do ROSTER. None = roster inteiro em cooldown."""
+    disp = _disponiveis()
+    if not disp:
+        return None
     estado = _carregar_rotacao()
-    return min(ROSTER, key=lambda m: (estado[m], ROSTER.index(m)))
+    return min(disp, key=lambda m: (estado.get(m, 0), ROSTER.index(m)))
 
 
 def _registrar_sucesso(modelo_escolhido):
-    """Só chamada depois de confirmar sucesso -- falha não penaliza."""
+    """Sucesso: zera o breaker do modelo, conta uso na rotação, loga p/ P-15."""
+    b = _carregar_breaker()
+    if modelo_escolhido in b:
+        b[modelo_escolhido] = {"fails": 0, "cooldown_ate": 0}
+        _gravar_breaker(b)
     estado = _carregar_rotacao()
     if modelo_escolhido in estado:
         estado[modelo_escolhido] += 1
     os.makedirs(DESTINO_DIR, exist_ok=True)
     with open(ROTACAO_ESTADO, "w", encoding="utf-8") as f:
         json.dump(estado, f, ensure_ascii=False, indent=2)
+    try:
+        with open(SUCESSOS_LOG, "a", encoding="utf-8") as f:
+            f.write(f"{int(time.time())}\t{modelo_escolhido}\t{_familia(modelo_escolhido)}\n")
+    except Exception:  # noqa: BLE001 -- log é auditoria, não trava
+        pass
 
 # Tetos, primeiro corte -- ajustavel pelo Humano, nao um numero canonizado.
 TETO_CHARS_PEDIDO = 60_000   # heuristica pre-envio -- nao ha tokenizador local
@@ -167,9 +259,12 @@ def enviar_omniroute(pedido_texto, modelo):
     payload = {
         "model": modelo,
         "messages": [{"role": "user", "content": pedido_texto}],
-        "max_tokens": TETO_TOKENS_SAIDA,
+        "max_tokens": MAX_TOKENS_POR_MODELO.get(modelo, TETO_TOKENS_SAIDA),
     }
     if DESABILITAR_THINKING:
+        # Alguns provedores ignoram (medido em (374): Gemini 2.5-flash raciocina
+        # mesmo assim). Manda-se do mesmo jeito -- quem protege é o portão de
+        # resposta, não este flag.
         payload["thinking"] = {"type": "disabled"}
     corpo = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
@@ -197,10 +292,97 @@ def _provider_do_modelo(modelo):
     para o registro -- best-effort; a `resposta_crua` continua sendo a fonte."""
     m = (modelo or "").lower()
     for chave, prov in (("glm", "zai"), ("gemini", "gemini"), ("gpt-oss", "groq/cerebras"),
-                        ("qwen", "local?"), ("llama", "local?"), ("minimax", "openrouter")):
+                        ("gemma", "cerebras"), ("qwen", "local?"), ("llama", "local?"),
+                        ("minimax", "openrouter"), ("auto", "openrouter")):
         if chave in m:
             return prov
     return "?"
+
+
+# --- portão de resposta + checagem de identidade (MEMÓRIAS (374)) ------------
+def _portao_resposta(resposta, conteudo):
+    """(ok, motivo). MECÂNICO. Pega a classe de falha que 'parece' resposta:
+    vazia, truncada por reasoning-burn, curta demais. NÃO julga o mérito."""
+    ch = (resposta.get("choices") or [{}])[0]
+    fr = ch.get("finish_reason")
+    uso = resposta.get("usage") or {}
+    ts = int(uso.get("completion_tokens", 0) or 0)
+    rt = int((uso.get("completion_tokens_details") or {}).get("reasoning_tokens", 0) or 0)
+    c = (conteudo or "").strip()
+    if not c:
+        return False, f"conteúdo vazio (finish_reason={fr}, reasoning_tokens={rt}/{ts})"
+    if fr == "length" and rt and rt >= ts * 0.9:
+        return False, f"truncada: {rt}/{ts} tokens foram reasoning, sobrou pouco pro conteúdo"
+    if len(c) < MIN_CHARS_RESPOSTA:
+        return False, f"resposta curta demais ({len(c)} chars)"
+    return True, "ok"
+
+
+_ASSINA_MODELO = re.compile(r"(?im)^\s*modelo\s*[:\-]\s*([A-Za-z0-9 ._/\-]{2,40})")
+
+
+def _checar_identidade(conteudo, resposta):
+    """A resposta assina um nome de modelo que bate com resposta_crua.model?
+    Não bloqueia -- marca SUSPEITA pro Humano decidir (TES-001, catálogo)."""
+    real = (resposta.get("model") or "").lower()
+    m = _ASSINA_MODELO.search(conteudo or "")
+    if not m or not real:
+        return {"suspeita": False, "assinou": None, "real": real or None}
+    assinou = m.group(1).strip().lower()
+    # bate se qualquer token do nome real aparece no que ele assinou
+    toks = [t for t in re.split(r"[^a-z0-9.]+", real) if len(t) >= 3]
+    ok = any(t in assinou for t in toks)
+    return {"suspeita": not ok, "assinou": m.group(1).strip(), "real": resposta.get("model")}
+
+
+def _chamar_local(pedido_texto):
+    """Fallback: uma chamada ao modelo LOCAL (Ollama) quando o roster remoto
+    inteiro está fora. Devolve um dict no shape OpenAI-compat (parcial) + a
+    marca `_fallback_local` pra ninguém confundir com opinião de família
+    independente na nuvem."""
+    body = json.dumps({"model": FALLBACK_MODELO, "prompt": pedido_texto,
+                       "stream": False, "options": {"temperature": 0.2}}).encode("utf-8")
+    req = urllib.request.Request(FALLBACK_OLLAMA, data=body, method="POST",
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=300) as r:
+        d = json.loads(r.read().decode("utf-8"))
+    txt = (d.get("response") or "").strip()
+    return {
+        "_fallback_local": True,
+        "model": FALLBACK_MODELO,
+        "choices": [{"message": {"role": "assistant", "content": txt},
+                     "finish_reason": "stop" if d.get("done") else "length"}],
+        "usage": {"prompt_tokens": d.get("prompt_eval_count", 0),
+                  "completion_tokens": d.get("eval_count", 0),
+                  "total_tokens": d.get("prompt_eval_count", 0) + d.get("eval_count", 0)},
+        "_ollama_raw_done": d.get("done"),
+    }
+
+
+def _salvar(caminho_pedido, modelo_escolhido, resposta, conteudo, duracao_s, extra=None):
+    os.makedirs(DESTINO_DIR, exist_ok=True)
+    uso = resposta.get("usage") or {}
+    te = int(uso.get("prompt_tokens", 0) or 0)
+    ts = int(uso.get("completion_tokens", 0) or 0)
+    modelo_usado = resposta.get("model") or modelo_escolhido
+    agora = datetime.now(timezone.utc).astimezone()
+    slug = re.sub(r"[^A-Za-z0-9._-]", "_", str(modelo_usado))
+    destino = os.path.join(DESTINO_DIR, agora.strftime("%Y%m%d-%H%M%S") + f"-{slug}.json")
+    registro = {
+        "data": agora.isoformat(), "via": "omniroute",
+        "rotacao_escolheu": modelo_escolhido, "modelo": modelo_usado,
+        "provider": _provider_do_modelo(modelo_usado), "familia": _familia(modelo_usado),
+        "duracao_s": duracao_s, "tokens_entrada": te, "tokens_saida": ts,
+        "tokens_total": te + ts,
+        "pedido_arquivo": os.path.abspath(caminho_pedido),
+        "identidade": _checar_identidade(conteudo, resposta),
+        "resposta_crua": resposta,
+    }
+    if extra:
+        registro.update(extra)
+    with open(destino, "w", encoding="utf-8") as f:
+        json.dump(registro, f, ensure_ascii=False, indent=2)
+    return destino, registro
 
 
 def main():
@@ -216,75 +398,85 @@ def main():
     if achado_privado:
         print(f"ABORTADO: o pedido menciona '{achado_privado}' -- conteúdo da camada privada (memoria/missoes/) nunca sai daqui. Remova a referência e tente de novo.")
         return 1
-
     if len(pedido_texto) > TETO_CHARS_PEDIDO:
         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
         return 1
 
-    modelo_escolhido = escolher_modelo()
-    print(f"Rotação escolheu: {modelo_escolhido} (menos usos bem-sucedidos no roster)")
+    # --- rotação com circuit breaker + portão de resposta (MEMÓRIAS (374)) ---
+    tentados = []
+    for _ in range(len(ROSTER)):
+        modelo = escolher_modelo()
+        if modelo is None or modelo in tentados:
+            break
+        tentados.append(modelo)
+        print(f"Rotação: {modelo} (família {_familia(modelo)})")
+        inicio = time.time()
+        try:
+            resposta = enviar_omniroute(pedido_texto, modelo)
+        except urllib.error.HTTPError as e:
+            corpo = e.read().decode("utf-8", errors="replace")
+            if e.code == 422 and "secret_blocked_before_egress" in corpo:
+                print(f"ABORTADO: o proxy de sanitização (P1-02) bloqueou -- padrão de segredo no texto. Nada enviado. {corpo[:300]}")
+                return 1
+            espera = _registrar_falha(modelo)
+            print(f"  falha: HTTP {e.code} -- cooldown {espera}s. {corpo[:180]}")
+            continue
+        except (ConnectionRefusedError, urllib.error.URLError) as e:
+            print(f"ABORTADO: o proxy de sanitização não responde em {SANITIZADOR_ENDPOINT} ({type(e).__name__}). Suba: `systemctl --user start omniroute-sanitizer omniroute`. Nada enviado.")
+            return 1
+        except Exception as e:  # noqa: BLE001
+            espera = _registrar_falha(modelo)
+            print(f"  falha: {type(e).__name__}: {e} -- cooldown {espera}s")
+            continue
 
+        duracao_s = round(time.time() - inicio, 1)
+        conteudo, te, ts, tt = _normalizar(resposta)
+        ok, motivo = _portao_resposta(resposta, conteudo)
+        if not ok:
+            espera = _registrar_falha(modelo)
+            print(f"  rejeitada no portão: {motivo} -- cooldown {espera}s")
+            continue
+
+        _registrar_sucesso(modelo)
+        destino, reg = _salvar(caminho_pedido, modelo, resposta, conteudo, duracao_s)
+        print(f"Guardado: {destino}")
+        print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
+        if reg["identidade"]["suspeita"]:
+            print(f"IDENTIDADE SUSPEITA: a resposta assina '{reg['identidade']['assinou']}' mas o modelo é '{reg['identidade']['real']}' (TES-001, catálogo). NÃO bloqueado -- o Humano decide.")
+        faltando = checar_formato_parecer(conteudo)
+        if faltando:
+            print(f"FORA DO FORMATO: faltam {', '.join(faltando)} (Origem / Posição / Fundamentação / Emenda). REGRAS manda devolver o pedido UMA vez -- decisão do Humano.")
+            return 1
+        print("Formato OK (as 4 partes apareceram). Conteúdo NÃO avaliado -- leia o arquivo salvo.")
+        return 0
+
+    # --- fallback local: roster remoto inteiro fora/rejeitado ---
+    print("\n" + "=" * 64)
+    print("ROSTER REMOTO INTEIRO INDISPONÍVEL -- caindo pro modelo LOCAL.")
+    print(f"Tentados: {', '.join(tentados) or '(nenhum -- tudo em cooldown)'}")
+    print("O que vier abaixo NÃO é segunda opinião de família independente na")
+    print("nuvem -- é o modelo local. Vale menos pro requisito de REGRAS.")
+    print("=" * 64)
     inicio = time.time()
     try:
-        resposta = enviar_omniroute(pedido_texto, modelo_escolhido)
-    except urllib.error.HTTPError as e:
-        corpo_erro = e.read().decode("utf-8", errors="replace")
-        if e.code == 422 and "secret_blocked_before_egress" in corpo_erro:
-            print(f"ABORTADO: o proxy de sanitização (P1-02) bloqueou o pedido -- há um padrão de segredo no texto. Nada foi enviado. Detalhe: {corpo_erro[:400]}")
-            return 1
-        print(f"ABORTADO: OmniRoute retornou HTTP {e.code}: {corpo_erro[:500]}. Nada foi guardado -- cair pro modelo local é decisão do Humano (ver (276)).")
+        resposta = _chamar_local(pedido_texto)
+    except Exception as e:  # noqa: BLE001
+        print(f"ABORTADO: o fallback local também falhou -- {type(e).__name__}: {e}. Ollama no ar? (`curl localhost:11434/api/tags`)")
         return 1
-    except (ConnectionRefusedError, urllib.error.URLError) as e:
-        # Emenda 3 (Cadeia de auditoria, Camada B): mensagem clara quando o proxy
-        # de sanitizacao nao responde (causa mais comum: servico P1-02 parado).
-        print(f"ABORTADO: o proxy de sanitização não responde em {SANITIZADOR_ENDPOINT} ({type(e).__name__}). Suba o serviço P1-02: `systemctl --user start omniroute-sanitizer omniroute`. Nada foi enviado. Cair pro modelo local é decisão do Humano (276).")
-        return 1
-    except Exception as e:  # noqa: BLE001 -- qualquer falha de rede/gateway aborta igual
-        print(f"ABORTADO: falha ao falar com o OmniRoute ({SANITIZADOR_ENDPOINT}) -- {type(e).__name__}: {e}. O gateway está no ar? (`systemctl --user status omniroute-sanitizer omniroute`). Cair pro modelo local é decisão do Humano (276).")
-        return 1
-
     duracao_s = round(time.time() - inicio, 1)
-    conteudo, tokens_entrada, tokens_saida, tokens_total = _normalizar(resposta)
-    modelo_usado = resposta.get("model") or modelo_escolhido
-    _registrar_sucesso(modelo_escolhido)  # só chega aqui se enviar_omniroute não levantou
-    custo_usd = round(
-        tokens_entrada * PRECO_ENTRADA_POR_TOKEN_USD
-        + tokens_saida * PRECO_SAIDA_POR_TOKEN_USD,
-        6,
-    )
-
-    os.makedirs(DESTINO_DIR, exist_ok=True)
-    agora = datetime.now(timezone.utc).astimezone()
-    modelo_slug = re.sub(r"[^A-Za-z0-9._-]", "_", str(modelo_usado))
-    nome_arquivo = agora.strftime("%Y%m%d-%H%M%S") + f"-{modelo_slug}.json"
-    destino = os.path.join(DESTINO_DIR, nome_arquivo)
-    registro = {
-        "data": agora.isoformat(),
-        "via": "omniroute",
-        "rotacao_escolheu": modelo_escolhido,
-        "modelo": modelo_usado,
-        "provider": _provider_do_modelo(modelo_usado),
-        "duracao_s": duracao_s,
-        "tokens_entrada": tokens_entrada,
-        "tokens_saida": tokens_saida,
-        "tokens_total": tokens_total,
-        "custo_usd": custo_usd,
-        "pedido_arquivo": os.path.abspath(caminho_pedido),
-        "resposta_crua": resposta,
-    }
-    with open(destino, "w", encoding="utf-8") as f:
-        json.dump(registro, f, ensure_ascii=False, indent=2)
-
-    print(f"Guardado: {destino}")
-    print(f"Tokens: {tokens_entrada} entrada + {tokens_saida} saída = {tokens_total} total. Custo: US${custo_usd}. (custo real do gateway: `omniroute cost`)")
-
+    conteudo, te, ts, tt = _normalizar(resposta)
+    ok, motivo = _portao_resposta(resposta, conteudo)
+    destino, _ = _salvar(caminho_pedido, FALLBACK_MODELO, resposta, conteudo, duracao_s,
+                         extra={"fallback_local": True, "portao_ok": ok,
+                                "portao_motivo": motivo, "tentados_remoto": tentados})
+    print(f"Guardado (FALLBACK LOCAL): {destino}")
+    print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
+    if not ok:
+        print(f"  atenção: o fallback local também não passou no portão: {motivo}")
     faltando = checar_formato_parecer(conteudo)
     if faltando:
-        print(f"FORA DO FORMATO: faltam {', '.join(faltando)} (Origem / Posição / Fundamentação / Emenda). REGRAS manda devolver o pedido UMA vez, com o formato junto -- decisão de reenviar é do Humano, não deste script.")
-        return 1
-
-    print("Formato OK (as 4 partes apareceram). Conteúdo NÃO avaliado -- leia o arquivo salvo antes de qualquer coisa acontecer com ele.")
-    return 0
+        print(f"FORA DO FORMATO (local): faltam {', '.join(faltando)}.")
+    return 3   # respondeu, mas foi fallback local degradado -- código distinto
 
 
 if __name__ == "__main__":
