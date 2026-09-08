@@ -1,0 +1,11 @@
+Aprovado pelo Humano em sessão, 08/09/2026.
+
+Ordem direta: "crie o aprovado e prossiga" (resposta à apresentação da proposta).
+Arquivo criado pelo executor (Claude Sonnet 5, Claude Code) sob essa ordem
+explícita -- é a ÚLTIMA vez que o executor cria um APROVADO- à mão: a própria
+proposta que este arquivo aprova adiciona `scripts/aprovar.sh`, que o Humano
+passa a colar no terminal daqui pra frente. Registrado assim por NÃO MINTA.
+
+Cobre: propostas/mecanismo-aprovacao-terminal.diff -- PROJETO.md "Quarentena
+estrutural" + propostas/README.md + scripts/aprovar.sh (novo). Muda só o GESTO
+de confirmação de P-8, não o escopo da quarentena nem a lógica do check.

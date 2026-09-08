@@ -1484,3 +1484,16 @@ no arquivo e na memória (entrada 364). Com a aprovação no lugar, apliquei o
 texto que descreve o defeito e a correção no documento técnico de estado e
 arquivei o par aprovação/mudança. O assunto do "504" está fechado do nosso
 lado; o que sobra é defeito do OmniRoute, fora do nosso alcance.
+
+Você disse que criar o arquivo de aprovação à mão a cada mudança complica,
+e pediu um jeito mais prático: eu escrevo a proposta, você lê, e para
+confirmar você cola um comando no terminal. Fiz isso. Agora existe
+`scripts/aprovar.sh` — você cola `bash scripts/aprovar.sh <nome> "motivo"`
+depois de ler a proposta, e ele cria o arquivo de aprovação com data e
+hora. Criar à mão continua valendo; o comando é só o atalho. Eu nunca rodo
+esse comando — quem aprova é você. Está tudo registrado na memória (entrada
+365). Esta foi a última vez que eu criei um arquivo de aprovação à mão.
+
+Você também disse que topa a versão com senha (uma senha guardada fora do
+repositório, que eu não consigo produzir). Expliquei como funcionaria; é
+uma proposta separada, ainda não escrita — quando quiser, eu preparo.

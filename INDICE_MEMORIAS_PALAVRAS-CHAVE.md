@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
+  palavras-chave: gesto, aprovação, ganha, caminho, prático, além, criar, propostas, aprovado, nome, mão, humano, pode, colar, bash, scripts, aprovar, motivo, terminal, novo, texto, atualizado, projeto, quarentena, estrutural, readme, escopo, lógica, check, intocados, muda
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
   palavras-chave: projeto, estado, bugs, testes, aplicada, entrada, registra, causa, raiz, omniroute, memórias, mitigação, fecha, diff, estava, aberto, desde, commits, locais, foram, empurrados, pro, remoto, mesmo, pedido
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, recebeu, orientação, respondeu, texto, fabricado, citação, entrada, inexistente, termos, referente, hora, inventada, autocorrigiu, autocorreção, conferida, agora, item, bate, disco, precisão
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
   palavras-chave: avaliação, capacidades, seth, síntese, pedido, humano, vamos, avaliar, luz, descobertas, hoje, orienta, envio, ela, orientação, escrita, relay, salva, área, trabalho, orientacao
-(335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
-  palavras-chave: misturou, fatos, força, diferente, datar, parecer, qwen, parte, sólida, conteúdo, descreve, estado, superado, muda, fraca, texto, escrito, retirada
+(335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao da …
+  palavras-chave: misturou, fatos, força, diferente
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, …
   palavras-chave: causa, raiz, drift, hipótese, fundamentada
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado …

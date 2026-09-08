@@ -23,7 +23,10 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
 ## Mecanismo
 
 1. A mudança proposta vira `propostas/<nome>.diff` (formato `git diff`, com cabeçalhos `--- a/<caminho>` / `+++ b/<caminho>`) e fica aqui, versionado.
-2. O Humano aprova criando `propostas/APROVADO-<nome>` (arquivo vazio ou com nota — o conteúdo não importa pra P-8, só a presença).
+2. O Humano aprova, de um destes dois jeitos (equivalentes pra P-8 — só a presença de `propostas/APROVADO-<nome>` importa):
+   - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota);
+   - **pelo terminal (caminho prático, MEMÓRIAS (365)):** cola `bash scripts/aprovar.sh <nome> ["motivo"]` depois de ler o `.diff`. O script cria o mesmo arquivo, carimbado com a hora da Máquina.
+   O **executor nunca** roda `scripts/aprovar.sh` — mesma linha vermelha de não se autoaprovar; o ato de aprovação é o Humano colar o comando.
 3. `scripts/perimetro.sh`, checagem P-8: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não aparecer nos cabeçalhos de nenhum `.diff` com `APROVADO-` correspondente presente em `propostas/`.
 4. Aprovação consumida: ao entrar no canon, quem aplica move o par `<nome>.diff` / `APROVADO-<nome>` para `propostas/aplicadas/` no mesmo commit que aplica a mudança.
 

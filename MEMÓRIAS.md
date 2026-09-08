@@ -28,6 +28,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
+
+**Pedido do Humano:** "O normal é você digitar com a própria mão, isso complica, vamos fazer assim vc cria uma proposta me apresenta eu leio, daí para confirmar eu colo um comando no terminal ... é mais prático, pode ser?" → depois de eu apresentar a proposta: "crie o aprovado e prossiga".
+
+**Por quê:** o gesto antigo tinha duas formas na prática — Humano cria o arquivo à mão, ou o executor cria "sob autorização em texto do Humano" (usado em (318), (327), (328), (338)-(340) e de novo hoje em (363)/(364)). A segunda deixa o registro do ato como alegação do executor. Colar um comando no terminal põe o ato no histórico do shell do Humano — mesmo nível de confiança (P-8 sempre assumiu o arquivo como criável pelo executor; a ameaça coberta é desatenção, não malícia), mais prático e mais rastreável.
+
+**O que entrou:**
+- `scripts/aprovar.sh` — `bash scripts/aprovar.sh <nome> ["motivo"]`: confere que `propostas/<nome>.diff` existe (pega erro de digitação), recusa sobrescrever `APROVADO-` já presente, cria o arquivo carimbado com a hora da Máquina + o motivo. Comentário no topo: **o executor nunca roda este script** — mesma linha vermelha de não se autoaprovar; o ato que vale é o Humano colar o comando. Testado: guarda de uso e guarda de `.diff` inexistente disparam certo; `bash -n` limpo.
+- PROJETO.md "Quarentena estrutural" e `propostas/README.md`: passo de aprovação lista os dois caminhos como equivalentes pra P-8; nota de risco residual registra que o comando colado não muda o balanço de confiança, só o torna prático/rastreável.
+
+**Exceção registrada:** o `APROVADO-` desta própria proposta foi criado pelo executor à mão, sob a ordem "crie o aprovado e prossiga" — é a última vez; daqui pra frente o gesto é o Humano colando `aprovar.sh`. O Humano sinalizou querer, num próximo passo, a variante com senha em `~/.config/agata/.env` que o executor não consiga produzir — proposta à parte, ainda não escrita.
+
+Par `.diff`/`APROVADO-` em `propostas/aplicadas/mecanismo-aprovacao-terminal`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` antes de aplicar; `bash -n` e os dois caminhos de erro do script exercitados à mão; `bash scripts/perimetro.sh` no hook de commit. Autorização: Humano, "pode ser?" + "crie o aprovado e prossiga".
+
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
 
 Par `.diff`/`APROVADO-` em `propostas/aplicadas/projeto-omniroute-504-causa-raiz`. O `.diff` foi preparado e depois emendado por mim (o trecho "não feito ainda" virou "feito em 08/09"). O `APROVADO-` foi criado **por mim, sob ordem direta do Humano** ("empurra e cria o APROVADO-"), não pela mão do Humano como de praxe — registrado assim no próprio arquivo de aprovação, por NÃO MINTA. P-8 continua satisfeito pela presença do marcador; a ressalva é que desta vez o marcador não foi digitado pelo Humano.
