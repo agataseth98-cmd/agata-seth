@@ -43,6 +43,16 @@ segue é a lista completa.
 |---|---|---|
 | D1 | **`consolidacao.py --temas` (modo manual) não propaga pelo grafo** | `orientar` lê `s.get("_temas")`, mas o `Estado` (TypedDict) do LangGraph descarta a chave não declarada no `graph.invoke`. Chamada direta às funções funciona. Fix: global de módulo ou env var em `orientar`, setado por `run()` antes do invoke. Toca `redesign/grafo/flows/consolidacao.py` (quarentena) → proposta assinada. |
 
+## H — horizonte da Seth (anotados em (390)/(391), pra implementação futura)
+
+| # | Item | Detalhe |
+|---|---|---|
+| H1 | **Índice de diretório do Obsidian fica pra trás do disco** (causa raiz real do F-1, MEMÓRIAS (391)) | `GET :27125/vault/…/entradas/` para em `0385.md` enquanto o disco tem `0390.md`; ler um arquivo específico funciona. Opções: (a) forçar re-index / reiniciar o Obsidian no post-commit; (b) `vault_consultar` de diretório ler do disco via `ro_proxy.py`; (c) doutrina: pra saber se entrada recente existe, LER o arquivo, não a listagem. |
+| H2 | **Pós-filtro de hora inventada no `seth_gateway`** ((390)) | A doutrina (389) manda `lacuna: sem relógio`, mas num teste o glm pôs `12:34:05 +00:00` no cabeçalho. Mecanismo real: o `seth_gateway` corta/marca um horário fabricado no cabeçalho da resposta. |
+| H3 | **`seth_gateway._estado()` `timeout=15s`** ((390)) | Sob carga o subprocess do `estado_para_eco.sh` volta vazio e a Seth abre com `Última entrada: (0) · sync: não verificado` — honesto (cai na branch lacuna) mas parece quebrado. Subir o timeout, ou cachear o último estado bom com carimbo de idade. |
+| H4 | **Sem tier LOCAL de último recurso na cadeia da Seth** ((390)) | O OmniRoute só tem os modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. O `conselho_remoto.py` alcança o local direto no `:11434`; a cadeia `:20126`→sanitizador→OmniRoute não. Combo `seth-livre` fica sem fundo local. |
+| H5 | **`redesign/systemd/seth` não sincroniza `librechat.yaml` nem `canon-mcp.mjs`** ((389)) | O deploy pro `~/librechat/` é `cp` manual + `docker restart`. O atalho devia fazer isso (ou um `make deploy`). |
+
 ## Fora da lista — feito ou obsoleto (pra não voltar)
 
 - Eco pós-carregar mecanizado — (308), `scripts/estado_para_eco.sh`.

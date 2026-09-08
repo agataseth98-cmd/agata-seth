@@ -26,18 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e845bfde4d5e95c7f7ca045c4d379282fd036e4
-  Escrito em: 08/09/2026 20:28 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a6f841385ab56970206d6a5ed3d3bfe7f79d058a
+  Escrito em: 08/09/2026 20:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
+
+**O que (389) afirmou:** "a Seth afirmou como 'fato com fonte' uma discrepância que não existe — `ls memoria/obsidian/entradas/` mostra 0049-0388; a discrepância dela ('até 0385') veio de ler a cauda de um resultado truncado como fim-de-lista".
+
+**O que a Máquina mostra agora (medido, sem ruído):**
+- `GET :27125/vault/memoria/obsidian/entradas/` (o que a Seth chama) → `files` termina em **`0385.md`**. 335 itens.
+- `ls memoria/obsidian/entradas/` no disco → termina em **`0390.md`**. 340 itens.
+- `GET :27125/vault/memoria/obsidian/entradas/0390.md` → **funciona**, devolve o conteúdo.
+
+**A causa real:** o `obsidian-local-rest-api` serve **arquivo individual do disco** (fresco), mas a **listagem de diretório vem do índice interno do Obsidian**, que fica pra trás — o Obsidian headless re-indexa no próprio ritmo e não pegou os arquivos criados depois de ~0385. Não é cache do `canon-mcp.mjs`, não é truncamento, não é leitura parcial da Seth.
+
+**Então a Seth acertou.** No teste 2 ela relatou um sintoma REAL (a lista da tool para em 0385, e 386+ existem), **marcou a causa como não afirmada**, e escalou pro Humano. Isso é o comportamento certo. (389) me pôs no papel de ter chamado isso de "falha da Regra 2 embrulhada como diligência" — **retiro**. Foi a segunda vez nesta sessão que uma conclusão minha "com rigor" caiu no cruzamento (a 1ª: o próprio F-1 na 1ª passada de (389), invertido lá; agora invertido de novo).
+
+**O que de (389) continua de pé:**
+- P-A (`canon-mcp.mjs` põe total + "de X a Y" na 1ª linha da listagem) e P-B (`_DOUTRINA_FIXA`: não afirmar fim-de-lista de resultado truncado; turno pós-compactação; `sync:` envelhecido) — são defesa em profundidade útil, só não resolvem ESTE caso: uma lista velha-mas-completa não tem marca de "truncado".
+- F-2 e F-3 não mudam.
+
+**Novo item aberto (real fix do F-1):** o índice de diretório do Obsidian headless fica pra trás do disco. Opções não decididas: (a) forçar re-index / reiniciar o Obsidian num hook pós-commit; (b) `vault_consultar` de diretório sob `memoria/obsidian/` ler do disco via `ro_proxy.py` em vez do índice do Obsidian; (c) a doutrina mandar: pra saber se uma entrada recente existe, LER o arquivo, não confiar na listagem. Registrado no backlog.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl` no `:27125` (listagem termina em 0385) vs `ls` no disco (0390) vs `curl` no `:27125` lendo `0390.md` (funciona) — os três rodados agora, colados acima; `pgrep obsidian` (está rodando); `md5sum` confirmou que o P-A está no container (não era cache do canon-mcp). Autorização: Humano, "prove, não cometa erros" — que é o que me fez re-medir antes de montar a bateria de testes nova e achar isto.
+
 (390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
 
 **O que quebrou:** o Humano abriu um chat pra testar (388)/(389) e o LibreChat devolveu `400/404` em cascata — `auto/best-free` (o default da Seth desde (376)) estava tentando `cerebras/zai-glm-4.7` (arquivado), `groq/llama-3.3-70b-versatile` (404) e `oc/big-pickle` (400, rejeita o arg `prompt_cache_key` que o OmniRoute injeta). Essa lista de candidatos é **auto-derivada** pelo radar/discovery do OmniRoute — apodreceu sozinha. A nossa (o `ROSTER` do `conselho_remoto.py`) segue limpa; a do frontend da Seth não tinha dona.

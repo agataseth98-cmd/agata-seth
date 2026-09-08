@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
 (390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
 (362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
-(360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
+(360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identid …
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atu …
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, qu …
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reor …

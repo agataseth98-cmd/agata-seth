@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
+  palavras-chave: análise, causa, raiz, estava, errada, seth, misleu, truncamento, vault, consultar, diretório, realmente, devolve, lista, velha, regra, corrige, cima, edita
 (390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
   palavras-chave: seth, ficou, muda, teste, auto, best, free, apodreceu, conserto, verdade, combo, custom, livre, pedido, humano, prossiga, agata, plataformas
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, real, omniroute, achada, reproduzida, teto, exposto, curto, próprio, timeout, detecção, conexão, morta, cliente, http, interno, auto, recuperação, nunca, tem, tempo, terminar, pedido, ter, sido, marcado, falho, bug, agata, mitigação, tentada, refutada, corrigida, fora, nosso, controle
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": registrada a rodada 5 do TES-001 (360 - GLM assinou como Claude Sonnet 5, adversa), de volta a três adversas em quatro
   palavras-chave: projeto, estado, bugs, testes, registrada, rodada, tes, glm, assinou, claude, sonnet, adversa, volta, três, adversas, quatro
-(360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
-  palavras-chave: tes, rodada, adversa, glm, flash, identidade, real, confirmada, json, cru, assinou, claude, sonnet, puxando, nome, corpus, próprio, pedido, regra, proíbe, mão, achados, incidentais, infraestrutura, caminho, gemini, estoura, teto, omniroute, grande, groq, bloqueado, cloudflare, browser, signature, banned
+(360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identid …
+  palavras-chave: tes, rodada, adversa, glm, flash, identid
 (359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atu …
   palavras-chave: projeto, fase, linha, fila, aderência, atu
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, qu …
