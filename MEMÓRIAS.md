@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fdf94a0e580e1d8a293ff811b9965e67901e8a5f
-  Escrito em: 08/09/2026 18:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1e88082b3811fc3f58ef5a96dfe0faf2734768d
+  Escrito em: 08/09/2026 18:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf94a0e580e1d8a293ff811b9965e67901e8a5f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf94a0e580e1d8a293ff811b9965e67901e8a5f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf94a0e580e1d8a293ff811b9965e67901e8a5f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e88082b3811fc3f58ef5a96dfe0faf2734768d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e88082b3811fc3f58ef5a96dfe0faf2734768d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e88082b3811fc3f58ef5a96dfe0faf2734768d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
+
+**De onde veio:** no teste da Seth (7 perguntas, todas de comportamento passaram — identidade honesta, zero fabricação, zero bajulação, recusa de decidir, recuperação da camada fria). Os 4 pontos fracos eram todos **formato do cabeçalho**, mesma raiz: o `_DOUTRINA_FIXA` do `redesign/router/seth_gateway.py` ensinava os 4 elementos da Regra 1 mas não o formato canônico, nem o selo de hora, nem a regra de turno pós-compactação.
+1. Sem hora em nenhum cabeçalho (a Seth não tem tool de relógio → devia ser `lacuna: sem relógio`, o selo alinhado na (384) — e a mesma falha que eu cometi nesta sessão, (386)).
+2. Cabeçalho em prosa ("Sou a Seth... Turno: 1 neste contexto..."), não `Agata · <modelo> · t=<n> · <hora+selo>` + `Última entrada: (n) título`.
+3. `sync:` (que vem do bloco de estado do `estado_para_eco.sh`) sumia depois do turno 1.
+4. Contagem de turno bagunçou quando o LibreChat compactou o contexto — devia usar `t≥<n> (prefixo compactado)`.
+
+**Mudou (proposta `seth-cabecalho-formato`, 1 arquivo quarentena, 1 assinatura):** `seth_gateway.py` — o bloco "Regra 1" do `_DOUTRINA_FIXA` passa a trazer o **formato exato** do cabeçalho + "você não tem relógio de dentro → `lacuna: sem relógio`, nunca invente nem herde" + "`t≥<n> (prefixo compactado)` se o contexto foi resumido" + "carregue a linha `sync:` em TODO cabeçalho". Efeito de borda desejado: mudar o `_DOUTRINA_FIXA` muda o `_HASH_DOUTRINA` (`3d…`→`b8b8c6fc`), então o `MARCADOR` muda e conversas da Seth em andamento **re-hidratam sozinhas** com a regra nova (o próprio módulo documenta isso desde 04/09).
+
+**Não mexido de propósito:** o `customWelcome` do `librechat.yaml` (texto de saudação do chat, não autoritativo — a doutrina injetada é que manda); o comportamento da Seth em si (que passou no teste).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-cabecalho-formato`. `seth-gateway.service` reiniciado pra pegar a doutrina nova (MARCADOR `b8b8c6fc`).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: transcrição do teste da Seth relida ponto a ponto; `_DOUTRINA_FIXA` e `_hidratacao()` lidos pra confirmar que os 4 elementos estavam lá mas sem formato/selo; `python3 -c ast.parse` + `seth_gateway.py --selftest` em porta livre (20991) = `SELFTEST OK` (injeta 1 system, não repete); `_HASH_DOUTRINA` recalculado à mão pra confirmar que muda; `git apply --check` limpo contra `d1e8808`; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "conserte os pontos da auditoria da Seth" + `APROVADO-seth-cabecalho-formato` assinado.
+
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
 
 **Diagnóstico:** o container era `ghcr.io/remsky/kokoro-fastapi-cpu:latest` (`USE_GPU=false`), `--log-level debug`, gerido pelo script `redesign/systemd/seth` (não por unit; `kokoro-fastapi.service` estava inativo). Dois problemas:

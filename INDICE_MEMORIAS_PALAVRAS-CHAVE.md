@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
+  palavras-chave: cabeçalho, seth, doutrina, injetada, ganha, formato, selo, hora, regra, compactação, pontos, teste, desta, sessão
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
   palavras-chave: voz, seth, tts, troca, kokoro, piper, pedido, humano, teste, text, speech, inutilizável, demora, transcreve, errado
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: projeto, fase, linha, fila, aderência, atualizada, dentro, janela, bug, pra, fechada, memórias, mudança, forma, apresentação, regra, conteúdo, novo, ficou, fora, commit, engano, meu, pegou, tinha, editado, aprovação, própria, revertido, commitar
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, quente/morno/frio) fechada — índice, vault Obsidian, busca semântica e índice derivado agora cobrem as três camadas, não só quente; um bug real achado testando (corte de bloco migrado aplicado por engano num chunk frio), corrigido antes de propor
   palavras-chave: fila, aderência, memórias, período, quente, morno, frio, fechada, índice, vault, obsidian, busca, semântica, derivado, agora, cobrem, três, camadas, bug, real, achado, testando, corte, bloco, migrado, aplicado, engano, chunk, corrigido, propor
-(357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reordenado em (355)) implementada — quente/morno/frio, testado num clone descartável antes de tocar o canon real, cinco bugs achados e corrigidos no processo, corte final reformulado a pedido do Humano (quente começa vazio, esta entrada é o marco zero); período de aderência de 4 semanas registrado
-  palavras-chave: memórias, período, fase, item, backlog, reordenado, implementada, quente, morno, frio, testado, clone, descartável, tocar, canon, real, cinco, bugs, achados, corrigidos, processo, corte, final, reformulado, pedido, humano, começa, vazio, entrada, marco, zero, aderência, semanas, registrado
+(357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reor …
+  palavras-chave: memórias, período, fase, item, backlog, reor
 (356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado …
   palavras-chave: discordância, sintética, item, backlog, reordenado
 (355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem im …
