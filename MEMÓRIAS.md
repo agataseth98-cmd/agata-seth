@@ -28,6 +28,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
+
+**Pedido do Humano:** "podemos usar a senha sim, como funcionaria?" → depois de eu explicar → "escreve como proposta" → leu → aprovou assinando (bootstrap manual, chave recém-gerada).
+
+**O que entrou:**
+- `scripts/aprovar.sh` — assina a mensagem `"<sha256 do .diff>  <nome>"` (namespace `agata-aprovacao-p8`) e grava o bloco `BEGIN SSH SIGNATURE` dentro do `APROVADO-<nome>`. Sem a chave privada no lugar: cria sem assinatura e avisa (janela de compat).
+- `scripts/perimetro.sh` — `_p8_assinatura_ok`: se `propostas/.allowed_signers` existe, exige a linha `diff-sha256:` batendo com o `.diff` atual + `ssh-keygen -Y verify` OK. Verificar não precisa de passphrase; só assinar precisa. Sem `.allowed_signers`: não exige (compat).
+- `PROJETO.md` "Quarentena estrutural" e `propostas/README.md` — parágrafo "Aprovação assinada" + nota de risco residual atualizada.
+
+**Testado, clone descartável, 5 casos:** assina+verifica → passa; marcador sem assinatura com `.allowed_signers` → FALHA; `.diff` editado depois de assinado (sha não bate) → FALHA; assinado com chave fora do `.allowed_signers` → FALHA; sem `.allowed_signers` (janela bootstrap) → passa (compat). Na Máquina real, com a chave do Humano staged, `p8_quarentena` deu exit 0.
+
+**Bootstrap desta própria proposta:** o `aprovar.sh` novo ainda não estava no disco na hora de aprovar, então o Humano assinou o `APROVADO-aprovacao-assinada` por um script de bootstrap à parte (não versionado, em `/tmp`) que roda `ssh-keygen -Y sign` lendo a mensagem de um arquivo — stdin livre pro prompt da passphrase; a 1ª tentativa por `printf | ssh-keygen` não gravou a assinatura — e se autoverifica. O `perimetro.sh` novo (staged no mesmo commit) verificou essa assinatura no pre-commit.
+
+**Não fecha (escrito no PROJETO):** `propostas/.allowed_signers` — a raiz de confiança — não está sob quarentena; janela compat sem `.allowed_signers`; chave privada mal guardada.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/aprovacao-assinada`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` antes de aplicar; `bash -n` nos dois scripts; 5 casos num clone descartável (positivo + 4 negativos); `p8_quarentena` rodado na árvore staged real; assinatura do Humano verificada à mão contra `.allowed_signers` antes e depois de mover o par. Autorização: Humano, "escreve como proposta" + aprovação assinada.
+
 (365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
 
 **Pedido do Humano:** "O normal é você digitar com a própria mão, isso complica, vamos fazer assim vc cria uma proposta me apresenta eu leio, daí para confirmar eu colo um comando no terminal ... é mais prático, pode ser?" → depois de eu apresentar a proposta: "crie o aprovado e prossiga".

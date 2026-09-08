@@ -23,13 +23,13 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
 ## Mecanismo
 
 1. A mudança proposta vira `propostas/<nome>.diff` (formato `git diff`, com cabeçalhos `--- a/<caminho>` / `+++ b/<caminho>`) e fica aqui, versionado.
-2. O Humano aprova, de um destes dois jeitos (equivalentes pra P-8 — só a presença de `propostas/APROVADO-<nome>` importa):
-   - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota);
-   - **pelo terminal (caminho prático, MEMÓRIAS (365)):** cola `bash scripts/aprovar.sh <nome> ["motivo"]` depois de ler o `.diff`. O script cria o mesmo arquivo, carimbado com a hora da Máquina.
-   O **executor nunca** roda `scripts/aprovar.sh` — mesma linha vermelha de não se autoaprovar; o ato de aprovação é o Humano colar o comando.
+2. O Humano aprova, de um destes dois jeitos:
+   - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota) — vale só na janela sem `propostas/.allowed_signers`; depois, P-8 recusa marcador sem assinatura;
+   - **pelo terminal (caminho normal):** cola `bash scripts/aprovar.sh <nome> ["motivo"]` depois de ler o `.diff`. Desde MEMÓRIAS (365) o script cria o `APROVADO-<nome>`; desde MEMÓRIAS (366) ele **assina** — com `propostas/.allowed_signers` no repo, `scripts/perimetro.sh` (P-8) exige uma assinatura ssh válida (chave privada em `~/.config/agata/aprovacao_ed25519`, passphrase), amarrada ao `sha256` daquele `.diff`.
+   O **executor nunca** roda `scripts/aprovar.sh` — assinar exige a passphrase da chave privada do Humano.
 3. `scripts/perimetro.sh`, checagem P-8: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não aparecer nos cabeçalhos de nenhum `.diff` com `APROVADO-` correspondente presente em `propostas/`.
 4. Aprovação consumida: ao entrar no canon, quem aplica move o par `<nome>.diff` / `APROVADO-<nome>` para `propostas/aplicadas/` no mesmo commit que aplica a mudança.
 
 ## Risco residual (não suavizado)
 
-O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 (MEMÓRIAS (214)) — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Se um dia for preciso mais, o caminho é assinatura que o executor não possa produzir, com o custo de o Humano digitar uma senha a cada mudança estrutural.
+O marcador de aprovação era um arquivo que o próprio executor tinha permissão técnica de criar. **Desde MEMÓRIAS (366)**, com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>` — assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase), que o executor não produz. Continua aceito, sem suavizar: (i) `propostas/.allowed_signers` (a raiz de confiança) não está sob quarentena — trocá-la aparece no `.diff` que o Humano revisa, mas P-8 não a protege por assinatura ainda; (ii) na janela sem `.allowed_signers`, o modo compat aceita marcador sem assinatura; (iii) chave privada mal guardada quebra tudo. O que P-8 sempre cobriu — automação/desatenção agindo sem ninguém ver (caso de 18/08/2026, MEMÓRIAS (214)) — segue coberto. Custo: o Humano digita a passphrase a cada mudança estrutural.

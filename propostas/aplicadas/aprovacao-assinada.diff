@@ -1,0 +1,197 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 31e0c43..f2c26e6 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -232,13 +232,15 @@ Quando uma operação na Máquina exigir `sudo`, o executor (Claude Code ou simi
+ 
+ **Escopo, proporcional de propósito.** QUARENTENA OBRIGATÓRIA — o que MUDA COMPORTAMENTO: `REGRAS.md`, `PROJETO.md`, `scripts/*`, `.githooks/*`, `config/*` (`config/` incluído em 20/08/2026, MEMÓRIAS (222) — um prompt que dirige um modelo autônomo contra o canon muda comportamento tanto quanto um script). SEM quarentena — o que só REGISTRA o que já aconteceu: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hidrata.md` (gerado), `PROMPT_CARREGAMENTO.md` (movido pra dentro do repo em 20/08/2026, item 2 do documento do Humano). Motivo da linha: registro errado se corrige com entrada nova — é pra isso que append-only existe. Comportamento errado, não. `PROMPT_CARREGAMENTO.md` fica fora da quarentena apesar de "dirigir" um modelo, ao contrário de um prompt que dirige um processo DESATENDIDO (systemd timer sem Humano revisando antes de agir — o `config/agata-consolidacao.prompt.txt` era desse tipo, removido em (312) quando a consolidação virou flow do grafo): o prompt de carregamento é sempre lido por um Humano que cola o texto numa sessão nova e revisa cada resposta — mais perto de `ONDE_ESTAMOS.md` (registro pro Humano) do que de um script autônomo.
+ 
+-**Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova de um destes dois jeitos, equivalentes pra P-8: (a) cria `propostas/APROVADO-<nome>` à mão, ou (b) — caminho prático, desde MEMÓRIAS (365) — cola `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal depois de ler o `.diff`; o script cria o mesmo arquivo, carimbado com a hora da Máquina. **O executor nunca roda `scripts/aprovar.sh` — mesma linha vermelha de "não se autoaprovar"; o ato que conta como aprovação é o Humano colar o comando.** `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
++**Mecanismo — ver `propostas/README.md` para o texto completo.** Diretório `propostas/` na raiz, versionado. A mudança proposta vira `propostas/<nome>.diff` (cabeçalhos `--- a/` / `+++ b/` de verdade). O Humano aprova de um destes dois jeitos: (a) cria `propostas/APROVADO-<nome>` à mão, ou (b) — caminho prático — cola `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal depois de ler o `.diff`. Desde MEMÓRIAS (365) o script só cria o arquivo; desde MEMÓRIAS (366) ele **assina** o par com a chave ssh do Humano (`~/.config/agata/aprovacao_ed25519`, fora do repo), e a assinatura fica amarrada àquele `.diff` — editar o `.diff` depois quebra a verificação. **O executor nunca roda `scripts/aprovar.sh`: assinar exige a passphrase da chave privada, que só o Humano tem — não é mais só convenção.** `scripts/perimetro.sh`, checagem **P-8**: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não estiver coberto por um par `.diff`/`APROVADO-` presente em `propostas/` — procura tanto em `propostas/` (pendente) quanto em `propostas/aplicadas/` (já consumido), porque a aprovação consumida NO MESMO commit que aplica a mudança já não está mais no lugar pendente quando o hook roda; sem checar as duas, todo commit que consome sua própria aprovação reprovaria a aprovação que o autoriza — achado testando antes de comitar de verdade, corrigido antes de ligar o controle. Aprovação consumida: ao entrar no canon, quem aplica move o par para `propostas/aplicadas/` no mesmo commit.
+ 
+ **Testado, positivo e negativo, taxa de falso positivo relatada antes de habilitar (MEMÓRIAS (218)):** 6 casos rodados contra um clone descartável antes do commit real — arquivo de comportamento staged sem aprovação (falha), com aprovação cobrindo o caminho (passa), arquivo de registro (MEMÓRIAS/ONDE_ESTAMOS) sem aprovação nenhuma (passa, nunca deveria travar), mistura de um aprovado + um não aprovado no mesmo commit (falha citando só o não aprovado), aprovação já movida pra `aplicadas/` no mesmo commit que ela autoriza (passa), e o caso negativo básico repetido depois da correção (falha). Zero falsos positivos e zero falsos negativos nos 6 casos.
+ 
++**Aprovação assinada, desde MEMÓRIAS (366).** A chave pública do Humano fica em `propostas/.allowed_signers` (formato `ssh-keygen -Y verify`); a privada em `~/.config/agata/aprovacao_ed25519`, protegida por passphrase, nunca no repo. `scripts/aprovar.sh` assina a mensagem `"<sha256 do .diff>  <nome>"` (namespace `agata-aprovacao-p8`) e grava a assinatura dentro do `APROVADO-<nome>`. `scripts/perimetro.sh`, P-8: recomputa o sha256 do `.diff`, exige a linha `diff-sha256:` batendo, e roda `ssh-keygen -Y verify` — verificar não precisa da passphrase, só assinar. Sem `propostas/.allowed_signers` no repo a assinatura não é exigida (modo compat da janela antes do par de chaves existir). Fecha do risco residual abaixo: forjar uma aprovação deixa de ser um `touch` — passa a exigir a chave privada do Humano. NÃO fecha: `propostas/.allowed_signers` (a raiz de confiança) não está sob quarentena — trocá-la é mudança visível no `.diff` que o Humano revisa, e endurecer esse caminho (verificar a troca contra a chave antiga) é follow-up nomeado, não feito aqui.
++
+ **Bootstrap, registrado sem suavizar.** Esta própria mudança toca `scripts/perimetro.sh` e `PROJETO.md` — ordem do Humano, ela é a primeira candidata a passar pela própria quarentena, depois de P-8 existir, aplicada antes de ligar P-8 (não havia como pedir aprovação a um mecanismo que ainda não existia). O par `propostas/aplicadas/quarentena-p8.diff` / `propostas/aplicadas/APROVADO-quarentena-p8` deste commit foi criado pelo próprio executor, sob ordem escrita direta e datada do Humano no documento de 20/08/2026 — não é o executor se autoaprovando por conta própria; a aprovação já existia em texto, este é só o registro mecânico dela. **A partir do próximo commit que toque REGRAS/PROJETO/scripts/.githooks, o marcador precisa vir do Humano — à mão ou colando `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) — nunca do executor; esta exceção não se repete.**
+ 
+-**Risco residual, não suavizado.** O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Colar `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) não muda esse balanço — é o mesmo nível de confiança de criar o arquivo à mão, só mais prático; o ganho real é que o ato fica no histórico do shell do Humano, não numa alegação do executor de que "o Humano autorizou em texto". Se um dia for preciso mais, o caminho continua sendo assinatura que o executor não possa produzir, com o custo de o Humano digitar uma senha a cada mudança estrutural.
++**Risco residual, não suavizado.** O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Colar `bash scripts/aprovar.sh <nome>` no terminal (MEMÓRIAS (365)) pôs o ato no histórico do shell do Humano em vez de numa alegação do executor. **Desde MEMÓRIAS (366) a brecha do "executor cria o arquivo" está estreitada:** com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>`, e assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase) — o executor não a produz. Resta aceito: (i) a raiz de confiança `propostas/.allowed_signers` não está sob quarentena; (ii) na janela sem `.allowed_signers`, o modo compat aceita marcador sem assinatura; (iii) chave privada mal guardada. Custo do ganho: o Humano digita a passphrase a cada mudança estrutural.
+ 
+ ## Doutrina de defesa proporcional
+ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra decidir se e como reagir a um achado de segurança/robustez — não regra universal de REGRAS.md, é ferramenta de decisão situacional do Humano (Regra 3).
+diff --git a/propostas/README.md b/propostas/README.md
+index 9e5efab..47743c2 100644
+--- a/propostas/README.md
++++ b/propostas/README.md
+@@ -23,13 +23,13 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
+ ## Mecanismo
+ 
+ 1. A mudança proposta vira `propostas/<nome>.diff` (formato `git diff`, com cabeçalhos `--- a/<caminho>` / `+++ b/<caminho>`) e fica aqui, versionado.
+-2. O Humano aprova, de um destes dois jeitos (equivalentes pra P-8 — só a presença de `propostas/APROVADO-<nome>` importa):
+-   - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota);
+-   - **pelo terminal (caminho prático, MEMÓRIAS (365)):** cola `bash scripts/aprovar.sh <nome> ["motivo"]` depois de ler o `.diff`. O script cria o mesmo arquivo, carimbado com a hora da Máquina.
+-   O **executor nunca** roda `scripts/aprovar.sh` — mesma linha vermelha de não se autoaprovar; o ato de aprovação é o Humano colar o comando.
++2. O Humano aprova, de um destes dois jeitos:
++   - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota) — vale só na janela sem `propostas/.allowed_signers`; depois, P-8 recusa marcador sem assinatura;
++   - **pelo terminal (caminho normal):** cola `bash scripts/aprovar.sh <nome> ["motivo"]` depois de ler o `.diff`. Desde MEMÓRIAS (365) o script cria o `APROVADO-<nome>`; desde MEMÓRIAS (366) ele **assina** — com `propostas/.allowed_signers` no repo, `scripts/perimetro.sh` (P-8) exige uma assinatura ssh válida (chave privada em `~/.config/agata/aprovacao_ed25519`, passphrase), amarrada ao `sha256` daquele `.diff`.
++   O **executor nunca** roda `scripts/aprovar.sh` — assinar exige a passphrase da chave privada do Humano.
+ 3. `scripts/perimetro.sh`, checagem P-8: FALHA o commit se algum arquivo staged do grupo "muda comportamento" não aparecer nos cabeçalhos de nenhum `.diff` com `APROVADO-` correspondente presente em `propostas/`.
+ 4. Aprovação consumida: ao entrar no canon, quem aplica move o par `<nome>.diff` / `APROVADO-<nome>` para `propostas/aplicadas/` no mesmo commit que aplica a mudança.
+ 
+ ## Risco residual (não suavizado)
+ 
+-O marcador de aprovação é um arquivo que o próprio executor TEM PERMISSÃO técnica de criar. P-8 impede automação agindo sem que ninguém perceba — que foi exatamente o caso de 18/08/2026 (MEMÓRIAS (214)) — e NÃO impede um modelo que decida contornar deliberadamente. Aceito por decisão do Humano: a ameaça real aqui é desatenção, não malícia. Se um dia for preciso mais, o caminho é assinatura que o executor não possa produzir, com o custo de o Humano digitar uma senha a cada mudança estrutural.
++O marcador de aprovação era um arquivo que o próprio executor tinha permissão técnica de criar. **Desde MEMÓRIAS (366)**, com `propostas/.allowed_signers` no repo, P-8 exige assinatura ssh no `APROVADO-<nome>` — assinar precisa da chave privada do Humano (`~/.config/agata/aprovacao_ed25519`, passphrase), que o executor não produz. Continua aceito, sem suavizar: (i) `propostas/.allowed_signers` (a raiz de confiança) não está sob quarentena — trocá-la aparece no `.diff` que o Humano revisa, mas P-8 não a protege por assinatura ainda; (ii) na janela sem `.allowed_signers`, o modo compat aceita marcador sem assinatura; (iii) chave privada mal guardada quebra tudo. O que P-8 sempre cobriu — automação/desatenção agindo sem ninguém ver (caso de 18/08/2026, MEMÓRIAS (214)) — segue coberto. Custo: o Humano digita a passphrase a cada mudança estrutural.
+diff --git a/scripts/aprovar.sh b/scripts/aprovar.sh
+index 80e6adb..64aebe6 100755
+--- a/scripts/aprovar.sh
++++ b/scripts/aprovar.sh
+@@ -1,42 +1,63 @@
+ #!/usr/bin/env bash
+ # scripts/aprovar.sh <nome> ["motivo em uma frase"]
+ #
+-# Cria propostas/APROVADO-<nome> -- o ato deliberado do Humano que P-8 exige
+-# (PROJETO.md, "Quarentena estrutural"). Substitui, como CAMINHO PRÁTICO, o
+-# "abrir editor e criar o arquivo à mão": o Humano cola esta linha no terminal
+-# depois de ler o propostas/<nome>.diff. Criar o arquivo à mão continua valendo.
++# Cria propostas/APROVADO-<nome> ASSINADO com a chave ssh do Humano -- o ato
++# deliberado que P-8 exige (PROJETO.md, "Quarentena estrutural"). A assinatura
++# amarra a aprovação AQUELE propostas/<nome>.diff: editar o diff depois quebra
++# a verificação em scripts/perimetro.sh (P-8).
+ #
+-# LINHA VERMELHA: o EXECUTOR (modelo) NUNCA roda este script. Mesma regra de
+-# "o executor não se autoaprova" -- quem cola o comando é o Humano, e é o ato
+-# de colar que conta como aprovação. O script não enfraquece P-8: a ameaça que
+-# P-8 cobre é desatenção/automação agindo sem ninguém ver, não um executor que
+-# decida burlar de propósito (esse risco segue aceito e escrito no PROJETO).
++# LINHA VERMELHA: o EXECUTOR (modelo) NUNCA roda este script. Agora não é só
++# convenção -- assinar exige a passphrase da chave privada, que só o Humano
++# tem. Chave privada: ~/.config/agata/aprovacao_ed25519 (fora do repo, nunca
++# commitada). Chave pública: propostas/.allowed_signers (no repo).
++#
++# Sem a chave privada no lugar: cria o arquivo SEM assinatura e AVISA -- só
++# serve na janela entre este script existir e o par de chaves ser gerado.
++# Depois que propostas/.allowed_signers existe, P-8 recusa APROVADO- sem
++# assinatura válida.
+ set -euo pipefail
+ 
+-nome="${1:?uso: bash scripts/aprovar.sh <nome> [\"motivo em uma frase\"]  (sem .diff, sem APROVADO-)}"
++nome="${1:?uso: bash scripts/aprovar.sh <nome> [\"motivo\"]  (nome = basename do .diff, sem extensão)}"
+ motivo="${2:-}"
+ 
+ raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+-diff_pend="$raiz/propostas/$nome.diff"
+-diff_aplic="$raiz/propostas/aplicadas/$nome.diff"
++chave="${AGATA_APROVACAO_CHAVE:-$HOME/.config/agata/aprovacao_ed25519}"
++ns="agata-aprovacao-p8"
++
++diff_path=""
++for d in "$raiz/propostas/$nome.diff" "$raiz/propostas/aplicadas/$nome.diff"; do
++  [ -f "$d" ] && { diff_path="$d"; break; }
++done
++[ -n "$diff_path" ] || { echo "ERRO: não achei propostas/$nome.diff (nem em aplicadas/)." >&2; exit 1; }
++
+ alvo="$raiz/propostas/APROVADO-$nome"
++[ -e "$alvo" ] && { echo "ERRO: $alvo já existe -- nada a fazer." >&2; exit 1; }
+ 
+-if [ ! -f "$diff_pend" ] && [ ! -f "$diff_aplic" ]; then
+-  echo "ERRO: não achei propostas/$nome.diff (nem em aplicadas/)." >&2
+-  echo "      confira o <nome> -- é o basename do .diff, sem extensão." >&2
+-  exit 1
+-fi
+-if [ -e "$alvo" ]; then
+-  echo "ERRO: propostas/APROVADO-$nome já existe -- nada a fazer." >&2
+-  exit 1
+-fi
++dsha="$(sha256sum "$diff_path" | awk '{print $1}')"
++msg="$(printf '%s  %s' "$dsha" "$nome")"
+ 
++tmp="$(mktemp)"
+ {
+   echo "Aprovado pelo Humano em $(date '+%Y-%m-%d %H:%M %z')."
+-  echo "Via: comando colado no terminal (scripts/aprovar.sh) -- ato deliberado do Humano."
+   [ -n "$motivo" ] && echo "Motivo: $motivo"
+-  echo "Cobre: propostas/$nome.diff"
+-} > "$alvo"
++  echo "nome: $nome"
++  echo "diff-sha256: $dsha"
++} > "$tmp"
++
++if [ -f "$chave" ]; then
++  if ! printf '%s' "$msg" | ssh-keygen -Y sign -f "$chave" -n "$ns" >> "$tmp"; then
++    rm -f "$tmp"
++    echo "ERRO: assinatura falhou -- propostas/APROVADO-$nome NÃO criado." >&2
++    exit 1
++  fi
++  mv "$tmp" "$alvo"
++  echo "criado e ASSINADO: propostas/APROVADO-$nome"
++else
++  mv "$tmp" "$alvo"
++  echo "AVISO: $chave não existe -- propostas/APROVADO-$nome criado SEM assinatura." >&2
++  echo "AVISO: gere o par uma vez:  ssh-keygen -t ed25519 -C $ns -f $chave" >&2
++  echo "       depois:  printf 'agata-humano %s\\n' \"\$(awk '{print \$1\" \"\$2}' $chave.pub)\" > $raiz/propostas/.allowed_signers" >&2
++  echo "criado (SEM assinatura): propostas/APROVADO-$nome"
++fi
+ 
+-echo "criado: propostas/APROVADO-$nome"
+ echo "próximo: o executor aplica o .diff, move o par para propostas/aplicadas/ e comita."
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 49e840f..ab29247 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -651,6 +651,45 @@ _p8_eh_comportamento() {
+   esac
+ }
+ 
++_p8_assinatura_ok() {
++  # Assinatura ssh de propostas/APROVADO-<nome> sobre o .diff (desde
++  # MEMÓRIAS (366)). Sem propostas/.allowed_signers no repo: assinatura
++  # NÃO exigida -- modo compat da janela em que o par de chaves ainda
++  # não foi gerado. Com .allowed_signers presente: exige bloco
++  # `BEGIN SSH SIGNATURE` válido, principal `agata-humano`, namespace
++  # `agata-aprovacao-p8`, mensagem = "<sha256 do .diff>  <nome>".
++  # A mensagem carrega o hash do .diff -> editar o .diff depois de
++  # assinado quebra a verificação. Verificar não precisa da passphrase;
++  # só assinar (scripts/aprovar.sh, mão do Humano) precisa.
++  local aprovado="$1" diff_abs="$2" nome="$3"
++  local signers="$(pwd)/propostas/.allowed_signers"
++  [ -f "$signers" ] || return 0
++  if ! command -v ssh-keygen >/dev/null 2>&1; then
++    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
++    return 1
++  fi
++  local dsha msg sig rc
++  dsha="$(sha256sum "$diff_abs" | awk '{print $1}')"
++  msg="$(printf '%s  %s' "$dsha" "$nome")"
++  if ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
++    echo "P-8: $aprovado -- linha 'diff-sha256:' ausente ou diferente do .diff atual (diff editado depois de assinado?)"
++    return 1
++  fi
++  sig="$(mktemp)" || return 1
++  awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
++  if ! [ -s "$sig" ]; then
++    rm -f "$sig"
++    echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
++    return 1
++  fi
++  printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
++    -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1
++  rc=$?
++  rm -f "$sig"
++  [ "$rc" -eq 0 ] || echo "P-8: assinatura inválida em $aprovado (chave não confere com propostas/.allowed_signers, ou mensagem adulterada)"
++  return "$rc"
++}
++
+ _p8_arquivo_aprovado() {
+   # Conserto de 22/08/2026 (achado testando `ab1-projeto.diff`, ver
+   # MEMÓRIAS -- "aprovado" deixava de expirar: qualquer arquivo já
+@@ -701,7 +740,7 @@ _p8_arquivo_aprovado() {
+ 
+       if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
+         resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
+-        if [ "$resultado_blob" = "$staged_blob" ]; then
++        if [ "$resultado_blob" = "$staged_blob" ] && _p8_assinatura_ok "$aprovado" "$diff_abs" "$nome"; then
+           rm -rf "$tmp"
+           return 0
+         fi

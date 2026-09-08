@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
+  palavras-chave: aprovação, passa, assinada, chave, ssh, humano, propostas, allowed, signers, pública, entra, repo, privada, fica, config, agata, aprovacao, passphrase, nunca, commitada, scripts, aprovar, assina, perimetro, verifica, presente, aprovado, nome, assinatura, válida, falha, commit, estreita, fecha, brecha, executor, cria, arquivo
 (365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
   palavras-chave: gesto, aprovação, ganha, caminho, prático, além, criar, propostas, aprovado, nome, mão, humano, pode, colar, bash, scripts, aprovar, motivo, terminal, novo, texto, atualizado, projeto, quarentena, estrutural, readme, escopo, lógica, check, intocados, muda
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pode, fazer, pendentes, auditoria, parecer, qwen, estavam, feitos, achado, corrigindo, erro, meu, implementados, testados, reais, investigado, httperror, consolidação, noturna, provavelmente, transitório
 (337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu com um texto fabricado (citação de entrada inexistente, termos sem referente, hora inventada), e se autocorrigiu — a autocorreção foi conferida agora, item por item, e bate com o disco com precisão
   palavras-chave: seth, recebeu, orientação, respondeu, texto, fabricado, citação, entrada, inexistente, termos, referente, hora, inventada, autocorrigiu, autocorreção, conferida, agora, item, bate, disco, precisão
-(336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/(334)/(335) — pedido do Humano ("vamos avaliar as capacidades da Seth à luz das descobertas de hoje... vc me orienta e eu envio para ela") — orientação escrita para relay, salva em `~/Área de trabalho/orientacao-para-seth-2026-09-04.md`
-  palavras-chave: avaliação, capacidades, seth, síntese, pedido, humano, vamos, avaliar, luz, descobertas, hoje, orienta, envio, ela, orientação, escrita, relay, salva, área, trabalho, orientacao
+(336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/( …
+  palavras-chave: avaliação, capacidades, seth, síntese
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao da …
   palavras-chave: misturou, fatos, força, diferente
 (334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, …

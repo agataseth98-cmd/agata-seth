@@ -1494,6 +1494,19 @@ hora. Criar à mão continua valendo; o comando é só o atalho. Eu nunca rodo
 esse comando — quem aprova é você. Está tudo registrado na memória (entrada
 365). Esta foi a última vez que eu criei um arquivo de aprovação à mão.
 
-Você também disse que topa a versão com senha (uma senha guardada fora do
-repositório, que eu não consigo produzir). Expliquei como funcionaria; é
-uma proposta separada, ainda não escrita — quando quiser, eu preparo.
+Você também topou a versão com senha (uma chave guardada fora do
+repositório, que eu não consigo produzir). Escrevi como proposta, você
+leu e aprovou. Agora funciona assim: você gerou uma chave protegida por
+senha; a parte pública dela está no repositório, a privada só na sua
+máquina. Quando você aprova uma mudança, o `aprovar.sh` assina a
+aprovação com essa chave, e o perímetro só deixa o commit passar se a
+assinatura conferir. Assinar pede a sua senha — eu não a tenho, então não
+consigo forjar uma aprovação. Testei cinco cenários num clone descartável
+antes de ligar (o certo passa; aprovação sem assinatura, com assinatura
+errada, ou com o diff mexido depois de assinado, todas falham). Registro
+completo na memória (entrada 366).
+
+O que continua frágil, e está escrito sem enfeite no documento técnico:
+trocar a lista de chaves confiáveis ainda não exige assinatura (aparece
+no diff que você revisa, mas não é barrado sozinho). É o próximo aperto,
+quando você quiser.

@@ -651,6 +651,45 @@ _p8_eh_comportamento() {
   esac
 }
 
+_p8_assinatura_ok() {
+  # Assinatura ssh de propostas/APROVADO-<nome> sobre o .diff (desde
+  # MEMÓRIAS (366)). Sem propostas/.allowed_signers no repo: assinatura
+  # NÃO exigida -- modo compat da janela em que o par de chaves ainda
+  # não foi gerado. Com .allowed_signers presente: exige bloco
+  # `BEGIN SSH SIGNATURE` válido, principal `agata-humano`, namespace
+  # `agata-aprovacao-p8`, mensagem = "<sha256 do .diff>  <nome>".
+  # A mensagem carrega o hash do .diff -> editar o .diff depois de
+  # assinado quebra a verificação. Verificar não precisa da passphrase;
+  # só assinar (scripts/aprovar.sh, mão do Humano) precisa.
+  local aprovado="$1" diff_abs="$2" nome="$3"
+  local signers="$(pwd)/propostas/.allowed_signers"
+  [ -f "$signers" ] || return 0
+  if ! command -v ssh-keygen >/dev/null 2>&1; then
+    echo "P-8: ssh-keygen ausente -- não dá pra verificar a assinatura de $aprovado"
+    return 1
+  fi
+  local dsha msg sig rc
+  dsha="$(sha256sum "$diff_abs" | awk '{print $1}')"
+  msg="$(printf '%s  %s' "$dsha" "$nome")"
+  if ! grep -qxE "diff-sha256: $dsha" "$aprovado" 2>/dev/null; then
+    echo "P-8: $aprovado -- linha 'diff-sha256:' ausente ou diferente do .diff atual (diff editado depois de assinado?)"
+    return 1
+  fi
+  sig="$(mktemp)" || return 1
+  awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
+  if ! [ -s "$sig" ]; then
+    rm -f "$sig"
+    echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
+    return 1
+  fi
+  printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
+    -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1
+  rc=$?
+  rm -f "$sig"
+  [ "$rc" -eq 0 ] || echo "P-8: assinatura inválida em $aprovado (chave não confere com propostas/.allowed_signers, ou mensagem adulterada)"
+  return "$rc"
+}
+
 _p8_arquivo_aprovado() {
   # Conserto de 22/08/2026 (achado testando `ab1-projeto.diff`, ver
   # MEMÓRIAS -- "aprovado" deixava de expirar: qualquer arquivo já
@@ -701,7 +740,7 @@ _p8_arquivo_aprovado() {
 
       if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
         resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
-        if [ "$resultado_blob" = "$staged_blob" ]; then
+        if [ "$resultado_blob" = "$staged_blob" ] && _p8_assinatura_ok "$aprovado" "$diff_abs" "$nome"; then
           rm -rf "$tmp"
           return 0
         fi
