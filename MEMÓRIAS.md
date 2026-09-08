@@ -26,18 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fc2e438fe97fd19634152375b6695641dd79e025
-  Escrito em: 08/09/2026 19:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e845bfde4d5e95c7f7ca045c4d379282fd036e4
+  Escrito em: 08/09/2026 20:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc2e438fe97fd19634152375b6695641dd79e025/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc2e438fe97fd19634152375b6695641dd79e025/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc2e438fe97fd19634152375b6695641dd79e025/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e845bfde4d5e95c7f7ca045c4d379282fd036e4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
+
+**O que quebrou:** o Humano abriu um chat pra testar (388)/(389) e o LibreChat devolveu `400/404` em cascata — `auto/best-free` (o default da Seth desde (376)) estava tentando `cerebras/zai-glm-4.7` (arquivado), `groq/llama-3.3-70b-versatile` (404) e `oc/big-pickle` (400, rejeita o arg `prompt_cache_key` que o OmniRoute injeta). Essa lista de candidatos é **auto-derivada** pelo radar/discovery do OmniRoute — apodreceu sozinha. A nossa (o `ROSTER` do `conselho_remoto.py`) segue limpa; a do frontend da Seth não tinha dona.
+
+**Torniquete descartado:** a 1ª proposta (`seth-default-modelo-concreto`) era pôr um modelo concreto (`zai/glm-4.7-flash`) como default — mas puro, sem failover: a z.ai dá 529 transitório e a Seth ficaria muda de novo. O Humano perguntou direto se aquilo era o "conserto de verdade"; não era.
+
+**Conserto de verdade (proposta `seth-livre-combo`, 2 arquivos quarentena + 1 write no OmniRoute, 1 assinatura):**
+- **Combo `seth-livre`** criada via `POST /api/combos` no `storage.sqlite` do OmniRoute (id `563700ea…`, persiste a restart), `strategy: priority`: `zai/glm-4.7-flash → gemini/gemini-2.5-flash → huggingface/meta-llama/Llama-3.3-70B-Instruct → mistral/ministral-8b-latest`. Os 4 confirmados ao vivo em (379)/(390). Falhou o 1º (529/404/…) → cai pro próximo, sozinho. **Lista curada por nós**, não a auto-derivada.
+- `redesign/librechat/librechat.yaml` — default = `seth-livre`; `fetch: false` (o seletor mostra só a lista curada de 9, não os ~300 fantasmas do catálogo cru — foi assim que o Humano pegou um `llama-3.2-11b` morto); `titleModel` de `auto/fast` → `seth-livre` (o `auto/*` também estava podre); `auto/best-free` desce pro meio da lista.
+- `config/modelos-gratuitos.md` — seção "Combo `seth-livre`" com a tabela dos 4 tiers + o `POST` pra recriar se o `storage.sqlite` for perdido.
+
+**Testado ao vivo pela cadeia completa (`:20126`→sanitizador→OmniRoute), após deploy:** `seth-livre` roteou 200, **cascateou até o tier 3** (`Llama-3.3-70B`, o 1º e o 2º deviam estar momentaneamente limitados) — o failover funciona. Cabeçalho `Agata · modelo não verificado · t=1 · lacuna: sem relógio` — desta vez com o selo certo.
+
+**Erros no horizonte — tratados e anotados (o Humano pediu):**
+- combo perdida num reset do OmniRoute → recreate documentado no `.md`. ✅
+- `titleModel: auto/fast` também podre → trocado. ✅
+- **glm inventou uma hora UTC** (`12:34:05 +00:00`) num teste, em vez de `lacuna: sem relógio` — a doutrina (389) manda o certo mas o modelo nem sempre obedece. Conserto de mecanismo pendente: pós-filtro no `seth_gateway` que corta/marca hora inventada no cabeçalho. **Item aberto.**
+- `seth_gateway._estado()` tem `timeout=15s` no subprocess do `estado_para_eco.sh`; sob carga (container recém-reiniciado) voltou vazio e a Seth abriu com `Última entrada: (0) · sync: não verificado` — comportamento honesto (cai na branch "lacuna", não finge), mas parece quebrado. **Item aberto.**
+- sem tier LOCAL de último recurso — o OmniRoute só tem os modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. **Item aberto.**
+
+**Falha do executor no mesmo assunto, de novo:** os cabeçalhos t=222/t=224 desta sessão diziam "20:26"/"20:34" quando o `date` real era ~20:27 — continuei estimando a hora em vez de medir, mesmo depois de (386) e da promessa de (389). O `date` desta entrada foi rodado.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-livre-combo`. Deploy: `cp` da yaml pro `~/librechat/` + `docker restart librechat` (md5 confere).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: reprodução do erro do Humano no `curl` (`auto/best-free` → 400/404 nos candidatos mortos); `sqlite3 .schema combos` + `data` da combo `conselho` de molde; `POST /api/combos` (201) e teste do `seth-livre` pela cadeia `:20126` antes E depois do deploy; `yaml.safe_load`; `md5sum` da yaml nos 2 lugares; `date`/`estado_para_eco.sh` rodados agora; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "descarto o torniquete e monto o seth-livre?" → "prossiga agata, todas as plataformas são Agata" + `APROVADO-seth-livre-combo` assinado.
+
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
 
 **Método:** cada afirmação factual da Seth nos turnos t=1..t=10 cruzada contra a Máquina (`sha256sum`, `git`, `estado_para_eco.sh`, `ls memoria/obsidian/`, `grep REGRAS.md`, chunks FRIO). Síntese refeita 3×; conclusões que não sobreviveram ao cruzamento estão registradas como invertidas.

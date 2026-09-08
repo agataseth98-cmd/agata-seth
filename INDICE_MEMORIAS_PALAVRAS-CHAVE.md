@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
+  palavras-chave: seth, ficou, muda, teste, auto, best, free, apodreceu, conserto, verdade, combo, custom, livre, pedido, humano, prossiga, agata, plataformas
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
   palavras-chave: auditoria, teste, seth, falha, real, leitura, parcial, virou, fato, conserto, lados, canon, mcp, mjs, doutrina, fixa, pedido, humano, audite, rigor, pesquisa, científica, refaça
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: projeto, estado, bugs, testes, registrada, rodada, tes, glm, assinou, claude, sonnet, adversa, volta, três, adversas, quatro
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identidade real confirmada no JSON cru) assinou como "Claude Sonnet 5", puxando o nome do corpus do próprio pedido, com a Regra 1 (que proíbe isso) na mão; achados incidentais de infraestrutura no caminho (Gemini estoura teto de 15s do OmniRoute com pedido grande; Groq bloqueado por Cloudflare, 403 browser_signature_banned)
   palavras-chave: tes, rodada, adversa, glm, flash, identidade, real, confirmada, json, cru, assinou, claude, sonnet, puxando, nome, corpus, próprio, pedido, regra, proíbe, mão, achados, incidentais, infraestrutura, caminho, gemini, estoura, teto, omniroute, grande, groq, bloqueado, cloudflare, browser, signature, banned
-(359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atualizada de "dentro da janela, não bug ainda" pra "fechada [MEMÓRIAS (358)]" — mudança de forma/apresentação (Regra 7), não de conteúdo novo; ficou de fora do commit de (358) por engano meu (P-8 pegou: eu tinha editado PROJETO.md sem aprovação própria, revertido antes de commitar (358))
-  palavras-chave: projeto, fase, linha, fila, aderência, atualizada, dentro, janela, bug, pra, fechada, memórias, mudança, forma, apresentação, regra, conteúdo, novo, ficou, fora, commit, engano, meu, pegou, tinha, editado, aprovação, própria, revertido, commitar
+(359) CORREÇÃO — 06/09/2026 · PROJETO.md, Fase 4: linha da fila de aderência atu …
+  palavras-chave: projeto, fase, linha, fila, aderência, atu
 (358) DIÁRIO — 06/09/2026 · Fila de aderência da (357 - MEMÓRIAS por período, qu …
   palavras-chave: fila, aderência, memórias, período
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reor …
