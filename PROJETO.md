@@ -263,6 +263,23 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
     → **504**; o modelo carrega mesmo assim e a 2ª chamada responde em ~0,5s. Mitigação:
     `agata-warmup.service` (manual — `systemctl --user start agata-warmup.service` antes de usar
     o modelo local pesado).
+  - **[07/09/2026, MEMÓRIAS (362)] `504` do OmniRoute generalizado, causa raiz achada:** não é
+    só cold-start do Ollama — o mesmo `resilienceSettings.requestQueue.maxWaitMs=15000` (15s)
+    é menor que o timeout interno de detecção de conexão morta do próprio cliente HTTP do
+    OmniRoute (`30000ms`, achado no bundle instalado) — a auto-recuperação (trocar pra um
+    dispatcher novo quando o pooled trava) estrutural­mente não cabe no teto exposto. Reproduzido
+    contra Gemini (pedido pequeno, 5,6KB — não é tamanho) e contra GLM/`api.z.ai` (madrugada de
+    07/09). `curl` direto nos mesmos hosts responde em <1s — não é rede, não é os provedores.
+    Restart do serviço e forçar IPv4 (`NODE_OPTIONS=--dns-result-order=ipv4first`) **testados,
+    não resolveram** (removido depois de testado, sem resíduo). Fora de P-8 e fora do nosso
+    controle — é bug/config do produto de terceiros (`omniroute`), não script nosso. Correção
+    real: UI do OmniRoute, Settings → Resilience, subir `maxWaitMs` acima de 30000ms — **feito
+    em 08/09/2026 (15000 → 45000ms) pela UI do próprio OmniRoute, ver MEMÓRIAS (363)**. A causa
+    de fundo (a conexão pooled pro provedor trava ~30s por chamada) segue fora do nosso
+    controle; o teto maior só dá folga pra auto-recuperação do OmniRoute terminar em vez de
+    estourar em `504`. Efeito residual: chamada isolada a um provedor pode ficar lenta (~45s
+    observado no GLM em 08/09) mas não falha; combos com fallback (`auto/*`) trocam de provedor
+    e sofrem menos.
   - **`ir_sha256_xmlbin` do manifesto:** a fórmula original não está registrada e não reproduz.
     `redesign/fase7-hd/hash_ir.sh` fixa uma fórmula reproduzível daqui pra frente; o teste de
     restore do restic (`diff -rq` restaurado vs. vivo) é a garantia real.

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
+  palavras-chave: projeto, estado, bugs, testes, aplicada, entrada, registra, causa, raiz, omniroute, memórias, mitigação, fecha, diff, estava, aberto, desde, commits, locais, foram, empurrados, pro, remoto, mesmo, pedido
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
   palavras-chave: mitigação, omniroute, aplicada, resiliencesettings, requestqueue, maxwaitms, subido, próprio, escrita, storage, sqlite, serviço, reiniciado, testado, vivo, causa, fundo, segue, fora, nosso, controle, teto, maior, folga, pra, auto, recuperação, interna, terminar, estourar
 (362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: avaliação, capacidades, seth, síntese, pedido, humano, vamos, avaliar, luz, descobertas, hoje, orienta, envio, ela, orientação, escrita, relay, salva, área, trabalho, orientacao
 (335) CORREÇÃO — 04/09/2026 · (334) misturou dois fatos de força diferente ao datar o parecer de Qwen — a parte sólida (conteúdo descreve estado superado) não muda; a parte fraca (quando o texto foi ESCRITO) é retirada
   palavras-chave: misturou, fatos, força, diferente, datar, parecer, qwen, parte, sólida, conteúdo, descreve, estado, superado, muda, fraca, texto, escrito, retirada
-(334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, não provada · auditoria de uma proposta de 7 itens da Seth (com parecer de Qwen), texto de 2 dias e ~20 entradas atrás: 2 itens descansam em premissa falsa, 2 já estavam implementados por outro caminho, o resto sobrevive
-  palavras-chave: causa, raiz, drift, hipótese, fundamentada, provada, auditoria, proposta, itens, seth, parecer, qwen, texto, dias, entradas, atrás, descansam, premissa, falsa, estavam, implementados, caminho, resto, sobrevive
+(334) DIÁRIO — 04/09/2026 · Causa raiz do drift de (333): hipótese fundamentada, …
+  palavras-chave: causa, raiz, drift, hipótese, fundamentada
 (333) DIÁRIO — 04/09/2026 · Sincronização pedida pelo Humano: drift real achado …
   palavras-chave: sincronização, pedida, humano, drift, real, achado
 (332) CORREÇÃO — 04/09/2026 · (331) errou: `guarda-utf8-hidratacao` NÃO está pen …

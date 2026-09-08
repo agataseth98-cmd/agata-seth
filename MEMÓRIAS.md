@@ -28,6 +28,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
+
+Par `.diff`/`APROVADO-` em `propostas/aplicadas/projeto-omniroute-504-causa-raiz`. O `.diff` foi preparado e depois emendado por mim (o trecho "não feito ainda" virou "feito em 08/09"). O `APROVADO-` foi criado **por mim, sob ordem direta do Humano** ("empurra e cria o APROVADO-"), não pela mão do Humano como de praxe — registrado assim no próprio arquivo de aprovação, por NÃO MINTA. P-8 continua satisfeito pela presença do marcador; a ressalva é que desta vez o marcador não foi digitado pelo Humano.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` contra HEAD antes de aplicar; `git push` confirmado (`313cd99..80af97a`); `bash scripts/perimetro.sh` no hook de commit. Autorização: Humano, "empurra e cria o APROVADO-".
+
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
 
 **Pedido do Humano:** "vc ia acessar o navegador Brave e configurar o omnirout" → depois "todos" (aplicar + reiniciar + testar ao vivo + registrar).

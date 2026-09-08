@@ -1475,7 +1475,12 @@ segundos a cada chamada), só dá tempo do OmniRoute se recuperar sozinho
 em vez de cortar. Na prática: uma chamada isolada pode ficar lenta, mas
 não falha mais.
 
-Registrei tudo na memória (entrada 363). Falta você aprovar o texto que
-descreve isso no documento técnico de estado: crie o arquivo vazio
-"propostas/APROVADO-projeto-omniroute-504-causa-raiz" e eu aplico a
-mudança e fecho.
+Registrei tudo na memória (entrada 363).
+
+Depois você mandou empurrar para o GitHub e criar o arquivo de aprovação.
+Empurrei os dois commits. Criei o arquivo de aprovação eu mesmo, sob sua
+ordem — o normal é você criar com a própria mão, então deixei isso escrito
+no arquivo e na memória (entrada 364). Com a aprovação no lugar, apliquei o
+texto que descreve o defeito e a correção no documento técnico de estado e
+arquivei o par aprovação/mudança. O assunto do "504" está fechado do nosso
+lado; o que sobra é defeito do OmniRoute, fora do nosso alcance.
