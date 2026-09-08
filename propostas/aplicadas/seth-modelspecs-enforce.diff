@@ -1,0 +1,57 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index d13b489..b6e1cb6 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -31,6 +31,52 @@ interface:
+ registration:
+   socialLogins: []
+ 
++# modelSpecs com enforce (MEMÓRIAS (392)): o LibreChat guarda no localStorage do
++# navegador o ultimo modelo escolhido -- uma escolha velha (ex.: um `llama-3.2-11b`
++# fantasma dos ~300 do catalogo cru, de antes do `fetch: false`) sobrevive a
++# mudanca de yaml e a Seth abre com "modelo nao disponivel". `enforce: true` faz
++# o yaml VENCER o localStorage: a UI so oferece estas specs, `seth-livre` e' o
++# default automatico, e o estado velho do navegador e' ignorado. As 4 concretas
++# ficam como troca manual (fallback quando um provedor cai). `auto/best-free`
++# fica como opcao, pra quando o auto-roteador do OmniRoute se recuperar.
++modelSpecs:
++  enforce: true
++  prioritize: true
++  list:
++    - name: "seth-livre"
++      label: "Seth (cascata livre)"
++      default: true
++      description: "zai -> gemini -> huggingface -> mistral, prioridade. O default."
++      preset:
++        endpoint: "Seth"
++        model: "seth-livre"
++    - name: "seth-zai"
++      label: "Seth · zai/glm-4.7-flash"
++      preset:
++        endpoint: "Seth"
++        model: "zai/glm-4.7-flash"
++    - name: "seth-gemini"
++      label: "Seth · gemini-2.5-flash"
++      preset:
++        endpoint: "Seth"
++        model: "gemini/gemini-2.5-flash"
++    - name: "seth-hf"
++      label: "Seth · Llama-3.3-70B (HuggingFace)"
++      preset:
++        endpoint: "Seth"
++        model: "huggingface/meta-llama/Llama-3.3-70B-Instruct"
++    - name: "seth-mistral"
++      label: "Seth · ministral-8b (Mistral)"
++      preset:
++        endpoint: "Seth"
++        model: "mistral/ministral-8b-latest"
++    - name: "seth-auto"
++      label: "Seth · auto/best-free (auto-roteador OmniRoute)"
++      description: "So quando o auto-roteador do OmniRoute estiver saudavel de novo."
++      preset:
++        endpoint: "Seth"
++        model: "auto/best-free"
++
+ # Memoria persistente: desligada de proposito. Ver acima.
+ memory:
+   disabled: true

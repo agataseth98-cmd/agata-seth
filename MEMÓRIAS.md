@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a6f841385ab56970206d6a5ed3d3bfe7f79d058a
-  Escrito em: 08/09/2026 20:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3
+  Escrito em: 08/09/2026 20:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6f841385ab56970206d6a5ed3d3bfe7f79d058a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
+
+**O que aconteceu:** depois de (390) (`fetch: false` + lista curada), o Humano abriu a Seth e recebeu *"O modelo 'huggingface/meta-llama/llama-3.2-11b-instruct' não está disponível para Seth"*. Causa: o LibreChat (v0.8.7) guarda o último modelo escolhido no **localStorage do NAVEGADOR**, não no servidor — a escolha velha (um `llama-3.2-11b` fantasma, de quando o seletor tinha os ~300 do catálogo cru) sobreviveu à mudança de yaml, e o LibreChat a rejeita porque não está mais na lista.
+
+**Correção de suposição minha:** ofereci "limpo a preferência no MongoDB". Conferi — **não existe no MongoDB** (`db.conversations` sem endpoint Seth, `db.users` sem campo de modelo). É localStorage do cliente; nada pro executor apagar do lado servidor. Retirado (mesmo tipo de correção da (391)).
+
+**Feito (proposta `seth-modelspecs-enforce`, `redesign/librechat/librechat.yaml`, quarentena, 1 assinatura):** bloco `modelSpecs` novo, `enforce: true` + `prioritize: true` + 6 specs (todas endpoint `Seth`): `seth-livre` (default), `seth-zai`, `seth-gemini`, `seth-hf`, `seth-mistral` (troca manual / fallback), `seth-auto` (`auto/best-free`, só quando o auto-roteador do OmniRoute sarar). Com `enforce`, a UI **só** oferece essas specs, `seth-livre` é o default automático, e o estado velho do navegador é ignorado.
+
+**Verificado:** `yaml.safe_load` OK; deploy `cp` pro `~/librechat/` (md5 `0abd1646` nos 2 lados) + `docker restart librechat`; log de startup: *"Custom config file loaded: modelSpecs: {"*; `seth-livre` pela cadeia `:20126` → 200. `estado_para_eco.sh` e `date` rodados agora (20:46 -03).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-modelspecs-enforce`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `docker exec librechat-mongodb mongosh` confirmou que não há preferência de modelo no Mongo (conversas só endpoint `agents`, user doc sem campo); `docker exec` da versão (`v0.8.7`) e do suporte a `modelSpecs` (`loadCustomConfig.js:171`); `yaml.safe_load` + `md5sum` nos 2 lugares + `docker logs` do startup + `curl :20126`; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "as 2 e repita bateria de testes" → "feito" + `APROVADO-seth-modelspecs-enforce` assinado.
+
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
 
 **O que (389) afirmou:** "a Seth afirmou como 'fato com fonte' uma discrepância que não existe — `ls memoria/obsidian/entradas/` mostra 0049-0388; a discrepância dela ('até 0385') veio de ler a cauda de um resultado truncado como fim-de-lista".
