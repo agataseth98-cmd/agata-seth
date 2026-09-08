@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2b0e58ace7a939d38cb17c7405d36e85bf6c1131
-  Escrito em: 08/09/2026 16:28 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1cdf5d800965eeba6724b8a32da6596d4415624b
+  Escrito em: 08/09/2026 16:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b0e58ace7a939d38cb17c7405d36e85bf6c1131/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1cdf5d800965eeba6724b8a32da6596d4415624b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
+
+**Achado que reordenou a prioridade:** `redesign/README.md` dizia *"NÃO é canon · vive no branch `redesign` · gates de governança (P-8, Cadeia de auditoria, Regra 8) SUSPENSOS"*. Falso desde o merge em `main` das Fases 0–8 ((310)/(311)) — esse código É a espinha de produção e está sob P-8 (o `_p8_eh_comportamento` lista `redesign/router/*`, `redesign/grafo/*.py`, `redesign/librechat/*.mjs|*.yaml`, `redesign/systemd/*`). Um leitor que abrisse o README era informado errado de que podia mexer sem cerimônia.
+
+**Feito (nada quarentenado — README de topo e `.md` de topo não estão no P-8; `extras/` e `backlog.md` também não; sem assinatura):**
+- `redesign/README.md` **reescrito**: tira o "não é canon / gates suspensos"; põe "mergeado em `main`, É produção, os gates valem" + mapa de 1 linha por subdir (router/grafo/librechat/mcp/igpu/obsidian/systemd/fase7-hd) com o serviço de cada.
+- **9 docs de planejamento** (`ROADMAP`, `STATUS`, `PESQUISA`, `CONTINUIDADE`, `CLAUDE-NA-MAQUINA`, `ANCORA`, `CANON-DELTA`, `OTIMIZACOES`, `SILO-HUMANO`) → `extras/arquivo-redesign/` por `git mv` (histórico preservado). A varredura de (319)/(320) os tinha mantido como "referência ativa"; reavaliação: redesenho fechado há mais de um mês, MEMÓRIAS é o registro, zero ref viva em canon/scripts/hooks/config.
+- **Ficaram em `redesign/`:** `LOG.md` (PROJETO.md e MEMÓRIAS.md citam o caminho — MEMÓRIAS não se edita, Regra 4); `ACESSO-GRADUADO.md` (o dict `CANON` de `redesign/librechat/canon-mcp.mjs`, quarentena P-8, aponta pra ele — mover exigiria assinatura); todas as pastas de código.
+- `extras/arquivo-redesign/README.md` atualizado registrando a mudança.
+
+**Não feito, virou B6 (ordem do Humano: "deixe registrada uma mudança futura dos códigos para fora de redesign para maior coerência e rastreabilidade, compreensão do sistema"):** promover `grafo/`, `router/`, `librechat/`, `mcp/`, `igpu/`, `obsidian/`, `systemd/`, `fase7-hd/` pra um nome permanente. É migração grande — toca ~10 units systemd (fonte + instaladas, com `.venv` no `ExecStart`), `perimetro.sh` (padrões P-8 + lista P-9), `scripts/gerar_obsidian.py` (lista hard-coded de `redesign/*/README.md`), `PROJETO.md` (18 refs), `config/modelos-gratuitos.md`, `canon-mcp.mjs`. Plano faseado próprio + aprovação assinada por peça. Registrado em `propostas/backlog.md` B6.
+
+**Refs que ficaram levemente velhas, aceitas:** o `LOG.md` (arquivo de história, congelado em lugar) e os `.md` já em `extras/arquivo-redesign/` têm links internos pra `redesign/STATUS.md` etc. — são docs congelados apontando um pro outro, não se reescreve história por link velho. O `canon-mcp.mjs` já tinha a chave `ROADMAP` quebrada antes disto (achado registrado numa entrada FRIO); mover `redesign/ROADMAP.md` não piora.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -rn` dos 10 nomes em `--include` de `.py/.sh/.mjs/.md/.service/.conf/.yaml/.yml` no repo inteiro pra achar refs vivas antes de mover (só `canon-mcp.mjs`→ACESSO-GRADUADO e `LOG.md` interno apareceram); `_p8_eh_comportamento` lido pra confirmar que `redesign/*.md` de topo não é quarentena; `sed` do dict `CANON` inteiro do `canon-mcp.mjs` pra ver o que quebra; `git mv` (não `mv`+`add`) pra preservar histórico. Autorização: Humano — "aprovado" (CORE) + "deixe registrada uma mudança futura dos códigos para fora de redesign" (→ B6).
+
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
 
 **Reavaliação:** os dois itens de backlog eram bem menores do que o texto sugeria.

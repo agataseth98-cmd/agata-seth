@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (357) DIÁRIO — 06/09/2026 · MEMÓRIAS por período (Fase 4, item 3 do backlog reordenado em (355)) implementada — quente/morno/frio, testado num clone descartável antes de tocar o canon real, cinco bugs achados e corrigidos no processo, corte final reformulado a pedido do Humano (quente começa vazio, esta entrada é o marco zero); período de aderência de 4 semanas registrado
 (356) DIÁRIO — 06/09/2026 · Discordância sintética (item 2 do backlog reordenado em (355)): checagem mecânica do relógio de 4 semanas (P-13) implementada + convenção `SINTÉTICO: true` documentada em REGRAS.md — achado, no caminho, que uma estimativa anterior de urgência estava errada
 (355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
-(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
+(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto d …
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não …
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — o …
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em ` …

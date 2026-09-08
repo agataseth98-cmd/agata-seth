@@ -6,11 +6,19 @@ viraram **história**, movidos pra cá em 04/09/2026 (MEMÓRIAS (319)/(320))
 numa varredura pedida pelo Humano ("muitas notas soltas... tornar tudo
 consiso e coerente"). Nada aqui é operacional — o que ainda é vivo continua
 em `redesign/` (código-fonte das peças em produção: `router/`, `grafo/`,
-`mcp/`, `librechat/`, `obsidian/`, `igpu/`, `systemd/`, `fase7-hd/`) e nos
-documentos que seguem sendo referência ativa (`STATUS.md`, `LOG.md`,
-`CONTINUIDADE.md`, `CLAUDE-NA-MAQUINA.md`, `ANCORA.md`, `ACESSO-GRADUADO.md`,
-`ROADMAP.md`, `CANON-DELTA.md`, `OTIMIZACOES.md`, `SILO-HUMANO.md`,
-`PESQUISA.md` — nenhum destes foi movido).
+`mcp/`, `librechat/`, `obsidian/`, `igpu/`, `systemd/`, `fase7-hd/`), o
+`LOG.md` (citado por PROJETO.md/MEMÓRIAS.md) e o `ACESSO-GRADUADO.md`
+(citado pelo dict `CANON` de `redesign/librechat/canon-mcp.mjs`).
+
+**Atualização MEMÓRIAS (385), 08/09/2026:** os 9 docs de planejamento das
+fases (`ROADMAP`, `STATUS`, `PESQUISA`, `CONTINUIDADE`, `CLAUDE-NA-MAQUINA`,
+`ANCORA`, `CANON-DELTA`, `OTIMIZACOES`, `SILO-HUMANO`) — que a varredura de
+(319)/(320) tinha mantido como "referência ativa" — foram movidos pra cá
+agora. Reavaliação: o redesenho fechou há mais de um mês, MEMÓRIAS é o
+registro do que aconteceu, e nenhum dos 9 tem referência viva em
+canon/scripts/hooks/config. `redesign/README.md` foi reescrito no mesmo
+commit (dizia, errado, que os gates de governança estavam suspensos — o
+código foi mergeado em `main` em (310)/(311) e está sob P-8).
 
 - `tasks/P0-*.md` … `P8-*.md` (42 arquivos) — especificação de cada tarefa
   das 9 fases do redesenho. Todas fechadas; o que aconteceu de fato está em

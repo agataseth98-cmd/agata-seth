@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
+  palavras-chave: reorg, redesign, parte, docs, readme, estava, mentindo, planejamento, arquivados, item, fork, pós, código, fica, pra, ordem, humano
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
   palavras-chave: fechados, parecer, remoto, alinhamento, regras, sanity, check, item, fork, pós
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: discordância, sintética, item, backlog, reordenado, checagem, mecânica, relógio, semanas, implementada, convenção, sintético, true, documentada, regras, achado, caminho, estimativa, anterior, urgência, estava, errada
 (355) DIÁRIO — 06/09/2026 · Item "GLM membro pleno" do Ponto Cego fechado sem implementar — superado pela própria decisão de (352); WhatsApp removido do backlog por ordem do Humano; ordem dos 5 itens restantes redefinida (MEMÓRIAS por período sobe uma posição)
   palavras-chave: item, glm, membro, pleno, ponto, cego, fechado, implementar, superado, própria, decisão, whatsapp, removido, backlog, ordem, humano, itens, restantes, redefinida, memórias, período, sobe, posição
-(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
-  palavras-chave: item, ponto, cego, fechado, aberto, desde, redigido, mandado, pra, segunda, opinião, rotação, nova, auditado, aceitar, achou, erro, real, meu, aplicado, regras, emenda
+(354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto d …
+  palavras-chave: item, ponto, cego, fechado, aberto
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não …
   palavras-chave: groq, confirmado, free, tier, real, websearch
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — o …

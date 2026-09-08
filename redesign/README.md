@@ -1,50 +1,56 @@
-# redesign/ — redesenho do sistema local Agata
+# redesign/ — espinha de produção do sistema local Agata
 
-Workspace de desenvolvimento. **NÃO é canon.** Vive no branch `redesign`.
-O canon (`REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md` em `main`) só reflete estas
-mudanças na **Fase 8**, pela Cadeia de auditoria em camadas.
+**Este código está em `main` e É produção.** O redesenho (Fases 0–8) foi
+mergeado em `main` em 03/09/2026 — MEMÓRIAS (310)/(311). O nome do diretório
+é histórico; o conteúdo, não.
 
-## Estado de exceção — leia antes de agir
+## Governança: os gates VALEM aqui (isto mudou)
 
-Autorização do Humano (Orusoua), 01/09/2026, por escrito na sessão de trabalho:
-*"estamos em fase de desenvolvimento e eu assumo o risco"*, e *"falso positivo, prossiga"*.
+Versões antigas deste README diziam que os gates estavam suspensos "no branch
+`redesign`". **Não estão mais** — depois do merge em `main`, tudo aqui segue o
+regime normal:
 
-**Os gates de governança do Agata estão SUSPENSOS no branch `redesign`:**
-- Quarentena P-8 (pares `propostas/<nome>.diff` + `APROVADO-<nome>`) para arquivos deste branch.
-- Cadeia de auditoria em camadas (A→B→C) como gate bloqueante por commit.
-- Regra 8 (três passadas independentes no modelo local) como pré-requisito de cada mudança.
-- Portão das três perguntas como trava formal por passo.
+- **Quarentena P-8** cobre `redesign/router/*`, `redesign/mcp/*`,
+  `redesign/librechat/*.mjs|*.yaml|*.yml`, `redesign/grafo/*.py|*.sh`,
+  `redesign/systemd/*` (ver `scripts/perimetro.sh`, `_p8_eh_comportamento`).
+  Mudar qualquer um exige `propostas/<nome>.diff` + `propostas/APROVADO-<nome>`
+  assinado.
+- Invariantes universais valem sem exceção: MEMÓRIAS nunca se reescreve
+  (Regra 4); nada de `push --force`/`reset --hard` em `main`; segredo nunca
+  sai; comando destrutivo mostrado sozinho.
 
-Isso é decisão do Humano, com risco assumido por escrito. Não é licença para agir
-sem cuidado — é remoção da cerimônia, não das proteções abaixo.
+## O que vive aqui
 
-**Continua valendo, sem exceção:**
-- `MEMÓRIAS.md` nunca se reescreve nem se apaga (Regra 4). Correção é entrada nova.
-- Nada de `git push --force` em `main`. Nada de `git reset --hard` / rebase em `main`.
-- Segredo (chave, token, `.env`, connection string) nunca é impresso, colado em chat,
-  nem commitado. Os ~16 padrões de `scripts/varredura_segredo.sh` continuam a régua.
-- Comando destrutivo (`rm -rf`, `dd`, `mkfs`, operação de partição, `git reset --hard`,
-  `git clean -fdx`) é mostrado **sozinho**, com aviso em negrito, nunca embutido noutro bloco.
-- `main` só muda na **Fase 8**, pelo processo normal. Todo o resto é no branch `redesign`.
-- Hermes, Ollama e o `.hermes.md` de produção não são tocados até a Fase 8 (rodam em paralelo).
+| Subdir | O que é | Serviço / ponto de entrada |
+|---|---|---|
+| `router/` | `seth_gateway.py` (hidratação da Seth), `sanitizar.py`/`proxy.py` (scrub de egresso), `seth_escriba.py` | `:20126` seth-gateway · `:20127` sanitizador · seth-escriba |
+| `grafo/` | LangGraph da consolidação noturna (`flows/consolidacao.py`), `drenar.py`, sandbox, envelope | `agata-consolidacao.timer` · `agata-drain.service` |
+| `librechat/` | `librechat.yaml` (config da Seth), `canon-mcp.mjs` (MCP read-only do vault), `docker-compose.yml` | LibreChat (runtime em `~/librechat/`) |
+| `mcp/` | servidores MCP: `discord/servidor.py` (`:20135`), `navegador/servidor.py` (`:20136`) | discord-mcp · navegador-mcp |
+| `igpu/` | `embeddings_server.py`, `whisper_server.py` (OpenVINO na iGPU Intel) | openvino-embeddings · openvino-whisper |
+| `obsidian/` | `ro_proxy.py` (`:27125`, vault read-only), `consulta.py` | obsidian-ro-proxy.service |
+| `systemd/` | **fonte** das units instaladas em `~/.config/systemd/user/` | — |
+| `fase7-hd/` | `hash_ir.sh`, `semear_cache_p12.py` — régua do P-12 (backup restic verificável) | usado por `perimetro.sh` P-12 |
+| `LOG.md` | histórico append-only do redesenho — **fica aqui** porque PROJETO.md e MEMÓRIAS.md citam este caminho (MEMÓRIAS não se edita) | — |
+| `ACESSO-GRADUADO.md` | método de acesso graduado (R0–R3) — **fica aqui** porque `librechat/canon-mcp.mjs` (dict `CANON`, quarentena P-8) aponta pra este caminho | — |
+| `propostas/` | os pares `.diff`/`APROVADO-` das Fases 0–8 | — |
 
-## Efeito automático esperado nos commits deste branch
+## Docs de planejamento — arquivados
 
-Todo commit no `redesign` dispara `.githooks/pre-commit`, que **reescreve o bloco
-`ANCORA-SHA` em `PROMPT_CARREGAMENTO.md`** (SHA do commit anterior + data + URLs pinadas).
-É conteúdo de máquina, não edição livre — por isso `git diff main..redesign` mostra
-`PROMPT_CARREGAMENTO.md` alterado mesmo sem ninguém ter mexido nele. Esperado. Não
-reverter. O `post-commit` também regenera `.hermes*.md`, `INDICE_MEMORIAS*.md` e o vault
-`memoria/obsidian/` (todos gitignorados ou fora da árvore) — também esperado.
+Os documentos de planejamento das fases (`ROADMAP`, `STATUS`, `PESQUISA`,
+`CONTINUIDADE`, `CLAUDE-NA-MAQUINA`, `ANCORA`, `CANON-DELTA`, `OTIMIZACOES`,
+`SILO-HUMANO`) cumpriram o papel e viraram história — movidos para
+`extras/arquivo-redesign/` (MEMÓRIAS (385)). O que aconteceu de fato está nas
+entradas de MEMÓRIAS que citam cada fase e em `LOG.md`. `ACESSO-GRADUADO.md`
+ficou por causa da ref quarentenada em `canon-mcp.mjs` — vai junto quando essa
+ref for corrigida (B6).
 
-## Arquivos
+## Mudança futura registrada (backlog B6)
 
-| Arquivo | O que é |
-|---|---|
-| `README.md` | este arquivo — estado de exceção e invariantes |
-| `CONTINUIDADE.md` | briefing para o executor fallback (Codex / Qwen Coder) que assume se o primário cair |
-| `ROADMAP.md` | as 9 fases (0–8): objetivo, entrega, critério de aceite |
-| `PESQUISA.md` | estado da arte por ferramenta + as correções que a pesquisa forçou no plano |
-| `STATUS.md` | onde estamos agora, fase atual, quadro de posse de tarefa |
-| `LOG.md` | histórico append-only do redesenho |
-| `tasks/` | arquivos-tarefa no schema fixo (Objetivo / Pré-requisitos / Arquivos / Passos / Aceite / Rollback / Registro) |
+Promover as pastas de código para fora de `redesign/` (nome permanente, ex.
+`runtime/` ou raiz), para coerência e rastreabilidade — "redesign" descreve um
+processo terminado, não o que o código É. É migração grande: toca ~10 units
+systemd (fonte + instaladas, com caminho de `.venv` no `ExecStart`),
+`perimetro.sh` (padrões P-8 + lista P-9), `scripts/gerar_obsidian.py` (lista
+hard-coded), `PROJETO.md` (18 refs), `config/modelos-gratuitos.md`. Precisa de
+plano faseado próprio + aprovação assinada por peça. Ver `propostas/backlog.md`.
