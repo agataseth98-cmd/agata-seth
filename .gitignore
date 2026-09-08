@@ -77,3 +77,12 @@ redesign/grafo/paralelo-runs/
 # canon. Repositorio e' PUBLICO -- sem isto, um "git add -A" descuidado
 # publicaria uma nota pessoal por acidente (achado 04/09, 2026-09-04.md).
 /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md
+
+# Lixeira do Obsidian -- untracked, mas polui `git status` a cada exclusao
+# no app (achado na sanitizacao de 08/09, MEMORIAS (368)).
+/.trash/
+
+# Log do sincronizar-estado.sh / .githooks/post-commit -- escrita automatica,
+# aparecia como `M` em todo diff. Fora do indice desde (368); mesmo espirito
+# de `memoria/*.md` (linha acima): escritor automatico nunca versionado.
+memoria/*.log

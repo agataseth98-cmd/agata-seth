@@ -1520,3 +1520,28 @@ senha da chave — agora pede direto no terminal. Registro na memória
 O que ainda depende de você prestar atenção: aprovar de olhos fechados um
 diff de troca de chave que fosse malicioso. E, como sempre, guardar bem a
 chave privada.
+
+--- 08/09/2026, faxina ---
+Você mandou juntar tudo da triagem com uma limpeza geral do repositório.
+
+As "consolidações noturnas" (um robô que roda toda noite tentando resumir
+pedaços antigos da memória) nunca produziram nada aproveitável: metade
+falhava por erro de rede, e a única que saiu inteira estava com o
+raciocínio invertido. Arquivei os três lotes acumulados em `extras/` e
+desliguei o robô. Se um dia quiser religar, o comando está na memória
+(entrada 368).
+
+Também tirei do caminho um experimento velho que já tinha sido dado por
+encerrado ("spike RLM"), parei de versionar um arquivo de log que sujava
+todo diff, e apaguei a lixeira do Obsidian.
+
+Conferi arquivo por arquivo: tudo o que está versionado tem função. Duas
+coisas ficaram anotadas pra depois — a pasta `redesign/` hoje mistura
+código que roda de verdade com documento de projeto já fechado (vale
+reorganizar), e os arquivos da memória "fria" aparecem soltos no Obsidian
+sem ligação com nada. Esse segundo ponto exige mexer num script sob
+quarentena, então vai virar proposta assinada, separada.
+
+Ficou uma decisão sua: o resumo daquele episódio do parâmetro
+`presence_penalty` estava errado. Se quiser um resumo certo na memória,
+eu escrevo à mão e você aprova.

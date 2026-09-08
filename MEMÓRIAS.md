@@ -28,6 +28,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
+
+**Pedido do Humano:** "combine tudo [triagem: arquivar lotes + pausar timer + reescrever presence_penalty] com o fato de que memórias frio está solto no obsidian sem ligação com nada. aproveite e verifique se todos os arquivos no repo tem alguma finalidade e sanitize."
+
+**Triagem das 4 consolidações de 07/09** (conferidas contra as entradas reais na camada fria): `num-ctx-16814` vazia (HTTP 529); **`presence-penalty` com conteúdo errado** — afirma que a hipótese foi descartada "porque rodadas com o parâmetro zerado não apresentaram a falha", o que na verdade a *sustentaria*; o que a derrubou foi o controle com `presence_penalty=1.5` em (154); `tes-002-nonce` português quebrado, cita (86) fora dos Refs, estado já coberto em PROJETO.md; `ncora-sha` vago, typo, ponto (3) é meta-comentário sobre um título. **Nenhuma entra no canon.**
+
+**Feito (nada quarentenado, sem P-8):**
+- Lotes de consolidação 05/09 (rastreado) + 07/09 (não rastreado) → `extras/arquivo/consolidacoes-noturnas/` (o de 03/09 já não existia). Motivo: nenhum jamais aprovado desde 03/09, geração falhando repetido (429/504/529), e o único com conteúdo estava errado.
+- `agata-consolidacao.timer` desligado (`systemctl --user disable --now` — removeu o symlink em `~/.config/systemd/user/`). `config/agata-consolidacao.{service,timer}` ficam no repo como registro dormente. Reativar: `systemctl --user link config/agata-consolidacao.timer && systemctl --user enable --now agata-consolidacao.timer`.
+- `redesign/rlm/` (spike RLM P5-01, ARQUIVADO por ordem do Humano em 02/09, 140K, 31 arquivos) → `extras/arquivo-redesign/rlm/`. Nada lê em runtime — só prosa (`redesign/LOG.md`, MEMÓRIAS (0?? fria), docstring de `busca_semantica.py:16`).
+- `memoria/sincronizacao.log` fora do índice (`git rm --cached`; arquivo local mantido). `.gitignore` ganha `memoria/*.log` e `/.trash/`.
+- `.trash/` (lixeira do Obsidian: 2 arquivos vazios, 1 template `insight.md`, 1 canvas de 2 bytes) apagada. `__pycache__` locais limpos (regeneráveis).
+
+**Auditoria de finalidade — todo arquivo rastreado tem finalidade identificável.** Achados que sobram (relatório completo entregue ao Humano na conversa): (a) `redesign/` mistura código VIVO (grafo, router, mcp, systemd) com design concluído — reorg maior, não feito aqui; (b) FRIO (`MEMORIAS-FRIO-*.md` ×12) + `MEMORIAS-MORNO.md` são folhas órfãs no grafo do Obsidian (penduradas só num MOC mal-nomeado `moc-redesign.md`, sem estrutura por entrada) — vai em proposta à parte que toca `scripts/gerar_obsidian.py`; (c) `scripts/busca_semantica.py:16` aponta pra `redesign/rlm/` movido — cosmético, na mesma proposta.
+
+**Decisão pendente sua:** reescrever à mão o episódio do `presence_penalty` ((151)-(154)) como entrada de canon — o resumo automático estava errado; um correto precisa ser escrito por alguém. Preparo se você quiser.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git ls-files` como fonte da auditoria (não `os.walk`); cada referência a `redesign/rlm` grepada antes de mover (só prosa); `agata.target` active e `:20127`/`:20136` escutando depois de limpar `__pycache__`; `systemctl --user list-timers` confirma o timer morto; triagem conferida linha a linha contra (151)-(154), (49)-(90), (72)-(226) na camada fria. Autorização: Humano, "combine tudo ... sanitize".
+
 (367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da aprovação assinada de (366)) entra na quarentena P-8, e `_p8_assinatura_ok` passa a verificar contra a versão de `HEAD:`, nunca a working-tree — uma troca de `.allowed_signers` staged não autoaprova a própria troca. Rotação de chave = assinar o `.diff` da rotação com a chave atual. `scripts/aprovar.sh` corrigido no mesmo commit (assina lendo de arquivo + `SSH_ASKPASS_REQUIRE=never`; a forma antiga por pipe pro stdin falhava porque o `ssh-keygen` mandava a passphrase pro `/usr/lib/ssh/ssh-askpass`, inexistente nesta Máquina).
 
 **Pedido do Humano:** "prossegue" (depois de conferir que `.allowed_signers` bate com a chave pública dele) → aprovou assinando.

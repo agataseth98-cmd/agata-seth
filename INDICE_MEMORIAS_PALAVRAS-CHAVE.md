@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
+  palavras-chave: sanitização, repositório, parte, mecânica, toca, scripts, vai, proposta, assinada, lotes, consolidação, noturna, nunca, aprovados, arquivados, timer, desligado, spike, rlm, arquivado, sincronizacao, log, trash, fora, git
 (367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da aprovação assinada de (366)) entra na quarentena P-8, e `_p8_assinatura_ok` passa a verificar contra a versão de `HEAD:`, nunca a working-tree — uma troca de `.allowed_signers` staged não autoaprova a própria troca. Rotação de chave = assinar o `.diff` da rotação com a chave atual. `scripts/aprovar.sh` corrigido no mesmo commit (assina lendo de arquivo + `SSH_ASKPASS_REQUIRE=never`; a forma antiga por pipe pro stdin falhava porque o `ssh-keygen` mandava a passphrase pro `/usr/lib/ssh/ssh-askpass`, inexistente nesta Máquina).
   palavras-chave: propostas, allowed, signers, raiz, confiança, aprovação, assinada, entra, quarentena, assinatura, passa, verificar, contra, versão, head, nunca, working, tree, troca, staged, autoaprova, própria, rotação, chave, assinar, diff, atual, scripts, aprovar, corrigido, mesmo, commit, assina, lendo, arquivo, ssh, askpass, require, never, forma, antiga, pipe, pro, stdin, falhava, porque, keygen, mandava, passphrase, usr, lib, inexistente, máquina
 (366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, real, httperror, consolidação, achada, corrigida, era, cota, transitória, concluiu, tailscale, conferido, instalado, máquina, achado, responder, pergunta, direta, humano
 (339) DIÁRIO — 05/09/2026 · Duas skills novas da Seth — ponte Discord e controle de navegador — desenhadas, implementadas e testadas de ponta a ponta, sob regime de exceção autorizado pelo Humano ("implementar em regime de exeção até o fim, me chame apenas quando estritamente necessário")
   palavras-chave: skills, novas, seth, ponte, discord, controle, navegador, desenhadas, implementadas, testadas, ponta, sob, regime, exceção, autorizado, humano, implementar, exeção, fim, chame, apenas, estritamente, necessário
-(338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parecer Qwen, 2 já estavam feitos (achado corrigindo erro meu) — implementados e testados os 2 reais, C1.1 e B1.1 · investigado o `HTTPError` da consolidação noturna, provavelmente transitório
-  palavras-chave: pode, fazer, pendentes, auditoria, parecer, qwen, estavam, feitos, achado, corrigindo, erro, meu, implementados, testados, reais, investigado, httperror, consolidação, noturna, provavelmente, transitório
+(338) DIÁRIO — 05/09/2026 · "pode fazer": dos 4 pendentes da auditoria do parece …
+  palavras-chave: pode, fazer, pendentes, auditoria, parece
 (337) CORREÇÃO — 05/09/2026 · A Seth recebeu a orientação de (336), respondeu co …
   palavras-chave: seth, recebeu, orientação, respondeu
 (336) DIÁRIO — 04/09/2026 · Avaliação de capacidades da Seth, síntese de (331)/( …
