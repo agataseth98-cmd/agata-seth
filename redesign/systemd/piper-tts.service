@@ -1,0 +1,16 @@
+[Unit]
+Description=Agata -- Piper TTS (voz pt-BR local, shim OpenAI-compat, :8890) -- MEMÓRIAS (387)
+Documentation=file:///home/orusoua/agata/redesign/router/tts_piper.py
+
+[Service]
+Type=simple
+Environment=PIPER_TTS_HOST=127.0.0.1
+Environment=PIPER_TTS_PORT=8890
+ExecStart=/usr/bin/python3 %h/agata/redesign/router/tts_piper.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+
+# Sem [Install] -- sobe sob demanda, igual seth-gateway. O atalho da Seth
+# (redesign/systemd/seth) faz `systemctl --user start piper-tts` quando ligar
+# a voz. CPU only: RTF ~0,13, zero VRAM, nao briga com o cerebro local da Seth.

@@ -68,23 +68,22 @@ endpoints:
       modelDisplayLabel: "Seth"
       forcePrompt: false
 
-# Voz: TTS pelo kokoro-fastapi (:8880, ja roda nesta maquina, OpenAI-compat).
+# Voz: TTS pelo Piper (shim OpenAI-compat em :8890, redesign/router/tts_piper.py) --
+# voz pt-BR real (pt_BR-faber-medium, corpus CML-TTS), CPU, RTF ~0,13, zero VRAM.
+# MEMÓRIAS (387): as vozes pt-BR do Kokoro (pf_dora etc.) nao tem nota de qualidade
+# no model card e pronunciam portugues errado; Kokoro seguia em CPU numa maquina
+# com RTX 4060 -> tambem lento. Kokoro (:8880) segue no ar pra ingles -- e' so
+# trocar a url abaixo de volta pra 8880 e a lista de vozes pelas af_/am_.
 # STT (whisper :20130) ainda nao e OpenAI-compat em /v1 -- pendente, ver redesign/librechat/README.md
 speech:
   tts:
     openai:
-      url: "http://127.0.0.1:8880/v1/audio/speech"
+      url: "http://127.0.0.1:8890/v1/audio/speech"
       apiKey: "loopback-sem-chave"
       model: "tts-1"
       voices:
-        - "af_sky"
-        - "af_bella"
-        - "af_heart"
-        - "af_nicole"
-        - "am_adam"
-        - "am_michael"
-        - "bf_emma"
-        - "pf_dora"
+        - "pt-br"
+        - "dora"
 
 # --- MCP: memória local (vault Obsidian, read-only) ------------------------
 # canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.

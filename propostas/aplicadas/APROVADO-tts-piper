@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 18:15 -0300.
+Motivo: TTS troca Kokoro pt-BR (pf_dora, sem nota de qualidade, lento em CPU) por Piper pt_BR-faber-medium via shim OpenAI-compat em :8890; MEMORIAS (387)
+nome: tts-piper
+diff-sha256: 740365b855ffa40a8ab796ded8a2075b323aeb8bba616432a96eec6065677a4c
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQDf44q6RytLQpwy0+XUAmAvqP4E/J7DT/3ene1wNk1dQVk
+2JR3oshntzc8+enac60Zbt/398rOoX19TdooyXjwM=
+-----END SSH SIGNATURE-----

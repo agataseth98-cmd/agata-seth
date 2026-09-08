@@ -12,6 +12,9 @@ systemctl --user start seth-gateway.service seth-escriba.service
 # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
 # o LibreChat nao falha se elas ainda nao responderam, so tenta de novo depois.
 systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || true
+# Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
+# fica de pe pra ingles -- ver comentario no librechat.yaml.
+systemctl --user start piper-tts.service 2>/dev/null || true
 docker compose -f "$LC" up -d >/dev/null 2>&1 || true
 docker start kokoro-tts >/dev/null 2>&1 || true
 # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)

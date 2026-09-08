@@ -86,3 +86,6 @@ redesign/grafo/paralelo-runs/
 # aparecia como `M` em todo diff. Fora do indice desde (368); mesmo espirito
 # de `memoria/*.md` (linha acima): escritor automatico nunca versionado.
 memoria/*.log
+
+# TTS Piper -- voz .onnx ~60MB, baixada por redesign/router/tts-piper/instalar.sh (MEMÓRIAS (387))
+redesign/router/tts-piper/voices/
