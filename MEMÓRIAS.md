@@ -28,6 +28,18 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
+
+**Pedido do Humano:** "corrija o que for necessário já autorizei no Terminal" — aprovação assinada de `obsidian-frio-nao-orfao`.
+
+**O que entrou:** helper `camadas_fisicas_com_faixa()` (parseia MORNO + cada FRIO, tira min/max do número de entrada); seção nova no `moc-memoria.md` (que já é linkado do `INICIO.md`); MORNO/FRIO adicionados a `JA_COBERTOS` pra não duplicarem na lista de documentos soltos.
+
+**Testado:** `python3 scripts/gerar_obsidian.py` rodou limpo (543 notas); a seção "Camadas físicas" saiu com 13 linhas (`MEMORIAS-MORNO.md (354)–(356)` … `-com-migrado.md (49)–(94)`); zero `MEMORIAS-FRIO` no `moc-redesign.md`. `p8_quarentena` exit 0 com o par staged.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/obsidian-frio-nao-orfao`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check`; `ast.parse` + execução real do gerador antes/depois; assinatura do Humano verificada contra `.allowed_signers` antes de aplicar; `p8_quarentena` na árvore staged. Autorização: Humano, aprovação assinada (`APROVADO-obsidian-frio-nao-orfao`).
+
 (368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
 
 **Pedido do Humano:** "combine tudo [triagem: arquivar lotes + pausar timer + reescrever presence_penalty] com o fato de que memórias frio está solto no obsidian sem ligação com nada. aproveite e verifique se todos os arquivos no repo tem alguma finalidade e sanitize."

@@ -1,0 +1,60 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 067fced..417f631 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -191,6 +191,26 @@ def camadas_frio_recente_primeiro():
+     return [nome for _, _, nome in achados]
+ 
+ 
++def camadas_fisicas_com_faixa():
++    """(nome_arquivo, primeira_n, ultima_n, qtd) para MEMORIAS-MORNO.md e cada
++    MEMORIAS-FRIO-*.md, na ordem em que a hidratação as lê (morno, depois frio
++    recente->antigo). O MOC de memória usa isto pra listar cada arquivo físico
++    com a faixa de entradas que ele guarda -- sem isto os chunks ficam órfãos
++    no grafo do Obsidian (achado na sanitização de 08/09, MEMÓRIAS (368))."""
++    out = []
++    if os.path.isfile(MORNO):
++        es = parse_entradas_morno(ler(MORNO))
++        if es:
++            ns = [e["num"] for e in es]
++            out.append(("MEMORIAS-MORNO.md", min(ns), max(ns), len(ns)))
++    for nome in camadas_frio_recente_primeiro():
++        es = parse_entradas_frio(ler(os.path.join(REPO, nome)))
++        if es:
++            ns = [e["num"] for e in es]
++            out.append((nome, min(ns), max(ns), len(ns)))
++    return out
++
++
+ def parse_entradas_morno(texto):
+     """Camada morna (MEMORIAS-MORNO.md) -- mesma disciplina de quente
+     (marcador ENTRADAS-NOVAS obrigatório, mesmo corte no bloco migrado)."""
+@@ -545,6 +565,11 @@ def main():
+     # `todos_md` já foi capturado no topo de main(), antes de qualquer escrita.
+     JA_COBERTOS = {"REGRAS.md", "PROJETO.md", "PROJETO_REFERENCIA.md", "MEMÓRIAS.md"}
+     JA_COBERTOS |= {arq for arq, _ in CANON_INTEIROS}
++    # Camadas morna/fria: têm lugar próprio no moc-memoria.md (abaixo), não
++    # entram na lista genérica de "documentos soltos" (MEMÓRIAS (368)).
++    JA_COBERTOS |= {p for p in todos_md
++                    if os.path.basename(p) == "MEMORIAS-MORNO.md"
++                    or FRIO_NOME.match(os.path.basename(p))}
+     soltos = [p for p in todos_md if p not in JA_COBERTOS]
+     grupos = {}
+     for p in soltos:
+@@ -590,6 +615,16 @@ def main():
+         L.append(f"## {tp} ({len(por_tipo[tp])})")
+         L.append(" · ".join(link(ent_base[n]) for n in sorted(por_tipo[tp], reverse=True)))
+         L.append("")
++    fisicas = camadas_fisicas_com_faixa()
++    if fisicas:
++        L += ["## Camadas físicas (Fase 4)", "",
++              "> [!info] O grafo tem uma nota por entrada em `entradas/`, seja qual for o "
++              "arquivo que a guarda hoje. Estes são os arquivos físicos das camadas morna e "
++              "fria — congelados (morno: append-only pelo topo; frio: selado, imutável, P-14). "
++              "Listados aqui pra não ficarem soltos no grafo.", ""]
++        for nome, a, b, q in fisicas:
++            L.append(f"- {wikilink_arquivo(nome, nome)} — ({a})–({b}), {q} entradas")
++        L.append("")
+     escrever("moc-memoria.md", L)
+ 
+     L = fm({"tipo-nota": "moc", "tags": "[moc]"})

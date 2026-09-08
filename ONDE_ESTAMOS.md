@@ -1545,3 +1545,8 @@ quarentena, então vai virar proposta assinada, separada.
 Ficou uma decisão sua: o resumo daquele episódio do parâmetro
 `presence_penalty` estava errado. Se quiser um resumo certo na memória,
 eu escrevo à mão e você aprova.
+
+Você aprovou a correção dos arquivos da memória "fria" no Obsidian: agora
+o mapa da memória tem uma seção listando cada arquivo físico (morno e
+frio) com a faixa de entradas que ele guarda, então eles param de
+aparecer soltos no grafo. Entrada 369.
