@@ -11,8 +11,12 @@ mais chave nenhuma.
 
 ROTACAO JUSTA (06/09/2026, ordem do Humano: "ninguem tem papel fixo... revogo
 GLM... deve ser decidido entre modelos gratuitos sob um regime de regras
-justas de rotatividade"). Escolhe, a cada chamada, o modelo com MENOS usos
-bem-sucedidos entre os DISPONIVEIS do roster gratuito (ROSTER abaixo).
+justas de rotatividade"). Desde MEMÓRIAS (381) a granularidade e' por FAMILIA
+(fornecedor/vendor), nao por modelo -- ordem do Humano: "silo proprio por
+familia nao modelo". Escolhe, a cada chamada, um modelo da FAMILIA com MENOS
+usos bem-sucedidos entre os DISPONIVEIS do roster gratuito (ROSTER abaixo); o
+circuit breaker segue POR MODELO, entao um modelo problematico nao resfria a
+familia inteira.
 
 CAMADA DE PROTECAO (MEMORIAS (374), depois de o roster inteiro cair no mesmo
 dia -- 403 Cloudflare no Groq, 404 no MiniMax, 504/reasoning-burn no Gemini,
@@ -126,17 +130,34 @@ FALLBACK_OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api
 FALLBACK_MODELO = os.environ.get("AGATA_FALLBACK_MODELO", "qwen3.5-9b-64k:latest")
 
 
+def _familias_do_roster():
+    """Conjunto de famílias representadas no ROSTER agora."""
+    return {_familia(m) for m in ROSTER}
+
+
 def _carregar_rotacao():
-    """Contagem de usos BEM-SUCEDIDOS por modelo do ROSTER. Modelo novo no
-    ROSTER que nunca apareceu no arquivo entra com 0 -- nunca levanta."""
-    estado = {}
+    """Contagem de usos BEM-SUCEDIDOS por FAMÍLIA (MEMÓRIAS (381)): soma dos
+    sucessos de qualquer modelo daquela família. Lê o formato ANTIGO do
+    arquivo (chaves = id de modelo) e migra somando na família; o formato
+    novo (chaves = nome de família) é lido direto. Família nova entra com 0."""
+    bruto = {}
     if os.path.isfile(ROTACAO_ESTADO):
         try:
             with open(ROTACAO_ESTADO, encoding="utf-8") as f:
-                estado = json.load(f)
+                bruto = json.load(f)
         except Exception:  # noqa: BLE001 -- arquivo corrompido não trava a escolha
-            estado = {}
-    return {m: int(estado.get(m, 0)) for m in ROSTER}
+            bruto = {}
+    familias = _familias_do_roster()
+    cont = {fam: 0 for fam in familias}
+    for chave, n in (bruto.items() if isinstance(bruto, dict) else []):
+        # chave já é nome de família (formato novo) OU id de modelo (antigo).
+        fam = chave if chave in familias else _familia(chave)
+        if fam in cont:
+            try:
+                cont[fam] += int(n)
+            except (TypeError, ValueError):  # valor lixo no arquivo -- ignora
+                pass
+    return cont
 
 
 # --- circuit breaker por modelo (MEMÓRIAS (374)) -----------------------------
@@ -193,30 +214,36 @@ def _disponiveis():
 
 
 def escolher_modelo():
-    """Menos usado primeiro, ENTRE os disponíveis (fora de cooldown). Empate
-    quebrado pela ordem do ROSTER. None = roster inteiro em cooldown."""
+    """Família MENOS usada primeiro, ENTRE os modelos disponíveis (fora de
+    cooldown). Dentro da família, e no empate entre famílias, a ordem do
+    ROSTER decide. None = roster inteiro em cooldown. (MEMÓRIAS (381): a
+    granularidade passou de modelo pra família; o breaker segue por modelo,
+    então um modelo problemático não resfria a família toda.)"""
     disp = _disponiveis()
     if not disp:
         return None
-    estado = _carregar_rotacao()
-    return min(disp, key=lambda m: (estado.get(m, 0), ROSTER.index(m)))
+    cont = _carregar_rotacao()
+    return min(disp, key=lambda m: (cont.get(_familia(m), 0), ROSTER.index(m)))
 
 
 def _registrar_sucesso(modelo_escolhido):
-    """Sucesso: zera o breaker do modelo, conta uso na rotação, loga p/ P-15."""
+    """Sucesso: zera o breaker DO MODELO, conta uso na rotação DA FAMÍLIA,
+    loga p/ P-15. A 1ª gravação depois de (381) já sai no formato novo
+    (chaves = família), migrando o arquivo."""
     b = _carregar_breaker()
     if modelo_escolhido in b:
         b[modelo_escolhido] = {"fails": 0, "cooldown_ate": 0}
         _gravar_breaker(b)
-    estado = _carregar_rotacao()
-    if modelo_escolhido in estado:
-        estado[modelo_escolhido] += 1
+    fam = _familia(modelo_escolhido)
+    cont = _carregar_rotacao()
+    if fam in cont:
+        cont[fam] += 1
     os.makedirs(DESTINO_DIR, exist_ok=True)
     with open(ROTACAO_ESTADO, "w", encoding="utf-8") as f:
-        json.dump(estado, f, ensure_ascii=False, indent=2)
+        json.dump(cont, f, ensure_ascii=False, indent=2)
     try:
         with open(SUCESSOS_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{int(time.time())}\t{modelo_escolhido}\t{_familia(modelo_escolhido)}\n")
+            f.write(f"{int(time.time())}\t{modelo_escolhido}\t{fam}\n")
     except Exception:  # noqa: BLE001 -- log é auditoria, não trava
         pass
 

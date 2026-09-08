@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (354) DIÁRIO — 06/09/2026 · Item 2 do "Ponto Cego" fechado — §4.2 (item aberto desde (309)) redigido, mandado pra segunda opinião pela rotação nova, auditado antes de aceitar (achou erro real meu), aplicado em REGRAS.md com a emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
-(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
+(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em ` …
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat …
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REF …
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a p …

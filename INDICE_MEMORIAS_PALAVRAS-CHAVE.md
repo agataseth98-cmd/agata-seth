@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
+  palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
   palavras-chave: bug, achado, teste, fumaça, corrigido, campo, thinking, payload, pra, roster, cerebras, mistral, rejeitam, agora, zai, gemini
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: groq, confirmado, free, tier, real, websearch, memória, treino, somado, roster, remoto, modelos, rotação
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
   palavras-chave: glm, revogado, modelo, fixo, remoto, ordem, doutrinária, humano, ninguém, tem, papel, sistema, razão, scripts, agora, escolhe, rotação, justa, modelos, grátis, confirmados, testado, pedido, real
-(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
-  palavras-chave: item, ponto, cego, fechado, lacunas, redesign, grafo, librechat, yml, cobertas, varredura, real, mostrou, arquivos, afetados, trava, retroativo
+(351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em ` …
+  palavras-chave: item, ponto, cego, fechado, lacunas
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat …
   palavras-chave: tailscale, instalado, logado, publicando, librechat
 (349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REF …

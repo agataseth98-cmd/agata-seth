@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 16:13 -0300.
+Motivo: rotacao do Conselho Remoto passa a ser por familia (vendor); breaker segue por modelo; REGRAS 'O Conselho' item 3 vira granularidade de familia. B2 decidido pelas 4 respostas do Humano.
+nome: rotacao-por-familia
+diff-sha256: ed71595d8aa890bbaf63542f3cc7c7daa832c9bfb279e034fc291710e8ad5e3e
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQC6zWdBrEi2FK+kl3CY0jZKUgk2BATJQS3r8Z3XjsbimRr
+EygJxpUJycJzU8WTyys4Wp2dZjJPXzbeYpRxzMCg4=
+-----END SSH SIGNATURE-----

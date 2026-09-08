@@ -1,5 +1,14 @@
 # Dossiê — rotação por família em todos os papéis, silo por família não por modelo
 
+> **RESOLVIDO em MEMÓRIAS (381), 08/09/2026.** As 4 perguntas abaixo foram
+> respondidas pelo Humano: (1) opção (a) pra Claude; (2) Seth NÃO rotaciona
+> (segue (140)); (3) entrada própria em MEMÓRIAS se Seth mudar; (4) silo por
+> família. Parte 1 implementada (`conselho_remoto.py` rotação por família +
+> `REGRAS.md` "O Conselho" item 3), par assinado em
+> `propostas/aplicadas/rotacao-por-familia`. **Ainda em aberto:** mecanizar a
+> Cadeia de auditoria A/B/C (hoje é norma) e o rename do arquivo de silo (sem
+> efeito hoje). Este dossiê fica como registro do raciocínio.
+
 Não é canon. Rascunho pra decisão do Humano antes de qualquer `.diff`/`APROVADO-`
 — nenhuma linha de REGRAS.md, PROJETO.md ou script aqui é proposta de código,
 é desenho pra revisão (REGRAS, "Mudança estrutural": item grande exige segunda
