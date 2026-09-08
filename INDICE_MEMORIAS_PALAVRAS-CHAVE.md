@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
+  palavras-chave: aposentado, roteamento, complexidade, aprovado, nunca, implementado, item, fork, pós
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
   palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, ponto, cego, fechado, aberto, desde, redigido, mandado, pra, segunda, opinião, rotação, nova, auditado, aceitar, achou, erro, real, meu, aplicado, regras, emenda
 (353) DIÁRIO — 06/09/2026 · Groq confirmado com free tier real (`WebSearch`, não memória de treino) e somado ao roster do Conselho Remoto — 4 modelos na rotação, não 3
   palavras-chave: groq, confirmado, free, tier, real, websearch, memória, treino, somado, roster, remoto, modelos, rotação
-(352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
-  palavras-chave: glm, revogado, modelo, fixo, remoto, ordem, doutrinária, humano, ninguém, tem, papel, sistema, razão, scripts, agora, escolhe, rotação, justa, modelos, grátis, confirmados, testado, pedido, real
+(352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — o …
+  palavras-chave: glm, revogado, modelo, fixo, remoto
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em ` …
   palavras-chave: item, ponto, cego, fechado, lacunas
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat …
