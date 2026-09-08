@@ -29,6 +29,8 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
 | `cerebras/gemma-4-31b` | Cerebras | limpo (200, finish=stop, zero reasoning). Melhor aposta hoje. |
 | `zai/glm-4.7-flash` | Zhipu | funciona quando a z.ai não está em 529 (sobrecarga transitória). |
 | `gemini/gemini-2.5-flash` | Google | degradado (504 intermitente + ignora `thinking:disabled` e queima reasoning). Só com `max_tokens ≥ 10000`. |
+| `huggingface/meta-llama/Llama-3.3-70B-Instruct` | HuggingFace | **(379)** — 200, finish=stop, ~1,3s, sem reasoning burn. Via HF Inference Providers (`router.huggingface.co`). Token precisa de `inference.serverless.write` ("Make calls to Inference Providers"). Free tier = crédito mensal pequeno; esgotou → 402 → breaker põe em cooldown. `Llama-3.1-8B-Instruct` (mesma conta) é a alternativa barata. |
+| `mistral/ministral-8b-latest` | Mistral | **(379)** — 200, finish=stop, ~0,55s pelo :20127. Chave da La Plateforme com escopo "pessoal e compartilhado" (a "Studio / só compartilhado" dá 429). **`mistral/mistral-small-latest` dá 429 nesta conta** — usar só `ministral-8b` / `ministral-3b`. |
 | `qwen3.5-9b-64k` (Ollama :11434) | Local | fallback final, sempre disponível. Não é opinião de família independente. |
 | `llamacpp-local/qwen3-30b-a3b` | Local | MoE, fallback local alternativo. |
 
@@ -40,6 +42,8 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
 | `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
 | `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
 | `cerebras/gpt-oss-120b` | queima o orçamento em reasoning e devolve vazio. |
+| **GitHub Models** (`models.github.ai`) | **descontinuado pela GitHub** — `410 github_models_retirement_brownout` ("scheduled retirement"), 08/09/2026. Não há slug de provedor pra ele neste build do OmniRoute de qualquer forma. |
+| `mistral/mistral-small-latest` | `429 code 1300` nesta conta (free tier). Usar `mistral/ministral-8b-latest` no lugar (tabela de cima). |
 
 ## Candidatos — precisam de chave do Humano em `~/.config/agata/.env`
 
@@ -48,14 +52,16 @@ Depois da chave: configurar o provedor no OmniRoute (Provedores → Adicionar),
 
 | Provedor | Família | Free tier (set/2026) | OpenAI-compat |
 |---|---|---|---|
-| **Mistral AI** | Mistral | free mode, sem cartão, limites por workspace | sim |
-| **GitHub Models** | GitHub | 15 RPM · 150 RPD, sem cartão; hospeda GPT-4o/Claude/Llama grátis | sim |
-| **HuggingFace Inference** | HuggingFace | Serverless: ~centenas req/hora, modelos < ~10B, limites não publicados; Inference Providers com crédito pequeno | sim (Inference Providers) |
 | Cloudflare Workers AI | Cloudflare | 10.000 neurons/dia | parcial |
 | NVIDIA NIM | NVIDIA | prototipagem, sem limite publicado | parcial |
 
 Descartados por não serem free tier de verdade: SambaNova / Fireworks / AI21
 (créditos que expiram). Cohere: só avaliação (1.000 chamadas/mês).
+
+**Integrados em 08/09/2026 (MEMÓRIAS (379)):** HuggingFace e Mistral saíram
+desta lista pra tabela "Confirmado". Conexões criadas no OmniRoute
+(`provider=huggingface` / `provider=mistral`, ambas `isActive:true`). GitHub
+Models foi pra "Fora — não usar" (descontinuado).
 
 ---
 

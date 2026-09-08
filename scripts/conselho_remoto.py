@@ -92,11 +92,22 @@ DESTINO_DIR = os.path.join(
 #    roster quando confirmado ao vivo.
 #  - dentro: `cerebras/gemma-4-31b` -- testado ao vivo em (374): 200, finish=stop,
 #    zero reasoning tokens, limpo.
+#  - dentro (MEMÓRIAS (379)): `huggingface/meta-llama/Llama-3.3-70B-Instruct` --
+#    testado ao vivo pelo :20127: 200, finish=stop, ~1,3s, sem reasoning burn.
+#    Infra HF Inference Providers (empresa distinta). Ressalva: free tier da HF
+#    e' credito mensal pequeno; esgotou -> 402 -> o breaker poe em cooldown e a
+#    rotacao segue. `Llama-3.1-8B-Instruct` (mesma conta) e' a alternativa barata.
+#  - dentro (MEMÓRIAS (379)): `mistral/ministral-8b-latest` -- 200, finish=stop,
+#    ~0,55s pelo :20127. `mistral/mistral-small-latest` foi testado junto e da
+#    429 no free tier desta conta; ministral-8b (e ministral-3b) respondem
+#    normal. 5ª familia independente.
 # Ordem = desempate determinístico quando a contagem empata.
 ROSTER = [
     "zai/glm-4.7-flash",
     "gemini/gemini-2.5-flash",
     "cerebras/gemma-4-31b",
+    "huggingface/meta-llama/Llama-3.3-70B-Instruct",
+    "mistral/ministral-8b-latest",
 ]
 # Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
 # teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini
@@ -160,8 +171,13 @@ def _registrar_falha(modelo):
 
 def _familia(modelo):
     m = (modelo or "").lower()
+    # "huggingface" tem que vir ANTES de "llama"/"qwen": o id da HF e'
+    # `huggingface/meta-llama/Llama-3.3-70B-Instruct` e o casamento e' por
+    # substring, primeira chave que bate ganha. Sem isto cairia em "local"
+    # (errado -- e' chamada remota) e o P-15 contaria familia de menos.
     for chave, fam in (("glm", "zhipu"), ("zai", "zhipu"), ("gemini", "google"),
                        ("cerebras", "cerebras"), ("groq", "groq"),
+                       ("huggingface", "huggingface"), ("mistral", "mistral"),
                        ("openrouter", "openrouter"), ("qwen", "local"),
                        ("llama", "local"), ("minimax", "openrouter")):
         if chave in m:
@@ -293,7 +309,8 @@ def _provider_do_modelo(modelo):
     para o registro -- best-effort; a `resposta_crua` continua sendo a fonte."""
     m = (modelo or "").lower()
     for chave, prov in (("glm", "zai"), ("gemini", "gemini"), ("gpt-oss", "groq/cerebras"),
-                        ("gemma", "cerebras"), ("qwen", "local?"), ("llama", "local?"),
+                        ("gemma", "cerebras"), ("huggingface", "huggingface"),
+                        ("mistral", "mistral"), ("qwen", "local?"), ("llama", "local?"),
                         ("minimax", "openrouter"), ("auto", "openrouter")):
         if chave in m:
             return prov

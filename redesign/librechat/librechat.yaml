@@ -46,6 +46,9 @@ endpoints:
       # pra ela nunca ficar sem resposta quando um provedor grátis cai (o dia
       # inteiro de 08/09 os 4 caíram). Os `auto/claude-*` sao PAGOS -- deixados
       # na lista mas nunca como default.
+      # HuggingFace e Mistral entraram como provedores gratis confirmados em
+      # MEMÓRIAS (379) -- o `auto/best-free` ja os pega sozinho (conexoes ativas
+      # no OmniRoute); as entradas explicitas abaixo sao so pra selecao manual.
       models:
         default:
           - "auto/best-free"
@@ -55,6 +58,8 @@ endpoints:
           - "auto/reasoning"
           - "auto/coding"
           - "auto/vision"
+          - "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+          - "mistral/ministral-8b-latest"
           - "auto/claude-sonnet"
           - "auto/claude-opus"
         fetch: true

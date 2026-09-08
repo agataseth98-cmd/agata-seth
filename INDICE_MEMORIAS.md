@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openrouter/auto` **sai** do roster do Conselho Remoto — é produto PAGO ("Auto Best Available" da OpenRouter; o painel de Combos do OmniRoute avisa), tinha entrado por engano em (374); roster fica `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`. (b) `config/modelos-gratuitos.md` novo — fonte única de verdade (confirmado / fora e por quê / candidatos com chave). (c) Seth (LibreChat) ganha `auto/best-free` como default — meta-roteador do OmniRoute que só usa provedores grátis, cascata até o local.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (352) DIÁRIO — 06/09/2026 · GLM revogado como modelo fixo do Conselho Remoto — ordem doutrinária do Humano ("ninguém tem papel fixo, o sistema tem razão"); `scripts/conselho_remoto.py` agora escolhe por rotação justa entre 3 modelos grátis confirmados, testado com pedido real
 (351) DIÁRIO — 06/09/2026 · Item 1 do "Ponto Cego" fechado — lacunas de P-8 em `redesign/grafo/*.py`/`*.sh` e `redesign/librechat/*.yml` cobertas, varredura real mostrou 17 arquivos afetados, nenhum trava retroativo
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
-(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
+(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REF …
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a p …
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imp …
 (346) DIÁRIO — 05/09/2026 · Regime de exceção ENCERRADO por ordem do Humano — os …

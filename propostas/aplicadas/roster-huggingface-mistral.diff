@@ -1,0 +1,117 @@
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index e6cbd2b..2baa4c5 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -29,6 +29,8 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
+ | `cerebras/gemma-4-31b` | Cerebras | limpo (200, finish=stop, zero reasoning). Melhor aposta hoje. |
+ | `zai/glm-4.7-flash` | Zhipu | funciona quando a z.ai não está em 529 (sobrecarga transitória). |
+ | `gemini/gemini-2.5-flash` | Google | degradado (504 intermitente + ignora `thinking:disabled` e queima reasoning). Só com `max_tokens ≥ 10000`. |
++| `huggingface/meta-llama/Llama-3.3-70B-Instruct` | HuggingFace | **(379)** — 200, finish=stop, ~1,3s, sem reasoning burn. Via HF Inference Providers (`router.huggingface.co`). Token precisa de `inference.serverless.write` ("Make calls to Inference Providers"). Free tier = crédito mensal pequeno; esgotou → 402 → breaker põe em cooldown. `Llama-3.1-8B-Instruct` (mesma conta) é a alternativa barata. |
++| `mistral/ministral-8b-latest` | Mistral | **(379)** — 200, finish=stop, ~0,55s pelo :20127. Chave da La Plateforme com escopo "pessoal e compartilhado" (a "Studio / só compartilhado" dá 429). **`mistral/mistral-small-latest` dá 429 nesta conta** — usar só `ministral-8b` / `ministral-3b`. |
+ | `qwen3.5-9b-64k` (Ollama :11434) | Local | fallback final, sempre disponível. Não é opinião de família independente. |
+ | `llamacpp-local/qwen3-30b-a3b` | Local | MoE, fallback local alternativo. |
+ 
+@@ -40,6 +42,8 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
+ | `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
+ | `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
+ | `cerebras/gpt-oss-120b` | queima o orçamento em reasoning e devolve vazio. |
++| **GitHub Models** (`models.github.ai`) | **descontinuado pela GitHub** — `410 github_models_retirement_brownout` ("scheduled retirement"), 08/09/2026. Não há slug de provedor pra ele neste build do OmniRoute de qualquer forma. |
++| `mistral/mistral-small-latest` | `429 code 1300` nesta conta (free tier). Usar `mistral/ministral-8b-latest` no lugar (tabela de cima). |
+ 
+ ## Candidatos — precisam de chave do Humano em `~/.config/agata/.env`
+ 
+@@ -48,15 +52,17 @@ Depois da chave: configurar o provedor no OmniRoute (Provedores → Adicionar),
+ 
+ | Provedor | Família | Free tier (set/2026) | OpenAI-compat |
+ |---|---|---|---|
+-| **Mistral AI** | Mistral | free mode, sem cartão, limites por workspace | sim |
+-| **GitHub Models** | GitHub | 15 RPM · 150 RPD, sem cartão; hospeda GPT-4o/Claude/Llama grátis | sim |
+-| **HuggingFace Inference** | HuggingFace | Serverless: ~centenas req/hora, modelos < ~10B, limites não publicados; Inference Providers com crédito pequeno | sim (Inference Providers) |
+ | Cloudflare Workers AI | Cloudflare | 10.000 neurons/dia | parcial |
+ | NVIDIA NIM | NVIDIA | prototipagem, sem limite publicado | parcial |
+ 
+ Descartados por não serem free tier de verdade: SambaNova / Fireworks / AI21
+ (créditos que expiram). Cohere: só avaliação (1.000 chamadas/mês).
+ 
++**Integrados em 08/09/2026 (MEMÓRIAS (379)):** HuggingFace e Mistral saíram
++desta lista pra tabela "Confirmado". Conexões criadas no OmniRoute
++(`provider=huggingface` / `provider=mistral`, ambas `isActive:true`). GitHub
++Models foi pra "Fora — não usar" (descontinuado).
++
+ ---
+ 
+ ## Rotina de pesquisa/saúde (MEMÓRIAS (377))
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 869c808..9f50b0d 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -46,6 +46,9 @@ endpoints:
+       # pra ela nunca ficar sem resposta quando um provedor grátis cai (o dia
+       # inteiro de 08/09 os 4 caíram). Os `auto/claude-*` sao PAGOS -- deixados
+       # na lista mas nunca como default.
++      # HuggingFace e Mistral entraram como provedores gratis confirmados em
++      # MEMÓRIAS (379) -- o `auto/best-free` ja os pega sozinho (conexoes ativas
++      # no OmniRoute); as entradas explicitas abaixo sao so pra selecao manual.
+       models:
+         default:
+           - "auto/best-free"
+@@ -55,6 +58,8 @@ endpoints:
+           - "auto/reasoning"
+           - "auto/coding"
+           - "auto/vision"
++          - "huggingface/meta-llama/Llama-3.3-70B-Instruct"
++          - "mistral/ministral-8b-latest"
+           - "auto/claude-sonnet"
+           - "auto/claude-opus"
+         fetch: true
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 583283f..a3abded 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -92,11 +92,22 @@ DESTINO_DIR = os.path.join(
+ #    roster quando confirmado ao vivo.
+ #  - dentro: `cerebras/gemma-4-31b` -- testado ao vivo em (374): 200, finish=stop,
+ #    zero reasoning tokens, limpo.
++#  - dentro (MEMÓRIAS (379)): `huggingface/meta-llama/Llama-3.3-70B-Instruct` --
++#    testado ao vivo pelo :20127: 200, finish=stop, ~1,3s, sem reasoning burn.
++#    Infra HF Inference Providers (empresa distinta). Ressalva: free tier da HF
++#    e' credito mensal pequeno; esgotou -> 402 -> o breaker poe em cooldown e a
++#    rotacao segue. `Llama-3.1-8B-Instruct` (mesma conta) e' a alternativa barata.
++#  - dentro (MEMÓRIAS (379)): `mistral/ministral-8b-latest` -- 200, finish=stop,
++#    ~0,55s pelo :20127. `mistral/mistral-small-latest` foi testado junto e da
++#    429 no free tier desta conta; ministral-8b (e ministral-3b) respondem
++#    normal. 5ª familia independente.
+ # Ordem = desempate determinístico quando a contagem empata.
+ ROSTER = [
+     "zai/glm-4.7-flash",
+     "gemini/gemini-2.5-flash",
+     "cerebras/gemma-4-31b",
++    "huggingface/meta-llama/Llama-3.3-70B-Instruct",
++    "mistral/ministral-8b-latest",
+ ]
+ # Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
+ # teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini
+@@ -160,8 +171,13 @@ def _registrar_falha(modelo):
+ 
+ def _familia(modelo):
+     m = (modelo or "").lower()
++    # "huggingface" tem que vir ANTES de "llama"/"qwen": o id da HF e'
++    # `huggingface/meta-llama/Llama-3.3-70B-Instruct` e o casamento e' por
++    # substring, primeira chave que bate ganha. Sem isto cairia em "local"
++    # (errado -- e' chamada remota) e o P-15 contaria familia de menos.
+     for chave, fam in (("glm", "zhipu"), ("zai", "zhipu"), ("gemini", "google"),
+                        ("cerebras", "cerebras"), ("groq", "groq"),
++                       ("huggingface", "huggingface"), ("mistral", "mistral"),
+                        ("openrouter", "openrouter"), ("qwen", "local"),
+                        ("llama", "local"), ("minimax", "openrouter")):
+         if chave in m:
+@@ -293,7 +309,8 @@ def _provider_do_modelo(modelo):
+     para o registro -- best-effort; a `resposta_crua` continua sendo a fonte."""
+     m = (modelo or "").lower()
+     for chave, prov in (("glm", "zai"), ("gemini", "gemini"), ("gpt-oss", "groq/cerebras"),
+-                        ("gemma", "cerebras"), ("qwen", "local?"), ("llama", "local?"),
++                        ("gemma", "cerebras"), ("huggingface", "huggingface"),
++                        ("mistral", "mistral"), ("qwen", "local?"), ("llama", "local?"),
+                         ("minimax", "openrouter"), ("auto", "openrouter")):
+         if chave in m:
+             return prov

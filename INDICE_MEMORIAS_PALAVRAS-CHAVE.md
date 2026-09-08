@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
+  palavras-chave: huggingface, mistral, entram, roster, remoto, famílias, independentes, confirmadas, chamada, real, item, fork, pós
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
   palavras-chave: carimbo, sha, preâmbulo, regras, projeto, memórias, resolução, variante, numérica, frescor, sub, itens, parecer, glm, mandou, eliminar, usar, existe, inventar, contador, novo
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, ponto, cego, fechado, lacunas, redesign, grafo, librechat, yml, cobertas, varredura, real, mostrou, arquivos, afetados, trava, retroativo
 (350) DIÁRIO — 06/09/2026 · Tailscale instalado, logado e publicando o LibreChat de verdade — primeira mudança estrutural sob o regime NORMAL desde o fechamento em (346): par `.diff`/`APROVADO-` criado pelo Humano, não por mim
   palavras-chave: tailscale, instalado, logado, publicando, librechat, verdade, primeira, mudança, estrutural, sob, regime, normal, desde, fechamento, par, diff, aprovado, criado, humano, mim
-(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REFUTADA pelo Humano, checando de verdade no app: sem snapshot de recuperação de arquivo no horário do achado — causa raiz volta a `lacuna`, não decidida por adivinhação · Obsidian Sync confirmado desconectado, fecha o risco de exposição levantado em (336)
-  palavras-chave: hipótese, causa, drift, refutada, humano, checando, verdade, app, snapshot, recuperação, arquivo, horário, achado, raiz, volta, lacuna, decidida, adivinhação, obsidian, sync, confirmado, desconectado, fecha, risco, exposição, levantado
+(349) CORREÇÃO — 06/09/2026 · Hipótese de (333)/(336) sobre a causa do drift REF …
+  palavras-chave: hipótese, causa, drift, ref
 (348) CORREÇÃO — 05/09/2026 · "Ponto Cego" (registrado em (346)) reconferido a p …
   palavras-chave: ponto, cego, registrado, reconferido
 (347) CORREÇÃO — 05/09/2026 · "Veios da Ágata" (registrado em (346)) tinha 5 imp …

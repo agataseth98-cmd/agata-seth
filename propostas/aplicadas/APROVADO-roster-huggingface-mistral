@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-08 15:50 -0300.
+Motivo: HuggingFace (Llama-3.3-70B) e Mistral (ministral-8b) confirmados ao vivo entram como 4a e 5a familias do roster do Conselho Remoto
+nome: roster-huggingface-mistral
+diff-sha256: 1fcf6cebc7660cb2915e9862ea725711ba3da01ac1de96fe4f8db06d633c25ca
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQPSSR6ov9jUeO+Ws6Tqdop/lN3b3L+7MDLT25gpT1eVbtP
+qJDiO55A7p0C996qEp6KYd0LJKQ6PR7mNmHpgWgAw=
+-----END SSH SIGNATURE-----
