@@ -84,7 +84,9 @@ _DOUTRINA_FIXA = (
     "número de memória.\n"
     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
-    "parênteses) — é a Máquina medindo, você só repassa. Sem essa linha → "
+    "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
+    "repassa. O que vai entre parênteses é o SELO; **nunca** o `HASH-ESTADO`, "
+    "que é outra linha e não entra no cabeçalho. Sem a linha `HORA-MAQUINA:` → "
     "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
     "nunca repita a do cabeçalho anterior.\n"
     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
@@ -109,10 +111,21 @@ _DOUTRINA_FIXA = (
     "≠ não existir no disco.\n\n"
     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
-    "hidratação mínima; o resto é sob demanda.\n\n"
+    "hidratação mínima; o resto é sob demanda.\n"
+    "— **entrada (N) ≠ linha N.** Pra achar a entrada `(N)` de MEMÓRIAS, busque "
+    "o marcador `(N)` com `query_canon` (grep), não peça o intervalo de linhas "
+    "`N`: o argumento `linhas:` é número de linha física do arquivo, não de "
+    "entrada.\n\n"
 )
 _HASH_DOUTRINA = hashlib.sha256(_DOUTRINA_FIXA.encode("utf-8")).hexdigest()[:8]
 MARCADOR = f"<!-- SETH:HIDRATADO:{_HASH_DOUTRINA} -->"
+# Bloco de estado FRESCO, reinjetado a cada turno (MEMÓRIAS (417)). O bloco de
+# estado que entra junto da doutrina no 1º turno fica congelado -- hora e sync
+# envelhecem, e do turno 2 em diante a Seth escrevia `lacuna: sem relógio` /
+# `sync: não verificado` (viola Regra 1.1). Agora `_injeta`, quando a conversa
+# já está hidratada, tira o ESTADO-ATUAL anterior e põe um novo com a hora/sync
+# do momento. Curto (só a saída de estado_para_eco.sh), sem repetir a doutrina.
+MARCADOR_ESTADO = "<!-- SETH:ESTADO-ATUAL -->"
 
 _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -162,6 +175,18 @@ def _hidratacao() -> str:
     except OSError:
         return f"{MARCADOR}\n(hidratação indisponível: {HIDRATA_PATH} não pôde ser lido)"
     return f"{MARCADOR}\n" + _CACHE["texto"]
+
+
+def _bloco_estado_atual() -> str:
+    """Bloco de estado FRESCO pra reinjetar em turno já hidratado (MEMÓRIAS (417)).
+    String vazia se estado_para_eco.sh não deu saída — nesse caso não reinjeta
+    nada (a Seth fica com o bloco velho do 1º turno, honesto via IDADE-HIDRATACAO)."""
+    est = _estado()
+    if not est:
+        return ""
+    return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
+            f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
+            f"use ESTA hora e ESTE `sync:`):**\n{est}\n")
 
 
 # --- chamadas utilitárias do frontend que NÃO devem ser hidratadas ---------
@@ -256,11 +281,20 @@ def _injeta(payload: dict) -> dict:
     # chamada de título/utilidade do frontend: repassa crua, sem hidratar.
     if _e_chamada_utilitaria(payload):
         return payload
-    # já hidratado nesta conversa? não repete.
-    for m in msgs:
-        if isinstance(m, dict) and m.get("role") == "system" \
-           and isinstance(m.get("content"), str) and MARCADOR in m["content"]:
-            return payload
+    ja_hidratado = any(
+        isinstance(m, dict) and m.get("role") == "system"
+        and isinstance(m.get("content"), str) and MARCADOR in m["content"]
+        for m in msgs)
+    if ja_hidratado:
+        # não repete a doutrina, mas REFRESCA o estado (MEMÓRIAS (417)): tira o
+        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora.
+        msgs = [m for m in msgs if not (
+            isinstance(m, dict) and m.get("role") == "system"
+            and isinstance(m.get("content"), str) and MARCADOR_ESTADO in m["content"])]
+        bloco = _bloco_estado_atual()
+        payload["messages"] = ([{"role": "system", "content": bloco}] + msgs
+                               if bloco else msgs)
+        return payload
     sys_msg = {"role": "system", "content": _hidratacao()}
     # se o frontend já mandou um system próprio, o nosso entra ANTES dele
     payload["messages"] = [sys_msg] + msgs
@@ -455,16 +489,34 @@ def _selftest() -> int:
           f"({len(m[0]['content'])} chars)")
     falhas += 0 if ok else 1
 
-    # 2. pedido JÁ hidratado -> não repete
+    # 2. pedido JÁ hidratado -> NÃO repete a doutrina, MAS reinjeta ESTADO-ATUAL
     body2 = json.dumps({"model": "seth", "messages": [
         {"role": "system", "content": f"{MARCADOR}\nx"},
         {"role": "user", "content": "oi"}]}).encode()
     urllib.request.urlopen(urllib.request.Request(
         base, data=body2, headers={"Content-Type": "application/json"}), timeout=10).read()
     m2 = json.loads(_Dummy.ultimo_corpo)["messages"]
-    ok2 = len(m2) == 2 and m2[0]["content"] == f"{MARCADOR}\nx"
-    print(f"{'PASS' if ok2 else 'FALHA'}  já hidratado -> não repetiu (messages={len(m2)})")
+    hidr = [x for x in m2 if isinstance(x.get("content"), str) and MARCADOR in x["content"]]
+    est = [x for x in m2 if isinstance(x.get("content"), str) and MARCADOR_ESTADO in x["content"]]
+    ok2 = (len(hidr) == 1 and hidr[0]["content"] == f"{MARCADOR}\nx"  # doutrina não repetida
+           and len(est) == 1 and m2[0]["content"].startswith(MARCADOR_ESTADO))  # 1 estado fresco no topo
+    print(f"{'PASS' if ok2 else 'FALHA'}  já hidratado -> doutrina intacta + 1 ESTADO-ATUAL "
+          f"(msgs={len(m2)}, hidr={len(hidr)}, est={len(est)})")
     falhas += 0 if ok2 else 1
+
+    # 2b. ESTADO-ATUAL velho no input -> substituído (nunca acumula)
+    body2b = json.dumps({"model": "seth", "messages": [
+        {"role": "system", "content": f"{MARCADOR_ESTADO}\nVELHO"},
+        {"role": "system", "content": f"{MARCADOR}\nx"},
+        {"role": "user", "content": "oi"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body2b, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m2b = json.loads(_Dummy.ultimo_corpo)["messages"]
+    est_b = [x for x in m2b if isinstance(x.get("content"), str) and MARCADOR_ESTADO in x["content"]]
+    ok2b = len(est_b) == 1 and "VELHO" not in est_b[0]["content"]
+    print(f"{'PASS' if ok2b else 'FALHA'}  ESTADO-ATUAL velho -> substituído, não acumulou "
+          f"(est={len(est_b)})")
+    falhas += 0 if ok2b else 1
 
     # 3. chamada de TÍTULO do LibreChat -> repassada crua, SEM system hidratado
     body3 = json.dumps({"model": "seth", "messages": [

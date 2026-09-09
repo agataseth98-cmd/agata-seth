@@ -22,15 +22,15 @@
 # lacuna: <motivo>`. É pra poder ser colada no bloco de prontidão sem virar
 # uma quarta grafia.
 #
-# HASH-ESTADO é derivado e PÚBLICO — não tem relação com o nonce secreto do
-# TES-002 (esse é gerado por openssl, nunca versionado, entregue à mão). Serve
-# só para o eco citar um token que prova leitura sem "teatro" narrativo.
+# HASH-ESTADO é derivado e PÚBLICO — serve só para o eco citar um token que
+# prova leitura sem "teatro" narrativo. (Não há mais nonce: TES-002 aposentado
+# em 09/09/2026, MEMÓRIAS (417).)
 
 set -euo pipefail
 
 # Locale fixo: `cut -c` conta caractere sob UTF-8 e byte sob LC_ALL=C — sem
-# isto, a linha TES-002 (travessão, acentos) sai como mojibake num ambiente
-# despido de locale (cron/CI). Achado 3 da Camada B, 31/08/2026.
+# isto, linha com travessão/acentos sai como mojibake num ambiente despido de
+# locale (cron/CI). Achado 3 da Camada B, 31/08/2026.
 export LC_ALL="${LC_ALL_ECO:-C.UTF-8}"
 
 cd "$(git rev-parse --show-toplevel)"
@@ -94,18 +94,9 @@ for d in propostas/*.diff; do
 done
 shopt -u nullglob
 
-# --- TES-002 (só o status da 1ª frase; NÃO ecoar o nonce aposentado da linha) ---
-# Achado 4 da Camada B: a linha do PROJETO cita `e1d1a` ("não deve ser ecoado
-# por ninguém"). Cortar na 1ª frase deixa o status e larga o nonce.
-tes002_raw=$(grep -m1 -E '^[[:space:]]*-[[:space:]]+\*\*TES-002:\*\*' PROJETO.md \
-  | sed -E 's/^[[:space:]]*-[[:space:]]+//; s/\*\*//g' \
-  | sed -E 's/^(TES-002:[^.]*\.).*/\1/' \
-  | cut -c1-160 || true)
-if [ -n "$tes002_raw" ] && ! printf '%s' "$tes002_raw" | grep -q '`'; then
-  tes002="$tes002_raw …(ver PROJETO.md \"Estado dos bugs\")"
-else
-  tes002="TES-002: (status não extraído da forma esperada — ver PROJETO.md \"Estado dos bugs\")"
-fi
+# TES-002 aposentado em 09/09/2026 (MEMÓRIAS (417)) — não há mais linha de
+# status de nonce no eco. A checagem de hidratação velha agora é `sync:` +
+# HASH-ESTADO + IDADE-HIDRATACAO abaixo.
 
 # --- HASH-ESTADO: derivado, determinístico, público ---
 hash_estado=$(printf '%s\n%s\n%s\n%s\n%s\n' \
@@ -156,7 +147,6 @@ TOPO-MEMÓRIAS: $topo_linha
 $sync_linha
 IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
-$tes002
 HORA-MAQUINA: $hora_maquina
 HASH-ESTADO: $hash_estado
 --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e

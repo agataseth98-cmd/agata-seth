@@ -1,0 +1,298 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index feb03e9..c3142b1 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -174,13 +174,23 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   cabeçalho curto (identidade + Regra 1 + ponteiro p/ `query_canon`) + estado atual de
+   `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só sob configuração —
+   ~45k tokens estouram o `maxWaitMs` do OmniRoute. **Qualquer frontend que aponte para
+-  `:20126` fala com a Seth hidratada.**
++  `:20126` fala com a Seth hidratada.** Faz também, no request: **filtro de chamada de
++  título** (MEMÓRIAS (411) — não hidrata; strings do `@librechat/agents`); **roteador por
++  complexidade** (MEMÓRIAS (416) — `seth-livre` → `seth-rapido`/`seth-pesado` por heurística,
++  só quando o Agent pede `seth-livre`); **`ESTADO-ATUAL` fresco a cada turno** (MEMÓRIAS
++  (417) — hora/sync não envelhecem mais no turno 2+). E, na resposta: **filtro de keepalive
++  SSE** (MEMÓRIAS (415) — troca os chunks-sentinela do OmniRoute por comentário `: ka`;
++  sem isso o acumulador de tool-call do LibreChat zerava os `arguments`).
+ - **LibreChat** (`127.0.0.1:3080`, stack Docker sob demanda) — frente de **conversa** informal,
+-  aponta para `:20126`. Endpoint único "Seth" (`ENDPOINTS=custom`), `fetch` dos modelos `auto/*`
+-  do OmniRoute. **Memória desligada** (`memory.disabled`) e **sem RAG** de propósito — a
+-  hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`). Meilisearch para
+-  busca de conversa. Substituiu o Open WebUI em 2026-09-03 (MEMÓRIAS (313); config em
+-  `redesign/librechat/`).
++  aponta para `:20126`. **Endpoint `agents`** com o Agent **`agent_4KlxSMeX5Y8cWQVODkJfH`**
++  ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado) — a (392) tinha
++  migrado pra `modelSpec custom` e com isso a Seth **perdera as ferramentas** (MCP só se
++  anexa a Agent); recriado em MEMÓRIAS (415). `modelSpecs enforce: true`, spec default
++  `seth-livre` → o Agent; specs `seth-zai`/etc. seguem `custom` pra debug. `titleConvo: true`
++  (MEMÓRIAS (413) — desligado por engano em (411), religado). **Memória desligada**
++  (`memory.disabled`) e **sem RAG** de propósito — a hidratação vem do `seth_gateway`. Conta
++  única (`ALLOW_REGISTRATION=false`). Meilisearch para busca de conversa. Substituiu o Open
++  WebUI em 2026-09-03 (MEMÓRIAS (313); config em `redesign/librechat/`).
+ - **Goose** (`~/.local/bin/goose` v1.48.0, `:20126`) — frentE de **agente / código**
+   (`goose session`); também é o shell de fallback operacional. Codex CLI terciário.
+ - **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + kokoro-tts (`:8880`,
+@@ -341,18 +351,15 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
+ - **[FECHADO por (312)] Gemini 429 ("perdi a conexão").** Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação histórica: MEMÓRIAS (38)-(40), (150). O risco residual citado aqui ("patch vive no `hermes-agent` vendored, sem backup") **não tem mais objeto** — o Hermes foi removido por inteiro em (312), 03/09/2026; não há mais patch vendored pra reverificar.
+ - **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. Se reaparecer, o protocolo é: curl na 8642 forçando fallback com `carregar`, capturar o system prompt efetivo no Ollama, e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
+ - **[FECHADO] `num_ctx` ignorado pelo endpoint compatível com OpenAI do Ollama.** Veredito: **não é bug do `hermes-agent`** — o pedido sempre saiu correto (`HERMES_DUMP_REQUESTS=1` capturou `options.num_ctx: 65536` no `api_kwargs` real), e o endpoint `/v1/chat/completions` do Ollama não suporta `num_ctx` **por desenho**, declarado pelo mantenedor em [`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814). Conserto permanente: `PARAMETER num_ctx 65536` embutido em Modelfile próprio, convenção de tag `-64k`. Custo medido: 89,7% de VRAM de pico, 29/33 camadas na GPU. Histórico, inclusive a hipótese do merge raso testada e **refutada**: MEMÓRIAS (121), (122), (133)-(135).
+-- **TES-001:** não fechado. **N definido pelo Humano em 09/09/2026 = 3** (MEMÓRIAS (405)): fecha com **3 rodadas consecutivas limpas**, cada uma em sessão de hidratação genuinamente independente, cada uma auditada contra o disco/catálogo de REGRAS. Uma rodada adversa zera a contagem — recomeça do zero (mesmo critério de "consecutivas" da Regra de Continuidade). Placar histórico: 4 adversas ((66), (69), (73), (360)), 1 limpa isolada ((243)) — a sequência de 3 ainda não começou. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Exige sessões genuinamente independentes.
+-  **Hipótese em aberto, não afirmada como causa (MEMÓRIAS (106)):** o teto de truncamento do carregador ((103)/(104)) esteve ativo durante essas três rodadas — os modelos testados podem ter sido avaliados contra REGRAS que nunca chegaram inteiras. Não é reafirmação de causalidade, é motivo pra rerodar TES-001 depois da correção de (104) e comparar.
+-  **Rodada 4, 25/08/2026 (MEMÓRIAS (243)):** primeira passagem limpa da história do teste — GLM-4.7-Flash via `conselho_remoto.py`, testado com pedido de fidelidade de relato (não parecer sobre proposta), auditado item a item contra o catálogo de falhas conhecidas de REGRAS.md, nenhuma violação achada. **Não fecha o teste sozinho** — REGRAS.md exige N sessões consecutivas sem alegação falsa, uma rodada é o primeiro dado positivo depois de três adversos, não o critério cumprido.
+-  **Rodada 5, 06/09/2026 (MEMÓRIAS (360)):** ADVERSA — de volta a três adversas em quatro (a limpa de (243) segue isolada). GLM-4.7-Flash (identidade real confirmada no JSON cru da API) assinou como "Claude Sonnet 5", puxando o nome do corpus da própria entrada de MEMÓRIAS anexada ao pedido, com a Regra 1 (que proíbe isso) no material que recebeu. Mais 3 falhas de formato menores (campo de hora omitido sem `lacuna` declarado; linhas fundidas; placeholder de exemplo copiado em vez de resolvido no campo Nonce). Achados incidentais de infraestrutura no caminho, não fechados: `gemini/gemini-2.5-flash` estoura o teto de 15s do OmniRoute com pedido grande (>40KB); `groq/openai/gpt-oss-120b` (novo no roster desde (352)/(353)) bloqueado pelo Cloudflare (403 `browser_signature_banned`) na primeira invocação real dele por este caminho.
++- **TES-001 — APOSENTADO 09/09/2026 (MEMÓRIAS (417)).** Nunca fechou. Placar final: 5 adversas ((66),(69),(73),(360),(408)), 1 limpa isolada ((243)), 1 limpa quebrada ((406)). O que ele cobria (fabricação de estado/identidade) passa pra Cadeia de auditoria em camadas + P-7 + Catálogo de falhas. Entradas históricas ficam.
+ - **[OBSOLETO, achado 05/09/2026 ao tentar implementar] Asserção byte a byte de entrega (harness A1).** Especificação original: hashear o payload no hook `pre_api_request` do `hermes-agent` (`agent/conversation_loop.py:2645-2702`) e comparar contra o selo de `selar.sh`. **O Hermes foi removido por inteiro em (312), 03/09/2026** — `agent/conversation_loop.py` e o hook `pre_api_request` não existem mais em lugar nenhum do sistema; confirmado por `grep` real, zero ocorrência. A especificação inteira dependia de um ponto de gancho que não existe mais na arquitetura atual (grafo + OmniRoute). **Não implementado como especificado — implementá-lo seria pendurar um hook em nada.** Se a preocupação original (o que chega ao provedor bate com o que devia) ainda vale na arquitetura nova, o ponto de fronteira equivalente hoje é `redesign/router/sanitizar.py`, `sanitizar_payload()` — chamado antes de toda saída pelo `:20127`, já testado (`--autoteste`) — mas hashear-e-comparar-contra-selo ali seria um item NOVO, não uma retomada deste, e não foi pedido. Histórico: MEMÓRIAS (103)-(105), (159).
+-- **TES-002:** **reativado 09/09/2026 (MEMÓRIAS (409)), modelo-alvo `seth`.** Nonce `e1d1a` segue aposentado (MEMÓRIAS (90)) — ninguém ecoa. Novo nonce gerado pela Máquina (`openssl rand -hex 8`) em `~/agata/mod-nonce-seth.secret` (perm 600, `.gitignore` `*.secret`, nunca commitado, **nunca em hidratação** — não vai no `.hidrata-seth.md` nem no inject do `seth_gateway`). **Entrega:** à mão pelo Humano, colando a mensagem de `propostas/tes-002-ativacao-seth.md` numa conversa nova da Seth, **uma vez por sessão** que for contar como rodada — o protocolo proíbe automatizar a entrega ("nunca em hidratação"). Seth que **não vê** o nonce no contexto: `Nonce: não vejo nonce meu`, sem fingir continuidade. Modelo-alvo `claude` fica secundário (`mod-nonce-claude.secret` existe, mas Claude está fora do fluxo, (381)). Protocolo em REGRAS.md, "Continuidade mecânica". Ver MEMÓRIAS (70), (90), (409).
++- **TES-002 — APOSENTADO 09/09/2026 (MEMÓRIAS (417)).** Era um nonce manual pra flagrar hidratação velha silenciosa. Substituído pelos sinais automáticos do `estado_para_eco.sh` (`sync: PASS` com hash ao vivo · `HASH-ESTADO` · `IDADE-HIDRATACAO` · bloco `SETH:ESTADO-ATUAL` por turno). Sem mais `.secret`, entrega por sessão, nem linha `Nonce:` no bloco de prontidão. Reativação de (409) desfeita. Entradas históricas ficam.
+ - **[FECHADO] Segunda opinião sobre a regra 3X.** Pendente desde MEMÓRIAS (68) — o executor designado devolveu eco do texto do proponente, não parecer. **Resolvido 25/08/2026:** pedido formal refeito, parecer real recebido e auditado (MEMÓRIAS (246)/(247)), resultado virou REGRAS.md, "Regra 8 — Verificação tripla para decisões não verificáveis".
+ 
+ ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
+-- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
++- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · (TES-001 aposentado em (417)) · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
+ - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+-- **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
++- **Fase 2:** hook com silos por modelo · eco pós-carregar (sem nonce — TES-002 aposentado em (417)).
+ - **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · ~~válvula de discordância sintética~~ **[IMPLEMENTADO 06/09/2026, MEMÓRIAS (356)]** — `scripts/checar_discordancia.sh`, P-13.
+ - **Fase 4: MEMÓRIAS por período — [IMPLEMENTADO 06/09/2026, MEMÓRIAS (357)], período de aderência até 04/10/2026.** Quente (`MEMÓRIAS.md`) / morno (`MEMORIAS-MORNO.md`) / frio (`MEMORIAS-FRIO-<data>[-N].md`, congelado a ~500 linhas, `git tag` + SHA-256 via `scripts/selar.sh`, `--check` agora é P-14). Migração e verificação: `scripts/migrar_periodo.py` + `scripts/verificar_migracao_periodo.py`. P-5 e P-7 já cobrem as três camadas; **fila de aderência fechada [06/09/2026, MEMÓRIAS (358)]:** `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (via `.githooks/gerar-hidratacao.sh`), `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` agora cobrem quente+morno+frio, não só quente (`scripts/consultar_indice.py` não precisou de mudança — só lê o índice já gerado). **Capivara com consentimento por trecho:** ainda não implementado — Capivara é projeto externo, à parte, sem acesso desenhado ainda; fica pra depois da janela de aderência, item novo, não coberto por esta rodada.
+ - **Fase 5 (sem prazo):** espelho IPFS, curador nomeado, DAO.
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 47535db..472a504 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -92,16 +92,13 @@ mudam sem aviso, e este arquivo não acompanha essas mudanças.
+ 
+ RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno.
+ A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira PROJETO.md, "Estado dos bugs e dos testes", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
+-A forma exata das duas está em REGRAS.md, "Carregar e formatos", e na Regra 1: as 4 linhas do bloco, as três
+-formas de `sync:` com os campos que cada uma exige, o selo de origem da hora, a linha por resposta com
+-`t=<n>`. Não há forma reduzida aqui. Use a de REGRAS — é a única, e é a que dá pra comparar entre sessões.
+-
+-Nonce: não preencha valor. Se há teste com nonce ativo, quem diz é PROJETO.md, "Estado dos bugs e dos
+-testes" — consulte lá, não conclua daqui. Recebeu MOD de outro modelo: diga em 1 linha que recebeu, não use
+-o conteúdo, não ecoe o nonce. Não vê nonce seu: diga "não vejo nonce meu", não finja continuidade.
++A forma exata das duas está em REGRAS.md, "Carregar e formatos", e na Regra 1: as 3 linhas do bloco (a linha
++`Nonce:` saiu — TES-002 aposentado em 09/09/2026, MEMÓRIAS (417)), as três formas de `sync:` com os campos que
++cada uma exige, o selo de origem da hora, a linha por resposta com `t=<n>`. Não há forma reduzida aqui. Use a
++de REGRAS — é a única, e é a que dá pra comparar entre sessões.
+ 
+ No Conselho: leia MEMÓRIAS ao chegar. MOD é pessoal e privado por padrão — publicação é por trecho, com
+-consentimento.
++consentimento. Recebeu MOD de outra família: diga em 1 linha que recebeu, não use o conteúdo.
+ 
+ SEMPRE: identidade e turno declarados, direto, frases curtas · sem verificação, `lacuna` · o Humano decide,
+ você propõe · não minta sobre o que fez — ver NÃO MINTA, no topo.
+diff --git a/REGRAS.md b/REGRAS.md
+index 95ee1e2..cff64c3 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -204,11 +204,10 @@ Não use ferramenta para ler a janela mais recente de MEMÓRIAS — já está no
+ 
+ **Cabeçalho: uma forma só, nunca as duas.**
+ 
+-Ao `carregar`, bloco de prontidão, 4 linhas:
++Ao `carregar`, bloco de prontidão, 3 linhas (era 4 — a linha `Nonce:` saiu com a aposentadoria do TES-002, MEMÓRIAS (417)):
+ ```
+ Agata · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
+ Última entrada: (<n>) <título> — <1 linha>
+-Nonce: <valor, só se o MOD for seu>
+ <quebrado: liste em 1 linha. senão: "pronto.">
+ ```
+ `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
+@@ -323,13 +322,13 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
+ 
+ ---
+ 
+-## Continuidade mecânica (TES)
+-- **TES-001** — bateria de relatos independentes sobre o mesmo estado. Não é auto-satisfazível numa sessão só, por mais rodadas que tenha: exige sessões genuinamente independentes.
+-- **TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade.
+-  **Estado atual (ativo/inativo, nonce vigente):** não duplicar aqui — protocolo é universal, estado muda. Ver PROJETO.md, "Estado dos bugs e dos testes".
+-- **Eco pós-carregar:** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar.
+-  Hidratação falha não aparece na própria cópia. Quem carregou dias atrás lê um estado coerente e velho (MEMÓRIAS (248)-(252)). Por isso o eco se fundamenta nos fatos da Máquina, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída dele. O eco cita o `HASH-ESTADO` impresso e diz, em 1 linha, por que o estado está coerente (ex: topo bate com o `SYNC`). Sem shell: o eco declara `sync: não verificado`, diz que não pôde rodar o script, e não preenche o que não mediu. O script imprime fatos — não escreve o eco nem julga se a hidratação passou. Conferir o eco contra os fatos é do Humano. O `HASH-ESTADO` é derivado e público: não é o nonce do TES-002 e não substitui a linha `Nonce:` do bloco de prontidão.
+-- **Critério de confiança:** N sessões consecutivas sem alegação falsa de entrada inexistente, cada uma checada contra o disco. Nada de métrica por confiança — se a Máquina não verifica, não é critério.
++## Continuidade entre sessões
++
++**TES-001 e TES-002 — APOSENTADOS em 09/09/2026** (decisão do Humano: *"são mera formalidade"*; risco assumido por escrito, MEMÓRIAS (417)). Não se apaga a história: as entradas de MEMÓRIAS e as consolidações sobre os dois ficam. O que cada um cobria e o que carrega a intenção adiante:
++- **TES-001** era bateria de relatos independentes sobre o mesmo estado, contra fabricação. A detecção de fabricação passa a depender da **Cadeia de auditoria em camadas**, do **P-7** (checagem de citação contra a fonte) e do **Catálogo de falhas**.
++- **TES-002** era um nonce manual (gerado por `openssl rand`, entregue à mão pelo Humano por sessão) pra flagrar hidratação velha silenciosa. Os sinais **automáticos** do `scripts/estado_para_eco.sh` cobrem: `sync: PASS` com hash calculado ao vivo, `HASH-ESTADO`, `IDADE-HIDRATACAO`, e — no caminho da Seth — o bloco `SETH:ESTADO-ATUAL` reinjetado a cada turno. Não há mais nonce, arquivo `.secret`, nem linha `Nonce:` no bloco de prontidão.
++
++**Eco pós-carregar (mantido, sem o nonce):** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar. Hidratação velha não aparece na própria cópia — quem carregou dias atrás lê um estado coerente e obsoleto (MEMÓRIAS (248)-(252)). Por isso o eco se apoia nos **fatos da Máquina**, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída — cite o `HASH-ESTADO` e diga em 1 linha por que o estado é coerente (ex: topo bate com o `SYNC`). Sem shell: declare `sync: não verificado` e não preencha o que não mediu. O script imprime fatos; conferir o eco contra eles é do Humano.
+ 
+ ## Modo de teste (declarado)
+ O Humano pode declarar **`modo teste`** a qualquer momento; vale até ele encerrar. Enquanto durar, toda resposta marca `[teste]` no cabeçalho e nada da sessão vira decisão canônica sem confirmação explícita.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 20733c2..2801255 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -84,7 +84,9 @@ _DOUTRINA_FIXA = (
+     "número de memória.\n"
+     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
+     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
+-    "parênteses) — é a Máquina medindo, você só repassa. Sem essa linha → "
++    "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
++    "repassa. O que vai entre parênteses é o SELO; **nunca** o `HASH-ESTADO`, "
++    "que é outra linha e não entra no cabeçalho. Sem a linha `HORA-MAQUINA:` → "
+     "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
+     "nunca repita a do cabeçalho anterior.\n"
+     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
+@@ -109,10 +111,21 @@ _DOUTRINA_FIXA = (
+     "≠ não existir no disco.\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+-    "hidratação mínima; o resto é sob demanda.\n\n"
++    "hidratação mínima; o resto é sob demanda.\n"
++    "— **entrada (N) ≠ linha N.** Pra achar a entrada `(N)` de MEMÓRIAS, busque "
++    "o marcador `(N)` com `query_canon` (grep), não peça o intervalo de linhas "
++    "`N`: o argumento `linhas:` é número de linha física do arquivo, não de "
++    "entrada.\n\n"
+ )
+ _HASH_DOUTRINA = hashlib.sha256(_DOUTRINA_FIXA.encode("utf-8")).hexdigest()[:8]
+ MARCADOR = f"<!-- SETH:HIDRATADO:{_HASH_DOUTRINA} -->"
++# Bloco de estado FRESCO, reinjetado a cada turno (MEMÓRIAS (417)). O bloco de
++# estado que entra junto da doutrina no 1º turno fica congelado -- hora e sync
++# envelhecem, e do turno 2 em diante a Seth escrevia `lacuna: sem relógio` /
++# `sync: não verificado` (viola Regra 1.1). Agora `_injeta`, quando a conversa
++# já está hidratada, tira o ESTADO-ATUAL anterior e põe um novo com a hora/sync
++# do momento. Curto (só a saída de estado_para_eco.sh), sem repetir a doutrina.
++MARCADOR_ESTADO = "<!-- SETH:ESTADO-ATUAL -->"
+ 
+ _HOP_BY_HOP = {
+     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+@@ -164,6 +177,18 @@ def _hidratacao() -> str:
+     return f"{MARCADOR}\n" + _CACHE["texto"]
+ 
+ 
++def _bloco_estado_atual() -> str:
++    """Bloco de estado FRESCO pra reinjetar em turno já hidratado (MEMÓRIAS (417)).
++    String vazia se estado_para_eco.sh não deu saída — nesse caso não reinjeta
++    nada (a Seth fica com o bloco velho do 1º turno, honesto via IDADE-HIDRATACAO)."""
++    est = _estado()
++    if not est:
++        return ""
++    return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
++            f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
++            f"use ESTA hora e ESTE `sync:`):**\n{est}\n")
++
++
+ # --- chamadas utilitárias do frontend que NÃO devem ser hidratadas ---------
+ # O LibreChat (e outros frontends) fazem, além do turno de chat, chamadas
+ # auxiliares ao mesmo endpoint: geração de TÍTULO da conversa, sumarização,
+@@ -256,11 +281,20 @@ def _injeta(payload: dict) -> dict:
+     # chamada de título/utilidade do frontend: repassa crua, sem hidratar.
+     if _e_chamada_utilitaria(payload):
+         return payload
+-    # já hidratado nesta conversa? não repete.
+-    for m in msgs:
+-        if isinstance(m, dict) and m.get("role") == "system" \
+-           and isinstance(m.get("content"), str) and MARCADOR in m["content"]:
+-            return payload
++    ja_hidratado = any(
++        isinstance(m, dict) and m.get("role") == "system"
++        and isinstance(m.get("content"), str) and MARCADOR in m["content"]
++        for m in msgs)
++    if ja_hidratado:
++        # não repete a doutrina, mas REFRESCA o estado (MEMÓRIAS (417)): tira o
++        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora.
++        msgs = [m for m in msgs if not (
++            isinstance(m, dict) and m.get("role") == "system"
++            and isinstance(m.get("content"), str) and MARCADOR_ESTADO in m["content"])]
++        bloco = _bloco_estado_atual()
++        payload["messages"] = ([{"role": "system", "content": bloco}] + msgs
++                               if bloco else msgs)
++        return payload
+     sys_msg = {"role": "system", "content": _hidratacao()}
+     # se o frontend já mandou um system próprio, o nosso entra ANTES dele
+     payload["messages"] = [sys_msg] + msgs
+@@ -455,17 +489,35 @@ def _selftest() -> int:
+           f"({len(m[0]['content'])} chars)")
+     falhas += 0 if ok else 1
+ 
+-    # 2. pedido JÁ hidratado -> não repete
++    # 2. pedido JÁ hidratado -> NÃO repete a doutrina, MAS reinjeta ESTADO-ATUAL
+     body2 = json.dumps({"model": "seth", "messages": [
+         {"role": "system", "content": f"{MARCADOR}\nx"},
+         {"role": "user", "content": "oi"}]}).encode()
+     urllib.request.urlopen(urllib.request.Request(
+         base, data=body2, headers={"Content-Type": "application/json"}), timeout=10).read()
+     m2 = json.loads(_Dummy.ultimo_corpo)["messages"]
+-    ok2 = len(m2) == 2 and m2[0]["content"] == f"{MARCADOR}\nx"
+-    print(f"{'PASS' if ok2 else 'FALHA'}  já hidratado -> não repetiu (messages={len(m2)})")
++    hidr = [x for x in m2 if isinstance(x.get("content"), str) and MARCADOR in x["content"]]
++    est = [x for x in m2 if isinstance(x.get("content"), str) and MARCADOR_ESTADO in x["content"]]
++    ok2 = (len(hidr) == 1 and hidr[0]["content"] == f"{MARCADOR}\nx"  # doutrina não repetida
++           and len(est) == 1 and m2[0]["content"].startswith(MARCADOR_ESTADO))  # 1 estado fresco no topo
++    print(f"{'PASS' if ok2 else 'FALHA'}  já hidratado -> doutrina intacta + 1 ESTADO-ATUAL "
++          f"(msgs={len(m2)}, hidr={len(hidr)}, est={len(est)})")
+     falhas += 0 if ok2 else 1
+ 
++    # 2b. ESTADO-ATUAL velho no input -> substituído (nunca acumula)
++    body2b = json.dumps({"model": "seth", "messages": [
++        {"role": "system", "content": f"{MARCADOR_ESTADO}\nVELHO"},
++        {"role": "system", "content": f"{MARCADOR}\nx"},
++        {"role": "user", "content": "oi"}]}).encode()
++    urllib.request.urlopen(urllib.request.Request(
++        base, data=body2b, headers={"Content-Type": "application/json"}), timeout=10).read()
++    m2b = json.loads(_Dummy.ultimo_corpo)["messages"]
++    est_b = [x for x in m2b if isinstance(x.get("content"), str) and MARCADOR_ESTADO in x["content"]]
++    ok2b = len(est_b) == 1 and "VELHO" not in est_b[0]["content"]
++    print(f"{'PASS' if ok2b else 'FALHA'}  ESTADO-ATUAL velho -> substituído, não acumulou "
++          f"(est={len(est_b)})")
++    falhas += 0 if ok2b else 1
++
+     # 3. chamada de TÍTULO do LibreChat -> repassada crua, SEM system hidratado
+     body3 = json.dumps({"model": "seth", "messages": [
+         {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 4904350..1113db4 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -22,15 +22,15 @@
+ # lacuna: <motivo>`. É pra poder ser colada no bloco de prontidão sem virar
+ # uma quarta grafia.
+ #
+-# HASH-ESTADO é derivado e PÚBLICO — não tem relação com o nonce secreto do
+-# TES-002 (esse é gerado por openssl, nunca versionado, entregue à mão). Serve
+-# só para o eco citar um token que prova leitura sem "teatro" narrativo.
++# HASH-ESTADO é derivado e PÚBLICO — serve só para o eco citar um token que
++# prova leitura sem "teatro" narrativo. (Não há mais nonce: TES-002 aposentado
++# em 09/09/2026, MEMÓRIAS (417).)
+ 
+ set -euo pipefail
+ 
+ # Locale fixo: `cut -c` conta caractere sob UTF-8 e byte sob LC_ALL=C — sem
+-# isto, a linha TES-002 (travessão, acentos) sai como mojibake num ambiente
+-# despido de locale (cron/CI). Achado 3 da Camada B, 31/08/2026.
++# isto, linha com travessão/acentos sai como mojibake num ambiente despido de
++# locale (cron/CI). Achado 3 da Camada B, 31/08/2026.
+ export LC_ALL="${LC_ALL_ECO:-C.UTF-8}"
+ 
+ cd "$(git rev-parse --show-toplevel)"
+@@ -94,18 +94,9 @@ for d in propostas/*.diff; do
+ done
+ shopt -u nullglob
+ 
+-# --- TES-002 (só o status da 1ª frase; NÃO ecoar o nonce aposentado da linha) ---
+-# Achado 4 da Camada B: a linha do PROJETO cita `e1d1a` ("não deve ser ecoado
+-# por ninguém"). Cortar na 1ª frase deixa o status e larga o nonce.
+-tes002_raw=$(grep -m1 -E '^[[:space:]]*-[[:space:]]+\*\*TES-002:\*\*' PROJETO.md \
+-  | sed -E 's/^[[:space:]]*-[[:space:]]+//; s/\*\*//g' \
+-  | sed -E 's/^(TES-002:[^.]*\.).*/\1/' \
+-  | cut -c1-160 || true)
+-if [ -n "$tes002_raw" ] && ! printf '%s' "$tes002_raw" | grep -q '`'; then
+-  tes002="$tes002_raw …(ver PROJETO.md \"Estado dos bugs\")"
+-else
+-  tes002="TES-002: (status não extraído da forma esperada — ver PROJETO.md \"Estado dos bugs\")"
+-fi
++# TES-002 aposentado em 09/09/2026 (MEMÓRIAS (417)) — não há mais linha de
++# status de nonce no eco. A checagem de hidratação velha agora é `sync:` +
++# HASH-ESTADO + IDADE-HIDRATACAO abaixo.
+ 
+ # --- HASH-ESTADO: derivado, determinístico, público ---
+ hash_estado=$(printf '%s\n%s\n%s\n%s\n%s\n' \
+@@ -156,7 +147,6 @@ TOPO-MEMÓRIAS: $topo_linha
+ $sync_linha
+ IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+-$tes002
+ HORA-MAQUINA: $hora_maquina
+ HASH-ESTADO: $hash_estado
+ --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e

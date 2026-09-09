@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 17:57 -0300.
+Motivo: aposenta TES-001 e TES-002 (mera formalidade, risco assumido); tira linha Nonce; conserta hora/entrada-nao-linha/ESTADO-ATUAL; PROJETO Interface
+nome: aposenta-tes-e-conserta-doutrina
+diff-sha256: 81fec3fcffc8ee30ff4f27388edd205465be34e2b994075edc889c2ddadb9207
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQAdRhGbMn9M+AZWpl9sJAxg8v8+EVQE5As69v+KKYT4ig2
+0yf9XGeOhRL5atPq06MM4JnWRQxzOMbjGydYmLaQQ=
+-----END SSH SIGNATURE-----

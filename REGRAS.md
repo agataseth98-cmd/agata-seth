@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f
-  Escrito em: 09/09/2026 16:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5460f8eb01bf077be11242674578d689842c9ff6
+  Escrito em: 09/09/2026 17:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -204,11 +204,10 @@ Não use ferramenta para ler a janela mais recente de MEMÓRIAS — já está no
 
 **Cabeçalho: uma forma só, nunca as duas.**
 
-Ao `carregar`, bloco de prontidão, 4 linhas:
+Ao `carregar`, bloco de prontidão, 3 linhas (era 4 — a linha `Nonce:` saiu com a aposentadoria do TES-002, MEMÓRIAS (417)):
 ```
 Agata · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
 Última entrada: (<n>) <título> — <1 linha>
-Nonce: <valor, só se o MOD for seu>
 <quebrado: liste em 1 linha. senão: "pronto.">
 ```
 `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada em relay entre sessões paralelas.
@@ -323,13 +322,13 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
 
 ---
 
-## Continuidade mecânica (TES)
-- **TES-001** — bateria de relatos independentes sobre o mesmo estado. Não é auto-satisfazível numa sessão só, por mais rodadas que tenha: exige sessões genuinamente independentes.
-- **TES-002** — o MOD ativo contém um nonce gerado pela Máquina (`openssl rand`), nunca por modelo. O sucessor o reproduz no eco pós-carregar. Não vê o nonce → hidratação falhou → diga isso, não finja continuidade.
-  **Estado atual (ativo/inativo, nonce vigente):** não duplicar aqui — protocolo é universal, estado muda. Ver PROJETO.md, "Estado dos bugs e dos testes".
-- **Eco pós-carregar:** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar.
-  Hidratação falha não aparece na própria cópia. Quem carregou dias atrás lê um estado coerente e velho (MEMÓRIAS (248)-(252)). Por isso o eco se fundamenta nos fatos da Máquina, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída dele. O eco cita o `HASH-ESTADO` impresso e diz, em 1 linha, por que o estado está coerente (ex: topo bate com o `SYNC`). Sem shell: o eco declara `sync: não verificado`, diz que não pôde rodar o script, e não preenche o que não mediu. O script imprime fatos — não escreve o eco nem julga se a hidratação passou. Conferir o eco contra os fatos é do Humano. O `HASH-ESTADO` é derivado e público: não é o nonce do TES-002 e não substitui a linha `Nonce:` do bloco de prontidão.
-- **Critério de confiança:** N sessões consecutivas sem alegação falsa de entrada inexistente, cada uma checada contra o disco. Nada de métrica por confiança — se a Máquina não verifica, não é critério.
+## Continuidade entre sessões
+
+**TES-001 e TES-002 — APOSENTADOS em 09/09/2026** (decisão do Humano: *"são mera formalidade"*; risco assumido por escrito, MEMÓRIAS (417)). Não se apaga a história: as entradas de MEMÓRIAS e as consolidações sobre os dois ficam. O que cada um cobria e o que carrega a intenção adiante:
+- **TES-001** era bateria de relatos independentes sobre o mesmo estado, contra fabricação. A detecção de fabricação passa a depender da **Cadeia de auditoria em camadas**, do **P-7** (checagem de citação contra a fonte) e do **Catálogo de falhas**.
+- **TES-002** era um nonce manual (gerado por `openssl rand`, entregue à mão pelo Humano por sessão) pra flagrar hidratação velha silenciosa. Os sinais **automáticos** do `scripts/estado_para_eco.sh` cobrem: `sync: PASS` com hash calculado ao vivo, `HASH-ESTADO`, `IDADE-HIDRATACAO`, e — no caminho da Seth — o bloco `SETH:ESTADO-ATUAL` reinjetado a cada turno. Não há mais nonce, arquivo `.secret`, nem linha `Nonce:` no bloco de prontidão.
+
+**Eco pós-carregar (mantido, sem o nonce):** ≤5 linhas resumindo o estado herdado; o Humano confirma antes do trabalho começar. Hidratação velha não aparece na própria cópia — quem carregou dias atrás lê um estado coerente e obsoleto (MEMÓRIAS (248)-(252)). Por isso o eco se apoia nos **fatos da Máquina**, não na releitura de si mesmo. Com shell: rode `scripts/estado_para_eco.sh` (read-only) e escreva o eco a partir da saída — cite o `HASH-ESTADO` e diga em 1 linha por que o estado é coerente (ex: topo bate com o `SYNC`). Sem shell: declare `sync: não verificado` e não preencha o que não mediu. O script imprime fatos; conferir o eco contra eles é do Humano.
 
 ## Modo de teste (declarado)
 O Humano pode declarar **`modo teste`** a qualquer momento; vale até ele encerrar. Enquanto durar, toda resposta marca `[teste]` no cabeçalho e nada da sessão vira decisão canônica sem confirmação explícita.

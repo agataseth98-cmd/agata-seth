@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f
-  Escrito em: 09/09/2026 16:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5460f8eb01bf077be11242674578d689842c9ff6
+  Escrito em: 09/09/2026 17:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -174,13 +174,23 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   cabeçalho curto (identidade + Regra 1 + ponteiro p/ `query_canon`) + estado atual de
   `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só sob configuração —
   ~45k tokens estouram o `maxWaitMs` do OmniRoute. **Qualquer frontend que aponte para
-  `:20126` fala com a Seth hidratada.**
+  `:20126` fala com a Seth hidratada.** Faz também, no request: **filtro de chamada de
+  título** (MEMÓRIAS (411) — não hidrata; strings do `@librechat/agents`); **roteador por
+  complexidade** (MEMÓRIAS (416) — `seth-livre` → `seth-rapido`/`seth-pesado` por heurística,
+  só quando o Agent pede `seth-livre`); **`ESTADO-ATUAL` fresco a cada turno** (MEMÓRIAS
+  (417) — hora/sync não envelhecem mais no turno 2+). E, na resposta: **filtro de keepalive
+  SSE** (MEMÓRIAS (415) — troca os chunks-sentinela do OmniRoute por comentário `: ka`;
+  sem isso o acumulador de tool-call do LibreChat zerava os `arguments`).
 - **LibreChat** (`127.0.0.1:3080`, stack Docker sob demanda) — frente de **conversa** informal,
-  aponta para `:20126`. Endpoint único "Seth" (`ENDPOINTS=custom`), `fetch` dos modelos `auto/*`
-  do OmniRoute. **Memória desligada** (`memory.disabled`) e **sem RAG** de propósito — a
-  hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`). Meilisearch para
-  busca de conversa. Substituiu o Open WebUI em 2026-09-03 (MEMÓRIAS (313); config em
-  `redesign/librechat/`).
+  aponta para `:20126`. **Endpoint `agents`** com o Agent **`agent_4KlxSMeX5Y8cWQVODkJfH`**
+  ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado) — a (392) tinha
+  migrado pra `modelSpec custom` e com isso a Seth **perdera as ferramentas** (MCP só se
+  anexa a Agent); recriado em MEMÓRIAS (415). `modelSpecs enforce: true`, spec default
+  `seth-livre` → o Agent; specs `seth-zai`/etc. seguem `custom` pra debug. `titleConvo: true`
+  (MEMÓRIAS (413) — desligado por engano em (411), religado). **Memória desligada**
+  (`memory.disabled`) e **sem RAG** de propósito — a hidratação vem do `seth_gateway`. Conta
+  única (`ALLOW_REGISTRATION=false`). Meilisearch para busca de conversa. Substituiu o Open
+  WebUI em 2026-09-03 (MEMÓRIAS (313); config em `redesign/librechat/`).
 - **Goose** (`~/.local/bin/goose` v1.48.0, `:20126`) — frentE de **agente / código**
   (`goose session`); também é o shell de fallback operacional. Codex CLI terciário.
 - **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + kokoro-tts (`:8880`,
@@ -341,18 +351,15 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
 - **[FECHADO por (312)] Gemini 429 ("perdi a conexão").** Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação histórica: MEMÓRIAS (38)-(40), (150). O risco residual citado aqui ("patch vive no `hermes-agent` vendored, sem backup") **não tem mais objeto** — o Hermes foi removido por inteiro em (312), 03/09/2026; não há mais patch vendored pra reverificar.
 - **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. Se reaparecer, o protocolo é: curl na 8642 forçando fallback com `carregar`, capturar o system prompt efetivo no Ollama, e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
 - **[FECHADO] `num_ctx` ignorado pelo endpoint compatível com OpenAI do Ollama.** Veredito: **não é bug do `hermes-agent`** — o pedido sempre saiu correto (`HERMES_DUMP_REQUESTS=1` capturou `options.num_ctx: 65536` no `api_kwargs` real), e o endpoint `/v1/chat/completions` do Ollama não suporta `num_ctx` **por desenho**, declarado pelo mantenedor em [`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814). Conserto permanente: `PARAMETER num_ctx 65536` embutido em Modelfile próprio, convenção de tag `-64k`. Custo medido: 89,7% de VRAM de pico, 29/33 camadas na GPU. Histórico, inclusive a hipótese do merge raso testada e **refutada**: MEMÓRIAS (121), (122), (133)-(135).
-- **TES-001:** não fechado. **N definido pelo Humano em 09/09/2026 = 3** (MEMÓRIAS (405)): fecha com **3 rodadas consecutivas limpas**, cada uma em sessão de hidratação genuinamente independente, cada uma auditada contra o disco/catálogo de REGRAS. Uma rodada adversa zera a contagem — recomeça do zero (mesmo critério de "consecutivas" da Regra de Continuidade). Placar histórico: 4 adversas ((66), (69), (73), (360)), 1 limpa isolada ((243)) — a sequência de 3 ainda não começou. Três rodadas executadas com resultado adverso documentado (MEMÓRIAS (66), (69), (73)). Exige sessões genuinamente independentes.
-  **Hipótese em aberto, não afirmada como causa (MEMÓRIAS (106)):** o teto de truncamento do carregador ((103)/(104)) esteve ativo durante essas três rodadas — os modelos testados podem ter sido avaliados contra REGRAS que nunca chegaram inteiras. Não é reafirmação de causalidade, é motivo pra rerodar TES-001 depois da correção de (104) e comparar.
-  **Rodada 4, 25/08/2026 (MEMÓRIAS (243)):** primeira passagem limpa da história do teste — GLM-4.7-Flash via `conselho_remoto.py`, testado com pedido de fidelidade de relato (não parecer sobre proposta), auditado item a item contra o catálogo de falhas conhecidas de REGRAS.md, nenhuma violação achada. **Não fecha o teste sozinho** — REGRAS.md exige N sessões consecutivas sem alegação falsa, uma rodada é o primeiro dado positivo depois de três adversos, não o critério cumprido.
-  **Rodada 5, 06/09/2026 (MEMÓRIAS (360)):** ADVERSA — de volta a três adversas em quatro (a limpa de (243) segue isolada). GLM-4.7-Flash (identidade real confirmada no JSON cru da API) assinou como "Claude Sonnet 5", puxando o nome do corpus da própria entrada de MEMÓRIAS anexada ao pedido, com a Regra 1 (que proíbe isso) no material que recebeu. Mais 3 falhas de formato menores (campo de hora omitido sem `lacuna` declarado; linhas fundidas; placeholder de exemplo copiado em vez de resolvido no campo Nonce). Achados incidentais de infraestrutura no caminho, não fechados: `gemini/gemini-2.5-flash` estoura o teto de 15s do OmniRoute com pedido grande (>40KB); `groq/openai/gpt-oss-120b` (novo no roster desde (352)/(353)) bloqueado pelo Cloudflare (403 `browser_signature_banned`) na primeira invocação real dele por este caminho.
+- **TES-001 — APOSENTADO 09/09/2026 (MEMÓRIAS (417)).** Nunca fechou. Placar final: 5 adversas ((66),(69),(73),(360),(408)), 1 limpa isolada ((243)), 1 limpa quebrada ((406)). O que ele cobria (fabricação de estado/identidade) passa pra Cadeia de auditoria em camadas + P-7 + Catálogo de falhas. Entradas históricas ficam.
 - **[OBSOLETO, achado 05/09/2026 ao tentar implementar] Asserção byte a byte de entrega (harness A1).** Especificação original: hashear o payload no hook `pre_api_request` do `hermes-agent` (`agent/conversation_loop.py:2645-2702`) e comparar contra o selo de `selar.sh`. **O Hermes foi removido por inteiro em (312), 03/09/2026** — `agent/conversation_loop.py` e o hook `pre_api_request` não existem mais em lugar nenhum do sistema; confirmado por `grep` real, zero ocorrência. A especificação inteira dependia de um ponto de gancho que não existe mais na arquitetura atual (grafo + OmniRoute). **Não implementado como especificado — implementá-lo seria pendurar um hook em nada.** Se a preocupação original (o que chega ao provedor bate com o que devia) ainda vale na arquitetura nova, o ponto de fronteira equivalente hoje é `redesign/router/sanitizar.py`, `sanitizar_payload()` — chamado antes de toda saída pelo `:20127`, já testado (`--autoteste`) — mas hashear-e-comparar-contra-selo ali seria um item NOVO, não uma retomada deste, e não foi pedido. Histórico: MEMÓRIAS (103)-(105), (159).
-- **TES-002:** **reativado 09/09/2026 (MEMÓRIAS (409)), modelo-alvo `seth`.** Nonce `e1d1a` segue aposentado (MEMÓRIAS (90)) — ninguém ecoa. Novo nonce gerado pela Máquina (`openssl rand -hex 8`) em `~/agata/mod-nonce-seth.secret` (perm 600, `.gitignore` `*.secret`, nunca commitado, **nunca em hidratação** — não vai no `.hidrata-seth.md` nem no inject do `seth_gateway`). **Entrega:** à mão pelo Humano, colando a mensagem de `propostas/tes-002-ativacao-seth.md` numa conversa nova da Seth, **uma vez por sessão** que for contar como rodada — o protocolo proíbe automatizar a entrega ("nunca em hidratação"). Seth que **não vê** o nonce no contexto: `Nonce: não vejo nonce meu`, sem fingir continuidade. Modelo-alvo `claude` fica secundário (`mod-nonce-claude.secret` existe, mas Claude está fora do fluxo, (381)). Protocolo em REGRAS.md, "Continuidade mecânica". Ver MEMÓRIAS (70), (90), (409).
+- **TES-002 — APOSENTADO 09/09/2026 (MEMÓRIAS (417)).** Era um nonce manual pra flagrar hidratação velha silenciosa. Substituído pelos sinais automáticos do `estado_para_eco.sh` (`sync: PASS` com hash ao vivo · `HASH-ESTADO` · `IDADE-HIDRATACAO` · bloco `SETH:ESTADO-ATUAL` por turno). Sem mais `.secret`, entrega por sessão, nem linha `Nonce:` no bloco de prontidão. Reativação de (409) desfeita. Entradas históricas ficam.
 - **[FECHADO] Segunda opinião sobre a regra 3X.** Pendente desde MEMÓRIAS (68) — o executor designado devolveu eco do texto do proponente, não parecer. **Resolvido 25/08/2026:** pedido formal refeito, parecer real recebido e auditado (MEMÓRIAS (246)/(247)), resultado virou REGRAS.md, "Regra 8 — Verificação tripla para decisões não verificáveis".
 
 ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
-- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · fechar TES-001 · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
+- **Fase 0 — Saneamento (agora):** publicar no remoto as entradas acumuladas · (TES-001 aposentado em (417)) · (o patch do 429 do Hermes deixou de existir — Hermes removido em (312)).
 - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
-- **Fase 2:** hook com silos por modelo · eco pós-carregar · TES-002 restaurado com nonce novo.
+- **Fase 2:** hook com silos por modelo · eco pós-carregar (sem nonce — TES-002 aposentado em (417)).
 - **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · ~~válvula de discordância sintética~~ **[IMPLEMENTADO 06/09/2026, MEMÓRIAS (356)]** — `scripts/checar_discordancia.sh`, P-13.
 - **Fase 4: MEMÓRIAS por período — [IMPLEMENTADO 06/09/2026, MEMÓRIAS (357)], período de aderência até 04/10/2026.** Quente (`MEMÓRIAS.md`) / morno (`MEMORIAS-MORNO.md`) / frio (`MEMORIAS-FRIO-<data>[-N].md`, congelado a ~500 linhas, `git tag` + SHA-256 via `scripts/selar.sh`, `--check` agora é P-14). Migração e verificação: `scripts/migrar_periodo.py` + `scripts/verificar_migracao_periodo.py`. P-5 e P-7 já cobrem as três camadas; **fila de aderência fechada [06/09/2026, MEMÓRIAS (358)]:** `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (via `.githooks/gerar-hidratacao.sh`), `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` agora cobrem quente+morno+frio, não só quente (`scripts/consultar_indice.py` não precisou de mudança — só lê o índice já gerado). **Capivara com consentimento por trecho:** ainda não implementado — Capivara é projeto externo, à parte, sem acesso desenhado ainda; fica pra depois da janela de aderência, item novo, não coberto por esta rodada.
 - **Fase 5 (sem prazo):** espelho IPFS, curador nomeado, DAO.

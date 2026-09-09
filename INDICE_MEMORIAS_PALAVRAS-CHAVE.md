@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
+  palavras-chave: tes, aposentados, decisão, humano, precisamos, nonce, quero, arquivar, esses, testes, mera, formalidade, pode, montar, risco, mudança, estrutural, assumido, escrito, auditoria, sessão, limpa, furos, doutrina, seth, consertados
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
   palavras-chave: roteador, complexidade, seth, reabre, premissa, nova, roda, hoje, cascata, cloud, livre, omniroute, strategy, priority, qwen, local, titular, requisição, começa, tier, topo, cai, falha, lento, medido, paga, mesmo, análise, longa, escalonamento, pra, tarefa, pesada, feito, classificador, heurístico, gateway, cerebras, gpt, oss, free, only
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, teste, seth, falha, real, leitura, parcial, virou, fato, conserto, lados, canon, mcp, mjs, doutrina, fixa, pedido, humano, audite, rigor, pesquisa, científica, refaça
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
   palavras-chave: cabeçalho, seth, doutrina, injetada, ganha, formato, selo, hora, regra, compactação, pontos, teste, desta, sessão
-(387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
-  palavras-chave: voz, seth, tts, troca, kokoro, piper, pedido, humano, teste, text, speech, inutilizável, demora, transcreve, errado
+(387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedid …
+  palavras-chave: voz, seth, tts, troca, kokoro, piper, pedid
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o r …
   palavras-chave: relógio, code, errado, investigado
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/REA …

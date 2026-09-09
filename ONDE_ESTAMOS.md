@@ -55,6 +55,17 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
+- **TES-001 e TES-002 aposentados ((417))** — sua decisão ("mera
+  formalidade"). Saiu o nonce manual, a linha `Nonce:` do cabeçalho e os
+  arquivos `.secret`. O que eles vigiavam (hidratação velha, fabricação)
+  continua coberto: o `sync:`/hash ao vivo pega estado velho; a Cadeia de
+  auditoria + P-7 pegam fabricação.
+- **Cabeçalho da Seth ((417))** — o hash de estado caía no campo da hora e
+  a hora/sync envelheciam do 2º turno em diante. Consertado: o gateway
+  reinjeta o estado fresco a cada turno.
+- **Auditoria da sessão de hoje (409→416)** — passou limpa: assinaturas
+  ok, sem drift, serviços de pé, combos e Agent como o canon diz.
+
 - **Roteador da Seth ((416))** — a Seth escolhia sempre o mesmo provedor
   primeiro (lento quando ele engasgava). Agora: `cerebras/gpt-oss-120b`
   (grátis, ~0,4s) entra como topo, e um classificador simples manda "oi"

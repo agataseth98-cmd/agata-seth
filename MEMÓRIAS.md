@@ -26,18 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f
-  Escrito em: 09/09/2026 16:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5460f8eb01bf077be11242674578d689842c9ff6
+  Escrito em: 09/09/2026 17:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
+
+**Auditoria 409→416 — nada errado:** local == remoto (`5460f8e`); os **6 pares** `.diff`/`APROVADO-` da sessão — `sha` bate e `ssh-keygen -Y verify -I agata-humano` → **Good** nos 6; sem drift repo vs `~/librechat/`; serviços `active`, LibreChat healthy; os 3 combos do OmniRoute batem com o canon; Agent `agent_4KlxSMeX5Y8cWQVODkJfH` + `mcp:["canon"]` intactos; `titleConvo: true`, tts → Piper `:8890`, spec default → Agent; `--selftest` OK.
+
+**Aposentadoria dos TES (Mudança estrutural — REGRAS "Continuidade mecânica"; risco por escrito do Humano no lugar da 2ª opinião, que voltou inútil em (416)). Portão das 3 perguntas: reversível (REGRAS "daqui pra frente"; história de MEMÓRIAS fica), alcance mapeado (REGRAS + PROJETO + `estado_para_eco.sh` + `PROMPT_CARREGAMENTO.md` + os `.secret`; não toca Conselho/Cadeia de auditoria/P-7/catálogo), observável (o que sumir aparece no `sync`/perímetro).**
+- **REGRAS.md** "Continuidade mecânica (TES)" → "**Continuidade entre sessões**": os dois marcados APOSENTADOS, com o que carrega a intenção adiante — TES-001 (fabricação) → Cadeia de auditoria + P-7 + Catálogo; TES-002 (hidratação velha) → sinais automáticos do `estado_para_eco.sh` (`sync: PASS` ao vivo, `HASH-ESTADO`, `IDADE-HIDRATACAO`, `SETH:ESTADO-ATUAL` por turno). "Eco pós-carregar" **mantido**, sem o nonce.
+- **Bloco de prontidão: 4 → 3 linhas** (a linha `Nonce:` saiu) — em REGRAS "Carregar e formatos", no `_DOUTRINA_FIXA` do `seth_gateway` e no `PROMPT_CARREGAMENTO.md`.
+- **PROJETO.md** "Estado dos bugs": entradas TES-001/TES-002 → APOSENTADO (placar final de TES-001 preservado como ponteiro); a reativação de (409) desfeita; Fases 0 e 2 do "Plano vigente" sem as menções aos TES.
+- **`scripts/estado_para_eco.sh`:** removido o bloco de status TES-002 (que aliás estava quebrado desde a (410) — `` `seth` `` entre crases disparava o guard). Uma linha a menos no eco.
+- **Apagados:** `mod-nonce-claude.secret` e `mod-nonce-seth.secret` (ambos gitignored, `rm`).
+
+**3 furos da doutrina da Seth (do teste do MCP e do cabeçalho), mesma proposta:**
+1. **hora:** o parêntese é o SELO (`(relógio da Máquina)` etc.), **nunca** o `HASH-ESTADO` (a Seth pôs o hash lá em (415)/(416)).
+2. **entrada (N) ≠ linha N:** pra achar `(N)`, grep pelo marcador `(N)` com `query_canon`; `linhas:` é linha **física** (a Seth leu o meio da (403) achando que era a (250)).
+3. **`ESTADO-ATUAL` fresco a cada turno:** o bloco de estado do 1º turno congelava — do turno 2 em diante hora/sync envelheciam e a Seth escrevia `lacuna: sem relógio` / `sync: não verificado` (viola Regra 1.1). Agora `_injeta`, em turno já hidratado, tira o `SETH:ESTADO-ATUAL` anterior e põe um novo com `_estado()` do momento; doutrina não repetida. Verificado direto: `_injeta` num payload turno-2 com estado velho (`2020-01-01`) → `[0]` = ESTADO-ATUAL fresco (hora real), `[1]` = hidratação original.
+
+**PROJETO.md "Interface"** também atualizada pro estado real (Agent, `titleConvo`, os 4 passos do `seth_gateway`: filtro de título (411) · roteador (416) · ESTADO-ATUAL (417) · filtro keepalive (415)) — avisos de reconciliação 8→5.
+
+`--selftest` do `seth_gateway` **9→11** (turno já hidratado → 1 `ESTADO-ATUAL` + doutrina intacta; `ESTADO-ATUAL` velho → substituído, não acumula). `_HASH_DOUTRINA` mudou → conversas em andamento re-hidratam.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/aposenta-tes-e-conserta-doutrina`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `ssh-keygen -Y verify -I agata-humano` nos 6 pares de 409→416 (Good); `md5sum` repo vs `~/librechat/` (igual); `sqlite3 storage.sqlite` (3 combos batem); `docker exec mongosh` (Agent + `mcpServerNames:["canon"]`); `python3 -m py_compile` + `bash -n scripts/estado_para_eco.sh` + `--selftest` 11/11; `bash scripts/estado_para_eco.sh` roda sem a linha TES-002; `_injeta`/`_bloco_estado_atual()` diretos (ESTADO-ATUAL fresco no topo, hora real); `grep -c Nonce` em REGRAS/PROMPT/doutrina só nos pontos históricos; `.secret` de nonce ausentes; `git apply --check` limpo contra HEAD; `.diff` sha256 `81fec3fcffc8ee30ff4f27388edd205465be34e2b994075edc889c2ddadb9207`. Autorização: Humano — "por que precisamos do nonce" + "quero arquivar esses testes TES, são mera formalidade" + "pode montar" (risco de Mudança estrutural assumido por escrito, substitui a 2ª opinião).
+
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
 
 **Processo (Mudança estrutural, reabre (383)):** o Humano ordenou — *"só grátis, redesenhe e aplique, siga com o processo de maneira autônoma, 2 opinião autorizada eu assumo o risco, não erre"*. REGRAS "Mudança estrutural" pede **2ª opinião OU risco assumido por escrito** — o Humano **assumiu o risco por escrito** ("eu assumo o risco"), e a 2ª opinião foi **tentada**: `conselho_remoto.py` → `cerebras/gemma-4-31b` deu 403 Cloudflare (cooldown), caiu pro `huggingface/meta-llama/Llama-3.3-70B`, que respondeu **fora do formato** (sem Origem/Posição/Fundamentação/Emenda) e sem posição real — *"requer avaliação cuidadosa"*, nenhuma objeção nem emenda utilizável. Raw: `memoria/missoes/conselho-remoto/20260909-164444-meta-llama_Llama-3.3-70B-Instruct.json`. Reenvio "uma vez" (REGRAS) não feito — o risco assumido já cobre.
