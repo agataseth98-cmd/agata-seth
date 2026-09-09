@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1
-  Escrito em: 08/09/2026 21:27 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 36edf156e0c40ca1c401b53d51e1c278d9eb6158
+  Escrito em: 09/09/2026 08:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
+
+**Sintoma (backlog H3, achado em (390)):** sob carga, o subprocess de `scripts/estado_para_eco.sh` (que faz `git ls-remote`, rede) estourava `timeout=15s` e voltava vazio — a Seth abria sem bloco de estado, e nada na doutrina proibia explicitamente preencher `Última entrada:` com `(0)` nesse caso.
+
+**Mudou (proposta `seth-ultima-entrada-e-estado`, 1 arquivo quarentena — `redesign/router/*` no P-8 —, 1 assinatura):**
+- `_DOUTRINA_FIXA`: `<n>` e `<título>` da linha `Última entrada:` têm que sair copiados da linha `TOPO-MEMÓRIAS:` do bloco de estado injetado, nunca inventados. Sem essa linha → `Última entrada: lacuna (estado não injetado)`. Proíbe `(0)` e qualquer número de memória fabricado.
+- `_estado()`: timeout do subprocess `15s → 25s` — mais tolerante ao pico de rede do `git ls-remote` local.
+- Não toca mais nada em `_DOUTRINA_FIXA` além do trecho acima.
+
+**Verificado:** `git apply --check` limpo contra HEAD antes de aplicar; aplicado; `py_compile` OK; `python3 redesign/router/seth_gateway.py --selftest` → `SELFTEST OK` (as 2 asserções de hidratação de system passam, comportamento de injeção não mudou).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-ultima-entrada-e-estado`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` + `git apply`; `python3 -m py_compile`; `--selftest`; assinatura verificada contra `HEAD:propostas/.allowed_signers` (sha256 do `.diff` bate com `diff-sha256:` do `APROVADO-`). Autorização: Humano, "feito" (`scripts/aprovar.sh seth-ultima-entrada-e-estado` rodado e assinado por ele).
+
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
 
 **Sintoma:** durante o Teste 3 o Humano disse "parece travado". O MongoDB do LibreChat não tinha nenhuma mensagem nova — a Seth nem respondia. `curl :20126/v1/chat/completions` → `000` (sem resposta em 25s), enquanto `:20126/v1/models` (GET), `:20127` e `:20128` respondiam normal. Restart do `seth-gateway` destravava; voltava a travar.

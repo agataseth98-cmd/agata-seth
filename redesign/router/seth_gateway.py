@@ -78,6 +78,10 @@ _DOUTRINA_FIXA = (
     "`Agata · <modelo, ou 'modelo não verificado'> · t=<n> · <hora + selo>`\n"
     "`Última entrada: (<n>) <título>` · `sync: <repita do bloco de estado>` · "
     "o que está quebrado (ou `pronto.`)\n"
+    "— **Última entrada:** `<n>` e `<título>` saem da linha `TOPO-MEMÓRIAS:` do "
+    "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
+    "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
+    "número de memória.\n"
     "— **hora:** você não tem relógio de dentro → selo `lacuna: sem relógio` "
     "(Regra 1.1). Nunca invente hora nem repita a do cabeçalho anterior.\n"
     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
@@ -114,8 +118,11 @@ def _estado() -> str:
     Best-effort — se falhar, devolve string vazia."""
     import subprocess
     try:
+        # 25s (era 15): estado_para_eco.sh faz `git ls-remote` -- local e' instantâneo,
+        # mas o remoto pode dar um pico de rede que estourava 15s e a Seth abria sem
+        # bloco de estado (MEMÓRIAS (394): `Última entrada: (0)`).
         r = subprocess.run(["bash", "scripts/estado_para_eco.sh"], cwd=REPO,
-                           capture_output=True, text=True, timeout=15)
+                           capture_output=True, text=True, timeout=25)
         linhas = [l for l in r.stdout.splitlines()
                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
                                     "IDADE-HIDRATACAO:", "HASH-ESTADO:"))]

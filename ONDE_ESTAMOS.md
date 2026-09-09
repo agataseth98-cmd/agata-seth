@@ -7,6 +7,13 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 08/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-08.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Onde estamos — 09/09/2026
+
+**H3 do backlog fechado.** A Seth podia abrir com `Última entrada: (0)` quando
+o pedido de estado (rede) demorava mais que 15s. Subi o timeout pra 25s e a
+doutrina agora proíbe explicitamente inventar esse número — sem o bloco de
+estado, ela escreve que faltou, não um número fabricado. Entrada 394.
+
 ## Onde estamos — 08/09/2026
 
 **Aprovar mudança estrutural agora tem assinatura.** Você gerou uma chave
