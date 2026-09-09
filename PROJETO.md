@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0a4b14ddb833b96e072961d556363f123b1f080e
-  Escrito em: 09/09/2026 10:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26b62857c99ab91228d21359697664c208098fd0
+  Escrito em: 09/09/2026 10:41 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -113,6 +113,7 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
 - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
 - **Vault Obsidian derivado (MEMÓRIAS (290)):** `memoria/obsidian/` — gerado por `scripts/gerar_obsidian.py` a cada commit (passo `post-commit`, pasta gitignorada). Representa TODO o sistema como notas religadas por wikilinks: uma por entrada de MEMÓRIAS, por regra, por seção de PROJETO/PROJETO_REFERENCIA, por script, por controle P-N, por proposta aplicada, mais MOCs e um painel de estado. **Fonte da verdade continua sendo o canon** — isto é camada de leitura, como o `.hidrata.md`. Modelo com acesso à Máquina (Seth) navega a partir de `memoria/obsidian/INICIO.md`; não editar (a geração apaga e reescreve — correção é entrada nova em MEMÓRIAS).
 - **Quando a Seth usa o vault (MEMÓRIAS (292)):** consulta dirigida, nunca varredura. Serve para história além da janela do `.hidrata.md`, para os backlinks de uma entrada/regra/proposta, ou para "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/`, chegando por `INICIO.md` ou pelos `moc-*`. São centenas de notas: não varrer o vault nem o `MEMÓRIAS.md` cru, o custo é de contexto.
+  **Listagem de diretório do vault (`:27125`) fica atrás do disco (MEMÓRIAS (391)/(400)):** o índice do Obsidian headless re-indexa no próprio ritmo — uma listagem de `entradas/` pode terminar antes da entrada mais recente e ainda trazer total coerente (não é truncamento). Doutrina da Seth (`_DOUTRINA_FIXA` no `seth_gateway`): pra saber se uma entrada recente existe, LER o arquivo (`query_canon`), nunca concluir da listagem. Escolha (c) de H1; (a) re-index no post-commit e (b) ler do disco via `ro_proxy` foram descartadas como cano a mais.
 - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
 - **Hidratação — pós-redesenho (Fase 8):** o **loop de governança** (grafo LangGraph) hidrata
   pelo nó `hidratar` = `scripts/estado_para_eco.sh` (fatos de Máquina: HEAD, topo de MEMÓRIAS,

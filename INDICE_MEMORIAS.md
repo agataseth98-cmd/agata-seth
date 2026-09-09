@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125`) fica atrás do disco — o índice do Obsidian headless re-indexa no próprio ritmo. Doutrina da Seth passa a mandar LER o arquivo pra confirmar entrada recente, nunca concluir da listagem.
 (399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
 (398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
-(370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
+(370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que toca …
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deix …
 (368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte …
 (367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da …

@@ -30,18 +30,11 @@ segue é a lista completa.
 | C1 | **Fechar TES-001** | N sessões consecutivas limpas, hidratações genuinamente independentes (rodada 5 foi adversa, (360)). N ainda não definido — defina N. |
 | C2 | **Reabrir TES-002** | Você entrega um nonce novo à mão a um modelo-alvo quando decidir. Silo `seth` já existe (Bloco 3.1). |
 
-## D — bug achado em (373), pequeno
-
-| # | Item | Detalhe |
-|---|---|---|
-| ~~D1~~ | ~~`consolidacao.py --temas` (modo manual) não propaga pelo grafo~~ | **FECHADO — MEMÓRIAS (375).** `_TEMAS_MANUAL`, global de módulo, setado por `run()` antes do `graph.invoke`; `orientar` lê dali primeiro. Linha desta tabela ficou desatualizada por 3 sessões — achado agora ao investigar D2 no mesmo arquivo. |
-| D2 | **Busca de refs do `consolidacao.py` puxa entrada não relacionada ao tema** | Achado em (395)/(396). **Duas correções mecânicas testadas em 09/09 contra dados reais, as duas refutadas:** (a) exigir termo no TÍTULO — corta (374)/(376)/(380), refs corretas de "OmniRoute 504" cujo título não usa essas palavras; relação de tema é semântica, não lexical. (b) exigir convergência das duas vias de busca (índice + FTS) — `em_comum` deu **vazio nos dois temas testados**, silenciaria o consolidador por completo. Correção de verdade exigiria um passe de julgamento com modelo (mais peça, mais falha possível) — desproporcional: o sintoma é ruído numa proposta que o Humano já revisa antes de virar canon (pegou os dois casos de (395)/(396)). **Sem fix mecânico planejado; revisão humana é a defesa que já funciona.** Reabrir só se o volume de consolidação crescer a ponto da revisão manual não escalar. |
-
 ## H — horizonte da Seth (anotados em (390)/(391), pra implementação futura)
 
 | # | Item | Detalhe |
 |---|---|---|
-| H1 | **Índice de diretório do Obsidian fica pra trás do disco** (causa raiz real do F-1, MEMÓRIAS (391)) | `GET :27125/vault/…/entradas/` para em `0385.md` enquanto o disco tem `0390.md`; ler um arquivo específico funciona. Opções: (a) forçar re-index / reiniciar o Obsidian no post-commit; (b) `vault_consultar` de diretório ler do disco via `ro_proxy.py`; (c) doutrina: pra saber se entrada recente existe, LER o arquivo, não a listagem. |
+| ~~H1~~ | ~~Índice de diretório do Obsidian fica pra trás do disco~~ | **FECHADO — MEMÓRIAS (400).** Opção (c): `_DOUTRINA_FIXA` da Seth manda LER o arquivo pra confirmar entrada recente, nunca concluir da listagem. (a)/(b) descartadas como cano a mais. |
 | ~~H2~~ | ~~Pós-filtro de hora inventada no `seth_gateway`~~ | **FECHADO — MEMÓRIAS (397).** Em vez de filtro de saída (reescrever o stream, arriscado — o mesmo código que travou em (393)), `estado_para_eco.sh` mede `HORA-MAQUINA:` real e a doutrina manda copiar essa linha, não inventar. Mesmo princípio da (394). |
 | ~~H3~~ | ~~`seth_gateway._estado()` `timeout=15s`~~ | **FECHADO — MEMÓRIAS (394).** Timeout `15s→25s` + doutrina proíbe inventar `(0)` quando o estado não chega; sem a linha `TOPO-MEMÓRIAS:`, vira `lacuna (estado não injetado)`. |
 | H4 | **Sem tier LOCAL de último recurso na cadeia da Seth** ((390)) | O OmniRoute só tem os modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. O `conselho_remoto.py` alcança o local direto no `:11434`; a cadeia `:20126`→sanitizador→OmniRoute não. Combo `seth-livre` fica sem fundo local. |
@@ -49,6 +42,10 @@ segue é a lista completa.
 
 ## Fora da lista — feito ou obsoleto (pra não voltar)
 
+- **D1** — `consolidacao.py --temas` não propaga pelo grafo — FECHADO em (375) (`_TEMAS_MANUAL`).
+- **D2** — busca de refs do `consolidacao.py` puxa entrada não relacionada — FECHADO sem fix mecânico, confirmado pelo Humano 09/09/2026. Duas correções testadas contra dados reais em (395)/(396), as duas refutadas (título-only corta refs corretas; convergência das duas vias dá vazio). Revisão humana antes do canon já pega — pegou os dois casos de (395)/(396). Reabrir só se o volume de consolidação crescer a ponto da revisão manual não escalar.
+- **H1** — índice de diretório do Obsidian atrás do disco — FECHADO em (400) (doutrina: LER o arquivo, não a listagem).
+- **H2** — pós-filtro de hora inventada — FECHADO em (397). **H3** — timeout do `_estado()` — FECHADO em (394).
 - `presence_penalty` na memória — consolidado e **aprovado em (382)**; par em `propostas/aplicadas/consolidacao-presence-penalty-2026-09-08.md`.
 - Eco pós-carregar mecanizado — (308), `scripts/estado_para_eco.sh`.
 - Geração de silo por modelo (`seth`) — Bloco 3.1, `.githooks/gerar-hidratacao.sh`.

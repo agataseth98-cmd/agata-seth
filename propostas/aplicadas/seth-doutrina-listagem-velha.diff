@@ -1,0 +1,29 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 065aceb..bdac46c 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -113,6 +113,7 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+ - Canônicos em `~/agata`. O repositório git é também o cofre Obsidian. Memória nativa do Hermes symlinkada em `~/agata/memoria/` — o arquivo real é o canônico; quem é link é o lado do Hermes.
+ - **Vault Obsidian derivado (MEMÓRIAS (290)):** `memoria/obsidian/` — gerado por `scripts/gerar_obsidian.py` a cada commit (passo `post-commit`, pasta gitignorada). Representa TODO o sistema como notas religadas por wikilinks: uma por entrada de MEMÓRIAS, por regra, por seção de PROJETO/PROJETO_REFERENCIA, por script, por controle P-N, por proposta aplicada, mais MOCs e um painel de estado. **Fonte da verdade continua sendo o canon** — isto é camada de leitura, como o `.hidrata.md`. Modelo com acesso à Máquina (Seth) navega a partir de `memoria/obsidian/INICIO.md`; não editar (a geração apaga e reescreve — correção é entrada nova em MEMÓRIAS).
+ - **Quando a Seth usa o vault (MEMÓRIAS (292)):** consulta dirigida, nunca varredura. Serve para história além da janela do `.hidrata.md`, para os backlinks de uma entrada/regra/proposta, ou para "o que faz o script X" sem abrir o arquivo inteiro — abrir a nota específica em `memoria/obsidian/`, chegando por `INICIO.md` ou pelos `moc-*`. São centenas de notas: não varrer o vault nem o `MEMÓRIAS.md` cru, o custo é de contexto.
++  **Listagem de diretório do vault (`:27125`) fica atrás do disco (MEMÓRIAS (391)/(400)):** o índice do Obsidian headless re-indexa no próprio ritmo — uma listagem de `entradas/` pode terminar antes da entrada mais recente e ainda trazer total coerente (não é truncamento). Doutrina da Seth (`_DOUTRINA_FIXA` no `seth_gateway`): pra saber se uma entrada recente existe, LER o arquivo (`query_canon`), nunca concluir da listagem. Escolha (c) de H1; (a) re-index no post-commit e (b) ler do disco via `ro_proxy` foram descartadas como cano a mais.
+ - **MEMÓRIAS.md** é o terceiro canônico: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, tudo append-only num arquivo só.
+ - **Hidratação — pós-redesenho (Fase 8):** o **loop de governança** (grafo LangGraph) hidrata
+   pelo nó `hidratar` = `scripts/estado_para_eco.sh` (fatos de Máquina: HEAD, topo de MEMÓRIAS,
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 2b755c8..52b819c 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -101,6 +101,12 @@ _DOUTRINA_FIXA = (
+     "fim da lista, o intervalo, nem 'vai até X'. É `lacuna: leitura parcial` — "
+     "peça a continuação, um sub-caminho, ou o total. O mesmo vale pro que sobra "
+     "de um tool-result depois de uma compactação.\n\n"
++    "**Listagem de diretório do vault pode estar VELHA, não truncada:** o índice "
++    "do Obsidian headless fica atrás do disco — uma listagem de `entradas/` pode "
++    "terminar antes da entrada mais recente e ainda trazer um total coerente "
++    "(MEMÓRIAS (391)/(400)). Pra saber se uma entrada recente existe, LEIA o "
++    "arquivo dela (`query_canon`), não conclua da listagem. Não estar na listagem "
++    "≠ não existir no disco.\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+     "hidratação mínima; o resto é sob demanda.\n\n"

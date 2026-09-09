@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0a4b14ddb833b96e072961d556363f123b1f080e
-  Escrito em: 09/09/2026 10:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26b62857c99ab91228d21359697664c208098fd0
+  Escrito em: 09/09/2026 10:41 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125`) fica atrás do disco — o índice do Obsidian headless re-indexa no próprio ritmo. Doutrina da Seth passa a mandar LER o arquivo pra confirmar entrada recente, nunca concluir da listagem.
+
+**Contexto (causa raiz do F-1, MEMÓRIAS (391)):** `GET :27125/vault/…/entradas/` terminava em `0385.md` enquanto o disco tinha `0390.md`; ler um arquivo específico (`0390.md`) funcionava. A lista vinha do índice interno do Obsidian headless, que não re-indexou os arquivos criados depois de ~0385. Não é truncamento — é lista completa-mas-velha, e a regra de "leitura parcial" que já existe no `_DOUTRINA_FIXA` não pega isso (não há marca de corte).
+
+**Decisão do Humano ("Sua sugestão"): opção (c).** Descartadas: (a) forçar re-index / reiniciar o Obsidian no `post-commit` e (b) `vault_consultar` de diretório ler do disco via `ro_proxy` — cano a mais pra um problema que só aparece em entrada dos últimos minutos e que a Seth já sabe escalar.
+
+**Mudou (proposta `seth-doutrina-listagem-velha`, `redesign/router/seth_gateway.py` + `PROJETO.md`, quarentena, 1 assinatura):**
+- `_DOUTRINA_FIXA`: parágrafo novo — listagem de diretório do vault pode estar VELHA, não truncada; pra saber se entrada recente existe, LER o arquivo (`query_canon`); não estar na listagem ≠ não existir no disco. Fica logo depois da regra de "leitura parcial", é caso distinto.
+- `_HASH_DOUTRINA` `2b755c8`→`ed2ae14d` (via hash do texto) — `MARCADOR` vira `<!-- SETH:HIDRATADO:ed2ae14d -->`, conversas da Seth em andamento re-hidratam sozinhas.
+- `PROJETO.md`, "Quando a Seth usa o vault": 1 linha registrando a doutrina e o descarte de (a)/(b).
+
+**Verificado:** `py_compile`; `--selftest` → `SELFTEST OK` (injeta 1 system, não repete); `seth-gateway.service` reiniciado, `:20126/v1/models` → HTTP 200, `MARCADOR` novo confirmado em runtime; `git apply --check` limpo; `diff-sha256` do `APROVADO-` (`bbc1d3b6…`) bate; assinatura ssh verificada pelo P-8 contra `HEAD:propostas/.allowed_signers`.
+
+**Backlog:** H1 e D2 fechados no mesmo commit. D2 (busca de refs do consolidador puxa entrada não-relacionada) — sem fix mecânico, confirmado pelo Humano: as duas correções testadas em (395)/(396) foram refutadas contra dados reais, e a revisão humana antes do canon já pega o sintoma.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-doutrina-listagem-velha`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `_DOUTRINA_FIXA` lido; `python3 -m py_compile`; `--selftest`; `systemctl --user restart seth-gateway.service` + `is-active` + `curl :20126/v1/models` (200) + `MARCADOR` lido do módulo em runtime (`ed2ae14d`); `git apply --check` limpo contra HEAD; assinatura verificada pelo P-8. Autorização: Humano, "vamos fazer segundo a sua sugestão" (Bloco 10 + Bloco 3 opção c) → "feito" (`scripts/aprovar.sh seth-doutrina-listagem-velha` assinado, 10:39 -03).
+
 (399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
 
 **Achado (verificação de coerência pedida pelo Humano):** `grep -c CONSOLIDA INDICE_MEMORIAS.md` → 0, enquanto a camada quente tem 3 entradas CONSOLIDAÇÃO. Causa: o padrão `(?:DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O)` repetido em 9 pontos de `.githooks/gerar-hidratacao.sh` (índice, índice de palavras-chave, janela do `.hidrata`, P-5 permutação, P-7 citação, reconciliação) e em 4 scripts de migração/verificação. Os 3 geradores Python (`gerar_indice_derivado.py`, `gerar_obsidian.py`, `busca_semantica.py`) **não** têm o bug — já usam padrão genérico.
