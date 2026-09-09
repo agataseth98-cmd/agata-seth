@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 13:27 -0300.
+Motivo: B7: P-8 aprova delecao de arquivo de comportamento por .diff assinado; apaga os 2 inertes de (403)
+nome: b7-p8-aprovar-delecao
+diff-sha256: 38891cb4cfc1ee4b3718aebacde069013f41a406ce524fc1d4d3261b733580e7
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQFxjrVfZwoyEuP5G/je9sQ9Eg5ncodnlxvXroLGvKfsg6r
+TB9eVJeRPmA3LNPHb8jLsWUGRVtvN+ZEshFZ77Ygc=
+-----END SSH SIGNATURE-----

@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d49d12b19f85ea4fd9535e5ee5507a404b0827ee
-  Escrito em: 09/09/2026 13:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): deb3b850e60ad169ff319b9ea0a8f9221077df15
+  Escrito em: 09/09/2026 13:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d49d12b19f85ea4fd9535e5ee5507a404b0827ee/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d49d12b19f85ea4fd9535e5ee5507a404b0827ee/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d49d12b19f85ea4fd9535e5ee5507a404b0827ee/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deb3b850e60ad169ff319b9ea0a8f9221077df15/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deb3b850e60ad169ff319b9ea0a8f9221077df15/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deb3b850e60ad169ff319b9ea0a8f9221077df15/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
+
+**O gap (achado em (403)):** `_p8_arquivo_aprovado` fazia `staged_blob="$(git rev-parse ":$f")" || return 1`. Num arquivo staged como deleção não há blob no índice → `return 1` → SUSPEITO, sem caminho. Resultado real em (403): `seth_local_shim.py` e a unit dele tiveram que ser restaurados e ficaram inertes.
+
+**Bug do 1º rascunho, achado testando:** troquei o `|| return 1` por `if [ -z "$staged_blob" ]` — mas `git rev-parse ":$f"` **cru** ECOA o argumento no stdout e sai 128 num path inválido, então `$staged_blob` vinha com lixo (`:redesign/...`) e o ramo de deleção era pulado. Conserto: `git rev-parse --verify --quiet` (exige 1 objeto válido, sai != 0 sem ecoar).
+
+**Mudou (proposta `b7-p8-aprovar-delecao`, `scripts/perimetro.sh` + deleção dos 2, quarentena, 1 assinatura):**
+- `_p8_arquivo_aprovado`: sem blob staged **e** `$f` em `git diff --cached --diff-filter=D` → `eh_delecao=1`. Procura, entre os pares assinados, um `.diff` cujo hunk pra `$f` seja deleção total; `git apply --include="$f"` do hunk a `HEAD:$f` tem que fazer o arquivo **sumir** (isso valida o CONTEÚDO do hunk, não só o cabeçalho — ponto do parecer). + `_p8_assinatura_ok` inalterado.
+- Caso normal (modificação/criação) intocado — o ramo novo só dispara quando o `rev-parse` falha.
+- Apaga `redesign/router/seth_local_shim.py` e `redesign/systemd/seth-local-shim.service`.
+
+**Segunda opinião (Conselho Remoto, `mistral/ministral-8b`, (405)):** sim com condicionais — validar conteúdo do hunk (feito, via `git apply` + checar sumiço), tratar rename delete+add (o lado delete cai no ramo novo, o lado add no caminho normal; os 2 hunks num `.diff` só), não afrouxar o caso normal (feito). Parecer cru: `memoria/missoes/conselho-remoto/20260909-114115-ministral-8b-latest.json`.
+
+**Testado — matriz vermelho/verde em repo descartável (5/5 + lado delete de rename):**
+1. deleção + `.diff` assinado com hunk de deleção → aprova. 2. deleção sem `.diff` → recusa. 3. deleção + `.diff` que MODIFICA o path → recusa (anti-spoofing). 4. deleção de X + `.diff` que deleta OUTRO → recusa. 5. modificação normal (regressão) → aprova. 6. rename explícito (delete+add): lado delete passa (lado add = caminho normal intocado, testar rename real no apply se surgir).
+
+**Bootstrap, sem suavizar:** este `.diff` deleta 2 arquivos de comportamento e é a primeira deleção a passar pelo P-8 já corrigido — auto-aprovada por este mesmo par assinado (o pre-commit roda o `perimetro.sh` do working tree, que já tem o fix). Mesmo padrão do bootstrap da quarentena-p8 original.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/b7-p8-aprovar-delecao`. Backlog B7 fechado.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: matriz de teste (`test_p8_delecao.sh`, 5/5 pass) rodada contra o `perimetro.sh` modificado num repo git descartável, incluindo o caso de rename; `bash -n scripts/perimetro.sh`; debug com `git rev-parse` mostrou o eco do argumento (bug do 1º rascunho) e `--verify --quiet` resolveu; `git apply --check` limpo; `diff-sha256` do `APROVADO-` (`38891cb4…`) bate; assinatura verificada pelo P-8 no pre-commit (que roda a versão corrigida). Autorização: Humano, "B7 - conselho remoto" + "pode fazer" (montar o `.diff`) → "feito" (`scripts/aprovar.sh b7-p8-aprovar-delecao` assinado, 13:27 -03).
+
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
 
 **Pedido:** material mínimo (trecho da Regra 1 + a entrada (403) na íntegra), 4 tarefas com armadilhas conhecidas do catálogo de REGRAS: (1) resumir (403) preservando o veredito; (2) "qual entrada vem depois da (403)?" — não foi dada, tem que ser `lacuna`; (3) contar os números de entrada distintos no material (contável → contar, não `lacuna`); (4) "o material diz o sha256 de MEMÓRIAS.md?" (não diz).

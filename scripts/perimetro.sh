@@ -728,9 +728,29 @@ _p8_arquivo_aprovado() {
   # EXATAMENTE o resultado daquela mudança antiga -- o que não acontece
   # numa edição nova e diferente, mesmo no mesmo caminho.
   local f="$1" staged_blob diretorio aprovado nome diff_path
-  local tmp resultado_blob diff_abs repo_raiz
+  local tmp resultado_blob diff_abs repo_raiz eh_delecao=0
 
-  staged_blob="$(git rev-parse ":$f" 2>/dev/null)" || return 1
+  # --verify --quiet: exige UM objeto válido e sai != 0 SEM ecoar o argumento
+  # quando não há (git rev-parse "cru" ecoa o arg no stdout e sai 128 -- isso
+  # enchia $staged_blob com lixo e pulava o ramo de deleção).
+  if ! staged_blob="$(git rev-parse --verify --quiet ":$f" 2>/dev/null)" \
+     || [ -z "$staged_blob" ]; then
+    # Sem blob staged. Ou o arquivo saiu do commit (P-8 não o checa), ou
+    # está staged como DELEÇÃO -- e P-8 tem que poder aprovar deleção de
+    # arquivo de comportamento igual aprova modificação: por um .diff
+    # ASSINADO cujo hunk pra este path seja uma deleção total. Antes,
+    # `|| return 1` aqui bloqueava TODA deleção sem caminho de aprovação
+    # (achado em MEMÓRIAS (403); conserto autorizado em (407) com 2a
+    # opinião do Conselho Remoto). Renomear = git vê delete(path velho) +
+    # add(path novo); p8_quarentena checa cada path à parte, então o lado
+    # "delete" cai aqui e o "add" no caminho normal -- os dois hunks
+    # precisam estar no MESMO .diff assinado.
+    if git diff --cached --name-only --diff-filter=D 2>/dev/null | grep -qxF -- "$f"; then
+      eh_delecao=1
+    else
+      return 1
+    fi
+  fi
   repo_raiz="$(pwd)"
 
   for diretorio in propostas propostas/aplicadas; do
@@ -760,10 +780,21 @@ _p8_arquivo_aprovado() {
       fi
 
       if (cd "$tmp" && git apply --include="$f" "$diff_abs") >/dev/null 2>&1; then
-        resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
-        if [ "$resultado_blob" = "$staged_blob" ] && _p8_assinatura_ok "$aprovado" "$diff_abs" "$nome"; then
-          rm -rf "$tmp"
-          return 0
+        if [ "$eh_delecao" -eq 1 ]; then
+          # Aplicar o .diff a HEAD:$f fez o arquivo SUMIR == a deleção
+          # staged. `git apply` já validou o CONTEÚDO do hunk (as linhas
+          # `-` da deleção têm que bater com HEAD:$f, senão recusa) --
+          # não basta o cabeçalho citar o path.
+          if [ ! -e "$tmp/$f" ] && _p8_assinatura_ok "$aprovado" "$diff_abs" "$nome"; then
+            rm -rf "$tmp"
+            return 0
+          fi
+        else
+          resultado_blob="$(git hash-object "$tmp/$f" 2>/dev/null)"
+          if [ "$resultado_blob" = "$staged_blob" ] && _p8_assinatura_ok "$aprovado" "$diff_abs" "$nome"; then
+            rm -rf "$tmp"
+            return 0
+          fi
         fi
       fi
       rm -rf "$tmp"

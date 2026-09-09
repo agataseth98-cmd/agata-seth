@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
+  palavras-chave: fecha, arquivo, aprovado, tinha, caminho, pra, aprovar, deleção, comportamento, git, rev, parse, path, deletado, devolve, blob, agora, aprova, diff, assinado, hunk, total, apaga, arquivos, inertes, seth, local, shim
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
   palavras-chave: tes, rodada, limpa, contagem, desde, primeira, nova, sequência, gemini, flash, remoto, pedido, fidelidade, relato, auditada, contra, disco
 (405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: huggingface, mistral, entram, roster, remoto, famílias, independentes, confirmadas, chamada, real, item, fork, pós
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
   palavras-chave: carimbo, sha, preâmbulo, regras, projeto, memórias, resolução, variante, numérica, frescor, sub, itens, parecer, glm, mandou, eliminar, usar, existe, inventar, contador, novo
-(377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos gratuitos (Proposta B da leva de (376)). `scripts/pesquisar_modelos_gratuitos.py` + `config/agata-pesquisa-modelos.{service,timer}` (domingo 22:00) + `perimetro.sh` P-9 + nota em `config/modelos-gratuitos.md`.
-  palavras-chave: rotina, semanal, pesquisa, saúde, pool, modelos, gratuitos, proposta, leva, scripts, pesquisar, config, agata, service, timer, domingo, perimetro, nota
+(377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos …
+  palavras-chave: rotina, semanal, pesquisa, saúde, pool, modelos
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openr …
   palavras-chave: pool, modelos, gratuitos, três, mudanças, openr
 (375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual …
