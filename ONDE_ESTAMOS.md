@@ -55,6 +55,10 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
+- **Voz da Seth** — TTS voltou pro Kokoro `pf_dora` (feminina pt-BR) em
+  modo de teste, CPU ((414)). Piper (masc.) segue no ar. Ainda não é
+  canon — se `pf_dora` firmar, próximo passo é rodar o Kokoro na GPU.
+
 - **Seth "não respondia" no LibreChat** — o palpite da (411) (geração de
   título) não se sustentou na auditoria ((412)): o mais provável era a
   cascata de provedores lenta naquela janela, que voltou ao normal

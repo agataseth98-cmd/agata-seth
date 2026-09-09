@@ -1,0 +1,36 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index ef16242..f705997 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -143,15 +143,27 @@ endpoints:
+ # com RTX 4060 -> tambem lento. Kokoro (:8880) segue no ar pra ingles -- e' so
+ # trocar a url abaixo de volta pra 8880 e a lista de vozes pelas af_/am_.
+ # STT (whisper :20130) ainda nao e OpenAI-compat em /v1 -- pendente, ver redesign/librechat/README.md
++#
++# TESTE (MEMÓRIAS (414)): TTS voltou pro Kokoro (:8880) pra o Humano avaliar
++# `pf_dora` -- a única voz feminina pt-BR disponível local (Piper só tem masc.:
++# `pt_BR-faber-medium`). Kokoro fica em CPU de propósito ("deixa na cpu pra eu
++# testar"): frase curta ~0,8s medido, parágrafo longo escala mal (a "demora" da
++# (387)). A pronúncia imperfeita da (387) é limite de dados do modelo, não some
++# na CPU→GPU. Próximos degraus se `pf_dora` servir: imagem `kokoro-fastapi-gpu`;
++# se a pronúncia não servir: XTTS-v2 (opção B da (412)/(413)). Piper (:8890)
++# segue no ar -- reverter = trocar a url e a lista de volta.
++# PROJETO.md ("Interface"/"Serviços") ainda diz "Piper default" de propósito:
++# isto é config de teste, não canon.
+ speech:
+   tts:
+     openai:
+-      url: "http://127.0.0.1:8890/v1/audio/speech"
++      url: "http://127.0.0.1:8880/v1/audio/speech"
+       apiKey: "loopback-sem-chave"
+-      model: "tts-1"
++      model: "kokoro"
+       voices:
+-        - "pt-br"
+-        - "dora"
++        - "pf_dora"
++        - "pm_alex"
++        - "pm_santa"
+ 
+ # --- MCP: memória local (vault Obsidian, read-only) ------------------------
+ # canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.

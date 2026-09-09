@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f5d9cd798c323612987c346645aec82af11027ed
-  Escrito em: 09/09/2026 15:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a10d0a0d805299b6d3e85dc77a0a2df748bb998e
+  Escrito em: 09/09/2026 15:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
+
+**Contexto:** a (387) tinha trocado Kokoro→Piper porque a Seth reclamou de *"demora e transcreve errado"*. A "demora" era Kokoro em CPU; frase curta mede ~0,4-0,8s, parágrafo longo escala mal. A pronúncia imperfeita é limite de dados do modelo (model card sem nota pra pt-BR), não some na CPU→GPU. O Humano assume isso pra testar.
+
+**Mudou (proposta `voz-pf-dora-teste`, só `redesign/librechat/librechat.yaml`, quarentena P-8, 1 assinatura):**
+- `speech.tts.openai.url`: `:8890` (Piper) → `:8880` (Kokoro); `model: tts-1` → `kokoro`.
+- `voices`: `["pt-br","dora"]` → `["pf_dora","pm_alex","pm_santa"]` (fem primária + 2 masc. como opção).
+- Kokoro **fica em CPU** de propósito ("deixa na cpu pra eu testar") — imagem `kokoro-fastapi-cpu` intocada.
+- Piper (`:8890`, `pt_BR-faber-medium`) **continua no ar** — reverter = trocar url/lista de volta.
+- **NÃO canonizado em PROJETO.md** ("Interface"/"Serviços" ainda dizem "Piper default") — é config de teste, pode reverter.
+
+**Próximos degraus (se `pf_dora` servir):** imagem `kokoro-fastapi-gpu` (GPU está ociosa, 56 MiB de 8 GB) pra matar a latência. **Se a pronúncia não servir:** XTTS-v2 (multilíngue, clona voz de sample de 6s, licença não-comercial, ~4 GB VRAM) — projeto à parte.
+
+**Verificado:** `curl :8880/v1/audio/speech` com `pf_dora`/`pm_alex`/`pm_santa` → 200, MP3 real, ~0,4-0,8s; `yaml.safe_load` OK; deploy `cp` pro `~/librechat/` + `docker restart librechat` healthy; LibreChat log de startup mostra `"url": "http://127.0.0.1:8880/v1/audio/speech"`; `sha256sum` do `.diff` (`4ed0a9bd…`) bate com `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify -I agata-humano` → `Good signature`.
+
+Par `.diff`/`APROVADO-` (assinado, Humano 15:39 -03) em `propostas/aplicadas/voz-pf-dora-teste`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl` nos 3 voices do Kokoro (200 + MP3); `WebSearch` confirmou que Piper não tem voz fem. pt-BR (só masc.) e que Kokoro/XTTS são as rotas; `git checkout` + re-apply do `.diff` reproduziu sha `4ed0a9bd` idêntico ao assinado; assinatura verificada; `docker inspect` healthy. Autorização: Humano, "b-voz pt-BR melhor feminina... proxima de pf_dora" + "volta para A coloca pf_dora, mas deixa na cpu" + `scripts/aprovar.sh voz-pf-dora-teste` assinado 15:39 -03 + "a voz está boa por enquanto".
+
 (413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
 
 **titleConvo:** `.diff` `propostas/reverter-titleconvo.diff` (sha256 `69125d9c…`), assinado pelo Humano 15:24 -03. Deployado (`~/librechat/` + `docker restart librechat` healthy, config sem erro). Comentário errado que eu tinha posto no yaml (mecanismo do abort) removido no mesmo `.diff`. `titleModel` fica `seth-livre` (inócuo).
