@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o que diziam controlar.** Auditoria completa por ordem do Humano ("audite o sistema por completo... percebendo e resolvendo falhas de segurança"). Todo achado abaixo foi demonstrado vermelho/verde em clone descartável, nunca só lido. Nenhum era teórico.
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
 (390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
-(389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
+(389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "le …
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha f …
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedid …
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o r …

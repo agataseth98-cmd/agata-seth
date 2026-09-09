@@ -46,6 +46,18 @@ _ROTULOS = [
     "slack-token",
     "pem-private-key",
     "heuristica-KEY/TOKEN/SECRET/PASSWORD",
+    # Acrescentados 09/09/2026 junto com os padrões correspondentes em
+    # scripts/varredura_segredo.sh. ESTA LISTA É PAREADA POR POSIÇÃO com o
+    # array PADROES_SEGREDO daquele arquivo (compilar(), logo abaixo, casa
+    # os dois por índice e só usa estes nomes se os COMPRIMENTOS baterem --
+    # senão cai pra "padrao-N" e o autoteste reprova). Acrescentar padrão lá
+    # sem acrescentar rótulo aqui quebra os dois de uma vez: medido nesta
+    # data, o autoteste caiu com 6 FALHA de rótulo antes desta linha existir.
+    "anthropic-openrouter-openai-project-key",
+    "groq-key",
+    "huggingface-token",
+    "github-fine-grained-pat",
+    "zhipu-glm-key",
 ]
 
 
@@ -175,10 +187,24 @@ def _campos_texto(payload):
             yield caminho, no
         elif isinstance(no, dict):
             for k, v in no.items():
+                # A CHAVE também é texto que sai na requisição. Antes só o
+                # VALOR era varrido, e `{"sk-...": 1}` é JSON perfeitamente
+                # válido -- o segredo ia inteiro pro provedor. Medido em
+                # 09/09/2026. Custo: um yield a mais por chave; o teto de nós
+                # não muda (a chave não é um nó novo, anda junto do valor).
+                if isinstance(k, str):
+                    yield (f"{caminho}.<chave>" if caminho else "<chave>"), k
                 yield from _anda(v, f"{caminho}.{k}" if caminho else str(k), profundidade + 1)
-        elif isinstance(no, list):
+        elif isinstance(no, (list, tuple)):
+            # tuple junto de list: não sai de json.loads, mas sanitizar_payload
+            # é biblioteca pública (redesign/mcp/discord/servidor.py importa
+            # `varrer`) e um chamador Python legítimo passa tupla sem pensar.
             for i, v in enumerate(no):
                 yield from _anda(v, f"{caminho}[{i}]", profundidade + 1)
+        elif isinstance(no, (bytes, bytearray)):
+            # idem: corpo binário que carrega texto. `errors="replace"` nunca
+            # levanta -- varrer é melhor que pular por não decodificar.
+            yield caminho, bytes(no).decode("utf-8", errors="replace")
         # números/bool/None/etc: nada a varrer
 
     yield from _anda(payload, "", 0)

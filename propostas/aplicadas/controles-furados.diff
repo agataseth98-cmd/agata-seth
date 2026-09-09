@@ -1,0 +1,399 @@
+diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
+index 44cdb3d..6a31946 100755
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -5,6 +5,29 @@
+ set -euo pipefail
+ cd "$(dirname "$0")/.."
+ 
++# --- Guarda de codificacao (achado 04/09/2026, sessao Claude Code na nuvem) ---
++# Este gerador reconhece entrada de MEMORIAS por rotulo ACENTUADO (DIÁRIO,
++# CORREÇÃO) e separador em travessão. Num ambiente sem locale UTF-8, ou com um
++# awk nao-multibyte (mawk, padrao de Debian/Ubuntu), os
++# regex de `grep -E` e do `awk` da janela deixam de casar essas linhas -- e o
++# script NAO falha: escreve um .hidrata.md e um INDICE_MEMORIAS.md
++# silenciosamente truncados, comecando na entrada ASCII mais antiga ((276),
++# escrita sem acento pelo Qwen). Medido de verdade, nao teorico: mawk 1.3.4 +
++# LC_ALL=POSIX derrubou o indice de 329 para 78 linhas e a janela de
++# hidratacao de (316)..(312) para (276)..(264) -- exatamente a classe de falha
++# de MEMORIAS (248)-(252), hidratacao errada que se le coerente. Silencio alto,
++# entao: aborta antes de escrever qualquer byte, nunca gera pela metade.
++_LINHA_TESTE='(0) DIÁRIO — 01/01/2026 · guarda de codificação'
++if ! printf '%s\n' "$_LINHA_TESTE" | grep -qE '^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O) [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}'; then
++  echo "gerar-hidratacao: ABORTADO -- o 'grep' deste ambiente nao casa rotulo acentuado (locale sem UTF-8?). Rode com LANG/LC_ALL em UTF-8. Nada foi escrito." >&2
++  exit 1
++fi
++if ! printf '%s\n' "$_LINHA_TESTE" | awk '/^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|CORRE[CÇ][AÃ]O)/ { ok=1 } END { exit !ok }'; then
++  echo "gerar-hidratacao: ABORTADO -- o 'awk' deste ambiente nao casa rotulo acentuado (mawk?). Use um awk multibyte (gawk). Nada foi escrito." >&2
++  exit 1
++fi
++unset _LINHA_TESTE
++
+ OUT=".hidrata.md"
+ INDICE="INDICE_MEMORIAS.md"
+ # Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
+diff --git a/redesign/router/proxy.py b/redesign/router/proxy.py
+index 462f588..13fed7b 100644
+--- a/redesign/router/proxy.py
++++ b/redesign/router/proxy.py
+@@ -82,6 +82,21 @@ class _Handler(BaseHTTPRequestHandler):
+                     sanitizar.sanitizar_payload(payload)
+                 except sanitizar.SegredoNoPayload as e:
+                     return self._bloqueado(e)
++            else:
++                # JSON válido mas não-objeto (lista, string, número) caía aqui
++                # e seguia direto pro _passar SEM VARREDURA NENHUMA -- o mesmo
++                # "passa ileso" que o conserto de 04/09 fechou um degrau
++                # abaixo (não-JSON), deixado aberto um degrau acima.
++                # Medido em 09/09/2026 com upstream de teste: corpo `dict` com
++                # segredo -> 422 e upstream intocado; a MESMA chave dentro de
++                # uma LISTA de topo -> 200 e o upstream RECEBEU o segredo.
++                # Falha fechada, como o topo deste arquivo promete: corpo
++                # OpenAI-compat é sempre objeto, então não-objeto é recusa.
++                return self._erro(
++                    415,
++                    "corpo JSON não é objeto -- este proxy só entende OpenAI-compat "
++                    "(objeto no topo); nada foi repassado",
++                )
+         self._passar(corpo, "POST")
+ 
+     # --------------------------------------------------------------------- #
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index 7a43b17..10946ee 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -46,6 +46,18 @@ _ROTULOS = [
+     "slack-token",
+     "pem-private-key",
+     "heuristica-KEY/TOKEN/SECRET/PASSWORD",
++    # Acrescentados 09/09/2026 junto com os padrões correspondentes em
++    # scripts/varredura_segredo.sh. ESTA LISTA É PAREADA POR POSIÇÃO com o
++    # array PADROES_SEGREDO daquele arquivo (compilar(), logo abaixo, casa
++    # os dois por índice e só usa estes nomes se os COMPRIMENTOS baterem --
++    # senão cai pra "padrao-N" e o autoteste reprova). Acrescentar padrão lá
++    # sem acrescentar rótulo aqui quebra os dois de uma vez: medido nesta
++    # data, o autoteste caiu com 6 FALHA de rótulo antes desta linha existir.
++    "anthropic-openrouter-openai-project-key",
++    "groq-key",
++    "huggingface-token",
++    "github-fine-grained-pat",
++    "zhipu-glm-key",
+ ]
+ 
+ 
+@@ -175,10 +187,24 @@ def _campos_texto(payload):
+             yield caminho, no
+         elif isinstance(no, dict):
+             for k, v in no.items():
++                # A CHAVE também é texto que sai na requisição. Antes só o
++                # VALOR era varrido, e `{"sk-...": 1}` é JSON perfeitamente
++                # válido -- o segredo ia inteiro pro provedor. Medido em
++                # 09/09/2026. Custo: um yield a mais por chave; o teto de nós
++                # não muda (a chave não é um nó novo, anda junto do valor).
++                if isinstance(k, str):
++                    yield (f"{caminho}.<chave>" if caminho else "<chave>"), k
+                 yield from _anda(v, f"{caminho}.{k}" if caminho else str(k), profundidade + 1)
+-        elif isinstance(no, list):
++        elif isinstance(no, (list, tuple)):
++            # tuple junto de list: não sai de json.loads, mas sanitizar_payload
++            # é biblioteca pública (redesign/mcp/discord/servidor.py importa
++            # `varrer`) e um chamador Python legítimo passa tupla sem pensar.
+             for i, v in enumerate(no):
+                 yield from _anda(v, f"{caminho}[{i}]", profundidade + 1)
++        elif isinstance(no, (bytes, bytearray)):
++            # idem: corpo binário que carrega texto. `errors="replace"` nunca
++            # levanta -- varrer é melhor que pular por não decodificar.
++            yield caminho, bytes(no).decode("utf-8", errors="replace")
+         # números/bool/None/etc: nada a varrer
+ 
+     yield from _anda(payload, "", 0)
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index f167e6c..273a152 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -274,7 +274,20 @@ _p5_periodo_verificar() {
+   return "$codigo"
+ }
+ 
++# Qual ramo o P-5 realmente tomou nesta corrida: "ordinario" (crescimento
++# normal, entrada nova -- há bytes novos a citar) ou "permutacao" (migração
++# entre camadas, byte a byte, nada de conteúdo novo). O P-7 lê isto pra
++# decidir se pode pular. Antes ele lia a MARCA de migração direto, e a marca
++# mora em propostas/aplicadas/, que NUNCA é limpo (é registro histórico, por
++# desenho) -- resultado: a marca de 06/09/2026 desligou o P-7 em todo commit
++# desde então, alegando "P-5 já provou por permutação" quando o P-5 tinha
++# passado pelo ramo ordinário. Mesmo bug que o próprio P-5 já corrigiu pra si
++# (comentário longo abaixo, "uma marca antiga esquecida"); a correção nunca
++# tinha chegado ao P-7.
++P5_RAMO="ordinario"
++
+ p5_append_only() {
++  P5_RAMO="ordinario"
+   if ! git rev-parse HEAD >/dev/null 2>&1; then
+     return 0
+   fi
+@@ -289,6 +302,7 @@ p5_append_only() {
+   local marca_migracao
+   marca_migracao="$(_p5_migracao_pendente)" || true
+   if [ -n "$marca_migracao" ] && [[ "$marca_migracao" != *PERIODO* ]]; then
++    P5_RAMO="permutacao"
+     echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
+     local tmp_antigo tmp_novo codigo
+     tmp_antigo="$(mktemp)"; tmp_novo="$(mktemp)"
+@@ -331,6 +345,7 @@ p5_append_only() {
+     return 0
+   fi
+   if [ -n "$marca_migracao" ]; then
++    P5_RAMO="permutacao"
+     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
+     _p5_periodo_verificar
+     return $?
+@@ -518,20 +533,43 @@ PY
+ # "história editada" que Regra 4 existe pra impedir, só que na camada fria.
+ p14_frio_imutavel() {
+   [ -f SELOS.txt ] || return 0
+-  local ruim=0 arquivo staged tmp_saida
++  local ruim=0 arquivo staged tmp_saida selos_lista
++  # A lista de selos vem de HEAD:SELOS.txt, não do disco. Se viesse do
++  # disco, apagar a linha de um chunk e reescrever o chunk no MESMO commit
++  # tiraria os dois do radar: o loop abaixo nunca veria o nome, e o
++  # selar.sh --check (a outra perna) também não -- o chunk sumiria do
++  # relatório em vez de aparecer como VIOLADO. Medido em 09/09/2026 numa
++  # cópia em sandbox. Lendo de HEAD, remover a linha não desprotege
++  # retroativamente o que já estava selado. (O outro lado do conserto:
++  # SELOS.txt entrou na quarentena P-8, então mexer nele exige aprovação
++  # assinada.) Sem HEAD ainda (primeiro commit) cai pro disco -- bootstrap,
++  # mesma lógica de _p8_assinatura_ok.
++  selos_lista="$(git show HEAD:SELOS.txt 2>/dev/null)" || selos_lista=""
++  [ -z "$selos_lista" ] && selos_lista="$(cat SELOS.txt 2>/dev/null)"
+   # Só é violação re-tocar um chunk que JÁ existia selado num commit
+-  # ANTERIOR -- na própria commit que cria e sela o chunk pela primeira
+-  # vez, ele necessariamente aparece staged, e isso é normal (mesmo
+-  # bootstrap de P-8: aprovar e criar acontecem juntos). `git diff --cached
+-  # --diff-filter=M` restringe a MODIFICADO, nunca ADICIONADO.
+-  staged="$(git diff --cached --name-only --diff-filter=M)"
++  # ANTERIOR -- na própria commit que cria e sela o chunk pela primeira vez
++  # ele necessariamente aparece staged, e isso é normal (mesmo bootstrap de
++  # P-8: aprovar e criar acontecem juntos).
++  # Antes esse caso era excluído por `--diff-filter=M` (só MODIFICADO, nunca
++  # ADICIONADO). O filtro saiu, e o caso continua excluído por um motivo
++  # melhor: a lista agora vem de HEAD:SELOS.txt, e no commit que cria o
++  # chunk o selo dele ainda NÃO está em HEAD -- o nome nem entra no loop.
++  # Trocar o filtro pela origem-em-HEAD amplia a cobertura de graça: agora
++  # DELEÇÃO e RENOMEAÇÃO de um chunk já selado também são pegas, e o
++  # `--diff-filter=M` deixava as duas passarem.
++  # --no-renames pelo mesmo motivo de P-8/P-11 (furo medido nesta data):
++  # sem ele o lado antigo de um rename some da listagem. Aqui o
++  # selar.sh --check ainda pegaria pelo hash, mas os três controles devem
++  # enxergar o mesmo conjunto de paths -- controle que enxerga menos do que
++  # devia é falha do controle (REGRAS, Princípios: Segurança).
++  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
+   while read -r _ arquivo _; do
+     [ -z "$arquivo" ] && continue
+     if echo "$staged" | grep -qxF "$arquivo"; then
+-      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece MODIFICADO e staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
++      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
+       ruim=1
+     fi
+-  done < SELOS.txt
++  done <<< "$selos_lista"
+   tmp_saida="$(mktemp)"
+   if ! bash "$_PERIMETRO_DIR/selar.sh" --check > "$tmp_saida" 2>&1; then
+     echo "SUSPEITO (P-14): 'scripts/selar.sh --check' reprovou -- ao menos um chunk frio foi alterado depois de selado:"
+@@ -566,8 +604,19 @@ p7_citacao() {
+   # Pular aqui não abre brecha: a garantia real é a permutação byte-exata
+   # do P-5, mais forte que P-7 -- se nenhum byte é novo, não há citação
+   # nova pra checar.
+-  if _p5_migracao_pendente >/dev/null; then
+-    echo "P-7: marca de migração presente -- pulado (P-5 já provou, por permutação, que nenhum byte de entrada é novo nesta commit; nada a citar que já não estivesse no canon)."
++  # Pula só quando o P-5 REALMENTE tomou o ramo de permutação nesta corrida
++  # (P5_RAMO, setado por p5_append_only, que roda antes de P-7 no main).
++  # A versão anterior perguntava por _p5_migracao_pendente -- a MARCA no
++  # disco, não o ramo tomado. Como a marca vive em propostas/aplicadas/ e
++  # esse diretório nunca é limpo por desenho, a marca de 06/09/2026 deixou
++  # o P-7 em SKIP permanente: medido em 09/09/2026, "veredito: SKIP" com o
++  # P-5 tendo passado pelo ramo ORDINÁRIO (havia bytes novos, e a mensagem
++  # impressa afirmava o contrário). Toda citação nova entrou sem checagem
++  # nesse intervalo. O controle em si estava íntegro -- testado contra
++  # positivo e negativo conhecidos: citação real -> passa, citação
++  # fabricada -> pega. Era só o portão de entrada que estava travado aberto.
++  if [ "${P5_RAMO:-ordinario}" = "permutacao" ]; then
++    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO nesta corrida -- pulado (nenhum byte de entrada é novo; nada a citar que já não estivesse no canon)."
+     PERIMETRO_ESTADO="SKIP"
+     return 0
+   fi
+@@ -652,6 +701,26 @@ _p8_eh_comportamento() {
+     # varredura real mostrou 17 arquivos afetados, nenhum com aprovação prévia,
+     # nenhum trava retroativo. Autorização do Humano, texto explícito.
+     redesign/grafo/*.py|redesign/grafo/*.sh|redesign/librechat/*.yml) return 0 ;;
++    # Buracos medidos em 09/09/2026, mesma classe do achado de 04/09 que
++    # trouxe redesign/router/* pra cá -- código de controle que ficou de fora:
++    #   redesign/obsidian/*.py  ro_proxy.py É o serviço que força read-only
++    #                           sobre o vault (do_PUT/do_PATCH/do_DELETE ->
++    #                           403) e injeta o bearer do Obsidian. Trocá-lo
++    #                           abre escrita no vault sem aprovação nenhuma.
++    #   SELOS.txt               raiz de confiança do P-14. Sem isto, apagar
++    #                           uma linha do SELOS + reescrever o chunk frio
++    #                           correspondente, no MESMO commit, passa: as
++    #                           duas pernas do P-14 iteram o arquivo mutilado
++    #                           e o chunk simplesmente some do relatório.
++    #                           (O outro lado deste conserto está no próprio
++    #                           p14_frio_imutavel, que agora lê HEAD:SELOS.txt.)
++    #   .gitignore              é a PRIMEIRA linha de defesa que o P-11 cita
++    #                           no próprio comentário -- editá-la para
++    #                           destravar um silo não exigia aprovação.
++    #   models/manifest.json    lista de recursos que o P-12 usa como régua de
++    #                           backup; mexer nela muda o que "estar coberto"
++    #                           significa.
++    redesign/obsidian/*.py|SELOS.txt|.gitignore|models/manifest.json) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
+@@ -742,10 +811,19 @@ _p8_arquivo_aprovado() {
+     # `|| return 1` aqui bloqueava TODA deleção sem caminho de aprovação
+     # (achado em MEMÓRIAS (403); conserto autorizado em (407) com 2a
+     # opinião do Conselho Remoto). Renomear = git vê delete(path velho) +
+-    # add(path novo); p8_quarentena checa cada path à parte, então o lado
+-    # "delete" cai aqui e o "add" no caminho normal -- os dois hunks
+-    # precisam estar no MESMO .diff assinado.
+-    if git diff --cached --name-only --diff-filter=D 2>/dev/null | grep -qxF -- "$f"; then
++    # add(path novo) -- mas isso só é verdade com `--no-renames`. Sem ele, a
++    # detecção de rename do git (LIGADA por padrão) colapsa os dois lados
++    # num único R e mostra APENAS o path novo: o lado "delete" simplesmente
++    # não aparece, e este ramo nunca dispara.
++    # MEDIDO 09/09/2026 (vermelho/verde, clone descartável): editar
++    # redesign/router/sanitizar.py no lugar -> SUSPEITO (P-8), correto;
++    # `git mv redesign/router/sanitizar.py extras/` -> P-8 SILENCIOSO, e o
++    # sanitizador (único ponto que tira segredo do payload antes de sair pra
++    # provedor externo) saía do caminho vivo sem nenhum APROVADO-. Qualquer
++    # arquivo de comportamento podia deixar a quarentena por renomeação.
++    # Por isso `--no-renames` aqui E em p8_quarentena -- os dois têm que
++    # enxergar o mesmo conjunto de paths, senão o furo volta por um lado só.
++    if git -c core.quotepath=false diff --cached --no-renames --name-only --diff-filter=D 2>/dev/null | grep -qxF -- "$f"; then
+       eh_delecao=1
+     else
+       return 1
+@@ -805,7 +883,13 @@ _p8_arquivo_aprovado() {
+ 
+ p8_quarentena() {
+   local staged f ruim=0
+-  staged="$(git diff --cached --name-only)"
++  # `--no-renames` é load-bearing, não cosmético: sem ele um rename aparece
++  # só com o path NOVO, e mover um arquivo de comportamento pra fora dos
++  # padrões de _p8_eh_comportamento tira ele da quarentena sem APROVADO-
++  # nenhum (bypass medido em 09/09/2026 -- ver o comentário longo em
++  # _p8_arquivo_aprovado). Com ele, os dois lados do rename entram na
++  # checagem, e os dois hunks precisam estar no MESMO .diff assinado.
++  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
+   [ -z "$staged" ] && return 0
+   while IFS= read -r f; do
+     [ -z "$f" ] && continue
+@@ -841,15 +925,44 @@ _p11_eh_silo() {
+   esac
+ }
+ 
++_p11_conteudo_de_silo() {
++  # Segunda camada, por CONTEÚDO. _p11_eh_silo olha só o NOME, e nome se
++  # troca: `cp .hidrata-seth.md notas.md && git add notas.md` nunca teve
++  # nome de silo, então nem a regra de nome nem o `--no-renames` abaixo o
++  # pegam -- não houve rename, houve cópia. MEDIDO 09/09/2026: passava
++  # limpo, com `modelo-alvo:` e MOD no corpo, pro repositório PÚBLICO.
++  # Marca de MOD: o cabeçalho `modelo-alvo:` no início da linha,
++  # obrigatório em bloco MOD (REGRAS, "O Conselho" item 3).
++  # Falsos positivos medidos no repo inteiro: 1 -- o chunk frio
++  # MEMORIAS-FRIO-2026-09-06-com-migrado.md, que REGISTRA o formato em vez
++  # de carregar MOD vivo. Por isso a lista de exclusão: história e canon,
++  # onde citar o cabeçalho é o trabalho normal do arquivo. Silo de verdade
++  # nunca tem nome dessa lista -- se tiver, P-5/P-14 já brigam por outro
++  # motivo. Esta camada é o que salvou P-14 do mesmo furo (selar.sh
++  # --check pegou o que a listagem staged não viu).
++  case "$1" in
++    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
++  esac
++  git show ":$1" 2>/dev/null | grep -qaE '^modelo-alvo:[[:space:]]*[A-Za-z]'
++}
++
+ p11_silos_nao_versionados() {
+   local staged f ruim=0
+-  staged="$(git diff --cached --name-only)"
++  # `--no-renames` pelo mesmo motivo de p8_quarentena: sem ele, `git mv`
++  # de um silo staged pra um nome inocente apaga o path de silo da
++  # listagem e P-11 dá OK. MEDIDO 09/09/2026 (vermelho/verde): silo com
++  # nome de silo -> SUSPEITO; o MESMO arquivo renomeado -> "veredito: OK",
++  # com `modelo-alvo:` e MOD privado indo pro repositório PÚBLICO.
++  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
+   [ -z "$staged" ] && return 0
+   while IFS= read -r f; do
+     [ -z "$f" ] && continue
+     if _p11_eh_silo "$f"; then
+       echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (MOD de outra família) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+       ruim=1
++    elif _p11_conteudo_de_silo "$f"; then
++      echo "SUSPEITO (P-11): '$f' não tem nome de silo, mas o conteúdo staged tem cabeçalho 'modelo-alvo:' -- é bloco MOD. Por que importa: MOD é privado por padrão (REGRAS, 'O Conselho' item 2/3) e este repositório é público; renomear ou copiar um silo não o torna publicável. O que fazer: 'git restore --staged $f'. Se for texto sobre o formato (não MOD vivo), o lugar é MEMÓRIAS/REGRAS, que estão fora desta checagem."
++      ruim=1
+     fi
+   done <<< "$staged"
+   return "$ruim"
+diff --git a/scripts/varredura_segredo.sh b/scripts/varredura_segredo.sh
+index 74e51c5..76d5861 100755
+--- a/scripts/varredura_segredo.sh
++++ b/scripts/varredura_segredo.sh
+@@ -24,6 +24,24 @@ PADROES_SEGREDO=(
+   'xox[baprs]-[0-9A-Za-z-]{10,}'              # Slack token
+   '-----BEGIN[A-Z ]*PRIVATE KEY-----'         # PEM private key
+   '[A-Za-z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)[A-Za-z0-9_]*[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9/+_-]{16,}["'"'"']?'
++  # Acrescentados 09/09/2026. Motivo medido, não teórico: os padrões acima
++  # não pegavam NENHUMA das chaves que ESTE sistema realmente usa em forma
++  # nua. `sk-[A-Za-z0-9]{20,}` quebra no primeiro hífen -- `sk-ant-` tem só
++  # 3 alfanuméricos depois de `sk-`, `sk-or-v1-` tem 2. Medido com controles
++  # válidos (openai/google/aws casam, provando o arranjo): anthropic,
++  # openrouter, groq, huggingface, github fine-grained PAT e zhipu TODOS
++  # passavam limpos. Segundo CHAVES.md, três dessas (GROQ, OPENROUTER,
++  # ZHIPU) são chaves vivas nesta máquina. Só a heurística #7 as pegava, e
++  # só na forma de atribuição (`GROQ_API_KEY=gsk_...`) -- a chave colada em
++  # prosa, que é o caso realista de vazamento, saía inteira.
++  # Esta régua serve DOIS controles: P-1 (o que entra no repo público) e
++  # sanitizar.py (o que sai pra provedor externo). Falsos positivos medidos
++  # antes de acrescentar: ZERO arquivos rastreados para os cinco.
++  'sk-(ant|or|proj)-[A-Za-z0-9_-]{20,}'       # Anthropic / OpenRouter / OpenAI project
++  'gsk_[A-Za-z0-9]{40,}'                      # Groq
++  'hf_[A-Za-z0-9]{30,}'                       # Hugging Face
++  'github_pat_[A-Za-z0-9_]{50,}'              # GitHub fine-grained PAT
++  '[0-9a-f]{32}\.[A-Za-z0-9]{16}'             # Zhipu/GLM (<32hex>.<16>)
+ )
+ 
+ # P-1 -- "Segredos só em ~/.config/agata/.env, fora do repo" (PROJETO, Segurança).
+diff --git a/scripts/verificar_cabecalho.py b/scripts/verificar_cabecalho.py
+index 2852970..4ba25a7 100755
+--- a/scripts/verificar_cabecalho.py
++++ b/scripts/verificar_cabecalho.py
+@@ -23,11 +23,27 @@ def ultima_entrada_local() -> int | None:
+ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]:
+     falhas = []
+ 
+-    tem_prontidao = bool(re.search(r"^\s*Nonce\s*:", texto, re.MULTILINE))
++    # Âncora do bloco de prontidão = `modelo:`, não mais `Nonce:`.
++    # A linha `Nonce:` SAIU do bloco em MEMÓRIAS (417) (TES-002 aposentado),
++    # e este detector ficou para trás: medido em 09/09/2026, o bloco de 3
++    # linhas CANÔNICO DE HOJE reprovava ("falta t=<n>") e o formato APOSENTADO
++    # passava. Um linter que valida o formato morto e rejeita o vivo é pior
++    # que linter nenhum -- e este roda em dois caminhos vivos
++    # (redesign/mcp/servidor.py, tool `lint_header`, e redesign/grafo/tools.py).
++    # `modelo:` é a âncora certa por texto de REGRAS, não por escolha minha:
++    # REGRAS.md, "Carregar e formatos", diz literalmente "Misturar as duas
++    # formas (`modelo:` junto com `t=`) é erro de formato" -- é o próprio
++    # discriminador que as REGRAS nomeiam. Sobrevive à saída do Nonce e
++    # mantém `Última entrada:`/`pronto.` como checagens de verdade (usar
++    # `Última entrada:` como detector as tornaria vazias).
++    tem_prontidao = bool(re.search(r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE))
+     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
+ 
++    # Citação por SEÇÃO, não por número de linha: o "REGRAS.md:110" que estava
++    # aqui já tinha apodrecido (a frase mora hoje noutra linha). Número de
++    # linha envelhece em silêncio; nome de seção, não.
+     if tem_prontidao and tem_t:
+-        falhas.append("mistura bloco de prontidão (Nonce:) com t=<n> — REGRAS.md:110, 'Misturar as duas formas é erro de formato'")
++        falhas.append("mistura bloco de prontidão (modelo:) com t=<n> — REGRAS.md, 'Carregar e formatos': 'Misturar as duas formas (modelo: junto com t=) é erro de formato'")
+ 
+     if tem_prontidao:
+         if not re.search(r"última entrada\s*:", texto, re.IGNORECASE):

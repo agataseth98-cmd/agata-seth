@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 18:43 -0300.
+Motivo: Fecha furos medidos: P-8/P-11 cegos a rename, P-7 morto desde 06/09, SELOS.txt fora da quarentena, régua de segredo sem as chaves reais, proxy fail-open em JSON não-objeto, linter de cabeçalho validando o formato aposentado, guarda utf8 nunca aplicada
+nome: controles-furados
+diff-sha256: 0b4e41cfa2762c32ed762b8eead5bdf607687bd5f5356fc0baa18c46a1d1ab3d
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQIN3AKHLdVFIEU6yNd0cAzCbcfyGeishz1f6neD9iMRY+z
+0mL6MQK31PlKOGbt3564s5vhEANH2JMWls/ChHOQ8=
+-----END SSH SIGNATURE-----

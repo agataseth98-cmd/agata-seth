@@ -7,93 +7,70 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 08/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-08.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Onde estamos — 09/09/2026
+## Onde estamos — 09/09/2026 (tarde)
 
-**Pilha da Seth subiu de novo** (estava desligada desde ontem à noite):
-LibreChat + Mongo + Meilisearch + Kokoro + `seth-gateway` no ar, `:3080`
-respondendo.
+**Auditoria completa do sistema. Quatro travas de segurança estavam
+abertas sem ninguém saber — todas fechadas hoje.**
 
-**Três buracos pequenos do cabeçalho da Seth fechados**, mesmo princípio
-nos três — a Máquina mede o fato, o modelo só copia, nunca inventa:
-- (394) timeout do pedido de estado subiu (15s→25s) e a doutrina proíbe
-  `Última entrada: (0)` fabricado quando o estado não chega a tempo.
-- (397) a Seth ganhou uma hora REAL pra copiar (`HORA-MAQUINA:`, medida
-  pela Máquina) em vez de só a proibição de inventar — um glm já tinha
-  furado essa proibição uma vez.
+O sistema tem travas automáticas que conferem cada mudança antes dela
+entrar. Descobri, testando de verdade e não só lendo, que quatro delas
+não faziam o que prometiam:
 
-**Duas consolidações fechadas** (395, 396): TES-002 nonce (já resolvido em
-(90), só faltava o sinalizador) e OmniRoute 504 (causa raiz fora do nosso
-controle, mitigação aplicada, proteção do pool grátis é mecanismo à parte).
-Nos dois rascunhos automáticos boa parte das referências não tinha nada a
-ver com o tema — descartei as erradas e documentei por quê; **não dá pra
-mecanizar esse filtro sem quebrar o consolidador** (testei duas formas,
-as duas falharam contra dados reais) — a revisão seguinte manual, que já
-pegou os dois casos de hoje.
+- **Bastava renomear um arquivo para escapar da trava principal.** Editar
+  um arquivo protegido era barrado, como devia. Mas *mover* o mesmo
+  arquivo para outra pasta passava em silêncio — inclusive o programa que
+  tira senhas e chaves de tudo que sai para fora. Dava para desligá-lo sem
+  aprovação nenhuma.
+- **Pelo mesmo caminho, um arquivo privado ia parar no repositório
+  público.** É exatamente o que essa trava existe para impedir.
+- **A trava que confere citações estava desligada desde 06/09.** Ela
+  achava que não tinha nada para conferir e pulava, silenciosamente, em
+  todo commit. A trava em si funcionava — só o portão dela estava travado
+  aberto.
+- **O detector de senhas não reconhecia as chaves que você realmente
+  usa.** Três das suas chaves passariam limpas por ele.
 
-## O que falta (lista completa, revista hoje — vários itens antigos aqui já
-tinham fechado em sessões anteriores e a lista nunca foi limpa)
+Fechei as quatro, mais quatro problemas menores da mesma família. Cada
+conserto foi testado antes e depois: mostrei o problema acontecendo,
+apliquei o conserto, mostrei o problema não acontecendo mais, e conferi
+que nada que funcionava parou de funcionar.
 
-- **`redesign/` mistura código vivo com projeto fechado** — parte docs já
-  reorganizada (385); a parte código é migração grande, só registrada,
-  precisa de plano faseado.
-- **Rotação por família** — parte 1 feita (381: rotaciona por família,
-  não por modelo); falta mecanizar a cadeia de auditoria A/B/C.
-- **TES-001 não fechado** — precisa de sessões de IA na nuvem
-  genuinamente independentes; não dá pra fechar daqui.
-- **TES-002** — você entregou o nonce à Seth (15:27) e ela repetiu o
-  valor certo ((413)). Falta a versão "de verdade": o nonce ecoado no
-  cabeçalho de abertura de uma conversa **nova** da Seth, não no meio de
-  uma já aberta — só isso conta como 1ª rodada.
-- **Cascata da Seth** — ficou lenta no começo da tarde (provedores 1-2
-  fora); voltou ao normal sozinha por volta das 15:10. Sem ação.
-- **Sem tier local de último recurso na cadeia da Seth** — o combo
-  `seth-livre` cascateia por 4 provedores externos mas não alcança o
-  modelo local se todos caírem no mesmo dia.
-- **Deploy da Seth não sincroniza `librechat.yaml`/`canon-mcp.mjs`** — o
-  atalho `seth` sobe os serviços, mas o `cp` desses dois arquivos pro
-  `~/librechat/` ainda é manual.
+**Uma trava passou no teste e merece registro:** a que protege a memória
+antiga congelada resistiu, porque tem duas camadas em vez de uma. Foi ela
+que me deu a ideia de como consertar as outras.
+
+## O que falta
+
+- **Reorganizar a pasta do código (a antiga "redesign")** — o nome
+  descreve um trabalho que já terminou, não o que o código é hoje. É a
+  mudança grande que sobrou; o plano está pronto e o levantamento
+  também. **Deixei para depois desta trava de segurança de propósito:**
+  são 102 arquivos mudando de lugar de uma vez, e mover arquivo era
+  justamente o buraco que acabei de tapar.
+- **Dois atalhos no seu computador estão atrás do que está guardado** —
+  os comandos `seth` e `seth-parar` receberam melhorias que nunca foram
+  instaladas. A lista de tarefas dá esse item como concluído, mas o
+  mecanismo que ele descreve nunca chegou a rodar.
+- **Uma lista de inconsistências no texto do projeto**, achadas na mesma
+  auditoria e ainda não corrigidas: dois documentos se contradizem sobre
+  o acesso remoto, uma seção de segurança descreve um programa que não
+  existe mais, e o índice do sistema oferece um documento que nunca
+  existiu.
 
 ## Fechado recentemente, pra não voltar
 
-- **Pendências fechadas ((418))** — refs órfãs dos TES aposentados
-  limpas dos scripts/docs; backlog zerado, exceto a reorg grande do
-  `redesign/` (B6, sessão dedicada). Próxima fase: otimização e refino.
-
+- **Pendências e limpeza ((418))** — restos dos testes aposentados saíram
+  dos programas e documentos; a lista de tarefas ficou zerada, exceto a
+  reorganização acima.
 - **TES-001 e TES-002 aposentados ((417))** — sua decisão ("mera
-  formalidade"). Saiu o nonce manual, a linha `Nonce:` do cabeçalho e os
-  arquivos `.secret`. O que eles vigiavam (hidratação velha, fabricação)
-  continua coberto: o `sync:`/hash ao vivo pega estado velho; a Cadeia de
-  auditoria + P-7 pegam fabricação.
-- **Cabeçalho da Seth ((417))** — o hash de estado caía no campo da hora e
-  a hora/sync envelheciam do 2º turno em diante. Consertado: o gateway
-  reinjeta o estado fresco a cada turno.
-- **Auditoria da sessão de hoje (409→416)** — passou limpa: assinaturas
-  ok, sem drift, serviços de pé, combos e Agent como o canon diz.
-
-- **Roteador da Seth ((416))** — a Seth escolhia sempre o mesmo provedor
-  primeiro (lento quando ele engasgava). Agora: `cerebras/gpt-oss-120b`
-  (grátis, ~0,4s) entra como topo, e um classificador simples manda "oi"
-  pra uma rota rápida e tarefa longa/código pra uma rota forte. Se o
-  Cerebras cai, desce pro provedor de sempre — sem quebrar. Reabre uma
-  decisão antiga (383) com premissa nova; você assumiu o risco por escrito.
-
-- **Ferramentas da Seth (MCP canon) voltaram** — estavam quebradas desde
-  a (392), que removeu o "Agent" da Seth. Agent recriado + um filtro no
-  gateway que estava zerando os argumentos das chamadas de ferramenta.
-  `query_canon` testado, funcionando ((415)).
-- **Voz** — a troca da (414) pra Kokoro `pf_dora` foi revertida ((415)):
-  de volta ao Piper (masc.), que é o que rodava de manhã. Voz feminina
-  pt-BR boa exige outro motor (XTTS-v2) — fica pra quando você pedir.
-
-- **Seth "não respondia" no LibreChat** — o palpite da (411) (geração de
-  título) não se sustentou na auditoria ((412)): o mais provável era a
-  cascata de provedores lenta naquela janela, que voltou ao normal
-  sozinha. Título automático **religado** em (413) — conversa nova volta a
-  ganhar nome; a chamada de título não carrega mais a hidratação toda.
-- Duas costuras em REGRAS.md (selo de hora, "última entrada" sob sync não
-  verificado) — fechadas em (384).
-- Âncora de frescor (carimbo de SHA no topo de REGRAS/PROJETO/MEMÓRIAS) —
-  feita em (378).
-- `presence_penalty` na memória — consolidado e aprovado em (382).
-- Rotina de pesquisa de modelos gratuitos — rodando (377); implementação
-  de achado continua manual e assinada, por desenho.
+  formalidade"). O que eles vigiavam continua coberto por outros meios.
+- **Cabeçalho da Seth ((417))** — a hora e o estado envelheciam do
+  segundo turno em diante. O sistema agora reinjeta dado fresco a cada
+  resposta.
+- **Roteador da Seth ((416))** — pergunta curta vai por um caminho
+  rápido, tarefa longa por um caminho forte, e entrou um provedor grátis
+  e veloz no topo. Se ele cair, desce para o de sempre sem quebrar.
+- **Ferramentas da Seth voltaram ((415))** — estavam quebradas desde a
+  (392); testadas e funcionando.
+- **Voz ((415))** — de volta ao Piper, a seu pedido. Voz feminina em
+  português exige outro motor; fica para quando você pedir.

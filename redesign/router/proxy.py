@@ -82,6 +82,21 @@ class _Handler(BaseHTTPRequestHandler):
                     sanitizar.sanitizar_payload(payload)
                 except sanitizar.SegredoNoPayload as e:
                     return self._bloqueado(e)
+            else:
+                # JSON válido mas não-objeto (lista, string, número) caía aqui
+                # e seguia direto pro _passar SEM VARREDURA NENHUMA -- o mesmo
+                # "passa ileso" que o conserto de 04/09 fechou um degrau
+                # abaixo (não-JSON), deixado aberto um degrau acima.
+                # Medido em 09/09/2026 com upstream de teste: corpo `dict` com
+                # segredo -> 422 e upstream intocado; a MESMA chave dentro de
+                # uma LISTA de topo -> 200 e o upstream RECEBEU o segredo.
+                # Falha fechada, como o topo deste arquivo promete: corpo
+                # OpenAI-compat é sempre objeto, então não-objeto é recusa.
+                return self._erro(
+                    415,
+                    "corpo JSON não é objeto -- este proxy só entende OpenAI-compat "
+                    "(objeto no topo); nada foi repassado",
+                )
         self._passar(corpo, "POST")
 
     # --------------------------------------------------------------------- #

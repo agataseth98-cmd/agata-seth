@@ -23,11 +23,27 @@ def ultima_entrada_local() -> int | None:
 def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]:
     falhas = []
 
-    tem_prontidao = bool(re.search(r"^\s*Nonce\s*:", texto, re.MULTILINE))
+    # Âncora do bloco de prontidão = `modelo:`, não mais `Nonce:`.
+    # A linha `Nonce:` SAIU do bloco em MEMÓRIAS (417) (TES-002 aposentado),
+    # e este detector ficou para trás: medido em 09/09/2026, o bloco de 3
+    # linhas CANÔNICO DE HOJE reprovava ("falta t=<n>") e o formato APOSENTADO
+    # passava. Um linter que valida o formato morto e rejeita o vivo é pior
+    # que linter nenhum -- e este roda em dois caminhos vivos
+    # (redesign/mcp/servidor.py, tool `lint_header`, e redesign/grafo/tools.py).
+    # `modelo:` é a âncora certa por texto de REGRAS, não por escolha minha:
+    # REGRAS.md, "Carregar e formatos", diz literalmente "Misturar as duas
+    # formas (`modelo:` junto com `t=`) é erro de formato" -- é o próprio
+    # discriminador que as REGRAS nomeiam. Sobrevive à saída do Nonce e
+    # mantém `Última entrada:`/`pronto.` como checagens de verdade (usar
+    # `Última entrada:` como detector as tornaria vazias).
+    tem_prontidao = bool(re.search(r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE))
     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
 
+    # Citação por SEÇÃO, não por número de linha: o "REGRAS.md:110" que estava
+    # aqui já tinha apodrecido (a frase mora hoje noutra linha). Número de
+    # linha envelhece em silêncio; nome de seção, não.
     if tem_prontidao and tem_t:
-        falhas.append("mistura bloco de prontidão (Nonce:) com t=<n> — REGRAS.md:110, 'Misturar as duas formas é erro de formato'")
+        falhas.append("mistura bloco de prontidão (modelo:) com t=<n> — REGRAS.md, 'Carregar e formatos': 'Misturar as duas formas (modelo: junto com t=) é erro de formato'")
 
     if tem_prontidao:
         if not re.search(r"última entrada\s*:", texto, re.IGNORECASE):

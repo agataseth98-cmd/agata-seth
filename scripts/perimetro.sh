@@ -274,7 +274,20 @@ _p5_periodo_verificar() {
   return "$codigo"
 }
 
+# Qual ramo o P-5 realmente tomou nesta corrida: "ordinario" (crescimento
+# normal, entrada nova -- há bytes novos a citar) ou "permutacao" (migração
+# entre camadas, byte a byte, nada de conteúdo novo). O P-7 lê isto pra
+# decidir se pode pular. Antes ele lia a MARCA de migração direto, e a marca
+# mora em propostas/aplicadas/, que NUNCA é limpo (é registro histórico, por
+# desenho) -- resultado: a marca de 06/09/2026 desligou o P-7 em todo commit
+# desde então, alegando "P-5 já provou por permutação" quando o P-5 tinha
+# passado pelo ramo ordinário. Mesmo bug que o próprio P-5 já corrigiu pra si
+# (comentário longo abaixo, "uma marca antiga esquecida"); a correção nunca
+# tinha chegado ao P-7.
+P5_RAMO="ordinario"
+
 p5_append_only() {
+  P5_RAMO="ordinario"
   if ! git rev-parse HEAD >/dev/null 2>&1; then
     return 0
   fi
@@ -289,6 +302,7 @@ p5_append_only() {
   local marca_migracao
   marca_migracao="$(_p5_migracao_pendente)" || true
   if [ -n "$marca_migracao" ] && [[ "$marca_migracao" != *PERIODO* ]]; then
+    P5_RAMO="permutacao"
     echo "P-5: marca de migração '$marca_migracao' presente -- checagem de PERMUTAÇÃO (verificar_migracao_memorias.py), não de sufixo. Uso único, MEMÓRIAS (271)."
     local tmp_antigo tmp_novo codigo
     tmp_antigo="$(mktemp)"; tmp_novo="$(mktemp)"
@@ -331,6 +345,7 @@ p5_append_only() {
     return 0
   fi
   if [ -n "$marca_migracao" ]; then
+    P5_RAMO="permutacao"
     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
     _p5_periodo_verificar
     return $?
@@ -518,20 +533,43 @@ PY
 # "história editada" que Regra 4 existe pra impedir, só que na camada fria.
 p14_frio_imutavel() {
   [ -f SELOS.txt ] || return 0
-  local ruim=0 arquivo staged tmp_saida
+  local ruim=0 arquivo staged tmp_saida selos_lista
+  # A lista de selos vem de HEAD:SELOS.txt, não do disco. Se viesse do
+  # disco, apagar a linha de um chunk e reescrever o chunk no MESMO commit
+  # tiraria os dois do radar: o loop abaixo nunca veria o nome, e o
+  # selar.sh --check (a outra perna) também não -- o chunk sumiria do
+  # relatório em vez de aparecer como VIOLADO. Medido em 09/09/2026 numa
+  # cópia em sandbox. Lendo de HEAD, remover a linha não desprotege
+  # retroativamente o que já estava selado. (O outro lado do conserto:
+  # SELOS.txt entrou na quarentena P-8, então mexer nele exige aprovação
+  # assinada.) Sem HEAD ainda (primeiro commit) cai pro disco -- bootstrap,
+  # mesma lógica de _p8_assinatura_ok.
+  selos_lista="$(git show HEAD:SELOS.txt 2>/dev/null)" || selos_lista=""
+  [ -z "$selos_lista" ] && selos_lista="$(cat SELOS.txt 2>/dev/null)"
   # Só é violação re-tocar um chunk que JÁ existia selado num commit
-  # ANTERIOR -- na própria commit que cria e sela o chunk pela primeira
-  # vez, ele necessariamente aparece staged, e isso é normal (mesmo
-  # bootstrap de P-8: aprovar e criar acontecem juntos). `git diff --cached
-  # --diff-filter=M` restringe a MODIFICADO, nunca ADICIONADO.
-  staged="$(git diff --cached --name-only --diff-filter=M)"
+  # ANTERIOR -- na própria commit que cria e sela o chunk pela primeira vez
+  # ele necessariamente aparece staged, e isso é normal (mesmo bootstrap de
+  # P-8: aprovar e criar acontecem juntos).
+  # Antes esse caso era excluído por `--diff-filter=M` (só MODIFICADO, nunca
+  # ADICIONADO). O filtro saiu, e o caso continua excluído por um motivo
+  # melhor: a lista agora vem de HEAD:SELOS.txt, e no commit que cria o
+  # chunk o selo dele ainda NÃO está em HEAD -- o nome nem entra no loop.
+  # Trocar o filtro pela origem-em-HEAD amplia a cobertura de graça: agora
+  # DELEÇÃO e RENOMEAÇÃO de um chunk já selado também são pegas, e o
+  # `--diff-filter=M` deixava as duas passarem.
+  # --no-renames pelo mesmo motivo de P-8/P-11 (furo medido nesta data):
+  # sem ele o lado antigo de um rename some da listagem. Aqui o
+  # selar.sh --check ainda pegaria pelo hash, mas os três controles devem
+  # enxergar o mesmo conjunto de paths -- controle que enxerga menos do que
+  # devia é falha do controle (REGRAS, Princípios: Segurança).
+  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
   while read -r _ arquivo _; do
     [ -z "$arquivo" ] && continue
     if echo "$staged" | grep -qxF "$arquivo"; then
-      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece MODIFICADO e staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
+      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
       ruim=1
     fi
-  done < SELOS.txt
+  done <<< "$selos_lista"
   tmp_saida="$(mktemp)"
   if ! bash "$_PERIMETRO_DIR/selar.sh" --check > "$tmp_saida" 2>&1; then
     echo "SUSPEITO (P-14): 'scripts/selar.sh --check' reprovou -- ao menos um chunk frio foi alterado depois de selado:"
@@ -566,8 +604,19 @@ p7_citacao() {
   # Pular aqui não abre brecha: a garantia real é a permutação byte-exata
   # do P-5, mais forte que P-7 -- se nenhum byte é novo, não há citação
   # nova pra checar.
-  if _p5_migracao_pendente >/dev/null; then
-    echo "P-7: marca de migração presente -- pulado (P-5 já provou, por permutação, que nenhum byte de entrada é novo nesta commit; nada a citar que já não estivesse no canon)."
+  # Pula só quando o P-5 REALMENTE tomou o ramo de permutação nesta corrida
+  # (P5_RAMO, setado por p5_append_only, que roda antes de P-7 no main).
+  # A versão anterior perguntava por _p5_migracao_pendente -- a MARCA no
+  # disco, não o ramo tomado. Como a marca vive em propostas/aplicadas/ e
+  # esse diretório nunca é limpo por desenho, a marca de 06/09/2026 deixou
+  # o P-7 em SKIP permanente: medido em 09/09/2026, "veredito: SKIP" com o
+  # P-5 tendo passado pelo ramo ORDINÁRIO (havia bytes novos, e a mensagem
+  # impressa afirmava o contrário). Toda citação nova entrou sem checagem
+  # nesse intervalo. O controle em si estava íntegro -- testado contra
+  # positivo e negativo conhecidos: citação real -> passa, citação
+  # fabricada -> pega. Era só o portão de entrada que estava travado aberto.
+  if [ "${P5_RAMO:-ordinario}" = "permutacao" ]; then
+    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO nesta corrida -- pulado (nenhum byte de entrada é novo; nada a citar que já não estivesse no canon)."
     PERIMETRO_ESTADO="SKIP"
     return 0
   fi
@@ -652,6 +701,26 @@ _p8_eh_comportamento() {
     # varredura real mostrou 17 arquivos afetados, nenhum com aprovação prévia,
     # nenhum trava retroativo. Autorização do Humano, texto explícito.
     redesign/grafo/*.py|redesign/grafo/*.sh|redesign/librechat/*.yml) return 0 ;;
+    # Buracos medidos em 09/09/2026, mesma classe do achado de 04/09 que
+    # trouxe redesign/router/* pra cá -- código de controle que ficou de fora:
+    #   redesign/obsidian/*.py  ro_proxy.py É o serviço que força read-only
+    #                           sobre o vault (do_PUT/do_PATCH/do_DELETE ->
+    #                           403) e injeta o bearer do Obsidian. Trocá-lo
+    #                           abre escrita no vault sem aprovação nenhuma.
+    #   SELOS.txt               raiz de confiança do P-14. Sem isto, apagar
+    #                           uma linha do SELOS + reescrever o chunk frio
+    #                           correspondente, no MESMO commit, passa: as
+    #                           duas pernas do P-14 iteram o arquivo mutilado
+    #                           e o chunk simplesmente some do relatório.
+    #                           (O outro lado deste conserto está no próprio
+    #                           p14_frio_imutavel, que agora lê HEAD:SELOS.txt.)
+    #   .gitignore              é a PRIMEIRA linha de defesa que o P-11 cita
+    #                           no próprio comentário -- editá-la para
+    #                           destravar um silo não exigia aprovação.
+    #   models/manifest.json    lista de recursos que o P-12 usa como régua de
+    #                           backup; mexer nela muda o que "estar coberto"
+    #                           significa.
+    redesign/obsidian/*.py|SELOS.txt|.gitignore|models/manifest.json) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -742,10 +811,19 @@ _p8_arquivo_aprovado() {
     # `|| return 1` aqui bloqueava TODA deleção sem caminho de aprovação
     # (achado em MEMÓRIAS (403); conserto autorizado em (407) com 2a
     # opinião do Conselho Remoto). Renomear = git vê delete(path velho) +
-    # add(path novo); p8_quarentena checa cada path à parte, então o lado
-    # "delete" cai aqui e o "add" no caminho normal -- os dois hunks
-    # precisam estar no MESMO .diff assinado.
-    if git diff --cached --name-only --diff-filter=D 2>/dev/null | grep -qxF -- "$f"; then
+    # add(path novo) -- mas isso só é verdade com `--no-renames`. Sem ele, a
+    # detecção de rename do git (LIGADA por padrão) colapsa os dois lados
+    # num único R e mostra APENAS o path novo: o lado "delete" simplesmente
+    # não aparece, e este ramo nunca dispara.
+    # MEDIDO 09/09/2026 (vermelho/verde, clone descartável): editar
+    # redesign/router/sanitizar.py no lugar -> SUSPEITO (P-8), correto;
+    # `git mv redesign/router/sanitizar.py extras/` -> P-8 SILENCIOSO, e o
+    # sanitizador (único ponto que tira segredo do payload antes de sair pra
+    # provedor externo) saía do caminho vivo sem nenhum APROVADO-. Qualquer
+    # arquivo de comportamento podia deixar a quarentena por renomeação.
+    # Por isso `--no-renames` aqui E em p8_quarentena -- os dois têm que
+    # enxergar o mesmo conjunto de paths, senão o furo volta por um lado só.
+    if git -c core.quotepath=false diff --cached --no-renames --name-only --diff-filter=D 2>/dev/null | grep -qxF -- "$f"; then
       eh_delecao=1
     else
       return 1
@@ -805,7 +883,13 @@ _p8_arquivo_aprovado() {
 
 p8_quarentena() {
   local staged f ruim=0
-  staged="$(git diff --cached --name-only)"
+  # `--no-renames` é load-bearing, não cosmético: sem ele um rename aparece
+  # só com o path NOVO, e mover um arquivo de comportamento pra fora dos
+  # padrões de _p8_eh_comportamento tira ele da quarentena sem APROVADO-
+  # nenhum (bypass medido em 09/09/2026 -- ver o comentário longo em
+  # _p8_arquivo_aprovado). Com ele, os dois lados do rename entram na
+  # checagem, e os dois hunks precisam estar no MESMO .diff assinado.
+  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
   [ -z "$staged" ] && return 0
   while IFS= read -r f; do
     [ -z "$f" ] && continue
@@ -841,14 +925,43 @@ _p11_eh_silo() {
   esac
 }
 
+_p11_conteudo_de_silo() {
+  # Segunda camada, por CONTEÚDO. _p11_eh_silo olha só o NOME, e nome se
+  # troca: `cp .hidrata-seth.md notas.md && git add notas.md` nunca teve
+  # nome de silo, então nem a regra de nome nem o `--no-renames` abaixo o
+  # pegam -- não houve rename, houve cópia. MEDIDO 09/09/2026: passava
+  # limpo, com `modelo-alvo:` e MOD no corpo, pro repositório PÚBLICO.
+  # Marca de MOD: o cabeçalho `modelo-alvo:` no início da linha,
+  # obrigatório em bloco MOD (REGRAS, "O Conselho" item 3).
+  # Falsos positivos medidos no repo inteiro: 1 -- o chunk frio
+  # MEMORIAS-FRIO-2026-09-06-com-migrado.md, que REGISTRA o formato em vez
+  # de carregar MOD vivo. Por isso a lista de exclusão: história e canon,
+  # onde citar o cabeçalho é o trabalho normal do arquivo. Silo de verdade
+  # nunca tem nome dessa lista -- se tiver, P-5/P-14 já brigam por outro
+  # motivo. Esta camada é o que salvou P-14 do mesmo furo (selar.sh
+  # --check pegou o que a listagem staged não viu).
+  case "$1" in
+    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
+  esac
+  git show ":$1" 2>/dev/null | grep -qaE '^modelo-alvo:[[:space:]]*[A-Za-z]'
+}
+
 p11_silos_nao_versionados() {
   local staged f ruim=0
-  staged="$(git diff --cached --name-only)"
+  # `--no-renames` pelo mesmo motivo de p8_quarentena: sem ele, `git mv`
+  # de um silo staged pra um nome inocente apaga o path de silo da
+  # listagem e P-11 dá OK. MEDIDO 09/09/2026 (vermelho/verde): silo com
+  # nome de silo -> SUSPEITO; o MESMO arquivo renomeado -> "veredito: OK",
+  # com `modelo-alvo:` e MOD privado indo pro repositório PÚBLICO.
+  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
   [ -z "$staged" ] && return 0
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     if _p11_eh_silo "$f"; then
       echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (MOD de outra família) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+      ruim=1
+    elif _p11_conteudo_de_silo "$f"; then
+      echo "SUSPEITO (P-11): '$f' não tem nome de silo, mas o conteúdo staged tem cabeçalho 'modelo-alvo:' -- é bloco MOD. Por que importa: MOD é privado por padrão (REGRAS, 'O Conselho' item 2/3) e este repositório é público; renomear ou copiar um silo não o torna publicável. O que fazer: 'git restore --staged $f'. Se for texto sobre o formato (não MOD vivo), o lugar é MEMÓRIAS/REGRAS, que estão fora desta checagem."
       ruim=1
     fi
   done <<< "$staged"

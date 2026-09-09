@@ -24,6 +24,24 @@ PADROES_SEGREDO=(
   'xox[baprs]-[0-9A-Za-z-]{10,}'              # Slack token
   '-----BEGIN[A-Z ]*PRIVATE KEY-----'         # PEM private key
   '[A-Za-z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)[A-Za-z0-9_]*[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9/+_-]{16,}["'"'"']?'
+  # Acrescentados 09/09/2026. Motivo medido, não teórico: os padrões acima
+  # não pegavam NENHUMA das chaves que ESTE sistema realmente usa em forma
+  # nua. `sk-[A-Za-z0-9]{20,}` quebra no primeiro hífen -- `sk-ant-` tem só
+  # 3 alfanuméricos depois de `sk-`, `sk-or-v1-` tem 2. Medido com controles
+  # válidos (openai/google/aws casam, provando o arranjo): anthropic,
+  # openrouter, groq, huggingface, github fine-grained PAT e zhipu TODOS
+  # passavam limpos. Segundo CHAVES.md, três dessas (GROQ, OPENROUTER,
+  # ZHIPU) são chaves vivas nesta máquina. Só a heurística #7 as pegava, e
+  # só na forma de atribuição (`GROQ_API_KEY=gsk_...`) -- a chave colada em
+  # prosa, que é o caso realista de vazamento, saía inteira.
+  # Esta régua serve DOIS controles: P-1 (o que entra no repo público) e
+  # sanitizar.py (o que sai pra provedor externo). Falsos positivos medidos
+  # antes de acrescentar: ZERO arquivos rastreados para os cinco.
+  'sk-(ant|or|proj)-[A-Za-z0-9_-]{20,}'       # Anthropic / OpenRouter / OpenAI project
+  'gsk_[A-Za-z0-9]{40,}'                      # Groq
+  'hf_[A-Za-z0-9]{30,}'                       # Hugging Face
+  'github_pat_[A-Za-z0-9_]{50,}'              # GitHub fine-grained PAT
+  '[0-9a-f]{32}\.[A-Za-z0-9]{16}'             # Zhipu/GLM (<32hex>.<16>)
 )
 
 # P-1 -- "Segredos só em ~/.config/agata/.env, fora do repo" (PROJETO, Segurança).
