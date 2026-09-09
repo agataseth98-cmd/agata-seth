@@ -26,18 +26,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 34135a8970427be9d36e0abf2c52a461cb593ebe
-  Escrito em: 09/09/2026 16:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f
+  Escrito em: 09/09/2026 16:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5aff8595eb4f9bf1c5c8c9a7419f6cfef45c50f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
+
+**Processo (Mudança estrutural, reabre (383)):** o Humano ordenou — *"só grátis, redesenhe e aplique, siga com o processo de maneira autônoma, 2 opinião autorizada eu assumo o risco, não erre"*. REGRAS "Mudança estrutural" pede **2ª opinião OU risco assumido por escrito** — o Humano **assumiu o risco por escrito** ("eu assumo o risco"), e a 2ª opinião foi **tentada**: `conselho_remoto.py` → `cerebras/gemma-4-31b` deu 403 Cloudflare (cooldown), caiu pro `huggingface/meta-llama/Llama-3.3-70B`, que respondeu **fora do formato** (sem Origem/Posição/Fundamentação/Emenda) e sem posição real — *"requer avaliação cuidadosa"*, nenhuma objeção nem emenda utilizável. Raw: `memoria/missoes/conselho-remoto/20260909-164444-meta-llama_Llama-3.3-70B-Instruct.json`. Reenvio "uma vez" (REGRAS) não feito — o risco assumido já cobre.
+
+**Portão das 3 perguntas:** (1) reversível sozinho — revert do `.diff` + `PUT` do `seth-livre` pré-(416) (backup em `extras/roteador-seth-416/`) + `DELETE` dos 2 combos novos; (2) toca `seth_gateway.py`, `PROJETO.md` "Cérebro", `config/modelos-gratuitos.md`, e 3 combos do OmniRoute — **não** toca LibreChat/Agent/MCP/combos `conselho`/`auto`/`cheap`/TES-002; (3) observável — header `X-Seth-Rota` na resposta + `model` resolvido no `.json`.
+
+**Pool verificado ao vivo hoje:** `cerebras/gpt-oss-120b` grátis, **~0,4s** medido, 120b reasoning, **tool-calling + streaming OK**. `cerebras/zai-glm-4.7` **arquivado** (404 "archived and unavailable"). Groq: connection ativa mas modelos 404 pra esta chave. `llamacpp-agata` (:20129) DOWN. Os 5 do `seth-livre` atual: OK. Cerebras é **intermitente** (free tier) — quando cai, `priority` desce pro próximo tier (fallthrough verificado: combo com provedor "unavailable" no topo devolveu 200 pelo tier vivo, nunca 404).
+
+**Mudou:**
+- **Combo `seth-livre`** (OmniRoute `PUT /api/combos/563700ea…`, HTTP 200): `+ cerebras/gpt-oss-120b` como tier 0. Nova ordem: cerebras/gpt-oss-120b → zai/glm-4.7-flash → gemini-2.5-flash → hf/Llama-3.3-70B → mistral/ministral-8b → ollama-local/qwen3.5-9b-64k.
+- **Combos NOVOS** (`POST /api/combos`, HTTP 201): `seth-rapido` (`d37e5f27…`: cerebras/gpt-oss-120b → zai/glm → local) e `seth-pesado` (`3980b8a1…`: cerebras/gpt-oss-120b → gemini → hf/Llama-70B → local).
+- **`seth_gateway.py`** — `_classificar_rota(payload)` (só regras, ~µs, sem inferência). Reescreve `payload["model"]` **só** quando o valor recebido é exatamente `"seth-livre"` (o default do Agent) — specs manuais (`seth-zai` etc.) passam intactas. **trivial** (`<400` chars de conteúdo E sem `tools` E `≤2` msgs user) → `seth-rapido`; **pesado** (`>6000` chars OU cerca de código OU `>10` msgs) → `seth-pesado`; resto → `seth-livre`. Roda **antes de `_injeta`** (a hidratação de ~3,8k chars empurraria tudo pra "não trivial"). Header `X-Seth-Rota`. `--selftest` **5→9** (4 casos de rota).
+- **`PROJETO.md` "Cérebro":** "Roteamento por complexidade — APOSENTADO (383)" → "REABERTO em (416)" com a premissa nova e o mecanismo.
+- **`config/modelos-gratuitos.md`:** os 3 combos, a tabela do `seth-livre` com o tier 0, e o passo-a-passo de reversão (IDs + `DELETE`).
+
+**Verificado ao vivo (`:20126`, pós-deploy):** trivial `"oi"` → `X-Seth-Rota: seth-rapido`; `"como vc tá?"` + `tools` → `seth-livre`; 7000 chars → `seth-pesado`. Os 3 HTTP 200 com conteúdo real. Cerebras caiu em 2 das 3 (intermitente) → resolveu no tier vivo (`glm-4.7-flash` / `Llama-3.3-70B`), nenhum 404.
+
+**Limitação honesta (era a pergunta (b) do pedido de parecer, sem resposta útil):** o ganho **dominante** é o `cerebras/gpt-oss-120b` como tier 0 — quando está no ar, ~0,4s pra tudo. O classificador de 3 vias muda sobretudo o **rabo de fallback** (trivial pula o hf/mistral lentos; pesado pula o ministral-8b fraco); o tier 0 é sempre o mesmo. Fica registrado como escolha do Humano, não como ganho comprovado grande do classificador.
+
+Par `.diff`/`APROVADO-` em `propostas/aplicadas/roteador-complexidade-seth` (sha256 `e756cef0…`). Artefatos de referência (backup do combo, JSONs dos combos novos, pedido de 2ª opinião): `extras/roteador-seth-416/`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl :20128` → `cerebras/gpt-oss-120b` 200 em 0,42s (realista, 400 tok) + stream com `tools` (`tool_calls`, args certos, `finish=stop`); `cerebras/zai-glm-4.7` 404 "archived"; `PUT`/`POST /api/combos` → 200/201; `sqlite3 storage.sqlite` confirmou os 3 combos e a ordem; `conselho_remoto.py` rodado (raw salvo, FORA DO FORMATO); `python3 -m py_compile` + `--selftest` **9/9**; `curl :20126` × 3 com `-D` conferindo `X-Seth-Rota` + `model` resolvido; `git apply --check` limpo contra HEAD; `.diff` sha256 `e756cef0143d2284cf56b32d7f3bc5b37fb56b989b268af2067194a286fc0f17`; backup `seth-livre` pré-(416) salvo. Autorização: Humano — "só grátis, redesenhe e aplique siga com o processo de maneira autônoma, 2 opinião autorizada eu assumo o risco, não erre" (risco assumido por escrito, satisfaz REGRAS "Mudança estrutural").
+
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
 
 **(1) Agent recriado.** O Humano criou `agent_4KlxSMeX5Y8cWQVODkJfH` na UI do LibreChat (provider `Seth`, model `seth-livre`, `mcpServerNames: ["canon"]`, tools `query_canon`+`vault_consultar`). A spec default `seth-livre` (`modelSpecs`, `enforce: true`) volta a apontar `endpoint: agents, agent_id: …`. As specs `seth-zai`/`seth-gemini`/etc. seguem `endpoint: Seth` (custom, **sem** MCP) — troca manual pra debug. A cascata do OmniRoute (`seth-livre`: zai→gemini→hf→mistral) segue por baixo, via o provider `Seth` do Agent.

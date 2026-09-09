@@ -1,0 +1,62 @@
+PEDIDO DE 2a OPINIAO -- Roteador da Seth (roteamento por complexidade/capacidade, free-only)
+
+Ancora de versao: MEMORIAS.md topo = (415) "A Seth voltou a ter as ferramentas de MCP";
+sha256 03f6411a834801d761b77d24a46f891b46dc5ba836e6a901c7873cc81125a52b; HEAD d5aff85.
+
+OBJECOES CONHECIDAS (leia antes de opinar):
+- MEMORIAS (383) aposentou "roteamento por complexidade" (B4, aprovado em (64), nunca
+  implementado). Motivo: a premissa de (64) -- Gemini titular, "pergunta simples -> modelo
+  barato" -- morreu com a inversao de (140) (Seth local passou a ser titular). A (383)
+  deixou a porta aberta textualmente: "Se surgir necessidade concreta (Seth lenta pra
+  trivialidade, escalonamento automatico pra modelo maior), e proposta nova com premissa
+  nova, nao ressurreicao desta."
+- Doutrina "Elegancia e eficiencia" dos Principios: "a menor solucao que cobre o caso;
+  nada de cano, arquivo ou regra a mais."
+
+PREMISSA NOVA:
+A Seth hoje NAO roda mais no qwen local como titular -- isso mudou com o setup atual
+(LibreChat -> Agent -> seth_gateway :20126 -> OmniRoute). Ela roda na cascata cloud
+`seth-livre` do OmniRoute, strategy=priority, ordem fixa:
+  zai/glm-4.7-flash -> gemini-2.5-flash -> hf/Llama-3.3-70B -> mistral/ministral-8b -> ollama-local/qwen3.5-9b-64k
+Toda requisicao, inclusive "oi", comeca no tier 1 e so cai por falha. Quando o tier 1
+(zai/glm-4.7-flash) esta lento -- medido hoje entre 2s e 25s -- TODA requisicao paga isso,
+inclusive trivialidades. Nao ha escalonamento automatico pra tarefa pesada.
+`cerebras/gpt-oss-120b` (gratis, medido ~0,4s, modelo de reasoning 120b, tool-calling e
+streaming verificados ao vivo hoje) esta ocioso -- fora de todo combo da Seth.
+
+PROPOSTA (free-only; o Humano autorizou e assumiu o risco por escrito):
+1. `seth-livre` (default): adiciona `cerebras/gpt-oss-120b` como tier 1. Nova ordem:
+   cerebras/gpt-oss-120b -> zai/glm-4.7-flash -> gemini-2.5-flash -> hf/Llama-3.3-70B
+   -> mistral/ministral-8b -> ollama-local/qwen3.5-9b-64k. strategy=priority mantido --
+   se o Cerebras cair, cai pro proximo tier (fallthrough verificado ao vivo: combo com
+   provedor "unavailable" no tier 1 devolveu 200 pelo tier vivo, nao 404).
+2. Combo NOVO `seth-rapido` (classe trivial):
+   cerebras/gpt-oss-120b -> zai/glm-4.7-flash -> ollama-local/qwen3.5-9b-64k.
+   Sem o rabo lento (hf/mistral).
+3. Combo NOVO `seth-pesado` (classe pesado):
+   cerebras/gpt-oss-120b -> gemini-2.5-flash -> hf/Llama-3.3-70B -> ollama-local/qwen3.5-9b-64k.
+   Sem o ministral-8b (fraco pra tarefa dura).
+4. Classificador HEURISTICO (regras leves, <1ms, SEM inferencia extra) dentro do
+   `seth_gateway`, no lado do request. So reescreve payload["model"] quando o valor
+   recebido e exatamente "seth-livre" (o default do Agent) -- specs manuais
+   (seth-zai/seth-gemini/etc.) passam intactas. Regras:
+   - trivial -> seth-rapido: soma do conteudo das mensagens < ~400 chars E sem `tools`
+     E <= 2 mensagens de usuario.
+   - pesado -> seth-pesado: soma > ~6000 chars OU tem cerca de codigo (tres crases) OU
+     mais de 10 mensagens no total.
+   - normal -> seth-livre (inalterado).
+5. `PROJETO.md` "Cerebro": o item "Roteamento por complexidade -- APOSENTADO (383)"
+   ganha nota de reabertura com a premissa nova acima, apontando pra entrada nova.
+6. Reversivel: revert do .diff assinado + restaurar o JSON do `seth-livre` (backup ja
+   guardado fora do repo) + deletar os 2 combos novos.
+
+NAO TOCA: LibreChat, o Agent, o MCP canon, os combos `conselho`/`auto`/`cheap`, TES-002.
+
+PERGUNTAS AO PARECER:
+(a) A premissa nova (Seth cloud, nao mais local; tier-1 fixo penaliza trivialidade)
+    justifica reabrir a (383), ou ainda cai em "cano a mais pra ganho marginal"?
+(b) Dado que o tier 1 passa a ser sempre `cerebras/gpt-oss-120b` (rapido E forte), o
+    classificador de 3 vias adiciona valor real, ou o ganho esta quase todo no item 1
+    (Cerebras como tier 1) e o classificador so muda o rabo de fallback?
+(c) Risco de misroteamento: algum caso trivial/pesado que essas heuristicas erram de
+    forma cara (ex.: pergunta curta mas dificil roteada como trivial)?

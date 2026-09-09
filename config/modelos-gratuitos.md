@@ -67,26 +67,45 @@ Models foi pra "Fora — não usar" (descontinuado).
 
 ---
 
-## Combo `seth-livre` (MEMÓRIAS (390)) — a cascata do frontend da Seth
+## Combos da Seth + roteador por complexidade (MEMÓRIAS (390), roteador em (416))
 
-Combo **custom** do OmniRoute (`storage.sqlite`, tabela `combos`), `strategy:
-priority` (tenta o 1º; falha/529/404 → próximo, sozinho). É o default da Seth no
-`librechat.yaml`. Lista **curada por nós** — não a auto-derivada do `auto/*`.
+3 combos **custom** do OmniRoute (`storage.sqlite`, tabela `combos`), todos
+`strategy: priority` (tenta o 1º; falha/529/404 → próximo, sozinho). Lista
+**curada por nós** — não a auto-derivada do `auto/*`. O default do Agent no
+`librechat.yaml` é `seth-livre`; o **`seth_gateway`** reescreve pra `seth-rapido`
+ou `seth-pesado` por heurística de complexidade (MEMÓRIAS (416), reabre (383)):
+
+- **`seth-rapido`** (trivial: <400 chars de conteúdo, sem `tools`, ≤2 msgs user):
+  `cerebras/gpt-oss-120b` → `zai/glm-4.7-flash` → `ollama-local/qwen3.5-9b-64k:latest`
+- **`seth-livre`** (normal — tudo que não é trivial nem pesado): tabela abaixo
+- **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs):
+  `cerebras/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `huggingface/meta-llama/Llama-3.3-70B-Instruct` → `ollama-local/qwen3.5-9b-64k:latest`
+
+Só o alvo `seth-livre` (o do Agent) é reescrito — specs manuais (`seth-zai` etc.)
+passam intactas. Misroteamento só degrada latência/força; nunca quebra (todo combo
+termina nos mesmos modelos confiáveis).
+
+### `seth-livre` (rota normal)
 
 | ordem | modelo | por quê |
 |---|---|---|
-| 1 | `zai/glm-4.7-flash` | mais capaz dos grátis; 529 transitório quando a z.ai sobrecarrega |
+| 0 | `cerebras/gpt-oss-120b` | **tier de topo, (416)**: grátis, ~0,4s medido, 120b reasoning, tools+stream OK. Intermitente (Cerebras livre) — quando cai, `priority` desce pro tier 1 (fallthrough verificado ao vivo). |
+| 1 | `zai/glm-4.7-flash` | mais capaz dos free-tier estáveis; 529 transitório quando a z.ai sobrecarrega |
 | 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
 | 3 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente (HF Inference Providers); crédito mensal pequeno |
 | 4 | `mistral/ministral-8b-latest` | último recurso remoto; pequeno mas responde |
-| 5 | `ollama-local/qwen3.5-9b-64k:latest` | **fundo LOCAL** (H4, MEMÓRIAS (402)/(403)). Nunca 429/402; cold start pode passar do `maxWaitMs` do OmniRoute (45s) na 1ª chamada — `agata-warmup` mitiga. Só entra se os 4 externos falharem. |
+| 5 | `ollama-local/qwen3.5-9b-64k:latest` | **fundo LOCAL** (H4, MEMÓRIAS (402)/(403)). Nunca 429/402; cold start pode passar do `maxWaitMs` do OmniRoute (45s) na 1ª chamada — `agata-warmup` mitiga. Só entra se os externos falharem. |
 
-**Recriar** (se o `storage.sqlite` for perdido): `PUT http://127.0.0.1:20128/api/combos/<id>`
-(ou `POST /api/combos` se ainda não existir) com `{"name":"seth-livre","strategy":"priority",
-"config":{},"models":[{...zai...},{...gemini...},{...hf...},{...mistral...},{"id":
-"seth-livre-5-local","kind":"model","model":"ollama-local/qwen3.5-9b-64k:latest",
-"providerId":"ollama-local","weight":0}]}` (cada model = `{id, kind:"model", model:"<id>",
-providerId:"<prov>", weight:0}`). Sincronizar a tabela acima quando mudar.
+**Recriar / reverter** (se o `storage.sqlite` for perdido, ou pra desfazer (416)):
+`PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
+corpo `{"name":"<nome>","strategy":"priority","config":{},"isHidden":false,"models":[…]}`,
+cada model = `{id, kind:"model", model:"<id>", providerId:"<prov>", weight:0}`.
+- **Reverter (416):** `PUT` o `seth-livre` sem o tier 0 `cerebras/gpt-oss-120b` (JSON pré-(416)
+  guardado no backup da sessão de (416)); `DELETE /api/combos/<id>` de `seth-rapido`
+  (`d37e5f27-d216-4e85-94f5-3621ad860260`) e `seth-pesado` (`3980b8a1-776b-475a-9e8b-76c65f1e6cf5`);
+  reverter o `.diff` de `seth_gateway.py`. O roteador é inerte sem os combos — mas o
+  `seth_gateway` reescreveria pra combos inexistentes, então reverter os dois juntos.
+- `seth-livre` id `563700ea-bf7d-45f0-97ab-c336f84b2361`. Sincronizar as tabelas acima quando mudar.
 
 O tier 5 usa a connection `ollama-local` já existente (`baseUrl` `http://127.0.0.1:11434`).
 O OmniRoute repassa a string do `model` depois do prefixo direto pro Ollama — testado ao

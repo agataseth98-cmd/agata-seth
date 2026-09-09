@@ -1,0 +1,194 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 500fc80..39dbee3 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -53,7 +53,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ ## Cérebro
+ - **Principal, sob regime de auditoria desde MEMÓRIAS (140): `qwen3.5-9b-64k` local** (Ollama, `custom:qwen-local-ctx-override`) — **não** a tag oficial `qwen3.5:9b`, que reproduz o bug de (121)/#16814. Promovido por decisão do Humano, risco assumido por escrito (mesma cláusula de (102)): cada resposta é auditada pelo Humano; o objetivo é medir o modelo sob a exposição mais alta, não confiar nele. Duas travas cumpridas antes da promoção: ferramenta `memory` testada isolada e confirmada honesta (MEMÓRIAS (139) — a anomalia de (138) era fabricação do modelo, não bug do mecanismo); `num_ctx` confirmado íntegro pelo caminho default, sem override de CLI (`KvSize:65536`, zero truncamento, `prompt_tokens=38.048`). Monitoramento contínuo de VRAM em `~/agata_vram_producao_*.log`, fora do scratchpad de sessão. **Critério de saída do regime, respondido em (141): até o Humano pedir o contrário — evento, não prazo nem contagem.**
+ - **Fallback: `gemini-2.5-flash`** (Google API, grátis) — papel invertido do histórico: era principal até (140), agora é o alívio quando o Qwen local falha ou não completa. Teto do free tier ~20 requisições/dia — estourar gera 429 (agora do lado do fallback, não do principal). **Circuit breaker ativo** (plugin `gemini_quota_guard`, hook `pre_api_request`): conta requisições reais e avisa a partir da 15ª do dia, sem bloquear nem rerotear (MEMÓRIAS (122)).
+-- **Roteamento por complexidade — APOSENTADO (MEMÓRIAS (383)).** Aprovado em (64) supondo Gemini como principal; a inversão de (140) (Seth local titular) matou a premissa. O sistema já roteia por adequação (Seth local default · Conselho Remoto invocado de propósito · `auto/*` do OmniRoute no caminho da Seth); um classificador+router novo seria cano a mais competindo com isso. Se surgir necessidade concreta, é proposta nova com premissa nova — não ressuscitar esta.
++- **Roteamento por complexidade — REABERTO em (416)** (estava APOSENTADO desde (383)). A (383) aposentou o B4 (aprovado em (64), nunca implementado) porque a premissa de (64) — Gemini titular, "simples→barato" — morreu com a inversão de (140). **Premissa nova de (416):** a Seth não roda mais no qwen local titular — roda na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), onde toda requisição começa no tier 0 e só cai por falha; quando o topo está lento (2–25s medido), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Mecanismo:** classificador heurístico (só regras, ~µs, sem inferência extra) no `seth_gateway`, no request — reescreve `model` **só** quando o Agent pede `seth-livre`; specs manuais passam intactas. 3 rotas / 3 combos `priority`, todos terminando nos mesmos modelos confiáveis (misroteamento degrada, nunca quebra): `seth-rapido` (trivial: <400 chars, sem tools, ≤2 msgs user) · `seth-livre` (normal) · `seth-pesado` (>6000 chars OU código OU >10 msgs). Tier 0 dos três: `cerebras/gpt-oss-120b` (grátis, ~0,4s, 120b reasoning, tools+stream OK — quando o Cerebras está no ar). Free-only; risco assumido pelo Humano por escrito + 2ª opinião do Conselho tentada (voltou fora-do-formato, ver (416)). Combos em `config/modelos-gratuitos.md`.
+ - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
+ - **Fundo local da cadeia da Seth (H4, MEMÓRIAS (402)/(403)):** o combo `seth-livre` (frontend da Seth, `:20126`→sanitizador→OmniRoute) ganhou um tier 5 local — `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) que o OmniRoute já tinha. Só entra se os 4 provedores grátis externos falharem no mesmo minuto (cenário de (390)). Medido em (403): o OmniRoute repassa a string do `model` direto pro Ollama — não precisa de shim (o `seth_local_shim` de (402) foi retirado em (403), era cano a mais).
+ - **Barreira dura:** o Hermes exige contexto ≥64k (constante de produto, não derivada do payload). Skills 12 ativas / 56 off; tools 12 de 18 documentado (13 medidos em ambiente CLI headless, (138) — `lacuna` de paridade exata com o ambiente do gateway); payload ~12,6k tokens.
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 9a3f8ed..b80dac8 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -67,26 +67,45 @@ Models foi pra "Fora — não usar" (descontinuado).
+ 
+ ---
+ 
+-## Combo `seth-livre` (MEMÓRIAS (390)) — a cascata do frontend da Seth
++## Combos da Seth + roteador por complexidade (MEMÓRIAS (390), roteador em (416))
+ 
+-Combo **custom** do OmniRoute (`storage.sqlite`, tabela `combos`), `strategy:
+-priority` (tenta o 1º; falha/529/404 → próximo, sozinho). É o default da Seth no
+-`librechat.yaml`. Lista **curada por nós** — não a auto-derivada do `auto/*`.
++3 combos **custom** do OmniRoute (`storage.sqlite`, tabela `combos`), todos
++`strategy: priority` (tenta o 1º; falha/529/404 → próximo, sozinho). Lista
++**curada por nós** — não a auto-derivada do `auto/*`. O default do Agent no
++`librechat.yaml` é `seth-livre`; o **`seth_gateway`** reescreve pra `seth-rapido`
++ou `seth-pesado` por heurística de complexidade (MEMÓRIAS (416), reabre (383)):
++
++- **`seth-rapido`** (trivial: <400 chars de conteúdo, sem `tools`, ≤2 msgs user):
++  `cerebras/gpt-oss-120b` → `zai/glm-4.7-flash` → `ollama-local/qwen3.5-9b-64k:latest`
++- **`seth-livre`** (normal — tudo que não é trivial nem pesado): tabela abaixo
++- **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs):
++  `cerebras/gpt-oss-120b` → `gemini/gemini-2.5-flash` → `huggingface/meta-llama/Llama-3.3-70B-Instruct` → `ollama-local/qwen3.5-9b-64k:latest`
++
++Só o alvo `seth-livre` (o do Agent) é reescrito — specs manuais (`seth-zai` etc.)
++passam intactas. Misroteamento só degrada latência/força; nunca quebra (todo combo
++termina nos mesmos modelos confiáveis).
++
++### `seth-livre` (rota normal)
+ 
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 1 | `zai/glm-4.7-flash` | mais capaz dos grátis; 529 transitório quando a z.ai sobrecarrega |
++| 0 | `cerebras/gpt-oss-120b` | **tier de topo, (416)**: grátis, ~0,4s medido, 120b reasoning, tools+stream OK. Intermitente (Cerebras livre) — quando cai, `priority` desce pro tier 1 (fallthrough verificado ao vivo). |
++| 1 | `zai/glm-4.7-flash` | mais capaz dos free-tier estáveis; 529 transitório quando a z.ai sobrecarrega |
+ | 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
+ | 3 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente (HF Inference Providers); crédito mensal pequeno |
+ | 4 | `mistral/ministral-8b-latest` | último recurso remoto; pequeno mas responde |
+-| 5 | `ollama-local/qwen3.5-9b-64k:latest` | **fundo LOCAL** (H4, MEMÓRIAS (402)/(403)). Nunca 429/402; cold start pode passar do `maxWaitMs` do OmniRoute (45s) na 1ª chamada — `agata-warmup` mitiga. Só entra se os 4 externos falharem. |
+-
+-**Recriar** (se o `storage.sqlite` for perdido): `PUT http://127.0.0.1:20128/api/combos/<id>`
+-(ou `POST /api/combos` se ainda não existir) com `{"name":"seth-livre","strategy":"priority",
+-"config":{},"models":[{...zai...},{...gemini...},{...hf...},{...mistral...},{"id":
+-"seth-livre-5-local","kind":"model","model":"ollama-local/qwen3.5-9b-64k:latest",
+-"providerId":"ollama-local","weight":0}]}` (cada model = `{id, kind:"model", model:"<id>",
+-providerId:"<prov>", weight:0}`). Sincronizar a tabela acima quando mudar.
++| 5 | `ollama-local/qwen3.5-9b-64k:latest` | **fundo LOCAL** (H4, MEMÓRIAS (402)/(403)). Nunca 429/402; cold start pode passar do `maxWaitMs` do OmniRoute (45s) na 1ª chamada — `agata-warmup` mitiga. Só entra se os externos falharem. |
++
++**Recriar / reverter** (se o `storage.sqlite` for perdido, ou pra desfazer (416)):
++`PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
++corpo `{"name":"<nome>","strategy":"priority","config":{},"isHidden":false,"models":[…]}`,
++cada model = `{id, kind:"model", model:"<id>", providerId:"<prov>", weight:0}`.
++- **Reverter (416):** `PUT` o `seth-livre` sem o tier 0 `cerebras/gpt-oss-120b` (JSON pré-(416)
++  guardado no backup da sessão de (416)); `DELETE /api/combos/<id>` de `seth-rapido`
++  (`d37e5f27-d216-4e85-94f5-3621ad860260`) e `seth-pesado` (`3980b8a1-776b-475a-9e8b-76c65f1e6cf5`);
++  reverter o `.diff` de `seth_gateway.py`. O roteador é inerte sem os combos — mas o
++  `seth_gateway` reescreveria pra combos inexistentes, então reverter os dois juntos.
++- `seth-livre` id `563700ea-bf7d-45f0-97ab-c336f84b2361`. Sincronizar as tabelas acima quando mudar.
+ 
+ O tier 5 usa a connection `ollama-local` já existente (`baseUrl` `http://127.0.0.1:11434`).
+ O OmniRoute repassa a string do `model` depois do prefixo direto pro Ollama — testado ao
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index ea2ac69..20733c2 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -199,6 +199,56 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
+     return any(s in blob for s in _SINAIS_TITULO)
+ 
+ 
++# --- Roteador por complexidade (MEMÓRIAS (416); reabre a (383) com premissa nova) --
++# A Seth roda na cascata cloud `seth-livre` (OmniRoute, strategy=priority): toda
++# requisição começa no tier 0 e só cai por falha. Quando o tier de topo está
++# lento, "oi" paga o mesmo que uma análise longa. Este classificador -- SÓ REGRAS,
++# nenhuma inferência extra, ~microssegundos -- reescreve o alvo quando o modelo
++# pedido é exatamente "seth-livre" (o default do Agent). Specs manuais
++# (seth-zai/seth-gemini/etc.) chegam com o model já concreto -> NÃO são tocadas.
++# Os 3 combos (seth-rapido / seth-livre / seth-pesado) são priority e TODOS
++# terminam nos mesmos modelos confiáveis -- misroteamento degrada latência/força,
++# nunca quebra. Rodar ANTES de _injeta: a hidratação (~3,8k chars) empurraria
++# tudo pra "não trivial".
++_ROTA_BASE = "seth-livre"
++_LIMIAR_TRIVIAL_CHARS = 400
++_LIMIAR_PESADO_CHARS = 6000
++_LIMIAR_PESADO_MSGS = 10
++
++
++def _texto_e_sinais(msgs: list) -> tuple[int, int, bool]:
++    """(total de chars de conteúdo, nº de mensagens 'user', tem cerca de código)."""
++    total, n_user, codigo = 0, 0, False
++    for m in msgs:
++        if not isinstance(m, dict):
++            continue
++        if m.get("role") == "user":
++            n_user += 1
++        c = m.get("content")
++        pedacos = [c] if isinstance(c, str) else (
++            [p.get("text") for p in c if isinstance(p, dict)] if isinstance(c, list) else [])
++        for t in pedacos:
++            if isinstance(t, str):
++                total += len(t)
++                if "```" in t:
++                    codigo = True
++    return total, n_user, codigo
++
++
++def _classificar_rota(payload: dict) -> str:
++    """seth-livre -> seth-rapido | seth-livre | seth-pesado. Heurística pura."""
++    msgs = payload.get("messages")
++    if not isinstance(msgs, list):
++        return _ROTA_BASE
++    tem_tools = bool(payload.get("tools"))
++    total, n_user, codigo = _texto_e_sinais(msgs)
++    if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
++        return "seth-pesado"
++    if total < _LIMIAR_TRIVIAL_CHARS and not tem_tools and n_user <= 2:
++        return "seth-rapido"
++    return _ROTA_BASE
++
++
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -219,6 +269,7 @@ def _injeta(payload: dict) -> dict:
+ 
+ class _Handler(BaseHTTPRequestHandler):
+     protocol_version = "HTTP/1.1"
++    _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
+ 
+     def log_message(self, fmt, *args):
+         pass
+@@ -239,6 +290,10 @@ class _Handler(BaseHTTPRequestHandler):
+             except ValueError:
+                 return self._erro(400, "corpo marcado como JSON mas não parseia")
+             if isinstance(payload, dict):
++                # roteador por complexidade: só o alvo "seth-livre" do Agent
++                if payload.get("model") == _ROTA_BASE:
++                    self._rota = _classificar_rota(payload)
++                    payload["model"] = self._rota
+                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
+         self._passar(corpo, "POST")
+ 
+@@ -258,6 +313,8 @@ class _Handler(BaseHTTPRequestHandler):
+         for k, v in up.headers.items():
+             if k.lower() not in _HOP_BY_HOP:
+                 self.send_header(k, v)
++        if self._rota:
++            self.send_header("X-Seth-Rota", self._rota)
+         self.send_header("Transfer-Encoding", "chunked")
+         self.end_headers()
+         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
+@@ -449,6 +506,28 @@ def _selftest() -> int:
+           f"(ka={r_ka!r})")
+     falhas += 0 if ok5 else 1
+ 
++    # 6-9. classificador de rota (pura, sem rede)
++    r_triv = _classificar_rota({"model": "seth-livre",
++                                "messages": [{"role": "user", "content": "oi"}]})
++    r_norm = _classificar_rota({"model": "seth-livre", "messages": [
++        {"role": "user", "content": "x" * 1200}]})
++    r_pesado_txt = _classificar_rota({"model": "seth-livre", "messages": [
++        {"role": "user", "content": "y" * 7000}]})
++    r_pesado_cod = _classificar_rota({"model": "seth-livre", "messages": [
++        {"role": "user", "content": "veja isso ```def f(): pass```"}]})
++    r_triv_tools = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}],
++                                      "messages": [{"role": "user", "content": "oi"}]})
++    ok6 = r_triv == "seth-rapido"
++    ok7 = r_norm == "seth-livre"
++    ok8 = r_pesado_txt == "seth-pesado" and r_pesado_cod == "seth-pesado"
++    ok9 = r_triv_tools == "seth-livre"   # curto MAS com tools -> não é trivial
++    for n, ok, desc in [(6, ok6, f"'oi' -> seth-rapido (deu {r_triv})"),
++                        (7, ok7, f"1200 chars -> seth-livre (deu {r_norm})"),
++                        (8, ok8, f"7000 chars / código -> seth-pesado ({r_pesado_txt}/{r_pesado_cod})"),
++                        (9, ok9, f"curto+tools -> seth-livre (deu {r_triv_tools})")]:
++        print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
++        falhas += 0 if ok else 1
++
+     up.shutdown()
+     gw.shutdown()
+     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")

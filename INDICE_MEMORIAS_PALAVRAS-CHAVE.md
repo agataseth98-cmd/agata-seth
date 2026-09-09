@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
+  palavras-chave: roteador, complexidade, seth, reabre, premissa, nova, roda, hoje, cascata, cloud, livre, omniroute, strategy, priority, qwen, local, titular, requisição, começa, tier, topo, cai, falha, lento, medido, paga, mesmo, análise, longa, escalonamento, pra, tarefa, pesada, feito, classificador, heurístico, gateway, cerebras, gpt, oss, free, only
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
   palavras-chave: seth, voltou, ter, ferramentas, mcp, quebras, achadas, consertadas, removeu, agent, librechat, anexa, endpoint, custom, puro, recebe, tool, gateway, deixava, passar, chunks, sentinela, keepalive, omniroute, zeravam, arguments, calls, acumulador, streaming, voz, revertida, pro, piper, desfaz
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: cabeçalho, seth, doutrina, injetada, ganha, formato, selo, hora, regra, compactação, pontos, teste, desta, sessão
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedido do Humano depois do teste da Seth ("text to speech inutilizável, demora e transcreve errado").
   palavras-chave: voz, seth, tts, troca, kokoro, piper, pedido, humano, teste, text, speech, inutilizável, demora, transcreve, errado
-(386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
-  palavras-chave: relógio, code, errado, investigado, máquina, certo, quem, fabricou, hora, fui, executor, cabeçalho, desta, sessão, falha, regra, pega, humano
+(386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o r …
+  palavras-chave: relógio, code, errado, investigado
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/REA …
   palavras-chave: reorg, redesign, parte, docs, rea
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre …

@@ -1,0 +1,11 @@
+{
+  "name": "seth-rapido",
+  "strategy": "priority",
+  "config": {},
+  "isHidden": false,
+  "models": [
+    {"id":"seth-rapido-1-cerebras","kind":"model","model":"cerebras/gpt-oss-120b","providerId":"cerebras","weight":0},
+    {"id":"seth-rapido-2-zai","kind":"model","model":"zai/glm-4.7-flash","providerId":"zai","weight":0},
+    {"id":"seth-rapido-3-local","kind":"model","model":"ollama-local/qwen3.5-9b-64k:latest","providerId":"ollama-local","weight":0}
+  ]
+}

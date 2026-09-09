@@ -55,6 +55,13 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
+- **Roteador da Seth ((416))** — a Seth escolhia sempre o mesmo provedor
+  primeiro (lento quando ele engasgava). Agora: `cerebras/gpt-oss-120b`
+  (grátis, ~0,4s) entra como topo, e um classificador simples manda "oi"
+  pra uma rota rápida e tarefa longa/código pra uma rota forte. Se o
+  Cerebras cai, desce pro provedor de sempre — sem quebrar. Reabre uma
+  decisão antiga (383) com premissa nova; você assumiu o risco por escrito.
+
 - **Ferramentas da Seth (MCP canon) voltaram** — estavam quebradas desde
   a (392), que removeu o "Agent" da Seth. Agent recriado + um filtro no
   gateway que estava zerando os argumentos das chamadas de ferramenta.

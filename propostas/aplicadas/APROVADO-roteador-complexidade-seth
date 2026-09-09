@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 16:52 -0300.
+Motivo: roteador por complexidade da Seth; reabre (383) premissa nova; cerebras/gpt-oss-120b tier 0; free-only; risco assumido
+nome: roteador-complexidade-seth
+diff-sha256: e756cef0143d2284cf56b32d7f3bc5b37fb56b989b268af2067194a286fc0f17
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQGeyRYxqdsXJpLTbUcZgoYv+EGB2H8U4c2I7fdlRD/SjcX
+yz5Btm4Ofi5RTYQz1hnaduhHeQQ7V6k5YRd0HYlAE=
+-----END SSH SIGNATURE-----

@@ -199,6 +199,56 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
     return any(s in blob for s in _SINAIS_TITULO)
 
 
+# --- Roteador por complexidade (MEMÓRIAS (416); reabre a (383) com premissa nova) --
+# A Seth roda na cascata cloud `seth-livre` (OmniRoute, strategy=priority): toda
+# requisição começa no tier 0 e só cai por falha. Quando o tier de topo está
+# lento, "oi" paga o mesmo que uma análise longa. Este classificador -- SÓ REGRAS,
+# nenhuma inferência extra, ~microssegundos -- reescreve o alvo quando o modelo
+# pedido é exatamente "seth-livre" (o default do Agent). Specs manuais
+# (seth-zai/seth-gemini/etc.) chegam com o model já concreto -> NÃO são tocadas.
+# Os 3 combos (seth-rapido / seth-livre / seth-pesado) são priority e TODOS
+# terminam nos mesmos modelos confiáveis -- misroteamento degrada latência/força,
+# nunca quebra. Rodar ANTES de _injeta: a hidratação (~3,8k chars) empurraria
+# tudo pra "não trivial".
+_ROTA_BASE = "seth-livre"
+_LIMIAR_TRIVIAL_CHARS = 400
+_LIMIAR_PESADO_CHARS = 6000
+_LIMIAR_PESADO_MSGS = 10
+
+
+def _texto_e_sinais(msgs: list) -> tuple[int, int, bool]:
+    """(total de chars de conteúdo, nº de mensagens 'user', tem cerca de código)."""
+    total, n_user, codigo = 0, 0, False
+    for m in msgs:
+        if not isinstance(m, dict):
+            continue
+        if m.get("role") == "user":
+            n_user += 1
+        c = m.get("content")
+        pedacos = [c] if isinstance(c, str) else (
+            [p.get("text") for p in c if isinstance(p, dict)] if isinstance(c, list) else [])
+        for t in pedacos:
+            if isinstance(t, str):
+                total += len(t)
+                if "```" in t:
+                    codigo = True
+    return total, n_user, codigo
+
+
+def _classificar_rota(payload: dict) -> str:
+    """seth-livre -> seth-rapido | seth-livre | seth-pesado. Heurística pura."""
+    msgs = payload.get("messages")
+    if not isinstance(msgs, list):
+        return _ROTA_BASE
+    tem_tools = bool(payload.get("tools"))
+    total, n_user, codigo = _texto_e_sinais(msgs)
+    if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
+        return "seth-pesado"
+    if total < _LIMIAR_TRIVIAL_CHARS and not tem_tools and n_user <= 2:
+        return "seth-rapido"
+    return _ROTA_BASE
+
+
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
@@ -219,6 +269,7 @@ def _injeta(payload: dict) -> dict:
 
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
+    _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
 
     def log_message(self, fmt, *args):
         pass
@@ -239,6 +290,10 @@ class _Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self._erro(400, "corpo marcado como JSON mas não parseia")
             if isinstance(payload, dict):
+                # roteador por complexidade: só o alvo "seth-livre" do Agent
+                if payload.get("model") == _ROTA_BASE:
+                    self._rota = _classificar_rota(payload)
+                    payload["model"] = self._rota
                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
         self._passar(corpo, "POST")
 
@@ -258,6 +313,8 @@ class _Handler(BaseHTTPRequestHandler):
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
                 self.send_header(k, v)
+        if self._rota:
+            self.send_header("X-Seth-Rota", self._rota)
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
@@ -448,6 +505,28 @@ def _selftest() -> int:
     print(f"{'PASS' if ok5 else 'FALHA'}  SSE: keepalive->': ka', tool_call/blank/[DONE] intactos "
           f"(ka={r_ka!r})")
     falhas += 0 if ok5 else 1
+
+    # 6-9. classificador de rota (pura, sem rede)
+    r_triv = _classificar_rota({"model": "seth-livre",
+                                "messages": [{"role": "user", "content": "oi"}]})
+    r_norm = _classificar_rota({"model": "seth-livre", "messages": [
+        {"role": "user", "content": "x" * 1200}]})
+    r_pesado_txt = _classificar_rota({"model": "seth-livre", "messages": [
+        {"role": "user", "content": "y" * 7000}]})
+    r_pesado_cod = _classificar_rota({"model": "seth-livre", "messages": [
+        {"role": "user", "content": "veja isso ```def f(): pass```"}]})
+    r_triv_tools = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}],
+                                      "messages": [{"role": "user", "content": "oi"}]})
+    ok6 = r_triv == "seth-rapido"
+    ok7 = r_norm == "seth-livre"
+    ok8 = r_pesado_txt == "seth-pesado" and r_pesado_cod == "seth-pesado"
+    ok9 = r_triv_tools == "seth-livre"   # curto MAS com tools -> não é trivial
+    for n, ok, desc in [(6, ok6, f"'oi' -> seth-rapido (deu {r_triv})"),
+                        (7, ok7, f"1200 chars -> seth-livre (deu {r_norm})"),
+                        (8, ok8, f"7000 chars / código -> seth-pesado ({r_pesado_txt}/{r_pesado_cod})"),
+                        (9, ok9, f"curto+tools -> seth-livre (deu {r_triv_tools})")]:
+        print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
+        falhas += 0 if ok else 1
 
     up.shutdown()
     gw.shutdown()

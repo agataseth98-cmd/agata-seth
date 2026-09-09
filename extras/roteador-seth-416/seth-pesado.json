@@ -1,0 +1,12 @@
+{
+  "name": "seth-pesado",
+  "strategy": "priority",
+  "config": {},
+  "isHidden": false,
+  "models": [
+    {"id":"seth-pesado-1-cerebras","kind":"model","model":"cerebras/gpt-oss-120b","providerId":"cerebras","weight":0},
+    {"id":"seth-pesado-2-gemini","kind":"model","model":"gemini/gemini-2.5-flash","providerId":"gemini","weight":0},
+    {"id":"seth-pesado-3-hf","kind":"model","model":"huggingface/meta-llama/Llama-3.3-70B-Instruct","providerId":"huggingface","weight":0},
+    {"id":"seth-pesado-4-local","kind":"model","model":"ollama-local/qwen3.5-9b-64k:latest","providerId":"ollama-local","weight":0}
+  ]
+}
