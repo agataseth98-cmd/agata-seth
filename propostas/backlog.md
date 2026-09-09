@@ -12,13 +12,6 @@ segue é a lista completa.
 
 ---
 
-## A — feito nesta sessão (fora da lista, só pra registro)
-
-- Timer `agata-consolidacao` religado (marcador semeado em (371), 1º run não faz nada).
-- Bundle `memoria/missoes` gravado no HD — P-6 sem AVISO.
-- `presence_penalty` consolidado sob demanda — `propostas/consolidacao-presence-penalty-*.md`,
-  aguarda sua decisão de virar entrada de MEMÓRIAS.
-
 ## B — precisa da sua decisão de desenho (o executor propõe, você decide)
 
 | # | Item | Estado | Bloqueio |
@@ -56,6 +49,7 @@ segue é a lista completa.
 
 ## Fora da lista — feito ou obsoleto (pra não voltar)
 
+- `presence_penalty` na memória — consolidado e **aprovado em (382)**; par em `propostas/aplicadas/consolidacao-presence-penalty-2026-09-08.md`.
 - Eco pós-carregar mecanizado — (308), `scripts/estado_para_eco.sh`.
 - Geração de silo por modelo (`seth`) — Bloco 3.1, `.githooks/gerar-hidratacao.sh`.
 - Harness A1 (asserção byte-a-byte) — obsoleto pós-Hermes ((312), "Estado dos bugs").
