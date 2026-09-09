@@ -7,9 +7,6 @@ LC=~/librechat/docker-compose.yml
 notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
 systemctl --user start agata.target 2>/dev/null || true
 systemctl --user start seth-gateway.service seth-escriba.service
-# Fundo local do combo seth-livre (tier 5): shim OpenAI-compat :20133 -> Ollama
-# :11434 (H4, MEMÓRIAS (402)). So repassa, nao consome recurso parado.
-systemctl --user start seth-local-shim.service 2>/dev/null || true
 # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
 # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
 # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que

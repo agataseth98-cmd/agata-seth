@@ -26,18 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4973930cc6312b8a48468421e8192aff662670f2
-  Escrito em: 09/09/2026 10:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d2848e1b5f604f912feeb950bbb1b3ecd87b28c6
+  Escrito em: 09/09/2026 11:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
+
+**O que (402) afirmou:** "o OmniRoute só descobriu os modelos de *embedding* do `ollama-local`; nenhum modelo local de chat aparece em `/v1/models`, então não dá pra pôr no combo" — e propôs (opção B) o shim `seth_local_shim` (`:20133`) como provider intermediário.
+
+**O que a Máquina mostrou depois (investigando B1/B3):**
+- `POST :20128/v1/chat/completions` com `model: ollama-local/qwen3.5-9b-64k:latest` → HTTP 200, `model: qwen3.5-9b-64k:latest`, conteúdo real. Em streaming: 200, 60 KB em 9 s.
+- Os combos `cheap` e `auto` **já têm** tier local (`ollama-local/llama3.2:3b` é o tier 1 do `cheap`).
+- A connection `ollama-local` (`baseUrl` `:11434`) resolve QUALQUER string de `model` depois do prefixo — repassa pro Ollama. O `/v1/models` é catálogo de anúncio/discovery, separado da capacidade de roteamento.
+- `POST /api/providers` com `provider:"seth-local"` (nome custom) exige `apiKey`; só `ollama-local`/`llamacpp-local` são slots locais sem chave — o que já empurrava a opção B pra perto da A.
+
+**Feito:**
+- **Tier 5 no `seth-livre`** via `PUT :20128/api/combos/563700ea-…` (Humano rodou; combo confirmado com 5 tiers: zai → gemini → hf → mistral → `ollama-local/qwen3.5-9b-64k:latest`, `strategy: priority`). Backup do combo original em scratchpad da sessão.
+- **Retirada do shim (proposta `retirar-seth-local-shim`, assinada):** fiação tirada do `seth`/`seth-parar` (não sobe/para mais o shim) e do P-9; unit parada e desinstalada do runtime (`:20133` livre). `config/modelos-gratuitos.md` e `PROJETO.md` reconciliados (`seth-local` provisório → `ollama-local` nativo; recreate por `PUT /api/combos`).
+
+**Gap do P-8 achado no caminho — os 2 arquivos do shim ficam INERTES neste commit:** o `.diff` assinado inclui a deleção de `redesign/router/seth_local_shim.py` e `redesign/systemd/seth-local-shim.service`, mas o pre-commit BLOQUEOU: `_p8_arquivo_aprovado` faz `git rev-parse ":$f"` pra pegar o blob staged, e num arquivo DELETADO isso falha (exit 128) → P-8 dá SUSPEITO, sem caminho pra aprovar deleção de arquivo de comportamento (`redesign/router/*`, `redesign/systemd/*`). Restaurei os 2 (`git checkout HEAD --`); ficam no repo sem ninguém referenciar (o `.py` não é importado, a unit não está instalada). **Item de backlog:** P-8 precisa de um ramo pra "staged como deleção + `.diff` assinado com hunk de deleção total (`+++ /dev/null`) → aprovado"; a deleção real dos 2 arquivos vai junto.
+
+**O que fica de (402):** o commit e o par `propostas/aplicadas/seth-local-shim.*` ficam na história (Regra 4) como registro do que se tentou. Nada apagado — corrigido por cima.
+
+**Teste de cascata (4 externos caírem juntos):** não exercitado — exige desativar as 4 connections externas, compartilhadas com outros combos. Provado por construção (rota local 200 + mecanismo `priority` dos tiers 1-4 já testado em (390)); confirmar end-to-end na próxima falha real dos 4.
+
+**Diretriz que mandou retirar:** Elegância e eficiência ("a menor solução que cobre o caso; nada de cano, arquivo ou regra a mais") + Checabilidade ("a Máquina arbitra medindo, não lembrando" — a premissa herdada do backlog foi medida e refutada).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/retirar-seth-local-shim`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `curl :20128/v1/chat/completions` (`ollama-local/qwen3.5-9b-64k:latest` → 200 non-stream + stream 60KB/9s); `sqlite3 ~/.omniroute/storage.sqlite` (`cheap`/`auto` já com tier local; `seth-livre` = 5 tiers após o PUT); `POST /api/providers` de teste (`seth-local` recusado; `ollama-local` aceito) + `DELETE` da connection de teste; `bash -n` nos 3 scripts; `systemctl --user stop` + `rm` da unit + `ss -tln` (`:20133` livre); `git apply --check` limpo; **pre-commit P-8 bloqueou a deleção dos 2 arquivos (`git rev-parse :<deletado>` falha em `_p8_arquivo_aprovado`) — restaurados, ficam inertes, gap anotado no backlog**; assinatura verificada pelo P-8 (bate nos 5 arquivos MODIFICADOS). Autorização: Humano, "retire" → "feito" (`scripts/aprovar.sh retirar-seth-local-shim` assinado, 11:18 -03).
+
 (402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído, rodando e vigiado pelo P-9 — expõe `qwen3.5-9b-64k` local em OpenAI-compat. **Falta o registro no OmniRoute** (provider + tier 5 do combo): esbarra numa restrição do OmniRoute que exige decisão sua (B1/B2/B3, abaixo).
 
 **Feito e verificado (parte de arquivo, proposta `seth-local-shim` assinada):**

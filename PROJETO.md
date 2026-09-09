@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4973930cc6312b8a48468421e8192aff662670f2
-  Escrito em: 09/09/2026 10:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d2848e1b5f604f912feeb950bbb1b3ecd87b28c6
+  Escrito em: 09/09/2026 11:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -55,7 +55,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 - **Fallback: `gemini-2.5-flash`** (Google API, grátis) — papel invertido do histórico: era principal até (140), agora é o alívio quando o Qwen local falha ou não completa. Teto do free tier ~20 requisições/dia — estourar gera 429 (agora do lado do fallback, não do principal). **Circuit breaker ativo** (plugin `gemini_quota_guard`, hook `pre_api_request`): conta requisições reais e avisa a partir da 15ª do dia, sem bloquear nem rerotear (MEMÓRIAS (122)).
 - **Roteamento por complexidade — APOSENTADO (MEMÓRIAS (383)).** Aprovado em (64) supondo Gemini como principal; a inversão de (140) (Seth local titular) matou a premissa. O sistema já roteia por adequação (Seth local default · Conselho Remoto invocado de propósito · `auto/*` do OmniRoute no caminho da Seth); um classificador+router novo seria cano a mais competindo com isso. Se surgir necessidade concreta, é proposta nova com premissa nova — não ressuscitar esta.
 - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
-- **Fundo local da cadeia da Seth (H4, MEMÓRIAS (402)):** o combo `seth-livre` (frontend da Seth, `:20126`→sanitizador→OmniRoute) ganhou um tier 5 local — `seth-local-shim` (`:20133`) expõe `qwen3.5-9b-64k` pro OmniRoute como provider `seth-local`. Só entra se os 4 provedores grátis externos falharem no mesmo minuto (cenário de (390)). O `conselho_remoto.py` já alcançava o `:11434` direto; agora a cadeia de conversa também tem piso local.
+- **Fundo local da cadeia da Seth (H4, MEMÓRIAS (402)/(403)):** o combo `seth-livre` (frontend da Seth, `:20126`→sanitizador→OmniRoute) ganhou um tier 5 local — `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) que o OmniRoute já tinha. Só entra se os 4 provedores grátis externos falharem no mesmo minuto (cenário de (390)). Medido em (403): o OmniRoute repassa a string do `model` direto pro Ollama — não precisa de shim (o `seth_local_shim` de (402) foi retirado em (403), era cano a mais).
 - **Barreira dura:** o Hermes exige contexto ≥64k (constante de produto, não derivada do payload). Skills 12 ativas / 56 off; tools 12 de 18 documentado (13 medidos em ambiente CLI headless, (138) — `lacuna` de paridade exata com o ambiente do gateway); payload ~12,6k tokens.
 - **[FECHADO] Histórico de avaliação do `qwen3.5-9b-64k`/`qwen3.5:9b`, que embasou a promoção.** Veredito: aprovado com ressalva — tool-calling correto sob payload real com `num_ctx=65536`, e **2 casos de fabricação deliberada** nos quais admitiu a ausência, errando a autoidentificação num deles. Histórico: MEMÓRIAS (119)/(120), (138), (139); a causa do truncamento tem item próprio abaixo. **Estado corrente, não histórico:** VRAM de pico medida em uso real 89-92% dos 8.188 MiB da placa — produção contínua é mais pesada que teste pontual. **Sem variante text-only na biblioteca do Ollama** (64 tags checadas, todas multimodais) — o encoder de visão é permanente *nessa biblioteca*, confirmado via `/api/show` (27 blocos de atenção de visão). **Fora dela, variantes text-only da família existem**: `alphaXiv/rlm-sft-Qwen3.5-9B-text-v1` tem `model_type: qwen3_5_text` e `Qwen3_5ForCausalLM` **sem `vision_config`**, confirmado por A/B contra o irmão multimodal `-v1` (`Qwen3_5ForConditionalGeneration`, com `vision_config`). A frase anterior afirmava inexistência absoluta; o escopo real é a biblioteca do Ollama. Correção registrada em MEMÓRIAS (162).
 - **Padrão de alucinação** documentado é do antecessor `qwen2.5-14b-64k` (inventava entradas e datas) — não do `qwen3.5-9b-64k`, que tem incidentes próprios registrados ((120), (138), (139)) sob rótulo de fabricação, não do mesmo padrão antigo.
@@ -83,11 +83,7 @@ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose 
 `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
 container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
 LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
-`piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)) +
-`seth-local-shim.service` (`:20133`, MEMÓRIAS (402) — expõe 1 modelo local de chat
-(`qwen3.5-9b-64k`) em OpenAI-compat pro OmniRoute, que só descobriu os modelos de *embedding*
-do `ollama-local`; é o tier 5 (fundo local) do combo `seth-livre`; só repassa pro Ollama
-`:11434`, não consome recurso parado).
+`piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
 Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
 **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
 a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para

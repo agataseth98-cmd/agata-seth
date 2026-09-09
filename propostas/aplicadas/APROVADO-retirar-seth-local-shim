@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 11:18 -0300.
+Motivo: H4: retira o seth_local_shim -- OmniRoute ja roteia ollama-local nativo, tier 5 no combo basta
+nome: retirar-seth-local-shim
+diff-sha256: fdade6e42e470dd8e67bc882a61a3ba72596511ca7104de713709d5b8fdf48bf
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQAKEtVsC9p5NS1tUyHbfpbDWY3TGORK/Rvf/2M2imUuR7O
+fKZsHvJOGSFICL92NrP6BY/TcXVzJnl8muGFj3fgU=
+-----END SSH SIGNATURE-----
