@@ -29,7 +29,7 @@ PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
 # viraram texto de dentro de (259) e saíram na ordem errada depois de
 # invertidas (bloco inteiro tratado como uma entrada só).
 PADRAO_ENTRADA = re.compile(
-    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
+    r"^\(\d+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?: [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)? [—-] \d{2}/\d{2}/\d{4}",
     re.MULTILINE,
 )
 

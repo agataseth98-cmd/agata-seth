@@ -34,7 +34,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
 PADRAO_ENTRADA = re.compile(
-    r"^\(\d+\) (?:DI[AÁ]RIO|CONSELHO|MOD[^—\-\n]*|CORRE[CÇ][AÃ]O) [—-] \d{2}/\d{2}/\d{4}",
+    r"^\(\d+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?: [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)? [—-] \d{2}/\d{2}/\d{4}",
     re.MULTILINE,
 )
 TETO_LINHAS_FRIO = 500

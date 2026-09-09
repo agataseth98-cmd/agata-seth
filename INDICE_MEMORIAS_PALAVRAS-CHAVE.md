@@ -7,10 +7,16 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
+  palavras-chave: gerador, índice, hidratação, reconhecia, rótulo, entrada, lista, fixa, mod, correção, consolidação, ficava, fora, sumiam, indice, memorias, palavras, chave, resumo, antigas, hidrata, morde
 (398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
   palavras-chave: projeto, descrevia, serviços, rodam, vigiados, seth, escriba, escrita, append, only, piper, tts, voz, sincronizado, realidade, máquina
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
   palavras-chave: fecha, item, backlog, seth, tinha, hora, real, pra, copiar, proibição, inventar, dando, valor, medido, máquina, doutrina, passa, mandar, estimar
+(396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
+  palavras-chave: consolidação, omniroute, refs
+(395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
+  palavras-chave: consolidação, tes, nonce, refs
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
   palavras-chave: fecha, item, backlog, seth, gateway, estado, tinha, timeout, curto, demais, podia, abrir, última, entrada, doutrina, ganha, regra, explícita, contra, inventar, número
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
@@ -35,6 +41,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fechados, parecer, remoto, alinhamento, regras, sanity, check, item, fork, pós
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
   palavras-chave: aposentado, roteamento, complexidade, aprovado, nunca, implementado, item, fork, pós
+(382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
+  palavras-chave: consolidação, presence, penalty, cortes, geração, refs
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
   palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
@@ -59,14 +67,14 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, noturna, reformulada, opção, explicação, nunca, ter, produzido, nada, aproveitável, semana, redesign, grafo, flows, consolidacao
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
   palavras-chave: cosméticos, sanitização, parte, tocava, scripts, gerar, obsidian, moc, documentos, repositório, era, gravado, nome, arquivo, redesign, batia, agora, pontos, registro, notas, escrever, link, inicio, busca, semantica, docstring, atualizada, pro, caminho, novo, spike, rlm, extras, movido
-(369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
-  palavras-chave: scripts, gerar, obsidian, camadas, morna, fria, deixam, folhas, órfãs, grafo, vault, parte, sanitização, moc, memoria, ganha, seção, físicas, ligando, memorias, morno, chunks, frio, faixa, entradas, guarda, saem, lista, genérica, documentos, soltos
-(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
-  palavras-chave: sanitização, repositório, parte, mecânica, toca, scripts, vai, proposta, assinada, lotes, consolidação, noturna, nunca, aprovados, arquivados, timer, desligado, spike, rlm, arquivado, sincronizacao, log, trash, fora, git
-(367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da aprovação assinada de (366)) entra na quarentena P-8, e `_p8_assinatura_ok` passa a verificar contra a versão de `HEAD:`, nunca a working-tree — uma troca de `.allowed_signers` staged não autoaprova a própria troca. Rotação de chave = assinar o `.diff` da rotação com a chave atual. `scripts/aprovar.sh` corrigido no mesmo commit (assina lendo de arquivo + `SSH_ASKPASS_REQUIRE=never`; a forma antiga por pipe pro stdin falhava porque o `ssh-keygen` mandava a passphrase pro `/usr/lib/ssh/ssh-askpass`, inexistente nesta Máquina).
-  palavras-chave: propostas, allowed, signers, raiz, confiança, aprovação, assinada, entra, quarentena, assinatura, passa, verificar, contra, versão, head, nunca, working, tree, troca, staged, autoaprova, própria, rotação, chave, assinar, diff, atual, scripts, aprovar, corrigido, mesmo, commit, assina, lendo, arquivo, ssh, askpass, require, never, forma, antiga, pipe, pro, stdin, falhava, porque, keygen, mandava, passphrase, usr, lib, inexistente, máquina
-(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
-  palavras-chave: aprovação, passa, assinada, chave, ssh, humano, propostas, allowed, signers, pública, entra, repo, privada, fica, config, agata, aprovacao, passphrase, nunca, commitada, scripts, aprovar, assina, perimetro, verifica, presente, aprovado, nome, assinatura, válida, falha, commit, estreita, fecha, brecha, executor, cria, arquivo
+(369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deix …
+  palavras-chave: scripts, gerar, obsidian, camadas, morna, fria, deix
+(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte …
+  palavras-chave: sanitização, repositório, parte, mecânica
+(367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da …
+  palavras-chave: propostas, allowed, signers, raiz, confiança
+(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh …
+  palavras-chave: aprovação, passa, assinada, chave, ssh
 (365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: alé …
   palavras-chave: gesto, aprovação, ganha, caminho, prático, alé
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada …

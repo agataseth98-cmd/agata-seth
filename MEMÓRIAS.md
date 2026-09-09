@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c31bc66ae8deed0b9f9e0df30784cb7431ceec38
-  Escrito em: 09/09/2026 10:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0a4b14ddb833b96e072961d556363f123b1f080e
+  Escrito em: 09/09/2026 10:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4b14ddb833b96e072961d556363f123b1f080e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
+
+**Achado (verificação de coerência pedida pelo Humano):** `grep -c CONSOLIDA INDICE_MEMORIAS.md` → 0, enquanto a camada quente tem 3 entradas CONSOLIDAÇÃO. Causa: o padrão `(?:DI[AÁ]RIO|CONSELHO|MOD[^—-]*|CORRE[CÇ][AÃ]O)` repetido em 9 pontos de `.githooks/gerar-hidratacao.sh` (índice, índice de palavras-chave, janela do `.hidrata`, P-5 permutação, P-7 citação, reconciliação) e em 4 scripts de migração/verificação. Os 3 geradores Python (`gerar_indice_derivado.py`, `gerar_obsidian.py`, `busca_semantica.py`) **não** têm o bug — já usam padrão genérico.
+
+**Mudou (proposta `indice-rotulo-generico`, `.githooks/gerar-hidratacao.sh` + 4 `scripts/*.py`, quarentena, 1 assinatura):**
+- Rótulo passa de lista fixa a `[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( palavra opcional)?` **ancorado em ` [—-] `** (separador que todo header tem). Igual ao que os geradores `.py` já fazem — uma definição só de "cabeçalho de entrada", e rótulo novo não volta a exigir patch.
+- Não é curinga nu (o aviso antigo do código, linhas 204-209, continua respeitado): exige `(N) ` no começo **e** ` [—-] ` depois do rótulo.
+- Comentário do hook reescrito preservando a lição de (134) (Regra 4 no espírito: histórico do porquê não se apaga).
+
+**Escopo (c), decisão do Humano ("Sua sugestão"):** conserta também os 4 scripts latentes (`migrar_periodo`, `verificar_migracao_periodo`, `verificar_migracao_memorias`, `inverter_memorias`) — o bug lá só morderia na próxima migração de período (janela de aderência até 04/10), mas deixá-los com uma definição de "entrada" diferente do hook seria incoerência nova.
+
+**Testado:** contagem old-pattern vs. new-pattern em quente (39→42), morno e nos 11 chunks frios (inalterados) — delta exato = as 3 CONSOLIDAÇÃO, zero falso-positivo em qualquer camada. `bash -n` + `py_compile` limpos. Índice regenerado no pre-commit deste commit passa a listar (382)/(395)/(396).
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/indice-rotulo-generico`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -c` do padrão antigo e do novo em `MEMÓRIAS.md`/`MEMORIAS-MORNO.md`/`MEMORIAS-FRIO-*.md` (delta = 3, só CONSOLIDAÇÃO); leitura dos 5 arquivos e dos 3 geradores `.py` pra confirmar quais têm a lista fixa; `bash -n`; `python3 -m py_compile` nos 4; simulação das linhas 238/386 do hook mostrando as 3 entradas; `git apply --check` limpo contra HEAD; `diff-sha256` do `APROVADO-` (`ddb79f3d…adb2`) bate; assinatura ssh verificada pelo P-8 contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "vamos fechar tudo que está em aberto" + escolha "B + escopo (c)" ("Sua sugestão") → "feito" (`scripts/aprovar.sh indice-rotulo-generico` assinado, 10:33 -03).
+
 (398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
 
 **Achado (verificação de coerência pedida pelo Humano, "veja a integridade e coerência de todos os recursos"):** `systemctl --user list-units` mostra `seth-escriba.service` e `piper-tts.service` ativos; `scripts/perimetro.sh` (P-9, `P9_UNIDADES_USUARIO`, linhas 846-854) já vigia `seth-escriba`, `seth-gateway` e `agata-pesquisa-modelos.timer`. Nenhum dos três aparecia na seção "Serviços (boot)" nem na descrição do P-9 em PROJETO.md. `seth-escriba` só constava na MEMÓRIA fria (318) — e é o único caminho de escrita da Seth (`canon-mcp`/`:27125` é read-only). PROJETO.md é "o agora"; faltava um componente sensível.

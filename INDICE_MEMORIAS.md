@@ -3,8 +3,11 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
 (398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
+(396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
+(395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
@@ -17,6 +20,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
+(382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
@@ -29,10 +33,10 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que tocava `scripts/*`. `scripts/gerar_obsidian.py`: o MOC "Documentos do repositório" era gravado com nome de arquivo `moc-redesign.md` (não batia com o H1) — agora `moc-documentos.md`, nos 3 pontos (registro em `NOTAS`, `escrever`, link no `INICIO`). `scripts/busca_semantica.py`: docstring atualizada pro caminho novo do spike RLM (`extras/arquivo-redesign/rlm/`, movido em (368)).
-(369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deixam de ser folhas órfãs no grafo do vault (parte da sanitização de (368)). `moc-memoria.md` ganha seção "Camadas físicas" ligando `MEMORIAS-MORNO.md` + os 12 chunks `MEMORIAS-FRIO-*.md`, cada um com a faixa de entradas que guarda; e saem da lista genérica de "documentos soltos".
-(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte que toca `scripts/*` vai em proposta assinada à parte). Lotes de consolidação noturna nunca aprovados arquivados; timer da consolidação desligado; spike RLM arquivado; `sincronizacao.log` e `.trash/` fora do git.
-(367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da aprovação assinada de (366)) entra na quarentena P-8, e `_p8_assinatura_ok` passa a verificar contra a versão de `HEAD:`, nunca a working-tree — uma troca de `.allowed_signers` staged não autoaprova a própria troca. Rotação de chave = assinar o `.diff` da rotação com a chave atual. `scripts/aprovar.sh` corrigido no mesmo commit (assina lendo de arquivo + `SSH_ASKPASS_REQUIRE=never`; a forma antiga por pipe pro stdin falhava porque o `ssh-keygen` mandava a passphrase pro `/usr/lib/ssh/ssh-askpass`, inexistente nesta Máquina).
-(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
+(369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deix …
+(368) DIÁRIO — 08/09/2026 · Sanitização do repositório, parte mecânica (a parte …
+(367) DIÁRIO — 08/09/2026 · `propostas/.allowed_signers` (a raiz de confiança da …
+(366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh …
 (365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: alé …
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada …
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: …
