@@ -60,10 +60,11 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
-- **Seth "não respondia" no LibreChat** — era a geração automática de
-  título da conversa, que travava e cortava a resposta na tela. Desligada
-  ((411)); a Seth voltou a responder. Conversa nova agora fica "New Chat"
-  até você renomear.
+- **Seth "não respondia" no LibreChat** — o palpite da (411) (geração de
+  título) não se sustentou na auditoria ((412)): o mais provável era a
+  cascata de provedores lenta naquela janela, que voltou ao normal
+  sozinha. A geração de título ficou desligada por ora (economia, não
+  conserto) — conversa nova fica "New Chat" até renomear; dá pra religar.
 - Duas costuras em REGRAS.md (selo de hora, "última entrada" sob sync não
   verificado) — fechadas em (384).
 - Âncora de frescor (carimbo de SHA no topo de REGRAS/PROJETO/MEMÓRIAS) —

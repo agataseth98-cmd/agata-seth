@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6d565e5ca48a02cf342e73319f1a8fb826ccb9ac
-  Escrito em: 09/09/2026 15:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0dab49903dc9c11171ee8ebaf93f68abb42b624a
+  Escrito em: 09/09/2026 15:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
+
+**O que a (411) afirmou e por que está errado:** que a chamada de título, lenta, "estourava o timeout de 45s → `AbortController` compartilhado → cortava a resposta principal / gravava vazia". Lendo `api/server/controllers/agents/title.js` e `request.js` no container: a geração de título roda com `titleAbortController`/`titleDiscardController` **próprios**, separados do `job.abortController` do turno principal. Abort propaga **num sentido só: principal → título** (`job.abortController` dispara `abortTitleOnJobAbort`). O timeout de título (`Title generation timeout`, 45s) é **capturado e engolido** (`immediateTitlePromise.catch`) — não aborta, não atrasa a resposta principal, que é `await sendPromise` + `saveMessage` independentes. Não há caminho de código título → principal. O erro de título no log era **sintoma** da mesma lentidão (as duas chamadas passando pela cascata degradada), não a causa.
+
+**Falha do catálogo REGRAS (159):** a evidência (erro de título logado) não sustentava a conclusão (título causa resposta vazia), e deixei passar — pior, escrevi o mecanismo no canon (411), na mensagem de commit e num comentário de `librechat.yaml`.
+
+**O que continua de pé:**
+- **Cascata degradada como causa provável.** Latência medida nesta sessão: `seth-livre`→glm 4-5s às 14:15 → glm pendura (timeout 40s) 14:39-14:45 → 200 em 2,2s às 15:11. Cota do gemini (tier 2) em cooldown 429 no meio, parte queimada pelos meus próprios testes de diagnóstico. Recuperou sozinha; a Seth responde e persiste (`content[]`, `unfinished:false`) em toda mensagem desde ~15:10.
+- **`seth_gateway` não hidratar chamada de título: mantido.** Correto por si — "escreva um título" não tem por que carregar REGRAS+PROJETO+estado. `--selftest` 4/4.
+- **`titleConvo: false`: mantido por ora, NÃO é load-bearing.** Vale como economia (uma chamada concorrente a menos pela cascata de cota limitada), não como conserto. Reverter pra `true` é opção agora que a cascata está sã — decisão do Humano.
+
+**Higiene pendente (P-8, precisa de assinatura):** o comentário em `redesign/librechat/librechat.yaml` (~linhas 128-138) repete o mecanismo errado. Ou um `.diff` corrige o comentário, ou o `.diff` que reverte `titleConvo` pra `true` já o remove. Proposto, não feito.
+
+**Auditoria (pedida pelo Humano "Audite e corrija") — o resto está limpo:** commits (410)/(411) no remoto, local==remoto (`0dab499`); PROJETO.md linha TES-002 correta; `titleConvo: false` no repo E no `~/librechat/` (md5 batem); `canon-mcp.mjs` sem drift; as 2 assinaturas dos pares em `propostas/aplicadas/` verificadas com `ssh-keygen -Y verify` (principal `agata-humano`): `Good signature` nas duas; `diff-sha256` batem. Reinício do `seth-gateway` às 15:11 foi o Humano (confirmado por ele), não crash.
+
+**Nonce do TES-002:** segue **não entregue**.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sed`/`grep` em `title.js`+`request.js` no container (abort só principal→título; timeout de título `.catch`-logado; `sendPromise`/`saveMessage` independentes); timeline de latência pelos `curl` cronometrados; `ssh-keygen -Y verify -I agata-humano` OK nas 2 assinaturas; `md5sum` repo vs `~/librechat/` (yaml + canon-mcp sem drift); Mongo com `content[]` cheio nas mensagens da Seth pós-15:10; `git diff HEAD` vazio em `redesign/`. Autorização: Humano, "Audite e corrija".
+
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
 
 **O mecanismo (fonte lida no container, LibreChat v0.8.7):** `titleConvo` roda uma 2ª run no MESMO `AgentClient`, em modo `immediate` — concorrente com a resposta principal. Ela também bate em `:20126`, então o `seth_gateway` injeta a hidratação inteira nela. Com a cascata degradada (ver abaixo) essa chamada passa dos **45s** do timeout de `title.js` → o `AbortController` compartilhado dispara → nos logs só sobra `Title generation timeout` / `[agents/client.js #titleConvo] This operation was aborted`, e o stream pro navegador é cortado antes de chegar à tela. O backend (`:20126` → OmniRoute) sempre respondeu HTTP 200 completo — testado 6 formas (stream, não-stream, com `tools`, com `stream_options`).

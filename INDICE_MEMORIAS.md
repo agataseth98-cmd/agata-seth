@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
 (410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
-(382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
+(382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: …
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Con …
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: …
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho R …
