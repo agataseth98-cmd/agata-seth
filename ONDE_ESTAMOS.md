@@ -40,8 +40,10 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
   não por modelo); falta mecanizar a cadeia de auditoria A/B/C.
 - **TES-001 não fechado** — precisa de sessões de IA na nuvem
   genuinamente independentes; não dá pra fechar daqui.
-- **TES-002** — reabrir com nonce novo depende de você entregar o nonce
-  à mão a um modelo-alvo quando decidir.
+- **TES-002** — reativado no canon (modelo-alvo Seth, nonce novo já
+  gerado pela Máquina em `mod-nonce-seth.secret`). Falta só você entregar
+  o nonce à mão numa conversa nova da Seth — uma vez por sessão que
+  contar como rodada. Passo a passo: `propostas/tes-002-ativacao-seth.md`.
 - **Sem tier local de último recurso na cadeia da Seth** — o combo
   `seth-livre` cascateia por 4 provedores externos mas não alcança o
   modelo local se todos caírem no mesmo dia.

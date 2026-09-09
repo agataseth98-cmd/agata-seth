@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
+  palavras-chave: aplicado, diff, projeto, tes, deixou, pendente, linha, estado, bugs, passou, formalmente, inativo, existir, silo, fase, reativado, modelo, alvo, seth, reativação, exercida, falta, entrega, manual, nonce, humano
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
   palavras-chave: tes, nonce, novo, gerado, máquina, mod, seth, secret, modelo, alvo, fora, repo, reativação, fechada, sessão, falta, assinatura, diff, projeto, entrega, manual, humano, protocolo, proíbe, automatizar, nunca, hidratação
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, presence, penalty, cortes, geração, refs
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
   palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
-(380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
-  palavras-chave: bug, achado, teste, fumaça, corrigido, campo, thinking, payload, pra, roster, cerebras, mistral, rejeitam, agora, zai, gemini
+(380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: …
+  palavras-chave: bug, achado, teste, fumaça, corrigido
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho R …
   palavras-chave: huggingface, mistral, entram, roster
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md …

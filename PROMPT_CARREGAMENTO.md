@@ -33,12 +33,12 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3a29d703c4b118fe75bf61b77837fb81a5fcb371
-  Escrito em: 09/09/2026 13:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 97f8b03d04b217200c7d5f7b7ca0cef2725d5e40
+  Escrito em: 09/09/2026 14:11 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 

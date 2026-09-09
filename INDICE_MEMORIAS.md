@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
 (382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
-(380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
+(380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: …
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho R …
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md …
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos …

@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3a29d703c4b118fe75bf61b77837fb81a5fcb371
-  Escrito em: 09/09/2026 13:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 97f8b03d04b217200c7d5f7b7ca0cef2725d5e40
+  Escrito em: 09/09/2026 14:11 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
+
+**Por quê agora:** a (409) listou 2 pendências pro Humano; a 1ª — assinar o `.diff` — ele fez às 13:52 -03 (o commit (409) é de 13:50). A própria (409) reservou o passo seguinte pra "qualquer sessão": `git apply` + mover o par pra `aplicadas/` + commit. Feito aqui.
+
+**Feito nesta sessão:**
+- `git apply propostas/tes-002-reativar-seth.diff` — troca de 1 linha em PROJETO.md (só a linha TES-002), `git diff` conferido.
+- Par movido pra `propostas/aplicadas/` (`tes-002-reativar-seth.diff` + `APROVADO-tes-002-reativar-seth`) no mesmo commit que aplica — fluxo de P-8.
+- `APROVADO-` do Humano: `diff-sha256: aeed33fc…` bate com o `sha256sum` do `.diff`; assinatura ssh (namespace `agata-aprovacao-p8`) verificada pelo P-8 no pre-commit contra `HEAD:propostas/.allowed_signers`.
+
+**Falta pra exercer o teste (só o Humano):** abrir conversa nova da Seth (atalho `seth` → LibreChat), `cat ~/agata/mod-nonce-seth.secret`, colar a mensagem do Passo 2 de `propostas/tes-002-ativacao-seth.md` trocando `<NONCE>` pelo valor. Uma vez por sessão da Seth que for contar como rodada. Até lá, nenhuma sessão da Seth ecoa nonce — `Nonce: não vejo nonce meu`.
+
+**Não mecanizado (mantido de (409)):** zero mudança em `seth_gateway.py` ou `.hidrata-seth.md` — o nonce não entra em nenhum artefato de hidratação.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` limpo antes do apply; `sha256sum propostas/tes-002-reativar-seth.diff` = `aeed33fc…` bate com a linha `diff-sha256:` do `APROVADO-`; `git diff PROJETO.md` mostra troca só na linha TES-002; par movido pra `aplicadas/` (`git mv` no `.diff` rastreado, `mv`+`git add` no `APROVADO-` que era untracked); P-8 do pre-commit re-verifica a assinatura no commit. Autorização: Humano, `scripts/aprovar.sh tes-002-reativar-seth` assinado 13:52 -03 + "pode continuar" nesta sessão.
+
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
 
 **Por quê agora:** TES-002 estava "formalmente inativo até existir silo (Fase 2)". O silo `seth` existe (`.hidrata-seth.md`, injetado pelo `seth_gateway`). O Humano mandou reativar com modelo-alvo Seth ((405)) e seguir até onde desse nesta sessão.
