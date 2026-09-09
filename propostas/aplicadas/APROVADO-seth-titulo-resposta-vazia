@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 15:04 -0300.
+Motivo: titleConvo off + filtro de titulo no seth_gateway; fecha resposta vazia da Seth
+nome: seth-titulo-resposta-vazia
+diff-sha256: 5fdc3ee1300923a723145259c024720ee89f2b7d2bafdbecee96702dba6ad321
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQEikPxwebb5J28mCSh3hMrR1o1//dpkgLQKfmavtxOguum
+aoNro+5rkNye6pXjmkARhm7NmIhvgtrjqDT8NkrwA=
+-----END SSH SIGNATURE-----

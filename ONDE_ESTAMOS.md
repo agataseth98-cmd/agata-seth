@@ -41,9 +41,16 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 - **TES-001 não fechado** — precisa de sessões de IA na nuvem
   genuinamente independentes; não dá pra fechar daqui.
 - **TES-002** — reativado no canon (modelo-alvo Seth, nonce novo já
-  gerado pela Máquina em `mod-nonce-seth.secret`). Falta só você entregar
-  o nonce à mão numa conversa nova da Seth — uma vez por sessão que
-  contar como rodada. Passo a passo: `propostas/tes-002-ativacao-seth.md`.
+  gerado pela Máquina em `mod-nonce-seth.secret`). Falta você entregar o
+  nonce à mão numa conversa nova da Seth. A entrega de hoje não valeu: foi
+  colado o arquivo de instruções inteiro, com o `<NONCE>` sem trocar pelo
+  valor. O certo é só o bloco do Passo 2 de
+  `propostas/tes-002-ativacao-seth.md`, com `<NONCE>` = saída de
+  `cat ~/agata/mod-nonce-seth.secret`.
+- **Cascata da Seth lenta hoje** — o provedor 1 (glm) está pendurado e o
+  provedor 2 (gemini) estourou a cota grátis do dia; as respostas caem no
+  provedor 3 e levam 30-60s. É limite de cota/serviço de terceiro, não bug
+  nosso — melhora sozinho. Reordenar a cascata seria mudança à parte.
 - **Sem tier local de último recurso na cadeia da Seth** — o combo
   `seth-livre` cascateia por 4 provedores externos mas não alcança o
   modelo local se todos caírem no mesmo dia.
@@ -53,6 +60,10 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
+- **Seth "não respondia" no LibreChat** — era a geração automática de
+  título da conversa, que travava e cortava a resposta na tela. Desligada
+  ((411)); a Seth voltou a responder. Conversa nova agora fica "New Chat"
+  até você renomear.
 - Duas costuras em REGRAS.md (selo de hora, "última entrada" sob sync não
   verificado) — fechadas em (384).
 - Âncora de frescor (carimbo de SHA no topo de REGRAS/PROJETO/MEMÓRIAS) —

@@ -26,18 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 97f8b03d04b217200c7d5f7b7ca0cef2725d5e40
-  Escrito em: 09/09/2026 14:11 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6d565e5ca48a02cf342e73319f1a8fb826ccb9ac
+  Escrito em: 09/09/2026 15:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/97f8b03d04b217200c7d5f7b7ca0cef2725d5e40/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d565e5ca48a02cf342e73319f1a8fb826ccb9ac/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
+
+**O mecanismo (fonte lida no container, LibreChat v0.8.7):** `titleConvo` roda uma 2ª run no MESMO `AgentClient`, em modo `immediate` — concorrente com a resposta principal. Ela também bate em `:20126`, então o `seth_gateway` injeta a hidratação inteira nela. Com a cascata degradada (ver abaixo) essa chamada passa dos **45s** do timeout de `title.js` → o `AbortController` compartilhado dispara → nos logs só sobra `Title generation timeout` / `[agents/client.js #titleConvo] This operation was aborted`, e o stream pro navegador é cortado antes de chegar à tela. O backend (`:20126` → OmniRoute) sempre respondeu HTTP 200 completo — testado 6 formas (stream, não-stream, com `tools`, com `stream_options`).
+
+**Correção do meu próprio relato nesta sessão (Regra 4 — entrada nova, não edito o que falei antes):** eu disse "12/12 respostas da Seth vazias" lendo o campo `text` do Mongo. Esse campo fica **sempre vazio** em mensagem de endpoint-agente do LibreChat 0.8.7 — o conteúdo real mora em `content[]` (array de partes). Não cheguei a conferir `content[]` nas mensagens antigas (o Humano apagou aquelas conversas antes). Então **não confirmo** que as respostas antigas estavam de fato vazias; o que é certo é o erro de título (logado) e o relato do Humano de não ver resposta. A mensagem nova (pós-fix) tem `content[]` cheio, `tokenCount: 269`, `unfinished: false`.
+
+**Mudou (proposta `seth-titulo-resposta-vazia`, `redesign/librechat/librechat.yaml` + `redesign/router/seth_gateway.py`, quarentena P-8, 1 assinatura):**
+- `librechat.yaml`, endpoint Seth: `titleConvo: true` → `false`. Custo: conversa nova fica "New Chat" até renomear à mão.
+- `seth_gateway._injeta()`: novo `_e_chamada_utilitaria()` — se o corpo JSON contém uma das strings literais que o `@librechat/agents` põe no prompt/schema de título (`"A concise title in the detected language"`, `"A concise title for the conversation in 5 words or less"`, `"Provide a concise, 5-word-or-less title for the conversation"`, `"Analyze this conversation and provide"` — texto gerado pelo frontend, nunca do usuário), a chamada é **repassada crua, sem hidratar**. Falso positivo (usuário colar exatamente a frase) = aquele turno sai sem hidratação, recuperável.
+- `--selftest` passou de 2 pra **4 casos**, 4/4: (1) sem system → hidrata; (2) já hidratado → não repete; (3) chamada de título → repassa sem hidratar; (4) chat que fala "que título você daria" → ainda hidrata (sem falso positivo).
+
+**OmniRoute (2ª parte do pedido do Humano): `systemctl --user restart omniroute` NÃO resolveu a lentidão.** Testado tier a tier: `zai/glm-4.7-flash` (tier 1) **pendura** (40s, HTTP 000); `gemini/gemini-2.5-flash` (tier 2) devolve **429** `"All credentials cooling down"` (cota do free tier, parte consumida pelos meus próprios testes de diagnóstico — erro meu de ter martelado a cascata); a cascata cai no tier 3 (`HF Llama-3.3-70B`), que responde mas leva 30-60s (cold start). É cota/provedor, não config nossa — melhora sozinho. Sem tocar na ordem da cascata (mudança à parte, não pedida).
+
+**Nonce do TES-002:** o Humano colou mais cedo o **arquivo `tes-002-ativacao-seth.md` inteiro** numa conversa da Seth, com o literal `<NONCE>` não substituído (0 tokens hex de 16 no texto) — Seth recebeu o manual, não o nonce. Aquela conversa foi apagada desde então. A entrega certa é só o bloco do Passo 2 com `<NONCE>` trocado por `cat ~/agata/mod-nonce-seth.secret`. A rodada do TES-002 continua não iniciada.
+
+**Deploy (working tree, antes do commit — mesmo padrão de (403)/(407)):** `seth-gateway.service` reiniciado (novo módulo no ar, `:20126` HTTP 200); `librechat.yaml` copiado pro `~/librechat/` + `docker restart librechat` (healthy, config carregada sem erro).
+
+Par `.diff`/`APROVADO-` (assinado, `diff-sha256 5fdc3ee1…`, Humano 15:04 -03) em `propostas/aplicadas/seth-titulo-resposta-vazia`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura da fonte do LibreChat no container (`title.js`, `agents/client.js` `titleConvo`, `@librechat/agents/dist/*/utils/title.*` — strings de título confirmadas); `curl :20126` 6 formas (todas 200 completo); `curl` tier a tier (`zai` pendura, `gemini` 429, `HF` lento); `python3 -m py_compile` + `--selftest` 4/4; `docker restart librechat` → `docker inspect` healthy; `docker logs` pós-fix sem erro de título; Mongo: mensagem nova da Seth com `content[]` cheio (`tokenCount 269`, `unfinished false`); `git apply --check` do `.diff` limpo contra HEAD; `sha256sum` do `.diff` bate com a linha `diff-sha256:` do `APROVADO-`; assinatura ssh verificada pelo P-8. Autorização: Humano, "pode atacar seth não respondeu mesmo" + "faça as 3" → `scripts/aprovar.sh seth-titulo-resposta-vazia` assinado 15:04 -03 + "feito".
+
 (410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
 
 **Por quê agora:** a (409) listou 2 pendências pro Humano; a 1ª — assinar o `.diff` — ele fez às 13:52 -03 (o commit (409) é de 13:50). A própria (409) reservou o passo seguinte pra "qualquer sessão": `git apply` + mover o par pra `aplicadas/` + commit. Feito aqui.

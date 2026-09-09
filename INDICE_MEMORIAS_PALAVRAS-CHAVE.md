@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
+  palavras-chave: seth, respondia, librechat, causa, geração, título, conversa, titleconvo, true, titlemodel, apontando, pro, corrigido, false, endpoint, gateway, agora, hidrata, chamadas, fix, respondeu, completa, visível, humano, resposta, persistida, nonce, tes, entregue, rodada, começou
 (410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
   palavras-chave: aplicado, diff, projeto, tes, deixou, pendente, linha, estado, bugs, passou, formalmente, inativo, existir, silo, fase, reativado, modelo, alvo, seth, reativação, exercida, falta, entrega, manual, nonce, humano
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aposentado, roteamento, complexidade, aprovado, nunca, implementado, item, fork, pós
 (382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: (135), (151), (152), (153), (154), (172).
   palavras-chave: consolidação, presence, penalty, cortes, geração, refs
-(381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Conselho Remoto passa a ser por FAMÍLIA (fornecedor/vendor), não por modelo. Item 1 do fork pós-B5.
-  palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
+(381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Con …
+  palavras-chave: decidido, implementado, parte, rotação, con
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: …
   palavras-chave: bug, achado, teste, fumaça, corrigido
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho R …

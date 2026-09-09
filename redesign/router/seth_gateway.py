@@ -164,9 +164,47 @@ def _hidratacao() -> str:
     return f"{MARCADOR}\n" + _CACHE["texto"]
 
 
+# --- chamadas utilitárias do frontend que NÃO devem ser hidratadas ---------
+# O LibreChat (e outros frontends) fazem, além do turno de chat, chamadas
+# auxiliares ao mesmo endpoint: geração de TÍTULO da conversa, sumarização,
+# etc. Injetar a hidratação inteira nelas é: (a) desperdício -- a doutrina + o
+# estado não têm nada a ver com "escreva um título"; (b) perigoso -- no
+# LibreChat a geração de título roda uma 2ª run CONCORRENTE no mesmo
+# AgentClient (modo `immediate`), e uma chamada de título grande/lenta estoura
+# o timeout de 45s do `title.js`, cujo `AbortController` compartilhado fazia a
+# resposta PRINCIPAL ser gravada vazia (MEMÓRIAS (411)).
+#
+# Detector: strings LITERAIS que o `@librechat/agents` põe no prompt de título
+# ou no schema de saída estruturada (`dist/*/utils/title.*`). São texto GERADO
+# pelo frontend, nunca conteúdo de usuário -- casar por elas não tem falso
+# positivo prático. Se um usuário colar exatamente uma dessas frases, o pior
+# caso é aquele turno sair sem hidratação (`Última entrada: lacuna`),
+# recuperável. Fonte conferida no container em 09/09/2026.
+_SINAIS_TITULO = (
+    "A concise title in the detected language",
+    "A concise title for the conversation in 5 words or less",
+    "Provide a concise, 5-word-or-less title for the conversation",
+    "Analyze this conversation and provide",
+)
+
+
+def _e_chamada_utilitaria(payload: dict) -> bool:
+    """True se o corpo parece uma chamada de título/utilidade do frontend
+    (não um turno de chat real). Varre o JSON inteiro -- a frase pode estar
+    numa message, em tools[].function.description ou em response_format."""
+    try:
+        blob = json.dumps(payload, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return False
+    return any(s in blob for s in _SINAIS_TITULO)
+
+
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
+        return payload
+    # chamada de título/utilidade do frontend: repassa crua, sem hidratar.
+    if _e_chamada_utilitaria(payload):
         return payload
     # já hidratado nesta conversa? não repete.
     for m in msgs:
@@ -320,6 +358,30 @@ def _selftest() -> int:
     ok2 = len(m2) == 2 and m2[0]["content"] == f"{MARCADOR}\nx"
     print(f"{'PASS' if ok2 else 'FALHA'}  já hidratado -> não repetiu (messages={len(m2)})")
     falhas += 0 if ok2 else 1
+
+    # 3. chamada de TÍTULO do LibreChat -> repassada crua, SEM system hidratado
+    body3 = json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
+         "detected language\n2. A concise title in the detected language (5 words "
+         "or less, no punctuation or quotation)\n\nUser: oi\nAssistant: ok"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body3, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m3 = json.loads(_Dummy.ultimo_corpo)["messages"]
+    ok3 = len(m3) == 1 and m3[0]["role"] == "user" and MARCADOR not in m3[0]["content"]
+    print(f"{'PASS' if ok3 else 'FALHA'}  chamada de título -> repassada sem hidratar "
+          f"(messages={len(m3)}, role0={m3[0]['role']})")
+    falhas += 0 if ok3 else 1
+
+    # 4. chat normal com a palavra "título" no meio -> AINDA hidrata (sem falso positivo)
+    body4 = json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "que título você daria pra essa conversa?"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body4, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m4 = json.loads(_Dummy.ultimo_corpo)["messages"]
+    ok4 = len(m4) == 2 and m4[0]["role"] == "system" and MARCADOR in m4[0]["content"]
+    print(f"{'PASS' if ok4 else 'FALHA'}  chat que fala de título -> hidratou normal "
+          f"(messages={len(m4)})")
+    falhas += 0 if ok4 else 1
 
     up.shutdown()
     gw.shutdown()
