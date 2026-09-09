@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librechat.yaml`/`canon-mcp.mjs` pro `~/librechat/` — era `cp` manual, e esquecê-lo deixava o LibreChat rodando a versão velha ((389)/(392)). Fecha também a lacuna do P-9 que abri na (398): `piper-tts.service` não era vigiado.
+  palavras-chave: fecha, atalho, seth, sincronizava, librechat, yaml, canon, mcp, mjs, pro, era, manual, esquecê, deixava, rodando, versão, velha, lacuna, abri, piper, tts, service, vigiado
 (400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125`) fica atrás do disco — o índice do Obsidian headless re-indexa no próprio ritmo. Doutrina da Seth passa a mandar LER o arquivo pra confirmar entrada recente, nunca concluir da listagem.
   palavras-chave: fecha, listagem, diretório, vault, fica, atrás, disco, índice, obsidian, headless, indexa, próprio, ritmo, doutrina, seth, passa, mandar, ler, arquivo, pra, confirmar, entrada, recente, nunca, concluir
 (399) DIÁRIO — 09/09/2026 · O gerador de índice/hidratação reconhecia rótulo de entrada por lista fixa (`DIÁRIO|CONSELHO|MOD|CORREÇÃO`) — `CONSOLIDAÇÃO` ficava de fora. (382)/(395)/(396) sumiam de `INDICE_MEMORIAS.md`, do índice de palavras-chave e do resumo de antigas do `.hidrata*.md`. 3ª vez que a lista fixa morde (CORREÇÃO em (134) foi a 1ª).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: varredura, memórias, camadas, propostas, itens, aberto, tivessem, escapado, entrar, fase, refinamento, nada, novo, executável, marcadores, pendente, quase, pré, remoção, hermes, fechados, backlog, consolidado, substitui, docs, era, arquivados
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
   palavras-chave: rumo, fase, refinamento, estamos, linhas, acima, teto, tela, regra, item, backlog, reescrito, pra, cópia, integral, extras, arquivo, ate, documentos, planejamento, era, hermes, removido, arquivados, propostas, plano, execucao, roteiro, dossie, selecao, silo, gateway, dimensionamento
-(371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explicação de (370)), depois de nunca ter produzido nada aproveitável em ~1 semana ((368)). `redesign/grafo/flows/consolidacao.py`:
-  palavras-chave: consolidação, noturna, reformulada, opção, explicação, nunca, ter, produzido, nada, aproveitável, semana, redesign, grafo, flows, consolidacao
+(371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explica …
+  palavras-chave: consolidação, noturna, reformulada, opção, explica
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que toca …
   palavras-chave: cosméticos, sanitização, parte, toca
 (369) DIÁRIO — 08/09/2026 · `scripts/gerar_obsidian.py`: camadas morna/fria deix …

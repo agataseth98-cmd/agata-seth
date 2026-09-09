@@ -1,0 +1,68 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index f60938a..4652576 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -78,7 +78,10 @@ verificação pós-escrita aborta com 409 se a operação não for insert/append
+ atômico; fonte `redesign/router/seth_escriba.py`, MEMÓRIAS (318)) · a stack Docker do
+ **LibreChat** (`librechat` em `network_mode: host` bind `127.0.0.1:3080`, + `librechat-mongodb`
+ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose em
+-`~/librechat/`, fonte versionada em `redesign/librechat/`) + `kokoro-tts` (`:8880`, inglês) +
++`~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
++`librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
++container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
++LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
+ `piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
+ Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
+ **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
+@@ -102,9 +105,9 @@ avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`,
+ `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service` ou os containers do
+ LibreChat (`librechat`, `librechat-mongodb`,
+ `librechat-meilisearch`) e `kokoro-tts` estiverem `failed`, `disabled`/`masked`, ou
+-(containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). **Ainda de fora
+-(lacuna conhecida):** `piper-tts.service` (`:8890`) — sobe pelo mesmo atalho `seth` e não é
+-vigiado; incluir na lista é mudança em `scripts/perimetro.sh`, item à parte.
++(containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). `piper-tts.service`
++(`:8890`) entrou na lista em 09/09/2026 (MEMÓRIAS (401)) — sobe pelo atalho `seth`, então é
++serviço declarado como os outros.
+ Motivo do controle: foi a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
+ 
+ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 498d8c1..119d101 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -15,7 +15,21 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null ||
+ # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
+ # fica de pe pra ingles -- ver comentario no librechat.yaml.
+ systemctl --user start piper-tts.service 2>/dev/null || true
++# Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
++# cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
++# rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
++# so reinicia o container se algo mudou.
++_lc_changed=0
++for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
++             "canon-mcp.mjs|$HOME/librechat/data/mcp/canon-mcp.mjs"; do
++  _src=~/agata/redesign/librechat/"${_pair%%|*}"; _dst="${_pair#*|}"
++  if [ -f "$_src" ] && ! cmp -s "$_src" "$_dst"; then
++    mkdir -p "$(dirname "$_dst")" && cp "$_src" "$_dst" && _lc_changed=1
++    echo "deploy: $_dst sincronizado da fonte versionada"
++  fi
++done
+ docker compose -f "$LC" up -d >/dev/null 2>&1 || true
++[ "$_lc_changed" = 1 ] && docker restart librechat >/dev/null 2>&1 || true
+ docker start kokoro-tts >/dev/null 2>&1 || true
+ # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
+ for i in $(seq 1 30); do
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 874067c..7880607 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -850,7 +850,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service")
++P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "piper-tts.service")
+ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
+ 
+ # --- P-15 --------------------------------------------------------------------

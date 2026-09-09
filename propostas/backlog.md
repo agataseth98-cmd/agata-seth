@@ -38,7 +38,7 @@ segue é a lista completa.
 | ~~H2~~ | ~~Pós-filtro de hora inventada no `seth_gateway`~~ | **FECHADO — MEMÓRIAS (397).** Em vez de filtro de saída (reescrever o stream, arriscado — o mesmo código que travou em (393)), `estado_para_eco.sh` mede `HORA-MAQUINA:` real e a doutrina manda copiar essa linha, não inventar. Mesmo princípio da (394). |
 | ~~H3~~ | ~~`seth_gateway._estado()` `timeout=15s`~~ | **FECHADO — MEMÓRIAS (394).** Timeout `15s→25s` + doutrina proíbe inventar `(0)` quando o estado não chega; sem a linha `TOPO-MEMÓRIAS:`, vira `lacuna (estado não injetado)`. |
 | H4 | **Sem tier LOCAL de último recurso na cadeia da Seth** ((390)) | O OmniRoute só tem os modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. O `conselho_remoto.py` alcança o local direto no `:11434`; a cadeia `:20126`→sanitizador→OmniRoute não. Combo `seth-livre` fica sem fundo local. |
-| H5 | **`redesign/systemd/seth` não sincroniza `librechat.yaml` nem `canon-mcp.mjs`** ((389)) | O deploy pro `~/librechat/` é `cp` manual + `docker restart`. O atalho devia fazer isso (ou um `make deploy`). |
+| ~~H5~~ | ~~`redesign/systemd/seth` não sincroniza `librechat.yaml` nem `canon-mcp.mjs`~~ | **FECHADO — MEMÓRIAS (401).** Atalho `seth` ganha bloco de deploy (`cmp -s` → `cp` só o que difere → `docker restart librechat` só se mudou). P-9 também passa a vigiar `piper-tts.service` (lacuna aberta na (398)). |
 
 ## Fora da lista — feito ou obsoleto (pra não voltar)
 

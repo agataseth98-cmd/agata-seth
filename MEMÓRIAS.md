@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26b62857c99ab91228d21359697664c208098fd0
-  Escrito em: 09/09/2026 10:41 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cbff32927682bff8e9e04ab494bff7175d5806e3
+  Escrito em: 09/09/2026 10:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librechat.yaml`/`canon-mcp.mjs` pro `~/librechat/` — era `cp` manual, e esquecê-lo deixava o LibreChat rodando a versão velha ((389)/(392)). Fecha também a lacuna do P-9 que abri na (398): `piper-tts.service` não era vigiado.
+
+**Estado no momento:** sem drift — `md5sum` de `redesign/librechat/librechat.yaml` e `redesign/librechat/canon-mcp.mjs` bate com as cópias em `~/librechat/`. H5 era lacuna de processo, não bug ativo: o atalho `seth` fazia `docker compose up -d` mas nunca copiava os fontes versionados; funcionava porque alguém `cp`ava à mão.
+
+**Mudou (proposta `seth-deploy-e-p9-piper`, `redesign/systemd/seth` + `scripts/perimetro.sh` + `PROJETO.md`, quarentena, 1 assinatura):**
+- `redesign/systemd/seth`: bloco de deploy antes do `docker compose up -d` — `cmp -s` fonte vs. destino pros 2 arquivos, `cp` só o que difere, `mkdir -p` do destino se preciso, e `docker restart librechat` **só se algo mudou** (`_lc_changed`). Idempotente: no-op quando já bate.
+- `scripts/perimetro.sh`: `piper-tts.service` entra em `P9_UNIDADES_USUARIO`. `p9_servicos_declarados()` só avisa unidade de usuário em `failed`/`disabled`/`masked` (não `inactive`) — serviço sob demanda parado pelo `seth-parar` não vira falso alarme, igual a `seth-gateway`/`seth-escriba`.
+- `PROJETO.md`: "Serviços (boot)" registra o deploy pelo atalho; a nota do P-9 troca "lacuna conhecida: piper-tts fora" por "piper-tts incluído".
+
+**Verificado:** `bash -n` nos 2 scripts; lógica do bloco de deploy rodada isolada com os arquivos como estão (`_lc_changed=0`, no-op correto); `p9_servicos_declarados()` lido pra confirmar que `inactive` não alarma; `git apply --check` limpo; `diff-sha256` do `APROVADO-` (`e7db5ab0…`) bate; assinatura ssh verificada pelo P-8 contra `HEAD:propostas/.allowed_signers`.
+
+**Backlog:** H5 fechado. Restam H4 (tier local de último recurso — Bloco 4), B2 resto, B6, TES-001/002.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-deploy-e-p9-piper`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `md5sum` fonte vs. `~/librechat/` (batem, sem drift); `bash -n redesign/systemd/seth` e `scripts/perimetro.sh`; bloco de deploy testado isolado; `sed`/leitura de `p9_servicos_declarados()`; `git apply --check` limpo contra HEAD; assinatura verificada pelo P-8. Autorização: Humano, "vamos fazer segundo a sua sugestão" (Bloco 5) → "feito" (`scripts/aprovar.sh seth-deploy-e-p9-piper` assinado, 10:43 -03).
+
 (400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125`) fica atrás do disco — o índice do Obsidian headless re-indexa no próprio ritmo. Doutrina da Seth passa a mandar LER o arquivo pra confirmar entrada recente, nunca concluir da listagem.
 
 **Contexto (causa raiz do F-1, MEMÓRIAS (391)):** `GET :27125/vault/…/entradas/` terminava em `0385.md` enquanto o disco tinha `0390.md`; ler um arquivo específico (`0390.md`) funcionava. A lista vinha do índice interno do Obsidian headless, que não re-indexou os arquivos criados depois de ~0385. Não é truncamento — é lista completa-mas-velha, e a regra de "leitura parcial" que já existe no `_DOUTRINA_FIXA` não pega isso (não há marca de corte).

@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26b62857c99ab91228d21359697664c208098fd0
-  Escrito em: 09/09/2026 10:41 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cbff32927682bff8e9e04ab494bff7175d5806e3
+  Escrito em: 09/09/2026 10:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26b62857c99ab91228d21359697664c208098fd0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -78,7 +78,10 @@ verificação pós-escrita aborta com 409 se a operação não for insert/append
 atômico; fonte `redesign/router/seth_escriba.py`, MEMÓRIAS (318)) · a stack Docker do
 **LibreChat** (`librechat` em `network_mode: host` bind `127.0.0.1:3080`, + `librechat-mongodb`
 e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose em
-`~/librechat/`, fonte versionada em `redesign/librechat/`) + `kokoro-tts` (`:8880`, inglês) +
+`~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
+`librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
+container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
+LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
 `piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
 Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
 **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
@@ -102,9 +105,9 @@ avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`,
 `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service` ou os containers do
 LibreChat (`librechat`, `librechat-mongodb`,
 `librechat-meilisearch`) e `kokoro-tts` estiverem `failed`, `disabled`/`masked`, ou
-(containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). **Ainda de fora
-(lacuna conhecida):** `piper-tts.service` (`:8890`) — sobe pelo mesmo atalho `seth` e não é
-vigiado; incluir na lista é mudança em `scripts/perimetro.sh`, item à parte.
+(containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). `piper-tts.service`
+(`:8890`) entrou na lista em 09/09/2026 (MEMÓRIAS (401)) — sobe pelo atalho `seth`, então é
+serviço declarado como os outros.
 Motivo do controle: foi a ausência desse aviso que deixou a consolidação morta sem ninguém notar.
 
 Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` confirmados ausentes (`systemctl status` → "could not be found"). **`agata-rest.service` ainda existe, mas está `disabled`** (`systemctl status` confirma, MEMÓRIAS (107)). Remoção da unit (com sudo) está na fila, mas não é impeditivo. As duas mitigações de GRUB (`nowatchdog` removido, `mem_sleep_default=s2idle`) foram aplicadas e **confirmadas no kernel via `/proc/cmdline`** (lido diretamente, sem restrição — `mem_sleep_default=s2idle` presente, `nowatchdog` ausente).

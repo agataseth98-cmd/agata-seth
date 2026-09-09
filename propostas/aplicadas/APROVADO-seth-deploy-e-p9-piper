@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 10:43 -0300.
+Motivo: H5: atalho seth sincroniza config do LibreChat; P-9 passa a vigiar piper-tts
+nome: seth-deploy-e-p9-piper
+diff-sha256: e7db5ab0eff78d0a82e398cd1658dae11c7512ff9cef62da075fb6b9c9e6287d
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQLj/cp1Bvvfv3js1/2HNeIrLrS/eAQeHQ8dg1u258x2eCW
+C8Ig+A/wpD/MmcIa+E9EFAZii8l73/leOnGqUGaQg=
+-----END SSH SIGNATURE-----

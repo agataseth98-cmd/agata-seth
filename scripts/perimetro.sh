@@ -850,7 +850,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
 # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
 # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
 # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service")
+P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "piper-tts.service")
 P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
 
 # --- P-15 --------------------------------------------------------------------
