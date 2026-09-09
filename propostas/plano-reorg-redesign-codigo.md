@@ -17,14 +17,11 @@
 os soltos `redesign/{ACESSO-GRADUADO.md, LOG.md, README.md}` e
 `redesign/propostas/` (2 arquivos).
 
-**Decisão pendente do Humano — nome do lar novo:**
-- (a) `runtime/` na raiz — um diretório só, agrupa tudo que "roda o sistema".
-- (b) promover cada subdir pra raiz (`grafo/`, `router/`, `librechat/`, …) — mais
-  itens na raiz, mas cada um autodescreve.
-- (c) outro nome (`sistema/`, `stack/`, `app/`…).
-
-Recomendação: **(a) `runtime/`** — a raiz já tem 20+ itens; um agrupador a mais é
-mais legível que 8 subdirs novos soltos. Mas é escolha sua.
+**Nome do lar novo: `runtime/`** (decidido 09/09/2026 — o executor sugeriu, o
+Humano confirmou). Um agrupador só, na raiz, para "código que roda o sistema".
+Alternativas descartadas: promover cada subdir pra raiz (8 itens novos soltos numa
+raiz que já tem 20+); `system/`/`stack/`/`execution/` (menos precisos). O parecer
+do Conselho (ministral-8b, 09/09) achou `runtime/` "adequado".
 
 ## 2. Inventário de referências a corrigir (levantado 09/09/2026)
 
@@ -59,6 +56,14 @@ mais legível que 8 subdirs novos soltos. Mas é escolha sua.
 - `config/modelos-gratuitos.md`, `CHAVES.md`, `ONDE_ESTAMOS.md`,
   `PROCEDIMENTO_LOGIN.md`.
 - `.gitignore` — padrões sob `redesign/` (`.venv`, `voices/`, etc.).
+
+### 2b-bis. Dependências dinâmicas (emenda do parecer ministral-8b, 09/09/2026)
+O inventário 2b cobre refs ESTÁTICAS no repo. Antes do `.diff`, varrer também:
+- **Symlinks do sistema** que apontem pra `redesign/`: `find ~/.local ~/bin ~/.config /usr/local -type l 2>/dev/null | xargs -r ls -l 2>/dev/null | grep -i redesign`. (Sabido: `~/.local/bin/agata` é wrapper, não symlink — mas confirmar que não há outros.)
+- **Env vars / rc files:** `grep -rn redesign ~/.bashrc ~/.zshrc ~/.profile ~/.config/fish/ /etc/environment 2>/dev/null`; `env | grep -i redesign`.
+- **systemd cross-refs:** `grep -rn "redesign" ~/.config/systemd/user/*.d/ 2>/dev/null` (dropins) + conferir `After=`/`Requires=`/`BindsTo=` que citem unidades cujo path mudou (o NOME da unit não muda, só o `ExecStart` — então baixo risco, mas checar).
+- **Docker:** `~/librechat/.env`, `docker-compose.override.yml` se existir, e `volumes:` montados que citem paths de `redesign/`.
+- **Caches:** `__pycache__/`, `.venv/`, `node_modules/`, `voices/` sob `redesign/` — gitignorados; o `git mv` do subdir os leva junto ou eles são recriados. Documentar: depois do move, `find runtime -name __pycache__ -exec rm -rf {} +` e deixar recriar; venvs (`igpu/.venv`, `router/tts-piper/.venv`) têm paths absolutos embutidos → **recriar do zero** (`instalar.sh` de cada), não mover.
 
 ### 2c. NÃO tocar (histórico / gerado)
 - `extras/arquivo-redesign/**` e `extras/arquivo/**` — descrevem o processo
@@ -118,3 +123,22 @@ Aprovar o **plano** (nome + "faço em sessão dedicada com 2ª opinião"), não 
 execução agora. B6 é coerência/rastreabilidade, não urgência — o custo de fazer
 com pressa (unit quebrada num reboot dias depois) é maior que o de esperar uma
 sessão própria.
+
+## 8. O que é "sessão dedicada"
+Uma sessão nova, começada só pra isto, com o `PROMPT_CARREGAMENTO.md` carregado
+do zero — não a continuação de uma sessão que já fez muita coisa (contexto longo,
+atenção diluída, risco de erro mecânico num passe de `sed` que toca 30+ arquivos).
+Na prática: o Humano abre uma sessão Claude Code, diz "executa o B6 conforme
+`propostas/plano-reorg-redesign-codigo.md`", e essa sessão faz só isso: o `git mv`,
+o passe de refs, os passos de Máquina (seção 4), o teste de aceite inteiro rodado
+com calma, e o commit assinado. Nada mais no mesmo turno. Se algo do teste falhar,
+`git revert` + re-`cp` das units antigas e para — sem tentar consertar no vácuo.
+
+## 9. Segunda opinião — recebida 09/09/2026
+Conselho Remoto, `mistral/ministral-8b-latest` (família mistral; cerebras e
+huggingface em cooldown 403 Cloudflare, google em 504). Posição: **condicional**.
+Concordou com big-bang > faseado e com `runtime/`. Acréscimos úteis, já dobrados
+na seção 2b-bis: varrer symlinks/env/dropins/docker antes do `.diff`, recriar
+venvs em vez de mover, `restart` (não só `reload`) de cada unit no apply. Sugestões
+genéricas descartadas (CI/CD `.github/workflows` — não existe neste repo; `/opt/agata`
+— não existe). Parecer cru: `memoria/missoes/conselho-remoto/20260909-113905-ministral-8b-latest.json`.
