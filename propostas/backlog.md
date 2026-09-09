@@ -42,6 +42,7 @@ segue é a lista completa.
 | # | Item | Detalhe |
 |---|---|---|
 | D1 | **`consolidacao.py --temas` (modo manual) não propaga pelo grafo** | `orientar` lê `s.get("_temas")`, mas o `Estado` (TypedDict) do LangGraph descarta a chave não declarada no `graph.invoke`. Chamada direta às funções funciona. Fix: global de módulo ou env var em `orientar`, setado por `run()` antes do invoke. Toca `redesign/grafo/flows/consolidacao.py` (quarentena) → proposta assinada. |
+| D2 | **Busca de refs do `consolidacao.py` puxa entrada não relacionada ao tema** | Achado em (395)/(396): dos 15+8 refs propostas nos dois rascunhos de 08/09, 11 não falavam do tema (ex.: "OmniRoute 504" trouxe Tailscale, troca de LibreChat, TES-001 — parece casar por palavra solta tipo "OmniRoute"/"LibreChat" no corpo, não por relação real). Sintoma leve hoje porque o Humano revisa antes de virar entrada; some se o volume de consolidação crescer. Fix: critério de busca mais estrito (ex.: exigir o termo no TÍTULO, não só no corpo) ou segunda passada que descarta ref cujo texto não sustenta o tema. Toca `redesign/grafo/flows/consolidacao.py` (quarentena) → proposta assinada. |
 
 ## H — horizonte da Seth (anotados em (390)/(391), pra implementação futura)
 

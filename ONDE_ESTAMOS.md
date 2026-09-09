@@ -9,6 +9,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Onde estamos — 09/09/2026
 
+**Duas consolidações fechadas** (395, 396): TES-002 nonce (já resolvido em
+(90), só faltava o sinalizador) e OmniRoute 504 (causa raiz fora do nosso
+controle, mitigação aplicada, proteção do pool grátis é mecanismo separado).
+Nos dois rascunhos automáticos, boa parte das referências não tinha nada a
+ver com o tema — descartei as erradas e documentei por quê. Backlog D2 anota
+o bug do consolidador pra revisar depois.
+
 **H3 do backlog fechado.** A Seth podia abrir com `Última entrada: (0)` quando
 o pedido de estado (rede) demorava mais que 15s. Subi o timeout pra 25s e a
 doutrina agora proíbe explicitamente inventar esse número — sem o bloco de

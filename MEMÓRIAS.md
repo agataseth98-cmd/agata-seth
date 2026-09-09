@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 36edf156e0c40ca1c401b53d51e1c278d9eb6158
-  Escrito em: 09/09/2026 08:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4bcffa6e978103572181a60c21ff166b3d9aff78
+  Escrito em: 09/09/2026 08:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/36edf156e0c40ca1c401b53d51e1c278d9eb6158/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4bcffa6e978103572181a60c21ff166b3d9aff78/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4bcffa6e978103572181a60c21ff166b3d9aff78/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4bcffa6e978103572181a60c21ff166b3d9aff78/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
+
+Fechado: causa raiz achada e fora do nosso controle, mitigação aplicada, e uma camada de proteção separada que reduz o impacto prático — os dois mecanismos não devem ser confundidos.
+- **Causa raiz (362):** o teto de 15s que o OmniRoute expõe é mais curto que o timeout interno de 30s que ele mesmo usa pra detectar conexão morta — a auto-recuperação nunca termina a tempo. Bug do próprio OmniRoute, não do Agata.
+- **Mitigação (363):** `requestQueue.maxWaitMs` subido de 15000→45000ms pela UI do OmniRoute, testado ao vivo. Dá folga; não corrige a causa (fora do nosso controle).
+- **Registrado (364):** PROJETO.md, "Estado dos bugs e dos testes", fecha o ciclo causa→mitigação.
+- **Proteção separada, mesmo período (374/376/380):** o pool de modelos grátis do Conselho Remoto ganhou defesa contra falha de provedor (rejeita resposta vazia/truncada, castigo, cai no local com aviso) depois do roster inteiro cair no mesmo dia; `openrouter/auto` (pago, entrado por engano) saiu do roster; bug do campo `thinking` que quebrava `cerebras/`/`mistral/` foi corrigido. Reduz o SINTOMA que às vezes se parecia com 504 na cadeia Seth→OmniRoute, mas é mecanismo distinto da causa raiz de (362).
+
+Draft automático juntava 15 refs sob "OmniRoute 504"; 9 não falam de 504 e ficam fora desta consolidação — casamento por palavra solta do consolidador, não tema real: (313) troca Open WebUI→LibreChat, (314) config do Goose, (316) bug de parser de stream da tool `query_canon`, (344) checkpoint de sessão, (350) Tailscale, (353) Groq entra no roster, (360) TES-001 identidade falsa, (368) sanitização do repo, (383) aposentadoria de "roteamento por complexidade". Rascunho original arquivado em `propostas/aplicadas/consolidacao-omniroute-504-2026-09-08.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: as 15 refs do draft automático lidas por inteiro (título completo de cada uma), contra o texto real de cada entrada; 6 confirmadas sobre o tema 504/mitigação/proteção externa, 9 descartadas por não falarem do assunto. Autorização: Humano, "organize e apresente" → "Aprovar as duas como redigidas".
+
+(395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
+
+Fechado: o tema já estava resolvido em (90) — nonce `e1d1a` aposentado, sucessor gerado fora do canônico (`~/agata/mod-nonce-claude.secret`, no `.gitignore`, nunca commitado), TES-002 formalmente inativo. Reabrir depende só do Humano entregar o nonce sucessor à mão a um modelo-alvo, quando decidir (backlog C2, sem prazo). (49)/(51)/(62)/(70)/(89) ficam como histórico do processo que levou a essa decisão — nada muda neles.
+
+Draft automático incluía (279) e (306) como refs do tema — conferidos por inteiro, não são: (279) é correção de (277) sobre um achado do "Passo 5", (306) é sobre a política P-11 de silo por modelo. Nenhum dos dois fala de TES-002 nem de nonce; casamento por palavra solta do consolidador. Rascunho original arquivado em `propostas/aplicadas/consolidacao-tes-002-nonce-2026-09-08.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: cada ref do draft automático lida por inteiro e conferida contra o texto de (90); (279)/(306) lidos por inteiro pra checar se falam de TES-002 — não falam. Autorização: Humano, "organize e apresente" → "Aprovar as duas como redigidas".
+
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
 
 **Sintoma (backlog H3, achado em (390)):** sob carga, o subprocess de `scripts/estado_para_eco.sh` (que faz `git ls-remote`, rede) estourava `timeout=15s` e voltava vazio — a Seth abria sem bloco de estado, e nada na doutrina proibia explicitamente preencher `Última entrada:` com `(0)` nesse caso.
