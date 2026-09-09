@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
+  palavras-chave: projeto, descrevia, serviços, rodam, vigiados, seth, escriba, escrita, append, only, piper, tts, voz, sincronizado, realidade, máquina
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
   palavras-chave: fecha, item, backlog, seth, tinha, hora, real, pra, copiar, proibição, inventar, dando, valor, medido, máquina, doutrina, passa, mandar, estimar
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: propostas, allowed, signers, raiz, confiança, aprovação, assinada, entra, quarentena, assinatura, passa, verificar, contra, versão, head, nunca, working, tree, troca, staged, autoaprova, própria, rotação, chave, assinar, diff, atual, scripts, aprovar, corrigido, mesmo, commit, assina, lendo, arquivo, ssh, askpass, require, never, forma, antiga, pipe, pro, stdin, falhava, porque, keygen, mandava, passphrase, usr, lib, inexistente, máquina
 (366) DIÁRIO — 08/09/2026 · Aprovação de P-8 passa a ser assinada com chave ssh do Humano. `propostas/.allowed_signers` (chave pública) entra no repo; a privada fica em `~/.config/agata/aprovacao_ed25519`, com passphrase, nunca commitada. `scripts/aprovar.sh` assina; `scripts/perimetro.sh` (P-8) verifica. Com `.allowed_signers` presente, `APROVADO-<nome>` sem assinatura válida FALHA o commit. Estreita (não fecha de todo) a brecha do "executor cria o arquivo".
   palavras-chave: aprovação, passa, assinada, chave, ssh, humano, propostas, allowed, signers, pública, entra, repo, privada, fica, config, agata, aprovacao, passphrase, nunca, commitada, scripts, aprovar, assina, perimetro, verifica, presente, aprovado, nome, assinatura, válida, falha, commit, estreita, fecha, brecha, executor, cria, arquivo
-(365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
-  palavras-chave: gesto, aprovação, ganha, caminho, prático, além, criar, propostas, aprovado, nome, mão, humano, pode, colar, bash, scripts, aprovar, motivo, terminal, novo, texto, atualizado, projeto, quarentena, estrutural, readme, escopo, lógica, check, intocados, muda
+(365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: alé …
+  palavras-chave: gesto, aprovação, ganha, caminho, prático, alé
 (364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada …
   palavras-chave: projeto, estado, bugs, testes, aplicada
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: …

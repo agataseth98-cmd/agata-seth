@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cde5a2080ba1de53e396fdc21852ce5d49c39865
-  Escrito em: 09/09/2026 10:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c31bc66ae8deed0b9f9e0df30784cb7431ceec38
+  Escrito em: 09/09/2026 10:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cde5a2080ba1de53e396fdc21852ce5d49c39865/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cde5a2080ba1de53e396fdc21852ce5d49c39865/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cde5a2080ba1de53e396fdc21852ce5d49c39865/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c31bc66ae8deed0b9f9e0df30784cb7431ceec38/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
+
+**Achado (verificação de coerência pedida pelo Humano, "veja a integridade e coerência de todos os recursos"):** `systemctl --user list-units` mostra `seth-escriba.service` e `piper-tts.service` ativos; `scripts/perimetro.sh` (P-9, `P9_UNIDADES_USUARIO`, linhas 846-854) já vigia `seth-escriba`, `seth-gateway` e `agata-pesquisa-modelos.timer`. Nenhum dos três aparecia na seção "Serviços (boot)" nem na descrição do P-9 em PROJETO.md. `seth-escriba` só constava na MEMÓRIA fria (318) — e é o único caminho de escrita da Seth (`canon-mcp`/`:27125` é read-only). PROJETO.md é "o agora"; faltava um componente sensível.
+
+**Mudou (proposta `coerencia-seth-escriba-piper`, só PROJETO.md, quarentena, 1 assinatura):**
+- "Serviços (boot)" / **Sob demanda**: entra `seth-escriba.service` (`:20140`) com o contrato do módulo — `POST /memoria` insere bloco sob o marcador `ENTRADAS-NOVAS`, `POST /diario` anexa a `SETH-DIARIO.md`, verificação pós-escrita → 409 se não for insert/append puro, sem `PUT`/`PATCH`/`DELETE`, sem `git add`/`commit`, `fcntl.flock` + `os.replace` atômico. `kokoro-tts` marcado "inglês". Entra `piper-tts.service` (`:8890`).
+- Descrição do P-9: entra `agata-pesquisa-modelos.timer`, `seth-gateway.service`, `seth-escriba.service`. `ollama.service` já constava (array `P9_UNIDADES_SISTEMA`) — a suspeita inicial de que faltava estava errada.
+- "Interface": linha de voz reescrita (Piper default desde (387)); bullet novo "Escrita da Seth".
+
+**Lacuna deixada explícita, não fechada:** `piper-tts.service` sobe pelo atalho `seth` mas P-9 não o vigia — incluir é mudança em `scripts/perimetro.sh`, item à parte, fora desta proposta (que é só PROJETO.md).
+
+**Não muda comportamento** — só descrição. Nenhum serviço, script ou unit tocado.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/coerencia-seth-escriba-piper`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `systemctl --user list-units` (serviços ativos); `grep`/`sed` em `scripts/perimetro.sh:846-854` (`P9_UNIDADES_SISTEMA`/`P9_UNIDADES_USUARIO`/`P9_CONTAINERS_DOCKER`); `redesign/router/seth_escriba.py` e `redesign/systemd/seth-escriba.service` lidos pro contrato; `git log 90a891a` (origem do escriba); `git apply --check` limpo contra HEAD; `diff-sha256` do `APROVADO-` (`6dc19fc9…560`) bate com `sha256sum` do `.diff`; assinatura ssh verificada contra `HEAD:propostas/.allowed_signers` pelo P-8 no pre-commit. Autorização: Humano, "vamos fechar tudo que está em aberto... veja a integridade e coerência de todos os recursos" → "feito" (`scripts/aprovar.sh coerencia-seth-escriba-piper` assinado, 10:20 -03).
+
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
 
 **Sintoma (H2, achado em (390)):** a doutrina (389) já mandava `lacuna: sem relógio` em vez de inventar hora, mas num teste o glm pôs `12:34:05 +00:00` no cabeçalho mesmo assim — proibir sem dar nada real pra copiar deixa a porta aberta pro modelo "ajudar" inventando.
