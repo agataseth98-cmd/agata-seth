@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
+  palavras-chave: coisas, titleconvo, religado, true, endpoint, seth, tinha, desligado, diagnóstico, errado, retratou, filtro, título, gateway, commitado, mantém, chamada, hidratação, então, religar, sai, barato, tes, humano, entregou, nonce, ela, ecoou, valor, exato
 (412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
   palavras-chave: culpou, geração, título, titleconvo, seth, responde, librechat, mecanismo, fonte, sustenta, retiro, causa, culpado, provável, real, cascata, degradada, tiers, fora, respostas, recuperou, sozinha, glm, voltou, mudanças, ficam, higiene, correção, confirmada
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reorg, redesign, parte, docs, readme, estava, mentindo, planejamento, arquivados, item, fork, pós, código, fica, pra, ordem, humano
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre 1 alinhamento de REGRAS + 1 sanity-check. Item 4 do fork pós-B5.
   palavras-chave: fechados, parecer, remoto, alinhamento, regras, sanity, check, item, fork, pós
-(383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprovado em (64), nunca implementado). Item 3 do fork pós-B5.
-  palavras-chave: aposentado, roteamento, complexidade, aprovado, nunca, implementado, item, fork, pós
+(383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprova …
+  palavras-chave: aposentado, roteamento, complexidade, aprova
 (382) CONSOLIDAÇÃO — 08/09/2026 · `presence_penalty` e cortes de geração. Refs: …
   palavras-chave: consolidação, presence, penalty, cortes, geração, refs
 (381) DIÁRIO — 08/09/2026 · B2 decidido e implementado (parte 1): rotação do Con …

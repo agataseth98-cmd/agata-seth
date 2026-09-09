@@ -124,19 +124,14 @@ endpoints:
           - "auto/claude-sonnet"
           - "auto/claude-opus"
         fetch: false
-      # titleConvo DESLIGADO (MEMÓRIAS (411)): a geração de título dispara uma
-      # 2ª run concorrente no mesmo AgentClient (modo `immediate`, em paralelo
-      # com a resposta) que também bate em :20126 -> o seth_gateway injeta a
-      # hidratação inteira nela -> chamada grande + lenta (cascata degradada) ->
-      # estoura o timeout de 45s do title.js -> `AbortController` compartilhado
-      # -> a resposta PRINCIPAL era gravada com `text: ""` no Mongo. Log: só
-      # `Title generation timeout` / `[agents/client.js #titleConvo] This
-      # operation was aborted`. Backend (:20126 -> OmniRoute) sempre respondeu
-      # 200 completo. Sem título automático a conversa fica "New Chat" até
-      # renomear à mão -- custo aceito. Reativar só junto de titleEndpoint
-      # apontando FORA do :20126, ou com o filtro de título do seth_gateway
-      # ((411)) confirmado em produção.
-      titleConvo: false
+      # titleConvo LIGADO. Foi desligado na (411) por um diagnóstico errado
+      # (que a geração de título abortava a resposta principal); a (412)
+      # retratou -- a fonte do LibreChat não sustenta esse mecanismo, a causa
+      # real da Seth muda era a cascata de provedores lenta naquela janela.
+      # Religado na (413). A chamada de título passa pelo :20126 mas o
+      # seth_gateway NÃO a hidrata (filtro `_e_chamada_utilitaria`, (411)):
+      # fica pequena e rápida, sem carregar REGRAS+PROJETO+estado.
+      titleConvo: true
       titleModel: "seth-livre"
       modelDisplayLabel: "Seth"
       forcePrompt: false

@@ -40,17 +40,12 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
   não por modelo); falta mecanizar a cadeia de auditoria A/B/C.
 - **TES-001 não fechado** — precisa de sessões de IA na nuvem
   genuinamente independentes; não dá pra fechar daqui.
-- **TES-002** — reativado no canon (modelo-alvo Seth, nonce novo já
-  gerado pela Máquina em `mod-nonce-seth.secret`). Falta você entregar o
-  nonce à mão numa conversa nova da Seth. A entrega de hoje não valeu: foi
-  colado o arquivo de instruções inteiro, com o `<NONCE>` sem trocar pelo
-  valor. O certo é só o bloco do Passo 2 de
-  `propostas/tes-002-ativacao-seth.md`, com `<NONCE>` = saída de
-  `cat ~/agata/mod-nonce-seth.secret`.
-- **Cascata da Seth lenta hoje** — o provedor 1 (glm) está pendurado e o
-  provedor 2 (gemini) estourou a cota grátis do dia; as respostas caem no
-  provedor 3 e levam 30-60s. É limite de cota/serviço de terceiro, não bug
-  nosso — melhora sozinho. Reordenar a cascata seria mudança à parte.
+- **TES-002** — você entregou o nonce à Seth (15:27) e ela repetiu o
+  valor certo ((413)). Falta a versão "de verdade": o nonce ecoado no
+  cabeçalho de abertura de uma conversa **nova** da Seth, não no meio de
+  uma já aberta — só isso conta como 1ª rodada.
+- **Cascata da Seth** — ficou lenta no começo da tarde (provedores 1-2
+  fora); voltou ao normal sozinha por volta das 15:10. Sem ação.
 - **Sem tier local de último recurso na cadeia da Seth** — o combo
   `seth-livre` cascateia por 4 provedores externos mas não alcança o
   modelo local se todos caírem no mesmo dia.
@@ -63,8 +58,8 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 - **Seth "não respondia" no LibreChat** — o palpite da (411) (geração de
   título) não se sustentou na auditoria ((412)): o mais provável era a
   cascata de provedores lenta naquela janela, que voltou ao normal
-  sozinha. A geração de título ficou desligada por ora (economia, não
-  conserto) — conversa nova fica "New Chat" até renomear; dá pra religar.
+  sozinha. Título automático **religado** em (413) — conversa nova volta a
+  ganhar nome; a chamada de título não carrega mais a hidratação toda.
 - Duas costuras em REGRAS.md (selo de hora, "última entrada" sob sync não
   verificado) — fechadas em (384).
 - Âncora de frescor (carimbo de SHA no topo de REGRAS/PROJETO/MEMÓRIAS) —

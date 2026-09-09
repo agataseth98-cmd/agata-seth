@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0dab49903dc9c11171ee8ebaf93f68abb42b624a
-  Escrito em: 09/09/2026 15:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f5d9cd798c323612987c346645aec82af11027ed
+  Escrito em: 09/09/2026 15:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dab49903dc9c11171ee8ebaf93f68abb42b624a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5d9cd798c323612987c346645aec82af11027ed/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
+
+**titleConvo:** `.diff` `propostas/reverter-titleconvo.diff` (sha256 `69125d9c…`), assinado pelo Humano 15:24 -03. Deployado (`~/librechat/` + `docker restart librechat` healthy, config sem erro). Comentário errado que eu tinha posto no yaml (mecanismo do abort) removido no mesmo `.diff`. `titleModel` fica `seth-livre` (inócuo).
+
+**TES-002 — 1ª entrega real:** às 15:27 -03 o Humano colou numa conversa da Seth **só o bloco do Passo 2** de `propostas/tes-002-ativacao-seth.md`, com `<NONCE>` trocado pelo valor de `mod-nonce-seth.secret`. A resposta da Seth (15:27:29) **reproduziu o mesmo hex-16, idêntico** — conferido por script que compara os conjuntos de tokens hex-16 das duas mensagens sem imprimir o valor (`MATCH exato = True`, nenhum hex extra). O mecanismo do TES-002 (o conteúdo entregue pelo Humano sobrevive à hidratação e o modelo o reproduz) **passou**.
+
+**2 ressalvas, não fecham a 1ª rodada formal:**
+- Entregue **no meio de uma conversa** (turno `t=2`), não no `Nonce:` do bloco de prontidão de uma sessão **fresca**. O protocolo (REGRAS "Continuidade mecânica") quer o eco no `carregar` de um sucessor. Isto confirma o mecanismo, não conta como rodada.
+- A Seth repetiu a hora `15:12` num turno de 15:27 (**viola Regra 1.1**, hora herdada). Causa estrutural: no modo `compacto` do `seth_gateway`, o bloco de estado (com `HORA-MAQUINA`) só entra no 1º `system` da conversa; turnos seguintes reusam o de turno 1, que envelhece. Mesma classe de (394)/(397). Item à parte — não corrigido aqui.
+
+**Voz (pedido do Humano nesta sessão): entra em (414)**, separada — troca de TTS pra Kokoro `pf_dora` em modo de teste (CPU), não canonizada em PROJETO.md.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/reverter-titleconvo`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` do `.diff` reconstruído = `69125d9c…` bate com a linha `diff-sha256:` do `APROVADO-` que o Humano assinou; `ssh-keygen -Y verify -I agata-humano` → `Good signature`; `git apply --check` limpo contra HEAD; `python3 -c yaml.safe_load` OK (`titleConvo: True`); `docker restart librechat` → `docker inspect` healthy; Mongo — mensagem NPR do Humano (15:27) e resposta da Seth (15:27:29), script comparou os hex-16 dos dois textos (`MATCH exato`, sem hex extra), valor nunca impresso; header da Seth mostrou `t=2` e hora `15:12` (herdada). Autorização: Humano, "reverta o title convo de volta" + `scripts/aprovar.sh reverter-titleconvo` assinado 15:24 -03 + "Entreguei o nonce".
+
 (412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
 
 **O que a (411) afirmou e por que está errado:** que a chamada de título, lenta, "estourava o timeout de 45s → `AbortController` compartilhado → cortava a resposta principal / gravava vazia". Lendo `api/server/controllers/agents/title.js` e `request.js` no container: a geração de título roda com `titleAbortController`/`titleDiscardController` **próprios**, separados do `job.abortController` do turno principal. Abort propaga **num sentido só: principal → título** (`job.abortController` dispara `abortTitleOnJobAbort`). O timeout de título (`Title generation timeout`, 45s) é **capturado e engolido** (`immediateTitlePromise.catch`) — não aborta, não atrasa a resposta principal, que é `await sendPromise` + `saveMessage` independentes. Não há caminho de código título → principal. O erro de título no log era **sintoma** da mesma lentidão (as duas chamadas passando pela cascata degradada), não a causa.
