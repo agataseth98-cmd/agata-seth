@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
+  palavras-chave: tes, rodada, adversa, contagem, volta, segue, história, sequência, quebrou, zai, glm, flash, remoto, mesmo, modelo
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
   palavras-chave: fecha, arquivo, aprovado, tinha, caminho, pra, aprovar, deleção, comportamento, git, rev, parse, path, deletado, devolve, blob, agora, aprova, diff, assinado, hunk, total, apaga, arquivos, inertes, seth, local, shim
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: bug, achado, teste, fumaça, corrigido, campo, thinking, payload, pra, roster, cerebras, mistral, rejeitam, agora, zai, gemini
 (379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
   palavras-chave: huggingface, mistral, entram, roster, remoto, famílias, independentes, confirmadas, chamada, real, item, fork, pós
-(378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md e MEMÓRIAS.md — resolução do B5 (a variante numérica de "frescor" com sub-itens 3-A/3-B, que o parecer do GLM mandou eliminar: usar o SHA que já existe, não inventar contador novo).
-  palavras-chave: carimbo, sha, preâmbulo, regras, projeto, memórias, resolução, variante, numérica, frescor, sub, itens, parecer, glm, mandou, eliminar, usar, existe, inventar, contador, novo
+(378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md …
+  palavras-chave: carimbo, sha, preâmbulo, regras, projeto
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos …
   palavras-chave: rotina, semanal, pesquisa, saúde, pool, modelos
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openr …
