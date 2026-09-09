@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cbff32927682bff8e9e04ab494bff7175d5806e3
-  Escrito em: 09/09/2026 10:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4973930cc6312b8a48468421e8192aff662670f2
+  Escrito em: 09/09/2026 10:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbff32927682bff8e9e04ab494bff7175d5806e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4973930cc6312b8a48468421e8192aff662670f2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído, rodando e vigiado pelo P-9 — expõe `qwen3.5-9b-64k` local em OpenAI-compat. **Falta o registro no OmniRoute** (provider + tier 5 do combo): esbarra numa restrição do OmniRoute que exige decisão sua (B1/B2/B3, abaixo).
+
+**Feito e verificado (parte de arquivo, proposta `seth-local-shim` assinada):**
+- `redesign/router/seth_local_shim.py` (novo, stdlib): `GET /health` (não toca Ollama), `GET /v1/models` (só `qwen3.5-9b-64k`), `POST /v1/chat/completions` (força a tag `qwen3.5-9b-64k:latest` — o `-64k` auditado, nunca `qwen3.5:9b` crua — repassa pro Ollama `:11434` com streaming; guard de `BrokenPipe`, lição de (393)). `--selftest` OK + smoke real contra o Ollama vivo (forçou o model, devolveu conteúdo).
+- `seth-local-shim.service` (sob demanda, `:20133`), instalado, `active`, respondendo. Sobe/para pelo atalho `seth`/`seth-parar`. Entra no `P9_UNIDADES_USUARIO`.
+- `config/modelos-gratuitos.md` e `PROJETO.md` ("Serviços", "Cérebro") descrevem o tier 5 e o piso local.
+
+**Restrição achada testando o OmniRoute ao vivo:** `POST :20128/api/providers` com `provider:"seth-local"` (nome custom) é recusado — *"API key is required"*. Os únicos slots de provider LOCAL sem chave que o OmniRoute reconhece são `ollama-local` e `llamacpp-local`. `POST` com `provider:"ollama-local"` + `baseUrl` do shim **funciona** (criei e deletei uma connection de teste, `d7b109bd`, pra confirmar — OmniRoute voltou a 10 connections, combo intacto em 4 tiers, nada ficou sujo).
+
+**Decisão pendente (só você) — como o shim entra no OmniRoute:**
+- **B1** — 2ª connection `provider:"ollama-local"` apontando pro shim `:20133`. Modelo vira `ollama-local/qwen3.5-9b-64k`; combo tier 5 = esse id. Duas connections `ollama-local` (a original em `:11434` + a do shim); OmniRoute escolhe uma, e as duas servem o modelo, então funciona de qualquer jeito. O shim ainda vale: força a tag `-64k`.
+- **B2** — sem shim: conserta a connection `ollama-local` existente (`default_model` → `qwen3.5-9b-64k`, dispara discovery) pra `ollama-local/qwen3.5-9b-64k` aparecer direto. É a opção (a) que você tinha descartado — mas a restrição acima praticamente colapsa B em A.
+- **B3** — repontar a `baseUrl` da connection `ollama-local` existente de `:11434` pro shim `:20133`. Discovery passa a ver só `qwen3.5-9b-64k` (1 modelo de chat, limpo). Risco: os modelos de *embedding* que hoje vêm por `ollama-local/*` sumiriam desse provider — não confirmei se algo usa (`openvino-embeddings` `:20134` é o serviço de embeddings do sistema; os `ollama-local/nomic-embed-text` etc. podem estar órfãos).
+
+**Nota de reconciliação:** `config/modelos-gratuitos.md` e `PROJETO.md` falam de provider `seth-local` — provisório; o `providerId` real (`ollama-local` ou o que sair de B1/B2/B3) entra numa correção junto do registro no OmniRoute.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-local-shim`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sqlite3 ~/.omniroute/storage.sqlite` (provider `ollama-local` ativo, catálogo só embeddings; combo `seth-livre` = 4 tiers); `curl :20128/api/providers` + `POST` de teste (`provider:"seth-local"` recusado por falta de chave; `provider:"ollama-local"` aceito) + `DELETE` da connection de teste (OmniRoute limpo depois); shim `py_compile` + `--selftest` + smoke real + `systemctl --user` (`active`, `:20133/health` 200); `git apply --check` limpo; assinatura verificada pelo P-8. Autorização: Humano, "B" + "feito" (`scripts/aprovar.sh seth-local-shim` assinado, 10:55 -03). Registro no OmniRoute: pendente da escolha B1/B2/B3.
+
 (401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librechat.yaml`/`canon-mcp.mjs` pro `~/librechat/` — era `cp` manual, e esquecê-lo deixava o LibreChat rodando a versão velha ((389)/(392)). Fecha também a lacuna do P-9 que abri na (398): `piper-tts.service` não era vigiado.
 
 **Estado no momento:** sem drift — `md5sum` de `redesign/librechat/librechat.yaml` e `redesign/librechat/canon-mcp.mjs` bate com as cópias em `~/librechat/`. H5 era lacuna de processo, não bug ativo: o atalho `seth` fazia `docker compose up -d` mas nunca copiava os fontes versionados; funcionava porque alguém `cp`ava à mão.

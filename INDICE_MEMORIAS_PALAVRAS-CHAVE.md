@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído, rodando e vigiado pelo P-9 — expõe `qwen3.5-9b-64k` local em OpenAI-compat. **Falta o registro no OmniRoute** (provider + tier 5 do combo): esbarra numa restrição do OmniRoute que exige decisão sua (B1/B2/B3, abaixo).
+  palavras-chave: opção, seth, local, shim, construído, rodando, vigiado, expõe, qwen, openai, compat, falta, registro, omniroute, provider, tier, combo, esbarra, restrição, exige, decisão, abaixo
 (401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librechat.yaml`/`canon-mcp.mjs` pro `~/librechat/` — era `cp` manual, e esquecê-lo deixava o LibreChat rodando a versão velha ((389)/(392)). Fecha também a lacuna do P-9 que abri na (398): `piper-tts.service` não era vigiado.
   palavras-chave: fecha, atalho, seth, sincronizava, librechat, yaml, canon, mcp, mjs, pro, era, manual, esquecê, deixava, rodando, versão, velha, lacuna, abri, piper, tts, service, vigiado
 (400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125`) fica atrás do disco — o índice do Obsidian headless re-indexa no próprio ritmo. Doutrina da Seth passa a mandar LER o arquivo pra confirmar entrada recente, nunca concluir da listagem.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: camada, proteção, remoto, contra, problemas, abordagem, modelos, externos, grátis, roster, inteiro, cair, mesmo, dia, groq, cloudflare, browser, signature, banned, persistente, minimax, gemini, queima, orçamento, tokens, reasoning, devolve, vazio, scripts, perimetro
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/itens em aberto que tivessem escapado, ao entrar em fase de refinamento. **Nada de novo executável** — os marcadores "pendente" são quase todos pré-remoção do Hermes ((312)) ou já fechados. Backlog consolidado num `propostas/backlog.md` novo (substitui os 4 docs da era Hermes arquivados em (372)).
   palavras-chave: varredura, memórias, camadas, propostas, itens, aberto, tivessem, escapado, entrar, fase, refinamento, nada, novo, executável, marcadores, pendente, quase, pré, remoção, hermes, fechados, backlog, consolidado, substitui, docs, era, arquivados
-(372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 linhas / 98KB, muito acima do teto "uma tela" da Regra 4 — item L do backlog de 28/08) reescrito pra uma tela; cópia integral em `extras/arquivo/onde-estamos-ate-2026-09-08.md`. Documentos de planejamento da era Hermes (removido em (312)) arquivados: `propostas/{plano-execucao-backlog,roteiro-fase2,dossie-selecao-silo-gateway,dossie-s1-dimensionamento-fase2}.md` → `extras/arquivo/`.
-  palavras-chave: rumo, fase, refinamento, estamos, linhas, acima, teto, tela, regra, item, backlog, reescrito, pra, cópia, integral, extras, arquivo, ate, documentos, planejamento, era, hermes, removido, arquivados, propostas, plano, execucao, roteiro, dossie, selecao, silo, gateway, dimensionamento
+(372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 …
+  palavras-chave: rumo, fase, refinamento, estamos
 (371) DIÁRIO — 08/09/2026 · Consolidação noturna reformulada (opção 2 da explica …
   palavras-chave: consolidação, noturna, reformulada, opção, explica
 (370) DIÁRIO — 08/09/2026 · Cosméticos da sanitização de (368), a parte que toca …

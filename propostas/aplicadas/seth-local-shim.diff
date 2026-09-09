@@ -1,0 +1,383 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index be77ab0..213b963 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -55,6 +55,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ - **Fallback: `gemini-2.5-flash`** (Google API, grátis) — papel invertido do histórico: era principal até (140), agora é o alívio quando o Qwen local falha ou não completa. Teto do free tier ~20 requisições/dia — estourar gera 429 (agora do lado do fallback, não do principal). **Circuit breaker ativo** (plugin `gemini_quota_guard`, hook `pre_api_request`): conta requisições reais e avisa a partir da 15ª do dia, sem bloquear nem rerotear (MEMÓRIAS (122)).
+ - **Roteamento por complexidade — APOSENTADO (MEMÓRIAS (383)).** Aprovado em (64) supondo Gemini como principal; a inversão de (140) (Seth local titular) matou a premissa. O sistema já roteia por adequação (Seth local default · Conselho Remoto invocado de propósito · `auto/*` do OmniRoute no caminho da Seth); um classificador+router novo seria cano a mais competindo com isso. Se surgir necessidade concreta, é proposta nova com premissa nova — não ressuscitar esta.
+ - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
++- **Fundo local da cadeia da Seth (H4, MEMÓRIAS (402)):** o combo `seth-livre` (frontend da Seth, `:20126`→sanitizador→OmniRoute) ganhou um tier 5 local — `seth-local-shim` (`:20133`) expõe `qwen3.5-9b-64k` pro OmniRoute como provider `seth-local`. Só entra se os 4 provedores grátis externos falharem no mesmo minuto (cenário de (390)). O `conselho_remoto.py` já alcançava o `:11434` direto; agora a cadeia de conversa também tem piso local.
+ - **Barreira dura:** o Hermes exige contexto ≥64k (constante de produto, não derivada do payload). Skills 12 ativas / 56 off; tools 12 de 18 documentado (13 medidos em ambiente CLI headless, (138) — `lacuna` de paridade exata com o ambiente do gateway); payload ~12,6k tokens.
+ - **[FECHADO] Histórico de avaliação do `qwen3.5-9b-64k`/`qwen3.5:9b`, que embasou a promoção.** Veredito: aprovado com ressalva — tool-calling correto sob payload real com `num_ctx=65536`, e **2 casos de fabricação deliberada** nos quais admitiu a ausência, errando a autoidentificação num deles. Histórico: MEMÓRIAS (119)/(120), (138), (139); a causa do truncamento tem item próprio abaixo. **Estado corrente, não histórico:** VRAM de pico medida em uso real 89-92% dos 8.188 MiB da placa — produção contínua é mais pesada que teste pontual. **Sem variante text-only na biblioteca do Ollama** (64 tags checadas, todas multimodais) — o encoder de visão é permanente *nessa biblioteca*, confirmado via `/api/show` (27 blocos de atenção de visão). **Fora dela, variantes text-only da família existem**: `alphaXiv/rlm-sft-Qwen3.5-9B-text-v1` tem `model_type: qwen3_5_text` e `Qwen3_5ForCausalLM` **sem `vision_config`**, confirmado por A/B contra o irmão multimodal `-v1` (`Qwen3_5ForConditionalGeneration`, com `vision_config`). A frase anterior afirmava inexistência absoluta; o escopo real é a biblioteca do Ollama. Correção registrada em MEMÓRIAS (162).
+ - **Padrão de alucinação** documentado é do antecessor `qwen2.5-14b-64k` (inventava entradas e datas) — não do `qwen3.5-9b-64k`, que tem incidentes próprios registrados ((120), (138), (139)) sob rótulo de fabricação, não do mesmo padrão antigo.
+@@ -82,7 +83,11 @@ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose
+ `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
+ container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
+ LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
+-`piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
++`piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)) +
++`seth-local-shim.service` (`:20133`, MEMÓRIAS (402) — expõe 1 modelo local de chat
++(`qwen3.5-9b-64k`) em OpenAI-compat pro OmniRoute, que só descobriu os modelos de *embedding*
++do `ollama-local`; é o tier 5 (fundo local) do combo `seth-livre`; só repassa pro Ollama
++`:11434`, não consome recurso parado).
+ Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
+ **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
+ a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 1f33dea..d8554b5 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -79,17 +79,17 @@ priority` (tenta o 1º; falha/529/404 → próximo, sozinho). É o default da Se
+ | 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
+ | 3 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente (HF Inference Providers); crédito mensal pequeno |
+ | 4 | `mistral/ministral-8b-latest` | último recurso remoto; pequeno mas responde |
++| 5 | `seth-local/qwen3.5-9b-64k` | **fundo LOCAL** — via `seth_local_shim` (`:20133` → Ollama `:11434`, MEMÓRIAS (402)). Nunca 429/402; cold start pode passar de 45s (`agata-warmup` mitiga). Só entra se os 4 externos falharem. |
+ 
+-**Recriar** (se o `storage.sqlite` for perdido): `POST http://127.0.0.1:20128/api/combos`
+-com `{"name":"seth-livre","strategy":"priority","config":{},"models":[{...zai...},
+-{...gemini...},{...hf...},{...mistral...}]}` (cada model = `{id, kind:"model",
+-model:"<id>", providerId:"<prov>", weight:0}`). Sincronizar a lista acima quando
+-mudar.
++**Recriar** (se o `storage.sqlite` for perdido):
++1. **Provider do shim** — `POST http://127.0.0.1:20128/api/provider-connections` (ou pela UI: Providers → Add → OpenAI-compatible) com `name: seth-local`, `baseUrl: http://127.0.0.1:20133/v1`, sem chave; garantir que `seth-local/qwen3.5-9b-64k` apareça em `/v1/models`.
++2. **Combo** — `POST http://127.0.0.1:20128/api/combos` com `{"name":"seth-livre","strategy":"priority","config":{},"models":[{...zai...},{...gemini...},{...hf...},{...mistral...},{"id":"seth-livre-5-local","kind":"model","model":"seth-local/qwen3.5-9b-64k","providerId":"seth-local","weight":0}]}` (cada model = `{id, kind:"model", model:"<id>", providerId:"<prov>", weight:0}`). Sincronizar a tabela acima quando mudar.
+ 
+-**Lacuna conhecida:** sem tier LOCAL de último recurso — o OmniRoute só tem os
+-modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. O
+-`conselho_remoto.py` alcança o local direto no `:11434`; a cadeia da Seth
+-(`:20126`→sanitizador→OmniRoute) não. Item à parte.
++O shim (`redesign/router/seth_local_shim.py`, unit `seth-local-shim.service`) sobe pelo
++atalho `seth`; força a tag `qwen3.5-9b-64k:latest` (o `-64k` auditado, nunca `qwen3.5:9b`
++crua — PROJETO.md "Cérebro"). É a opção (B) de H4; (a) fazer o OmniRoute descobrir o
++modelo do `ollama-local` e (c) fundo local no `seth_gateway` fora do OmniRoute foram
++descartadas.
+ 
+ ---
+ 
+diff --git a/redesign/router/seth_local_shim.py b/redesign/router/seth_local_shim.py
+new file mode 100644
+index 0000000..622babf
+--- /dev/null
++++ b/redesign/router/seth_local_shim.py
+@@ -0,0 +1,256 @@
++#!/usr/bin/env python3
++"""seth_local_shim.py — endpoint OpenAI-compat de UM modelo local, pro OmniRoute.
++
++Motivo (H4, MEMÓRIAS (402)): o combo `seth-livre` da Seth cascateia por 4
++provedores grátis EXTERNOS (zai -> gemini -> huggingface -> mistral) e não tem
++fundo local. Se os 4 caírem no mesmo minuto — cenário de (390), já aconteceu
++1× — a Seth fica muda. O OmniRoute até tem provider connection pro Ollama
++(`ollama-local`, :11434), mas a descoberta de modelos dele só pegou os de
++EMBEDDING; nenhum modelo local de chat aparece em `/v1/models`, então não dá
++pra pôr no combo.
++
++Este shim é a opção (B), escolhida pelo Humano: em vez de brigar com a
++descoberta do OmniRoute, um endpoint mínimo que expõe EXATAMENTE UM modelo
++local de chat, que o OmniRoute registra como provider custom sem ambiguidade.
++
++Fala só o dialeto OpenAI que o OmniRoute usa:
++  GET  /health                 -> {"status":"ok"}  (não toca o Ollama — barato)
++  GET  /v1/models              -> lista com 1 modelo só (SETH_LOCAL_MODEL_ID)
++  POST /v1/chat/completions    -> força `model` = SETH_LOCAL_MODEL, repassa pro
++                                  Ollama (:11434/v1), faz streaming passar.
++
++Qualquer outra rota -> 404 JSON.
++
++Por que forçar o `model`: o OmniRoute manda o id que ele conhece
++(`<provider>/<SETH_LOCAL_MODEL_ID>`); o Ollama precisa da tag real
++(`qwen3.5-9b-64k:latest`). O shim traduz. Também garante que só o modelo
++auditado (`-64k`, com `PARAMETER num_ctx 65536` no Modelfile — PROJETO.md
++"Cérebro") seja usado, nunca a tag `qwen3.5:9b` crua que reproduz o bug de
++(121)/#16814.
++
++Só stdlib. Não lê segredo nenhum. Loopback só.
++
++Cold start: se o modelo não estiver carregado, a 1ª chamada pode passar de
++30-45s (load do Ollama) e o OmniRoute desiste no `maxWaitMs` (45s desde
++(363)); a 2ª responde. `agata-warmup.service` pré-aquece. Este é o ÚLTIMO
++tier — se a requisição chegou aqui, os 4 externos já falharam e esperar é
++melhor que mudo. Por isso o timeout do upstream é largo (300s).
++
++Env:
++  SETH_LOCAL_SHIM_BIND   default 127.0.0.1:20133
++  SETH_LOCAL_UPSTREAM    default http://127.0.0.1:11434   (Ollama)
++  SETH_LOCAL_MODEL       default qwen3.5-9b-64k:latest    (tag real no Ollama)
++  SETH_LOCAL_MODEL_ID    default qwen3.5-9b-64k           (id anunciado ao OmniRoute)
++
++Uso:
++  python3 redesign/router/seth_local_shim.py
++  python3 redesign/router/seth_local_shim.py --selftest
++"""
++from __future__ import annotations
++
++import json
++import os
++import socket
++import sys
++import urllib.error
++import urllib.request
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++_bind = os.environ.get("SETH_LOCAL_SHIM_BIND", "127.0.0.1:20133")
++BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
++UPSTREAM = os.environ.get("SETH_LOCAL_UPSTREAM", "http://127.0.0.1:11434").rstrip("/")
++MODEL = os.environ.get("SETH_LOCAL_MODEL", "qwen3.5-9b-64k:latest")
++MODEL_ID = os.environ.get("SETH_LOCAL_MODEL_ID", "qwen3.5-9b-64k")
++UPSTREAM_TIMEOUT = int(os.environ.get("SETH_LOCAL_TIMEOUT", "300"))
++
++_HOP_BY_HOP = {
++    "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
++    "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
++}
++
++
++def _models_payload() -> bytes:
++    return json.dumps({
++        "object": "list",
++        "data": [{"id": MODEL_ID, "object": "model", "owned_by": "agata-local"}],
++    }).encode("utf-8")
++
++
++class _Handler(BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def log_message(self, fmt, *args):
++        pass
++
++    def do_GET(self):
++        if self.path.rstrip("/") in ("/health", "/healthz"):
++            return self._json(200, {"status": "ok", "model": MODEL_ID})
++        if self.path.rstrip("/") in ("/v1/models", "/models"):
++            return self._raw(200, "application/json", _models_payload())
++        return self._json(404, {"error": {"message": f"rota não suportada: {self.path}"}})
++
++    def do_POST(self):
++        n = int(self.headers.get("Content-Length") or 0)
++        corpo = self.rfile.read(n) if n else b""
++        if "/chat/completions" not in self.path:
++            return self._json(404, {"error": {"message": f"rota não suportada: {self.path}"}})
++        try:
++            payload = json.loads(corpo) if corpo else {}
++        except ValueError:
++            return self._json(400, {"error": {"message": "corpo não é JSON válido"}})
++        if not isinstance(payload, dict):
++            return self._json(400, {"error": {"message": "corpo JSON não é um objeto"}})
++        # força a tag real do Ollama, seja qual for o id que o OmniRoute mandou.
++        payload["model"] = MODEL
++        corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
++        self._passar(corpo)
++
++    def _passar(self, corpo: bytes):
++        url = UPSTREAM + "/v1/chat/completions"
++        headers = {k: v for k, v in self.headers.items()
++                   if k.lower() not in _HOP_BY_HOP}
++        headers["Content-Type"] = "application/json"
++        req = urllib.request.Request(url, data=corpo, method="POST", headers=headers)
++        try:
++            up = urllib.request.urlopen(req, timeout=UPSTREAM_TIMEOUT)
++        except urllib.error.HTTPError as e:
++            up = e
++        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
++            return self._json(502, {"error": {
++                "message": f"Ollama ({UPSTREAM}) inacessível: {e}. "
++                           "systemctl --user start ollama (ou verifique :11434)."}})
++        try:
++            self.send_response(up.status)
++            for k, v in up.headers.items():
++                if k.lower() not in _HOP_BY_HOP:
++                    self.send_header(k, v)
++            self.send_header("Transfer-Encoding", "chunked")
++            self.end_headers()
++            while True:
++                pedaco = up.read(8192)
++                if not pedaco:
++                    break
++                self.wfile.write(f"{len(pedaco):X}\r\n".encode())
++                self.wfile.write(pedaco)
++                self.wfile.write(b"\r\n")
++            self.wfile.write(b"0\r\n\r\n")
++        except (BrokenPipeError, ConnectionResetError):
++            # cliente (OmniRoute) desconectou no meio -- abandona ESTA req em
++            # silêncio, não derruba o servidor. Mesmo bug de (393) no seth_gateway.
++            self.close_connection = True
++        finally:
++            up.close()
++
++    def _json(self, code: int, obj: dict):
++        self._raw(code, "application/json", json.dumps(obj, ensure_ascii=False).encode("utf-8"))
++
++    def _raw(self, code: int, ctype: str, corpo: bytes):
++        try:
++            self.send_response(code)
++            self.send_header("Content-Type", ctype)
++            self.send_header("Content-Length", str(len(corpo)))
++            self.end_headers()
++            self.wfile.write(corpo)
++        except (BrokenPipeError, ConnectionResetError):
++            self.close_connection = True
++
++
++def servir(host: str = BIND_HOST, port: int = BIND_PORT):
++    srv = ThreadingHTTPServer((host, port), _Handler)
++    print(f"seth_local_shim em http://{host}:{port}  ->  {UPSTREAM}/v1  "
++          f"(modelo: {MODEL_ID} -> {MODEL})")
++    srv.serve_forever()
++
++
++# --------------------------------------------------------------------------- #
++class _DummyOllama(BaseHTTPRequestHandler):
++    ultimo_corpo = b""
++
++    def log_message(self, *a):
++        pass
++
++    def do_POST(self):
++        n = int(self.headers.get("Content-Length") or 0)
++        type(self).ultimo_corpo = self.rfile.read(n)
++        corpo = json.dumps({
++            "model": "qwen3.5-9b-64k:latest",
++            "choices": [{"message": {"role": "assistant", "content": "ok"}}],
++        }).encode()
++        self.send_response(200)
++        self.send_header("Content-Type", "application/json")
++        self.send_header("Content-Length", str(len(corpo)))
++        self.end_headers()
++        self.wfile.write(corpo)
++
++
++def _porta_livre() -> int:
++    s = socket.socket()
++    s.bind(("127.0.0.1", 0))
++    p = s.getsockname()[1]
++    s.close()
++    return p
++
++
++def _selftest() -> int:
++    import threading
++    import time
++
++    global UPSTREAM
++    porta_ollama = _porta_livre()
++    UPSTREAM = f"http://127.0.0.1:{porta_ollama}"
++    dummy = ThreadingHTTPServer(("127.0.0.1", porta_ollama), _DummyOllama)
++    threading.Thread(target=dummy.serve_forever, daemon=True).start()
++
++    porta_shim = _porta_livre()
++    shim = ThreadingHTTPServer(("127.0.0.1", porta_shim), _Handler)
++    threading.Thread(target=shim.serve_forever, daemon=True).start()
++    time.sleep(0.2)
++
++    falhas = []
++
++    # /v1/models expõe 1 modelo só
++    r = urllib.request.urlopen(f"http://127.0.0.1:{porta_shim}/v1/models", timeout=5)
++    d = json.loads(r.read())
++    if [m["id"] for m in d["data"]] != [MODEL_ID]:
++        falhas.append(f"/v1/models devia listar só [{MODEL_ID}], listou {d['data']}")
++
++    # /health não toca o upstream
++    r = urllib.request.urlopen(f"http://127.0.0.1:{porta_shim}/health", timeout=5)
++    if json.loads(r.read()).get("status") != "ok":
++        falhas.append("/health não devolveu status ok")
++
++    # POST força o model e repassa
++    body = json.dumps({"model": "qualquer/coisa", "messages": [{"role": "user", "content": "oi"}]}).encode()
++    req = urllib.request.Request(f"http://127.0.0.1:{porta_shim}/v1/chat/completions",
++                                 data=body, headers={"Content-Type": "application/json"}, method="POST")
++    r = urllib.request.urlopen(req, timeout=5)
++    resp = r.read().decode()
++    if '"content": "ok"' not in resp and '"content":"ok"' not in resp:
++        falhas.append(f"POST não repassou a resposta do upstream: {resp[:200]}")
++    enviado = json.loads(_DummyOllama.ultimo_corpo)
++    if enviado.get("model") != MODEL:
++        falhas.append(f"model devia ter sido forçado pra {MODEL!r}, foi {enviado.get('model')!r}")
++
++    # rota desconhecida -> 404
++    try:
++        urllib.request.urlopen(f"http://127.0.0.1:{porta_shim}/v1/embeddings", timeout=5)
++        falhas.append("/v1/embeddings devia dar 404")
++    except urllib.error.HTTPError as e:
++        if e.code != 404:
++            falhas.append(f"/v1/embeddings devia dar 404, deu {e.code}")
++
++    dummy.shutdown()
++    shim.shutdown()
++    if falhas:
++        print("SELFTEST FALHOU:")
++        for f in falhas:
++            print("  -", f)
++        return 1
++    print("SELFTEST OK")
++    return 0
++
++
++if __name__ == "__main__":
++    if "--selftest" in sys.argv:
++        sys.exit(_selftest())
++    servir()
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 119d101..2146f12 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -7,6 +7,9 @@ LC=~/librechat/docker-compose.yml
+ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+ systemctl --user start seth-gateway.service seth-escriba.service
++# Fundo local do combo seth-livre (tier 5): shim OpenAI-compat :20133 -> Ollama
++# :11434 (H4, MEMÓRIAS (402)). So repassa, nao consome recurso parado.
++systemctl --user start seth-local-shim.service 2>/dev/null || true
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+diff --git a/redesign/systemd/seth-local-shim.service b/redesign/systemd/seth-local-shim.service
+new file mode 100644
+index 0000000..6590d8d
+--- /dev/null
++++ b/redesign/systemd/seth-local-shim.service
+@@ -0,0 +1,20 @@
++[Unit]
++Description=Agata -- seth_local_shim: 1 modelo local de chat em OpenAI-compat pro OmniRoute (:20133) -- MEMÓRIAS (402)
++Documentation=file:///home/orusoua/agata/redesign/router/seth_local_shim.py
++
++[Service]
++Type=simple
++Environment=SETH_LOCAL_SHIM_BIND=127.0.0.1:20133
++Environment=SETH_LOCAL_UPSTREAM=http://127.0.0.1:11434
++Environment=SETH_LOCAL_MODEL=qwen3.5-9b-64k:latest
++Environment=SETH_LOCAL_MODEL_ID=qwen3.5-9b-64k
++ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_local_shim.py
++Restart=on-failure
++RestartSec=3
++Nice=5
++
++# Sem [Install] -- sobe sob demanda, igual seth-gateway/piper-tts. O atalho da
++# Seth (redesign/systemd/seth) faz `systemctl --user start seth-local-shim`.
++# Não consome recurso parado: só repassa pro Ollama (:11434), que já roda no
++# boot. É o tier 5 (fundo local) do combo `seth-livre` -- ver
++# config/modelos-gratuitos.md.
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 345ec48..7d65312 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -5,6 +5,6 @@ LC=~/librechat/docker-compose.yml
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ docker stop kokoro-tts >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+-systemctl --user stop seth-gateway.service seth-escriba.service 2>/dev/null || true
++systemctl --user stop seth-gateway.service seth-escriba.service seth-local-shim.service 2>/dev/null || true
+ systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
+ notify-send -a Seth "Seth" "frentes parados (espinha segue de pe)" 2>/dev/null || true
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 7880607..a8e625d 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -850,7 +850,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "piper-tts.service")
++P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "piper-tts.service" "seth-local-shim.service")
+ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
+ 
+ # --- P-15 --------------------------------------------------------------------

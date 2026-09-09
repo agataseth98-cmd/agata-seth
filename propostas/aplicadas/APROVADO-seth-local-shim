@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 10:55 -0300.
+Motivo: H4 opcao B: shim :20133 expoe qwen3.5-9b-64k local pro OmniRoute, tier 5 do combo seth-livre
+nome: seth-local-shim
+diff-sha256: 1bc951c64d148dc201e7798cf987642b607ccbc0a8eab6a8caf46360c85cafb8
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQDWMTt3eJLzdoTAd2sE4PYd7yqmD+5WuDgc5sTrzCFdsRC
+PkdC7wWzeQRaQR2Sr/hviaxsKrw5gdeKS+HygcSg4=
+-----END SSH SIGNATURE-----

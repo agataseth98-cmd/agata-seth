@@ -79,17 +79,17 @@ priority` (tenta o 1º; falha/529/404 → próximo, sozinho). É o default da Se
 | 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
 | 3 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente (HF Inference Providers); crédito mensal pequeno |
 | 4 | `mistral/ministral-8b-latest` | último recurso remoto; pequeno mas responde |
+| 5 | `seth-local/qwen3.5-9b-64k` | **fundo LOCAL** — via `seth_local_shim` (`:20133` → Ollama `:11434`, MEMÓRIAS (402)). Nunca 429/402; cold start pode passar de 45s (`agata-warmup` mitiga). Só entra se os 4 externos falharem. |
 
-**Recriar** (se o `storage.sqlite` for perdido): `POST http://127.0.0.1:20128/api/combos`
-com `{"name":"seth-livre","strategy":"priority","config":{},"models":[{...zai...},
-{...gemini...},{...hf...},{...mistral...}]}` (cada model = `{id, kind:"model",
-model:"<id>", providerId:"<prov>", weight:0}`). Sincronizar a lista acima quando
-mudar.
+**Recriar** (se o `storage.sqlite` for perdido):
+1. **Provider do shim** — `POST http://127.0.0.1:20128/api/provider-connections` (ou pela UI: Providers → Add → OpenAI-compatible) com `name: seth-local`, `baseUrl: http://127.0.0.1:20133/v1`, sem chave; garantir que `seth-local/qwen3.5-9b-64k` apareça em `/v1/models`.
+2. **Combo** — `POST http://127.0.0.1:20128/api/combos` com `{"name":"seth-livre","strategy":"priority","config":{},"models":[{...zai...},{...gemini...},{...hf...},{...mistral...},{"id":"seth-livre-5-local","kind":"model","model":"seth-local/qwen3.5-9b-64k","providerId":"seth-local","weight":0}]}` (cada model = `{id, kind:"model", model:"<id>", providerId:"<prov>", weight:0}`). Sincronizar a tabela acima quando mudar.
 
-**Lacuna conhecida:** sem tier LOCAL de último recurso — o OmniRoute só tem os
-modelos de *embedding* do Ollama no catálogo, não o `qwen3.5-9b-64k` de chat. O
-`conselho_remoto.py` alcança o local direto no `:11434`; a cadeia da Seth
-(`:20126`→sanitizador→OmniRoute) não. Item à parte.
+O shim (`redesign/router/seth_local_shim.py`, unit `seth-local-shim.service`) sobe pelo
+atalho `seth`; força a tag `qwen3.5-9b-64k:latest` (o `-64k` auditado, nunca `qwen3.5:9b`
+crua — PROJETO.md "Cérebro"). É a opção (B) de H4; (a) fazer o OmniRoute descobrir o
+modelo do `ollama-local` e (c) fundo local no `seth_gateway` fora do OmniRoute foram
+descartadas.
 
 ---
 
