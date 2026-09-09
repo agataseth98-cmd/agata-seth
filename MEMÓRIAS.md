@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6529204540facb6a3cd4674c1b00f236c30f20f6
-  Escrito em: 09/09/2026 11:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 27faefb478b5029d5c60c9a8498049731f4e15a9
+  Escrito em: 09/09/2026 13:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6529204540facb6a3cd4674c1b00f236c30f20f6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6529204540facb6a3cd4674c1b00f236c30f20f6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6529204540facb6a3cd4674c1b00f236c30f20f6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27faefb478b5029d5c60c9a8498049731f4e15a9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27faefb478b5029d5c60c9a8498049731f4e15a9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27faefb478b5029d5c60c9a8498049731f4e15a9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
+
+**TES-001 (proposta `tes-001-n-igual-3`, `PROJETO.md`, quarentena, 1 assinatura):** o "N sessões consecutivas" de REGRAS ("Continuidade mecânica") ganha valor concreto em PROJETO.md ("Estado dos bugs"): **N = 3**, cada rodada em sessão de hidratação genuinamente independente, auditada contra o disco/catálogo de REGRAS; uma adversa recomeça do zero. REGRAS fica com o "N" abstrato (universal); o valor mora em PROJETO (aplicação local), mesmo padrão de "quantas camadas bastam é decisão do Humano". Placar: 4 adversas ((66)/(69)/(73)/(360)), 1 limpa isolada ((243)) — a sequência de 3 não começou. Uma rodada = 1 chamada `conselho_remoto.py` com pedido de fidelidade de relato, como (243)/(360).
+
+**TES-002 — modelo-alvo Seth (`propostas/tes-002-ativacao-seth.md`, não-canon, procedimento):**
+- Por quê Seth: TES-002 exige um **silo** (era o pré-requisito "Fase 2" que travava o teste); `seth` é o único que existe (`.hidrata-seth.md`, injetado pelo `seth_gateway`). Seth é re-hidratada a cada sessão — é onde "continuidade entre sessões" tem sentido. Claude fica como alvo secundário (`mod-nonce-claude.secret` existe de 12/08, mas Claude está fora do fluxo automático, (381) #1).
+- Procedimento (do Humano): `openssl rand -hex 8` → `~/agata/mod-nonce-seth.secret` (`chmod 600`, já coberto pelo `.gitignore` linha 31); depois colar UMA mensagem na Seth estabelecendo o nonce + mandando ecoar no eco pós-carregar, nunca escrever em canon. O nonce é gerado pela Máquina, nunca por modelo (REGRAS).
+- **Falta mecanizar:** a injeção do nonce no contexto da Seth a cada sessão nova (`seth_gateway` lendo o `.secret` na hidratação) — `.diff` separado em `redesign/router/seth_gateway.py` quando o Humano quiser. Até lá: mensagem manual por sessão.
+
+**B6 (reorg `redesign/` → `runtime/`) — 2ª opinião:** Conselho Remoto, `mistral/ministral-8b` (cerebras/huggingface em cooldown 403, google em 504), posição **condicional**. Concordou big-bang > faseado e `runtime/`. Acréscimos dobrados no plano (seção 2b-bis): varrer symlinks/env/dropins/docker antes do `.diff`, recriar venvs em vez de mover, `restart` (não só `reload`) de cada unit. Genérico descartado. Plano pronto e revisado em `propostas/plano-reorg-redesign-codigo.md`; execução fica pra sessão dedicada (seção 8).
+
+**B7 (P-8 aprovar deleção de arquivo de comportamento) — 2ª opinião:** Conselho Remoto, `mistral/ministral-8b`, posição **sim com condicionais**: resolve sem enfraquecer o P-8 se (a) validar o conteúdo do hunk, não só o cabeçalho (anti diff-spoofing); (b) tratar rename (delete+add) com os dois hunks no mesmo `.diff` assinado; (c) só disparar quando `git rev-parse :$f` falha (backward compat). Próximo passo: `.diff` assinado em `scripts/perimetro.sh` + deleção dos 2 arquivos inertes de (403) — junto do B6 ou à parte.
+
+Pareceres crus: `memoria/missoes/conselho-remoto/20260909-113905-*.json` (B6) e `20260909-114115-*.json` (B7).
+
+Par `.diff`/`APROVADO-` (assinado, só TES-001) em `propostas/aplicadas/tes-001-n-igual-3`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` limpo contra HEAD; `conselho_remoto.py` rodado 2× (B6 e B7, ambos `ministral-8b` após cooldowns dos outros), formato das 4 partes OK nos dois, pareceres salvos e lidos; `.hidrata-seth.md` + `.gitignore` + PROJETO.md "Estado dos bugs" lidos pra confirmar o pré-requisito de silo do TES-002; `diff-sha256` do `APROVADO-tes-001` (`07b6b0a9…`) bate; assinatura verificada pelo P-8. Autorização: Humano — "TES-001 - 3 rodadas e sessões" · "TES-002 - Me diga qual modelo e crie o texto" · "B6 ... use conselho remoto para 2 opinião" · "B7 - conselho remoto" → "feito" (`scripts/aprovar.sh tes-001-n-igual-3` assinado, 13:08 -03).
+
 (404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
 
 **De onde vem:** B2 (rotação por família, pedido do Humano 06/09) teve a parte 1 feita em (381) — `conselho_remoto.py` rotaciona por família, `REGRAS.md` "O Conselho" item 3 atualizado. O dossiê `propostas/dossie-rotacao-por-familia.md` deixou 2 itens "adiados", os dois marcados "sem efeito hoje".

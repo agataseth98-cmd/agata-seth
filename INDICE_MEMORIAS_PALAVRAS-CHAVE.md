@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
+  palavras-chave: tes, definido, humano, rodadas, consecutivas, limpas, adversa, zera, contagem, modelo, alvo, decidido, seth, qwen, silo, procedimento, ativação, escrito, execução, gerar, entregar, nonce, segunda, opinião, remoto, recebida
 (404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
   palavras-chave: fechado, itens, sobraram, rotação, família, mecanizar, cadeia, auditoria, renomear, arquivo, silo, decididos, fazer, agora, critério, reabertura, decisão, humano, pode, fechar, deixe, devidamente, registrado
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: rotina, semanal, pesquisa, saúde, pool, modelos, gratuitos, proposta, leva, scripts, pesquisar, config, agata, service, timer, domingo, perimetro, nota
 (376) DIÁRIO — 08/09/2026 · Pool de modelos gratuitos, três mudanças: (a) `openrouter/auto` **sai** do roster do Conselho Remoto — é produto PAGO ("Auto Best Available" da OpenRouter; o painel de Combos do OmniRoute avisa), tinha entrado por engano em (374); roster fica `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`. (b) `config/modelos-gratuitos.md` novo — fonte única de verdade (confirmado / fora e por quê / candidatos com chave). (c) Seth (LibreChat) ganha `auto/best-free` como default — meta-roteador do OmniRoute que só usa provedores grátis, cascata até o local.
   palavras-chave: pool, modelos, gratuitos, três, mudanças, openrouter, auto, sai, roster, remoto, produto, pago, best, available, painel, combos, omniroute, avisa, tinha, entrado, engano, fica, zai, glm, flash, gemini, cerebras, gemma, config, novo, fonte, única, verdade, confirmado, fora, quê, candidatos, chave, seth, librechat, ganha, free, default, meta, roteador, usa, provedores, grátis, cascata, local
-(375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
-  palavras-chave: redesign, grafo, flows, consolidacao, modo, manual, temas, volta, funcionar, estado, typeddict, langgraph, descartava, chave, graph, invoke, run, agora, seta, global, módulo, orientar, primeiro, bug, achado, testando, geração, sob, demanda, presence, penalty
+(375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual …
+  palavras-chave: redesign, grafo, flows, consolidacao, modo, manual
 (374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os prob …
   palavras-chave: camada, proteção, remoto, contra, prob
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/iten …
