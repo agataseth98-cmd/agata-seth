@@ -193,7 +193,7 @@ class _Handler(BaseHTTPRequestHandler):
                    if k.lower() not in _HOP_BY_HOP}
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
-            up = urllib.request.urlopen(req, timeout=300)
+            up = urllib.request.urlopen(req, timeout=180)
         except urllib.error.HTTPError as e:
             up = e
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
@@ -214,6 +214,13 @@ class _Handler(BaseHTTPRequestHandler):
                 self.wfile.write(pedaco)
                 self.wfile.write(b"\r\n")
             self.wfile.write(b"0\r\n\r\n")
+        except (BrokenPipeError, ConnectionResetError):
+            # O cliente (LibreChat) desconectou no meio do stream -- reload da
+            # página, timeout do navegador. Abandona ESTA requisição em silêncio;
+            # sem isto a exceção subia e o servidor inteiro emperrava (a Seth
+            # "travou" no teste 3, MEMÓRIAS (393)). close_connection pra o
+            # keep-alive não reusar o socket morto.
+            self.close_connection = True
         finally:
             up.close()
 
@@ -224,7 +231,10 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(corpo)))
         self.end_headers()
-        self.wfile.write(corpo)
+        try:
+            self.wfile.write(corpo)
+        except (BrokenPipeError, ConnectionResetError):
+            self.close_connection = True  # cliente já foi; ver _passar
 
 
 def servir(host: str = BIND_HOST, port: int = BIND_PORT):

@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3
-  Escrito em: 08/09/2026 20:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1
+  Escrito em: 08/09/2026 21:27 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/873ad5e6d509d0edaa13f9c0bdbcd4f32702cac3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f71d8437f5aef28fd36d0ae9381b15b5e13ff4f1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
+
+**Sintoma:** durante o Teste 3 o Humano disse "parece travado". O MongoDB do LibreChat não tinha nenhuma mensagem nova — a Seth nem respondia. `curl :20126/v1/chat/completions` → `000` (sem resposta em 25s), enquanto `:20126/v1/models` (GET), `:20127` e `:20128` respondiam normal. Restart do `seth-gateway` destravava; voltava a travar.
+
+**Causa (log):** `seth_gateway.py:213`, no laço de streaming chunked, `self.wfile.write(...)` estourava `BrokenPipeError: [Errno 32] Broken pipe` quando o cliente (LibreChat) desconectava no meio da resposta — reload da página, timeout do navegador. A exceção subia pelo handler e o `ThreadingHTTPServer` ficava sem responder a novas conexões (keep-alive `HTTP/1.1` deixando o socket morto no loop).
+
+**Mudou (proposta `seth-gateway-broken-pipe`, 1 arquivo quarentena, 1 assinatura):**
+- `_passar`: `except (BrokenPipeError, ConnectionResetError)` no laço de streaming → abandona só ESTA requisição em silêncio + `self.close_connection = True` (keep-alive não reusa socket morto).
+- `_erro`: mesmo guard no `wfile.write` final.
+- `urlopen` timeout `300s → 180s` — thread presa num upstream lento se solta em 3 min, não 5.
+- **Não toca `_DOUTRINA_FIXA`** → `_HASH_DOUTRINA` continua `fd81eb8e`, sem re-hidratação forçada.
+
+**Muleta enquanto não assinava:** um watchdog (monitor de sessão) checa `:20126/v1/models` a cada 15s e reinicia o `seth-gateway` se travar. Runtime, sem canon; sai quando a sessão fecha.
+
+**Verificado pós-fix:** `py_compile` + `--selftest` OK; a 1ª requisição depois do restart pode dar `000` no `curl -m 25` (caminho frio: `estado_para_eco.sh` + cascata do `seth-livre` com a z.ai em 529 passa de 25s), mas a 2ª respondeu **200 em 3,4s** com conteúdo real. Não há trava persistente com o fix.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-gateway-broken-pipe`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `journalctl --user -u seth-gateway` mostrou o traceback do `BrokenPipeError`; teste hop-a-hop (`:20126/v1/models` 200 em 6ms, `:20127` 200 em 1,7s, `:20128` 200 em 0,4s, `estado_para_eco.sh` exit 0 em 0,48s) isolou o problema no POST da própria gateway; `curl -m 90` pós-fix = 200 em 3,4s; `git apply --check`; `--selftest` em porta livre; assinatura verificada contra `HEAD:propostas/.allowed_signers`. Autorização: Humano, "monte e oriente" → "feito" + `APROVADO-seth-gateway-broken-pipe` assinado.
+
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
 
 **O que aconteceu:** depois de (390) (`fetch: false` + lista curada), o Humano abriu a Seth e recebeu *"O modelo 'huggingface/meta-llama/llama-3.2-11b-instruct' não está disponível para Seth"*. Causa: o LibreChat (v0.8.7) guarda o último modelo escolhido no **localStorage do NAVEGADOR**, não no servidor — a escolha velha (um `llama-3.2-11b` fantasma, de quando o seletor tinha os ~300 do catálogo cru) sobreviveu à mudança de yaml, e o LibreChat a rejeita porque não está mais na lista.

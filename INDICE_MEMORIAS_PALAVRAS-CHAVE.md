@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
+  palavras-chave: seth, gateway, emperrava, servidor, inteiro, navegador, desconectava, meio, stream, achado, travou, teste
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
   palavras-chave: modelspecs, enforce, librechat, yaml, vence, localstorage, navegador, fecha, modelo, disponível, abrir, seth
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: projeto, estado, bugs, testes, aplicada, entrada, registra, causa, raiz, omniroute, memórias, mitigação, fecha, diff, estava, aberto, desde, commits, locais, foram, empurrados, pro, remoto, mesmo, pedido
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: `resilienceSettings.requestQueue.maxWaitMs` subido de 15000 → 45000ms pela UI do próprio OmniRoute (não por escrita em `storage.sqlite`), serviço reiniciado, testado ao vivo. A causa de fundo segue fora do nosso controle; o teto maior só dá folga pra auto-recuperação interna do OmniRoute terminar em vez de estourar em `504`.
   palavras-chave: mitigação, omniroute, aplicada, resiliencesettings, requestqueue, maxwaitms, subido, próprio, escrita, storage, sqlite, serviço, reiniciado, testado, vivo, causa, fundo, segue, fora, nosso, controle, teto, maior, folga, pra, auto, recuperação, interna, terminar, estourar
-(362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e reproduzida: teto exposto (15s) é mais curto que o próprio timeout de detecção de conexão morta do cliente HTTP interno (30s) — a auto-recuperação nunca tem tempo de terminar antes do pedido já ter sido marcado como falho. Não é bug do Agata; é o próprio OmniRoute. Uma mitigação tentada e refutada, causa raiz não corrigida (fora do nosso controle)
-  palavras-chave: causa, raiz, real, omniroute, achada, reproduzida, teto, exposto, curto, próprio, timeout, detecção, conexão, morta, cliente, http, interno, auto, recuperação, nunca, tem, tempo, terminar, pedido, ter, sido, marcado, falho, bug, agata, mitigação, tentada, refutada, corrigida, fora, nosso, controle
+(362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e repr …
+  palavras-chave: causa, raiz, real, omniroute, achada, repr
 (361) CORREÇÃO — 07/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": regist …
   palavras-chave: projeto, estado, bugs, testes, regist
 (360) CONSELHO — 06/09/2026 · TES-001 rodada 5 — ADVERSA: GLM-4.7-Flash (identid …
