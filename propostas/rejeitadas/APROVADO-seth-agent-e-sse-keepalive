@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 16:16 -0300.
+Motivo: recria o Agent Seth com MCP canon (392 removeu); seth_gateway filtra keepalive do OmniRoute que zerava os args das tool calls
+nome: seth-agent-e-sse-keepalive
+diff-sha256: 61c70cde867ba7d30a009bc98f32e0b8cadb1232c6987c9ec68e0111cd382a36
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQJIT1WTfLgHjbVTV7ex0HlTrDe/d3X8GCxSPeRa45cIrqT
++jOUZRsITY/uA9OGsvN22ugtJkN0YSDfGp4ykdTAE=
+-----END SSH SIGNATURE-----

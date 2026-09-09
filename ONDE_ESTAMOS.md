@@ -55,9 +55,13 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
-- **Voz da Seth** — TTS voltou pro Kokoro `pf_dora` (feminina pt-BR) em
-  modo de teste, CPU ((414)). Piper (masc.) segue no ar. Ainda não é
-  canon — se `pf_dora` firmar, próximo passo é rodar o Kokoro na GPU.
+- **Ferramentas da Seth (MCP canon) voltaram** — estavam quebradas desde
+  a (392), que removeu o "Agent" da Seth. Agent recriado + um filtro no
+  gateway que estava zerando os argumentos das chamadas de ferramenta.
+  `query_canon` testado, funcionando ((415)).
+- **Voz** — a troca da (414) pra Kokoro `pf_dora` foi revertida ((415)):
+  de volta ao Piper (masc.), que é o que rodava de manhã. Voz feminina
+  pt-BR boa exige outro motor (XTTS-v2) — fica pra quando você pedir.
 
 - **Seth "não respondia" no LibreChat** — o palpite da (411) (geração de
   título) não se sustentou na auditoria ((412)): o mais provável era a

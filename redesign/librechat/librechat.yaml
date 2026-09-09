@@ -44,20 +44,27 @@ modelSpecs:
   prioritize: true
   list:
     # iconURL em TODAS as specs: com `enforce: true` a Seth aparece sempre via
-    # spec, e spec sem `iconURL` cai no icone generico. A foto vivia no Agent
-    # `agent_0Kdj6GbqpUe2rgKRIFmvk` (endpoint `agents`); a migracao pra modelSpec
-    # (MEMORIAS (392)) removeu o Agent e levou o rosto junto. `/images/seth.png`
+    # spec, e spec sem `iconURL` cai no icone generico. `/images/seth.png`
     # e servido pelo bind-mount `~/librechat/images` -> `/app/images` (deploy: ver
-    # propostas/librechat-seth-iconurl.md). Original recuperado em
-    # ~/librechat/images/6a99c8514070d04134d59265/agent-*-avatar-*.png (150x150).
+    # propostas/librechat-seth-iconurl.md).
+    #
+    # Agent RECRIADO em (415): `agent_4KlxSMeX5Y8cWQVODkJfH` (provider `Seth`,
+    # model `seth-livre`), com o MCP `canon` anexado (`query_canon`,
+    # `vault_consultar`). A (392) tinha removido o Agent anterior
+    # (`agent_0Kdj6GbqpUe2rgKRIFmvk`) na migracao pra modelSpec -- e com isso a
+    # Seth perdeu acesso as ferramentas de MCP (elas so se anexam a Agent, nao a
+    # endpoint `custom` puro). A spec default abaixo volta a apontar pro Agent;
+    # a cascata do OmniRoute (`seth-livre`: zai->gemini->hf->mistral) segue por
+    # baixo, via o provider `Seth` do Agent. As specs seth-zai/gemini/etc.
+    # continuam `endpoint: Seth` (custom, sem MCP) -- troca manual pra debug.
     - name: "seth-livre"
       label: "Seth (cascata livre)"
       iconURL: "/images/seth.png"
       default: true
-      description: "zai -> gemini -> huggingface -> mistral, prioridade. O default."
+      description: "Agente Seth + MCP canon. Cascata zai->gemini->hf->mistral por baixo. O default."
       preset:
-        endpoint: "Seth"
-        model: "seth-livre"
+        endpoint: "agents"
+        agent_id: "agent_4KlxSMeX5Y8cWQVODkJfH"
     - name: "seth-zai"
       label: "Seth · zai/glm-4.7-flash"
       iconURL: "/images/seth.png"
@@ -144,26 +151,21 @@ endpoints:
 # trocar a url abaixo de volta pra 8880 e a lista de vozes pelas af_/am_.
 # STT (whisper :20130) ainda nao e OpenAI-compat em /v1 -- pendente, ver redesign/librechat/README.md
 #
-# TESTE (MEMÓRIAS (414)): TTS voltou pro Kokoro (:8880) pra o Humano avaliar
-# `pf_dora` -- a única voz feminina pt-BR disponível local (Piper só tem masc.:
-# `pt_BR-faber-medium`). Kokoro fica em CPU de propósito ("deixa na cpu pra eu
-# testar"): frase curta ~0,8s medido, parágrafo longo escala mal (a "demora" da
-# (387)). A pronúncia imperfeita da (387) é limite de dados do modelo, não some
-# na CPU→GPU. Próximos degraus se `pf_dora` servir: imagem `kokoro-fastapi-gpu`;
-# se a pronúncia não servir: XTTS-v2 (opção B da (412)/(413)). Piper (:8890)
-# segue no ar -- reverter = trocar a url e a lista de volta.
-# PROJETO.md ("Interface"/"Serviços") ainda diz "Piper default" de propósito:
-# isto é config de teste, não canon.
+# (414) trocou pra Kokoro `pf_dora` em teste; (415) REVERTEU pro Piper -- ordem
+# do Humano ("reverta a dora pro modelo anterior, ela estava funcionando
+# lindamente pela manha"). Volta ao estado da (387): Piper `pt_BR-faber-medium`
+# (:8890), voz pt-BR masc., CPU, rapido. Kokoro (:8880) segue no ar. Se o pedido
+# de voz feminina pt-BR voltar: caminho e XTTS-v2 (opcao B da (412)/(413)), nao
+# pf_dora em CPU.
 speech:
   tts:
     openai:
-      url: "http://127.0.0.1:8880/v1/audio/speech"
+      url: "http://127.0.0.1:8890/v1/audio/speech"
       apiKey: "loopback-sem-chave"
-      model: "kokoro"
+      model: "tts-1"
       voices:
-        - "pf_dora"
-        - "pm_alex"
-        - "pm_santa"
+        - "pt-br"
+        - "dora"
 
 # --- MCP: memória local (vault Obsidian, read-only) ------------------------
 # canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.

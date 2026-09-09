@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
+  palavras-chave: seth, voltou, ter, ferramentas, mcp, quebras, achadas, consertadas, removeu, agent, librechat, anexa, endpoint, custom, puro, recebe, tool, gateway, deixava, passar, chunks, sentinela, keepalive, omniroute, zeravam, arguments, calls, acumulador, streaming, voz, revertida, pro, piper, desfaz
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
   palavras-chave: voz, librechat, tts, voltou, pro, kokoro, dora, modo, teste, cpu, pedido, humano, sessão, quer, feminina, piper, tem, faber, medium, masc, única, opção, local, testado, vivo, boa, enquanto
 (413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: voz, seth, tts, troca, kokoro, piper, pedido, humano, teste, text, speech, inutilizável, demora, transcreve, errado
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o relógio da Máquina está certo; quem fabricou a hora fui eu, o executor, em todo cabeçalho desta sessão.** Falha de Regra 1.1 pega pelo Humano.
   palavras-chave: relógio, code, errado, investigado, máquina, certo, quem, fabricou, hora, fui, executor, cabeçalho, desta, sessão, falha, regra, pega, humano
-(385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/README.md` estava mentindo; 9 docs de planejamento arquivados. Item 5 do fork pós-B5. Parte código fica pra B6 (ordem do Humano).
-  palavras-chave: reorg, redesign, parte, docs, readme, estava, mentindo, planejamento, arquivados, item, fork, pós, código, fica, pra, ordem, humano
+(385) DIÁRIO — 08/09/2026 · Reorg de `redesign/`, parte docs (B1). `redesign/REA …
+  palavras-chave: reorg, redesign, parte, docs, rea
 (384) CONSELHO — 08/09/2026 · B3 e B5 fechados. Parecer do Conselho Remoto sobre …
   palavras-chave: fechados, parecer, remoto
 (383) DIÁRIO — 08/09/2026 · B4 aposentado: "roteamento por complexidade" (aprova …

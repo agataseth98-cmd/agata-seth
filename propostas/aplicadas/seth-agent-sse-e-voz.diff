@@ -1,0 +1,183 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index f705997..7a0bcc0 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -44,20 +44,27 @@ modelSpecs:
+   prioritize: true
+   list:
+     # iconURL em TODAS as specs: com `enforce: true` a Seth aparece sempre via
+-    # spec, e spec sem `iconURL` cai no icone generico. A foto vivia no Agent
+-    # `agent_0Kdj6GbqpUe2rgKRIFmvk` (endpoint `agents`); a migracao pra modelSpec
+-    # (MEMORIAS (392)) removeu o Agent e levou o rosto junto. `/images/seth.png`
++    # spec, e spec sem `iconURL` cai no icone generico. `/images/seth.png`
+     # e servido pelo bind-mount `~/librechat/images` -> `/app/images` (deploy: ver
+-    # propostas/librechat-seth-iconurl.md). Original recuperado em
+-    # ~/librechat/images/6a99c8514070d04134d59265/agent-*-avatar-*.png (150x150).
++    # propostas/librechat-seth-iconurl.md).
++    #
++    # Agent RECRIADO em (415): `agent_4KlxSMeX5Y8cWQVODkJfH` (provider `Seth`,
++    # model `seth-livre`), com o MCP `canon` anexado (`query_canon`,
++    # `vault_consultar`). A (392) tinha removido o Agent anterior
++    # (`agent_0Kdj6GbqpUe2rgKRIFmvk`) na migracao pra modelSpec -- e com isso a
++    # Seth perdeu acesso as ferramentas de MCP (elas so se anexam a Agent, nao a
++    # endpoint `custom` puro). A spec default abaixo volta a apontar pro Agent;
++    # a cascata do OmniRoute (`seth-livre`: zai->gemini->hf->mistral) segue por
++    # baixo, via o provider `Seth` do Agent. As specs seth-zai/gemini/etc.
++    # continuam `endpoint: Seth` (custom, sem MCP) -- troca manual pra debug.
+     - name: "seth-livre"
+       label: "Seth (cascata livre)"
+       iconURL: "/images/seth.png"
+       default: true
+-      description: "zai -> gemini -> huggingface -> mistral, prioridade. O default."
++      description: "Agente Seth + MCP canon. Cascata zai->gemini->hf->mistral por baixo. O default."
+       preset:
+-        endpoint: "Seth"
+-        model: "seth-livre"
++        endpoint: "agents"
++        agent_id: "agent_4KlxSMeX5Y8cWQVODkJfH"
+     - name: "seth-zai"
+       label: "Seth · zai/glm-4.7-flash"
+       iconURL: "/images/seth.png"
+@@ -144,26 +151,21 @@ endpoints:
+ # trocar a url abaixo de volta pra 8880 e a lista de vozes pelas af_/am_.
+ # STT (whisper :20130) ainda nao e OpenAI-compat em /v1 -- pendente, ver redesign/librechat/README.md
+ #
+-# TESTE (MEMÓRIAS (414)): TTS voltou pro Kokoro (:8880) pra o Humano avaliar
+-# `pf_dora` -- a única voz feminina pt-BR disponível local (Piper só tem masc.:
+-# `pt_BR-faber-medium`). Kokoro fica em CPU de propósito ("deixa na cpu pra eu
+-# testar"): frase curta ~0,8s medido, parágrafo longo escala mal (a "demora" da
+-# (387)). A pronúncia imperfeita da (387) é limite de dados do modelo, não some
+-# na CPU→GPU. Próximos degraus se `pf_dora` servir: imagem `kokoro-fastapi-gpu`;
+-# se a pronúncia não servir: XTTS-v2 (opção B da (412)/(413)). Piper (:8890)
+-# segue no ar -- reverter = trocar a url e a lista de volta.
+-# PROJETO.md ("Interface"/"Serviços") ainda diz "Piper default" de propósito:
+-# isto é config de teste, não canon.
++# (414) trocou pra Kokoro `pf_dora` em teste; (415) REVERTEU pro Piper -- ordem
++# do Humano ("reverta a dora pro modelo anterior, ela estava funcionando
++# lindamente pela manha"). Volta ao estado da (387): Piper `pt_BR-faber-medium`
++# (:8890), voz pt-BR masc., CPU, rapido. Kokoro (:8880) segue no ar. Se o pedido
++# de voz feminina pt-BR voltar: caminho e XTTS-v2 (opcao B da (412)/(413)), nao
++# pf_dora em CPU.
+ speech:
+   tts:
+     openai:
+-      url: "http://127.0.0.1:8880/v1/audio/speech"
++      url: "http://127.0.0.1:8890/v1/audio/speech"
+       apiKey: "loopback-sem-chave"
+-      model: "kokoro"
++      model: "tts-1"
+       voices:
+-        - "pf_dora"
+-        - "pm_alex"
+-        - "pm_santa"
++        - "pt-br"
++        - "dora"
+ 
+ # --- MCP: memória local (vault Obsidian, read-only) ------------------------
+ # canon-mcp.mjs bate no proxy read-only :27125 (obsidian-ro-proxy). Zero deps.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index e0017c3..ea2ac69 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -260,14 +260,18 @@ class _Handler(BaseHTTPRequestHandler):
+                 self.send_header(k, v)
+         self.send_header("Transfer-Encoding", "chunked")
+         self.end_headers()
++        sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
+         try:
+-            while True:
+-                pedaco = up.read(8192)
+-                if not pedaco:
+-                    break
+-                self.wfile.write(f"{len(pedaco):X}\r\n".encode())
+-                self.wfile.write(pedaco)
+-                self.wfile.write(b"\r\n")
++            if sse:
++                self._stream_sse_filtrado(up)
++            else:
++                while True:
++                    pedaco = up.read(8192)
++                    if not pedaco:
++                        break
++                    self.wfile.write(f"{len(pedaco):X}\r\n".encode())
++                    self.wfile.write(pedaco)
++                    self.wfile.write(b"\r\n")
+             self.wfile.write(b"0\r\n\r\n")
+         except (BrokenPipeError, ConnectionResetError):
+             # O cliente (LibreChat) desconectou no meio do stream -- reload da
+@@ -279,6 +283,52 @@ class _Handler(BaseHTTPRequestHandler):
+         finally:
+             up.close()
+ 
++    # Chunks-sentinela de keep-alive que o OmniRoute emite ANTES de escolher/
++    # conectar o provedor: `data: {"id":"chatcmpl-keepalive","model":"keepalive",
++    # "choices":[{"delta":{},"finish_reason":null}]}`. Servem só pra segurar a
++    # conexão HTTP durante a latência de seleção -- não carregam conteúdo.
++    # O acumulador de tool-call em streaming do LibreChat (@librechat/agents)
++    # tropeça neles: o `id` muda de `chatcmpl-keepalive` pro `chatcmpl-msg_...`
++    # real, e os deltas de `function.arguments` (que só trazem `index`, sem `id`
++    # nem `name`) acabam órfãos -> a tool é chamada com `arguments: ""` e falha
++    # ("Cancelado" na UI). Achado 09/09/2026 comparando o SSE cru do :20126 (que
++    # traz os args certinhos, formato OpenAI padrão) com o que o LibreChat grava.
++    # Aqui a gente troca cada linha `data:` de keepalive por um COMENTÁRIO SSE
++    # (`: ka`) -- mantém a conexão quente, e todo parser de SSE ignora linha que
++    # começa com `:`. O resto do stream passa byte a byte.
++    _SSE_KEEPALIVE = (b'"chatcmpl-keepalive"', b'"model":"keepalive"',
++                      b'"model": "keepalive"')
++
++    @classmethod
++    def _filtrar_linha_sse(cls, linha: bytes) -> bytes:
++        """Uma linha `data:` de keepalive vira comentário SSE (`: ka`); o resto
++        passa intacto. Pura -- testada no --selftest."""
++        if linha.startswith(b"data:") and any(m in linha for m in cls._SSE_KEEPALIVE):
++            return b": ka\n" if linha.endswith(b"\n") else b": ka"
++        return linha
++
++    def _stream_sse_filtrado(self, up):
++        """Repassa o SSE do upstream, trocando os chunks-sentinela de keepalive
++        do OmniRoute por comentários SSE. Line-buffered: um read do upstream pode
++        cair no meio de uma linha."""
++        buf = b""
++        while True:
++            pedaco = up.read(8192)
++            if not pedaco:
++                break
++            buf += pedaco
++            while b"\n" in buf:
++                linha, buf = buf.split(b"\n", 1)
++                saida = self._filtrar_linha_sse(linha + b"\n")
++                self.wfile.write(f"{len(saida):X}\r\n".encode())
++                self.wfile.write(saida)
++                self.wfile.write(b"\r\n")
++        if buf:
++            saida = self._filtrar_linha_sse(buf)
++            self.wfile.write(f"{len(saida):X}\r\n".encode())
++            self.wfile.write(saida)
++            self.wfile.write(b"\r\n")
++
+     def _erro(self, code: int, msg: str):
+         corpo = json.dumps({"error": {"type": "seth_gateway_error", "message": msg}},
+                            ensure_ascii=False).encode("utf-8")
+@@ -383,6 +433,22 @@ def _selftest() -> int:
+           f"(messages={len(m4)})")
+     falhas += 0 if ok4 else 1
+ 
++    # 5. filtro de keepalive SSE: linha de keepalive -> comentário; resto intacto
++    ka = (b'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk",'
++          b'"created":0,"model":"keepalive","choices":[{"index":0,"delta":{},'
++          b'"finish_reason":null}]}\n')
++    real = (b'data: {"id":"chatcmpl-msg_x","choices":[{"index":0,"delta":'
++            b'{"tool_calls":[{"index":0,"function":{"arguments":"250"}}]}}]}\n')
++    r_ka = _Handler._filtrar_linha_sse(ka)
++    r_real = _Handler._filtrar_linha_sse(real)
++    r_blank = _Handler._filtrar_linha_sse(b"\n")
++    r_done = _Handler._filtrar_linha_sse(b"data: [DONE]\n")
++    ok5 = (r_ka == b": ka\n" and r_real == real and r_blank == b"\n"
++           and r_done == b"data: [DONE]\n")
++    print(f"{'PASS' if ok5 else 'FALHA'}  SSE: keepalive->': ka', tool_call/blank/[DONE] intactos "
++          f"(ka={r_ka!r})")
++    falhas += 0 if ok5 else 1
++
+     up.shutdown()
+     gw.shutdown()
+     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")

@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 16:21 -0300.
+Motivo: Agent Seth + MCP canon (392 removeu); seth_gateway filtra keepalive do OmniRoute; voz revertida pro Piper
+nome: seth-agent-sse-e-voz
+diff-sha256: aed72538ac69cb452b398a20b79d32e8eeb11a73e417a1c42f9bd7300c5c306f
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQMEpVCEV4kxG53XiOYilOPaorHLG/pTIX3RNdYYdDQK43F
+1oru7xBNOIMueNmh26CZqoPPv2WcbGr/SM+10KHQs=
+-----END SSH SIGNATURE-----

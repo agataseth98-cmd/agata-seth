@@ -260,14 +260,18 @@ class _Handler(BaseHTTPRequestHandler):
                 self.send_header(k, v)
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
+        sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
         try:
-            while True:
-                pedaco = up.read(8192)
-                if not pedaco:
-                    break
-                self.wfile.write(f"{len(pedaco):X}\r\n".encode())
-                self.wfile.write(pedaco)
-                self.wfile.write(b"\r\n")
+            if sse:
+                self._stream_sse_filtrado(up)
+            else:
+                while True:
+                    pedaco = up.read(8192)
+                    if not pedaco:
+                        break
+                    self.wfile.write(f"{len(pedaco):X}\r\n".encode())
+                    self.wfile.write(pedaco)
+                    self.wfile.write(b"\r\n")
             self.wfile.write(b"0\r\n\r\n")
         except (BrokenPipeError, ConnectionResetError):
             # O cliente (LibreChat) desconectou no meio do stream -- reload da
@@ -278,6 +282,52 @@ class _Handler(BaseHTTPRequestHandler):
             self.close_connection = True
         finally:
             up.close()
+
+    # Chunks-sentinela de keep-alive que o OmniRoute emite ANTES de escolher/
+    # conectar o provedor: `data: {"id":"chatcmpl-keepalive","model":"keepalive",
+    # "choices":[{"delta":{},"finish_reason":null}]}`. Servem só pra segurar a
+    # conexão HTTP durante a latência de seleção -- não carregam conteúdo.
+    # O acumulador de tool-call em streaming do LibreChat (@librechat/agents)
+    # tropeça neles: o `id` muda de `chatcmpl-keepalive` pro `chatcmpl-msg_...`
+    # real, e os deltas de `function.arguments` (que só trazem `index`, sem `id`
+    # nem `name`) acabam órfãos -> a tool é chamada com `arguments: ""` e falha
+    # ("Cancelado" na UI). Achado 09/09/2026 comparando o SSE cru do :20126 (que
+    # traz os args certinhos, formato OpenAI padrão) com o que o LibreChat grava.
+    # Aqui a gente troca cada linha `data:` de keepalive por um COMENTÁRIO SSE
+    # (`: ka`) -- mantém a conexão quente, e todo parser de SSE ignora linha que
+    # começa com `:`. O resto do stream passa byte a byte.
+    _SSE_KEEPALIVE = (b'"chatcmpl-keepalive"', b'"model":"keepalive"',
+                      b'"model": "keepalive"')
+
+    @classmethod
+    def _filtrar_linha_sse(cls, linha: bytes) -> bytes:
+        """Uma linha `data:` de keepalive vira comentário SSE (`: ka`); o resto
+        passa intacto. Pura -- testada no --selftest."""
+        if linha.startswith(b"data:") and any(m in linha for m in cls._SSE_KEEPALIVE):
+            return b": ka\n" if linha.endswith(b"\n") else b": ka"
+        return linha
+
+    def _stream_sse_filtrado(self, up):
+        """Repassa o SSE do upstream, trocando os chunks-sentinela de keepalive
+        do OmniRoute por comentários SSE. Line-buffered: um read do upstream pode
+        cair no meio de uma linha."""
+        buf = b""
+        while True:
+            pedaco = up.read(8192)
+            if not pedaco:
+                break
+            buf += pedaco
+            while b"\n" in buf:
+                linha, buf = buf.split(b"\n", 1)
+                saida = self._filtrar_linha_sse(linha + b"\n")
+                self.wfile.write(f"{len(saida):X}\r\n".encode())
+                self.wfile.write(saida)
+                self.wfile.write(b"\r\n")
+        if buf:
+            saida = self._filtrar_linha_sse(buf)
+            self.wfile.write(f"{len(saida):X}\r\n".encode())
+            self.wfile.write(saida)
+            self.wfile.write(b"\r\n")
 
     def _erro(self, code: int, msg: str):
         corpo = json.dumps({"error": {"type": "seth_gateway_error", "message": msg}},
@@ -382,6 +432,22 @@ def _selftest() -> int:
     print(f"{'PASS' if ok4 else 'FALHA'}  chat que fala de título -> hidratou normal "
           f"(messages={len(m4)})")
     falhas += 0 if ok4 else 1
+
+    # 5. filtro de keepalive SSE: linha de keepalive -> comentário; resto intacto
+    ka = (b'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk",'
+          b'"created":0,"model":"keepalive","choices":[{"index":0,"delta":{},'
+          b'"finish_reason":null}]}\n')
+    real = (b'data: {"id":"chatcmpl-msg_x","choices":[{"index":0,"delta":'
+            b'{"tool_calls":[{"index":0,"function":{"arguments":"250"}}]}}]}\n')
+    r_ka = _Handler._filtrar_linha_sse(ka)
+    r_real = _Handler._filtrar_linha_sse(real)
+    r_blank = _Handler._filtrar_linha_sse(b"\n")
+    r_done = _Handler._filtrar_linha_sse(b"data: [DONE]\n")
+    ok5 = (r_ka == b": ka\n" and r_real == real and r_blank == b"\n"
+           and r_done == b"data: [DONE]\n")
+    print(f"{'PASS' if ok5 else 'FALHA'}  SSE: keepalive->': ka', tool_call/blank/[DONE] intactos "
+          f"(ka={r_ka!r})")
+    falhas += 0 if ok5 else 1
 
     up.shutdown()
     gw.shutdown()

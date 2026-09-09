@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a10d0a0d805299b6d3e85dc77a0a2df748bb998e
-  Escrito em: 09/09/2026 15:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 34135a8970427be9d36e0abf2c52a461cb593ebe
+  Escrito em: 09/09/2026 16:23 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a10d0a0d805299b6d3e85dc77a0a2df748bb998e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34135a8970427be9d36e0abf2c52a461cb593ebe/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
+
+**(1) Agent recriado.** O Humano criou `agent_4KlxSMeX5Y8cWQVODkJfH` na UI do LibreChat (provider `Seth`, model `seth-livre`, `mcpServerNames: ["canon"]`, tools `query_canon`+`vault_consultar`). A spec default `seth-livre` (`modelSpecs`, `enforce: true`) volta a apontar `endpoint: agents, agent_id: …`. As specs `seth-zai`/`seth-gemini`/etc. seguem `endpoint: Seth` (custom, **sem** MCP) — troca manual pra debug. A cascata do OmniRoute (`seth-livre`: zai→gemini→hf→mistral) segue por baixo, via o provider `Seth` do Agent.
+
+**(2) Filtro de keepalive SSE.** O OmniRoute emite `data: {"id":"chatcmpl-keepalive","model":"keepalive","choices":[{"delta":{},"finish_reason":null}]}` ANTES de escolher/conectar o provedor — só pra segurar a conexão, mais frequente quando a cascata está lenta. **Diagnóstico:** capturei o SSE cru do `:20126` — os `arguments` das tool calls vêm no formato OpenAI padrão (1º delta `id`+`name`+`args:""`, depois deltas `index:0` com os pedaços). Mas o LibreChat gravava `args: ""`. O acumulador de `@librechat/agents` tropeça no `id` mudando de `chatcmpl-keepalive` pro real e órfã os deltas de argumento → tool chamada sem args → "Cancelado" na UI. **Conserto:** `seth_gateway._stream_sse_filtrado` — cada linha `data:` de keepalive vira comentário SSE (`: ka`), que todo parser ignora; resto passa byte a byte, line-buffered. `--selftest` 2→**5 casos**, 5/5 (novo: keepalive→`: ka`, tool_call/blank/`[DONE]` intactos). **Verificado ao vivo:** conversa nova da Seth, `TOOLCALL query_canon_mcp_canon args={"doc":"MEMÓRIAS","linhas":"245-255"} output_len=1741`.
+
+**(3) Voz → Piper.** A (414) trocou o TTS pra Kokoro `pf_dora` (CPU) em teste. O Humano pediu de volta: *"reverta a dora pro modelo anterior, ela estava funcionando lindamente pela manhã"*. `speech.tts.openai` volta pro Piper `:8890` `pt_BR-faber-medium` (estado da (387)). Kokoro (`:8880`) segue no ar. Voz feminina pt-BR fica pra XTTS-v2 (opção B da (412)/(413)) se o pedido voltar — não `pf_dora` em CPU.
+
+**APROVADO obsoleto.** O par `seth-agent-e-sse-keepalive` (sha `61c70cde`) foi assinado ~16:1x mas ainda tinha a voz Kokoro dentro; superado pela reversão antes de aplicar. `APROVADO-` movido pra `propostas/rejeitadas/` com nota. Substituído por `seth-agent-sse-e-voz` (sha `aed72538`, assinado 16:21 -03).
+
+**Observação sobre a Seth (não corrigida aqui):** no teste ela chamou `query_canon` com `linhas: 245-255` achando que era a **entrada** (250) — isso é o meio da (403). Confunde número de entrada com número de linha. Item pro `.diff` da doutrina (pendente, ver abaixo).
+
+**Contexto — cascata instável a tarde toda:** `zai/glm` pendurando, `gemini` na cota diária (parte queimada pelos meus testes de diagnóstico). Não é config nossa; melhora/piora sozinho. Ainda lento às 16:19 (`seth-livre` 25s). É a causa de fundo da lentidão da Seth hoje (a (412) já tinha apontado isso).
+
+**Pendente, separado (não neste commit):** `.diff` do `_DOUTRINA_FIXA` (linha `Nonce:` obrigatória; hora não pode receber o `HASH-ESTADO`; entrada (N) ≠ linha N) + `estado_para_eco.sh` (extração do status TES-002 quebrada desde (410)) + o bug do bloco de estado só entrar no turno 1.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-agent-sse-e-voz`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: Mongo (`db.agents` = `agent_4Klx…` com `mcpServerNames:["canon"]`; conversa nova `endpoint: agents`; `TOOLCALL query_canon … output_len=1741`); SSE cru do `:20126` capturado antes (keepalive presente, args órfãos no LibreChat) e depois do fix (`0` keepalive, `: ka`, args e `[DONE]` intactos); `python3 -m py_compile` + `--selftest` 5/5; `docker restart librechat` healthy + config carregada; `curl :8890/v1/audio/speech` (Piper) 200; `sha256sum` do `.diff` = `aed72538` bate com `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify -I agata-humano` → `Good signature`; `git apply --check` limpo. Autorização: Humano — "a" (criar o Agent na UI) + `agent_4KlxSMeX5Y8cWQVODkJfH` + "Agora foi, registre o fix" + "reverta a dora pro modelo anterior" + `scripts/aprovar.sh seth-agent-sse-e-voz` assinado 16:21 -03 + "feito".
+
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
 
 **Contexto:** a (387) tinha trocado Kokoro→Piper porque a Seth reclamou de *"demora e transcreve errado"*. A "demora" era Kokoro em CPU; frase curta mede ~0,4-0,8s, parágrafo longo escala mal. A pronúncia imperfeita é limite de dados do modelo (model card sem nota pra pt-BR), não some na CPU→GPU. O Humano assume isso pra testar.
