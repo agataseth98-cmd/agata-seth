@@ -5,9 +5,13 @@
 > (segue (140)); (3) entrada própria em MEMÓRIAS se Seth mudar; (4) silo por
 > família. Parte 1 implementada (`conselho_remoto.py` rotação por família +
 > `REGRAS.md` "O Conselho" item 3), par assinado em
-> `propostas/aplicadas/rotacao-por-familia`. **Ainda em aberto:** mecanizar a
-> Cadeia de auditoria A/B/C (hoje é norma) e o rename do arquivo de silo (sem
-> efeito hoje). Este dossiê fica como registro do raciocínio.
+> `propostas/aplicadas/rotacao-por-familia`.
+>
+> **FECHADO por inteiro em MEMÓRIAS (404), 09/09/2026.** Os 2 itens que ficaram
+> em aberto — mecanizar a Cadeia de auditoria A/B/C e o rename do arquivo de
+> silo — foram decididos como **NÃO fazer agora**, com critério de reabertura
+> em (404) (uma família ganha 2º modelo em uso, ou disputa real de justiça na
+> cadeia). Este dossiê fica como registro do raciocínio.
 
 Não é canon. Rascunho pra decisão do Humano antes de qualquer `.diff`/`APROVADO-`
 — nenhuma linha de REGRAS.md, PROJETO.md ou script aqui é proposta de código,

@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d2848e1b5f604f912feeb950bbb1b3ecd87b28c6
-  Escrito em: 09/09/2026 11:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ead5596906221743b9486795626cfe0271883f7d
+  Escrito em: 09/09/2026 11:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2848e1b5f604f912feeb950bbb1b3ecd87b28c6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ead5596906221743b9486795626cfe0271883f7d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ead5596906221743b9486795626cfe0271883f7d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ead5596906221743b9486795626cfe0271883f7d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
+
+**De onde vem:** B2 (rotação por família, pedido do Humano 06/09) teve a parte 1 feita em (381) — `conselho_remoto.py` rotaciona por família, `REGRAS.md` "O Conselho" item 3 atualizado. O dossiê `propostas/dossie-rotacao-por-familia.md` deixou 2 itens "adiados", os dois marcados "sem efeito hoje".
+
+**Item A — mecanizar a Cadeia de auditoria A/B/C: NÃO.** Hoje é norma (REGRAS, "Cadeia de auditoria em camadas"), orquestrada caso a caso pelo Humano. Por que não mecanizar:
+- Só é invocada pra mudança sensível que vai a canon — rara — e o Humano está sempre no laço (passo 4 = ele autoriza).
+- Dos 3 papéis: **B (auditor) já é rotacionado por família** via `conselho_remoto.py`; **C exige Máquina** (só sessão local/Claude Code pode); **A = quem propôs**. Só B é escolha livre, e já roda. Um "mecanismo" seria bookkeeping do que o Humano já faz.
+- Mesma forma do B4 (roteamento por complexidade, aposentado em (383)) e do `seth_local_shim` (retirado em (403)): cano a mais pra ganho marginal. Doutrina de defesa proporcional: "defesa só entra se for mecânica E no limite"; "não infle as REGRAS por reflexo".
+- Contraste com o P-13 (relógio de discordância sintética): aquele guarda um prazo de 4 semanas que decai; a cadeia A/B/C é por-evento, não decai — o argumento "mecanismo não decai, vigilância decai" não se aplica.
+
+**Item B — renomear `.hidrata-<modelo>.md` → `.hidrata-<familia>.md`: NÃO.** Zero efeito hoje: só existe `seth`, papel fixo (P2), que não rotaciona ((381) #2). Renomear tocaria `.githooks/gerar-hidratacao.sh` (`ALVOS_SILO`) e `redesign/router/seth_gateway.py` (caminho default, env, 3× docstring), com risco de quebrar a hidratação da Seth, por uma etiqueta.
+
+**Critério de reabertura (qualquer um dos dois basta):** uma família do ROSTER ganha um 2º modelo em uso real (aí silo/rotação por família passam a ter efeito concreto); ou aparece uma disputa real de justiça na cadeia de auditoria (uma família sempre no mesmo papel, sem rodízio). Aí é proposta nova com premissa nova — não ressuscitar esta.
+
+**Nada de código mudou.** `propostas/dossie-rotacao-por-familia.md` (não-canon) atualizado pra apontar esta decisão; `propostas/backlog.md` fecha B2.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `propostas/dossie-rotacao-por-familia.md` + (381) lidos por inteiro; `grep` de `.hidrata-seth`/`ALVOS_SILO` em `.githooks/gerar-hidratacao.sh` e `redesign/router/seth_gateway.py` (confirmado o alcance do rename); REGRAS "Cadeia de auditoria" e "O Conselho" relidos. Autorização: Humano, "pode fechar sem mecanizar mas deixe devidamente registrado".
+
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
 
 **O que (402) afirmou:** "o OmniRoute só descobriu os modelos de *embedding* do `ollama-local`; nenhum modelo local de chat aparece em `/v1/models`, então não dá pra pôr no combo" — e propôs (opção B) o shim `seth_local_shim` (`:20133`) como provider intermediário.

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
+  palavras-chave: fechado, itens, sobraram, rotação, família, mecanizar, cadeia, auditoria, renomear, arquivo, silo, decididos, fazer, agora, critério, reabertura, decisão, humano, pode, fechar, deixe, devidamente, registrado
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
   palavras-chave: seth, local, shim, era, necessário, medido, vivo, omniroute, roteia, ollama, model, string, direto, pro, lista, models, mostrar, embeddings, artefato, anúncio, roteamento, fecha, tier, combo
 (402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído, rodando e vigiado pelo P-9 — expõe `qwen3.5-9b-64k` local em OpenAI-compat. **Falta o registro no OmniRoute** (provider + tier 5 do combo): esbarra numa restrição do OmniRoute que exige decisão sua (B1/B2/B3, abaixo).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pool, modelos, gratuitos, três, mudanças, openrouter, auto, sai, roster, remoto, produto, pago, best, available, painel, combos, omniroute, avisa, tinha, entrado, engano, fica, zai, glm, flash, gemini, cerebras, gemma, config, novo, fonte, única, verdade, confirmado, fora, quê, candidatos, chave, seth, librechat, ganha, free, default, meta, roteador, usa, provedores, grátis, cascata, local
 (375) DIÁRIO — 08/09/2026 · `redesign/grafo/flows/consolidacao.py`: modo manual `--temas` volta a funcionar. O `Estado` (TypedDict do LangGraph) descartava a chave `_temas` no `graph.invoke`; `run()` agora seta um global de módulo (`_TEMAS_MANUAL`) que `orientar` lê primeiro. Bug achado em (373) testando a geração sob demanda do `presence_penalty`.
   palavras-chave: redesign, grafo, flows, consolidacao, modo, manual, temas, volta, funcionar, estado, typeddict, langgraph, descartava, chave, graph, invoke, run, agora, seta, global, módulo, orientar, primeiro, bug, achado, testando, geração, sob, demanda, presence, penalty
-(374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os problemas da abordagem "modelos externos grátis", depois de o roster inteiro cair no mesmo dia (Groq 403 Cloudflare `browser_signature_banned` persistente; MiniMax 404; Gemini 504 + queima o orçamento de tokens em reasoning e devolve vazio; z.ai 529). `scripts/conselho_remoto.py` + `scripts/perimetro.sh`.
-  palavras-chave: camada, proteção, remoto, contra, problemas, abordagem, modelos, externos, grátis, roster, inteiro, cair, mesmo, dia, groq, cloudflare, browser, signature, banned, persistente, minimax, gemini, queima, orçamento, tokens, reasoning, devolve, vazio, scripts, perimetro
+(374) DIÁRIO — 08/09/2026 · Camada de proteção do Conselho Remoto contra os prob …
+  palavras-chave: camada, proteção, remoto, contra, prob
 (373) DIÁRIO — 08/09/2026 · Varredura de MEMÓRIAS (3 camadas) por propostas/iten …
   palavras-chave: varredura, memórias, camadas, propostas, iten
 (372) DIÁRIO — 08/09/2026 · Rumo à fase de refinamento: `ONDE_ESTAMOS.md` (1566 …
