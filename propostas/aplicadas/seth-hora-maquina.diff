@@ -1,0 +1,60 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 570b86b..2b755c8 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -82,8 +82,11 @@ _DOUTRINA_FIXA = (
+     "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
+     "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
+     "número de memória.\n"
+-    "— **hora:** você não tem relógio de dentro → selo `lacuna: sem relógio` "
+-    "(Regra 1.1). Nunca invente hora nem repita a do cabeçalho anterior.\n"
++    "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
++    "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
++    "parênteses) — é a Máquina medindo, você só repassa. Sem essa linha → "
++    "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
++    "nunca repita a do cabeçalho anterior.\n"
+     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
+     "não o par pergunta-resposta). Contexto compactado/resumido: se o resumo "
+     "preserva a contagem de turnos, `t=<n> (contagem do resumo)`; se a contagem "
+@@ -125,7 +128,8 @@ def _estado() -> str:
+                            capture_output=True, text=True, timeout=25)
+         linhas = [l for l in r.stdout.splitlines()
+                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
+-                                    "IDADE-HIDRATACAO:", "HASH-ESTADO:"))]
++                                    "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
++                                    "HASH-ESTADO:"))]
+         return "\n".join(linhas)
+     except Exception:
+         return ""
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index f824459..4904350 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -136,6 +136,19 @@ else
+   idade_hidratacao="lacuna: .hidrata.md não existe neste checkout"
+ fi
+ 
++# --- HORA-MAQUINA (H2, MEMÓRIAS (390)): a Seth (modelo em nuvem, sem shell)
++# não tem como medir hora nenhuma -- só pode ecoar o que a Máquina mede e
++# repassa aqui. Mesmo critério de selo da Regra 1.1 pros modelos locais
++# (que TÊM shell): NTP sincronizado -> (relógio da Máquina); senão -> (relógio
++# do sistema, não sincronizado). Sem isto, a doutrina só proibia inventar sem
++# dar nada real pra copiar -- um glm já inventou `12:34:05 +00:00` num teste.
++if command -v timedatectl >/dev/null 2>&1 \
++   && timedatectl status 2>/dev/null | grep -qi "synchronized: yes"; then
++  hora_maquina="$(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M %z') (relógio da Máquina)"
++else
++  hora_maquina="$(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M %z') (relógio do sistema, não sincronizado)"
++fi
++
+ cat <<FIM
+ --- ESTADO PARA O ECO (fatos da Máquina; não é o eco) ---
+ HEAD: $head7 $head_subject
+@@ -144,6 +157,7 @@ $sync_linha
+ IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+ $tes002
++HORA-MAQUINA: $hora_maquina
+ HASH-ESTADO: $hash_estado
+ --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e
+ --- diz em 1 linha por que o estado está coerente. O Humano confere e confirma.

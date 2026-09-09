@@ -9,74 +9,52 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Onde estamos — 09/09/2026
 
+**Pilha da Seth subiu de novo** (estava desligada desde ontem à noite):
+LibreChat + Mongo + Meilisearch + Kokoro + `seth-gateway` no ar, `:3080`
+respondendo.
+
+**Três buracos pequenos do cabeçalho da Seth fechados**, mesmo princípio
+nos três — a Máquina mede o fato, o modelo só copia, nunca inventa:
+- (394) timeout do pedido de estado subiu (15s→25s) e a doutrina proíbe
+  `Última entrada: (0)` fabricado quando o estado não chega a tempo.
+- (397) a Seth ganhou uma hora REAL pra copiar (`HORA-MAQUINA:`, medida
+  pela Máquina) em vez de só a proibição de inventar — um glm já tinha
+  furado essa proibição uma vez.
+
 **Duas consolidações fechadas** (395, 396): TES-002 nonce (já resolvido em
 (90), só faltava o sinalizador) e OmniRoute 504 (causa raiz fora do nosso
-controle, mitigação aplicada, proteção do pool grátis é mecanismo separado).
-Nos dois rascunhos automáticos, boa parte das referências não tinha nada a
-ver com o tema — descartei as erradas e documentei por quê. Backlog D2 anota
-o bug do consolidador pra revisar depois.
+controle, mitigação aplicada, proteção do pool grátis é mecanismo à parte).
+Nos dois rascunhos automáticos boa parte das referências não tinha nada a
+ver com o tema — descartei as erradas e documentei por quê; **não dá pra
+mecanizar esse filtro sem quebrar o consolidador** (testei duas formas,
+as duas falharam contra dados reais) — a revisão seguinte manual, que já
+pegou os dois casos de hoje.
 
-**H3 do backlog fechado.** A Seth podia abrir com `Última entrada: (0)` quando
-o pedido de estado (rede) demorava mais que 15s. Subi o timeout pra 25s e a
-doutrina agora proíbe explicitamente inventar esse número — sem o bloco de
-estado, ela escreve que faltou, não um número fabricado. Entrada 394.
+## O que falta (lista completa, revista hoje — vários itens antigos aqui já
+tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
-## Onde estamos — 08/09/2026
-
-**Aprovar mudança estrutural agora tem assinatura.** Você gerou uma chave
-protegida por senha; a parte pública está no repositório. Pra aprovar uma
-proposta você cola `bash scripts/aprovar.sh <nome> "motivo"` — ele assina,
-e o perímetro só deixa o commit passar se a assinatura conferir. Eu não
-tenho a senha, então não forjo aprovação. Trocar a lista de chaves também
-exige assinatura (da chave atual). Entradas 365–367.
-
-**Faxina feita.** Arquivei os lotes da "consolidação noturna" que nunca
-deram nada, um experimento velho (spike RLM) e agora os documentos de
-planejamento da era do Hermes (que foi removido em 03/09). Tirei do git
-um log que sujava todo diff. Conferi arquivo por arquivo: tudo o que
-está versionado tem função. Entradas 368, 372.
-
-**Consolidação noturna consertada** (você escolheu consertar, não apagar):
-só mexe num tema quando ele ganhou entradas novas; filtro mecânico joga
-fora resumo vazio/errado antes de virar arquivo; usa o modelo local. O
-robô continua **desligado** — religar: comando na entrada 371.
-
-**Memória fria no Obsidian** deixou de aparecer solta: o mapa da memória
-agora lista cada arquivo físico com a faixa de entradas que guarda.
-Entradas 369, 370.
-
-## O que falta (lista completa)
-
-- **`redesign/` mistura código vivo com projeto fechado** — vale
-  reorganizar. Preciso te apresentar uma proposta; é grande.
-- **Rotação por família** (`propostas/dossie-rotacao-por-familia.md`) —
-  desenho aberto, com perguntas pra você. Inclui se a Seth entra na
-  rotação (hoje é papel fixo).
-- **Duas costuras em REGRAS.md** (selo de hora com dois nomes; "última
-  entrada" pedindo afirmação seca sob sync não verificado) — mexer em
-  REGRAS exige segunda opinião de outro modelo.
+- **`redesign/` mistura código vivo com projeto fechado** — parte docs já
+  reorganizada (385); a parte código é migração grande, só registrada,
+  precisa de plano faseado.
+- **Rotação por família** — parte 1 feita (381: rotaciona por família,
+  não por modelo); falta mecanizar a cadeia de auditoria A/B/C.
 - **TES-001 não fechado** — precisa de sessões de IA na nuvem
   genuinamente independentes; não dá pra fechar daqui.
 - **TES-002** — reabrir com nonce novo depende de você entregar o nonce
   à mão a um modelo-alvo quando decidir.
-- **`presence_penalty` na memória** — sob demanda: `consolidacao.py
-  --temas "presence_penalty"` gera o resumo, você revisa e aprova.
-- **Rotina de pesquisa de modelos gratuitos** (Proposta B) — job semanal
-  que pesquisa, testa e escreve uma proposta; **implementação continua
-  manual e assinada** (a Máquina não integra endpoint da web sozinha).
-- **Âncora de frescor** (Proposta C) — ligar o carimbo de SHA que já
-  existe no prompt de carregamento também no topo de REGRAS/PROJETO/
-  MEMÓRIAS, pra um leitor offline saber se os três são do mesmo commit.
+- **Sem tier local de último recurso na cadeia da Seth** — o combo
+  `seth-livre` cascateia por 4 provedores externos mas não alcança o
+  modelo local se todos caírem no mesmo dia.
+- **Deploy da Seth não sincroniza `librechat.yaml`/`canon-mcp.mjs`** — o
+  atalho `seth` sobe os serviços, mas o `cp` desses dois arquivos pro
+  `~/librechat/` ainda é manual.
 
-## Feito hoje que fecha esta rodada
+## Fechado recentemente, pra não voltar
 
-- **Camada de proteção dos modelos externos** (entrada 374): quando um
-  provedor grátis cai (aconteceu com os quatro no mesmo dia), o sistema
-  agora se recupera sozinho — põe o provedor de castigo, rejeita resposta
-  vazia ou truncada, tenta o próximo, e no fim cai no modelo local com
-  aviso de que não é opinião externa de verdade. Um alarme novo (P-15)
-  avisa se a camada externa está degradada. Investiguei a causa: são os
-  provedores, não a nossa máquina nem a rede; a Seth (cérebro local) não
-  é afetada.
-- Backup do `memoria/missoes` gravado no HD. Timer da consolidação
-  religado.
+- Duas costuras em REGRAS.md (selo de hora, "última entrada" sob sync não
+  verificado) — fechadas em (384).
+- Âncora de frescor (carimbo de SHA no topo de REGRAS/PROJETO/MEMÓRIAS) —
+  feita em (378).
+- `presence_penalty` na memória — consolidado e aprovado em (382).
+- Rotina de pesquisa de modelos gratuitos — rodando (377); implementação
+  de achado continua manual e assinada, por desenho.

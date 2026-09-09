@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
+  palavras-chave: fecha, item, backlog, seth, tinha, hora, real, pra, copiar, proibição, inventar, dando, valor, medido, máquina, doutrina, passa, mandar, estimar
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
   palavras-chave: fecha, item, backlog, seth, gateway, estado, tinha, timeout, curto, demais, podia, abrir, última, entrada, doutrina, ganha, regra, explícita, contra, inventar, número
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aprovação, passa, assinada, chave, ssh, humano, propostas, allowed, signers, pública, entra, repo, privada, fica, config, agata, aprovacao, passphrase, nunca, commitada, scripts, aprovar, assina, perimetro, verifica, presente, aprovado, nome, assinatura, válida, falha, commit, estreita, fecha, brecha, executor, cria, arquivo
 (365) DIÁRIO — 08/09/2026 · Gesto de aprovação de P-8 ganha caminho prático: além de criar `propostas/APROVADO-<nome>` à mão, o Humano pode colar `bash scripts/aprovar.sh <nome> ["motivo"]` no terminal. Novo `scripts/aprovar.sh`; texto atualizado em PROJETO.md "Quarentena estrutural" e `propostas/README.md`. Escopo da quarentena e lógica do check P-8 intocados — muda só o gesto.
   palavras-chave: gesto, aprovação, ganha, caminho, prático, além, criar, propostas, aprovado, nome, mão, humano, pode, colar, bash, scripts, aprovar, motivo, terminal, novo, texto, atualizado, projeto, quarentena, estrutural, readme, escopo, lógica, check, intocados, muda
-(364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada a entrada que registra a causa raiz dos `504` do OmniRoute (MEMÓRIAS (362)) e a mitigação de 08/09 (MEMÓRIAS (363)). Fecha o `.diff` que estava aberto desde (362); os 2 commits locais de (363) foram empurrados pro remoto no mesmo pedido.
-  palavras-chave: projeto, estado, bugs, testes, aplicada, entrada, registra, causa, raiz, omniroute, memórias, mitigação, fecha, diff, estava, aberto, desde, commits, locais, foram, empurrados, pro, remoto, mesmo, pedido
+(364) DIÁRIO — 08/09/2026 · PROJETO.md, "Estado dos bugs e dos testes": aplicada …
+  palavras-chave: projeto, estado, bugs, testes, aplicada
 (363) DIÁRIO — 08/09/2026 · Mitigação dos `504` do OmniRoute de (362) aplicada: …
   palavras-chave: mitigação, omniroute, aplicada
 (362) DIÁRIO — 07/09/2026 · Causa raiz real dos `504` do OmniRoute achada e repr …

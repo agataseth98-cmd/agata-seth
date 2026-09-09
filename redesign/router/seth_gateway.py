@@ -82,8 +82,11 @@ _DOUTRINA_FIXA = (
     "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
     "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
     "número de memória.\n"
-    "— **hora:** você não tem relógio de dentro → selo `lacuna: sem relógio` "
-    "(Regra 1.1). Nunca invente hora nem repita a do cabeçalho anterior.\n"
+    "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
+    "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
+    "parênteses) — é a Máquina medindo, você só repassa. Sem essa linha → "
+    "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
+    "nunca repita a do cabeçalho anterior.\n"
     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
     "não o par pergunta-resposta). Contexto compactado/resumido: se o resumo "
     "preserva a contagem de turnos, `t=<n> (contagem do resumo)`; se a contagem "
@@ -125,7 +128,8 @@ def _estado() -> str:
                            capture_output=True, text=True, timeout=25)
         linhas = [l for l in r.stdout.splitlines()
                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
-                                    "IDADE-HIDRATACAO:", "HASH-ESTADO:"))]
+                                    "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
+                                    "HASH-ESTADO:"))]
         return "\n".join(linhas)
     except Exception:
         return ""

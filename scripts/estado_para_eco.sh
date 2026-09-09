@@ -136,6 +136,19 @@ else
   idade_hidratacao="lacuna: .hidrata.md não existe neste checkout"
 fi
 
+# --- HORA-MAQUINA (H2, MEMÓRIAS (390)): a Seth (modelo em nuvem, sem shell)
+# não tem como medir hora nenhuma -- só pode ecoar o que a Máquina mede e
+# repassa aqui. Mesmo critério de selo da Regra 1.1 pros modelos locais
+# (que TÊM shell): NTP sincronizado -> (relógio da Máquina); senão -> (relógio
+# do sistema, não sincronizado). Sem isto, a doutrina só proibia inventar sem
+# dar nada real pra copiar -- um glm já inventou `12:34:05 +00:00` num teste.
+if command -v timedatectl >/dev/null 2>&1 \
+   && timedatectl status 2>/dev/null | grep -qi "synchronized: yes"; then
+  hora_maquina="$(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M %z') (relógio da Máquina)"
+else
+  hora_maquina="$(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M %z') (relógio do sistema, não sincronizado)"
+fi
+
 cat <<FIM
 --- ESTADO PARA O ECO (fatos da Máquina; não é o eco) ---
 HEAD: $head7 $head_subject
@@ -144,6 +157,7 @@ $sync_linha
 IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
 $tes002
+HORA-MAQUINA: $hora_maquina
 HASH-ESTADO: $hash_estado
 --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e
 --- diz em 1 linha por que o estado está coerente. O Humano confere e confirma.

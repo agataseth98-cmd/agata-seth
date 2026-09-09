@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7992e58e006fd79bf620f92b232f761557cdbb73
-  Escrito em: 09/09/2026 08:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0f4cdaaeeae4a32f1d27c10e4fce80d72b6ea401
+  Escrito em: 09/09/2026 09:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7992e58e006fd79bf620f92b232f761557cdbb73/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7992e58e006fd79bf620f92b232f761557cdbb73/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7992e58e006fd79bf620f92b232f761557cdbb73/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f4cdaaeeae4a32f1d27c10e4fce80d72b6ea401/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f4cdaaeeae4a32f1d27c10e4fce80d72b6ea401/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f4cdaaeeae4a32f1d27c10e4fce80d72b6ea401/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
+
+**Sintoma (H2, achado em (390)):** a doutrina (389) já mandava `lacuna: sem relógio` em vez de inventar hora, mas num teste o glm pôs `12:34:05 +00:00` no cabeçalho mesmo assim — proibir sem dar nada real pra copiar deixa a porta aberta pro modelo "ajudar" inventando.
+
+**Mudou (proposta `seth-hora-maquina`, 2 arquivos quarentena, 1 assinatura):** aplica o mesmo princípio da (394) (Máquina mede, modelo copia) ao campo hora, não só à "Última entrada".
+- `scripts/estado_para_eco.sh`: nova linha `HORA-MAQUINA: <data+hora -03> (relógio da Máquina | relógio do sistema, não sincronizado)` — medida com `date`, selo decidido pelo mesmo critério de NTP que a Regra 1.1 já usa pros modelos locais (o `seth_gateway` TEM shell; a Seth, não).
+- `_estado()` (`seth_gateway.py`): whitelist do filtro passa a linha `HORA-MAQUINA:` adiante.
+- `_DOUTRINA_FIXA`: o campo `hora:` do cabeçalho manda copiar `HORA-MAQUINA:` do bloco de estado, valor + selo, sem calcular nem inventar; sem a linha, `lacuna: sem relógio` continua valendo.
+
+**Descartada:** abordagem de filtro no stream de saída (interceptar/reescrever token a token procurando hora fabricada) — exigiria parsear e remontar o SSE que `_passar` hoje só repassa cru, o mesmo código que travou em (393). Desproporcional pra "o modelo inventou hora uma vez"; a solução de dar o dado real é menor e mais fiel ao princípio já usado em (394).
+
+**Lição de processo, sem entrada própria:** montei o `.diff` editando o arquivo direto e reiniciando o `seth-gateway` pra testar — o serviço rodou a mudança de quarentena ao vivo por alguns minutos **sem assinatura**, exatamente o que o P-8 existe pra impedir. Revertido pro HEAD aprovado antes de pedir a assinatura; daqui pra frente, gerar o `.diff` primeiro e só aplicar no disco depois de `APROVADO-`.
+
+**Verificado:** `bash -n`, rodada real do script (`HORA-MAQUINA: 2026-09-09 08:59 -0300 (relógio da Máquina)`), `py_compile`, `--selftest` OK, payload injetado inspecionado direto (linha e texto novo presentes) antes e depois da assinatura.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-hora-maquina`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git apply --check` + `git apply` contra HEAD; `bash -n`; `py_compile`; `--selftest`; inspeção direta do payload (`_injeta`) pré e pós-aprovação; assinatura verificada contra `HEAD:propostas/.allowed_signers` (sha256 do `.diff` bate com `diff-sha256:` do `APROVADO-`). Autorização: Humano, "vamos seguir com o que for melhor mais elegante e fiel ao espelho do sistema, proponha" → "feito" (`scripts/aprovar.sh seth-hora-maquina` assinado).
+
 (396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
 
 Fechado: causa raiz achada e fora do nosso controle, mitigação aplicada, e uma camada de proteção separada que reduz o impacto prático — os dois mecanismos não devem ser confundidos.

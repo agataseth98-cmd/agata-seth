@@ -1564,3 +1564,38 @@ Entrada 371.
 
 O robô continua desligado — quando quiser religar, o comando está na
 entrada 371.
+
+## Onde estamos — 08/09/2026 (resto do dia, movido do topo em 09/09)
+
+**Aprovar mudança estrutural agora tem assinatura.** Você gerou uma chave
+protegida por senha; a parte pública está no repositório. Pra aprovar uma
+proposta você cola `bash scripts/aprovar.sh <nome> "motivo"` — ele assina,
+e o perímetro só deixa o commit passar se a assinatura conferir. Eu não
+tenho a senha, então não forjo aprovação. Trocar a lista de chaves também
+exige assinatura (da chave atual). Entradas 365–367.
+
+**Faxina feita.** Arquivei os lotes da "consolidação noturna" que nunca
+deram nada, um experimento velho (spike RLM) e agora os documentos de
+planejamento da era do Hermes (que foi removido em 03/09). Tirei do git
+um log que sujava todo diff. Conferi arquivo por arquivo: tudo o que
+está versionado tem função. Entradas 368, 372.
+
+**Consolidação noturna consertada** (você escolheu consertar, não apagar):
+só mexe num tema quando ele ganhou entradas novas; filtro mecânico joga
+fora resumo vazio/errado antes de virar arquivo; usa o modelo local. O
+robô continua **desligado** — religar: comando na entrada 371.
+
+**Memória fria no Obsidian** deixou de aparecer solta: o mapa da memória
+agora lista cada arquivo físico com a faixa de entradas que guarda.
+Entradas 369, 370.
+
+**Camada de proteção dos modelos externos** (entrada 374): quando um
+provedor grátis cai (aconteceu com os quatro no mesmo dia), o sistema
+agora se recupera sozinho — põe o provedor de castigo, rejeita resposta
+vazia ou truncada, tenta o próximo, e no fim cai no modelo local com
+aviso de que não é opinião externa de verdade. Um alarme novo (P-15)
+avisa se a camada externa está degradada. Investiguei a causa: são os
+provedores, não a nossa máquina nem a rede; a Seth (cérebro local) não
+é afetada.
+
+Backup do `memoria/missoes` gravado no HD. Timer da consolidação religado.
