@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 09:46 -0300.
+Motivo: devolve o rosto da Seth (iconURL nas modelSpecs)
+nome: librechat-seth-iconurl
+diff-sha256: 0d967ce3ae62ab7ea9d4c0ec179a68d7ec4e99ed730c26186cb9e6ee185787f9
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQFPv0g3mBNqJG/vnmvwUha1XfO1GyOE2wWZiGMQTdkgdeB
+7hO8Xqi4p2mxzQtRfWkTepJiigDA2gK0RdLVAqEwE=
+-----END SSH SIGNATURE-----

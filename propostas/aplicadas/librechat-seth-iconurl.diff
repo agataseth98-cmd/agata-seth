@@ -1,0 +1,61 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index b6e1cb6..70d768b 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -43,8 +43,16 @@ modelSpecs:
+   enforce: true
+   prioritize: true
+   list:
++    # iconURL em TODAS as specs: com `enforce: true` a Seth aparece sempre via
++    # spec, e spec sem `iconURL` cai no icone generico. A foto vivia no Agent
++    # `agent_0Kdj6GbqpUe2rgKRIFmvk` (endpoint `agents`); a migracao pra modelSpec
++    # (MEMORIAS (392)) removeu o Agent e levou o rosto junto. `/images/seth.png`
++    # e servido pelo bind-mount `~/librechat/images` -> `/app/images` (deploy: ver
++    # propostas/librechat-seth-iconurl.md). Original recuperado em
++    # ~/librechat/images/6a99c8514070d04134d59265/agent-*-avatar-*.png (150x150).
+     - name: "seth-livre"
+       label: "Seth (cascata livre)"
++      iconURL: "/images/seth.png"
+       default: true
+       description: "zai -> gemini -> huggingface -> mistral, prioridade. O default."
+       preset:
+@@ -52,26 +60,31 @@ modelSpecs:
+         model: "seth-livre"
+     - name: "seth-zai"
+       label: "Seth · zai/glm-4.7-flash"
++      iconURL: "/images/seth.png"
+       preset:
+         endpoint: "Seth"
+         model: "zai/glm-4.7-flash"
+     - name: "seth-gemini"
+       label: "Seth · gemini-2.5-flash"
++      iconURL: "/images/seth.png"
+       preset:
+         endpoint: "Seth"
+         model: "gemini/gemini-2.5-flash"
+     - name: "seth-hf"
+       label: "Seth · Llama-3.3-70B (HuggingFace)"
++      iconURL: "/images/seth.png"
+       preset:
+         endpoint: "Seth"
+         model: "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+     - name: "seth-mistral"
+       label: "Seth · ministral-8b (Mistral)"
++      iconURL: "/images/seth.png"
+       preset:
+         endpoint: "Seth"
+         model: "mistral/ministral-8b-latest"
+     - name: "seth-auto"
+       label: "Seth · auto/best-free (auto-roteador OmniRoute)"
++      iconURL: "/images/seth.png"
+       description: "So quando o auto-roteador do OmniRoute estiver saudavel de novo."
+       preset:
+         endpoint: "Seth"
+@@ -86,6 +99,7 @@ endpoints:
+     - name: "Seth"
+       apiKey: "loopback-sem-chave"
+       baseURL: "http://127.0.0.1:20126/v1"
++      iconURL: "/images/seth.png"   # fallback do rosto quando a UI nao passa por spec
+       # Default = `seth-livre` (MEMÓRIAS (390)): combo CUSTOM do OmniRoute
+       # (storage.sqlite, curada por nós), strategy=priority, cascata
+       # zai/glm-4.7-flash -> gemini/gemini-2.5-flash -> huggingface/Llama-3.3-70B
