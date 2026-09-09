@@ -1,0 +1,75 @@
+diff --git a/redesign/grafo/flows/consolidacao.py b/redesign/grafo/flows/consolidacao.py
+index e3c32a0..24a8ef2 100644
+--- a/redesign/grafo/flows/consolidacao.py
++++ b/redesign/grafo/flows/consolidacao.py
+@@ -27,7 +27,7 @@ versao anterior nunca ter produzido nada aproveitavel em ~1 semana:
+   (429/504/529 cronicos eram a causa de a maioria das saidas nem existir).
+ 
+ Uso:
+-  consolidacao.py --repo <dir> [--temas "presence_penalty;TES-002 nonce"]
++  consolidacao.py --repo <dir> [--temas "presence_penalty;num_ctx 16814"]
+   (com --temas explicito roda mesmo sem "mudanca" -- modo manual.)
+ """
+ import json
+@@ -57,7 +57,7 @@ IDX_CHAVES = "INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
+ # editando o arquivo direto, sem proposta. Selecao e' que e' automatica
+ # (so consolida tema que MEXEU), o pool e' dado, nao logica.
+ TEMAS_TXT = HERE / "temas-consolidacao.txt"
+-TEMAS_PADRAO = ["presence_penalty", "TES-002 nonce", "num_ctx 16814", "âncora sha"]
++TEMAS_PADRAO = ["presence_penalty", "num_ctx 16814", "âncora sha"]
+ MIN_NOVAS = 2    # tema so consolida se >= 2 entradas novas (desde o marcador) o citam
+ 
+ OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 1a1ee03..aafbb47 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -35,7 +35,7 @@ dia -- 403 Cloudflare no Groq, 404 no MiniMax, 504/reasoning-burn no Gemini,
+     que NAO e opiniao de familia independente. Antes de (374) isso era
+     "decisao do Humano" (276); agora e automatico mas rotulado sem disfarce.
+   - CHECAGEM DE IDENTIDADE: se a resposta assina um nome != resposta_crua.model
+-    -> `IDENTIDADE SUSPEITA` no registro (nao bloqueia; TES-001, catalogo).
++    -> `IDENTIDADE SUSPEITA` no registro (nao bloqueia; catalogo de falhas).
+   - P-15 (perimetro.sh) le SUCESSOS_LOG: AVISO se < 2 familias tiveram sucesso
+     em 24h.
+ 
+@@ -377,7 +377,7 @@ _ASSINA_MODELO = re.compile(r"(?im)^\s*modelo\s*[:\-]\s*([A-Za-z0-9 ._/\-]{2,40}
+ 
+ def _checar_identidade(conteudo, resposta):
+     """A resposta assina um nome de modelo que bate com resposta_crua.model?
+-    Não bloqueia -- marca SUSPEITA pro Humano decidir (TES-001, catálogo)."""
++    Não bloqueia -- marca SUSPEITA pro Humano decidir (catálogo de falhas)."""
+     real = (resposta.get("model") or "").lower()
+     m = _ASSINA_MODELO.search(conteudo or "")
+     if not m or not real:
+@@ -500,7 +500,7 @@ def main():
+         print(f"Guardado: {destino}")
+         print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
+         if reg["identidade"]["suspeita"]:
+-            print(f"IDENTIDADE SUSPEITA: a resposta assina '{reg['identidade']['assinou']}' mas o modelo é '{reg['identidade']['real']}' (TES-001, catálogo). NÃO bloqueado -- o Humano decide.")
++            print(f"IDENTIDADE SUSPEITA: a resposta assina '{reg['identidade']['assinou']}' mas o modelo é '{reg['identidade']['real']}' (catálogo de falhas). NÃO bloqueado -- o Humano decide.")
+         faltando = checar_formato_parecer(conteudo)
+         if faltando:
+             print(f"FORA DO FORMATO: faltam {', '.join(faltando)} (Origem / Posição / Fundamentação / Emenda). REGRAS manda devolver o pedido UMA vez -- decisão do Humano.")
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 94aa136..f167e6c 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -822,7 +822,7 @@ p8_quarentena() {
+ # --- P-11 ----------------------------------------------------------------
+ # Silos por modelo (.hidrata-<modelo>.md) nunca entram no canon. Vêm do
+ # hook gerar-hidratacao.sh, um por modelo-alvo, e
+-# podem conter bloco MOD sensível -- nonce TES-002 de 3.3 -- num
++# podem conter bloco MOD sensível (MOD de outra família, dado privado) num
+ # repositório PÚBLICO. A defesa de primeira linha é o `.gitignore`
+ # (`.hidrata-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
+ # o backstop pro caso que nenhum dos dois cobre: `git add -f` manual.
+@@ -848,7 +848,7 @@ p11_silos_nao_versionados() {
+   while IFS= read -r f; do
+     [ -z "$f" ] && continue
+     if _p11_eh_silo "$f"; then
+-      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
++      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (MOD de outra família) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+       ruim=1
+     fi
+   done <<< "$staged"

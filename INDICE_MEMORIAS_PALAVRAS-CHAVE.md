@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
+  palavras-chave: limpeza, pós, aposentadoria, tes, varredura, pendências, humano, termine, entraremos, fase, otimização, refinamento
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
   palavras-chave: tes, aposentados, decisão, humano, precisamos, nonce, quero, arquivar, esses, testes, mera, formalidade, pode, montar, risco, mudança, estrutural, assumido, escrito, auditoria, sessão, limpa, furos, doutrina, seth, consertados
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, ficou, muda, teste, auto, best, free, apodreceu, conserto, verdade, combo, custom, livre, pedido, humano, prossiga, agata, plataformas
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "leitura parcial virou fato"). Conserto nos dois lados — `canon-mcp.mjs` + `_DOUTRINA_FIXA`. Pedido do Humano: "audite com rigor de pesquisa científica... refaça 3X".
   palavras-chave: auditoria, teste, seth, falha, real, leitura, parcial, virou, fato, conserto, lados, canon, mcp, mjs, doutrina, fixa, pedido, humano, audite, rigor, pesquisa, científica, refaça
-(388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha formato + selo de hora + regra de compactação. Pontos do teste da Seth desta sessão.
-  palavras-chave: cabeçalho, seth, doutrina, injetada, ganha, formato, selo, hora, regra, compactação, pontos, teste, desta, sessão
+(388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha f …
+  palavras-chave: cabeçalho, seth, doutrina, injetada, ganha
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedid …
   palavras-chave: voz, seth, tts, troca, kokoro, piper, pedid
 (386) DIÁRIO — 08/09/2026 · "O relógio do CODE está errado" — investigado: **o r …

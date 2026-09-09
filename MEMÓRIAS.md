@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5460f8eb01bf077be11242674578d689842c9ff6
-  Escrito em: 09/09/2026 17:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 706995b38234d76278ff263c689a8857e97b35cf
+  Escrito em: 09/09/2026 18:06 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5460f8eb01bf077be11242674578d689842c9ff6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/706995b38234d76278ff263c689a8857e97b35cf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/706995b38234d76278ff263c689a8857e97b35cf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/706995b38234d76278ff263c689a8857e97b35cf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
+
+**Refs órfãs de TES-001/TES-002 em arquivos vivos — `.diff` `limpa-refs-tes-aposentado` (quarentena P-8, 3 arquivos):**
+- **`scripts/perimetro.sh`** P-11 (comentário + mensagem): "bloco MOD sensível — nonce TES-002" → "bloco MOD sensível (MOD de outra família, dado privado)". O controle não muda — silo por modelo continua não entrando no canon público; só o exemplo saiu.
+- **`scripts/conselho_remoto.py`** (3×): o ponteiro da checagem de identidade `(TES-001, catálogo)` → `(catálogo de falhas)`. A checagem "assinou nome ≠ `model` real → `IDENTIDADE SUSPEITA`" **continua** — é a mesma que carrega a intenção do TES-001 adiante (REGRAS "Continuidade entre sessões").
+- **`redesign/grafo/flows/consolidacao.py`**: "TES-002 nonce" fora de `TEMAS_PADRAO` e do exemplo do docstring.
+
+**Livres (não P-8):**
+- `propostas/backlog.md`: C1 (Fechar TES-001) e C2 (Reabrir TES-002) → **FECHADO por (417)** (aposentados).
+- `redesign/grafo/flows/temas-consolidacao.txt`: linha "TES-002 nonce" removida do pool.
+- `propostas/tes-002-ativacao-seth.md` (procedimento de entrega do nonce, obsoleto) → `extras/arquivo/tes-002-ativacao-seth-OBSOLETO.md` (`git mv`).
+
+**Estado do backlog após esta varredura:** C1/C2 fechados. Resta **B6** — reorg `redesign/` → `runtime/` (mover `grafo/`, `router/`, `librechat/`, etc. pra fora de `redesign/`, que descreve um processo terminado, não o que o código É). Grande (~10 units systemd, padrões P-8/P-9 do `perimetro.sh`, ~18 refs em PROJETO.md, `gerar_obsidian.py`, `canon-mcp.mjs`). **Sessão dedicada, plano faseado próprio** em `propostas/plano-reorg-redesign-codigo.md` — não cabe em "terminar pendências". Fora isso, o backlog está zerado. Instabilidade da cascata de provedores grátis (Cerebras intermitente, cotas) é externa — assunto da fase de otimização, não pendência.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/limpa-refs-tes-aposentado`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `bash -n scripts/perimetro.sh` + `python3 -m py_compile` nos 2 `.py`; `grep -rn "TES-00"` em `scripts/perimetro.sh`/`conselho_remoto.py`/`consolidacao.py` = 0; `grep -c TES` em `temas-consolidacao.txt` = 0; `git mv` do doc obsoleto; `git apply --check` limpo contra HEAD; `.diff` sha256 `3c795cfc79e95f9eb40617d7575f0e8997b0c15aa872b86a1ae45dddd0c2797e`. Autorização: Humano, "termine as pendências e entraremos em fase de otimização e refinamento".
+
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
 
 **Auditoria 409→416 — nada errado:** local == remoto (`5460f8e`); os **6 pares** `.diff`/`APROVADO-` da sessão — `sha` bate e `ssh-keygen -Y verify -I agata-humano` → **Good** nos 6; sem drift repo vs `~/librechat/`; serviços `active`, LibreChat healthy; os 3 combos do OmniRoute batem com o canon; Agent `agent_4KlxSMeX5Y8cWQVODkJfH` + `mcp:["canon"]` intactos; `titleConvo: true`, tts → Piper `:8890`, spec default → Agent; `--selftest` OK.

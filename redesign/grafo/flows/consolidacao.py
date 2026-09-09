@@ -27,7 +27,7 @@ versao anterior nunca ter produzido nada aproveitavel em ~1 semana:
   (429/504/529 cronicos eram a causa de a maioria das saidas nem existir).
 
 Uso:
-  consolidacao.py --repo <dir> [--temas "presence_penalty;TES-002 nonce"]
+  consolidacao.py --repo <dir> [--temas "presence_penalty;num_ctx 16814"]
   (com --temas explicito roda mesmo sem "mudanca" -- modo manual.)
 """
 import json
@@ -57,7 +57,7 @@ IDX_CHAVES = "INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
 # editando o arquivo direto, sem proposta. Selecao e' que e' automatica
 # (so consolida tema que MEXEU), o pool e' dado, nao logica.
 TEMAS_TXT = HERE / "temas-consolidacao.txt"
-TEMAS_PADRAO = ["presence_penalty", "TES-002 nonce", "num_ctx 16814", "âncora sha"]
+TEMAS_PADRAO = ["presence_penalty", "num_ctx 16814", "âncora sha"]
 MIN_NOVAS = 2    # tema so consolida se >= 2 entradas novas (desde o marcador) o citam
 
 OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")

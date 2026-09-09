@@ -9,7 +9,6 @@
 # Criado em MEMORIAS (371).
 
 presence_penalty
-TES-002 nonce
 num_ctx 16814
 âncora sha
 OmniRoute 504

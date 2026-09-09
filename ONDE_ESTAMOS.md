@@ -55,6 +55,10 @@ tinham fechado em sessões anteriores e a lista nunca foi limpa)
 
 ## Fechado recentemente, pra não voltar
 
+- **Pendências fechadas ((418))** — refs órfãs dos TES aposentados
+  limpas dos scripts/docs; backlog zerado, exceto a reorg grande do
+  `redesign/` (B6, sessão dedicada). Próxima fase: otimização e refino.
+
 - **TES-001 e TES-002 aposentados ((417))** — sua decisão ("mera
   formalidade"). Saiu o nonce manual, a linha `Nonce:` do cabeçalho e os
   arquivos `.secret`. O que eles vigiavam (hidratação velha, fabricação)

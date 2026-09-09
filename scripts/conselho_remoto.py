@@ -35,7 +35,7 @@ dia -- 403 Cloudflare no Groq, 404 no MiniMax, 504/reasoning-burn no Gemini,
     que NAO e opiniao de familia independente. Antes de (374) isso era
     "decisao do Humano" (276); agora e automatico mas rotulado sem disfarce.
   - CHECAGEM DE IDENTIDADE: se a resposta assina um nome != resposta_crua.model
-    -> `IDENTIDADE SUSPEITA` no registro (nao bloqueia; TES-001, catalogo).
+    -> `IDENTIDADE SUSPEITA` no registro (nao bloqueia; catalogo de falhas).
   - P-15 (perimetro.sh) le SUCESSOS_LOG: AVISO se < 2 familias tiveram sucesso
     em 24h.
 
@@ -377,7 +377,7 @@ _ASSINA_MODELO = re.compile(r"(?im)^\s*modelo\s*[:\-]\s*([A-Za-z0-9 ._/\-]{2,40}
 
 def _checar_identidade(conteudo, resposta):
     """A resposta assina um nome de modelo que bate com resposta_crua.model?
-    Não bloqueia -- marca SUSPEITA pro Humano decidir (TES-001, catálogo)."""
+    Não bloqueia -- marca SUSPEITA pro Humano decidir (catálogo de falhas)."""
     real = (resposta.get("model") or "").lower()
     m = _ASSINA_MODELO.search(conteudo or "")
     if not m or not real:
@@ -500,7 +500,7 @@ def main():
         print(f"Guardado: {destino}")
         print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
         if reg["identidade"]["suspeita"]:
-            print(f"IDENTIDADE SUSPEITA: a resposta assina '{reg['identidade']['assinou']}' mas o modelo é '{reg['identidade']['real']}' (TES-001, catálogo). NÃO bloqueado -- o Humano decide.")
+            print(f"IDENTIDADE SUSPEITA: a resposta assina '{reg['identidade']['assinou']}' mas o modelo é '{reg['identidade']['real']}' (catálogo de falhas). NÃO bloqueado -- o Humano decide.")
         faltando = checar_formato_parecer(conteudo)
         if faltando:
             print(f"FORA DO FORMATO: faltam {', '.join(faltando)} (Origem / Posição / Fundamentação / Emenda). REGRAS manda devolver o pedido UMA vez -- decisão do Humano.")

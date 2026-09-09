@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-09 18:05 -0300.
+Motivo: limpa refs orfas de TES-001/TES-002 dos scripts vivos apos a aposentadoria de (417)
+nome: limpa-refs-tes-aposentado
+diff-sha256: 3c795cfc79e95f9eb40617d7575f0e8997b0c15aa872b86a1ae45dddd0c2797e
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQJ7BAfqUseM0ptIvy6osZcFSGCI2Ca06UTXFb8EmRspZkD
+khwQrnsFHBRV+Ghi/f19ifqDC3w6g5/2lNVU2DGAU=
+-----END SSH SIGNATURE-----

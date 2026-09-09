@@ -822,7 +822,7 @@ p8_quarentena() {
 # --- P-11 ----------------------------------------------------------------
 # Silos por modelo (.hidrata-<modelo>.md) nunca entram no canon. Vêm do
 # hook gerar-hidratacao.sh, um por modelo-alvo, e
-# podem conter bloco MOD sensível -- nonce TES-002 de 3.3 -- num
+# podem conter bloco MOD sensível (MOD de outra família, dado privado) num
 # repositório PÚBLICO. A defesa de primeira linha é o `.gitignore`
 # (`.hidrata-*.md`) + o `git add` de nomes literais no pre-commit; P-11 é
 # o backstop pro caso que nenhum dos dois cobre: `git add -f` manual.
@@ -848,7 +848,7 @@ p11_silos_nao_versionados() {
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     if _p11_eh_silo "$f"; then
-      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (nonce TES-002) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
+      echo "SUSPEITO (P-11): '$f' é um silo por modelo e está staged. Por que importa: silo pode conter bloco MOD sensível (MOD de outra família) e o repositório é público -- só '.hidrata.md' (o comum, sem MOD com modelo-alvo) entra no canon. O que fazer: 'git restore --staged $f' -- o hook gerar-hidratacao.sh regenera o silo na árvore da Máquina quando preciso; se veio de 'git add -f', não force silo pro commit."
       ruim=1
     fi
   done <<< "$staged"

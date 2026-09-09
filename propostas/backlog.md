@@ -28,8 +28,8 @@ segue é a lista completa.
 
 | # | Item | O que falta |
 |---|---|---|
-| C1 | **Fechar TES-001** | N sessões consecutivas limpas, hidratações genuinamente independentes (rodada 5 foi adversa, (360)). N ainda não definido — defina N. |
-| C2 | **Reabrir TES-002** | Você entrega um nonce novo à mão a um modelo-alvo quando decidir. Silo `seth` já existe (Bloco 3.1). |
+| ~~C1~~ | ~~Fechar TES-001~~ | **FECHADO — TES-001 APOSENTADO em (417)** (decisão do Humano: mera formalidade). Detecção de fabricação passa pra Cadeia de auditoria + P-7 + Catálogo. |
+| ~~C2~~ | ~~Reabrir TES-002~~ | **FECHADO — TES-002 APOSENTADO em (417).** Substituído pelos sinais automáticos do `estado_para_eco.sh` (`sync: PASS` ao vivo, `HASH-ESTADO`, `IDADE-HIDRATACAO`, `SETH:ESTADO-ATUAL` por turno). |
 
 ## H — horizonte da Seth (anotados em (390)/(391), pra implementação futura)
 
