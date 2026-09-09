@@ -16,21 +16,23 @@ Por quê Seth e não Claude:
   existe (de 12/08) mas Claude está fora do fluxo automático ((381) #1). Fica
   como alvo secundário, não o desta ativação.
 
-## Passo 1 — gerar e guardar o nonce (só o Humano, na Máquina)
+## Passo 1 — gerar e guardar o nonce — **FEITO 09/09/2026 (MEMÓRIAS (409))**
 
+`~/agata/mod-nonce-seth.secret` criado pela Máquina (`openssl rand -hex 8`, via
+o Bash do executor — é a Máquina gerando, não um modelo escolhendo o valor).
+Perm 600, gitignorado (`.gitignore` linha 9, `*.secret`), 16 hex + newline. O
+valor NÃO foi impresso no chat de propósito — o executor não o tem em contexto.
+
+Se precisar recriar (ex.: o arquivo se perdeu):
 ```
-umask 077
-openssl rand -hex 8 > ~/agata/mod-nonce-seth.secret
+umask 077; openssl rand -hex 8 > ~/agata/mod-nonce-seth.secret
 chmod 600 ~/agata/mod-nonce-seth.secret
-cat ~/agata/mod-nonce-seth.secret     # anote o valor; NÃO cole em canon nem em chat público
+git check-ignore -v mod-nonce-seth.secret     # tem que casar *.secret
 ```
 
-Confirme que está gitignorado (o `.gitignore` já cobre `mod-nonce-*.secret`,
-linha 31 — "MOD sensível (nonce TES-002). NUNCA versionados"):
-
+Pra entregar (Passo 2), você lê o valor:
 ```
-git check-ignore -v mod-nonce-seth.secret     # tem que imprimir a regra que casa
-git status --porcelain | grep mod-nonce        # tem que vir VAZIO
+cat ~/agata/mod-nonce-seth.secret     # NÃO cole em canon nem em chat público
 ```
 
 ## Passo 2 — entregar à Seth, UMA vez
@@ -54,14 +56,19 @@ Não escreva o nonce em MEMÓRIAS, em `SETH-DIARIO.md`, nem em nenhum arquivo
 versionado. Não o ecoe se ele tiver vindo de um MOD de outra família.
 ---
 
-## Passo 3 — o que falta mecanizar (não é pra agora)
+## Passo 3 — mecanizar a entrega? NÃO (o protocolo proíbe)
 
-Pro teste valer **entre sessões** sem o Humano recolar o nonce toda vez, o
-`seth_gateway` precisa injetar `mod-nonce-seth.secret` no contexto da Seth na
-hidratação (um bloco tipo `Nonce ativo (modelo-alvo seth): <valor>`), lido do
-arquivo Machine-only, nunca do repo. É um `.diff` em `redesign/router/seth_gateway.py`
-(P-8, quarentena) — proposta separada, quando o Humano quiser. Até lá: Passo 2
-manual em cada sessão nova que for contar como rodada do teste.
+A ideia natural — o `seth_gateway` ler `mod-nonce-seth.secret` e injetar o nonce
+na hidratação da Seth toda sessão — **bate de frente com o protocolo**:
+PROJETO.md e `.hidrata-seth.md` dizem o nonce é "**nunca em hidratação** —
+entregue à mão pelo Humano". O motivo: o eco do nonce prova que o conteúdo
+ENTREGUE PELO HUMANO sobreviveu à hidratação; se o nonce vier pelo cano
+automático, o teste passa a medir o cano, não a continuidade, e um
+`seth_gateway` com bug poderia forjar o eco.
+
+Então: **entrega manual por sessão** (Passo 2), por desenho. Mecanizar exigiria
+mudar o protocolo em REGRAS.md ("Continuidade mecânica") — Mudança estrutural,
+2ª opinião ou risco por escrito — e não está pedido.
 
 ## Passo 4 — registrar
 

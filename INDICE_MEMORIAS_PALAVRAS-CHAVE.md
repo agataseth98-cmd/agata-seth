@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
+  palavras-chave: tes, nonce, novo, gerado, máquina, mod, seth, secret, modelo, alvo, fora, repo, reativação, fechada, sessão, falta, assinatura, diff, projeto, entrega, manual, humano, protocolo, proíbe, automatizar, nunca, hidratação
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
   palavras-chave: tes, rodada, adversa, contagem, volta, segue, história, sequência, quebrou, zai, glm, flash, remoto, mesmo, modelo
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: decidido, implementado, parte, rotação, remoto, passa, família, fornecedor, vendor, modelo, item, fork, pós
 (380) DIÁRIO — 08/09/2026 · Bug achado no teste de fumaça de (379) e corrigido: o campo `thinking` do payload ia pra todo o ROSTER; `cerebras/*` e `mistral/*` rejeitam (400/422). Agora só `zai/` e `gemini/`.
   palavras-chave: bug, achado, teste, fumaça, corrigido, campo, thinking, payload, pra, roster, cerebras, mistral, rejeitam, agora, zai, gemini
-(379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho Remoto — 4ª e 5ª famílias independentes, confirmadas com chamada real. Item 3a do fork pós-B5.
-  palavras-chave: huggingface, mistral, entram, roster, remoto, famílias, independentes, confirmadas, chamada, real, item, fork, pós
+(379) DIÁRIO — 08/09/2026 · HuggingFace e Mistral entram no roster do Conselho R …
+  palavras-chave: huggingface, mistral, entram, roster
 (378) DIÁRIO — 08/09/2026 · Carimbo de SHA no preâmbulo de REGRAS.md, PROJETO.md …
   palavras-chave: carimbo, sha, preâmbulo, regras, projeto
 (377) DIÁRIO — 08/09/2026 · Rotina semanal de pesquisa/saúde do pool de modelos …

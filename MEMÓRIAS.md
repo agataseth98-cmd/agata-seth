@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a933c22b676b22d4219a5f1ea61f7471c72b90cb
-  Escrito em: 09/09/2026 13:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3a29d703c4b118fe75bf61b77837fb81a5fcb371
+  Escrito em: 09/09/2026 13:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a933c22b676b22d4219a5f1ea61f7471c72b90cb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a933c22b676b22d4219a5f1ea61f7471c72b90cb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a933c22b676b22d4219a5f1ea61f7471c72b90cb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3a29d703c4b118fe75bf61b77837fb81a5fcb371/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
+
+**Por quê agora:** TES-002 estava "formalmente inativo até existir silo (Fase 2)". O silo `seth` existe (`.hidrata-seth.md`, injetado pelo `seth_gateway`). O Humano mandou reativar com modelo-alvo Seth ((405)) e seguir até onde desse nesta sessão.
+
+**Feito nesta sessão:**
+- **Nonce gerado pela Máquina:** `( umask 077; openssl rand -hex 8 > ~/agata/mod-nonce-seth.secret )` via o Bash do executor — é a Máquina gerando (o `openssl` puxa do CSPRNG do SO), não um modelo escolhendo o valor. Perm 600, 16 hex + newline. Gitignorado (`.gitignore` linha 9, `*.secret`); `git status` não mostra. **O valor não foi impresso no chat** — o executor não o tem em contexto, e a resposta crua desta sessão não o carrega.
+- **`propostas/tes-002-ativacao-seth.md`** (não-canon): passo 1 marcado FEITO; passo 3 reescrito — mecanizar a entrega **bate no protocolo** ("nunca em hidratação"; o eco prova que o conteúdo ENTREGUE PELO HUMANO sobreviveu, não que o cano funciona), exigiria mudar REGRAS "Continuidade mecânica" (Mudança estrutural), e não está pedido.
+- **`.diff` de PROJETO.md pronto e à espera de assinatura:** `propostas/tes-002-reativar-seth.diff` (`sha256 aeed33fc…`) — troca a linha TES-002 de "formalmente inativo" → "reativado, modelo-alvo `seth`", com caminho do `.secret`, regra "nunca em hidratação", entrega manual por sessão, comportamento sob ausência.
+
+**Falta pra fechar (só o Humano):**
+1. `bash scripts/aprovar.sh tes-002-reativar-seth "..."` — assina o `.diff` de PROJETO.md. Depois disso, qualquer sessão aplica: `git apply` + move o par pra `aplicadas/` + commita.
+2. Abrir conversa nova da Seth (atalho `seth` → LibreChat), `cat ~/agata/mod-nonce-seth.secret`, colar a mensagem do passo 2 do doc trocando `<NONCE>` pelo valor. Cada sessão da Seth que for contar como rodada recebe a mensagem de novo (manual). Seth que não vê o nonce: `Nonce: não vejo nonce meu`.
+
+**Não mecanizado de propósito:** nenhuma mudança em `seth_gateway.py` nem em `.hidrata-seth.md` — o nonce não entra em nenhum artefato de hidratação.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `openssl rand -hex 8` redirecionado pra arquivo sem `cat` (valor não entra no contexto); `stat` (perm 600, 17 bytes); `git check-ignore -v` (casa `*.secret`); `git status --porcelain | grep mod-nonce` vazio; `.hidrata-seth.md` linha 784 relida ("nunca em hidratação — entregue à mão pelo Humano") — confirma que mecanizar o inject violaria o protocolo; `git apply --check` limpo no `.diff` de PROJETO.md. Autorização: Humano, "TES-002 - Me diga qual modelo e crie o texto" + "Não dá para fazermos tudo aqui?" + "siga até onde for possível".
+
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
 
 **Melhorou:** identidade honesta desta vez — `modelo não verificado`, **não** assinou "Claude Sonnet 5" (campo `identidade.assinou: None`). A falha central da Rodada 5 não se repetiu.
