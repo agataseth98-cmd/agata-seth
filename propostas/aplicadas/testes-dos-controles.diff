@@ -1,0 +1,585 @@
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index 10946ee..fbd46b3 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -250,6 +250,15 @@ _FIXTURES_CASA = [
+     ("slack-token", _fx("xo", "xb", "-", "1234567890")),
+     ("pem-private-key", _fx("---", "--BEGIN ", "RSA ", "PRIVATE ", "KEY", "---", "--")),
+     ("heuristica-KEY/TOKEN/SECRET/PASSWORD", _fx("API", "_KEY", " = ", '"', "abcdef0123456789ABCD", '"')),
++    # Os 5 padrões acrescentados em (419) também precisam de fixture, senão o
++    # autoteste passa sem exercitá-los -- cobertura que não cobre é o mesmo
++    # tipo de cerimônia que o P-7 morto era. Montados por _fx pelo motivo de
++    # sempre: literal inteiro no arquivo faria o próprio P-1 barrar o commit.
++    ("anthropic-openrouter-openai-project-key", _fx("sk", "-", "ant", "-api03-", "e" * 30)),
++    ("groq-key", _fx("gs", "k", "_", "f" * 44)),
++    ("huggingface-token", _fx("h", "f", "_", "g" * 34)),
++    ("github-fine-grained-pat", _fx("git", "hub", "_pat_", "h" * 55)),
++    ("zhipu-glm-key", _fx("0" * 32, ".", "i" * 16)),
+ ]
+ _FIXTURES_LIMPO = [
+     "responda só: ok",
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 273a152..2db674e 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -37,6 +37,10 @@ source "$_PERIMETRO_DIR/checar_citacao.sh"
+ source "$_PERIMETRO_DIR/checar_discordancia.sh"
+ 
+ cabecalho() {
++  # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
++  # (vigia de SKIP) saber a QUEM atribuir um SKIP -- antes, o veredito era
++  # anônimo e um controle podia ficar em SKIP para sempre sem nome nem conta.
++  PERIMETRO_CTRL="$1"
+   echo "=== $1 ==="
+   echo "controle: $2"
+   echo "fonte: $3"
+@@ -285,9 +289,17 @@ _p5_periodo_verificar() {
+ # (comentário longo abaixo, "uma marca antiga esquecida"); a correção nunca
+ # tinha chegado ao P-7.
+ P5_RAMO="ordinario"
++# Houve entrada NOVA nesta corrida, mesmo tendo ido pelo ramo de permutação?
++# O verificador de permutação distingue "entrada realocada byte-idêntica" de
++# "entrada nova genuína" e ANUNCIA a contagem. Sem ler essa contagem, o P-7
++# pulava um commit que trazia entrada nova só porque o P-5 tinha ido pela
++# permutação -- foi assim que a suíte de regressão dos controles pegou, em
++# 09/09/2026, um furo introduzido pelo conserto do dia anterior ((419)).
++P5_ENTRADAS_NOVAS=0
+ 
+ p5_append_only() {
+   P5_RAMO="ordinario"
++  P5_ENTRADAS_NOVAS=0
+   if ! git rev-parse HEAD >/dev/null 2>&1; then
+     return 0
+   fi
+@@ -347,8 +359,23 @@ p5_append_only() {
+   if [ -n "$marca_migracao" ]; then
+     P5_RAMO="permutacao"
+     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
+-    _p5_periodo_verificar
+-    return $?
++    local saida_perm codigo_perm
++    saida_perm="$(_p5_periodo_verificar 2>&1)"; codigo_perm=$?
++    [ -n "$saida_perm" ] && echo "$saida_perm"
++    # O verificador separa "entrada realocada byte-idêntica" de "entrada NOVA
++    # genuína" e imprime a contagem das novas. Se veio entrada nova, este
++    # commit TEM conteúdo inédito -- e o P-7 não pode pular alegando que não
++    # há nada a citar. Medido em 09/09/2026: uma entrada gravada no lugar
++    # errado (fim do arquivo, em vez do topo abaixo do marcador) derruba o
++    # crescimento ordinário, cai aqui, passa como permutação legítima com
++    # "+1 entrada nova genuína" -- e o P-7 pulava justo o commit que trazia
++    # a citação nova. Achado pela suíte scripts/testar_perimetro.sh no
++    # primeiro dia dela, contra um furo que o conserto do dia anterior
++    # ((419)) tinha acabado de criar.
++    if echo "$saida_perm" | grep -qE '[1-9][0-9]* entrada\(s\) nova\(s\) genuína\(s\)'; then
++      P5_ENTRADAS_NOVAS=1
++    fi
++    return "$codigo_perm"
+   fi
+   [ -n "$saida_quente" ] && echo "$saida_quente"
+   [ -n "$saida_morno" ] && echo "$saida_morno"
+@@ -615,8 +642,12 @@ p7_citacao() {
+   # nesse intervalo. O controle em si estava íntegro -- testado contra
+   # positivo e negativo conhecidos: citação real -> passa, citação
+   # fabricada -> pega. Era só o portão de entrada que estava travado aberto.
+-  if [ "${P5_RAMO:-ordinario}" = "permutacao" ]; then
+-    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO nesta corrida -- pulado (nenhum byte de entrada é novo; nada a citar que já não estivesse no canon)."
++  # Duas condições, não uma: o P-5 foi pela permutação E a permutação não
++  # trouxe entrada nova. A segunda metade veio depois (mesma data), quando a
++  # suíte mostrou que permutação com entrada nova existe e é comum -- ver o
++  # comentário em p5_append_only.
++  if [ "${P5_RAMO:-ordinario}" = "permutacao" ] && [ "${P5_ENTRADAS_NOVAS:-0}" -eq 0 ]; then
++    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO e nenhuma entrada nova veio junto -- pulado (nada a citar que já não estivesse no canon)."
+     PERIMETRO_ESTADO="SKIP"
+     return 0
+   fi
+@@ -1120,6 +1151,133 @@ p10_vault_derivado() {
+ # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
+ # (193)). $1 = exit code da checagem; usa PERIMETRO_ESTADO, que a própria
+ # checagem deixa setado quando não é um OK de verdade.
++# --- P-16 ----------------------------------------------------------------
++# "Quem muda um controle roda os testes daquele controle." (MEMÓRIAS (421))
++#
++# Motivo, medido e não teórico: até 09/09/2026 NADA testava os controles. O
++# P-7 ficou morto 79 commits; P-8 e P-11 eram cegos a renomeação desde
++# sempre. Os quatro furos da (419) foram achados porque alguém sentou pra
++# procurar -- não porque o sistema avisou. A (419) consertou os furos; sem
++# este controle, o próximo furo esperaria a próxima auditoria manual.
++#
++# Escopo estreito de propósito: só dispara quando um arquivo de CONTROLE está
++# staged. Commit que não toca controle não paga nada. Quando dispara, custa
++# ~1-2 min (a suíte roda o perímetro inteiro uma vez por caso, num clone).
++# Esse é o commit em que vale esperar.
++#
++# FALHA-class: mesma severidade de P-8. Mudar o controle sem que os testes
++# dele passem é a definição de regressão silenciosa.
++#
++# Prova de que não é decorativo: na primeira corrida, a suíte reprovou o
++# próprio conserto que a (419) tinha acabado de fazer -- o P-7 pulava commits
++# de permutação que traziam entrada nova. Consertado antes de entrar no canon.
++P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
++
++p16_testes_dos_controles() {
++  # Guarda de recursão: a suíte roda o perímetro dentro do clone dela.
++  if [ -n "${AGATA_TESTE_PERIMETRO:-}" ]; then
++    echo "P-16: rodando DENTRO da suíte -- pulado (senão recursa infinitamente)."
++    PERIMETRO_ESTADO="SKIP"; return 0
++  fi
++  local staged tocados
++  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only 2>/dev/null)"
++  tocados="$(echo "$staged" | grep -E "$P16_ARQUIVOS_DE_CONTROLE" || true)"
++  if [ -z "$tocados" ]; then
++    echo "P-16: nenhum arquivo de controle staged -- suíte não precisa rodar."
++    PERIMETRO_ESTADO="SKIP"; return 0
++  fi
++  if [ ! -f "$_PERIMETRO_DIR/testar_perimetro.sh" ]; then
++    echo "SUSPEITO (P-16): arquivo de controle staged ($(echo "$tocados" | tr '\n' ' ')) mas scripts/testar_perimetro.sh não existe -- o controle mudou sem que exista teste dele."
++    return 1
++  fi
++  # Cobertura ANTES de rodar: todo controle do main() precisa ter caso na
++  # suíte OU motivo escrito na tabela SEM_TESTE dela. Acrescentado em (422)
++  # porque a suíte nasceu cobrindo 5 de 16 e os outros 11 não estavam
++  # isentos -- estavam esquecidos, e ninguém sabia dizer quais. É a mesma
++  # doutrina do resto: a diferença entre "não dá pra testar" e "ninguém
++  # testou" tem de estar escrita, senão vira o P-7 outra vez.
++  local declarados testados descobertos
++  declarados="$(grep -oE 'cabecalho "P-[0-9]+"' "$_PERIMETRO_DIR/perimetro.sh" | grep -oE 'P-[0-9]+' | sort -u)"
++  testados="$( { grep -oE '_caso P-[0-9]+' "$_PERIMETRO_DIR/testar_perimetro.sh" | grep -oE 'P-[0-9]+'
++                 grep -oE '^\s*\[P-[0-9]+\]=' "$_PERIMETRO_DIR/testar_perimetro.sh" | grep -oE 'P-[0-9]+'; } | sort -u)"
++  descobertos="$(comm -23 <(echo "$declarados") <(echo "$testados") | tr '\n' ' ')"
++  if [ -n "${descobertos// /}" ]; then
++    echo "SUSPEITO (P-16): controle(s) sem caso na suíte E sem motivo escrito: $descobertos"
++    echo "  O que fazer: ou escreva um caso em scripts/testar_perimetro.sh, ou declare o motivo na tabela SEM_TESTE de lá. Controle sem teste e sem justificativa é como o P-7 antes de (419) -- ninguém sabe se está dispensado ou esquecido."
++    return 1
++  fi
++  echo "P-16: controle staged ($(echo "$tocados" | tr '\n' ' ')) -- rodando a suíte de regressão (pode levar 1-2 min)..."
++  local saida codigo
++  saida="$(AGATA_TESTE_PERIMETRO=1 bash "$_PERIMETRO_DIR/testar_perimetro.sh" 2>&1)"; codigo=$?
++  if [ "$codigo" -eq 0 ]; then
++    echo "$saida" | tail -1
++    return 0
++  fi
++  echo "SUSPEITO (P-16): a suíte de regressão dos controles REPROVOU com um arquivo de controle staged. O que fazer: rode 'bash scripts/testar_perimetro.sh' e conserte antes de comitar -- um controle que perdeu cobertura não deve entrar no canon."
++  echo "$saida" | sed 's/^/  /'
++  return 1
++}
++
++# --- P-17 ----------------------------------------------------------------
++# "Controle que pula sempre está desligado, não é dispensado." (MEMÓRIAS (422))
++#
++# A falha que este controle contém, medida: o P-7 ficou em SKIP por 79
++# commits. Não quebrou, não deu erro, não avisou -- pulava educadamente,
++# escrevendo na tela que não havia nada a conferir. Ninguém percebeu porque
++# um SKIP é indistinguível de outro: normal na terça, normal na quarta,
++# normal por três meses. O olho humano perde a série; o disco não.
++#
++# Mecanismo: cada corrida grava quem pulou. Um controle que pula N corridas
++# SEGUIDAS deixa de ser rotina e vira AVISO com o número na cara -- "P-7:
++# 79 corridas seguidas sem conferir nada" é impossível de ler como normal.
++# Sucesso (qualquer veredito que não seja SKIP) zera a série daquele
++# controle, então SKIP legítimo e ocasional nunca alarma.
++#
++# AVISA, nunca falha: pular pode ser correto (P-16 fora de commit de
++# controle, P-7 numa migração real). O que não pode é pular em silêncio
++# para sempre. Mesma doutrina de P-6/P-9 -- barulho, não bloqueio.
++#
++# Estado FORA do repositório (~/.cache/agata/): é telemetria de execução,
++# não canon, e não deve sujar `git status` nem exigir entrada no .gitignore.
++P17_SKIPS=""
++P17_LIMITE=10
++P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
++
++p17_skip_cronico() {
++  [ -n "${AGATA_TESTE_PERIMETRO:-}" ] && { echo "P-17: dentro da suíte -- não contabiliza."; PERIMETRO_ESTADO="SKIP"; return 0; }
++  mkdir -p "$(dirname "$P17_ESTADO")" 2>/dev/null || { echo "P-17: sem cache gravável -- série não acompanhada."; PERIMETRO_ESTADO="PARCIAL"; return 0; }
++  touch "$P17_ESTADO" 2>/dev/null
++
++  local todos ctrl serie novo="" alarmes=""
++  todos="$(grep -oE 'cabecalho "P-[0-9]+"' "$_PERIMETRO_DIR/perimetro.sh" 2>/dev/null | grep -oE 'P-[0-9]+' | sort -u)"
++  while IFS= read -r ctrl; do
++    [ -z "$ctrl" ] && continue
++    serie="$(awk -v c="$ctrl" '$1==c{print $2}' "$P17_ESTADO" 2>/dev/null | tail -1)"
++    [ -z "$serie" ] && serie=0
++    if printf '%s' " $P17_SKIPS" | grep -q " $ctrl "; then
++      serie=$((serie + 1))
++      [ "$serie" -ge "$P17_LIMITE" ] && alarmes="${alarmes}${ctrl}=${serie} "
++    else
++      serie=0
++    fi
++    novo="${novo}${ctrl}	${serie}
++"
++  done <<< "$todos"
++  printf '%s' "$novo" > "$P17_ESTADO" 2>/dev/null
++
++  if [ -n "$alarmes" ]; then
++    echo "AVISO (P-17): controle(s) em SKIP por $P17_LIMITE ou mais corridas SEGUIDAS: $alarmes"
++    echo "  Por que importa: foi exatamente assim que o P-7 ficou desligado por 79 commits -- pulando em silêncio, um SKIP igual ao anterior. Confira se o motivo do SKIP ainda é verdade; se for, o controle talvez precise mudar de forma, não continuar pulando."
++    return 0
++  fi
++  if [ -n "$P17_SKIPS" ]; then
++    echo "P-17: pularam nesta corrida ($P17_SKIPS) -- séries abaixo do limite de $P17_LIMITE."
++  else
++    echo "P-17: nenhum controle pulou nesta corrida."
++  fi
++  return 0
++}
++
+ _perimetro_veredito() {
+   local codigo="$1"
+   if [ "$codigo" -ne 0 ]; then
+@@ -1129,6 +1287,7 @@ _perimetro_veredito() {
+   elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
+     echo "veredito: SKIP"
+     CONT_SKIP=$((CONT_SKIP + 1))
++    P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
+   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
+     echo "veredito: PARCIAL"
+     CONT_PARCIAL=$((CONT_PARCIAL + 1))
+@@ -1225,6 +1384,16 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-16" "Quem muda um controle roda os testes daquele controle" "MEMÓRIAS (421); scripts/testar_perimetro.sh"
++  PERIMETRO_ESTADO=""
++  p16_testes_dos_controles; _perimetro_veredito "$?"
++  echo
++
++  cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"
++  PERIMETRO_ESTADO=""
++  p17_skip_cronico; _perimetro_veredito "$?"
++  echo
++
+   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
+   return "$FALHOU"
+ }
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+new file mode 100755
+index 0000000..612746c
+--- /dev/null
++++ b/scripts/testar_perimetro.sh
+@@ -0,0 +1,326 @@
++#!/usr/bin/env bash
++# scripts/testar_perimetro.sh -- suite de regressao DOS CONTROLES.
++#
++# POR QUE ISTO EXISTE (MEMORIAS (421)):
++# Ate 09/09/2026 nada neste repositorio testava os controles. O resultado,
++# medido: o P-7 ficou MORTO por 79 commits sem ninguem notar, e o P-8 e o
++# P-11 eram cegos a renomeacao provavelmente desde que nasceram. Os quatro
++# furos da (419) foram achados por auditoria manual -- se ninguem tivesse
++# sentado pra procurar, continuariam abertos. Controle que ninguem testa
++# nao e' controle, e' cerimonia.
++#
++# O QUE ESTA SUITE E': casos vermelho/verde contra um CLONE DESCARTAVEL do
++# repositorio, nunca contra o repo real. Cada caso diz o que espera:
++#   PEGA   -- o controle TEM que acusar (se nao acusar, ha um furo)
++#   PASSA  -- o controle NAO pode acusar (se acusar, e' falso positivo)
++# Falso positivo e' falha tanto quanto furo: controle que grita a toa e'
++# desligado pelo operador, e ai nao protege mais nada.
++#
++# COMO RODAR:  bash scripts/testar_perimetro.sh          (tudo)
++#              bash scripts/testar_perimetro.sh P-8      (so um controle)
++#
++# QUEM RODA SOZINHO: o P-16 (em perimetro.sh) dispara esta suite quando um
++# arquivo de controle esta staged -- nao da' pra mudar os controles sem que
++# os testes deles rodem. Custo zero nos commits que nao tocam controle.
++#
++# TESTA A ARVORE DE TRABALHO, nao o HEAD: o clone recebe uma copia de
++# scripts/ e .githooks/ como estao no disco AGORA. E' o que voce esta prestes
++# a commitar que e' exercitado.
++set -uo pipefail
++
++RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++FILTRO="${1:-}"
++export AGATA_TESTE_PERIMETRO=1   # impede o P-16 de recursar dentro do clone
++
++OK=0; FALHOU=0; PULADO=0
++falhas_detalhe=()
++
++_cor() { [ -t 1 ] && printf '\033[%sm%s\033[0m' "$1" "$2" || printf '%s' "$2"; }
++
++# ---------------------------------------------------------------- clone ----
++CLONE=""
++_montar_clone() {
++  CLONE="$(mktemp -d -t agata-teste-perimetro.XXXXXX)"
++  if ! git clone -q --no-hardlinks "$RAIZ" "$CLONE/repo" 2>/dev/null; then
++    echo "ABORTADO: nao consegui clonar $RAIZ" >&2; exit 2
++  fi
++  # A arvore de trabalho manda: copia scripts/ e .githooks/ por cima do que
++  # veio do HEAD, senao a suite testaria a versao ANTIGA dos controles --
++  # exatamente o falso verde que ela existe pra impedir.
++  cp -a "$RAIZ/scripts/." "$CLONE/repo/scripts/" 2>/dev/null || true
++  cp -a "$RAIZ/.githooks/." "$CLONE/repo/.githooks/" 2>/dev/null || true
++  ( cd "$CLONE/repo" && git -c user.email=teste@agata -c user.name=teste \
++      commit -q --no-verify -am "base da suite: arvore de trabalho" 2>/dev/null ) || true
++}
++_limpar_clone() { [ -n "$CLONE" ] && rm -rf "$CLONE"; CLONE=""; }
++trap _limpar_clone EXIT
++
++_reset() { ( cd "$CLONE/repo" && git reset -q --hard HEAD && git clean -qfdx ) 2>/dev/null; }
++
++# Escreve entrada nova NO LUGAR CERTO: topo do corpo, logo abaixo do marcador
++# ENTRADAS-NOVAS (desde MEMORIAS (271)). Existe porque a primeira versao desta
++# suite anexava no FIM do arquivo -- lugar errado -- e isso derrubava o
++# crescimento ordinario do P-5, jogava a corrida no ramo de permutacao e fazia
++# o P-7 pular. O teste "falhava" por defeito do fixture, nao do controle. Um
++# fixture que nao imita o sistema de verdade produz vermelho falso, que custa
++# tanta confianca quanto verde falso.
++_nova_entrada() {
++  python3 - "$1" <<'PY'
++import io,sys
++p="MEMÓRIAS.md"; s=io.open(p,encoding="utf-8").read()
++i=s.index("<!-- ENTRADAS-NOVAS:AQUI"); fim=s.index("\n",i)+1
++io.open(p,"w",encoding="utf-8").write(s[:fim]+"\n"+sys.argv[1].rstrip("\n")+"\n\n"+s[fim:].lstrip("\n"))
++PY
++}
++# ... e no lugar ERRADO (fim fisico do arquivo), de proposito: e' o caminho
++# que cai na permutacao. Usado so pelo caso de regressao que exige que a
++# citacao continue sendo checada mesmo assim.
++_entrada_no_fim() { printf '\n%s\n' "$1" >> "MEMÓRIAS.md"; }
++
++# Quantos SUSPEITO/FALHA o controle $1 emitiu no estado atual do indice.
++_acusacoes() {
++  local ctrl="$1"
++  ( cd "$CLONE/repo" && bash scripts/perimetro.sh 2>&1 ) \
++    | sed -n "/^=== ${ctrl} ===/,/^=== /p" \
++    | grep -cE "^(SUSPEITO|FALHA)" || true
++}
++
++# _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
++_caso() {
++  local ctrl="$1" espera="$2" nome="$3" setup n
++  if [ -n "$FILTRO" ] && [ "$ctrl" != "$FILTRO" ]; then PULADO=$((PULADO+1)); return; fi
++  setup="$(cat)"
++  _reset
++  if ! ( cd "$CLONE/repo" && eval "$setup" ) >/dev/null 2>&1; then
++    FALHOU=$((FALHOU+1))
++    falhas_detalhe+=("$ctrl/$nome: o SETUP falhou (o teste nao chegou a rodar)")
++    printf '  %s %-7s %s\n' "$(_cor '1;31' 'ERRO ')" "$ctrl" "$nome"
++    return
++  fi
++  n="$(_acusacoes "$ctrl")"
++  local bom=0
++  [ "$espera" = "PEGA"  ] && [ "$n" -ge 1 ] && bom=1
++  [ "$espera" = "PASSA" ] && [ "$n" -eq 0 ] && bom=1
++  if [ "$bom" = 1 ]; then
++    OK=$((OK+1)); printf '  %s %-7s %s\n' "$(_cor '0;32' ' ok  ')" "$ctrl" "$nome"
++  else
++    FALHOU=$((FALHOU+1))
++    falhas_detalhe+=("$ctrl/$nome: esperava $espera, obteve $n acusacao(oes)")
++    printf '  %s %-7s %s  (esperava %s, obteve %s)\n' "$(_cor '1;31' 'FALHA')" "$ctrl" "$nome" "$espera" "$n"
++  fi
++}
++
++# ---------------------------------------------------- cobertura declarada --
++# Todo controle do perimetro tem de ter OU caso nesta suite OU um motivo
++# ESCRITO aqui. Silencio nao e' opcao -- e' o P-16 que cobra.
++#
++# Por que isto existe: em 09/09/2026 a suite nasceu cobrindo 5 dos 16
++# controles. Os outros 11 nao estavam "isentos" -- estavam ESQUECIDOS, e
++# ninguem saberia dizer quais. A diferenca entre "nao da' pra testar" e
++# "ninguem testou ainda" e' exatamente a diferenca entre P-7 dispensado e
++# P-7 morto. Agora essa diferenca esta escrita, com nome e motivo.
++#
++# Regra pra quem mexer aqui: mover um controle desta lista PRA a suite e'
++# sempre progresso. Acrescentar controle novo a esta lista exige motivo que
++# alguem leia e concorde -- "e' dificil" nao e' motivo.
++declare -A SEM_TESTE=(
++  [P-2]="exige root para ler /etc/sudoers.d; a suite roda como usuario comum e nao vai pedir sudo pra testar"
++  [P-3]="depende do estado do REMOTO (publicacao); um clone descartavel nao reproduz a condicao"
++  [P-4]="depende de portas e processos VIVOS da Maquina; dentro do clone nao ha o que bindar"
++  [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
++  [P-9]="depende de unidades systemd vivas do usuario; o clone nao tem servicos"
++  [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
++  [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
++  [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
++  [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
++  [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
++  [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
++)
++
++# ------------------------------------------------------------------ casos --
++_montar_clone
++echo "suite de regressao dos controles -- clone descartavel, repo real intocado"
++echo
++
++# --- P-8: quarentena ------------------------------------------------------
++# O caso "rename-pra-fora" e' o furo de (419): sem --no-renames o git mostra
++# so o path NOVO, e mover um arquivo de comportamento pra fora dos padroes o
++# tirava da quarentena sem APROVADO- nenhum.
++_caso P-8 PEGA "editar arquivo de comportamento no lugar" <<'EOF'
++echo "# sujo" >> redesign/router/sanitizar.py && git add redesign/router/sanitizar.py
++EOF
++
++_caso P-8 PEGA "REGRESSAO (419): renomear comportamento pra fora da quarentena" <<'EOF'
++git mv redesign/router/sanitizar.py extras/sanitizar-fugitivo.py && git add -A
++EOF
++
++_caso P-8 PEGA "REGRESSAO (419): mover script de controle pra extras/" <<'EOF'
++git mv scripts/checar_citacao.sh extras/checar_citacao.sh && git add -A
++EOF
++
++_caso P-8 PEGA "deletar arquivo de comportamento sem aprovacao" <<'EOF'
++git rm -q redesign/router/sanitizar.py && git add -A
++EOF
++
++_caso P-8 PEGA "(419): SELOS.txt agora e' comportamento" <<'EOF'
++echo "" >> SELOS.txt && git add SELOS.txt
++EOF
++
++_caso P-8 PEGA "(419): .gitignore agora e' comportamento" <<'EOF'
++echo "# x" >> .gitignore && git add .gitignore
++EOF
++
++_caso P-8 PEGA "(419): redesign/obsidian/*.py agora e' comportamento" <<'EOF'
++echo "# x" >> redesign/obsidian/ro_proxy.py && git add redesign/obsidian/ro_proxy.py
++EOF
++
++_caso P-8 PASSA "FALSO POSITIVO: renomear arquivo comum dentro de extras/" <<'EOF'
++f=$(git ls-files 'extras/*.md' | head -1); git mv "$f" "${f%.md}-renomeado.md" && git add -A
++EOF
++
++_caso P-8 PASSA "FALSO POSITIVO: commit so em MEMORIAS.md" <<'EOF'
++_nova_entrada "(9999) DIARIO — 01/01/2026 · teste." && git add "MEMÓRIAS.md"
++EOF
++
++# --- P-11: silos ----------------------------------------------------------
++_caso P-11 PEGA "silo staged com nome de silo" <<'EOF'
++printf 'modelo-alvo: seth\nMOD privado\n' > .hidrata-teste.md && git add -f .hidrata-teste.md
++EOF
++
++_caso P-11 PEGA "REGRESSAO (419): silo renomeado pra nome inocente" <<'EOF'
++printf 'modelo-alvo: seth\nMOD privado\n' > .hidrata-teste.md && git add -f .hidrata-teste.md \
++  && git mv .hidrata-teste.md notas-publicas.md
++EOF
++
++_caso P-11 PEGA "REGRESSAO (419): silo COPIADO (nunca teve nome de silo)" <<'EOF'
++printf 'modelo-alvo: seth\nMOD privado\n' > notas-inocentes.md && git add notas-inocentes.md
++EOF
++
++_caso P-11 PASSA "FALSO POSITIVO: MEMORIAS citando o formato modelo-alvo" <<'EOF'
++_nova_entrada "(9999) DIARIO — 01/01/2026 · texto sobre o cabecalho modelo-alvo: usado em bloco MOD." && git add "MEMÓRIAS.md"
++EOF
++
++# --- P-5: append-only, a LINHA VERMELHA -----------------------------------
++# P-5 guarda a Regra 4 ("Registre e nunca apague"), que as REGRAS declaram
++# linha vermelha -- nem o Humano pede pra cruzar. Estava sem UM caso de
++# teste ate 09/09/2026, e foi o proprio portao de cobertura do P-16 que
++# cobrou, nesta mesma sessao. O controle mais grave do sistema era o menos
++# exercitado.
++_caso P-5 PASSA "FALSO POSITIVO: entrada nova no topo (crescimento ordinario)" <<'EOF'
++_nova_entrada "(9999) DIARIO — 01/01/2026 · entrada legitima." && git add "MEMÓRIAS.md"
++EOF
++
++_caso P-5 PEGA "apagar uma linha de MEMORIAS" <<'EOF'
++python3 - <<'PY2'
++import io
++p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
++del L[60]
++io.open(p,"w",encoding="utf-8").write("\n".join(L))
++PY2
++git add "MEMÓRIAS.md"
++EOF
++
++# A 1a versao deste caso trocava o primeiro "DIÁRIO" do arquivo e dava
++# VERMELHO FALSO: o primeiro fica no PREAMBULO (a legenda dos tipos de
++# entrada), ACIMA do marcador ENTRADAS-NOVAS -- zona que o P-5 legitimamente
++# nao policia. Fixture ruim acusa controle inocente, e foi a terceira vez
++# nesta sessao. Por isso este caso ancora explicitamente ABAIXO do marcador.
++_caso P-5 PEGA "editar entrada que ja existia (abaixo do marcador)" <<'EOF'
++python3 - <<'PY2'
++import io
++p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
++i=next(k for k,l in enumerate(L) if "ENTRADAS-NOVAS:AQUI" in l)
++alvo=next(k for k in range(i+1,len(L)) if len(L[k])>80)
++L[alvo]=L[alvo].replace("a","@",3)
++io.open(p,"w",encoding="utf-8").write("\n".join(L))
++PY2
++git add "MEMÓRIAS.md"
++EOF
++
++# --- P-7: citacao ---------------------------------------------------------
++# O furo de (419): a marca de migracao em propostas/aplicadas/ (que nunca e'
++# limpo, por desenho) deixava o P-7 em SKIP permanente. SKIP nao emite
++# acusacao, entao o caso "citacao fabricada" cobre os dois de uma vez: se o
++# P-7 voltar a pular, este teste falha.
++_caso P-7 PEGA "REGRESSAO (419): citacao fabricada e' pega mesmo com marca de migracao presente" <<'EOF'
++_nova_entrada "(9999) DIARIO — 01/01/2026 · teste citando (9876 - entrada que nunca existiu) de proposito."
++git add "MEMÓRIAS.md"
++EOF
++
++# Furo achado pela PROPRIA suite em 09/09/2026, no primeiro dia dela: o
++# conserto de (419) fez o P-7 pular sempre que o P-5 ia pela permutacao --
++# mas permutacao COM entrada nova existe (entrada gravada no fim do arquivo
++# derruba o crescimento ordinario e cai la). O commit trazia citacao nova e
++# ninguem checava. Este caso e' a trava contra a volta disso.
++_caso P-7 PEGA "REGRESSAO: citacao fabricada em entrada nova que caiu na PERMUTACAO" <<'EOF'
++_entrada_no_fim "(9999) DIARIO — 01/01/2026 · teste citando (9876 - entrada que nunca existiu) de proposito."
++git add "MEMÓRIAS.md"
++EOF
++
++_caso P-7 PASSA "FALSO POSITIVO: citacao real com sintese coerente" <<'EOF'
++_nova_entrada "(9999) DIARIO — 01/01/2026 · teste citando (417 - TES-001 e TES-002 aposentados por decisao do Humano)."
++git add "MEMÓRIAS.md"
++EOF
++
++# --- P-14: chunk frio selado ---------------------------------------------
++_caso P-14 PEGA "modificar chunk frio ja selado" <<'EOF'
++a=$(awk 'NR==1{print $2}' SELOS.txt); printf '\nadulterado\n' >> "$a" && git add "$a"
++EOF
++
++_caso P-14 PEGA "REGRESSAO (419): renomear chunk frio selado" <<'EOF'
++a=$(awk 'NR==1{print $2}' SELOS.txt); git mv "$a" "RENOMEADO-$a" && git add -A
++EOF
++
++_caso P-14 PEGA "REGRESSAO (419): apagar a linha do SELOS e reescrever o chunk" <<'EOF'
++a=$(awk 'NR==1{print $2}' SELOS.txt)
++grep -vF " $a " SELOS.txt > /tmp/selos.$$ && mv /tmp/selos.$$ SELOS.txt
++printf '\nadulterado\n' >> "$a" && git add -A
++EOF
++
++# --- P-1: regua de segredo ------------------------------------------------
++# (419): os padroes nao pegavam NENHUMA das chaves que este sistema usa.
++#
++# As chaves de teste sao MONTADAS EM PEDACOS, nunca escritas inteiras. Motivo
++# concreto, achado ao commitar esta suite pela primeira vez: escrita inteira,
++# a fixture casa os proprios padroes e o P-1 barra o commit do teste -- o
++# varredor acusando o teste do varredor. A saida NAO e' abrir excecao no P-1
++# (excecao no varredor de segredo e' exatamente o buraco que (419) fechou);
++# e' nao deixar o literal existir no arquivo. Mesma convencao ja usada em
++# redesign/router/sanitizar.py (_fx / _FIXTURES_CASA).
++_k() { local IFS=""; printf '%s' "$*"; }
++
++_A40="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
++while IFS='|' read -r _nome _chave; do
++  [ -z "$_nome" ] && continue
++  _caso P-1 PEGA "chave $_nome nao pode passar" <<EOF
++printf 'chave colada em prosa: $_chave\n' > vazamento.md && git add vazamento.md
++EOF
++done <<LISTA
++anthropic|$(_k "sk" "-" "ant" "-api03-" "$_A40")
++openrouter|$(_k "sk" "-" "or" "-v1-" "0000000000000000000000000000000000000000")
++groq|$(_k "gs" "k" "_" "$_A40" "AAAAAAAA")
++huggingface|$(_k "h" "f" "_" "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
++github-pat|$(_k "git" "hub" "_pat_" "$_A40" "AAAAAAAAAAAAAAAAAAAA")
++zhipu|$(_k "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "." "bbbbbbbbbbbbbbbb")
++openai (controle)|$(_k "sk" "-" "$_A40")
++google (controle)|$(_k "AI" "za" "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
++LISTA
++
++_caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
++printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
++EOF
++
++# --------------------------------------------------------------- veredito --
++echo
++if [ "$FALHOU" -eq 0 ]; then
++  echo "$(_cor '0;32' "SUITE OK") -- $OK caso(s), 0 falha(s)${PULADO:+, $PULADO fora do filtro}"
++  exit 0
++fi
++echo "$(_cor '1;31' "SUITE FALHOU") -- $OK ok, $FALHOU falha(s)"
++printf '  - %s\n' "${falhas_detalhe[@]}"
++echo
++echo "Uma FALHA aqui significa uma de duas coisas, e as duas sao serias:"
++echo "  'esperava PEGA'  -> um controle parou de proteger o que protegia (furo)."
++echo "  'esperava PASSA' -> um controle passou a acusar o que e' legitimo"
++echo "                      (falso positivo -- o operador desliga, e ai nao protege mais nada)."
++exit 1

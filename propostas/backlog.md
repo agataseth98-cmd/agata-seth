@@ -17,7 +17,7 @@ segue é a lista completa.
 | # | Item | Estado | Bloqueio |
 |---|---|---|---|
 | B1 | **Reorg do `redesign/` — parte docs** — separar documento de projeto fechado do código vivo. | **FEITO — MEMÓRIAS (385).** 9 docs de planejamento → `extras/arquivo-redesign/`; `redesign/README.md` reescrito (dizia, errado, "gates suspensos"). Código não foi tocado. | — |
-| B6 | **Reorg do `redesign/` — parte código** — promover `grafo/`, `router/`, `librechat/`, `mcp/`, `igpu/`, `obsidian/`, `systemd/`, `fase7-hd/` pra fora de `redesign/` (nome permanente, ex. `runtime/` ou raiz). "redesign" descreve um processo terminado, não o que o código É — mover melhora coerência, rastreabilidade e compreensão do sistema. | Só registrado (ordem do Humano, 08/09/2026). | Migração grande: ~10 units systemd (fonte + instaladas, `.venv` no `ExecStart`), `perimetro.sh` (padrões P-8 + lista P-9), `scripts/gerar_obsidian.py` (lista hard-coded), `PROJETO.md` (18 refs), `config/modelos-gratuitos.md`, `redesign/librechat/canon-mcp.mjs` (dict `CANON` — já tem chave `ROADMAP` quebrada; `ACESSO-GRADUADO.md` vai junto). Plano faseado próprio + aprovação assinada por peça. |
+| B6 | **Reorg do `redesign/` — parte código** | **MOVIDO PRA HORIZONTE em 09/09/2026 (ordem do Humano: "deixe o B6 como futuro/horizonte").** Sai da lista B, que é o que se decide agora. Não é bloqueio de nada: o código funciona onde está, `redesign/` é um nome feio e não um defeito. Detalhe, plano e levantamento na seção **Horizonte** abaixo. |
 | ~~B2~~ | ~~Rotação por família~~ | **FECHADO.** Parte 1 em (381) (`conselho_remoto.py` + `REGRAS.md` "O Conselho" item 3). Os 2 restantes decididos como **NÃO fazer** em (404): mecanizar A/B/C (é norma, B já rotaciona, C exige Máquina, A = proponente — cano a mais) e rename do arquivo de silo (zero efeito hoje). Critério de reabertura em (404). |
 | ~~B7~~ | ~~P-8 não aprova DELEÇÃO de arquivo de comportamento~~ | **FECHADO — MEMÓRIAS (407).** `_p8_arquivo_aprovado` ganhou ramo pra deleção (`.diff` assinado com hunk de deleção total; `git apply` tem que fazer o arquivo sumir). 2ª opinião ministral-8b ((405)), matriz de teste 5/5. Os 2 arquivos inertes do `seth_local_shim` apagados no mesmo commit (bootstrap auto-aprovado). |
 | B3 | **Duas costuras em REGRAS.md** | **FECHADO — MEMÓRIAS (384).** (b) já resolvido na linha 215 (nada a fazer). (a) alinhado: `lacuna: sem relógio` entra na lista de selos da Regra 1.1, com parecer do Conselho (ministral-8b). | — |
@@ -39,7 +39,43 @@ segue é a lista completa.
 | ~~H2~~ | ~~Pós-filtro de hora inventada no `seth_gateway`~~ | **FECHADO — MEMÓRIAS (397).** Em vez de filtro de saída (reescrever o stream, arriscado — o mesmo código que travou em (393)), `estado_para_eco.sh` mede `HORA-MAQUINA:` real e a doutrina manda copiar essa linha, não inventar. Mesmo princípio da (394). |
 | ~~H3~~ | ~~`seth_gateway._estado()` `timeout=15s`~~ | **FECHADO — MEMÓRIAS (394).** Timeout `15s→25s` + doutrina proíbe inventar `(0)` quando o estado não chega; sem a linha `TOPO-MEMÓRIAS:`, vira `lacuna (estado não injetado)`. |
 | ~~H4~~ | ~~Sem tier LOCAL de último recurso na cadeia da Seth~~ | **FECHADO — MEMÓRIAS (403).** Premissa refutada ao vivo: o OmniRoute já roteia `ollama-local/<model>` direto pro `:11434`. Tier 5 (`ollama-local/qwen3.5-9b-64k:latest`) adicionado ao combo `seth-livre` por `PUT /api/combos`. O `seth_local_shim` de (402) foi retirado — era cano a mais. |
-| ~~H5~~ | ~~`redesign/systemd/seth` não sincroniza `librechat.yaml` nem `canon-mcp.mjs`~~ | **FECHADO — MEMÓRIAS (401).** Atalho `seth` ganha bloco de deploy (`cmp -s` → `cp` só o que difere → `docker restart librechat` só se mudou). P-9 também passa a vigiar `piper-tts.service` (lacuna aberta na (398)). |
+| ~~H5~~ | ~~`redesign/systemd/seth` não sincroniza `librechat.yaml` nem `canon-mcp.mjs`~~ | **FECHADO — MEMÓRIAS (401), mas só passou a valer de fato em 09/09/2026 ((420)).** O bloco de deploy foi escrito na fonte versionada e **nunca instalado** em `~/.local/bin/` — o atalho que você de fato executava era a versão de 05/09, sem deploy e sem `piper-tts`. Ou seja: por quatro dias este item constou como FECHADO descrevendo um mecanismo que não rodava. Achado na auditoria da (419), instalado e conferido na (420). **Lição, não só conserto:** "commitado na fonte" ≠ "instalado na Máquina" para tudo que vive fora do repo (`~/.local/bin/`, units systemd copiadas, `~/librechat/`). Fechar item de deploy exige conferir o disco, não o `git`. |
+
+## Horizonte — bússola, não backlog
+
+REGRAS, "Contenção de escopo": *"Só a fase atual e a seguinte têm gates e prazo. O
+resto é bússola, não backlog."* O que está aqui não tem prazo e não bloqueia nada.
+Modelo que propuser antecipar item daqui: negado por default, salvo ordem sua.
+
+### B6 — reorg do `redesign/` para `runtime/`
+
+**Por que existe:** "redesign" descreve um processo que terminou em 03/09/2026
+(MEMÓRIAS (310)/(311)), não o que o código É. Mover melhora coerência e
+rastreabilidade. **Não é defeito** — é nome feio. Nada depende disso.
+
+**Estado: pronto pra executar, aguardando sessão dedicada.** O que já está feito:
+- Nome decidido (`runtime/`) e 2ª opinião obtida (ministral-8b, posição condicional,
+  emendas incorporadas) — plano em `propostas/plano-reorg-redesign-codigo.md`.
+- Levantamento completo em 09/09/2026 ((419)), que **corrigiu dois erros do plano**:
+  (a) `agata-consolidacao` é *symlink* pra `config/`, não cópia de `redesign/systemd/`,
+  logo `config/agata-consolidacao.service` precisa entrar no `.diff` e o plano não o
+  listava; (b) são **três** wrappers em `~/.local/bin/` (`agata`, `seth`, `seth-parar`),
+  não um.
+- Medido: 102 arquivos rastreados sob `redesign/`; ~2,17 GB de venvs com caminho
+  absoluto embutido, que se **recriam**, não se movem; 12 units instaladas citando o
+  caminho (11 cópias + 1 symlink).
+
+**Duas decisões de desenho tomadas no levantamento, pra quem executar:**
+- `LOG.md` (234 KB) e `redesign/propostas/` (13 arquivos) vão pra
+  `extras/arquivo-redesign/`, **não** pra `runtime/` — são história do processo, não
+  código que roda. Isso também evita reescrever 284 referências dentro de um log
+  histórico, o que seria falsificar história (Regra 4).
+- `fase7-hd/` mantém o nome na mudança, pra não ampliar o raio de explosão. Renomear
+  fica como item separado, se algum dia valer.
+
+**Pré-requisito já cumprido:** o P-8 enxergava rename? Não enxergava — furo fechado na
+(419). Executar o B6 antes daquele conserto teria passado a maior mudança estrutural do
+projeto por um controle cego justamente a renomeação.
 
 ## Fora da lista — feito ou obsoleto (pra não voltar)
 

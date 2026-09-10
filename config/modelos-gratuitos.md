@@ -43,7 +43,7 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
 | `groq/openai/gpt-oss-*` | Cloudflare fichou o cliente do OmniRoute como bot (`403 browser_signature_banned`), persistente; e gpt-oss queima reasoning. |
 | `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
 | `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
-| `cerebras/gpt-oss-120b` | queima o orçamento em reasoning e devolve vazio. |
+| ~~`cerebras/gpt-oss-120b`~~ | **[SUPERADO por (416), 09/09/2026 — não está mais fora.]** O motivo antigo era "queima o orçamento em reasoning e devolve vazio". Medição nova, ao vivo: grátis, ~0,4s, tools+stream OK — virou **tier 0** dos três combos da Seth (tabela abaixo). Esta linha ficou aqui contradizendo a de baixo até a auditoria de (419) achar; mantida riscada em vez de apagada porque saber que a avaliação MUDOU vale mais que fingir que nunca houve a outra. Intermitente: quando cai, o `priority` desce sozinho. |
 | **GitHub Models** (`models.github.ai`) | **descontinuado pela GitHub** — `410 github_models_retirement_brownout` ("scheduled retirement"), 08/09/2026. Não há slug de provedor pra ele neste build do OmniRoute de qualquer forma. |
 | `mistral/mistral-small-latest` | `429 code 1300` nesta conta (free tier). Usar `mistral/ministral-8b-latest` no lugar (tabela de cima). |
 

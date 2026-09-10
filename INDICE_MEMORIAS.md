@@ -3,6 +3,8 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
+(420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon reconciliado com a Máquina, atalhos de fato instalados, B6 movido pra horizonte.** Ordem do Humano: *"deixe o B6 como futuro/horizonte, e encerre os outros"*. Sequência da (419 - quatro controles do perímetro não controlavam o que diziam controlar), que consertou os controles; esta fecha o que os controles não pegavam porque é texto, não código.
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o que diziam controlar.** Auditoria completa por ordem do Humano ("audite o sistema por completo... percebendo e resolvendo falhas de segurança"). Todo achado abaixo foi demonstrado vermelho/verde em clone descartável, nunca só lido. Nenhum era teórico.
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
@@ -31,8 +33,8 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
-(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
-(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
+(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERR …
+(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apod …
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "le …
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha f …
 (387) DIÁRIO — 08/09/2026 · Voz da Seth: TTS troca Kokoro pt-BR por Piper. Pedid …

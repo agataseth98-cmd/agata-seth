@@ -250,6 +250,15 @@ _FIXTURES_CASA = [
     ("slack-token", _fx("xo", "xb", "-", "1234567890")),
     ("pem-private-key", _fx("---", "--BEGIN ", "RSA ", "PRIVATE ", "KEY", "---", "--")),
     ("heuristica-KEY/TOKEN/SECRET/PASSWORD", _fx("API", "_KEY", " = ", '"', "abcdef0123456789ABCD", '"')),
+    # Os 5 padrões acrescentados em (419) também precisam de fixture, senão o
+    # autoteste passa sem exercitá-los -- cobertura que não cobre é o mesmo
+    # tipo de cerimônia que o P-7 morto era. Montados por _fx pelo motivo de
+    # sempre: literal inteiro no arquivo faria o próprio P-1 barrar o commit.
+    ("anthropic-openrouter-openai-project-key", _fx("sk", "-", "ant", "-api03-", "e" * 30)),
+    ("groq-key", _fx("gs", "k", "_", "f" * 44)),
+    ("huggingface-token", _fx("h", "f", "_", "g" * 34)),
+    ("github-fine-grained-pat", _fx("git", "hub", "_pat_", "h" * 55)),
+    ("zhipu-glm-key", _fx("0" * 32, ".", "i" * 16)),
 ]
 _FIXTURES_LIMPO = [
     "responda só: ok",

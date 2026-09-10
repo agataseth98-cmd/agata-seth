@@ -60,15 +60,24 @@ journalctl -b 0 -k --no-pager | grep -i "failed to resume\|ACPI D-Notifier" | ta
 faillock --user orusoua
 ```
 
-## Sobre acesso remoto — achado importante, corrige PROJETO.md
+## Sobre acesso remoto — estado real, medido em 09/09/2026
 
-`PROJETO.md` descreve acesso remoto por LibreChat sobre Tailscale serve. **Tailscale não
-está instalado nesta máquina** (reconfirmado 03/09/2026 na troca p/ LibreChat) — sem binário,
-sem serviço, sem interface de rede (`tailscale0` ausente). Passos de instalação em
-`redesign/librechat/README.md`. SSH (`sshd`) está instalado mas **desabilitado e parado**.
-Ou seja: hoje, se a tela travar, **não há como acessar a máquina de outro dispositivo**
-— só o procedimento local acima. Corrigido no registro; decisão de reativar SSH/instalar
-Tailscale é sua, não tomada aqui.
+**Tailscale ESTÁ instalado e no ar.** Binário presente, `tailscaled` ativo, interface
+`tailscale0` com IP `100.89.222.23`. Ou seja: **se a tela travar, você TEM como alcançar
+esta máquina de outro dispositivo** pela rede Tailscale.
+
+SSH (`sshd`) continua instalado mas **desabilitado e parado** — isso não mudou.
+
+**Correção de um registro que estava errado, e errado do jeito pior.** Até hoje esta seção
+dizia o contrário ("Tailscale não está instalado nesta máquina", datado de 03/09/2026) e se
+anunciava como *"achado importante, corrige PROJETO.md"*. Era o `PROJETO.md` que estava
+certo (ele registra a instalação em 06/09/2026, MEMÓRIAS (350)) e este arquivo que estava
+desatualizado — três dias mais velho e com moldura de correção, que é o que faz um leitor
+apressado confiar nele. Num documento de emergência isso custa caro: você leria "não há
+como acessar de outro dispositivo" bem na hora em que precisaria saber que há.
+
+Lição que fica, não só o conserto: arquivo que se declara "corrige X" precisa de data
+visível ao lado da afirmação, senão ele envelhece carregando autoridade que já perdeu.
 
 Se quiser um acesso mínimo de emergência sem reinstalar Tailscale agora, o mais rápido é:
 ```sh

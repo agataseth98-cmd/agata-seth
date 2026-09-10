@@ -1,0 +1,130 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index c94e06c..435e0e2 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -70,6 +70,11 @@ Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `
+ `agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper
+ para lançar jogo com o Agata fora da RTX 4060 — **não** Feral GameMode, que briga com o
+ `ananicy-cpp` do CachyOS; usa o `game-performance` da distro).
++**Portas que existiam sem constar aqui (achado da auditoria de (419), documentadas em (420)):**
++`:20135` = `discord-mcp.service` e `:20136` = `navegador-mcp.service` — os serviços já estavam
++descritos mais abaixo, as portas não estavam em lugar nenhum do canon. `:20131` e `:20132` são
++do próprio processo `omniroute` (respondem 426 e 404) — **`lacuna`: função não determinada**,
++registrada como desconhecida em vez de adivinhada. Todas em `127.0.0.1`, conferidas por `ss -tlnp`.
+ **Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`, reidrata a Seth) ·
+ `seth-escriba.service` (`:20140`, **único caminho de escrita da Seth — APPEND-ONLY**: `POST
+ /memoria` insere um bloco em `MEMÓRIAS.md` logo abaixo do marcador `ENTRADAS-NOVAS` (número e
+@@ -130,7 +135,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   **arquivado** — injeção venceu em fidelidade/custo; números no `redesign/LOG.md`).
+ - **`ONDE_ESTAMOS.md` (16/08/2026) é um quarto arquivo na raiz, só para o Humano — nunca entra na hidratação.** Uma tela, português simples, sem jargão de canon. Mantido atualizado no mesmo commit de qualquer entrada de MEMÓRIAS que mude o estado (REGRAS, Regra 4). MEMÓRIAS (196)/(197).
+ - **[FECHADO] Teto de entrega do carregador do `hermes-agent`.** Veredito: `agent/prompt_builder.py` truncava `.hermes.md` antes de injetar — piso dinâmico de 20.000 chars vindo de `model.context_length: 65536`, e **o PROJETO.md inteiro nunca chegava a nenhum modelo**. Corrigido com `context_file_max_chars: 100000` explícito no `config.yaml`, escopo estreito, verificado rodando o carregador real e não só lendo a config. `lacuna` que permanece: efeito de `model.context_length` sobre a compressão de histórico de conversa, não medido. Histórico: MEMÓRIAS (103)-(105).
+-- Silos por modelo (Fase 2, ainda NÃO construídos): o hook `gerar-hidratacao.sh` gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, que o `seth_gateway` usa no modo `full`); cada um filtra só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria (vaza MOD entre modelos). Silo do Conselho (REGRAS, "O Conselho" item 3): norma.
++- **Silos por modelo: CONSTRUÍDOS.** (A frase anterior aqui dizia "Fase 2, ainda NÃO construídos" e emendava, na mesma linha, que o hook os gera — contradição dentro de uma frase só, achada na auditoria de (419) e corrigida em (420).) O hook `gerar-hidratacao.sh` gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, que o `seth_gateway` usa no modo `full`); cada um filtra só o MOD do modelo-alvo. Arquivo único foi rejeitado em auditoria (vaza MOD entre modelos). O P-11 impede silo de entrar no canon, agora também por conteúdo e contra renomeação ((419)). Silo do Conselho (REGRAS, "O Conselho" item 3): norma.
++  - **Consequência normativa em aberto, para sua decisão:** REGRAS, "O Conselho", condiciona um controle a este marco — *"Enquanto a Fase 2 não existir: nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção"*. Se a Fase 2 está cumprida, essa condição precisa de **entrada nova** dizendo o que passa a valer (Regra 4: correção é entrada nova, nunca edição). Não mexi em REGRAS por conta própria — é Mudança estrutural e exige 2ª opinião ou risco assumido por você. Enquanto não se decide, **vale a leitura conservadora**: MOD sensível continua fora de MEMÓRIAS.
+ - **Item C1.1 (05/09/2026, MEMÓRIAS (338)): `scripts/estado_para_eco.sh` reporta `IDADE-HIDRATACAO`** — há quanto tempo `.hidrata.md` foi gerado, distinto de `sync:` (que só mede HEAD local vs. remoto). `redesign/router/seth_gateway.py` já repassa esse campo pro contexto compacto da Seth.
+ - **Item B1.1 (05/09/2026, MEMÓRIAS (338)): a janela de `.hidrata.md` ganhou um resumo de 1 linha das entradas mais antigas que a janela cheia** — aditivo, mesmo orçamento de `JANELA_ORCAMENTO_CHARS` sem mudar, mais `JANELA_RESUMO_ANTIGAS_CHARS=8000` à parte, reaproveitando `INDICE_MEMORIAS.md`. Não muda o algoritmo de acúmulo por orçamento abaixo, só estende o alcance depois dele.
+ - **A janela de injeção é por ENTRADA INTEIRA, não por linha crua.** `.githooks/gerar-hidratacao.sh` acumula entradas completas até um orçamento de `JANELA_ORCAMENTO_CHARS=25000` caracteres — desde MEMÓRIAS (271), de cima pra baixo a partir do marcador `ENTRADAS-NOVAS` (mais recente primeiro); nas entradas migradas de antes de (271), o mecanismo original (de trás pra frente, a partir do fim físico) continua documentado como fallback para HEADs sem o marcador. Nunca corta uma entrada no meio — se a primeira sozinha já estourar o orçamento, entra inteira mesmo assim. Medido ao vivo em 20/08/2026 (antes da migração): o `.hidrata.md` (então `.hermes.md`) publicado carregava 9 entradas completas, (205)-(213), nenhuma cortada, 16.713 palavras no arquivo todo. A frase anterior a essa medição ("janela de 30 linhas") vinha de um desenho anterior ao hook atual e nunca foi atualizada quando o mecanismo mudou — corrigida em (215), sem apagar a entrada de MEMÓRIAS que registra o achado.
+@@ -220,7 +226,9 @@ movido na remoção do Hermes, 2026-09-03, MEMÓRIAS (312); junto de `restic.pas
+ `obsidian.token`, `google-project/` no mesmo diretório). O OmniRoute não lê esse arquivo em
+ runtime — as chaves ficam cifradas no `~/.omniroute/storage.sqlite`; `~/.config/agata/.env`
+ é a fonte para adicionar/rotacionar provedor (ver `redesign/router/PROVEDORES.md`).
+-**O api_server executa terminal: nunca expor sem contenção.** Auditado em MEMÓRIAS (126) — a frase antiga desta seção descrevia Tailscale com dupla autenticação, mecanismo que **não existe nesta máquina** (achado em (125)). O mecanismo real, confirmado por `ss -tlnp`: `api_server` compartilha a porta do `hermes-gateway` (8642), e o bind é **`127.0.0.1`** — contenção de kernel, não de firewall. LibreChat (`network_mode: host`, bind `127.0.0.1:3080`), Mongo/Meili (publicados só em `127.0.0.1`) e Kokoro TTS (8880, publicado pelo Docker) também só em loopback. Mesmo efeito de contenção do texto antigo, mecanismo diferente do descrito — corrigido aqui pra não sustentar um controle de segurança em algo que não roda.
++**Nada deste sistema escuta fora de `127.0.0.1`.** Essa é a contenção — de kernel, não de firewall. Verificado por `ss -tlnp` em 09/09/2026, porta a porta: `20126` seth-gateway · `20127` sanitizador · `20128` OmniRoute · `20130` whisper · `20134` embeddings · `20135` discord-mcp · `20136` navegador-mcp · `20140` seth-escriba · `27124` obsidian-rest · `27125` obsidian-ro-proxy · `3080` LibreChat · `8880` Kokoro · `8890` Piper · `11434` Ollama · `27017` Mongo · `7700` Meili. Fora de loopback só `tailscaled` — que é o acesso remoto legítimo, e é deliberado.
++
++**Correção de 09/09/2026 ((420)): esta seção sustentava a contenção num processo que não existe mais.** O texto anterior dizia que *"`api_server` compartilha a porta do `hermes-gateway` (8642)"*. O Hermes foi removido por inteiro em (312), 03/09/2026, e **nada escuta na 8642** — conferido, zero listeners. Ou seja: um controle de segurança descrito em cima de algo que não roda, exatamente a falha que a auditoria de (126) tinha corrigido nesta mesma seção uma vez (ali era Tailscale com dupla autenticação, também inexistente). Repetiu-se porque o parágrafo foi reescrito para o mecanismo da época e não voltou a ser conferido quando o mecanismo morreu. A contenção real nunca dependeu do Hermes — são os binds em loopback listados acima, que continuam de pé.
+ **Ollama (`11434`):** restrito a `127.0.0.1` desde MEMÓRIAS (126)/(127), confirmado no bind real (`ss -tlnp`) e no ambiente do processo. `override.conf` completo com as 5 variáveis (`OLLAMA_NUM_GPU=999`, `OLLAMA_KV_CACHE_TYPE=q4_0`, `CUDA_VISIBLE_DEVICES=0`, `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_HOST=127.0.0.1:11434`) — o efeito colateral de (127) (`OLLAMA_NUM_GPU`/`CUDA_VISIBLE_DEVICES`/`OLLAMA_FLASH_ATTENTION` apagados por um `tee` destrutivo) foi corrigido, confirmado em MEMÓRIAS (130). Efeito sobre estabilidade de VRAM não medido nesta correção — restaurar a variável não é o mesmo que testar carga.
+ Ao rotacionar chave, atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
+ 
+@@ -248,13 +256,31 @@ Aprovado em princípio, escopo pequeno de propósito: UM modelo, UMA tarefa —
+ **Backoff de 429, 20/08/2026 (item 3 do documento do Humano, sugestão do Marcos, MEMÓRIAS (216)).** Antes: uma retentativa (duas invocações manuais em sequência) e desiste, sem memória entre invocações. Agora: `conselho_remoto.py` guarda em `memoria/missoes/conselho-remoto/.backoff-estado.json` (camada privada, sem remote) quantas falhas HTTP 429 aconteceram SEGUIDAS entre invocações; na segunda falha seguida, a próxima chamada é recusada por 15 minutos, com a espera registrada em `memoria/missoes/conselho-remoto/backoff.log`. Uma chamada sem 429 (sucesso ou erro de outro tipo) zera o contador. Testado isolado: 1 falha não trava, 2 falhas seguidas travam por ~900s, sucesso depois reseta — os três casos rodados de verdade contra o módulo importado, sem chamada de rede real.
+ 
+ **Pós-redesenho (Fase 1 do `redesign`, P1-04; mergeado na Fase 8, MEMÓRIAS (310)/(311)):**
+-`conselho_remoto.py` **não lê mais chave nenhuma** e não faz backoff próprio — a chamada externa
+-sai por **UMA POST em `http://127.0.0.1:20127/v1/chat/completions`** (o proxy de sanitização
+-P1-02) → OmniRoute, combo `conselho` (`zai/glm-4.7-flash → gemini-2.5-flash`, `strategy=priority`,
+-**sem tier local** — verificado em `storage.sqlite`). Backoff/breaker/cota agora são do OmniRoute.
+-**Ganho:** o pedido do Conselho passa pela sanitização de segredo. **Invariantes preservados:**
+-só material público sai (`checar_conteudo_privado` byte a byte igual), teto de tamanho, UMA
+-chamada, aborta se os externos esgotarem (não cai pro local), formato do parecer, resposta crua.
++`conselho_remoto.py` **não lê mais chave nenhuma** — a chamada externa sai por **UMA POST em
++`http://127.0.0.1:20127/v1/chat/completions`** (o proxy de sanitização P1-02) → OmniRoute.
++**Ganho:** o pedido do Conselho passa pela sanitização de segredo.
++
++**Corrigido em 09/09/2026 ((420)) — este parágrafo descrevia o código de antes da (374) em
++quatro pontos, e um deles estava redigido como garantia de desenho.** A auditoria conferiu
++contra `scripts/conselho_remoto.py`, não contra o texto:
++- **Roster:** não são 4 nomes fixos, são **5**, e a lista real é `zai/glm-4.7-flash`,
++  `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`, `huggingface/meta-llama/Llama-3.3-70B-Instruct`,
++  `mistral/ministral-8b-latest`. Os dois que o texto antigo nomeava e sumiram
++  (`openrouter/minimax/minimax-m3:free`, `groq/openai/gpt-oss-120b`) estão hoje na tabela
++  "Fora — não usar" de `config/modelos-gratuitos.md`.
++- **Backoff/breaker:** o texto dizia "não faz backoff próprio... agora são do OmniRoute". O
++  script **tem** circuit breaker POR MODELO, com estado em disco e recuo exponencial.
++- **Alvo:** não é mais o combo `conselho`. A rotação escolhe um **modelo cru**; `COMBO` só
++  sobra como legado, para o caso de o roster ficar vazio.
++- **"Aborta se os externos esgotarem (não cai pro local)" era FALSO** — e é o pior dos quatro,
++  porque estava sob o rótulo "Invariantes preservados", que é linguagem de garantia. Existe
++  `_chamar_local()`: roster remoto inteiro fora ou rejeitado ⇒ **uma** chamada ao qwen local.
++  Nuance que o texto antigo confundia: o *combo* `conselho` de fato não tem tier local; quem
++  cai pro local é o *script*.
++
++**Invariantes que continuam valendo** (conferidos, não herdados): só material público sai
++(`checar_conteudo_privado`), teto de tamanho, UMA chamada por invocação, formato do parecer,
++resposta crua gravada.
+ O `.json` de saída passou a gravar `provider` (derivado do modelo) — rastreabilidade, já que a
+ combo é config. Cadeia de auditoria A→B→C cumprida (B=Qwen; C=Máquina); `redesign/propostas/
+ conselho-remoto-omniroute.diff` + `APROVADO-`.
+@@ -347,9 +373,9 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
+   - **(336)** Síntese de capacidades da Seth: acerta quando repete número já medido, erra quando afirma existência/estado sem checar (mesmo padrão em 2 incidentes de formato de cabeçalho). Orientação escrita entregue a ela.
+   - **(337)** A Seth reproduziu o padrão descrito em (336) na resposta seguinte (citação de entrada inexistente, termos sem referente), depois se autocorrigiu com precisão real (linha exata, contagem exata) — confirmado item a item, não aceito por confiança.
+   - **(338)** Dos 4 pendentes de (334), 2 já estavam feitos (B3.1, A3-médio — erro meu não ter checado antes de listar); implementados e testados os 2 reais: **C1.1**/**B1.1**, ver "Memória e hidratação" acima.
+-  - **(340)** Causa raiz real do `HTTPError` da consolidação noturna corrigida (`max_tokens` baixo pro reasoning do Gemini + teto de 15s do OmniRoute em overload do provedor principal) — (338) tinha concluído "transitório", incompleto. Tailscale conferido: não instalado nesta Máquina, ver "O que é" acima.
++  - **(340)** Causa raiz real do `HTTPError` da consolidação noturna corrigida (`max_tokens` baixo pro reasoning do Gemini + teto de 15s do OmniRoute em overload do provedor principal) — (338) tinha concluído "transitório", incompleto. Tailscale conferido: não instalado nesta Máquina, ver "O que é" acima. **[Esta última frase valia em 05/09/2026 e não vale mais: o Tailscale foi instalado em 06/09, (350). Mantida como o registro do que (340) mediu na época, com o carimbo de superada — anotar é mais honesto que reescrever.]**
+ - **[FECHADO por (312)] Gemini 429 ("perdi a conexão").** Causa raiz, mecanismo (`_summarize_api_error`/`run_agent.py:2146`) e verificação histórica: MEMÓRIAS (38)-(40), (150). O risco residual citado aqui ("patch vive no `hermes-agent` vendored, sem backup") **não tem mais objeto** — o Hermes foi removido por inteiro em (312), 03/09/2026; não há mais patch vendored pra reverificar.
+-- **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. Se reaparecer, o protocolo é: curl na 8642 forçando fallback com `carregar`, capturar o system prompt efetivo no Ollama, e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
++- **`carregar` no fallback:** nenhum bug confirmado com esse nome na história real. Não carregar adiante como fato. O protocolo de investigação que estava aqui mandava dar `curl` na **8642** — porta do `hermes-gateway`, removido em (312); era um roteiro inexecutável, corrigido em (420). Se o sintoma reaparecer, o equivalente hoje é: `curl` no `:20126` (seth-gateway) forçando o caminho suspeito, capturar o payload efetivo que sai (o `--selftest` do gateway mostra o que `_injeta` monta), e testar em ordem — (a) hidratação não injetada, (b) injetada mas truncada, (c) recebida e ignorada.
+ - **[FECHADO] `num_ctx` ignorado pelo endpoint compatível com OpenAI do Ollama.** Veredito: **não é bug do `hermes-agent`** — o pedido sempre saiu correto (`HERMES_DUMP_REQUESTS=1` capturou `options.num_ctx: 65536` no `api_kwargs` real), e o endpoint `/v1/chat/completions` do Ollama não suporta `num_ctx` **por desenho**, declarado pelo mantenedor em [`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814). Conserto permanente: `PARAMETER num_ctx 65536` embutido em Modelfile próprio, convenção de tag `-64k`. Custo medido: 89,7% de VRAM de pico, 29/33 camadas na GPU. Histórico, inclusive a hipótese do merge raso testada e **refutada**: MEMÓRIAS (121), (122), (133)-(135).
+ - **TES-001 — APOSENTADO 09/09/2026 (MEMÓRIAS (417)).** Nunca fechou. Placar final: 5 adversas ((66),(69),(73),(360),(408)), 1 limpa isolada ((243)), 1 limpa quebrada ((406)). O que ele cobria (fabricação de estado/identidade) passa pra Cadeia de auditoria em camadas + P-7 + Catálogo de falhas. Entradas históricas ficam.
+ - **[OBSOLETO, achado 05/09/2026 ao tentar implementar] Asserção byte a byte de entrega (harness A1).** Especificação original: hashear o payload no hook `pre_api_request` do `hermes-agent` (`agent/conversation_loop.py:2645-2702`) e comparar contra o selo de `selar.sh`. **O Hermes foi removido por inteiro em (312), 03/09/2026** — `agent/conversation_loop.py` e o hook `pre_api_request` não existem mais em lugar nenhum do sistema; confirmado por `grep` real, zero ocorrência. A especificação inteira dependia de um ponto de gancho que não existe mais na arquitetura atual (grafo + OmniRoute). **Não implementado como especificado — implementá-lo seria pendurar um hook em nada.** Se a preocupação original (o que chega ao provedor bate com o que devia) ainda vale na arquitetura nova, o ponto de fronteira equivalente hoje é `redesign/router/sanitizar.py`, `sanitizar_payload()` — chamado antes de toda saída pelo `:20127`, já testado (`--autoteste`) — mas hashear-e-comparar-contra-selo ali seria um item NOVO, não uma retomada deste, e não foi pedido. Histórico: MEMÓRIAS (103)-(105), (159).
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index b80dac8..cde28b9 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -43,7 +43,7 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
+ | `groq/openai/gpt-oss-*` | Cloudflare fichou o cliente do OmniRoute como bot (`403 browser_signature_banned`), persistente; e gpt-oss queima reasoning. |
+ | `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
+ | `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
+-| `cerebras/gpt-oss-120b` | queima o orçamento em reasoning e devolve vazio. |
++| ~~`cerebras/gpt-oss-120b`~~ | **[SUPERADO por (416), 09/09/2026 — não está mais fora.]** O motivo antigo era "queima o orçamento em reasoning e devolve vazio". Medição nova, ao vivo: grátis, ~0,4s, tools+stream OK — virou **tier 0** dos três combos da Seth (tabela abaixo). Esta linha ficou aqui contradizendo a de baixo até a auditoria de (419) achar; mantida riscada em vez de apagada porque saber que a avaliação MUDOU vale mais que fingir que nunca houve a outra. Intermitente: quando cai, o `priority` desce sozinho. |
+ | **GitHub Models** (`models.github.ai`) | **descontinuado pela GitHub** — `410 github_models_retirement_brownout` ("scheduled retirement"), 08/09/2026. Não há slug de provedor pra ele neste build do OmniRoute de qualquer forma. |
+ | `mistral/mistral-small-latest` | `429 code 1300` nesta conta (free tier). Usar `mistral/ministral-8b-latest` no lugar (tabela de cima). |
+ 
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index aafb472..30958bc 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -24,7 +24,7 @@ const CANON = {
+   REGRAS: "REGRAS.md", PROJETO: "PROJETO.md",
+   "MEMÓRIAS": "MEMÓRIAS.md", MEMORIAS: "MEMÓRIAS.md",
+   ONDE_ESTAMOS: "ONDE_ESTAMOS.md", CHAVES: "CHAVES.md",
+-  PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md", ROADMAP: "ROADMAP.md",
++  PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md",
+   PROMPT_CARREGAMENTO: "PROMPT_CARREGAMENTO.md",
+   PROCEDIMENTO_LOGIN: "PROCEDIMENTO_LOGIN.md",
+   INDICE_MEMORIAS: "INDICE_MEMORIAS.md",
+@@ -169,13 +169,13 @@ const TOOLS = [
+     name: "query_canon",
+     description:
+       "Lê um documento do canon do Agata direto da fonte (REGRAS, PROJETO, MEMÓRIAS, " +
+-      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, ROADMAP, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
++      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
+       "Use SEMPRE antes de afirmar qualquer coisa sobre regra, estado ou histórico — não confie na memória. " +
+       "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo).",
+     inputSchema: {
+       type: "object",
+       properties: {
+-        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | ROADMAP | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
++        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
+         grep: { type: "string", description: "regex (case-insensitive); devolve só os trechos casando com contexto" },
+         contexto: { type: "number", description: "linhas de contexto ao redor de cada hit do grep (0–20, default 3)" },
+         linhas: { type: "string", description: 'intervalo "N-M" (ex: "1-120")' },

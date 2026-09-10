@@ -1,0 +1,80 @@
+diff --git a/scripts/varredura_segredo.sh b/scripts/varredura_segredo.sh
+index 76d5861..0fa1910 100755
+--- a/scripts/varredura_segredo.sh
++++ b/scripts/varredura_segredo.sh
+@@ -49,9 +49,75 @@ PADROES_SEGREDO=(
+ # real veria. Padrões de chave conhecidos + heurística genérica. Heurística
+ # tem falso positivo/negativo -- rede de segurança adicional, não substitui
+ # revisão humana do diff.
++# --- AUTOPROVA DOS PADRÕES (MEMÓRIAS (422)) -------------------------------
++# O varredor prova que ENXERGA antes de dizer que não viu nada.
++#
++# Buraco medido em 09/09/2026, não teórico: um padrão MALFORMADO (ex.: um
++# parêntese sem fechar) faz `grep -E` sair 2 e devolver VAZIO. No laço do
++# checar_segredo, vazio == "não achei" == limpo. Ou seja: quebrar um padrão
++# -- por edição desatenta, por merge, por um `sed` largo -- desliga aquela
++# régua EM SILÊNCIO, e o segredo que ela guardava passa. O controle não
++# distingue "procurei e não achei" de "não consegui procurar".
++#
++# Origem do achado: o modelo desta sessão declarou um commit "limpo" depois
++# de uma varredura ad-hoc em que um dos 12 padrões (o PEM, que começa com
++# `-----`) foi lido como OPÇÃO do grep e nunca chegou a rodar. O controle
++# real não tinha esse defeito (usa `grep -E --`), mas o episódio expôs a
++# pergunta certa: como alguém SABE que todos os padrões rodaram? Não sabia.
++# Agora sabe. É a falha catalogada em REGRAS ("Grep negativo usado como
++# prova de ausência sem validar o padrão contra um positivo conhecido
++# primeiro", (250)-(251)) transformada em mecanismo em vez de advertência.
++#
++# Fixtures montadas em PEDAÇOS, nunca escritas inteiras: literal completo
++# faria o próprio P-1 acusar este arquivo. Mesma convenção de
++# redesign/router/sanitizar.py (_fx) e de scripts/testar_perimetro.sh (_k).
++_vs_k() { local IFS=""; printf '%s' "$*"; }
++_vs_rep() { printf "%${2}s" "" | tr ' ' "$1"; }
++
++_autoprova_padroes() {
++  local provas=(
++    "$(_vs_k "AK" "IA" "$(_vs_rep A 16)")"
++    "$(_vs_k "AI" "za" "$(_vs_rep b 35)")"
++    "$(_vs_k "gh" "p" "_" "$(_vs_rep c 36)")"
++    "$(_vs_k "sk" "-" "$(_vs_rep d 20)")"
++    "$(_vs_k "xo" "xb" "-" "1234567890")"
++    "$(_vs_k "---" "--BEGIN " "RSA " "PRIVATE " "KEY" "---" "--")"
++    "$(_vs_k "API" "_KEY" "=" "$(_vs_rep e 16)")"
++    "$(_vs_k "sk" "-" "ant" "-" "$(_vs_rep f 20)")"
++    "$(_vs_k "gs" "k" "_" "$(_vs_rep g 40)")"
++    "$(_vs_k "h" "f" "_" "$(_vs_rep h 30)")"
++    "$(_vs_k "git" "hub" "_pat_" "$(_vs_rep i 50)")"
++    "$(_vs_k "$(_vs_rep 0 32)" "." "$(_vs_rep j 16)")"
++  )
++  # O pareamento por POSIÇÃO é frágil por natureza -- foi exatamente assim
++  # que _ROTULOS quebrou nesta mesma sessão quando padrões novos entraram
++  # sem rótulo novo. Então o descasamento de tamanho é FALHA declarada, não
++  # silêncio: quem acrescentar padrão sem acrescentar prova, descobre aqui.
++  if [ "${#provas[@]}" -ne "${#PADROES_SEGREDO[@]}" ]; then
++    echo "FALHA (P-1): ${#PADROES_SEGREDO[@]} padrões e ${#provas[@]} provas -- alguém acrescentou padrão sem a fixture correspondente. Enquanto não parear, o varredor NÃO pode declarar nada limpo."
++    return 1
++  fi
++  local i ruim=0
++  for i in "${!PADROES_SEGREDO[@]}"; do
++    if ! printf '%s\n' "${provas[$i]}" | grep -qE -- "${PADROES_SEGREDO[$i]}" 2>/dev/null; then
++      echo "FALHA (P-1): o padrão '${PADROES_SEGREDO[$i]}' NÃO casa a própria fixture -- está malformado ou foi quebrado numa edição. Esta régua está CEGA, e um segredo que ela cobria passaria como limpo. Conserte o padrão antes de comitar qualquer coisa."
++      ruim=1
++    fi
++  done
++  return "$ruim"
++}
++
+ checar_segredo() {
+   local achou=0
+ 
++  # Antes de qualquer veredito: as réguas enxergam? Se alguma estiver cega,
++  # "limpo" seria mentira -- e mentira de controle de segredo num repo
++  # público. Falha fechada, como manda o princípio: controle que enxerga
++  # menos do que devia é falha do controle, não licença.
++  if ! _autoprova_padroes; then
++    achou=1
++  fi
++
+   # Arquivo .env staged é o próprio incidente, não um caso pra escanear por
+   # padrão -- se .gitignore falhou ou foi forçado (`git add -f`), avisa
+   # sempre, sujo ou limpo por dentro. Achado real ao testar (15/08/2026):

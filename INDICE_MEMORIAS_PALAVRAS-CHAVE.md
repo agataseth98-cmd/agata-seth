@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
+  palavras-chave: agora, existe, teste, controles, ele, pegou, furo, meu, dia, anterior, correção, imediata, item, mesmo, apontei, causa, raiz, dar, nota, confiabilidade, sistema, nada, repositório, testava, ordem, humano, proposta
+(420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon reconciliado com a Máquina, atalhos de fato instalados, B6 movido pra horizonte.** Ordem do Humano: *"deixe o B6 como futuro/horizonte, e encerre os outros"*. Sequência da (419 - quatro controles do perímetro não controlavam o que diziam controlar), que consertou os controles; esta fecha o que os controles não pegavam porque é texto, não código.
+  palavras-chave: encerrando, pendências, auditoria, canon, reconciliado, máquina, atalhos, fato, instalados, movido, pra, horizonte, ordem, humano, deixe, futuro, encerre, sequência, quatro, controles, perímetro, controlavam, diziam, controlar, consertou, fecha, pegavam, porque, texto, código
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o que diziam controlar.** Auditoria completa por ordem do Humano ("audite o sistema por completo... percebendo e resolvendo falhas de segurança"). Todo achado abaixo foi demonstrado vermelho/verde em clone descartável, nunca só lido. Nenhum era teórico.
   palavras-chave: quatro, controles, perímetro, controlavam, diziam, controlar, auditoria, completa, ordem, humano, audite, sistema, completo, percebendo, resolvendo, falhas, segurança, achado, abaixo, demonstrado, vermelho, verde, clone, descartável, nunca, lido, era, teórico
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, gateway, emperrava, servidor, inteiro, navegador, desconectava, meio, stream, achado, travou, teste
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
   palavras-chave: modelspecs, enforce, librechat, yaml, vence, localstorage, navegador, fecha, modelo, disponível, abrir, seth
-(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERRADA. A Seth não misleu um truncamento; o `vault_consultar` de diretório **realmente** devolve uma lista velha. Regra 4: corrige por cima, não edita (389).
-  palavras-chave: análise, causa, raiz, estava, errada, seth, misleu, truncamento, vault, consultar, diretório, realmente, devolve, lista, velha, regra, corrige, cima, edita
-(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apodreceu. Conserto de verdade = combo custom `seth-livre`. Pedido do Humano: "prossiga agata, todas as plataformas são Agata".
-  palavras-chave: seth, ficou, muda, teste, auto, best, free, apodreceu, conserto, verdade, combo, custom, livre, pedido, humano, prossiga, agata, plataformas
+(391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERR …
+  palavras-chave: análise, causa, raiz, estava, err
+(390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apod …
+  palavras-chave: seth, ficou, muda, teste, auto, best, free, apod
 (389) DIÁRIO — 08/09/2026 · Auditoria do teste 2 da Seth: 1 falha real (F-1, "le …
   palavras-chave: auditoria, teste, seth, falha, real
 (388) DIÁRIO — 08/09/2026 · Cabeçalho da Seth (R-1): a doutrina injetada ganha f …

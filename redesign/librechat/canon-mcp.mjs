@@ -24,7 +24,7 @@ const CANON = {
   REGRAS: "REGRAS.md", PROJETO: "PROJETO.md",
   "MEMÓRIAS": "MEMÓRIAS.md", MEMORIAS: "MEMÓRIAS.md",
   ONDE_ESTAMOS: "ONDE_ESTAMOS.md", CHAVES: "CHAVES.md",
-  PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md", ROADMAP: "ROADMAP.md",
+  PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md",
   PROMPT_CARREGAMENTO: "PROMPT_CARREGAMENTO.md",
   PROCEDIMENTO_LOGIN: "PROCEDIMENTO_LOGIN.md",
   INDICE_MEMORIAS: "INDICE_MEMORIAS.md",
@@ -169,13 +169,13 @@ const TOOLS = [
     name: "query_canon",
     description:
       "Lê um documento do canon do Agata direto da fonte (REGRAS, PROJETO, MEMÓRIAS, " +
-      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, ROADMAP, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
+      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
       "Use SEMPRE antes de afirmar qualquer coisa sobre regra, estado ou histórico — não confie na memória. " +
       "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo).",
     inputSchema: {
       type: "object",
       properties: {
-        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | ROADMAP | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
+        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
         grep: { type: "string", description: "regex (case-insensitive); devolve só os trechos casando com contexto" },
         contexto: { type: "number", description: "linhas de contexto ao redor de cada hit do grep (0–20, default 3)" },
         linhas: { type: "string", description: 'intervalo "N-M" (ex: "1-120")' },

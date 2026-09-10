@@ -37,6 +37,10 @@ source "$_PERIMETRO_DIR/checar_citacao.sh"
 source "$_PERIMETRO_DIR/checar_discordancia.sh"
 
 cabecalho() {
+  # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+  # (vigia de SKIP) saber a QUEM atribuir um SKIP -- antes, o veredito era
+  # anônimo e um controle podia ficar em SKIP para sempre sem nome nem conta.
+  PERIMETRO_CTRL="$1"
   echo "=== $1 ==="
   echo "controle: $2"
   echo "fonte: $3"
@@ -285,9 +289,17 @@ _p5_periodo_verificar() {
 # (comentário longo abaixo, "uma marca antiga esquecida"); a correção nunca
 # tinha chegado ao P-7.
 P5_RAMO="ordinario"
+# Houve entrada NOVA nesta corrida, mesmo tendo ido pelo ramo de permutação?
+# O verificador de permutação distingue "entrada realocada byte-idêntica" de
+# "entrada nova genuína" e ANUNCIA a contagem. Sem ler essa contagem, o P-7
+# pulava um commit que trazia entrada nova só porque o P-5 tinha ido pela
+# permutação -- foi assim que a suíte de regressão dos controles pegou, em
+# 09/09/2026, um furo introduzido pelo conserto do dia anterior ((419)).
+P5_ENTRADAS_NOVAS=0
 
 p5_append_only() {
   P5_RAMO="ordinario"
+  P5_ENTRADAS_NOVAS=0
   if ! git rev-parse HEAD >/dev/null 2>&1; then
     return 0
   fi
@@ -347,8 +359,23 @@ p5_append_only() {
   if [ -n "$marca_migracao" ]; then
     P5_RAMO="permutacao"
     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
-    _p5_periodo_verificar
-    return $?
+    local saida_perm codigo_perm
+    saida_perm="$(_p5_periodo_verificar 2>&1)"; codigo_perm=$?
+    [ -n "$saida_perm" ] && echo "$saida_perm"
+    # O verificador separa "entrada realocada byte-idêntica" de "entrada NOVA
+    # genuína" e imprime a contagem das novas. Se veio entrada nova, este
+    # commit TEM conteúdo inédito -- e o P-7 não pode pular alegando que não
+    # há nada a citar. Medido em 09/09/2026: uma entrada gravada no lugar
+    # errado (fim do arquivo, em vez do topo abaixo do marcador) derruba o
+    # crescimento ordinário, cai aqui, passa como permutação legítima com
+    # "+1 entrada nova genuína" -- e o P-7 pulava justo o commit que trazia
+    # a citação nova. Achado pela suíte scripts/testar_perimetro.sh no
+    # primeiro dia dela, contra um furo que o conserto do dia anterior
+    # ((419)) tinha acabado de criar.
+    if echo "$saida_perm" | grep -qE '[1-9][0-9]* entrada\(s\) nova\(s\) genuína\(s\)'; then
+      P5_ENTRADAS_NOVAS=1
+    fi
+    return "$codigo_perm"
   fi
   [ -n "$saida_quente" ] && echo "$saida_quente"
   [ -n "$saida_morno" ] && echo "$saida_morno"
@@ -615,8 +642,12 @@ p7_citacao() {
   # nesse intervalo. O controle em si estava íntegro -- testado contra
   # positivo e negativo conhecidos: citação real -> passa, citação
   # fabricada -> pega. Era só o portão de entrada que estava travado aberto.
-  if [ "${P5_RAMO:-ordinario}" = "permutacao" ]; then
-    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO nesta corrida -- pulado (nenhum byte de entrada é novo; nada a citar que já não estivesse no canon)."
+  # Duas condições, não uma: o P-5 foi pela permutação E a permutação não
+  # trouxe entrada nova. A segunda metade veio depois (mesma data), quando a
+  # suíte mostrou que permutação com entrada nova existe e é comum -- ver o
+  # comentário em p5_append_only.
+  if [ "${P5_RAMO:-ordinario}" = "permutacao" ] && [ "${P5_ENTRADAS_NOVAS:-0}" -eq 0 ]; then
+    echo "P-7: P-5 tomou o ramo de PERMUTAÇÃO e nenhuma entrada nova veio junto -- pulado (nada a citar que já não estivesse no canon)."
     PERIMETRO_ESTADO="SKIP"
     return 0
   fi
@@ -1120,6 +1151,133 @@ p10_vault_derivado() {
 # arriscar imprimir "OK" por engano quando a checagem só pulou (MEMÓRIAS
 # (193)). $1 = exit code da checagem; usa PERIMETRO_ESTADO, que a própria
 # checagem deixa setado quando não é um OK de verdade.
+# --- P-16 ----------------------------------------------------------------
+# "Quem muda um controle roda os testes daquele controle." (MEMÓRIAS (421))
+#
+# Motivo, medido e não teórico: até 09/09/2026 NADA testava os controles. O
+# P-7 ficou morto 79 commits; P-8 e P-11 eram cegos a renomeação desde
+# sempre. Os quatro furos da (419) foram achados porque alguém sentou pra
+# procurar -- não porque o sistema avisou. A (419) consertou os furos; sem
+# este controle, o próximo furo esperaria a próxima auditoria manual.
+#
+# Escopo estreito de propósito: só dispara quando um arquivo de CONTROLE está
+# staged. Commit que não toca controle não paga nada. Quando dispara, custa
+# ~1-2 min (a suíte roda o perímetro inteiro uma vez por caso, num clone).
+# Esse é o commit em que vale esperar.
+#
+# FALHA-class: mesma severidade de P-8. Mudar o controle sem que os testes
+# dele passem é a definição de regressão silenciosa.
+#
+# Prova de que não é decorativo: na primeira corrida, a suíte reprovou o
+# próprio conserto que a (419) tinha acabado de fazer -- o P-7 pulava commits
+# de permutação que traziam entrada nova. Consertado antes de entrar no canon.
+P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
+
+p16_testes_dos_controles() {
+  # Guarda de recursão: a suíte roda o perímetro dentro do clone dela.
+  if [ -n "${AGATA_TESTE_PERIMETRO:-}" ]; then
+    echo "P-16: rodando DENTRO da suíte -- pulado (senão recursa infinitamente)."
+    PERIMETRO_ESTADO="SKIP"; return 0
+  fi
+  local staged tocados
+  staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only 2>/dev/null)"
+  tocados="$(echo "$staged" | grep -E "$P16_ARQUIVOS_DE_CONTROLE" || true)"
+  if [ -z "$tocados" ]; then
+    echo "P-16: nenhum arquivo de controle staged -- suíte não precisa rodar."
+    PERIMETRO_ESTADO="SKIP"; return 0
+  fi
+  if [ ! -f "$_PERIMETRO_DIR/testar_perimetro.sh" ]; then
+    echo "SUSPEITO (P-16): arquivo de controle staged ($(echo "$tocados" | tr '\n' ' ')) mas scripts/testar_perimetro.sh não existe -- o controle mudou sem que exista teste dele."
+    return 1
+  fi
+  # Cobertura ANTES de rodar: todo controle do main() precisa ter caso na
+  # suíte OU motivo escrito na tabela SEM_TESTE dela. Acrescentado em (422)
+  # porque a suíte nasceu cobrindo 5 de 16 e os outros 11 não estavam
+  # isentos -- estavam esquecidos, e ninguém sabia dizer quais. É a mesma
+  # doutrina do resto: a diferença entre "não dá pra testar" e "ninguém
+  # testou" tem de estar escrita, senão vira o P-7 outra vez.
+  local declarados testados descobertos
+  declarados="$(grep -oE 'cabecalho "P-[0-9]+"' "$_PERIMETRO_DIR/perimetro.sh" | grep -oE 'P-[0-9]+' | sort -u)"
+  testados="$( { grep -oE '_caso P-[0-9]+' "$_PERIMETRO_DIR/testar_perimetro.sh" | grep -oE 'P-[0-9]+'
+                 grep -oE '^\s*\[P-[0-9]+\]=' "$_PERIMETRO_DIR/testar_perimetro.sh" | grep -oE 'P-[0-9]+'; } | sort -u)"
+  descobertos="$(comm -23 <(echo "$declarados") <(echo "$testados") | tr '\n' ' ')"
+  if [ -n "${descobertos// /}" ]; then
+    echo "SUSPEITO (P-16): controle(s) sem caso na suíte E sem motivo escrito: $descobertos"
+    echo "  O que fazer: ou escreva um caso em scripts/testar_perimetro.sh, ou declare o motivo na tabela SEM_TESTE de lá. Controle sem teste e sem justificativa é como o P-7 antes de (419) -- ninguém sabe se está dispensado ou esquecido."
+    return 1
+  fi
+  echo "P-16: controle staged ($(echo "$tocados" | tr '\n' ' ')) -- rodando a suíte de regressão (pode levar 1-2 min)..."
+  local saida codigo
+  saida="$(AGATA_TESTE_PERIMETRO=1 bash "$_PERIMETRO_DIR/testar_perimetro.sh" 2>&1)"; codigo=$?
+  if [ "$codigo" -eq 0 ]; then
+    echo "$saida" | tail -1
+    return 0
+  fi
+  echo "SUSPEITO (P-16): a suíte de regressão dos controles REPROVOU com um arquivo de controle staged. O que fazer: rode 'bash scripts/testar_perimetro.sh' e conserte antes de comitar -- um controle que perdeu cobertura não deve entrar no canon."
+  echo "$saida" | sed 's/^/  /'
+  return 1
+}
+
+# --- P-17 ----------------------------------------------------------------
+# "Controle que pula sempre está desligado, não é dispensado." (MEMÓRIAS (422))
+#
+# A falha que este controle contém, medida: o P-7 ficou em SKIP por 79
+# commits. Não quebrou, não deu erro, não avisou -- pulava educadamente,
+# escrevendo na tela que não havia nada a conferir. Ninguém percebeu porque
+# um SKIP é indistinguível de outro: normal na terça, normal na quarta,
+# normal por três meses. O olho humano perde a série; o disco não.
+#
+# Mecanismo: cada corrida grava quem pulou. Um controle que pula N corridas
+# SEGUIDAS deixa de ser rotina e vira AVISO com o número na cara -- "P-7:
+# 79 corridas seguidas sem conferir nada" é impossível de ler como normal.
+# Sucesso (qualquer veredito que não seja SKIP) zera a série daquele
+# controle, então SKIP legítimo e ocasional nunca alarma.
+#
+# AVISA, nunca falha: pular pode ser correto (P-16 fora de commit de
+# controle, P-7 numa migração real). O que não pode é pular em silêncio
+# para sempre. Mesma doutrina de P-6/P-9 -- barulho, não bloqueio.
+#
+# Estado FORA do repositório (~/.cache/agata/): é telemetria de execução,
+# não canon, e não deve sujar `git status` nem exigir entrada no .gitignore.
+P17_SKIPS=""
+P17_LIMITE=10
+P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
+
+p17_skip_cronico() {
+  [ -n "${AGATA_TESTE_PERIMETRO:-}" ] && { echo "P-17: dentro da suíte -- não contabiliza."; PERIMETRO_ESTADO="SKIP"; return 0; }
+  mkdir -p "$(dirname "$P17_ESTADO")" 2>/dev/null || { echo "P-17: sem cache gravável -- série não acompanhada."; PERIMETRO_ESTADO="PARCIAL"; return 0; }
+  touch "$P17_ESTADO" 2>/dev/null
+
+  local todos ctrl serie novo="" alarmes=""
+  todos="$(grep -oE 'cabecalho "P-[0-9]+"' "$_PERIMETRO_DIR/perimetro.sh" 2>/dev/null | grep -oE 'P-[0-9]+' | sort -u)"
+  while IFS= read -r ctrl; do
+    [ -z "$ctrl" ] && continue
+    serie="$(awk -v c="$ctrl" '$1==c{print $2}' "$P17_ESTADO" 2>/dev/null | tail -1)"
+    [ -z "$serie" ] && serie=0
+    if printf '%s' " $P17_SKIPS" | grep -q " $ctrl "; then
+      serie=$((serie + 1))
+      [ "$serie" -ge "$P17_LIMITE" ] && alarmes="${alarmes}${ctrl}=${serie} "
+    else
+      serie=0
+    fi
+    novo="${novo}${ctrl}	${serie}
+"
+  done <<< "$todos"
+  printf '%s' "$novo" > "$P17_ESTADO" 2>/dev/null
+
+  if [ -n "$alarmes" ]; then
+    echo "AVISO (P-17): controle(s) em SKIP por $P17_LIMITE ou mais corridas SEGUIDAS: $alarmes"
+    echo "  Por que importa: foi exatamente assim que o P-7 ficou desligado por 79 commits -- pulando em silêncio, um SKIP igual ao anterior. Confira se o motivo do SKIP ainda é verdade; se for, o controle talvez precise mudar de forma, não continuar pulando."
+    return 0
+  fi
+  if [ -n "$P17_SKIPS" ]; then
+    echo "P-17: pularam nesta corrida ($P17_SKIPS) -- séries abaixo do limite de $P17_LIMITE."
+  else
+    echo "P-17: nenhum controle pulou nesta corrida."
+  fi
+  return 0
+}
+
 _perimetro_veredito() {
   local codigo="$1"
   if [ "$codigo" -ne 0 ]; then
@@ -1129,6 +1287,7 @@ _perimetro_veredito() {
   elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
     echo "veredito: SKIP"
     CONT_SKIP=$((CONT_SKIP + 1))
+    P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
     echo "veredito: PARCIAL"
     CONT_PARCIAL=$((CONT_PARCIAL + 1))
@@ -1223,6 +1382,16 @@ main() {
   p15_roster_remoto
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  echo
+
+  cabecalho "P-16" "Quem muda um controle roda os testes daquele controle" "MEMÓRIAS (421); scripts/testar_perimetro.sh"
+  PERIMETRO_ESTADO=""
+  p16_testes_dos_controles; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"
+  PERIMETRO_ESTADO=""
+  p17_skip_cronico; _perimetro_veredito "$?"
   echo
 
   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
