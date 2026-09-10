@@ -84,6 +84,38 @@ reprovou o conserto que eu tinha feito ontem. Minha suposição estava
 errada, e o teste viu. Não fui eu que percebi — foi o teste. É exatamente
 para isso que ele serve.
 
+## 10/09 — auditamos a Seth e o culpado era o sistema
+
+Você mandou auditar a Seth. Ela não inventou **nada**. As cinco coisas
+verificáveis que ela afirmou estavam certas — inclusive uma data que eu
+mesmo corrigi quatro minutos depois de ela responder.
+
+Os erros de formato dela vieram de instruções nossas:
+
+- **As Regras descreviam um arquivo que não existe mais** como sendo o
+  mecanismo atual do sistema. Ele foi removido há sete dias. Pior: nosso
+  próprio registro conta que a Seth **já tinha sido corrigida** por citar
+  esse arquivo — corrigiram a Seth e deixaram o texto que a induziu ao
+  erro. Ela repetiu, lendo corretamente.
+- **A instrução mandava ela misturar dois formatos de cabeçalho** que as
+  Regras proíbem juntar. Ela obedecia direitinho.
+- **A instrução não proibia dizer "olá"** — só proibia bajular. Daí o
+  "Olá! Como posso ajudar?".
+- E um erro meu: o corretor de cabeçalho que escrevi ontem ficou cego a
+  uma forma que as Regras permitem. **Foi ela, sendo auditada, que
+  expôs.**
+
+Tudo corrigido. A lição ficou escrita ao lado do conserto: **quando o
+modelo e o texto divergem, confira os dois antes de culpar o modelo.**
+
+**O vault do Obsidian tinha sete travas invisíveis.** Ele mostrava 10 dos
+17 controles — faltavam justamente o que guarda dados privados, o que
+protege a história congelada e os dois criados na véspera. Quem
+consultasse para saber o que protege o sistema veria um retrato antigo,
+sem aviso. Agora a lista **se monta sozinha** a partir do código real, e
+o gerador **para e reclama** se não encontrar nada, em vez de produzir um
+vault vazio em silêncio.
+
 ## O que falta
 
 - **Uma decisão sua sobre uma regra.** Uma parte do sistema ficou pronta,

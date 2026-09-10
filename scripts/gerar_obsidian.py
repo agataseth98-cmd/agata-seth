@@ -319,6 +319,37 @@ def cabecalho_arquivo(path):
 
 # ------------------------------------------------------------------ geração
 
+def _controles_do_perimetro():
+    """(P-N, descrição) lidos de scripts/perimetro.sh -- a fonte da verdade.
+
+    O perímetro declara cada controle com `cabecalho "P-N" "<descrição>" "<fonte>"`.
+    Ler dali significa que o vault nunca fica atrás do que o sistema realmente
+    roda: controle novo aparece sozinho, controle removido some sozinho.
+
+    FALHA ALTO se não achar nada. Devolver lista vazia em silêncio recriaria,
+    de outro jeito, exatamente o problema que esta função existe pra matar --
+    um vault que descreve menos controles do que existem, sem avisar.
+    """
+    caminho = os.path.join(REPO, "scripts", "perimetro.sh")
+    try:
+        with open(caminho, encoding="utf-8") as fh:
+            texto = fh.read()
+    except OSError as e:
+        raise SystemExit(f"gerar_obsidian: nao consegui ler {caminho} ({e}) -- "
+                         "os controles do vault saem dali; abortado sem escrever nada.")
+    achados = re.findall(r'^\s*cabecalho\s+"(P-\d+)"\s+"([^"]*)"', texto, re.MULTILINE)
+    if not achados:
+        raise SystemExit("gerar_obsidian: nenhum controle casou o padrao "
+                         "'cabecalho \"P-N\" \"descricao\"' em scripts/perimetro.sh. "
+                         "Ou o formato mudou, ou o arquivo esta errado -- abortado "
+                         "sem escrever nada, em vez de gerar um vault sem controles.")
+    desc = {}
+    for c, d in achados:
+        desc.setdefault(c, d.strip())
+    ordenados = sorted(desc, key=lambda c: int(c.split("-")[1]))
+    return ordenados, desc
+
+
 def main():
     if os.path.isdir(SAIDA):
         shutil.rmtree(SAIDA)
@@ -391,7 +422,16 @@ def main():
     prop_base = {p: slug(p, "prop-") for p in props}
     NOTAS.update(prop_base.values())
 
-    controles = ["P-1", "P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9", "P-10"]
+    # Os controles vêm do PRÓPRIO perimetro.sh, não de lista fixa aqui.
+    # Motivo medido em 10/09/2026: esta lista estava congelada em P-1..P-10
+    # enquanto o perímetro já tinha 17. Sete controles -- entre eles o P-11
+    # (silo, segurança), o P-14 (selos, história) e os dois criados na
+    # véspera -- simplesmente NÃO EXISTIAM no vault. Quem consultasse o vault
+    # para saber o que protege o sistema receberia um retrato de meses atrás,
+    # sem nenhum aviso de que estava incompleto.
+    # Acrescentar os sete à mão seria conserto; ficaria para trás no P-18.
+    # Derivar da fonte é mecanismo: controle novo aparece no vault sozinho.
+    controles, CTRL_DESC = _controles_do_perimetro()
     ctrl_base = {c: c.lower() for c in controles}
     NOTAS.update(ctrl_base.values())
 
@@ -533,19 +573,7 @@ def main():
                    "---", f"< {link('moc-propostas','MOC propostas')} >"]
         escrever(f"propostas/{b}.md", linhas)
 
-    # -------- controles do perímetro
-    CTRL_DESC = {
-        "P-1": "Segredos só em ~/.config/agata/.env, fora do repo",
-        "P-2": "O executor pausa e pede sudo ao Humano",
-        "P-3": "Publicação é decisão deliberada; consentimento por trecho",
-        "P-4": "api_server contido; Ollama só em 127.0.0.1",
-        "P-5": "Regra 4 mecânica: MEMÓRIAS.md append-only (sufixo não-encolhido)",
-        "P-6": "Cópia da história fora da máquina (bundle + HD)",
-        "P-7": "Citação de MEMÓRIAS aponta pra entrada real, não fabricada",
-        "P-8": "Quarentena: mudança de comportamento exige proposta + APROVADO-",
-        "P-9": "Serviço declarado em PROJETO.md não pode morrer em silêncio",
-        "P-10": "Vault derivado confere byte a byte com a regeneração do HEAD",
-    }
+    # -------- controles do perímetro (lista e descrições vêm de _controles_do_perimetro)
     for c in controles:
         ents = sorted(e["num"] for e in entradas
                       if re.search(rf"\b{c}\b", "\n".join(e["linhas"])))
@@ -851,7 +879,7 @@ def main():
         "## Mapas",
         f"- {link('moc-memoria','Memória')}  ·  {link('moc-regras','Regras')}  ·  "
         f"{link('moc-projeto','Projeto')}",
-        f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
+        f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles', f'Controles {controles[0]}..{controles[-1]}')}  ·  "
         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
         f"{link('moc-documentos','Documentos do repositório')}  ·  "

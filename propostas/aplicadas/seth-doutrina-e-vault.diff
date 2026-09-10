@@ -1,0 +1,215 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index a4f0cdd..7d2c9a5 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -167,23 +167,34 @@ no contexto de nenhum modelo, só o que está no disco/repo.
+ **Hidratação** -- o ESTADO de ter REGRAS + PROJETO + a janela mais recente
+ de MEMÓRIAS presentes no contexto de um modelo (desde (271): topo do
+ corpo, logo após o marcador `ENTRADAS-NOVAS`; antes disso, fim físico).
+-Mecanismo real hoje: `.hermes.md`
++Mecanismo real hoje: `.hidrata.md`
+ único, gerado pelo hook pre-commit (`.githooks/gerar-hidratacao.sh`),
+-injetado automaticamente no system prompt de sessões dentro do
+-Hermes. Fora do Hermes, não há injeção automática -- a sessão precisa
++mais o silo por modelo `.hidrata-<modelo>.md`. Quem injeta é o consumidor
++da hidratação -- hoje o `seth_gateway` (`:20126`), que monta o contexto da
++Seth a cada turno. Fora dele não há injeção automática -- a sessão precisa
+ `carregar` (abaixo) pra chegar lá.
++  *Corrigido em 10/09/2026, MEMÓRIAS (422): este parágrafo dizia "Mecanismo
++  real hoje: `.hermes.md` ... sessões dentro do Hermes" — e o Hermes foi
++  removido por inteiro em (312), 03/09/2026. Um arquivo inexistente constava
++  como o mecanismo CORRENTE, no presente, na seção que DEFINE hidratação.
++  Não é curiosidade: a Seth foi auditada em (331) justamente por citar
++  `.hermes.md`, corrigiram a Seth, e deixaram aqui o texto que a induziu.
++  Ela voltou a repetir em 10/09 — lendo o canon corretamente. Quando o
++  modelo e o canon divergem, conferir os dois antes de culpar o modelo.*
+ 
+ **`carregar`** -- o COMANDO/PROCEDIMENTO que uma sessão fora do Hermes
+ segue pra chegar ao estado de hidratação: buscar REGRAS/PROJETO/
+ MEMÓRIAS pela Fonte canônica ("Verificação de canônico" nesta seção),
+-e abrir com o bloco de prontidão de 4 linhas (abaixo). Mecanismo
++e abrir com o bloco de prontidão de 3 linhas (abaixo) -- eram 4 até a
++linha `Nonce:` sair com a aposentadoria do TES-002, (417); este parágrafo
++ficou dizendo 4 e foi corrigido em (422). Mecanismo
+ (arquivo, hook, contador de turno fora do Hermes) é deste projeto,
+ não universal.
+ 
+ **`atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>`** -- comando que combina
+ `sincronizar` + regenerar hidratação: `git pull` do alvo, depois
+-regenera a hidratação (`.hermes.md` pra sessões no Hermes, releitura
+-pra sessões que já `carregar`am). Nunca sobrescreve história; conflito
++regenera a hidratação (`.hidrata.md` + os silos, para quem injeta;
++releitura pra sessões que já `carregar`am). Nunca sobrescreve história; conflito
+ -> para e avisa. Diferença de `sincronizar` sozinho: `sincronizar` só
+ confere/traz o repo, `atualizar` também refaz a hidratação a partir do
+ que trouxe.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 2801255..6304596 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -73,11 +73,31 @@ _DOUTRINA_FIXA = (
+     "**Humano decide**, você **propõe**, a Máquina arbitra fatos (rodando o "
+     "comando, não afirmando de memória). Nada muda o canon sem passar pelo "
+     "**portão** (as 3 perguntas). Não bajule, não simule emoção, não afirme "
+-    "sem fonte, não diga ter feito o que não fez.\n\n"
+-    "**Regra 1 — abra TODA resposta com o cabeçalho, exatamente neste formato:**\n"
+-    "`Agata · <modelo, ou 'modelo não verificado'> · t=<n> · <hora + selo>`\n"
+-    "`Última entrada: (<n>) <título>` · `sync: <repita do bloco de estado>` · "
+-    "o que está quebrado (ou `pronto.`)\n"
++    "sem fonte, não diga ter feito o que não fez.\n"
++    "**Sem saudação, sem oferta de ajuda, sem encerramento performático** "
++    "(REGRAS, Regra 5: \"Sem saudação, bajulação ou encerramento "
++    "performático\"). Nada de \"Olá\", \"Como posso ajudar?\", \"Espero ter "
++    "ajudado\". Depois do cabeçalho, vá direto ao assunto. Acrescentado em "
++    "(422): a doutrina proibia bajular e não proibia saudar, e a saudação "
++    "apareceu — a falta era da instrução, não sua.\n\n"
++    "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
++    "usa UMA, nunca as duas juntas** (REGRAS, \"Carregar e formatos\": "
++    "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
++    "é erro de formato).\n"
++    "— **(a) Só na PRIMEIRA resposta da conversa** (o `carregar`), bloco de "
++    "prontidão, 3 linhas, SEM `t=`:\n"
++    "`Agata · modelo: <nome> · sync: <repita do bloco de estado> · <hora + selo>`\n"
++    "`Última entrada: (<n>) <título> — <1 linha>`\n"
++    "`<quebrado: liste em 1 linha>` ou `pronto.`\n"
++    "  Sem nome confiável, a Regra 1 permite trocar `modelo: <nome>` por "
++    "`modelo não verificado` ou `família <X>, versão não verificada` — nessa "
++    "ordem de preferência, e último recurso, não o primeiro.\n"
++    "— **(b) Em TODA resposta seguinte**, uma linha só, COM `t=` e SEM "
++    "`Última entrada:`/`quebrado:`:\n"
++    "`Agata · <modelo> · t=<n> (<base da contagem>) · <hora + selo>`\n"
++    "  Corrigido em 10/09/2026, MEMÓRIAS (422): esta doutrina mandava fundir as "
++    "duas — `t=` junto com `Última entrada:` e `quebrado:` em todo cabeçalho. "
++    "Você obedecia certo uma instrução errada; o defeito era daqui.\n"
+     "— **Última entrada:** `<n>` e `<título>` saem da linha `TOPO-MEMÓRIAS:` do "
+     "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
+     "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
+@@ -97,7 +117,11 @@ _DOUTRINA_FIXA = (
+     "se ela não veio, `sync: não verificado`. Se o bloco de estado traz "
+     "`IDADE-HIDRATACAO` acima de ~15 min, anexe: `sync: PASS (hidratação ~Xmin, "
+     "não re-medido)` — um PASS antigo que você não pode re-medir não é um PASS ao "
+-    "vivo.\n\n"
++    "vivo.\n"
++    "— **quebrado:** só no bloco de prontidão (a). Não repita ali a linha "
++    "`sync:` — isso é reformulação, não item aberto. Procure em PROJETO, "
++    "\"Estado dos bugs e dos testes\", e na janela de MEMÓRIAS: item aberto "
++    "ali entra em `quebrado:`; nada aberto, `pronto.`.\n\n"
+     "**Leitura parcial (Regra 2):** resultado de tool que diga 'cortado', "
+     "'truncado', 'resumido', ou uma listagem SEM total explícito: NUNCA afirme o "
+     "fim da lista, o intervalo, nem 'vai até X'. É `lacuna: leitura parcial` — "
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index bbd6e7a..ff767f1 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -319,6 +319,37 @@ def cabecalho_arquivo(path):
+ 
+ # ------------------------------------------------------------------ geração
+ 
++def _controles_do_perimetro():
++    """(P-N, descrição) lidos de scripts/perimetro.sh -- a fonte da verdade.
++
++    O perímetro declara cada controle com `cabecalho "P-N" "<descrição>" "<fonte>"`.
++    Ler dali significa que o vault nunca fica atrás do que o sistema realmente
++    roda: controle novo aparece sozinho, controle removido some sozinho.
++
++    FALHA ALTO se não achar nada. Devolver lista vazia em silêncio recriaria,
++    de outro jeito, exatamente o problema que esta função existe pra matar --
++    um vault que descreve menos controles do que existem, sem avisar.
++    """
++    caminho = os.path.join(REPO, "scripts", "perimetro.sh")
++    try:
++        with open(caminho, encoding="utf-8") as fh:
++            texto = fh.read()
++    except OSError as e:
++        raise SystemExit(f"gerar_obsidian: nao consegui ler {caminho} ({e}) -- "
++                         "os controles do vault saem dali; abortado sem escrever nada.")
++    achados = re.findall(r'^\s*cabecalho\s+"(P-\d+)"\s+"([^"]*)"', texto, re.MULTILINE)
++    if not achados:
++        raise SystemExit("gerar_obsidian: nenhum controle casou o padrao "
++                         "'cabecalho \"P-N\" \"descricao\"' em scripts/perimetro.sh. "
++                         "Ou o formato mudou, ou o arquivo esta errado -- abortado "
++                         "sem escrever nada, em vez de gerar um vault sem controles.")
++    desc = {}
++    for c, d in achados:
++        desc.setdefault(c, d.strip())
++    ordenados = sorted(desc, key=lambda c: int(c.split("-")[1]))
++    return ordenados, desc
++
++
+ def main():
+     if os.path.isdir(SAIDA):
+         shutil.rmtree(SAIDA)
+@@ -391,7 +422,16 @@ def main():
+     prop_base = {p: slug(p, "prop-") for p in props}
+     NOTAS.update(prop_base.values())
+ 
+-    controles = ["P-1", "P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9", "P-10"]
++    # Os controles vêm do PRÓPRIO perimetro.sh, não de lista fixa aqui.
++    # Motivo medido em 10/09/2026: esta lista estava congelada em P-1..P-10
++    # enquanto o perímetro já tinha 17. Sete controles -- entre eles o P-11
++    # (silo, segurança), o P-14 (selos, história) e os dois criados na
++    # véspera -- simplesmente NÃO EXISTIAM no vault. Quem consultasse o vault
++    # para saber o que protege o sistema receberia um retrato de meses atrás,
++    # sem nenhum aviso de que estava incompleto.
++    # Acrescentar os sete à mão seria conserto; ficaria para trás no P-18.
++    # Derivar da fonte é mecanismo: controle novo aparece no vault sozinho.
++    controles, CTRL_DESC = _controles_do_perimetro()
+     ctrl_base = {c: c.lower() for c in controles}
+     NOTAS.update(ctrl_base.values())
+ 
+@@ -533,19 +573,7 @@ def main():
+                    "---", f"< {link('moc-propostas','MOC propostas')} >"]
+         escrever(f"propostas/{b}.md", linhas)
+ 
+-    # -------- controles do perímetro
+-    CTRL_DESC = {
+-        "P-1": "Segredos só em ~/.config/agata/.env, fora do repo",
+-        "P-2": "O executor pausa e pede sudo ao Humano",
+-        "P-3": "Publicação é decisão deliberada; consentimento por trecho",
+-        "P-4": "api_server contido; Ollama só em 127.0.0.1",
+-        "P-5": "Regra 4 mecânica: MEMÓRIAS.md append-only (sufixo não-encolhido)",
+-        "P-6": "Cópia da história fora da máquina (bundle + HD)",
+-        "P-7": "Citação de MEMÓRIAS aponta pra entrada real, não fabricada",
+-        "P-8": "Quarentena: mudança de comportamento exige proposta + APROVADO-",
+-        "P-9": "Serviço declarado em PROJETO.md não pode morrer em silêncio",
+-        "P-10": "Vault derivado confere byte a byte com a regeneração do HEAD",
+-    }
++    # -------- controles do perímetro (lista e descrições vêm de _controles_do_perimetro)
+     for c in controles:
+         ents = sorted(e["num"] for e in entradas
+                       if re.search(rf"\b{c}\b", "\n".join(e["linhas"])))
+@@ -851,7 +879,7 @@ def main():
+         "## Mapas",
+         f"- {link('moc-memoria','Memória')}  ·  {link('moc-regras','Regras')}  ·  "
+         f"{link('moc-projeto','Projeto')}",
+-        f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles','Controles P-1..P-9')}  ·  "
++        f"- {link('moc-scripts','Scripts')}  ·  {link('moc-controles', f'Controles {controles[0]}..{controles[-1]}')}  ·  "
+         f"{link('moc-propostas','Propostas')}  ·  {link('moc-esferas','Duas esferas')}",
+         f"- {link('moc-readmes','READMEs do sistema')}  ·  "
+         f"{link('moc-documentos','Documentos do repositório')}  ·  "
+diff --git a/scripts/verificar_cabecalho.py b/scripts/verificar_cabecalho.py
+index 4ba25a7..23fb0d2 100755
+--- a/scripts/verificar_cabecalho.py
++++ b/scripts/verificar_cabecalho.py
+@@ -36,7 +36,20 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+     # discriminador que as REGRAS nomeiam. Sobrevive à saída do Nonce e
+     # mantém `Última entrada:`/`pronto.` como checagens de verdade (usar
+     # `Última entrada:` como detector as tornaria vazias).
+-    tem_prontidao = bool(re.search(r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE))
++    # A âncora aceita as TRÊS formas que a Regra 1 autoriza, não só a primeira.
++    # Achado em 10/09/2026 auditando um cabeçalho real da Seth: ela abriu com
++    # `Agata · modelo não verificado · ...` -- forma LEGÍTIMA (Regra 1: "os dois
++    # recursos de honestidade continuam: `família <X>, versão não verificada`
++    # ou `modelo não verificado`") -- e a âncora, que eu tinha estreitado no dia
++    # anterior para `Agata · modelo:`, não casou. O bloco caiu no ramo de
++    # linha-de-turno e TRÊS violações de prontidão passaram ilesas.
++    # Consertei o linter para o formato aposentado e o quebrei para dois
++    # formatos vivos. Quem expôs isso foi o modelo auditado, não o auditor.
++    tem_prontidao = bool(re.search(
++        r"^\s*Agata\s*·\s*(?:modelo\s*:"
++        r"|modelo\s+n[ãa]o\s+verificado"
++        r"|fam[íi]lia\s+[^·]+?,\s*vers[ãa]o\s+n[ãa]o\s+verificada)",
++        texto, re.MULTILINE | re.IGNORECASE))
+     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
+ 
+     # Citação por SEÇÃO, não por número de linha: o "REGRAS.md:110" que estava

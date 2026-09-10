@@ -36,7 +36,20 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # discriminador que as REGRAS nomeiam. Sobrevive à saída do Nonce e
     # mantém `Última entrada:`/`pronto.` como checagens de verdade (usar
     # `Última entrada:` como detector as tornaria vazias).
-    tem_prontidao = bool(re.search(r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE))
+    # A âncora aceita as TRÊS formas que a Regra 1 autoriza, não só a primeira.
+    # Achado em 10/09/2026 auditando um cabeçalho real da Seth: ela abriu com
+    # `Agata · modelo não verificado · ...` -- forma LEGÍTIMA (Regra 1: "os dois
+    # recursos de honestidade continuam: `família <X>, versão não verificada`
+    # ou `modelo não verificado`") -- e a âncora, que eu tinha estreitado no dia
+    # anterior para `Agata · modelo:`, não casou. O bloco caiu no ramo de
+    # linha-de-turno e TRÊS violações de prontidão passaram ilesas.
+    # Consertei o linter para o formato aposentado e o quebrei para dois
+    # formatos vivos. Quem expôs isso foi o modelo auditado, não o auditor.
+    tem_prontidao = bool(re.search(
+        r"^\s*Agata\s*·\s*(?:modelo\s*:"
+        r"|modelo\s+n[ãa]o\s+verificado"
+        r"|fam[íi]lia\s+[^·]+?,\s*vers[ãa]o\s+n[ãa]o\s+verificada)",
+        texto, re.MULTILINE | re.IGNORECASE))
     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
 
     # Citação por SEÇÃO, não por número de linha: o "REGRAS.md:110" que estava

@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fc756e3e6da859ebef2d3f1e4663614a9f3a2b29
-  Escrito em: 10/09/2026 08:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43490bd09d196faafaebe95339b89cfa903b07ca
+  Escrito em: 10/09/2026 08:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc756e3e6da859ebef2d3f1e4663614a9f3a2b29/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc756e3e6da859ebef2d3f1e4663614a9f3a2b29/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc756e3e6da859ebef2d3f1e4663614a9f3a2b29/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -167,23 +167,34 @@ no contexto de nenhum modelo, só o que está no disco/repo.
 **Hidratação** -- o ESTADO de ter REGRAS + PROJETO + a janela mais recente
 de MEMÓRIAS presentes no contexto de um modelo (desde (271): topo do
 corpo, logo após o marcador `ENTRADAS-NOVAS`; antes disso, fim físico).
-Mecanismo real hoje: `.hermes.md`
+Mecanismo real hoje: `.hidrata.md`
 único, gerado pelo hook pre-commit (`.githooks/gerar-hidratacao.sh`),
-injetado automaticamente no system prompt de sessões dentro do
-Hermes. Fora do Hermes, não há injeção automática -- a sessão precisa
+mais o silo por modelo `.hidrata-<modelo>.md`. Quem injeta é o consumidor
+da hidratação -- hoje o `seth_gateway` (`:20126`), que monta o contexto da
+Seth a cada turno. Fora dele não há injeção automática -- a sessão precisa
 `carregar` (abaixo) pra chegar lá.
+  *Corrigido em 10/09/2026, MEMÓRIAS (422): este parágrafo dizia "Mecanismo
+  real hoje: `.hermes.md` ... sessões dentro do Hermes" — e o Hermes foi
+  removido por inteiro em (312), 03/09/2026. Um arquivo inexistente constava
+  como o mecanismo CORRENTE, no presente, na seção que DEFINE hidratação.
+  Não é curiosidade: a Seth foi auditada em (331) justamente por citar
+  `.hermes.md`, corrigiram a Seth, e deixaram aqui o texto que a induziu.
+  Ela voltou a repetir em 10/09 — lendo o canon corretamente. Quando o
+  modelo e o canon divergem, conferir os dois antes de culpar o modelo.*
 
 **`carregar`** -- o COMANDO/PROCEDIMENTO que uma sessão fora do Hermes
 segue pra chegar ao estado de hidratação: buscar REGRAS/PROJETO/
 MEMÓRIAS pela Fonte canônica ("Verificação de canônico" nesta seção),
-e abrir com o bloco de prontidão de 4 linhas (abaixo). Mecanismo
+e abrir com o bloco de prontidão de 3 linhas (abaixo) -- eram 4 até a
+linha `Nonce:` sair com a aposentadoria do TES-002, (417); este parágrafo
+ficou dizendo 4 e foi corrigido em (422). Mecanismo
 (arquivo, hook, contador de turno fora do Hermes) é deste projeto,
 não universal.
 
 **`atualizar <REGRAS|PROJETO|MEMÓRIAS|TUDO>`** -- comando que combina
 `sincronizar` + regenerar hidratação: `git pull` do alvo, depois
-regenera a hidratação (`.hermes.md` pra sessões no Hermes, releitura
-pra sessões que já `carregar`am). Nunca sobrescreve história; conflito
+regenera a hidratação (`.hidrata.md` + os silos, para quem injeta;
+releitura pra sessões que já `carregar`am). Nunca sobrescreve história; conflito
 -> para e avisa. Diferença de `sincronizar` sozinho: `sincronizar` só
 confere/traz o repo, `atualizar` também refaz a hidratação a partir do
 que trouxe.

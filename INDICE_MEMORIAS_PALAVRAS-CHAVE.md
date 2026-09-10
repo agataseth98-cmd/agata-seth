@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
+  palavras-chave: auditamos, seth, culpado, era, sistema, ordem, humano, audite, cabeçalhos, respostas, dela, colados, sessão, veredito, cinco, alegações, checáveis, ela, fez, estavam, certas, quatro, violações, formato, cometeu, três, vinham, instruções, erradas, nós, escrevemos, meu, próprio, linter, fabricou, nada
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
   palavras-chave: agora, existe, teste, controles, ele, pegou, furo, meu, dia, anterior, correção, imediata, item, mesmo, apontei, causa, raiz, dar, nota, confiabilidade, sistema, nada, repositório, testava, ordem, humano, proposta
 (420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon reconciliado com a Máquina, atalhos de fato instalados, B6 movido pra horizonte.** Ordem do Humano: *"deixe o B6 como futuro/horizonte, e encerre os outros"*. Sequência da (419 - quatro controles do perímetro não controlavam o que diziam controlar), que consertou os controles; esta fecha o que os controles não pegavam porque é texto, não código.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fecha, item, backlog, seth, gateway, estado, tinha, timeout, curto, demais, podia, abrir, última, entrada, doutrina, ganha, regra, explícita, contra, inventar, número
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
   palavras-chave: seth, gateway, emperrava, servidor, inteiro, navegador, desconectava, meio, stream, achado, travou, teste
-(392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o localStorage do navegador. Fecha o "modelo não disponível" ao abrir a Seth.
-  palavras-chave: modelspecs, enforce, librechat, yaml, vence, localstorage, navegador, fecha, modelo, disponível, abrir, seth
+(392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o lo …
+  palavras-chave: modelspecs, enforce, librechat, yaml, vence
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERR …
   palavras-chave: análise, causa, raiz, estava, err
 (390) DIÁRIO — 08/09/2026 · A Seth ficou muda no re-teste: `auto/best-free` apod …
