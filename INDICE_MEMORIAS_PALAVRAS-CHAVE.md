@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
+  palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder, verificar, mudar, ordem, humano, aplique, desenho, próprio, novo, serviço, verificador, nova, tool, mcp, maquina, lista, fechada, comandos, verificação, read, only
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
   palavras-chave: auditamos, seth, culpado, era, sistema, ordem, humano, audite, cabeçalhos, respostas, dela, colados, sessão, veredito, cinco, alegações, checáveis, ela, fez, estavam, certas, quatro, violações, formato, cometeu, três, vinham, instruções, erradas, nós, escrevemos, meu, próprio, linter, fabricou, nada
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, tes, nonce, refs
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
   palavras-chave: fecha, item, backlog, seth, gateway, estado, tinha, timeout, curto, demais, podia, abrir, última, entrada, doutrina, ganha, regra, explícita, contra, inventar, número
-(393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o navegador desconectava no meio do stream. Achado quando a Seth "travou" no Teste 3.
-  palavras-chave: seth, gateway, emperrava, servidor, inteiro, navegador, desconectava, meio, stream, achado, travou, teste
+(393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o …
+  palavras-chave: seth, gateway, emperrava, servidor, inteiro
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o lo …
   palavras-chave: modelspecs, enforce, librechat, yaml, vence
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERR …

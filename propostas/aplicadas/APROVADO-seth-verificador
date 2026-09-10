@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-10 09:29 -0300.
+Motivo: Canal de verificacao read-only da Seth (:20141): lista fechada de 9 comandos, sem shell, saida redigida pela regua do P-1, teto com total. Resposta ao pedido dela por interpretador de codigo
+nome: seth-verificador
+diff-sha256: f3fe1c3ca49405fe74b80e921f29a9add472dde811656aca90f6e58aac456cb1
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQH9L3KK/7rRI7zoGZCWsr8zuQn7Y9rJFUTT4aP3zdCcyr2
+Y/T4YQV5YL5LiHIOT2F4DXUw4Zzgzp0sQmtMBCbwI=
+-----END SSH SIGNATURE-----

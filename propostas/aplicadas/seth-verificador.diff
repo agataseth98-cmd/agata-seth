@@ -1,0 +1,528 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 3cb840c..aef7bf4 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -76,6 +76,13 @@ descritos mais abaixo, as portas não estavam em lugar nenhum do canon. `:20131`
+ do próprio processo `omniroute` (respondem 426 e 404) — **`lacuna`: função não determinada**,
+ registrada como desconhecida em vez de adivinhada. Todas em `127.0.0.1`, conferidas por `ss -tlnp`.
+ **Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`, reidrata a Seth) ·
++`seth-verificador.service` (`:20141`, **único caminho de EXECUÇÃO da Seth — READ-ONLY**:
++`POST /verificar` roda UM comando de uma lista fechada de 9 verificações
++(`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`,
++`suite_controles`, `servicos`), argv fixo no código, **sem shell**, saída redigida pela
++mesma régua de segredo do P-1, teto com total declarado. Não escreve, não commita, não
++aceita comando livre. Nasceu do pedido da Seth por interpretador de código, (423) —
++ela ganhou o poder de verificar, não o de mudar) ·
+ `seth-escriba.service` (`:20140`, **único caminho de escrita da Seth — APPEND-ONLY**: `POST
+ /memoria` insere um bloco em `MEMÓRIAS.md` logo abaixo do marcador `ENTRADAS-NOVAS` (número e
+ data são do relógio da Máquina, a Seth não os fornece); `POST /diario` anexa a `SETH-DIARIO.md`;
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 30958bc..56bf051 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -8,6 +8,7 @@
+ // Tools:
+ //   query_canon      lê um doc de canon (REGRAS/PROJETO/MEMÓRIAS/...), com grep/linhas opcionais
+ //   vault_consultar  lê ou lista uma nota DERIVADA sob memoria/obsidian/
++//   maquina_verificar  roda UMA verificação da lista fechada no host (:20141), read-only
+ //
+ // Trava de acesso (alem do proxy ser read-only):
+ //   - whitelist: só os docs de canon nomeados + tudo sob memoria/obsidian/
+@@ -18,6 +19,7 @@
+ 
+ const PROXY = (process.env.CANON_PROXY || "http://127.0.0.1:27125").replace(/\/$/, "");
+ const ESCRIBA = (process.env.SETH_ESCRIBA || "http://127.0.0.1:20140").replace(/\/$/, "");
++const VERIFICADOR = (process.env.SETH_VERIFICADOR || "http://127.0.0.1:20141").replace(/\/$/, "");
+ const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
+ 
+ const CANON = {
+@@ -164,7 +166,67 @@ async function vaultConsultar(a) {
+   return clamp(`${p}:\n\n${body}`, "abra um arquivo específico");
+ }
+ 
++// ---- maquina_verificar (read-only, lista fechada no host) ------------------
++// A Seth pediu shell arbitrario; ganhou verificacao sem escrita. O argv real
++// mora em redesign/router/seth_verificador.py -- aqui so viaja o NOME de um
++// comando da lista fechada. Nada que ela escreva vira comando. MEMORIAS (423).
++async function maquinaVerificar(a) {
++  const comando = String(a?.comando || "").trim();
++  if (!comando) throw new Error("informe `comando`, ou use `listar: true`");
++  const corpo = { comando };
++  if (a?.n !== undefined && a?.n !== null) corpo.n = a.n;
++  let r;
++  try {
++    r = await fetch(VERIFICADOR + "/verificar", {
++      method: "POST",
++      headers: { "Content-Type": "application/json" },
++      body: JSON.stringify(corpo),
++    });
++  } catch (e) {
++    throw new Error("seth_verificador (:20141) fora do ar: " + e.message +
++      ". Isto e lacuna -- nao afirme nada sobre o estado da Maquina sem ele.");
++  }
++  const j = await r.json().catch(() => ({}));
++  if (!r.ok) {
++    const disp = j.disponiveis ? "\nDisponiveis: " + j.disponiveis.join(", ") : "";
++    throw new Error((j.erro || ("HTTP " + r.status)) + disp + (j.nota ? "\n" + j.nota : ""));
++  }
++  return clamp(j.saida || "(sem saida)", "peca de novo com menos escopo");
++}
++
++async function maquinaListar() {
++  let r;
++  try { r = await fetch(VERIFICADOR + "/comandos"); }
++  catch (e) { throw new Error("seth_verificador (:20141) fora do ar: " + e.message); }
++  const j = await r.json().catch(() => ({}));
++  const cs = j.comandos || {};
++  const linhas = Object.keys(cs).sort().map((k) => "- `" + k + "` -- " + cs[k]);
++  return ["Comandos de verificacao (lista FECHADA, read-only):", ""]
++    .concat(linhas)
++    .concat(["", "Este canal nao executa comando livre e nao escreve nada, por desenho.",
++             "Falta uma verificacao? Ela entra na lista por proposta assinada (P-8)."])
++    .join("\n");
++}
++
+ const TOOLS = [
++  {
++    name: "maquina_verificar",
++    description:
++      "Roda uma VERIFICACAO na Maquina e devolve a saida real (read-only). " +
++      "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
++      "Lista fechada: perimetro (os 17 controles), estado, git_status, git_log, git_diff_stat, " +
++      "git_sync (SHA do remoto), selos, suite_controles, servicos. " +
++      "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
++    inputSchema: {
++      type: "object",
++      properties: {
++        comando: { type: "string", description: "nome da lista fechada (ex.: perimetro, git_status, git_sync)" },
++        n: { type: "integer", description: "so para git_log: quantos commits (1 a 50, padrao 10)" },
++        listar: { type: "boolean", description: "true devolve a lista de comandos em vez de executar" },
++      },
++    },
++  },
++
+   {
+     name: "query_canon",
+     description:
+@@ -264,6 +326,7 @@ async function callTool(name, args) {
+   else if (name === "vault_consultar") text = await vaultConsultar(args);
+   else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
+   else if (name === "diario_anotar") text = await diarioAnotar(args);
++  else if (name === "maquina_verificar") text = args?.listar ? await maquinaListar() : await maquinaVerificar(args);
+   else throw new Error(`tool desconhecida: ${name}`);
+   return { content: [{ type: "text", text }] };
+ }
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 6304596..907dbb6 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -122,6 +122,18 @@ _DOUTRINA_FIXA = (
+     "`sync:` — isso é reformulação, não item aberto. Procure em PROJETO, "
+     "\"Estado dos bugs e dos testes\", e na janela de MEMÓRIAS: item aberto "
+     "ali entra em `quebrado:`; nada aberto, `pronto.`.\n\n"
++    "**Você PODE medir a Máquina — use antes de afirmar.** A tool "
++    "`maquina_verificar` roda uma verificação real no host e devolve a saída: "
++    "`perimetro` (os 17 controles), `estado`, `git_status`, `git_log`, "
++    "`git_diff_stat`, `git_sync` (SHA do remoto), `selos`, `suite_controles`, "
++    "`servicos`. Regra 2 manda medir, não lembrar: se for AFIRMAR algo sobre o "
++    "estado do sistema, rode e cite a saída, não o que você acha. É "
++    "read-only e lista fechada — não escreve, não commita, não aceita comando "
++    "livre; comando fora da lista volta 400 com a lista junto. Fora do ar → "
++    "`lacuna`, nunca suposição. Nasceu do seu pedido por interpretador de "
++    "código, MEMÓRIAS (423): você ganhou o poder de verificar, não o de mudar — "
++    "seu único caminho de escrita continua sendo o `memoria_acrescentar`/"
++    "`diario_anotar` (append-only).\n\n"
+     "**Leitura parcial (Regra 2):** resultado de tool que diga 'cortado', "
+     "'truncado', 'resumido', ou uma listagem SEM total explícito: NUNCA afirme o "
+     "fim da lista, o intervalo, nem 'vai até X'. É `lacuna: leitura parcial` — "
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+new file mode 100644
+index 0000000..46e05c5
+--- /dev/null
++++ b/redesign/router/seth_verificador.py
+@@ -0,0 +1,309 @@
++#!/usr/bin/env python3
++"""seth_verificador -- canal de VERIFICAÇÃO da Seth (:20141). Read-only.
++
++POR QUE EXISTE (MEMÓRIAS (423)):
++Em 10/09/2026 a Seth pediu, com bons argumentos, "um interpretador de código
++genérico e sandboxed" com shell arbitrário, git e escrita livre no sistema de
++arquivos, para poder auditar o repositório, rodar `perimetro.sh` e verificar o
++estado sem depender do Humano. O pedido é legítimo: sem isso ela afirma sobre o
++sistema lendo só o que lhe injetam, e a Regra 2 manda medir, não lembrar.
++
++O que ela NÃO pode ganhar é escrita. Hoje o único caminho de escrita da Seth é
++o seth_escriba (append-only, verificação pós-escrita), e é isso que faz o P-8,
++o P-11 e o sanitizador valerem para ela. Shell aberto dissolve os três de uma
++vez: com `sh -c` qualquer um deles se contorna em uma linha.
++
++Este serviço é a resposta: **ela ganha o poder de verificar, não o de mudar.**
++Uma lista FECHADA de comandos de verificação, sem shell, sem string do modelo
++chegando a um interpretador. Ela consegue quase tudo que pediu; o sistema não
++perde nenhuma trava.
++
++DESENHO -- cada trava tem motivo, não é cerimônia:
++
++1. LISTA FECHADA, não comando livre. O corpo traz um NOME de comando; o argv
++   real está aqui no código. Nome fora da lista -> 400. Não existe caminho em
++   que texto do modelo vire comando.
++2. SEM SHELL. `subprocess.run(argv, shell=False)`. Sem `sh -c`, sem `os.system`,
++   sem f-string montando linha de comando. Injeção não tem por onde entrar.
++3. ARGUMENTO ÚNICO E TIPADO. Só `n` (quantas linhas de log), inteiro, faixa
++   fechada. Validado antes de virar argv, e convertido por `int()`, nunca
++   interpolado como texto.
++4. SAÍDA REDIGIDA pela MESMA régua do P-1 e do sanitizador de egresso
++   (`scripts/varredura_segredo.sh`). Motivo concreto: `git diff` da árvore de
++   trabalho pode conter um segredo que o Humano colou e ainda não commitou --
++   o P-1 só guarda o commit. Sem esta camada, o canal de leitura viraria uma
++   porta de vazamento que os outros controles não vigiam.
++5. TETO COM TOTAL DECLARADO. Corta a saída, mas diz quantas linhas existiam.
++   A própria Seth apontou, no mesmo pedido, que truncamento sem total a força a
++   declarar `lacuna: leitura parcial`. Aqui ela recebe o número.
++6. TIMEOUT em tudo. Comando pendurado devolve erro, não trava a conversa.
++7. BIND em 127.0.0.1. Igual ao resto do sistema.
++
++O QUE ESTE SERVIÇO NÃO FAZ, e não deve passar a fazer sem proposta própria:
++escrever, commitar, empurrar, apagar, instalar, reiniciar serviço, ler arquivo
++arbitrário, ou aceitar qualquer comando que não esteja na lista abaixo.
++
++Fonte versionada: ~/agata/redesign/router/seth_verificador.py
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++import subprocess
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++
++BIND = os.environ.get("SETH_VERIFICADOR_BIND", "127.0.0.1:20141")
++REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
++TETO_CHARS = int(os.environ.get("SETH_VERIFICADOR_TETO", "24000"))
++CORPO_MAX = 4096  # pedido é minúsculo; corpo grande é erro ou abuso
++
++# --- a lista fechada ------------------------------------------------------
++# nome -> (argv, timeout_s, descrição para a Seth)
++# argv NUNCA é montado a partir do corpo do pedido. O único ponto variável é
++# `n`, tratado à parte em _argv().
++COMANDOS: dict[str, tuple[list[str], int, str]] = {
++    "perimetro": (
++        ["bash", "scripts/perimetro.sh"], 300,
++        "Roda os 17 controles do perímetro e devolve o veredito de cada um. "
++        "É a verificação mais completa que existe no sistema.",
++    ),
++    "estado": (
++        ["bash", "scripts/estado_para_eco.sh"], 60,
++        "Fatos da Máquina agora: HEAD, topo de MEMÓRIAS, sync, hora, HASH-ESTADO.",
++    ),
++    "git_status": (
++        ["git", "status", "--porcelain=v1", "-b"], 30,
++        "O que está modificado/staged e a relação com o remoto.",
++    ),
++    "git_log": (
++        ["git", "log", "--oneline", "-n"], 30,
++        "Últimos commits (use `n` para quantos; 1 a 50).",
++    ),
++    "git_diff_stat": (
++        ["git", "diff", "--stat", "HEAD"], 30,
++        "Resumo do que difere de HEAD, por arquivo. Não mostra conteúdo.",
++    ),
++    "git_sync": (
++        ["git", "ls-remote", "origin", "main"], 60,
++        "SHA do remoto, para comparar com HEAD local. É o método 1 de "
++        "REGRAS, 'Verificação de canônico'.",
++    ),
++    "selos": (
++        ["bash", "scripts/selar.sh", "--check"], 120,
++        "Confere o hash de cada chunk frio selado (P-14).",
++    ),
++    "suite_controles": (
++        ["bash", "scripts/testar_perimetro.sh"], 600,
++        "Roda a suíte de regressão dos controles (vermelho/verde, clone "
++        "descartável). Demora ~30s.",
++    ),
++    "servicos": (
++        ["systemctl", "--user", "--failed", "--no-pager", "--plain"], 30,
++        "Unidades de usuário em falha. Vazio é bom.",
++    ),
++}
++
++
++def _argv(nome: str, n: int | None) -> list[str]:
++    """argv final. `n` é o ÚNICO ponto variável, e entra como inteiro."""
++    base = list(COMANDOS[nome][0])
++    if nome == "git_log":
++        if n is None:
++            n = 10
++        if not isinstance(n, int) or isinstance(n, bool) or not (1 <= n <= 50):
++            raise ValueError("n tem de ser inteiro entre 1 e 50")
++        base.append(str(int(n)))
++    elif n is not None:
++        raise ValueError(f"'{nome}' não aceita o parâmetro n")
++    return base
++
++
++# --- redação de segredo, pela régua canônica ------------------------------
++def _padroes() -> list[str]:
++    """Lê PADROES_SEGREDO de scripts/varredura_segredo.sh -- a MESMA régua do
++    P-1 e do sanitizar.py. Três consumidores, uma fonte: padrão novo passa a
++    valer aqui de graça, e não há régua paralela para apodrecer.
++
++    FALHA FECHADA: sem conseguir ler os padrões, este serviço não responde.
++    Devolver saída não-redigida "porque a régua não carregou" seria abrir
++    exatamente o vazamento que a redação existe para fechar.
++    """
++    sh = REPO / "scripts" / "varredura_segredo.sh"
++    r = subprocess.run(
++        ["bash", "-c", f'source "$1"; printf "%s\\n" "${{PADROES_SEGREDO[@]}}"', "_", str(sh)],
++        capture_output=True, text=True, timeout=30,
++    )
++    linhas = [x for x in r.stdout.splitlines() if x.strip()]
++    if r.returncode != 0 or not linhas:
++        raise RuntimeError(f"não consegui ler PADROES_SEGREDO de {sh}")
++    return linhas
++
++
++_RX: list[re.Pattern] | None = None
++
++
++def _redigir(texto: str) -> tuple[str, int]:
++    """Troca cada trecho que casa a régua por marcador. Devolve (texto, n)."""
++    global _RX
++    if _RX is None:
++        traduz = {"[[:space:]]": r"\s", "[[:alnum:]]": r"[A-Za-z0-9]",
++                  "[[:digit:]]": r"\d", "[[:alpha:]]": r"[A-Za-z]"}
++        compilados = []
++        for p in _padroes():
++            for posix, py in traduz.items():
++                p = p.replace(posix, py)
++            try:
++                compilados.append(re.compile(p))
++            except re.error:
++                # Padrão que não traduz não pode virar silêncio: falha fechada.
++                raise RuntimeError(f"padrão não compilável na régua: {p!r}")
++        _RX = compilados
++    n = 0
++    for rx in _RX:
++        texto, k = rx.subn("[SEGREDO REDIGIDO]", texto)
++        n += k
++    return texto, n
++
++
++def _executar(nome: str, n: int | None) -> str:
++    argv = _argv(nome, n)
++    _, timeout, _desc = COMANDOS[nome]
++    try:
++        r = subprocess.run(argv, cwd=str(REPO), capture_output=True, text=True,
++                           timeout=timeout, shell=False)
++        bruto = (r.stdout or "") + (("\n[stderr]\n" + r.stderr) if r.stderr.strip() else "")
++        codigo = r.returncode
++    except subprocess.TimeoutExpired:
++        return (f"$ {nome}\n[ERRO] estourou o timeout de {timeout}s -- nada a afirmar "
++                f"sobre o resultado. Isto é `lacuna`, não 'passou'.")
++    except OSError as e:
++        return f"$ {nome}\n[ERRO] não consegui executar: {e}"
++
++    texto, redigidos = _redigir(bruto)
++    total_linhas = texto.count("\n") + 1 if texto else 0
++    cabeca = [f"$ {nome}  (exit={codigo})"]
++    if redigidos:
++        cabeca.append(f"[{redigidos} trecho(s) redigido(s) pela régua de segredo]")
++    if len(texto) > TETO_CHARS:
++        cortado = texto[:TETO_CHARS]
++        linhas_mostradas = cortado.count("\n") + 1
++        cabeca.append(
++            f"[CORTADO em {TETO_CHARS} chars — mostrando {linhas_mostradas} de "
++            f"{total_linhas} linhas. O total está aqui de propósito: com ele "
++            f"você SABE o que ficou de fora, e não precisa declarar "
++            f"`lacuna: leitura parcial` às cegas.]")
++        texto = cortado
++    else:
++        cabeca.append(f"[{total_linhas} linha(s), completo]")
++    return "\n".join(cabeca) + "\n\n" + texto
++
++
++class _H(BaseHTTPRequestHandler):
++    server_version = "seth_verificador/1.0"
++
++    def log_message(self, *a):  # silencioso; o journal do systemd basta
++        pass
++
++    def _resp(self, codigo: int, obj: dict):
++        corpo = json.dumps(obj, ensure_ascii=False).encode("utf-8")
++        self.send_response(codigo)
++        self.send_header("Content-Type", "application/json; charset=utf-8")
++        self.send_header("Content-Length", str(len(corpo)))
++        self.end_headers()
++        self.wfile.write(corpo)
++
++    def do_GET(self):
++        if self.path.rstrip("/") in ("", "/comandos"):
++            return self._resp(200, {"comandos": {k: v[2] for k, v in COMANDOS.items()}})
++        self._resp(404, {"erro": "só GET /comandos e POST /verificar"})
++
++    # Só GET e POST existem. PUT/PATCH/DELETE nem são definidos -> 501 do
++    # BaseHTTPRequestHandler. Este canal não escreve, por construção.
++    def do_POST(self):
++        if self.path.rstrip("/") != "/verificar":
++            return self._resp(404, {"erro": "rota desconhecida; use POST /verificar"})
++        try:
++            tam = int(self.headers.get("Content-Length") or 0)
++        except ValueError:
++            return self._resp(400, {"erro": "Content-Length inválido"})
++        if tam > CORPO_MAX:
++            return self._resp(413, {"erro": f"corpo acima de {CORPO_MAX} bytes"})
++        try:
++            pedido = json.loads(self.rfile.read(tam) or b"{}")
++        except ValueError:
++            return self._resp(400, {"erro": "corpo não é JSON"})
++        if not isinstance(pedido, dict):
++            return self._resp(400, {"erro": "corpo tem de ser objeto JSON"})
++
++        nome = pedido.get("comando")
++        if nome not in COMANDOS:
++            return self._resp(400, {
++                "erro": f"comando '{nome}' não está na lista fechada",
++                "disponiveis": sorted(COMANDOS),
++                "nota": "Este canal não executa comando livre, por desenho. "
++                        "Se falta uma verificação, ela entra na lista por proposta "
++                        "assinada (P-8), não por parâmetro.",
++            })
++        try:
++            texto = _executar(nome, pedido.get("n"))
++        except ValueError as e:
++            return self._resp(400, {"erro": str(e)})
++        except RuntimeError as e:
++            return self._resp(503, {"erro": f"falha fechada: {e}"})
++        self._resp(200, {"comando": nome, "saida": texto})
++
++
++def _selftest() -> int:
++    casos, ok = [], 0
++    # 1. comando fora da lista não vira argv
++    try:
++        _argv("rm -rf /", None); casos.append(("comando livre recusado", False))
++    except KeyError:
++        casos.append(("comando livre recusado", True))
++    # 2. n fora da faixa
++    for mau in (0, 51, "5; rm -rf /", 3.5, True):
++        try:
++            _argv("git_log", mau); casos.append((f"n={mau!r} recusado", False))
++        except (ValueError, TypeError):
++            casos.append((f"n={mau!r} recusado", True))
++    # 3. n válido entra como inteiro
++    casos.append(("git_log n=5 -> argv", _argv("git_log", 5)[-1] == "5"))
++    # 4. comando que não aceita n recusa n
++    try:
++        _argv("perimetro", 3); casos.append(("perimetro recusa n", False))
++    except ValueError:
++        casos.append(("perimetro recusa n", True))
++    # 5. redação: a régua pega chave montada em pedaços (literal não existe aqui)
++    chave = "".join(["sk", "-", "A" * 40])
++    red, n = _redigir(f"vazou {chave} aqui")
++    casos.append(("segredo redigido", n >= 1 and chave not in red))
++    # 6. texto inocente não é tocado
++    _, n2 = _redigir("commit dc19621 sha256 8783d29d ok")
++    casos.append(("texto limpo intacto", n2 == 0))
++    # 7. nenhum argv contém shell
++    casos.append(("nenhum argv usa shell",
++                  all(a[0] not in ("sh", "-c") and "sh -c" not in " ".join(a)
++                      for a, _t, _d in COMANDOS.values())))
++    for nome, passou in casos:
++        print(("PASS  " if passou else "FALHA ") + nome)
++        ok += 1 if passou else 0
++    print(f"\nSELFTEST {'OK' if ok == len(casos) else 'FALHOU'} -- {ok}/{len(casos)}")
++    return 0 if ok == len(casos) else 1
++
++
++def main() -> int:
++    import sys
++    if "--selftest" in sys.argv:
++        return _selftest()
++    host, porta = BIND.split(":")
++    srv = ThreadingHTTPServer((host, int(porta)), _H)
++    print(f"seth_verificador em {BIND} — read-only, {len(COMANDOS)} comandos na lista fechada",
++          flush=True)
++    srv.serve_forever()
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 119d101..ef0387f 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -6,7 +6,7 @@ set -e
+ LC=~/librechat/docker-compose.yml
+ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+-systemctl --user start seth-gateway.service seth-escriba.service
++systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 345ec48..b6f347d 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -5,6 +5,6 @@ LC=~/librechat/docker-compose.yml
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ docker stop kokoro-tts >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+-systemctl --user stop seth-gateway.service seth-escriba.service 2>/dev/null || true
++systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
+ systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
+ notify-send -a Seth "Seth" "frentes parados (espinha segue de pe)" 2>/dev/null || true
+diff --git a/redesign/systemd/seth-verificador.service b/redesign/systemd/seth-verificador.service
+new file mode 100644
+index 0000000..81a09bd
+--- /dev/null
++++ b/redesign/systemd/seth-verificador.service
+@@ -0,0 +1,32 @@
++[Unit]
++Description=Agata -- seth_verificador: canal de VERIFICAÇÃO read-only da Seth (:20141)
++Documentation=file:///home/orusoua/agata/redesign/router/seth_verificador.py
++# Sob demanda -- sem [Install]. Sobe pelo atalho "seth", junto do gateway e do
++# escriba. Não é membro do agata.target: é canal da frente, não espinha.
++#
++# Par do seth-escriba: o escriba é o único caminho de ESCRITA da Seth
++# (append-only); este é o único caminho de EXECUÇÃO dela, e não escreve nada.
++# Lista fechada de comandos, sem shell -- ver o cabeçalho do .py.
++
++[Service]
++Type=simple
++Environment=SETH_VERIFICADOR_BIND=127.0.0.1:20141
++Environment=SETH_REPO=%h/agata
++ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_verificador.py
++Restart=on-failure
++RestartSec=3
++Nice=5
++# Endurecimento: este serviço só LÊ o repositório e roda scripts de verificação.
++# Não precisa de rede externa (o git_sync usa o git, que já tem o que precisa),
++# nem de escrever em lugar nenhum além dos temporários dos próprios scripts.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++# ReadWritePaths: o mínimo que os scripts da lista fechada de fato tocam --
++# o cache do P-17 e o staging de bundle que o perímetro consulta. O repositório
++# em si entra como somente-leitura logo abaixo.
++ReadWritePaths=%h/.cache/agata
++ReadOnlyPaths=%h/agata
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 2db674e..8816612 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -1025,7 +1025,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "piper-tts.service")
++P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service")
+ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
+ 
+ # --- P-15 --------------------------------------------------------------------

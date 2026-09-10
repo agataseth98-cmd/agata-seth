@@ -1,0 +1,32 @@
+[Unit]
+Description=Agata -- seth_verificador: canal de VERIFICAÇÃO read-only da Seth (:20141)
+Documentation=file:///home/orusoua/agata/redesign/router/seth_verificador.py
+# Sob demanda -- sem [Install]. Sobe pelo atalho "seth", junto do gateway e do
+# escriba. Não é membro do agata.target: é canal da frente, não espinha.
+#
+# Par do seth-escriba: o escriba é o único caminho de ESCRITA da Seth
+# (append-only); este é o único caminho de EXECUÇÃO dela, e não escreve nada.
+# Lista fechada de comandos, sem shell -- ver o cabeçalho do .py.
+
+[Service]
+Type=simple
+Environment=SETH_VERIFICADOR_BIND=127.0.0.1:20141
+Environment=SETH_REPO=%h/agata
+ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_verificador.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+# Endurecimento: este serviço só LÊ o repositório e roda scripts de verificação.
+# Não precisa de rede externa (o git_sync usa o git, que já tem o que precisa),
+# nem de escrever em lugar nenhum além dos temporários dos próprios scripts.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+# ReadWritePaths: o mínimo que os scripts da lista fechada de fato tocam --
+# o cache do P-17 e o staging de bundle que o perímetro consulta. O repositório
+# em si entra como somente-leitura logo abaixo.
+ReadWritePaths=%h/.cache/agata
+ReadOnlyPaths=%h/agata

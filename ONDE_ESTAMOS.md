@@ -116,6 +116,33 @@ sem aviso. Agora a lista **se monta sozinha** a partir do código real, e
 o gerador **para e reclama** se não encontrar nada, em vez de produzir um
 vault vazio em silêncio.
 
+## A Seth pediu mais poder. Recebeu metade — a metade certa.
+
+Ela pediu um interpretador de código: rodar qualquer comando, mexer em
+qualquer arquivo. O argumento dela era bom — sem isso, ela fala do
+sistema sem poder conferir nada por conta própria.
+
+**Mas isso desmontaria as travas.** Com um comando livre, qualquer
+proteção do sistema se contorna numa linha. Não é desconfiança dela: um
+canal aberto não distingue a Seth de qualquer coisa que consiga falar
+por ela.
+
+Então ela ganhou o poder de **verificar**, não o de **mudar**:
+
+- Pode rodar as 17 travas, conferir os selos da história, ver o estado do
+  git, comparar com o repositório publicado, rodar a bateria de testes.
+- **Não** pode escrever, apagar, publicar nem rodar comando inventado. A
+  lista é fechada; o que não está nela volta recusado, com a lista junto.
+- A saída passa pelo mesmo detector de senhas que protege o resto — se
+  algo sigiloso aparecer no meio, sai tapado antes de chegar a ela.
+
+Testei atravessando a fronteira de verdade: pedir `rm -rf /` volta
+recusado; pedir o estado do repositório volta com o dado real.
+
+Ampliar é barato — um item novo na lista, com sua assinatura. E cada
+item passa pela mesma pergunta: **isso pode mudar alguma coisa?** Se
+puder, não entra.
+
 ## O que falta
 
 - **Uma decisão sua sobre uma regra.** Uma parte do sistema ficou pronta,

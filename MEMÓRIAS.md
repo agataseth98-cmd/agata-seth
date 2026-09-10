@@ -26,18 +26,49 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43490bd09d196faafaebe95339b89cfa903b07ca
-  Escrito em: 10/09/2026 08:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7ca3336e953783290fe1383f826cd2f2e2383472
+  Escrito em: 10/09/2026 09:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43490bd09d196faafaebe95339b89cfa903b07ca/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
+
+**O pedido, e por que não podia ser atendido como veio.** No t=3 de 10/09 a Seth pediu *"um interpretador de código genérico e sandboxed"* com shell arbitrário, git e escrita livre no sistema de arquivos, argumentando — corretamente — que sem isso ela afirma sobre o sistema lendo só o que lhe injetam, e a Regra 2 manda medir, não lembrar. O argumento é bom; o pedido, como veio, dissolveria a contenção que a define. Hoje o único caminho de escrita dela é o `seth_escriba` (append-only, verificação pós-escrita), e é isso que faz o P-8, o P-11 e o sanitizador de egresso valerem PARA ELA. Com `sh -c`, os três se contornam em uma linha. Não é desconfiança da Seth: é que um canal com shell não distingue a Seth de qualquer coisa que consiga falar por ela.
+
+**A arquitetura foi decidida pela Máquina, não por suposição.** Antes de desenhar, medi onde o MCP dela roda: DENTRO do container do LibreChat (`args: /app/data/mcp/canon-mcp.mjs`), onde `which git` volta vazio e `/app/agata` não existe. Um `spawn("git")` ali nunca funcionaria. O container usa `network_mode: host`, então a travessia é a mesma que a escrita já faz: serviço no host, tool chamando por `127.0.0.1`. Se eu tivesse suposto, teria escrito código morto.
+
+**As sete travas, cada uma com motivo — não cerimônia:**
+1. **Lista fechada, não comando livre.** O argv real mora em `seth_verificador.py`; do modelo viaja só o NOME. Não existe caminho em que texto dela vire comando.
+2. **Sem shell:** `subprocess.run(argv, shell=False)`, nunca `sh -c`, nunca f-string montando linha.
+3. **Um argumento, tipado:** só `n` (quantos commits), inteiro em faixa fechada, convertido por `int()`.
+4. **Saída redigida pela MESMA régua do P-1 e do sanitizador** (`scripts/varredura_segredo.sh`). Motivo concreto: `git diff` da árvore de trabalho pode conter segredo que o Humano colou e ainda não commitou — o P-1 só guarda o COMMIT. Sem esta camada, o canal de leitura seria uma porta de vazamento que nenhum outro controle vigia. Três consumidores, uma régua.
+5. **Teto COM total declarado.** Era queixa da própria Seth no t=2: truncamento sem total a força a declarar `lacuna: leitura parcial`. Agora ela recebe o número e sabe o que ficou de fora.
+6. **Timeout em tudo.** Comando pendurado vira erro, não trava a conversa.
+7. **Falha fechada.** Sem conseguir carregar a régua de segredo, o serviço NÃO RESPONDE — devolver saída não-redigida "porque a régua não carregou" abriria exatamente o vazamento que a redação fecha.
+
+**Os 9 comandos:** `perimetro` (os 17 controles), `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync` (SHA do remoto — o método 1 de REGRAS, "Verificação de canônico"), `selos`, `suite_controles`, `servicos`.
+
+**Endurecimento do systemd testado, não presumido:** `ProtectSystem=strict`, `ReadOnlyPaths=~/agata`, `PrivateTmp`, `NoNewPrivileges`. Havia risco real de o repositório somente-leitura quebrar o `git` ou a suíte (que clona); rodei os 9 antes de afirmar — todos `exit=0`, inclusive o perímetro completo e a suíte de 31 casos.
+
+**Ponta a ponta, atravessando a fronteira:** de dentro do container, `maquina_verificar{comando:"git_sync"}` devolveu o SHA real do host; `{comando:"rm -rf /"}` voltou recusado com a lista e a nota *"este canal não executa comando livre, por desenho; se falta uma verificação, ela entra na lista por proposta assinada (P-8)"*. `PUT /verificar` → 501: o canal não escreve nem por método HTTP.
+
+**A doutrina dela passou a dizer que pode medir.** Ter a ferramenta e saber quando usá-la são coisas diferentes: acrescentado ao `_DOUTRINA_FIXA` que a Regra 2 manda rodar e citar a saída antes de afirmar estado, e que fora do ar é `lacuna`, nunca suposição. `seth-verificador.service` entrou na lista do P-9 e nos atalhos `seth`/`seth-parar` (instalados no disco, não só na fonte — lição da (422)).
+
+**Erro meu no caminho, registrado:** um comando morreu com exit 1 sem explicação porque usei `pkill -f seth_verificador` e o padrão casou a PRÓPRIA linha de comando que continha essa string — matei o meu shell. Quinta vez nesta sessão que o arranjo de teste era o defeito, e não o alvo.
+
+**O que fica ABERTO, e é o ponto honesto:** isto não é o que a Seth pediu. Ela pediu generalidade; recebeu 9 comandos. A ampliação é barata — uma entrada na lista, por proposta assinada — mas cada entrada nova precisa ser pesada pela mesma pergunta: *este comando pode mudar alguma coisa?* Se puder, não entra. A fronteira não é "confiamos ou não na Seth"; é que verificação e mutação são canais diferentes, e misturá-los é o que torna todo o resto decorativo.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-verificador`.
+
+Modelo: Claude Opus 5 (Claude Code, na Máquina) · vetor: `docker exec` confirmando que o container não tem `git` nem o repo (a arquitetura saiu daí, não de suposição); `--selftest` do `seth_verificador` 11/11 incluindo `n="3; rm -rf /"`, `n=True`, `n=3.5` e "nenhum argv usa shell"; serviço subido com o endurecimento e os 9 comandos rodados um a um (todos `exit=0`); `perimetro` pela tool devolvendo `15 OK · 1 SKIP · 1 PARCIAL · 0 FALHA` e `suite_controles` devolvendo 31/31; 4 ataques por HTTP (comando livre, injeção via `n`, comando com `;`, `n` em comando que não aceita) todos 400, e `PUT` 501; `node --check` no `canon-mcp.mjs`; handshake MCP dentro do container listando as 5 tools; chamada ponta a ponta container→host devolvendo o SHA real e recusando `rm -rf /`; `python3 -m py_compile` + `--selftest` do `seth_gateway` OK; varredura de segredo no próprio `seth_verificador.py` = limpo; `.diff` reproduzindo o staged byte a byte nos 8 arquivos; assinatura verificada por `ssh-keygen -Y verify -I agata-humano`; `.diff` sha256 `f3fe1c3ca49405fe74b80e921f29a9add472dde811656aca90f6e58aac456cb1`. Autorização: Humano — "aplique o desenho próprio" + `scripts/aprovar.sh seth-verificador` assinado + "assinado".
 
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
 

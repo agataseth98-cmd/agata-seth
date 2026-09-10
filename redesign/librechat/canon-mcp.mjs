@@ -8,6 +8,7 @@
 // Tools:
 //   query_canon      lê um doc de canon (REGRAS/PROJETO/MEMÓRIAS/...), com grep/linhas opcionais
 //   vault_consultar  lê ou lista uma nota DERIVADA sob memoria/obsidian/
+//   maquina_verificar  roda UMA verificação da lista fechada no host (:20141), read-only
 //
 // Trava de acesso (alem do proxy ser read-only):
 //   - whitelist: só os docs de canon nomeados + tudo sob memoria/obsidian/
@@ -18,6 +19,7 @@
 
 const PROXY = (process.env.CANON_PROXY || "http://127.0.0.1:27125").replace(/\/$/, "");
 const ESCRIBA = (process.env.SETH_ESCRIBA || "http://127.0.0.1:20140").replace(/\/$/, "");
+const VERIFICADOR = (process.env.SETH_VERIFICADOR || "http://127.0.0.1:20141").replace(/\/$/, "");
 const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
 
 const CANON = {
@@ -164,7 +166,67 @@ async function vaultConsultar(a) {
   return clamp(`${p}:\n\n${body}`, "abra um arquivo específico");
 }
 
+// ---- maquina_verificar (read-only, lista fechada no host) ------------------
+// A Seth pediu shell arbitrario; ganhou verificacao sem escrita. O argv real
+// mora em redesign/router/seth_verificador.py -- aqui so viaja o NOME de um
+// comando da lista fechada. Nada que ela escreva vira comando. MEMORIAS (423).
+async function maquinaVerificar(a) {
+  const comando = String(a?.comando || "").trim();
+  if (!comando) throw new Error("informe `comando`, ou use `listar: true`");
+  const corpo = { comando };
+  if (a?.n !== undefined && a?.n !== null) corpo.n = a.n;
+  let r;
+  try {
+    r = await fetch(VERIFICADOR + "/verificar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(corpo),
+    });
+  } catch (e) {
+    throw new Error("seth_verificador (:20141) fora do ar: " + e.message +
+      ". Isto e lacuna -- nao afirme nada sobre o estado da Maquina sem ele.");
+  }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const disp = j.disponiveis ? "\nDisponiveis: " + j.disponiveis.join(", ") : "";
+    throw new Error((j.erro || ("HTTP " + r.status)) + disp + (j.nota ? "\n" + j.nota : ""));
+  }
+  return clamp(j.saida || "(sem saida)", "peca de novo com menos escopo");
+}
+
+async function maquinaListar() {
+  let r;
+  try { r = await fetch(VERIFICADOR + "/comandos"); }
+  catch (e) { throw new Error("seth_verificador (:20141) fora do ar: " + e.message); }
+  const j = await r.json().catch(() => ({}));
+  const cs = j.comandos || {};
+  const linhas = Object.keys(cs).sort().map((k) => "- `" + k + "` -- " + cs[k]);
+  return ["Comandos de verificacao (lista FECHADA, read-only):", ""]
+    .concat(linhas)
+    .concat(["", "Este canal nao executa comando livre e nao escreve nada, por desenho.",
+             "Falta uma verificacao? Ela entra na lista por proposta assinada (P-8)."])
+    .join("\n");
+}
+
 const TOOLS = [
+  {
+    name: "maquina_verificar",
+    description:
+      "Roda uma VERIFICACAO na Maquina e devolve a saida real (read-only). " +
+      "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
+      "Lista fechada: perimetro (os 17 controles), estado, git_status, git_log, git_diff_stat, " +
+      "git_sync (SHA do remoto), selos, suite_controles, servicos. " +
+      "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        comando: { type: "string", description: "nome da lista fechada (ex.: perimetro, git_status, git_sync)" },
+        n: { type: "integer", description: "so para git_log: quantos commits (1 a 50, padrao 10)" },
+        listar: { type: "boolean", description: "true devolve a lista de comandos em vez de executar" },
+      },
+    },
+  },
+
   {
     name: "query_canon",
     description:
@@ -264,6 +326,7 @@ async function callTool(name, args) {
   else if (name === "vault_consultar") text = await vaultConsultar(args);
   else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
   else if (name === "diario_anotar") text = await diarioAnotar(args);
+  else if (name === "maquina_verificar") text = args?.listar ? await maquinaListar() : await maquinaVerificar(args);
   else throw new Error(`tool desconhecida: ${name}`);
   return { content: [{ type: "text", text }] };
 }
