@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
 (396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
 (395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
-(394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
+(394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` …
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o …
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o lo …
 (391) CORREÇÃO — 08/09/2026 · A análise de causa raiz do F-1 em (389) estava ERR …

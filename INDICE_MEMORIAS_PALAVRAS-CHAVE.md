@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
+  palavras-chave: sync, pass, seth, truncou, evidência, nem, doutrina, linter, cobravam, terceira, auditoria, dia, padrão, manteve, cinco, defeitos, dela, auditados, quatro, vinham, instruções, minhas, incompletas, meu, próprio
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
   palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder, verificar, mudar, ordem, humano, aplique, desenho, próprio, novo, serviço, verificador, nova, tool, mcp, maquina, lista, fechada, comandos, verificação, read, only
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, omniroute, refs
 (395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
   palavras-chave: consolidação, tes, nonce, refs
-(394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` tinha timeout curto demais e a Seth podia abrir com `Última entrada: (0)`. Doutrina ganha regra explícita contra inventar esse número.
-  palavras-chave: fecha, item, backlog, seth, gateway, estado, tinha, timeout, curto, demais, podia, abrir, última, entrada, doutrina, ganha, regra, explícita, contra, inventar, número
+(394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` …
+  palavras-chave: fecha, item, backlog, seth, gateway, estado
 (393) DIÁRIO — 08/09/2026 · `seth_gateway` emperrava o servidor inteiro quando o …
   palavras-chave: seth, gateway, emperrava, servidor, inteiro
 (392) DIÁRIO — 08/09/2026 · `modelSpecs enforce` no LibreChat: o yaml vence o lo …

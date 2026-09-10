@@ -143,6 +143,32 @@ Ampliar é barato — um item novo na lista, com sua assinatura. E cada
 item passa pela mesma pergunta: **isso pode mudar alguma coisa?** Se
 puder, não entra.
 
+## Terceira auditoria da Seth: o formato melhorou, a evidência sumiu
+
+O cabeçalho dela saiu certo desta vez — a instrução consertada de manhã
+funcionou. Sobrou um erro, e é o mais caro:
+
+Ela escreveu **"sincronizado: OK"** e parou aí. A máquina tinha entregado
+a linha inteira, com as três medidas que provam o "OK". Ela copiou só a
+palavra e jogou fora a prova. Um "está tudo certo" sem a prova junto é
+opinião, não verificação — e quem lê não tem como conferir nada.
+
+Também escreveu **"nada quebrado"** quando havia um item aberto. E ela
+estava certa: o item não estava na lista que eu mandei ela consultar. Eu
+mandei olhar num lugar onde eu não tinha guardado o problema. Agora está.
+
+**O corretor de cabeçalho ganhou teste próprio, e era hora.** Ele já
+esteve errado duas vezes em dois dias — e nas duas quem descobriu foi uma
+pessoa ou a própria Seth, nunca um teste, porque não havia teste. Agora
+são 11 casos automáticos. **O teste se pagou no primeiro minuto:**
+reprovou uma checagem que eu tinha acabado de escrever, que aceitava a
+data do cabeçalho como se fosse o motivo de uma falha.
+
+**O padrão do dia, sem maquiagem:** dos cinco erros da Seth auditados
+hoje, quatro vieram de instruções minhas incompletas e um do meu
+corretor. Ela obedece bem. O que falha é o que eu escrevo para ela
+obedecer.
+
 ## O que falta
 
 - **Uma decisão sua sobre uma regra.** Uma parte do sistema ficou pronta,

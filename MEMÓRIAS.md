@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7ca3336e953783290fe1383f826cd2f2e2383472
-  Escrito em: 10/09/2026 09:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 23d454863fa81619278e745cfc96aba8ca1d43ce
+  Escrito em: 10/09/2026 09:48 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ca3336e953783290fe1383f826cd2f2e2383472/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/23d454863fa81619278e745cfc96aba8ca1d43ce/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/23d454863fa81619278e745cfc96aba8ca1d43ce/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/23d454863fa81619278e745cfc96aba8ca1d43ce/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
+
+**O acerto primeiro, porque a doutrina consertada em (422 - auditamos a Seth e o culpado era o sistema) funcionou.** O cabeçalho dela passou a sair no formato certo: `modelo:` presente, `sync:` na linha 1, hora com selo, **sem `t=`**, sem saudação. Três dos quatro defeitos da manhã sumiram — e sumiram porque a instrução mudou, não porque ela mudou.
+
+**O erro que sobrou é o mais caro da família.** Ela escreveu `sync: PASS` e parou aí. A Máquina tinha entregado a linha inteira no bloco de estado — `sync: PASS · REGRAS=bcc35b0b · MEMÓRIAS=ee6b5840 · HEAD=23d4548` — e ela copiou só a palavra. REGRAS, seção *"'sync' tem preço"*, existe exatamente contra isso: PASS exige as três medidas feitas ao vivo. Sem elas, **PASS é afirmação, não verificação**, e quem lê o cabeçalho não tem como conferir nada. É a falha catalogada *"Dizer 'íntegro' por coerência de texto"* ((66),(69)) com nome novo. **E o meu linter deu OK** — ele não cobrava os campos.
+
+**`pronto.` com item aberto — e ela escreveu certo.** A doutrina manda procurar em PROJETO "Estado dos bugs" e na janela de MEMÓRIAS. Havia item aberto: o `_e_chamada_utilitaria`, de (419 - quatro controles do perímetro não controlavam o que diziam controlar), que deixa dado externo desligar a hidratação. Só que eu nunca o registrei naquela seção — estava em MEMÓRIAS e no ONDE_ESTAMOS, não onde eu mandei ela olhar. **Mandei consultar um lugar onde eu não tinha posto o item.** Agora está lá, com mecanismo, colisão com a Regra 2 e correção mínima proposta.
+
+**`modelo: Seth` — provável melhora que piorou.** Ela vinha escrevendo `modelo não verificado`, que era honesto: por baixo roda uma cascata que troca de modelo por requisição. Trocou por `Seth`, que é a **persona**, não o modelo — e a Regra 1 existe para rastrear QUEM disse o quê. Minha doutrina só dizia `modelo: <nome>` e nunca esclareceu a diferença. Corrigido com a frase que faltava: *"`modelo não verificado` é a resposta certa e honesta, não um rebaixamento; nunca escreva `modelo: Seth`"*.
+
+**Os quatro consertos:** (1) doutrina exige a linha `sync:` INTEIRA, e aponta a `maquina_verificar{comando:"estado"}` de (423 - a Seth ganhou o poder de verificar sem o de mudar) como caminho para medir sozinha; (2) doutrina distingue persona de modelo; (3) PROJETO "Estado dos bugs" ganha o item ABERTO, que é onde a doutrina manda olhar; (4) o linter passa a reprovar `PASS` nu, `FALHA` sem motivo e `não verificado` sem `lacuna:`.
+
+**E o linter ganhou teste próprio — isto é o principal desta entrada.** Ele já esteve errado DUAS vezes em dois dias: na (421 - agora existe teste dos controles) a âncora ficou no `Nonce:` aposentado (reprovava o formato vivo e aprovava o morto), e na (422) a âncora nova ficou cega a `modelo não verificado`, que a Regra 1 autoriza. **Nas duas vezes quem descobriu foi um humano ou o modelo auditado, nunca um teste — porque não havia teste.** Agora há `--selftest`, 11 casos, com os dois de regressão marcados pelo número da entrada que os originou.
+
+**O selftest se pagou ao nascer:** minha checagem de `sync: FALHA` exigia "algo depois do `·`" e aceitava a **data do próprio cabeçalho** como se fosse o motivo da divergência. O teste reprovou, apertei para recusar quando o que segue parece data/hora. Um controle que eu tinha acabado de escrever, errado, pego pelo teste que nasceu junto.
+
+**Teto honesto, escrito para não iludir:** nenhum dos quatro consertos impede que ela entenda mal a PRÓXIMA instrução ambígua. O que o teste garante é que o erro **apareça**, não que não aconteça. A diferença entre as duas coisas é toda a diferença entre este sistema e um que só promete.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/sync-tem-preco`.
+
+Modelo: Claude Opus 5 (Claude Code, na Máquina) · vetor: cabeçalho real da Seth passado pelo linter antes e depois (antes `OK`, depois `FALHA: sync: PASS sem as medidas que o PASS exige`); `estado_para_eco.sh` conferido entregando a linha `sync:` completa, provando que a evidência existia e foi descartada, não faltava; seção "Estado dos bugs" do PROJETO varrida por itens não-fechados antes de eu afirmar que `pronto.` estava errado — havia zero, o que absolveu a Seth e acusou a mim; `--selftest` do `verificar_cabecalho.py` 11/11, tendo reprovado 10/11 na primeira corrida e apontado o defeito da minha checagem de `FALHA`; `python3 -m py_compile` nos 2 `.py` + `--selftest` do `seth_gateway` OK; doutrina no ar conferida por leitura do `_DOUTRINA_FIXA` montado (4 marcas presentes, hash `57711cdc`); `.diff` reproduzindo o staged byte a byte nos 3 arquivos; assinatura verificada por `ssh-keygen -Y verify -I agata-humano`; `.diff` sha256 `40648ae3696d7e01b40bf171e1e6a6a7867f222293d45674eab424872ca4e93a`. Autorização: Humano — "Audite" (cabeçalho colado) + "faça" + `scripts/aprovar.sh sync-tem-preco` assinado + "assinado".
 
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
 

@@ -63,6 +63,43 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
             falhas.append("bloco de prontidão sem 'Última entrada:'")
         if not re.search(r"\bpronto\.?\b|\bquebrado\s*:", texto, re.IGNORECASE):
             falhas.append("bloco de prontidão sem 'pronto.' ou 'quebrado: <o quê>'")
+
+    # `sync: PASS` NU é o erro mais caro desta família, e passava aqui.
+    # REGRAS, "'sync' tem preço": PASS exige as três medidas feitas ao vivo --
+    # `sync: PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>`.
+    # Sem elas, "PASS" é afirmação, não verificação: quem lê o cabeçalho não
+    # tem como conferir nada. Medido em 10/09/2026 num cabeçalho real da Seth:
+    # a Máquina entregou a linha inteira no bloco de estado e ela copiou só a
+    # palavra `PASS`, descartando a evidência -- e este linter deu OK.
+    # FALHA e não AVISO de propósito: é exatamente a falha catalogada
+    # "Dizer 'íntegro' por coerência de texto" ((66),(69)), com nome novo.
+    m_sync = re.search(r"sync\s*:\s*([A-Za-zÀ-ÿ ]+)", texto, re.IGNORECASE)
+    if m_sync:
+        forma = m_sync.group(1).strip().lower()
+        if forma.startswith("pass"):
+            faltando = [c for c in ("REGRAS=", "MEMÓRIAS=", "HEAD=") if c not in texto]
+            if faltando:
+                falhas.append(
+                    "sync: PASS sem as medidas que o PASS exige (falta "
+                    + ", ".join(faltando)
+                    + ") — REGRAS.md, \"'sync' tem preço\": PASS pede "
+                    "`REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>` medidos ao vivo. "
+                    "Sem eles é `sync: não verificado`, não PASS."
+                )
+        elif forma.startswith("falha"):
+            # Exigir só "algo depois do ·" era fraco demais: no cabeçalho de
+            # uma linha o que vem depois costuma ser a DATA, e a checagem
+            # passava sem motivo nenhum. Achado pelo próprio selftest ao
+            # nascer. Agora: se o que segue `FALHA ·` começa com data/hora,
+            # não é motivo -- é o resto do cabeçalho.
+            m = re.search(r"sync\s*:\s*FALHA\s*·\s*(.{0,40})", texto, re.IGNORECASE | re.DOTALL)
+            depois = (m.group(1).strip() if m else "")
+            parece_data = bool(re.match(r"^(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4}|\d{1,2}:\d{2})", depois))
+            if not depois or parece_data:
+                falhas.append("sync: FALHA sem dizer o que diverge em 1 linha (REGRAS, 'Carregar e formatos') — o que vem depois do `·` é a data, não o motivo")
+        elif "não verificado" in forma or "nao verificado" in forma:
+            if not re.search(r"lacuna\s*:", texto, re.IGNORECASE):
+                falhas.append("sync: não verificado sem `lacuna: <motivo>` (REGRAS, 'Carregar e formatos')")
     else:
         if not tem_t:
             falhas.append("falta t=<n> (ou t≥<n>) no cabeçalho")
@@ -87,7 +124,62 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
 
     return falhas
 
+
+# --- selftest ---------------------------------------------------------------
+# Este linter já esteve errado DUAS vezes em dois dias: em (421) a âncora ficou
+# no `Nonce:` aposentado (reprovava o formato vivo, aprovava o morto), e em
+# (422) a âncora nova ficou cega a `modelo não verificado`, que a Regra 1
+# autoriza. As duas vezes quem descobriu foi um humano ou o modelo auditado,
+# nunca um teste -- porque não havia teste. Agora há. MEMÓRIAS (424).
+_CASOS = [
+    # (nome, texto, deve_passar)
+    ("prontidão completa",
+     "Agata · modelo: X · sync: PASS · REGRAS=aaaaaaaa · MEMÓRIAS=bbbbbbbb · HEAD=ccccccc · "
+     "2026-01-01 10:00 -03 (relógio da Máquina)\nÚltima entrada: (423) t\npronto.\n", True),
+    ("prontidão com modelo não verificado",
+     "Agata · modelo não verificado · sync: PASS · REGRAS=aaaaaaaa · MEMÓRIAS=bbbbbbbb · HEAD=ccccccc · "
+     "2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", True),
+    ("prontidão com família não verificada",
+     "Agata · família gemini, versão não verificada · sync: PASS · REGRAS=aaaaaaaa · "
+     "MEMÓRIAS=bbbbbbbb · HEAD=ccccccc · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", True),
+    ("linha de turno legítima",
+     "Agata · X · t=7 (contado no contexto) · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", True),
+    ("REGRESSAO (424): sync PASS nu",
+     "Agata · modelo: X · sync: PASS · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", False),
+    ("sync FALHA sem motivo",
+     "Agata · modelo: X · sync: FALHA · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", False),
+    ("sync não verificado sem lacuna",
+     "Agata · modelo: X · sync: não verificado · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", False),
+    ("REGRESSAO (422): mistura as duas formas",
+     "Agata · modelo: X · t=2 · sync: PASS · REGRAS=aaaaaaaa · MEMÓRIAS=bbbbbbbb · HEAD=ccccccc\n"
+     "Última entrada: (423) t\npronto.\n", False),
+    ("prontidão sem pronto./quebrado:",
+     "Agata · modelo: X · sync: PASS · REGRAS=aaaaaaaa · MEMÓRIAS=bbbbbbbb · HEAD=ccccccc\n"
+     "Última entrada: (423) t\n", False),
+    ("t= sem qualificador",
+     "Agata · X · t=7 · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", False),
+    ("entrada implausível (maior que a real)",
+     "Agata · X · t=7 (contado no contexto) · MEMÓRIAS (99999)\n", False),
+]
+
+
+def _selftest() -> int:
+    ok = 0
+    for nome, texto, deve_passar in _CASOS:
+        falhas = verificar(texto, 500)
+        passou = (not falhas) == deve_passar
+        ok += passou
+        marca = "PASS " if passou else "FALHA"
+        extra = "" if passou else f"   -> {falhas or ['(passou, mas devia reprovar)']}"
+        print(f"{marca} {nome}{extra}")
+    print(f"\nSELFTEST {'OK' if ok == len(_CASOS) else 'FALHOU'} -- {ok}/{len(_CASOS)}")
+    return 0 if ok == len(_CASOS) else 1
+
+
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        sys.exit(_selftest())
+
     max_entrada = ultima_entrada_local()
     if "--max-entrada" in sys.argv:
         i = sys.argv.index("--max-entrada")

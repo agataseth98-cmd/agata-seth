@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-09-10 09:43 -0300.
+Motivo: Doutrina: sync inteiro nunca truncado + Seth e persona nao modelo. PROJETO: registra _e_chamada_utilitaria em Estado dos bugs. Linter: reprova PASS nu e ganha selftest 11/11
+nome: sync-tem-preco
+diff-sha256: 40648ae3696d7e01b40bf171e1e6a6a7867f222293d45674eab424872ca4e93a
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQDKRicEt2NW/EmhfNz/xNsYHAK4cZuD3dBd91p7ozhAGyq
+sXFgatgE8QNUCHjtlulmEXyIz3zUSmJzVI61qzNw8=
+-----END SSH SIGNATURE-----
