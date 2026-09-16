@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aefe4d07f1aa996490a4fb0335640eaa6c66902c
-  Escrito em: 15/09/2026 22:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 211448482c0f890debc54afee49e991b8fa1b120
+  Escrito em: 16/09/2026 00:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -327,7 +327,9 @@ Nenhum salto é dispensável quando o destino é o canon. Pular um salto é trat
 5. Humano arbitra valores; Máquina arbitra fatos.
 6. Modelo com padrão de alucinação documentado não tem MOD até cumprir o critério de reabilitação (PROJETO).
 
-**Enquanto a Fase 2 não existir:** nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos. MOD real fica em arquivo separado ou permanece rascunho não canônico.
+**Com a Fase 2 existindo (silos construídos; decisão MEMÓRIAS (430), segunda opinião favorável), as restrições para MOD em MEMÓRIAS são:**
+a. MOD com conteúdo sensível de natureza operacional/técnica (rascunho, raciocínio interno, sem credenciais nem dado pessoal identificável) pode entrar em MEMÓRIAS em produção — a Fase 2 isola o contexto de hidratação entre modelos.
+b. MOD com conteúdo genuinamente privado (opinião pessoal não destinada ao público, ou qualquer dado pessoal identificável) continua fora de MEMÓRIAS — o repositório é público, a exposição permanente não é mitigada pela Fase 2. MOD desse tipo fica em arquivo separado ou permanece rascunho não canônico.
 
 **Marca estrutural de discordância sintética (item 4, checagem mecânica em `scripts/checar_discordancia.sh`, P-13):** quando o relógio de 4 semanas dispara e uma discordância é provocada de propósito (não espontânea), a entrada de MEMÓRIAS que a registra carrega um campo literal e greppável, nunca só prosa solta: `SINTÉTICO: true`, numa linha própria, perto do bloco `Modelo: ... vetor: ...` de fechamento da entrada. Ausência do campo é o padrão até aqui — discordância espontânea, achada no processo. Presença marca que ela foi provocada por ordem do relógio de P-13, não por desacordo real encontrado sozinho. Nunca marcar `SINTÉTICO: true` numa discordância que já nasceu espontânea só pra "contar" pro relógio — isso inverteria o propósito do controle, trocando fricção real por teatro de fricção. Como provocar uma (o quê perguntar, a quem) é julgamento editorial de cada vez, fora do escopo desta convenção — aqui só se define o formato de registro, não o método de provocação.
 

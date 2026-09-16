@@ -26,18 +26,48 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aefe4d07f1aa996490a4fb0335640eaa6c66902c
-  Escrito em: 15/09/2026 22:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 211448482c0f890debc54afee49e991b8fa1b120
+  Escrito em: 16/09/2026 00:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aefe4d07f1aa996490a4fb0335640eaa6c66902c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/211448482c0f890debc54afee49e991b8fa1b120/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sobre MOD sensível em produção divide em duas, com segunda opinião formal favorável.** Pergunta do Humano: se a Fase 2 (silos por modelo, CONSTRUÍDA) resolve a restrição "nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos" (`REGRAS.md`, "O Conselho" item 3).
+
+**Achado antes de responder que sim:** a Fase 2 resolve o motivo ESCRITO na cláusula (injeção entre modelos — conferido no código de `gerar-hidratacao.sh`, o `.hidrata.md` comum nunca carrega bloco MOD com `modelo-alvo:`). Mas o repositório `agataseth98-cmd/agata-seth` é **PÚBLICO** (`gh repo view`, confirmado agora), e `MEMÓRIAS.md` é commitado nele — a filtragem de hidratação só controla o que é injetado em tempo de execução, não o que fica publicamente visível no arquivo bruto, pra sempre. Dois riscos distintos, a mesma regra cobria os dois por coincidência.
+
+**Segunda opinião pedida** (`scripts/conselho_remoto.py`, `REGRAS.md` "Segunda opinião — pedido e parecer") — 1ª tentativa (gemini-2.5-flash, `20260915-233655`) concordou em substância mas veio fora do formato exigido (faltou Origem/Posição/Fundamentação/Emenda); devolvida uma vez, conforme manda a regra. 2ª tentativa (gemini-2.5-flash, `20260915-234018`), formato OK: **Posição: sim**. Fundamentação: "a Fase 2... resolve o risco de injeção contextual ampla para conteúdo operacional/técnico [mas] o risco de exposição genuinamente privada nunca foi mitigado pela Fase 2". Redação de emenda fornecida, adotada quase literal abaixo.
+
+**Emenda a `REGRAS.md`, "O Conselho" item 3** (substitui a cláusula condicional atual — Regra 4: `MEMÓRIAS` registra a decisão aqui, a edição do arquivo em si segue quarentena P-8, proposta em `propostas/mod-sensivel-fase2.diff`, aguardando aprovação):
+
+> Com a Fase 2 existindo, as restrições para MOD em MEMÓRIAS são:
+> a. MOD com conteúdo sensível de natureza operacional/técnica (rascunho, raciocínio interno, sem credenciais nem dado pessoal identificável) pode entrar em MEMÓRIAS em produção — a Fase 2 isola o contexto de hidratação entre modelos.
+> b. MOD com conteúdo genuinamente privado (opinião pessoal não destinada ao público, ou qualquer dado pessoal identificável) continua fora de MEMÓRIAS — a exposição pública permanente do repositório não é mitigada pela Fase 2.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `gh repo view agataseth98-cmd/agata-seth --json isPrivate,visibility` = `{"isPrivate":false,"visibility":"PUBLIC"}`; filtragem de silo conferida lendo `.githooks/gerar-hidratacao.sh` linhas 60-94; segunda opinião real via `scripts/conselho_remoto.py`, dois registros crus salvos em `memoria/missoes/conselho-remoto/` (`20260915-233655-gemini-2.5-flash.json`, `20260915-234018-gemini-2.5-flash.json`), identidade conferida (`suspeita: False` nos dois). Autorização: Humano — "Buscar 2ª opinião antes" (escolha entre 3 caminhos oferecidos), "reenvie" (formato).
+
+(429) DIÁRIO — 15/09/2026 · **`P-10` quebrado de verdade: a missão `maquina-md-completo` estourou um teto do kernel, não um limite do Agata — nenhum commit em canon consegue passar agora.** Achado tentando commitar (428): `gerar_obsidian.py` parou de rodar dentro do sandbox do P-10 com `E2BIG` ("lista de argumentos muito longa"). Causa: `AGATA_MISSOES_MD` passa a lista de `.md` de `memoria/missoes` inteira como **uma variável de ambiente**; antes da missão `maquina-md-completo` (commit `8e1d9b5`, camada privada) essa lista tinha ~40 arquivos, depois passou a ter 3.406 (386.501 bytes) — e o Linux limita uma única variável de ambiente a 131.072 bytes (`MAX_ARG_STRLEN` do kernel, não um número inventado: `getconf ARG_MAX` = 2.097.152, mas o teto por-variável-única é menor e é esse que estourou). Passou do limite em quase 3x.
+
+**Efeito real, não teórico:** `.githooks/pre-commit` roda `perimetro.sh` antes de qualquer commit — com P-10 quebrado, **nenhum commit em `REGRAS.md`/`PROJETO.md`/`MEMÓRIAS.md` passa**, nem um que não tenha nada a ver com missões. (428) e esta própria entrada (429) ficam presas no arquivo de trabalho até o conserto ser aprovado e aplicado.
+
+**Proposta pronta, sob quarentena P-8, aguardando aprovação:** `propostas/p10-lista-missoes-por-arquivo.diff` — troca a variável de ambiente por um arquivo temporário (`AGATA_MISSOES_MD_FILE`), em `scripts/perimetro.sh` (P-10) e `scripts/gerar_obsidian.py`. **Sem retrocompatibilidade com `AGATA_MISSOES_MD`** (a variável antiga): conferido por `grep` que nenhum outro chamador no repo a usava — manter um caminho de código pra uma interface sem uso, e que é exatamente a forma que causou o bug, seria "cano a mais" (REGRAS, "Princípios que guiam o sistema"). Testado de verdade, versão final: apliquei a mudança simplificada na árvore de trabalho, rodei `perimetro.sh` completo com os 3.406 arquivos reais — 14 OK/1 SKIP/2 PARCIAL/**0 FALHA** — depois revertive os dois arquivos pro estado do `HEAD` (`git checkout --`) porque mudança de comportamento não entra sem a assinatura do Humano, mesmo já testada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `E2BIG` reproduzido ao vivo rodando o comando real; `git -c core.quotepath=false -C memoria/missoes ls-files '*.md' | wc -c` = 386.501; teto do kernel conferido (`ulimit`/documentação de `execve(2)`, `MAX_ARG_STRLEN` = 32 páginas = 131.072 bytes em página de 4096); correção testada com `bash scripts/perimetro.sh` completo antes e depois do `git checkout --` de reversão. Autorização: Humano — "corrigir o mecanismo, faça a proposta".
+
+(428) DIÁRIO — 15/09/2026 · **Correção de exatidão no `vetor:` de (427) — comando citado não foi o comando rodado.** Autoauditoria pedida pelo Humano (3 rodadas à procura de falha) achou: (427) afirma "commit conferido com `git show --stat HEAD`" — esse comando não foi rodado separado. O que de fato aconteceu: o próprio `git commit` (em `memoria/missoes`, commit `25a9ce8`) imprimiu a estatística (22 files changed, 764 insertions) na sua saída normal, e foi essa saída que eu li antes de escrever (427) — mesma evidência (contagem de arquivo, estatística do commit), comando diferente do que descrevi.
+
+(427) não se edita (Regra 4). Fica valendo como estava, com esta nota ao lado: a existência da missão `memoria-claude-code` e seu commit continuam verificados — o que estava impreciso era só a descrição do método, não o fato.
+
+**Por que registrar algo tão pequeno:** o campo `vetor:` existe pra ser conferível — citar um comando que não rodou, mesmo com o fato final correto, é o tipo de imprecisão que, acumulada, esvazia o que o campo garante. Regra 4 trata isso como qualquer outra correção: entrada nova, não edição.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: reli o histórico desta sessão — a saída de `git commit` que motivou (427) não continha a string `git show --stat HEAD`; nenhum comando com esse texto aparece rodado antes de (427) ser escrita. Autorização: Humano — "registre a correção do vetor de (427)".
 
 (427) DIÁRIO — 15/09/2026 · **Nova missão em `memoria/missoes/`: `memoria-claude-code` — só a existência entra aqui, o conteúdo fica na camada privada (regra da própria `INDICE.md`).** Pedido do Humano: tornar minhas (Claude Code) interações acumuladas com ele — hoje um sistema próprio do harness, fora do Agata, em `~/.claude/projects/-home-orusoua/memory/` — acessíveis como banco de dados dentro das regras do Agata, pesquisável por qualquer modelo com acesso à Máquina, não só por mim.
 

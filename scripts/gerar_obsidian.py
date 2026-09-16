@@ -749,19 +749,25 @@ def main():
     # (mais estrita que a esfera do projeto), e PROJETO.md diz "modelos em
     # nuvem não veem". Linkar no grafo principal reduziria essa fronteira
     # justamente pro tipo de sessão (nuvem) que ela existe pra excluir.
-    # AGATA_MISSOES_MD (opcional): lista pronta, uma por linha, passada pelo
-    # ambiente -- mesmo padrão de AGATA_CANON_SHA/DATA. Necessário porque
-    # memoria/missoes/ é gitignorado do repo principal: um `git archive HEAD`
-    # (a sandbox do P-10) nunca o contém, então o `os.path.isdir` abaixo dá
-    # falso nesse ambiente e o P-10 acusaria SUSPEITO pra sempre, mesmo com
-    # tudo certo -- achado testando isto, não hipotético. perimetro.sh calcula
-    # a lista no repo real (que o tem) e repassa pra sandbox por variável.
+    # AGATA_MISSOES_MD_FILE (opcional): caminho de um arquivo com a lista,
+    # uma por linha -- mesmo padrão de AGATA_CANON_SHA/DATA. Necessário
+    # porque memoria/missoes/ é gitignorado do repo principal: um
+    # `git archive HEAD` (a sandbox do P-10) nunca o contém, então o
+    # `os.path.isdir` abaixo dá falso nesse ambiente e o P-10 acusaria
+    # SUSPEITO pra sempre, mesmo com tudo certo -- achado testando isto, não
+    # hipotético. perimetro.sh calcula a lista no repo real (que o tem) e
+    # repassa pra sandbox por ARQUIVO, não variável de ambiente: uma missão
+    # com milhares de .md rastreados estoura MAX_ARG_STRLEN do kernel
+    # (131072 bytes por variável), achado em 15/09/2026 (MEMÓRIAS (429)) —
+    # arquivo não tem esse teto, e nenhum outro chamador desta função usava
+    # a forma por variável, então não existe interface antiga pra manter.
     MISSOES_DIR = os.path.join(REPO, "memoria", "missoes")
     missoes_md = []
-    if os.environ.get("AGATA_MISSOES_MD") is not None:
-        missoes_md = sorted(
-            p for p in os.environ["AGATA_MISSOES_MD"].splitlines()
-            if p and not p.startswith("segunda-camada/"))
+    if os.environ.get("AGATA_MISSOES_MD_FILE"):
+        with open(os.environ["AGATA_MISSOES_MD_FILE"], "r", encoding="utf-8") as f:
+            missoes_md = sorted(
+                p for p in f.read().splitlines()
+                if p and not p.startswith("segunda-camada/"))
     elif os.path.isdir(MISSOES_DIR):
         try:
             saida_git = subprocess.run(
