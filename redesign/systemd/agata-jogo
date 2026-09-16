@@ -57,10 +57,23 @@ if [ "$#" -eq 0 ]; then
   exit 0
 fi
 
+# GPU: em MUX hibrido (iGPU Intel + dGPU NVIDIA, as duas no lspci) o painel esta
+# ligado na Intel, entao o jogo SO usa a RTX 4060 com PRIME render offload --
+# sem isso ele roda na iGPU. `prime-run` (pacote nvidia-prime) junta as env
+# vars. Em "Discrete only" (so a NVIDIA aparece no lspci) este bloco fica vazio
+# e nao muda nada. (10/09/2026)
+_pr=()
+if command -v prime-run >/dev/null 2>&1 \
+   && lspci -nn 2>/dev/null | grep -qiE 'VGA.*Intel' \
+   && lspci -nn 2>/dev/null | grep -qiE '(VGA|3D).*NVIDIA'; then
+  _pr=(prime-run)
+  echo "agata-jogo: MUX hibrido -- offload pra RTX 4060 via prime-run" >&2
+fi
+
 if command -v game-performance >/dev/null 2>&1; then
   echo "agata-jogo: lancando via game-performance (power-profiles-daemon -> performance)" >&2
-  game-performance "$@"
+  game-performance "${_pr[@]}" "$@"
 else
   echo "agata-jogo: game-performance ausente -- lancando direto" >&2
-  "$@"
+  "${_pr[@]}" "$@"
 fi

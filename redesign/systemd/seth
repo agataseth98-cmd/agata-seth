@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Inicia a Seth para CONVERSA (LibreChat). Sobe a espinha + o gateway + a stack
-# do LibreChat + a voz, espera responder e abre o navegador.
+# Inicia a Seth para CONVERSA (LibreChat). Sobe a espinha INTEIRA (agata.target)
+# + o gateway + a stack do LibreChat + a voz, espera responder e abre o navegador.
+# Contraparte de `seth-parar` (que para tudo). O MoE :20129 continua sob demanda.
 # Fonte versionada: ~/agata/redesign/systemd/seth
 set -e
 LC=~/librechat/docker-compose.yml

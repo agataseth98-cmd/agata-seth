@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Para os frentes da Seth e libera recursos. Mantem a espinha (agata.target).
+# Para a Seth INTEIRA: as frentes E a espinha (agata.target). Libera todos os
+# recursos -- inclusive a VRAM da RTX 4060 e os modelos carregados no Ollama.
+# (Ordem do Humano 10/09/2026: "parar Seth parando tudo". Antes parava so as
+# frentes e mantinha a espinha de pe.)
 # Fonte versionada: ~/agata/redesign/systemd/seth-parar
 LC=~/librechat/docker-compose.yml
 docker compose -f "$LC" stop >/dev/null 2>&1 || true
@@ -7,4 +10,14 @@ docker stop kokoro-tts >/dev/null 2>&1 || true
 systemctl --user stop piper-tts.service 2>/dev/null || true
 systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
 systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
-notify-send -a Seth "Seth" "frentes parados (espinha segue de pe)" 2>/dev/null || true
+# descarrega os modelos ativos do Ollama de producao (:11434) -- sem sudo, nao
+# mexe no ollama.service
+if command -v ollama >/dev/null 2>&1; then
+  ollama ps 2>/dev/null | awk 'NR>1 && $1 != "" {print $1}' | while read -r _m; do
+    [ -n "$_m" ] && ollama stop "$_m" 2>/dev/null || true
+  done
+fi
+# espinha: no stop o agata-drain roda antes e drena o WAL -> nunca corta no meio
+# de um commit. Derruba os 5 servicos + o MoE :20129 (libera a VRAM).
+systemctl --user stop agata.target 2>/dev/null || true
+notify-send -a Seth "Seth" "parada por completo (frentes + espinha)" 2>/dev/null || true
