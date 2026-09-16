@@ -7,6 +7,12 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(427) DIÁRIO — 15/09/2026 · **Nova missão em `memoria/missoes/`: `memoria-claude-code` — só a existência entra aqui, o conteúdo fica na camada privada (regra da própria `INDICE.md`).** Pedido do Humano: tornar minhas (Claude Code) interações acumuladas com ele — hoje um sistema próprio do harness, fora do Agata, em `~/.claude/projects/-home-orusoua/memory/` — acessíveis como banco de dados dentro das regras do Agata, pesquisável por qualquer modelo com acesso à Máquina, não só por mim.
+  palavras-chave: nova, missão, memoria, missoes, claude, code, existência, entra, aqui, conteúdo, fica, camada, privada, regra, própria, indice, pedido, humano, tornar, minhas, interações, acumuladas, ele, hoje, sistema, próprio, harness, fora, agata, projects, home, orusoua, memory, acessíveis, banco, dados, dentro, regras, pesquisável, modelo, acesso, máquina, mim
+(426) DIÁRIO — 15/09/2026 · **(425) retratada — confundi "aplicar o rigor do Agata" com "registrar no canon do Agata".** O Humano pediu, na tarefa de ajuste de desempenho de um jogo (explicitamente marcada por ele como fora do desenvolvimento do Agata desde o início): *"utilize o padrão do sistema agata nesta tarefa"*. Li isso como ordem de registro e escrevi (425) — uma entrada inteira sobre um jogo Steam, sem nenhum arquivo de `~/agata` envolvido. Ordem certa era outra: aplicar o MÉTODO (verificar antes de afirmar, não fabricar, propor com evidência) a uma tarefa que continua fora do escopo do canon, não escrever essa tarefa no histórico do projeto.
+  palavras-chave: retratada, confundi, aplicar, rigor, agata, registrar, canon, humano, pediu, tarefa, ajuste, desempenho, jogo, explicitamente, marcada, ele, fora, desenvolvimento, desde, início, utilize, padrão, sistema, ordem, registro, escrevi, entrada, inteira, steam, arquivo, envolvido, certa, era, método, verificar, afirmar, fabricar, propor, evidência, continua, escopo, escrever, histórico, projeto
+(425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo), registrada por ordem direta do Humano — não é desenvolvimento do Agata, mas ele pediu o padrão do sistema aplicado mesmo assim.** Tarefa: ajudar a tornar o Crimson Desert (Steam, GOverlay/MangoHud/lsfg-vk) jogável nesta Máquina. Nenhum arquivo tocado fica dentro de `~/agata` — sem objeto de quarentena P-8.
+  palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo, registrada, ordem, direta, humano, desenvolvimento, agata, ele, pediu, padrão, sistema, aplicado, mesmo, assim, tarefa, ajudar, tornar, crimson, desert, steam, goverlay, mangohud, lsfg, jogável, máquina, arquivo, tocado, fica, dentro, objeto, quarentena
 (424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
   palavras-chave: sync, pass, seth, truncou, evidência, nem, doutrina, linter, cobravam, terceira, auditoria, dia, padrão, manteve, cinco, defeitos, dela, auditados, quatro, vinham, instruções, minhas, incompletas, meu, próprio
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
@@ -61,11 +67,11 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: gerador, índice, hidratação, reconhecia, rótulo, entrada, lista, fixa, mod, correção, consolidação, ficava, fora, sumiam, indice, memorias, palavras, chave, resumo, antigas, hidrata, morde
 (398) DIÁRIO — 09/09/2026 · PROJETO.md não descrevia dois serviços que rodam e são vigiados pelo P-9: `seth-escriba` (`:20140`, escrita append-only da Seth) e `piper-tts` (`:8890`, voz pt-BR). Sincronizado com a realidade da Máquina.
   palavras-chave: projeto, descrevia, serviços, rodam, vigiados, seth, escriba, escrita, append, only, piper, tts, voz, sincronizado, realidade, máquina
-(397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora real pra copiar, só a proibição de inventar. Dando o valor medido pela Máquina, a doutrina passa a mandar copiar, não estimar.
-  palavras-chave: fecha, item, backlog, seth, tinha, hora, real, pra, copiar, proibição, inventar, dando, valor, medido, máquina, doutrina, passa, mandar, estimar
-(396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374), (376), (380).
+(397) DIÁRIO — 09/09/2026 · Fecha o item H2 do backlog: a Seth não tinha hora re …
+  palavras-chave: fecha, item, backlog, seth, tinha, hora
+(396) CONSOLIDAÇÃO — 09/09/2026 · OmniRoute 504. Refs: (362), (363), (364), (374 …
   palavras-chave: consolidação, omniroute, refs
-(395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), (89), (90).
+(395) CONSOLIDAÇÃO — 09/09/2026 · TES-002 nonce. Refs: (49), (51), (62), (70), ( …
   palavras-chave: consolidação, tes, nonce, refs
 (394) DIÁRIO — 09/09/2026 · Fecha o item H3 do backlog: `seth_gateway._estado()` …
   palavras-chave: fecha, item, backlog, seth, gateway, estado
