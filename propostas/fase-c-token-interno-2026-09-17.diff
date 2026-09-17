@@ -1,0 +1,314 @@
+diff --git a/redesign/grafo/grafo.py b/redesign/grafo/grafo.py
+index 75bc53e..38600b8 100644
+--- a/redesign/grafo/grafo.py
++++ b/redesign/grafo/grafo.py
+@@ -31,6 +31,20 @@ import tools                                       # noqa: E402  (P4-02 -- wrapp
+ AGATA = Path(os.path.expanduser("~/agata"))
+ SCRIPTS = AGATA / "scripts"
+ PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
++
++
++def _token_interno():
++    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
++    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
++    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403."""
++    try:
++        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
++            for linha in f:
++                if linha.startswith("AGATA_INTERNAL_TOKEN="):
++                    return linha.split("=", 1)[1].strip()
++    except OSError:
++        pass
++    return ""
+ DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/grafo"))
+ DB = DIR_ESTADO / "checkpoints.sqlite"
+ LOG_LOOP = "redesign/grafo/loop.log"   # relativo ao repo alvo -- onde registrar_e_commitar escreve
+@@ -106,7 +120,8 @@ def trabalhar(s: Estado) -> dict:
+         "max_tokens": 400, "stream": False,
+     }).encode()
+     req = urllib.request.Request(f"{PROXY}/v1/chat/completions", data=body,
+-                                 headers={"content-type": "application/json"})
++                                 headers={"content-type": "application/json",
++                                          "X-Agata-Token": _token_interno()})
+     try:
+         with urllib.request.urlopen(req, timeout=90) as r:
+             d = json.loads(r.read())
+diff --git a/redesign/router/proxy.py b/redesign/router/proxy.py
+index 13fed7b..2097e34 100644
+--- a/redesign/router/proxy.py
++++ b/redesign/router/proxy.py
+@@ -42,6 +42,28 @@ UPSTREAM = os.environ.get("OMNIROUTE_UPSTREAM", "http://127.0.0.1:20128").rstrip
+ _bind = os.environ.get("SANITIZER_BIND", "127.0.0.1:20127")
+ BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
+ 
++_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
++
++
++def _token_interno() -> str:
++    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
++
++    Item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
++    a fronteira localhost não é fronteira de segurança por si só -- qualquer
++    processo no mesmo host podia bater direto neste proxy (ou pior, direto
++    no OmniRoute em :20128) sem passar pelo seth_gateway. Este token não
++    fecha a porta do OmniRoute (produto de terceiro, sem controle de código
++    aqui -- residual registrado, não escondido), mas fecha a deste proxy:
++    só quem tem o segredo (hoje, só o seth_gateway) passa."""
++    try:
++        with open(_ENV_PATH, encoding="utf-8") as f:
++            for linha in f:
++                if linha.startswith("AGATA_INTERNAL_TOKEN="):
++                    return linha.split("=", 1)[1].strip()
++    except OSError:
++        pass
++    return ""
++
+ _HOP_BY_HOP = {
+     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+     "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
+@@ -54,15 +76,38 @@ class _Handler(BaseHTTPRequestHandler):
+     def log_message(self, fmt, *args):  # silencia o log ruidoso do http.server
+         pass
+ 
++    def _token_ok(self) -> bool:
++        """Falha FECHADA (mesma doutrina do resto deste arquivo): sem token
++        configurado em .env, NADA passa -- não é modo aberto de
++        compatibilidade, é o mesmo padrão de 'sem a régua de segredo, o
++        serviço não responde' que P1-02 já usa."""
++        esperado = _token_interno()
++        if not esperado:
++            return False
++        recebido = self.headers.get("X-Agata-Token", "")
++        return recebido == esperado
++
++    def _recusar_sem_token(self):
++        self._json(403, {"error": {
++            "type": "internal_token_required",
++            "message": "faltou ou errou X-Agata-Token -- este proxy só aceita chamadas do seth_gateway",
++        }})
++
+     # -- GET/HEAD: repassa sem tocar (ex.: /v1/models, /health) -------------- #
+     def do_GET(self):
++        if not self._token_ok():
++            return self._recusar_sem_token()
+         self._passar(b"", "GET")
+ 
+     def do_HEAD(self):
++        if not self._token_ok():
++            return self._recusar_sem_token()
+         self._passar(b"", "HEAD")
+ 
+     # -- POST: sanitiza o corpo antes de repassar --------------------------- #
+     def do_POST(self):
++        if not self._token_ok():
++            return self._recusar_sem_token()
+         n = int(self.headers.get("Content-Length") or 0)
+         corpo = self.rfile.read(n) if n else b""
+ 
+@@ -200,6 +245,14 @@ def _selftest() -> int:
+     px_port = _porta_livre()
+     UPSTREAM = f"http://127.0.0.1:{up_port}"
+ 
++    # Token isolado do .env real -- o selftest não depende de o Humano já
++    # ter configurado AGATA_INTERNAL_TOKEN, e não usa o valor de produção.
++    # globals() (não reimport) porque este arquivo pode rodar como
++    # __main__ -- um `import proxy` separado criaria um SEGUNDO objeto de
++    # módulo, e o monkeypatch cairia no lugar errado (achado testando).
++    token_teste = "selftest-token-nao-e-segredo-de-verdade"
++    globals()["_token_interno"] = lambda: token_teste
++
+     up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
+     px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
+     threading.Thread(target=up_srv.serve_forever, daemon=True).start()
+@@ -207,27 +260,51 @@ def _selftest() -> int:
+ 
+     base = f"http://127.0.0.1:{px_port}/v1/chat/completions"
+     falhas = 0
++    com_token = {"Content-Type": "application/json", "X-Agata-Token": token_teste}
+ 
+-    # 1. pedido limpo -> 200, passthrough do dummy
+-    limpo = json.dumps({"model": "x", "messages": [{"role": "user", "content": "responda so: ok"}]}).encode()
++    # 0a. sem token nenhum -> 403, upstream NAO tocado (item 3 do plano de
++    # mitigacao da auditoria do Marcos, MEMORIAS (437))
++    limpo = json.dumps({"model": "x", "messages": [{"role": "user", "content": "oi"}]}).encode()
+     try:
+-        r = urllib.request.urlopen(
++        urllib.request.urlopen(
+             urllib.request.Request(base, data=limpo, headers={"Content-Type": "application/json"}), timeout=10)
++        print("FALHA  pedido sem token passou (esperava 403)")
++        falhas += 1
++    except urllib.error.HTTPError as e:
++        ok = e.code == 403 and not _DummyUpstream.tocado
++        print(f"{'PASS' if ok else 'FALHA'}  sem token -> {e.code}, upstream {'NAO tocado' if not _DummyUpstream.tocado else 'TOCADO (falha!)'}")
++        falhas += 0 if ok else 1
++
++    # 0b. token errado -> 403, upstream NAO tocado
++    try:
++        urllib.request.urlopen(urllib.request.Request(
++            base, data=limpo, headers={"Content-Type": "application/json", "X-Agata-Token": "errado"}), timeout=10)
++        print("FALHA  pedido com token errado passou (esperava 403)")
++        falhas += 1
++    except urllib.error.HTTPError as e:
++        ok = e.code == 403 and not _DummyUpstream.tocado
++        print(f"{'PASS' if ok else 'FALHA'}  token errado -> {e.code}, upstream {'NAO tocado' if not _DummyUpstream.tocado else 'TOCADO (falha!)'}")
++        falhas += 0 if ok else 1
++
++    # 1. pedido limpo, token certo -> 200, passthrough do dummy
++    try:
++        r = urllib.request.urlopen(
++            urllib.request.Request(base, data=limpo, headers=com_token), timeout=10)
+         body = json.loads(r.read())
+         ok = r.status == 200 and body.get("choices", [{}])[0].get("message", {}).get("content") == "ok-dummy"
+-        print(f"{'PASS' if ok else 'FALHA'}  pedido limpo -> {r.status}, upstream {'tocado' if _DummyUpstream.tocado else 'NAO tocado'}")
++        print(f"{'PASS' if ok else 'FALHA'}  pedido limpo, token certo -> {r.status}, upstream {'tocado' if _DummyUpstream.tocado else 'NAO tocado'}")
+         falhas += 0 if ok else 1
+     except Exception as e:  # noqa: BLE001
+         print(f"FALHA  pedido limpo levantou {type(e).__name__}: {e}")
+         falhas += 1
+ 
+-    # 2. pedido com segredo plantado (gerado na hora) -> 4xx do proxy, upstream NAO tocado
++    # 2. pedido com segredo plantado (gerado na hora), token certo -> 4xx do proxy, upstream NAO tocado
+     _DummyUpstream.tocado = False
+     fake = sanitizar._fx("sk", "-", "Z" * 24)  # casa sk-[A-Za-z0-9]{20,}
+     sujo = json.dumps({"model": "x", "messages": [{"role": "user", "content": f"minha chave e {fake}"}]}).encode()
+     try:
+         urllib.request.urlopen(
+-            urllib.request.Request(base, data=sujo, headers={"Content-Type": "application/json"}), timeout=10)
++            urllib.request.Request(base, data=sujo, headers=com_token), timeout=10)
+         print("FALHA  pedido com segredo passou (esperava 4xx)")
+         falhas += 1
+     except urllib.error.HTTPError as e:
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 30fc0d3..86741fc 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -10,7 +10,11 @@ mensagem `system` e repassa para :20127 (que sanitiza segredo) -> OmniRoute.
+ Assim qualquer frontend que apontar para :20126 fala com a Seth hidratada,
+ sem o Hermes. GET (/v1/models, /health) e streaming passam direto.
+ 
+-Só stdlib. Não instala nada, não lê chave nenhuma.
++Só stdlib. Não instala nada. Lê UMA coisa de ~/.config/agata/.env desde o
++item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
++AGATA_INTERNAL_TOKEN, que este processo anexa em toda chamada ao proxy
++sanitizador -- a fronteira localhost sozinha não provava quem estava do
++outro lado da chamada.
+ 
+ Uso:
+     python3 redesign/router/seth_gateway.py
+@@ -48,6 +52,24 @@ _bind = os.environ.get("SETH_BIND", "127.0.0.1:20126")
+ BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
+ HIDRATA_PATH = Path(os.environ.get(
+     "SETH_HIDRATA", str(Path.home() / "agata" / ".hidrata-seth.md")))
++
++_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
++
++
++def _token_interno() -> str:
++    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
++    Mesma função de redesign/router/proxy.py -- duplicação deliberada,
++    igual à de _e_comportamento em redesign/grafo/tools.py: são só 8
++    linhas, e as duas cópias lêem o MESMO arquivo pela MESMA chave, risco
++    de deriva baixo. Unificação real fica pro item 11/Fase E do plano."""
++    try:
++        with open(_ENV_PATH, encoding="utf-8") as f:
++            for linha in f:
++                if linha.startswith("AGATA_INTERNAL_TOKEN="):
++                    return linha.split("=", 1)[1].strip()
++    except OSError:
++        pass
++    return ""
+ MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
+ REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+ 
+@@ -444,6 +466,7 @@ class _Handler(BaseHTTPRequestHandler):
+         url = UPSTREAM + self.path
+         headers = {k: v for k, v in self.headers.items()
+                    if k.lower() not in _HOP_BY_HOP}
++        headers["X-Agata-Token"] = _token_interno()
+         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
+         try:
+             up = urllib.request.urlopen(req, timeout=180)
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index aafbb47..d41015a 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -7,7 +7,11 @@ opiniao" e PROJETO "Conselho Remoto".
+ 
+ Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
+ ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
+-mais chave nenhuma.
++chave de PROVEDOR nenhuma -- desde o item 3 do plano de mitigacao da auditoria
++do Marcos (MEMORIAS (437)), le UMA coisa de ~/.config/agata/.env
++(AGATA_INTERNAL_TOKEN) pra se identificar ao proxy, que agora recusa chamada
++sem esse token (fechava uma porta que qualquer processo local podia bater
++direto, sem passar pelo seth_gateway nem por este script).
+ 
+ ROTACAO JUSTA (06/09/2026, ordem do Humano: "ninguem tem papel fixo... revogo
+ GLM... deve ser decidido entre modelos gratuitos sob um regime de regras
+@@ -79,6 +83,24 @@ SANITIZADOR_ENDPOINT = os.environ.get(
+ )
+ COMBO = "conselho"   # legado -- so usado se ROSTER ficar vazio (nunca deveria)
+ 
++_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
++
++
++def _token_interno() -> str:
++    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
++    Mesma funcao de redesign/router/proxy.py e seth_gateway.py -- duplicacao
++    deliberada, ver comentario em seth_gateway.py. Sem ela, o proxy (item 3
++    do plano de mitigacao, MEMORIAS (437)) recusaria toda chamada deste
++    script com 403."""
++    try:
++        with open(_ENV_PATH, encoding="utf-8") as f:
++            for linha in f:
++                if linha.startswith("AGATA_INTERNAL_TOKEN="):
++                    return linha.split("=", 1)[1].strip()
++    except OSError:
++        pass
++    return ""
++
+ DESTINO_DIR = os.path.join(
+     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+     "memoria", "missoes", "conselho-remoto",
+@@ -322,7 +344,7 @@ def enviar_omniroute(pedido_texto, modelo):
+     corpo = json.dumps(payload).encode("utf-8")
+     req = urllib.request.Request(
+         SANITIZADOR_ENDPOINT, data=corpo, method="POST",
+-        headers={"Content-Type": "application/json"},
++        headers={"Content-Type": "application/json", "X-Agata-Token": _token_interno()},
+     )
+     with urllib.request.urlopen(req, timeout=180) as resp:
+         return json.loads(resp.read().decode("utf-8"))
+diff --git a/scripts/pesquisar_modelos_gratuitos.py b/scripts/pesquisar_modelos_gratuitos.py
+index c89af44..5edcba1 100755
+--- a/scripts/pesquisar_modelos_gratuitos.py
++++ b/scripts/pesquisar_modelos_gratuitos.py
+@@ -44,10 +44,27 @@ CANDIDATOS_COM_CHAVE = ["Mistral AI", "GitHub Models", "HuggingFace Inference",
+                         "Cloudflare Workers AI", "NVIDIA NIM"]
+ 
+ 
++def _token_interno():
++    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
++    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
++    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403. Enviado
++    tambem nas chamadas diretas ao OmniRoute (:20128) por simplicidade --
++    ele nao conhece o header e o ignora, sem quebrar nada."""
++    try:
++        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
++            for linha in f:
++                if linha.startswith("AGATA_INTERNAL_TOKEN="):
++                    return linha.split("=", 1)[1].strip()
++    except OSError:
++        pass
++    return ""
++
++
+ def _http(url, metodo="GET", body=None, timeout=45):
+     data = json.dumps(body).encode() if body is not None else None
+     req = urllib.request.Request(url, data=data, method=metodo,
+-                                 headers={"content-type": "application/json"})
++                                 headers={"content-type": "application/json",
++                                          "X-Agata-Token": _token_interno()})
+     with urllib.request.urlopen(req, timeout=timeout) as r:
+         return json.loads(r.read().decode("utf-8"))
+ 

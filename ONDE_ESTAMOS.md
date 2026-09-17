@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (442)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (444)).
 
 ## Onde estamos — 17/09/2026
 
@@ -33,7 +33,15 @@ confirmei o arquivo gerado e do tamanho certo.**
 
 **[Feito] Fase B parte 1 assinada e aplicada** — hardening dos 10 serviços. Detalhe: `MEMÓRIAS.md`, entradas (440)/(441).
 
-**Fase B parte 2 pronta, esperando sua assinatura — fecha a Fase B inteira.** O detector automático que devia avisar se um serviço da Seth vazasse pra fora do computador nunca funcionava de verdade — procurava pelo nome errado, sobrou de um desenho antigo. Troquei por uma lista com as 12 portas que a Seth usa e o endereço certo de cada uma; testei contra a máquina real (limpo) e fabriquei um vazamento de propósito pra confirmar que agora ele pega. Mexi no script que trava todo commit futuro — testei com cuidado redobrado antes de propor: suíte de 31 testes, 0 falhas. Arquivo: `propostas/fase-b2-manifesto-p4-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (442).
+**[Feito] Fase B parte 2 assinada e aplicada** — Fase B inteira fechada. Detalhe: `MEMÓRIAS.md`, entradas (442)/(443).
+
+**Fase C pronta, esperando uma coisa sua ANTES de assinar.** Descobri no meio do caminho que o plano original pedia mais do que dá pra fazer: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro. Fechei a parte que é nossa: o proxy que fica na frente dele agora exige uma senha interna gerada só pra isso; sem ela, nada passa, nem a própria Seth. Achei e consertei de brinde 3 outros lugares do sistema que também falavam com esse proxy e que eu ia quebrar por engano se não tivesse conferido.
+
+**Antes de assinar, rode isto uma vez** (gera a senha interna, sem ela a Seth para de responder depois que eu aplicar):
+```
+grep -q "^AGATA_INTERNAL_TOKEN=" ~/.config/agata/.env || printf '\nAGATA_INTERNAL_TOKEN=%s\n' "$(openssl rand -hex 32)" >> ~/.config/agata/.env
+```
+Arquivo: `propostas/fase-c-token-interno-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (444).
 
 ## Onde estamos — 16/09/2026
 

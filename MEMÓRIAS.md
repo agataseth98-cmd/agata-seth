@@ -26,18 +26,43 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a32477b3253f9d973560792a11f00e6d6be3269a
-  Escrito em: 17/09/2026 19:25 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a98b8ca6c95ace5fd9a376c5f389c1a18326e57
+  Escrito em: 17/09/2026 19:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
+
+**Correção ao próprio plano, antes de implementar:** o desenho original (MEMÓRIAS (437), Fase C) previa token em `:20127` **e** `:20128`. Verificado nesta sessão: `omniroute.service` não tem fonte em `redesign/systemd/`, e `redesign/router/proxy.py` (o sanitizador) não tem acesso ao código do OmniRoute — não dá pra colocar checagem de token *dentro* de um produto de terceiro sem acesso ao código dele. `omniroute --help` não respondeu nesta Máquina (comando não encontrado no PATH do shell usado), então nem uma configuração nativa dele pôde ser verificada — não inventei uma flag de CLI que eu não confirmei existir. Escopo fechado: só o proxy, que é 100% código do Agata.
+
+**Mecanismo:** `AGATA_INTERNAL_TOKEN`, gerado por `openssl rand -hex 32`, guardado em `~/.config/agata/.env` (mesma convenção de toda outra chave do projeto — o Humano edita direto, o executor não escreve nesse arquivo: tentei, o classificador de auto-mode do harness bloqueou por ser escrita em cofre de segredo, e isso é o comportamento CERTO, não contornado). `proxy.py` exige o header `X-Agata-Token` em toda requisição (`do_GET`/`do_HEAD`/`do_POST`) e **falha fechado**: sem o token configurado no `.env`, absolutamente nada passa — nem o próprio `seth_gateway`. Testado explicitamente: `.env` sem a chave → `token_ok()` `False` incondicional, header presente ou não.
+
+**Achado no meio do caminho — quase quebrei em vez de consertar.** `grep -rl "20127"` no repo achou **5 chamadores** do proxy, não só o `seth_gateway`: `scripts/conselho_remoto.py` (segunda opinião externa), `scripts/pesquisar_modelos_gratuitos.py`, `redesign/grafo/grafo.py` (o loop de governança) — nenhum deles no meu radar inicial. Os 3 ganharam a mesma função `_token_interno()` e o mesmo header. Sem esse `grep`, eu teria entregado um `.diff` que quebrava a segunda opinião do Conselho e o loop de governança no primeiro uso depois de aplicado.
+
+**Testado, em ordem crescente de integração:**
+- `proxy.py --selftest`: 4/4, incluindo os 2 casos novos (sem token → 403; token errado → 403), com token isolado do `.env` real via `globals()["_token_interno"] = ...` (não `import proxy as _mod` — essa forma criaria um SEGUNDO objeto de módulo quando o arquivo roda como `__main__`, e o monkeypatch cairia no lugar errado; achado testando, corrigido antes de confiar no resultado).
+- `seth_gateway.py --selftest`: 10/10, sem regressão.
+- **Ponta a ponta de verdade**, os 3 componentes reais (`seth_gateway`+`proxy`+um upstream dummy) rodando ao mesmo tempo em portas soltas: (1) fluxo completo com token certo → resposta real do upstream, ponta a ponta; (2) pular o gateway e bater direto no proxy sem token → `403`, upstream nunca tocado. É exatamente a propriedade que o item 3 pedia, para a perna que dá pra fechar.
+- `py_compile` limpo nos 5 arquivos.
+
+**Sequenciamento, para não derrubar a Seth:** o token TEM que existir no `.env` **antes** deste `.diff` ser aplicado e o `omniroute-sanitizer.service` reiniciado — com o `.env` como está hoje (sem a chave), aplicar isto agora bloquearia toda chamada da Seth, inclusive as legítimas. Comando para o Humano rodar, uma vez, antes de assinar:
+```
+grep -q "^AGATA_INTERNAL_TOKEN=" ~/.config/agata/.env || printf '\nAGATA_INTERNAL_TOKEN=%s\n' "$(openssl rand -hex 32)" >> ~/.config/agata/.env
+```
+
+**Residual declarado, não fechado:** qualquer processo local ainda pode bater direto em `:20128` (OmniRoute) sem passar pelo proxy nem pelo token — essa porta continua sem controle de acesso do lado do Agata. Fechar isso de verdade exigiria ou uma configuração nativa do OmniRoute (não verificada nesta sessão) ou isolar a porta por outro mecanismo (namespace de rede, Unix socket) — mudança maior, fora do escopo desta leva.
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-c-token-interno-2026-09-17.diff`, sem `APROVADO-` — aguardando o Humano rodar o comando do token E assinar via `bash scripts/aprovar.sh fase-c-token-interno-2026-09-17`.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep -rln "20127"` no repo inteiro, cruzado contra referências ao token nos 5 arquivos achados; `proxy.py --selftest` 4/4; `seth_gateway.py --selftest` 10/10; teste de integração de 3 processos reais rodando ao mesmo tempo, com upstream dummy respondendo de verdade; teste isolado do caminho "sem token configurado" confirmando falha fechada incondicional; `py_compile` nos 5 arquivos; tentativa real de escrever em `~/.config/agata/.env`, bloqueada pelo classificador do harness (não contornada); `which omniroute`/`omniroute --help` confirmando ausência do binário no PATH desta sessão, não inventado. Autorização: Humano — plano de 5 fases aprovado via `ExitPlanMode`.
 
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
 

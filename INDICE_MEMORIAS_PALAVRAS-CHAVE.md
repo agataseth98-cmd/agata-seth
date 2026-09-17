@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
+  palavras-chave: fase, plano, mitigação, auditoria, marcos, item, escopo, real, menor, planejado, achado, corrigindo, forçar, token, interno, protege, proxy, sanitizador, agata, código, próprio, omniroute, produto, terceiro, fonte, repositório, fica, fora, residual, declarado
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
   palavras-chave: fase, parte, assinada, aplicada, inteira, plano, mitigação, auditoria, marcos, fecha, itens
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: roteador, complexidade, seth, reabre, premissa, nova, roda, hoje, cascata, cloud, livre, omniroute, strategy, priority, qwen, local, titular, requisição, começa, tier, topo, cai, falha, lento, medido, paga, mesmo, análise, longa, escalonamento, pra, tarefa, pesada, feito, classificador, heurístico, gateway, cerebras, gpt, oss, free, only
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
   palavras-chave: seth, voltou, ter, ferramentas, mcp, quebras, achadas, consertadas, removeu, agent, librechat, anexa, endpoint, custom, puro, recebe, tool, gateway, deixava, passar, chunks, sentinela, keepalive, omniroute, zeravam, arguments, calls, acumulador, streaming, voz, revertida, pro, piper, desfaz
-(414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
-  palavras-chave: voz, librechat, tts, voltou, pro, kokoro, dora, modo, teste, cpu, pedido, humano, sessão, quer, feminina, piper, tem, faber, medium, masc, única, opção, local, testado, vivo, boa, enquanto
+(414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, …
+  palavras-chave: voz, librechat, tts, voltou, pro, kokoro, dora
 (413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) …
   palavras-chave: coisas, titleconvo, religado, true
 (412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConv …
