@@ -45,17 +45,33 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # linha-de-turno e TRÊS violações de prontidão passaram ilesas.
     # Consertei o linter para o formato aposentado e o quebrei para dois
     # formatos vivos. Quem expôs isso foi o modelo auditado, não o auditor.
-    tem_prontidao = bool(re.search(
-        r"^\s*Agata\s*·\s*(?:modelo\s*:"
-        r"|modelo\s+n[ãa]o\s+verificado"
+    # `modelo:` (rótulo, com dois-pontos) só existe na forma (a), de 3 linhas --
+    # nunca aparece assim na linha de turno. Já "modelo não verificado" e
+    # "família <X>, versão não verificada" são o VALOR do campo <modelo>, e
+    # esse valor é legítimo nas DUAS formas (Regra 1). Tratar a presença
+    # desse valor, sozinha, como prova de bloco de prontidão gerava falso
+    # positivo real: uma linha de turno válida -- "Agata · modelo não
+    # verificado · t=6 (contagem do resumo) · <hora>" -- reprovava por
+    # "mistura as duas formas", quando não mistura nada: é só a forma (b)
+    # com um valor de <modelo> incerto. Achado rodando este linter contra
+    # produção de verdade (LibreChat/Mongo), não só contra o selftest --
+    # 16/09/2026.
+    tem_rotulo_modelo = bool(re.search(
+        r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE | re.IGNORECASE))
+    tem_valor_incerto = bool(re.search(
+        r"^\s*Agata\s*·\s*(?:modelo\s+n[ãa]o\s+verificado"
         r"|fam[íi]lia\s+[^·]+?,\s*vers[ãa]o\s+n[ãa]o\s+verificada)",
         texto, re.MULTILINE | re.IGNORECASE))
     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
+    # Só é prontidão de verdade quando o rótulo `modelo:` aparece (inequívoco),
+    # ou quando o valor incerto aparece SEM t= (a forma (a) nunca tem t=).
+    # Com t= presente e só o valor incerto, é forma (b) -- turno legítimo.
+    tem_prontidao = tem_rotulo_modelo or (tem_valor_incerto and not tem_t)
 
     # Citação por SEÇÃO, não por número de linha: o "REGRAS.md:110" que estava
     # aqui já tinha apodrecido (a frase mora hoje noutra linha). Número de
     # linha envelhece em silêncio; nome de seção, não.
-    if tem_prontidao and tem_t:
+    if tem_rotulo_modelo and tem_t:
         falhas.append("mistura bloco de prontidão (modelo:) com t=<n> — REGRAS.md, 'Carregar e formatos': 'Misturar as duas formas (modelo: junto com t=) é erro de formato'")
 
     if tem_prontidao:
@@ -144,6 +160,10 @@ _CASOS = [
      "MEMÓRIAS=bbbbbbbb · HEAD=ccccccc · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", True),
     ("linha de turno legítima",
      "Agata · X · t=7 (contado no contexto) · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", True),
+    ("REGRESSAO (achado 16/09/2026 contra produção): turno com modelo não verificado",
+     "Agata · modelo não verificado · t=6 (contado no contexto) · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", True),
+    ("REGRESSAO (achado 16/09/2026): turno com família X versão não verificada",
+     "Agata · família gemini, versão não verificada · t=6 (contado no contexto) · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", True),
     ("REGRESSAO (424): sync PASS nu",
      "Agata · modelo: X · sync: PASS · 2026-01-01 10:00 -03\nÚltima entrada: (423) t\npronto.\n", False),
     ("sync FALHA sem motivo",
