@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
+  palavras-chave: fase, parte, assinada, aplicada, inteira, plano, mitigação, auditoria, marcos, fecha, itens
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
   palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, item, fecha, troca, regex, hermes, ollama, manifesto, real, portas, toca, scripts, perimetro, próprio, gatekeeper, testado, cuidado, extra, propor
 (441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, voltou, ter, ferramentas, mcp, quebras, achadas, consertadas, removeu, agent, librechat, anexa, endpoint, custom, puro, recebe, tool, gateway, deixava, passar, chunks, sentinela, keepalive, omniroute, zeravam, arguments, calls, acumulador, streaming, voz, revertida, pro, piper, desfaz
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
   palavras-chave: voz, librechat, tts, voltou, pro, kokoro, dora, modo, teste, cpu, pedido, humano, sessão, quer, feminina, piper, tem, faber, medium, masc, única, opção, local, testado, vivo, boa, enquanto
-(413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
-  palavras-chave: coisas, titleconvo, religado, true, endpoint, seth, tinha, desligado, diagnóstico, errado, retratou, filtro, título, gateway, commitado, mantém, chamada, hidratação, então, religar, sai, barato, tes, humano, entregou, nonce, ela, ecoou, valor, exato
+(413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) …
+  palavras-chave: coisas, titleconvo, religado, true
 (412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConv …
   palavras-chave: culpou, geração, título, titleconv
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geraçã …

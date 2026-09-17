@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f486372937b6669edc3e944e544b616e2750e6c4
-  Escrito em: 17/09/2026 18:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a32477b3253f9d973560792a11f00e6d6be3269a
+  Escrito em: 17/09/2026 19:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 

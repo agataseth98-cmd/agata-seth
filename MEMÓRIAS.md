@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f486372937b6669edc3e944e544b616e2750e6c4
-  Escrito em: 17/09/2026 18:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a32477b3253f9d973560792a11f00e6d6be3269a
+  Escrito em: 17/09/2026 19:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a32477b3253f9d973560792a11f00e6d6be3269a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum` do `.diff` = `766288f2...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Confirmado byte a byte que a árvore de trabalho batia com o `.diff` assinado antes de commitar. Vault do Obsidian reconstruído a partir de `git archive HEAD` antes do commit (mesmo cuidado de (441), evita o `SUSPEITO (P-10)` falso-positivo).
+
+**Rodei `perimetro.sh` mais uma vez, com tudo já staged e aprovado, antes de fechar** — 0 `FALHA`, P-8 `OK` (o par assinado cobre os dois arquivos), P-4 continua `PARCIAL` (sem root) sem `SUSPEITO`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo; `diff` entre o `.diff` assinado e o `git diff` real, saída vazia; `perimetro.sh` completo rodado com tudo staged, antes de commitar. Autorização: Humano — assinou via `scripts/aprovar.sh fase-b2-manifesto-p4-2026-09-17`, "feito".
 
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
 

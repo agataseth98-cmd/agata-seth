@@ -1,0 +1,33 @@
+# Manifesto declarativo de portas do Agata -- item 9 do plano de mitigação
+# da auditoria do Marcos (MEMÓRIAS (437)/(440)). Substitui a regex
+# "hermes|ollama" do P-4, que nunca cobriu a arquitetura atual (o processo
+# real aparece em `ss` como "python", não pelo nome do script).
+#
+# Formato: porta|nome|bind_esperado -- um por linha, `#` comenta.
+# `bind_esperado` é o endereço IPv4 que a porta TEM que usar; loopback IPv6
+# (::1) é sempre aceito também, por equivalência.
+#
+# Adicionar serviço novo aqui é obrigatório pra ele entrar na checagem de
+# bind do P-4 -- sem entrada aqui, o P-4 simplesmente não vê a porta (não é
+# falha silenciosa: P-9, "Estado dos bugs" e este comentário existem
+# exatamente pra isso não passar despercebido).
+#
+# Fora deste manifesto de propósito: contêineres Docker (LibreChat/Mongo/
+# Meilisearch) -- o bind deles é outra camada (docker network), P-9 já
+# confere se estão de pé via `docker ps`; portas :20131/:20132 (função não
+# determinada, PROJETO.md "Serviços (boot)") -- não dá pra declarar
+# `bind_esperado` pra algo que não se sabe o que é.
+
+20126|seth-gateway|127.0.0.1
+20127|omniroute-sanitizer|127.0.0.1
+20128|omniroute|127.0.0.1
+20130|openvino-whisper|127.0.0.1
+20134|openvino-embeddings|127.0.0.1
+20135|discord-mcp|127.0.0.1
+20136|navegador-mcp|127.0.0.1
+20140|seth-escriba|127.0.0.1
+20141|seth-verificador|127.0.0.1
+27125|obsidian-ro-proxy|127.0.0.1
+8890|piper-tts|127.0.0.1
+8880|kokoro-tts|127.0.0.1
+11434|ollama|127.0.0.1
