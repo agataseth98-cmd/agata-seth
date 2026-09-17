@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marcos (437) — pronta e testada, aguardando assinatura. Cobre os itens 1, 2, 4 e 5: egress/anti-SSRF, proveniência de dado externo, `commit_entry()` transacional, gate interno. Achado colateral: um bug pré-existente que impedia `commit_entry(posicao="apos-marcador")` de funcionar, sempre, corrigido junto.**
+  palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, cobre, itens, egress, anti, ssrf, proveniência, dado, externo, commit, entry, transacional, gate, interno, achado, colateral, bug, pré, existente, impedia, posicao, apos, marcador, funcionar, sempre, corrigido, junto
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
   palavras-chave: auditoria, externa, marcos, snapshot, incidente, boot, verificada, item, máquina, camada, cadeia, sete, achados, confirmados, código, config, real, confiar, texto, dele, descartes, corretos
 (436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicado, diff, projeto, tes, deixou, pendente, linha, estado, bugs, passou, formalmente, inativo, existir, silo, fase, reativado, modelo, alvo, seth, reativação, exercida, falta, entrega, manual, nonce, humano
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonce-seth.secret` (modelo-alvo `seth`, fora do repo). **Reativação ainda NÃO fechada nesta sessão:** falta a assinatura do `.diff` de PROJETO.md e a 1ª entrega manual do Humano à Seth. Entrega é manual por sessão — o protocolo proíbe automatizar ("nunca em hidratação").
   palavras-chave: tes, nonce, novo, gerado, máquina, mod, seth, secret, modelo, alvo, fora, repo, reativação, fechada, sessão, falta, assinatura, diff, projeto, entrega, manual, humano, protocolo, proíbe, automatizar, nunca, hidratação
-(408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
-  palavras-chave: tes, rodada, adversa, contagem, volta, segue, história, sequência, quebrou, zai, glm, flash, remoto, mesmo, modelo
+(408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/ …
+  palavras-chave: tes, rodada, adversa, contagem, volta
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha c …
   palavras-chave: fecha, arquivo, aprovado, tinha
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde …

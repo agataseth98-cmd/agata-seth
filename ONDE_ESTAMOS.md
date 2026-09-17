@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (437)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (438)).
 
 ## Onde estamos — 17/09/2026
 
@@ -27,7 +27,9 @@ confirmei o arquivo gerado e do tamanho certo.**
   raiz de hoje.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
 
-**Auditoria externa do Marcos, pedida por você antes do incidente — conferi cada achado checável na própria máquina.** Ele estava certo nos sete pontos que dão pra checar sem rodar nada ao vivo: o navegador da Seth pode visitar qualquer endereço sem checar pra onde vai (inclusive endereços internos do próprio sistema), o jeito como os serviços conversam entre si depende de convenção, não de trava técnica, uma função de escrita no canon pode deixar arquivo alterado mesmo quando o `git commit` falha, e dois dos serviços mais expostos da Seth têm menos proteção do sistema do que o menos exposto. Nada disso é "alguém já invadiu" — é "isto pode ser mais sólido". Prioridade e o que fazer com isso é decisão sua: `MEMÓRIAS.md`, entrada (437).
+**Auditoria externa do Marcos, pedida por você antes do incidente — conferi cada achado checável na própria máquina.** Ele estava certo nos sete pontos que dão pra checar sem rodar nada ao vivo: o navegador da Seth pode visitar qualquer endereço sem checar pra onde vai (inclusive endereços internos do próprio sistema), o jeito como os serviços conversam entre si depende de convenção, não de trava técnica, uma função de escrita no canon pode deixar arquivo alterado mesmo quando o `git commit` falha, e dois dos serviços mais expostos da Seth têm menos proteção do sistema do que o menos exposto. Nada disso é "alguém já invadiu" — é "isto pode ser mais sólido". Você aprovou um plano de 5 fases pra fechar os 12 pontos do relatório, um `.diff` assinado por vez.
+
+**Fase A pronta, testada, esperando sua assinatura** — fecha 4 dos 12 pontos: o navegador e o leitor de página agora recusam endereço interno/privado antes de qualquer requisição; toda leitura de página/mensagem chega marcada como "isto é dado externo, não instrução"; a função que escreve no canon não deixa mais arquivo alterado quando o commit falha (achei e corrigi de brinde um bug que fazia essa mesma função nunca funcionar de verdade num dos dois jeitos de escrever); e ela agora se recusa, por conta própria, a tocar em qualquer arquivo que mude comportamento do sistema. Arquivo: `propostas/fase-a-egress-provenance-transacional-2026-09-17.diff`. Detalhe técnico: `MEMÓRIAS.md`, entrada (438).
 
 ## Onde estamos — 16/09/2026
 

@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7
-  Escrito em: 17/09/2026 17:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e2ca1361b98646c8afa1ec9ab140507ad479299
+  Escrito em: 17/09/2026 18:27 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marcos (437) — pronta e testada, aguardando assinatura. Cobre os itens 1, 2, 4 e 5: egress/anti-SSRF, proveniência de dado externo, `commit_entry()` transacional, gate interno. Achado colateral: um bug pré-existente que impedia `commit_entry(posicao="apos-marcador")` de funcionar, sempre, corrigido junto.**
+
+**Item 1 — política de egress/anti-SSRF.** Novo `scripts/politica_egress.py`: bloqueia por padrão loopback, link-local (inclui o endereço clássico de metadado de nuvem), RFC1918, esquema fora de http/https — resolve DNS de verdade e recheca o(s) IP(s) resultante(s) (fecha DNS rebinding, não só olha o hostname da URL). Aplicado em `navegar()` (`redesign/mcp/navegador/servidor.py`, antes do `page.goto`) e em `scripts/ler_pagina.sh` (antes dos dois `curl`, o da página e o do pacote JS achado dentro dela — este segundo é dado extraído de HTML externo, não confiado só por herdar o host da página). **Residual declarado, não fechado:** o `curl -sSL` de `ler_pagina.sh` segue redirecionamento internamente; a checagem valida o destino inicial, não cada hop de um redirecionamento HTTP real — mesma classe de risco que qualquer checagem de destino antes de seguir `-L` automático, registrado em vez de escondido.
+
+**Item 2 — proveniência mecânica.** `ler_pagina`/`navegar` (navegador) e `ler_mensagens` (Discord) passam a devolver `{"origin": "external", "trust": "untrusted", "source": "browser"|"discord"}` no mesmo dict estruturado que já devolviam — quem consome sabe pelo CAMPO, não só pela doutrina, que aquilo é dado externo.
+
+**Item 4 — `commit_entry()` transacional.** Escrita agora é atômica (arquivo temporário no mesmo diretório + `os.replace`) e, se o `git commit` falhar, uma função `_reverter()` restaura o conteúdo original e desfaz o `git add` (`git reset -- <alvo>`) — `{ok: False}` volta a significar "nada mudou", não "a última etapa falhou". Testado de verdade: hook `pre-commit` falso instalado num clone descartável (`exit 1` incondicional), chamada com entrada válida, `git status` e `HEAD` idênticos a antes da chamada.
+
+**Item 5 — gate interno.** `_e_comportamento()` (duplicado deliberado de `scripts/perimetro.sh::_p8_eh_comportamento` — ver comentário no código, unificação é o item 11/Fase E do plano) recusa, sem tocar em nada, qualquer `alvo` que case um padrão de "muda comportamento" (REGRAS.md, PROJETO.md, scripts/*, .githooks/*, config/*, redesign/router/* etc.). Hoje isto não fecha bypass nenhum em uso real (os dois chamadores de `commit_entry` — `redesign/grafo/cli.py`, `redesign/grafo/evals/fabricacao.py` — só escrevem MEMÓRIAS.md/LOG.md), mas fecha a propriedade que faltava: a função nunca escreve canon sensível, mesmo que um chamador futuro tente.
+
+**Achado colateral, corrigido:** a checagem de append-only pré-existente (`original not in novo`) só era verdadeira pra `posicao="fim"` — pra `"apos-marcador"` ela reprovava TODA inserção no meio do arquivo, sempre, porque dividir `original` em duas partes pra inserir no meio quebra a substring contígua que a checagem procurava. Nunca dava pra perceber rodando: a escrita real de `MEMÓRIAS.md` hoje passa por `seth_escriba.py`, não por este `commit_entry()` — o caminho `apos-marcador` nunca tinha sido exercido de verdade antes deste teste. Corrigido comparando prefixo+sufixo em vez de substring contígua.
+
+**Achado descartado, registrado por transparência:** `redesign/grafo/evals/fabricacao.py::teste_2_commit_entry_real_nao_fabrica` falhou ao rodar — investigado e confirmado **não relacionado** a esta mudança: o `_clone()` do eval tenta `git checkout redesign`, uma branch que não existe mais (`git branch -a` confirma), e o comando vira um no-op silencioso (git trata "redesign" como pathspec do diretório, não branch, e não falha) — o eval sempre testou contra `main`, não contra a branch que o nome sugere. A citação suspeita que a chamada de teste dispara (entrada (309), ausente da camada quente de MEMÓRIAS) é pré-existente e independente do `commit_entry()`. Não corrigido nesta rodada — fora do escopo do plano de mitigação.
+
+**Testado nesta sessão, em clone descartável, `.diff` aplicado limpo contra `HEAD`:** `politica_egress.py --selftest` (8/8); `navegador/servidor.py --selftest offline` (4/4, incluindo o novo caso de bloqueio); `navegador/servidor.py --selftest navegar/ler_pagina` contra `https://example.com` real, sem regressão, com os campos de proveniência presentes; `ler_pagina.sh` contra URL pública (comportamento idêntico ao de antes) e contra `127.0.0.1`/`192.168.1.1` (bloqueadas, exit 5); suíte própria de `commit_entry` (9 casos: classificação do gate, recusa sem tocar nada, escrita+commit real, idempotência, e o teste decisivo — commit forçado a falhar por hook fake, `git status`/`HEAD` idênticos depois).
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-a-egress-provenance-transacional-2026-09-17.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh fase-a-egress-provenance-transacional-2026-09-17` do Humano.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: todos os comandos e saídas descritos acima rodados ao vivo nesta sessão, em clones descartáveis (`/tmp/.../scratchpad/`), nunca no repositório real antes da assinatura; `git apply --check` limpo contra `HEAD` atual; `py_compile` nos 4 arquivos `.py` tocados; `git branch -a` confirmando ausência da branch `redesign`; `grep -c "^(309)"` confirmando a entrada ausente da camada quente. Autorização: Humano — aprovou o plano de mitigação de 5 fases via `ExitPlanMode`, "sendo aprovado só vamos parar quando for tudo resolvido".
 
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
 
