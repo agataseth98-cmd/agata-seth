@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (444)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (446)).
 
 ## Onde estamos — 17/09/2026
 
@@ -35,13 +35,7 @@ confirmei o arquivo gerado e do tamanho certo.**
 
 **[Feito] Fase B parte 2 assinada e aplicada** — Fase B inteira fechada. Detalhe: `MEMÓRIAS.md`, entradas (442)/(443).
 
-**Fase C pronta, esperando uma coisa sua ANTES de assinar.** Descobri no meio do caminho que o plano original pedia mais do que dá pra fazer: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro. Fechei a parte que é nossa: o proxy que fica na frente dele agora exige uma senha interna gerada só pra isso; sem ela, nada passa, nem a própria Seth. Achei e consertei de brinde 3 outros lugares do sistema que também falavam com esse proxy e que eu ia quebrar por engano se não tivesse conferido.
-
-**Antes de assinar, rode isto uma vez** (gera a senha interna, sem ela a Seth para de responder depois que eu aplicar):
-```
-grep -q "^AGATA_INTERNAL_TOKEN=" ~/.config/agata/.env || printf '\nAGATA_INTERNAL_TOKEN=%s\n' "$(openssl rand -hex 32)" >> ~/.config/agata/.env
-```
-Arquivo: `propostas/fase-c-token-interno-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (444).
+**[Feito] Fase C assinada, aplicada e testada ao vivo em produção** — reiniciei o proxy real, confirmei que ele bloqueia quem não tem a senha, e a Seth respondeu de verdade (resposta real do modelo) através da cadeia inteira já protegida. Descoberta no caminho: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro; fechei a parte que é nossa e registrei o resto como pendência conhecida, não escondida. Detalhe: `MEMÓRIAS.md`, entradas (444)/(445)/(446).
 
 ## Onde estamos — 16/09/2026
 

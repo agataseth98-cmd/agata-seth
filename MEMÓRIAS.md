@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f6ddcfd29db990294e8de448be841e4fe5fdd4db
-  Escrito em: 17/09/2026 19:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): acfee008237508355bd14f76ca0e03581ea3c0fc
+  Escrito em: 17/09/2026 19:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
+
+**`omniroute-sanitizer.service` reiniciado** — subiu limpo, sem erro no log. **Bati direto em `:20127` sem token:** `403`, `{"error": {"type": "internal_token_required", ...}}` — o serviço real, em produção, recusa exatamente como o `--selftest` previu.
+
+**Teste que importava de verdade — a Seth continua respondendo:** subi `seth-gateway.service`, mandei um `POST /v1/chat/completions` real (`seth-rapido`, "responda só a palavra: ok"), e voltou **200 com resposta real do modelo** (`gpt-oss-120b`, via a cadeia inteira gateway→proxy com token→OmniRoute→provedor externo). Não é simulação, não é `--selftest` — é a Seth de verdade respondendo depois da mudança de segurança.
+
+`seth-gateway.service` devolvido a inativo depois do teste (estava assim antes de eu começar). `systemctl --user --failed`: zero unidades.
+
+**Fase C fecha aqui — parte que era nossa, feita e verificada em produção.** O residual do OmniRoute (`:20128`, sem controle nosso) continua registrado em (444), não reaberto por esta entrada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `systemctl --user restart omniroute-sanitizer.service` + `journalctl` lido antes/depois; `curl` direto em `:20127` sem token, `403` real capturado; `curl` real em `:20126` (`seth-gateway`) com resposta `200` e conteúdo de modelo de verdade, lido por inteiro; `systemctl --user --failed` limpo ao final; `seth-gateway.service` conferido de volta a `inactive`. Autorização: Humano — "feito" (assinatura), sequência de verificação e reinício por conta própria, dentro do que a assinatura já autorizava (aplicar + verificar).
 
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
 

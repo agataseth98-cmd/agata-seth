@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
+  palavras-chave: fase, verificada, vivo, produção, omniroute, sanitizer, service, reiniciado, token, exigido, seth, respondeu, verdade, através, cadeia, inteira, item, fecha, parte, nossa
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
   palavras-chave: fase, assinada, aplicada, código, item, fecha, parte, era, nossa, reinício, omniroute, sanitizer, service, verificação, vivo, entrada, separada, desta
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: limpeza, pós, aposentadoria, tes, varredura, pendências, humano, termine, entraremos, fase, otimização, refinamento
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
   palavras-chave: tes, aposentados, decisão, humano, precisamos, nonce, quero, arquivar, esses, testes, mera, formalidade, pode, montar, risco, mudança, estrutural, assumido, escrito, auditoria, sessão, limpa, furos, doutrina, seth, consertados
-(416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) com premissa nova.** A Seth roda hoje na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), não mais no qwen local titular. Toda requisição começa no tier de topo e só cai por falha — quando o topo está lento (2–25s medido hoje), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Feito:** classificador heurístico no `seth_gateway` + `cerebras/gpt-oss-120b` como tier de topo. Free-only.
-  palavras-chave: roteador, complexidade, seth, reabre, premissa, nova, roda, hoje, cascata, cloud, livre, omniroute, strategy, priority, qwen, local, titular, requisição, começa, tier, topo, cai, falha, lento, medido, paga, mesmo, análise, longa, escalonamento, pra, tarefa, pesada, feito, classificador, heurístico, gateway, cerebras, gpt, oss, free, only
+(416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) …
+  palavras-chave: roteador, complexidade, seth, reabre
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas …
   palavras-chave: seth, voltou, ter, ferramentas, mcp
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, …
