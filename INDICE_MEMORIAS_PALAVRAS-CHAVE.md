@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
+  palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, hardening, systemd, serviços, diretiva, testado, vivo, analyze, verify, pronto, assinatura, item, fechado
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
   palavras-chave: fase, assinada, aplicada, itens, plano, mitigação, auditoria, marcos, fecham, código, real
 (438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marcos (437) — pronta e testada, aguardando assinatura. Cobre os itens 1, 2, 4 e 5: egress/anti-SSRF, proveniência de dado externo, `commit_entry()` transacional, gate interno. Achado colateral: um bug pré-existente que impedia `commit_entry(posicao="apos-marcador")` de funcionar, sempre, corrigido junto.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: culpou, geração, título, titleconvo, seth, responde, librechat, mecanismo, fonte, sustenta, retiro, causa, culpado, provável, real, cascata, degradada, tiers, fora, respostas, recuperou, sozinha, glm, voltou, mudanças, ficam, higiene, correção, confirmada
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
   palavras-chave: seth, respondia, librechat, causa, geração, título, conversa, titleconvo, true, titlemodel, apontando, pro, corrigido, false, endpoint, gateway, agora, hidrata, chamadas, fix, respondeu, completa, visível, humano, resposta, persistida, nonce, tes, entregue, rodada, começou
-(410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (409) deixou pendente. A linha "Estado dos bugs" do TES-002 passou de **"formalmente inativo até existir silo (Fase 2)"** para **"reativado 09/09/2026, modelo-alvo `seth`"**. Reativação ainda **não exercida**: falta a 1ª entrega manual do nonce à Seth (só o Humano).
-  palavras-chave: aplicado, diff, projeto, tes, deixou, pendente, linha, estado, bugs, passou, formalmente, inativo, existir, silo, fase, reativado, modelo, alvo, seth, reativação, exercida, falta, entrega, manual, nonce, humano
+(410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (4 …
+  palavras-chave: aplicado, diff, projeto, tes
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonc …
   palavras-chave: tes, nonce, novo, gerado, máquina, mod, nonc
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/ …

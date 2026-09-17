@@ -1,0 +1,225 @@
+diff --git a/redesign/systemd/agata-drain.service b/redesign/systemd/agata-drain.service
+index 7bcba4b..152e5be 100644
+--- a/redesign/systemd/agata-drain.service
++++ b/redesign/systemd/agata-drain.service
+@@ -12,6 +12,16 @@ RemainAfterExit=yes
+ ExecStart=/bin/true
+ ExecStop=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/drenar.py
+ TimeoutStopSec=45
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- drenar.py só lê o WAL/checkpoint do grafo,
++# não escreve nada em disco (confirmado por grep antes de aplicar).
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ [Install]
+ WantedBy=agata.target
+diff --git a/redesign/systemd/agata-warmup.service b/redesign/systemd/agata-warmup.service
+index e812160..44e9559 100644
+--- a/redesign/systemd/agata-warmup.service
++++ b/redesign/systemd/agata-warmup.service
+@@ -8,6 +8,16 @@ Type=oneshot
+ # 15s) e' esperado; o efeito util e' o load. Nao marcar o oneshot como failed.
+ ExecStart=-/usr/bin/curl -s -o /dev/null --max-time 90 http://127.0.0.1:20127/v1/chat/completions -H "content-type: application/json" --data-raw {"model":"ollama-local/qwen3.5:9b","messages":[{"role":"user","content":"oi"}],"max_tokens":1}
+ TimeoutStartSec=120
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- só faz um curl pro próprio loopback, não
++# toca disco nenhum.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectHome=yes
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
+ 
+ # SEM [Install] -- NAO sobe no boot nem com `agata up`. Dispare a mao quando for
+ # usar o modelo local pesado:  systemctl --user start agata-warmup.service
+diff --git a/redesign/systemd/discord-mcp.service b/redesign/systemd/discord-mcp.service
+index 0db1c29..2f64b75 100644
+--- a/redesign/systemd/discord-mcp.service
++++ b/redesign/systemd/discord-mcp.service
+@@ -7,6 +7,17 @@ Type=simple
+ ExecStart=%h/agata/redesign/mcp/.venv/bin/python %h/agata/redesign/mcp/discord/servidor.py --http 20135
+ Restart=on-failure
+ RestartSec=3
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- só lê ~/.config/agata/.env (token) e o
++# repositório; nunca escreve em disco. ProtectSystem=strict deixa tudo
++# somente-leitura por padrão, sem precisar listar cada caminho de leitura.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
+ # start discord-mcp`), nao no boot. Mesma logica do seth-gateway.
+diff --git a/redesign/systemd/navegador-mcp.service b/redesign/systemd/navegador-mcp.service
+index 33ee2db..baef6f1 100644
+--- a/redesign/systemd/navegador-mcp.service
++++ b/redesign/systemd/navegador-mcp.service
+@@ -7,6 +7,19 @@ Type=simple
+ ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/navegador/servidor.py --http 20136
+ Restart=on-failure
+ RestartSec=3
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- testado ao vivo com Playwright+Brave real sob
++# NoNewPrivileges=yes antes de aplicar (o sandbox interno do Brave não
++# depende de setuid nesta Máquina). Escreve perfil/log/screenshot só sob
++# ~/.cache/agata -- é a única exceção de escrita.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
++ReadWritePaths=%h/.cache/agata
+ 
+ # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
+ # start navegador-mcp`), nao no boot. Mesma logica do seth-gateway.
+diff --git a/redesign/systemd/obsidian-ro-proxy.service b/redesign/systemd/obsidian-ro-proxy.service
+index f63e8e3..3c45948 100644
+--- a/redesign/systemd/obsidian-ro-proxy.service
++++ b/redesign/systemd/obsidian-ro-proxy.service
+@@ -14,6 +14,16 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/obsidian/ro_proxy.py
+ Restart=on-failure
+ RestartSec=3
+ Nice=5
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- proxy read-only por desenho (do_PUT/do_PATCH/
++# do_DELETE -> 403); não escreve nada em disco, só lê o token e proxeia.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
+ [Install]
+diff --git a/redesign/systemd/openvino-embeddings.service b/redesign/systemd/openvino-embeddings.service
+index 8071b50..0188399 100644
+--- a/redesign/systemd/openvino-embeddings.service
++++ b/redesign/systemd/openvino-embeddings.service
+@@ -14,6 +14,17 @@ ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/embeddi
+ Restart=on-failure
+ RestartSec=3
+ Nice=5
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- só lê o modelo em ~/.cache/agata/openvino/ e
++# responde por socket; não escreve em disco. /dev/dri (iGPU) continua
++# acessível -- ProtectSystem não toca dispositivos, só o filesystem.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
+ [Install]
+diff --git a/redesign/systemd/openvino-whisper.service b/redesign/systemd/openvino-whisper.service
+index cf8f354..b047282 100644
+--- a/redesign/systemd/openvino-whisper.service
++++ b/redesign/systemd/openvino-whisper.service
+@@ -16,6 +16,19 @@ ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/whisper
+ Restart=on-failure
+ RestartSec=3
+ Nice=5
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- lê o modelo em ~/.cache/agata/openvino/ e
++# arquivos de áudio por caminho (aceita 'path' no corpo do POST -- leitura
++# arbitrária pré-existente, fora de escopo desta correção); não escreve em
++# disco. ProtectSystem=strict não bloqueia leitura em lugar nenhum, só
++# escrita fora dos caminhos declarados -- não quebra esse recurso.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # P7-01 fix (02/09): era WantedBy=default.target -- somado ao [Install] do drop-in
+ # agata.conf, um `systemctl --user enable` recriava default.target.wants/<unit> e o
+diff --git a/redesign/systemd/piper-tts.service b/redesign/systemd/piper-tts.service
+index b3fff6b..9e60751 100644
+--- a/redesign/systemd/piper-tts.service
++++ b/redesign/systemd/piper-tts.service
+@@ -10,6 +10,16 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/tts_piper.py
+ Restart=on-failure
+ RestartSec=3
+ Nice=5
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- só lê o modelo de voz em redesign/router/
++# tts-piper/voices/ e responde áudio por socket; não escreve em disco.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # Sem [Install] -- sobe sob demanda, igual seth-gateway. O atalho da Seth
+ # (redesign/systemd/seth) faz `systemctl --user start piper-tts` quando ligar
+diff --git a/redesign/systemd/seth-escriba.service b/redesign/systemd/seth-escriba.service
+index f3f16c4..758563d 100644
+--- a/redesign/systemd/seth-escriba.service
++++ b/redesign/systemd/seth-escriba.service
+@@ -13,4 +13,19 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_escriba.py
+ Restart=on-failure
+ RestartSec=3
+ Nice=5
+-# escreve so em MEMÓRIAS.md e SETH-DIARIO.md do repo -- sem ProtectHome
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- ANTES deste conserto, este serviço (o ÚNICO
++# canal de escrita da Seth) não tinha NENHUMA diretiva de hardening,
++# menos que o seth-verificador (só leitura) -- achado invertido do que o
++# risco pediria, confirmado na auditoria. Escreve só em MEMÓRIAS.md e
++# SETH-DIARIO.md do repo (a trava de verdade é a aplicação: fcntl.flock +
++# verificação pós-escrita, insert/append puro) -- ReadWritePaths cobre o
++# repositório inteiro porque a escrita atômica (os.replace) e o lock
++# precisam do diretório, não só dos dois arquivos.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadWritePaths=%h/agata
+diff --git a/redesign/systemd/seth-gateway.service b/redesign/systemd/seth-gateway.service
+index d2b2683..f09e571 100644
+--- a/redesign/systemd/seth-gateway.service
++++ b/redesign/systemd/seth-gateway.service
+@@ -9,6 +9,19 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
+ Environment=SETH_HIDRATA_MODO=compacto
+ Restart=on-failure
+ RestartSec=3
++# Baseline de hardening (item 6 do plano de mitigação da auditoria do
++# Marcos, MEMÓRIAS (437)) -- ANTES deste conserto, este serviço (vê TODO o
++# tráfego da Seth, hidrata, roteia) não tinha NENHUMA diretiva de
++# hardening -- o mais exposto dos serviços da Seth era também o menos
++# isolado. Só lê REGRAS/PROJETO/MEMÓRIAS pra hidratar e responde por
++# socket -- confirmado por grep antes de aplicar, zero escrita em disco.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
+ 
+ # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user start
+ # seth-gateway`), nao no boot. Mesma logica do llamacpp-agata / agata-warmup.

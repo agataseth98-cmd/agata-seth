@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9
-  Escrito em: 17/09/2026 18:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 738cf19ff8e80186551aaf07a2cf6ce007d2699b
+  Escrito em: 17/09/2026 18:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/738cf19ff8e80186551aaf07a2cf6ce007d2699b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/738cf19ff8e80186551aaf07a2cf6ce007d2699b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/738cf19ff8e80186551aaf07a2cf6ce007d2699b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
+
+**Baseline aplicada** (a mesma de `seth-verificador.service`, já em produção): `NoNewPrivileges`, `PrivateTmp`, `ProtectSystem=strict`, `ProtectKernelTunables`, `ProtectControlGroups`, `RestrictSUIDSGID`, mais `ReadOnlyPaths=%h/agata` (ou `ReadWritePaths` só onde o serviço escreve de verdade — `navegador-mcp` em `~/.cache/agata`, `seth-escriba` no repositório inteiro). Confirmado por `grep` em cada `.py`, antes de escrever qualquer `.service`, que nenhum dos outros 8 escreve em disco — só socket.
+
+**10 serviços, testados um por um, com rollback ao estado anterior depois de cada teste:** `agata-drain` (dreno rodou, "WAL limpo, nada a esperar"), `agata-warmup` (oneshot terminou limpo), `discord-mcp` (subiu, respondeu na porta), `navegador-mcp` (subiu — o teste de `NoNewPrivileges` contra o Brave real já tinha sido feito ANTES de escrever o `.service`, via `systemd-run` isolado: navegação real a `https://example.com` funcionou, o sandbox interno do Brave não depende de setuid nesta Máquina), `obsidian-ro-proxy` (reiniciado, 403 esperado sem token), `openvino-embeddings` (reiniciado, modelo recarregou na iGPU em 0,5s, **embedding real gerado, vetor de 384 dimensões**), `openvino-whisper` (reiniciado, modelo recarregou na iGPU em 0,7s), `piper-tts` (subiu, **áudio real sintetizado, 9.239 bytes**), `seth-escriba` (subiu, **escrita real em `SETH-DIARIO.md` via `POST /diario`, depois revertida com `git checkout --`**), `seth-gateway` (subiu; `--selftest` rodado sob os MESMOS parâmetros de sandbox via `systemd-run` isolado, 10/10 PASS, confirmando que a hidratação lê REGRAS/PROJETO/MEMÓRIAS normalmente sob `ProtectSystem=strict`).
+
+**Nenhuma unidade ficou em `failed`** (`systemctl --user --failed` limpo depois de tudo); os 4 que já estavam ativos antes (`agata-drain`, `obsidian-ro-proxy`, `openvino-embeddings`, `openvino-whisper`) voltaram ativos; os 6 sob demanda voltaram inativos — estado do sistema idêntico ao de antes de começar, só com a proteção nova.
+
+**Fora do escopo desta leva, registrado, não esquecido:** `omniroute.service`/`omniroute-sanitizer.service` (sem fonte em `redesign/systemd/`, produto de terceiro ou sem unit versionada — fora do que o P-8 consegue governar hoje), `agata-token-check.service` e `llamacpp-agata.service` (idem). `agata-consolidacao.service` e `agata-pesquisa-modelos.service` já tinham hardening, não tocados.
+
+**Achado colateral, não corrigido:** o `.githooks/post-commit` roda `gerar_obsidian.py` direto na árvore de trabalho (sem sandbox de `git archive HEAD`, ao contrário da própria verificação do P-10) — se houver mudança não commitada na árvore no momento de QUALQUER commit anterior, o vault fica "à frente" do HEAD real, e o próximo commit vê `SUSPEITO (P-10)`. Aconteceu nesta sessão (commit (439)), corrigido reconstruindo o vault a partir de `git archive HEAD` manualmente antes de commitar. Não é item do plano do Marcos — registrado pra não se repetir sem explicação da próxima vez.
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-b-hardening-systemd-2026-09-17.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh fase-b-hardening-systemd-2026-09-17`. Pendente na mesma Fase B: manifesto declarativo de serviços substituindo o regex do P-4 (item 9) — próxima leva.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `systemd-analyze --user verify` nos 10 arquivos (limpo); cada serviço copiado individualmente pro `~/.config/systemd/user/` (lote bloqueado pelo classificador de auto-mode do harness — refeito um por um, por decisão própria, não contornado); `systemctl --user start/restart/stop` + `journalctl --user -u <serviço>` lido antes/depois de cada um; requisição HTTP real contra `piper-tts` (áudio) e `openvino-embeddings` (vetor); `POST /diario` real contra `seth-escriba`, revertido com `git checkout --`; `seth_gateway.py --selftest` e o teste de navegação do Brave rodados via `systemd-run --user --pty --wait` com os mesmos parâmetros de sandbox do `.service` real; `systemctl --user --failed` limpo ao final; `git apply --check` do `.diff` limpo contra `HEAD` num clone descartável. Autorização: Humano — plano de 5 fases aprovado via `ExitPlanMode`.
 
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
 
