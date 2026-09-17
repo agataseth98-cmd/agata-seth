@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (440)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (442)).
 
 ## Onde estamos — 17/09/2026
 
@@ -31,7 +31,9 @@ confirmei o arquivo gerado e do tamanho certo.**
 
 **[Feito] Fase A assinada e aplicada** — fechou 4 dos 12 pontos. Detalhe: `MEMÓRIAS.md`, entradas (438)/(439).
 
-**Fase B, parte 1, pronta e testada de verdade, esperando sua assinatura** — os dois serviços mais expostos da Seth (o que vê todo o tráfego, e o único que escreve no canon) tinham ZERO proteção do sistema operacional; agora têm a mesma que o mais protegido já tinha. Testei cada um dos 10 serviços ao vivo, não só "parece certo no papel": gerei um áudio de verdade, gerei um vetor de embedding de verdade na placa de vídeo, escrevi (e desfiz) uma linha de teste real no diário da Seth. Nada quebrou, nada ficou em estado de erro. Arquivo: `propostas/fase-b-hardening-systemd-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (440).
+**[Feito] Fase B parte 1 assinada e aplicada** — hardening dos 10 serviços. Detalhe: `MEMÓRIAS.md`, entradas (440)/(441).
+
+**Fase B parte 2 pronta, esperando sua assinatura — fecha a Fase B inteira.** O detector automático que devia avisar se um serviço da Seth vazasse pra fora do computador nunca funcionava de verdade — procurava pelo nome errado, sobrou de um desenho antigo. Troquei por uma lista com as 12 portas que a Seth usa e o endereço certo de cada uma; testei contra a máquina real (limpo) e fabriquei um vazamento de propósito pra confirmar que agora ele pega. Mexi no script que trava todo commit futuro — testei com cuidado redobrado antes de propor: suíte de 31 testes, 0 falhas. Arquivo: `propostas/fase-b2-manifesto-p4-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (442).
 
 ## Onde estamos — 16/09/2026
 

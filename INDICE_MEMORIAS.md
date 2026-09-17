@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
 (441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
 (440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas quebras achadas e consertadas: (1) a (392) removeu o **Agent** da Seth, e no LibreChat MCP só se anexa a Agent — endpoint `custom` puro não recebe tool nenhuma; (2) o `seth_gateway` deixava passar os chunks-sentinela `keepalive` do OmniRoute, que **zeravam os `arguments`** das tool calls no acumulador de streaming do LibreChat. Também: **voz revertida pro Piper** (desfaz a (414)).
 (414) DIÁRIO — 09/09/2026 · **Voz do LibreChat: TTS voltou pro Kokoro `pf_dora`, em modo de teste (CPU).** Pedido do Humano nesta sessão: quer uma voz **feminina** pt-BR. Piper não tem nenhuma (só `pt_BR-faber-medium`, masc.); `pf_dora` do Kokoro é a única opção local. Testado ao vivo pelo Humano: *"a voz está boa por enquanto"*.
 (413) DIÁRIO — 09/09/2026 · Duas coisas. (1) **`titleConvo` religado** (`true`) no endpoint Seth — a (411) tinha desligado por diagnóstico errado, a (412) retratou; o filtro de título do `seth_gateway` (commitado em (411)) mantém essa chamada sem hidratação, então religar sai barato. (2) **TES-002: o Humano entregou o nonce à Seth e ela ecoou o valor exato.**
-(412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
+(412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConv …
 (411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geraçã …
 (410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (4 …
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonc …

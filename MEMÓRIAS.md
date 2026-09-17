@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e14672aef294937d4d4e3bdcb3513c890f9e4ef5
-  Escrito em: 17/09/2026 18:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f486372937b6669edc3e944e544b616e2750e6c4
+  Escrito em: 17/09/2026 18:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e14672aef294937d4d4e3bdcb3513c890f9e4ef5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e14672aef294937d4d4e3bdcb3513c890f9e4ef5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e14672aef294937d4d4e3bdcb3513c890f9e4ef5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f486372937b6669edc3e944e544b616e2750e6c4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
+
+**O problema real, confirmado antes de mexer:** `p4_bind()` filtrava a saída de `ss -tulpn` por `grep -qiE "hermes|ollama"` contra a linha inteira. Na arquitetura pós-redesenho, os processos aparecem como `python` (seth-gateway, seth-escriba, discord-mcp, navegador-mcp, openvino-*, piper-tts) — **nenhum deles batia com o regex, nunca**. Se qualquer um bindasse fora de loopback por engano, o P-4 não veria.
+
+**Conserto:** novo `config/portas-agata.txt` (manifesto declarativo, `porta|nome|bind_esperado`, 12 portas hoje: as 9 do redesenho + `obsidian-ro-proxy`, `piper-tts`, `ollama` — fora do escopo de propósito: contêineres Docker, cobertos por P-9 via `docker ps`; `:20131`/`:20132`, função não determinada, PROJETO.md). `p4_bind()` reescrita: lê o manifesto, confere CADA porta declarada por **número**, não por nome de processo — funciona não importa como o processo aparece na `ss`.
+
+**Testado em isolamento antes de tocar o `perimetro.sh` real** (script à parte, mesma lógica): contra a `ss` de verdade desta Máquina (limpo — as 12 portas do manifesto já estão certas); bind ruim fabricado (`0.0.0.0:20126`) — pego; bind bom fabricado — não dispara; porta do manifesto ausente da saída (serviço fora do ar agora) — não gera suspeita falsa; ambiguidade de prefixo de porta (`201260` vs `20126`) — não casa por engano.
+
+**Testado no `perimetro.sh` real, com o P-16 rodando de verdade** (arquivo staged, suíte disparada pela própria checagem): `bash -n` limpo; `perimetro.sh` completo contra a Máquina real — P-4 continua `PARCIAL` (sem root), zero `SUSPEITO`, igual ao comportamento de antes contra um sistema saudável; **`testar_perimetro.sh`: 31/31, 0 falhas** — nenhuma regressão nos outros 16 controles. `SUSPEITO (P-8)` disparou corretamente contra os dois arquivos staged sem assinatura — confirmação de que a quarentena ainda funciona, não um bug.
+
+**Fora do escopo desta leva, registrado:** unificar P-9 (arrays `P9_UNIDADES_*`) pra ler do mesmo manifesto — cogitado, adiado por cautela: P-9 tem semântica própria por categoria (sistema/usuário/docker, cada uma com regra diferente de o que conta como falha) que uma unificação apressada podia confundir. Fica pro item 11 (Fase E), não empacotado aqui.
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-b2-manifesto-p4-2026-09-17.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh fase-b2-manifesto-p4-2026-09-17`. Fecha a Fase B inteira (itens 6 e 9) quando assinado.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: script de teste isolado com 5 casos adversariais, rodado antes de tocar `perimetro.sh`; `bash -n scripts/perimetro.sh` limpo; `perimetro.sh` completo rodado contra a Máquina real, saída de P-4 conferida; `testar_perimetro.sh` disparado pelo próprio P-16 com o arquivo staged, 31/31; `git apply --check` do `.diff` limpo contra `HEAD` num clone descartável. Autorização: Humano — plano de 5 fases aprovado via `ExitPlanMode`, "sem pausa além da assinatura".
 
 (441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
 
