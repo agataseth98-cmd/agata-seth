@@ -26,18 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 50c05f700eacadb37df2ba6a69af801470c75715
-  Escrito em: 17/09/2026 16:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 94eded4afdecb8d218effde9b86735a4d7244183
+  Escrito em: 17/09/2026 16:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum propostas/registra-incidente-boot-2026-09-17.diff` = `021a48c9...`, batendo `diff-sha256:` de `propostas/APROVADO-registra-incidente-boot-2026-09-17`; `ssh-keygen -Y verify` contra `propostas/.allowed_signers` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. `git apply --check` limpo contra `HEAD`, `git apply` real mudando `PROJETO.md`. Par movido para `propostas/aplicadas/`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` conferido contra `diff-sha256:`; `ssh-keygen -Y verify` rodado ao vivo, saída colada acima; `git apply --check`/`git apply` reais. Autorização: Humano — assinou via `scripts/aprovar.sh registra-incidente-boot-2026-09-17`, "feito".
 
 (435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
 
