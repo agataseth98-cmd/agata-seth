@@ -48,7 +48,7 @@ PROIBIDO = os.path.join("memoria", "missoes")
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
 CAB_ENTRADA = re.compile(
-    r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+.*$"
+    r"^\((\d+)\)\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*(?:\s+[A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)?)\s+[—-]\s+.*$"
 )
 FRIO_NOME = re.compile(
     r"^MEMORIAS-FRIO-(\d{4}-\d{2}-\d{2})(?:-(\d+))?(-com-migrado)?\.md$"

@@ -111,7 +111,7 @@ filtrar_mod_por_alvo() {
     }
     migrado { print; next }
     /^## Migrado de DIÁRIO\.md/ { flush(); print; migrado = 1; next }
-    /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / {
+    /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / {
       flush()
       em_mod = ($0 ~ /^\([0-9]+\) MOD([ (]|$)/)
       buf[++n] = $0
@@ -190,10 +190,10 @@ listar_frio_recente_primeiro() {
 # scripts/compactar_indice.py (N primeiras completas, resto truncado) --
 # a ordem entre camadas importa de verdade aqui, não é só estética.
 _grep_entradas_modernas_todas_camadas() {
-  grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
-  [ -f MEMORIAS-MORNO.md ] && grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMORIAS-MORNO.md
+  grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+  [ -f MEMORIAS-MORNO.md ] && grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMORIAS-MORNO.md
   while IFS= read -r _frio; do
-    grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' "$_frio"
+    grep -hE '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' "$_frio"
   done < <(listar_frio_recente_primeiro)
 }
 
@@ -265,7 +265,7 @@ gerar_indice() {
     else
       {
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
-        grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS"
     fi
   } > "$INDICE"
@@ -318,7 +318,7 @@ janela_memorias() {
     # senão a última entrada "engoliria" o bloco inteiro na medição.
     printf '%s\n' "$mem" | awk -v budget="$budget" '
       /^## Migrado de DIÁRIO\.md/ { migrado=NR }
-      /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / { hdr[++n]=NR }
+      /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / { hdr[++n]=NR }
       { line[NR]=$0 }
       END {
         total=NR
@@ -349,7 +349,7 @@ janela_memorias() {
     # Formato antigo: mais recente no fim físico. Acumula de trás pra
     # frente até o orçamento -- comportamento original, MEMÓRIAS (191)/(192).
     printf '%s\n' "$mem" | awk -v budget="$budget" '
-      /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / { hdr[++n]=NR }
+      /^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] / { hdr[++n]=NR }
       { line[NR]=$0 }
       END {
         total=NR
@@ -387,7 +387,7 @@ checar_reconciliacao() {
       echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
       avisos=$((avisos + 1))
     fi
-  done < <(grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] ' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
+  done < <(grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] ' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
   if [ "$avisos" -gt 0 ]; then
     echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
   fi
@@ -413,7 +413,7 @@ gerar_indice_palavras_chave() {
     else
       {
         grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md | sed -E 's/^### //' || true
-        grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
+        grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] [0-9]{2}/[0-9]{2}/[0-9]{4}' MEMÓRIAS.md
       } | python3 scripts/compactar_indice.py "$INDICE_RECENTES_COMPLETAS" "$INDICE_TETO_ANTIGAS" \
         | python3 scripts/extrair_palavras_chave.py
     fi
@@ -471,7 +471,14 @@ montar_hermes() {
     echo ""
     cat PROJETO.md
     echo ""
-    filtrar_indice_por_alvo "$modelo" < "$INDICE"
+    echo "# Índice de MEMÓRIAS.md"
+    echo ""
+    echo "Não embutido aqui — mesmo motivo do índice de palavras-chave (ver INDICE_CHAVES"
+    echo "acima): medido em 16/09/2026, o índice puro (\$INDICE) sozinho custava 18.736"
+    echo "tokens (28,59% do num_ctx do tier local), mais que o dobro da janela de MEMÓRIAS"
+    echo "que ele indexa. Pra achar uma entrada fora da janela abaixo: query_canon{doc:"
+    echo "\"INDICE_MEMORIAS\", grep:\"<termo>\"} — o arquivo \$INDICE continua completo em"
+    echo "disco, só não é mais auto-injetado. Corte item 2a, MEMÓRIAS (431)."
     echo ""
     echo "# MEMÓRIAS.md (janela por entrada inteira, orçamento ${_budget} chars${modelo:+, silo: $modelo})"
     echo ""

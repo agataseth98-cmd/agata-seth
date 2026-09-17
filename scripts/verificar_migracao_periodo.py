@@ -16,7 +16,7 @@ import sys
 
 PADRAO_MIGRADO = re.compile(r"^## Migrado de DIÁRIO\.md", re.MULTILINE)
 PADRAO_ENTRADA = re.compile(
-    r"^\(\d+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?: [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)? [—-] \d{2}/\d{2}/\d{4}",
+    r"^\(\d+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(?:\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*(?: [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.\-]+)? [—-] \d{2}/\d{2}/\d{4}",
     re.MULTILINE,
 )
 
