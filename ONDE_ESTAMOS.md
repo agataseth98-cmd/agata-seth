@@ -5,7 +5,27 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (431)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (435)).
+
+## Onde estamos — 17/09/2026
+
+**Sua máquina parou de ligar hoje mais cedo — atualização do CachyOS corrompeu
+os arquivos que preparam o boot, e sem eles o Linux não enxergava o disco
+(dois SSDs em conjunto). Você consertou sozinho, em horas, por Live USB. Eu
+conferi cada passo do seu conserto na própria máquina — bateu tudo — e achei
+um buraco que sobrou: o kernel reserva (o "plano B" para o caso do principal
+falhar de novo) tinha sido instalado no meio do conserto, mas sem a imagem
+que ele precisa pra funcionar. Se você precisasse dele antes de eu achar
+isso, ia falhar do mesmo jeito. Já fechei — você rodou os 3 comandos, eu
+confirmei o arquivo gerado e do tamanho certo.**
+
+- Pode seguir com a atualização de pacotes que estava pendente (nenhum deles
+  mexe em kernel, disco ou boot).
+- Ponto em aberto, não resolvido: seu computador já tinha histórico de
+  desligar sozinho por instabilidade ao suspender. Pode ter sido a causa
+  raiz de hoje — vale desconfiar de suspender a máquina até isso ficar mais
+  claro, prefira desligar/ligar de verdade por enquanto.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
 
 ## Onde estamos — 16/09/2026
 
@@ -57,18 +77,15 @@ redundante com o que já está escrito. Arquivamos a ideia.
 
 ### O que falta
 
-- **[Feito 17/09] As duas assinaturas de 16/09 foram dadas e aplicadas** —
-  cortamos o índice pesado da memória e consertamos o corretor de
-  cabeçalho. Só o conserto do "robô" (travado pelo meu próprio ambiente)
-  continua parado.
-- **[Feito 17/09] Você assinou e a brecha da página web foi fechada.** Uma
-  página que a Seth lia pelo navegador podia desligar a memória dela num
-  turno de chat de verdade, sem avisar. Apliquei o conserto no código
-  real e testei de novo lá — funciona.
+- Só o conserto do "robô" da Seth continua parado (travado pelo meu
+  ambiente de execução, não por falta da sua autorização).
 - Você decidir se autoriza rodar um teste mais caro (que usa a placa de
   vídeo por um instante) para medir a memória com ainda mais precisão.
 
 ## Fechado recentemente, pra não voltar
+- **Crash e recuperação da máquina, 17/09** — GRUB reinstalado, LVM íntegro, kernel reserva consertado. Ver seção de hoje acima.
+- **Duas assinaturas de 16/09 aplicadas em 17/09** — índice pesado da memória cortado; corretor de cabeçalho consertado.
+- **Brecha da página web fechada, 17/09** — a Seth não perde mais a memória por causa de algo que ela lê num site.
 - **Auditoria completa de segurança ((419)) e reconciliação do canon ((420))** — quatro travas furadas, fechadas; textos desatualizados, corrigidos.
 - **Terceira auditoria da Seth ((424))** — corrigiu o linter e a doutrina dela sobre `sync:` completo.
-- **Atalhos de sistema aplicados ((429)/HEAD atual)** — `agata-jogo` e `seth-parar` ganharam as mudanças pendentes desde 10/09.
+- **Atalhos de sistema aplicados ((429))** — `agata-jogo` e `seth-parar` ganharam as mudanças pendentes desde 10/09.

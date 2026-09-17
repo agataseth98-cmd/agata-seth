@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
-(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
+(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consec …
 (404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por f …
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. M …
 (402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído …

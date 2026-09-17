@@ -26,18 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 780fc8a42d6ecf2417f84bc53a4654e270b5a673
-  Escrito em: 17/09/2026 16:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 50c05f700eacadb37df2ba6a69af801470c75715
+  Escrito em: 17/09/2026 16:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50c05f700eacadb37df2ba6a69af801470c75715/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
+
+**O incidente, pelo relato do Humano (alegação, não fato até eu medir):** atualização do CachyOS ou desligamento incorreto reduziu os presets do `mkinitcpio` a 0 bytes; sem `initramfs` válido e sem o módulo `lvm2` embarcado, o Kernel não montava a raiz (LVM sobre 2 NVMe em RAID0/striping, Btrfs) — pânico no boot. Recuperação por Live USB + chroot: trocou o bootloader (Limine, com falhas contra o arranjo multi-disco → GRUB), corrigiu `HOOKS` do `mkinitcpio.conf` (posição do `lvm2`), reinstalou o GRUB na partição EFI certa, e por fim corrigiu um UUID velho (`79A0-4AA2` → `45B3-2049`) preso no `/etc/fstab` que travava o boot em Modo de Emergência mesmo com o Kernel já de pé.
+
+**Verificado na Máquina, item por item — o que bateu:**
+- Raiz é mesmo LVM sobre 2 NVMe: `findmnt /` → `/dev/mapper/vg_cachy-CachyOS`, `lsblk -f` mostra um LV só puxando `nvme0n1p1` + `nvme1n1p2`.
+- `HOOKS` do `mkinitcpio.conf`: `...modconf block lvm2 keyboard...` — `lvm2` logo após `block`, como o relato descreve.
+- GRUB é o bootloader ativo, Limine fora de cena: `efibootmgr -v` → único `Boot0001* CachyOS` no `BootOrder`, apontando `\EFI\CachyOS\grubx64.efi`; `pacman -Q limine` → pacote nem instalado.
+- `/etc/fstab` aponta pro UUID certo (`45B3-2049`), batendo com `lsblk -f`/`findmnt /boot/efi`.
+- Preset do kernel principal (`linux-cachyos.preset`) não está mais em 0 bytes: 644 bytes, conteúdo coerente.
+- Sem erro de disco: `journalctl -b -p err` (66 linhas) e `dmesg` sem nenhuma menção a `btrfs`/`nvme`/`ata`/`i/o error` — todo o ruído é `udev-worker`/`wpa_supplicant`, irrelevante.
+- **Achado independente que corrobora sem eu ter pedido:** o boot imediatamente anterior ao atual (`journalctl --list-boots`, 15:21–15:32) tem `systemd[1]: Timed out waiting for device /dev/disk/by-uuid/79A0-4AA2` — o UUID velho, na hora exata em que o relato situa o Modo de Emergência, antes da correção do `fstab`.
+
+**O que o relato do Humano não via — achado nesta auditoria, não copiado dele:** `linux-cachyos-lts` foi instalado às 11:36 de hoje (`pacman -Qi`, `Install Date`), no meio da janela de recuperação, mas **sem preset e sem `initramfs`** — `/etc/mkinitcpio.d/` só tinha o preset do kernel principal, `/boot/initramfs-linux-cachyos-lts.img` não existia, e `grub-btrfs.cfg` já citava esse caminho inexistente (`grep` confirmou, 208 ocorrências do nome do kernel LTS no arquivo). Ou seja: a rede de segurança que parece ter entrado durante a recuperação estava vazia — selecionar a entrada LTS no GRUB quebraria de novo, mesma classe de erro.
+
+**Conserto do gap do LTS, aplicado e verificado nesta sessão (o Humano rodou os 3 comandos, exigem sudo; eu só verifiquei o resultado, não executei):**
+1. Criado `/etc/mkinitcpio.d/linux-cachyos-lts.preset` (mesmo padrão do preset que já funciona, `ALL_kver`/`default_image` trocados pro caminho do LTS).
+2. `mkinitcpio -p linux-cachyos-lts` gerou `/boot/initramfs-linux-cachyos-lts.img`, 241.260.331 bytes — tamanho coerente com o do kernel principal (242.132.018 bytes), não truncado.
+3. `grub-mkconfig -o /boot/grub/grub.cfg` regenerado às 16:39, um minuto depois da imagem — ordem certa. `grub-btrfs.cfg` confirmado citando o caminho que agora existe de verdade (`test -f` → `EXISTE`).
+
+**Correlação que fica registrada, não fechada — para quem ler depois:** esta máquina (Predator) já tem histórico documentado de desligamento não-limpo por instabilidade de suspend/resume — PROJETO.md, "Máquinas", registra 3 eventos em 12/08 e o bug de login recorrente de 13/08 (suspend/resume em loop, `mem_sleep_default=s2idle`/`nowatchdog` como mitigação). Os parâmetros de mitigação seguem no `GRUB_CMDLINE_LINUX_DEFAULT` mesmo depois da reinstalação do GRUB (conferido em `/etc/default/grub` e em `/proc/cmdline`) — não se perderam na migração. `lacuna`: não medi `smartctl` nas duas NVMe (`sudo` pede senha interativa, não rodei sem o Humano); jornal e `dmesg` limpos são evidência indireta contra falha de disco, não o SMART em si. Causa raiz mais provável, não provada: o mesmo padrão de desligamento não-limpo já conhecido, não um evento novo e aleatório — o risco de recorrência depende de como a máquina desliga, não de qual pacote é atualizado.
+
+**Achado cosmético, não corrigido, baixo risco:** `/boot/EFI` (maiúsculo) é uma pasta vazia criada às 14:25 durante a recuperação, sobra do chroot, sem uso — não é o mountpoint real (`/boot/efi`, minúsculo). Não atrapalha nada, mas confunde; fica pra limpeza futura.
+
+**Veredito dado ao Humano antes desta entrada: pode prosseguir com a atualização pendente** (16 pacotes, `linux-firmware-*` + `hplip` + `kirigami-addons` — nenhum toca kernel/GRUB/LVM/`mkinitcpio` diretamente; o hook `90-mkinitcpio-install.hook` dispara de qualquer forma por tocar `usr/lib/firmware/*`, mas só regenera presets que já existem e estão saudáveis agora, incluindo o do LTS recém-criado).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `findmnt`/`lsblk -f`/`mount` pro layout de disco; `grep HOOKS /etc/mkinitcpio.conf`; `efibootmgr -v` + `pacman -Q grub limine`; `cat /etc/fstab` + `blkid`/`lsblk -f` pro UUID; `ls -la /etc/mkinitcpio.d/` pro tamanho do preset; `journalctl -b -p err` + `dmesg` grepados por padrão de erro de disco; `journalctl --list-boots` + `journalctl -b -1 -p err` achando o timeout do UUID velho; `pacman -Qi linux-cachyos-lts` pra data de instalação; `pacman -Ql linux-cachyos-lts` confirmando ausência de preset no pacote; `grep` em `grub-btrfs.cfg` confirmando a citação do caminho inexistente, depois existente; `stat`/`test -f`/`ls -la` no `initramfs-linux-cachyos-lts.img` antes e depois dos 3 comandos que o Humano rodou; `cat /etc/default/grub` + `/proc/cmdline` pra mitigação de suspend persistente; `sudo -n` testado e recusado (confirma ausência de sudo sem senha, não contornado). Autorização: Humano — relatou o incidente, pediu auditoria ("audite, assimile, e aprenda... verifique se o sistema está perfeito"), depois "resolve o gap do LTS e registra no PROJETO.md"; os 3 comandos de conserto foram rodados pelo próprio Humano, não pelo executor.
 
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
 

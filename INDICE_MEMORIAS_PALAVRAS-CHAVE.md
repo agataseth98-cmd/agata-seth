@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
+  palavras-chave: predator, bootava, corrompimento, presets, mkinitcpio, migração, forçada, limine, grub, auditado, máquina, conserto, recuperação, humano, bateu, fatos, achei, buraco, real, relatório, dele, fechado, mesma, sessão
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
   palavras-chave: fecha, projeto, assinado, aplicado, texto, pendente, deixou, fora, propósito, estado, bugs, testes, passa, marcar, chamada, utilitaria, fechado, aberto, citando, proposta, assinada
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fecha, arquivo, aprovado, tinha, caminho, pra, aprovar, deleção, comportamento, git, rev, parse, path, deletado, devolve, blob, agora, aprova, diff, assinado, hunk, total, apaga, arquivos, inertes, seth, local, shim
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
   palavras-chave: tes, rodada, limpa, contagem, desde, primeira, nova, sequência, gemini, flash, remoto, pedido, fidelidade, relato, auditada, contra, disco
-(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
-  palavras-chave: tes, definido, humano, rodadas, consecutivas, limpas, adversa, zera, contagem, modelo, alvo, decidido, seth, qwen, silo, procedimento, ativação, escrito, execução, gerar, entregar, nonce, segunda, opinião, remoto, recebida
+(405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consec …
+  palavras-chave: tes, definido, humano, rodadas, consec
 (404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por f …
   palavras-chave: fechado, itens, sobraram, rotação
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. M …
