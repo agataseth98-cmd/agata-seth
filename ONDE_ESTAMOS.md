@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (435)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (437)).
 
 ## Onde estamos — 17/09/2026
 
@@ -19,13 +19,15 @@ que ele precisa pra funcionar. Se você precisasse dele antes de eu achar
 isso, ia falhar do mesmo jeito. Já fechei — você rodou os 3 comandos, eu
 confirmei o arquivo gerado e do tamanho certo.**
 
-- Pode seguir com a atualização de pacotes que estava pendente (nenhum deles
-  mexe em kernel, disco ou boot).
+- **[Feito] Atualização de pacotes rodada e conferida** — os dois kernels
+  regeneraram certo, sem erro. Falta só você desligar e ligar de verdade
+  pra confirmar o boot na prática (evite suspender por enquanto).
 - Ponto em aberto, não resolvido: seu computador já tinha histórico de
   desligar sozinho por instabilidade ao suspender. Pode ter sido a causa
-  raiz de hoje — vale desconfiar de suspender a máquina até isso ficar mais
-  claro, prefira desligar/ligar de verdade por enquanto.
+  raiz de hoje.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
+
+**Auditoria externa do Marcos, pedida por você antes do incidente — conferi cada achado checável na própria máquina.** Ele estava certo nos sete pontos que dão pra checar sem rodar nada ao vivo: o navegador da Seth pode visitar qualquer endereço sem checar pra onde vai (inclusive endereços internos do próprio sistema), o jeito como os serviços conversam entre si depende de convenção, não de trava técnica, uma função de escrita no canon pode deixar arquivo alterado mesmo quando o `git commit` falha, e dois dos serviços mais expostos da Seth têm menos proteção do sistema do que o menos exposto. Nada disso é "alguém já invadiu" — é "isto pode ser mais sólido". Prioridade e o que fazer com isso é decisão sua: `MEMÓRIAS.md`, entrada (437).
 
 ## Onde estamos — 16/09/2026
 

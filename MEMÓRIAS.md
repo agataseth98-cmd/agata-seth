@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 94eded4afdecb8d218effde9b86735a4d7244183
-  Escrito em: 17/09/2026 16:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7
+  Escrito em: 17/09/2026 17:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/94eded4afdecb8d218effde9b86735a4d7244183/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/552d19fc4e8a28ae59abf68c6c18433fa7f1f5b7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
+
+**Contexto:** o Humano pediu ao Marcos uma auditoria de segurança independente antes do incidente de hoje. O relatório dele é análise estática, sem acesso à Máquina — trata corretamente cada achado que depende de runtime como hipótese, não fato. Recebido como DADO (REGRAS, Regra 2), verificado abaixo, não repetido de cabeça.
+
+**Achados de prioridade alta/média confirmados nesta sessão, com evidência:**
+1. **Egress livre no navegador — confirmado.** `redesign/mcp/navegador/servidor.py:21-23,127`: docstring e código dizem literalmente "Ler/navegar é livre. Escrever (clicar/preencher) é travado por allowlist" — `navegar()` chama `page.goto(url, ...)` sem checar destino. `scripts/ler_pagina.sh:33`: `curl -sSL` (segue redirecionamento) sem filtro de esquema/loopback/RFC1918. Nenhum dos dois valida pra onde a requisição vai.
+2. **Fronteira localhost não é fronteira de segurança — confirmado.** `redesign/librechat/docker-compose.yml:49`: `network_mode: host`, comentário próprio confirma o motivo ("alcançar o seth_gateway em 127.0.0.1:20126"). Nada no systemd ou na rede impede um cliente de bater direto em `:20127`/`:20128` — só a config do LibreChat aponta pra `:20126`; é convenção, não controle técnico. PROJETO.md, "Segurança", já registra que "nada escuta fora de 127.0.0.1" é a única contenção — logo qualquer coisa capaz de fazer requisição a partir do host (inclusive via SSRF do navegador, achado 1) herda esse nível de confiança.
+3. **`commit_entry()` não é transacional — confirmado por leitura de código, sem precisar rodar nada.** `redesign/grafo/tools.py:187-196`: a função escreve o arquivo em disco (`open().write()` + `fsync`) e faz `git add` **antes** de tentar `git commit`; se o `commit` falhar (linha 195), a função retorna `{"ok": False}`, mas o arquivo já foi sobrescrito e já está staged — nada desfaz os dois passos anteriores. Quem confia só no retorno lê "nada aconteceu" quando na verdade já aconteceu.
+4. **`commit_entry()` não representa o portão humano internamente — confirmado, com o mesmo calibre do Marcos.** A função só checa idempotência, cabeçalho e citação — o gate P-8 de verdade mora inteiramente no hook `pre-commit` externo, disparado pelo `git commit` da linha 192. Hoje isso não é bypass (o alvo típico, MEMÓRIAS/LOG, está fora da quarentena), mas a garantia "nenhuma escrita canônica sai sem gate" não é propriedade da função — é acidente de quem a chama hoje.
+5. **P-4 tem regex desatualizada — confirmado.** `scripts/perimetro.sh:136`: `grep -qiE "hermes|ollama"` — literal, igual ao que o Marcos citou. Não cobre `seth-gateway`, `seth-verificador`, `seth-escriba`, MCP navegador/Discord, LibreChat nem os serviços de voz.
+6. **Hardening desigual entre serviços da Seth — confirmado, e na direção mais preocupante.** `seth-verificador.service` (só leitura) tem `NoNewPrivileges`/`PrivateTmp`/`ProtectSystem=strict`/`ReadOnlyPaths`. `seth-gateway.service` (vê todo o tráfego da Seth) e `seth-escriba.service` (o único canal de escrita dela) **não têm nenhuma dessas diretivas** — o serviço mais exposto e o único que escreve são os menos isolados pelo systemd, o oposto do que o risco pediria.
+7. **Dois descartes do Marcos, conferidos e corretos:** `--no-renames` contra o bypass de quarentena por rename está mesmo em `perimetro.sh` (linhas 592, 857, com o comentário explicando o furo original); a raiz de confiança de `.allowed_signers` sob quarentena, verificada contra `HEAD:` (não a working-tree) — já documentado em PROJETO.md, "Quarentena estrutural", desde (367).
+
+**Não verificado nesta sessão (tempo/escopo), citado só como recebido:** os itens de simplificação (modularizar `perimetro.sh`, manifesto único de política, reduzir doutrina no gateway) e a suíte de níveis de teste (L0-L5) são recomendações de design, não fatos checáveis por grep — ficam para o Humano decidir se entram no plano, não para eu validar sozinho.
+
+**O que isto NÃO é:** não é decisão de prioridade nem mudança de plano — isso é do Humano (Regra 3, "Contenção de escopo"). É o registro de que a auditoria do Marcos é, nos pontos checáveis, precisa e bem calibrada — nenhum achado dela que verifiquei foi exagero, e os dois descartes dela também resistiram à checagem.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep`/`cat` em `redesign/mcp/navegador/servidor.py` (docstring + `navegar()`); `grep curl` em `scripts/ler_pagina.sh`; `grep network_mode` em `redesign/librechat/docker-compose.yml`; leitura completa de `redesign/grafo/tools.py:136-200` (`commit_entry`); `grep` da regex de P-4 em `scripts/perimetro.sh:136`; `cat` dos 3 arquivos `.service` (`seth-gateway`, `seth-verificador`, `seth-escriba`) em `~/.config/systemd/user/`; `grep no-renames` em `perimetro.sh`; PROJETO.md, "Quarentena estrutural", já lido nesta sessão, conferindo o descarte da raiz de confiança. Autorização: Humano — colou o relatório do Marcos, "para que essa seção audite".
 
 (436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
 

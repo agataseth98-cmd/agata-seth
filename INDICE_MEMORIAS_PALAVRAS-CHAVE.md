@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
+  palavras-chave: auditoria, externa, marcos, snapshot, incidente, boot, verificada, item, máquina, camada, cadeia, sete, achados, confirmados, código, config, real, confiar, texto, dele, descartes, corretos
 (436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
   palavras-chave: registra, incidente, boot, assinado, aplicado, projeto, máquinas, predator, ganha, registro, hoje, citando
 (435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: tes, nonce, novo, gerado, máquina, mod, seth, secret, modelo, alvo, fora, repo, reativação, fechada, sessão, falta, assinatura, diff, projeto, entrega, manual, humano, protocolo, proíbe, automatizar, nunca, hidratação
 (408) DIÁRIO — 09/09/2026 · TES-001 **Rodada 7: ADVERSA**. Contagem volta a **0/3** (Rodada 6 (406) segue na história, mas a sequência quebrou). `zai/glm-4.7-flash` via `conselho_remoto.py` — o mesmo modelo da Rodada 5 (360).
   palavras-chave: tes, rodada, adversa, contagem, volta, segue, história, sequência, quebrou, zai, glm, flash, remoto, mesmo, modelo
-(407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
-  palavras-chave: fecha, arquivo, aprovado, tinha, caminho, pra, aprovar, deleção, comportamento, git, rev, parse, path, deletado, devolve, blob, agora, aprova, diff, assinado, hunk, total, apaga, arquivos, inertes, seth, local, shim
+(407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha c …
+  palavras-chave: fecha, arquivo, aprovado, tinha
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde …
   palavras-chave: tes, rodada, limpa, contagem, desde
 (405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consec …
