@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (407) DIÁRIO — 09/09/2026 · Fecha B7: o P-8 (`_p8_arquivo_aprovado`) não tinha caminho pra aprovar **deleção** de arquivo de comportamento — `git rev-parse ":$f"` num path deletado não devolve blob. Agora aprova deleção por `.diff` assinado com hunk de deleção total. Apaga os 2 arquivos inertes do `seth_local_shim` de (403).
 (406) DIÁRIO — 09/09/2026 · TES-001 **Rodada 6: LIMPA**. Contagem 1/3 (N=3 desde (405)). Primeira rodada da nova sequência; `gemini/gemini-2.5-flash` via `conselho_remoto.py`, pedido de fidelidade de relato, auditada contra o disco.
 (405) DIÁRIO — 09/09/2026 · TES-001: N definido pelo Humano = **3 rodadas consecutivas limpas**, adversa zera a contagem. TES-002: modelo-alvo decidido = **Seth** (`qwen3.5-9b-64k`, silo `seth`); procedimento de ativação escrito, execução (gerar/entregar o nonce) é do Humano. B6/B7: segunda opinião do Conselho Remoto recebida nos dois.
-(404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
+(404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por f …
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. M …
 (402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído …
 (401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librecha …

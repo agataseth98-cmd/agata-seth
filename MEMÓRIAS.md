@@ -26,18 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26e53413034cf0817bc14b5481a596d0bb9aa15b
-  Escrito em: 17/09/2026 16:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 780fc8a42d6ecf2417f84bc53a4654e270b5a673
+  Escrito em: 17/09/2026 16:14 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780fc8a42d6ecf2417f84bc53a4654e270b5a673/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum propostas/fecha-419-em-projeto.diff` = `ac7eb525...`, batendo `diff-sha256:` de `propostas/APROVADO-fecha-419-em-projeto`; `ssh-keygen -Y verify` contra `propostas/.allowed_signers` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. `git apply --check` limpo contra `HEAD`, `git apply` real mudando `PROJETO.md`. Par movido para `propostas/aplicadas/`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` conferido contra `diff-sha256:`; `ssh-keygen -Y verify` rodado ao vivo, saída colada acima; `git apply --check`/`git apply` reais, `git diff PROJETO.md` lido antes de commitar, batendo exatamente o `.diff` assinado. Autorização: Humano — assinou via `scripts/aprovar.sh fecha-419-em-projeto`, "assinado, já faça tudo".
 
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
 
