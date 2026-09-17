@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
+  palavras-chave: proposta, formalizada, testada, item, aberto, dado, externo, payload, ferramenta, desliga, hidratação, seth, diff, pronto, versionado, aguardando, assinatura, humano, nada, aplicado
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
   palavras-chave: decisão, pacote, dia, acréscimo, regras, arquivado, três, causas, medidas, degradação, seth, fabricações, reais, achadas, sessão, vivo, bug, linter, corrigido, quatro, artefatos, aguardando, assinatura, nada, aplicado, ela, auditoria, multi, modelo, claude, sonnet, executor, máquina, opus, camada, nuvem, conversa, real, librechat, próprio, sistema, registrado, único, pedido, humano, achado, abaixo, machine, verified, herdado, alegação
 (430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sobre MOD sensível em produção divide em duas, com segunda opinião formal favorável.** Pergunta do Humano: se a Fase 2 (silos por modelo, CONSTRUÍDA) resolve a restrição "nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos" (`REGRAS.md`, "O Conselho" item 3).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fechado, itens, sobraram, rotação, família, mecanizar, cadeia, auditoria, renomear, arquivo, silo, decididos, fazer, agora, critério, reabertura, decisão, humano, pode, fechar, deixe, devidamente, registrado
 (403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
   palavras-chave: seth, local, shim, era, necessário, medido, vivo, omniroute, roteia, ollama, model, string, direto, pro, lista, models, mostrar, embeddings, artefato, anúncio, roteamento, fecha, tier, combo
-(402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído, rodando e vigiado pelo P-9 — expõe `qwen3.5-9b-64k` local em OpenAI-compat. **Falta o registro no OmniRoute** (provider + tier 5 do combo): esbarra numa restrição do OmniRoute que exige decisão sua (B1/B2/B3, abaixo).
-  palavras-chave: opção, seth, local, shim, construído, rodando, vigiado, expõe, qwen, openai, compat, falta, registro, omniroute, provider, tier, combo, esbarra, restrição, exige, decisão, abaixo
+(402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído …
+  palavras-chave: opção, seth, local, shim, construído
 (401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librecha …
   palavras-chave: fecha, atalho, seth, sincronizava, librecha
 (400) DIÁRIO — 09/09/2026 · Fecha H1: a listagem de diretório do vault (`:27125` …

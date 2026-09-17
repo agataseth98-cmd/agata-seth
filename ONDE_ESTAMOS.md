@@ -57,9 +57,16 @@ redundante com o que já está escrito. Arquivamos a ideia.
 
 ### O que falta
 
-- Sua assinatura em dois arquivos de mudança prontos (`aprovar.sh`).
-- Sua decisão: cortar o índice pesado da memória primeiro, ou aplicar o
-  conserto do "robô" primeiro.
+- **[Feito 17/09] As duas assinaturas de 16/09 foram dadas e aplicadas** —
+  cortamos o índice pesado da memória e consertamos o corretor de
+  cabeçalho. Só o conserto do "robô" (travado pelo meu próprio ambiente)
+  continua parado.
+- **Proposta nova, pronta e testada, esperando sua assinatura:** fecha a
+  brecha em que uma página que a Seth lê (pelo navegador) podia desligar
+  a memória dela num turno de chat de verdade, sem avisar. Testei o
+  ataque de verdade num clone separado — sem o conserto ele funciona,
+  com o conserto não funciona mais. Arquivo:
+  `propostas/corrige-p4-injecao-2026-09-17.diff`.
 - Você decidir se autoriza rodar um teste mais caro (que usa a placa de
   vídeo por um instante) para medir a memória com ainda mais precisão.
 

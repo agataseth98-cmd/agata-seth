@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6ee4cbf63cd2b21d35d016305a41570fd1b2d0b0
-  Escrito em: 17/09/2026 10:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 03c5d47e83e4abf794ddc6e3be4db7411a769301
+  Escrito em: 17/09/2026 15:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6ee4cbf63cd2b21d35d016305a41570fd1b2d0b0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6ee4cbf63cd2b21d35d016305a41570fd1b2d0b0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6ee4cbf63cd2b21d35d016305a41570fd1b2d0b0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
+
+`propostas/corrige-p4-injecao-2026-09-17.diff` — achado já pronto, solto, na árvore de trabalho ao carregar esta sessão (`lacuna`: sessão/autoria que o escreveu não identificada aqui, o `git status` só mostrava o arquivo untracked). Muda `_e_chamada_utilitaria()` em `redesign/router/seth_gateway.py`: acrescenta `_schema_pede_titulo()` como sinal de CANAL, checado antes do sinal de conteúdo — a chamada de título real do `@librechat/agents` usa `response_format`/`tools` com um schema exigindo a propriedade `"title"`, campo que mensagem de usuário ou resultado de ferramenta não tem como escrever (esses campos são montados pelo backend do frontend, nunca por conteúdo). Mantém como sinal 2 a correção já descrita em (419)/(431): a string-gatilho só conta se estiver na ÚLTIMA mensagem, `role` user/system, **e** `len(messages)<=2`. Risco residual (a string como primeira mensagem de uma conversa nova ainda bate a condição 2) permanece declarado no próprio `.diff`, não escondido — doutrina de defesa proporcional, PROJETO.md.
+
+**Verificado nesta sessão, não só lido:** `git rev-parse HEAD:redesign/router/seth_gateway.py` = `e698712`, batendo o `index` do `.diff` (contra o HEAD real, não presumido); `git apply --check` limpo; aplicado de verdade num clone descartável (`git clone` local, fora do repo); `python3 redesign/router/seth_gateway.py --selftest` no clone patchado: **10/10 PASS**, incluindo os 2 casos de chamada de título já existentes. Teste próprio escrito para reproduzir o ataque exato de (419) — payload de 4 mensagens (turno real de chat, não chamada de título), com um `tool result` no meio contendo a string-gatilho: `_e_chamada_utilitaria()` = `False` (antes do fix, a varredura de `json.dumps(payload)` inteiro batia a string em qualquer posição e teria dado `True`, desligando hidratação e bloco de estado num turno de chat de verdade). Título real via schema (`response_format` com `properties.title`) = `True`. Título real sem schema, texto na última msg com `len<=2` = `True`. Residual declarado (string como 1ª mensagem) = `True`, exatamente como o `.diff` avisa — não inflou a promessa além do que o código cobre.
+
+**Estado: proposta pronta e versionada em `propostas/`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh corrige-p4-injecao-2026-09-17` do Humano, depois de ler o `.diff`. Executor não assina.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git rev-parse HEAD:redesign/router/seth_gateway.py` = `e698712`, conferido contra o `index` do `.diff`; `git apply --check propostas/corrige-p4-injecao-2026-09-17.diff` limpo contra HEAD; clone descartável em `/tmp/claude-1000/.../scratchpad/p4-clone`, `git apply` real (não `--check`) + `python3 redesign/router/seth_gateway.py --selftest` (10/10 PASS) + script de teste próprio (`teste_p4.py`, 4 casos: ataque de (419), título por schema, título por texto, residual declarado) rodado no clone, saída lida linha a linha antes de escrever esta entrada. Autorização: Humano — "formalize as proposta o corrige-p4-injecao-2026-09-17.diff".
 
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
 
