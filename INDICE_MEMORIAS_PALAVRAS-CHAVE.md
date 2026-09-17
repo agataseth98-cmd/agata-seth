@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
+  palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, itens, remoto, independente, níveis, formais, teste
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
   palavras-chave: fase, verificada, vivo, produção, omniroute, sanitizer, service, reiniciado, token, exigido, seth, respondeu, verdade, através, cadeia, inteira, item, fecha, parte, nossa
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: quatro, controles, perímetro, controlavam, diziam, controlar, auditoria, completa, ordem, humano, audite, sistema, completo, percebendo, resolvendo, falhas, segurança, achado, abaixo, demonstrado, vermelho, verde, clone, descartável, nunca, lido, era, teórico
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
   palavras-chave: limpeza, pós, aposentadoria, tes, varredura, pendências, humano, termine, entraremos, fase, otimização, refinamento
-(417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano: *"por que precisamos do nonce"* + *"quero arquivar esses testes TES, são mera formalidade"* + *"pode montar"* — risco de Mudança estrutural assumido por escrito) · **+ auditoria da sessão 409→416 (limpa)** · **+ 3 furos da doutrina da Seth consertados**.
-  palavras-chave: tes, aposentados, decisão, humano, precisamos, nonce, quero, arquivar, esses, testes, mera, formalidade, pode, montar, risco, mudança, estrutural, assumido, escrito, auditoria, sessão, limpa, furos, doutrina, seth, consertados
+(417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano …
+  palavras-chave: tes, aposentados, decisão, humano
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) …
   palavras-chave: roteador, complexidade, seth, reabre
 (415) DIÁRIO — 09/09/2026 · **A Seth voltou a ter as ferramentas de MCP.** Duas …

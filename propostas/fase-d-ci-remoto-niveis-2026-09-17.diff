@@ -1,0 +1,130 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+new file mode 100644
+index 0000000..2d71dbe
+--- /dev/null
++++ b/.github/workflows/perimetro.yml
+@@ -0,0 +1,37 @@
++# Segunda linha de enforcement independente -- item 7 do plano de mitigação
++# da auditoria do Marcos (MEMÓRIAS (437)). Até aqui, só o hook `pre-commit`
++# na Máquina do Humano revalidava um commit; nada revalidava DEPOIS do push,
++# fora dessa mesma Máquina. Roda a MESMA suíte adversarial dos controles
++# (scripts/testar_perimetro.sh) num runner do GitHub -- mecanismo que não
++# roda no computador do Humano, não pode ser desligado por engano junto com
++# um serviço local, e não compartilha nada do ambiente que gerou o commit.
++#
++# Escopo deliberado: só os controles nível L1 (clone/offline -- ver
++# scripts/testar_perimetro.sh, "niveis"). L2-L5 (systemd vivo, root, rede
++# real, HD de backup) não existem num runner efêmero -- não é lacuna
++# escondida, é a mesma fronteira que a própria suíte já declara há dias.
++name: Perímetro (segunda linha independente)
++
++on:
++  push:
++    branches: [main]
++  pull_request:
++    branches: [main]
++  workflow_dispatch: {}
++
++jobs:
++  suite-adversarial:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
++
++      - name: Configura git (a suíte clona o próprio repo e comita nos testes)
++        run: |
++          git config --global user.email "ci@agata.local"
++          git config --global user.name "Agata CI"
++
++      - name: Suíte adversarial dos controles (nível L1 -- clone/offline)
++        run: bash scripts/testar_perimetro.sh
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 1eefd14..32ad722 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -768,6 +768,13 @@ _p8_eh_comportamento() {
+     #                           backup; mexer nela muda o que "estar coberto"
+     #                           significa.
+     redesign/obsidian/*.py|SELOS.txt|.gitignore|models/manifest.json) return 0 ;;
++    # Buraco achado implementando o item 7 do plano de mitigacao da auditoria
++    # do Marcos (MEMORIAS (437), "segunda linha de enforcement remota"):
++    # .github/workflows/*.yml executa codigo arbitrario a cada push, no
++    # runner do GitHub -- muda comportamento tanto quanto um script daqui,
++    # e nao estava coberto. Fechado ANTES de criar o primeiro workflow, nao
++    # depois -- senao o proprio workflow entraria sem aprovacao.
++    .github/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 612746c..0561d76 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -18,6 +18,13 @@
+ #
+ # COMO RODAR:  bash scripts/testar_perimetro.sh          (tudo)
+ #              bash scripts/testar_perimetro.sh P-8      (so um controle)
++#              bash scripts/testar_perimetro.sh L1       (so um nivel -- item 8
++#                                                          do plano de mitigacao
++#                                                          da auditoria do
++#                                                          Marcos, MEMORIAS
++#                                                          (437); niveis L0-L5
++#                                                          documentados perto
++#                                                          de SEM_TESTE/NIVEL)
+ #
+ # QUEM RODA SOZINHO: o P-16 (em perimetro.sh) dispara esta suite quando um
+ # arquivo de controle esta staged -- nao da' pra mudar os controles sem que
+@@ -88,7 +95,16 @@ _acusacoes() {
+ # _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
+ _caso() {
+   local ctrl="$1" espera="$2" nome="$3" setup n
+-  if [ -n "$FILTRO" ] && [ "$ctrl" != "$FILTRO" ]; then PULADO=$((PULADO+1)); return; fi
++  # FILTRO aceita um controle ("P-8") ou um nivel ("L1"..."L5", item 8 do
++  # plano de mitigacao, MEMORIAS (437)) -- NIVEL[$ctrl] so existe depois que
++  # o array e' declarado mais abaixo, mas por ser funcao bash so' resolve no
++  # momento da CHAMADA, nao da definicao, entao a ordem no arquivo nao importa.
++  if [ -n "$FILTRO" ]; then
++    case "$FILTRO" in
++      L[0-5]) [ "${NIVEL[$ctrl]:-}" = "$FILTRO" ] || { PULADO=$((PULADO+1)); return; } ;;
++      *) [ "$ctrl" = "$FILTRO" ] || { PULADO=$((PULADO+1)); return; } ;;
++    esac
++  fi
+   setup="$(cat)"
+   _reset
+   if ! ( cd "$CLONE/repo" && eval "$setup" ) >/dev/null 2>&1; then
+@@ -137,6 +153,32 @@ declare -A SEM_TESTE=(
+   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
+ )
+ 
++# ---------------------------------------------------------- niveis (item 8) --
++# Item 8 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
++# formaliza uma separacao que ja existia informalmente acima (SEM_TESTE) --
++# rotulo novo, MESMA suite, MESMOS casos, nada de motor de execucao novo.
++#   L0 -- unitario: funcao pura, sem clone nem processo (nenhum controle
++#         hoje se encaixa so' nisso; os _caso abaixo ja precisam do clone).
++#   L1 -- clone/offline: e' o que esta suite FAZ -- clone descartavel, sem
++#         root, sem rede, sem servico vivo. Todo controle com _caso() aqui
++#         e' L1, por definicao (P-1, P-5, P-7, P-8, P-11, P-14).
++#   L2 -- integracao local: precisa de processo/servico vivo na Maquina,
++#         mas nada alem de localhost (P-4, P-9, P-10).
++#   L3 -- privilegiado: precisa de root (P-2).
++#   L4 -- rede: depende de chamada remota real ou relogio de calendario
++#         passando (P-3, P-13, P-15).
++#   L5 -- recovery/chaos: precisa do HD de backup fisico montado (P-6, P-12).
++# P-16/P-17 ficam fora da escala -- P-16 e' quem executa esta suite (recursa
++# se testado aqui dentro), P-17 mede serie ENTRE corridas, nao um estado
++# unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
++declare -A NIVEL=(
++  [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
++  [P-2]=L3
++  [P-3]=L4 [P-13]=L4 [P-15]=L4
++  [P-4]=L2 [P-9]=L2 [P-10]=L2
++  [P-6]=L5 [P-12]=L5
++)
++
+ # ------------------------------------------------------------------ casos --
+ _montar_clone
+ echo "suite de regressao dos controles -- clone descartavel, repo real intocado"

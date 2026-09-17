@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (446)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (447)).
 
 ## Onde estamos — 17/09/2026
 
@@ -36,6 +36,8 @@ confirmei o arquivo gerado e do tamanho certo.**
 **[Feito] Fase B parte 2 assinada e aplicada** — Fase B inteira fechada. Detalhe: `MEMÓRIAS.md`, entradas (442)/(443).
 
 **[Feito] Fase C assinada, aplicada e testada ao vivo em produção** — reiniciei o proxy real, confirmei que ele bloqueia quem não tem a senha, e a Seth respondeu de verdade (resposta real do modelo) através da cadeia inteira já protegida. Descoberta no caminho: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro; fechei a parte que é nossa e registrei o resto como pendência conhecida, não escondida. Detalhe: `MEMÓRIAS.md`, entradas (444)/(445)/(446).
+
+**Fase D pronta, esperando sua assinatura.** O GitHub agora vai conferir sozinho, a cada vez que você empurrar código, se os controles de segurança continuam funcionando — antes só o seu computador fazia essa checagem. Achei e fechei de brinde um buraco: a trava que exige sua assinatura pra mudança de comportamento não cobria arquivos do GitHub Actions — se eu tivesse criado o arquivo de checagem automática antes de fechar isso, ele mesmo teria entrado sem sua aprovação. Arquivo: `propostas/fase-d-ci-remoto-niveis-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (447).
 
 ## Onde estamos — 16/09/2026
 

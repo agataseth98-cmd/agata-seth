@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): acfee008237508355bd14f76ca0e03581ea3c0fc
-  Escrito em: 17/09/2026 19:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d705b7c393253bf39aebca066021f8b7828fc21d
+  Escrito em: 17/09/2026 20:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acfee008237508355bd14f76ca0e03581ea3c0fc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
+
+**Item 7 — segunda linha de enforcement remota.** `.github/workflows/perimetro.yml` (novo): roda `scripts/testar_perimetro.sh` (a suíte adversarial, nível L1/clone-offline) num runner do GitHub, a cada `push`/`pull_request` em `main`. Mecanismo independente da Máquina do Humano — exatamente o gap que o Marcos apontou (só o hook `pre-commit` local revalidava, nada revalidava depois do push).
+
+**Buraco achado e fechado ANTES de criar o workflow, não depois:** `.github/*` não estava nos padrões de "muda comportamento" do P-8 — um workflow do GitHub Actions executa código a cada push, no mesmo nível de risco de um script daqui, e não estava coberto. Se eu tivesse criado o arquivo primeiro, ele teria entrado sem aprovação nenhuma. Fechado em `_p8_eh_comportamento` (mesmo padrão dos outros: `redesign/router/*`, `.gitignore`, etc.) antes do workflow existir. **Confirmado com teste positivo:** staged o `.yml` novo, `perimetro.sh` reprovou com `SUSPEITO (P-8)` citando exatamente esse caminho.
+
+**Item 8 — níveis formais L0-L5.** `scripts/testar_perimetro.sh` já tinha a separação certa, só não tinha nome: o array `SEM_TESTE` documentava, controle por controle, por que P-2/P-3/P-4/P-6/P-9/P-10/P-12/P-13/P-15 não rodam no clone descartável. Virou um segundo array, `NIVEL`, rotulando cada um: L1 (clone/offline — os 6 controles que a suíte já testa: P-1/P-5/P-7/P-8/P-11/P-14), L2 (integração local — P-4/P-9/P-10, precisam de processo vivo), L3 (privilegiado — P-2, precisa de root), L4 (rede — P-3/P-13/P-15, dependem de chamada remota ou relógio real passando), L5 (recovery/chaos — P-6/P-12, precisam do HD físico). P-16/P-17 ficam fora da escala (são "meta": um roda a suíte, o outro mede série entre corridas). **Sem reescrever a suíte** — só rótulo, mais um filtro novo (`bash testar_perimetro.sh L1` funciona igual a `bash testar_perimetro.sh P-8`, mesma função `_caso()`, um `case` a mais).
+
+**Testado:** `bash -n` limpo nos dois scripts; `testar_perimetro.sh P-8` → 9 casos, 0 falhas, 22 fora do filtro (filtro por controle intacto); `testar_perimetro.sh L1` → 31 casos, 0 falhas, 0 fora do filtro (confirma que TODOS os casos existentes são mesmo L1, nenhum ficou de fora da nova rotulagem); suíte completa sem filtro → 31/31; `python3 -c "import yaml; yaml.safe_load(...)"` confirmando o `.yml` sintaticamente válido (a chave `on:` vira `True` num parser YAML genérico — comportamento padrão do YAML 1.1, não um bug; o parser do GitHub Actions trata esse caso corretamente, é assim que todo workflow do mundo é escrito).
+
+**Não verificado nesta sessão, e dito sem rodeio:** a execução real do workflow no runner do GitHub só se prova rodando de verdade lá — não dá pra simular o `ubuntu-latest` com fidelidade total aqui. Primeira confirmação de verdade acontece no primeiro push depois deste commit.
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-d-ci-remoto-niveis-2026-09-17.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh fase-d-ci-remoto-niveis-2026-09-17`.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `bash -n` nos 2 scripts; `testar_perimetro.sh` rodado 3 formas (sem filtro, `P-8`, `L1`) com contagens conferidas; `perimetro.sh` rodado com o `.yml` novo staged, `SUSPEITO (P-8)` citando o caminho certo, confirmando o fechamento do buraco antes de criar o arquivo; `python3`/`yaml.safe_load` no `.yml`; `git apply --check` do `.diff` limpo contra `HEAD` num clone descartável. Autorização: Humano — plano de 5 fases aprovado via `ExitPlanMode`.
 
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
 
