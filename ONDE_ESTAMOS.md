@@ -61,12 +61,10 @@ redundante com o que já está escrito. Arquivamos a ideia.
   cortamos o índice pesado da memória e consertamos o corretor de
   cabeçalho. Só o conserto do "robô" (travado pelo meu próprio ambiente)
   continua parado.
-- **Proposta nova, pronta e testada, esperando sua assinatura:** fecha a
-  brecha em que uma página que a Seth lê (pelo navegador) podia desligar
-  a memória dela num turno de chat de verdade, sem avisar. Testei o
-  ataque de verdade num clone separado — sem o conserto ele funciona,
-  com o conserto não funciona mais. Arquivo:
-  `propostas/corrige-p4-injecao-2026-09-17.diff`.
+- **[Feito 17/09] Você assinou e a brecha da página web foi fechada.** Uma
+  página que a Seth lia pelo navegador podia desligar a memória dela num
+  turno de chat de verdade, sem avisar. Apliquei o conserto no código
+  real e testei de novo lá — funciona.
 - Você decidir se autoriza rodar um teste mais caro (que usa a placa de
   vídeo por um instante) para medir a memória com ainda mais precisão.
 

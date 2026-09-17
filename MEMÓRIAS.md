@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 03c5d47e83e4abf794ddc6e3be4db7411a769301
-  Escrito em: 17/09/2026 15:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 26e53413034cf0817bc14b5481a596d0bb9aa15b
+  Escrito em: 17/09/2026 16:06 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/03c5d47e83e4abf794ddc6e3be4db7411a769301/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/26e53413034cf0817bc14b5481a596d0bb9aa15b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
+
+**Assinatura verificada nesta sessão, não presumida:** `sha256sum propostas/corrige-p4-injecao-2026-09-17.diff` = `006568c6...`, batendo exatamente o `diff-sha256:` dentro de `propostas/APROVADO-corrige-p4-injecao-2026-09-17`; `ssh-keygen -Y verify -f propostas/.allowed_signers -I agata-humano -n agata-aprovacao-p8` sobre a mensagem `"<sha256>  corrige-p4-injecao-2026-09-17"` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Só depois disso o `.diff` foi aplicado ao repositório real (não a um clone).
+
+**Aplicado e testado de verdade:** `git apply --check` limpo contra o `HEAD` real, `git apply` (sem `--check`) mudando `redesign/router/seth_gateway.py` de fato, `python3 redesign/router/seth_gateway.py --selftest` no arquivo já modificado: **10/10 PASS** — os mesmos 10 casos de (432), agora contra o código de produção, não contra um clone descartável.
+
+**Par movido para `propostas/aplicadas/`** no mesmo commit (mecanismo do P-8, `propostas/README.md`, item 4): `corrige-p4-injecao-2026-09-17.diff` e `APROVADO-corrige-p4-injecao-2026-09-17`.
+
+**PROJETO.md, "Estado dos bugs e dos testes", NÃO entra neste commit — achado a tempo, não depois.** O item ABERTO ali (`_e_chamada_utilitaria()` pode ser desligada por dado externo) está desatualizado agora, mas editá-lo aqui exigiria que PROJETO.md também aparecesse nos cabeçalhos de um `.diff` com `APROVADO-` correspondente (P-8, `propostas/README.md`) — e `corrige-p4-injecao-2026-09-17.diff`, já assinado, só cita `redesign/router/seth_gateway.py`. Editar PROJETO.md por fora disso seria contornar a própria quarentena que este pacote acabou de usar. A correção do texto (marcar FECHADO, citar esta entrada) está isolada em `propostas/fecha-419-em-projeto.diff`, fora da árvore ainda, aguardando assinatura própria — nunca lida como aprovada por associação com esta.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` do `.diff` conferido contra `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` rodado ao vivo contra `propostas/.allowed_signers`, saída "Good signature" colada acima; `git apply --check` e `git apply` reais no repositório (não clone) confirmados por `git status`/`git diff` antes de commitar; `--selftest` do arquivo já modificado, 10/10, saída lida linha a linha. Autorização: Humano — assinou via `scripts/aprovar.sh corrige-p4-injecao-2026-09-17` e confirmou "feito".
 
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
 

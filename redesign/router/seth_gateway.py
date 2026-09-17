@@ -261,15 +261,76 @@ _SINAIS_TITULO = (
 )
 
 
-def _e_chamada_utilitaria(payload: dict) -> bool:
-    """True se o corpo parece uma chamada de título/utilidade do frontend
-    (não um turno de chat real). Varre o JSON inteiro -- a frase pode estar
-    numa message, em tools[].function.description ou em response_format."""
-    try:
-        blob = json.dumps(payload, ensure_ascii=False)
-    except (TypeError, ValueError):
+def _schema_pede_titulo(payload: dict) -> bool:
+    """Sinal FORTE, não forjável por dado externo: o @librechat/agents monta
+    a chamada de título com `model.withStructuredOutput(titleSchema)`
+    (node_modules/@librechat/agents/dist/cjs/utils/title.cjs, conferido no
+    container real em 17/09/2026) -- um schema fixo do PRÓPRIO LibreChat,
+    exigindo a propriedade "title" (`titleSchema`/`combinedSchema`, ambos
+    com `required: ["title", ...]`). Mensagem de usuário ou resultado de
+    ferramenta não tem como escrever em `response_format`/`tools` -- esses
+    campos são montados pelo backend do frontend, nunca por conteúdo.
+    Verificação tolerante de propósito (não presumo a forma exata do JSON
+    Schema -- OpenAI json_schema aninha em `schema`, tool-calling aninha em
+    `function.parameters`): procura "title" como CHAVE de propriedade em
+    qualquer nível dentro de `response_format` ou `tools`, sem exigir
+    caminho fixo. Onde esse formato divergir do suposto, este sinal
+    simplesmente não dispara -- cai pro sinal 2, não perde proteção."""
+    def _tem_prop_title(no) -> bool:
+        if isinstance(no, dict):
+            props = no.get("properties")
+            if isinstance(props, dict) and "title" in props:
+                return True
+            return any(_tem_prop_title(v) for v in no.values())
+        if isinstance(no, list):
+            return any(_tem_prop_title(v) for v in no)
         return False
-    return any(s in blob for s in _SINAIS_TITULO)
+    return _tem_prop_title(payload.get("response_format")) or _tem_prop_title(payload.get("tools"))
+
+
+def _e_chamada_utilitaria(payload: dict) -> bool:
+    """True se o corpo é uma chamada de título/utilidade do frontend, nunca
+    um turno de chat real da Seth. Dois sinais, checados nesta ordem:
+
+    1. `_schema_pede_titulo` -- sinal de CANAL, não de conteúdo. Se bater,
+       basta: nenhuma posição de mensagem importa, porque dado externo não
+       consegue forjar `response_format`/`tools`.
+    2. Sem (1): o `@librechat/agents` também tem um caminho SEM structured
+       output (`createCompletionTitleRunnable`, mesmo arquivo, usado quando
+       o provedor não suporta) -- prompt de completion puro, sem
+       `response_format`. Aí vale a correção de (419)/MEMÓRIAS (431): a
+       string-gatilho só conta se estiver na ÚLTIMA mensagem, com
+       `role` user/system, E `len(messages) <= 2` -- a chamada de título é
+       sempre one-shot (um H, no máximo um turno de usuário antes).
+       `content` normalizado antes do teste de substring: lista de partes
+       vira texto concatenado, `None`/outro tipo vira string vazia -- nunca
+       `TypeError`, nunca falso negativo silencioso por testar `in` numa
+       lista (achado de auditoria, 16/09/2026).
+
+    Residual CONHECIDO, não fechado por este desenho: colar um texto com a
+    string-gatilho como a PRIMEIRA mensagem de uma conversa nova ainda bate
+    a condição 2 (role user, len<=2) sem ser uma chamada de título de
+    verdade -- mesma classe de risco que qualquer detector por conteúdo,
+    registrado em vez de escondido (Doutrina de defesa proporcional,
+    PROJETO.md: risco residual declarado é mais seguro que estado seguro
+    não declarado)."""
+    if _schema_pede_titulo(payload):
+        return True
+
+    msgs = payload.get("messages")
+    if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
+        return False
+    ultima = msgs[-1]
+    if not isinstance(ultima, dict) or ultima.get("role") not in ("user", "system"):
+        return False
+    conteudo = ultima.get("content")
+    if isinstance(conteudo, list):
+        texto = " ".join(p.get("text", "") for p in conteudo if isinstance(p, dict))
+    elif isinstance(conteudo, str):
+        texto = conteudo
+    else:
+        texto = ""
+    return any(s in texto for s in _SINAIS_TITULO)
 
 
 # --- Roteador por complexidade (MEMÓRIAS (416); reabre a (383) com premissa nova) --

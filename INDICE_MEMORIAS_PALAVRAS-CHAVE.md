@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
+  palavras-chave: corrige, injecao, assinado, humano, aplicado, fecha, item, aberto, dado, externo, desliga, hidratação, seth
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
   palavras-chave: proposta, formalizada, testada, item, aberto, dado, externo, payload, ferramenta, desliga, hidratação, seth, diff, pronto, versionado, aguardando, assinatura, humano, nada, aplicado
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: tes, definido, humano, rodadas, consecutivas, limpas, adversa, zera, contagem, modelo, alvo, decidido, seth, qwen, silo, procedimento, ativação, escrito, execução, gerar, entregar, nonce, segunda, opinião, remoto, recebida
 (404) DIÁRIO — 09/09/2026 · B2 fechado. Os 2 itens que sobraram da rotação por família — mecanizar a Cadeia de auditoria A/B/C e renomear o arquivo de silo — **decididos como NÃO fazer agora**, com critério de reabertura. Decisão do Humano: "pode fechar sem mecanizar mas deixe devidamente registrado".
   palavras-chave: fechado, itens, sobraram, rotação, família, mecanizar, cadeia, auditoria, renomear, arquivo, silo, decididos, fazer, agora, critério, reabertura, decisão, humano, pode, fechar, deixe, devidamente, registrado
-(403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. Medido ao vivo: o OmniRoute já roteia `ollama-local/<qualquer model string>` direto pro Ollama `:11434` — a lista `/v1/models` só mostrar embeddings era artefato de anúncio, não de roteamento. H4 fecha com 1 tier no combo, sem shim.
-  palavras-chave: seth, local, shim, era, necessário, medido, vivo, omniroute, roteia, ollama, model, string, direto, pro, lista, models, mostrar, embeddings, artefato, anúncio, roteamento, fecha, tier, combo
+(403) CORREÇÃO — 09/09/2026 · O `seth_local_shim` de (402) não era necessário. M …
+  palavras-chave: seth, local, shim, era, necessário
 (402) DIÁRIO — 09/09/2026 · H4, opção B: `seth_local_shim` (`:20133`) construído …
   palavras-chave: opção, seth, local, shim, construído
 (401) DIÁRIO — 09/09/2026 · Fecha H5: o atalho `seth` não sincronizava `librecha …
