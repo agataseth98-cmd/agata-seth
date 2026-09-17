@@ -27,6 +27,17 @@ URL="$1"
 UA="Mozilla/5.0"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+
+# 0. Política de egress/anti-SSRF (item 1 do plano de mitigação da auditoria
+# do Marcos, MEMÓRIAS (437)) -- mesma régua usada pelo navegador Playwright
+# (redesign/mcp/navegador/servidor.py). Bloqueia loopback/link-local/
+# RFC1918/esquema fora de http-https, resolvendo DNS de verdade.
+if ! python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL" >/dev/null 2>&1; then
+  MOTIVO=$(python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL" 2>&1)
+  echo "abortado: destino bloqueado pela política de egress -- $MOTIVO" >&2
+  exit 5
+fi
 
 # 1. HTML cru + código HTTP -- checagem obrigatória ANTES de qualquer
 # extração. Página de erro (404 etc.) nunca é conteúdo.
@@ -87,6 +98,12 @@ if [ -n "$PACOTES" ]; then
       /*) URL_JS="${ORIGEM}${p}" ;;
       *) URL_JS="${ORIGEM}/${p}" ;;
     esac
+    # URL_JS pode vir de dentro do HTML da própria página (src="..." absoluto)
+    # -- dado externo, não confiado só por herdar o esquema/host de ORIGEM.
+    # Checagem de destino de novo, mesma régua do item 0.
+    if ! python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL_JS" >/dev/null 2>&1; then
+      continue
+    fi
     if curl -sSL -A "$UA" "$URL_JS" -o "$TMP/pacote.js" 2>/dev/null; then
       # Heurística: cadeia longa, sem caractere de sintaxe de código
       # ({}();=$), com pelo menos 4 palavras de 2+ letras separadas por

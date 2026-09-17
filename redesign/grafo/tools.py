@@ -15,6 +15,7 @@ APPEND-ONLY: nunca reescreve/trunca; so acrescenta. Idempotente pela idem key (P
 """
 from __future__ import annotations
 
+import fnmatch
 import os
 import re
 import subprocess
@@ -132,6 +133,28 @@ def query_canon(termos: list[str], repo=None) -> dict:
 # --------------------------------------------------------------------------- commit_entry (escreve canon)
 _MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 
+# Duplicado DELIBERADAMENTE de scripts/perimetro.sh::_p8_eh_comportamento --
+# mesma classificacao (o que MUDA COMPORTAMENTO vs. o que so REGISTRA),
+# runtime diferente (bash vs Python). Nao extraido para um so lugar agora
+# porque isso tocaria perimetro.sh, o proprio gatekeeper de todo commit
+# futuro -- essa mudanca fica pro item 10/Fase E do plano de mitigacao da
+# auditoria do Marcos (MEMORIAS (437)), com testagem extra antes de trocar
+# quem decide. Ate la, os dois ficam em sincronia manual -- e' o preco
+# aceito, registrado, nao escondido (item 11 do mesmo plano e' a unificacao
+# real). Se um padrao mudar num lado, mudar no outro tambem.
+_PADROES_COMPORTAMENTO = (
+    "REGRAS.md", "PROJETO.md", "scripts/*", ".githooks/*", "config/*",
+    "propostas/.allowed_signers",
+    "redesign/router/*", "redesign/mcp/*",
+    "redesign/librechat/*.mjs", "redesign/librechat/*.yaml", "redesign/librechat/*.yml",
+    "redesign/systemd/*", "redesign/grafo/*.py", "redesign/grafo/*.sh",
+    "redesign/obsidian/*.py", "SELOS.txt", ".gitignore", "models/manifest.json",
+)
+
+
+def _e_comportamento(alvo: str) -> bool:
+    return any(fnmatch.fnmatch(alvo, p) for p in _PADROES_COMPORTAMENTO)
+
 
 def commit_entry(repo: str, alvo: str, entrada: str, idem: str, *,
                  posicao: str = "fim", validar_cabecalho: bool = True) -> dict:
@@ -141,11 +164,26 @@ def commit_entry(repo: str, alvo: str, entrada: str, idem: str, *,
     - `posicao="fim"`: acrescenta no fim fisico (LOG.md).
     - `posicao="apos-marcador"`: insere logo APOS a linha do marcador `ENTRADAS-NOVAS:AQUI`
       (MEMORIAS.md -- mais recente primeiro). Nunca move/edita nada acima do marcador.
+    - **Gate interno (item 5 do plano de mitigacao, MEMORIAS (437)):** se `alvo`
+      casar um padrao de "muda comportamento" (mesma classe do P-8), recusa
+      sem tocar em nada -- esta funcao nunca escreve canon sensivel, mesmo
+      que um chamador futuro tente. Defesa em profundidade: o gate de
+      verdade continua sendo o hook `pre-commit` externo (P-8); isto nao o
+      substitui.
+    - **Transacional (item 4):** escreve em arquivo temporario + `os.replace`
+      atomico; se o `git commit` falhar, restaura o conteudo original e
+      desfaz o `git add` -- o retorno `{ok: False}` significa de verdade
+      "nada mudou", nao so "a ultima etapa falhou".
     - Valida o cabecalho da Regra 1 (`verificar_cabecalho.py`) e as citacoes
       (`checar_citacao.sh`) ANTES de escrever; invalido -> {ok: False}, nada tocado.
     - Idempotente: se `git log --grep=idem:<idem>` ja acha, nao escreve nem commita.
     - Garante que o arquivo SO CRESCEU (assert de tamanho).
     """
+    if _e_comportamento(alvo):
+        return {"ok": False, "idem": idem,
+                "motivo": f"recusado: '{alvo}' e arquivo de comportamento -- "
+                          f"commit_entry() so escreve o que REGISTRA, nunca o que MUDA "
+                          f"COMPORTAMENTO (REGRAS, 'Quarentena estrutural')"}
     repo = _exige_raiz_git(repo)          # trava contra git -C <caminho-ruim> subindo a arvore
     repo_p = Path(repo)
     alvo_p = repo_p / alvo
@@ -177,23 +215,63 @@ def commit_entry(repo: str, alvo: str, entrada: str, idem: str, *,
         i = next((k for k, l in enumerate(linhas) if _MARCADOR in l), None)
         if i is None:
             return {"ok": False, "motivo": f"marcador {_MARCADOR!r} ausente em {alvo}", "idem": idem}
-        novo = "".join(linhas[: i + 1]) + bloco + "".join(linhas[i + 1:])
+        pos = len("".join(linhas[: i + 1]))
+        novo = original[:pos] + bloco + original[pos:]
     elif posicao == "fim":
+        pos = len(original)
         novo = original + bloco
     else:
         return {"ok": False, "motivo": f"posicao invalida: {posicao!r}", "idem": idem}
-    if len(novo) <= len(original) or original not in novo:
+    # Append-only de verdade: tirar o bloco novo de volta (na posicao onde ele
+    # entrou) tem que sobrar EXATAMENTE o original -- pega truncamento e
+    # reescrita no meio, nos dois modos de insercao por igual.
+    # Bug corrigido aqui (achado testando o item 4/5 do plano de mitigacao,
+    # nao fazia parte do pedido original): a checagem antiga, `original not
+    # in novo`, so' e verdadeira pra posicao="fim" -- pra "apos-marcador" ela
+    # reprovava TODA insercao no meio do arquivo, sempre, porque splitar o
+    # original em duas partes quebra a substring contigua que ela procurava.
+    # Nunca dava pra perceber rodando: a escrita real de MEMORIAS.md hoje
+    # passa por seth_escriba.py, nao por este commit_entry() -- este caminho
+    # nunca tinha sido exercido de verdade.
+    if novo[:pos] + novo[pos + len(bloco):] != original:
         return {"ok": False, "motivo": "escrita nao e' append-only (arquivo nao cresceu / conteudo antigo sumiu)", "idem": idem}
-    with open(alvo_p, "w", encoding="utf-8") as f:
-        f.write(novo)
-        f.flush()
-        os.fsync(f.fileno())
-    subprocess.run(["git", "-C", repo, "add", alvo], check=True)
+
+    # Escrita ATOMICA: arquivo temporario no mesmo diretorio (garante que
+    # os.replace fique no mesmo filesystem, sem janela onde o arquivo real
+    # existe truncado/parcial) + fsync antes do replace.
+    fd, tmp_path = tempfile.mkstemp(dir=str(alvo_p.parent), prefix=f".{alvo_p.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(novo)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, alvo_p)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+    def _reverter(motivo_extra: str = "") -> None:
+        """Desfaz a escrita + o stage -- o repo volta a ficar exatamente como
+        estava antes desta chamada. Existe porque {ok: False} tem que
+        significar 'nada mudou', nunca 'a ultima etapa falhou'."""
+        alvo_p.write_text(original, encoding="utf-8")
+        subprocess.run(["git", "-C", repo, "reset", "-q", "HEAD", "--", alvo],
+                       capture_output=True, text=True)
+
+    try:
+        subprocess.run(["git", "-C", repo, "add", alvo], check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        _reverter()
+        return {"ok": False, "motivo": f"git add falhou: {e.stderr.strip()} -- revertido, working tree limpo", "idem": idem}
     r = subprocess.run(["git", "-C", repo, "commit", "-q", "-m",
                         f"entrada em {alvo} ({posicao})\n\nidem:{idem}"],
                        capture_output=True, text=True)
     if r.returncode != 0:
-        return {"ok": False, "motivo": f"git commit falhou: {r.stderr.strip()}", "idem": idem}
+        _reverter()
+        return {"ok": False, "motivo": f"git commit falhou: {r.stderr.strip()} -- revertido, working tree limpo", "idem": idem}
     sha = subprocess.run(["git", "-C", repo, "rev-parse", "--short", "HEAD"],
                          capture_output=True, text=True).stdout.strip()
     return {"ok": True, "estado": "novo", "commit_sha": sha, "idem": idem,

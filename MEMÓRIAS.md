@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e2ca1361b98646c8afa1ec9ab140507ad479299
-  Escrito em: 17/09/2026 18:27 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9
+  Escrito em: 17/09/2026 18:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e2ca1361b98646c8afa1ec9ab140507ad479299/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c3627b87fe5ba8662b1cdb08f5c290a3a8f88ad9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum` do `.diff` = `8680ae1f...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` contra `propostas/.allowed_signers` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`.
+
+**Aplicado sem reaplicar o `.diff`:** as mudanças já estavam na árvore de trabalho real desde (438) (testadas ali, não num clone à parte) — conferido byte a byte que o `git diff` atual bate exatamente com o `.diff` assinado (`diff` entre os dois, ignorando só as linhas `index` de metadado, saiu vazio) antes de commitar. Par movido para `propostas/aplicadas/`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo; `diff` entre o `.diff` assinado e o `git diff` real da árvore de trabalho, saída vazia. Autorização: Humano — assinou via `scripts/aprovar.sh fase-a-egress-provenance-transacional-2026-09-17`, "Feitoa".
 
 (438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marcos (437) — pronta e testada, aguardando assinatura. Cobre os itens 1, 2, 4 e 5: egress/anti-SSRF, proveniência de dado externo, `commit_entry()` transacional, gate interno. Achado colateral: um bug pré-existente que impedia `commit_entry(posicao="apos-marcador")` de funcionar, sempre, corrigido junto.**
 
