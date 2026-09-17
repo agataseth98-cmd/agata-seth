@@ -44,10 +44,27 @@ CANDIDATOS_COM_CHAVE = ["Mistral AI", "GitHub Models", "HuggingFace Inference",
                         "Cloudflare Workers AI", "NVIDIA NIM"]
 
 
+def _token_interno():
+    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
+    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403. Enviado
+    tambem nas chamadas diretas ao OmniRoute (:20128) por simplicidade --
+    ele nao conhece o header e o ignora, sem quebrar nada."""
+    try:
+        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
+            for linha in f:
+                if linha.startswith("AGATA_INTERNAL_TOKEN="):
+                    return linha.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
+
+
 def _http(url, metodo="GET", body=None, timeout=45):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=metodo,
-                                 headers={"content-type": "application/json"})
+                                 headers={"content-type": "application/json",
+                                          "X-Agata-Token": _token_interno()})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 

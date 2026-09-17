@@ -31,6 +31,20 @@ import tools                                       # noqa: E402  (P4-02 -- wrapp
 AGATA = Path(os.path.expanduser("~/agata"))
 SCRIPTS = AGATA / "scripts"
 PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
+
+
+def _token_interno():
+    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
+    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403."""
+    try:
+        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
+            for linha in f:
+                if linha.startswith("AGATA_INTERNAL_TOKEN="):
+                    return linha.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
 DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/grafo"))
 DB = DIR_ESTADO / "checkpoints.sqlite"
 LOG_LOOP = "redesign/grafo/loop.log"   # relativo ao repo alvo -- onde registrar_e_commitar escreve
@@ -106,7 +120,8 @@ def trabalhar(s: Estado) -> dict:
         "max_tokens": 400, "stream": False,
     }).encode()
     req = urllib.request.Request(f"{PROXY}/v1/chat/completions", data=body,
-                                 headers={"content-type": "application/json"})
+                                 headers={"content-type": "application/json",
+                                          "X-Agata-Token": _token_interno()})
     try:
         with urllib.request.urlopen(req, timeout=90) as r:
             d = json.loads(r.read())

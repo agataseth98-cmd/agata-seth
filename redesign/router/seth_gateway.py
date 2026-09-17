@@ -10,7 +10,11 @@ mensagem `system` e repassa para :20127 (que sanitiza segredo) -> OmniRoute.
 Assim qualquer frontend que apontar para :20126 fala com a Seth hidratada,
 sem o Hermes. GET (/v1/models, /health) e streaming passam direto.
 
-Só stdlib. Não instala nada, não lê chave nenhuma.
+Só stdlib. Não instala nada. Lê UMA coisa de ~/.config/agata/.env desde o
+item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
+AGATA_INTERNAL_TOKEN, que este processo anexa em toda chamada ao proxy
+sanitizador -- a fronteira localhost sozinha não provava quem estava do
+outro lado da chamada.
 
 Uso:
     python3 redesign/router/seth_gateway.py
@@ -48,6 +52,24 @@ _bind = os.environ.get("SETH_BIND", "127.0.0.1:20126")
 BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
 HIDRATA_PATH = Path(os.environ.get(
     "SETH_HIDRATA", str(Path.home() / "agata" / ".hidrata-seth.md")))
+
+_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
+
+
+def _token_interno() -> str:
+    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+    Mesma função de redesign/router/proxy.py -- duplicação deliberada,
+    igual à de _e_comportamento em redesign/grafo/tools.py: são só 8
+    linhas, e as duas cópias lêem o MESMO arquivo pela MESMA chave, risco
+    de deriva baixo. Unificação real fica pro item 11/Fase E do plano."""
+    try:
+        with open(_ENV_PATH, encoding="utf-8") as f:
+            for linha in f:
+                if linha.startswith("AGATA_INTERNAL_TOKEN="):
+                    return linha.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
 MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
 REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
 
@@ -444,6 +466,7 @@ class _Handler(BaseHTTPRequestHandler):
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in _HOP_BY_HOP}
+        headers["X-Agata-Token"] = _token_interno()
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
             up = urllib.request.urlopen(req, timeout=180)

@@ -26,18 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a98b8ca6c95ace5fd9a376c5f389c1a18326e57
-  Escrito em: 17/09/2026 19:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f6ddcfd29db990294e8de448be841e4fe5fdd4db
+  Escrito em: 17/09/2026 19:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a98b8ca6c95ace5fd9a376c5f389c1a18326e57/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6ddcfd29db990294e8de448be841e4fe5fdd4db/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum` do `.diff` = `9855c7de...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Confirmado antes: `AGATA_INTERNAL_TOKEN` presente em `~/.config/agata/.env` (só o nome da chave, nunca o valor). Confirmado byte a byte que a árvore de trabalho batia com o `.diff` assinado.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo; `grep -q "^AGATA_INTERNAL_TOKEN="` confirmando a chave sem ler o valor; `diff` entre o `.diff` assinado e o `git diff` real, saída vazia. Autorização: Humano — rodou o comando do token e assinou via `scripts/aprovar.sh fase-c-token-interno-2026-09-17`, "feito".
 
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
 

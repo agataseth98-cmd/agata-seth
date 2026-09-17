@@ -7,7 +7,11 @@ opiniao" e PROJETO "Conselho Remoto".
 
 Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
 ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
-mais chave nenhuma.
+chave de PROVEDOR nenhuma -- desde o item 3 do plano de mitigacao da auditoria
+do Marcos (MEMORIAS (437)), le UMA coisa de ~/.config/agata/.env
+(AGATA_INTERNAL_TOKEN) pra se identificar ao proxy, que agora recusa chamada
+sem esse token (fechava uma porta que qualquer processo local podia bater
+direto, sem passar pelo seth_gateway nem por este script).
 
 ROTACAO JUSTA (06/09/2026, ordem do Humano: "ninguem tem papel fixo... revogo
 GLM... deve ser decidido entre modelos gratuitos sob um regime de regras
@@ -78,6 +82,24 @@ SANITIZADOR_ENDPOINT = os.environ.get(
     "CONSELHO_ENDPOINT", "http://127.0.0.1:20127/v1/chat/completions"
 )
 COMBO = "conselho"   # legado -- so usado se ROSTER ficar vazio (nunca deveria)
+
+_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
+
+
+def _token_interno() -> str:
+    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+    Mesma funcao de redesign/router/proxy.py e seth_gateway.py -- duplicacao
+    deliberada, ver comentario em seth_gateway.py. Sem ela, o proxy (item 3
+    do plano de mitigacao, MEMORIAS (437)) recusaria toda chamada deste
+    script com 403."""
+    try:
+        with open(_ENV_PATH, encoding="utf-8") as f:
+            for linha in f:
+                if linha.startswith("AGATA_INTERNAL_TOKEN="):
+                    return linha.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
 
 DESTINO_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -322,7 +344,7 @@ def enviar_omniroute(pedido_texto, modelo):
     corpo = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         SANITIZADOR_ENDPOINT, data=corpo, method="POST",
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "X-Agata-Token": _token_interno()},
     )
     with urllib.request.urlopen(req, timeout=180) as resp:
         return json.loads(resp.read().decode("utf-8"))

@@ -42,6 +42,28 @@ UPSTREAM = os.environ.get("OMNIROUTE_UPSTREAM", "http://127.0.0.1:20128").rstrip
 _bind = os.environ.get("SANITIZER_BIND", "127.0.0.1:20127")
 BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
 
+_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
+
+
+def _token_interno() -> str:
+    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+
+    Item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
+    a fronteira localhost não é fronteira de segurança por si só -- qualquer
+    processo no mesmo host podia bater direto neste proxy (ou pior, direto
+    no OmniRoute em :20128) sem passar pelo seth_gateway. Este token não
+    fecha a porta do OmniRoute (produto de terceiro, sem controle de código
+    aqui -- residual registrado, não escondido), mas fecha a deste proxy:
+    só quem tem o segredo (hoje, só o seth_gateway) passa."""
+    try:
+        with open(_ENV_PATH, encoding="utf-8") as f:
+            for linha in f:
+                if linha.startswith("AGATA_INTERNAL_TOKEN="):
+                    return linha.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
+
 _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
     "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
@@ -54,15 +76,38 @@ class _Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):  # silencia o log ruidoso do http.server
         pass
 
+    def _token_ok(self) -> bool:
+        """Falha FECHADA (mesma doutrina do resto deste arquivo): sem token
+        configurado em .env, NADA passa -- não é modo aberto de
+        compatibilidade, é o mesmo padrão de 'sem a régua de segredo, o
+        serviço não responde' que P1-02 já usa."""
+        esperado = _token_interno()
+        if not esperado:
+            return False
+        recebido = self.headers.get("X-Agata-Token", "")
+        return recebido == esperado
+
+    def _recusar_sem_token(self):
+        self._json(403, {"error": {
+            "type": "internal_token_required",
+            "message": "faltou ou errou X-Agata-Token -- este proxy só aceita chamadas do seth_gateway",
+        }})
+
     # -- GET/HEAD: repassa sem tocar (ex.: /v1/models, /health) -------------- #
     def do_GET(self):
+        if not self._token_ok():
+            return self._recusar_sem_token()
         self._passar(b"", "GET")
 
     def do_HEAD(self):
+        if not self._token_ok():
+            return self._recusar_sem_token()
         self._passar(b"", "HEAD")
 
     # -- POST: sanitiza o corpo antes de repassar --------------------------- #
     def do_POST(self):
+        if not self._token_ok():
+            return self._recusar_sem_token()
         n = int(self.headers.get("Content-Length") or 0)
         corpo = self.rfile.read(n) if n else b""
 
@@ -200,6 +245,14 @@ def _selftest() -> int:
     px_port = _porta_livre()
     UPSTREAM = f"http://127.0.0.1:{up_port}"
 
+    # Token isolado do .env real -- o selftest não depende de o Humano já
+    # ter configurado AGATA_INTERNAL_TOKEN, e não usa o valor de produção.
+    # globals() (não reimport) porque este arquivo pode rodar como
+    # __main__ -- um `import proxy` separado criaria um SEGUNDO objeto de
+    # módulo, e o monkeypatch cairia no lugar errado (achado testando).
+    token_teste = "selftest-token-nao-e-segredo-de-verdade"
+    globals()["_token_interno"] = lambda: token_teste
+
     up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
     px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
     threading.Thread(target=up_srv.serve_forever, daemon=True).start()
@@ -207,27 +260,51 @@ def _selftest() -> int:
 
     base = f"http://127.0.0.1:{px_port}/v1/chat/completions"
     falhas = 0
+    com_token = {"Content-Type": "application/json", "X-Agata-Token": token_teste}
 
-    # 1. pedido limpo -> 200, passthrough do dummy
-    limpo = json.dumps({"model": "x", "messages": [{"role": "user", "content": "responda so: ok"}]}).encode()
+    # 0a. sem token nenhum -> 403, upstream NAO tocado (item 3 do plano de
+    # mitigacao da auditoria do Marcos, MEMORIAS (437))
+    limpo = json.dumps({"model": "x", "messages": [{"role": "user", "content": "oi"}]}).encode()
+    try:
+        urllib.request.urlopen(
+            urllib.request.Request(base, data=limpo, headers={"Content-Type": "application/json"}), timeout=10)
+        print("FALHA  pedido sem token passou (esperava 403)")
+        falhas += 1
+    except urllib.error.HTTPError as e:
+        ok = e.code == 403 and not _DummyUpstream.tocado
+        print(f"{'PASS' if ok else 'FALHA'}  sem token -> {e.code}, upstream {'NAO tocado' if not _DummyUpstream.tocado else 'TOCADO (falha!)'}")
+        falhas += 0 if ok else 1
+
+    # 0b. token errado -> 403, upstream NAO tocado
+    try:
+        urllib.request.urlopen(urllib.request.Request(
+            base, data=limpo, headers={"Content-Type": "application/json", "X-Agata-Token": "errado"}), timeout=10)
+        print("FALHA  pedido com token errado passou (esperava 403)")
+        falhas += 1
+    except urllib.error.HTTPError as e:
+        ok = e.code == 403 and not _DummyUpstream.tocado
+        print(f"{'PASS' if ok else 'FALHA'}  token errado -> {e.code}, upstream {'NAO tocado' if not _DummyUpstream.tocado else 'TOCADO (falha!)'}")
+        falhas += 0 if ok else 1
+
+    # 1. pedido limpo, token certo -> 200, passthrough do dummy
     try:
         r = urllib.request.urlopen(
-            urllib.request.Request(base, data=limpo, headers={"Content-Type": "application/json"}), timeout=10)
+            urllib.request.Request(base, data=limpo, headers=com_token), timeout=10)
         body = json.loads(r.read())
         ok = r.status == 200 and body.get("choices", [{}])[0].get("message", {}).get("content") == "ok-dummy"
-        print(f"{'PASS' if ok else 'FALHA'}  pedido limpo -> {r.status}, upstream {'tocado' if _DummyUpstream.tocado else 'NAO tocado'}")
+        print(f"{'PASS' if ok else 'FALHA'}  pedido limpo, token certo -> {r.status}, upstream {'tocado' if _DummyUpstream.tocado else 'NAO tocado'}")
         falhas += 0 if ok else 1
     except Exception as e:  # noqa: BLE001
         print(f"FALHA  pedido limpo levantou {type(e).__name__}: {e}")
         falhas += 1
 
-    # 2. pedido com segredo plantado (gerado na hora) -> 4xx do proxy, upstream NAO tocado
+    # 2. pedido com segredo plantado (gerado na hora), token certo -> 4xx do proxy, upstream NAO tocado
     _DummyUpstream.tocado = False
     fake = sanitizar._fx("sk", "-", "Z" * 24)  # casa sk-[A-Za-z0-9]{20,}
     sujo = json.dumps({"model": "x", "messages": [{"role": "user", "content": f"minha chave e {fake}"}]}).encode()
     try:
         urllib.request.urlopen(
-            urllib.request.Request(base, data=sujo, headers={"Content-Type": "application/json"}), timeout=10)
+            urllib.request.Request(base, data=sujo, headers=com_token), timeout=10)
         print("FALHA  pedido com segredo passou (esperava 4xx)")
         falhas += 1
     except urllib.error.HTTPError as e:
