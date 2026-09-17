@@ -7,6 +7,19 @@ Type=simple
 ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/navegador/servidor.py --http 20136
 Restart=on-failure
 RestartSec=3
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- testado ao vivo com Playwright+Brave real sob
+# NoNewPrivileges=yes antes de aplicar (o sandbox interno do Brave não
+# depende de setuid nesta Máquina). Escreve perfil/log/screenshot só sob
+# ~/.cache/agata -- é a única exceção de escrita.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
+ReadWritePaths=%h/.cache/agata
 
 # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
 # start navegador-mcp`), nao no boot. Mesma logica do seth-gateway.

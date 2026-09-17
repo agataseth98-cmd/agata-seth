@@ -7,6 +7,17 @@ Type=simple
 ExecStart=%h/agata/redesign/mcp/.venv/bin/python %h/agata/redesign/mcp/discord/servidor.py --http 20135
 Restart=on-failure
 RestartSec=3
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- só lê ~/.config/agata/.env (token) e o
+# repositório; nunca escreve em disco. ProtectSystem=strict deixa tudo
+# somente-leitura por padrão, sem precisar listar cada caminho de leitura.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
 # start discord-mcp`), nao no boot. Mesma logica do seth-gateway.

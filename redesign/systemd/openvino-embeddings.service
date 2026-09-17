@@ -14,6 +14,17 @@ ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/embeddi
 Restart=on-failure
 RestartSec=3
 Nice=5
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- só lê o modelo em ~/.cache/agata/openvino/ e
+# responde por socket; não escreve em disco. /dev/dri (iGPU) continua
+# acessível -- ProtectSystem não toca dispositivos, só o filesystem.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
 [Install]

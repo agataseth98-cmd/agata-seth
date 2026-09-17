@@ -16,6 +16,19 @@ ExecStart=%h/agata/redesign/igpu/.venv/bin/python %h/agata/redesign/igpu/whisper
 Restart=on-failure
 RestartSec=3
 Nice=5
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- lê o modelo em ~/.cache/agata/openvino/ e
+# arquivos de áudio por caminho (aceita 'path' no corpo do POST -- leitura
+# arbitrária pré-existente, fora de escopo desta correção); não escreve em
+# disco. ProtectSystem=strict não bloqueia leitura em lugar nenhum, só
+# escrita fora dos caminhos declarados -- não quebra esse recurso.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # P7-01 fix (02/09): era WantedBy=default.target -- somado ao [Install] do drop-in
 # agata.conf, um `systemctl --user enable` recriava default.target.wants/<unit> e o

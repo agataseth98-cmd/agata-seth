@@ -12,6 +12,16 @@ RemainAfterExit=yes
 ExecStart=/bin/true
 ExecStop=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/drenar.py
 TimeoutStopSec=45
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- drenar.py só lê o WAL/checkpoint do grafo,
+# não escreve nada em disco (confirmado por grep antes de aplicar).
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 [Install]
 WantedBy=agata.target

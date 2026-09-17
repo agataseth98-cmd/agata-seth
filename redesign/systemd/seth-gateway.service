@@ -9,6 +9,19 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
 Environment=SETH_HIDRATA_MODO=compacto
 Restart=on-failure
 RestartSec=3
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- ANTES deste conserto, este serviço (vê TODO o
+# tráfego da Seth, hidrata, roteia) não tinha NENHUMA diretiva de
+# hardening -- o mais exposto dos serviços da Seth era também o menos
+# isolado. Só lê REGRAS/PROJETO/MEMÓRIAS pra hidratar e responde por
+# socket -- confirmado por grep antes de aplicar, zero escrita em disco.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user start
 # seth-gateway`), nao no boot. Mesma logica do llamacpp-agata / agata-warmup.

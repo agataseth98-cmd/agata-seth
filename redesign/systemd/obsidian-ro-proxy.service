@@ -14,6 +14,16 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/obsidian/ro_proxy.py
 Restart=on-failure
 RestartSec=3
 Nice=5
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- proxy read-only por desenho (do_PUT/do_PATCH/
+# do_DELETE -> 403); não escreve nada em disco, só lê o token e proxeia.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # P7-01 fix (02/09): era WantedBy=default.target -- ver openvino-whisper.service.
 [Install]

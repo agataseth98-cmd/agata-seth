@@ -13,4 +13,19 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_escriba.py
 Restart=on-failure
 RestartSec=3
 Nice=5
-# escreve so em MEMÓRIAS.md e SETH-DIARIO.md do repo -- sem ProtectHome
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- ANTES deste conserto, este serviço (o ÚNICO
+# canal de escrita da Seth) não tinha NENHUMA diretiva de hardening,
+# menos que o seth-verificador (só leitura) -- achado invertido do que o
+# risco pediria, confirmado na auditoria. Escreve só em MEMÓRIAS.md e
+# SETH-DIARIO.md do repo (a trava de verdade é a aplicação: fcntl.flock +
+# verificação pós-escrita, insert/append puro) -- ReadWritePaths cobre o
+# repositório inteiro porque a escrita atômica (os.replace) e o lock
+# precisam do diretório, não só dos dois arquivos.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadWritePaths=%h/agata

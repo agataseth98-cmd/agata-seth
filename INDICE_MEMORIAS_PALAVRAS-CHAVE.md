@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
+  palavras-chave: fase, parte, assinada, aplicada, item, hardening, systemd, fecha, canon
 (440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
   palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, hardening, systemd, serviços, diretiva, testado, vivo, analyze, verify, pronto, assinatura, item, fechado
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: coisas, titleconvo, religado, true, endpoint, seth, tinha, desligado, diagnóstico, errado, retratou, filtro, título, gateway, commitado, mantém, chamada, hidratação, então, religar, sai, barato, tes, humano, entregou, nonce, ela, ecoou, valor, exato
 (412) CORREÇÃO — 09/09/2026 · A (411) culpou a geração de **título** (`titleConvo`) pela "Seth não responde no LibreChat", com um mecanismo que a fonte do LibreChat **não sustenta**. Retiro a causa. Culpado provável real: a **cascata degradada** (tiers 1-2 fora ~14:39-15:10, respostas de 30-60s), que se recuperou sozinha (glm voltou a 2,2s às 15:11). As mudanças da (411) ficam como higiene, **não** como correção confirmada.
   palavras-chave: culpou, geração, título, titleconvo, seth, responde, librechat, mecanismo, fonte, sustenta, retiro, causa, culpado, provável, real, cascata, degradada, tiers, fora, respostas, recuperou, sozinha, glm, voltou, mudanças, ficam, higiene, correção, confirmada
-(411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geração de **título** da conversa (`titleConvo: true` + `titleModel` apontando pro `:20126`). Corrigido: `titleConvo: false` no endpoint + o `seth_gateway` agora **não hidrata** chamadas de título. Depois do fix, a Seth respondeu completa e visível a um `Oi.` do Humano, resposta persistida. **Nonce do TES-002 ainda não entregue** — a rodada não começou.
-  palavras-chave: seth, respondia, librechat, causa, geração, título, conversa, titleconvo, true, titlemodel, apontando, pro, corrigido, false, endpoint, gateway, agora, hidrata, chamadas, fix, respondeu, completa, visível, humano, resposta, persistida, nonce, tes, entregue, rodada, começou
+(411) DIÁRIO — 09/09/2026 · A Seth "não respondia" no LibreChat. Causa: a geraçã …
+  palavras-chave: seth, respondia, librechat, causa, geraçã
 (410) DIÁRIO — 09/09/2026 · Aplicado o `.diff` de PROJETO.md do TES-002 que a (4 …
   palavras-chave: aplicado, diff, projeto, tes
 (409) DIÁRIO — 09/09/2026 · TES-002: nonce novo gerado pela Máquina em `mod-nonc …

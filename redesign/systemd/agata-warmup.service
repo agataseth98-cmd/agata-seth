@@ -8,6 +8,16 @@ Type=oneshot
 # 15s) e' esperado; o efeito util e' o load. Nao marcar o oneshot como failed.
 ExecStart=-/usr/bin/curl -s -o /dev/null --max-time 90 http://127.0.0.1:20127/v1/chat/completions -H "content-type: application/json" --data-raw {"model":"ollama-local/qwen3.5:9b","messages":[{"role":"user","content":"oi"}],"max_tokens":1}
 TimeoutStartSec=120
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- só faz um curl pro próprio loopback, não
+# toca disco nenhum.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
 
 # SEM [Install] -- NAO sobe no boot nem com `agata up`. Dispare a mao quando for
 # usar o modelo local pesado:  systemctl --user start agata-warmup.service

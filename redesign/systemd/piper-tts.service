@@ -10,6 +10,16 @@ ExecStart=/usr/bin/python3 %h/agata/redesign/router/tts_piper.py
 Restart=on-failure
 RestartSec=3
 Nice=5
+# Baseline de hardening (item 6 do plano de mitigação da auditoria do
+# Marcos, MEMÓRIAS (437)) -- só lê o modelo de voz em redesign/router/
+# tts-piper/voices/ e responde áudio por socket; não escreve em disco.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
 
 # Sem [Install] -- sobe sob demanda, igual seth-gateway. O atalho da Seth
 # (redesign/systemd/seth) faz `systemctl --user start piper-tts` quando ligar
