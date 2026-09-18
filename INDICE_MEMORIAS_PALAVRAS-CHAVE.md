@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
+  palavras-chave: fase, assinada, aplicada, itens, fecham, código, arquivo, workflow, commit, token, tem, escopo, github, recusou, push, registrado, suavizar, corrigido, virar, canon, empurrado
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
   palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, itens, remoto, independente, níveis, formais, teste
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: encerrando, pendências, auditoria, canon, reconciliado, máquina, atalhos, fato, instalados, movido, pra, horizonte, ordem, humano, deixe, futuro, encerre, sequência, quatro, controles, perímetro, controlavam, diziam, controlar, consertou, fecha, pegavam, porque, texto, código
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o que diziam controlar.** Auditoria completa por ordem do Humano ("audite o sistema por completo... percebendo e resolvendo falhas de segurança"). Todo achado abaixo foi demonstrado vermelho/verde em clone descartável, nunca só lido. Nenhum era teórico.
   palavras-chave: quatro, controles, perímetro, controlavam, diziam, controlar, auditoria, completa, ordem, humano, audite, sistema, completo, percebendo, resolvendo, falhas, segurança, achado, abaixo, demonstrado, vermelho, verde, clone, descartável, nunca, lido, era, teórico
-(418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varredura de pendências.** O Humano: "termine as pendências e entraremos em fase de otimização e refinamento".
-  palavras-chave: limpeza, pós, aposentadoria, tes, varredura, pendências, humano, termine, entraremos, fase, otimização, refinamento
+(418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varred …
+  palavras-chave: limpeza, pós, aposentadoria, tes, varred
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano …
   palavras-chave: tes, aposentados, decisão, humano
 (416) DIÁRIO — 09/09/2026 · **Roteador por complexidade da Seth — reabre a (383) …

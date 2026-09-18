@@ -768,6 +768,13 @@ _p8_eh_comportamento() {
     #                           backup; mexer nela muda o que "estar coberto"
     #                           significa.
     redesign/obsidian/*.py|SELOS.txt|.gitignore|models/manifest.json) return 0 ;;
+    # Buraco achado implementando o item 7 do plano de mitigacao da auditoria
+    # do Marcos (MEMORIAS (437), "segunda linha de enforcement remota"):
+    # .github/workflows/*.yml executa codigo arbitrario a cada push, no
+    # runner do GitHub -- muda comportamento tanto quanto um script daqui,
+    # e nao estava coberto. Fechado ANTES de criar o primeiro workflow, nao
+    # depois -- senao o proprio workflow entraria sem aprovacao.
+    .github/*) return 0 ;;
     *) return 1 ;;
   esac
 }

@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d705b7c393253bf39aebca066021f8b7828fc21d
-  Escrito em: 17/09/2026 20:03 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b
+  Escrito em: 17/09/2026 21:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d705b7c393253bf39aebca066021f8b7828fc21d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
+
+**Assinatura verificada ao vivo antes de aplicar (isto não muda):** `sha256sum` do `.diff` = `d8326c68...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Confirmado byte a byte que a árvore de trabalho batia com o `.diff` assinado ANTES do primeiro commit (`44429f4`, local). Vault reconstruído a partir de `git archive HEAD`.
+
+**O que aconteceu na hora de empurrar:** `git push` recusado — `refusing to allow an OAuth App to create or update workflow .github/workflows/perimetro.yml without workflow scope`. `gh auth status` confirmou: token só tem `gist, read:org, repo`. Duas tentativas de `gh auth refresh -h github.com -s workflow` pelo Humano não completaram o fluxo (escopo continuou igual nas duas). Decisão do Humano: ele mesmo cria o arquivo pela interface web do GitHub, com o conteúdo exato deste `.diff` — eu não tenho como.
+
+**Mecânica desta entrada:** o commit local `44429f4` (que continha o arquivo) nunca foi publicado — `git reset --soft origin/main` desfez SÓ o commit local não-empurrado (não é edição de história publicada, Regra 4 não se aplica a algo que nunca saiu da Máquina), recriando o commit sem o rastreamento git do workflow. O arquivo continua no disco, íntegro, fora do controle de versão até o Humano o criar pelo GitHub e um `git pull` reconciliar. `scripts/perimetro.sh` e `scripts/testar_perimetro.sh` (níveis L0-L5, o resto do item 8) entram normalmente neste commit — só o item 7 fica com essa pendência mecânica, não de conteúdo.
+
+**Estado: itens 7 e 8 aprovados e aplicados; o arquivo `.github/workflows/perimetro.yml` aguarda o Humano criá-lo manualmente no GitHub (conteúdo idêntico ao já assinado) — sem isso, a segunda linha de enforcement do item 7 não existe de fato, só no disco local.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo antes do primeiro commit; `git push` real, mensagem de recusa lida por inteiro; `gh auth status` conferido antes e depois de cada tentativa de refresh, escopo inalterado nas duas; `git reset --soft origin/main` + novo commit, `git status` conferido mostrando o arquivo como untracked depois. Autorização: Humano — assinou via `scripts/aprovar.sh fase-d-ci-remoto-niveis-2026-09-17`, "feito"; depois escolheu, entre 3 opções oferecidas, criar o arquivo manualmente.
 
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
 

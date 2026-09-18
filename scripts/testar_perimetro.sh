@@ -18,6 +18,13 @@
 #
 # COMO RODAR:  bash scripts/testar_perimetro.sh          (tudo)
 #              bash scripts/testar_perimetro.sh P-8      (so um controle)
+#              bash scripts/testar_perimetro.sh L1       (so um nivel -- item 8
+#                                                          do plano de mitigacao
+#                                                          da auditoria do
+#                                                          Marcos, MEMORIAS
+#                                                          (437); niveis L0-L5
+#                                                          documentados perto
+#                                                          de SEM_TESTE/NIVEL)
 #
 # QUEM RODA SOZINHO: o P-16 (em perimetro.sh) dispara esta suite quando um
 # arquivo de controle esta staged -- nao da' pra mudar os controles sem que
@@ -88,7 +95,16 @@ _acusacoes() {
 # _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
 _caso() {
   local ctrl="$1" espera="$2" nome="$3" setup n
-  if [ -n "$FILTRO" ] && [ "$ctrl" != "$FILTRO" ]; then PULADO=$((PULADO+1)); return; fi
+  # FILTRO aceita um controle ("P-8") ou um nivel ("L1"..."L5", item 8 do
+  # plano de mitigacao, MEMORIAS (437)) -- NIVEL[$ctrl] so existe depois que
+  # o array e' declarado mais abaixo, mas por ser funcao bash so' resolve no
+  # momento da CHAMADA, nao da definicao, entao a ordem no arquivo nao importa.
+  if [ -n "$FILTRO" ]; then
+    case "$FILTRO" in
+      L[0-5]) [ "${NIVEL[$ctrl]:-}" = "$FILTRO" ] || { PULADO=$((PULADO+1)); return; } ;;
+      *) [ "$ctrl" = "$FILTRO" ] || { PULADO=$((PULADO+1)); return; } ;;
+    esac
+  fi
   setup="$(cat)"
   _reset
   if ! ( cd "$CLONE/repo" && eval "$setup" ) >/dev/null 2>&1; then
@@ -135,6 +151,32 @@ declare -A SEM_TESTE=(
   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
   [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
+)
+
+# ---------------------------------------------------------- niveis (item 8) --
+# Item 8 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
+# formaliza uma separacao que ja existia informalmente acima (SEM_TESTE) --
+# rotulo novo, MESMA suite, MESMOS casos, nada de motor de execucao novo.
+#   L0 -- unitario: funcao pura, sem clone nem processo (nenhum controle
+#         hoje se encaixa so' nisso; os _caso abaixo ja precisam do clone).
+#   L1 -- clone/offline: e' o que esta suite FAZ -- clone descartavel, sem
+#         root, sem rede, sem servico vivo. Todo controle com _caso() aqui
+#         e' L1, por definicao (P-1, P-5, P-7, P-8, P-11, P-14).
+#   L2 -- integracao local: precisa de processo/servico vivo na Maquina,
+#         mas nada alem de localhost (P-4, P-9, P-10).
+#   L3 -- privilegiado: precisa de root (P-2).
+#   L4 -- rede: depende de chamada remota real ou relogio de calendario
+#         passando (P-3, P-13, P-15).
+#   L5 -- recovery/chaos: precisa do HD de backup fisico montado (P-6, P-12).
+# P-16/P-17 ficam fora da escala -- P-16 e' quem executa esta suite (recursa
+# se testado aqui dentro), P-17 mede serie ENTRE corridas, nao um estado
+# unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
+declare -A NIVEL=(
+  [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
+  [P-2]=L3
+  [P-3]=L4 [P-13]=L4 [P-15]=L4
+  [P-4]=L2 [P-9]=L2 [P-10]=L2
+  [P-6]=L5 [P-12]=L5
 )
 
 # ------------------------------------------------------------------ casos --
