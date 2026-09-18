@@ -1,0 +1,118 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index ace9d0c..e5bb8a2 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -67,12 +67,33 @@ fi
+ 
+ # 3. Índice derivado do canon público — refaz indice.md + manifesto.md em
+ # memoria/missoes/agata-sistema/derivado/ (repo missoes, gitignorado do
+-# principal) para ficar em dia com o canon. NÃO sobe pro Drive: isso exige
+-# preparar_export_indice.py + subir_esfera_projeto.py + chamada real, sempre
+-# manual. Fail-soft (MEMÓRIAS (298)/(301)).
++# principal) para ficar em dia com o canon. Fail-soft (MEMÓRIAS (298)/(301)).
++#
++# 3b. Export + upload pro Drive — automático a partir daqui (ordem do Humano,
++# achado de indice_export.md defasado 155 entradas). SÓ roda preparar_export_
++# indice.py/subir_esfera_projeto.py quando o sha256 de indice.md mudou desde
++# o último envio (marcador em ~/.cache/agata/, fora do repo) -- evita reenviar
++# em commit que não toca canon (ex: mudar só um script). Fail-soft: falha de
++# rede, token ou varredura de segredo nunca bloqueia o commit, só avisa --
++# mesmo espírito dos passos 1/2/3a.
+ if [ -f scripts/gerar_indice_derivado.py ]; then
+   if python3 scripts/gerar_indice_derivado.py >/dev/null 2>&1; then
+     echo "post-commit: índice derivado regenerado (memoria/missoes/agata-sistema/derivado/)"
++    INDICE="memoria/missoes/agata-sistema/derivado/indice.md"
++    MARCADOR="$HOME/.cache/agata/indice-export-ultimo-sha"
++    mkdir -p "$(dirname "$MARCADOR")"
++    SHA_ATUAL="$(sha256sum "$INDICE" 2>/dev/null | awk '{print $1}')"
++    SHA_ENVIADO="$(cat "$MARCADOR" 2>/dev/null || echo "")"
++    if [ -n "$SHA_ATUAL" ] && [ "$SHA_ATUAL" != "$SHA_ENVIADO" ]; then
++      if python3 scripts/preparar_export_indice.py >/dev/null 2>&1 \
++         && python3 scripts/subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/indice_export.md >/dev/null 2>&1 \
++         && python3 scripts/subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/manifesto.md >/dev/null 2>&1; then
++        printf '%s' "$SHA_ATUAL" > "$MARCADOR"
++        echo "post-commit: índice exportado e enviado ao Drive (conteúdo do canon mudou desde o último envio)"
++      else
++        echo "post-commit: AVISO — export/envio ao Drive falhou (rede, token, ou varredura de segredo) -- rode manualmente: preparar_export_indice.py + subir_esfera_projeto.py" >&2
++      fi
++    fi
+   else
+     echo "post-commit: AVISO — gerar_indice_derivado.py falhou; índice pode estar desatualizado" >&2
+   fi
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index 0a96cd7..e496bbb 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -44,6 +44,28 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
+     # -- divergiu, a cópia veio de commits diferentes (canal serviu um velho
+     # e um novo). O bloco fica ACIMA do marcador ENTRADAS-NOVAS em MEMÓRIAS.md,
+     # que o P-5 não policia (só o corpo de entradas). Mesma regra fail-soft.
++    #
++    # Guarda de integridade (achado real, MEMÓRIAS (458)): o `git add "$_canon"`
++    # abaixo estagia o ARQUIVO INTEIRO, não só as linhas da âncora -- se houver
++    # edição pendente sem stage nesse arquivo (ex: uma proposta ainda não
++    # assinada, deixada na árvore de trabalho), ela entra no commit sem o
++    # autor ter mandado `git add` nela. Não dá pra virar controle de
++    # perimetro.sh (P-N): perimetro.sh já rodou e passou, linha 9 acima,
++    # ANTES deste laço -- um controle lá nunca veria a varredura acontecer.
++    # Por isso mora aqui: snapshot do STAGED (index) de cada canônico, SEM o
++    # bloco da âncora, antes do laço; comparado depois. Qualquer diferença
++    # fora da âncora só pode ter vindo do `git add` do laço, nunca de um
++    # `git add` explícito do autor -- bloqueia o commit, desfaz o stage
++    # indevido, e diz exatamente o que fazer.
++    _sem_ancora() {
++      awk '/<!-- ANCORA-SHA:INICIO/{s=1} !s{print} /<!-- ANCORA-SHA:FIM -->/{s=0}'
++    }
++    declare -A _ANCORA_ANTES
++    for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
++      [ -f "$_canon" ] || continue
++      _ANCORA_ANTES["$_canon"]="$(git show ":$_canon" 2>/dev/null | _sem_ancora | sha256sum)"
++    done
++
+     for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
+       [ -f "$_canon" ] || continue
+       if python3 scripts/atualizar_ancora_prompt.py "$_canon" "$HEAD_ANTERIOR" "$AGORA"; then
+@@ -53,5 +75,17 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
+         echo "$(date -Iseconds) $_canon $HEAD_ANTERIOR" >> "$(git rev-parse --git-dir)/AGATA_ANCORA_AVISOS.log"
+       fi
+     done
++
++    for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
++      [ -f "$_canon" ] || continue
++      [ -n "${_ANCORA_ANTES[$_canon]:-}" ] || continue
++      _ancora_depois="$(git show ":$_canon" 2>/dev/null | _sem_ancora | sha256sum)"
++      if [ "$_ancora_depois" != "${_ANCORA_ANTES[$_canon]}" ]; then
++        git reset -q -- "$_canon" 2>/dev/null || true
++        echo "pre-commit: FALHA -- '$_canon' staged ganhou conteúdo fora da âncora de SHA que você não tinha mandado 'git add' -- provavelmente uma edição pendente na árvore de trabalho (proposta ainda não assinada?) foi varrida pelo passo da âncora." >&2
++        echo "pre-commit: desfiz o stage de '$_canon'. Rode 'git diff -- \"$_canon\"' pra ver o que sobrou pendente, decida se entra (stage explícito) ou fica de fora, e commite de novo." >&2
++        exit 1
++      fi
++    done
+   fi
+ fi
+diff --git a/PROJETO.md b/PROJETO.md
+index 6ab67e0..348c0fb 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -447,7 +447,8 @@ MEMÓRIAS (296)/(298)/(299)/(300). Camada de consulta sobre o canon, separada do
+ - `scripts/consultar_indice.py <palavras>` extrai trechos do `indice.md` em texto plano. É como o executor local entrega recorte pra um modelo em nuvem — o modelo não lê o índice nem `memoria/missoes/` direto.
+ - **Export pro Drive:** o `indice.md` não sobe pelo cano — contém o PROJETO.md verbatim, que nomeia variáveis de ambiente (`ZHIPU_API_KEY` etc.), e a varredura de segredo aborta no nome pelado (falso positivo; o scanner não se afrouxa). `scripts/preparar_export_indice.py` lê o `indice.md` e escreve `indice_export.md` com esses nomes mascarados como `[variável de ambiente]`; o original fica intacto, e o script só grava se o resultado passar em todos os padrões de `PADROES_SEGREDO`. Fluxo: `gerar_indice_derivado.py` → `preparar_export_indice.py` → `subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/indice_export.md`. No NotebookLM, usa-se o `indice_export.md` baixado do Drive; `manifesto.md` também sobe, como carimbo de proveniência.
+ - Regeneração automática: `.githooks/post-commit` (passo 3, MEMÓRIAS (301)) refaz `indice.md`/`manifesto.md` a cada commit, fail-soft, sob P-8 — espelho do passo 2 (vault Obsidian). Regeneração sob demanda antes de um export segue disponível (`gerar_indice_derivado.py` direto).
+-- **Upload pro Drive, automático desde 18/09/2026 (ordem do Humano, achado de `indice_export.md` defasado 155 entradas atrás do canon).** `.githooks/post-commit` (passo 3b) roda `preparar_export_indice.py` + `subir_esfera_projeto.py` (`indice_export.md` e `manifesto.md`) só quando o sha256 de `indice.md` muda em relação ao último envio — marcador em `~/.cache/agata/indice-export-ultimo-sha`, fora do repo, evita reenviar em commit que não toca canon. Fail-soft: falha de rede/token/varredura de segredo vira `AVISO`, nunca bloqueia o commit — mesmo padrão dos outros passos do `post-commit`. Regeneração/envio manual seguem disponíveis, sem mudança.
++- **Upload pro Drive, automático desde 18/09/2026 (ordem do Humano, achado de `indice_export.md` defasado 155 entradas atrás do canon, MEMÓRIAS (457)).** `.githooks/post-commit` (passo 3b) roda `preparar_export_indice.py` + `subir_esfera_projeto.py` (`indice_export.md` e `manifesto.md`) só quando o sha256 de `indice.md` muda em relação ao último envio — marcador em `~/.cache/agata/indice-export-ultimo-sha`, fora do repo, evita reenviar em commit que não toca canon. Fail-soft: falha de rede/token/varredura de segredo vira `AVISO`, nunca bloqueia o commit — mesmo padrão dos outros passos do `post-commit`. Regeneração/envio manual seguem disponíveis, sem mudança.
++- **Guarda de integridade da âncora, desde 18/09/2026 (MEMÓRIAS (458)/(459)).** O laço que atualiza a âncora de SHA em REGRAS/PROJETO/MEMÓRIAS faz `git add "$_canon"` do arquivo inteiro — sem guarda, uma edição pendente sem stage nesses três arquivos entraria no commit sem o autor ter mandado. `.githooks/pre-commit` agora tira um sha256 do conteúdo staged de cada um (sem o bloco da âncora) antes e depois do laço; se mudar fora da âncora, desfaz o stage daquele arquivo e bloqueia o commit — não é `AVISO`, é integridade de canon.
+ 
+ ### Mão única refinada
+ A política deixa de ser "lê, nunca escreve fato de volta" e passa a ser: **nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta. Nada disso é escrita de fato. Nenhum resultado retorna automaticamente a `REGRAS.md`, `PROJETO.md` ou `MEMÓRIAS.md`.
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 213b12c..74d42dc 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -157,6 +157,7 @@ declare -A SEM_TESTE=(
+   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
+   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
+   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
++  [P-18]="so' emite linha 'AVISO (P-18): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15, nao falta de reprodutibilidade: p18_ancora_falha() foi testada isolada, 6 casos (sem log, ancora em dia, defasagem normal, defasagem de alarme, linha malformada, log com duas linhas), fora deste harness, na auditoria que introduziu o controle (MEMORIAS (455))"
+   [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
+   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
+ )

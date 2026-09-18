@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(460) DIÁRIO — 18/09/2026 · **As 4 propostas pendentes ((456)-(459)) unificadas num `.diff` só, por pedido do Humano — não é concatenação cega: o texto do PROJETO.md precisou ser reescrito, senão o pacote entraria contraditório.**
+  palavras-chave: propostas, pendentes, unificadas, diff, pedido, humano, concatenação, cega, texto, projeto, precisou, reescrito, senão, pacote, entraria, contraditório
 (459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (458): fecha a classe, testada com o bug exato reproduzido. Ordem do Humano ("autorizado"), proposta pronta, não aplicada sozinha.**
   palavras-chave: guarda, integridade, contra, buraco, achado, fecha, classe, testada, bug, exato, reproduzido, ordem, humano, autorizado, proposta, pronta, aplicada, sozinha
 (458) DIÁRIO — 18/09/2026 · **Achado real, meu, no próprio commit anterior: o passo que atualiza a âncora de SHA faz `git add` do arquivo INTEIRO, não só das linhas da âncora — e varreu, sem eu querer, um texto do PROJETO.md descrevendo uma automação que ainda não foi assinada. O canon empurrado em (457) afirma algo falso agora. Corrigindo, e nomeando o buraco de P-8 que isso expõe.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, formalizada, testada, item, aberto, dado, externo, payload, ferramenta, desliga, hidratação, seth, diff, pronto, versionado, aguardando, assinatura, humano, nada, aplicado
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
   palavras-chave: decisão, pacote, dia, acréscimo, regras, arquivado, três, causas, medidas, degradação, seth, fabricações, reais, achadas, sessão, vivo, bug, linter, corrigido, quatro, artefatos, aguardando, assinatura, nada, aplicado, ela, auditoria, multi, modelo, claude, sonnet, executor, máquina, opus, camada, nuvem, conversa, real, librechat, próprio, sistema, registrado, único, pedido, humano, achado, abaixo, machine, verified, herdado, alegação
-(430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sobre MOD sensível em produção divide em duas, com segunda opinião formal favorável.** Pergunta do Humano: se a Fase 2 (silos por modelo, CONSTRUÍDA) resolve a restrição "nenhum MOD com conteúdo sensível deve entrar em MEMÓRIAS em produção — seria injetado no contexto de todos os modelos" (`REGRAS.md`, "O Conselho" item 3).
-  palavras-chave: decisão, cláusula, condicional, item, mod, sensível, produção, divide, segunda, opinião, formal, favorável, pergunta, humano, fase, silos, modelo, construída, resolve, restrição, conteúdo, deve, entrar, memórias, seria, injetado, contexto, modelos, regras
+(430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sob …
+  palavras-chave: decisão, cláusula, condicional, item, sob
 (429) DIÁRIO — 15/09/2026 · **`P-10` quebrado de verdade: a missão `maquina-md-c …
   palavras-chave: quebrado, verdade, missão, maquina
 (428) DIÁRIO — 15/09/2026 · **Correção de exatidão no `vetor:` de (427) — comand …
