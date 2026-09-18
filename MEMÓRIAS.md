@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb
-  Escrito em: 18/09/2026 09:03 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e4da551e94bfae0eb0b2695ffc045bba90d375c6
+  Escrito em: 18/09/2026 09:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
+
+`gh run list`/`gh run view 35342700725`: disparado pelo push do commit `e4da551` (que publicou o próprio arquivo), job `suite-adversarial` **concluído com sucesso em 33s**. Duas anotações, nenhuma falha: aviso de depreciação do Node.js 20 em `actions/checkout@v4` (a Actions força Node 24 mesmo assim, sem quebrar) e aviso de que `ubuntu-latest` migra para Ubuntu 26 em 19/10/2026 — nenhuma das duas bloqueia hoje, ambas fora do escopo desta entrada, registradas pra não se perderem.
+
+**Fecha, de vez e com prova em runtime, o item 7 e a auditoria do Marcos inteira (437)-(454).**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `gh run list --json status,conclusion` (polling até `completed success`); `gh run view 35342700725` lido por inteiro, job e anotações. Autorização: Humano — mesma autorização de (453), execução decorrente do push já autorizado, sem decisão nova.
 
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
 

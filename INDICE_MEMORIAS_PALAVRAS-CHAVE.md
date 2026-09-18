@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
+  palavras-chave: primeira, execução, real, workflow, runner, github, confirmada, deixou, aberto
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
   palavras-chave: item, fecha, github, workflows, perimetro, yml, publicado, bloqueio, era, escopo, workflow, token, cli, humano, concedeu, apliquei, aprovação, assinada, pedir, assinatura, nova
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: retratada, confundi, aplicar, rigor, agata, registrar, canon, humano, pediu, tarefa, ajuste, desempenho, jogo, explicitamente, marcada, ele, fora, desenvolvimento, desde, início, utilize, padrão, sistema, ordem, registro, escrevi, entrada, inteira, steam, arquivo, envolvido, certa, era, método, verificar, afirmar, fabricar, propor, evidência, continua, escopo, escrever, histórico, projeto
 (425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo), registrada por ordem direta do Humano — não é desenvolvimento do Agata, mas ele pediu o padrão do sistema aplicado mesmo assim.** Tarefa: ajudar a tornar o Crimson Desert (Steam, GOverlay/MangoHud/lsfg-vk) jogável nesta Máquina. Nenhum arquivo tocado fica dentro de `~/agata` — sem objeto de quarentena P-8.
   palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo, registrada, ordem, direta, humano, desenvolvimento, agata, ele, pediu, padrão, sistema, aplicado, mesmo, assim, tarefa, ajudar, tornar, crimson, desert, steam, goverlay, mangohud, lsfg, jogável, máquina, arquivo, tocado, fica, dentro, objeto, quarentena
-(424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
-  palavras-chave: sync, pass, seth, truncou, evidência, nem, doutrina, linter, cobravam, terceira, auditoria, dia, padrão, manteve, cinco, defeitos, dela, auditados, quatro, vinham, instruções, minhas, incompletas, meu, próprio
+(424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e ne …
+  palavras-chave: sync, pass, seth, truncou, evidência
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de v …
   palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Orde …
