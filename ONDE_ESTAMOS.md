@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (452)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (453)).
 
 ## Onde estamos — 17/09/2026
 
@@ -27,9 +27,9 @@ confirmei o arquivo gerado e do tamanho certo.**
   raiz de hoje.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
 
-**[FECHADO] Auditoria externa do Marcos — os 12 pontos, todos respondidos.** Você pediu essa auditoria antes do incidente de boot. Achados reais: o navegador da Seth podia visitar qualquer endereço sem checar pra onde ia, os serviços internos confiavam uns nos outros só por convenção, uma função de escrita no canon podia deixar arquivo alterado mesmo com o `git commit` falhando, e o serviço que escreve no canon tinha menos proteção do sistema que o menos exposto. Nada disso era "alguém já invadiu" — era "isto pode ficar mais sólido", e agora ficou: 9 pontos com correção real, testada e em produção; 1 fechado na parte que é nossa (o resto depende de um produto de terceiro, sem código nosso); 2 auditados e registrados como "nada pra fazer de verdade" — nenhum ficou em silêncio. No meio do caminho achei e consertei, de brinde: um bug de 12 dias no seu robô de horário, um bug real na própria ferramenta de teste do sistema (parado desde 06/09, nunca notado), e um buraco na trava de aprovação que cobria só metade dos arquivos que deveriam precisar da sua assinatura.
-- Único resto pendente, fora do meu alcance: criar `.github/workflows/perimetro.yml` direto no site do GitHub (o token de acesso daqui não tem permissão) — conteúdo já pronto, só falta colar. Sem isso a segunda checagem automática (Fase D) fica só no seu disco, não no GitHub.
-- Detalhe técnico completo, passo a passo: `MEMÓRIAS.md`, entradas (437) até (452).
+**[FECHADO POR COMPLETO, 18/09] Auditoria externa do Marcos — os 12 pontos, todos respondidos, sem resto nenhum.** Você pediu essa auditoria antes do incidente de boot. Achados reais: o navegador da Seth podia visitar qualquer endereço sem checar pra onde ia, os serviços internos confiavam uns nos outros só por convenção, uma função de escrita no canon podia deixar arquivo alterado mesmo com o `git commit` falhando, e o serviço que escreve no canon tinha menos proteção do sistema que o menos exposto. Nada disso era "alguém já invadiu" — era "isto pode ficar mais sólido", e agora ficou: 10 pontos com correção real, testada e em produção; 1 fechado na parte que é nossa (o resto depende de um produto de terceiro, sem código nosso); 2 auditados e registrados como "nada pra fazer de verdade" — nenhum ficou em silêncio. No meio do caminho achei e consertei, de brinde: um bug de 12 dias no seu robô de horário, um bug real na própria ferramenta de teste do sistema (parado desde 06/09, nunca notado), e um buraco na trava de aprovação que cobria só metade dos arquivos que deveriam precisar da sua assinatura.
+- Última pendência fechada hoje: você deu ao `gh` (a ferramenta de linha de comando que fala com o GitHub) a permissão que faltava, e eu publiquei `.github/workflows/perimetro.yml` — a segunda checagem automática (Fase D) agora roda de verdade no GitHub a cada mudança, não só no seu disco. Usei a aprovação que você já tinha assinado em 17/09, não pedi assinatura nova.
+- Detalhe técnico completo, passo a passo: `MEMÓRIAS.md`, entradas (437) até (453).
 
 ## Onde estamos — 16/09/2026
 

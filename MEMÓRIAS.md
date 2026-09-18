@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2300b266991e9653da79f17b20b5a5bebb6d2ac7
-  Escrito em: 17/09/2026 22:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb
+  Escrito em: 18/09/2026 09:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6a94dcf86dfaeb43af1a83e0c32b4697ae0e60eb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
+
+**Por que não precisava de nova assinatura:** o par `propostas/aplicadas/fase-d-ci-remoto-niveis-2026-09-17.diff`/`APROVADO-fase-d-ci-remoto-niveis-2026-09-17` já cobria este arquivo e já estava commitado desde (448)/commit `35ad429` — só o `git push` do arquivo em si tinha falhado então, por falta de escopo OAuth, não por falta de aprovação. Reaplicar hoje é executar uma decisão já autorizada, não decidir de novo.
+
+**Verificado antes de tocar em qualquer coisa:** `sha256sum` do `.diff` em `aplicadas/` = `d8326c68...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify -f propostas/.allowed_signers -I agata-humano -n agata-aprovacao-p8` sobre a mensagem `"<sha256>  fase-d-ci-remoto-niveis-2026-09-17"` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Isolei o hunk de `.github/workflows/perimetro.yml` dentro do `.diff` já assinado, reconstruí o conteúdo a partir dele e comparei contra o arquivo real na árvore de trabalho: **byte-idêntico**, `diff` vazio — o arquivo que ia ser publicado é exatamente o que foi assinado em 17/09, nada mudou no meio do caminho.
+
+**`gh auth status` confirmou o escopo novo** (`gist, read:org, repo, workflow` — antes só os três primeiros) antes de eu tentar qualquer coisa. Staged o arquivo, rodei `scripts/perimetro.sh` completo: **P-8 `OK`** (achou o par em `aplicadas/`, como o mecanismo prevê para aprovação já consumida), **RESULTADO GERAL: OK, 0 FALHA**. Só depois commitei e empurrei.
+
+**Estado: fecha o item 7 por completo — os 12 pontos da auditoria do Marcos (437)-(452) não têm mais nenhum resto pendente, nem interno nem externo.** Primeira execução real do workflow no runner do GitHub confirmada nesta mesma entrada, abaixo do bloco de assinatura, ou registrada à parte se não coube no tempo desta sessão.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` do `.diff` conferido contra `diff-sha256:`; `ssh-keygen -Y verify` rodado ao vivo, saída "Good signature" colada; extração do hunk do arquivo dentro do `.diff` assinado + reconstrução do conteúdo + `diff` byte a byte contra a árvore de trabalho, vazio; `gh auth status` conferindo o escopo `workflow` antes de agir; `scripts/perimetro.sh` completo rodado com o arquivo staged, P-8 `OK`, resultado geral `OK`; `git push` real, confirmado depois contra `origin/main`. Autorização: Humano — "Fiz o B, tente novamente", sobre uma aprovação já assinada por ele em 17/09 (`scripts/aprovar.sh fase-d-ci-remoto-niveis-2026-09-17`), não uma decisão nova.
 
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
 

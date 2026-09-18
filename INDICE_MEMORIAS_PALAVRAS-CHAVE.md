@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
+  palavras-chave: item, fecha, github, workflows, perimetro, yml, publicado, bloqueio, era, escopo, workflow, token, cli, humano, concedeu, apliquei, aprovação, assinada, pedir, assinatura, nova
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
   palavras-chave: item, assinado, aplicado, pontos, auditoria, marcos, fecham, completo, scripts, perimetro, modular, partir, agora, modo, sombra, ativo
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo, registrada, ordem, direta, humano, desenvolvimento, agata, ele, pediu, padrão, sistema, aplicado, mesmo, assim, tarefa, ajudar, tornar, crimson, desert, steam, goverlay, mangohud, lsfg, jogável, máquina, arquivo, tocado, fica, dentro, objeto, quarentena
 (424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
   palavras-chave: sync, pass, seth, truncou, evidência, nem, doutrina, linter, cobravam, terceira, auditoria, dia, padrão, manteve, cinco, defeitos, dela, auditados, quatro, vinham, instruções, minhas, incompletas, meu, próprio
-(423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
-  palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder, verificar, mudar, ordem, humano, aplique, desenho, próprio, novo, serviço, verificador, nova, tool, mcp, maquina, lista, fechada, comandos, verificação, read, only
+(423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de v …
+  palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Orde …
   palavras-chave: auditamos, seth, culpado, era, sistema, orde
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou u …

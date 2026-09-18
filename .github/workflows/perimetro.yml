@@ -1,0 +1,37 @@
+# Segunda linha de enforcement independente -- item 7 do plano de mitigação
+# da auditoria do Marcos (MEMÓRIAS (437)). Até aqui, só o hook `pre-commit`
+# na Máquina do Humano revalidava um commit; nada revalidava DEPOIS do push,
+# fora dessa mesma Máquina. Roda a MESMA suíte adversarial dos controles
+# (scripts/testar_perimetro.sh) num runner do GitHub -- mecanismo que não
+# roda no computador do Humano, não pode ser desligado por engano junto com
+# um serviço local, e não compartilha nada do ambiente que gerou o commit.
+#
+# Escopo deliberado: só os controles nível L1 (clone/offline -- ver
+# scripts/testar_perimetro.sh, "niveis"). L2-L5 (systemd vivo, root, rede
+# real, HD de backup) não existem num runner efêmero -- não é lacuna
+# escondida, é a mesma fronteira que a própria suíte já declara há dias.
+name: Perímetro (segunda linha independente)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  suite-adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configura git (a suíte clona o próprio repo e comita nos testes)
+        run: |
+          git config --global user.email "ci@agata.local"
+          git config --global user.name "Agata CI"
+
+      - name: Suíte adversarial dos controles (nível L1 -- clone/offline)
+        run: bash scripts/testar_perimetro.sh
