@@ -56,7 +56,15 @@ _montar_clone() {
   # exatamente o falso verde que ela existe pra impedir.
   cp -a "$RAIZ/scripts/." "$CLONE/repo/scripts/" 2>/dev/null || true
   cp -a "$RAIZ/.githooks/." "$CLONE/repo/.githooks/" 2>/dev/null || true
-  ( cd "$CLONE/repo" && git -c user.email=teste@agata -c user.name=teste \
+  # `-am` só pega arquivo RASTREADO modificado -- um controle novo que
+  # introduza ARQUIVO NOVO (ex.: item 10 do plano de mitigacao da auditoria
+  # do Marcos, scripts/perimetro/*.sh) ficava untracked no clone, e o
+  # `git clean -fdx` de _reset() apagava esse diretorio novo antes do
+  # PRIMEIRO caso rodar -- toda a suite passava a testar um perimetro.sh
+  # (rastreado, sobrevive ao reset) que tentava `source` arquivos que já
+  # não existiam mais, silenciosamente sem funcao nenhuma das extraidas.
+  # Achado rodando esta suite de verdade contra o item 10, nao teorico.
+  ( cd "$CLONE/repo" && git add -A && git -c user.email=teste@agata -c user.name=teste \
       commit -q --no-verify -am "base da suite: arvore de trabalho" 2>/dev/null ) || true
 }
 _limpar_clone() { [ -n "$CLONE" ] && rm -rf "$CLONE"; CLONE=""; }
@@ -252,11 +260,25 @@ _caso P-5 PASSA "FALSO POSITIVO: entrada nova no topo (crescimento ordinario)" <
 _nova_entrada "(9999) DIARIO — 01/01/2026 · entrada legitima." && git add "MEMÓRIAS.md"
 EOF
 
+# Achado rodando esta suite de verdade (item 10 do plano de mitigacao da
+# auditoria do Marcos, MEMORIAS (437)/(450)): a versao original deste caso
+# apagava a linha 60 por INDICE FIXO. MEMORIAS.md cresce a cada sessao, e
+# entradas longas empurram o que "linha 60" significa -- na hora deste
+# achado, a linha 60 tinha virado uma linha EM BRANCO por coincidencia
+# (separador entre paragrafos de uma entrada), e apagar linha em branco
+# nao muda o conteudo de nenhuma entrada aos olhos do checador de
+# permutacao (verificar_migracao_periodo.py, que compara por ENTRADA, nao
+# por byte cru) -- vermelho falso virou VERDE FALSO, o mais caro dos dois.
+# Mesma classe de bug ja documentada abaixo (o caso do "primeiro DIARIO").
+# Corrigido: acha e apaga a PRIMEIRA linha NAO-BRANCA depois do marcador --
+# sempre conteudo de verdade, nunca refem do tamanho atual do arquivo.
 _caso P-5 PEGA "apagar uma linha de MEMORIAS" <<'EOF'
 python3 - <<'PY2'
 import io
 p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
-del L[60]
+i = next(k for k, l in enumerate(L) if "ENTRADAS-NOVAS:AQUI" in l)
+alvo = next(k for k in range(i+1, len(L)) if L[k].strip())
+del L[alvo]
 io.open(p,"w",encoding="utf-8").write("\n".join(L))
 PY2
 git add "MEMÓRIAS.md"

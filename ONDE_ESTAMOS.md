@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (451)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (452)).
 
 ## Onde estamos — 17/09/2026
 
@@ -27,21 +27,9 @@ confirmei o arquivo gerado e do tamanho certo.**
   raiz de hoje.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
 
-**Auditoria externa do Marcos, pedida por você antes do incidente — conferi cada achado checável na própria máquina.** Ele estava certo nos sete pontos que dão pra checar sem rodar nada ao vivo: o navegador da Seth pode visitar qualquer endereço sem checar pra onde vai (inclusive endereços internos do próprio sistema), o jeito como os serviços conversam entre si depende de convenção, não de trava técnica, uma função de escrita no canon pode deixar arquivo alterado mesmo quando o `git commit` falha, e dois dos serviços mais expostos da Seth têm menos proteção do sistema do que o menos exposto. Nada disso é "alguém já invadiu" — é "isto pode ser mais sólido". Você aprovou um plano de 5 fases pra fechar os 12 pontos do relatório, um `.diff` assinado por vez.
-
-**[Feito] Fase A assinada e aplicada** — fechou 4 dos 12 pontos. Detalhe: `MEMÓRIAS.md`, entradas (438)/(439).
-
-**[Feito] Fase B parte 1 assinada e aplicada** — hardening dos 10 serviços. Detalhe: `MEMÓRIAS.md`, entradas (440)/(441).
-
-**[Feito] Fase B parte 2 assinada e aplicada** — Fase B inteira fechada. Detalhe: `MEMÓRIAS.md`, entradas (442)/(443).
-
-**[Feito] Fase C assinada, aplicada e testada ao vivo em produção** — reiniciei o proxy real, confirmei que ele bloqueia quem não tem a senha, e a Seth respondeu de verdade (resposta real do modelo) através da cadeia inteira já protegida. Descoberta no caminho: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro; fechei a parte que é nossa e registrei o resto como pendência conhecida, não escondida. Detalhe: `MEMÓRIAS.md`, entradas (444)/(445)/(446).
-
-**[Quase feito] Fase D assinada e aplicada — falta 1 passo seu, fora do meu alcance.** Achei e fechei de brinde um buraco: a trava que exige sua assinatura pra mudança de comportamento não cobria arquivos do GitHub Actions. Só que na hora de empurrar, o GitHub recusou: o token de acesso não tem permissão pra criar arquivo de automação (`.github/workflows/`), e as duas vezes que você tentou renovar essa permissão não completaram. **Você precisa criar o arquivo `.github/workflows/perimetro.yml` direto no site do GitHub**, colando o conteúdo que já está pronto no seu computador em `.github/workflows/perimetro.yml` — depois disso um `git pull` reconcilia tudo. Sem esse passo, a segunda checagem automática (o ponto principal da Fase D) não existe de verdade ainda. Detalhe: `MEMÓRIAS.md`, entrada (448).
-
-**Fase E, dois dos três itens — conferidos, sem trabalho real neles.** O plano previa cortar texto duplicado das instruções da Seth e juntar 4 arquivos de política num só. Fui checar antes de mexer: as instruções da Seth nunca chegaram a repetir o que os consertos das Fases A-C fizeram (não tinha o que cortar), e juntar os 4 arquivos agora seria o tipo de mudança arriscada demais pro benefício — decisão de adiar, não esquecimento. Detalhe: `MEMÓRIAS.md`, entrada (449).
-
-**Último item — sua assinatura de agora há pouco ficou obsoleta antes de eu aplicar, preciso pedir de novo.** Antes de aplicar de verdade eu rodo os testes mais uma vez, sempre — foi isso que me salvou aqui: achei uma falha nova, investiguei, e não era do meu trabalho: é um bug real e antigo (desde 06/09), nunca notado, numa parte da própria suíte de testes que checa o histórico. Corrigi só a parte que precisava, testei tudo de novo (31/31), e o arquivo que você vai assinar mudou de conteúdo por causa disso — por isso preciso de uma assinatura nova, não a de antes. Arquivo: `propostas/fase-e-modularizar-perimetro-2026-09-17.diff` (conteúdo novo). Detalhe: `MEMÓRIAS.md`, entrada (451).
+**[FECHADO] Auditoria externa do Marcos — os 12 pontos, todos respondidos.** Você pediu essa auditoria antes do incidente de boot. Achados reais: o navegador da Seth podia visitar qualquer endereço sem checar pra onde ia, os serviços internos confiavam uns nos outros só por convenção, uma função de escrita no canon podia deixar arquivo alterado mesmo com o `git commit` falhando, e o serviço que escreve no canon tinha menos proteção do sistema que o menos exposto. Nada disso era "alguém já invadiu" — era "isto pode ficar mais sólido", e agora ficou: 9 pontos com correção real, testada e em produção; 1 fechado na parte que é nossa (o resto depende de um produto de terceiro, sem código nosso); 2 auditados e registrados como "nada pra fazer de verdade" — nenhum ficou em silêncio. No meio do caminho achei e consertei, de brinde: um bug de 12 dias no seu robô de horário, um bug real na própria ferramenta de teste do sistema (parado desde 06/09, nunca notado), e um buraco na trava de aprovação que cobria só metade dos arquivos que deveriam precisar da sua assinatura.
+- Único resto pendente, fora do meu alcance: criar `.github/workflows/perimetro.yml` direto no site do GitHub (o token de acesso daqui não tem permissão) — conteúdo já pronto, só falta colar. Sem isso a segunda checagem automática (Fase D) fica só no seu disco, não no GitHub.
+- Detalhe técnico completo, passo a passo: `MEMÓRIAS.md`, entradas (437) até (452).
 
 ## Onde estamos — 16/09/2026
 

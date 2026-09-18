@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo), registrada por ordem direta do Humano — não é desenvolvimento do Agata, mas ele pediu o padrão do sistema aplicado mesmo assim.** Tarefa: ajudar a tornar o Crimson Desert (Steam, GOverlay/MangoHud/lsfg-vk) jogável nesta Máquina. Nenhum arquivo tocado fica dentro de `~/agata` — sem objeto de quarentena P-8.
 (424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e nem a doutrina nem o linter cobravam.** Terceira auditoria da Seth no dia, e o padrão se manteve: dos cinco defeitos dela auditados em 10/09, **quatro vinham de instruções minhas incompletas** e um do meu próprio linter.
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de verificar sem o de mudar.** Ordem do Humano: *"aplique o desenho próprio"*. Novo serviço `seth_verificador` (`:20141`) e nova tool de MCP `maquina_verificar`: lista FECHADA de 9 comandos de verificação, sem shell, read-only.
-(422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
+(422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Orde …
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou u …
 (420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon recon …
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o qu …

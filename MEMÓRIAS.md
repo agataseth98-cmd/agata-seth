@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fb309d27a99351915f8fc212e438e755d091204e
-  Escrito em: 17/09/2026 22:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2300b266991e9653da79f17b20b5a5bebb6d2ac7
+  Escrito em: 17/09/2026 22:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2300b266991e9653da79f17b20b5a5bebb6d2ac7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
+
+**Assinatura verificada ao vivo antes de aplicar:** `sha256sum` do `.diff` = `ede01799...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`. Confirmado byte a byte que a árvore de trabalho batia com o `.diff` assinado — antes de qualquer coisa. `bash -n` limpo em todos os arquivos, suíte adversarial 31/31 rodada uma última vez, vault reconstruído a partir de `git archive HEAD`.
+
+**O que muda a partir deste commit:** `scripts/perimetro.sh` cai de 1429 para 384 linhas, vira runner puro. 14 controles (P-3,4,5,6,7,8,9,10,11,12,14,15,16,17) agora moram em `scripts/perimetro/p<NN>_<nome>.sh`. `scripts/perimetro-sombra-referencia.sh` guarda o monolito de antes, congelado, só para o modo sombra — cada commit, a partir de agora, roda os dois em paralelo, e só loga se divergirem (`~/.cache/agata/perimetro-sombra.log`), sem a referência decidir nada.
+
+**Fecha o pacote inteiro da auditoria do Marcos** (MEMÓRIAS (437)): itens 1,2,4,5,6,7,8,9,10 com correção real testada e aplicada; item 3 fechado na parte que é do Agata (residual do OmniRoute, terceiro, declarado); itens 11 e 12 auditados e registrados sem material de ação real. Nenhum dos 12 ficou sem resposta — alguns com código, alguns com "verificado, nada a fazer", nenhum com silêncio.
+
+**Próximo passo, fora desta entrada:** observar o log de sombra por um período antes de remover `scripts/perimetro-sombra-referencia.sh` — decisão do Humano, quando ele achar que já é suficiente.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo; `diff` entre o `.diff` assinado e o `git diff` real da árvore de trabalho, saída vazia; `bash -n` em todos os arquivos tocados; `testar_perimetro.sh` 31/31 rodado imediatamente antes do commit. Autorização: Humano — assinou via `scripts/aprovar.sh fase-e-modularizar-perimetro-2026-09-17` pela segunda vez, sobre o `.diff` corrigido, "feito, Ágata.".
 
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
 
