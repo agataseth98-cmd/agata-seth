@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43b870af398cf9ab18bba7a3422c7f276c75aec1
-  Escrito em: 18/09/2026 12:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9579ee32de070d65110471224b82f9fbe6f84d9b
+  Escrito em: 18/09/2026 12:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(458) DIÁRIO — 18/09/2026 · **Achado real, meu, no próprio commit anterior: o passo que atualiza a âncora de SHA faz `git add` do arquivo INTEIRO, não só das linhas da âncora — e varreu, sem eu querer, um texto do PROJETO.md descrevendo uma automação que ainda não foi assinada. O canon empurrado em (457) afirma algo falso agora. Corrigindo, e nomeando o buraco de P-8 que isso expõe.**
+
+**O que aconteceu, mecânico:** ao preparar a proposta `automatiza-export-drive-2026-09-18`, editei `.githooks/post-commit` E `PROJETO.md` juntos, gerei o `.diff` combinado, e depois — corretamente — tirei os dois do staging (`git reset`) pra não commitar sem assinatura. Mas deixei o texto do PROJETO.md **modificado na árvore de trabalho**, sem stage, junto da entrada de MEMÓRIAS (457) que eu ia commitar. `.githooks/pre-commit` roda, pra QUALQUER commit, `atualizar_ancora_prompt.py` nos três canônicos e faz `git add "$_canon"` depois — sem essa linha discriminar "só a âncora" de "o arquivo inteiro". O `git add` pegou a árvore de trabalho como estava, texto pendente incluso, e commitou tudo em (457), publicado no remoto antes de eu notar.
+
+**Segundo achado, ao testar a correção do primeiro:** o `.githooks/post-commit` que eu tinha proposto (mas nunca comitado) TAMBÉM já estava rodando de verdade nesse mesmo commit — porque hooks executam o que está no DISCO, não o que está staged ou aprovado. O envio automático ao Drive que a entrada (457) descreve como "testado, não aplicado" **rodou de verdade**, uma vez, antes de eu perceber e reverter o arquivo pro estado commitado (`git checkout HEAD -- .githooks/post-commit`).
+
+**Os dois achados juntos apontam pro mesmo buraco: P-8 protege o que entra STAGED explicitamente, mas não protege contra (a) `git add` automático de terceiros dentro dos próprios hooks, nem (b) execução de hook a partir do disco antes de qualquer commit/aprovação.** Nenhum dos dois é malícia — os dois são efeito colateral de mecanismo já existente (a âncora fail-soft, documentada desde (277); a natureza de hooks git, universal) encontrando uma situação nova (proposta com dois arquivos, um deles ficando pendente sem stage). Registrado como achado real, não escondido — a Doutrina de defesa proporcional (PROJETO.md) pede fechar a CLASSE, não só o caso; `lacuna`: se vale um controle novo pra isso (ex: um P-19 que confira, no fim do commit, que nenhum canônico ganhou linha fora do que o autor pretendia) é decisão do Humano, não coisa que decido sozinho.
+
+**Corrigido nesta entrada:** revertida a frase falsa em PROJETO.md ("automático desde 18/09/2026") — o upload continua manual até a proposta ser assinada de verdade. `.githooks/post-commit` já estava revertido (checkout de HEAD) antes desta entrada. `.diff` da correção isolado e versionado, não commitado direto — mesma disciplina P-8, mesmo depois de um erro real: correção de texto em PROJETO.md TAMBÉM precisa de assinatura, o mecanismo não abre exceção pra "é só corrigir uma mentira que eu mesmo causei".
+
+**Estado: `propostas/corrige-projeto-drive-nao-automatico-2026-09-18.diff` pronto, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh corrige-projeto-drive-nao-automatico-2026-09-18`. Até lá, PROJETO.md no remoto (`9579ee3`) contém a frase falsa — registrado aqui pra quem ler antes da correção entrar.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git show 9579ee3 -- PROJETO.md` lido, confirmando a frase falsa dentro do commit real e pushed; leitura de `.githooks/pre-commit` confirmando o `git add "$_canon"` sem escopo restrito à âncora; reprodução real do efeito (a frase entrou sem eu tê-la staged); `git checkout HEAD -- .githooks/post-commit` e verificação byte a byte contra `git show HEAD:.githooks/post-commit` confirmando a reversão; `.diff` da correção gerado a partir do `git diff` real antes de reverter o arquivo, não reescrito de memória. Autorização: Humano — achado e correção são iniciativa própria, dentro do que a honestidade sobre erro real exige (REGRAS, Regra 2/NÃO MINTA) — nenhuma parte disto foi pedida, e nada foi commitado sem passar pela quarentena, incluindo a correção do próprio erro.
 
 (457) DIÁRIO — 18/09/2026 · **Coerência canon/Drive/Obsidian verificada; achado real (`indice_export.md` 155 entradas atrás do canon, defasado desde 28/08) corrigido; automação do upload pro Drive desenhada, testada e proposta — não aplicada sozinha.**
 

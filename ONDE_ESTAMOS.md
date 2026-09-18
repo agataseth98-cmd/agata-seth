@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (457)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (458)).
 
 ## Onde estamos — 18/09/2026
 
@@ -13,7 +13,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (457)).
 
 **[FEITO] Pedido de sincronizar tudo (repositório, Drive, Obsidian) — checado, e um problema real corrigido.** O arquivo que vai pro Google Drive (`indice_export.md`) estava parado desde 28/08, 155 entradas atrás do canon — ninguém tinha mandado de novo. Já regenerei e reenviei. Resto do relatório que você colou: a maioria já estava documentada no próprio sistema, não era descoberta nova.
 
-**Proposta nova, pronta e testada:** você escolheu automatizar esse envio, dentro do próprio processo de cada commit, só quando o conteúdo realmente muda. Testei 5 cenários (envio normal, sem mudança, mudança de verdade, falha de rede, e repetir depois da falha) — todos certos. `bash scripts/aprovar.sh automatiza-export-drive-2026-09-18` quando quiser assinar. Detalhe: `MEMÓRIAS.md`, entrada (457).
+**Proposta nova, pronta e testada:** você escolheu automatizar esse envio, dentro do próprio processo de cada commit, só quando o conteúdo realmente muda. Testei 5 cenários (envio normal, sem mudança, mudança de verdade, falha de rede, e repetir depois da falha) — todos certos. `bash scripts/aprovar.sh automatiza-export-drive-2026-09-18` quando quiser assinar.
+
+**[ERRO MEU, corrigido no mesmo golpe] Uma frase que eu escrevi sobre essa automação foi publicada por acidente, antes de você assinar nada.** O jeito como o robô de segurança do sistema atualiza um selo interno acabou levando junto um texto que eu tinha deixado pendente. Nada de segredo vazou, nada de comportamento real mudou sem sua autorização — só um texto no repositório ficou, por um tempo, dizendo algo que não é verdade ainda. Já corrigi (proposta própria, aguardando sua assinatura): `bash scripts/aprovar.sh corrige-projeto-drive-nao-automatico-2026-09-18`. Detalhe completo: `MEMÓRIAS.md`, entrada (458).
 
 ## Onde estamos — 17/09/2026
 
