@@ -4,7 +4,7 @@
 # mesma lógica de padrões do script real, aplicada ao diff que cada commit
 # introduziu (git show), não ao staged atual.
 set -uo pipefail
-cd "$(git rev-parse --show-toplevel)"
+cd "$(git rev-parse --show-toplevel)" || exit 1
 
 PADROES=(
   'AKIA[0-9A-Z]{16}'

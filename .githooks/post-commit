@@ -10,7 +10,7 @@
 # point-in-time verificado. Isto só reduz o quanto elas precisam alcançar
 # quando alguém lembrar de fazer uma.
 set -uo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || { echo "post-commit: AVISO — não consegui entrar na raiz do repo; backup e vault pulados neste commit." >&2; exit 0; }
 
 STAGING="$HOME/.agata-backup-staging"
 mkdir -p "$STAGING"

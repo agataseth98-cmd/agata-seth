@@ -13,7 +13,7 @@
 # pacote (https://conduit.productionready.io/api, confirmada por grep
 # direto no pacote JS).
 set -uo pipefail
-cd "$(git rev-parse --show-toplevel)"
+cd "$(git rev-parse --show-toplevel)" || exit 1
 SCRIPT="scripts/ler_pagina.sh"
 FALHAS=0
 

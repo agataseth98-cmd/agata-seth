@@ -37,6 +37,7 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
       git add PROMPT_CARREGAMENTO.md
     else
       echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em PROMPT_CARREGAMENTO.md" >&2
+      echo "$(date -Iseconds) PROMPT_CARREGAMENTO.md $HEAD_ANTERIOR" >> "$(git rev-parse --git-dir)/AGATA_ANCORA_AVISOS.log"
     fi
     # Âncora de SHA também no PREÂMBULO de REGRAS/PROJETO/MEMÓRIAS (MEMÓRIAS
     # (378), resolução do B5): um leitor offline compara o SHA entre os três
@@ -49,6 +50,7 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
         git add "$_canon"
       else
         echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em $_canon" >&2
+        echo "$(date -Iseconds) $_canon $HEAD_ANTERIOR" >> "$(git rev-parse --git-dir)/AGATA_ANCORA_AVISOS.log"
       fi
     done
   fi
