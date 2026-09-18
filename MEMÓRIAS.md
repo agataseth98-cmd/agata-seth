@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35ad42996559b938dd4ffafe9fbb6177bd09002f
-  Escrito em: 17/09/2026 21:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 751c0b0b93776f3aa0aa08e0ade68b5bc671361c
+  Escrito em: 17/09/2026 21:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
+
+**Segunda opinião pedida** (`scripts/conselho_remoto.py`, REGRAS "Segunda opinião — pedido e parecer"): âncora em (449)/`sha256` de `REGRAS.md` e `scripts/perimetro.sh`. Escolhido `gemini/gemini-2.5-flash` na rotação (cerebras e huggingface em cooldown/sem credencial). **Posição: Condicional.** Aprovou o escopo total (13 controles extraídos de uma vez, não um recorte de 3-4) condicionado à execução rigorosa de três camadas de validação, e propôs um desenho concreto de modo sombra. Registro cru: `memoria/missoes/conselho-remoto/20260917-211401-gemini-2.5-flash.json`.
+
+**O que foi extraído:** 14 controles que viviam como funções inline em `scripts/perimetro.sh` (P-3,4,5,6,7,8,9,10,11,12,14,15,16,17 — P-1/P-13 já tinham arquivo próprio) foram movidos, corte-e-cola, pro corpo idêntico, para `scripts/perimetro/p<NN>_<nome>.sh`. `perimetro.sh` cai de 1429 para 384 linhas — vira runner: source + orquestração + veredito. Nenhum contrato de saída mudou; a unificação num formato comum (`control`/`status`/`evidence`/`reason`/`remediation`, sugerida pela auditoria original) fica pra uma rodada futura, separada de propósito — misturar "mover arquivo" com "redesenhar contrato" no mesmo commit era exatamente o risco que a segunda opinião pediu pra evitar.
+
+**As três camadas de validação, mais as três que a segunda opinião acrescentou — todas cumpridas:**
+1. **Sintaxe e sourcing isolado:** `bash -n` limpo nos 14 arquivos + no runner novo; os 14 sourceados juntos num shell só, zero função duplicada.
+2. **Saída idêntica contra o estado real:** `perimetro.sh` original vs modular, mesmo repositório, mesmo momento — `diff` vazio, exit code igual.
+3. **Suíte adversarial completa:** `testar_perimetro.sh`, 31 casos. **Primeira rodada: 17 falhas** — achado real, não do código extraído: a própria suíte usa `git commit -am` pra fixar sua árvore de teste, e `-am` não pega arquivo NOVO (untracked) — o diretório `scripts/perimetro/` inteiro, recém-criado, sumia no primeiro `git clean -fdx` de cada caso, e o `perimetro.sh` modular ficava tentando `source` arquivos que já não existiam. **Corrigido** (`git add -A` antes do commit de base) — bug real da suíte, não do item 10, mas só apareceu testando o item 10 de verdade. Depois do conserto: **31/31, 0 falhas**.
+4. **Comparação histórica:** contra os 2 commits recentes onde `scripts/perimetro.sh` é byte-idêntico ao `HEAD` atual, saída idêntica. Commits mais antigos (antes do manifesto de portas do item 9 existir) divergiam no P-4 — não é regressão: é comparar o código extraído do `HEAD` de hoje contra árvores de arquivo de antes da feature existir, artefato do método de teste, não bug, explicado e descartado depois de entendido.
+5. **Desempenho:** 5 rodadas de cada versão, tempo total 7,49s (monolítico) vs 7,32s (modular) — sem regressão.
+6. **Variável global/escopo implícito:** coberto pela combinação dos itens 2 e 3 (qualquer vazamento de escopo entre os 14 arquivos teria aparecido como divergência em pelo menos um dos 31 casos ou no estado real; nenhuma apareceu) — não rodado como trace `bash -x` separado, decisão registrada, não escondida.
+
+**Modo sombra, desenho da segunda opinião, adaptado às convenções do projeto:** `scripts/perimetro-sombra-referencia.sh` é o monolito congelado de antes da extração. O `perimetro.sh` modular **decide** (seu exit code é o que o hook usa de verdade); ao terminar, roda a referência congelada em paralelo, só pra log — `~/.cache/agata/perimetro-sombra.log`, escrito só quando os dois exit codes divergem. Testado nos dois sentidos: rodada real sem divergência → sem log criado; divergência forçada de propósito (uma função temporariamente quebrada) → log criado, exit code do MODULAR prevalecendo (testado: `exit=1`, o forçado, não o da referência). Desligado dentro da própria suíte (`AGATA_TESTE_PERIMETRO`) pra não dobrar o tempo de cada um dos 31 casos. Remoção do arquivo de referência desliga o modo sombra sozinho, sem tocar em mais nada — fica pra uma entrada futura, depois de um período de observação real.
+
+**Estado: `.diff` pronto e versionado em `propostas/fase-e-modularizar-perimetro-2026-09-17.diff` (3959 linhas, a maior parte é o monolito congelado da referência sombra), aguardando `bash scripts/aprovar.sh fase-e-modularizar-perimetro-2026-09-17`. Fecha o item 10 — o último dos 12 pontos do Marcos com ação pendente.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `scripts/conselho_remoto.py` rodado ao vivo, JSON cru salvo; extração feita por script Python próprio com verificação de não-sobreposição de faixas antes de escrever qualquer arquivo; `bash -n` em cada um dos 14 arquivos + runner + referência sombra; teste de sourcing isolado (script bash dedicado); comparação de saída byte a byte (real e histórica, 2+13 commits); `testar_perimetro.sh` rodado 2 vezes (17 falhas → achado e corrigido → 31/31); medição de tempo com `time` real, 5 rodadas cada versão; modo sombra testado nos dois sentidos (sem e com divergência forçada); `git apply --check` e `git apply` reais do `.diff` final, num clone descartável, com `testar_perimetro.sh` e `perimetro.sh` rodados de novo depois de aplicado. Autorização: Humano — escolheu explicitamente "segunda opinião + modo sombra" entre 3 opções oferecidas.
 
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
 

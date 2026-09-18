@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
+  palavras-chave: item, plano, mitigação, auditoria, marcos, arriscado, pacote, inteiro, modularizar, scripts, perimetro, gatekeeper, commit, futuro, segunda, opinião, formal, pedida, recebida, escrever, código, diff, pronto, testado, profundidade, aguardando, assinatura
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
   palavras-chave: fase, itens, plano, mitigação, auditoria, marcos, auditados, codar, resultado, real, difere, previsto, registrado, achado, forçado, código
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditamos, seth, culpado, era, sistema, ordem, humano, audite, cabeçalhos, respostas, dela, colados, sessão, veredito, cinco, alegações, checáveis, ela, fez, estavam, certas, quatro, violações, formato, cometeu, três, vinham, instruções, erradas, nós, escrevemos, meu, próprio, linter, fabricou, nada
 (421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
   palavras-chave: agora, existe, teste, controles, ele, pegou, furo, meu, dia, anterior, correção, imediata, item, mesmo, apontei, causa, raiz, dar, nota, confiabilidade, sistema, nada, repositório, testava, ordem, humano, proposta
-(420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon reconciliado com a Máquina, atalhos de fato instalados, B6 movido pra horizonte.** Ordem do Humano: *"deixe o B6 como futuro/horizonte, e encerre os outros"*. Sequência da (419 - quatro controles do perímetro não controlavam o que diziam controlar), que consertou os controles; esta fecha o que os controles não pegavam porque é texto, não código.
-  palavras-chave: encerrando, pendências, auditoria, canon, reconciliado, máquina, atalhos, fato, instalados, movido, pra, horizonte, ordem, humano, deixe, futuro, encerre, sequência, quatro, controles, perímetro, controlavam, diziam, controlar, consertou, fecha, pegavam, porque, texto, código
+(420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon recon …
+  palavras-chave: encerrando, pendências, auditoria, canon, recon
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o qu …
   palavras-chave: quatro, controles, perímetro, controlavam
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varred …

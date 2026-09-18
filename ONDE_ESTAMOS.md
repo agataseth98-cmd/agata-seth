@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (449)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (450)).
 
 ## Onde estamos — 17/09/2026
 
@@ -39,7 +39,9 @@ confirmei o arquivo gerado e do tamanho certo.**
 
 **[Quase feito] Fase D assinada e aplicada — falta 1 passo seu, fora do meu alcance.** Achei e fechei de brinde um buraco: a trava que exige sua assinatura pra mudança de comportamento não cobria arquivos do GitHub Actions. Só que na hora de empurrar, o GitHub recusou: o token de acesso não tem permissão pra criar arquivo de automação (`.github/workflows/`), e as duas vezes que você tentou renovar essa permissão não completaram. **Você precisa criar o arquivo `.github/workflows/perimetro.yml` direto no site do GitHub**, colando o conteúdo que já está pronto no seu computador em `.github/workflows/perimetro.yml` — depois disso um `git pull` reconcilia tudo. Sem esse passo, a segunda checagem automática (o ponto principal da Fase D) não existe de verdade ainda. Detalhe: `MEMÓRIAS.md`, entrada (448).
 
-**Fase E, dois dos três itens — conferidos, sem trabalho real neles.** O plano previa cortar texto duplicado das instruções da Seth e juntar 4 arquivos de política num só. Fui checar antes de mexer: as instruções da Seth nunca chegaram a repetir o que os consertos das Fases A-C fizeram (não tinha o que cortar), e juntar os 4 arquivos agora seria o tipo de mudança arriscada demais pro benefício — decisão de adiar, não esquecimento. Detalhe: `MEMÓRIAS.md`, entrada (449). Só falta o item mais arriscado de todos.
+**Fase E, dois dos três itens — conferidos, sem trabalho real neles.** O plano previa cortar texto duplicado das instruções da Seth e juntar 4 arquivos de política num só. Fui checar antes de mexer: as instruções da Seth nunca chegaram a repetir o que os consertos das Fases A-C fizeram (não tinha o que cortar), e juntar os 4 arquivos agora seria o tipo de mudança arriscada demais pro benefício — decisão de adiar, não esquecimento. Detalhe: `MEMÓRIAS.md`, entrada (449).
+
+**Último item, o mais arriscado — pronto, testado a fundo, esperando sua assinatura.** Você escolheu o caminho mais cauteloso (segunda opinião + modo sombra) e foi isso que eu fiz: pedi um parecer externo antes de escrever qualquer código, e ele concordou com condições — cumpri todas. Dividi o script gigante que trava todo commit em 14 pedacinhos, sem mudar o que cada um faz, só onde ele mora. Na primeira rodada de teste achei e consertei um bug real na própria ferramenta de teste (não no que eu tinha feito). No fim: mesma saída, mesma velocidade, 31 testes automáticos passando, e um mecanismo novo que compara a versão nova com a antiga por um tempo e avisa se divergirem — testei isso também, forçando uma divergência de propósito pra confirmar que o aviso funciona. Arquivo: `propostas/fase-e-modularizar-perimetro-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (450).
 
 ## Onde estamos — 16/09/2026
 
