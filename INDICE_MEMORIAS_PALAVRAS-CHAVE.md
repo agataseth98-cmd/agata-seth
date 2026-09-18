@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
+  palavras-chave: diff, externo, auditado, benéfico, citação, fabricada, corrigida, propor, pronto, testado, fundo, aguardando, assinatura
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
   palavras-chave: primeira, execução, real, workflow, runner, github, confirmada, deixou, aberto
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: nova, missão, memoria, missoes, claude, code, existência, entra, aqui, conteúdo, fica, camada, privada, regra, própria, indice, pedido, humano, tornar, minhas, interações, acumuladas, ele, hoje, sistema, próprio, harness, fora, agata, projects, home, orusoua, memory, acessíveis, banco, dados, dentro, regras, pesquisável, modelo, acesso, máquina, mim
 (426) DIÁRIO — 15/09/2026 · **(425) retratada — confundi "aplicar o rigor do Agata" com "registrar no canon do Agata".** O Humano pediu, na tarefa de ajuste de desempenho de um jogo (explicitamente marcada por ele como fora do desenvolvimento do Agata desde o início): *"utilize o padrão do sistema agata nesta tarefa"*. Li isso como ordem de registro e escrevi (425) — uma entrada inteira sobre um jogo Steam, sem nenhum arquivo de `~/agata` envolvido. Ordem certa era outra: aplicar o MÉTODO (verificar antes de afirmar, não fabricar, propor com evidência) a uma tarefa que continua fora do escopo do canon, não escrever essa tarefa no histórico do projeto.
   palavras-chave: retratada, confundi, aplicar, rigor, agata, registrar, canon, humano, pediu, tarefa, ajuste, desempenho, jogo, explicitamente, marcada, ele, fora, desenvolvimento, desde, início, utilize, padrão, sistema, ordem, registro, escrevi, entrada, inteira, steam, arquivo, envolvido, certa, era, método, verificar, afirmar, fabricar, propor, evidência, continua, escopo, escrever, histórico, projeto
-(425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo), registrada por ordem direta do Humano — não é desenvolvimento do Agata, mas ele pediu o padrão do sistema aplicado mesmo assim.** Tarefa: ajudar a tornar o Crimson Desert (Steam, GOverlay/MangoHud/lsfg-vk) jogável nesta Máquina. Nenhum arquivo tocado fica dentro de `~/agata` — sem objeto de quarentena P-8.
-  palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo, registrada, ordem, direta, humano, desenvolvimento, agata, ele, pediu, padrão, sistema, aplicado, mesmo, assim, tarefa, ajudar, tornar, crimson, desert, steam, goverlay, mangohud, lsfg, jogável, máquina, arquivo, tocado, fica, dentro, objeto, quarentena
+(425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo …
+  palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo
 (424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e ne …
   palavras-chave: sync, pass, seth, truncou, evidência
 (423) DIÁRIO — 10/09/2026 · **A Seth pediu shell arbitrário; ganhou o poder de v …

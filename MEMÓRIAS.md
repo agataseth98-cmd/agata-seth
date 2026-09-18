@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e4da551e94bfae0eb0b2695ffc045bba90d375c6
-  Escrito em: 18/09/2026 09:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7eff231de30734a430422c50e13a3c778beb5a8a
+  Escrito em: 18/09/2026 11:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4da551e94bfae0eb0b2695ffc045bba90d375c6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7eff231de30734a430422c50e13a3c778beb5a8a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7eff231de30734a430422c50e13a3c778beb5a8a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7eff231de30734a430422c50e13a3c778beb5a8a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
+
+**Origem:** o Humano colou um `diff --git` pronto (não escrito por mim), pedindo auditoria e implementação se benéfico — tratado como DADO até eu verificar, não como patch confiável de origem própria (REGRAS, Regra 2).
+
+**O que o diff faz, em duas frentes:**
+1. **Guarda de `cd` contra diretório errado silencioso** em `.githooks/post-commit`, `.githooks/pre-commit` (indireto, via log novo), `scripts/perimetro.sh` (`main()`), `scripts/testar_ler_pagina.sh`, `scripts/testar_varredura_20_commits.sh` — se `cd` falhar, aborta com mensagem clara em vez de continuar rodando no diretório que sobrou. Testado de propósito: `perimetro.sh` rodado de fora de qualquer repositório git — abortou com `exit=1` e a mensagem certa, não tentou rodar os 14 controles no lugar errado.
+2. **P-18, controle novo, AVISO SÓ (nunca falha):** mecaniza um detector que antes só existia como instrução textual — compara `$(git rev-parse --git-dir)/AGATA_ANCORA_AVISOS.log` (novo, escrito pelo `pre-commit` toda vez que a âncora de SHA falha fail-soft) contra `HEAD`, e avisa se a defasagem passar de 1 commit sem ser corrigida.
+
+**Achado da auditoria, corrigido antes de propor:** o diff citava, duas vezes, `"achado na auditoria de dívida técnica, tech-debt #2"` — `grep` em MEMÓRIAS.md, PROJETO.md, PROJETO_REFERENCIA.md, `propostas/` e `extras/` não achou essa fonte em lugar nenhum. Citação sem fonte verificável não entra no canon (Regra 2, catálogo de falhas). A fonte REAL do mesmo gap já existe e é melhor: **MEMÓRIAS (277)**, que registra exatamente esse fail-soft e o detector textual que ele propôs ("campo 'Escrito em:' comparado com a hora medida na sessão") — nunca mecanizado até agora. Corrigi as duas citações para (277) antes de escrever a proposta; a versão com a citação fabricada nunca foi commitada.
+
+**Testado, em camadas:** `bash -n` limpo nos 6 arquivos; `git apply --check` limpo contra `HEAD` real; `p18_ancora_falha()` testada isolada contra 6 casos (sem log, âncora em dia, defasagem de 1 commit/normal, defasagem de 3/alarme, linha malformada, duas linhas no log) — todos batendo o esperado; comparação A/B num clone descartável, ANTES e DEPOIS do diff, mesmo HEAD: 0 FALHA nos dois, só +1 OK (o P-18 novo) — zero regressão real, confirmado sem o falso positivo de P-10 que apareceu numa tentativa anterior (causa: eu mesmo regenerando o vault fora de ordem no clone de teste, não o diff — descartado depois de entendido); `testar_perimetro.sh`, 31/31, 0 falha, no repositório real depois da correção da citação.
+
+**Estado: `.diff` (já com a citação corrigida) pronto e versionado em `propostas/p18-ancora-falha-2026-09-18.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh p18-ancora-falha-2026-09-18`. Confirmado que P-8 reprova o staged agora (`SUSPEITO`, sem assinatura) — quarentena funcionando, não contornada.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `grep` das 3 fontes citáveis + `propostas/`/`extras/` confirmando ausência da citação original; `grep` confirmando (277) real e seu conteúdo batendo o gap descrito; `bash -n` nos 6 arquivos; `git apply --check` num clone descartável e no repositório real; teste isolado de `p18_ancora_falha()` com 6 casos, saída lida linha a linha; reprodução real do `cd` falhando (rodado de `/tmp`, fora de qualquer repo) confirmando a guarda de `perimetro.sh`; comparação A/B em clone limpo (antes/depois do diff, mesmo HEAD); `testar_perimetro.sh` 31/31 no repositório real após a correção; `perimetro.sh` rodado com tudo staged, confirmando P-8 `SUSPEITO` (sem assinatura) — a quarentena não foi contornada em nenhum momento. Autorização: Humano — "Audite e se for benéfico para o Agata implemente"; implementação = trabalho na árvore + proposta versionada, nunca commit direto (Regra 3, executor não assina P-8).
 
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
 
