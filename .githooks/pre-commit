@@ -44,6 +44,28 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
     # -- divergiu, a cópia veio de commits diferentes (canal serviu um velho
     # e um novo). O bloco fica ACIMA do marcador ENTRADAS-NOVAS em MEMÓRIAS.md,
     # que o P-5 não policia (só o corpo de entradas). Mesma regra fail-soft.
+    #
+    # Guarda de integridade (achado real, MEMÓRIAS (458)): o `git add "$_canon"`
+    # abaixo estagia o ARQUIVO INTEIRO, não só as linhas da âncora -- se houver
+    # edição pendente sem stage nesse arquivo (ex: uma proposta ainda não
+    # assinada, deixada na árvore de trabalho), ela entra no commit sem o
+    # autor ter mandado `git add` nela. Não dá pra virar controle de
+    # perimetro.sh (P-N): perimetro.sh já rodou e passou, linha 9 acima,
+    # ANTES deste laço -- um controle lá nunca veria a varredura acontecer.
+    # Por isso mora aqui: snapshot do STAGED (index) de cada canônico, SEM o
+    # bloco da âncora, antes do laço; comparado depois. Qualquer diferença
+    # fora da âncora só pode ter vindo do `git add` do laço, nunca de um
+    # `git add` explícito do autor -- bloqueia o commit, desfaz o stage
+    # indevido, e diz exatamente o que fazer.
+    _sem_ancora() {
+      awk '/<!-- ANCORA-SHA:INICIO/{s=1} !s{print} /<!-- ANCORA-SHA:FIM -->/{s=0}'
+    }
+    declare -A _ANCORA_ANTES
+    for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
+      [ -f "$_canon" ] || continue
+      _ANCORA_ANTES["$_canon"]="$(git show ":$_canon" 2>/dev/null | _sem_ancora | sha256sum)"
+    done
+
     for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
       [ -f "$_canon" ] || continue
       if python3 scripts/atualizar_ancora_prompt.py "$_canon" "$HEAD_ANTERIOR" "$AGORA"; then
@@ -51,6 +73,18 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
       else
         echo "pre-commit: AVISO -- não consegui atualizar a âncora de SHA em $_canon" >&2
         echo "$(date -Iseconds) $_canon $HEAD_ANTERIOR" >> "$(git rev-parse --git-dir)/AGATA_ANCORA_AVISOS.log"
+      fi
+    done
+
+    for _canon in REGRAS.md PROJETO.md MEMÓRIAS.md; do
+      [ -f "$_canon" ] || continue
+      [ -n "${_ANCORA_ANTES[$_canon]:-}" ] || continue
+      _ancora_depois="$(git show ":$_canon" 2>/dev/null | _sem_ancora | sha256sum)"
+      if [ "$_ancora_depois" != "${_ANCORA_ANTES[$_canon]}" ]; then
+        git reset -q -- "$_canon" 2>/dev/null || true
+        echo "pre-commit: FALHA -- '$_canon' staged ganhou conteúdo fora da âncora de SHA que você não tinha mandado 'git add' -- provavelmente uma edição pendente na árvore de trabalho (proposta ainda não assinada?) foi varrida pelo passo da âncora." >&2
+        echo "pre-commit: desfiz o stage de '$_canon'. Rode 'git diff -- \"$_canon\"' pra ver o que sobrou pendente, decida se entra (stage explícito) ou fica de fora, e commite de novo." >&2
+        exit 1
       fi
     done
   fi
