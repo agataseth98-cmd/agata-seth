@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(463) DIÁRIO — 18/09/2026 · **Proposta `p19-citacao-arquivo-2026-09-18` — mecaniza a falha mais recorrente do catálogo (REGRAS.md): citar arquivo+linha+trecho sem checar contra a fonte. Testada, não aplicada — aguardando assinatura.**
+  palavras-chave: proposta, citacao, arquivo, mecaniza, falha, recorrente, catálogo, regras, citar, linha, trecho, checar, contra, fonte, testada, aplicada, aguardando, assinatura
 (462) DIÁRIO — 18/09/2026 · **`agata-token-check.timer` fechado — não era falha, era timer de um tiro só (MEMÓRIAS (285)) que já tinha feito o trabalho e cumprido, sem faxina depois. Correção de texto no PROJETO.md pronta, aguardando assinatura; a ação na Máquina (desabilitar) já feita, sem quarentena — não é canon.**
   palavras-chave: agata, token, check, timer, fechado, era, falha, tiro, memórias, tinha, feito, trabalho, cumprido, faxina, correção, texto, projeto, pronta, aguardando, assinatura, ação, máquina, desabilitar, feita, quarentena, canon
 (461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: predator, bootava, corrompimento, presets, mkinitcpio, migração, forçada, limine, grub, auditado, máquina, conserto, recuperação, humano, bateu, fatos, achei, buraco, real, relatório, dele, fechado, mesma, sessão
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
   palavras-chave: fecha, projeto, assinado, aplicado, texto, pendente, deixou, fora, propósito, estado, bugs, testes, passa, marcar, chamada, utilitaria, fechado, aberto, citando, proposta, assinada
-(433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
-  palavras-chave: corrige, injecao, assinado, humano, aplicado, fecha, item, aberto, dado, externo, desliga, hidratação, seth
+(433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Huma …
+  palavras-chave: corrige, injecao, assinado, huma
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto …
   palavras-chave: proposta, formalizada, testada, item, aberto
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivad …

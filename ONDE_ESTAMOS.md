@@ -5,11 +5,14 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (462)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 18/09/2026
 
-**[APLICADO] O pacote assinado hoje já está no ar — os quatro itens juntos.** Sincronizei tudo (repositório, Drive, Obsidian); o `indice_export.md` que estava 155 entradas atrasado foi corrigido e agora se atualiza sozinho a cada commit que mudar o canon de verdade; e ganhou uma trava nova contra o tipo exato de acidente que aconteceu no meio do caminho (um texto meu entrando no repositório sem eu ter mandado — já corrigido, e agora impedido de se repetir). Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (461).
+**[AGUARDANDO ASSINATURA] Proposta nova: uma checagem automática que confere se as citações "arquivo, linha tal" que eu escrevo em MEMÓRIAS.md realmente batem com o arquivo de verdade.** Contei o catálogo de erros já registrado no sistema: 8 em cada 20 falhas conhecidas são exatamente isso — citar algo sem checar antes. Duas vezes essa mesma semana, incluindo uma vez em que EU MESMO disse que uma citação minha estava errada e não estava (corrigi na hora, publicamente). Construí a ferramenta, testei bastante (inclusive achei e consertei dois erros nela mesma, testando de verdade, não só descrevendo), e deixei pronta pra você assinar: `bash scripts/aprovar.sh p19-citacao-arquivo-2026-09-18`. Nada disso entrou no sistema ainda — só a proposta, esperando sua palavra.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (463).
+
+**[APLICADO] O pacote assinado ontem já está no ar — os quatro itens juntos.** Sincronizei tudo (repositório, Drive, Obsidian); o `indice_export.md` que estava 155 entradas atrasado foi corrigido e agora se atualiza sozinho a cada commit que mudar o canon de verdade; e ganhou uma trava nova contra o tipo exato de acidente que aconteceu no meio do caminho (um texto meu entrando no repositório sem eu ter mandado — já corrigido, e agora impedido de se repetir). Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (461).
 
 **[FECHADO POR COMPLETO] O item "quebrado" (`agata-token-check.timer`) não era falha — era um alarme de um tiro só que já tinha disparado, em 04/09, e passou.** Testava se sua credencial do Google (a do Drive do projeto) ia expirar depois de 8 dias — não expirou, o teste deu certo, só ninguém tinha desligado o alarme depois. Desligado na Máquina e o registro no repositório já assinado e aplicado. Nada pendente. Detalhe: `MEMÓRIAS.md`, entrada (462).
 

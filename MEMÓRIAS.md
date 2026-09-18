@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 08b2f86aa71f74026fecdb8a141021589298dbd9
-  Escrito em: 18/09/2026 14:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ca5213069b3589cadf3fe8d0b44e580ade506845
+  Escrito em: 18/09/2026 20:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08b2f86aa71f74026fecdb8a141021589298dbd9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08b2f86aa71f74026fecdb8a141021589298dbd9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08b2f86aa71f74026fecdb8a141021589298dbd9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca5213069b3589cadf3fe8d0b44e580ade506845/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca5213069b3589cadf3fe8d0b44e580ade506845/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca5213069b3589cadf3fe8d0b44e580ade506845/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(463) DIÁRIO — 18/09/2026 · **Proposta `p19-citacao-arquivo-2026-09-18` — mecaniza a falha mais recorrente do catálogo (REGRAS.md): citar arquivo+linha+trecho sem checar contra a fonte. Testada, não aplicada — aguardando assinatura.**
+
+**Por que agora, e por que é a prioridade real:** contando programaticamente o "Catálogo de falhas conhecidas" (REGRAS.md), 8 das 20 falhas catalogadas — (59) até (250)/(251) — são desta família. 40% do histórico de erros deste projeto, medido, não impressão. Duas ocorrências frescas nesta mesma sessão reforçaram o achado: uma minuta externa (Conselho Remoto, GLM v1/v2) trouxe citações de arquivo:linha erradas, achadas só testando contra o repositório real; e eu mesmo dei uma citação MINHA — a MEMÓRIAS (459) que GLM citou corretamente — por fabricada, num `grep` que falhou por motivo não diagnosticado. `sed -n '80p' MEMÓRIAS.md` mostrou a citação 100% correta. Eu estava errado, não a minuta — corrigido em público na hora, não depois.
+
+**O que entra:** `scripts/verificar_citacao_arquivo.py` (ferramenta nova, achador de citações `` `arquivo:N` `` + conferidor contra a linha real) e `scripts/perimetro/p19_citacao_arquivo.sh` (controle novo do perímetro, mesmo padrão de P-7: só audita o que a entrada NOVA de MEMÓRIAS.md acrescenta a cada commit, nunca a história inteira; mesma guarda de permutação do P-7, pra não reescanear citação antiga como se fosse nova numa migração de camada). Fonte citada no cabeçalho do controle: `REGRAS.md`, Catálogo de falhas conhecidas.
+
+**Nome "P-19" reclamado formalmente aqui, pela primeira vez.** Numa conversa recente usei "P-19" de forma informal pra nomear outro mecanismo — a guarda de integridade da âncora dentro de `.githooks/pre-commit` ((458)/(459)) — mas aquela guarda NUNCA foi registrada em `scripts/perimetro.sh` via `cabecalho "P-N"` (confirmei de novo antes desta proposta: `grep -oE 'cabecalho "P-[0-9]+"' scripts/perimetro.sh` mostrava só P-1..P-18). Esta proposta é o primeiro controle a ocupar o número P-19 de verdade. A guarda da âncora segue sem número — chamada só pelo nome descritivo daqui em diante. O artefato publicado ("Sistema Agata") ainda descreve "19 controles" com a guarda da âncora como se fosse um deles — fica **pendente de correção separada**, não coberta por este pacote.
+
+**Dois bugs reais achados testando o verificador contra o próprio repositório, não caso sintético** — mesma classe de erro que a ferramenta existe pra pegar em terceiros, então testei nela mesma com o mesmo rigor: (1) a primeira versão da citação (`` `arquivo`:N `` — dois pontos DEPOIS da crase) nunca casava com a forma mais comum no próprio canon (`` `arquivo:N` ``, dois pontos DENTRO da crase — conferido com grep real em MEMÓRIAS.md/REGRAS.md, achei seis ocorrências da forma "dentro" que ficavam invisíveis). Corrigido: o regex agora aceita as duas formas. (2) meu primeiro harness de teste isolado usava `git reset --hard HEAD` a cada caso, o que revertia silenciosamente a correção do próprio script de volta pro commit-base do clone descartável — três casos deram falso-verde até eu perceber que o problema era o teste, não o controle.
+
+**Testado, tudo verde:** `bash -n`/`ast.parse` nos 4 arquivos; 7 casos isolados num clone descartável (sem entrada nova → silêncio; citação real correta → silêncio; citação fabricada → pega; arquivo inexistente → pega; off-by-one → pega com a linha certa; guarda de permutação → pula corretamente; arquivo sem extensão, estilo `.githooks/` → confere certo); `scripts/perimetro.sh` completo no repositório real, 16 OK/1 SKIP/2 PARCIAL/0 FALHA, P-19 mudo (nada staged em MEMÓRIAS.md pra checar); `scripts/testar_perimetro.sh` completo, 31/31 casos, 0 falha. Verifiquei também, à mão, que o `.diff` proposto aplicado a `HEAD:<arquivo>` reproduz byte a byte o que está no disco pros 4 arquivos — a mesma checagem que o P-8 vai fazer de verdade na hora de aprovar.
+
+**Doutrina de severidade:** AVISO SÓ, nunca falha o commit — mesma régua de P-6/P-9/P-15/P-18. Motivo testado, não teórico: o próprio verificador tem falso-positivo conhecido (citação sem trecho entre aspas pra conferir, ou prosa com mais de um trecho entre crases perto da citação), documentado no docstring do script. "Nenhuma checagem entra bloqueando antes de passar verde um tempo de verdade" — a régua que já vale pra P-18 promover a FALHA-class algum dia vale aqui também.
+
+**Estado: `propostas/p19-citacao-arquivo-2026-09-18.diff` no repositório, aguardando `bash scripts/aprovar.sh p19-citacao-arquivo-2026-09-18`. Os 4 arquivos (novos e modificados) seguem fora do commit, sem stage — quarentena estrutural (`propostas/README.md`), não aplicados até assinatura.**
 
 (462) DIÁRIO — 18/09/2026 · **`agata-token-check.timer` fechado — não era falha, era timer de um tiro só (MEMÓRIAS (285)) que já tinha feito o trabalho e cumprido, sem faxina depois. Correção de texto no PROJETO.md pronta, aguardando assinatura; a ação na Máquina (desabilitar) já feita, sem quarentena — não é canon.**
 

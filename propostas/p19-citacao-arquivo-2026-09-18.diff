@@ -1,0 +1,275 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 5fad31c..a99894a 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -55,6 +55,7 @@ source "$_PERIMETRO_DIR/perimetro/p15_roster_remoto.sh"
+ source "$_PERIMETRO_DIR/perimetro/p16_testes_dos_controles.sh"
+ source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
+ source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
++source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -319,6 +320,12 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-19" "Citação de arquivo:linha em entrada nova de MEMÓRIAS confere contra a fonte real" "REGRAS, Catálogo de falhas conhecidas -- família (59)-(250)/(251), 8/20 do catálogo"
++  p19_citacao_arquivo
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
+   PERIMETRO_ESTADO=""
+   p12_backup_verificavel; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p19_citacao_arquivo.sh b/scripts/perimetro/p19_citacao_arquivo.sh
+new file mode 100644
+index 0000000..272b570
+--- /dev/null
++++ b/scripts/perimetro/p19_citacao_arquivo.sh
+@@ -0,0 +1,77 @@
++#!/usr/bin/env bash
++# P-19 -- citação de arquivo:linha em entrada NOVA de MEMÓRIAS.md confere
++# contra a fonte real. Mecaniza a falha mais recorrente do catálogo
++# (REGRAS.md, "Catálogo de falhas conhecidas"): 8 das 20 falhas catalogadas
++# -- (59) até (250)/(251) -- são desta família: citar arquivo+linha+trecho
++# sem checar contra a fonte antes de escrever. Duas ocorrências frescas
++# motivaram esta proposta: uma minuta externa (Conselho Remoto, GLM) com
++# dois erros reais de linha só achados testando contra o repositório de
++# verdade, e uma citação MINHA que dei por fabricada num `grep` que falhou
++# por engano -- a citação era 100% correta; a checagem manual é que falhou.
++#
++# Nome "P-19" reclamado FORMALMENTE aqui pela primeira vez. Numa conversa
++# recente este número foi usado informalmente para outro mecanismo -- a
++# guarda de integridade da âncora dentro de `.githooks/pre-commit` (a que
++# aborta o commit se a atualização da âncora de SHA varre conteúdo fora
++# dela) -- mas aquela guarda NUNCA foi registrada aqui via `cabecalho
++# "P-19"` (confirmado com `grep -oE 'cabecalho "P-[0-9]+"' scripts/perimetro.sh`
++# antes desta proposta: só P-1..P-18 existiam). Este controle é o primeiro a
++# ocupar o número de verdade; a guarda da âncora segue sem número, chamada
++# só pelo nome descritivo daqui em diante.
++#
++# Doutrina P-6/P-9/P-18: AVISO SÓ, nunca falha o commit. Motivo, testado e
++# não teórico: o próprio verificador (scripts/verificar_citacao_arquivo.py)
++# tem falso-positivo conhecido -- citação sem trecho entre aspas pra
++# conferir, ou prosa com mais de um trecho entre crases perto da citação
++# (ex.: um hash curto de commit entre a referência de linha e o trecho de
++# verdade), pode marcar FALHA numa citação correta. Achado rodando contra o
++# documento real da minuta GLM v2, não em caso sintético -- documentado no
++# docstring do próprio script. "Nenhuma checagem entra bloqueando antes de
++# passar verde um tempo de verdade" é a régua já usada para promover P-18 a
++# FALHA-class no futuro, se for o caso; a mesma régua vale aqui.
++#
++# Escopo igual ao P-7: só a entrada NOVA que este commit ACRESCENTA a
++# MEMÓRIAS.md, nunca o arquivo inteiro -- reaudita a história toda a cada
++# commit seria caro e ruidoso, e citação já commitada no passado já teve a
++# chance de virar entrada nova de correção (REGRAS, Regra 4 -- corrigir é
++# entrada nova, nunca edição). Mesmo guarda de permutação do P-7: sem ele,
++# uma migração de camada (quente -> morno/frio) aparece pro `git diff` como
++# bloco "+" gigante, e este controle rescanearia citações antigas como se
++# fossem novas -- o mesmo bug que já pegou o P-7 de verdade (comentário em
++# p07_citacao.sh, e o mesmo teste de regressão se aplica aqui).
++
++p19_citacao_arquivo() {
++  if ! git rev-parse HEAD >/dev/null 2>&1; then
++    return 0
++  fi
++  if [ "${P5_RAMO:-ordinario}" = "permutacao" ] && [ "${P5_ENTRADAS_NOVAS:-0}" -eq 0 ]; then
++    echo "P-19: P-5 tomou o ramo de PERMUTAÇÃO e nenhuma entrada nova veio junto -- pulado (nada de novo pra citar)."
++    return 0
++  fi
++
++  local raiz verificador tmp_diff saida
++  raiz="$(git rev-parse --show-toplevel 2>/dev/null)" || return 0
++  verificador="$raiz/scripts/verificar_citacao_arquivo.py"
++  [ -f "$verificador" ] || return 0
++  if ! command -v python3 >/dev/null 2>&1; then
++    echo "AVISO (P-19): python3 não encontrado -- checagem pulada."
++    return 0
++  fi
++
++  tmp_diff="$(mktemp)"
++  git diff --cached -U0 -- MEMÓRIAS.md 2>/dev/null | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^\+//' > "$tmp_diff"
++
++  if [ ! -s "$tmp_diff" ]; then
++    rm -f "$tmp_diff"
++    return 0
++  fi
++
++  saida="$(python3 "$verificador" --raiz "$raiz" < "$tmp_diff" 2>&1)"
++  rm -f "$tmp_diff"
++
++  if echo "$saida" | grep -q '^FALHA'; then
++    echo "AVISO (P-19): citação de arquivo:linha na entrada nova de MEMÓRIAS.md não bate com a fonte -- confira antes de assinar/aplicar (verificador tem falso-positivo conhecido, ver docstring)."
++    echo "$saida" | grep -E '^(OK|FALHA)'
++  fi
++  return 0
++}
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 74d42dc..7893b3f 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -158,6 +158,7 @@ declare -A SEM_TESTE=(
+   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
+   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
+   [P-18]="so' emite linha 'AVISO (P-18): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15, nao falta de reprodutibilidade: p18_ancora_falha() foi testada isolada, 6 casos (sem log, ancora em dia, defasagem normal, defasagem de alarme, linha malformada, log com duas linhas), fora deste harness, na auditoria que introduziu o controle (MEMORIAS (455))"
++  [P-19]="so' emite linha 'AVISO (P-19): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15/P-18, nao falta de reprodutibilidade: p19_citacao_arquivo() e o verificador que ela chama (scripts/verificar_citacao_arquivo.py) foram testados isolados, fora deste harness -- 5 casos sinteticos (citacao real, citacao fabricada, arquivo inexistente, linha off-by-one, arquivo sem extensao) mais uma corrida contra o documento real da minuta GLM v2, que reproduziu o erro genuino e tambem revelou o falso-positivo ja documentado no docstring do script"
+   [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
+   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
+ )
+diff --git a/scripts/verificar_citacao_arquivo.py b/scripts/verificar_citacao_arquivo.py
+new file mode 100644
+index 0000000..265984e
+--- /dev/null
++++ b/scripts/verificar_citacao_arquivo.py
+@@ -0,0 +1,149 @@
++#!/usr/bin/env python3
++"""verificar_citacao_arquivo.py -- fecha a classe de falha mais recorrente do
++catalogo (REGRAS.md, "Catalogo de falhas conhecidas"): citar arquivo+linha+
++trecho sem checar contra a fonte. 8 das 20 falhas catalogadas sao desta
++familia ((59) ate (250)/(251)); duas ocorrencias frescas nesta sessao
++(minuta externa GLM v1/v2, e uma citacao minha propria que dei por errada
++num grep que falhou) motivaram esta proposta.
++
++Uso:
++  python3 verificar_citacao_arquivo.py < texto.md
++  python3 verificar_citacao_arquivo.py --raiz /caminho/repo < texto.md
++
++Le um texto (stdin) e acha citacoes no padrao que este projeto realmente usa:
++  `arquivo.ext` linha N       ou   `arquivo.ext:N`
++seguidas (na mesma frase ou ate ~200 chars depois) de um trecho entre aspas
++retas ("...") ou crase dupla/backtick (`...`). Para cada uma, abre o arquivo
++REAL (relativo a raiz do repo) e confere se a linha N contem o trecho citado.
++
++Saida, uma linha por citacao achada:
++  OK    arquivo:N
++  FALHA arquivo:N -- trecho nao bate. Linha real: "..."
++  FALHA arquivo:N -- arquivo nao existe
++  FALHA arquivo:N -- linha nao existe (arquivo tem M linhas)
++
++Exit 0 se tudo OK ou nada achado pra checar; exit 1 se alguma FALHA.
++Nao e' juiz de prosa -- so confere o que foi citado como fato preciso.
++
++Limitacao conhecida, testada contra documento real (nao so caso sintetico):
++citacao sem trecho entre aspas para conferir, ou prosa com mais de um span
++entre crases perto da citacao (ex.: um hash curto de commit entre a
++referencia de linha e o trecho de verdade), pode gerar falso-positivo ou
++reduzir recall. Por isso este verificador entra no perimetro como AVISO,
++nunca como FALHA-class -- ver scripts/perimetro/p19_citacao_arquivo.sh.
++"""
++import re
++import sys
++import argparse
++import unicodedata
++
++
++def normaliza(s: str) -> str:
++    # remove acentuacao e colapsa espaco, pra comparar sem depender de
++    # normalizacao unicode exata (aspas curvas vs retas, etc.)
++    s = unicodedata.normalize("NFKD", s)
++    s = "".join(c for c in s if not unicodedata.combining(c))
++    s = re.sub(r"\s+", " ", s).strip()
++    return s.lower()
++
++
++# Padrao de citacao: `caminho/arquivo[.ext]` com a linha DENTRO da crase
++# (`arquivo.py:112`, a forma mais comum no proprio canon deste projeto,
++# conferida com grep em MEMORIAS.md/REGRAS.md antes desta versao) ou FORA
++# dela (`arquivo.py`:112 / `arquivo.py` linha 112, tambem usada). A
++# primeira versao deste regex so' reconhecia a forma de FORA -- achado
++# testando contra citacoes REAIS ja existentes no canon (nao caso
++# sintetico): `scripts/ler_pagina.sh:33` e outras seis ocorrencias da
++# forma "dentro" ficavam invisiveis, maioria dos casos reais do proprio
++# arquivo MEMORIAS.md. O caminho tem que ter '/' (path) OU extensao
++# (.ext) -- cobre tanto scripts/perimetro.sh quanto .githooks/pre-commit
++# (hook sem extensao, mesma lacuna achada antes: a primeira versao do
++# regex exigia extensao e nunca casava com nada em .githooks/).
++CITACAO_RE = re.compile(
++    r"`(?P<arq>[^`\s:]*(?:/[^`\s:]+|\.[a-zA-Z0-9]+))(?::(?P<n1>\d+))?`"
++    r"(?:\s*(?:linhas?\s+(?P<n2>\d+)|:\s*(?P<n3>\d+)))?",
++    re.IGNORECASE,
++)
++
++# Trecho citado: primeiro bloco entre aspas retas ou crase apos a citacao,
++# dentro de uma janela curta (mesma frase, tipicamente).
++TRECHO_RE = re.compile(r'["“]([^"“”]{6,300})["”]|`([^`]{6,300})`')
++
++
++def achar_citacoes(texto: str):
++    # Achado testando contra a minuta real (nao um caso sintetico): entre a
++    # citacao "arquivo linha N" e o trecho de verdade pode haver OUTRO span
++    # entre crases no meio (ex: "linha 316, HEAD `ca521306`): `trecho real`"
++    # -- pegar o PRIMEIRO span da janela pega o hash curto, nao o trecho.
++    # Corrigido pegando o span MAIS LONGO da janela, nao o primeiro --
++    # trecho citado de verdade tende a ser mais longo que um hash/identificador
++    # incidental. Descarta spans com menos de 12 chars (abaixo disso e' mais
++    # provavel ser hash/nome de variavel que texto citado).
++    citacoes = []
++    for m in CITACAO_RE.finditer(texto):
++        arquivo = m.group("arq")
++        linha_n = m.group("n1") or m.group("n2") or m.group("n3")
++        if not linha_n:
++            continue
++        # Janela apertada (200, nao 400): testando contra a minuta real,
++        # 400 chars alcancava a citacao SEGUINTE e pegava o trecho errado
++        # -- prosa bem formada cita o trecho logo depois da referencia de
++        # linha, nao 3 frases adiante. Reduz falso-positivo, custa recall
++        # em prosa mais solta (aceito: reprovar sem certeza e' mais seguro
++        # que aprovar sem checar -- mesma doutrina do P-1 sobre grep
++        # negativo, REGRAS catalogo (250)-(251)).
++        janela = texto[m.end(): m.end() + 200]
++        candidatos = [
++            (g1 or g2) for g1, g2 in TRECHO_RE.findall(janela)
++        ]
++        candidatos = [c for c in candidatos if len(c) >= 12]
++        trecho = max(candidatos, key=len) if candidatos else None
++        citacoes.append((arquivo, int(linha_n), trecho))
++    return citacoes
++
++
++def checar(raiz: str, arquivo: str, linha_n: int, trecho):
++    import os
++
++    caminho = os.path.join(raiz, arquivo)
++    if not os.path.isfile(caminho):
++        return False, f"arquivo nao existe: {caminho}"
++    with open(caminho, encoding="utf-8", errors="replace") as f:
++        linhas = f.readlines()
++    if linha_n < 1 or linha_n > len(linhas):
++        return False, f"linha nao existe (arquivo tem {len(linhas)} linhas)"
++    real = linhas[linha_n - 1]
++    if trecho is None:
++        return True, f"citacao sem trecho entre aspas para conferir -- linha real: {real.strip()[:120]!r}"
++    if normaliza(trecho) in normaliza(real):
++        return True, None
++    # tenta vizinhanca de 1 linha pra citacao off-by-one (erro comum, achado testando)
++    for offset in (-1, 1):
++        idx = linha_n - 1 + offset
++        if 0 <= idx < len(linhas) and normaliza(trecho) in normaliza(linhas[idx]):
++            return False, f"trecho bate na linha {idx+1}, nao {linha_n} -- off-by-{offset:+d}"
++    return False, f"trecho nao bate. Linha real: {real.strip()[:160]!r}"
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--raiz", default=".")
++    args = ap.parse_args()
++    texto = sys.stdin.read()
++    citacoes = achar_citacoes(texto)
++    if not citacoes:
++        print("nenhuma citacao arquivo+linha achada no texto.")
++        sys.exit(0)
++    falhou = False
++    for arquivo, linha_n, trecho in citacoes:
++        ok, msg = checar(args.raiz, arquivo, linha_n, trecho)
++        status = "OK   " if ok else "FALHA"
++        if not ok:
++            falhou = True
++        extra = f" -- {msg}" if msg else ""
++        print(f"{status} {arquivo}:{linha_n}{extra}")
++    sys.exit(1 if falhou else 0)
++
++
++if __name__ == "__main__":
++    main()
