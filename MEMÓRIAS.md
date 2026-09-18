@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9579ee32de070d65110471224b82f9fbe6f84d9b
-  Escrito em: 18/09/2026 12:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a7b4d38f68e68988b5d4ec7ed1a3c5db55f58961
+  Escrito em: 18/09/2026 12:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9579ee32de070d65110471224b82f9fbe6f84d9b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7b4d38f68e68988b5d4ec7ed1a3c5db55f58961/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7b4d38f68e68988b5d4ec7ed1a3c5db55f58961/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7b4d38f68e68988b5d4ec7ed1a3c5db55f58961/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (458): fecha a classe, testada com o bug exato reproduzido. Ordem do Humano ("autorizado"), proposta pronta, não aplicada sozinha.**
+
+**Por que não é controle de `perimetro.sh` (o "P-19" que eu tinha sugerido nomear assim):** `perimetro.sh` roda na linha 9 de `.githooks/pre-commit`, **antes** do laço que atualiza a âncora de SHA (linhas 26+). Um controle dentro de `perimetro.sh` nunca veria a varredura acontecer — ela é posterior à própria checagem. A guarda mora em `pre-commit`, envolvendo o laço diretamente.
+
+**Mecanismo:** antes do `git add "$_canon"` de cada um dos 3 canônicos (REGRAS/PROJETO/MEMÓRIAS), tira um sha256 do conteúdo STAGED (`git show ":$_canon"`) com o bloco da âncora removido. Depois do laço, tira o mesmo sha256 de novo. Se o "sem âncora" mudou, alguma coisa fora da âncora entrou no stage sem o autor ter mandado `git add` nela — desfaz o stage daquele arquivo (`git reset`) e **bloqueia o commit** (`exit 1`, não `AVISO`: isto é integridade de canon, não conveniência).
+
+**Testado reproduzindo o bug exato de (458), num clone real (não stub) com `perimetro.sh` estubado só pra isolar esta guarda especificamente — o resto de `perimetro.sh` já é testado por outros meios:**
+1. Commit normal, só `MEMÓRIAS.md` staged de propósito → passa, sem falso positivo.
+2. **Reprodução exata do bug:** linha solta em `PROJETO.md`, sem `git add`, junto de um commit de `MEMÓRIAS.md` → **bloqueado**; `git log` confirma que o commit nunca aconteceu; `PROJETO.md` saiu do stage mas a linha continua na árvore de trabalho (nada perdido); `REGRAS.md` (só a âncora, sem violação) permaneceu staged normalmente — a guarda não penaliza o que está limpo.
+3. Edição intencional em `PROJETO.md`, com `git add PROJETO.md` explícito → passa, comita normal — confirma que o fluxo de propostas assinadas (usado a sessão inteira) continua funcionando.
+
+**Estado: `propostas/p19-guarda-ancora-integridade-2026-09-18.diff` pronto, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh p19-guarda-ancora-integridade-2026-09-18`.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `bash -n` no `pre-commit` novo; 3 casos rodados em clone real do repositório (`core.hooksPath` configurado, `perimetro.sh` estubado só para isolar a guarda), cada um com `git log`/`git status`/conteúdo de arquivo lido depois pra confirmar o resultado, não só o texto impresso; reprodução literal do cenário de (458) (linha solta sem stage) confirmando bloqueio real, não teórico. Autorização: Humano — "autorizado", sobre a pergunta explícita feita em (458) se valia fechar a classe com um controle novo.
 
 (458) DIÁRIO — 18/09/2026 · **Achado real, meu, no próprio commit anterior: o passo que atualiza a âncora de SHA faz `git add` do arquivo INTEIRO, não só das linhas da âncora — e varreu, sem eu querer, um texto do PROJETO.md descrevendo uma automação que ainda não foi assinada. O canon empurrado em (457) afirma algo falso agora. Corrigindo, e nomeando o buraco de P-8 que isso expõe.**
 

@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (458)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (459)).
 
 ## Onde estamos — 18/09/2026
 
@@ -15,7 +15,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (458)).
 
 **Proposta nova, pronta e testada:** você escolheu automatizar esse envio, dentro do próprio processo de cada commit, só quando o conteúdo realmente muda. Testei 5 cenários (envio normal, sem mudança, mudança de verdade, falha de rede, e repetir depois da falha) — todos certos. `bash scripts/aprovar.sh automatiza-export-drive-2026-09-18` quando quiser assinar.
 
-**[ERRO MEU, corrigido no mesmo golpe] Uma frase que eu escrevi sobre essa automação foi publicada por acidente, antes de você assinar nada.** O jeito como o robô de segurança do sistema atualiza um selo interno acabou levando junto um texto que eu tinha deixado pendente. Nada de segredo vazou, nada de comportamento real mudou sem sua autorização — só um texto no repositório ficou, por um tempo, dizendo algo que não é verdade ainda. Já corrigi (proposta própria, aguardando sua assinatura): `bash scripts/aprovar.sh corrige-projeto-drive-nao-automatico-2026-09-18`. Detalhe completo: `MEMÓRIAS.md`, entrada (458).
+**[ERRO MEU, corrigido no mesmo golpe] Uma frase que eu escrevi sobre essa automação foi publicada por acidente, antes de você assinar nada.** O jeito como o robô de segurança do sistema atualiza um selo interno acabou levando junto um texto que eu tinha deixado pendente. Nada de segredo vazou, nada de comportamento real mudou sem sua autorização — só um texto no repositório ficou, por um tempo, dizendo algo que não é verdade ainda. Já corrigi (proposta própria, aguardando sua assinatura): `bash scripts/aprovar.sh corrige-projeto-drive-nao-automatico-2026-09-18`.
+
+**[AUTORIZADO POR VOCÊ] Trava nova pra impedir esse tipo de acidente de vez.** Desenhei, testei (reproduzindo o bug exato de propósito, confirmando que agora ele é bloqueado) e deixei pronto: `bash scripts/aprovar.sh p19-guarda-ancora-integridade-2026-09-18`. Detalhe completo: `MEMÓRIAS.md`, entrada (459).
 
 ## Onde estamos — 17/09/2026
 
