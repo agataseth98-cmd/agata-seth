@@ -11,7 +11,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (462)).
 
 **[APLICADO] O pacote assinado hoje já está no ar — os quatro itens juntos.** Sincronizei tudo (repositório, Drive, Obsidian); o `indice_export.md` que estava 155 entradas atrasado foi corrigido e agora se atualiza sozinho a cada commit que mudar o canon de verdade; e ganhou uma trava nova contra o tipo exato de acidente que aconteceu no meio do caminho (um texto meu entrando no repositório sem eu ter mandado — já corrigido, e agora impedido de se repetir). Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (461).
 
-**[FECHADO] O item "quebrado" (`agata-token-check.timer`) não era falha — era um alarme de um tiro só que já tinha disparado, em 04/09, e passou.** Testava se sua credencial do Google (a do Drive do projeto) ia expirar depois de 8 dias — não expirou, o teste deu certo, só ninguém tinha desligado o alarme depois. Já desliguei. Falta só uma assinatura pequena, de texto, pra fechar o registro: `bash scripts/aprovar.sh fecha-agata-token-check-2026-09-18`. Detalhe: `MEMÓRIAS.md`, entrada (462).
+**[FECHADO POR COMPLETO] O item "quebrado" (`agata-token-check.timer`) não era falha — era um alarme de um tiro só que já tinha disparado, em 04/09, e passou.** Testava se sua credencial do Google (a do Drive do projeto) ia expirar depois de 8 dias — não expirou, o teste deu certo, só ninguém tinha desligado o alarme depois. Desligado na Máquina e o registro no repositório já assinado e aplicado. Nada pendente. Detalhe: `MEMÓRIAS.md`, entrada (462).
 
 ## Onde estamos — 17/09/2026
 
