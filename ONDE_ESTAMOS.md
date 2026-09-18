@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (450)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (451)).
 
 ## Onde estamos — 17/09/2026
 
@@ -41,7 +41,7 @@ confirmei o arquivo gerado e do tamanho certo.**
 
 **Fase E, dois dos três itens — conferidos, sem trabalho real neles.** O plano previa cortar texto duplicado das instruções da Seth e juntar 4 arquivos de política num só. Fui checar antes de mexer: as instruções da Seth nunca chegaram a repetir o que os consertos das Fases A-C fizeram (não tinha o que cortar), e juntar os 4 arquivos agora seria o tipo de mudança arriscada demais pro benefício — decisão de adiar, não esquecimento. Detalhe: `MEMÓRIAS.md`, entrada (449).
 
-**Último item, o mais arriscado — pronto, testado a fundo, esperando sua assinatura.** Você escolheu o caminho mais cauteloso (segunda opinião + modo sombra) e foi isso que eu fiz: pedi um parecer externo antes de escrever qualquer código, e ele concordou com condições — cumpri todas. Dividi o script gigante que trava todo commit em 14 pedacinhos, sem mudar o que cada um faz, só onde ele mora. Na primeira rodada de teste achei e consertei um bug real na própria ferramenta de teste (não no que eu tinha feito). No fim: mesma saída, mesma velocidade, 31 testes automáticos passando, e um mecanismo novo que compara a versão nova com a antiga por um tempo e avisa se divergirem — testei isso também, forçando uma divergência de propósito pra confirmar que o aviso funciona. Arquivo: `propostas/fase-e-modularizar-perimetro-2026-09-17.diff`. Detalhe: `MEMÓRIAS.md`, entrada (450).
+**Último item — sua assinatura de agora há pouco ficou obsoleta antes de eu aplicar, preciso pedir de novo.** Antes de aplicar de verdade eu rodo os testes mais uma vez, sempre — foi isso que me salvou aqui: achei uma falha nova, investiguei, e não era do meu trabalho: é um bug real e antigo (desde 06/09), nunca notado, numa parte da própria suíte de testes que checa o histórico. Corrigi só a parte que precisava, testei tudo de novo (31/31), e o arquivo que você vai assinar mudou de conteúdo por causa disso — por isso preciso de uma assinatura nova, não a de antes. Arquivo: `propostas/fase-e-modularizar-perimetro-2026-09-17.diff` (conteúdo novo). Detalhe: `MEMÓRIAS.md`, entrada (451).
 
 ## Onde estamos — 16/09/2026
 

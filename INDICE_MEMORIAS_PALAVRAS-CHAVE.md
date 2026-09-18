@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
+  palavras-chave: assinatura, ficou, obsoleta, conseguir, aplicá, achado, tentando, aplicar, produção, diff, corrigido, reemitido, precisa, nova, bug, real, pré, existente, silencioso, desde, fase
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
   palavras-chave: item, plano, mitigação, auditoria, marcos, arriscado, pacote, inteiro, modularizar, scripts, perimetro, gatekeeper, commit, futuro, segunda, opinião, formal, pedida, recebida, escrever, código, diff, pronto, testado, profundidade, aguardando, assinatura
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, pediu, shell, arbitrário, ganhou, poder, verificar, mudar, ordem, humano, aplique, desenho, próprio, novo, serviço, verificador, nova, tool, mcp, maquina, lista, fechada, comandos, verificação, read, only
 (422) DIÁRIO — 10/09/2026 · **Auditamos a Seth e o culpado era o sistema.** Ordem do Humano: *"audite a Seth"*, com dois cabeçalhos e duas respostas dela colados na sessão. Veredito: das cinco alegações checáveis que ela fez, **cinco estavam certas**; e das quatro violações de formato que ela cometeu, **três vinham de instruções erradas que nós escrevemos** e uma do meu próprio linter. Ela não fabricou nada, nenhuma vez.
   palavras-chave: auditamos, seth, culpado, era, sistema, ordem, humano, audite, cabeçalhos, respostas, dela, colados, sessão, veredito, cinco, alegações, checáveis, ela, fez, estavam, certas, quatro, violações, formato, cometeu, três, vinham, instruções, erradas, nós, escrevemos, meu, próprio, linter, fabricou, nada
-(421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou um furo — meu, do dia anterior.** Correção imediata do item que eu mesmo apontei como causa-raiz ao dar a nota de confiabilidade do sistema: nada neste repositório testava os controles. Ordem do Humano: *"ok proposta de correção imediata"*.
-  palavras-chave: agora, existe, teste, controles, ele, pegou, furo, meu, dia, anterior, correção, imediata, item, mesmo, apontei, causa, raiz, dar, nota, confiabilidade, sistema, nada, repositório, testava, ordem, humano, proposta
+(421) DIÁRIO — 10/09/2026 · **Agora existe teste dos controles, e ele já pegou u …
+  palavras-chave: agora, existe, teste, controles, ele, pegou
 (420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon recon …
   palavras-chave: encerrando, pendências, auditoria, canon, recon
 (419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o qu …

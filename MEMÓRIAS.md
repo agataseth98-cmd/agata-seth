@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 751c0b0b93776f3aa0aa08e0ade68b5bc671361c
-  Escrito em: 17/09/2026 21:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fb309d27a99351915f8fc212e438e755d091204e
+  Escrito em: 17/09/2026 22:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/751c0b0b93776f3aa0aa08e0ade68b5bc671361c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb309d27a99351915f8fc212e438e755d091204e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
+
+**O que aconteceu, na ordem certa:** depois de (450) ser assinada, rodei a suíte adversarial mais uma vez, como faço antes de todo commit — prática que já tinha me pego bugs reais nesta mesma sessão duas vezes. Desta vez achou uma FALHA nova: `P-5/apagar uma linha de MEMORIAS`. Testei a versão ORIGINAL (não-modular, `HEAD~1`) contra o mesmo estado — **falhou igual**. Isso prova, sem ambiguidade, que não é regressão da extração do item 10: é um bug que já existia, só não tinha aparecido ainda.
+
+**Causa raiz, achada e confirmada:** o caso de teste apaga a "linha 60" de `MEMÓRIAS.md` por índice fixo. Desde a Fase 4 (06/09/2026, MEMÓRIAS (357)), o marcador de migração `propostas/aplicadas/MIGRACAO-P5-PERIODO-memorias-por-periodo` — deixado no repositório de propósito, como registro histórico permanente — faz o P-5 tomar SEMPRE o ramo de checagem por PERMUTAÇÃO (`verificar_migracao_periodo.py`, que compara por entrada, não por byte cru), nunca mais o ramo de sufixo/prefixo byte a byte. Isso por si só não é o bug — é o desenho documentado. O bug é mais estreito: a linha 60 de `MEMÓRIAS.md`, no momento exato deste teste, tinha virado uma linha EM BRANCO (a entrada (450), enorme, empurrou o que "linha 60" significa) — e apagar uma linha em branco não muda o conteúdo de nenhuma entrada aos olhos do checador de permutação. Vermelho falso virou **verde falso**, o mais caro dos dois tipos de erro que este projeto já catalogou.
+
+**Mesma classe do "P-7 morto por 79 commits"** (REGRAS, Catálogo) — um controle degradado silenciosamente por uma condição permanente (aqui, a marca de migração que nunca sai) combinada com uma fixture frágil (índice fixo, refém do tamanho do arquivo). Diferença importante: aqui o controle REAL (a checagem de permutação) não está necessariamente furado em geral — só não pega a remoção de uma linha em branco especificamente. Se um Humano ou modelo apagasse uma linha de CONTEÚDO de uma entrada existente, a checagem de permutação (que compara byte a byte por entrada) teria pego. `lacuna`: não testei exaustivamente se HÁ outras formas de edição que a checagem de permutação deixa passar — só a que a fixture, por acidente, revelou.
+
+**Conserto, só na fixture, não no controle:** `scripts/testar_perimetro.sh` passa a apagar a PRIMEIRA linha NÃO-BRANCA depois do marcador, achada dinamicamente, nunca mais por índice fixo — imune ao tamanho do arquivo. Testado: com o fix, a versão ORIGINAL e a MODULAR passam as duas, 31/31, idênticas.
+
+**Por que isto virou uma NOVA entrada de MEMÓRIAS em vez de silenciosamente entrar dentro de (450):** a assinatura de (450) já tinha sido dada sobre um `.diff` com hash específico (`a2efa880...`). O conserto da fixture não estava nele. Sem essa entrada, um leitor futuro veria "(450) assinada" e "(451) — hash diferente aplicado" sem entender por quê — Regra 2 (não afirme sem mostrar) e a disciplina de vetor exigem este registro, não um ajuste silencioso.
+
+**`propostas/fase-e-modularizar-perimetro-2026-09-17.diff` foi REESCRITO no lugar (mesmo nome, hash novo: `ede01799...`) — a assinatura anterior (`a2efa880...`) não cobre mais o conteúdo atual do arquivo, removida do disco.** Isto não viola Regra 4: o `.diff` é um artefato de proposta em `propostas/`, não um registro histórico — a HISTÓRIA do que aconteceu está aqui, nesta entrada, append-only; o artefato de proposta pendente É o tipo de coisa que se corrige no lugar até ser assinado (equivalente a uma proposta ainda não aplicada sendo ajustada antes da aprovação final).
+
+**Estado: aguardando nova assinatura, `bash scripts/aprovar.sh fase-e-modularizar-perimetro-2026-09-17` sobre o `.diff` com hash `ede01799...`. Confirmado: aplica limpo, 31/31, rodada real OK, num clone descartável, antes de pedir a assinatura de novo.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `bash scripts/testar_perimetro.sh` rodado 3 vezes seguidas (mesma falha, não intermitente); `HEAD~1:scripts/perimetro.sh` isolado num clone e testado contra o mesmo estado (falhou igual, provando não-regressão); saída do `perimetro.sh` mostrando literalmente a frase "marca ... está presente" identificando o ramo de permutação como o caminho tomado; simulação em Python confirmando que a linha 60 do `MEMÓRIAS.md` atual é uma string vazia; `sha256sum` do `.diff` antes e depois da correção, ambos citados; `git apply --check`/`git apply` reais num clone descartável depois da correção, `testar_perimetro.sh` e `perimetro.sh` rodados de novo. Autorização: Humano — nenhuma ainda para o `.diff` corrigido; a assinatura de (450) ficou órfã, removida do disco por decisão própria dentro do que a correção honesta exige.
 
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
 

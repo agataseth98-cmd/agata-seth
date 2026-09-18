@@ -3937,7 +3937,7 @@ index 0000000..727a773
 +}
 +
 diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
-index 0561d76..14fcc4a 100755
+index 0561d76..213b12c 100755
 --- a/scripts/testar_perimetro.sh
 +++ b/scripts/testar_perimetro.sh
 @@ -56,7 +56,15 @@ _montar_clone() {
@@ -3957,3 +3957,30 @@ index 0561d76..14fcc4a 100755
        commit -q --no-verify -am "base da suite: arvore de trabalho" 2>/dev/null ) || true
  }
  _limpar_clone() { [ -n "$CLONE" ] && rm -rf "$CLONE"; CLONE=""; }
+@@ -252,11 +260,25 @@ _caso P-5 PASSA "FALSO POSITIVO: entrada nova no topo (crescimento ordinario)" <
+ _nova_entrada "(9999) DIARIO — 01/01/2026 · entrada legitima." && git add "MEMÓRIAS.md"
+ EOF
+ 
++# Achado rodando esta suite de verdade (item 10 do plano de mitigacao da
++# auditoria do Marcos, MEMORIAS (437)/(450)): a versao original deste caso
++# apagava a linha 60 por INDICE FIXO. MEMORIAS.md cresce a cada sessao, e
++# entradas longas empurram o que "linha 60" significa -- na hora deste
++# achado, a linha 60 tinha virado uma linha EM BRANCO por coincidencia
++# (separador entre paragrafos de uma entrada), e apagar linha em branco
++# nao muda o conteudo de nenhuma entrada aos olhos do checador de
++# permutacao (verificar_migracao_periodo.py, que compara por ENTRADA, nao
++# por byte cru) -- vermelho falso virou VERDE FALSO, o mais caro dos dois.
++# Mesma classe de bug ja documentada abaixo (o caso do "primeiro DIARIO").
++# Corrigido: acha e apaga a PRIMEIRA linha NAO-BRANCA depois do marcador --
++# sempre conteudo de verdade, nunca refem do tamanho atual do arquivo.
+ _caso P-5 PEGA "apagar uma linha de MEMORIAS" <<'EOF'
+ python3 - <<'PY2'
+ import io
+ p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
+-del L[60]
++i = next(k for k, l in enumerate(L) if "ENTRADAS-NOVAS:AQUI" in l)
++alvo = next(k for k in range(i+1, len(L)) if L[k].strip())
++del L[alvo]
+ io.open(p,"w",encoding="utf-8").write("\n".join(L))
+ PY2
+ git add "MEMÓRIAS.md"
