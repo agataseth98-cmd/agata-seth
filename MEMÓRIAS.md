@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 24c90ad956683f7df1f208e9e9472e0d00c43d84
-  Escrito em: 18/09/2026 13:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 758dee89b1cbf51d90089e41d5883081619cc0db
+  Escrito em: 18/09/2026 13:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/758dee89b1cbf51d90089e41d5883081619cc0db/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/758dee89b1cbf51d90089e41d5883081619cc0db/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/758dee89b1cbf51d90089e41d5883081619cc0db/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(462) DIÁRIO — 18/09/2026 · **`agata-token-check.timer` fechado — não era falha, era timer de um tiro só (MEMÓRIAS (285)) que já tinha feito o trabalho e cumprido, sem faxina depois. Correção de texto no PROJETO.md pronta, aguardando assinatura; a ação na Máquina (desabilitar) já feita, sem quarentena — não é canon.**
+
+**O que ele era, achado lendo a unit real:** `systemctl --user cat agata-token-check.timer` — `OnCalendar=2026-09-04 10:00:00`, data fixa, sem repetição, `[Install] WantedBy=timers.target`. Não é um monitor contínuo, nunca foi — um alarme de uma vez só, criado em (285) pra provar mecanicamente se a credencial OAuth do Drive da conta do projeto (`agata.seth98@gmail.com`, escopo `drive.file`) sobrevivia 8 dias sem reconsentimento: app Google em "Testing" perde o refresh token em 7 dias, em "Production" não — e "publicado em produção" no Console era alegação, não fato, até a Máquina medir.
+
+**Disparou, no dia certo, e a resposta foi a que se queria:** `cat ~/.config/agata/google-project/verificacao-8dias.log` — `2026-09-04T10:00:41-03:00`, ciclo refresh→criar→apagar, os três 200, `"CICLO COMPLETO ... Credencial funcional."` O app está em produção de verdade; o teste cumpriu o que foi desenhado pra fazer.
+
+**O que ficava "aberto" nunca foi o resultado — era o cadáver do timer.** `enabled`, `Trigger: n/a`, sem próximo disparo (porque não HÁ próximo disparo por desenho), e nenhum canônico fechando isso depois do sucesso — só o relato solto de (420) chamando de "quebrado" um teste que na verdade tinha passado. Desabilitado agora: `systemctl --user disable --now agata-token-check.timer` → `disabled`, `inactive (dead)`. Não está na lista de unidades que P-9 vigia (PROJETO.md, "Serviços (boot)") — desabilitar não dispara aviso novo, conferido rodando `perimetro.sh` depois.
+
+**Estado: ação na Máquina já feita (não é canon, não precisa de propostas/APROVADO-). O texto em PROJETO.md que registra o fechamento está em `propostas/fecha-agata-token-check-2026-09-18.diff`, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh fecha-agata-token-check-2026-09-18`. Item sai do `quebrado:` do bloco de prontidão quando essa entrar.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `systemctl --user cat` das duas units, lido por inteiro; `cat` do log real de verificação, não resumo; `systemctl --user disable --now` rodado e `status` conferido depois (`disabled`/`inactive (dead)`); `grep` em PROJETO.md confirmando `agata-token-check` fora da lista de unidades do P-9; `perimetro.sh` rodado depois de desabilitar, sem aviso novo. Autorização: Humano — "pode fechar".
 
 (461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
 
