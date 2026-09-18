@@ -5,13 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (460)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (461)).
 
 ## Onde estamos — 18/09/2026
 
-**Dia de sincronizar tudo (repositório, Drive, Obsidian) — feito, e três coisas pequenas ficaram por resolver, agora unidas numa assinatura só, por seu pedido.** Resumo do que cada uma resolve: (1) o conserto que faltava pro P-18 (âncora de SHA) passar na checagem automática; (2) o envio automático ao Drive toda vez que o canon mudar de verdade (o `indice_export.md` estava 155 entradas atrasado — já corrigi manualmente, isso só evita que aconteça de novo); (3) uma trava nova que impede um texto pendente de entrar no repositório por acidente — achei esse buraco tentando aplicar o item 2, com um erro real meu no meio do caminho, registrado sem esconder (`MEMÓRIAS`, (458)).
-
-`bash scripts/aprovar.sh pacote-2026-09-18-unificado` — uma assinatura, os três itens juntos. Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (460).
+**[APLICADO] O pacote assinado hoje já está no ar — os quatro itens juntos.** Sincronizei tudo (repositório, Drive, Obsidian); o `indice_export.md` que estava 155 entradas atrasado foi corrigido e agora se atualiza sozinho a cada commit que mudar o canon de verdade; e ganhou uma trava nova contra o tipo exato de acidente que aconteceu no meio do caminho (um texto meu entrando no repositório sem eu ter mandado — já corrigido, e agora impedido de se repetir). Nada pendente de assinatura no momento. Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (461).
 
 ## Onde estamos — 17/09/2026
 

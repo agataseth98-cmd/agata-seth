@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fbbeb5080dfc13b3ef48e965f038407d6bd96da1
-  Escrito em: 18/09/2026 13:36 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 24c90ad956683f7df1f208e9e9472e0d00c43d84
+  Escrito em: 18/09/2026 13:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbbeb5080dfc13b3ef48e965f038407d6bd96da1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbbeb5080dfc13b3ef48e965f038407d6bd96da1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbbeb5080dfc13b3ef48e965f038407d6bd96da1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c90ad956683f7df1f208e9e9472e0d00c43d84/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
+
+**Assinatura verificada ao vivo:** `sha256sum` do `.diff` = `29b56818...`, batendo `diff-sha256:` do `APROVADO-`; `ssh-keygen -Y verify` devolveu `Good "agata-aprovacao-p8" signature for agata-humano`.
+
+**Achado ao aplicar, não ao ler:** comparar meu `PROJETO.md` salvo contra o `.diff` assinado dava só a âncora de SHA diferente (esperado, HEAD tinha avançado desde que gerei o pacote) — mas o P-8 real recusou mesmo assim: ele aplica o `.diff` candidato contra `HEAD:PROJETO.md` **fresco** (via `git show`) e compara hash do resultado contra o staged, não contra o que eu tinha na árvore de trabalho. Meu arquivo salvo carregava uma âncora velha; P-8 exige a fresca. Corrigido reconstruindo `PROJETO.md` do jeito que o próprio controle valida: `git show HEAD:PROJETO.md` + `git apply` do `.diff` assinado, por cima. P-8 passou depois disso, com o MESMO `.diff`, sem reassinatura — a mudança semântica nunca tinha saído do que foi aprovado, só a parte mecânica (âncora) precisava estar em dia.
+
+**Aplicado e testado: `perimetro.sh` completo, 16 OK · 0 SKIP · 2 PARCIAL · 0 FALHA.** `post-commit` deste mesmo commit já correu com o código novo de verdade — export e upload automático ao Drive dispararam porque o `indice.md` mudou de verdade neste commit (não é mais o efeito colateral de hook rodando do disco antes da aprovação, como em (458): agora o código está no HEAD, committed, é o comportamento real e assinado).
+
+**Par movido para `propostas/aplicadas/`** no mesmo commit. `.githooks/pre-commit` ganha, a partir de agora, a guarda de integridade contra o próprio buraco que a aplicação de (457) tinha exposto — o mecanismo que se protege a si mesmo, ativo desde este commit.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum`/`ssh-keygen -Y verify` ao vivo; reconstrução de `PROJETO.md` a partir de `git show HEAD:PROJETO.md` + `git apply`, replicando exatamente o método do próprio `_p8_arquivo_aprovado`; `perimetro.sh` completo rodado com tudo staged antes de commitar, `P-8` conferido isoladamente antes do relatório geral; `git push` real, confirmado contra `origin/main` (`24c90ad` nos dois lados). Autorização: Humano — "assinado", sobre `pacote-2026-09-18-unificado`.
 
 (460) DIÁRIO — 18/09/2026 · **As 4 propostas pendentes ((456)-(459)) unificadas num `.diff` só, por pedido do Humano — não é concatenação cega: o texto do PROJETO.md precisou ser reescrito, senão o pacote entraria contraditório.**
 

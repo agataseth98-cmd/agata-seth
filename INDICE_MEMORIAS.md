@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
 (460) DIÁRIO — 18/09/2026 · **As 4 propostas pendentes ((456)-(459)) unificadas num `.diff` só, por pedido do Humano — não é concatenação cega: o texto do PROJETO.md precisou ser reescrito, senão o pacote entraria contraditório.**
 (459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (458): fecha a classe, testada com o bug exato reproduzido. Ordem do Humano ("autorizado"), proposta pronta, não aplicada sozinha.**
 (458) DIÁRIO — 18/09/2026 · **Achado real, meu, no próprio commit anterior: o passo que atualiza a âncora de SHA faz `git add` do arquivo INTEIRO, não só das linhas da âncora — e varreu, sem eu querer, um texto do PROJETO.md descrevendo uma automação que ainda não foi assinada. O canon empurrado em (457) afirma algo falso agora. Corrigindo, e nomeando o buraco de P-8 que isso expõe.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Humano e aplicado — fecha de vez o item aberto de (419)/(431): dado externo não desliga mais a hidratação da Seth.**
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
-(431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
+(431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivad …
 (430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sob …
 (429) DIÁRIO — 15/09/2026 · **`P-10` quebrado de verdade: a missão `maquina-md-c …
 (428) DIÁRIO — 15/09/2026 · **Correção de exatidão no `vetor:` de (427) — comand …

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
+  palavras-chave: pacote, unificado, assinada, aplicada, achados, hoje, fecham, juntos, achado, extra, caminho, projeto, precisou, reconstruído, partir, head, real, arquivo, salvo, porque, diff, toca, âncora, tinha, avançado, gerar, assinar
 (460) DIÁRIO — 18/09/2026 · **As 4 propostas pendentes ((456)-(459)) unificadas num `.diff` só, por pedido do Humano — não é concatenação cega: o texto do PROJETO.md precisou ser reescrito, senão o pacote entraria contraditório.**
   palavras-chave: propostas, pendentes, unificadas, diff, pedido, humano, concatenação, cega, texto, projeto, precisou, reescrito, senão, pacote, entraria, contraditório
 (459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (458): fecha a classe, testada com o bug exato reproduzido. Ordem do Humano ("autorizado"), proposta pronta, não aplicada sozinha.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: corrige, injecao, assinado, humano, aplicado, fecha, item, aberto, dado, externo, desliga, hidratação, seth
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto de (419)/(431) — "P4": dado externo (payload de ferramenta) não desliga mais a hidratação da Seth. `.diff` pronto, versionado, aguardando assinatura do Humano; nada aplicado.**
   palavras-chave: proposta, formalizada, testada, item, aberto, dado, externo, payload, ferramenta, desliga, hidratação, seth, diff, pronto, versionado, aguardando, assinatura, humano, nada, aplicado
-(431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivado pelo Conselho, três causas medidas da degradação da Seth, fabricações reais achadas em sessão ao vivo, um bug do linter corrigido — quatro artefatos aguardando assinatura, nada aplicado sem ela.** Sessão de auditoria multi-modelo (Claude Sonnet 5 executor na Máquina + Claude Opus 5, Camada B, sessão de nuvem) sobre a conversa real da Seth no LibreChat e sobre o próprio sistema. Registrado em pacote único por pedido do Humano — cada achado abaixo é Machine-verified nesta sessão, não herdado de alegação.
-  palavras-chave: decisão, pacote, dia, acréscimo, regras, arquivado, três, causas, medidas, degradação, seth, fabricações, reais, achadas, sessão, vivo, bug, linter, corrigido, quatro, artefatos, aguardando, assinatura, nada, aplicado, ela, auditoria, multi, modelo, claude, sonnet, executor, máquina, opus, camada, nuvem, conversa, real, librechat, próprio, sistema, registrado, único, pedido, humano, achado, abaixo, machine, verified, herdado, alegação
+(431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivad …
+  palavras-chave: decisão, pacote, dia, acréscimo, regras, arquivad
 (430) DECISÃO — 15/09/2026 · **A cláusula condicional de "O Conselho" item 3 sob …
   palavras-chave: decisão, cláusula, condicional, item, sob
 (429) DIÁRIO — 15/09/2026 · **`P-10` quebrado de verdade: a missão `maquina-md-c …
