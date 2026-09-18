@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
+  palavras-chave: fase, itens, plano, mitigação, auditoria, marcos, auditados, codar, resultado, real, difere, previsto, registrado, achado, forçado, código
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
   palavras-chave: fase, assinada, aplicada, itens, fecham, código, arquivo, workflow, commit, token, tem, escopo, github, recusou, push, registrado, suavizar, corrigido, virar, canon, empurrado
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: agora, existe, teste, controles, ele, pegou, furo, meu, dia, anterior, correção, imediata, item, mesmo, apontei, causa, raiz, dar, nota, confiabilidade, sistema, nada, repositório, testava, ordem, humano, proposta
 (420) DIÁRIO — 10/09/2026 · **Encerrando as pendências da auditoria: canon reconciliado com a Máquina, atalhos de fato instalados, B6 movido pra horizonte.** Ordem do Humano: *"deixe o B6 como futuro/horizonte, e encerre os outros"*. Sequência da (419 - quatro controles do perímetro não controlavam o que diziam controlar), que consertou os controles; esta fecha o que os controles não pegavam porque é texto, não código.
   palavras-chave: encerrando, pendências, auditoria, canon, reconciliado, máquina, atalhos, fato, instalados, movido, pra, horizonte, ordem, humano, deixe, futuro, encerre, sequência, quatro, controles, perímetro, controlavam, diziam, controlar, consertou, fecha, pegavam, porque, texto, código
-(419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o que diziam controlar.** Auditoria completa por ordem do Humano ("audite o sistema por completo... percebendo e resolvendo falhas de segurança"). Todo achado abaixo foi demonstrado vermelho/verde em clone descartável, nunca só lido. Nenhum era teórico.
-  palavras-chave: quatro, controles, perímetro, controlavam, diziam, controlar, auditoria, completa, ordem, humano, audite, sistema, completo, percebendo, resolvendo, falhas, segurança, achado, abaixo, demonstrado, vermelho, verde, clone, descartável, nunca, lido, era, teórico
+(419) DIÁRIO — 09/09/2026 · **Quatro controles do perímetro não controlavam o qu …
+  palavras-chave: quatro, controles, perímetro, controlavam
 (418) DIÁRIO — 09/09/2026 · **Limpeza pós-aposentadoria dos TES ((417)) + varred …
   palavras-chave: limpeza, pós, aposentadoria, tes, varred
 (417) DIÁRIO — 09/09/2026 · **TES-001 e TES-002 APOSENTADOS** (decisão do Humano …

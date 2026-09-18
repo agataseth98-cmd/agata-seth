@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (447)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (449)).
 
 ## Onde estamos — 17/09/2026
 
@@ -38,6 +38,8 @@ confirmei o arquivo gerado e do tamanho certo.**
 **[Feito] Fase C assinada, aplicada e testada ao vivo em produção** — reiniciei o proxy real, confirmei que ele bloqueia quem não tem a senha, e a Seth respondeu de verdade (resposta real do modelo) através da cadeia inteira já protegida. Descoberta no caminho: o OmniRoute é produto de terceiro, sem código nosso — não dá pra trancar a porta dele por dentro; fechei a parte que é nossa e registrei o resto como pendência conhecida, não escondida. Detalhe: `MEMÓRIAS.md`, entradas (444)/(445)/(446).
 
 **[Quase feito] Fase D assinada e aplicada — falta 1 passo seu, fora do meu alcance.** Achei e fechei de brinde um buraco: a trava que exige sua assinatura pra mudança de comportamento não cobria arquivos do GitHub Actions. Só que na hora de empurrar, o GitHub recusou: o token de acesso não tem permissão pra criar arquivo de automação (`.github/workflows/`), e as duas vezes que você tentou renovar essa permissão não completaram. **Você precisa criar o arquivo `.github/workflows/perimetro.yml` direto no site do GitHub**, colando o conteúdo que já está pronto no seu computador em `.github/workflows/perimetro.yml` — depois disso um `git pull` reconcilia tudo. Sem esse passo, a segunda checagem automática (o ponto principal da Fase D) não existe de verdade ainda. Detalhe: `MEMÓRIAS.md`, entrada (448).
+
+**Fase E, dois dos três itens — conferidos, sem trabalho real neles.** O plano previa cortar texto duplicado das instruções da Seth e juntar 4 arquivos de política num só. Fui checar antes de mexer: as instruções da Seth nunca chegaram a repetir o que os consertos das Fases A-C fizeram (não tinha o que cortar), e juntar os 4 arquivos agora seria o tipo de mudança arriscada demais pro benefício — decisão de adiar, não esquecimento. Detalhe: `MEMÓRIAS.md`, entrada (449). Só falta o item mais arriscado de todos.
 
 ## Onde estamos — 16/09/2026
 

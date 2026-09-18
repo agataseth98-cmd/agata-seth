@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b
-  Escrito em: 17/09/2026 21:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35ad42996559b938dd4ffafe9fbb6177bd09002f
+  Escrito em: 17/09/2026 21:08 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46d43071b858658ee7d1ac6a9e048eb2c1f5ca7b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35ad42996559b938dd4ffafe9fbb6177bd09002f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
+
+**Item 12 (reduzir doutrina textual no gateway) — verificado, sem material pra cortar.** O plano (444) previa cortar da `_DOUTRINA_FIXA` (98 linhas, `redesign/router/seth_gateway.py`) as partes que descrevem controles que as Fases A-D acabaram de mecanizar (egress/SSRF, proveniência, gate interno do `commit_entry`). Lida a doutrina inteira, linha por linha, antes de cortar qualquer coisa: **ela nunca descreveu esses três controles para começo de conversa.** O texto é inteiro sobre Regra 1 (formato de cabeçalho, as duas formas), uso de `maquina_verificar`, leitura parcial, e staleness do vault — nada sobre navegador, egress ou proveniência de dado externo. Não hávia redundância entre doutrina e mecanismo porque a doutrina nunca tratou desse assunto. Forçar um corte aqui seria cosmético, não simplificação de verdade — exatamente o "teatro de simplificação" que a Doutrina de defesa proporcional (PROJETO.md) adverte contra. Item fechado como **verificado, sem ação necessária**, não como pulado.
+
+**Item 11 (manifesto único de política) — escopo reduzido pra o que é seguro fazer agora.** O plano previa unificar `config/portas-agata.txt` (item 9, novo) com a allowlist de domínio do navegador, os padrões de segredo do P-1, e a classificação de "muda comportamento" do P-8 — tudo num arquivo só. Auditado antes de mexer: são 4 sistemas com formatos, consumidores e semânticas diferentes (lista de porta/bind; lista de domínio; regex de segredo; padrões glob de caminho) — forçar isso num arquivo monolítico agora seria o tipo de mudança arriscada que o próprio Marcos citou como sintoma (duplicação virando nova complexidade), não a cura. **Decisão: adiado por cautela, registrado como decisão consciente**, não silêncio — mesma disciplina já usada em (442) pra não unificar P-9 apressado. Quando entrar, entra por partes, cada uma testada isolada, do jeito que (438)-(448) fizeram até aqui — não como um item único de "Fase E".
+
+**O que isto significa pro plano original:** dos 12 itens do Marcos, **10 têm ação real, completa e testada** (1,2,4,5,6,7,8,9 fechados; 3 fechado na parte que é nossa, residual do OmniRoute declarado). Os itens 11 e 12, auditados agora, não tinham o material que o plano presumia — ambos ficam **verificados e registrados**, não implementados por não haver o que implementar sem inventar trabalho. Falta só o **item 10** (modularizar `perimetro.sh`) — o mais arriscado de todos, o único que o próprio plano (444) já previa exigir segunda opinião ou risco assumido por escrito antes do `.diff` final. Decisão de como seguir com ele: pedida ao Humano nesta sessão, fora desta entrada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `redesign/router/seth_gateway.py`, `_DOUTRINA_FIXA` (linhas 92-189) lida por inteiro antes de concluir ausência de material pro corte; `grep` confirmando zero menção a egress/SSRF/proveniência/`_e_comportamento` no texto da doutrina; inventário dos 4 formatos de política hoje (`config/portas-agata.txt`, `~/.config/agata/navegador-dominios-permitidos.txt`, padrões do P-1 em `scripts/varredura_segredo.sh`, `_p8_eh_comportamento`/`_PADROES_COMPORTAMENTO`) conferido antes de decidir adiar a unificação. Autorização: Humano — plano de 5 fases aprovado via `ExitPlanMode`; achado reportado em vez de forçado, por decisão própria dentro do que a auditoria honesta exige (REGRAS, Regra 2).
 
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
 
