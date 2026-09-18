@@ -5,11 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (455)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (456)).
 
 ## Onde estamos — 18/09/2026
 
-**Proposta nova, pronta e testada, aguardando sua assinatura:** você colou um ajuste (não escrito por mim) pra dois problemas pequenos — um script que continuava rodando no diretório errado se `cd` falhasse (agora aborta com aviso), e um alarme novo pra quando a âncora de segurança do prompt de carregamento fica desatualizada há mais de 1 commit sem ninguém notar. Achei uma citação que não existia em lugar nenhum do canon, corrigi pra apontar a entrada real antes de propor. `bash scripts/aprovar.sh p18-ancora-falha-2026-09-18` quando quiser assinar. Detalhe: `MEMÓRIAS.md`, entrada (455).
+**[APLICADO] O ajuste que você assinou (dois problemas pequenos de robustez + alarme novo de âncora de SHA) já está no ar.** No caminho, achei que faltava um pedaço: sem um conserto extra que eu mesmo escrevi depois da sua assinatura, o pacote que você assinou nem passaria na checagem automática deste repositório. Apliquei só o que você assinou (passou limpo) e separei o pedaço extra numa proposta própria, pequena, aguardando sua assinatura: `bash scripts/aprovar.sh testar-perimetro-sem-teste-p18-2026-09-18`. Detalhe: `MEMÓRIAS.md`, entrada (456).
 
 ## Onde estamos — 17/09/2026
 

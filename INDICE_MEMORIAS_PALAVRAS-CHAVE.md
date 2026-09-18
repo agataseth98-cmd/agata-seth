@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(456) DIÁRIO — 18/09/2026 · **`p18-ancora-falha-2026-09-18` assinada e aplicada — e um segundo achado real no processo: o `.diff` assinado, sozinho, nunca passaria no próprio gate deste repositório. Proposta pequena separada, aguardando assinatura própria.**
+  palavras-chave: ancora, falha, assinada, aplicada, segundo, achado, real, processo, diff, assinado, sozinho, nunca, passaria, próprio, gate, deste, repositório, proposta, pequena, separada, aguardando, assinatura, própria
 (455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
   palavras-chave: diff, externo, auditado, benéfico, citação, fabricada, corrigida, propor, pronto, testado, fundo, aguardando, assinatura
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, exatidão, vetor, comando, citado, rodado, autoauditoria, pedida, humano, rodadas, procura, falha, achou, afirma, commit, conferido, git, show, stat, head, separado, fato, aconteceu, próprio, memoria, missoes, imprimiu, estatística, files, changed, insertions, saída, normal, escrever, mesma, evidência, contagem, arquivo, diferente, descrevi
 (427) DIÁRIO — 15/09/2026 · **Nova missão em `memoria/missoes/`: `memoria-claude-code` — só a existência entra aqui, o conteúdo fica na camada privada (regra da própria `INDICE.md`).** Pedido do Humano: tornar minhas (Claude Code) interações acumuladas com ele — hoje um sistema próprio do harness, fora do Agata, em `~/.claude/projects/-home-orusoua/memory/` — acessíveis como banco de dados dentro das regras do Agata, pesquisável por qualquer modelo com acesso à Máquina, não só por mim.
   palavras-chave: nova, missão, memoria, missoes, claude, code, existência, entra, aqui, conteúdo, fica, camada, privada, regra, própria, indice, pedido, humano, tornar, minhas, interações, acumuladas, ele, hoje, sistema, próprio, harness, fora, agata, projects, home, orusoua, memory, acessíveis, banco, dados, dentro, regras, pesquisável, modelo, acesso, máquina, mim
-(426) DIÁRIO — 15/09/2026 · **(425) retratada — confundi "aplicar o rigor do Agata" com "registrar no canon do Agata".** O Humano pediu, na tarefa de ajuste de desempenho de um jogo (explicitamente marcada por ele como fora do desenvolvimento do Agata desde o início): *"utilize o padrão do sistema agata nesta tarefa"*. Li isso como ordem de registro e escrevi (425) — uma entrada inteira sobre um jogo Steam, sem nenhum arquivo de `~/agata` envolvido. Ordem certa era outra: aplicar o MÉTODO (verificar antes de afirmar, não fabricar, propor com evidência) a uma tarefa que continua fora do escopo do canon, não escrever essa tarefa no histórico do projeto.
-  palavras-chave: retratada, confundi, aplicar, rigor, agata, registrar, canon, humano, pediu, tarefa, ajuste, desempenho, jogo, explicitamente, marcada, ele, fora, desenvolvimento, desde, início, utilize, padrão, sistema, ordem, registro, escrevi, entrada, inteira, steam, arquivo, envolvido, certa, era, método, verificar, afirmar, fabricar, propor, evidência, continua, escopo, escrever, histórico, projeto
+(426) DIÁRIO — 15/09/2026 · **(425) retratada — confundi "aplicar o rigor do Aga …
+  palavras-chave: retratada, confundi, aplicar, rigor, aga
 (425) DIÁRIO — 15/09/2026 · **Sessão fora do canon (ajuste de desempenho de jogo …
   palavras-chave: sessão, fora, canon, ajuste, desempenho, jogo
 (424) DIÁRIO — 10/09/2026 · **`sync: PASS` nu — a Seth truncou a evidência, e ne …
