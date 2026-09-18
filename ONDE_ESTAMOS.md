@@ -5,11 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (456)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (457)).
 
 ## Onde estamos — 18/09/2026
 
-**[APLICADO] O ajuste que você assinou (dois problemas pequenos de robustez + alarme novo de âncora de SHA) já está no ar.** No caminho, achei que faltava um pedaço: sem um conserto extra que eu mesmo escrevi depois da sua assinatura, o pacote que você assinou nem passaria na checagem automática deste repositório. Apliquei só o que você assinou (passou limpo) e separei o pedaço extra numa proposta própria, pequena, aguardando sua assinatura: `bash scripts/aprovar.sh testar-perimetro-sem-teste-p18-2026-09-18`. Detalhe: `MEMÓRIAS.md`, entrada (456).
+**[APLICADO] O ajuste que você assinou (dois problemas pequenos de robustez + alarme novo de âncora de SHA) já está no ar.** No caminho, achei que faltava um pedaço: sem um conserto extra que eu mesmo escrevi depois da sua assinatura, o pacote que você assinou nem passaria na checagem automática deste repositório. Apliquei só o que você assinou (passou limpo) e separei o pedaço extra numa proposta própria, pequena, aguardando sua assinatura: `bash scripts/aprovar.sh testar-perimetro-sem-teste-p18-2026-09-18`.
+
+**[FEITO] Pedido de sincronizar tudo (repositório, Drive, Obsidian) — checado, e um problema real corrigido.** O arquivo que vai pro Google Drive (`indice_export.md`) estava parado desde 28/08, 155 entradas atrás do canon — ninguém tinha mandado de novo. Já regenerei e reenviei. Resto do relatório que você colou: a maioria já estava documentada no próprio sistema, não era descoberta nova.
+
+**Proposta nova, pronta e testada:** você escolheu automatizar esse envio, dentro do próprio processo de cada commit, só quando o conteúdo realmente muda. Testei 5 cenários (envio normal, sem mudança, mudança de verdade, falha de rede, e repetir depois da falha) — todos certos. `bash scripts/aprovar.sh automatiza-export-drive-2026-09-18` quando quiser assinar. Detalhe: `MEMÓRIAS.md`, entrada (457).
 
 ## Onde estamos — 17/09/2026
 

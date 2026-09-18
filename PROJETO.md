@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e0c2ad1a584541d24b863f8b1ba3c868fd19d243
-  Escrito em: 18/09/2026 12:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43b870af398cf9ab18bba7a3422c7f276c75aec1
+  Escrito em: 18/09/2026 12:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -446,7 +446,8 @@ MEMÓRIAS (296)/(298)/(299)/(300). Camada de consulta sobre o canon, separada do
 - `scripts/gerar_indice_derivado.py` → `memoria/missoes/agata-sistema/derivado/{indice.md, manifesto.md}`. `indice.md` = REGRAS + PROJETO na íntegra + os títulos das entradas de MEMÓRIAS (sem corpo), mais recente primeiro. Reconstrução byte a byte antes de gravar — se sobrar um byte fora do boilerplate fixo + canon, aborta. `manifesto.md` traz o sha256 das 3 fontes. Determinístico (carimbo de commit).
 - `scripts/consultar_indice.py <palavras>` extrai trechos do `indice.md` em texto plano. É como o executor local entrega recorte pra um modelo em nuvem — o modelo não lê o índice nem `memoria/missoes/` direto.
 - **Export pro Drive:** o `indice.md` não sobe pelo cano — contém o PROJETO.md verbatim, que nomeia variáveis de ambiente (`ZHIPU_API_KEY` etc.), e a varredura de segredo aborta no nome pelado (falso positivo; o scanner não se afrouxa). `scripts/preparar_export_indice.py` lê o `indice.md` e escreve `indice_export.md` com esses nomes mascarados como `[variável de ambiente]`; o original fica intacto, e o script só grava se o resultado passar em todos os padrões de `PADROES_SEGREDO`. Fluxo: `gerar_indice_derivado.py` → `preparar_export_indice.py` → `subir_esfera_projeto.py memoria/missoes/agata-sistema/derivado/indice_export.md`. No NotebookLM, usa-se o `indice_export.md` baixado do Drive; `manifesto.md` também sobe, como carimbo de proveniência.
-- Regeneração automática: `.githooks/post-commit` (passo 3, MEMÓRIAS (301)) refaz `indice.md`/`manifesto.md` a cada commit, fail-soft, sob P-8 — espelho do passo 2 (vault Obsidian). Regeneração sob demanda antes de um export segue disponível (`gerar_indice_derivado.py` direto). O upload pro Drive nunca é automático.
+- Regeneração automática: `.githooks/post-commit` (passo 3, MEMÓRIAS (301)) refaz `indice.md`/`manifesto.md` a cada commit, fail-soft, sob P-8 — espelho do passo 2 (vault Obsidian). Regeneração sob demanda antes de um export segue disponível (`gerar_indice_derivado.py` direto).
+- **Upload pro Drive, automático desde 18/09/2026 (ordem do Humano, achado de `indice_export.md` defasado 155 entradas atrás do canon).** `.githooks/post-commit` (passo 3b) roda `preparar_export_indice.py` + `subir_esfera_projeto.py` (`indice_export.md` e `manifesto.md`) só quando o sha256 de `indice.md` muda em relação ao último envio — marcador em `~/.cache/agata/indice-export-ultimo-sha`, fora do repo, evita reenviar em commit que não toca canon. Fail-soft: falha de rede/token/varredura de segredo vira `AVISO`, nunca bloqueia o commit — mesmo padrão dos outros passos do `post-commit`. Regeneração/envio manual seguem disponíveis, sem mudança.
 
 ### Mão única refinada
 A política deixa de ser "lê, nunca escreve fato de volta" e passa a ser: **nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta. Nada disso é escrita de fato. Nenhum resultado retorna automaticamente a `REGRAS.md`, `PROJETO.md` ou `MEMÓRIAS.md`.

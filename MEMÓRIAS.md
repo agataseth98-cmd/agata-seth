@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e0c2ad1a584541d24b863f8b1ba3c868fd19d243
-  Escrito em: 18/09/2026 12:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43b870af398cf9ab18bba7a3422c7f276c75aec1
+  Escrito em: 18/09/2026 12:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0c2ad1a584541d24b863f8b1ba3c868fd19d243/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43b870af398cf9ab18bba7a3422c7f276c75aec1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(457) DIÁRIO — 18/09/2026 · **Coerência canon/Drive/Obsidian verificada; achado real (`indice_export.md` 155 entradas atrás do canon, defasado desde 28/08) corrigido; automação do upload pro Drive desenhada, testada e proposta — não aplicada sozinha.**
+
+**Sincronização conferida, item por item, na Máquina:** `git rev-parse HEAD` local = `git ls-remote origin main` — sem divergência. `sha256sum` dos 3 canônicos medido ao vivo. Âncora de SHA idêntica nos três arquivos (REGRAS/PROJETO/MEMÓRIAS), 1 commit atrasada, dentro do normal. Vault Obsidian: P-10 `OK`, confere com HEAD.
+
+**Achado real, verificado antes de aceitar:** um relatório colado (dado externo, Regra 2 — origem não é o Humano, é uma ferramenta terceira relayada por ele) listou 5 "inconsistências". Verificação item por item: **4 das 5 já estavam documentadas no próprio canon** (atraso estrutural da âncora, bloqueio de `api.github.com` por bot-detection, lacuna do log da consolidação, e a permanência de referências antigas a "janela de 30 linhas" — esta última NÃO é bug, é o append-only funcionando: entrada antiga registra o que era verdade quando escrita, Regra 4). **Só o achado nº1 era real e novo:** `indice_export.md` (o que sobe pro Drive) era um snapshot de 28/08/2026, cobrindo até a entrada (299) — o canon já ia até (454)/(455) no momento da checagem, 155+ entradas de defasagem. Causa: `indice.md` local é regenerado a cada commit (post-commit, passo 3) desde (301), mas o upload em si sempre foi manual, e ninguém tinha rodado `preparar_export_indice.py`/`subir_esfera_projeto.py` desde aquela data.
+
+**Corrigido nesta sessão:** `preparar_export_indice.py` rodado (2 nomes de variável mascarados, `ZHIPU_API_KEY`, 16/16 padrões de segredo OK) e `subir_esfera_projeto.py` enviou `indice_export.md` (225.423 B) e `manifesto.md` de volta ao Drive — `upload.log` confirma os dois envios às 12:07.
+
+**Automação desenhada e testada, não aplicada sem assinatura:** o Humano escolheu, entre 4 opções oferecidas, automatizar o upload dentro do próprio `.githooks/post-commit` (passo 3b, novo), disparando só quando o sha256 de `indice.md` muda em relação a um marcador local (`~/.cache/agata/indice-export-ultimo-sha`, fora do repo) — evita reenviar em commit que não toca canon. Fail-soft, mesmo padrão dos passos 1-3a: falha de rede/token/varredura de segredo vira `AVISO`, nunca bloqueia o commit.
+
+**Testado com scripts reais substituídos por stubs, em repositório descartável** (`git init` próprio, `core.hooksPath .githooks`, `HOME` isolado): (1) primeira execução, sem marcador → envia, marcador escrito; (2) mesmo conteúdo → não chama nada de novo (SKIP real, não só teórico); (3) conteúdo mudou → envia de novo; (4) envio falha (simulado) → `AVISO`, commit segue (`exit 0`), marcador NÃO atualiza (não marca como enviado o que falhou); (5) mesmo conteúdo do caso 4, falha removida → tenta de novo (retry real, não desiste em silêncio). Cinco casos, cinco resultados batendo o esperado.
+
+**PROJETO.md corrigido no mesmo pacote:** a frase "o upload pro Drive nunca é automático" ficaria falsa se este `.diff` entrasse sem atualizar o texto — corrigido junto, mesmo `.diff`.
+
+**Estado: `propostas/automatiza-export-drive-2026-09-18.diff` pronto, versionado, sem `APROVADO-` — aguardando `bash scripts/aprovar.sh automatiza-export-drive-2026-09-18`.**
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git rev-parse`/`git ls-remote` ao vivo; `sha256sum` dos 3 canônicos; `grep` das 5 alegações do relatório contra MEMÓRIAS/PROJETO, confirmando 4/5 já documentadas; `ls -la`/conteúdo real de `indice_export.md` antes da correção, datado 28/08; `preparar_export_indice.py` e `subir_esfera_projeto.py` rodados de verdade, saída lida; `upload.log` conferido depois; `bash -n` no `post-commit` novo; 5 casos de teste com scripts stub num repositório git isolado (`core.hooksPath`, `HOME` fake), saída de cada caso lida linha a linha antes de aceitar. Autorização: Humano — "sincronize... tudo deve estar coerente. E automatize este processo", escolha explícita entre 4 opções oferecidas (AskUserQuestion) pela automação dentro do `post-commit`.
 
 (456) DIÁRIO — 18/09/2026 · **`p18-ancora-falha-2026-09-18` assinada e aplicada — e um segundo achado real no processo: o `.diff` assinado, sozinho, nunca passaria no próprio gate deste repositório. Proposta pequena separada, aguardando assinatura própria.**
 
