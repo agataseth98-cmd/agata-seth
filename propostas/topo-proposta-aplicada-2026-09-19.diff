@@ -1,0 +1,68 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 86741fc..8602656 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -128,6 +128,15 @@ _DOUTRINA_FIXA = (
+     "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
+     "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
+     "número de memória.\n"
++    "— **TOPO-PROPOSTA-JA-APLICADA:** se essa linha vier no bloco de estado, o "
++    "texto da entrada do topo (ex.: \"aguardando assinatura\") já está "
++    "desatualizado — a proposta citada foi assinada e aplicada DEPOIS de a "
++    "entrada ter sido escrita, e a entrada não ganha correção própria (Regra "
++    "4: correção é entrada nova, nunca edição do texto existente). Copie a "
++    "entrada normalmente, mas não afirme o status dela como atual — diga que "
++    "está aplicada, apontando pra esta linha. Achado auditando você mesma, "
++    "MEMÓRIAS (464)/(465): sem isto, você repetiria \"aguardando assinatura\" "
++    "pra sempre, mesmo commits depois de já resolvido.\n"
+     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
+     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
+     "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
+@@ -218,7 +227,7 @@ def _estado() -> str:
+         linhas = [l for l in r.stdout.splitlines()
+                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
+                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
+-                                    "HASH-ESTADO:"))]
++                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:"))]
+         return "\n".join(linhas)
+     except Exception:
+         return ""
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 1113db4..15c291c 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -94,6 +94,24 @@ for d in propostas/*.diff; do
+ done
+ shopt -u nullglob
+ 
++# --- TOPO-PROPOSTA-JA-APLICADA: a entrada do topo cita uma proposta que já
++# saiu de propostas/ pra propostas/aplicadas/? (achado auditando um
++# carregamento real da Seth, MEMÓRIAS (464)/(465)). Aplicar uma proposta
++# assinada não ganha entrada própria em MEMÓRIAS (Regra 4: correção é entrada
++# nova, nunca edição do texto existente) -- então o topo pode dizer
++# "aguardando assinatura" bem depois de já ter sido assinada e aplicada, sem
++# nenhum sinal disso pra quem só lê o topo (a Seth, ou qualquer modelo sem
++# `git log`). Heurística, não prova: procura nomes entre crases no topo que
++# batam com um `.diff` em propostas/aplicadas/. Nome coincidente por acaso é
++# o único falso-positivo esperado -- por isso isto é só um aviso, nunca falha.
++topo_proposta_aplicada=""
++for _nome_topo in $(grep -oE '`[a-zA-Z0-9_-]+`' <<<"$topo_linha" | tr -d '`'); do
++  if [ -f "propostas/aplicadas/${_nome_topo}.diff" ]; then
++    topo_proposta_aplicada="$_nome_topo"
++    break
++  fi
++done
++
+ # TES-002 aposentado em 09/09/2026 (MEMÓRIAS (417)) — não há mais linha de
+ # status de nonce no eco. A checagem de hidratação velha agora é `sync:` +
+ # HASH-ESTADO + IDADE-HIDRATACAO abaixo.
+@@ -147,7 +165,8 @@ TOPO-MEMÓRIAS: $topo_linha
+ $sync_linha
+ IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+-HORA-MAQUINA: $hora_maquina
++${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
++}HORA-MAQUINA: $hora_maquina
+ HASH-ESTADO: $hash_estado
+ --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e
+ --- diz em 1 linha por que o estado está coerente. O Humano confere e confirma.

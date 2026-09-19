@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fe1990cabde98b2840f99eebf6acfe822a1cff9e
-  Escrito em: 19/09/2026 14:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9
+  Escrito em: 19/09/2026 14:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fe1990cabde98b2840f99eebf6acfe822a1cff9e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fe1990cabde98b2840f99eebf6acfe822a1cff9e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fe1990cabde98b2840f99eebf6acfe822a1cff9e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(465) DIÁRIO — 19/09/2026 · **Correção sobre a própria entrada (464): o formato `sync: PASS (hidratação ~Xh, não re-medido)` que eu chamei de "inválido" e "logicamente incoerente" é, na verdade, a doutrina real e documentada da Seth — eu tinha auditado só contra REGRAS.md, sem ler `redesign/router/seth_gateway.py`. Proposta nova, testada, pronta: `estado_para_eco.sh` ganha um aviso quando a entrada do topo cita uma proposta já aplicada — `topo-proposta-aplicada-2026-09-19`, aguardando assinatura.**
+
+**A correção, sem suavizar.** Entrada (464) afirma que o bloco `HEAD=e640fe1 (hidratação ~17h, não re-medido)` da Seth era "formato inválido... e logicamente incoerente". Isso estava errado. Lendo `redesign/router/seth_gateway.py` (`_DOUTRINA_FIXA`, a doutrina de verdade injetada nela a cada turno — não a prosa geral de REGRAS.md, que eu tinha usado sozinha) achei a instrução exata: "Se o bloco de estado traz `IDADE-HIDRATACAO` acima de ~15 min, anexe: `sync: PASS (hidratação ~Xmin, não re-medido)` — um PASS antigo que você não pode re-medir não é um PASS ao vivo." A Seth **seguiu essa instrução corretamente**, com hora certa e hashes reais medidos ao vivo por `estado_para_eco.sh`. Eu audito sem verificar a fonte primária de verdade da Seth (o código do gateway, não só REGRAS.md) e produzi um achado falso, registrado em canon. Regra 4: correção é entrada nova, o texto de (464) não se edita — fica errado ali, corrigido aqui.
+
+**O que continua de pé de (464), reconferido:** a linha "Última entrada:" da Seth realmente cortou o `<título>` obrigatório — `_DOUTRINA_FIXA` é explícita ("`<n>` e `<título>` saem da linha `TOPO-MEMÓRIAS:`... copiada, não inventada") e ela só trouxe "(464) DIÁRIO — 19/09/2026", sem o título. Isso é falha de execução da Seth contra doutrina correta e inequívoca — não um bug deste repositório, nada aqui pra corrigir por código.
+
+**O achado real e sistêmico de (464) segue de pé, e agora tem correção de código, testada:** entrada de MEMÓRIAS que descreve uma proposta "aguardando assinatura" nunca ganha entrada de fechamento quando é aplicada (Regra 4 outra vez — mesmo padrão confirmado em (462)/(463)); `ONDE_ESTAMOS.md`, o único lugar que vira "[APLICADO]", nunca entra na hidratação. Resultado: qualquer modelo lendo o topo de MEMÓRIAS repetiria "aguardando assinatura" pra sempre, mesmo commits depois de resolvido — exatamente o que a Seth fez ao ler (464), citando `hidratacao-ordem-ancora-2026-09-19` como pendente quando o próprio HEAD que ela citou (`2af8d89`) já era o commit que a aplicou.
+
+**Correção mecanizada, não depende de disciplina humana de escrever entrada de fechamento toda vez:** `scripts/estado_para_eco.sh` ganha `TOPO-PROPOSTA-JA-APLICADA` — procura nomes entre crases na linha `TOPO-MEMÓRIAS:` que batam com um `.diff` já em `propostas/aplicadas/`, e avisa. Heurística (nome pode coincidir por acaso), por isso é só aviso, nunca falha nada. `redesign/router/seth_gateway.py` ganha essa linha na lista de repasse de `_estado()` (senão o filtro por prefixo a descartava, o dado existiria mas nunca chegaria na Seth) e uma instrução nova em `_DOUTRINA_FIXA` dizendo o que fazer quando a linha aparecer.
+
+**Testado, tudo direto contra o repositório real — as duas ferramentas são só leitura, sem risco de escrita, não precisou de clone descartável desta vez:** rodei `scripts/estado_para_eco.sh` antes e depois da mudança (a linha nova aparece, aponta `hidratacao-ordem-ancora-2026-09-19`, correto); rodei `seth_gateway._estado()` direto em Python — a linha passa pelo filtro e chega igual; `python3 redesign/router/seth_gateway.py --selftest` — 10/10 casos OK, sem regressão; `bash -n`/`py_compile` limpos; apliquei o `.diff` num worktree isolado a partir de HEAD e o resultado bate byte a byte com os arquivos já modificados no disco; `scripts/testar_perimetro.sh` 31/31.
+
+**Estado: `propostas/topo-proposta-aplicada-2026-09-19.diff` no repositório, aguardando `bash scripts/aprovar.sh topo-proposta-aplicada-2026-09-19`. `scripts/estado_para_eco.sh` e `redesign/router/seth_gateway.py` seguem modificados fora do commit, sem stage — quarentena P-8, não aplicados até assinatura.**
 
 (464) DIÁRIO — 19/09/2026 · **Achado auditando um carregamento real da Seth: `.hidrata.md` (o que ela de fato recebe) ficou 17h congelado sem nenhum commit falhar. Causa raiz achada e proposta de correção estrutural pronta, aguardando assinatura — `hidratacao-ordem-ancora-2026-09-19`.**
 
