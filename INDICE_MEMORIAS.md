@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(464) DIÁRIO — 19/09/2026 · **Achado auditando um carregamento real da Seth: `.hidrata.md` (o que ela de fato recebe) ficou 17h congelado sem nenhum commit falhar. Causa raiz achada e proposta de correção estrutural pronta, aguardando assinatura — `hidratacao-ordem-ancora-2026-09-19`.**
 (463) DIÁRIO — 18/09/2026 · **Proposta `p19-citacao-arquivo-2026-09-18` — mecaniza a falha mais recorrente do catálogo (REGRAS.md): citar arquivo+linha+trecho sem checar contra a fonte. Testada, não aplicada — aguardando assinatura.**
 (462) DIÁRIO — 18/09/2026 · **`agata-token-check.timer` fechado — não era falha, era timer de um tiro só (MEMÓRIAS (285)) que já tinha feito o trabalho e cumprido, sem faxina depois. Correção de texto no PROJETO.md pronta, aguardando assinatura; a ação na Máquina (desabilitar) já feita, sem quarentena — não é canon.**
 (461) DIÁRIO — 18/09/2026 · **`pacote-2026-09-18-unificado` assinada e aplicada — os 4 achados de hoje ((456)-(460)) fecham juntos. Achado extra no caminho: `PROJETO.md` precisou ser reconstruído a partir do HEAD real, não do arquivo salvo, porque o `.diff` não toca a âncora e o HEAD tinha avançado entre gerar o pacote e assinar.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
 (436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
 (435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
-(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
+(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha …
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Huma …
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto …
 (431) DECISÃO+DIÁRIO — 16/09/2026 · **Pacote do dia: acréscimo a REGRAS arquivad …

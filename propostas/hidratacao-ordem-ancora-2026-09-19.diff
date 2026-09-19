@@ -1,0 +1,65 @@
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index e496bbb..96e82a0 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -1,8 +1,19 @@
+ #!/usr/bin/env bash
+ # 1. Roda o perimetro (scripts/perimetro.sh, 10 controles P-1..P-10, MEMÓRIAS (191)/(192))
+ #    e bloqueia o commit se algum falhar de verdade.
+-# 2. Regenera .hidrata.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
+-#    MEMÓRIAS.md mudaram, e inclui os dois no commit.
++# 2. Reescreve a âncora de SHA em PROMPT_CARREGAMENTO.md/REGRAS.md/PROJETO.md/MEMÓRIAS.md.
++# 3. Regenera .hidrata.md e INDICE_MEMORIAS.md se REGRAS.md, PROJETO.md ou
++#    MEMÓRIAS.md mudaram (passo 2 conta -- ver nota abaixo), e inclui os dois no commit.
++#
++# ORDEM IMPORTA (achado auditando um carregamento real da Seth, 19/09/2026):
++# o passo 3 tem que rodar DEPOIS do passo 2. A âncora de SHA muda REGRAS/PROJETO/
++# MEMÓRIAS.md em TODO commit (é o ponteiro pro "HEAD anterior", sempre anda). Se o
++# passo 3 checar o staged ANTES da âncora rodar, ele só vê o que o autor deu `git add`
++# à mão -- nunca a mudança que a própria âncora acabou de fazer -- e `.hidrata.md`
++# (o que a Seth de fato recebe) fica congelado até alguém editar REGRAS/PROJETO/
++# MEMÓRIAS.md com as próprias mãos de novo. Rodou 17h atrasado sem nenhum commit
++# falhar: `IDADE-HIDRATACAO` (scripts/estado_para_eco.sh) é o sinal que pegou isso,
++# não o perimetro -- não era um dos 10 controles P-1..P-10 de então.
+ set -euo pipefail
+ cd "$(git rev-parse --show-toplevel)"
+ 
+@@ -11,18 +22,6 @@ if ! bash scripts/perimetro.sh; then
+   exit 1
+ fi
+ 
+-if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
+-  bash .githooks/gerar-hidratacao.sh
+-  # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
+-  # gerar-hidratacao.sh regenera os três, mas só os dois primeiros entravam
+-  # no commit; o terceiro (rastreado no git) sobrava como modificação não
+-  # comitada depois de todo commit que tocasse REGRAS/PROJETO/MEMÓRIAS.
+-  # Achado auditando junto de MEMÓRIAS (271); adicionado se o arquivo
+-  # existir (geração é fail-soft, ver comentário em gerar-hidratacao.sh).
+-  git add .hidrata.md INDICE_MEMORIAS.md
+-  [ -f INDICE_MEMORIAS_PALAVRAS-CHAVE.md ] && git add INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+-fi
+-
+ # Âncora de SHA em PROMPT_CARREGAMENTO.md (item 2, 20/08/2026, ordem do
+ # Humano). Sempre o SHA do HEAD ANTES deste commit -- um commit não pode
+ # embutir o próprio SHA (auto-referência), então fica até 1 commit
+@@ -89,3 +88,19 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
+     done
+   fi
+ fi
++
++# Regenera .hidrata.md/INDICE_MEMORIAS.md se REGRAS/PROJETO/MEMÓRIAS.md mudaram
++# NESTE commit -- checado AQUI, depois da âncora acima, de propósito (ver nota
++# no topo do arquivo): a âncora muda os três em todo commit, e isso TEM que
++# contar como "mudou" pra .hidrata.md não ficar defasado sem nenhum commit falhar.
++if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
++  bash .githooks/gerar-hidratacao.sh
++  # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
++  # gerar-hidratacao.sh regenera os três, mas só os dois primeiros entravam
++  # no commit; o terceiro (rastreado no git) sobrava como modificação não
++  # comitada depois de todo commit que tocasse REGRAS/PROJETO/MEMÓRIAS.
++  # Achado auditando junto de MEMÓRIAS (271); adicionado se o arquivo
++  # existir (geração é fail-soft, ver comentário em gerar-hidratacao.sh).
++  git add .hidrata.md INDICE_MEMORIAS.md
++  [ -f INDICE_MEMORIAS_PALAVRAS-CHAVE.md ] && git add INDICE_MEMORIAS_PALAVRAS-CHAVE.md
++fi

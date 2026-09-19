@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(464) DIÁRIO — 19/09/2026 · **Achado auditando um carregamento real da Seth: `.hidrata.md` (o que ela de fato recebe) ficou 17h congelado sem nenhum commit falhar. Causa raiz achada e proposta de correção estrutural pronta, aguardando assinatura — `hidratacao-ordem-ancora-2026-09-19`.**
+  palavras-chave: achado, auditando, carregamento, real, seth, hidrata, ela, fato, recebe, ficou, congelado, commit, falhar, causa, raiz, achada, proposta, correção, estrutural, pronta, aguardando, assinatura, hidratacao, ordem, ancora
 (463) DIÁRIO — 18/09/2026 · **Proposta `p19-citacao-arquivo-2026-09-18` — mecaniza a falha mais recorrente do catálogo (REGRAS.md): citar arquivo+linha+trecho sem checar contra a fonte. Testada, não aplicada — aguardando assinatura.**
   palavras-chave: proposta, citacao, arquivo, mecaniza, falha, recorrente, catálogo, regras, citar, linha, trecho, checar, contra, fonte, testada, aplicada, aguardando, assinatura
 (462) DIÁRIO — 18/09/2026 · **`agata-token-check.timer` fechado — não era falha, era timer de um tiro só (MEMÓRIAS (285)) que já tinha feito o trabalho e cumprido, sem faxina depois. Correção de texto no PROJETO.md pronta, aguardando assinatura; a ação na Máquina (desabilitar) já feita, sem quarentena — não é canon.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: registra, incidente, boot, assinado, aplicado, projeto, máquinas, predator, ganha, registro, hoje, citando
 (435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do `mkinitcpio` + migração forçada Limine→GRUB. Auditado na Máquina depois do conserto: a recuperação do Humano bateu com os fatos, e achei um buraco real que o relatório dele não via — fechado na mesma sessão.**
   palavras-chave: predator, bootava, corrompimento, presets, mkinitcpio, migração, forçada, limine, grub, auditado, máquina, conserto, recuperação, humano, bateu, fatos, achei, buraco, real, relatório, dele, fechado, mesma, sessão
-(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha o texto pendente que (433) deixou de fora de propósito.** PROJETO.md, "Estado dos bugs e dos testes", passa a marcar `_e_chamada_utilitaria()` como FECHADO em vez de ABERTO, citando (433) e a proposta assinada.
-  palavras-chave: fecha, projeto, assinado, aplicado, texto, pendente, deixou, fora, propósito, estado, bugs, testes, passa, marcar, chamada, utilitaria, fechado, aberto, citando, proposta, assinada
+(434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha …
+  palavras-chave: fecha, projeto, assinado, aplicado
 (433) DIÁRIO — 17/09/2026 · **`corrige-p4-injecao-2026-09-17` assinado pelo Huma …
   palavras-chave: corrige, injecao, assinado, huma
 (432) DIÁRIO — 17/09/2026 · **Proposta formalizada e testada para o item aberto …
