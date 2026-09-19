@@ -26,18 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9c0891ba11355bc3e51d9f96e0510da9635c6be8
-  Escrito em: 19/09/2026 15:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6c88c099d0c76aa7e4946624fe257e125f76534a
+  Escrito em: 19/09/2026 15:31 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(467) DIÁRIO — 19/09/2026 · **Segunda rodada de verificação do Conselho Remoto (467, continuação de (466)), pedido do próprio Humano ("rerode a tarefa"): mais 3 chamadas reais, 3/3 sucesso de novo. `huggingface` falhou com o MESMO erro 401 duas vezes seguidas — achado de (466) confirmado, não é transitório. `zhipu` falhou de novo, mas com sintoma diferente (529 sobrecarga, não 502 timeout) — instável, não bloqueado como `cerebras`/`huggingface`.**
+
+**Resultado: 3/3 sucesso — `gemini` → `mistral` → `gemini`.** `cerebras` seguia em cooldown (ainda dentro das 6h do teto, não pôde ser re-testado). `huggingface` falhou de novo, HTTP 401, mensagem idêntica à de (466) ("No active credentials for provider: huggingface") — duas ocorrências seguidas com o mesmo erro exato é o suficiente pra descartar "azar transitório": é configuração quebrada no OmniRoute pra esse provider, não instabilidade de rede. `zhipu` falhou de novo, mas desta vez HTTP 529 ("service may be temporarily overloaded") — sintoma diferente do 502/ETIMEDOUT de (466), o que aponta pra instabilidade real do provedor (zhipu/z.ai), não um bloqueio fixo como os outros dois.
+
+**P-15 seguiu OK** (2 famílias com sucesso em 24h) depois desta rodada também. As duas famílias saudáveis (`gemini`, `mistral`) sustentaram 5/5 chamadas bem-sucedidas nas duas rodadas de hoje, sem exceção. Mesma disciplina de (466): nenhuma escrita fora de `memoria/missoes/conselho-remoto/`.
 
 (466) DIÁRIO — 19/09/2026 · **Mecanismo do Conselho Remoto verificado ao vivo, 3 chamadas reais, não simuladas — funciona de ponta a ponta. O AVISO (P-15) que persistiu o dia inteiro era "ninguém chamou em 24h", não "está quebrado". Dois achados reais de saúde por família no caminho: `cerebras/gemma-4-31b` no teto do circuit breaker (bloqueio persistente Cloudflare) e `huggingface/...Llama-3.3-70B` com credencial ausente no OmniRoute (401), não esgotamento normal de cota.**
 
