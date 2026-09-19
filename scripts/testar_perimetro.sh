@@ -158,6 +158,7 @@ declare -A SEM_TESTE=(
   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
   [P-18]="so' emite linha 'AVISO (P-18): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15, nao falta de reprodutibilidade: p18_ancora_falha() foi testada isolada, 6 casos (sem log, ancora em dia, defasagem normal, defasagem de alarme, linha malformada, log com duas linhas), fora deste harness, na auditoria que introduziu o controle (MEMORIAS (455))"
+  [P-19]="so' emite linha 'AVISO (P-19): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15/P-18, nao falta de reprodutibilidade: p19_citacao_arquivo() e o verificador que ela chama (scripts/verificar_citacao_arquivo.py) foram testados isolados, fora deste harness -- 5 casos sinteticos (citacao real, citacao fabricada, arquivo inexistente, linha off-by-one, arquivo sem extensao) mais uma corrida contra o documento real da minuta GLM v2, que reproduziu o erro genuino e tambem revelou o falso-positivo ja documentado no docstring do script"
   [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
 )

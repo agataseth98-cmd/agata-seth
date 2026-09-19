@@ -55,6 +55,7 @@ source "$_PERIMETRO_DIR/perimetro/p15_roster_remoto.sh"
 source "$_PERIMETRO_DIR/perimetro/p16_testes_dos_controles.sh"
 source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
 source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
+source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -315,6 +316,12 @@ main() {
 
   cabecalho "P-18" "Âncora de SHA não fica fail-soft esquecida" "MEMÓRIAS (277) -- fail-soft da âncora, detector textual não mecanizado até agora"
   p18_ancora_falha
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
+  echo
+
+  cabecalho "P-19" "Citação de arquivo:linha em entrada nova de MEMÓRIAS confere contra a fonte real" "REGRAS, Catálogo de falhas conhecidas -- família (59)-(250)/(251), 8/20 do catálogo"
+  p19_citacao_arquivo
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
   echo
