@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(466) DIÁRIO — 19/09/2026 · **Mecanismo do Conselho Remoto verificado ao vivo, 3 chamadas reais, não simuladas — funciona de ponta a ponta. O AVISO (P-15) que persistiu o dia inteiro era "ninguém chamou em 24h", não "está quebrado". Dois achados reais de saúde por família no caminho: `cerebras/gemma-4-31b` no teto do circuit breaker (bloqueio persistente Cloudflare) e `huggingface/...Llama-3.3-70B` com credencial ausente no OmniRoute (401), não esgotamento normal de cota.**
+  palavras-chave: mecanismo, remoto, verificado, vivo, chamadas, reais, simuladas, funciona, ponta, aviso, persistiu, dia, inteiro, era, ninguém, chamou, quebrado, achados, saúde, família, caminho, cerebras, gemma, teto, circuit, breaker, bloqueio, persistente, cloudflare, huggingface, llama, credencial, ausente, omniroute, esgotamento, normal, cota
 (465) DIÁRIO — 19/09/2026 · **Correção sobre a própria entrada (464): o formato `sync: PASS (hidratação ~Xh, não re-medido)` que eu chamei de "inválido" e "logicamente incoerente" é, na verdade, a doutrina real e documentada da Seth — eu tinha auditado só contra REGRAS.md, sem ler `redesign/router/seth_gateway.py`. Proposta nova, testada, pronta: `estado_para_eco.sh` ganha um aviso quando a entrada do topo cita uma proposta já aplicada — `topo-proposta-aplicada-2026-09-19`, aguardando assinatura.**
   palavras-chave: correção, própria, entrada, formato, sync, pass, hidratação, medido, chamei, inválido, logicamente, incoerente, verdade, doutrina, real, documentada, seth, tinha, auditado, contra, regras, ler, redesign, router, gateway, proposta, nova, testada, pronta, estado, eco, ganha, aviso, topo, cita, aplicada, aguardando, assinatura
 (464) DIÁRIO — 19/09/2026 · **Achado auditando um carregamento real da Seth: `.hidrata.md` (o que ela de fato recebe) ficou 17h congelado sem nenhum commit falhar. Causa raiz achada e proposta de correção estrutural pronta, aguardando assinatura — `hidratacao-ordem-ancora-2026-09-19`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, cobre, itens, egress, anti, ssrf, proveniência, dado, externo, commit, entry, transacional, gate, interno, achado, colateral, bug, pré, existente, impedia, posicao, apos, marcador, funcionar, sempre, corrigido, junto
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, antes do incidente de boot) — verificada item por item na Máquina, camada C da Cadeia de auditoria. Sete achados confirmados por código/config real, não por confiar no texto dele; dois descartes dele também confirmados corretos.**
   palavras-chave: auditoria, externa, marcos, snapshot, incidente, boot, verificada, item, máquina, camada, cadeia, sete, achados, confirmados, código, config, real, confiar, texto, dele, descartes, corretos
-(436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e aplicado — PROJETO.md, "Máquinas" > Predator, ganha o registro do incidente de hoje, citando (435).**
-  palavras-chave: registra, incidente, boot, assinado, aplicado, projeto, máquinas, predator, ganha, registro, hoje, citando
+(436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e ap …
+  palavras-chave: registra, incidente, boot, assinado
 (435) DIÁRIO — 17/09/2026 · **Predator não bootava — corrompimento de presets do …
   palavras-chave: predator, bootava, corrompimento, presets
 (434) DIÁRIO — 17/09/2026 · **`fecha-419-em-projeto` assinado e aplicado — fecha …

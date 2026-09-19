@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9
-  Escrito em: 19/09/2026 14:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9c0891ba11355bc3e51d9f96e0510da9635c6be8
+  Escrito em: 19/09/2026 15:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2af8d89c6df0d2b29bcc6f7d52c52b89d770dbf9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c0891ba11355bc3e51d9f96e0510da9635c6be8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(466) DIÁRIO — 19/09/2026 · **Mecanismo do Conselho Remoto verificado ao vivo, 3 chamadas reais, não simuladas — funciona de ponta a ponta. O AVISO (P-15) que persistiu o dia inteiro era "ninguém chamou em 24h", não "está quebrado". Dois achados reais de saúde por família no caminho: `cerebras/gemma-4-31b` no teto do circuit breaker (bloqueio persistente Cloudflare) e `huggingface/...Llama-3.3-70B` com credencial ausente no OmniRoute (401), não esgotamento normal de cota.**
+
+**Por que testei 3x, não 1.** O Humano pediu verificação, não relato de uma corrida só — `P-15` vinha em AVISO desde o início da sessão de hoje, e uma falha isolada não distingue "mecanismo quebrado" de "só não foi usado". Rodei `python3 scripts/conselho_remoto.py <pedido de teste>` três vezes seguidas, pedido idêntico, rotulado explicitamente como teste mecânico (não pedido de decisão real, dispensado do formato Origem/Posição/Fundamentação/Emenda pra não confundir "fora do formato" com "mecanismo falhou").
+
+**Resultado: 3/3 invocações terminaram em sucesso real, cada uma guardando um parecer utilizável em `memoria/missoes/conselho-remoto/`.**
+- Chamada 1: `cerebras/gemma-4-31b` falhou (HTTP 403, Cloudflare `error-1010`) → `huggingface/...Llama-3.3-70B` falhou (HTTP 401, `"No active credentials for provider: huggingface"`) → `mistral/ministral-8b-latest` respondeu certo (0,8s, matemática certa, identidade batendo).
+- Chamada 2: `zai/glm-4.7-flash` falhou (HTTP 502, `ETIMEDOUT`, parece transitório — 1ª falha dele, cooldown curto de 5min) → `gemini/gemini-2.5-flash` respondeu certo (2,8s).
+- Chamada 3: sem falha no caminho — `mistral/ministral-8b-latest` de novo, direto (0,9s).
+- A rotação/circuit-breaker fez exatamente o que o desenho promete: penalizou quem falhou, pulou pra próxima família automaticamente DENTRO da mesma invocação, sem eu precisar re-tentar à mão.
+
+**Achado 1, persistente, não transitório: `cerebras/gemma-4-31b` está no teto do backoff exponencial.** `breaker.json` mostrava 8 falhas acumuladas ANTES do meu teste; agora 9, cooldown de 21600s (6h — o teto, `BREAKER_MAX_S`). O erro (Cloudflare, `browser_signature_banned`-like) é a MESMA classe que já tirou `groq/openai/gpt-oss-120b` do roster em (374) por motivo idêntico. Não corrigi nada — é achado, não proposta; decisão de tirar `cerebras` do roster (ou investigar contorno) é sua.
+
+**Achado 2, provavelmente configuração, não cota: `huggingface/meta-llama/Llama-3.3-70B-Instruct` devolveu 401 "sem credenciais ativas", não 402 (que seria cota grátis esgotada, já esperado pelo próprio script).** 401 sugere token ausente/inválido no lado do OmniRoute pra esse provider — categoria diferente de "free tier acabou", que é o único cenário de falha documentado nos comentários do script pra essa família. Vale conferir a configuração do provider `huggingface` no OmniRoute.
+
+**P-15 confirmado limpo depois:** rodei `scripts/perimetro.sh` de novo — "roster remoto OK -- 2 familias com sucesso nas ultimas 24h" (era "AVISO... 0 familia(s)" a manhã inteira). Nada escrito em MEMÓRIAS/PROJETO/REGRAS pelo script (nunca escreve lá, confirmado pela doutrina do próprio arquivo); os 3 pareceres crus ficaram só na camada privada `memoria/missoes/conselho-remoto/` (gitignorada, fora do canon). Nenhum dado de `memoria/missoes/` saiu no pedido — texto 100% escrito por mim, sobre o próprio teste.
 
 (465) DIÁRIO — 19/09/2026 · **Correção sobre a própria entrada (464): o formato `sync: PASS (hidratação ~Xh, não re-medido)` que eu chamei de "inválido" e "logicamente incoerente" é, na verdade, a doutrina real e documentada da Seth — eu tinha auditado só contra REGRAS.md, sem ler `redesign/router/seth_gateway.py`. Proposta nova, testada, pronta: `estado_para_eco.sh` ganha um aviso quando a entrada do topo cita uma proposta já aplicada — `topo-proposta-aplicada-2026-09-19`, aguardando assinatura.**
 
