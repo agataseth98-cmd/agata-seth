@@ -131,15 +131,50 @@ DESTINO_DIR = os.path.join(
 ROSTER = [
     "zai/glm-4.7-flash",
     "gemini/gemini-2.5-flash",
-    "cerebras/gemma-4-31b",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
     "huggingface/meta-llama/Llama-3.3-70B-Instruct",
     "mistral/ministral-8b-latest",
+    "llama-cpp/nemotron-3.5-lightning",
+    "llama-cpp/qwen3-coder-30b-a3b",
+    "llama-cpp/phi-4-mini",
 ]
+# 3 dos 4 modelos locais planejados entraram em 20/09/2026, ordem do Humano
+# ("todos os llms tanto locais quanto em nuvem entram no conselho e são
+# avaliados de acordo com a sua performance") -- NÃO reverte a decisão de
+# (352) ("ninguém tem papel fixo"), estende o mesmo princípio: cada um tem
+# família PRÓPRIA em _familia() (não um "local" genérico) pra competir pela
+# rotação igual aos de nuvem, não ficar decorando o ROSTER sem nunca ser
+# chamado -- veja o motivo técnico no comentário de _familia() abaixo.
+# `llama-cpp/gpt-oss-20b` FICOU DE FORA -- baixado, serviço criado, mas o
+# `llama-server` (build 10964) trava com `Assertion 'found' failed` em
+# `llama_sampler_dist_apply` no primeiro token gerado, sempre, com ou sem
+# `--jinja`, com sampling permissivo, com ou sem `--n-cpu-moe` (sem offload
+# nem cabe na VRAM: precisa de 11,2GB, a placa tem 8GB). 3 tentativas de
+# parâmetro, todas o mesmo crash -- não é ajuste fino, é incompatibilidade
+# real entre este quant (`unsloth/gpt-oss-20b-GGUF`) e esta versão do
+# llama.cpp com split de MoE. Arquivo e serviço systemd ficam no disco pra
+# quando alguém quiser investigar (outro quant, versão nova do llama.cpp);
+# não estão em ROSTER nem em combo nenhum enquanto não funcionar de verdade.
+# Custo dos 3 que ficaram: $0 (rodam nesta Máquina, sem chamada de rede);
+# tempo de resposta depende do serviço systemd `llamacpp-<nome>` estar de pé
+# (sobem sob demanda, como o
+# `llamacpp-agata` original) -- se não estiver, a chamada falha e o breaker
+# trata como qualquer outra falha, sem quebrar a rotação.
+# "cerebras/gemma-4-31b" saiu em 20/09/2026: banido pelo Cloudflare do lado do
+# provedor (403 browser_signature_banned, retryable:false, owner_action_required:
+# true) -- não é credencial nem cota, não adianta esperar o breaker, é o dono do
+# site banindo o user-agent do OmniRoute. Mesma classe do banimento do Groq, que
+# já não estava neste ROSTER. Substituído por um modelo novo do catálogo :free da
+# OpenRouter, testado ao vivo no mesmo dia (config/modelos-gratuitos.md).
 # Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
 # teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini
 # 2.5-flash queimou 3836/3996 tokens em reasoning e truncou). Default = TETO.
 MAX_TOKENS_POR_MODELO = {
     "gemini/gemini-2.5-flash": 12_000,
+    # Medido ao vivo 20/09/2026: com max_tokens=400 devolveu content vazio,
+    # finish=length -- reasoning consumiu tudo (mesmo padrão do Gemini acima).
+    # Com max_tokens=3000, finish=stop, resposta real usando 622 tokens no total.
+    "llama-cpp/nemotron-3.5-lightning": 6_000,
 }
 ROTACAO_ESTADO = os.path.join(DESTINO_DIR, "rotacao-estado.json")
 BREAKER_ESTADO = os.path.join(DESTINO_DIR, "breaker.json")
@@ -218,10 +253,27 @@ def _familia(modelo):
     # `huggingface/meta-llama/Llama-3.3-70B-Instruct` e o casamento e' por
     # substring, primeira chave que bate ganha. Sem isto cairia em "local"
     # (errado -- e' chamada remota) e o P-15 contaria familia de menos.
+    # Os 4 checks "nemotron-3.5-lightning"/"qwen3-coder"/"gpt-oss-20b"/
+    # "phi-4-mini" (20/09/2026) têm que vir ANTES de "qwen"/"llama": os 4
+    # modelos locais novos usam o prefixo `llama-cpp/...` (contém "llama") e
+    # um deles se chama `qwen3-coder-30b-a3b` (contém "qwen") -- sem checar a
+    # forma específica primeiro, os 4 cairiam juntos no "local" genérico e
+    # perderiam a família própria que o Humano pediu (avaliar cada um pela
+    # performance, não empilhar tudo numa família só onde só o primeiro do
+    # ROSTER seria chamado de verdade -- ver comentário do ROSTER acima).
+    # "gpt-oss-20b" tem que vir ANTES de "cerebras"/"groq" não fazer
+    # diferença aqui (aqueles casam por "cerebras"/"groq", não por
+    # "gpt-oss"), mas depois de nada que já contenha "gpt-oss-20b" por
+    # engano -- não existe hoje, registrado pra quem for mexer de novo.
     for chave, fam in (("glm", "zhipu"), ("zai", "zhipu"), ("gemini", "google"),
                        ("cerebras", "cerebras"), ("groq", "groq"),
                        ("huggingface", "huggingface"), ("mistral", "mistral"),
-                       ("openrouter", "openrouter"), ("qwen", "local"),
+                       ("openrouter", "openrouter"),
+                       ("nemotron-3.5-lightning", "local-nemotron"),
+                       ("qwen3-coder", "local-qwencoder"),
+                       ("gpt-oss-20b", "local-gptoss20b"),
+                       ("phi-4-mini", "local-phi4mini"),
+                       ("qwen", "local"),
                        ("llama", "local"), ("minimax", "openrouter")):
         if chave in m:
             return fam

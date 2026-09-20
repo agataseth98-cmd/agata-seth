@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 20/09/2026
 
+**[APLICADO] 3 modelos de IA novos rodando nesta máquina, de graça — e um 4º que você pediu, mas travou.** Você pediu pesquisar o estado da arte de modelos gratuitos (nuvem e locais) e montar um sistema único de "rápido/geral/pesado" pro LibreChat (chat), Goose (código) e Conselho Remoto. Baixei e testei 4 modelos que rodam nesta máquina sem internet: um generalista (Nemotron, 23,7GB), um especialista em código (Qwen3-Coder, 17,3GB) e um leve/rápido (Phi-4-mini, 2,3GB) — os três funcionando, testados de verdade. O quarto (gpt-oss-20b, agentic) baixou certo mas trava com um bug do programa que roda os modelos (`llama.cpp`) — não é coisa que eu resolvo ajustando parâmetro, fica de fora até alguém investigar mais. Também descobri que a Cerebras e o Groq (dois provedores gratuitos na nuvem) foram bloqueados pelo dono do serviço deles — não é bug nosso, é bloqueio do outro lado; troquei a ordem pra eles nunca serem a primeira tentativa, só um extra se sobrar.
+- Detalhe técnico completo: `config/modelos-gratuitos.md`, `PROJETO.md` ("Cérebro" e "Interface"), proposta `farm-local-4-modelos-2026-09-20`.
+
 **[APLICADO] A Seth para de repetir "aguardando assinatura" numa proposta que já foi resolvida.** Você assinou a correção hoje; ela estava pronta e testada desde ontem (19/09). Duas entradas de MEMÓRIAS ((468)/(469)) organizaram, sem fato novo, o histórico já registrado sobre a quarentena de aprovação (P-8) e sobre a âncora de SHA — conferi cada referência citada contra o arquivo de verdade antes de gravar.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entradas (468), (469), e a aplicação da proposta `topo-proposta-aplicada-2026-09-19`.
 
