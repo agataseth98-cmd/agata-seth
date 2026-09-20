@@ -137,25 +137,23 @@ ROSTER = [
     "llama-cpp/nemotron-3.5-lightning",
     "llama-cpp/qwen3-coder-30b-a3b",
     "llama-cpp/phi-4-mini",
+    "llama-cpp/gpt-oss-20b",
 ]
-# 3 dos 4 modelos locais planejados entraram em 20/09/2026, ordem do Humano
+# Os 4 modelos locais planejados entraram em 20/09/2026, ordem do Humano
 # ("todos os llms tanto locais quanto em nuvem entram no conselho e são
 # avaliados de acordo com a sua performance") -- NÃO reverte a decisão de
 # (352) ("ninguém tem papel fixo"), estende o mesmo princípio: cada um tem
 # família PRÓPRIA em _familia() (não um "local" genérico) pra competir pela
 # rotação igual aos de nuvem, não ficar decorando o ROSTER sem nunca ser
 # chamado -- veja o motivo técnico no comentário de _familia() abaixo.
-# `llama-cpp/gpt-oss-20b` FICOU DE FORA -- baixado, serviço criado, mas o
-# `llama-server` (build 10964) trava com `Assertion 'found' failed` em
-# `llama_sampler_dist_apply` no primeiro token gerado, sempre, com ou sem
-# `--jinja`, com sampling permissivo, com ou sem `--n-cpu-moe` (sem offload
-# nem cabe na VRAM: precisa de 11,2GB, a placa tem 8GB). 3 tentativas de
-# parâmetro, todas o mesmo crash -- não é ajuste fino, é incompatibilidade
-# real entre este quant (`unsloth/gpt-oss-20b-GGUF`) e esta versão do
-# llama.cpp com split de MoE. Arquivo e serviço systemd ficam no disco pra
-# quando alguém quiser investigar (outro quant, versão nova do llama.cpp);
-# não estão em ROSTER nem em combo nenhum enquanto não funcionar de verdade.
-# Custo dos 3 que ficaram: $0 (rodam nesta Máquina, sem chamada de rede);
+# `llama-cpp/gpt-oss-20b` ENTROU NA SEGUNDA TENTATIVA (mesmo dia): a primeira
+# versão baixada (`unsloth/gpt-oss-20b-GGUF`, requantizada em Q4_K_M) travava
+# com `Assertion 'found' failed` em `llama_sampler_dist_apply`, sempre, em 3
+# tentativas de parâmetro diferentes. Trocado pelo arquivo do próprio
+# `ggml-org` (mantenedor do llama.cpp), formato nativo MXFP4 do gpt-oss (não
+# uma requantização de terceiro) -- carrega e responde limpo, confirmando que
+# o problema era o quant, não o llama.cpp nem o modelo em si.
+# Custo dos 4: $0 (rodam nesta Máquina, sem chamada de rede);
 # tempo de resposta depende do serviço systemd `llamacpp-<nome>` estar de pé
 # (sobem sob demanda, como o
 # `llamacpp-agata` original) -- se não estiver, a chamada falha e o breaker

@@ -84,7 +84,7 @@ Models foi pra "Fora — não usar" (descontinuado).
 
 ---
 
-## 3 modelos locais novos, instalados 20/09/2026 (ordem do Humano; um 4º tentado, travou)
+## 4 modelos locais novos, instalados 20/09/2026 (ordem do Humano)
 
 Baixados via `llama.cpp` (mesmo motor do `Qwen3-30B-A3B-Instruct-2507` já em produção,
 `redesign/router/llamacpp.md`), GGUF em `~/.cache/agata/models/`. Cada um tem seu próprio
@@ -101,22 +101,19 @@ catálogo, distinguidas pelo `defaultModel`/porta, não por um `provider` custom
 | `llama-cpp/qwen3-coder-30b-a3b` | 20143 | 17,3GB (Q4_K_M, medido) | Código — tier 0 do `seth-codigo` (Goose) e do `seth-pesado` | `--n-cpu-moe 36` (mesmo do Qwen3-30B-A3B original, mesmo tamanho de modelo) — **102,2 tok/s prompt-processing, 23,7 tok/s geração** (`llama-bench`), 6967MiB de VRAM (~85%) com `-c 16384`. Testado ao vivo: 200, `finish=stop`, resposta de código correta, margem mais apertada que o Qwen3-30B-A3B original (~1,2GB de folga contra ~1,6GB). |
 | `llama-cpp/phi-4-mini` | 20145 | 2,5GB (Q4_K_M, medido) | Leve/rápido — tier 0 do `seth-rapido` | denso, `-ngl 999` sem offload de MoE (não é MoE) — cabe inteiro na GPU. **4097 tok/s prompt-processing, 86,5 tok/s geração** (`llama-bench`). Testado ao vivo: 200, `finish=stop`, sem reasoning burn. |
 
-**`llama-cpp/gpt-oss-20b` NÃO ENTROU — trava, não é gap de tuning, é bug real (20/09/2026).**
-Baixado (11,6GB, hash bate com o repo), serviço systemd criado (porta 20144), mas o
-`llama-server` (build 10964, commit `b29c606e28`) crasha em TODA chamada de
-`chat/completions`, sempre no primeiro token:
+| `llama-cpp/gpt-oss-20b` | 20144 | 11,3GB (MXFP4, nativo — medido) | Agentic/tool-use — tier 2 do `seth-pesado` | `--n-cpu-moe 20` — **145 tok/s prompt-processing, 21,5 tok/s geração** (`llama-bench`), 3411MiB de VRAM (~42%, o mais folgado dos 4 locais). Testado ao vivo: direto, via OmniRoute e via `seth-pesado`, `finish=stop`, resposta correta. |
+
+**`llama-cpp/gpt-oss-20b`: 1ª tentativa travou, 2ª funcionou — o problema era o quant, não o llama.cpp (achado e corrigido no mesmo dia, 20/09/2026).**
+Primeira tentativa (`unsloth/gpt-oss-20b-GGUF`, Q4_K_M — uma requantização de terceiro):
+crashava em TODA chamada, sempre no primeiro token:
 ```
 llama-server: .../llama-sampler.cpp:1211: void llama_sampler_dist_apply(...): Assertion `found' failed.
 ```
-3 tentativas de contorno, todas o mesmo crash: com `--jinja`, com sampling permissivo
-(`--temp 1.0 --top-k 0 --top-p 1.0 --min-p 0.0`), e sem `--n-cpu-moe` nenhum (esse último
-só provou que sem offload o modelo nem carrega — precisa de 11,2GB de buffer CUDA, a
-placa tem 8GB). Não é parâmetro errado, é incompatibilidade entre este quant
-(`unsloth/gpt-oss-20b-GGUF`) e esta versão do llama.cpp com split de MoE — a mesma classe
-de risco que a ressalva "não rebenchmarcado" abaixo já cobria, só que descoberta na
-prática em vez de só declarada. Arquivo e unit ficam no disco (`llamacpp-gptoss20b.service`,
-parado) pra quem quiser investigar depois (outro quant — `bartowski`/`ggml-org` — ou
-versão nova do llama.cpp). Não está em ROSTER nem em combo nenhum.
+3 tentativas de contorno nesse arquivo, todas o mesmo crash (`--jinja`, sampling permissivo,
+sem `--n-cpu-moe`). Troquei pelo arquivo do próprio `ggml-org` (mantenedor do llama.cpp),
+formato **MXFP4 nativo** do gpt-oss (não uma requantização) — carregou e respondeu limpo de
+primeira. Lição: quando um quant trava de forma reproduzível e sistemática, testar o arquivo
+do mantenedor antes de assumir que é o motor (llama.cpp) ou o modelo que têm o bug.
 
 **Bancada rodada em 20/09/2026** (fechando o gap declarado antes): números de tokens/s
 na tabela acima, `llama-bench -p 128 -n 128 -r 3` por modelo, no `--n-cpu-moe` que o
