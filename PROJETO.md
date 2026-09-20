@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b97b7bff1beb48abd037093b884820f641dbf6dd
-  Escrito em: 20/09/2026 18:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f6f76f87d522d09ff4ecbddf77efc24583ecae4d
+  Escrito em: 20/09/2026 19:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b97b7bff1beb48abd037093b884820f641dbf6dd/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b97b7bff1beb48abd037093b884820f641dbf6dd/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b97b7bff1beb48abd037093b884820f641dbf6dd/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6f76f87d522d09ff4ecbddf77efc24583ecae4d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6f76f87d522d09ff4ecbddf77efc24583ecae4d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f6f76f87d522d09ff4ecbddf77efc24583ecae4d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -66,7 +66,13 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 **Pós-redesenho (Fase 8, 2026-09-03):** `agata.target` (`systemd --user`, `enable`d p/ boot)
 puxa `omniroute` (`:20128`) · `omniroute-sanitizer` (`:20127`, os callers usam este — sanitiza
 segredo antes do egresso) · `openvino-whisper` (`:20130`, STT na iGPU) · `openvino-embeddings`
-(`:20134`, embeddings na iGPU) · `obsidian-ro-proxy` (`:27125`, só leitura) · `agata-drain`
+(`:20134`, embeddings na iGPU) · `obsidian-ro-proxy` (`:27125`, só leitura) · `obsidian-app`
+(Flatpak `md.obsidian.Obsidian`, GUI — **backend real** do `obsidian-ro-proxy`: a API REST/MCP
+que a Seth lê via `query_canon` é um plugin DENTRO do app, não existe sem ele rodando. Achado
+20/09/2026: com o app fechado, o `ro_proxy.py` fica de pé mas devolve **403** ("upstream
+inacessível"), não 502/503 — confunde com permissão negada. `obsidian-app.service` fecha essa
+classe de falha subindo o app junto com `agata.target`, `After=graphical-session.target`) ·
+`agata-drain`
 (oneshot, drena o WAL do grafo no stop, nunca corta um commit). `llamacpp-agata` (`:20129`, MoE
 Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `WantedBy`).
 `agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper

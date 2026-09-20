@@ -1,0 +1,54 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 5280507..5079934 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -66,7 +66,13 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ **Pós-redesenho (Fase 8, 2026-09-03):** `agata.target` (`systemd --user`, `enable`d p/ boot)
+ puxa `omniroute` (`:20128`) · `omniroute-sanitizer` (`:20127`, os callers usam este — sanitiza
+ segredo antes do egresso) · `openvino-whisper` (`:20130`, STT na iGPU) · `openvino-embeddings`
+-(`:20134`, embeddings na iGPU) · `obsidian-ro-proxy` (`:27125`, só leitura) · `agata-drain`
++(`:20134`, embeddings na iGPU) · `obsidian-ro-proxy` (`:27125`, só leitura) · `obsidian-app`
++(Flatpak `md.obsidian.Obsidian`, GUI — **backend real** do `obsidian-ro-proxy`: a API REST/MCP
++que a Seth lê via `query_canon` é um plugin DENTRO do app, não existe sem ele rodando. Achado
++20/09/2026: com o app fechado, o `ro_proxy.py` fica de pé mas devolve **403** ("upstream
++inacessível"), não 502/503 — confunde com permissão negada. `obsidian-app.service` fecha essa
++classe de falha subindo o app junto com `agata.target`, `After=graphical-session.target`) ·
++`agata-drain`
+ (oneshot, drena o WAL do grafo no stop, nunca corta um commit). `llamacpp-agata` (`:20129`, MoE
+ Qwen3-30B-A3B, `--n-cpu-moe 36`, ~31 tok/s) sobe **sob demanda** (`PartOf` sem `WantedBy`).
+ `agata-warmup.service` (manual) pré-aquece o modelo local. `agata-jogo` (`~/.local/bin/`, wrapper
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 7b7fa38..2e80e8a 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -97,9 +97,9 @@ catálogo, distinguidas pelo `defaultModel`/porta, não por um `provider` custom
+ 
+ | Modelo | Porta | RAM (Q4_K_M) | Papel | Ajuste de offload |
+ |---|---|---|---|---|
+-| `llama-cpp/nemotron-3.5-lightning` | 20142 | **23,7GB** (Q4_K_M, medido — corrigido de um ~19GB citado antes, de um quant Q4_0 diferente) | Geral/conversação — tier 0 do `seth-livre` (LibreChat) | **`--n-cpu-moe 44`, não 36** — `36` (copiado do Qwen3-30B-A3B, 17,3GB) deu OOM de CUDA na hora de carregar (`cudaMalloc failed`, precisava de 9,6GB de buffer, a placa tem 8GB) — modelo maior precisa de mais offload pra CPU. `44` carrega, 7081MiB de VRAM (~86%, mais apertado que os ~76% do Qwen3-30B-A3B original). **Precisa de `max_tokens` alto** — mesmo padrão do Gemini: com 400 devolveu vazio (`finish=length`, todo o orçamento em reasoning); com 3000 respondeu certo usando só 622 no total. `MAX_TOKENS_POR_MODELO["llama-cpp/nemotron-3.5-lightning"] = 6000` no `conselho_remoto.py`. Testado ao vivo direto, pelo OmniRoute e pelo combo `seth-livre` — os três roteiam e respondem certo. Ainda não passou pela bancada completa de `llama-bench` (só ajuste manual até carregar e responder, não o ponto ótimo de tokens/s). |
+-| `llama-cpp/qwen3-coder-30b-a3b` | 20143 | 17,3GB (Q4_K_M, medido) | Código — tier 0 do `seth-codigo` (Goose) e do `seth-pesado` | idem, mesma ressalva de offload não medido. Testado ao vivo: 200, `finish=stop`, ~85% de VRAM (6967/8188 MiB) — funciona, margem mais apertada que o Qwen3-30B-A3B original (que tem ~1,6GB de folga contra os ~1,2GB daqui). |
+-| `llama-cpp/phi-4-mini` | 20145 | 2,5GB (Q4_K_M, medido) | Leve/rápido — tier 0 do `seth-rapido` | denso, `-ngl 999` sem offload de MoE (não é MoE). Testado ao vivo: 200, `finish=stop`, ~67 tok/s, sem reasoning burn. |
++| `llama-cpp/nemotron-3.5-lightning` | 20142 | **23,7GB** (Q4_K_M, medido — corrigido de um ~19GB citado antes, de um quant Q4_0 diferente) | Geral/conversação — tier 0 do `seth-livre` (LibreChat) | **`--n-cpu-moe 44`**, confirmado pela bancada. `36` (copiado do Qwen3-30B-A3B) deu OOM ao carregar. `42` passou no `llama-bench` (que testa com prompt/gen curtos, sem reservar o `-c 8192` inteiro) mas **falhou no servidor real** com `-c 8192` — 1,1GB faltando no buffer de computação. `llama-bench` não é proxy confiável de VRAM do servidor real quando o contexto configurado é grande; só o teste com o `-c` de produção prova. `44` é o mínimo real que carrega com `-c 8192`: **75,2 tok/s prompt-processing, 24,6 tok/s geração** (`llama-bench -p 128 -n 128 -r 3`), 7081MiB de VRAM (~86%, mais apertado que os ~76% do Qwen3-30B-A3B original). **Precisa de `max_tokens` alto** — mesmo padrão do Gemini: com 400 devolveu vazio (`finish=length`, todo o orçamento em reasoning); com 3000 respondeu certo usando só 622 no total. `MAX_TOKENS_POR_MODELO["llama-cpp/nemotron-3.5-lightning"] = 6000` no `conselho_remoto.py`. Testado ao vivo direto, pelo OmniRoute e pelo combo `seth-livre`. |
++| `llama-cpp/qwen3-coder-30b-a3b` | 20143 | 17,3GB (Q4_K_M, medido) | Código — tier 0 do `seth-codigo` (Goose) e do `seth-pesado` | `--n-cpu-moe 36` (mesmo do Qwen3-30B-A3B original, mesmo tamanho de modelo) — **102,2 tok/s prompt-processing, 23,7 tok/s geração** (`llama-bench`), 6967MiB de VRAM (~85%) com `-c 16384`. Testado ao vivo: 200, `finish=stop`, resposta de código correta, margem mais apertada que o Qwen3-30B-A3B original (~1,2GB de folga contra ~1,6GB). |
++| `llama-cpp/phi-4-mini` | 20145 | 2,5GB (Q4_K_M, medido) | Leve/rápido — tier 0 do `seth-rapido` | denso, `-ngl 999` sem offload de MoE (não é MoE) — cabe inteiro na GPU. **4097 tok/s prompt-processing, 86,5 tok/s geração** (`llama-bench`). Testado ao vivo: 200, `finish=stop`, sem reasoning burn. |
+ 
+ **`llama-cpp/gpt-oss-20b` NÃO ENTROU — trava, não é gap de tuning, é bug real (20/09/2026).**
+ Baixado (11,6GB, hash bate com o repo), serviço systemd criado (porta 20144), mas o
+@@ -118,12 +118,11 @@ prática em vez de só declarada. Arquivo e unit ficam no disco (`llamacpp-gptos
+ parado) pra quem quiser investigar depois (outro quant — `bartowski`/`ggml-org` — ou
+ versão nova do llama.cpp). Não está em ROSTER nem em combo nenhum.
+ 
+-**Gap declarado nos 2 que ficaram sem bancada completa (Nemotron, Qwen3-Coder):**
+-subiram e responderam num teste de fumaça real (não só smoke test — pedido de verdade,
+-resposta coerente), mas **não** passaram pela mesma bancada de `llama-bench` que validou
+-`--n-cpu-moe 36` pro Qwen3-30B-A3B original (tabela completa em
+-`redesign/router/llamacpp.md`). Tokens/s e VRAM de pico sob carga sustentada, não só uma
+-chamada, ficam como `lacuna` até alguém rodar a bancada.
++**Bancada rodada em 20/09/2026** (fechando o gap declarado antes): números de tokens/s
++na tabela acima, `llama-bench -p 128 -n 128 -r 3` por modelo, no `--n-cpu-moe` que o
++servidor real usa. `lacuna` que continua: tokens/s sob CARGA SUSTENTADA (várias chamadas
++seguidas, concorrência) — a bancada mede uma janela curta, não o comportamento em uso
++contínuo real.
+ 
+ **Pesquisa que embasou a escolha** (WebSearch, 20/09/2026, dado externo — não confirmado
+ por medição própria além do teste de fumaça acima): Nemotron-3.5-Lightning é MoE híbrido
