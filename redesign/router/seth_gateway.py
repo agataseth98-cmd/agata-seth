@@ -128,6 +128,15 @@ _DOUTRINA_FIXA = (
     "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
     "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
     "número de memória.\n"
+    "— **TOPO-PROPOSTA-JA-APLICADA:** se essa linha vier no bloco de estado, o "
+    "texto da entrada do topo (ex.: \"aguardando assinatura\") já está "
+    "desatualizado — a proposta citada foi assinada e aplicada DEPOIS de a "
+    "entrada ter sido escrita, e a entrada não ganha correção própria (Regra "
+    "4: correção é entrada nova, nunca edição do texto existente). Copie a "
+    "entrada normalmente, mas não afirme o status dela como atual — diga que "
+    "está aplicada, apontando pra esta linha. Achado auditando você mesma, "
+    "MEMÓRIAS (464)/(465): sem isto, você repetiria \"aguardando assinatura\" "
+    "pra sempre, mesmo commits depois de já resolvido.\n"
     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
     "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
@@ -218,7 +227,7 @@ def _estado() -> str:
         linhas = [l for l in r.stdout.splitlines()
                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
-                                    "HASH-ESTADO:"))]
+                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:"))]
         return "\n".join(linhas)
     except Exception:
         return ""

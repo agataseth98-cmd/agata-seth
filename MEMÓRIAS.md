@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6c88c099d0c76aa7e4946624fe257e125f76534a
-  Escrito em: 19/09/2026 15:31 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1679504fe35fdb840289f2b79c7efff002b14072
+  Escrito em: 20/09/2026 12:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6c88c099d0c76aa7e4946624fe257e125f76534a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1679504fe35fdb840289f2b79c7efff002b14072/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1679504fe35fdb840289f2b79c7efff002b14072/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1679504fe35fdb840289f2b79c7efff002b14072/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
+
+Síntese, conferida ref a ref contra o canon antes de gravar: (96) introduz a âncora original por offset e marcadores de conteúdo; (97) corrige (96) — offset é foto de um momento, não âncora durável, porque o preâmbulo pode ser reescrito e deslocar qualquer offset absoluto; a âncora durável são marcadores de conteúdo + comprimento + hash. (149) executa emendas de auditoria externa com autocorreção sobre a própria âncora de sha256. (166) verifica o GGUF do Caminho 3 — sha256 e tamanho batendo. (168) corrige a causa de uma divergência anterior: era latência, não medição contra alvo errado. (211) e (213) documentam tentativas reais do Conselho Remoto batendo em HTTP 429, sem parecer recebido. (217) insere o SHA no prompt de carregamento, pra sessão só-HTTP detectar versão velha sem precisar da Máquina. (223) é a autorização em bloco que fecha, entre outros, esse item. (226) automatiza a geração da âncora a cada commit. (253) traz as URLs raw pinadas em SHA — conteúdo endereçado por hash, imune a cache velho. (281) aplica `ancora-defasagem-honesta`, tirando a promessa "nunca mais" do template. (302) troca o detector de âncora velha (falso positivo) por checagem de defasagem em três degraus (v2) — a mesma que hoje está em `PROMPT_CARREGAMENTO.md`. (378) carimba o SHA nos preâmbulos dos três canônicos. (458) acha, no próprio commit anterior, que o passo da âncora faz `git add` do arquivo inteiro — não só das linhas da âncora — motivando a guarda de integridade que existe hoje. (96) segue superada pela correção de (97), mas a entrada não se apaga (Regra 4) — fica como registro do desenho original.
+
+(468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quarentena estrutural), gerada por `agata-consolidacao.timer` em 17/09/2026. Refs: (218), (222), (223), (238), (281), (286), (289), (295), (298)-(301), (318), (351), (359).**
+
+Síntese, conferida ref a ref contra o canon antes de gravar: (218) cria a quarentena estrutural P-8; (222) inclui `config/` no escopo obrigatório; (223) é autorização em bloco do Humano — quatro pendentes fechados, ACB inteiro fica de fora por escopo; (238) fecha um lote de seis propostas da ordem de 22/08/2026; (281) aplica `ancora-defasagem-honesta`, tirando "nunca mais" do template da âncora; (286)-(295) cobrem envio ao Drive, geração do vault Obsidian e a nota do P-10; (298)-(301) implementam as fases 5-6 do índice derivado do canon e o post-commit que o exporta; (318) audita pareceres externos e corrige um buraco em `redesign/router/`; (351) fecha lacunas em `redesign/grafo/*`; (359) atualiza a fila de aderência da Fase 4 no PROJETO.md. Nenhuma das entradas listadas está marcada como obsoleta entre si — todas seguem valendo sob P-8.
+
+Nota sobre a rodada descartada: o rerun de 18/09 (`consolidacao-aprova-o-assinada-p-8-2026-09-18.md`) regenerou a mesma síntese um dia depois, mas trocou (223) e (238) por "título insuficiente" — falha de geração, não achado novo. Preferida a versão de 17/09. O arquivo de 18/09 fica em `propostas/` sem virar entrada; a informação certa está aqui.
 
 (467) DIÁRIO — 19/09/2026 · **Segunda rodada de verificação do Conselho Remoto (467, continuação de (466)), pedido do próprio Humano ("rerode a tarefa"): mais 3 chamadas reais, 3/3 sucesso de novo. `huggingface` falhou com o MESMO erro 401 duas vezes seguidas — achado de (466) confirmado, não é transitório. `zhipu` falhou de novo, mas com sintoma diferente (529 sobrecarga, não 502 timeout) — instável, não bloqueado como `cerebras`/`huggingface`.**
 

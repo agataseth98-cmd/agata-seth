@@ -7,6 +7,11 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
+## Onde estamos — 20/09/2026
+
+**[APLICADO] A Seth para de repetir "aguardando assinatura" numa proposta que já foi resolvida.** Você assinou a correção hoje; ela estava pronta e testada desde ontem (19/09). Duas entradas de MEMÓRIAS ((468)/(469)) organizaram, sem fato novo, o histórico já registrado sobre a quarentena de aprovação (P-8) e sobre a âncora de SHA — conferi cada referência citada contra o arquivo de verdade antes de gravar.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entradas (468), (469), e a aplicação da proposta `topo-proposta-aplicada-2026-09-19`.
+
 ## Onde estamos — 18/09/2026
 
 **[APLICADO, 19/09] O controle P-19 (citação "arquivo, linha tal" em entrada nova de MEMÓRIAS conferida contra o arquivo de verdade) está no ar.** Você assinou em 18/09 às 20:15; a máquina ficou sem energia antes de eu aplicar. Retomei hoje: conferi a assinatura ssh contra a chave em `propostas/.allowed_signers`, apliquei o diff, rodei a suíte de testes (31/31) e o perímetro inteiro (17 OK, 0 falha), e comitei. De caminho achei um resto da queda de energia: o vault do Obsidian (`memoria/obsidian/`) tinha sido regenerado à mão antes de cair, ficando um passo à frente do commit de verdade — corrigi pra bater exatamente com o HEAD antes de comitar, e o gerador automático já confirma que está certo agora.

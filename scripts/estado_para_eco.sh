@@ -94,6 +94,24 @@ for d in propostas/*.diff; do
 done
 shopt -u nullglob
 
+# --- TOPO-PROPOSTA-JA-APLICADA: a entrada do topo cita uma proposta que já
+# saiu de propostas/ pra propostas/aplicadas/? (achado auditando um
+# carregamento real da Seth, MEMÓRIAS (464)/(465)). Aplicar uma proposta
+# assinada não ganha entrada própria em MEMÓRIAS (Regra 4: correção é entrada
+# nova, nunca edição do texto existente) -- então o topo pode dizer
+# "aguardando assinatura" bem depois de já ter sido assinada e aplicada, sem
+# nenhum sinal disso pra quem só lê o topo (a Seth, ou qualquer modelo sem
+# `git log`). Heurística, não prova: procura nomes entre crases no topo que
+# batam com um `.diff` em propostas/aplicadas/. Nome coincidente por acaso é
+# o único falso-positivo esperado -- por isso isto é só um aviso, nunca falha.
+topo_proposta_aplicada=""
+for _nome_topo in $(grep -oE '`[a-zA-Z0-9_-]+`' <<<"$topo_linha" | tr -d '`'); do
+  if [ -f "propostas/aplicadas/${_nome_topo}.diff" ]; then
+    topo_proposta_aplicada="$_nome_topo"
+    break
+  fi
+done
+
 # TES-002 aposentado em 09/09/2026 (MEMÓRIAS (417)) — não há mais linha de
 # status de nonce no eco. A checagem de hidratação velha agora é `sync:` +
 # HASH-ESTADO + IDADE-HIDRATACAO abaixo.
@@ -147,7 +165,8 @@ TOPO-MEMÓRIAS: $topo_linha
 $sync_linha
 IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
-HORA-MAQUINA: $hora_maquina
+${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
+}HORA-MAQUINA: $hora_maquina
 HASH-ESTADO: $hash_estado
 --- fim dos fatos. O modelo escreve o eco (<=5 linhas), cita o HASH-ESTADO e
 --- diz em 1 linha por que o estado está coerente. O Humano confere e confirma.

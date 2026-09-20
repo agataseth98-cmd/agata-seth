@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
+  palavras-chave: consolidação, automática, histórico, âncora, sha, gerada, agata, consolidacao, timer, refs
+(468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quarentena estrutural), gerada por `agata-consolidacao.timer` em 17/09/2026. Refs: (218), (222), (223), (238), (281), (286), (289), (295), (298)-(301), (318), (351), (359).**
+  palavras-chave: consolidação, automática, histórico, quarentena, estrutural, gerada, agata, consolidacao, timer, refs
 (467) DIÁRIO — 19/09/2026 · **Segunda rodada de verificação do Conselho Remoto (467, continuação de (466)), pedido do próprio Humano ("rerode a tarefa"): mais 3 chamadas reais, 3/3 sucesso de novo. `huggingface` falhou com o MESMO erro 401 duas vezes seguidas — achado de (466) confirmado, não é transitório. `zhipu` falhou de novo, mas com sintoma diferente (529 sobrecarga, não 502 timeout) — instável, não bloqueado como `cerebras`/`huggingface`.**
   palavras-chave: segunda, rodada, verificação, remoto, continuação, pedido, próprio, humano, rerode, tarefa, chamadas, reais, sucesso, novo, huggingface, falhou, mesmo, erro, seguidas, achado, confirmado, transitório, zhipu, sintoma, diferente, sobrecarga, timeout, instável, bloqueado, cerebras
 (466) DIÁRIO — 19/09/2026 · **Mecanismo do Conselho Remoto verificado ao vivo, 3 chamadas reais, não simuladas — funciona de ponta a ponta. O AVISO (P-15) que persistiu o dia inteiro era "ninguém chamou em 24h", não "está quebrado". Dois achados reais de saúde por família no caminho: `cerebras/gemma-4-31b` no teto do circuit breaker (bloqueio persistente Cloudflare) e `huggingface/...Llama-3.3-70B` com credencial ausente no OmniRoute (401), não esgotamento normal de cota.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, parte, assinada, aplicada, item, hardening, systemd, fecha, canon
 (440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
   palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, hardening, systemd, serviços, diretiva, testado, vivo, analyze, verify, pronto, assinatura, item, fechado
-(439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do plano de mitigação da auditoria do Marcos fecham de vez no código real.**
-  palavras-chave: fase, assinada, aplicada, itens, plano, mitigação, auditoria, marcos, fecham, código, real
-(438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marcos (437) — pronta e testada, aguardando assinatura. Cobre os itens 1, 2, 4 e 5: egress/anti-SSRF, proveniência de dado externo, `commit_entry()` transacional, gate interno. Achado colateral: um bug pré-existente que impedia `commit_entry(posicao="apos-marcador")` de funcionar, sempre, corrigido junto.**
-  palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, cobre, itens, egress, anti, ssrf, proveniência, dado, externo, commit, entry, transacional, gate, interno, achado, colateral, bug, pré, existente, impedia, posicao, apos, marcador, funcionar, sempre, corrigido, junto
+(439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do …
+  palavras-chave: fase, assinada, aplicada, itens
+(438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marco …
+  palavras-chave: fase, plano, mitigação, auditoria, marco
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, a …
   palavras-chave: auditoria, externa, marcos, snapshot
 (436) DIÁRIO — 17/09/2026 · **`registra-incidente-boot-2026-09-17` assinado e ap …
