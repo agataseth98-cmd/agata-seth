@@ -291,6 +291,54 @@ _SINAIS_TITULO = (
     "Analyze this conversation and provide",
 )
 
+# Sinal separado pro Goose (achado 21/09/2026, MEMÓRIAS (495)): ele também faz
+# uma chamada de "nomear a sessão" pro MESMO endpoint (:20126), sistema PRÓPRIO
+# do cliente Goose, nunca visto antes porque o LibreChat era o único frontend
+# auditado até aqui. Capturado com um proxy de log real entre o Goose e este
+# gateway (não suposto) -- corpo de verdade:
+#   {"model":"seth-codigo","messages":[
+#     {"role":"system","content":"Generate a short title (four words or less)
+#       that describes the topic of the user's messages. \nReply with only
+#       the title, nothing else..."},
+#     {"role":"user","content":"---BEGIN USER MESSAGES---\n...\n---END USER
+#       MESSAGES---\n\nGenerate a short title for the above messages."}],
+#    "stream":true,"stream_options":{"include_usage":true}}
+# Diferença estrutural do padrão LibreChat: o texto-gatilho está na PRIMEIRA
+# mensagem (system), não na última -- por isso checado à parte de
+# `_SINAIS_TITULO` (que só olha `msgs[-1]`), em QUALQUER posição/papel.
+# Mesma classe de risco residual já declarada acima para `_SINAIS_TITULO`:
+# string literal do PRÓPRIO cliente, não conteúdo de usuário -- colar esse
+# texto exato como mensagem própria no pior caso perde só a hidratação
+# daquele turno.
+_SINAIS_TITULO_GOOSE = (
+    "Generate a short title (four words or less) that describes the topic "
+    "of the user's messages",
+)
+
+
+def _e_chamada_titulo_goose(payload: dict) -> bool:
+    """Sinal 3 de `_e_chamada_utilitaria`: chamada de nomear-sessão do Goose,
+    que carrega o texto-gatilho na PRIMEIRA mensagem (system), não na
+    última. Varre todas as mensagens (posição não importa aqui), mas só
+    quando `len(messages) <= 2` -- mesmo limite dos outros sinais, é sempre
+    one-shot."""
+    msgs = payload.get("messages")
+    if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
+        return False
+    for m in msgs:
+        if not isinstance(m, dict):
+            continue
+        conteudo = m.get("content")
+        if isinstance(conteudo, list):
+            texto = " ".join(p.get("text", "") for p in conteudo if isinstance(p, dict))
+        elif isinstance(conteudo, str):
+            texto = conteudo
+        else:
+            continue
+        if any(s in texto for s in _SINAIS_TITULO_GOOSE):
+            return True
+    return False
+
 
 def _schema_pede_titulo(payload: dict) -> bool:
     """Sinal FORTE, não forjável por dado externo: o @librechat/agents monta
@@ -321,7 +369,9 @@ def _schema_pede_titulo(payload: dict) -> bool:
 
 def _e_chamada_utilitaria(payload: dict) -> bool:
     """True se o corpo é uma chamada de título/utilidade do frontend, nunca
-    um turno de chat real da Seth. Dois sinais, checados nesta ordem:
+    um turno de chat real da Seth. Três sinais, checados nesta ordem
+    (achado 21/09/2026, MEMÓRIAS (495): 3º sinal cobre o Goose, não só o
+    LibreChat):
 
     1. `_schema_pede_titulo` -- sinal de CANAL, não de conteúdo. Se bater,
        basta: nenhuma posição de mensagem importa, porque dado externo não
@@ -337,6 +387,9 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
        vira texto concatenado, `None`/outro tipo vira string vazia -- nunca
        `TypeError`, nunca falso negativo silencioso por testar `in` numa
        lista (achado de auditoria, 16/09/2026).
+    3. `_e_chamada_titulo_goose` -- mesma ideia do (2), mas pro Goose: o
+       texto-gatilho vem na PRIMEIRA mensagem (system), não na última, então
+       tem checagem própria (varre todas as mensagens do payload).
 
     Residual CONHECIDO, não fechado por este desenho: colar um texto com a
     string-gatilho como a PRIMEIRA mensagem de uma conversa nova ainda bate
@@ -346,6 +399,8 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
     PROJETO.md: risco residual declarado é mais seguro que estado seguro
     não declarado)."""
     if _schema_pede_titulo(payload):
+        return True
+    if _e_chamada_titulo_goose(payload):
         return True
 
     msgs = payload.get("messages")
@@ -671,6 +726,24 @@ def _selftest() -> int:
     print(f"{'PASS' if ok3 else 'FALHA'}  chamada de título -> repassada sem hidratar "
           f"(messages={len(m3)}, role0={m3[0]['role']})")
     falhas += 0 if ok3 else 1
+
+    # 3b. chamada de TÍTULO do Goose (payload real capturado com proxy, MEMÓRIAS (495)) ->
+    # repassada crua, SEM system hidratado. Gatilho na PRIMEIRA mensagem (system), não na
+    # última -- é exatamente o caso que o sinal 2 (só olha msgs[-1]) não cobre.
+    body3b = json.dumps({"model": "seth-codigo", "messages": [
+        {"role": "system", "content": "Generate a short title (four words or less) that "
+         "describes the topic of the user's messages. \nReply with only the title, "
+         "nothing else. Do not show your reasoning."},
+        {"role": "user", "content": "---BEGIN USER MESSAGES---\noi\n---END USER "
+         "MESSAGES---\n\nGenerate a short title for the above messages."}],
+        "stream": True, "stream_options": {"include_usage": True}}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body3b, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m3b = json.loads(_Dummy.ultimo_corpo)["messages"]
+    ok3b = len(m3b) == 2 and m3b[0]["role"] == "system" and MARCADOR not in m3b[0]["content"]
+    print(f"{'PASS' if ok3b else 'FALHA'}  chamada de título do Goose -> repassada sem "
+          f"hidratar (messages={len(m3b)})")
+    falhas += 0 if ok3b else 1
 
     # 4. chat normal com a palavra "título" no meio -> AINDA hidrata (sem falso positivo)
     body4 = json.dumps({"model": "seth", "messages": [
