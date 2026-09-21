@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de ação priorizado da auditoria de Marcos (500), item por item. Item 1 (GOV-03) fechado de verdade: `main` protegido no GitHub, PR obrigatório + `suite-adversarial` como status check exigido + force-push e deleção bloqueados. Esta própria entrada é o primeiro teste real do fluxo novo — branch + PR + checagem verde + merge, não mais push direto.**
+  palavras-chave: ordem, humano, vamos, fazer, tudo, plano, ação, priorizado, auditoria, marcos, item, gov, fechado, verdade, main, protegido, github, obrigatório, suite, adversarial, status, check, exigido, force, push, deleção, bloqueados, própria, entrada, primeiro, teste, real, fluxo, novo, branch, checagem, verde, merge, direto
 (500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, 12 páginas, snapshot `5d88f54` = (481)) e auditada na Máquina — camada C da cadeia (REGRAS, "Cadeia de auditoria em camadas"): não aceitei o relatório de cara, conferi contra o real. Os 3 achados HIGH batem exatos com o estado atual. Nenhum é tocado pelos 18 commits desta sessão desde o snapshot.**
   palavras-chave: auditoria, técnica, externa, marcos, recebida, pdf, páginas, snapshot, auditada, máquina, camada, cadeia, regras, camadas, aceitei, relatório, cara, conferi, contra, real, achados, high, batem, exatos, estado, atual, tocado, commits, desta, sessão, desde
 (499) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (488): o tema de cores "Agata-Dark"/"Agata-Light" do Goose NUNCA funcionou numa sessão de verdade — eu tinha declarado essa lacuna em (488) ("não confirmei visualmente"), mas subestimei a forma da falha: não é só "não aplica a cor", é um aviso `[bat warning]: Unknown theme 'Agata-Dark'` REPETIDO A CADA PALAVRA transmitida em streaming, tornando o terminal interativo inutilizável. Achado pelo Humano numa sessão real colada aqui, não por mim sozinho. Corrigido revertendo pros nomes de tema que o Goose de fato reconhece.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: nota, máquina, conversa, hoje, erros, reais, ditos, direto, suavizar, você, acertou, meio, deles
 (472) DIÁRIO — 20/09/2026 · **`SETH-DIARIO.md` reordenado (mais recente primeiro, como MEMÓRIAS) e o mecanismo de escrita corrigido pra manter a ordem daqui pra frente. Pedido real do Humano, relayado por Seth com dois erros de framing — corrigidos antes de agir, não herdados.**
   palavras-chave: seth, diario, reordenado, recente, primeiro, memórias, mecanismo, escrita, corrigido, pra, manter, ordem, daqui, frente, pedido, real, humano, relayado, erros, framing, corrigidos, agir, herdados
-(471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
-  palavras-chave: proposta, vanguardista, recebida, seth, librechat, colada, humano, módulo, novo, regras, prioridade, commits, infraestrutura, verificação, segunda, opinião, pedida, posição, independente, concordante, objeção, levantada, pedir, arquivada, nada, aplicado
+(471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreC …
+  palavras-chave: proposta, vanguardista, recebida, seth, librec
 (470) MOD Seth — 20/09/2026 · **Nota da Máquina pra Seth sobre a queda de energi …
   palavras-chave: nota, máquina, pra, seth, queda, energi
 (469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de …

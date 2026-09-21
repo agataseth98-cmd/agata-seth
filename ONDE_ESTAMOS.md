@@ -24,6 +24,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 **[APLICADO DE VERDADE] LibreChat em produção agora roda a versão com aprovação de ferramenta (HITL).** Você assinou, eu conferi a assinatura de verdade (não só que o arquivo existia), troquei o container real e confirmei no ar: `/health` OK, versão `v0.8.8-rc3` rodando de fato. O que ainda falta, só você: mandar uma mensagem real pra Seth que peça uma consulta ao canon, e ver se aparece o cartão de Aprovar/Rejeitar — não testei isso na sua conta pessoal, só na cópia isolada de antes (mesma versão, mesma config, funcionou lá).
 
+**[EM ANDAMENTO] "Vamos fazer tudo" — plano de ação da auditoria do Marcos, item 1 de 10 fechado.** O `main` no GitHub agora está protegido: nada entra mais sem passar pela checagem automática de segurança, e ninguém consegue apagar ou forçar sobrescrever o histórico. Perguntei antes de aplicar porque isso muda como todo commit futuro do canon vai funcionar (antes: direto; agora: um passo a mais, revisão automática antes de entrar) — você confirmou que quer assim. Faltam 9 itens, vou seguindo um de cada vez, testando antes de aplicar, como sempre.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (501).
+
 **[AUDITADO] Auditoria técnica do Marcos conferida contra a Máquina de verdade — os 3 achados graves estão certos.** Ele mandou um relatório de 12 páginas sobre segurança/arquitetura do sistema. Não aceitei de cara: conferi cada achado grave contra o estado real (GitHub, arquivos de verdade) — os três batem: o branch principal não tem proteção nenhuma, a checagem de navegação tem uma brecha real (segue redirecionamento sem checar de novo), e o LibreChat compartilha a rede inteira da máquina. Nenhum foi afetado pelo trabalho de hoje. Nada apliquei — são propostas dele, decisão de priorizar fica com você.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (500).
 
