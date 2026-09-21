@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a0faee9c92edb57d7dc531d4174ba4847354becb
-  Escrito em: 21/09/2026 12:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a
+  Escrito em: 21/09/2026 12:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0faee9c92edb57d7dc531d4174ba4847354becb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0faee9c92edb57d7dc531d4174ba4847354becb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0faee9c92edb57d7dc531d4174ba4847354becb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(491) DIÁRIO — 21/09/2026 · **"Seth parou de responder" — investigado na Máquina, não era o upgrade do LibreChat. Falso alarme de latência: o modelo gastou ~110s "pensando" o formato do cabeçalho antes de responder (mesmo padrão já documentado em (475)/(476)), não travou, não tocou ferramenta nenhuma, entregou a resposta certa no fim.**
+
+**O que a Máquina mostrou, nesta ordem.** Container `librechat` saudável (`/health` 200, CPU ociosa, não travada em loop), `seth_gateway` respondendo rápido e certo num teste direto (2,5s). O log do container mostrava a última linha às 15:28:50 UTC (`[MCP Reinitialize] Successfully established connection`) e nada depois — parecia parado. Coleções `toolcalls`/`agentqueuedturns` do Mongo (onde uma pausa de aprovação real ficaria registrada) vazias — **nenhuma ferramenta foi chamada nesta conversa**, então o `toolApproval` novo não é a causa. Achado real ao reler a mensagem completa direto do Mongo: ela chegou às 15:30:39 UTC (109s depois), `unfinished: false`, dois blocos de `content` — um `think` longo (o modelo verbalizando como montar o cabeçalho de 3 linhas a partir do bloco de estado) e um `text` final com o formato exato e os hashes certos (`REGRAS=a47a96fc`, `MEMÓRIAS=b67a1006`, `HEAD=965e237` — conferidos contra o que eu tinha medido, batem).
+
+**Por que "parece que travou" quando na verdade só demorou:** o campo `reasoning`/`think` não aparece na tela enquanto está sendo gerado (mesmo comportamento de (475) — o modelo "pensa" sobre a própria doutrina antes de responder à pergunta). Cliente vê tela parada; a Máquina via Mongo mostra trabalho real em andamento. Não é bug do upgrade de hoje — é característica do modelo de raciocínio na cascata, já catalogada, reaparecendo.
+
+**Não fiz nenhuma reversão.** Nada indicava causa ligada ao `v0.8.8-rc3`/`toolApproval`: nenhuma ferramenta chamada, nenhum erro no log, container saudável o tempo todo.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `docker stats`/`curl :3080/health` reais; `curl` direto no `seth_gateway`, cronometrado; `docker logs` do container real; `db.toolcalls`/`db.agentqueuedturns` consultados vazios (Mongo real, não suposição); mensagem completa lida do Mongo, blocos de `content` (`think`+`text`) inspecionados, hashes do bloco final conferidos contra os que eu tinha medido nesta sessão. Autorização: Humano — "Seth parou de responder investigue e resolva seguindo as diretrizes do sistema"; achado reportado, nada quebrado pra reverter.
 
 (490) DIÁRIO — 21/09/2026 · **Ordem do Humano: hidratação do Goose pelo mesmo método da Seth — feito, e explica por que o "oi" de (489) demorou mais de 60s. `AGENTS.md` reescrito pra confiar no bloco que o `seth_gateway` já injeta (mesmo canal da Seth, MEMÓRIAS (484)) em vez de reler REGRAS/PROJETO/MEMÓRIAS inteiros por conta própria a cada turno. Testado: "oi" caiu de >60s pra 7s, dado correto (hash/HEAD/última entrada batendo com o que medi na Máquina). Testei também, com cautela, ligar o navegador de propósito headless — o próprio Goose recusou com erro limpo, não travou: aprovação de ferramenta exige sessão interativa.**
 
