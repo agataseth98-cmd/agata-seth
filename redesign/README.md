@@ -12,7 +12,14 @@ regime normal:
 
 - **Quarentena P-8** cobre `redesign/router/*`, `redesign/mcp/*`,
   `redesign/librechat/*.mjs|*.yaml|*.yml`, `redesign/grafo/*.py|*.sh`,
-  `redesign/systemd/*` (ver `scripts/perimetro.sh`, `_p8_eh_comportamento`).
+  `redesign/systemd/*`, `redesign/obsidian/*.py`, `redesign/igpu/*.py`
+  (o último acrescentado 21/09/2026, item 5/9 do plano de ação da auditoria
+  de Marcos, MEMÓRIAS (504)/(506) -- achado real: `whisper_server.py`/
+  `embeddings_server.py` mudavam de comportamento sem quarentena nenhuma;
+  ver `scripts/perimetro.sh`, `_p8_eh_comportamento`). Este README já tinha
+  ficado pra trás uma vez (não citava `redesign/obsidian/*.py`, acrescentado
+  numa sessão anterior) -- lição registrada em MEMÓRIAS: atualizar esta
+  lista sempre que `_p8_eh_comportamento` mudar, não confiar em lembrar depois.
   Mudar qualquer um exige `propostas/<nome>.diff` + `propostas/APROVADO-<nome>`
   assinado.
 - Invariantes universais valem sem exceção: MEMÓRIAS nunca se reescreve
