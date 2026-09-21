@@ -1,0 +1,40 @@
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index 96e82a0..720918f 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -104,3 +104,35 @@ if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓR
+   git add .hidrata.md INDICE_MEMORIAS.md
+   [ -f INDICE_MEMORIAS_PALAVRAS-CHAVE.md ] && git add INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+ fi
++
++# 2ª passada do perímetro, sensível ao ÍNDICE FINAL -- item 9 do plano de
++# ação da auditoria de Marcos (MEMÓRIAS (500)/(502), achado GOV-02): a
++# passada da linha 20 valida o staged de T0, ANTES da âncora de SHA e da
++# regeneração de .hidrata.md/índices (linhas 25-106) mexerem no index de
++# novo. Essas mutações são geradas por script de confiança, não input do
++# autor -- mas "gerado por script de confiança" não é o mesmo que "provado
++# inofensivo": um bug ali (ou um script comprometido) podia introduzir algo
++# que P-8/P-1/P-5 pegariam, sem que ninguém rodasse os controles contra o
++# index que de fato vira commit. A guarda de âncora (linhas 59-88) já cobre
++# a classe "conteúdo fora da âncora nos 3 canônicos" -- isto é mais geral:
++# roda TODOS os controles de novo, contra o T1 real, antes de deixar o
++# commit fechar.
++#
++# `_P8_EXCLUIR` (scripts/perimetro/p08_quarentena.sh) tira REGRAS.md/
++# PROJETO.md/MEMÓRIAS.md da checagem do P-8 SÓ NESTA chamada -- sem isto,
++# a 2ª passada bloquearia TODO commit (a âncora muda os 3 em todo commit,
++# bookkeeping mecânico, nunca assinado, nem devia ser). Seguro porque: (1)
++# a 1ª passada (linha 20, sem esta variável) já viu esses 3 arquivos no
++# estado do AUTOR, antes da âncora -- se o autor tivesse mudado algo neles
++# sem aprovação, já teria bloqueado ali; (2) a guarda de âncora acima (linhas
++# 59-88) já PROVOU, byte a byte, que nada além do bloco da âncora mudou
++# neles depois disso. Qualquer OUTRO arquivo (scripts/*, redesign/*,
++# .githooks/* etc.) continua checado normalmente nesta 2ª passada -- só os
++# 3 canônicos, e só pelo motivo específico acima, ficam de fora.
++if ! _P8_EXCLUIR="$(printf '%s\n' REGRAS.md PROJETO.md MEMÓRIAS.md)" \
++     bash scripts/perimetro.sh >/tmp/agata-perimetro-2a-passada.log 2>&1; then
++  echo "pre-commit: FALHA na 2ª passada do perímetro (índice final, depois da âncora/hidratação) -- algo que a 1ª passada não viu entrou no meio do caminho. Commit bloqueado. Saída completa em /tmp/agata-perimetro-2a-passada.log:" >&2
++  cat /tmp/agata-perimetro-2a-passada.log >&2
++  exit 1
++fi
++rm -f /tmp/agata-perimetro-2a-passada.log
