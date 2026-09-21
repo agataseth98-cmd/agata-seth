@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4234e434a6a3107f8fde2c7465b6f784482c559b
-  Escrito em: 21/09/2026 18:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7d005e2acb4e9f762fe63d97854e4d256149b8bf
+  Escrito em: 21/09/2026 18:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4234e434a6a3107f8fde2c7465b6f784482c559b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4234e434a6a3107f8fde2c7465b6f784482c559b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4234e434a6a3107f8fde2c7465b6f784482c559b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois investigados. Item 8 (manifests de sistema/runtime/recovery): já existem, de forma distribuída, não faltava construir do zero. Item 10 (limpeza de documentação): achado real e corrigido — `redesign/README.md` listava o escopo do P-8 desatualizado, sem os dois caminhos que sessões anteriores e esta mesma sessão acrescentaram. Com isto, os 10 itens do plano de ação de (500) estão todos com uma resposta real — 5 aplicados/prontos pra assinatura (2, 4, 5, 7, 9), 2 devolvidos como decisão de desenho (3, 6), 2 fechados por já existirem (8) ou por ajuste pontual (10). Nenhum pulado sem registro.**
+
+**Item 8 — não virou arquivo novo, porque já existe, só que espalhado.** Conferido, não suposto: **sistema** = `PROJETO.md`, "Serviços (boot)" (prosa viva, com data e MEMÓRIAS de cada achado, ex.: portas 20135/20136 que faltavam, achadas em (419)/(420)) + P-9 (`scripts/perimetro/p09_servicos_declarados.sh`), que já confere esses serviços declarados contra o `systemctl` real. **Recovery** = `models/manifest.json` (P-12) + `redesign/fase7-hd/` (roteiro de restauração do backup restic). **Runtime** = o que P-9 já mede ao vivo. Um arquivo `.json`/`.yaml` único juntando os três seria bonito, mas duplicaria uma fonte da verdade que já existe e já é verificada — exatamente o risco que este projeto evita de propósito (duas descrições do mesmo fato divergindo com o tempo, como aconteceu com o Hermes/8642 em (420)). **Fechado como "já resolvido, de forma distribuída"**, não como pulado; se o Humano quiser um arquivo único mesmo assim, é decisão de forma, não de lacuna real.
+
+**Item 10 — achado real, não cosmético.** `redesign/README.md` listava o escopo da quarentena P-8 (`redesign/router/*`, `redesign/mcp/*`, etc.) **sem `redesign/obsidian/*.py`** (acrescentado numa sessão anterior, achado de 09/09/2026) **nem `redesign/igpu/*.py`** (acrescentado NESTA sessão, item 5, MEMÓRIAS (504)) — o README, que existe justamente pra explicar o regime de governança de quem entra nesta pasta, estava desatualizado sobre o próprio regime que descreve. Corrigido, com nota explícita pra não repetir: atualizar esta lista sempre que `_p8_eh_comportamento` mudar. `redesign/README.md` não é quarentenado (`.md`, fora dos padrões de extensão do P-8) — commitado direto, sem proposta.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `PROJETO.md` "Serviços (boot)" por inteiro; leitura de `p09_servicos_declarados.sh`/`models/manifest.json`/`redesign/fase7-hd/` antes de concluir que já cobrem o item 8; `grep` comparando `_p8_eh_comportamento` real contra o texto do README, achando a divergência exata do item 10. Autorização: Humano — "vou sair prossiga até o fim e me apresente assinatura quando for extremamente necessário" (mandato de (503), mesma sessão — plano de (500) completo).
 
 (506) DIÁRIO — 21/09/2026 · **Item 9 (2ª passada do perímetro sensível ao índice final, achado GOV-02) pronto e testado, aguardando assinatura. No meio do trabalho, cometi um erro real testando o hook — `git reset --hard` apagou 10 arquivos pendentes de assinatura — recuperado por inteiro a partir dos próprios `.diff` já commitados, nada perdido de verdade. Registrado sem suavizar, doutrina "Fraqueza vira força".**
 
