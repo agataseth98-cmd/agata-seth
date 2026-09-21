@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
 (480) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (479): a opção (a) ("instalar Chrome ou Chromium, caminho que o `@playwright/mcp` já suporta sem gambiarra") estava errada — conferido na fonte, nem Chromium nem Brave têm entrada no mapa de canais, só literalmente Google Chrome e Microsoft Edge (nas variantes beta/dev/canary). O Humano notou o furo ("espera, o brave é cromium") antes de eu instalar qualquer coisa. Com o Brave fechado, avancei um degrau real na opção (b) — achei a extensão certo, travei de novo tentando lançar o navegador, mesmo bloqueio de segurança de (478)/(479).**
 (479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano instalou a "Playwright Extension" no Brave. Testei de verdade, na Máquina — handshake MCP funciona, mas a extensão não é encontrada porque o `@playwright/mcp --extension` procura o perfil em `~/.config/google-chrome`, nunca em Brave. Tentativa de corrigir apontando pro perfil do Brave foi bloqueada pelo próprio harness (mesma classe de bloqueio de segurança de (478)) — parei, não contornei.**
 (478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
-(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
+(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu c …
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marc …
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da au …
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no …

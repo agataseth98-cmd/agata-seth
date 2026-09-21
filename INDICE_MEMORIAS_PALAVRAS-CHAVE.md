@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
+  palavras-chave: achado, real, risco, segurança, genuíno, travamento, era, bug, própria, extensão, pedindo, consentimento, explícito, humano, conectar, porque, aprovar, expõe, navegador, inteiro, sessões, cookies, cliente, mcp, tela, verdade, screenshot, cliquei, nada
 (480) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (479): a opção (a) ("instalar Chrome ou Chromium, caminho que o `@playwright/mcp` já suporta sem gambiarra") estava errada — conferido na fonte, nem Chromium nem Brave têm entrada no mapa de canais, só literalmente Google Chrome e Microsoft Edge (nas variantes beta/dev/canary). O Humano notou o furo ("espera, o brave é cromium") antes de eu instalar qualquer coisa. Com o Brave fechado, avancei um degrau real na opção (b) — achei a extensão certo, travei de novo tentando lançar o navegador, mesmo bloqueio de segurança de (478)/(479).**
   palavras-chave: correção, própria, entrada, opção, instalar, chrome, chromium, caminho, playwright, mcp, suporta, gambiarra, estava, errada, conferido, fonte, nem, brave, têm, mapa, canais, literalmente, google, microsoft, edge, variantes, beta, dev, canary, humano, notou, furo, espera, cromium, coisa, fechado, avancei, degrau, real, achei, extensão, certo, travei, novo, tentando, lançar, navegador, mesmo, bloqueio, segurança
 (479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano instalou a "Playwright Extension" no Brave. Testei de verdade, na Máquina — handshake MCP funciona, mas a extensão não é encontrada porque o `@playwright/mcp --extension` procura o perfil em `~/.config/google-chrome`, nunca em Brave. Tentativa de corrigir apontando pro perfil do Brave foi bloqueada pelo próprio harness (mesma classe de bloqueio de segurança de (478)) — parei, não contornei.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, fecha, github, workflows, perimetro, yml, publicado, bloqueio, era, escopo, workflow, token, cli, humano, concedeu, apliquei, aprovação, assinada, pedir, assinatura, nova
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
   palavras-chave: item, assinado, aplicado, pontos, auditoria, marcos, fecham, completo, scripts, perimetro, modular, partir, agora, modo, sombra, ativo
-(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
-  palavras-chave: assinatura, ficou, obsoleta, conseguir, aplicá, achado, tentando, aplicar, produção, diff, corrigido, reemitido, precisa, nova, bug, real, pré, existente, silencioso, desde, fase
+(451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu c …
+  palavras-chave: assinatura, ficou, obsoleta
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marc …
   palavras-chave: item, plano, mitigação, auditoria, marc
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da au …
