@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c71aec5e510dfc806750b1ece66e6047d01d7589
-  Escrito em: 21/09/2026 14:00 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cbb4358301bcbd87607eff209bfb6932b01ef36c
+  Escrito em: 21/09/2026 14:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c71aec5e510dfc806750b1ece66e6047d01d7589/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c71aec5e510dfc806750b1ece66e6047d01d7589/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c71aec5e510dfc806750b1ece66e6047d01d7589/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbb4358301bcbd87607eff209bfb6932b01ef36c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbb4358301bcbd87607eff209bfb6932b01ef36c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbb4358301bcbd87607eff209bfb6932b01ef36c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(497) DIÁRIO — 21/09/2026 · **CASO ENCERRADO — proposta do Humano confirmou a tese de (496): 3 de 3 chamadas reais do Goose forçado no modelo local (`ollama-local/qwen3.5-9b-64k:latest`, sem depender de provedor gratuito nenhum) vieram com hidratação perfeita — `sync: PASS`, hashes certos, última entrada certa e completa. Os dois bugs locais de (494)/(495) estão fechados de verdade; o resto era mesmo instabilidade externa, como (496) já tinha medido.**
+
+**Teste, não confiança.** `goose run --no-session --model "ollama-local/qwen3.5-9b-64k:latest" -t "oi"` rodado 3 vezes seguidas — nenhuma tocou provedor gratuito de nuvem nenhum (o combo local já testado e documentado em (403), servido pelo Ollama que já está de pé sempre, `:11434`). As 3 saíram com `sync: PASS · REGRAS=56f11954 · MEMÓRIAS=7076067c · HEAD=cbb4358` — os mesmos hashes que eu tinha medido na Máquina — e a última entrada (496) citada certa, incluindo o resumo completo e correto na 2ª e 3ª tentativa. Tempo: 22-48s (modelo local é mais lento por token, mas não depende de rede nem de cota de terceiro).
+
+**Achado pequeno, não crítico, registrado por completude:** a 1ª resposta usou `<br>` em vez de quebra de linha real entre os campos do cabeçalho, e a 2ª escreveu `Agata · Seth ·` em vez de `modelo: modelo não verificado` (viola a doutrina que proíbe `modelo: Seth`, MEMÓRIAS (424)) — falhas de qualidade do modelo local nesta chamada específica, mesma classe já catalogada em REGRAS, não relacionadas à hidratação (os dados injetados, que é o que estava quebrado, saíram certos as 3 vezes).
+
+**Fechamento:** os dois consertos reais de hoje (timeout no `git ls-remote`, e o 3º sinal de chamada utilitária pro Goose) resolvem os dois bugs que estavam sob nosso controle — confirmado agora com um caminho que não depende de provedor de nuvem nenhum. A instabilidade externa medida em (496) continua sendo o único fator restante fora do nosso alcance, e essa distinção fica clara: quando o transporte é confiável (local), a hidratação funciona 100% das vezes testadas.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: 3 chamadas reais `goose run --model ollama-local/qwen3.5-9b-64k:latest`, saída completa lida em cada uma, hashes conferidos contra `sha256sum`/`git rev-parse` desta sessão antes de aceitar como corretos. Autorização: Humano — "tenta com um modelo local e damos o caso por encerrado dando certo".
 
 (496) DIÁRIO — 21/09/2026 · **Assinatura verificada, aplicado, serviço reiniciado — e MESMO ASSIM o Goose continuou voltando com `lacuna`, 5 de 5 tentativas. Investiguei fundo (proxy de captura + replay byte a byte do payload real do Goose direto no `seth_gateway`) e a hidratação funciona perfeita quando eu reenvio o EXATO mesmo payload. A causa real, medida no `call_logs` do OmniRoute: ~75% das chamadas de verdade dos últimos 30min estão falhando (502/429/529) — instabilidade externa dos provedores, não bug nosso. `100% garantido` não é alcançável enquanto isso durar — é limite real, declarado, não escondido.**
 
