@@ -9,6 +9,15 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
+**[VOCÊ SAIU — trabalhando sozinho até onde der, sem parar por pergunta, só por assinatura de verdade.]** Você pediu pra eu seguir o plano de ação inteiro sozinho e só te mostrar assinatura quando for realmente necessário.
+
+**[DEVOLVIDO PRA SUA DECISÃO] Item 3 (a brecha de rede do LibreChat) — não apliquei.** Achei um desenho real que resolveria (isolar a app grande numa rede própria, com um retransmissor bem pequeno e simples fazendo a ponte pros serviços que ela precisa alcançar) — mas na hora de testar de verdade, a MINHA PRÓPRIA ferramenta bloqueou a ação por segurança ("expor serviço local"), exatamente porque mexer na rede de um serviço de produção compartilhado sem você por perto pra checar depois não é algo que devo forçar sozinho, mesmo com sua ordem geral de continuar. Deixei escrito em detalhe pra quando você quiser decidir e estar presente — `propostas/backlog.md`, item B8.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (503).
+
+**[ACHADO E CORRIGIDO, aguardando só sua assinatura] Item 4 — achei um problema de segurança de verdade, não só o que o Marcos apontou: o serviço de transcrição de voz aceitava um "caminho de arquivo" sem checar nada, então dava pra pedir pra ele ler QUALQUER arquivo que o próprio computador conseguisse ler (uma senha guardada, por exemplo) — mesmo sem ninguém de fora conseguir chegar nele pela rede (só funciona de dentro da própria máquina, mas mesmo assim era uma porta que não devia estar aberta). Corrigido: agora só aceita arquivo de dentro de uma pasta específica, e testei os 4 jeitos de tentar burlar isso (direto, de fora, por "..", por atalho escondido) — todos bloqueados certo.
+- Rode quando puder: `bash scripts/aprovar.sh whisper-restringe-path-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (503).
+
 **[APLICADO, com correção] O Goose já navega no Brave de verdade E já tem paridade completa de carregamento com a Seth — e essa paridade já existia antes desta sessão, eu só não sabia.** Você autorizou acesso total ao navegador e pediu carregamento automático "como a Seth". Naveguei errado numa resposta: disse que faltava reinjeção contínua a cada turno, que precisaria de um serviço novo. Era mentira minha por falta de checagem — o Goose já fala com o mesmo `seth_gateway` da Seth (mesma porta, configurado desde 20/09), que já reinjeta o estado do canon em toda chamada, sem eu precisar fazer nada. Testei de verdade, sem nenhuma ferramenta, e a resposta veio com o estado certo na hora. Some-se a isso o `~/.config/goose/AGENTS.md` (que eu criei) fazendo o Goose também ler os arquivos ativamente no início — as duas coisas juntas, não uma no lugar da outra.
 - Antes disso: a Seth corrigiu sozinha uma alegação errada de identidade ("sou Claude Sonnet 5" — provado falso, ela roda em modelos gratuitos via OmniRoute, nunca Anthropic) e propôs um benchmark de inferência real, rodado e registrado em `(475)`-`(476)`. O HD de backup (`AgataBkup01`) foi reconectado e teve uma passada completa — `(477)`.
 - Detalhe técnico completo: `MEMÓRIAS.md` (474)-(484).

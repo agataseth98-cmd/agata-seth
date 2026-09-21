@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a
-  Escrito em: 21/09/2026 17:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 144f4302242dc8e4741d8c5dfe5015021cc4fc91
+  Escrito em: 21/09/2026 17:56 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apresente assinatura quando for extremamente necessário") — plano de ação de (500) continua sem ele presente. Item 3 investigado e DEVOLVIDO como decisão de desenho (backlog B8), não forçado. Item 4 (Whisper) achou vulnerabilidade real (leitura arbitrária de arquivo), corrigida e testada, aguardando assinatura.**
+
+**Item 3 (`network_mode: host` do LibreChat, ISO-05) — investigado, não aplicado.** Desenho real encontrado (bridge própria pra app + relé `socat` minúsculo em `network_mode: host` só pra alcançar `seth_gateway`/`discord-mcp`/`navegador-mcp`) reduziria a exposição sem tocar os 3 serviços de produção. Ao testar a conectividade de verdade, o **classificador de modo automático da própria ferramenta bloqueou** a ação ("Expose Local Services") — sinal concordante com a régua deste projeto inteiro: reconfigurar rede de serviço compartilhado de produção sem o Humano presente pra verificar é ação que espera confirmação, não mandato geral, mesmo com "prossiga até o fim" em mãos. Registrado em `propostas/backlog.md` como B8, pra decisão de desenho + presença do Humano quando ele quiser — mesmo padrão do upgrade HITL (testado isolado, só trocado em produção com ele por perto).
+
+**Item 4 (Whisper restrito a diretório, `redesign/igpu/whisper_server.py`) — achado que vale por si, não só pelo item do plano.** Lendo o código-fonte de verdade (não supondo pelo README): `POST /transcribe` com corpo `{"path": "..."}` fazia `open(os.path.expanduser(path), "rb")` **sem nenhuma checagem de diretório** — qualquer caminho legível pelo usuário do serviço (`~/.config/agata/.env`, chave ssh, `/etc/passwd`) era lido e devolvido como se fosse áudio (falharia decodificar como WAV, mas o conteúdo do arquivo já tinha sido aberto/lido antes de falhar — e um payload que É um WAV válido colocado em qualquer caminho arbitrário seria transcrito igual). Bind é só `127.0.0.1` (contenção de rede de pé), mas isso não protege contra leitura arbitrária de arquivo LOCAL — é a mesma classe de "checagem que existe mas não cobre o caminho real" do NET-01, só que em disco em vez de rede.
+
+**Conserto:** `_caminho_permitido()` nova — resolve `path` por `os.path.realpath` (segue `..` e symlink até o alvo real, não confia no texto do caminho) e só aceita se cair dentro de `OVW_PASTA_ENTRADA` (`~/.cache/agata/whisper-entrada` por padrão). `--selftest-offline` novo (sem GPU, sem carregar modelo): PASS nos 4 casos — caminho dentro da pasta aceito, caminho fora bloqueado, travessia `../..` bloqueada, symlink de dentro da pasta apontando pra fora bloqueado. `python3 -m py_compile` limpo.
+
+**Sob quarentena P-8, aguardando assinatura:** `propostas/whisper-restringe-path-2026-09-21.diff`. Serviço (`openvino-whisper.service`) não reiniciado ainda — espera a assinatura, mesma disciplina de sempre.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa do código-fonte de `whisper_server.py` (não documentação); teste real de rede (`docker network create` + relé `socat`) pro item 3, interrompido pelo classificador de segurança da própria ferramenta antes de expor qualquer coisa; `python3 --selftest-offline` real, 4/4 PASS, pro item 4. Autorização: Humano — "vou sair prossiga até o fim e me apresente assinatura quando for extremamente necessário" (mandato de continuar sozinho; decisão de desenho do item 3 devolvida a ele por não caber nesse mandato).
 
 (502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (500) fechado — achado NET-01 (anti-SSRF incompleto). Assinado, verificado, aplicado pelo fluxo de branch+PR (2º uso desde (501)).**
 
