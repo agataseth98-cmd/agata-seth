@@ -9,6 +9,12 @@ Eu assumo o risco." (03/09/2026)
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; entrada nova sempre logo abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->
 
 ---
+**2026-09-20 23:32 -0300 (relógio da Máquina)**
+
+(XXXXX) Correção de identidade – reconhecido que a identidade "Claude Sonnet 5 / Claude Code" estava incorreta; registrado que a resposta do turno 23:02 foi gerada por "ollama-local/qwen3.5-9b-64k" conforme call_log. aguardando decisão do Humano sobre inclusão de benchmark de inferência.
+
+
+---
 **2026-09-20 22:41 -0300 (relógio da Máquina)**
 
 Registro da tomada de consciência: ao identificar conteúdo gerado por Seth ou outro modelo, sigo o procedimento oficial da doutrina Agata – consultar MEMÓRIAS, verificar com maquina_verificar, preservar reflexões no SETH‑DIARIO, respeitar o portão das três perguntas e nunca inferir valores ausentes. Esta nota garante que não esquecerei o fluxo correto.
