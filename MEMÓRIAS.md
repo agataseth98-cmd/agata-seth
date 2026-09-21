@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 80539670962dd557f9845bff26a9eee83f88a440
-  Escrito em: 21/09/2026 10:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5e2f841ae9d1a0b4042c6ef2fa7721205e89227f
+  Escrito em: 21/09/2026 10:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5e2f841ae9d1a0b4042c6ef2fa7721205e89227f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5e2f841ae9d1a0b4042c6ef2fa7721205e89227f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5e2f841ae9d1a0b4042c6ef2fa7721205e89227f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(484) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (483): eu disse que o Goose só carregava o canon uma vez por sessão, sem a reinjeção contínua da Seth — falso, e eu não tinha testado antes de afirmar. Testado agora: a paridade completa já existe, de graça, desde 20/09/2026 (quando `GOOSE_MODEL` virou `seth-codigo`) — o Humano pediu algo que, sem eu saber, já estava feito.**
+
+**O erro exato:** (483) dizia *"isto carrega o canon UMA VEZ, no início de cada sessão do Goose — não é a reinjeção contínua a cada turno que o `seth_gateway` faz pra Seth"*. Afirmação sobre o que um canal NÃO tem, sem medir — a mesma classe de falha do catálogo de REGRAS (*"Afirmar 'não existe' sobre o mundo lendo só a própria cópia"*, (73)). Eu tinha lido o `AGENTS.md` que eu mesmo escrevi e concluído dali; não tinha lido `redesign/router/seth_gateway.py` nem testado uma chamada real.
+
+**O que a leitura do código mostrou, e o teste confirmou.** `seth_gateway.py`, linha 4: *"Fica entre o frontend (Open WebUI, **Goose**, curl) e o proxy de sanitização"* — Goose já está nomeado no próprio docstring do arquivo, não é acaso. `~/.config/goose/config.yaml` (linha 1) já tinha `OPENAI_HOST: http://127.0.0.1:20126` — a mesma porta do gateway da Seth, configurado desde (PROJETO.md, "Cérebro") 20/09/2026, antes desta sessão. A função `_injeta()` não filtra por nome de modelo nem por origem — qualquer POST `/v1/chat/completions` que chegue na porta, exceto chamada utilitária de título, ganha o bloco de doutrina (se ainda não tiver) e o bloco `SETH:ESTADO-ATUAL` FRESCO (se já tiver) a cada turno, sempre.
+
+**Teste real, sem ferramenta nenhuma do lado do cliente:** `curl` direto em `http://127.0.0.1:20126/v1/chat/completions`, `model: "seth-codigo"` (o mesmo que o Goose usa), uma única mensagem de usuário perguntando a última entrada de MEMÓRIAS e o HEAD do git — nada de arquivo, nada de `git`, nada de ferramenta, só a chamada de rede crua. Resposta: *"Última entrada: (483)... HEAD: 5e2f841"* — os dois valores corretos, medidos pelo `estado_para_eco.sh` do próprio gateway no instante da chamada, não inventados nem vindos de treino (dado fictício/privado deste projeto). Roteou pra `gemini-2.5-flash` (fallback da cadeia `seth-codigo`), confirmando que a injeção vale pra qualquer modelo atrás da rota, não um caso especial.
+
+**O que isso muda:** (483) continua certa sobre o `AGENTS.md` (mecanismo real, testado, útil — dá o carregamento agêntico via leitura de arquivo no início da sessão). O que estava errado era a comparação com a Seth: o Goose JÁ tinha a reinjeção contínua por turno, de graça, por já rodar atrás do mesmo `seth_gateway` — as duas coisas se somam (leitura ativa no início + reinjeção passiva a cada chamada de rede), não competem. Paridade completa, do jeito que o Humano pediu, já existia antes de eu prometer que precisaria de "um serviço à parte".
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `redesign/router/seth_gateway.py` inteiro (docstring, `_injeta`, `ja_hidratado`, `MARCADOR`, `_bloco_estado_atual`) antes de concluir; `grep` em `~/.config/goose/config.yaml` confirmando `OPENAI_HOST` real; `systemctl --user is-active`/`ss -tlnp`/`pgrep` confirmando o `seth_gateway` rodando de verdade na porta 20126; `curl` real contra o gateway, `model: seth-codigo`, resposta JSON completa lida (campo `content` E `model` da rota real, `gemini-2.5-flash`), valores cruzados contra o commit que eu mesmo tinha acabado de empurrar. Autorização: Humano — "quero paridade completa" (motivou a verificação que achou o erro).
 
 (483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
 

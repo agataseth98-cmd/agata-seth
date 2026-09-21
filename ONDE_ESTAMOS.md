@@ -9,9 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
-**[APLICADO] O Goose já navega no Brave de verdade E já carrega o sistema Agata sozinho, sem você pedir — os dois testados ponta a ponta, não só configurados.** Você autorizou acesso total ("este pc só tem coisa do Agata") e pediu que o carregamento fosse automático "como a Seth". Os dois: `~/.config/goose/config.yaml` tem o navegador funcionando de verdade (testei abrindo uma página real através dele); `~/.config/goose/AGENTS.md` (novo) faz o Goose sincronizar e ler REGRAS/PROJETO/MEMÓRIAS sozinho no início de toda sessão — testei perguntando algo sem pedir carregamento, e ele carregou por conta própria, citando a entrada certa. Diferença honesta: carrega uma vez no início da sessão, não fica reinjetando a cada turno como o mecanismo da Seth — pra isso seria preciso um serviço à parte, não um arquivo de hints.
+**[APLICADO, com correção] O Goose já navega no Brave de verdade E já tem paridade completa de carregamento com a Seth — e essa paridade já existia antes desta sessão, eu só não sabia.** Você autorizou acesso total ao navegador e pediu carregamento automático "como a Seth". Naveguei errado numa resposta: disse que faltava reinjeção contínua a cada turno, que precisaria de um serviço novo. Era mentira minha por falta de checagem — o Goose já fala com o mesmo `seth_gateway` da Seth (mesma porta, configurado desde 20/09), que já reinjeta o estado do canon em toda chamada, sem eu precisar fazer nada. Testei de verdade, sem nenhuma ferramenta, e a resposta veio com o estado certo na hora. Some-se a isso o `~/.config/goose/AGENTS.md` (que eu criei) fazendo o Goose também ler os arquivos ativamente no início — as duas coisas juntas, não uma no lugar da outra.
 - Antes disso: a Seth corrigiu sozinha uma alegação errada de identidade ("sou Claude Sonnet 5" — provado falso, ela roda em modelos gratuitos via OmniRoute, nunca Anthropic) e propôs um benchmark de inferência real, rodado e registrado em `(475)`-`(476)`. O HD de backup (`AgataBkup01`) foi reconectado e teve uma passada completa — `(477)`.
-- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(483).
+- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(484).
 
 ## Onde estamos — 20/09/2026
 

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(484) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (483): eu disse que o Goose só carregava o canon uma vez por sessão, sem a reinjeção contínua da Seth — falso, e eu não tinha testado antes de afirmar. Testado agora: a paridade completa já existe, de graça, desde 20/09/2026 (quando `GOOSE_MODEL` virou `seth-codigo`) — o Humano pediu algo que, sem eu saber, já estava feito.**
+  palavras-chave: correção, própria, entrada, disse, goose, carregava, canon, sessão, reinjeção, contínua, seth, falso, tinha, testado, afirmar, agora, paridade, completa, existe, graça, desde, model, virou, codigo, humano, pediu, algo, saber, estava, feito
 (483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
   palavras-chave: goose, agora, carrega, sistema, agata, sozinho, sessão, humano, pedir, pedido, dele, quero, ele, seja, automático, seth, testado, verdade, configurado
 (482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: ancora, falha, assinada, aplicada, segundo, achado, real, processo, diff, assinado, sozinho, nunca, passaria, próprio, gate, deste, repositório, proposta, pequena, separada, aguardando, assinatura, própria
 (455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
   palavras-chave: diff, externo, auditado, benéfico, citação, fabricada, corrigida, propor, pronto, testado, fundo, aguardando, assinatura
-(454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
-  palavras-chave: primeira, execução, real, workflow, runner, github, confirmada, deixou, aberto
+(454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do Gi …
+  palavras-chave: primeira, execução, real, workflow, runner
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro …
   palavras-chave: item, fecha, github, workflows, perimetro
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da audi …
