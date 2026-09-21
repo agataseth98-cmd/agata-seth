@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ca551a2991600f804016478222823e2332e99012
-  Escrito em: 21/09/2026 08:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3cb68cc2f12f1401cf6b34ef07b62bdad58b5a2b
+  Escrito em: 21/09/2026 09:13 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cb68cc2f12f1401cf6b34ef07b62bdad58b5a2b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cb68cc2f12f1401cf6b34ef07b62bdad58b5a2b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cb68cc2f12f1401cf6b34ef07b62bdad58b5a2b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano instalou a "Playwright Extension" no Brave. Testei de verdade, na Máquina — handshake MCP funciona, mas a extensão não é encontrada porque o `@playwright/mcp --extension` procura o perfil em `~/.config/google-chrome`, nunca em Brave. Tentativa de corrigir apontando pro perfil do Brave foi bloqueada pelo próprio harness (mesma classe de bloqueio de segurança de (478)) — parei, não contornei.**
+
+**Extensão confirmada instalada e ativa, com evidência de Máquina, não só "está na lista".** `manifest.json` real dentro de `~/.config/BraveSoftware/Brave-Browser/Default/Extensions/mmlmfjhmonkocbjadbfplnigmagldckm/0.4.0_0/` — nome "Playwright Extension", versão 0.4.0. `Preferences` do perfil: `disable_reasons: []` (não desabilitada), `has_started_service_worker: true` (o worker dela já rodou de verdade, não só foi copiada pro disco), `first_install_time` convertido do epoch do Chrome bate com **21/09/2026 09:02:14 -03** — 5 minutos antes desta sessão, condizente com o Humano tendo clicado em "Adicionar ao Chrome" assim que a Máquina voltou do reboot.
+
+**Handshake MCP real, não suposto.** Subi `npx @playwright/mcp@latest --extension --port 8931` (processo efêmero, matei depois); `curl` fazendo `initialize` + `tools/list` no protocolo MCP (streamable HTTP) respondeu certo — servidor `Playwright 1.64.0-alpha`, 26 ferramentas listadas (`browser_navigate`, `browser_tabs`, `browser_snapshot` etc.).
+
+**Achado real ao tentar usar uma ferramenta de verdade (`browser_tabs`, ação `list`, somente leitura):** erro do próprio servidor — `Error: Playwright Extension not found in "/home/orusoua/.config/google-chrome". Install it from .../mmlmfjhmonkocbjadbfplnigmagldckm, or set the PLAYWRIGHT_MCP_EXECUTABLE_PATH...`. Fui na fonte (`playwright-core/lib/coreBundle.js`, função `createExtensionBrowser`) confirmar antes de concluir: `defaultUserDataDirForChannel(channel)` só conhece `google-chrome`/`-beta`/`-unstable`/`-canary` no Linux — nenhuma entrada pra Brave nem Chromium. `--browser` do CLI só aceita `chrome, firefox, webkit, msedge`. A extensão está instalada e rodando dentro do Brave; o problema é o `@playwright/mcp` nunca olhar pra lá por padrão.
+
+**Tentei uma correção (apontar `--user-data-dir` pro perfil real do Brave, que já está aberto) — bloqueada pelo classificador do Claude Code ("Irreversible Local Destruction") antes de rodar.** Não tentei contornar (mesma disciplina de (478)). Achado, não decisão minha: existe `PWTEST_EXTENSION_USER_DATA_DIR` no código-fonte como variável de ambiente equivalente — mesmo risco, mesma classe de bloqueio esperada, não testei. Risco real por trás do bloqueio: apontar um processo novo pro diretório de perfil de um Brave **já aberto**, com sessões reais (e-mail, Discord etc.), pode disputar lock com o processo vivo — não é claro pela leitura do código se o relay realmente lança um Chromium novo nesse caminho ou só lê o diretório pra achar a extensão e depois fala com o Brave já aberto via WebSocket; não decidi isso sozinho, nem testei pra descobrir.
+
+**Nenhum processo ficou rodando, nenhum arquivo do sistema foi tocado.** `pgrep` conferido depois: nem `playwright/mcp` nem nada mexendo em `BraveSoftware/` continua de pé. `git status` limpo antes e depois — só o `.md` não commitado que já estava solto desde antes desta sessão.
+
+**Três caminhos possíveis, pro Humano escolher — nenhum eu tomei sozinho:** (a) instalar Google Chrome ou Chromium nesta máquina e a extensão nele, caminho que o `@playwright/mcp` já suporta sem gambiarra; (b) o Humano fechar o Brave manualmente e então tentar `--user-data-dir`/`PWTEST_EXTENSION_USER_DATA_DIR` apontado pro perfil, sem risco de disputa de lock por não estar mais aberto; (c) usar `Browser MCP` (a reserva já configurada em `~/.config/goose/config.yaml`, extensão própria, mesma arquitetura) em vez do Playwright, se ela tiver o mesmo suporte a Chromium/Brave — não verificado ainda.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `manifest.json` real da extensão; `python3`/`json` lendo `Preferences` do perfil Brave (`disable_reasons`, `has_started_service_worker`, `first_install_time` convertido do epoch do Chrome); `npx @playwright/mcp@latest --extension --port 8931` real, `curl` fazendo o handshake MCP completo (`initialize` → `notifications/initialized` → `tools/list` → `tools/call browser_tabs`), resposta de erro lida por inteiro; `grep`/leitura direta de `playwright-core/lib/coreBundle.js` (função `createExtensionBrowser`, `defaultUserDataDirForChannel`) antes de afirmar o motivo do erro; tentativa de correção bloqueada pelo próprio harness, mensagem de bloqueio lida por inteiro antes de parar; `pgrep`/`git status` conferidos depois, nada solto. Autorização: Humano — "carregar sistema e prosseguir a pos falha extensão instalada" (retomar o item pendente de (478)); o diagnóstico foi até o ponto de bloqueio de segurança, não além.
 
 (478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
 

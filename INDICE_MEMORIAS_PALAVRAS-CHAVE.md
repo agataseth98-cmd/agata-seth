@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano instalou a "Playwright Extension" no Brave. Testei de verdade, na Máquina — handshake MCP funciona, mas a extensão não é encontrada porque o `@playwright/mcp --extension` procura o perfil em `~/.config/google-chrome`, nunca em Brave. Tentativa de corrigir apontando pro perfil do Brave foi bloqueada pelo próprio harness (mesma classe de bloqueio de segurança de (478)) — parei, não contornei.**
+  palavras-chave: retomada, reboot, humano, instalou, playwright, extension, brave, testei, verdade, máquina, handshake, mcp, funciona, extensão, encontrada, porque, procura, perfil, config, google, chrome, nunca, tentativa, corrigir, apontando, pro, bloqueada, próprio, harness, mesma, classe, bloqueio, segurança, parei, contornei
 (478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
   palavras-chave: humano, perdeu, controle, mouse, teclado, máquina, terminal, respondia, vai, forçar, reboot, estado, salvo, nada, risco, canon
 (477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinatura, ficou, obsoleta, conseguir, aplicá, achado, tentando, aplicar, produção, diff, corrigido, reemitido, precisa, nova, bug, real, pré, existente, silencioso, desde, fase
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
   palavras-chave: item, plano, mitigação, auditoria, marcos, arriscado, pacote, inteiro, modularizar, scripts, perimetro, gatekeeper, commit, futuro, segunda, opinião, formal, pedida, recebida, escrever, código, diff, pronto, testado, profundidade, aguardando, assinatura
-(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
-  palavras-chave: fase, itens, plano, mitigação, auditoria, marcos, auditados, codar, resultado, real, difere, previsto, registrado, achado, forçado, código
+(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da au …
+  palavras-chave: fase, itens, plano, mitigação
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no …
   palavras-chave: fase, assinada, aplicada, itens, fecham
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marco …

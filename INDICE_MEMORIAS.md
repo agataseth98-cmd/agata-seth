@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano instalou a "Playwright Extension" no Brave. Testei de verdade, na Máquina — handshake MCP funciona, mas a extensão não é encontrada porque o `@playwright/mcp --extension` procura o perfil em `~/.config/google-chrome`, nunca em Brave. Tentativa de corrigir apontando pro perfil do Brave foi bloqueada pelo próprio harness (mesma classe de bloqueio de segurança de (478)) — parei, não contornei.**
 (478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
 (477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
 (476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
-(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
+(449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da au …
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no …
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marco …
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
