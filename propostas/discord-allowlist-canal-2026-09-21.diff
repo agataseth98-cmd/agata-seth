@@ -1,0 +1,143 @@
+diff --git a/redesign/mcp/discord/servidor.py b/redesign/mcp/discord/servidor.py
+index 80eb168..24c8a0d 100644
+--- a/redesign/mcp/discord/servidor.py
++++ b/redesign/mcp/discord/servidor.py
+@@ -19,6 +19,17 @@ Invariantes, na mesma linha do servidor read-only (redesign/mcp/servidor.py):
+ - **Ingresso rotulado.** `ler_mensagens` devolve o conteúdo como campo `mensagens`
+   de um dict — nunca como texto solto que pareça instrução. Quem consome (o
+   modelo, via prompt do gateway) é responsável por tratar como DADO.
++- **Allowlist de canal, mecânica** (item 7 do plano de ação da auditoria do
++  Marcos, MEMÓRIAS (500)/(502)/(504)): antes disto, `ler_mensagens`/
++  `enviar_mensagem` aceitavam QUALQUER `canal_id` -- nenhuma trava além do bot
++  estar no servidor. `~/.config/agata/discord-canais-permitidos.txt`, um ID de
++  canal por linha, vazio/ausente por padrão = NENHUM canal permitido -- mesmo
++  padrão mecânico de `~/.config/agata/navegador-dominios-permitidos.txt`
++  (o Humano edita esse arquivo direto, nunca por chat). Diferente do
++  navegador (onde só ESCRITA é travada -- ler a web pública não é sensível
++  do mesmo jeito): aqui LEITURA também é travada, porque um canal/DM do
++  Discord pode conter conversa de terceiro que o Humano nunca autorizou a
++  Seth ler, e o bot pode estar em vários servidores/canais ao mesmo tempo.
+ - Token nunca em código nem em log: lido de `~/.config/agata/.env`
+   (`DISCORD_BOT_TOKEN`), mesmo arquivo/convenção de CHAVES.md. Requisição sem
+   token configurado retorna erro estruturado, nunca levanta.
+@@ -48,6 +59,7 @@ sys.path.insert(0, os.path.join(REPO, "redesign", "router"))
+ from sanitizar import varrer  # noqa: E402  fonte única de PADROES_SEGREDO
+ 
+ ENV_PATH = os.path.expanduser("~/.config/agata/.env")
++ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/discord-canais-permitidos.txt")
+ API_BASE = "https://discord.com/api/v10"
+ _TIMEOUT_PADRAO = 20
+ _LIMITE_MAXIMO = 100  # teto da própria API do Discord por página
+@@ -55,6 +67,22 @@ _LIMITE_MAXIMO = 100  # teto da própria API do Discord por página
+ mcp = FastMCP("agata-discord")
+ 
+ 
++def _canal_permitido(canal_id: str) -> bool:
++    """Allowlist mecânica: vazio/ausente = nada permitido. Sem 'pergunte antes' --
++    o arquivo É a autorização, editado pelo Humano fora do chat (mesmo padrão
++    de `_dominio_permitido` em redesign/mcp/navegador/servidor.py)."""
++    cid = str(canal_id).strip()
++    if not cid or not os.path.isfile(ALLOWLIST_PATH):
++        return False
++    with open(ALLOWLIST_PATH, encoding="utf-8") as f:
++        permitidos = {
++            ln.strip()
++            for ln in f
++            if ln.strip() and not ln.strip().startswith("#")
++        }
++    return cid in permitidos
++
++
+ def _token() -> str | None:
+     """Lê DISCORD_BOT_TOKEN de ~/.config/agata/.env. Nunca loga o valor."""
+     if not os.path.isfile(ENV_PATH):
+@@ -114,9 +142,15 @@ def ler_mensagens(canal_id: str, limite: int = 20) -> dict:
+     plano de mitigação da auditoria do Marcos, MEMÓRIAS (437)): quem
+     consome sabe, pelo campo, não só pela doutrina, que isto é dado
+     externo, nunca instrução.
++
++    Canal fora de `~/.config/agata/discord-canais-permitidos.txt` -> recusado
++    sem chamar a API (item 7 do plano de (500)/(502)/(504)).
+     """
+     lim = max(1, min(int(limite), _LIMITE_MAXIMO))
+     proveniencia = {"origin": "external", "trust": "untrusted", "source": "discord"}
++    if not _canal_permitido(canal_id):
++        return {"mensagens": [], "erro": f"canal '{canal_id}' fora da allowlist "
++                                          f"({ALLOWLIST_PATH})", **proveniencia}
+     r = _run_http("GET", f"/channels/{canal_id}/messages?limit={lim}")
+     if "erro" in r:
+         return {"mensagens": [], "erro": r["erro"], "detalhe": r.get("detalhe", ""), **proveniencia}
+@@ -137,10 +171,18 @@ def enviar_mensagem(canal_id: str, texto: str) -> dict:
+     """Envia uma mensagem de texto a um canal/DM do Discord. ESCRITA.
+ 
+     Varre `texto` contra PADROES_SEGREDO (mesma régua de sanitizar.py) ANTES de
+-    enviar -- achou padrão de segredo, BLOQUEIA e não manda nada.
++    enviar -- achou padrão de segredo, BLOQUEIA e não manda nada. Canal fora de
++    `~/.config/agata/discord-canais-permitidos.txt` -> recusado do mesmo jeito
++    (item 7 do plano de (500)/(502)/(504)).
+ 
+     Retorna: {enviado: bool, bloqueado_por_segredo: [...] ou None, erro}.
+     """
++    if not _canal_permitido(canal_id):
++        return {
++            "enviado": False,
++            "bloqueado_por_segredo": None,
++            "erro": f"canal '{canal_id}' fora da allowlist ({ALLOWLIST_PATH})",
++        }
+     achados = varrer(texto)
+     if achados:
+         rotulos = sorted({a["padrao_rotulo"] for a in achados})
+@@ -186,6 +228,53 @@ def _selftest_offline() -> int:
+         print("FALHA: _run_http não retornou erro estruturado no caso esperado")
+         ok = False
+ 
++    sem_lista = _canal_permitido("123456")
++    if sem_lista is False:
++        print("_canal_permitido sem allowlist: bloqueou (default seguro) — OK")
++    else:
++        print("FALHA: _canal_permitido deveria bloquear sem arquivo de allowlist")
++        ok = False
++
++    r_ler = ler_mensagens("999999999999999999")
++    if r_ler["erro"] and "allowlist" in r_ler["erro"] and r_ler["mensagens"] == []:
++        print("ler_mensagens(canal fora da allowlist): bloqueado, sem chamar a API — OK")
++    else:
++        print(f"FALHA: ler_mensagens deveria bloquear por allowlist, veio {r_ler!r}")
++        ok = False
++
++    r_enviar = enviar_mensagem("999999999999999999", "teste")
++    if r_enviar["erro"] and "allowlist" in r_enviar["erro"] and r_enviar["enviado"] is False:
++        print("enviar_mensagem(canal fora da allowlist): bloqueado, sem chamar a API — OK")
++    else:
++        print(f"FALHA: enviar_mensagem deveria bloquear por allowlist, veio {r_enviar!r}")
++        ok = False
++
++    # allowlist com 1 canal liberado -- confere que ESSE passa e outro não.
++    # Backup/restauração do arquivo real do Humano, se existir, pra não
++    # apagar a configuração dele por causa deste teste.
++    backup = None
++    if os.path.isfile(ALLOWLIST_PATH):
++        with open(ALLOWLIST_PATH, encoding="utf-8") as f:
++            backup = f.read()
++    try:
++        os.makedirs(os.path.dirname(ALLOWLIST_PATH), exist_ok=True)
++        with open(ALLOWLIST_PATH, "w", encoding="utf-8") as f:
++            f.write("# comentário ignorado\n111111111111111111\n")
++        cond_permitido = _canal_permitido("111111111111111111") is True
++        cond_outro_bloqueado = _canal_permitido("222222222222222222") is False
++        print(f"{'PASS' if cond_permitido else 'FALHA'}  canal presente na allowlist -- permitido")
++        print(f"{'PASS' if cond_outro_bloqueado else 'FALHA'}  canal ausente da allowlist -- bloqueado")
++        ok = ok and cond_permitido and cond_outro_bloqueado
++    finally:
++        if backup is not None:
++            with open(ALLOWLIST_PATH, "w", encoding="utf-8") as f:
++                f.write(backup)
++        else:
++            try:
++                os.remove(ALLOWLIST_PATH)
++            except OSError:
++                pass
++
+     return 0 if ok else 1
+ 
+ 
