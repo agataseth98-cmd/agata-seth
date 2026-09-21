@@ -29,24 +29,21 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-# 0. Política de egress/anti-SSRF (item 1 do plano de mitigação da auditoria
-# do Marcos, MEMÓRIAS (437)) -- mesma régua usada pelo navegador Playwright
-# (redesign/mcp/navegador/servidor.py). Bloqueia loopback/link-local/
-# RFC1918/esquema fora de http-https, resolvendo DNS de verdade.
-if ! python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL" >/dev/null 2>&1; then
-  MOTIVO=$(python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL" 2>&1)
-  echo "abortado: destino bloqueado pela política de egress -- $MOTIVO" >&2
+# 0/1. Busca segura -- item 2 do plano de ação da auditoria do Marcos
+# (MEMÓRIAS (500)/(502), achado NET-01): antes disto, a checagem de egress
+# rodava só na URL inicial e o download em si (`curl -sSL`) seguia
+# redirecionamento sozinho, sem revalidar cada salto -- um destino público
+# que redireciona pra loopback/RFC1918 passava batido. `buscar_seguro`
+# (scripts/politica_egress.py) resolve os dois problemas de uma vez: mede o
+# HTTP de verdade E revalida CADA salto de redirect, mesma régua do
+# navegador Playwright (redesign/mcp/navegador/servidor.py).
+SAIDA_BUSCA=$(python3 "$SCRIPT_DIR/politica_egress.py" --buscar "$URL" "$TMP/pg.html" 2>&1)
+BUSCA_RC=$?
+if [ $BUSCA_RC -ne 0 ]; then
+  echo "abortado: $SAIDA_BUSCA" >&2
   exit 5
 fi
-
-# 1. HTML cru + código HTTP -- checagem obrigatória ANTES de qualquer
-# extração. Página de erro (404 etc.) nunca é conteúdo.
-HTTP_CODE=$(curl -sSL -A "$UA" -o "$TMP/pg.html" -w "%{http_code}" "$URL")
-CURL_RC=$?
-if [ $CURL_RC -ne 0 ]; then
-  echo "lacuna: não consegui baixar $URL (rede ou URL inválida, curl saiu com código $CURL_RC)"
-  exit 1
-fi
+HTTP_CODE=$(echo "$SAIDA_BUSCA" | awk '{print $1}')
 case "$HTTP_CODE" in
   2[0-9][0-9]) ;;
   *)
@@ -100,11 +97,10 @@ if [ -n "$PACOTES" ]; then
     esac
     # URL_JS pode vir de dentro do HTML da própria página (src="..." absoluto)
     # -- dado externo, não confiado só por herdar o esquema/host de ORIGEM.
-    # Checagem de destino de novo, mesma régua do item 0.
-    if ! python3 "$SCRIPT_DIR/politica_egress.py" --checar "$URL_JS" >/dev/null 2>&1; then
-      continue
-    fi
-    if curl -sSL -A "$UA" "$URL_JS" -o "$TMP/pacote.js" 2>/dev/null; then
+    # `buscar_seguro` já checa a URL inicial E cada salto de redirect --
+    # não precisa mais do `--checar` solto antes (era a checagem única que
+    # o achado NET-01 apontou como insuficiente).
+    if python3 "$SCRIPT_DIR/politica_egress.py" --buscar "$URL_JS" "$TMP/pacote.js" >/dev/null 2>&1; then
       # Heurística: cadeia longa, sem caractere de sintaxe de código
       # ({}();=$), com pelo menos 4 palavras de 2+ letras separadas por
       # espaço -- descarta source code minificado, fica com frase. Isto

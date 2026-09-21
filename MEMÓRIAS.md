@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7733d903b0a5a2997e435bb5daae31f1b99267ee
-  Escrito em: 21/09/2026 16:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a
+  Escrito em: 21/09/2026 17:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e42bb3b9a51a1b865cafcd065bbe54d1bd1cf8a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (500) fechado — achado NET-01 (anti-SSRF incompleto). Assinado, verificado, aplicado pelo fluxo de branch+PR (2º uso desde (501)).**
+
+**O gap exato que o Marcos descreveu:** `politica_egress.py` checava só a URL pedida uma vez; o download em si (`curl -sSL` em `ler_pagina.sh`, `page.goto()` sem interceptor no Browser MCP) seguia redirecionamento por conta própria, sem revalidar cada salto — um destino público que redireciona pra loopback/RFC1918/metadado de nuvem passava batido depois da 1ª checagem.
+
+**`scripts/politica_egress.py` — nova `buscar_seguro()`:** revalida `destino_permitido()` a CADA `Location` de 3xx (até 10 saltos), com `curl -sS` sem `-L` — quem decide seguir é o Python, não o curl. Selftest novo com 3 servidores HTTP descartáveis reais (não mock): busca direta OK, segue 1 redirect pra destino permitido OK, BLOQUEIA redirect pra `169.254.169.254` mesmo a URL inicial sendo permitida. Bug real achado testando: `curl -D -` normaliza `\r\n` pra `\n` na saída — o `rpartition` original nunca casava; corrigido. 11/11 selftest PASS.
+
+**`scripts/ler_pagina.sh`:** as duas checagens soltas (`--checar` + `curl -sSL`, na página principal e no pacote JS) trocadas por `--buscar`, que já cobre os dois. Testado ao vivo, 4 casos: sucesso direto com conteúdo real (`httpbin.org/html`, CASO 1, exit 0); redirect público de verdade seguido e revalidado (`httpbin.org/redirect-to`, mesmo conteúdo, exit 0); casca vazia genuína (`example.com`, exit 3, lacuna honesta); bloqueio de loopback (`127.0.0.1:20126`, exit 5, `abortado:`).
+
+**`redesign/mcp/navegador/servidor.py` — interceptor de CONTEXTO:** `ctx.route("**/*", _handler_rota)`, registrado em `_pagina()` — cobre toda requisição (navegação, redirect, subrecurso, clique), não só a `navegar()` inicial. Novo `--selftest interceptor` (navegador real, mesmo truque de monkeypatch-só-pra-loopback do teste acima): página local permitida carrega OK, `<img>` nela apontando pra `169.254.169.254` é abortado pelo interceptor — confirmado lendo o log (`requisicao_bloqueada`), não só ausência de erro. PASS nos dois.
+
+**Fluxo de aplicação:** diff gerado (`propostas/egress-redirect-interceptor-2026-09-21.diff`), assinatura do Humano (`bash scripts/aprovar.sh`) verificada por mim com `ssh-keygen -Y verify` real (namespace `agata-aprovacao-p8`, hash do `.diff` conferido, `Good signature`) antes de aplicar — nunca confiei no marcador sozinho. Queda momentânea de P-10 no `perimetro.sh` durante a edição (árvore suja) — esperada, some no commit, não é bug.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `bash -n` + execução real de `ler_pagina.sh` contra 4 URLs reais (sucesso/redirect/vazio/bloqueio); `python3 scripts/politica_egress.py --selftest` (11/11); `--selftest interceptor` real do Browser MCP (navegador de verdade, servidor HTTP descartável, log conferido); `ssh-keygen -Y verify` manual antes de aplicar. Autorização: Humano — "Vamos fazer tudo" (mandato geral de (500)) + assinatura de `egress-redirect-interceptor-2026-09-21`.
 
 (501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de ação priorizado da auditoria de Marcos (500), item por item. Item 1 (GOV-03) fechado de verdade: `main` protegido no GitHub, PR obrigatório + `suite-adversarial` como status check exigido + force-push e deleção bloqueados. Esta própria entrada é o primeiro teste real do fluxo novo — branch + PR + checagem verde + merge, não mais push direto.**
 

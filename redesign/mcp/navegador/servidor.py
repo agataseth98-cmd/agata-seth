@@ -44,6 +44,10 @@ Uso:
     .venv/bin/python servidor.py --selftest screenshot
     .venv/bin/python servidor.py --selftest offline
         # sem navegador nenhum: só a lógica de allowlist + parsing de domínio
+    .venv/bin/python servidor.py --selftest interceptor
+        # navegador de verdade: prova que o interceptor de contexto bloqueia
+        # subrecurso apontando pra endereço de metadado de nuvem, não só a
+        # navegação principal (item 2 do plano da auditoria do Marcos, NET-01)
 """
 from __future__ import annotations
 
@@ -119,12 +123,32 @@ def _pagina():
         headless=True,
         args=["--disable-blink-features=AutomationControlled"],
     )
+    ctx.route("**/*", _handler_rota)
     page = ctx.new_page()
     _estado.update(pw=pw, ctx=ctx, page=page)
     return page
 
 
 _PROVENIENCIA = {"origin": "external", "trust": "untrusted", "source": "browser"}
+
+
+def _handler_rota(route, request) -> None:
+    """Intercepta TODA requisição do contexto -- navegação inicial, redirect,
+    subrecurso (script/imagem/xhr/fetch), navegação por clique. Item 2 do
+    plano de ação da auditoria do Marcos (MEMÓRIAS (500), achado NET-01): o
+    `destino_permitido()` de `navegar()` sozinho só olha a URL pedida uma vez;
+    uma página podia redirecionar, ou carregar um subrecurso, apontando pra
+    loopback/link-local/RFC1918 sem passar por checagem nenhuma. Registrado
+    via `ctx.route("**/*", ...)` -- nível de CONTEXTO, cobre toda página
+    (inclusive as criadas depois) e todo tipo de requisição, não só a
+    navegação principal."""
+    permitido, motivo = destino_permitido(request.url)
+    if not permitido:
+        _log("requisicao_bloqueada", url=request.url, motivo=motivo,
+             tipo=request.resource_type)
+        route.abort()
+    else:
+        route.continue_()
 
 
 @mcp.tool
@@ -134,7 +158,11 @@ def navegar(url: str) -> dict:
     mas passa por política de DESTINO antes de qualquer requisição: bloqueia
     loopback/link-local/RFC1918/esquema fora de http-https, mesmo sem
     allowlist nenhuma (`scripts/politica_egress.py`, item 1 do plano de
-    mitigação da auditoria do Marcos -- MEMÓRIAS (437)).
+    mitigação da auditoria do Marcos -- MEMÓRIAS (437)). Além da checagem
+    daqui (só a URL pedida), o contexto inteiro tem um interceptor
+    (`_handler_rota`, registrado em `_pagina()`) que revalida CADA
+    requisição -- redirect, subrecurso, clique -- não só esta primeira
+    (item 2 do plano, MEMÓRIAS (500), achado NET-01).
 
     Retorna: {url_final, titulo, status_http, erro, origin, trust, source}.
     """
@@ -302,11 +330,91 @@ def _selftest_offline() -> int:
     return 0 if ok else 1
 
 
+def _selftest_interceptor() -> int:
+    """Prova que o interceptor de CONTEXTO (`_handler_rota`, registrado em
+    `_pagina()`) bloqueia SUBRECURSO, não só a navegação principal -- é
+    exatamente o gap que `navegar()` sozinho (checagem de uma URL só) não
+    cobria (item 2 do plano da auditoria do Marcos, MEMÓRIAS (500), NET-01).
+
+    Sobe navegador de verdade. Mesmo truque de `_selftest_buscar_seguro()`
+    em `politica_egress.py`: só permite LOOPBACK pra alcançar o servidor de
+    teste local; o endereço link-local do <img> continua julgado pela lógica
+    REAL (sem substituição) -- é isso que este teste verifica."""
+    import http.server
+    import threading
+    import politica_egress
+
+    _original = politica_egress.destino_permitido
+
+    def _permitir_loopback_para_teste(url: str):
+        permitido, motivo = _original(url)
+        if not permitido and "loopback" in motivo:
+            return True, ""
+        return permitido, motivo
+
+    class _Pagina(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def do_GET(self):
+            corpo = b'<html><body><img src="http://169.254.169.254/latest/meta-data/x.png"></body></html>'
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(corpo)))
+            self.end_headers()
+            self.wfile.write(corpo)
+
+    import socket as _socket
+    s = _socket.socket()
+    s.bind(("127.0.0.1", 0))
+    porta = s.getsockname()[1]
+    s.close()
+    srv = http.server.HTTPServer(("127.0.0.1", porta), _Pagina)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+    ok = True
+    try:
+        politica_egress.destino_permitido = _permitir_loopback_para_teste
+        globals()["destino_permitido"] = _permitir_loopback_para_teste
+
+        if os.path.exists(LOG_PATH):
+            os.remove(LOG_PATH)
+
+        r = navegar(f"http://127.0.0.1:{porta}/")
+        cond_nav = r["erro"] is None
+        print(f"{'PASS' if cond_nav else 'FALHA'}  navegar() na página permitida "
+              f"(erro={r['erro']!r})")
+        ok = ok and cond_nav
+
+        _pagina().wait_for_timeout(1000)
+
+        bloqueado = False
+        if os.path.exists(LOG_PATH):
+            with open(LOG_PATH, encoding="utf-8") as f:
+                for linha in f:
+                    reg = json.loads(linha)
+                    if (reg.get("acao") == "requisicao_bloqueada"
+                            and "169.254.169.254" in reg.get("url", "")):
+                        bloqueado = True
+        print(f"{'PASS' if bloqueado else 'FALHA'}  interceptor de contexto bloqueou "
+              f"o <img> pra 169.254.169.254 (subrecurso, não navegação principal)")
+        ok = ok and bloqueado
+    finally:
+        politica_egress.destino_permitido = _original
+        globals()["destino_permitido"] = _original
+        fechar_navegador()
+        srv.shutdown()
+
+    return 0 if ok else 1
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if a and a[0] == "--selftest":
         if len(a) >= 2 and a[1] == "offline":
             sys.exit(_selftest_offline())
+        if len(a) >= 2 and a[1] == "interceptor":
+            sys.exit(_selftest_interceptor())
         if len(a) >= 3 and a[1] == "navegar":
             print(json.dumps(navegar(a[2]), ensure_ascii=False, indent=2))
             print(json.dumps(fechar_navegador(), ensure_ascii=False))
