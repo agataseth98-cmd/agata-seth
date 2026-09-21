@@ -41,6 +41,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 import threading
 from contextlib import contextmanager
@@ -51,6 +52,8 @@ from zoneinfo import ZoneInfo
 
 BIND = os.environ.get("SETH_ESCRIBA_BIND", "127.0.0.1:20140")
 REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+sys.path.insert(0, str(REPO / "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
 TZ = ZoneInfo(os.environ.get("SETH_ESCRIBA_TZ", "America/Sao_Paulo"))
 
 MEMORIAS = REPO / "MEMÓRIAS.md"
@@ -219,8 +222,9 @@ class _H(BaseHTTPRequestHandler):
         self._j(404, {"error": "so POST /memoria e POST /diario"})
 
     def do_POST(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        raw = self.rfile.read(n) if n else b""
+        raw = ler_corpo_limitado(self)
+        if raw is None:
+            return
         try:
             data = json.loads(raw or b"{}")
         except ValueError:
@@ -247,7 +251,7 @@ def main():
     host, port = BIND.split(":")
     if not MEMORIAS.exists():
         raise SystemExit(f"seth_escriba: {MEMORIAS} nao existe — SETH_REPO errado?")
-    srv = ThreadingHTTPServer((host, int(port)), _H)
+    srv = ServidorConcorrenciaLimitada((host, int(port)), _H)
     print(f"seth_escriba em http://{host}:{port}  (repo {REPO})  append-only: /memoria /diario")
     srv.serve_forever()
 

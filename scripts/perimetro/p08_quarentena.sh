@@ -80,6 +80,16 @@ _p8_eh_comportamento() {
     # e nao estava coberto. Fechado ANTES de criar o primeiro workflow, nao
     # depois -- senao o proprio workflow entraria sem aprovacao.
     .github/*) return 0 ;;
+    # Buraco achado 21/09/2026 fazendo o item 5 do plano de ação da auditoria
+    # de Marcos (MEMÓRIAS (500)/(502)/(503)): redesign/igpu/*.py
+    # (whisper_server.py, embeddings_server.py -- servem STT/embeddings na
+    # iGPU, leem arquivo por caminho pedido no corpo do request) nunca esteve
+    # nesta lista -- mesma classe dos buracos de 04/09 e 09/09 acima (código
+    # de controle real, fora do padrão scripts/*). Confirmado o mesmo teste ao
+    # vivo de antes: sujar redesign/igpu/whisper_server.py sem propostas/
+    # nenhuma, `git add`, rodar perimetro.sh -- P-8 dizia OK antes deste
+    # conserto (ver commit desta entrada pro antes/depois).
+    redesign/igpu/*.py) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -255,6 +265,22 @@ p8_quarentena() {
   [ -z "$staged" ] && return 0
   while IFS= read -r f; do
     [ -z "$f" ] && continue
+    # 2ª passada do índice final (item 9 do plano de ação da auditoria do
+    # Marcos, MEMÓRIAS (500)/(502)/(505)/(506)): `.githooks/pre-commit` roda
+    # `p8_quarentena` de novo DEPOIS da âncora de SHA reescrever REGRAS.md/
+    # PROJETO.md/MEMÓRIAS.md -- sem isto, a 2ª passada bloquearia TODO commit
+    # (a âncora muda os 3 em todo commit, e ninguém assina isso, nem devia:
+    # é bookkeeping mecânico, não mudança de comportamento). `_P8_EXCLUIR`
+    # (uma linha por caminho) só é setado pelo próprio hook, só na 2ª
+    # chamada -- a 1ª (T0, antes da âncora rodar) nunca o define, então
+    # continua vendo os 3 arquivos normalmente se o AUTOR tivesse mudado
+    # algo neles por conta própria. A guarda de integridade de âncora
+    # (.githooks/pre-commit) já prova, byte a byte, que nada MAIS mudou
+    # nesses 3 arquivos além do bloco da âncora -- é essa prova que torna
+    # a exclusão aqui segura, não uma isenção às cegas.
+    if [ -n "${_P8_EXCLUIR:-}" ] && grep -qxF "$f" <<< "$_P8_EXCLUIR"; then
+      continue
+    fi
     if _p8_eh_comportamento "$f"; then
       if ! _p8_arquivo_aprovado "$f"; then
         echo "SUSPEITO (P-8): '$f' muda comportamento e está staged sem propostas/APROVADO-<nome> correspondente cujo diff, aplicado ao HEAD deste arquivo, reproduza exatamente o conteúdo staged (o .diff em propostas/ precisa citar este caminho nos cabeçalhos E bater byte a byte). Crie a proposta, peça aprovação do Humano (propostas/README.md), ou tire este arquivo do commit."

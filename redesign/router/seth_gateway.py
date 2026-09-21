@@ -72,6 +72,8 @@ def _token_interno() -> str:
     return ""
 MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
 REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+sys.path.insert(0, str(REPO / "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
 
 # --- marcador amarrado a hash (achado 04/09/2026, Camada C) ----------------
 # A versão anterior usava uma string fixa: qualquer system message que o
@@ -510,8 +512,9 @@ class _Handler(BaseHTTPRequestHandler):
         self._passar(b"", "HEAD")
 
     def do_POST(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        corpo = self.rfile.read(n) if n else b""
+        corpo = ler_corpo_limitado(self)
+        if corpo is None:
+            return
         ctype = (self.headers.get("Content-Type") or "").lower()
         if "application/json" in ctype and corpo and "/chat/completions" in self.path:
             try:
@@ -630,7 +633,7 @@ class _Handler(BaseHTTPRequestHandler):
 
 
 def servir(host: str = BIND_HOST, port: int = BIND_PORT):
-    srv = ThreadingHTTPServer((host, port), _Handler)
+    srv = ServidorConcorrenciaLimitada((host, port), _Handler)
     print(f"seth_gateway em http://{host}:{port}  ->  {UPSTREAM}  "
           f"(hidratação: {MODO}, {HIDRATA_PATH.name})")
     srv.serve_forever()

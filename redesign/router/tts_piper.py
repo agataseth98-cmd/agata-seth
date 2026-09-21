@@ -32,6 +32,8 @@ import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(AQUI, "..", "..", "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
 HOST = os.environ.get("PIPER_TTS_HOST", "127.0.0.1")
 PORT = int(os.environ.get("PIPER_TTS_PORT", "8890"))
 MODEL = os.environ.get("PIPER_MODEL", os.path.join(AQUI, "tts-piper", "voices", "pt_BR-faber-medium.onnx"))
@@ -124,9 +126,11 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path.rstrip("/") not in ("/v1/audio/speech", "/audio/speech"):
             return self._json(404, {"error": {"message": "not found", "type": "not_found"}})
+        corpo = ler_corpo_limitado(self)
+        if corpo is None:
+            return
         try:
-            n = int(self.headers.get("Content-Length", 0))
-            req = json.loads(self.rfile.read(n) or b"{}")
+            req = json.loads(corpo or b"{}")
         except Exception:  # noqa: BLE001
             return self._json(400, {"error": {"message": "corpo não é JSON", "type": "invalid_request_error"}})
 
@@ -165,7 +169,7 @@ def main():
     if not os.path.exists(PYTHON):
         print(f"ABORTADO: python do venv não encontrado em {PYTHON}. Rode tts-piper/instalar.sh.", file=sys.stderr)
         return 1
-    srv = ThreadingHTTPServer((HOST, PORT), H)
+    srv = ServidorConcorrenciaLimitada((HOST, PORT), H)
     print(f"piper-tts: {HOST}:{PORT} · modelo {os.path.basename(MODEL)} · {SAMPLE_RATE}Hz · ffmpeg={'sim' if FFMPEG else 'não'}")
     try:
         srv.serve_forever()
