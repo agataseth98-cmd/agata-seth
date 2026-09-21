@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9618ae64d8529043f21a650b962815fc08bda125
-  Escrito em: 21/09/2026 13:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4cd931a8fac7c409c1dbff7829e6af198d8dffcf
+  Escrito em: 21/09/2026 13:35 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4cd931a8fac7c409c1dbff7829e6af198d8dffcf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4cd931a8fac7c409c1dbff7829e6af198d8dffcf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4cd931a8fac7c409c1dbff7829e6af198d8dffcf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(493) DIÁRIO — 21/09/2026 · **Causa raiz achada de verdade e corrigida — não só mitigada — do buraco de (492). `git ls-remote` dentro de `scripts/estado_para_eco.sh` não tinha timeout próprio; um pico de rede consumia o orçamento inteiro do subprocess (25s, em `seth_gateway.py`) e DERRUBAVA O SCRIPT INTEIRO, mesmo os dados que não dependem de rede (HEAD, hashes, topo de MEMÓRIAS). Testado simulando rede morta de verdade: sem o conserto, o script inteiro falharia; com ele, sai em 8s com tudo certo, só `sync: não verificado` no lugar de `sync: PASS`. Proposta pronta, sob quarentena P-8 (`scripts/*`), aguardando assinatura.**
+
+**Por que (492) não bastava.** (492) deu ao Goose uma saída de emergência pra quando o bloco de estado vier vazio — reduz o dano, não fecha a causa. O Humano pediu "100% garantido"; isso exige a causa, não só o paraquedas.
+
+**Achado lendo o código-fonte, não suposto.** `scripts/estado_para_eco.sh` linha 73 (antes do conserto): `git ls-remote origin main` sem `timeout` próprio — só o `subprocess.run(..., timeout=25)` do lado de fora, em `seth_gateway.py`. O comentário do próprio arquivo já registrava o padrão de risco, sem ter sido fechado: *"o remoto pode dar um pico de rede que estourava 15s"* (motivo do bump de 15→25s em MEMÓRIAS (394)). Bump de timeout externo não fecha a classe — só empurra o limiar; a chance de estourar continua existindo, só fica mais rara.
+
+**Teste real, não hipotético, dos dois lados.** (a) Normal: `time bash scripts/estado_para_eco.sh` — 0,6s, `sync: PASS` certo. (b) Rede morta de propósito: `env https_proxy=http://192.0.2.1:1 http_proxy=http://192.0.2.1:1 bash scripts/estado_para_eco.sh` (IP de TEST-NET-1, nunca roteável, simula timeout real sem depender de sorte de rede) — script terminou em **8,03s** (o novo teto), com **HEAD, TOPO-MEMÓRIAS, HORA-MAQUINA, HASH-ESTADO todos presentes e certos**, só `sync: não verificado · lacuna: remoto inacessível (rede ou credencial)` no lugar de PASS. Antes do conserto, esse mesmo teste teria consumido o timeout externo inteiro (25s) sem nenhuma garantia de terminar dentro dele — dependendo do timeout de conexão TCP do sistema, podia passar até disso, fazendo `_estado()` (em `seth_gateway.py`) retornar vazio e a hidratação inteira colapsar pro fallback de lacuna que confundiu o Goose em (492).
+
+**Conserto: `timeout "${LS_REMOTE_TIMEOUT_ECO:-8}"` só na chamada do `ls-remote`**, não no script inteiro — as outras seções (hash, HEAD, topo, hora) nunca dependeram de rede e não precisam de proteção nova. Variável de saída de emergência (`LS_REMOTE_TIMEOUT_ECO`), mesmo padrão já usado em `LC_ALL_ECO` no topo do mesmo arquivo. `bash -n` limpo, `scripts/perimetro.sh` rodado depois — 16 OK, 1 SKIP (esperado, arquivo não staged), 2 PARCIAL (os de sempre), 0 FALHA.
+
+**Sob quarentena P-8** (`scripts/*` é "muda comportamento"). `propostas/timeout-ls-remote-estado-eco-2026-09-21.diff` gerado e comitado nesta entrada; o arquivo real (`scripts/estado_para_eco.sh`) fica pendente na working tree até a assinatura — mesmo mecanismo de (488)/(489).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa de `scripts/estado_para_eco.sh` e `seth_gateway.py` antes de diagnosticar; teste real cronometrado, condição normal e condição de rede morta simulada (proxy pra IP não roteável, não um mock); `bash -n`; `scripts/perimetro.sh` completo depois da edição; `git diff`/`sha256sum` gerando a proposta. Autorização: Humano — "deixe 100% garantido por favor".
 
 (492) DIÁRIO — 21/09/2026 · **Checagem final do Goose, pedida pelo Humano depois de (491): achei um buraco real na mudança de (490) — quando o bloco injetado do `seth_gateway` não chega (intermitente, causa não fechada), o Goose, seguindo a instrução nova ao pé da letra, ficava preso tentando `grep` um nome de campo que não existe como texto literal em `MEMÓRIAS.md`. Corrigido com um degrau de fallback explícito no `AGENTS.md`. `Lacuna` que fica aberta: por que a injeção falha às vezes.**
 
