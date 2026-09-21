@@ -24,6 +24,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 **[APLICADO DE VERDADE] LibreChat em produção agora roda a versão com aprovação de ferramenta (HITL).** Você assinou, eu conferi a assinatura de verdade (não só que o arquivo existia), troquei o container real e confirmei no ar: `/health` OK, versão `v0.8.8-rc3` rodando de fato. O que ainda falta, só você: mandar uma mensagem real pra Seth que peça uma consulta ao canon, e ver se aparece o cartão de Aprovar/Rejeitar — não testei isso na sua conta pessoal, só na cópia isolada de antes (mesma versão, mesma config, funcionou lá).
 
+**[FALTA VOCÊ, duas coisas] Achei um SEGUNDO motivo real pro Goose falhar, além do primeiro — corrigido, testado isolado, falta ligar de verdade.** O primeiro conserto ajudou mas não foi suficiente — continuei testando e achei outro: o Goose manda uma chamada extra, escondida, só pra dar nome à conversa — e o sistema tratava essa chamada como se fosse uma pergunta de verdade, carregando toda a doutrina nela à toa e disputando recurso com a resposta principal. Corrigi, testei sozinho (passou), mas **preciso de duas coisas suas**: (1) assinar essa proposta também (`bash scripts/aprovar.sh goose-titulo-nao-hidrata-2026-09-21`); (2) autorizar reiniciar o serviço da Seth (`seth-gateway`) pra rodar o conserto de verdade — isso o sistema bloqueou sozinho, por ser algo compartilhado em produção, certo em bloquear. Sem essas duas, não fecho de verdade o "100% garantido".
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (495).
+
 **[APLICADO, garantido de verdade] O buraco do Goose está fechado na causa — não só no sintoma.** Você assinou, conferi a assinatura de verdade, apliquei o script corrigido. Rodei o teste de saúde geral do sistema depois: nada quebrou.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (494).
 

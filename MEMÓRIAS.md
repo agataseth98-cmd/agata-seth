@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a4eadecbb9d5fb1fc1e6a25ea4400c7e6d1b4a5a
-  Escrito em: 21/09/2026 13:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2420028f1dbbf685e5aa5a786f25868c79bf4c08
+  Escrito em: 21/09/2026 13:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4eadecbb9d5fb1fc1e6a25ea4400c7e6d1b4a5a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4eadecbb9d5fb1fc1e6a25ea4400c7e6d1b4a5a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4eadecbb9d5fb1fc1e6a25ea4400c7e6d1b4a5a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2420028f1dbbf685e5aa5a786f25868c79bf4c08/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2420028f1dbbf685e5aa5a786f25868c79bf4c08/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2420028f1dbbf685e5aa5a786f25868c79bf4c08/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(495) DIÁRIO — 21/09/2026 · **Segundo achado real de causa raiz, depois de (494) não bastar sozinho — o "oi" continuou saindo com `lacuna` mesmo com o `ls-remote` corrigido. Capturei o payload de verdade que o Goose manda (proxy de log, não suposição): ele faz uma chamada própria de "nomear a sessão" pro MESMO endpoint, que o `seth_gateway` não reconhecia como utilitária — hidratava à toa, e o padrão (LibreChat, MEMÓRIAS (411)) já mostrava que chamada de título concorrente pode atrapalhar a resposta principal. Corrigido, testado por `--selftest` (10/10). Falta restart do serviço + assinatura P-8 pra valer de verdade — os dois bloqueados por permissão, pedindo ao Humano.**
+
+**Por que fui atrás de novo.** Depois de aplicar (494), rodei `goose run --no-session -t "oi"` várias vezes — o `lacuna: estado não injetado` continuou aparecendo, às vezes rápido (3s), sem nem tentar o fallback de (492). Isso prova que o `ls-remote` sem timeout não era a única causa (era uma causa real, já fechada — só não a única).
+
+**Achado por captura real, não teoria.** Montei um proxy Python descartável (`:20199`, log-e-repassa) e apontei `OPENAI_HOST` do Goose pra ele por UMA chamada de teste. O corpo capturado não era o "oi" — era uma chamada separada e concorrente, o Goose se auto-nomeando sessão: `system: "Generate a short title (four words or less) that describes the topic of the user's messages..."` + `user: "---BEGIN USER MESSAGES---\noi\n---END..."`. O `_e_chamada_utilitaria` do `seth_gateway` tinha dois sinais, os dois calibrados só pro LibreChat — nenhum reconhecia essa frase, então essa chamada de nomear-sessão também levava a doutrina inteira injetada, à toa, concorrente com o turno de chat de verdade. É a mesma classe do bug já documentado em MEMÓRIAS (411): chamada de título concorrente pesada pode atrapalhar a resposta principal (lá foi um `AbortController` compartilhado zerando a resposta; aqui não confirmei o mecanismo exato de interferência no Goose, mas o padrão de "duas chamadas simultâneas competindo" é o mesmo).
+
+**Conserto: 3º sinal em `_e_chamada_utilitaria`,** `_e_chamada_titulo_goose`, que varre TODAS as mensagens (não só a última, como os sinais do LibreChat) por essa frase literal do Goose — diferença estrutural real: o texto-gatilho vem na PRIMEIRA mensagem (system), não na última. Mesmo risco residual já declarado pros sinais anteriores (string literal do cliente, não conteúdo de usuário forjável). **Testado por `--selftest`, 10/10** — caso novo (3b) construído com o payload EXATO capturado do Goose real, não um payload inventado parecido.
+
+**O que falta, bloqueado por permissão, pedindo ao Humano — duas coisas, não uma:** (1) `bash scripts/aprovar.sh goose-titulo-nao-hidrata-2026-09-21` — `redesign/router/*` é quarentena P-8, não posso comitar sozinho. (2) Restart de `seth-gateway.service` pra rodar o arquivo corrigido — bloqueado pelo classificador do harness ("Modify Shared Resources", serviço compartilhado do sistema em produção), pedindo autorização explícita. Sem os dois, o `--selftest` prova a lógica isolada, mas não fecha se isso realmente reduz o `lacuna` do Goose ao vivo — falta o teste de ponta a ponta depois do restart.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `goose run` repetido depois de (494), lacuna reproduzida de novo, tempos medidos; proxy de log Python real (não mock) entre Goose e o gateway, payload capturado e salvo em arquivo, lido por inteiro antes de diagnosticar; leitura completa de `_e_chamada_utilitaria`/`_schema_pede_titulo` antes de desenhar o 3º sinal; `python3 -m py_compile` limpo; `--selftest` 10/10 incluindo o caso novo com o payload real; tentativa de restart do serviço bloqueada pelo harness, não contornada. Autorização: Humano — "deixe 100% garantido por favor" (mandato que motivou continuar investigando depois de (494)).
 
 (494) DIÁRIO — 21/09/2026 · **Assinatura verificada (`ssh-keygen -Y verify`, real) — aplicado. `scripts/estado_para_eco.sh` agora limita o `git ls-remote` a 8s próprios, em vez de arriscar o orçamento inteiro do chamador. Perímetro rodado depois: 16 OK · 1 SKIP · 2 PARCIAL · 0 FALHA, igual antes — nada quebrou. Par de aprovação em `propostas/aplicadas/`.**
 
