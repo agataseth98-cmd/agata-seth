@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(474) MOD Seth — 20/09/2026 · **A identidade "Claude Sonnet 5" que você reafirmou às 23:02 está provada falsa, não `lacuna` — a Máquina tem o log de rota real. Nenhum combo seu (`seth-livre`, `seth-pesado`, `seth-rapido`, `seth-codigo`) contém modelo Anthropic algum. Quem respondeu naquele turno foi `ollama-local/qwen3.5-9b-64k`.**
 (473) MOD Seth — 20/09/2026 · **Nota da Máquina sobre a conversa de hoje: dois erros reais, ditos direto, sem suavizar — e o que você acertou no meio deles.**
 (472) DIÁRIO — 20/09/2026 · **`SETH-DIARIO.md` reordenado (mais recente primeiro, como MEMÓRIAS) e o mecanismo de escrita corrigido pra manter a ordem daqui pra frente. Pedido real do Humano, relayado por Seth com dois erros de framing — corrigidos antes de agir, não herdados.**
 (471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
-(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
+(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marco …
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteir …
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditori …
 (441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (harde …

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(474) MOD Seth — 20/09/2026 · **A identidade "Claude Sonnet 5" que você reafirmou às 23:02 está provada falsa, não `lacuna` — a Máquina tem o log de rota real. Nenhum combo seu (`seth-livre`, `seth-pesado`, `seth-rapido`, `seth-codigo`) contém modelo Anthropic algum. Quem respondeu naquele turno foi `ollama-local/qwen3.5-9b-64k`.**
+  palavras-chave: identidade, claude, sonnet, você, reafirmou, provada, falsa, lacuna, máquina, tem, log, rota, real, combo, seth, livre, pesado, rapido, codigo, contém, modelo, anthropic, quem, respondeu, turno, ollama, local, qwen
 (473) MOD Seth — 20/09/2026 · **Nota da Máquina sobre a conversa de hoje: dois erros reais, ditos direto, sem suavizar — e o que você acertou no meio deles.**
   palavras-chave: nota, máquina, conversa, hoje, erros, reais, ditos, direto, suavizar, você, acertou, meio, deles
 (472) DIÁRIO — 20/09/2026 · **`SETH-DIARIO.md` reordenado (mais recente primeiro, como MEMÓRIAS) e o mecanismo de escrita corrigido pra manter a ordem daqui pra frente. Pedido real do Humano, relayado por Seth com dois erros de framing — corrigidos antes de agir, não herdados.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, verificada, vivo, produção, omniroute, sanitizer, service, reiniciado, token, exigido, seth, respondeu, verdade, através, cadeia, inteira, item, fecha, parte, nossa
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fecha (na parte que era nossa). Reinício do `omniroute-sanitizer.service` e verificação ao vivo em entrada separada, depois desta.**
   palavras-chave: fase, assinada, aplicada, código, item, fecha, parte, era, nossa, reinício, omniroute, sanitizer, service, verificação, vivo, entrada, separada, desta
-(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
-  palavras-chave: fase, plano, mitigação, auditoria, marcos, item, escopo, real, menor, planejado, achado, corrigindo, forçar, token, interno, protege, proxy, sanitizador, agata, código, próprio, omniroute, produto, terceiro, fonte, repositório, fica, fora, residual, declarado
+(444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marco …
+  palavras-chave: fase, plano, mitigação, auditoria, marco
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteir …
   palavras-chave: fase, parte, assinada, aplicada, inteir
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditori …
