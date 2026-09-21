@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d88f5429b2d16bcbe2cb6e063bc369cc255961f
-  Escrito em: 21/09/2026 09:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 80539670962dd557f9845bff26a9eee83f88a440
+  Escrito em: 21/09/2026 10:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d88f5429b2d16bcbe2cb6e063bc369cc255961f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d88f5429b2d16bcbe2cb6e063bc369cc255961f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d88f5429b2d16bcbe2cb6e063bc369cc255961f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/80539670962dd557f9845bff26a9eee83f88a440/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
+
+**Mecanismo, achado antes de implementar, não suposto.** `strings` no binário do Goose mostrou os templates `### Global Hints` / `### Project Hints`; confirmado por busca externa (`WebSearch`, documentação oficial `goose-docs.ai`): Goose procura `AGENTS.md` (preferência) e depois `.goosehints`, tanto global (`~/.config/goose/`) quanto no projeto — os dois se combinam, local vence em conflito. Nenhum flag de CLI liga isso; é descoberta automática por presença de arquivo.
+
+**Escolhi o caminho global, não o de projeto.** `~/.config/goose/AGENTS.md` criado — vale pra qualquer sessão do Goose nesta Máquina, não só quando aberto dentro de `~/agata`. Faz sentido aqui porque esta Máquina só tem coisa do Agata (mesma premissa da entrada (482)). Conteúdo: manda o Goose, antes de qualquer tarefa, sincronizar (`git fetch`/`status`), ler REGRAS.md inteiro + janela mais recente de MEMÓRIAS.md + PROJETO.md inteiro, e responder com o bloco de prontidão de 3 linhas — aponta pra `PROMPT_CARREGAMENTO.md`/`REGRAS.md` como fonte do procedimento completo, não duplica o texto deles.
+
+**Teste real, não confiança no mecanismo documentado:** `goose run --no-session -t "..."` perguntando só se havia hints carregadas — sem pedir carregamento nenhum. Resposta real, sem eu induzir: rodou o procedimento inteiro sozinho, sincronizou (`sync: PASS`, hashes reais de REGRAS/MEMÓRIAS, `HEAD=8053967`), citou a última entrada de MEMÓRIAS corretamente ((482), a que acabou de ser commitada nesta mesma sessão), fechou com `pronto.` no formato exato de REGRAS.md. Identidade marcada `modelo: não verificado` — correto, é modelo local sem prova de nome, não inventou identidade.
+
+**Diferença honesta em relação à Seth, pra não prometer o que não é:** isto carrega o canon UMA VEZ, no início de cada sessão do Goose — não é a reinjeção contínua a cada turno que o `seth_gateway` faz pra Seth (PROJETO.md, "Memória e hidratação"). Se o canon mudar no meio de uma sessão longa do Goose, ele não percebe sozinho até a próxima sessão. Resolve exatamente o que foi pedido (nunca mais digitar "carregar" ao abrir) — não é o mecanismo idêntico ao da Seth, e não afirmei que fosse.
+
+**Sem quarentena — fora do repositório `agata` por completo.** `~/.config/goose/AGENTS.md` não é canon nem `config/` do projeto (P-8 é sobre o que está dentro de `~/agata`); é config local de outro programa, mesma categoria de `~/.config/goose/config.yaml` já editado em (482).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `strings` no binário `goose` real, achou os templates de hints; `WebSearch` cruzando contra `goose-docs.ai` (documentação oficial, não blog de terceiro sem confirmar a fonte) antes de escrever o arquivo; `goose --help`/`goose session --help`/`goose run --help` reais, confirmando ausência de flag de hints (é descoberta por arquivo); `~/.config/goose/AGENTS.md` escrito e conferido fora do `.git` do projeto; `goose run --no-session -t "..."` real, saída completa lida, não resumida, antes de concluir que funcionou; `git status` no repo `agata` conferido antes e depois, nada solto. Autorização: Humano — "quero que ele seja automatico como a seth".
 
 (482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
 

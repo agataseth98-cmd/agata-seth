@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
+  palavras-chave: goose, agora, carrega, sistema, agata, sozinho, sessão, humano, pedir, pedido, dele, quero, ele, seja, automático, seth, testado, verdade, configurado
 (482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
   palavras-chave: fechado, navegação, real, goose, brave, playwright, extension, ponta, testada, verdade, humano, autorizou, acesso, total, libera, tudo, tem, coisa, agata, clique, manual, dele, deu, erro, relay, antigo, tinha, caído, próprio, diálogo, recomendou, token, bypass, usei, ele, mesmo, repassou, servidor, novo, conectou, navegou, página
 (481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: diff, externo, auditado, benéfico, citação, fabricada, corrigida, propor, pronto, testado, fundo, aguardando, assinatura
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
   palavras-chave: primeira, execução, real, workflow, runner, github, confirmada, deixou, aberto
-(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
-  palavras-chave: item, fecha, github, workflows, perimetro, yml, publicado, bloqueio, era, escopo, workflow, token, cli, humano, concedeu, apliquei, aprovação, assinada, pedir, assinatura, nova
+(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro …
+  palavras-chave: item, fecha, github, workflows, perimetro
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da audi …
   palavras-chave: item, assinado, aplicado, pontos, audi
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu c …

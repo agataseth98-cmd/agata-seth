@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
 (482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
 (481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
 (480) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (479): a opção (a) ("instalar Chrome ou Chromium, caminho que o `@playwright/mcp` já suporta sem gambiarra") estava errada — conferido na fonte, nem Chromium nem Brave têm entrada no mapa de canais, só literalmente Google Chrome e Microsoft Edge (nas variantes beta/dev/canary). O Humano notou o furo ("espera, o brave é cromium") antes de eu instalar qualquer coisa. Com o Brave fechado, avancei um degrau real na opção (b) — achei a extensão certo, travei de novo tentando lançar o navegador, mesmo bloqueio de segurança de (478)/(479).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (456) DIÁRIO — 18/09/2026 · **`p18-ancora-falha-2026-09-18` assinada e aplicada — e um segundo achado real no processo: o `.diff` assinado, sozinho, nunca passaria no próprio gate deste repositório. Proposta pequena separada, aguardando assinatura própria.**
 (455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do GitHub, confirmada — o que (453) deixou em aberto.**
-(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
+(453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro …
 (452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da audi …
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu c …
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marc …

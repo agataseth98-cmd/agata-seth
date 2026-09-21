@@ -9,10 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
-**[APLICADO] O Goose já consegue navegar no Brave de verdade — testado ponta a ponta, não só configurado.** Você autorizou acesso total ("este pc só tem coisa do Agata"). Seu clique na tela de permissão deu erro (o teste anterior tinha caído), a própria extensão recomendou um código de desbloqueio, você me passou o código, e com ele o navegador conectou de verdade — cheguei a abrir uma página real através dele. `~/.config/goose/config.yaml` já está atualizado com o que funcionou. O código fica só nesta Máquina, num arquivo que nunca vai pro GitHub.
-- **Falta só:** você abrir uma sessão do Goose de verdade e pedir pra ele navegar algo, pra confirmar que funciona no uso real, não só no meu teste isolado.
+**[APLICADO] O Goose já navega no Brave de verdade E já carrega o sistema Agata sozinho, sem você pedir — os dois testados ponta a ponta, não só configurados.** Você autorizou acesso total ("este pc só tem coisa do Agata") e pediu que o carregamento fosse automático "como a Seth". Os dois: `~/.config/goose/config.yaml` tem o navegador funcionando de verdade (testei abrindo uma página real através dele); `~/.config/goose/AGENTS.md` (novo) faz o Goose sincronizar e ler REGRAS/PROJETO/MEMÓRIAS sozinho no início de toda sessão — testei perguntando algo sem pedir carregamento, e ele carregou por conta própria, citando a entrada certa. Diferença honesta: carrega uma vez no início da sessão, não fica reinjetando a cada turno como o mecanismo da Seth — pra isso seria preciso um serviço à parte, não um arquivo de hints.
 - Antes disso: a Seth corrigiu sozinha uma alegação errada de identidade ("sou Claude Sonnet 5" — provado falso, ela roda em modelos gratuitos via OmniRoute, nunca Anthropic) e propôs um benchmark de inferência real, rodado e registrado em `(475)`-`(476)`. O HD de backup (`AgataBkup01`) foi reconectado e teve uma passada completa — `(477)`.
-- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(482).
+- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(483).
 
 ## Onde estamos — 20/09/2026
 
