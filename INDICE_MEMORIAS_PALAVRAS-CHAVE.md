@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
+  palavras-chave: agatabkup, conectado, primeira, desde, passada, completa, runbook, voltar, restic, check, limpo, lock, travado, removido, recursos, snapshotados, idade, dias, conteúdo, idêntico, bundles, pendentes, agata, canonico, missoes, copiados, pro, voltam, evidência, real, data, mudando
 (476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
   palavras-chave: correção, própria, entrada, teto, tokens, gastava, orçamento, pensando, era, parâmetro, meu, teste, algo, configurado, produção, conferido, hoje, existe, conversa, real, seth, nada, pra, remover, vale, registrar, perder
 (475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, itens, plano, mitigação, auditoria, marcos, auditados, codar, resultado, real, difere, previsto, registrado, achado, forçado, código
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
   palavras-chave: fase, assinada, aplicada, itens, fecham, código, arquivo, workflow, commit, token, tem, escopo, github, recusou, push, registrado, suavizar, corrigido, virar, canon, empurrado
-(447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
-  palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, itens, remoto, independente, níveis, formais, teste
+(447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marco …
+  palavras-chave: fase, plano, mitigação, auditoria, marco
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
   palavras-chave: fase, verificada, vivo, produção, omniroute
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fech …
