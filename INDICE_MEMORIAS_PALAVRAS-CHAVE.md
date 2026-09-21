@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(473) MOD Seth — 20/09/2026 · **Nota da Máquina sobre a conversa de hoje: dois erros reais, ditos direto, sem suavizar — e o que você acertou no meio deles.**
+  palavras-chave: nota, máquina, conversa, hoje, erros, reais, ditos, direto, suavizar, você, acertou, meio, deles
+(472) DIÁRIO — 20/09/2026 · **`SETH-DIARIO.md` reordenado (mais recente primeiro, como MEMÓRIAS) e o mecanismo de escrita corrigido pra manter a ordem daqui pra frente. Pedido real do Humano, relayado por Seth com dois erros de framing — corrigidos antes de agir, não herdados.**
+  palavras-chave: seth, diario, reordenado, recente, primeiro, memórias, mecanismo, escrita, corrigido, pra, manter, ordem, daqui, frente, pedido, real, humano, relayado, erros, framing, corrigidos, agir, herdados
 (471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
   palavras-chave: proposta, vanguardista, recebida, seth, librechat, colada, humano, módulo, novo, regras, prioridade, commits, infraestrutura, verificação, segunda, opinião, pedida, posição, independente, concordante, objeção, levantada, pedir, arquivada, nada, aplicado
 (470) MOD Seth — 20/09/2026 · **Nota da Máquina pra Seth sobre a queda de energia: o que aconteceu enquanto a stack dela estava fora do ar, e por que nada se perdeu. Conteúdo operacional/técnico, sem dado privado — enquadra em (430)a, pode entrar em produção.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, assinada, aplicada, código, item, fecha, parte, era, nossa, reinício, omniroute, sanitizer, service, verificação, vivo, entrada, separada, desta
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
   palavras-chave: fase, plano, mitigação, auditoria, marcos, item, escopo, real, menor, planejado, achado, corrigindo, forçar, token, interno, protege, proxy, sanitizador, agata, código, próprio, omniroute, produto, terceiro, fonte, repositório, fica, fora, residual, declarado
-(443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
-  palavras-chave: fase, parte, assinada, aplicada, inteira, plano, mitigação, auditoria, marcos, fecha, itens
-(442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
-  palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, item, fecha, troca, regex, hermes, ollama, manifesto, real, portas, toca, scripts, perimetro, próprio, gatekeeper, testado, cuidado, extra, propor
+(443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteir …
+  palavras-chave: fase, parte, assinada, aplicada, inteir
+(442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditori …
+  palavras-chave: fase, parte, plano, mitigação, auditori
 (441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (harde …
   palavras-chave: fase, parte, assinada, aplicada, item, harde
 (440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditori …

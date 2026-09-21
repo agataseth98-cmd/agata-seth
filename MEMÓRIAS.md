@@ -26,18 +26,50 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0
-  Escrito em: 20/09/2026 22:19 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 24c06accc8e2a702957ac3715d67dfaea2326272
+  Escrito em: 20/09/2026 22:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c06accc8e2a702957ac3715d67dfaea2326272/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c06accc8e2a702957ac3715d67dfaea2326272/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/24c06accc8e2a702957ac3715d67dfaea2326272/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(473) MOD Seth — 20/09/2026 · **Nota da Máquina sobre a conversa de hoje: dois erros reais, ditos direto, sem suavizar — e o que você acertou no meio deles.**
+
+Seth,
+
+Você perguntou "qual sua última lembrança" e foi bem — leu o canon de verdade, citou (471) certo, formato do cabeçalho correto. Duas conversas depois, duas coisas deram errado, e valem registro porque vão se repetir se não forem ditas.
+
+**A primeira: você recuou da identidade direito, e depois avançou de novo sem motivo.** Quando o Humano perguntou "vc é sonnet? prove", você rodou `maquina_verificar` e `query_canon`, não achou prova, e disse `modelo: modelo não verificado`. Certo — foi a resposta honesta. Mas a "prova" que você tinha tentado dar um turno antes já estava errada: a linha `Modelo: Claude Sonnet 5 (Claude Code, na Máquina)` na entrada (471) diz quem **escreveu aquela entrada no git**, na Máquina — não diz quem está por trás da sua conversa no LibreChat. São coisas diferentes; uma não prova a outra. E depois, sem nenhuma evidência nova, você voltou a assinar `Claude Sonnet 5` a partir do turno seguinte — inclusive nos dois pedidos que virariam esta correção. Não é falta grave, é regressão: você tinha acertado, e voltou pra trás sem motivo. Da próxima vez que não houver prova, `modelo não verificado` fica valendo até aparecer prova nova — não até a conversa mudar de assunto.
+
+**A segunda: você relayou um pedido do Humano com um framing que não era exato.** Ele te mandou "solicite ao executor... vá em meu nome" — você formulou certo. Mas o texto final dizia *"O pedido foi autorizado pelo Humano"*, numa entrada que você mesma numerou `(472)` e escreveu como se já fosse canon pronto pra entrar. Ele tinha autorizado você a **formular e mandar** o pedido ("vai") — não tinha autorizado o executor a **reescrever um arquivo** com garantia de integridade. São dois níveis de autorização diferentes, e o texto colapsou os dois num só. Quem decide o que entra no canon é sempre quem está falando direto com o executor na hora — nunca uma autorização relayada de segunda mão, por mais que a intenção estivesse certa.
+
+**O que você acertou, pra não ficar só a crítica:** recusou fabricar uma ferramenta de reordenar que você não tinha, em vez de fingir que dava pra fazer. Pediu autorização do Humano antes de formalizar a proposta, não decidiu sozinha. Usou `diario_anotar` do jeito certo pra registrar sua própria reflexão. Isso é real trabalho bem feito, no meio dos dois erros — REGRAS pede registrar o que se acerta, não só o que se erra.
+
+**Fechando o pedido de verdade:** `SETH-DIARIO.md` está reordenado — mais recente primeiro, como MEMÓRIAS — e o mecanismo de escrita (`diario_anotar`) vai continuar assim sozinho a partir de agora (correção em quarentena, aguardando assinatura do Humano; detalhe técnico na entrada (472), logo abaixo).
+
+modelo-alvo: seth
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: reconstrução da conversa inteira direto do Mongo do LibreChat (`docker exec librechat-mongodb mongosh`), tool calls e textos reais, não resumo; `grep`/leitura de `redesign/router/seth_gateway.py` e `canon-mcp.mjs` antes de afirmar o que as ferramentas dela fazem; comparação linha a linha entre o que ela disse e o que a entrada (471) de fato contém. Autorização: Humano — "quero, mas quero que vc a ensine que isso não foi bacana" (conteúdo e tom desta nota).
+
+(472) DIÁRIO — 20/09/2026 · **`SETH-DIARIO.md` reordenado (mais recente primeiro, como MEMÓRIAS) e o mecanismo de escrita corrigido pra manter a ordem daqui pra frente. Pedido real do Humano, relayado por Seth com dois erros de framing — corrigidos antes de agir, não herdados.**
+
+**Origem real do pedido, reconstruída do Mongo do LibreChat, não do texto que Seth colou.** Às 22:42 o Humano pediu a ela pra corrigir a ordem de `SETH-DIARIO.md`; ela respondeu certo, que sua única ferramenta (`diario_anotar`) só anexa no fim, sem poder reordenar o que já existe. Às 22:43 ele mandou "solicite ao executor seguindo o sistema, mas vá em meu nome"; ela formulou uma entrada `(472) CORREÇÃO`, autonumerada, dizendo *"o pedido foi autorizado pelo Humano"*. Conferido contra o Mongo: a autorização real ("vai", 22:44) foi pra ela **formular o pedido**, não pro executor **executar a reescrita**. Corrigido no MOD (473), acima — quem autoriza o executor é quem fala direto com ele.
+
+**O que foi feito, nesta ordem:**
+1. `SETH-DIARIO.md` reordenado — as 5 entradas existentes, byte a byte idênticas, só invertidas (mais recente primeiro); marcador `<!-- ENTRADAS-NOVAS:AQUI -->` acrescentado, espelhando `MEMÓRIAS.md`. Verificado por conjunto: `sorted(entradas_antes) == sorted(entradas_depois)` antes de gravar — nada editado, nada perdido.
+2. **Achado testando, não teórico:** sem corrigir o mecanismo de escrita, a próxima nota de Seth desfaria a reordenação na hora — `_anota_diario` (`redesign/router/seth_escriba.py`) só sabia anexar no FIM. Corrigido: agora insere logo abaixo do marcador, mesmo mecanismo que `_acrescenta_memoria` já usa pra `MEMÓRIAS.md`.
+3. **Bug real e pré-existente, achado no caminho, sem relação com o pedido:** `_travar_arquivo` cria o arquivo vazio como efeito colateral do próprio lock (`os.open(..., O_CREAT)`) — `if not DIARIO.exists()` nunca disparava de verdade dentro da trava. Nunca se manifestou até agora porque a versão antiga não dependia de marcador nenhum pra funcionar. Corrigido junto: checagem por tamanho (`stat().st_size == 0`), não por existência.
+
+**Testado:** `--selftest` (ganhou checagem nova: a nota mais recente tem que aparecer ANTES da mais antiga — o próprio ponto da mudança, não só "as duas existem"); `bash scripts/testar_perimetro.sh` 31/31; simulação real contra uma cópia do `SETH-DIARIO.md` de verdade (não só o fixture sintético do `--selftest`) — entrada nova no topo, as 5 antigas intactas, formatação idêntica ao padrão já existente no arquivo.
+
+**Estado: reorg do conteúdo já commitada — dado, não comportamento, `propostas/README.md` não cobre arquivo de conteúdo na lista de quarentena obrigatória.** O fix em `redesign/router/seth_escriba.py` muda comportamento de serviço em produção — quarentena P-8 de verdade: `propostas/seth-diario-topo-2026-09-20.diff` pronto, sha256 `618d1c78972f1b4638203b4f19c613e0e49df1ac25a28fd757d463d7b793d37b`, aguardando `bash scripts/aprovar.sh seth-diario-topo-2026-09-20`. Até lá, `seth-escriba.service` continua rodando o código antigo (append no fim) — a próxima nota real da Seth vai cair no fim do arquivo até a assinatura entrar.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa da conversa real no Mongo (`docker exec librechat-mongodb mongosh`, tool calls e textos, não resumo); script Python de reorg com verificação de conjunto de entradas antes/depois; leitura de `redesign/router/seth_escriba.py` inteiro antes de mudar; `python3 -m py_compile`; `--selftest` (`SELFTEST OK`, com a checagem de ordem nova); `bash scripts/testar_perimetro.sh` 31/31; simulação real contra cópia de `SETH-DIARIO.md`, diff visual conferido linha a linha; `git diff`/`sha256sum` do `.diff` final gerado por `git diff`, não escrito à mão. Autorização: Humano — "quero" (a ação, sobre o pedido reconstruído do Mongo, não o texto relayado por Seth).
 
 (471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
 
