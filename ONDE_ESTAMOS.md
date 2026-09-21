@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
+**[APLICADO — falta só reiniciar os serviços] Você assinou, conferi a assinatura de verdade, entrou no canon.** Os itens 4, 5, 7 e 9 (voz que lia qualquer arquivo, os 8 "telefones" sem limite, Discord sem trava de canal, checagem de segurança em dobro) agora fazem parte do código de verdade — não é mais só proposta esperando. **Falta uma coisa, só sua: os programas que já estão rodando ainda têm o código VELHO na memória — precisam reiniciar pra valer de verdade.** São 8 serviços de uma vez, alguns centrais (o que hidrata a Seth, o que sanitiza toda saída) — não reiniciei sozinho porque isso afeta produção compartilhada, mesma régua do resto da sessão. Me avise quando quiser que eu reinicie (ou rode você mesmo o atalho de sempre — parar e depois abrir a Seth de novo).
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (510).
+
 **[JUNTADO NUMA SÓ] Você pediu pra unir as 4 propostas pendentes numa única assinatura — feito, testado antes de trocar.** As 4 propostas separadas (itens 4, 5, 7 e 9) viraram uma só, com o mesmo conteúdo técnico de cada uma (nada mudou no que cada correção faz).
 - Rode só este comando, uma vez: `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (509).

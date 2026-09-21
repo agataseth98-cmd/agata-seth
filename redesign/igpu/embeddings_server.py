@@ -26,6 +26,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 HOME = os.path.expanduser("~")
@@ -111,9 +114,11 @@ class Handler(BaseHTTPRequestHandler):
         if self.path not in ("/embed", "/v1/embeddings"):
             self._send(404, {"error": "not_found"})
             return
-        n = int(self.headers.get("content-length", 0))
+        corpo = ler_corpo_limitado(self)
+        if corpo is None:
+            return
         try:
-            req = json.loads(self.rfile.read(n) or b"{}")
+            req = json.loads(corpo or b"{}")
             inp = req.get("input")
             if isinstance(inp, str):
                 inp = [inp]
@@ -165,7 +170,7 @@ def main():
         sys.exit(_selftest(device))
     host, port = BIND.split(":")
     _load(device)
-    srv = ThreadingHTTPServer((host, int(port)), Handler)
+    srv = ServidorConcorrenciaLimitada((host, int(port)), Handler)
     sys.stderr.write(f"[emb] ouvindo em http://{host}:{port}  device={device}\n")
     sys.stderr.flush()
     srv.serve_forever()

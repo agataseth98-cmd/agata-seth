@@ -31,6 +31,9 @@ import sys
 import threading
 import urllib.request
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+
 UPSTREAM = os.environ.get("OBS_UPSTREAM", "https://127.0.0.1:27124").rstrip("/")
 BIND = os.environ.get("OBS_BIND", "127.0.0.1:27125")
 TOKEN_FILE = os.environ.get("OBS_TOKEN_FILE", os.path.expanduser("~/.config/agata/obsidian.token"))
@@ -125,8 +128,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                    "/search/gui", "/search/gui/")
 
     def do_POST(self):
-        n = int(self.headers.get("content-length", 0))
-        corpo = self.rfile.read(n) if n else b""
+        corpo = ler_corpo_limitado(self)
+        if corpo is None:
+            return
         if self.path.rstrip("/") == "/mcp":
             motivo = _bloqueia_mcp(corpo)
             if motivo:
@@ -148,7 +152,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 def _serve():
     host, port = BIND.split(":")
-    srv = http.server.ThreadingHTTPServer((host, int(port)), Handler)
+    srv = ServidorConcorrenciaLimitada((host, int(port)), Handler)
     srv.serve_forever()
 
 

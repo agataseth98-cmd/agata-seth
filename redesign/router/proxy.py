@@ -38,6 +38,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sanitizar  # noqa: E402  (redesign/router/sanitizar.py)
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+
 UPSTREAM = os.environ.get("OMNIROUTE_UPSTREAM", "http://127.0.0.1:20128").rstrip("/")
 _bind = os.environ.get("SANITIZER_BIND", "127.0.0.1:20127")
 BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
@@ -108,8 +111,9 @@ class _Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self._token_ok():
             return self._recusar_sem_token()
-        n = int(self.headers.get("Content-Length") or 0)
-        corpo = self.rfile.read(n) if n else b""
+        corpo = ler_corpo_limitado(self)
+        if corpo is None:
+            return
 
         # Falha FECHADA (docstring do módulo, P1-02): corpo vazio passa (nada
         # a varrer); todo corpo COM bytes tem que parsear como JSON e ser
@@ -204,7 +208,7 @@ class _Handler(BaseHTTPRequestHandler):
 
 
 def servir(host: str = BIND_HOST, port: int = BIND_PORT):
-    srv = ThreadingHTTPServer((host, port), _Handler)
+    srv = ServidorConcorrenciaLimitada((host, port), _Handler)
     print(f"proxy de sanitização em http://{host}:{port}  ->  {UPSTREAM}")
     srv.serve_forever()
 

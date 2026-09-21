@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8b659c46e1737b443c2e75a0f070bba52ceb308b
-  Escrito em: 21/09/2026 19:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a2871df3e13c2f56314899f1392c7286024b35c
+  Escrito em: 21/09/2026 19:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e 9 do plano de ação da auditoria de Marcos (500) entram no canon de uma vez, via a proposta única `plano-marcos-lote-2026-09-21`. Com isto, 6 dos 10 itens do plano estão de fato no ar (1, 2 aplicados antes; 4/5/7/9 agora); 2 devolvidos pra decisão do Humano (3, 6); 2 fechados sem precisar de aplicação (8, 10).**
+
+**Verificação, não confiança no marcador.** `sha256sum` do `.diff` conferido contra a linha `diff-sha256:` do `APROVADO-` (bateu); `ssh-keygen -Y verify` real contra `HEAD:propostas/.allowed_signers`, namespace `agata-aprovacao-p8` — **assinatura boa**. Antes de commitar, os 12 arquivos aprovados foram reconferidos byte a byte: aplicado o `.diff` assinado numa cópia limpa e descartável de HEAD (`git archive`, `/tmp`, nunca a árvore real) e comparado arquivo por arquivo contra o que estava de fato na árvore de trabalho — **os 12 idênticos**, sem diferença nenhuma (a comparação `diff` bruta entre o `.diff` reconstruído e o assinado tinha mostrado diferença só de ORDEM dos blocos por arquivo, não de conteúdo — checado à parte pra não confundir ruído de ordenação com discrepância real).
+
+**O que entra:** `scripts/http_seguro.py` (novo, item 5) + `_P8_EXCLUIR` em `p08_quarentena.sh` (item 9, junto do fechamento do buraco `redesign/igpu/*.py` do item 5) + `.githooks/pre-commit` com a 2ª passada do perímetro (item 9) + `_caminho_permitido`/`OVW_PASTA_ENTRADA` em `whisper_server.py` (item 4) + corpo/concorrência limitados em 7 servidores (item 5) + allowlist de canal em `discord/servidor.py` (item 7). Par `.diff`/`APROVADO-` movido pra `propostas/aplicadas/`.
+
+**Pendente, ainda: reiniciar os serviços de produção pra estes fixes valerem de verdade.** Os arquivos entram no canon agora, mas os PROCESSOS já rodando (`seth-gateway`, `seth-escriba`, `seth-verificador`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `discord-mcp`, `obsidian-ro-proxy`) continuam com o código ANTIGO na memória até reiniciarem. São 8 serviços de produção compartilhados de uma vez — não reiniciei sozinho sem perguntar, mesma régua do resto da sessão pra ação que afeta produção.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` reais; `git archive HEAD` num dir descartável + `git apply` + comparação arquivo a arquivo (`diff -q`) contra a árvore de trabalho real, confirmando os 12 arquivos byte-idênticos antes de commitar. Autorização: Humano — "assinado" (após rodar `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`).
 
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
 

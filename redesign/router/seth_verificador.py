@@ -51,11 +51,14 @@ import json
 import os
 import re
 import subprocess
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import sys
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 BIND = os.environ.get("SETH_VERIFICADOR_BIND", "127.0.0.1:20141")
 REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+sys.path.insert(0, str(REPO / "scripts"))
+from http_seguro import ServidorConcorrenciaLimitada  # noqa: E402
 TETO_CHARS = int(os.environ.get("SETH_VERIFICADOR_TETO", "24000"))
 CORPO_MAX = 4096  # pedido é minúsculo; corpo grande é erro ou abuso
 
@@ -294,11 +297,10 @@ def _selftest() -> int:
 
 
 def main() -> int:
-    import sys
     if "--selftest" in sys.argv:
         return _selftest()
     host, porta = BIND.split(":")
-    srv = ThreadingHTTPServer((host, int(porta)), _H)
+    srv = ServidorConcorrenciaLimitada((host, int(porta)), _H)
     print(f"seth_verificador em {BIND} — read-only, {len(COMANDOS)} comandos na lista fechada",
           flush=True)
     srv.serve_forever()
