@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f2535ce4f6bd6538a1c60d91902c27db14a9902c
-  Escrito em: 21/09/2026 14:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 478f1184cc35b61404e33eb2a1fc7095f0cdd69c
+  Escrito em: 21/09/2026 14:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2535ce4f6bd6538a1c60d91902c27db14a9902c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2535ce4f6bd6538a1c60d91902c27db14a9902c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2535ce4f6bd6538a1c60d91902c27db14a9902c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(499) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (488): o tema de cores "Agata-Dark"/"Agata-Light" do Goose NUNCA funcionou numa sessão de verdade — eu tinha declarado essa lacuna em (488) ("não confirmei visualmente"), mas subestimei a forma da falha: não é só "não aplica a cor", é um aviso `[bat warning]: Unknown theme 'Agata-Dark'` REPETIDO A CADA PALAVRA transmitida em streaming, tornando o terminal interativo inutilizável. Achado pelo Humano numa sessão real colada aqui, não por mim sozinho. Corrigido revertendo pros nomes de tema que o Goose de fato reconhece.**
+
+**Causa raiz, achada no binário, não suposta.** `strings` no `goose` real: as strings `"[bat warning]"`, `"something is very wrong if the default theme is missing"` e o conjunto fixo `Dracula/GitHub/Monokai/Nord/OneHalfDark/Solarized/zenburn` estão **compiladas dentro do próprio binário** — `ldd` confirma nenhum link dinâmico com `bat`. O Goose **embute o crate `bat` como biblioteca Rust**, com seu próprio conjunto de temas fixo — nunca lê `~/.config/bat/themes/` nem o cache do `bat` do sistema (`/usr/bin/bat`), que é um processo totalmente separado. Meu teste em (488) validou o `bat` standalone (`bat --color=always --theme Agata-Dark`, que funcionava) e nunca validou o Goose de verdade rodando interativo — a lacuna que eu mesmo declarei virou o bug real.
+
+**Conserto: `GOOSE_CLI_DARK_THEME`/`GOOSE_CLI_LIGHT_THEME` trocados pros nomes que o binário realmente reconhece** (achados nas mesmas `strings`) — `Nord` (escuro, tom azul/frio, o mais próximo do accent `#52c7ff` do artefato entre as opções reais disponíveis) e `GitHub` (claro, era o default original). **Testado depois:** `goose run` real, `grep -c "bat warning"` → **0**; pedido de negrito + bloco de código Python renderizou limpo, sem aviso nenhum.
+
+**Sem quarentena** (`~/.config/goose/`, fora do repositório — mesmo precedente de sempre).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `strings $(which goose)` real, confirmando as strings de aviso e o conjunto de temas embutido; `ldd` confirmando ausência de link dinâmico com `bat`; edição do `config.yaml`; `goose run` real depois, contagem de avisos por `grep -c`, saída completa lida antes de aceitar como limpa. Autorização: Humano — colou a interação real mostrando o bug ("audite essa interação com o Goose, me parece errado"), corrigido no mesmo turno.
 
 (498) DIÁRIO — 21/09/2026 · **Humano voltou testando a Seth: imagens sumiram + uma chamada de `maquina_verificar` aprovada não conseguiu acessar o MCP. Achado real pras imagens (regressão do upgrade v0.8.8-rc3, corrigida e testada visualmente, sob P-8 aguardando assinatura). O caso do MCP: config correta, conferida — foi o modelo chamando a ferramenta sem o argumento obrigatório, não bug de sistema.**
 
