@@ -102,6 +102,21 @@ memory:
   disabled: true
 
 endpoints:
+  # HITL tool approval (MEMÓRIAS (487)) -- toda chamada de ferramenta MCP de
+  # qualquer Agent (a Seth incluída) para e espera Aprovar/Rejeitar/Editar do
+  # Humano antes de rodar. Testado de ponta a ponta numa cópia isolada antes
+  # de entrar aqui -- schema aceito sem erro, aprovação e rejeição confirmadas
+  # funcionando (rejeitar => "Cancelado", ferramenta nunca chamada de verdade).
+  # `checkpointer: memory` -- estado da pausa não sobrevive a restart do
+  # container (aceitável: só uma sessão em andamento por vez nesta Máquina).
+  agents:
+    toolApproval:
+      enabled: true
+      mode: default
+      ask:
+        - "*"
+    checkpointer:
+      type: memory
   custom:
     - name: "Seth"
       apiKey: "loopback-sem-chave"

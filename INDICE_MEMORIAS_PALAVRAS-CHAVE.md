@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(489) DIÁRIO — 21/09/2026 · **Assinatura do Humano verificada de verdade (`ssh-keygen -Y verify`, não só "o arquivo existe") — aplicado na produção de verdade: LibreChat real agora roda `v0.8.8-rc3` com HITL ligado, `/health` OK. Par `.diff`/`APROVADO` movido pra `propostas/aplicadas/`, fechando (488). Goose segue SEM acesso a navegador (`playwright: enabled: false`, confirmado agora, não de memória) — não religuei nada.**
+  palavras-chave: assinatura, humano, verificada, verdade, ssh, keygen, verify, arquivo, existe, aplicado, produção, librechat, real, agora, roda, hitl, ligado, health, par, diff, aprovado, movido, pra, propostas, aplicadas, fechando, goose, segue, acesso, navegador, playwright, enabled, false, confirmado, memória, religuei, nada
 (488) DIÁRIO — 21/09/2026 · **Duas coisas, mesmo pedido do Humano ("aplicar de verdade, e prosseguir... aproveite e aplique a formatação"). (1) Proposta real do upgrade do LibreChat pronta, sob quarentena P-8, aguardando assinatura — não posso assinar sozinho. (2) Tema de cores do Goose trocado pro mesmo paletteo do artefato "Sistema Agata", testado e funcionando, sem quarentena (fora do repositório).**
   palavras-chave: coisas, mesmo, pedido, humano, aplicar, verdade, prosseguir, aproveite, aplique, formatação, proposta, real, upgrade, librechat, pronta, sob, quarentena, aguardando, assinatura, posso, assinar, sozinho, tema, cores, goose, trocado, pro, paletteo, artefato, sistema, agata, testado, funcionando, fora, repositório
 (487) DIÁRIO — 21/09/2026 · **HITL tool approval testado de ponta a ponta numa cópia descartável — funciona de verdade, com a configuração real da Seth. Prova visual, não achado de documentação: pedi pro agente de teste chamar `query_canon`, a UI parou e pediu Aprovar/Rejeitar/Editar antes de executar; rejeitei, e o log confirma "Cancelado em canon" — a ferramenta nunca rodou. Produção nunca foi tocada. Decisão de aplicar em produção fica pro Humano — é RC, não estável.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pacote, unificado, assinada, aplicada, achados, hoje, fecham, juntos, achado, extra, caminho, projeto, precisou, reconstruído, partir, head, real, arquivo, salvo, porque, diff, toca, âncora, tinha, avançado, gerar, assinar
 (460) DIÁRIO — 18/09/2026 · **As 4 propostas pendentes ((456)-(459)) unificadas num `.diff` só, por pedido do Humano — não é concatenação cega: o texto do PROJETO.md precisou ser reescrito, senão o pacote entraria contraditório.**
   palavras-chave: propostas, pendentes, unificadas, diff, pedido, humano, concatenação, cega, texto, projeto, precisou, reescrito, senão, pacote, entraria, contraditório
-(459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (458): fecha a classe, testada com o bug exato reproduzido. Ordem do Humano ("autorizado"), proposta pronta, não aplicada sozinha.**
-  palavras-chave: guarda, integridade, contra, buraco, achado, fecha, classe, testada, bug, exato, reproduzido, ordem, humano, autorizado, proposta, pronta, aplicada, sozinha
+(459) DIÁRIO — 18/09/2026 · **Guarda de integridade contra o buraco achado em (4 …
+  palavras-chave: guarda, integridade, contra, buraco, achado
 (458) DIÁRIO — 18/09/2026 · **Achado real, meu, no próprio commit anterior: o pa …
   palavras-chave: achado, real, meu, próprio, commit, anterior
 (457) DIÁRIO — 18/09/2026 · **Coerência canon/Drive/Obsidian verificada; achado …

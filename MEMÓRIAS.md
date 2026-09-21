@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 57ec15e1c242efe3f9da7a74a2382f793a127956
-  Escrito em: 21/09/2026 11:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): def67eaf3d7694d50d5e8c228c3e86a63d0ce0c1
+  Escrito em: 21/09/2026 11:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/57ec15e1c242efe3f9da7a74a2382f793a127956/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/57ec15e1c242efe3f9da7a74a2382f793a127956/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/57ec15e1c242efe3f9da7a74a2382f793a127956/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/def67eaf3d7694d50d5e8c228c3e86a63d0ce0c1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/def67eaf3d7694d50d5e8c228c3e86a63d0ce0c1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/def67eaf3d7694d50d5e8c228c3e86a63d0ce0c1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(489) DIÁRIO — 21/09/2026 · **Assinatura do Humano verificada de verdade (`ssh-keygen -Y verify`, não só "o arquivo existe") — aplicado na produção de verdade: LibreChat real agora roda `v0.8.8-rc3` com HITL ligado, `/health` OK. Par `.diff`/`APROVADO` movido pra `propostas/aplicadas/`, fechando (488). Goose segue SEM acesso a navegador (`playwright: enabled: false`, confirmado agora, não de memória) — não religuei nada.**
+
+**Verificação da assinatura, não confiança no nome do arquivo.** `ssh-keygen -Y verify -f propostas/.allowed_signers -I agata-humano -n agata-aprovacao-p8` contra a mensagem exata que `scripts/aprovar.sh` assina (`"<sha256>  <nome>"`) — `Good "agata-aprovacao-p8" signature for agata-humano`. Só depois disso apliquei.
+
+**Aplicado de verdade, nesta ordem:** `redesign/librechat/{librechat.yaml,docker-compose.yml}` copiados pra `~/librechat/` (byte a byte idênticos, conferido com `diff`); `SCHEDULES_SINGLE_PROCESS=true` acrescentado em `~/librechat/.env` (achado necessário em (487), evita o erro 503 do agendador visto no teste isolado); `docker compose up -d --force-recreate librechat`. Depois: `/health` 200, `docker exec librechat cat package.json` confirma `v0.8.8-rc3` rodando de verdade (não só o compose apontando pra lá), únicos erros no log são os mesmos índices do Mongo já vistos e explicados em (487) (pré-existentes, não causados por esta troca).
+
+**Limite honesto — o que NÃO testei nesta entrada.** Não logei na conta pessoal real do Humano no LibreChat pra ver o cartão de aprovação aparecer numa conversa de verdade com a Seth — os dados dessa conta são dele, não fiz por conta própria sem pedir. O que dá confiança sem isso: é o MESMO binário (mesmo digest sha256) e a MESMA config (bloco `toolApproval` idêntico, `diff` byte a byte) que (487) já testou de ponta a ponta numa cópia isolada, com aprovação e rejeição reais funcionando. Produção rodando o mesmo código não é o mesmo que "testado em produção" — fica registrado como a diferença que é.
+
+**Goose: não mexi. `playwright: enabled: false` confirmado agora** (`grep` direto no `config.yaml`, não lembrança de (485)) — nenhum processo `goose`/`playwright`/`npx` rodando. Segue exatamente como (485) deixou: sem acesso a navegador até alguém ligar de propósito.
+
+**P-8 fechado.** `propostas/librechat-hitl-upgrade-2026-09-21.diff` + `APROVADO-librechat-hitl-upgrade-2026-09-21` movidos pra `propostas/aplicadas/` neste commit, junto com os dois arquivos de comportamento aplicados — mesmo commit que consome a aprovação e aplica a mudança, como o mecanismo pede.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `ssh-keygen -Y verify` real contra `propostas/.allowed_signers`, mensagem reconstruída exata (`printf '%s  %s'`, dois espaços, conferido contra `scripts/aprovar.sh:37`); `diff` real confirmando os arquivos copiados idênticos à fonte; `docker compose up -d --force-recreate`; `curl :3080/health`; `docker exec librechat cat package.json` (versão real, não a do compose); `docker logs --since 1m` filtrado; `grep`/`ps` confirmando playwright desligado e nenhum processo goose/brave-de-automação rodando. Autorização: Humano — assinatura real via `scripts/aprovar.sh` (confirmada, não presumida) + "aplicar de verdade, e prosseguir" de (488).
 
 (488) DIÁRIO — 21/09/2026 · **Duas coisas, mesmo pedido do Humano ("aplicar de verdade, e prosseguir... aproveite e aplique a formatação"). (1) Proposta real do upgrade do LibreChat pronta, sob quarentena P-8, aguardando assinatura — não posso assinar sozinho. (2) Tema de cores do Goose trocado pro mesmo paletteo do artefato "Sistema Agata", testado e funcionando, sem quarentena (fora do repositório).**
 

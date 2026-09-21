@@ -44,7 +44,13 @@ services:
     # Subir de propósito, não sem querer: `docker pull ...:latest` +
     # `docker inspect --format='{{index .RepoDigests 0}}'` pra pegar o novo
     # digest, testar, só então trocar aqui.
-    image: ghcr.io/danny-avila/librechat@sha256:c5db3331b845e1f289f8d04c0c77936c4bbe372f76730a804abc1c37e44d23a9
+    # Atualizado 21/09/2026 (MEMÓRIAS (487)) -- tag v0.8.8-rc3, pra ganhar o
+    # HITL tool approval (endpoints.agents.toolApproval acima). É release
+    # candidate, não versão estável -- não existe v0.8.8 oficial ainda
+    # (conferido na API do Docker Hub). Testado numa cópia isolada antes de
+    # trocar aqui: boot limpo com esta mesma config, aprovação/rejeição de
+    # ferramenta confirmadas funcionando.
+    image: ghcr.io/danny-avila/librechat@sha256:b07248d86e020c44101170bde2dbb4ab547df30dd223b4aacd6218cc90e8632b
     restart: "no"
     network_mode: host
     depends_on:
