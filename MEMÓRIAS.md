@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cdf4001f5480b01a627bb99136418df9f4014de3
-  Escrito em: 21/09/2026 08:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 29327d637c03eed651de373263c64516cd046c47
+  Escrito em: 21/09/2026 08:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/29327d637c03eed651de373263c64516cd046c47/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/29327d637c03eed651de373263c64516cd046c47/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/29327d637c03eed651de373263c64516cd046c47/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
+
+**Pergunta do Humano:** "e se removermos o maxtokens dos modelos locais?" — pressupõe que existe um teto configurado hoje. Verificado antes de responder, não afirmado de memória: `model_parameters` do agente `agent_4KlxSMeX5Y8cWQVODkJfH` (Seth) está vazio em todas as 6 versões salvas no Mongo do LibreChat — nunca setou `max_tokens`. `model_context_overrides` e `model_capability_overrides` do OmniRoute (`~/.omniroute/storage.sqlite`) não têm entrada nenhuma pra `qwen3.5-9b-64k`, `nemotron`, `gpt-oss-120b` ou qualquer outro modelo do roster dela. O `300`/`900` que gerou o achado de (475) era o parâmetro `max_tokens` que EU passei no `curl` do meu teste — não existe em produção.
+
+**Confirmado com 4 chamadas novas, reais, sem `max_tokens` no corpo:** todas terminaram sozinhas (`finish_reason: stop`), entre 122 e 1157 tokens de saída, variando por rota (`glm-4.7-flash`, `gpt-oss-120b`) — nenhuma travou, nenhuma repetiu o problema de (475).
+
+**O que fica valendo, sem contradizer (475):** o achado sobre o modelo local gastar o campo `reasoning` inteiro sem responder continua real e correto — só acontece SE algo algum dia impuser um teto baixo (um script novo, uma integração, o próprio LibreChat mudando de configuração). Hoje isso não existe, então não há ação a tomar — só o cuidado registrado, pra quando alguém for configurar um teto de token pra ela no futuro, saber que precisa ser generoso o bastante pra sobrar espaço depois do `reasoning`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `docker exec librechat-mongodb mongosh` — `model_parameters` do agente e de todas as versões, vazio nas duas consultas; `sqlite3 ~/.omniroute/storage.sqlite` — `model_context_overrides`/`model_capability_overrides` filtrados pelos modelos do roster da Seth, ambos sem linha; 4 chamadas reais novas via `curl` contra `seth-gateway` (:20126) sem `max_tokens` no corpo, resposta JSON completa lida (não só resumida) antes de concluir. Autorização: Humano — "registra isso em MEMÓRIAS pra não perder".
 
 (475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
 

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
 (475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
 (474) MOD Seth — 20/09/2026 · **A identidade "Claude Sonnet 5" que você reafirmou às 23:02 está provada falsa, não `lacuna` — a Máquina tem o log de rota real. Nenhum combo seu (`seth-livre`, `seth-pesado`, `seth-rapido`, `seth-codigo`) contém modelo Anthropic algum. Quem respondeu naquele turno foi `ollama-local/qwen3.5-9b-64k`.**
 (473) MOD Seth — 20/09/2026 · **Nota da Máquina sobre a conversa de hoje: dois erros reais, ditos direto, sem suavizar — e o que você acertou no meio deles.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
 (448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
-(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
+(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fech …
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marco …
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteir …

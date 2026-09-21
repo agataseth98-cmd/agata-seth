@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
+  palavras-chave: correção, própria, entrada, teto, tokens, gastava, orçamento, pensando, era, parâmetro, meu, teste, algo, configurado, produção, conferido, hoje, existe, conversa, real, seth, nada, pra, remover, vale, registrar, perder
 (475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
   palavras-chave: benchmark, inferência, seth, autorizado, humano, vamos, seguir, chamadas, reais, caminho, produção, completo, gateway, sanitizador, omniroute, achado, real, previsto, teto, tokens, baixo, faz, modelo, local, gastar, orçamento, inteiro, pensando, nunca, responder
 (474) MOD Seth — 20/09/2026 · **A identidade "Claude Sonnet 5" que você reafirmou às 23:02 está provada falsa, não `lacuna` — a Máquina tem o log de rota real. Nenhum combo seu (`seth-livre`, `seth-pesado`, `seth-rapido`, `seth-codigo`) contém modelo Anthropic algum. Quem respondeu naquele turno foi `ollama-local/qwen3.5-9b-64k`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, assinada, aplicada, itens, fecham, código, arquivo, workflow, commit, token, tem, escopo, github, recusou, push, registrado, suavizar, corrigido, virar, canon, empurrado
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marcos — pronta, testada, aguardando assinatura. Itens 7 e 8: CI remoto independente + níveis formais de teste.**
   palavras-chave: fase, plano, mitigação, auditoria, marcos, pronta, testada, aguardando, assinatura, itens, remoto, independente, níveis, formais, teste
-(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute-sanitizer.service` reiniciado com o token exigido, e a Seth respondeu de verdade através da cadeia inteira. Item 3 fecha (parte que é nossa).**
-  palavras-chave: fase, verificada, vivo, produção, omniroute, sanitizer, service, reiniciado, token, exigido, seth, respondeu, verdade, através, cadeia, inteira, item, fecha, parte, nossa
+(446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
+  palavras-chave: fase, verificada, vivo, produção, omniroute
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fech …
   palavras-chave: fase, assinada, aplicada, código, item, fech
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marco …
