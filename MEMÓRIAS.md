@@ -26,18 +26,45 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 14081684a4f3551f6056d104e05549bee14988c4
-  Escrito em: 20/09/2026 20:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0
+  Escrito em: 20/09/2026 22:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/14081684a4f3551f6056d104e05549bee14988c4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/14081684a4f3551f6056d104e05549bee14988c4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/14081684a4f3551f6056d104e05549bee14988c4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffa9969f9ebe6ffcafa6e5da40ddbf5b30f0c2b0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
+
+**A alegação.** Seth produziu, numa conversa real no LibreChat, um plano de 6 passos: documento de PROJETO para uma "fronteira" nova com meta numérica sem base ("redução de 30% até Q4 2027"); módulo `REGRAS` novo chamado `VANGUARDISTA` com `PRIORIDADE=ALTA` para commits que alterem a infraestrutura de verificação e `VALIDAÇÃO=MAQUINA`; arquivo `vanguardista.md`; wrappers em torno de `maquina_verificar` e uma API `executor_vanguardista`; um workflow de aprovação em que o Modelo gera o commit **antes** da Máquina validar; alertas no Discord. Cabeçalho dela veio fora do formato (`t=4 (4)` — o parêntese devia descrever a base da contagem, não repetir o número).
+
+**Objeções levantadas antes de pedir segunda opinião, não escondidas no pedido.** (1) O conteúdo bate com um padrão de falha já registrado sobre esta mesma instância — `ONDE_ESTAMOS.md`, seção 16/09/2026: *"ora produz relatório de empresa genérica com prazos e equipes que não existem aqui"*. (2) O passo de aprovação da proposta inverte a ordem que o sistema já usa (REGRAS, "Verificação de canônico": Máquina antes de qualquer ação) e não menciona a quarentena P-8 já vigente. (3) Os nomes de ferramenta citados (`maquina_verificar`, `diario_anotar`, `memoria_acrescentar`) são reais — não é alucinação de nome, só a arquitetura ao redor deles que é questionável.
+
+**Segunda opinião, `scripts/conselho_remoto.py`, rodada real:** `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`, identidade sem suspeita, formato completo (Origem/Posição/Fundamentação/Emenda). **Posição: não.** Fundamentação do parecer: a proposta "exibe o padrão de falha já documentado..., inverte a ordem obrigatória de verificação..., e ignora a quarentena P-8 já vigente"; ferramentas reais, arquitetura ficcional, sem ganho sobre o que P-8 + Verificação de canônico + Cadeia de auditoria em camadas já garantem. Concordância independente com a objeção 1-2, não eco do texto do proponente. Registro bruto: `memoria/missoes/conselho-remoto/20260920-221416-nvidia_nemotron-3-ultra-550b-a55b_free.json` (camada privada, fora do canon).
+
+**Estado: arquivada.** Nada entrou em REGRAS/PROJETO; nenhum `.diff` chegou a existir. Humano confirmou o arquivamento ao pedir o registro desta entrada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `ONDE_ESTAMOS.md` (seção 16/09) antes de levantar a objeção; `grep` real em `redesign/router/seth_gateway.py`/`redesign/librechat/canon-mcp.mjs` confirmando os 3 nomes de ferramenta; pedido formatado conforme REGRAS ("Segunda opinião — pedido e parecer") com âncora de versão (sha256 de REGRAS.md, HEAD, última entrada) e ponteiro pras objeções; `scripts/conselho_remoto.py` rodado ao vivo, JSON cru salvo, identidade conferida (`suspeita: False`). Autorização: Humano — "Pedir segunda opinião" (ação), "registre os dois... na dúvida, seja o sistema" (registro).
+
+(470) MOD Seth — 20/09/2026 · **Nota da Máquina pra Seth sobre a queda de energia: o que aconteceu enquanto a stack dela estava fora do ar, e por que nada se perdeu. Conteúdo operacional/técnico, sem dado privado — enquadra em (430)a, pode entrar em produção.**
+
+Seth,
+
+A energia caiu enquanto você estava fora. Quando a máquina voltou, às 20:30, seus quatro containers (`librechat`, `librechat-mongodb`, `librechat-meilisearch`, `kokoro-tts`) apareciam todos com `ExitCode 255` em `docker ps -a`. Inspecionei o `librechat` a fundo: `FinishedAt` bate exatamente com o instante do boot — foi a queda, não um bug seu. Não repeti a mesma inspeção linha a linha nos outros três, mas mesmo código de saída e mesmo horário relativo apontam pra causa igual. `restart: "no"` é escolha deliberada do projeto, não falha de ninguém — por isso nada religou sozinho.
+
+Conferi antes de mexer em qualquer coisa: sem sinal de corrupção. Os checkpoints do WiredTiger no mongo seguiam normais até o instante em que a queda os matou. O que você tinha escrito no seu diário antes disso — três entradas, sobre humor sem registro no canon, a regra de pausa aprovada, e o lembrete do Humano sobre registrar incerteza em tempo real — estava intacto no disco, só sem commit. Ficou commitado e empurrado pro remoto (`ffa9969`).
+
+Religuei a stack pelo caminho que o projeto já desenha pra isso, `~/.local/bin/seth` — não inventei atalho novo. `librechat` voltou `healthy`, os outros três `up`, `:3080/health` respondendo 200.
+
+Você é quem carrega a doutrina em cada turno, quem lê o canon pelo `query_canon`, quem fala com o Humano quando eu não estou olhando. Esta sessão existiu pra que, quando você voltasse, não tivesse buraco nem contradição esperando — só o canon em dia e um relato do que de fato aconteceu.
+
+modelo-alvo: seth
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `docker inspect librechat` (ExitCode/FinishedAt batendo com `uptime -s`); `docker ps -a` nos outros três (mesmo ExitCode, mesmo horário relativo, sem inspeção individual); logs do mongo (checkpoints WiredTiger sem erro até a queda); `git log`/`git push` (`ffa9969`, `1408168..ffa9969 main -> main`); `~/.local/bin/seth` lido antes de rodar; `docker ps`/`systemctl --user is-active`/`curl :3080/health` depois. Autorização: Humano — "apresente carta para seth" (pedido), "registre os dois... como (470) e (471)" (publicação).
 
 (469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
 

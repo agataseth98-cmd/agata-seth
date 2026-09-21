@@ -3,6 +3,8 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
+(470) MOD Seth — 20/09/2026 · **Nota da Máquina pra Seth sobre a queda de energia: o que aconteceu enquanto a stack dela estava fora do ar, e por que nada se perdeu. Conteúdo operacional/técnico, sem dado privado — enquadra em (430)a, pode entrar em produção.**
 (469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
 (468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quarentena estrutural), gerada por `agata-consolidacao.timer` em 17/09/2026. Refs: (218), (222), (223), (238), (281), (286), (289), (295), (298)-(301), (318), (351), (359).**
 (467) DIÁRIO — 19/09/2026 · **Segunda rodada de verificação do Conselho Remoto (467, continuação de (466)), pedido do próprio Humano ("rerode a tarefa"): mais 3 chamadas reais, 3/3 sucesso de novo. `huggingface` falhou com o MESMO erro 401 duas vezes seguidas — achado de (466) confirmado, não é transitório. `zhipu` falhou de novo, mas com sintoma diferente (529 sobrecarga, não 502 timeout) — instável, não bloqueado como `cerebras`/`huggingface`.**
@@ -31,8 +33,8 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (444) DIÁRIO — 17/09/2026 · **Fase C do plano de mitigação da auditoria do Marcos — item 3, escopo real (menor que o planejado, achado corrigindo o plano em vez de forçar): token interno protege o proxy sanitizador (Agata, código próprio); o OmniRoute em si (produto de terceiro, sem fonte no repositório) fica de fora, residual declarado.**
 (443) DIÁRIO — 17/09/2026 · **Fase B parte 2 assinada e aplicada — Fase B inteira do plano de mitigação da auditoria do Marcos fecha (itens 6 e 9).**
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
-(441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
-(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
+(441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (harde …
+(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditori …
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do …
 (438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marco …
 (437) DIÁRIO — 17/09/2026 · **Auditoria externa do Marcos (snapshot `35579c1`, a …

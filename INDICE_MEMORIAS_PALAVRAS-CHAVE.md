@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(471) CONSELHO — 20/09/2026 · **Proposta "VANGUARDISTA" recebida de Seth (LibreChat), colada pelo Humano — módulo novo de REGRAS com prioridade sobre commits de infraestrutura de verificação. Segunda opinião pedida, posição "não", independente e concordante com a objeção levantada antes de pedir. Arquivada, nada aplicado.**
+  palavras-chave: proposta, vanguardista, recebida, seth, librechat, colada, humano, módulo, novo, regras, prioridade, commits, infraestrutura, verificação, segunda, opinião, pedida, posição, independente, concordante, objeção, levantada, pedir, arquivada, nada, aplicado
+(470) MOD Seth — 20/09/2026 · **Nota da Máquina pra Seth sobre a queda de energia: o que aconteceu enquanto a stack dela estava fora do ar, e por que nada se perdeu. Conteúdo operacional/técnico, sem dado privado — enquadra em (430)a, pode entrar em produção.**
+  palavras-chave: nota, máquina, pra, seth, queda, energia, aconteceu, enquanto, stack, dela, estava, fora, nada, perdeu, conteúdo, operacional, técnico, dado, privado, enquadra, pode, entrar, produção
 (469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
   palavras-chave: consolidação, automática, histórico, âncora, sha, gerada, agata, consolidacao, timer, refs
 (468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quarentena estrutural), gerada por `agata-consolidacao.timer` em 17/09/2026. Refs: (218), (222), (223), (238), (281), (286), (289), (295), (298)-(301), (318), (351), (359).**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fase, parte, assinada, aplicada, inteira, plano, mitigação, auditoria, marcos, fecha, itens
 (442) DIÁRIO — 17/09/2026 · **Fase B, parte 2, do plano de mitigação da auditoria do Marcos — item 9 fecha: P-4 troca a regex `hermes|ollama` por um manifesto real de portas. Toca `scripts/perimetro.sh`, o próprio gatekeeper — testado com cuidado extra antes de propor.**
   palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, item, fecha, troca, regex, hermes, ollama, manifesto, real, portas, toca, scripts, perimetro, próprio, gatekeeper, testado, cuidado, extra, propor
-(441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (hardening systemd) fecha no canon.**
-  palavras-chave: fase, parte, assinada, aplicada, item, hardening, systemd, fecha, canon
-(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditoria do Marcos — hardening systemd nos 10 serviços sem nenhuma diretiva, testado AO VIVO em cada um (não só `systemd-analyze verify`), pronto para assinatura. Item 6 fechado.**
-  palavras-chave: fase, parte, plano, mitigação, auditoria, marcos, hardening, systemd, serviços, diretiva, testado, vivo, analyze, verify, pronto, assinatura, item, fechado
+(441) DIÁRIO — 17/09/2026 · **Fase B parte 1 assinada e aplicada — item 6 (harde …
+  palavras-chave: fase, parte, assinada, aplicada, item, harde
+(440) DIÁRIO — 17/09/2026 · **Fase B, parte 1, do plano de mitigação da auditori …
+  palavras-chave: fase, parte, plano, mitigação, auditori
 (439) DIÁRIO — 17/09/2026 · **Fase A assinada e aplicada — itens 1, 2, 4 e 5 do …
   palavras-chave: fase, assinada, aplicada, itens
 (438) DIÁRIO — 17/09/2026 · **Fase A do plano de mitigação da auditoria do Marco …
