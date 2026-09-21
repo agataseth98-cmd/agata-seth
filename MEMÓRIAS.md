@@ -26,18 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cdac5e2ecec235cf3d2c7574b59eeb9beebfecf0
-  Escrito em: 21/09/2026 11:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ebbae6d98c208b34117a157085f9dee92526c6fd
+  Escrito em: 21/09/2026 11:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdac5e2ecec235cf3d2c7574b59eeb9beebfecf0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdac5e2ecec235cf3d2c7574b59eeb9beebfecf0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdac5e2ecec235cf3d2c7574b59eeb9beebfecf0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbae6d98c208b34117a157085f9dee92526c6fd/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbae6d98c208b34117a157085f9dee92526c6fd/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbae6d98c208b34117a157085f9dee92526c6fd/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(487) DIÁRIO — 21/09/2026 · **HITL tool approval testado de ponta a ponta numa cópia descartável — funciona de verdade, com a configuração real da Seth. Prova visual, não achado de documentação: pedi pro agente de teste chamar `query_canon`, a UI parou e pediu Aprovar/Rejeitar/Editar antes de executar; rejeitei, e o log confirma "Cancelado em canon" — a ferramenta nunca rodou. Produção nunca foi tocada. Decisão de aplicar em produção fica pro Humano — é RC, não estável.**
+
+**Ambiente isolado, sem risco pra produção.** `docker-compose.yml`/`librechat.yaml` próprios num diretório descartável (scratchpad da sessão, fora do repo), containers/rede/volumes com nomes `-test`, portas próprias (`3081`/`27018`/`7701`) — nunca tocou `~/librechat/` nem os containers reais. Imagem: `ghcr.io/danny-avila/librechat@sha256:b07248d86...` (tag `v0.8.8-rc3`, puxada e conferida via `docker pull`+`docker inspect`, não copiada de terceiro). Config real copiada (`librechat.yaml`, `data/mcp/canon-mcp.mjs`, `.env`) — o teste roda a mesma configuração que a produção rodaria, não uma versão simplificada.
+
+**O que foi adicionado, só no teste:** `endpoints.agents.toolApproval` (`enabled: true`, `mode: default`, `ask: ["*"]`) e `endpoints.agents.checkpointer` (`type: memory`) — schema exato achado via `WebSearch` em (486), aceito pelo servidor sem erro de validação (conferido no JSON de config ecoado no log de boot).
+
+**Teste real, não suposição sobre o que o recurso faz.** Registrei um usuário de teste (`ALLOW_REGISTRATION` ligado só no `.env` de teste), criei um Agent (`TesteHITL`) com a ferramenta `query_canon` (mesmo servidor MCP `canon` de produção, mesmo proxy `:27125`), apontei o modelSpec `seth-livre` de teste pro `agent_id` novo — mesma forma que a Seth de produção é servida, não um atalho. Via `Claude in Chrome` (não `curl`, a API de criação de agente recusou com "Illegal request" por proteção própria da versão nova — não investigado a fundo, contornado usando a UI real): mandei "consulte REGRAS.md" pro agente. A UI **parou antes de executar** — cartão "Review 1 action", `query_canon_mcp_canon`, argumentos propostos visíveis, botões Aprovar/Rejeitar/Editar/Responder. Cliquei Rejeitar: resposta final trouxe "Cancelado em canon" — nenhuma chamada real ao proxy do canon aconteceu. O agente seguiu a conversa normalmente depois (bloco de estado real da Seth, hash/HEAD batendo com o que eu tinha medido nesta sessão) — rejeitar a ferramenta não quebrou a conversa.
+
+**Achados colaterais da versão nova, registrados sem decidir nada sobre eles:**
+- `version: 1.3.13` do nosso `librechat.yaml` está desatualizada pra essa imagem (aviso no log, "Latest version: 1.3.16") — não bloqueia, mas convite a atualizar o schema se a troca for adiante.
+- Índice do Mongo (`meili_excluded_legacy_cleanup_v3`) falha ao criar num Mongo `8.0.20` limpo — mesma versão de imagem que a produção já usa, então não é incompatibilidade nova introduzida pela troca; não investigado se afeta a sincronização com o Meilisearch.
+- O subsistema de agendamento (`schedules`) da versão nova recusa escrever (503) sem `USE_REDIS_STREAMS` ou `SCHEDULES_SINGLE_PROCESS=true` — não usamos esse recurso hoje, mas se a troca for adiante, `SCHEDULES_SINGLE_PROCESS=true` no `.env` evita o erro (deployment de réplica única, que é o nosso caso).
+
+**Limite honesto: é release candidate, não estável.** `v0.8.8-rc3` (15/09/2026) é a versão mais nova que existe — não há `v0.8.8` estável ainda (conferido via API do Docker Hub, não memória). Rodar RC em produção, mesmo testado, é risco real e declarado, não zero.
+
+**Nada mudou em produção.** `~/librechat/` inteiro (compose, yaml, `.env`) segue byte a byte como estava; os 4 containers reais (`librechat`, `-mongodb`, `-meilisearch`, `kokoro-tts`) seguem no ar, `/health` OK, conferido depois do teste. Ambiente de teste inteiro (containers, volumes, rede, diretório) destruído ao final — `docker ps -a`/`docker network ls` conferidos vazios de qualquer coisa `-test`.
+
+**Decisão que falta, sua:** aplicar de verdade (trocar a imagem de produção pro digest do RC, copiar o bloco `toolApproval`/`checkpointer` pro `librechat.yaml` real, sob quarentena P-8 se `redesign/librechat/` estiver coberta) ou esperar a versão estável sair. Proponho, não decido.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `docker pull`/`docker inspect` reais pro digest do RC; compose/yaml de teste com nomes/portas isolados, conferido `docker ps -a`/`docker network ls` limpo antes e depois; API do Docker Hub consultada ao vivo pra lista de tags (não memória de treino); registro/login/criação de agente e conversa real via `Claude in Chrome` contra a UI de teste — não simulado, screenshot de cada etapa lido antes de concluir; card de aprovação e resultado "Cancelado" lidos da tela real, não inferidos; `/health` de produção conferido antes e depois do teste inteiro. Autorização: Humano — "1" (planejar o upgrade, testar antes de tocar produção).
 
 (486) DIÁRIO — 21/09/2026 · **Continuação de (485), pedido do Humano de "resolver tudo, estado da arte". Três partes: LibreChat/Seth religada depois do boot de hoje (mecânico, sem achado novo); confirmado por leitura do binário que o Goose já tem gate de aprovação embutido pra ligar extensão (`manage_extensions` — "requer aprovação por segurança", incondicional, não é o `GOOSE_MODE` que eu tinha suposto); e achado real pro lado da Seth — o recurso que o Humano pediu (aprovação humana antes de toda chamada de ferramenta) EXISTE de verdade no LibreChat desde a v0.8.8-rc3, mas a versão rodando aqui é a v0.8.7 — mais velha, sem o recurso. Nada disso implementado do lado da Seth ainda; fica proposta, não feito.**
 
