@@ -17,13 +17,17 @@ ABORTA (e nao grava) se a operacao nao for um insert/append puro:
      a mudanca fica no working tree pro Humano revisar e commitar.
 
   POST /diario    {"texto": str}
-     Anexa `texto` ao FIM de SETH-DIARIO.md (arquivo proprio da Seth, fora do
-     vault derivado, nao policiado pelo P-10). Append puro.
+     Insere um bloco novo em SETH-DIARIO.md (arquivo proprio da Seth, fora do
+     vault derivado, nao policiado pelo P-10) LOGO ABAIXO do marcador
+     <!-- ENTRADAS-NOVAS:AQUI -->, mesmo mecanismo de /memoria -- mais
+     recente primeiro, espelhando MEMORIAS.md. Ate 20/09/2026 anexava no FIM
+     (mais antigo no topo); trocado por pedido do Humano, mesmo padrao dos
+     dois arquivos (MEMORIAS (472)/(473)).
 
 Verificacao (a trava do "nao pode apagar"):
-  memoria -> depois == antes com exatamente um bloco inserido no offset do
-             marcador; todo byte anterior e posterior identico. Senao: 409.
-  diario  -> antes e' prefixo exato de depois. Senao: 409.
+  memoria, diario -> depois == antes com exatamente um bloco inserido no
+             offset do marcador; todo byte anterior e posterior identico
+             (nada apagado, nada reescrito). Senao: 409.
 
 Nao tem rota de PUT/PATCH/DELETE. So stdlib. Nao le segredo nenhum.
 
@@ -147,27 +151,51 @@ def _anota_diario(texto: str) -> dict:
     if len(texto) > MAX_CORPO:
         raise ValueError(f"texto > {MAX_CORPO} chars")
     with _LOCK_PROCESSO, _travar_arquivo(DIARIO):
-        if not DIARIO.exists():
+        # `_travar_arquivo` abre com O_CREAT -- o arquivo já "existe" (vazio)
+        # quando chegamos aqui, mesmo na primeira vez. `exists()` nunca
+        # dispararia o bootstrap; o teste certo é tamanho zero. Achado
+        # testando esta mudança (MEMÓRIAS (472)), bug preexistente, nunca
+        # se manifestou porque a versão antiga não dependia de marcador.
+        if DIARIO.stat().st_size == 0:
             _escreve_atomico(
                 DIARIO,
                 "# Diário da Seth\n\n"
                 "Espaço próprio da Seth, append-only. Fora do vault derivado (o P-10 não\n"
                 "policia este arquivo) e fora de MEMÓRIAS. Escrito só via `POST /diario`\n"
                 "do seth_escriba; nunca editado nem apagado por ela. Autorizado pelo\n"
-                "Humano: \"append only... quero ver como ela se desenvolve. Eu assumo o risco.\"\n")
+                "Humano: \"append only... quero ver como ela se desenvolve. Eu assumo o risco.\"\n\n"
+                f"{MARCADOR} -- não editar esta linha à mão; entrada nova sempre logo "
+                "abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->\n")
+        # relê AGORA, dentro da trava -- mesmo motivo de _acrescenta_memoria:
+        # "antes" lido fora da trava seria a mesma corrida, só mascarada.
         antes = DIARIO.read_text(encoding="utf-8")
+        linha_marcador = next((l for l in antes.splitlines() if l.startswith(MARCADOR)), None)
+        if linha_marcador is None:
+            raise RuntimeError("marcador ENTRADAS-NOVAS nao encontrado em SETH-DIARIO.md")
         ts = _agora().strftime("%Y-%m-%d %H:%M %z")
-        ap = f"\n\n---\n**{ts} (relógio da Máquina)**\n\n{texto.strip()}\n"
-        depois = antes + ap
-        # relido AGORA, dentro da trava -- a checagem antiga comparava
-        # `depois` contra si mesmo (sempre verdadeira); esta compara contra
-        # o disco de fato, protege contra escrita concorrente de outro
-        # processo que não passe por este lock (ex.: edição manual).
-        if DIARIO.read_text(encoding="utf-8") != antes:
-            raise RuntimeError("verificacao falhou: arquivo mudou entre leitura e escrita")
+        # mesmo ponto de inserção de _acrescenta_memoria: logo após a própria
+        # linha do marcador (+1 = o \n dela). O bloco começa com "\n" pra
+        # abrir a linha em branco depois do marcador -- funciona igual com
+        # ou sem entrada existente logo abaixo (arquivo novo: antes[corte:]
+        # é vazio; arquivo com histórico: antes[corte:] já começa com
+        # "\n---\n**entrada antiga**...", e as duas quebras de linha do fim
+        # do bloco mais essa reproduzem a mesma linha dupla em branco que já
+        # separa as entradas existentes entre si).
+        corte = antes.index(linha_marcador) + len(linha_marcador) + 1
+        bloco = f"\n---\n**{ts} (relógio da Máquina)**\n\n{texto.strip()}\n\n"
+        depois = antes[:corte] + bloco + antes[corte:]
+
+        # --- trava de conteúdo: so um insert no offset do marcador, nada mais mudou ---
+        if depois[:corte] != antes[:corte]:
+            raise RuntimeError("verificacao falhou: conteudo antes do marcador mudou")
+        if depois[corte + len(bloco):] != antes[corte:]:
+            raise RuntimeError("verificacao falhou: conteudo depois do ponto de insercao mudou")
+        if len(depois) != len(antes) + len(bloco):
+            raise RuntimeError("verificacao falhou: tamanho inconsistente")
+
         _escreve_atomico(DIARIO, depois)
-    return {"ok": True, "bytes_add": len(ap),
-            "nota": "anexado ao fim de SETH-DIARIO.md (working tree; nao commitado)."}
+    return {"ok": True, "bytes_add": len(bloco),
+            "nota": "inserido logo abaixo do marcador ENTRADAS-NOVAS em SETH-DIARIO.md (working tree; nao commitado)."}
 
 
 class _H(BaseHTTPRequestHandler):
@@ -245,6 +273,10 @@ if __name__ == "__main__":
         _anota_diario("segunda nota")
         dv = DIARIO.read_text(encoding="utf-8")
         ok4 = dv.count("---") >= 2 and "primeira nota" in dv and "segunda nota" in dv
-        print("SELFTEST", "OK" if all([ok1, ok2, ok3, ok4]) else f"FALHA {ok1=} {ok2=} {ok3=} {ok4=}")
-        raise SystemExit(0 if all([ok1, ok2, ok3, ok4]) else 1)
+        # a mais recente ("segunda") tem que aparecer ANTES da mais antiga
+        # ("primeira") -- é o próprio ponto da mudança de 20/09/2026
+        # (MEMÓRIAS (472)): mais recente primeiro, não mais anexado no fim.
+        ok5 = dv.index("segunda nota") < dv.index("primeira nota")
+        print("SELFTEST", "OK" if all([ok1, ok2, ok3, ok4, ok5]) else f"FALHA {ok1=} {ok2=} {ok3=} {ok4=} {ok5=}")
+        raise SystemExit(0 if all([ok1, ok2, ok3, ok4, ok5]) else 1)
     main()
