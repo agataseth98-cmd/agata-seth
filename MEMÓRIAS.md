@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7d005e2acb4e9f762fe63d97854e4d256149b8bf
-  Escrito em: 21/09/2026 18:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3
+  Escrito em: 21/09/2026 18:56 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7d005e2acb4e9f762fe63d97854e4d256149b8bf/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e resolva." — a mesma classe de trava do Goose/Playwright de (485) voltou, mesmo com o conserto de lá de pé. Achado, resolvido na hora (processo travado morto, mouse solto), e mitigado com um teto automático de tempo — a causa raiz de POR QUE trava não foi investigada a fundo, por decisão explícita de não arriscar travar o mouse de novo só pra reproduzir.**
+
+**Achado real, não suposto: dois processos vivos, o de anexar a extensão do Playwright ao Brave preso havia 1h54min** (`npm exec @playwright/mcp@latest --extension ...`, PID 151867/151879, iniciado 16:59, achado às 18:53) — dentro de uma sessão `goose session` de verdade (PID 121856, de pé desde 14:55). `~/.config/goose/config.yaml` confirma `playwright: enabled: false` (o conserto de (485) segue válido) — ou seja, o Humano **ligou a extensão à mão, dentro da sessão**, exatamente como a doutrina de (485) recomenda ("ligar na mão só quando for pedir navegação de verdade") — e mesmo assim travou. **O conserto de (485) só cobria o auto-lançamento no boot da sessão; não cobria o caso de ligar de propósito e a própria anexação travar.**
+
+**Resolvido na hora:** `kill -TERM` nos dois PIDs do processo travado — mortos limpos, confirmado (`ps -p` não encontra mais nenhum). Nenhum processo órfão sobrou. A sessão `goose session` (PID 121856) continua de pé, viva -- não reiniciada (decisão de não mexer numa sessão que pode ter contexto de conversa que o Humano queira, sem ele pedir).
+
+**Mitigado, não curado: teto automático de tempo.** `~/.config/goose/config.yaml`, entrada `playwright`: `cmd: npx` virou `cmd: timeout` com `args: ["120", "npx", ...]` -- se a anexação não completar em 2 minutos, o processo morre sozinho (`timeout`, GNU coreutils, testado com um `sleep` de mentira: matou em 3s como configurado, código de saída 124, confirmado real). O `timeout: 300` que já existia no YAML do Goose **não cobriu este caso** (o processo ficou de pé quase 2 HORAS, não 5 minutos) -- ou esse campo não se aplica à fase de inicialização da extensão, ou o Goose não o está aplicando aqui; não investigado a fundo (ver próximo parágrafo).
+
+**Causa raiz de POR QUE trava, deliberadamente NÃO investigada agora.** A extensão Playwright está de fato instalada no Brave real do Humano (conferido: pasta `Default/Extensions/`, `manifest.json` com `"name": "Playwright Extension"`) -- não é caso de extensão ausente. A causa mais provável é um handshake que espera alguma confirmação (clique, permissão) que nunca chegou, ou um token/porta que não bateu -- mas **reproduzir isto pra diagnosticar arriscaria travar o mouse do Humano de novo**, o mesmo custo que motivou não investigar fundo em (485). O teto de 2 minutos acima é a mitigação proporcional: da próxima vez que travar, o Humano perde o mouse por no máximo ~2 min, não horas, e o processo morre sozinho sem precisar de mim pra matar na mão.
+
+**Sem quarentena** (`~/.config/goose/`, fora do repositório -- mesmo precedente de sempre).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `ps aux`/`ps -o lstart,etime` reais identificando os PIDs e o tempo exato travado; `kill -TERM` real, `ps -p` depois confirmando morte limpa; leitura de `~/.config/goose/config.yaml` confirmando `enabled: false` (não foi auto-lançamento); `find`/`manifest.json` confirmando a extensão está instalada no Brave; teste real e seguro do wrapper `timeout` com `sleep` (nunca com o comando real, pra não arriscar travar o mouse de novo); `python3 -c "import yaml"` validando a sintaxe do config depois de editar. Autorização: Humano — "perdi o mouse again. documente e resolva."
 
 (507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois investigados. Item 8 (manifests de sistema/runtime/recovery): já existem, de forma distribuída, não faltava construir do zero. Item 10 (limpeza de documentação): achado real e corrigido — `redesign/README.md` listava o escopo do P-8 desatualizado, sem os dois caminhos que sessões anteriores e esta mesma sessão acrescentaram. Com isto, os 10 itens do plano de ação de (500) estão todos com uma resposta real — 5 aplicados/prontos pra assinatura (2, 4, 5, 7, 9), 2 devolvidos como decisão de desenho (3, 6), 2 fechados por já existirem (8) ou por ajuste pontual (10). Nenhum pulado sem registro.**
 
