@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3
-  Escrito em: 21/09/2026 18:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8b659c46e1737b443c2e75a0f070bba52ceb308b
+  Escrito em: 21/09/2026 19:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31f3a5f02dc51b1fb013e4a2c9b151b28bd604f3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b659c46e1737b443c2e75a0f070bba52ceb308b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
+
+**Verificado, não suposto, que P-8 aceita isto por desenho:** `_p8_arquivo_aprovado` (scripts/perimetro/p08_quarentena.sh) já testa cada arquivo com `git apply --include="$f" "$diff_abs"` — extrai só o hunk daquele caminho de dentro de um `.diff` com QUALQUER número de arquivos. Um `.diff`/`APROVADO-` cobrindo 9 arquivos já era o caso normal (item 5). Concatenar os 4 `.diff` (nenhum arquivo se repete entre eles — conferido) produz um único arquivo `--git diff` válido; testado de verdade: `git apply --check` numa cópia limpa de HEAD (`git archive` num `/tmp` descartável, nunca a árvore real) — aplica limpo, 12 blocos `diff --git`, um por arquivo.
+
+**Os 4 `.diff` antigos (`whisper-restringe-path`, `bounded-request-concorrencia`, `discord-allowlist-canal`, `perimetro-2a-passada`) removidos** — nenhum tinha assinatura ainda, nada se perde: o conteúdo técnico de cada achado continua descrito por inteiro nas entradas (503)-(506); o `.diff` em si era só o veículo de aplicação, agora consolidado num arquivo novo com o mesmo conteúdo (só concatenado).
+
+**Sob quarentena P-8, aguardando 1 única assinatura:** `propostas/plano-marcos-lote-2026-09-21.diff` — cobre os itens 4, 5, 7 e 9 do plano de (500) inteiros, 12 arquivos.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `_p8_arquivo_aprovado` confirmando que a checagem é por arquivo dentro do `.diff`, não por `.diff` inteiro; `cat` dos 4 `.diff` + `git apply --check` real contra `git archive HEAD` num clone/dir descartável (nunca a árvore de trabalho real, que já tinha as mudanças aplicadas e daria falso negativo). Autorização: Humano — "una todos em uma única assinatura".
 
 (508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e resolva." — a mesma classe de trava do Goose/Playwright de (485) voltou, mesmo com o conserto de lá de pé. Achado, resolvido na hora (processo travado morto, mouse solto), e mitigado com um teto automático de tempo — a causa raiz de POR QUE trava não foi investigada a fundo, por decisão explícita de não arriscar travar o mouse de novo só pra reproduzir.**
 
