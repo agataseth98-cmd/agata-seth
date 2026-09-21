@@ -70,7 +70,15 @@ h_projeto=$(sha256sum PROJETO.md  | cut -c1-8)
 sujos=$(git -c core.quotepath=false diff --name-only HEAD -- "${CANONICOS[@]}" 2>/dev/null | paste -sd' ' - || true)
 
 # --- sync: local × remoto (forma canônica de REGRAS) ---
-remoto=$(git ls-remote origin main 2>/dev/null | awk '{print $1}' | head -c 40 || true)
+# Timeout PRÓPRIO pro `ls-remote`, menor que o timeout externo do chamador
+# (seth_gateway.py usa 25s pro script inteiro) -- achado real, MEMÓRIAS (492):
+# sem isto, um pico de rede no `ls-remote` consumia o orçamento inteiro do
+# subprocess e o script INTEIRO morria por timeout, sem chegar nem a imprimir
+# HEAD/hashes/topo-de-MEMÓRIAS -- que não dependem de rede nenhuma. Com
+# timeout próprio e mais curto, o pico de rede vira só `sync: não verificado`
+# (linha abaixo), e o resto do estado sai normal. `LS_REMOTE_TIMEOUT_ECO`
+# como saída de emergência, mesmo padrão de `LC_ALL_ECO` acima.
+remoto=$(timeout "${LS_REMOTE_TIMEOUT_ECO:-8}" git ls-remote origin main 2>/dev/null | awk '{print $1}' | head -c 40 || true)
 if [ -z "$remoto" ]; then
   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
 elif [ "$remoto" != "$head_full" ]; then
