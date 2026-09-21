@@ -24,6 +24,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 **[APLICADO DE VERDADE] LibreChat em produção agora roda a versão com aprovação de ferramenta (HITL).** Você assinou, eu conferi a assinatura de verdade (não só que o arquivo existia), troquei o container real e confirmei no ar: `/health` OK, versão `v0.8.8-rc3` rodando de fato. O que ainda falta, só você: mandar uma mensagem real pra Seth que peça uma consulta ao canon, e ver se aparece o cartão de Aprovar/Rejeitar — não testei isso na sua conta pessoal, só na cópia isolada de antes (mesma versão, mesma config, funcionou lá).
 
+**[AUDITADO] Auditoria técnica do Marcos conferida contra a Máquina de verdade — os 3 achados graves estão certos.** Ele mandou um relatório de 12 páginas sobre segurança/arquitetura do sistema. Não aceitei de cara: conferi cada achado grave contra o estado real (GitHub, arquivos de verdade) — os três batem: o branch principal não tem proteção nenhuma, a checagem de navegação tem uma brecha real (segue redirecionamento sem checar de novo), e o LibreChat compartilha a rede inteira da máquina. Nenhum foi afetado pelo trabalho de hoje. Nada apliquei — são propostas dele, decisão de priorizar fica com você.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (500).
+
 **[CORRIGIDO] As cores personalizadas que botei no Goose mais cedo hoje estavam quebrando ele — obrigado por avisar.** Você colou a tela real e vi: cada palavra que ele escrevia vinha com um aviso de tema desconhecido grudado, deixando ilegível. O motivo: o tema customizado que criei só funciona no programa `bat` separado — o Goose tem o dele PRÓPRIO embutido, que nunca via meu tema. Troquei pra um dos temas que ele já reconhece de verdade (mais parecido com as cores do sistema que dava pra conseguir) e testei — sem aviso nenhum agora.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (499).
 

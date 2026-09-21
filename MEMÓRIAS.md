@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 478f1184cc35b61404e33eb2a1fc7095f0cdd69c
-  Escrito em: 21/09/2026 14:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2cf22570d6842e8a645566f502f32d0622c80ef7
+  Escrito em: 21/09/2026 16:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/478f1184cc35b61404e33eb2a1fc7095f0cdd69c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, 12 páginas, snapshot `5d88f54` = (481)) e auditada na Máquina — camada C da cadeia (REGRAS, "Cadeia de auditoria em camadas"): não aceitei o relatório de cara, conferi contra o real. Os 3 achados HIGH batem exatos com o estado atual. Nenhum é tocado pelos 18 commits desta sessão desde o snapshot.**
+
+**Verificado, um a um, contra a Máquina — não contra o texto do PDF:**
+- **GOV-03** (main sem proteção de branch): `gh api repos/.../branches/main/protection` real → `404 Branch not protected`. Confirmado, exato como o relatório descreve.
+- **NET-01** (anti-SSRF incompleto): `scripts/politica_egress.py` existe e é chamado uma vez em `scripts/ler_pagina.sh` (linha 36) antes do fetch — mas o fetch em si é `curl -sSL` (linha 44), que segue redirect sozinho, sem revalidar cada hop. No Browser MCP (`redesign/mcp/navegador/servidor.py`), só existe uma chamada `page.goto()` (linha 149) — nenhum `page.route()`/interceptor de request achado no arquivo. Os dois gaps batem exatos com o relatório.
+- **ISO-05** (LibreChat em `network_mode: host`): confirmado em `redesign/librechat/docker-compose.yml` e no deploy real (`~/librechat/docker-compose.yml`), linha 55 dos dois — mesmo arquivo que eu mexi hoje (upgrade v0.8.8-rc3, MEMÓRIAS (487)-(489)) pra outro motivo; o `network_mode: host` não mudou, achado continua de pé.
+- **GOV-02** (P-8 valida T0, hook aplica mutação em T1 sem 2ª passada byte-a-byte): lido `.githooks/pre-commit` de verdade — `perimetro.sh` roda na linha 20, contra o staged daquele momento; os `git add` de arquivos gerados (âncora, `.hidrata.md`, índices) acontecem DEPOIS, linhas 36-105. A guarda de integridade (MEMÓRIAS (458)/(459), que eu já tinha lido antes) cobre só a classe "canônico ganhou conteúdo fora da âncora", não uma segunda validação geral. Achado preciso, não superficial.
+
+**Nenhum dos 3 achados HIGH é afetado pelo trabalho desta sessão.** O snapshot auditado (`5d88f54`) é 18 commits atrás do HEAD atual — todos os 18 são hidratação do Goose, upgrade do LibreChat/HITL, ícone da Seth e correções de tema — nenhum toca proteção de branch, política de egress ou `network_mode` do LibreChat. Os achados seguem válidos hoje exatamente como no dia da auditoria.
+
+**Avaliação geral: relatório de qualidade real, não meramente plausível.** Metodologia declarada (estática, snapshot fixo, limitações explícitas — sem pentest, sem tráfego de rede real) é honesta e bate com o tipo de acesso que um auditor externo teria. Conclusão final ("sem CRITICAL, base do canon forte, bordas de rede/isolamento mais fracas que o núcleo") é consistente com o que a própria história do projeto já registra (P-8/P-5/P-14 testados e sobrevivendo a auditoria cruzada, network_mode:host documentado como escolha funcional deliberada em PROJETO.md). Plano de ação priorizado (proteger main primeiro, depois egress, depois `network_mode`) é razoável e não decidido aqui — fica pro Humano.
+
+**Nada aplicado nesta entrada — é auditoria da auditoria, não correção.** Se o Humano quiser agir em algum item, cada um vira proposta própria, com P-8, como todo o resto de hoje.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: PDF lido por inteiro (12 páginas); `git log`/`git rev-list --count` confirmando o SHA do snapshot e a distância real do HEAD; `gh api` real contra o GitHub (não suposição sobre proteção de branch); `grep`/leitura direta de `politica_egress.py`, `ler_pagina.sh`, `servidor.py` (Browser MCP), `docker-compose.yml` (fonte e deploy), `.githooks/pre-commit` — cada achado HIGH conferido contra o arquivo real, não aceito do texto do PDF. Autorização: Humano — "posso te mandar para vc auditar?" / "é o único arquivo em downloads".
 
 (499) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (488): o tema de cores "Agata-Dark"/"Agata-Light" do Goose NUNCA funcionou numa sessão de verdade — eu tinha declarado essa lacuna em (488) ("não confirmei visualmente"), mas subestimei a forma da falha: não é só "não aplica a cor", é um aviso `[bat warning]: Unknown theme 'Agata-Dark'` REPETIDO A CADA PALAVRA transmitida em streaming, tornando o terminal interativo inutilizável. Achado pelo Humano numa sessão real colada aqui, não por mim sozinho. Corrigido revertendo pros nomes de tema que o Goose de fato reconhece.**
 
