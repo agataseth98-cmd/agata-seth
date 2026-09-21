@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2cf22570d6842e8a645566f502f32d0622c80ef7
-  Escrito em: 21/09/2026 16:51 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7733d903b0a5a2997e435bb5daae31f1b99267ee
+  Escrito em: 21/09/2026 16:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cf22570d6842e8a645566f502f32d0622c80ef7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7733d903b0a5a2997e435bb5daae31f1b99267ee/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de ação priorizado da auditoria de Marcos (500), item por item. Item 1 (GOV-03) fechado de verdade: `main` protegido no GitHub, PR obrigatório + `suite-adversarial` como status check exigido + force-push e deleção bloqueados. Esta própria entrada é o primeiro teste real do fluxo novo — branch + PR + checagem verde + merge, não mais push direto.**
+
+**Bifurcação real, perguntada antes de aplicar — não presumida.** Fechar GOV-03 de verdade (impedir commit ruim de entrar em `main` antes da suíte rodar) exige Pull Request obrigatório — status check sozinho só bloqueia merge de PR, nunca push direto (limite do próprio GitHub, não do projeto). Isso muda o fluxo de todo commit futuro de canon: hoje era push direto; a partir de agora, branch + PR + `suite-adversarial` verde + merge. Perguntei ao Humano antes de decidir sozinho (mudança que toca todo trabalho futuro, não só um arquivo) — resposta: **sim, PR obrigatório, como o Marcos recomendou.**
+
+**Aplicado via `gh api` real, verificado depois, não só a chamada em si:** `PUT .../branches/main/protection` com `required_status_checks.contexts: ["suite-adversarial"]` (nome do check confirmado contra o `check-runs` real do commit atual, não suposto), `required_pull_request_reviews.required_approving_review_count: 0` (projeto de um humano só — PR obrigatório, aprovação de terceiro não se aplica), `enforce_admins: true` (a regra vale pro dono da conta também, inclusive pra mim), `allow_force_pushes: false`, `allow_deletions: false`. `GET` de conferência depois confirma os campos aplicados exatamente como enviados.
+
+**Junto nesta entrada: fechamento do conserto do ícone da Seth (498) — assinatura chegou, verificada, aplicada.** `ssh-keygen -Y verify` real, boa. Par `.diff`/`APROVADO` movido pra `propostas/aplicadas/`. O arquivo já estava rodando em produção desde o teste visual de (498); esta entrada só fecha o registro formal atrasado — nada novo aplicado no ar.
+
+**Faltam 9 itens do plano de ação de (500).** Seguindo a ordem de prioridade do próprio relatório: egress por hop + interceptor Browser (2), reduzir `network_mode: host` do LibreChat (3), Whisper restrito a diretório (4), bounded request + concorrência (5), capability broker ligando proveniência a efeito (6), allowlist Discord + revisão Browser (7), manifests de sistema/runtime/recovery (8), segunda passada do perímetro sensível ao index final (9), limpeza de documentação (10). Cada um vira proposta própria, testada antes de aplicar — mesma disciplina de hoje inteiro.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `gh api repos/.../commits/main/check-runs` real conferindo o nome exato do check antes de configurar a regra; `gh api --method PUT .../protection` real; `gh api .../protection` (GET) depois, campos conferidos um a um contra o que foi enviado; `ssh-keygen -Y verify` real na assinatura do ícone antes de mover o par pra `aplicadas/`. Autorização: Humano — "Vamos fazer tudo" (mandato geral) + "Sim, PR obrigatório" (a bifurcação específica, perguntada antes de decidir).
 
 (500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, 12 páginas, snapshot `5d88f54` = (481)) e auditada na Máquina — camada C da cadeia (REGRAS, "Cadeia de auditoria em camadas"): não aceitei o relatório de cara, conferi contra o real. Os 3 achados HIGH batem exatos com o estado atual. Nenhum é tocado pelos 18 commits desta sessão desde o snapshot.**
 
