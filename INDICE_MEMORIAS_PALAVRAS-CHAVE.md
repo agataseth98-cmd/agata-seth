@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(498) DIÁRIO — 21/09/2026 · **Humano voltou testando a Seth: imagens sumiram + uma chamada de `maquina_verificar` aprovada não conseguiu acessar o MCP. Achado real pras imagens (regressão do upgrade v0.8.8-rc3, corrigida e testada visualmente, sob P-8 aguardando assinatura). O caso do MCP: config correta, conferida — foi o modelo chamando a ferramenta sem o argumento obrigatório, não bug de sistema.**
+  palavras-chave: humano, voltou, testando, seth, imagens, sumiram, chamada, maquina, verificar, aprovada, conseguiu, acessar, mcp, achado, real, pras, regressão, upgrade, corrigida, testada, visualmente, sob, aguardando, assinatura, caso, config, correta, conferida, modelo, chamando, ferramenta, argumento, obrigatório, bug, sistema
 (497) DIÁRIO — 21/09/2026 · **CASO ENCERRADO — proposta do Humano confirmou a tese de (496): 3 de 3 chamadas reais do Goose forçado no modelo local (`ollama-local/qwen3.5-9b-64k:latest`, sem depender de provedor gratuito nenhum) vieram com hidratação perfeita — `sync: PASS`, hashes certos, última entrada certa e completa. Os dois bugs locais de (494)/(495) estão fechados de verdade; o resto era mesmo instabilidade externa, como (496) já tinha medido.**
   palavras-chave: caso, encerrado, proposta, humano, confirmou, tese, chamadas, reais, goose, forçado, modelo, local, ollama, qwen, latest, depender, provedor, gratuito, vieram, hidratação, perfeita, sync, pass, hashes, certos, última, entrada, certa, completa, bugs, locais, estão, fechados, verdade, resto, era, mesmo, instabilidade, externa, tinha, medido
 (496) DIÁRIO — 21/09/2026 · **Assinatura verificada, aplicado, serviço reiniciado — e MESMO ASSIM o Goose continuou voltando com `lacuna`, 5 de 5 tentativas. Investiguei fundo (proxy de captura + replay byte a byte do payload real do Goose direto no `seth_gateway`) e a hidratação funciona perfeita quando eu reenvio o EXATO mesmo payload. A causa real, medida no `call_logs` do OmniRoute: ~75% das chamadas de verdade dos últimos 30min estão falhando (502/429/529) — instabilidade externa dos provedores, não bug nosso. `100% garantido` não é alcançável enquanto isso durar — é limite real, declarado, não escondido.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: nota, máquina, pra, seth, queda, energia, aconteceu, enquanto, stack, dela, estava, fora, nada, perdeu, conteúdo, operacional, técnico, dado, privado, enquadra, pode, entrar, produção
 (469) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico da âncora de SHA, gerada por `agata-consolidacao.timer` em 18/09/2026. Refs: (96), (97), (149), (166), (168), (211), (213), (217), (223), (226), (253), (281), (302), (378), (458).**
   palavras-chave: consolidação, automática, histórico, âncora, sha, gerada, agata, consolidacao, timer, refs
-(468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quarentena estrutural), gerada por `agata-consolidacao.timer` em 17/09/2026. Refs: (218), (222), (223), (238), (281), (286), (289), (295), (298)-(301), (318), (351), (359).**
-  palavras-chave: consolidação, automática, histórico, quarentena, estrutural, gerada, agata, consolidacao, timer, refs
+(468) DIÁRIO — 20/09/2026 · **Consolidação automática do histórico de P-8 (quare …
+  palavras-chave: consolidação, automática, histórico, quare
 (467) DIÁRIO — 19/09/2026 · **Segunda rodada de verificação do Conselho Remoto ( …
   palavras-chave: segunda, rodada, verificação, remoto
 (466) DIÁRIO — 19/09/2026 · **Mecanismo do Conselho Remoto verificado ao vivo, 3 …

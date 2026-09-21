@@ -1,0 +1,79 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 58e2132..2961ad7 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -44,9 +44,16 @@ modelSpecs:
+   prioritize: true
+   list:
+     # iconURL em TODAS as specs: com `enforce: true` a Seth aparece sempre via
+-    # spec, e spec sem `iconURL` cai no icone generico. `/images/seth.png`
+-    # e servido pelo bind-mount `~/librechat/images` -> `/app/images` (deploy: ver
+-    # propostas/librechat-seth-iconurl.md).
++    # spec, e spec sem `iconURL` cai no icone generico.
++    # Corrigido 21/09/2026 (MEMORIAS (498)): `/images/seth.png`, servido direto
++    # da raiz do bind-mount, parou de funcionar no v0.8.8-rc3 -- a nova rota
++    # /images/ (createValidateImageRequest, secureImageLinks:true por padrao)
++    # so autoriza caminho `/images/<userId ObjectId>/...`, e um arquivo solto
++    # na raiz nunca bate esse regex (403 sempre, independente de estar
++    # logado). O Agent da Seth (`agent_4KlxSMeX5Y8cWQVODkJfH`) JA TINHA um
++    # avatar de verdade, ligado no Mongo (`avatar.filepath`) -- esse caminho
++    # passa na validacao (200, testado real). Trocamos o iconURL das specs
++    # pra apontar pra ELE, em vez de recriar outro arquivo.
+     #
+     # Agent RECRIADO em (415): `agent_4KlxSMeX5Y8cWQVODkJfH` (provider `Seth`,
+     # model `seth-livre`), com o MCP `canon` anexado (`query_canon`,
+@@ -59,7 +66,7 @@ modelSpecs:
+     # continuam `endpoint: Seth` (custom, sem MCP) -- troca manual pra debug.
+     - name: "seth-livre"
+       label: "Seth (cascata livre)"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       default: true
+       description: "Agente Seth + MCP canon. Cascata zai->gemini->hf->mistral por baixo. O default."
+       preset:
+@@ -67,31 +74,31 @@ modelSpecs:
+         agent_id: "agent_4KlxSMeX5Y8cWQVODkJfH"
+     - name: "seth-zai"
+       label: "Seth · zai/glm-4.7-flash"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       preset:
+         endpoint: "Seth"
+         model: "zai/glm-4.7-flash"
+     - name: "seth-gemini"
+       label: "Seth · gemini-2.5-flash"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       preset:
+         endpoint: "Seth"
+         model: "gemini/gemini-2.5-flash"
+     - name: "seth-hf"
+       label: "Seth · Llama-3.3-70B (HuggingFace)"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       preset:
+         endpoint: "Seth"
+         model: "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+     - name: "seth-mistral"
+       label: "Seth · ministral-8b (Mistral)"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       preset:
+         endpoint: "Seth"
+         model: "mistral/ministral-8b-latest"
+     - name: "seth-auto"
+       label: "Seth · auto/best-free (auto-roteador OmniRoute)"
+-      iconURL: "/images/seth.png"
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+       description: "So quando o auto-roteador do OmniRoute estiver saudavel de novo."
+       preset:
+         endpoint: "Seth"
+@@ -121,7 +128,7 @@ endpoints:
+     - name: "Seth"
+       apiKey: "loopback-sem-chave"
+       baseURL: "http://127.0.0.1:20126/v1"
+-      iconURL: "/images/seth.png"   # fallback do rosto quando a UI nao passa por spec
++      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"   # fallback do rosto quando a UI nao passa por spec
+       # Default = `seth-livre` (MEMÓRIAS (390)): combo CUSTOM do OmniRoute
+       # (storage.sqlite, curada por nós), strategy=priority, cascata
+       # zai/glm-4.7-flash -> gemini/gemini-2.5-flash -> huggingface/Llama-3.3-70B
