@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
+**[RESOLVIDO NA HORA] Você voltou avisando "perdi o mouse again" — a mesma trava do Goose com o navegador de antes. Achei os dois processos travados (o mesmo de sempre, anexando a extensão no Brave, preso fazia quase 2 horas), matei, mouse solto de novo.** Dessa vez você tinha ligado a extensão à mão, do jeito certo (não foi auto-lançamento) — mesmo assim travou. Não investiguei o motivo exato de propósito: reproduzir o travamento pra descobrir arriscaria travar seu mouse de novo. Botei uma rede de segurança: se travar de novo, o processo agora morre sozinho em no máximo 2 minutos, em vez de ficar preso por horas até alguém perceber e matar na mão.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (508).
+
 **[VOCÊ SAIU — trabalhando sozinho até onde der, sem parar por pergunta, só por assinatura de verdade.]** Você pediu pra eu seguir o plano de ação inteiro sozinho e só te mostrar assinatura quando for realmente necessário.
 
 **[PLANO DE (500) COMPLETO — os 10 itens todos com resposta real] Item 8 (manifests) já existia, espalhado em 3 lugares — não precisava construir do zero. Item 10 (limpeza de documentação): achei e corrigi um README que descrevia errado a própria regra de segurança que ele existe pra explicar.** Com isto, fechei a auditoria inteira do Marcos: 5 itens corrigidos e testados, esperando só sua assinatura (2 já aplicado, 4/5/7/9 esperando); 2 devolvidos pra sua decisão porque exigem você presente (3 e 6); os 2 últimos (8 e 10) resolvidos sem precisar de assinatura.
