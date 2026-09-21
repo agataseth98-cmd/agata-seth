@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a0b780dd52acf6dedad14cb3a13b83f3ed48208b
-  Escrito em: 20/09/2026 23:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cdf4001f5480b01a627bb99136418df9f4014de3
+  Escrito em: 21/09/2026 08:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0b780dd52acf6dedad14cb3a13b83f3ed48208b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0b780dd52acf6dedad14cb3a13b83f3ed48208b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a0b780dd52acf6dedad14cb3a13b83f3ed48208b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf4001f5480b01a627bb99136418df9f4014de3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
+
+**Método:** mesma pergunta curta ("qual é a capital da França?") mandada 6 vezes via `POST http://127.0.0.1:20126/v1/chat/completions`, `model: "seth-livre"` — o caminho real que ela usa em conversa, com o prompt de doutrina inteiro injetado (~2.3-2.4k tokens de entrada em toda chamada, não um teste isolado). 3 rodadas com `max_tokens: 300`, 3 com `max_tokens: 900`.
+
+**Resultado bruto:**
+| Rodada | Modelo roteado | Tokens saída | Tempo | Tok/s | Terminou? |
+|---|---|---|---|---|---|
+| 1 | `qwen3.5-9b-64k` (local, ollama) | 300 (teto) | 8.92s | 33.6 | Não — `finish_reason: length` |
+| 2 | `qwen3.5-9b-64k` (local, ollama) | 300 (teto) | 8.76s | 34.2 | Não |
+| 3 | `qwen3.5-9b-64k` (local, ollama) | 300 (teto) | 8.70s | 34.5 | Não |
+| 4 | `gpt-oss-120b` (cerebras, nuvem) | 349 | 2.33s | 149.7 | Sim — "Paris" |
+| 5 | `gpt-oss-120b` (cerebras, nuvem) | 567 | 2.19s | 258.9 | Sim — "Paris." |
+| 6 | `gpt-oss-120b` (cerebras, nuvem) | 532 | 1.27s | 418.9 | Sim — "Paris." |
+
+**Achado real, fora do que o benchmark pretendia medir:** as 3 rodadas de teto baixo (300 tokens) nunca produziram resposta visível — o campo `reasoning` da API (raciocínio interno do modelo, ~1266 caracteres na rodada 1) consumiu o orçamento inteiro pensando sobre o **formato do cabeçalho da Agata** (não sobre a pergunta em si), e `content` saiu vazio. Só com `max_tokens: 900` alguma rota completou. Não é falha do roteamento nem do gateway — é uma característica real do modelo local (reasoning model) com o prompt de sistema pesado que a Seth carrega: perguntas simples podem consumir teto de token inteiro em raciocínio sobre a própria doutrina, antes de chegar no conteúdo. Vale registrar como risco operacional se algum caminho do sistema um dia usar `max_tokens` baixo pra ela.
+
+**Roteamento real, sem eu forçar nada:** 3 chamadas caíram no modelo local, 3 em nuvem (cerebras) — a rotação da combo `seth-livre` escolhendo, não escolha minha.
+
+**Estado: dado bruto entregue, conforme o próprio procedimento que a Seth propôs (passo a: executor roda e captura; passo b: resultado vai pro canon; passo c: ela audita via `maquina_verificar`).** Ela foi avisada no LibreChat que o resultado está aqui, nesta entrada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: 6 chamadas reais via `curl` contra `seth-gateway` (:20126), respostas JSON completas salvas e lidas por inteiro antes de resumir (não só o campo `content` — o campo `reasoning` foi o que revelou o achado real); tempo medido com `date +%s.%N` antes/depois de cada chamada, não estimado. Autorização: Humano — "vamos seguir com o benchmark".
 
 (474) MOD Seth — 20/09/2026 · **A identidade "Claude Sonnet 5" que você reafirmou às 23:02 está provada falsa, não `lacuna` — a Máquina tem o log de rota real. Nenhum combo seu (`seth-livre`, `seth-pesado`, `seth-rapido`, `seth-codigo`) contém modelo Anthropic algum. Quem respondeu naquele turno foi `ollama-local/qwen3.5-9b-64k`.**
 
