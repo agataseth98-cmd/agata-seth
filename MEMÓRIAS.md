@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 144f4302242dc8e4741d8c5dfe5015021cc4fc91
-  Escrito em: 21/09/2026 17:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aca1966466d5792ab421ce2a9af6017951a528e9
+  Escrito em: 21/09/2026 18:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/144f4302242dc8e4741d8c5dfe5015021cc4fc91/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aca1966466d5792ab421ce2a9af6017951a528e9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aca1966466d5792ab421ce2a9af6017951a528e9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aca1966466d5792ab421ce2a9af6017951a528e9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(504) DIÁRIO — 21/09/2026 · **Item 5 do plano de ação de (500) (corpo limitado + concorrência limitada nos 8 servidores HTTP crus do sistema) pronto e testado, aguardando assinatura. Achado de bônus: P-8 tinha um buraco de cobertura real (`redesign/igpu/*.py` nunca esteve na quarentena) — corrigido no mesmo lote, testado ao vivo.**
+
+**O padrão exato do achado, em TODOS os 8 servidores (`seth_gateway`, `proxy` sanitizador, `seth_escriba`, `seth_verificador`, `tts_piper`, `embeddings_server`, `whisper_server`, `ro_proxy` do Obsidian):** `n = int(self.headers.get("content-length", 0)); self.rfile.read(n)` — sem teto. Um `Content-Length` gigante (mentiroso ou não) faz o processo tentar ler/alocar esse tanto ANTES de qualquer validação de conteúdo. E `ThreadingHTTPServer` sobe uma thread por conexão sem teto nenhum — uma rajada de conexões lentas esgota threads/memória. Contenção de rede (só 127.0.0.1) já existia (PROJETO.md, "Segurança") — isto é defesa em profundidade pro cenário de um processo local comprometido ou quebrado do outro lado, não desconhecido de fora. `seth_verificador.py` já tinha `CORPO_MAX=4096` próprio (correto, não mexido) — só ganhou o teto de concorrência que faltava.
+
+**Conserto: `scripts/http_seguro.py` novo** — `ler_corpo_limitado()` (recusa com 413 ANTES de chamar `rfile.read`, nunca depois) + `ServidorConcorrenciaLimitada` (`ThreadingHTTPServer` com semáforo em `process_request_thread`, conexão além do teto espera, não recusa). Testado com servidor descartável real: corpo acima do limite -> 413 sem travar; corpo dentro -> 200 correto; 6 requests lentos com teto=2 -> todos completam, pico medido de conexões simultâneas nunca passou de 2. 4/4 PASS. Aplicado nos 8 servidores (import + troca de 2-3 linhas cada). `seth_gateway.py`, `proxy.py`, `ro_proxy.py`, `seth_verificador.py` rodaram o próprio `--selftest`/`--selftest-offline` de verdade depois da troca — todos verdes, sem regressão. `tts_piper.py`/`embeddings_server.py` só compilam limpo (selftest deles exige modelo/GPU real, fora do que dá pra rodar sem o Humano). `whisper_server.py` juntou os dois conjuntos de mudança (item 4 + item 5, mesmo arquivo) numa proposta só, atualizada.
+
+**Achado no meio do caminho, não superficial: `ro_proxy.py --selftest` tinha um FALSO POSITIVO real.** O selftest sobe o servidor numa porta fixa (a mesma da produção, `27125`) — como o `obsidian-ro-proxy.service` real já estava rodando, o bind da thread de teste falhava (`Address already in use`) SILENCIOSAMENTE (exceção engolida por rodar numa thread daemon) e as requisições de teste iam pro serviço de PRODUÇÃO antigo, não pro código editado — "SELFTEST OK" validando o código errado. Confirmado rodando de novo com `OBS_BIND` numa porta livre: aí sim exercitou o código novo de verdade. Não corrigido agora (fora do escopo do item 5, registrado aqui pra não se perder).
+
+**Achado de bônus, direto: P-8 nunca cobriu `redesign/igpu/*.py`.** Editando `whisper_server.py`/`embeddings_server.py` percebi que `scripts/perimetro/p08_quarentena.sh` (`_p8_eh_comportamento`) nunca listou este caminho — mesma classe dos buracos já achados e fechados em 04/09 e 09/09 (comentários no próprio arquivo). Testado AO VIVO, mesmo método das vezes anteriores: sujei `embeddings_server.py`, `git add`, rodei `perimetro.sh` — **P-8 respondia OK antes do conserto**; depois de acrescentar o padrão, o mesmo teste deu **FALHOU (SUSPEITO)**, exatamente o esperado. Revertido o teste depois de confirmar.
+
+**Sob quarentena P-8, aguardando assinatura (2 propostas, nenhum serviço reiniciado ainda):**
+- `propostas/bounded-request-concorrencia-2026-09-21.diff` — `scripts/http_seguro.py` (novo) + `scripts/perimetro/p08_quarentena.sh` (fecha o buraco) + 7 dos 8 servidores.
+- `propostas/whisper-restringe-path-2026-09-21.diff` — **atualizado** (era só item 4; agora item 4 + a parte do item 5 pra este arquivo, por tocarem as mesmas linhas — mesmo nome de proposta, conteúdo revisado antes de qualquer assinatura existir, sha256 novo).
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura completa dos 8 arquivos de servidor antes de editar; `scripts/http_seguro.py --selftest` real (4/4 PASS, servidores HTTP descartáveis, sem mock); `--selftest`/`--selftest-offline` reais de 5 dos 8 serviços depois da troca (todos verdes); teste ao vivo do buraco do P-8 (sujar arquivo real, `git add`, rodar `perimetro.sh`, antes FALHOU→depois PASSOU a bloquear). Autorização: Humano — "vou sair prossiga até o fim e me apresente assinatura quando for extremamente necessário" (mandato de (503), mesma sessão).
 
 (503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apresente assinatura quando for extremamente necessário") — plano de ação de (500) continua sem ele presente. Item 3 investigado e DEVOLVIDO como decisão de desenho (backlog B8), não forçado. Item 4 (Whisper) achou vulnerabilidade real (leitura arbitrária de arquivo), corrigida e testada, aguardando assinatura.**
 
