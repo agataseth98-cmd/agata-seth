@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fb65aeb721c001998c6c4102111cd42c9e209532
-  Escrito em: 21/09/2026 08:36 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ca551a2991600f804016478222823e2332e99012
+  Escrito em: 21/09/2026 08:56 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb65aeb721c001998c6c4102111cd42c9e209532/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb65aeb721c001998c6c4102111cd42c9e209532/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb65aeb721c001998c6c4102111cd42c9e209532/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca551a2991600f804016478222823e2332e99012/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
+
+**O que estava em andamento, interrompido no meio:** pedido do Humano de dar navegação de browser visível ao Goose (pesquisa de estado da arte feita, `Playwright MCP --extension` escolhido como principal, `Browser MCP` e `Chrome DevTools MCP` como reserva desligada — `~/.config/goose/config.yaml` já editado e validado, backup em `config.yaml.bak-pre-browser-mcp`). Faltava só um clique humano em "Adicionar ao Chrome" — a Chrome Web Store bloqueia script/screenshot na própria página, proteção do Google contra instalação automatizada, não limite meu. Na hora de pedir o clique, o Humano relatou ter perdido controle de mouse/teclado fora deste terminal.
+
+**Diagnóstico tentado, dentro do limite certo.** Kernel reconhece os 3 apontadores (touchpad interno, mouse sem fio, mouse USB) em `/proc/bus/input/devices` — não é desconexão total a nível de driver. `xfwm4`/painel/Brave/Obsidian sem processo travado em CPU. Consegui acesso X real (cookie certo em `~/.Xauthority`) e tirei um screenshot real da tela — mostrou este terminal por cima do navegador. Ao tentar `xdotool` pra simular clique e confirmar se a camada X respondia, **o classificador de segurança do Claude Code bloqueou a ação (`Tmux Self Drive`)** — eu controlando input físico da mesma Máquina que roda esta sessão é exatamente o tipo de ação que não se deve contornar. Parei ali, não tentei burlar. Causa raiz do controle perdido: não determinada — pode ser física (dongle sem fio, cabo USB) ou algo acima do que consegui inspecionar sem sudo/mais acesso.
+
+**Estado no momento do reboot: canon limpo.** `HEAD=ca551a2`, sem commit pendente, sem `.diff` sem assinatura em `propostas/`. `ONDE_ESTAMOS.md` atualizado com o resumo pro Humano antes de qualquer coisa.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `/proc/bus/input/devices` lido por inteiro; `ps aux`/`ps -u orusoua` conferindo CPU de cada processo gráfico, nenhum spinning; `/proc/<pid>/environ` pra achar o `XAUTHORITY` real; `xauth list`/`xdotool getactivewindow` confirmando acesso X genuíno antes de tentar mais; `import -window root` real, screenshot lido; ação de clique bloqueada pelo próprio harness, mensagem de recusa lida por inteiro antes de parar; `git status`/`git rev-parse` conferidos antes de declarar o canon limpo. Autorização: Humano — "salve onde estamos agora o que já foi feito e vou forçar a reinicialização".
 
 (477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
 

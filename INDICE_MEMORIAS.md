@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
 (477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
 (476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
 (475) DIÁRIO — 21/09/2026 · **Benchmark de inferência da Seth, autorizado pelo Humano ("vamos seguir com o benchmark") — 6 chamadas reais no caminho de produção completo (`seth-gateway` → sanitizador → OmniRoute). Achado real, não previsto: teto de tokens baixo faz o modelo local gastar o orçamento inteiro "pensando" e nunca responder.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu conseguir aplicá-la — achado tentando aplicar, não em produção. `.diff` corrigido e reemitido, precisa de assinatura nova. Também achado: um bug real e pré-existente no P-5, silencioso desde a Fase 4 (06/09/2026).**
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marcos — o mais arriscado do pacote inteiro (modularizar `scripts/perimetro.sh`, o gatekeeper de todo commit futuro). Segunda opinião formal pedida e recebida ANTES de escrever código. `.diff` pronto, testado em profundidade, aguardando assinatura.**
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
-(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
+(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no …
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marco …
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
 (445) DIÁRIO — 17/09/2026 · **Fase C assinada e aplicada no código — item 3 fech …

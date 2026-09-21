@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(478) DIÁRIO — 21/09/2026 · **Humano perdeu controle de mouse/teclado da Máquina (só este terminal respondia) e vai forçar reboot — estado salvo antes, nada em risco no canon.**
+  palavras-chave: humano, perdeu, controle, mouse, teclado, máquina, terminal, respondia, vai, forçar, reboot, estado, salvo, nada, risco, canon
 (477) DIÁRIO — 21/09/2026 · **HD `AgataBkup01` conectado pela primeira vez desde 03/09 — passada completa do runbook `QUANDO-O-HD-VOLTAR.md`: `restic check` limpo (2x), lock travado desde 03/09 removido, 4 recursos re-snapshotados (idade > 14 dias, conteúdo idêntico), 2 bundles pendentes (`agata-canonico` + `agata-missoes`) copiados pro HD. P-12 e P-6 voltam a `OK`, com evidência real, não só a data mudando.**
   palavras-chave: agatabkup, conectado, primeira, desde, passada, completa, runbook, voltar, restic, check, limpo, lock, travado, removido, recursos, snapshotados, idade, dias, conteúdo, idêntico, bundles, pendentes, agata, canonico, missoes, copiados, pro, voltam, evidência, real, data, mudando
 (476) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (475): o teto de 300/900 tokens que "gastava o orçamento pensando" era parâmetro do MEU teste, não algo configurado em produção. Conferido: hoje não existe teto de tokens nenhum na conversa real da Seth. Nada pra remover — e é isso que vale registrar, pra não se perder.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, plano, mitigação, auditoria, marcos, arriscado, pacote, inteiro, modularizar, scripts, perimetro, gatekeeper, commit, futuro, segunda, opinião, formal, pedida, recebida, escrever, código, diff, pronto, testado, profundidade, aguardando, assinatura
 (449) DIÁRIO — 17/09/2026 · **Fase E, itens 11 e 12, do plano de mitigação da auditoria do Marcos — auditados antes de codar, resultado real difere do previsto no plano. Registrado como achado, não forçado como código.**
   palavras-chave: fase, itens, plano, mitigação, auditoria, marcos, auditados, codar, resultado, real, difere, previsto, registrado, achado, forçado, código
-(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no código. O arquivo do workflow em si não foi por este commit: o token do `gh` não tem escopo `workflow`, GitHub recusou o push. Registrado sem suavizar, corrigido antes de virar canon empurrado.**
-  palavras-chave: fase, assinada, aplicada, itens, fecham, código, arquivo, workflow, commit, token, tem, escopo, github, recusou, push, registrado, suavizar, corrigido, virar, canon, empurrado
+(448) DIÁRIO — 17/09/2026 · **Fase D assinada e aplicada — itens 7 e 8 fecham no …
+  palavras-chave: fase, assinada, aplicada, itens, fecham
 (447) DIÁRIO — 17/09/2026 · **Fase D do plano de mitigação da auditoria do Marco …
   palavras-chave: fase, plano, mitigação, auditoria, marco
 (446) DIÁRIO — 17/09/2026 · **Fase C verificada ao vivo em produção — `omniroute …
