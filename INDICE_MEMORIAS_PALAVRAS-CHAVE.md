@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(485) DIÁRIO — 21/09/2026 · **Goose travou de novo tentando anexar o Brave via Playwright — 2ª ocorrência, mesma classe de (479)-(482), desta vez contida na janela do Goose (não travou mouse/teclado da Máquina inteira como (478)). Achado real: `GOOSE_MODE: approve` já estava configurado e não impediu nada — a extensão inicializa no boot da sessão, antes de qualquer chamada de ferramenta, fora do alcance desse gate. Extensão desligada por padrão, processo travado morto, testado limpo depois. Ordem nova do Humano registrada: todo componente do sistema deve pedir autorização antes de usar ferramenta/skill — ainda não implementada em Goose nem na Seth, só o achado + a mitigação pontual.**
+  palavras-chave: goose, travou, novo, tentando, anexar, brave, playwright, ocorrência, mesma, classe, desta, contida, janela, mouse, teclado, máquina, inteira, achado, real, mode, approve, estava, configurado, impediu, nada, extensão, inicializa, boot, sessão, chamada, ferramenta, fora, alcance, desse, gate, desligada, padrão, processo, travado, morto, testado, limpo, ordem, nova, humano, registrada, componente, sistema, deve, pedir, autorização, usar, skill, implementada, nem, seth, mitigação, pontual
 (484) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (483): eu disse que o Goose só carregava o canon uma vez por sessão, sem a reinjeção contínua da Seth — falso, e eu não tinha testado antes de afirmar. Testado agora: a paridade completa já existe, de graça, desde 20/09/2026 (quando `GOOSE_MODEL` virou `seth-codigo`) — o Humano pediu algo que, sem eu saber, já estava feito.**
   palavras-chave: correção, própria, entrada, disse, goose, carregava, canon, sessão, reinjeção, contínua, seth, falso, tinha, testado, afirmar, agora, paridade, completa, existe, graça, desde, model, virou, codigo, humano, pediu, algo, saber, estava, feito
 (483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: coerência, canon, drive, obsidian, verificada, achado, real, indice, export, entradas, atrás, defasado, desde, corrigido, automação, upload, pro, desenhada, testada, proposta, aplicada, sozinha
 (456) DIÁRIO — 18/09/2026 · **`p18-ancora-falha-2026-09-18` assinada e aplicada — e um segundo achado real no processo: o `.diff` assinado, sozinho, nunca passaria no próprio gate deste repositório. Proposta pequena separada, aguardando assinatura própria.**
   palavras-chave: ancora, falha, assinada, aplicada, segundo, achado, real, processo, diff, assinado, sozinho, nunca, passaria, próprio, gate, deste, repositório, proposta, pequena, separada, aguardando, assinatura, própria
-(455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma citação fabricada, corrigida antes de propor. `.diff` pronto, testado a fundo, aguardando assinatura.**
-  palavras-chave: diff, externo, auditado, benéfico, citação, fabricada, corrigida, propor, pronto, testado, fundo, aguardando, assinatura
+(455) DIÁRIO — 18/09/2026 · **Diff externo auditado — benéfico, mas com uma cita …
+  palavras-chave: diff, externo, auditado, benéfico, cita
 (454) DIÁRIO — 18/09/2026 · **Primeira execução real do workflow no runner do Gi …
   palavras-chave: primeira, execução, real, workflow, runner
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro …
