@@ -9,10 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 21/09/2026
 
-**[DECISÃO SUA — segurança, não técnica] O navegador abriu de verdade — e a própria extensão está pedindo sua permissão explícita antes de continuar, porque isso expõe o navegador inteiro.** Você liberou a permissão que faltava e o Brave abriu sozinho, do jeito certo. Só que a extensão, com razão, não deixa nenhuma automação entrar sem você aprovar na tela — porque aprovar dá acesso a **todas** as suas abas e sessões abertas, inclusive Gmail e WhatsApp. Vi essa tela de verdade num screenshot (sem clicar em nada) — ela lista suas abas reais e pede pra você escolher qual (se alguma) liberar.
-- **Antes de aprovar qualquer coisa, três opções:** (1) aprovar só uma aba nova, em branco — nunca Gmail nem WhatsApp — pra automação nunca ter caminho até elas; (2) mais seguro pra sempre: criar um perfil separado no navegador, só pra automação, sem nenhum login seu nele; (3) desistir do Playwright e tentar a extensão reserva (`Browser MCP`), que talvez peça a mesma coisa, talvez não.
+**[APLICADO] O Goose já consegue navegar no Brave de verdade — testado ponta a ponta, não só configurado.** Você autorizou acesso total ("este pc só tem coisa do Agata"). Seu clique na tela de permissão deu erro (o teste anterior tinha caído), a própria extensão recomendou um código de desbloqueio, você me passou o código, e com ele o navegador conectou de verdade — cheguei a abrir uma página real através dele. `~/.config/goose/config.yaml` já está atualizado com o que funcionou. O código fica só nesta Máquina, num arquivo que nunca vai pro GitHub.
+- **Falta só:** você abrir uma sessão do Goose de verdade e pedir pra ele navegar algo, pra confirmar que funciona no uso real, não só no meu teste isolado.
 - Antes disso: a Seth corrigiu sozinha uma alegação errada de identidade ("sou Claude Sonnet 5" — provado falso, ela roda em modelos gratuitos via OmniRoute, nunca Anthropic) e propôs um benchmark de inferência real, rodado e registrado em `(475)`-`(476)`. O HD de backup (`AgataBkup01`) foi reconectado e teve uma passada completa — `(477)`.
-- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(481).
+- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(482).
 
 ## Onde estamos — 20/09/2026
 

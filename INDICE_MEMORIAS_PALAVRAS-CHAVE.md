@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
+  palavras-chave: fechado, navegação, real, goose, brave, playwright, extension, ponta, testada, verdade, humano, autorizou, acesso, total, libera, tudo, tem, coisa, agata, clique, manual, dele, deu, erro, relay, antigo, tinha, caído, próprio, diálogo, recomendou, token, bypass, usei, ele, mesmo, repassou, servidor, novo, conectou, navegou, página
 (481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
   palavras-chave: achado, real, risco, segurança, genuíno, travamento, era, bug, própria, extensão, pedindo, consentimento, explícito, humano, conectar, porque, aprovar, expõe, navegador, inteiro, sessões, cookies, cliente, mcp, tela, verdade, screenshot, cliquei, nada
 (480) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (479): a opção (a) ("instalar Chrome ou Chromium, caminho que o `@playwright/mcp` já suporta sem gambiarra") estava errada — conferido na fonte, nem Chromium nem Brave têm entrada no mapa de canais, só literalmente Google Chrome e Microsoft Edge (nas variantes beta/dev/canary). O Humano notou o furo ("espera, o brave é cromium") antes de eu instalar qualquer coisa. Com o Brave fechado, avancei um degrau real na opção (b) — achei a extensão certo, travei de novo tentando lançar o navegador, mesmo bloqueio de segurança de (478)/(479).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: primeira, execução, real, workflow, runner, github, confirmada, deixou, aberto
 (453) DIÁRIO — 18/09/2026 · **Item 7 fecha de vez — `.github/workflows/perimetro.yml` publicado no GitHub. Bloqueio era só o escopo `workflow` no token do `gh` CLI (448); Humano concedeu, eu apliquei a aprovação JÁ assinada em (448)/(452), sem pedir assinatura nova.**
   palavras-chave: item, fecha, github, workflows, perimetro, yml, publicado, bloqueio, era, escopo, workflow, token, cli, humano, concedeu, apliquei, aprovação, assinada, pedir, assinatura, nova
-(452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da auditoria do Marcos fecham por completo. `scripts/perimetro.sh` é modular a partir de agora, com modo sombra ativo.**
-  palavras-chave: item, assinado, aplicado, pontos, auditoria, marcos, fecham, completo, scripts, perimetro, modular, partir, agora, modo, sombra, ativo
+(452) DIÁRIO — 17/09/2026 · **Item 10 assinado e aplicado — os 12 pontos da audi …
+  palavras-chave: item, assinado, aplicado, pontos, audi
 (451) DIÁRIO — 17/09/2026 · **A assinatura de (450) ficou obsoleta antes de eu c …
   palavras-chave: assinatura, ficou, obsoleta
 (450) DIÁRIO — 17/09/2026 · **Item 10 do plano de mitigação da auditoria do Marc …
