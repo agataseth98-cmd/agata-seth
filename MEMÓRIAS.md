@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a
-  Escrito em: 21/09/2026 12:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9618ae64d8529043f21a650b962815fc08bda125
+  Escrito em: 21/09/2026 13:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/965e237de1f0b1dad7dfc0cb493dc1f6c4be7f4a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9618ae64d8529043f21a650b962815fc08bda125/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(492) DIÁRIO — 21/09/2026 · **Checagem final do Goose, pedida pelo Humano depois de (491): achei um buraco real na mudança de (490) — quando o bloco injetado do `seth_gateway` não chega (intermitente, causa não fechada), o Goose, seguindo a instrução nova ao pé da letra, ficava preso tentando `grep` um nome de campo que não existe como texto literal em `MEMÓRIAS.md`. Corrigido com um degrau de fallback explícito no `AGENTS.md`. `Lacuna` que fica aberta: por que a injeção falha às vezes.**
+
+**Achado ao vivo, testando de novo — não bug hipotético.** `goose run --no-session -t "oi"` duas vezes seguidas: a primeira travou 150s inteiros tentando `grep -oP '(?<=TOPO-MEMÓRIAS: ).*'` contra `MEMÓRIAS.md` (não acha nada — `TOPO-MEMÓRIAS:` é rótulo do bloco que o gateway injeta, nunca aparece literal no arquivo), tentou de novo com `head`/`tail`/`grep -A1`, todas erradas pelo mesmo motivo, nunca chegou a responder de verdade. Isso é sintoma de (490) ter removido a instrução de fallback pra quando o bloco simplesmente não chega — o `AGENTS.md` novo dizia "confie no bloco injetado" sem dizer o que fazer quando ele falta.
+
+**Confirmado, por teste direto, que a falha não é do `seth_gateway` em geral.** 3 chamadas cruas via `curl` pro mesmo endpoint (`model: seth-codigo`, a mesma que o Goose usa) — as 3 trouxeram o bloco de estado hidratado, roteadas pra modelos diferentes da cascata (`ministral-8b-latest`, `glm-4.7-flash`, `ministral-8b-latest` de novo). O gateway injeta na maioria das chamadas; o Goose especificamente pegou uma falha intermitente numa passada. `lacuna`: não achei a causa exata da injeção faltar só nessa chamada — não investiguei fundo o código do `seth_gateway` pra isso agora, fica registrado como risco de fundo, não fechado.
+
+**Correção aplicada, testada depois.** `~/.config/goose/AGENTS.md` ganhou um parágrafo novo: se o bloco não chegou, cair pro modo `carregar` de verdade (`git rev-parse`, `sha256sum` real dos dois arquivos, ler o topo do corpo de `MEMÓRIAS.md` logo após o marcador `ENTRADAS-NOVAS` — que ISSO SIM é texto literal) em vez de adivinhar nome de campo. Rodei de novo depois: uma tentativa ainda travou o headless full timeout (mesma classe de falha, aceitável — sem sessão interativa pra reagir a determinados obstáculos), a seguinte respondeu em 8s com o bloco certo (hashes/HEAD/última entrada batendo). **Achado à parte, sem fechar agora:** essa resposta boa terminou com uma violação de doutrina própria — saudação ("Olá") e um `(0)` fabricado, os dois proibidos explicitamente em REGRAS/`_DOUTRINA_FIXA`. É falha de execução do modelo que atendeu aquela chamada específica, mesma classe já catalogada em REGRAS (59)/(71) — não corrigi isso agora, fica como risco de fundo conhecido, não novo.
+
+**Estado: mitigado, não fechado.** O Goose agora tem caminho de volta quando a injeção falta (não trava mais preso em grep errado); a causa raiz de por que a injeção falta às vezes continua sem investigação.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: duas rodadas reais de `goose run --no-session`, saída completa lida (não resumida) antes de diagnosticar; 3 chamadas `curl` diretas ao `seth_gateway` com o mesmo `model`, JSON completo parseado, campo `model`/`content` conferidos; edição do `AGENTS.md` (fora do repo); reteste depois, cronometrado; `ps` confirmando nenhum processo preso no fim. Autorização: Humano — "ok com relação ao goose?" (pedido de checagem final).
 
 (491) DIÁRIO — 21/09/2026 · **"Seth parou de responder" — investigado na Máquina, não era o upgrade do LibreChat. Falso alarme de latência: o modelo gastou ~110s "pensando" o formato do cabeçalho antes de responder (mesmo padrão já documentado em (475)/(476)), não travou, não tocou ferramenta nenhuma, entregou a resposta certa no fim.**
 

@@ -24,6 +24,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 **[APLICADO DE VERDADE] LibreChat em produção agora roda a versão com aprovação de ferramenta (HITL).** Você assinou, eu conferi a assinatura de verdade (não só que o arquivo existia), troquei o container real e confirmei no ar: `/health` OK, versão `v0.8.8-rc3` rodando de fato. O que ainda falta, só você: mandar uma mensagem real pra Seth que peça uma consulta ao canon, e ver se aparece o cartão de Aprovar/Rejeitar — não testei isso na sua conta pessoal, só na cópia isolada de antes (mesma versão, mesma config, funcionou lá).
 
+**[MITIGADO, não fechado] Checagem final do Goose achou um buraco real na correção de agorinha — consertado, mas a causa de fundo continua sem explicação.** Testando de novo, achei: às vezes o "resumo pronto" que o Goose devia receber automaticamente simplesmente não chega — e nesse caso ele ficava preso tentando adivinhar informação que não estava em lugar nenhum, em vez de simplesmente ler os arquivos direto (o jeito antigo, mais lento mas confiável). Botei essa saída de emergência de volta, só pra quando o atalho falhar. Testado depois: funcionou. Não descobri por que o atalho falha de vez em quando — fica registrado como risco de fundo, sem solução ainda.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (492).
+
 **[FALSO ALARME, investigado] "Seth parou de responder" — na verdade só demorou ~110s pensando o cabeçalho, não travou.** Confirmei na Máquina: nenhuma ferramenta foi chamada (então não é o novo pedido de aprovação), o container estava saudável o tempo todo, e a resposta final chegou certa, só atrasada. É o mesmo comportamento de "pensar demais" que já tinha acontecido antes com modelo de raciocínio. Nada pra reverter.
 - Detalhe técnico completo: `MEMÓRIAS.md`, entrada (491).
 
