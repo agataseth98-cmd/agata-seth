@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
+  palavras-chave: consolidação, automática, bug, ctx, tema, aprovada, humano, edição, conteúdo, entradas, resumidas, veredito, fechado, reconfirmado
+(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
+  palavras-chave: consolidação, automática, quarentena, tema, aprovacao, assinada, aprovada, humano, edição, conteúdo, entradas, resumidas, obsoleta
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e 9 do plano de ação da auditoria de Marcos (500) entram no canon de uma vez, via a proposta única `plano-marcos-lote-2026-09-21`. Com isto, 6 dos 10 itens do plano estão de fato no ar (1, 2 aplicados antes; 4/5/7/9 agora); 2 devolvidos pra decisão do Humano (3, 6); 2 fechados sem precisar de aplicação (8, 10).**
   palavras-chave: assinado, verificado, aplicado, itens, plano, ação, auditoria, marcos, entram, canon, proposta, única, lote, estão, fato, aplicados, agora, devolvidos, pra, decisão, humano, fechados, precisar, aplicação
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, própria, entrada, disse, goose, carregava, canon, sessão, reinjeção, contínua, seth, falso, tinha, testado, afirmar, agora, paridade, completa, existe, graça, desde, model, virou, codigo, humano, pediu, algo, saber, estava, feito
 (483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
   palavras-chave: goose, agora, carrega, sistema, agata, sozinho, sessão, humano, pedir, pedido, dele, quero, ele, seja, automático, seth, testado, verdade, configurado
-(482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Playwright Extension, ponta a ponta, testada de verdade. O Humano autorizou acesso total ("libera tudo, este pc só tem coisa do Agata"), o clique manual dele deu erro (relay antigo tinha caído), o próprio diálogo recomendou o token de bypass — usei o que ele mesmo me repassou, servidor novo conectou e navegou uma página real.**
-  palavras-chave: fechado, navegação, real, goose, brave, playwright, extension, ponta, testada, verdade, humano, autorizou, acesso, total, libera, tudo, tem, coisa, agata, clique, manual, dele, deu, erro, relay, antigo, tinha, caído, próprio, diálogo, recomendou, token, bypass, usei, ele, mesmo, repassou, servidor, novo, conectou, navegou, página
-(481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "travamento" de (480) não era bug — é a própria extensão pedindo consentimento explícito do Humano antes de conectar, porque aprovar expõe o navegador inteiro (todas as sessões, todos os cookies) ao cliente MCP. Vi a tela de verdade, num screenshot real; não cliquei em nada.**
-  palavras-chave: achado, real, risco, segurança, genuíno, travamento, era, bug, própria, extensão, pedindo, consentimento, explícito, humano, conectar, porque, aprovar, expõe, navegador, inteiro, sessões, cookies, cliente, mcp, tela, verdade, screenshot, cliquei, nada
+(482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Play …
+  palavras-chave: fechado, navegação, real, goose, brave, play
+(481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "tr …
+  palavras-chave: achado, real, risco, segurança, genuíno
 (480) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (479): a opção …
   palavras-chave: correção, própria, entrada, opção
 (479) DIÁRIO — 21/09/2026 · **Retomada depois do reboot de (478): o Humano insta …

@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a2871df3e13c2f56314899f1392c7286024b35c
-  Escrito em: 21/09/2026 19:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9b6c6195d27522ba974ddb0a73fb79b31d1d3adf
+  Escrito em: 22/09/2026 08:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a2871df3e13c2f56314899f1392c7286024b35c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
+
+Gerada por `redesign/grafo/flows/consolidacao.py`, passou no portão mecânico de (371) antes de virar arquivo em `propostas/`. Reconstitui o arco: violação da barreira de 64k revertida (111) · validação de código HTTP (128) · protocolo de introspecção (131)/(132) · fechamento do bug ao vivo, sem fallback automático (133) · conserto por Modelfile customizado confirmado (135) · determinação do ramo real em produção (139) · condensação em PROJETO.md (164) · padrão grep (175) · runners com `num_ctx` explícito (234) · remoção de scripts Hermes-era (312) · triagem de status 529 (368) · confirmação final de `presence_penalty=1.5` + `num_ctx=65536` (382). Conferido contra PROJETO.md, "[FECHADO] `num_ctx` ignorado pelo endpoint compatível com OpenAI do Ollama" — bate. **Achado do próprio gerador, não decidido aqui:** (312) sugere que `verificar_num_ctx.py` (e scripts irmãos da mesma checagem) ficaram redundantes — candidato a limpeza, registrado, sem ação (não removo script sem pedido explícito).
+
+Rascunho movido pra `propostas/aplicadas/consolidacao-num-ctx-16814-2026-09-21.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: conferência do resumo contra o texto já lido de PROJETO.md antes de aceitar; nenhuma edição de conteúdo do rascunho gerado. Autorização: Humano — "aplicar todas".
+
+(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
+
+Gerada por `redesign/grafo/flows/consolidacao.py`, mesmo portão de (371). Cobre o arco completo do mecanismo: criação da quarentena (218) · extensão a `config/` (222) · limite do ACB a assuntos pessoais (223) · cobertura de commit sem entrada (224) · fechamento do lote de 22/08 (238) · âncora de defasagem honesta no template (281) · mover par aprovado pra `aplicadas/` (284) · export sanitizado pro Drive (286) · geração do vault Obsidian com wikilinks/MOC/timeline (289)/(295) · índice canon público pra consulta externa (298)-(300) · regeneração do índice no post-commit (301) · auditoria de `redesign/router` com 6 correções (318). Conferido contra PROJETO.md, "Quarentena estrutural (P-8)" — bate. Nenhuma das 15 entradas obsoleta — só (238) fecha um lote anterior, o resto segue vigente.
+
+Rascunho movido pra `propostas/aplicadas/consolidacao-aprova-o-assinada-p-8-2026-09-21.md`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: conferência do resumo contra o texto já lido de PROJETO.md antes de aceitar; nenhuma edição de conteúdo do rascunho gerado. Autorização: Humano — "aplicar todas".
 
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e 9 do plano de ação da auditoria de Marcos (500) entram no canon de uma vez, via a proposta única `plano-marcos-lote-2026-09-21`. Com isto, 6 dos 10 itens do plano estão de fato no ar (1, 2 aplicados antes; 4/5/7/9 agora); 2 devolvidos pra decisão do Humano (3, 6); 2 fechados sem precisar de aplicação (8, 10).**
 
