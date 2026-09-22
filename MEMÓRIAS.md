@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fd591e7568ce3f4730d9ab3dc89cc8d467f468eb
-  Escrito em: 22/09/2026 09:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e46b58658126242a506a66211c7bfae9a1f7a2f1
+  Escrito em: 22/09/2026 09:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e46b58658126242a506a66211c7bfae9a1f7a2f1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e46b58658126242a506a66211c7bfae9a1f7a2f1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e46b58658126242a506a66211c7bfae9a1f7a2f1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-gratuitos.md` sobre a Cerebras fechada — Humano logou na própria conta e pediu pra eu olhar direto no painel `cloud.cerebras.ai`, aberto no navegador dele.**
+
+**Confirmado, não mais achado externo de busca:** saldo `$4.51`, banner "Qwen 3.8 27B is now available on Cerebras PayGo" — é trial com crédito, não free tier (o que a entrada anterior citava como "não verificado na fonte primária" bate exato). **Achado extra, não previsto ao entrar:** `gemma-4-31b` está listado como "Archived Models" pela própria Cerebras — descontinuado do lado deles, motivo A MAIS pro banimento de Cloudflare já registrado, não o mesmo motivo. **`gpt-oss-120b` diferente: última chamada com sucesso nos logs reais da conta é 16/09/2026 — zero sucesso nos 6 dias seguintes**, o que não dava pra confirmar antes (bloqueio de Cloudflare acontece na borda, nunca chega a gerar log do lado da Cerebras) — agora dá: o silêncio nos logs desde 16/09 é o efeito visível do banimento de 20/09 continuando ativo hoje. Segue sem "Archived" e com limite normal (5 req/min · 2.400/dia) — voltaria a funcionar se o bloqueio de Cloudflare caísse.
+
+**Atualizado `config/modelos-gratuitos.md`** (as duas linhas da Cerebras em "Fora — não usar") com os dois achados verificados. Juntado no MESMO `.diff` que já esperava assinatura (`propostas/conselho-remoto-corrige-sonda-e-doc-2026-09-22.diff`) — pedido do Humano ("pode juntar"). Sha256 do `.diff` mudou (arquivo cresceu de 72 pra 87 linhas); testado de novo com `git apply --check` num clone descartável antes de guardar.
+
+**Pergunta do Humano, respondida em conversa, não é decisão minha:** se cancela a conta trial da Cerebras. Não decidi por ele — é conta e cartão dele. Não fui checar a página de faturamento/plano (não tinha aberto), então não sei se o trial cobra sozinho ao acabar ou exige upgrade manual — isso muda a urgência.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: navegação real no `cloud.cerebras.ai` autenticado (sessão do Humano, mesmo perfil do Chrome) — telas de Get Started, Limits e Logs (filtro "All" modelos, 7 dias, ordenado por data) lidas via screenshot; `git apply --check` num clone descartável (`git archive HEAD` + `git init` local) antes de sobrescrever o `.diff` guardado. Autorização: Humano — "entrei na minha conta da cerebras... olhe lá" + "pode juntar".
 
 (513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
 
