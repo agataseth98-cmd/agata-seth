@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8eb0867762eb41a5a2987035b3eb572b9b88a507
-  Escrito em: 22/09/2026 09:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): dc1be368f06320663d87615deae423af9e6a08f0
+  Escrito em: 22/09/2026 15:56 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8eb0867762eb41a5a2987035b3eb572b9b88a507/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8eb0867762eb41a5a2987035b3eb572b9b88a507/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8eb0867762eb41a5a2987035b3eb572b9b88a507/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1be368f06320663d87615deae423af9e6a08f0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1be368f06320663d87615deae423af9e6a08f0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1be368f06320663d87615deae423af9e6a08f0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(516) DIÁRIO — 22/09/2026 · **Working tree local tinha `MEMÓRIAS.md`, `PROJETO.md`, `INDICE_MEMORIAS.md`, `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` e `.hidrata.md` corrompidos, não commitados — restaurados do HEAD (`dc1be36`), nenhuma entrada perdida.**
+
+Ao carregar o sistema nesta sessão, `git status` mostrou os cinco arquivos acima como modificados sem commit. `MEMÓRIAS.md` do working tree tinha **2457 linhas cortadas pra 14** — a história inteira apagada, sobrando só uma entrada solta numerada `(518)`, sem `Modelo:`/`vetor:`/autorização, alegando (sem teste real anexado) que `cerebras/gpt-oss-120b` "continua BANIDO (404)" — **contradizendo direto (515)**, testado ao vivo minutos antes com 3 de 3 sucessos. A entrada citava uma `(516)` que não existe em canon nenhum (a numeração real pula de (515) pra essa (518) fantasma). `PROJETO.md` tinha um trecho não commitado equivalente, mesma alegação de banimento. `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`/`.hidrata.md` estavam regenerados a partir do `MEMÓRIAS.md` já truncado — espelhavam o mesmo dano, não são causa.
+
+**Isto é a Regra 4 sendo cruzada — linha vermelha, "nada se apaga, nada se edita — só se acrescenta".** Não foi pelo canal certo: `seth_escriba` (único caminho de escrita da Seth) insere abaixo do marcador, nunca sobrescreve o arquivo inteiro — o padrão do dano (arquivo inteiro substituído por um trecho pequeno, coerente só com o que cabia no contexto de quem escreveu) é a assinatura de uma edição direta de arquivo que reescreveu tudo a partir só do que tinha em mãos, não do append-only.
+
+**Causa raiz de QUEM/O QUÊ escreveu: `lacuna`, não inventada.** Evidência de tempo, não de autoria: `PROJETO.md` do working tree foi tocado às 10:20:11 (dentro do boot 08:11→11:00) e `MEMÓRIAS.md` às 11:21:40 (dentro do boot seguinte, 11:01→12:21) — a Máquina rebootou pelo menos 3 vezes hoje (08:11, 11:01, 12:22) mais 2 crashes ontem (21/09), o mesmo padrão de instabilidade já documentado em PROJETO.md, "Máquinas" (suspend/resume, boot 17/09). Nenhuma das duas edições foi commitada — pode ser P-5 barrando no `pre-commit`, ou a sessão/Máquina caindo antes de terminar. `seth-escriba.service` reiniciou 4 vezes hoje (10:41, 11:01, 12:21, 12:23) — não prova nem descarta relação com o dano, só registra que não estava num estado estável nas janelas em questão.
+
+**Ação tomada:** evidência bruta (os 5 arquivos corrompidos + `.diff` completo contra HEAD) salva em `logs/incidente-corrupcao-memorias-2026-09-22/` (fora do canon, gitignorado). `git checkout HEAD -- MEMÓRIAS.md INDICE_MEMORIAS.md INDICE_MEMORIAS_PALAVRAS-CHAVE.md .hidrata.md PROJETO.md` restaurou os 5 pro estado do commit `dc1be36` — que já é o canon real, confirmado igual ao remoto (`git ls-remote` bateu com `HEAD` antes de eu tocar em qualquer coisa). `.hidrata-seth.md` (silo, não versionado) regenerado por `.githooks/gerar-hidratacao.sh` a partir do canon limpo. **Nenhuma entrada de MEMÓRIAS foi perdida** — o canon nunca teve o `(518)` fantasma nem a versão truncada; só o working tree local tinha.
+
+**Não tocado:** `redesign/librechat/docker-compose.yml` e `librechat.yaml`, também modificados sem commit — mas citam `MEMÓRIAS (511)` e descrevem o item 3 do plano ISO-05 (trocar `127.0.0.1` por `172.29.7.1` na rede do LibreChat) de forma coerente e verificável; parecem trabalho legítimo em andamento, não corrupção. Fica pro Humano decidir se commita.
+
+**Pendência pro Humano:** decidir se investiga mais a fundo a causa (qual processo/sessão escreveu por fora do `seth_escriba`) ou se aceita como mais um efeito da instabilidade de boot já conhecida e segue.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `git status`/`git diff HEAD`/`sha256sum` reais antes e depois da restauração; `journalctl --user -u seth-escriba.service`; `last reboot`; `find -newermt` no repo pra cruzar horário de cada arquivo tocado com o boot correspondente. Autorização: Humano — "não podemos perder nenhuma memória... resolva de forma a trazer o sistema a seu estado saudável".
 
 (515) CORREÇÃO — 22/09/2026 · **Corrige (514): `cerebras/gpt-oss-120b` NÃO está mais bloqueado — testado ao vivo, 3 de 3 chamadas com sucesso, minutos depois de eu ter registrado o contrário.**
 
