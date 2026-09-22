@@ -7,6 +7,15 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
+## Onde estamos — 22/09/2026
+
+**[APLICADAS] As 2 propostas de consolidação noturna sobre P-8 e sobre o bug do `num_ctx`.** Você pediu pra aplicar as 3 propostas soltas na pasta e aproveitar pra checar a saúde de tudo. As duas de consolidação (resumos automáticos de história antiga, sem mudar nenhum código) viraram entradas novas em MEMÓRIAS — (511) e (512) — e os rascunhos foram pro arquivo, como sempre.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (511) e (512).
+
+**[SEGURANDO, não apliquei] A 3ª proposta (roster de modelos grátis) tem problema nos dados — não mudei nada ainda.** Ela sugere reduzir a lista de modelos de reserva pra só 2, mas o teste que gerou isso rodou numa hora ruim: 3 dos modelos que "falharam" tiveram problema temporário (limite de uso, chave não configurada, timeout de rede) — não é que pararam de funcionar. Confirmei rodando a checagem de saúde: o sistema realmente está sem nenhum modelo externo de reserva respondendo bem nas últimas 24h agora — pode ser só um mau momento, não motivo pra cortar modelo da lista de vez. Quer que eu teste de novo em outro horário antes de decidir, ou aplica assim mesmo?
+
+**[CHECADO, tudo bem] Rodei a checagem geral de saúde do sistema (perímetro) — nada quebrado.** 16 controles OK, 2 parciais (o disco externo de backup está desconectado — já sabíamos; e sem `sudo` não vejo 100% dos processos — normal) e uns avisos de serviços "sob demanda" que estavam desligados porque ninguém tinha pedido pra usar (LibreChat, voz em inglês) — nada disso é problema, é esperado quando ninguém está usando.
+
 ## Onde estamos — 21/09/2026
 
 **[APLICADO — falta só reiniciar os serviços] Você assinou, conferi a assinatura de verdade, entrou no canon.** Os itens 4, 5, 7 e 9 (voz que lia qualquer arquivo, os 8 "telefones" sem limite, Discord sem trava de canal, checagem de segurança em dobro) agora fazem parte do código de verdade — não é mais só proposta esperando. **Falta uma coisa, só sua: os programas que já estão rodando ainda têm o código VELHO na memória — precisam reiniciar pra valer de verdade.** São 8 serviços de uma vez, alguns centrais (o que hidrata a Seth, o que sanitiza toda saída) — não reiniciei sozinho porque isso afeta produção compartilhada, mesma régua do resto da sessão. Me avise quando quiser que eu reinicie (ou rode você mesmo o atalho de sempre — parar e depois abrir a Seth de novo).
