@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9b6c6195d27522ba974ddb0a73fb79b31d1d3adf
-  Escrito em: 22/09/2026 08:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fd591e7568ce3f4730d9ab3dc89cc8d467f468eb
+  Escrito em: 22/09/2026 09:06 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b6c6195d27522ba974ddb0a73fb79b31d1d3adf/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd591e7568ce3f4730d9ab3dc89cc8d467f468eb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
+
+**O pedido original era pra reduzir o ROSTER de 5 pra 2-3 modelos, com base num teste que rodou numa hora ruim (429/timeout/serviço local desligado). Retestei duas vezes hoje, com os serviços de pé, antes de aceitar qualquer conclusão.** 1º reteste: `zai/glm-4.7-flash` e os dois já confirmados (`mistral/ministral-8b-latest`, `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`) voltaram OK — provava que o timeout de ontem era rede, não modelo quebrado. `gemini/gemini-2.5-flash` deu **VAZIO** (`finish=length`, todo o orçamento em reasoning) — parecia achado novo e real.
+
+**Não era.** `config/modelos-gratuitos.md` (fonte viva, já commitada, não lida antes de eu montar o primeiro relatório) já documentava: "Gemini... queima reasoning. Só com `max_tokens ≥ 10000`." A causa: `scripts/pesquisar_modelos_gratuitos.py::_sondar()` manda `max_tokens: 24` fixo pra TODO modelo, sem olhar o `MAX_TOKENS_POR_MODELO` que `conselho_remoto.py` já usa na chamada real (Gemini precisa de 12.000). **Provei com uma chamada direta ao `:20127` usando os parâmetros reais** (`max_tokens: 12000`, `thinking: disabled`): Gemini respondeu limpo, `finish=stop`, 'pong'. O "achado" era falso-negativo do próprio instrumento de medição, não do modelo.
+
+**Corrigido: `_sondar()` agora importa `MAX_TOKENS_POR_MODELO`/`TETO_TOKENS_SAIDA`/`THINKING_DISABLED_PREFIXOS` direto de `conselho_remoto.py`** (mesmo diretório, sem efeito colateral no import — conferido antes de usar) em vez de duplicar um teto fixo errado. Retestado depois do conserto, 2 vezes: os 4 modelos externos ligados agora (`gemini`, `mistral`, `openrouter/nemotron`, `zai/glm`) saem **OK nas duas rodadas**. `huggingface` continua 401 (`isActive:false` no OmniRoute desde 16/09/2026 14:21 UTC, conferido na Máquina — chave precisa ser trocada pelo Humano, HuggingFace exige conta dele). Os 4 `llama-cpp/*` locais deram `ECONNREFUSED` nas 3 rodadas — não é falha, são serviços **sob demanda**, desligados porque ninguém pediu (`systemctl --user status`: `inactive (dead)`, unit `static`/`disabled`) — não cabem os 4 rodando junto nos 38GB de RAM (já documentado).
+
+**Achado de bônus, batido no caminho: PROJETO.md, seção "Conselho Remoto", tinha um ROSTER fantasma.** O parágrafo de correção de (420) (09/09/2026) descrevia 5 membros (`zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `cerebras/gemma-4-31b`, `huggingface/...`, `mistral/ministral-8b-latest`) — mas o `ROSTER` real em `scripts/conselho_remoto.py`, lido agora, tem **9**: os 5 menos `cerebras/gemma-4-31b` (banido pela Cloudflare do próprio provedor, reconfirmado 20/09/2026) mais `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` (substituto) mais os 4 `llama-cpp/*` locais instalados em 20/09/2026 (commits assinados `f6f76f8`/`04e295d`/`1408168`). O texto ficou parado 11 dias depois do código mudar — corrigido em PROJETO.md, com o parágrafo antigo mantido (é o "agora" do arquivo, não histórico append-only; ver seu próprio topo: "editável e trocável").
+
+**Conclusão sobre o pedido original: não mudo o ROSTER.** Já está certo — os 9 membros batem com a realidade testada hoje (exceto HuggingFace, já sinalizado pro Humano resolver, e Cerebras, deliberadamente fora). Nada a assinar nesse ponto.
+
+**Sob quarentena P-8, aguardando assinatura:** `propostas/conselho-remoto-corrige-sonda-e-doc-2026-09-22.diff` — só os 2 achados reais: o bug do `_sondar()` (`scripts/pesquisar_modelos_gratuitos.py`) e a correção do ROSTER fantasma (`PROJETO.md`). Nenhuma mudança de comportamento de produção — o ROSTER real usado pelo Conselho Remoto não muda, só o instrumento que o testa e o texto que o descreve.
+
+**Achados menores, sem ação:** Discovery do OmniRoute achou 3 modelos fora do pool respondendo OK (`gemini/gemini-3-flash-preview`, `gemini/gemini-3.1-flash-lite`, `openrouter/auto` — este último já documentado como PAGO, falso positivo conhecido do discovery) — candidatos não avaliados, registrados pra quando o Humano quiser olhar.
+
+Os dois rascunhos de `modelos-gratuitos-<data>.md` (20/09 e 22/09) movidos pra `propostas/aplicadas/` — investigação encerrada, conclusão é esta entrada.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: 3 rodadas reais do script (antes/depois do conserto, mais 1 de confirmação pós-rename de variável); 1 chamada direta ao `:20127` com os parâmetros de produção provando Gemini funcional; leitura de `config/modelos-gratuitos.md` e `scripts/conselho_remoto.py` (ROSTER, `MAX_TOKENS_POR_MODELO`) direto da fonte, não de memória nem do PROJETO.md desatualizado; `systemctl --user status` nos 5 serviços locais confirmando "sob demanda, desligado" em vez de "quebrado"; consulta à API do OmniRoute (`/api/providers`) confirmando `huggingface` inativo desde 16/09; `git log`/`git show` conferindo os 3 commits citados antes de citar; `python3 -c "import ast; ast.parse(...)"` + execução real depois de editar o script, duas vezes (antes e depois de renomear uma variável que colidia de nome). Autorização: Humano — "faça tudo e me apresente relatório... vamos deixar tudo redondo".
 
 (512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
 

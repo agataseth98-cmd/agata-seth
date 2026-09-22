@@ -1,0 +1,72 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 6129ca1..26cd9b0 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -302,6 +302,22 @@ contra `scripts/conselho_remoto.py`, não contra o texto:
+ **Invariantes que continuam valendo** (conferidos, não herdados): só material público sai
+ (`checar_conteudo_privado`), teto de tamanho, UMA chamada por invocação, formato do parecer,
+ resposta crua gravada.
++
++**Corrigido em 22/09/2026 (MEMÓRIAS (513)) — o roster do parágrafo acima ficou parado em
++09/09, o script já tinha mudado 11 dias depois.** Conferido contra `scripts/conselho_remoto.py`
++ao vivo, não contra o texto: são **9** membros hoje, não 5 — `zai/glm-4.7-flash`,
++`gemini/gemini-2.5-flash`, `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`,
++`huggingface/meta-llama/Llama-3.3-70B-Instruct`, `mistral/ministral-8b-latest`,
++`llama-cpp/nemotron-3.5-lightning`, `llama-cpp/qwen3-coder-30b-a3b`, `llama-cpp/phi-4-mini`,
++`llama-cpp/gpt-oss-20b`. `cerebras/gemma-4-31b` **saiu** — banido pela Cloudflare do próprio
++provedor (`browser_signature_banned`, reconfirmado duas vezes em 20/09/2026), substituído por
++`openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`; os 4 `llama-cpp/*` entraram quando os
++modelos locais novos foram instalados, mesma data. Histórico e evidência completos:
++`config/modelos-gratuitos.md` (fonte viva, mantida à parte deste arquivo por desenho — ver
++nota no topo dela) e os commits assinados de 20/09/2026 que instalaram os 4 modelos locais e
++atualizaram o ROSTER: `f6f76f8` (3 modelos + Cerebras/Groq nunca tier 0), `04e295d` (bancada
++de tokens/s), `1408168` (4º modelo, gpt-oss-20b).
++
+ O `.json` de saída passou a gravar `provider` (derivado do modelo) — rastreabilidade, já que a
+ combo é config. Cadeia de auditoria A→B→C cumprida (B=Qwen; C=Máquina); `redesign/propostas/
+ conselho-remoto-omniroute.diff` + `APROVADO-`.
+diff --git a/scripts/pesquisar_modelos_gratuitos.py b/scripts/pesquisar_modelos_gratuitos.py
+index 5edcba1..f5bacc4 100755
+--- a/scripts/pesquisar_modelos_gratuitos.py
++++ b/scripts/pesquisar_modelos_gratuitos.py
+@@ -38,6 +38,15 @@ LOG = ESTADO_DIR / "runs.log"
+ POOL_MD = REPO / "config" / "modelos-gratuitos.md"
+ CONSELHO = REPO / "scripts" / "conselho_remoto.py"
+ 
++# Reaproveita os MESMOS parâmetros da chamada real (achado 22/09/2026: com
++# max_tokens fixo baixo, a sonda reportava Gemini como VAZIO -- na verdade só
++# precisa de max_tokens alto pra não queimar tudo em reasoning, confirmado
++# testando direto com os parâmetros de baixo. Sem isto, todo modelo que
++# precisa de max_tokens>padrão (hoje: gemini/, llama-cpp/nemotron-3.5-lightning)
++# aparece falso-VAZIO aqui mesmo funcionando limpo em produção).
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import conselho_remoto as _cr  # noqa: E402
++
+ # famílias que precisam de chave do Humano -- a rotina só as LEMBRA, nunca as
+ # adiciona (isso é integração, decisão do Humano + .env + proposta assinada).
+ CANDIDATOS_COM_CHAVE = ["Mistral AI", "GitHub Models", "HuggingFace Inference",
+@@ -70,13 +79,18 @@ def _http(url, metodo="GET", body=None, timeout=45):
+ 
+ 
+ def _sondar(modelo):
+-    """1 chamada mínima. Devolve (estado, detalhe)."""
++    """1 chamada mínima, com os mesmos max_tokens/thinking da chamada real de
++    conselho_remoto.py (MAX_TOKENS_POR_MODELO / THINKING_DISABLED_PREFIXOS) --
++    não um teto fixo curto. Devolve (estado, detalhe)."""
++    payload = {
++        "model": modelo,
++        "messages": [{"role": "user", "content": "Responda apenas: pong"}],
++        "max_tokens": _cr.MAX_TOKENS_POR_MODELO.get(modelo, _cr.TETO_TOKENS_SAIDA),
++    }
++    if _cr.DESABILITAR_THINKING and modelo.startswith(_cr.THINKING_DISABLED_PREFIXOS):
++        payload["thinking"] = {"type": "disabled"}
+     try:
+-        d = _http(f"{PROXY}/v1/chat/completions", "POST", {
+-            "model": modelo,
+-            "messages": [{"role": "user", "content": "Responda apenas: pong"}],
+-            "max_tokens": 24,
+-        })
++        d = _http(f"{PROXY}/v1/chat/completions", "POST", payload)
+     except urllib.error.HTTPError as e:
+         corpo = e.read().decode("utf-8", errors="replace")[:200]
+         if e.code in (402,) or "payment" in corpo.lower() or "billing" in corpo.lower():

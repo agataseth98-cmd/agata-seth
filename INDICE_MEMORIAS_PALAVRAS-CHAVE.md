@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
+  palavras-chave: proposta, roster, modelos, grátis, investigada, fundo, aplicada, veio, dado, embasava, estava, errado, causa, raiz, era, bug, próprio, script, sondagem, achado, bônus, projeto, descrevia, membros, existe, dias, real, tem
 (512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
   palavras-chave: consolidação, automática, bug, ctx, tema, aprovada, humano, edição, conteúdo, entradas, resumidas, veredito, fechado, reconfirmado
 (511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: goose, travou, novo, tentando, anexar, brave, playwright, ocorrência, mesma, classe, desta, contida, janela, mouse, teclado, máquina, inteira, achado, real, mode, approve, estava, configurado, impediu, nada, extensão, inicializa, boot, sessão, chamada, ferramenta, fora, alcance, desse, gate, desligada, padrão, processo, travado, morto, testado, limpo, ordem, nova, humano, registrada, componente, sistema, deve, pedir, autorização, usar, skill, implementada, nem, seth, mitigação, pontual
 (484) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (483): eu disse que o Goose só carregava o canon uma vez por sessão, sem a reinjeção contínua da Seth — falso, e eu não tinha testado antes de afirmar. Testado agora: a paridade completa já existe, de graça, desde 20/09/2026 (quando `GOOSE_MODEL` virou `seth-codigo`) — o Humano pediu algo que, sem eu saber, já estava feito.**
   palavras-chave: correção, própria, entrada, disse, goose, carregava, canon, sessão, reinjeção, contínua, seth, falso, tinha, testado, afirmar, agora, paridade, completa, existe, graça, desde, model, virou, codigo, humano, pediu, algo, saber, estava, feito
-(483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em toda sessão, sem o Humano pedir — pedido dele ("quero que ele seja automático como a Seth"), testado de verdade, não só configurado.**
-  palavras-chave: goose, agora, carrega, sistema, agata, sozinho, sessão, humano, pedir, pedido, dele, quero, ele, seja, automático, seth, testado, verdade, configurado
+(483) DIÁRIO — 21/09/2026 · **O Goose agora carrega o sistema Agata sozinho, em …
+  palavras-chave: goose, agora, carrega, sistema, agata, sozinho
 (482) DIÁRIO — 21/09/2026 · **Fechado: navegação real do Goose no Brave via Play …
   palavras-chave: fechado, navegação, real, goose, brave, play
 (481) DIÁRIO — 21/09/2026 · **Achado real, com risco de segurança genuíno: o "tr …
