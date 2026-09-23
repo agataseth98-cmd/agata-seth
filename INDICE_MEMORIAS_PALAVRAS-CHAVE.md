@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (informado pelo Humano). As duas quedas do Obsidian de hoje (15:43 e 17:03, saída 0) foram a janela fechada pelo Humano, não defeito. Unit mantida com `Restart=on-failure`.**
+  palavras-chave: huggingface, renova, créditos, informado, humano, quedas, obsidian, hoje, saída, foram, janela, fechada, defeito, unit, mantida, restart, failure
 (521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
   palavras-chave: assinado, verificado, aplicado, post, merge, regenera, derivados, git, pull, máquina, roda, mesmo, commit
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando assinatura (P-8): depois de `git pull`, roda os mesmos passos do `post-commit`. Fecha o candidato registrado em (519): merge feito pelo GitHub deixava o vault atrás do HEAD, e o P-10 barrava o próximo commit sem edição real nenhuma.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinatura, verificada, ssh, keygen, verify, real, aplicado, scripts, estado, eco, agora, limita, git, remote, próprios, arriscar, orçamento, inteiro, chamador, perímetro, rodado, skip, parcial, falha, igual, nada, quebrou, par, aprovação, propostas, aplicadas
 (493) DIÁRIO — 21/09/2026 · **Causa raiz achada de verdade e corrigida — não só mitigada — do buraco de (492). `git ls-remote` dentro de `scripts/estado_para_eco.sh` não tinha timeout próprio; um pico de rede consumia o orçamento inteiro do subprocess (25s, em `seth_gateway.py`) e DERRUBAVA O SCRIPT INTEIRO, mesmo os dados que não dependem de rede (HEAD, hashes, topo de MEMÓRIAS). Testado simulando rede morta de verdade: sem o conserto, o script inteiro falharia; com ele, sai em 8s com tudo certo, só `sync: não verificado` no lugar de `sync: PASS`. Proposta pronta, sob quarentena P-8 (`scripts/*`), aguardando assinatura.**
   palavras-chave: causa, raiz, achada, verdade, corrigida, mitigada, buraco, git, remote, dentro, scripts, estado, eco, tinha, timeout, próprio, pico, rede, consumia, orçamento, inteiro, subprocess, seth, gateway, derrubava, script, mesmo, dados, dependem, head, hashes, topo, memórias, testado, simulando, morta, conserto, falharia, ele, sai, tudo, certo, sync, verificado, lugar, pass, proposta, pronta, sob, quarentena, aguardando, assinatura
-(492) DIÁRIO — 21/09/2026 · **Checagem final do Goose, pedida pelo Humano depois de (491): achei um buraco real na mudança de (490) — quando o bloco injetado do `seth_gateway` não chega (intermitente, causa não fechada), o Goose, seguindo a instrução nova ao pé da letra, ficava preso tentando `grep` um nome de campo que não existe como texto literal em `MEMÓRIAS.md`. Corrigido com um degrau de fallback explícito no `AGENTS.md`. `Lacuna` que fica aberta: por que a injeção falha às vezes.**
-  palavras-chave: checagem, final, goose, pedida, humano, achei, buraco, real, mudança, bloco, injetado, seth, gateway, chega, intermitente, causa, fechada, seguindo, instrução, nova, letra, ficava, preso, tentando, grep, nome, campo, existe, texto, literal, memórias, corrigido, degrau, fallback, explícito, agents, lacuna, fica, aberta, injeção, falha
+(492) DIÁRIO — 21/09/2026 · **Checagem final do Goose, pedida pelo Humano depois …
+  palavras-chave: checagem, final, goose, pedida, humano
 (491) DIÁRIO — 21/09/2026 · **"Seth parou de responder" — investigado na Máquina …
   palavras-chave: seth, parou, responder, investigado, máquina
 (490) DIÁRIO — 21/09/2026 · **Ordem do Humano: hidratação do Goose pelo mesmo mé …
