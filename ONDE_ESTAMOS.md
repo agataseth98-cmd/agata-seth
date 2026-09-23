@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[ANOTADO] HuggingFace volta em 1º de outubro.** Nesse dia eu religo a conexão e testo. O Obsidian que caiu hoje foi a janela fechada; basta deixar minimizado.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (522).
+
 **[APLICADO] O gancho que refaz os índices depois de cada merge está no ar.** Conferi sua assinatura: é sua e vale. Nada mais esperando assinatura.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (521).
 

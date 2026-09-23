@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 52ec655395b856cdfdd80df5192f37a74b5df4e9
-  Escrito em: 23/09/2026 18:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): af40564473e5dcb00f6a8b72e7ec532241370f67
+  Escrito em: 23/09/2026 18:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/af40564473e5dcb00f6a8b72e7ec532241370f67/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/af40564473e5dcb00f6a8b72e7ec532241370f67/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/af40564473e5dcb00f6a8b72e7ec532241370f67/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (informado pelo Humano). As duas quedas do Obsidian de hoje (15:43 e 17:03, saída 0) foram a janela fechada pelo Humano, não defeito. Unit mantida com `Restart=on-failure`.**
+
+**HuggingFace:** a data de renovação, que era `lacuna` em (519), foi informada pelo Humano: "outubro 1". Não verificada na Máquina, porque a página de cobrança só abre logado na conta dele. Em 01/10: religar a conexão `huggingface` no OmniRoute (`is_active=0` desde 22/09, (519)), testar com 1 chamada e registrar.
+
+**Obsidian:** às 18:39 ele estava parado desde 17:03, com `ExecMainStatus=0` e `NRestarts=0`, e o `ro_proxy` respondia 403. A Seth ficou 1h36 sem canon. Religado: 200. O Humano confirmou: "fechei, deve ter sido eu... minimizei apenas, não o tocarei mais". A janela aparece na tela quando a unit sobe, e fechá-la derruba a API de que a Seth depende. `Restart=always` foi considerado e recusado: reabriria contra a vontade de quem fechou. O Humano escolheu não fechar mais.
+
+**Erro meu, registrado:** na resposta das 18:39 escrevi "Anotei o 1º de outubro" antes de ter gravado a data em lugar nenhum. Era intenção, não fato — a falha de "alegar ação que não aconteceu", do Catálogo. Esta entrada é a anotação de verdade.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `systemctl --user show obsidian-app` (status de saída, reinícios) + `journalctl`; `curl :27125` antes (403) e depois (200) de religar. Autorização: Humano — "outubro 1"; "fechei, deve ter sido eu... não o tocarei mais".
 
 (521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
 
