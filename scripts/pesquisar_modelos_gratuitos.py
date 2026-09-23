@@ -38,6 +38,15 @@ LOG = ESTADO_DIR / "runs.log"
 POOL_MD = REPO / "config" / "modelos-gratuitos.md"
 CONSELHO = REPO / "scripts" / "conselho_remoto.py"
 
+# Reaproveita os MESMOS parâmetros da chamada real (achado 22/09/2026: com
+# max_tokens fixo baixo, a sonda reportava Gemini como VAZIO -- na verdade só
+# precisa de max_tokens alto pra não queimar tudo em reasoning, confirmado
+# testando direto com os parâmetros de baixo. Sem isto, todo modelo que
+# precisa de max_tokens>padrão (hoje: gemini/, llama-cpp/nemotron-3.5-lightning)
+# aparece falso-VAZIO aqui mesmo funcionando limpo em produção).
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import conselho_remoto as _cr  # noqa: E402
+
 # famílias que precisam de chave do Humano -- a rotina só as LEMBRA, nunca as
 # adiciona (isso é integração, decisão do Humano + .env + proposta assinada).
 CANDIDATOS_COM_CHAVE = ["Mistral AI", "GitHub Models", "HuggingFace Inference",
@@ -70,13 +79,18 @@ def _http(url, metodo="GET", body=None, timeout=45):
 
 
 def _sondar(modelo):
-    """1 chamada mínima. Devolve (estado, detalhe)."""
+    """1 chamada mínima, com os mesmos max_tokens/thinking da chamada real de
+    conselho_remoto.py (MAX_TOKENS_POR_MODELO / THINKING_DISABLED_PREFIXOS) --
+    não um teto fixo curto. Devolve (estado, detalhe)."""
+    payload = {
+        "model": modelo,
+        "messages": [{"role": "user", "content": "Responda apenas: pong"}],
+        "max_tokens": _cr.MAX_TOKENS_POR_MODELO.get(modelo, _cr.TETO_TOKENS_SAIDA),
+    }
+    if _cr.DESABILITAR_THINKING and modelo.startswith(_cr.THINKING_DISABLED_PREFIXOS):
+        payload["thinking"] = {"type": "disabled"}
     try:
-        d = _http(f"{PROXY}/v1/chat/completions", "POST", {
-            "model": modelo,
-            "messages": [{"role": "user", "content": "Responda apenas: pong"}],
-            "max_tokens": 24,
-        })
+        d = _http(f"{PROXY}/v1/chat/completions", "POST", payload)
     except urllib.error.HTTPError as e:
         corpo = e.read().decode("utf-8", errors="replace")[:200]
         if e.code in (402,) or "payment" in corpo.lower() or "billing" in corpo.lower():

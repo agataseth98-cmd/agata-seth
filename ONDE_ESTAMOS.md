@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADAS — nada mais esperando assinatura] Conferi as duas assinaturas que você fez; as duas são suas e valem.** O alarme de memória apagada já está no ar: se a memória local perder história, a Seth avisa na primeira linha. A correção do teste de modelos, de 22/09, também entrou. A Seth foi reiniciada e responde normal. A Cerebras voltou a funcionar no fim da tarde.
+- **HuggingFace:** além de estar sem crédito, a conexão dela está desligada no roteador desde ontem de manhã. Pra voltar: (1) esperar os créditos grátis do mês renovarem (a data aparece em huggingface.co/settings/billing, na sua conta); (2) religar a conexão. O passo 2 eu faço quando você me disser que o crédito voltou.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (519).
+
 **[FEITO — só falta 1 assinatura sua] Resolvi as pendências que te mostrei.**
 - **Goose:** agora ele te pergunta antes de escrever ou editar qualquer arquivo. Também ganhou a regra escrita de nunca mexer na memória por conta própria. Se incomodar, dá pra voltar atrás.
 - **Obsidian:** não fica mais caindo quando o computador liga. Espera você entrar na sessão e abre uma vez só.

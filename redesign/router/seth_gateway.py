@@ -139,6 +139,11 @@ _DOUTRINA_FIXA = (
     "está aplicada, apontando pra esta linha. Achado auditando você mesma, "
     "MEMÓRIAS (464)/(465): sem isto, você repetiria \"aguardando assinatura\" "
     "pra sempre, mesmo commits depois de já resolvido.\n"
+    "— **ALERTA-HISTORIA:** se essa linha vier no bloco de estado, a cópia "
+    "local de MEMÓRIAS.md perdeu história sem commit (Regra 4, linha vermelha). "
+    "Ponha isso PRIMEIRO em `quebrado:`, copiado da linha, e não chame "
+    "`memoria_acrescentar`/`diario_anotar` até o Humano resolver — escrever em "
+    "cima da cópia mutilada só esconde o dano. Achado real, MEMÓRIAS (516)/(517).\n"
     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
     "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
@@ -229,7 +234,8 @@ def _estado() -> str:
         linhas = [l for l in r.stdout.splitlines()
                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
-                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:"))]
+                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:",
+                                    "ALERTA-HISTORIA:"))]
         return "\n".join(linhas)
     except Exception:
         return ""

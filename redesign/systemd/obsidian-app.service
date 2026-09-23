@@ -1,0 +1,26 @@
+[Unit]
+Description=Obsidian.app (Fase 7-adjacente) -- backend real da API REST/MCP que o proxy obsidian-ro-proxy (:27125) usa, e que a Seth le via query_canon
+Documentation=file:///home/orusoua/agata/redesign/obsidian/ro_proxy.py
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+Environment=DISPLAY=:0
+# Espera o display existir antes de abrir o app (achado 23/09/2026, MEMÓRIAS (518)):
+# agata.target sobe no boot, antes do login grafico; sem isto o Obsidian caia com
+# status=139 (sem socket X11) em loop -- 85+ reinicios ate o Humano entrar na sessao.
+# Espera sem prazo (o login pode demorar horas) e sem gastar reinicio.
+ExecStartPre=/bin/sh -c 'until [ -S /tmp/.X11-unix/X0 ]; do sleep 2; done'
+TimeoutStartSec=infinity
+ExecStart=/usr/bin/flatpak run md.obsidian.Obsidian
+Restart=on-failure
+RestartSec=5
+# A API REST do Obsidian (plugin "Local REST API with MCP") so existe enquanto
+# o app roda -- achado em 20/09/2026: obsidian-ro-proxy (:27125) fica de pe
+# sozinho, mas devolve 403 "upstream inacessivel" (nao 502/503) quando o app
+# esta fechado, o que uma leitura rapida confunde com permissao negada. Este
+# servico fecha essa classe de falha, subindo o app junto com a sessao grafica.
+
+[Install]
+WantedBy=agata.target

@@ -69,6 +69,21 @@ h_projeto=$(sha256sum PROJETO.md  | cut -c1-8)
 # `git diff HEAD` já cobre staged + não-staged. Achado 1 da Camada B, 31/08/2026.
 sujos=$(git -c core.quotepath=false diff --name-only HEAD -- "${CANONICOS[@]}" 2>/dev/null | paste -sd' ' - || true)
 
+# --- ALERTA-HISTORIA: MEMÓRIAS.md perdeu linhas sem commit? ---
+# "Árvore suja" acima não distingue uma entrada nova esperando commit (normal)
+# de história APAGADA (Regra 4, linha vermelha). Em MEMÓRIAS.md, entre dois
+# commits, só se acrescenta -- linha removida em relação ao HEAD nunca é
+# legítima. Achado real, MEMÓRIAS (516)/(517): a ferramenta `write` do Goose
+# reescreveu o arquivo inteiro (2457 -> 14 linhas) e ficou assim a manhã toda
+# com `sync: FALHA` genérico, sem ninguém reagir. Linha própria, com número,
+# pra ninguém confundir com "tem entrada pendente".
+removidas=$(git diff --numstat HEAD -- MEMÓRIAS.md 2>/dev/null | awk '{print $2}' | head -1 || true)
+alerta_historia=""
+if [ -n "$removidas" ] && [ "$removidas" != "-" ] && [ "$removidas" -gt 0 ] 2>/dev/null; then
+  alerta_historia="ALERTA-HISTORIA: MEMÓRIAS.md perdeu $removidas linha(s) em relação ao HEAD, sem commit -- história apagada na cópia local (Regra 4). Não escreva em MEMÓRIAS nem commite; avise o Humano. O canon no GitHub não é afetado."
+  SAIDA=$(( SAIDA < 1 ? 1 : SAIDA ))
+fi
+
 # --- sync: local × remoto (forma canônica de REGRAS) ---
 # Timeout PRÓPRIO pro `ls-remote`, menor que o timeout externo do chamador
 # (seth_gateway.py usa 25s pro script inteiro) -- achado real, MEMÓRIAS (492):
@@ -171,7 +186,8 @@ cat <<FIM
 HEAD: $head7 $head_subject
 TOPO-MEMÓRIAS: $topo_linha
 $sync_linha
-IDADE-HIDRATACAO: $idade_hidratacao
+${alerta_historia:+$alerta_historia
+}IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
 ${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
 }HORA-MAQUINA: $hora_maquina
