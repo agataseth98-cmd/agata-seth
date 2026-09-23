@@ -1,0 +1,17 @@
+diff --git a/.githooks/post-merge b/.githooks/post-merge
+new file mode 100755
+index 0000000..126a18e
+--- /dev/null
++++ b/.githooks/post-merge
+@@ -0,0 +1,11 @@
++#!/usr/bin/env bash
++# Depois de `git pull`/`git merge`: roda os MESMOS passos do post-commit
++# (bundle de backup, vault Obsidian, índice derivado + Drive). Uma lógica só,
++# nunca duplicada aqui -- quem muda o post-commit muda os dois.
++#
++# Por quê (MEMÓRIAS (519)/(520)): merge feito pelo GitHub chega na Máquina
++# por `git pull`, que não dispara o post-commit. O vault ficava gerado do
++# commit ANTERIOR, e o P-10 barrava o próximo commit ("memoria/obsidian/ não
++# bate com o que gerar_obsidian.py produz de HEAD") sem nenhuma edição real.
++# Fail-soft como o post-commit: nunca atrapalha o merge.
++exec "$(dirname "$0")/post-commit" "$@"

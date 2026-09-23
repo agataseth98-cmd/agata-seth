@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3ec6dadad77a799c380d0f4ae95ce36bb6703e54
-  Escrito em: 23/09/2026 18:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2d52950e69c0d92baad5708ed04ac73ea140dd9c
+  Escrito em: 23/09/2026 18:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando assinatura (P-8): depois de `git pull`, roda os mesmos passos do `post-commit`. Fecha o candidato registrado em (519): merge feito pelo GitHub deixava o vault atrás do HEAD, e o P-10 barrava o próximo commit sem edição real nenhuma.**
+
+**Desenho: uma lógica só.** `.githooks/post-merge` é uma linha: `exec "$(dirname "$0")/post-commit"`. Tudo o que o `post-commit` faz faltava depois de um pull: bundle de backup, vault Obsidian com SHA/data fixados no HEAD, índice derivado e envio ao Drive quando o índice muda. Duplicar esses passos criaria duas cópias que divergem com o tempo, o risco que (507) já recusou. Fail-soft herdado: o `post-commit` sai sempre com 0, então nunca atrapalha o merge. Fica de fora, de propósito: `git pull --rebase` (que dispara `post-rewrite`, não `post-merge`) e troca de branch (`post-checkout`). Neste repositório o fluxo é PR mergeada pelo GitHub + `pull --ff-only`, que é exatamente o caso coberto.
+
+**Testado num clone isolado.** Bare local + dois clones, `core.hooksPath=.githooks`, `HOME` apontando pra uma pasta falsa, pra o envio ao Drive e o bundle não tocarem o Drive nem o staging reais — o efeito colateral registrado em (506). Resultado: o envio ao Drive falhou fail-soft, como devia; o staging real não foi tocado (`PENDENTE-HD-DESCONECTADO` continua com a hora do commit anterior, 18:07). (1) **Sem o gancho:** depois do pull, o vault difere do que o P-10 gera do HEAD, e o P-10 barraria. O bloqueio real da (519) foi reproduzido. (2) **Gancho copiado mas não commitado:** ainda diferia, só em `script-post-merge.md`/`moc-scripts.md`/`estado.md`, porque o gerador lista o próprio gancho como script fora do HEAD. É artefato do teste; no uso real o gancho está commitado. (3) **Gancho commitado, pull de um commit novo:** vault `de83720e00cf` → `4782aed32db9`, idêntico ao esperado (`4782aed32db9`), e o P-10 passaria. `git apply --check` limpo contra `git archive HEAD`.
+
+**Sob quarentena P-8, aguardando assinatura:** `propostas/post-merge-regenera-derivados-2026-09-23.diff` (1 arquivo novo, `.githooks/post-merge`).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: leitura completa de `.githooks/post-commit`; 3 cenários reais em clone isolado (bare + clones, `HOME` falso), com o hash do vault comparado ao que o P-10 gera a partir do `git archive HEAD`; `ls` do staging real conferindo que ele não foi tocado; `git apply --check`. Autorização: Humano — "gancheie".
 
 (519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-historia-apagada-2026-09-23` (518) e `conselho-remoto-corrige-sonda-e-doc-2026-09-22` (513). A HuggingFace não está só sem crédito: a conexão está DESLIGADA no OmniRoute desde 22/09 às 10:11. A Cerebras voltou a responder às 18:03.**
 
