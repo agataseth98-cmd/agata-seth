@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
+  palavras-chave: assinado, verificado, aplicado, post, merge, regenera, derivados, git, pull, máquina, roda, mesmo, commit
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando assinatura (P-8): depois de `git pull`, roda os mesmos passos do `post-commit`. Fecha o candidato registrado em (519): merge feito pelo GitHub deixava o vault atrás do HEAD, e o P-10 barrava o próximo commit sem edição real nenhuma.**
   palavras-chave: gancho, post, merge, pronto, testado, aguardando, assinatura, git, pull, roda, mesmos, passos, commit, fecha, candidato, registrado, feito, github, deixava, vault, atrás, head, barrava, próximo, edição, real
 (519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-historia-apagada-2026-09-23` (518) e `conselho-remoto-corrige-sonda-e-doc-2026-09-22` (513). A HuggingFace não está só sem crédito: a conexão está DESLIGADA no OmniRoute desde 22/09 às 10:11. A Cerebras voltou a responder às 18:03.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, achada, verdade, corrigida, mitigada, buraco, git, remote, dentro, scripts, estado, eco, tinha, timeout, próprio, pico, rede, consumia, orçamento, inteiro, subprocess, seth, gateway, derrubava, script, mesmo, dados, dependem, head, hashes, topo, memórias, testado, simulando, morta, conserto, falharia, ele, sai, tudo, certo, sync, verificado, lugar, pass, proposta, pronta, sob, quarentena, aguardando, assinatura
 (492) DIÁRIO — 21/09/2026 · **Checagem final do Goose, pedida pelo Humano depois de (491): achei um buraco real na mudança de (490) — quando o bloco injetado do `seth_gateway` não chega (intermitente, causa não fechada), o Goose, seguindo a instrução nova ao pé da letra, ficava preso tentando `grep` um nome de campo que não existe como texto literal em `MEMÓRIAS.md`. Corrigido com um degrau de fallback explícito no `AGENTS.md`. `Lacuna` que fica aberta: por que a injeção falha às vezes.**
   palavras-chave: checagem, final, goose, pedida, humano, achei, buraco, real, mudança, bloco, injetado, seth, gateway, chega, intermitente, causa, fechada, seguindo, instrução, nova, letra, ficava, preso, tentando, grep, nome, campo, existe, texto, literal, memórias, corrigido, degrau, fallback, explícito, agents, lacuna, fica, aberta, injeção, falha
-(491) DIÁRIO — 21/09/2026 · **"Seth parou de responder" — investigado na Máquina, não era o upgrade do LibreChat. Falso alarme de latência: o modelo gastou ~110s "pensando" o formato do cabeçalho antes de responder (mesmo padrão já documentado em (475)/(476)), não travou, não tocou ferramenta nenhuma, entregou a resposta certa no fim.**
-  palavras-chave: seth, parou, responder, investigado, máquina, era, upgrade, librechat, falso, alarme, latência, modelo, gastou, pensando, formato, cabeçalho, mesmo, padrão, documentado, travou, tocou, ferramenta, entregou, resposta, certa, fim
+(491) DIÁRIO — 21/09/2026 · **"Seth parou de responder" — investigado na Máquina …
+  palavras-chave: seth, parou, responder, investigado, máquina
 (490) DIÁRIO — 21/09/2026 · **Ordem do Humano: hidratação do Goose pelo mesmo mé …
   palavras-chave: ordem, humano, hidratação, goose, mesmo
 (489) DIÁRIO — 21/09/2026 · **Assinatura do Humano verificada de verdade (`ssh-k …

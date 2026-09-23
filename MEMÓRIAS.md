@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2d52950e69c0d92baad5708ed04ac73ea140dd9c
-  Escrito em: 23/09/2026 18:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 52ec655395b856cdfdd80df5192f37a74b5df4e9
+  Escrito em: 23/09/2026 18:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d52950e69c0d92baad5708ed04ac73ea140dd9c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52ec655395b856cdfdd80df5192f37a74b5df4e9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
+
+**Verificação.** O `sha256sum` do `.diff` bateu com a linha `diff-sha256:` do `APROVADO-`. `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers`, namespace `agata-aprovacao-p8`: `Good signature` da chave `agata-humano`. `git apply --check` limpo; aplicado, com `bash -n` limpo e o bit de execução preservado (`-rwxr-xr-x`). Par movido pra `propostas/aplicadas/`. **O primeiro uso real é o pull do merge desta própria PR**: o resultado fica conferido na resposta que fecha esta sessão, não nesta entrada, porque o gancho só existe no `main` depois do merge.
+
+**Decisão registrada sobre troca de branch** (explicada ao Humano nesta sessão): o `post-checkout` fica de fora. No fluxo daqui (branch → PR → merge no GitHub → `pull`), o índice atrasado ao voltar pro `main` é corrigido pelo `post-merge` logo em seguida. O `post-checkout` dispara também em `git checkout -- <arquivo>`, e chamaria backup e Drive a cada desfazer de teste (classe da (506)). Se o caso aparecer, o P-10 barra o commit de forma visível, sem estrago silencioso. Reabrir só se virar problema real.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` reais; `git apply --check`/`git apply`; `bash -n`; `ls -la` do bit de execução. Autorização: Humano — assinou (`scripts/aprovar.sh post-merge-regenera-derivados-2026-09-23`) e disse "feito".
 
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando assinatura (P-8): depois de `git pull`, roda os mesmos passos do `post-commit`. Fecha o candidato registrado em (519): merge feito pelo GitHub deixava o vault atrás do HEAD, e o P-10 barrava o próximo commit sem edição real nenhuma.**
 
