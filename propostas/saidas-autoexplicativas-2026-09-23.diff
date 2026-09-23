@@ -1,0 +1,154 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 56bf051..70d136b 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -65,9 +65,15 @@ async function vaultGet(rel) {
+   return { ct, body: await r.text() };
+ }
+ 
++// O corte diz o TOTAL e a fração (MEMÓRIAS (525); Catálogo de falhas, (250):
++// "ler parte truncada e não declarar a fração"). Sem o total, quem lê não sabe
++// quanto ficou de fora e tende a tratar o pedaço como o todo.
+ function clamp(s, nota) {
+   if (s.length <= MAX) return s;
+-  return s.slice(0, MAX) + `\n\n[...cortado em ${MAX} chars${nota ? " — " + nota : ""}]`;
++  const pct = Math.round((MAX / s.length) * 100);
++  return s.slice(0, MAX) +
++    `\n\n[...CORTADO: mostrando ${MAX} de ${s.length} chars (~${pct}%)${nota ? " — " + nota : ""}. ` +
++    `O resto NÃO foi lido — não conclua nada sobre ele.]`;
+ }
+ 
+ // ---- query_canon -------------------------------------------------------------
+@@ -98,7 +104,15 @@ async function queryCanon(a) {
+     const ctx = Math.max(0, Math.min(20, a.contexto ?? 3));
+     const hits = [];
+     linhas.forEach((ln, i) => { if (re.test(ln)) hits.push(i); });
+-    if (!hits.length) return `(${file}) sem linha casando /${a.grep}/i`;
++    // Ausência de match NÃO prova ausência (Catálogo de falhas, (250)/(251):
++    // "grep negativo usado como prova de ausência sem validar o padrão").
++    // O grep é REGEX: "(522)" vira grupo, "." casa qualquer coisa -- um padrão
++    // mal escrito devolve vazio sobre algo que existe. MEMÓRIAS (525).
++    if (!hits.length) return `(${file}) sem linha casando /${a.grep}/i. ` +
++      `ATENÇÃO: isto NÃO prova que o conteúdo não existe — o grep é regex ` +
++      `(parênteses, ponto e colchete são especiais; ex.: entrada (522) = "\\(522\\)"). ` +
++      `Antes de afirmar ausência, teste o padrão contra algo que você sabe que existe, ` +
++      `ou afrouxe o padrão.`;
+     const want = new Set();
+     hits.forEach((i) => { for (let j = i - ctx; j <= i + ctx; j++) if (j >= 0 && j < linhas.length) want.add(j); });
+     const ordered = [...want].sort((x, y) => x - y);
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 12d2f21..13283bf 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -104,7 +104,8 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+     ),
+     "servicos": (
+         ["systemctl", "--user", "--failed", "--no-pager", "--plain"], 30,
+-        "Unidades de usuário em falha. Vazio é bom.",
++        "Unidades de usuário em FALHA (`systemctl --user --failed`). "
++        "'0 loaded units listed' = nenhuma falhando = saudável.",
+     ),
+ }
+ 
+@@ -170,6 +171,56 @@ def _redigir(texto: str) -> tuple[str, int]:
+     return texto, n
+ 
+ 
++# --- leitura: o SENTIDO da saída, calculado, não deixado pro modelo adivinhar --
++# Achado real, MEMÓRIAS (524)/(525): a Seth recebeu "0 loaded units listed" do
++# `servicos` e concluiu "falta de unidades ativas" -- o contrário do fato (zero
++# unidades em FALHA = saudável). A descrição dizia "Vazio é bom", mas nunca
++# viajava junto com a saída. Aqui: só leitura que dá pra CALCULAR da saída (ou
++# de um fato fixo da Máquina), nunca opinião. Sem leitura segura -> None, e o
++# modelo fica com a saída + a descrição.
++def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) -> str | None:
++    if nome == "servicos":
++        m = re.search(r"(\d+) loaded units? listed", texto)
++        if m is None:
++            return None
++        k = int(m.group(1))
++        return ("nenhuma unidade de usuário em falha -- saudável."
++                if k == 0 else f"{k} unidade(s) de usuário em FALHA -- listadas abaixo.")
++    if nome == "git_status":
++        linhas = [x for x in texto.splitlines() if x.strip()]
++        ramo = next((x for x in linhas if x.startswith("## ")), None)
++        arquivos = [x for x in linhas if not x.startswith("## ")]
++        partes = [("árvore limpa (nada modificado nem staged)" if not arquivos
++                   else f"{len(arquivos)} arquivo(s) modificado(s)/staged/novo(s)")]
++        if ramo:
++            ad = re.search(r"ahead (\d+)", ramo); at = re.search(r"behind (\d+)", ramo)
++            if ad or at:
++                partes.append(f"{ad.group(1) if ad else 0} commit(s) à frente e "
++                              f"{at.group(1) if at else 0} atrás do remoto rastreado")
++            elif "..." in ramo:
++                partes.append("em dia com o remoto rastreado (na última busca local; "
++                              "pra medir o remoto AGORA use git_sync)")
++        return "; ".join(partes) + "."
++    if nome == "git_diff_stat":
++        return ("nada difere de HEAD -- a árvore de trabalho é igual ao último commit."
++                if not texto.strip() else "há diferença em relação a HEAD -- arquivos listados abaixo.")
++    if nome == "git_sync":
++        m = re.search(r"\b([0-9a-f]{40})\s+refs/heads/main\b", texto)
++        if m is None or not head_local:
++            return None
++        remoto = m.group(1)
++        return (f"remoto = HEAD local ({remoto[:7]}) -- sincronizado." if remoto == head_local
++                else f"DIFERENTE: HEAD local {head_local[:7]}, remoto {remoto[:7]} -- "
++                     f"a cópia local não é o canon publicado.")
++    if nome == "perimetro":
++        m = re.search(r"^=== RESULTADO GERAL: .*$", texto, re.M)
++        return m.group(0).strip("= ").strip() if m else None
++    if nome in ("selos", "suite_controles"):
++        return ("exit=0 -- passou." if codigo == 0
++                else f"exit={codigo} -- FALHOU; o motivo está na saída abaixo.")
++    return None
++
++
+ def _executar(nome: str, n: int | None) -> str:
+     argv = _argv(nome, n)
+     _, timeout, _desc = COMANDOS[nome]
+@@ -186,7 +237,18 @@ def _executar(nome: str, n: int | None) -> str:
+ 
+     texto, redigidos = _redigir(bruto)
+     total_linhas = texto.count("\n") + 1 if texto else 0
+-    cabeca = [f"$ {nome}  (exit={codigo})"]
++    head_local = None
++    if nome == "git_sync":
++        try:
++            head_local = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(REPO),
++                                        capture_output=True, text=True, timeout=10,
++                                        shell=False).stdout.strip() or None
++        except (subprocess.TimeoutExpired, OSError):
++            head_local = None
++    cabeca = [f"$ {nome}  (exit={codigo})", f"[o que é: {_desc}]"]
++    leitura = _leitura(nome, texto, codigo, head_local)
++    if leitura:
++        cabeca.append(f"[leitura: {leitura}]")
+     if redigidos:
+         cabeca.append(f"[{redigidos} trecho(s) redigido(s) pela régua de segredo]")
+     if len(texto) > TETO_CHARS:
+@@ -289,6 +351,24 @@ def _selftest() -> int:
+     casos.append(("nenhum argv usa shell",
+                   all(a[0] not in ("sh", "-c") and "sh -c" not in " ".join(a)
+                       for a, _t, _d in COMANDOS.values())))
++    # 8. leitura calculada (MEMÓRIAS (525)) -- o caso real que a Seth leu ao contrário
++    vazio = "UNIT LOAD ACTIVE SUB DESCRIPTION\n\n0 loaded units listed.\n"
++    casos.append(("servicos 0 -> saudável", "saudável" in (_leitura("servicos", vazio, 0) or "")))
++    casos.append(("servicos 2 -> FALHA",
++                  "2 unidade(s)" in (_leitura("servicos", "x.service loaded failed failed x\n\n2 loaded units listed.", 0) or "")))
++    casos.append(("git_status limpo", "árvore limpa" in (_leitura("git_status", "## main...origin/main\n", 0) or "")))
++    casos.append(("git_status sujo+ahead",
++                  (lambda r: "1 arquivo" in r and "2 commit(s) à frente" in r)(
++                      _leitura("git_status", "## main...origin/main [ahead 2]\n M REGRAS.md\n", 0) or "")))
++    casos.append(("git_diff_stat vazio", "nada difere" in (_leitura("git_diff_stat", "", 0) or "")))
++    sha = "a" * 40
++    casos.append(("git_sync igual", "sincronizado" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, sha) or "")))
++    casos.append(("git_sync diferente", "DIFERENTE" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, "b" * 40) or "")))
++    casos.append(("git_sync sem HEAD local -> sem leitura", _leitura("git_sync", f"{sha}\trefs/heads/main", 0, None) is None))
++    casos.append(("perimetro repete RESULTADO",
++                  "OK -- 16 OK" in (_leitura("perimetro", "x\n=== RESULTADO GERAL: OK -- 16 OK · 0 FALHA ===\n", 0) or "")))
++    casos.append(("selos exit!=0 -> FALHOU", "FALHOU" in (_leitura("selos", "", 1) or "")))
++    casos.append(("estado sem leitura inventada", _leitura("estado", "HEAD: x", 0) is None))
+     for nome, passou in casos:
+         print(("PASS  " if passou else "FALHA ") + nome)
+         ok += 1 if passou else 0
