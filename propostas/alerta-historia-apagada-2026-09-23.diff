@@ -1,0 +1,94 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 04430b6..84a1bfd 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -139,6 +139,11 @@ _DOUTRINA_FIXA = (
+     "está aplicada, apontando pra esta linha. Achado auditando você mesma, "
+     "MEMÓRIAS (464)/(465): sem isto, você repetiria \"aguardando assinatura\" "
+     "pra sempre, mesmo commits depois de já resolvido.\n"
++    "— **ALERTA-HISTORIA:** se essa linha vier no bloco de estado, a cópia "
++    "local de MEMÓRIAS.md perdeu história sem commit (Regra 4, linha vermelha). "
++    "Ponha isso PRIMEIRO em `quebrado:`, copiado da linha, e não chame "
++    "`memoria_acrescentar`/`diario_anotar` até o Humano resolver — escrever em "
++    "cima da cópia mutilada só esconde o dano. Achado real, MEMÓRIAS (516)/(517).\n"
+     "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
+     "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
+     "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
+@@ -229,7 +234,8 @@ def _estado() -> str:
+         linhas = [l for l in r.stdout.splitlines()
+                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
+                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
+-                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:"))]
++                                    "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:",
++                                    "ALERTA-HISTORIA:"))]
+         return "\n".join(linhas)
+     except Exception:
+         return ""
+diff --git a/redesign/systemd/obsidian-app.service b/redesign/systemd/obsidian-app.service
+new file mode 100644
+index 0000000..dd978a9
+--- /dev/null
++++ b/redesign/systemd/obsidian-app.service
+@@ -0,0 +1,26 @@
++[Unit]
++Description=Obsidian.app (Fase 7-adjacente) -- backend real da API REST/MCP que o proxy obsidian-ro-proxy (:27125) usa, e que a Seth le via query_canon
++Documentation=file:///home/orusoua/agata/redesign/obsidian/ro_proxy.py
++After=graphical-session.target
++Wants=graphical-session.target
++
++[Service]
++Type=simple
++Environment=DISPLAY=:0
++# Espera o display existir antes de abrir o app (achado 23/09/2026, MEMÓRIAS (518)):
++# agata.target sobe no boot, antes do login grafico; sem isto o Obsidian caia com
++# status=139 (sem socket X11) em loop -- 85+ reinicios ate o Humano entrar na sessao.
++# Espera sem prazo (o login pode demorar horas) e sem gastar reinicio.
++ExecStartPre=/bin/sh -c 'until [ -S /tmp/.X11-unix/X0 ]; do sleep 2; done'
++TimeoutStartSec=infinity
++ExecStart=/usr/bin/flatpak run md.obsidian.Obsidian
++Restart=on-failure
++RestartSec=5
++# A API REST do Obsidian (plugin "Local REST API with MCP") so existe enquanto
++# o app roda -- achado em 20/09/2026: obsidian-ro-proxy (:27125) fica de pe
++# sozinho, mas devolve 403 "upstream inacessivel" (nao 502/503) quando o app
++# esta fechado, o que uma leitura rapida confunde com permissao negada. Este
++# servico fecha essa classe de falha, subindo o app junto com a sessao grafica.
++
++[Install]
++WantedBy=agata.target
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 6fb6484..472c53f 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -69,6 +69,21 @@ h_projeto=$(sha256sum PROJETO.md  | cut -c1-8)
+ # `git diff HEAD` já cobre staged + não-staged. Achado 1 da Camada B, 31/08/2026.
+ sujos=$(git -c core.quotepath=false diff --name-only HEAD -- "${CANONICOS[@]}" 2>/dev/null | paste -sd' ' - || true)
+ 
++# --- ALERTA-HISTORIA: MEMÓRIAS.md perdeu linhas sem commit? ---
++# "Árvore suja" acima não distingue uma entrada nova esperando commit (normal)
++# de história APAGADA (Regra 4, linha vermelha). Em MEMÓRIAS.md, entre dois
++# commits, só se acrescenta -- linha removida em relação ao HEAD nunca é
++# legítima. Achado real, MEMÓRIAS (516)/(517): a ferramenta `write` do Goose
++# reescreveu o arquivo inteiro (2457 -> 14 linhas) e ficou assim a manhã toda
++# com `sync: FALHA` genérico, sem ninguém reagir. Linha própria, com número,
++# pra ninguém confundir com "tem entrada pendente".
++removidas=$(git diff --numstat HEAD -- MEMÓRIAS.md 2>/dev/null | awk '{print $2}' | head -1 || true)
++alerta_historia=""
++if [ -n "$removidas" ] && [ "$removidas" != "-" ] && [ "$removidas" -gt 0 ] 2>/dev/null; then
++  alerta_historia="ALERTA-HISTORIA: MEMÓRIAS.md perdeu $removidas linha(s) em relação ao HEAD, sem commit -- história apagada na cópia local (Regra 4). Não escreva em MEMÓRIAS nem commite; avise o Humano. O canon no GitHub não é afetado."
++  SAIDA=$(( SAIDA < 1 ? 1 : SAIDA ))
++fi
++
+ # --- sync: local × remoto (forma canônica de REGRAS) ---
+ # Timeout PRÓPRIO pro `ls-remote`, menor que o timeout externo do chamador
+ # (seth_gateway.py usa 25s pro script inteiro) -- achado real, MEMÓRIAS (492):
+@@ -171,7 +186,8 @@ cat <<FIM
+ HEAD: $head7 $head_subject
+ TOPO-MEMÓRIAS: $topo_linha
+ $sync_linha
+-IDADE-HIDRATACAO: $idade_hidratacao
++${alerta_historia:+$alerta_historia
++}IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+ ${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
+ }HORA-MAQUINA: $hora_maquina

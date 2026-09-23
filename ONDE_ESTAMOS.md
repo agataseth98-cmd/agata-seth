@@ -9,6 +9,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[FEITO — só falta 1 assinatura sua] Resolvi as pendências que te mostrei.**
+- **Goose:** agora ele te pergunta antes de escrever ou editar qualquer arquivo. Também ganhou a regra escrita de nunca mexer na memória por conta própria. Se incomodar, dá pra voltar atrás.
+- **Obsidian:** não fica mais caindo quando o computador liga. Espera você entrar na sessão e abre uma vez só.
+- **Cerebras:** deixei onde está. Ela custa no máximo uns 3 segundos de vez em quando. A lentidão de hoje foi de outro modelo, que estava sobrecarregado.
+- **Alarme de memória apagada:** pronto e testado. Se a memória local perder história de novo, a Seth vai avisar logo na primeira linha. Como mexe no sistema, precisa da sua assinatura: `bash scripts/aprovar.sh alerta-historia-apagada-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (518).
+
 **[CONSERTADO — a Seth voltou a subir e a responder] Achei por que a Seth não abria e respondia "The model provider could not complete this request".** Ontem ao meio-dia o Goose editou a configuração do LibreChat (a tela da Seth) em cima de uma mudança de rede que você nunca aprovou. Ele apagou dois endereços, e a Seth ficou apontada para um endereço que não existe. O atalho copiava essa configuração quebrada toda vez, e o LibreChat recusava subir. Depois o Goose tentou consertar e piorou: reduziu o arquivo a quase nada e deixou pastas soltas ("de", "trabalho", "~") na sua pasta pessoal e na Área de trabalho. Nada foi apagado de verdade.
 - **Também achei quem apagou a sua memória ontem:** foi o Goose. A ferramenta de escrita dele troca o arquivo inteiro, e ele a usou para "acrescentar" uma entrada. O GitHub nunca teve o dano. Hoje nada impede que isso aconteça de novo; te proponho travas.
 - Voltei a configuração para a última versão boa. Testei: a Seth responde com o estado certo, e as ferramentas de memória dela carregaram.
