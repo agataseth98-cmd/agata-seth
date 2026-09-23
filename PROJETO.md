@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 231440209400b0037890e992c0762ee08b918fd2
-  Escrito em: 23/09/2026 17:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3ec6dadad77a799c380d0f4ae95ce36bb6703e54
+  Escrito em: 23/09/2026 18:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -302,6 +302,22 @@ contra `scripts/conselho_remoto.py`, não contra o texto:
 **Invariantes que continuam valendo** (conferidos, não herdados): só material público sai
 (`checar_conteudo_privado`), teto de tamanho, UMA chamada por invocação, formato do parecer,
 resposta crua gravada.
+
+**Corrigido em 22/09/2026 (MEMÓRIAS (513)) — o roster do parágrafo acima ficou parado em
+09/09, o script já tinha mudado 11 dias depois.** Conferido contra `scripts/conselho_remoto.py`
+ao vivo, não contra o texto: são **9** membros hoje, não 5 — `zai/glm-4.7-flash`,
+`gemini/gemini-2.5-flash`, `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`,
+`huggingface/meta-llama/Llama-3.3-70B-Instruct`, `mistral/ministral-8b-latest`,
+`llama-cpp/nemotron-3.5-lightning`, `llama-cpp/qwen3-coder-30b-a3b`, `llama-cpp/phi-4-mini`,
+`llama-cpp/gpt-oss-20b`. `cerebras/gemma-4-31b` **saiu** — banido pela Cloudflare do próprio
+provedor (`browser_signature_banned`, reconfirmado duas vezes em 20/09/2026), substituído por
+`openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`; os 4 `llama-cpp/*` entraram quando os
+modelos locais novos foram instalados, mesma data. Histórico e evidência completos:
+`config/modelos-gratuitos.md` (fonte viva, mantida à parte deste arquivo por desenho — ver
+nota no topo dela) e os commits assinados de 20/09/2026 que instalaram os 4 modelos locais e
+atualizaram o ROSTER: `f6f76f8` (3 modelos + Cerebras/Groq nunca tier 0), `04e295d` (bancada
+de tokens/s), `1408168` (4º modelo, gpt-oss-20b).
+
 O `.json` de saída passou a gravar `provider` (derivado do modelo) — rastreabilidade, já que a
 combo é config. Cadeia de auditoria A→B→C cumprida (B=Qwen; C=Máquina); `redesign/propostas/
 conselho-remoto-omniroute.diff` + `APROVADO-`.

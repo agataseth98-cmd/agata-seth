@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 231440209400b0037890e992c0762ee08b918fd2
-  Escrito em: 23/09/2026 17:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3ec6dadad77a799c380d0f4ae95ce36bb6703e54
+  Escrito em: 23/09/2026 18:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/231440209400b0037890e992c0762ee08b918fd2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3ec6dadad77a799c380d0f4ae95ce36bb6703e54/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-historia-apagada-2026-09-23` (518) e `conselho-remoto-corrige-sonda-e-doc-2026-09-22` (513). A HuggingFace não está só sem crédito: a conexão está DESLIGADA no OmniRoute desde 22/09 às 10:11. A Cerebras voltou a responder às 18:03.**
+
+**Verificação, não confiança no marcador.** Para cada par: o `sha256sum` do `.diff` bateu com a linha `diff-sha256:` do `APROVADO-`, e `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers`, namespace `agata-aprovacao-p8`, deu `Good signature` da chave `agata-humano` (as duas). `git apply --check` limpo na árvore atual; a proposta de 22/09 veio de 2 commits atrás e aplicou sem conflito. Pares movidos pra `propostas/aplicadas/`.
+
+**O que entra.** Da (518): a linha `ALERTA-HISTORIA:` em `scripts/estado_para_eco.sh`; o repasse dela e a doutrina no `redesign/router/seth_gateway.py`; e `redesign/systemd/obsidian-app.service`, byte a byte igual à unit que já roda (conferido com `cmp`). Da (513): o `_sondar()` de `scripts/pesquisar_modelos_gratuitos.py` passa a usar o `max_tokens` real de cada modelo; e as correções do ROSTER em `PROJETO.md` e da Cerebras em `config/modelos-gratuitos.md`. **Testado depois de aplicar:** `bash -n` e `py_compile` limpos, `seth_gateway.py --selftest` OK. `seth-gateway.service` reiniciado pra carregar o código novo, e 2 chamadas reais à Seth responderam 200. Ela acusou `sync: FALHA` por causa do `PROJETO.md` ainda não commitado; é a detecção fazendo o trabalho certo, e resolve com este commit. **Achado lateral, não é defeito:** uma chamada com `max_tokens: 300` voltou vazia depois de 47 s, porque o orçamento foi gasto em raciocínio (mesma classe da (513)). Com 2000 tokens, respostas normais em 3,7 a 6,1 s.
+
+**Achado no commit:** o P-10 barrou a primeira tentativa. O vault `memoria/obsidian/` tinha sido gerado pelo post-commit do commit do branch (`ab565aa`), e o `main` chegou ao merge da PR #17 por `git pull`, que não roda o post-commit. O vault ficou atrás do HEAD e o P-10 pegou. Regenerado com `scripts/gerar_obsidian.py` a partir do HEAD; o commit passou. **Vai acontecer de novo** depois de todo merge feito pelo GitHub, até alguém regenerar o vault. Não é dano, é o controle fazendo o trabalho dele; um hook `post-merge` resolveria, e fica registrado como candidato, sem ação.
+
+**Cerebras:** as duas respostas das 18:03 vieram de `gpt-oss-120b`. Três horas antes eram 3 de 3 em 403 (Cloudflare 1010), registrados na (518). Confirma a oscilação e a decisão da (518) de não tirá-la da fila.
+
+**HuggingFace — corrige a leitura de "só sem crédito" das (515)/(517).** Leitura só dos campos de estado de `provider_connections` no `~/.omniroute/storage.sqlite`, sem ler chave: `is_active=0`, `test_status=active`, sem erro registrado, `updated_at=2026-09-22T13:11:34Z` (10:11 em Brasília). As sessões do Goose daquela hora não tocam na HuggingFace nem no OmniRoute (conferido no extrato). O desligamento veio da (515), às 09:45, ou do próprio OmniRoute depois do 402, e a Máquina não guarda qual dos dois: `lacuna`. Pra voltar, faltam **duas** coisas: (1) a conta ter crédito de novo — os créditos grátis da HuggingFace renovam por mês, e a data exata de renovação desta conta é `lacuna`, só aparece em `huggingface.co/settings/billing`; (2) religar a conexão no OmniRoute. Sem o (2), mesmo com crédito, o erro continua "No active credentials".
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` reais nos 2 pares; `git apply --check` e depois `git apply`; `cmp` da unit versionada contra a viva; `bash -n`/`py_compile`/`--selftest`; `systemctl --user restart seth-gateway` + 3 chamadas reais ao `:20126`; `sqlite3 -readonly` só nas colunas de estado de `provider_connections`. Autorização: Humano — assinou os dois pares (`scripts/aprovar.sh`) e perguntou "tudo assinado quando o hugg volta?".
 
 (518) DIÁRIO — 23/09/2026 · **Pendências de (517) resolvidas com o mandato "pode fazer tudo da melhor forma para o sistema". O Goose ficou travado pra escrever arquivo sem perguntar. O Obsidian parou de cair no boot. Um alerta novo de "história apagada" está pronto e espera assinatura (P-8). A Cerebras fica na fila, com o motivo medido. O container órfão foi removido.**
 
