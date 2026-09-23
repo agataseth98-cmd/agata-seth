@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO] O gancho que refaz os índices depois de cada merge está no ar.** Conferi sua assinatura: é sua e vale. Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (521).
+
 **[PRONTO — falta sua assinatura] O gancho que atualiza o índice do Obsidian sozinho depois de cada merge.** Quando você (ou eu) aceita uma mudança pelo GitHub, o computador agora vai refazer sozinho os índices e o backup, como já faz depois de cada commit. Isso evita o bloqueio que aconteceu hoje. Testei numa cópia isolada, sem mexer no seu Drive.
 - Rode: `bash scripts/aprovar.sh post-merge-regenera-derivados-2026-09-23`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (520).
