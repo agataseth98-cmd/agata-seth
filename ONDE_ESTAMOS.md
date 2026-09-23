@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO E CONFERIDO COM VOCÊ VENDO] A Seth agora entende o resultado das ferramentas.** Conferi sua assinatura e apliquei. Fiz a mesma pergunta que ela tinha errado, e desta vez ela respondeu certo: "Nenhum serviço está falhando". Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (526).
+
 **[PRONTO — falta sua assinatura] As ferramentas da Seth vão explicar o que o resultado quer dizer.** Foi o caso de hoje: ela leu "nenhum serviço com falha" como "nenhum serviço ativo". Procurei outros casos iguais e achei mais 7. O mais sério: quando a Seth lê o PROJETO.md inteiro, ela só recebe 44% dele, e não sabia disso. Agora cada resultado vem com uma linha dizendo o que significa (calculada pela Máquina, não opinião), e os cortes dizem quanto ficou de fora.
 - Assine: `bash scripts/aprovar.sh saidas-autoexplicativas-2026-09-23`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (525).
