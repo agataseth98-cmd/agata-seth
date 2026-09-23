@@ -9,6 +9,12 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[CONSERTADO E TESTADO COM VOCÊ VENDO — falta 1 assinatura] A Seth não conseguia usar nenhuma ferramenta.** Toda vez que ela ia ler a memória ou verificar a Máquina e você aprovava, a chamada virava "Cancelado". A causa: uma configuração do LibreChat guardava o pedido de aprovação só na memória de curto prazo, e ele se perdia antes da sua resposta chegar. Troquei pra guardar no banco de dados. Você viu funcionar: a Seth leu a memória e respondeu certo.
+- Também: o "Parar Seth" não fechava o Obsidian. Consertado na mesma proposta.
+- Assine: `bash scripts/aprovar.sh hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23`
+- **Importante:** até você assinar, se você fechar e abrir a Seth pelo atalho, o defeito volta.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (523).
+
 **[ANOTADO] HuggingFace volta em 1º de outubro.** Nesse dia eu religo a conexão e testo. O Obsidian que caiu hoje foi a janela fechada; basta deixar minimizado.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (522).
 

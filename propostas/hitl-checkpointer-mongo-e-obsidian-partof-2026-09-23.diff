@@ -1,0 +1,43 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 2961ad7..20b39ee 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -114,8 +114,13 @@ endpoints:
+   # Humano antes de rodar. Testado de ponta a ponta numa cópia isolada antes
+   # de entrar aqui -- schema aceito sem erro, aprovação e rejeição confirmadas
+   # funcionando (rejeitar => "Cancelado", ferramenta nunca chamada de verdade).
+-  # `checkpointer: memory` -- estado da pausa não sobrevive a restart do
+-  # container (aceitável: só uma sessão em andamento por vez nesta Máquina).
++  # `checkpointer: mongo` (MEMÓRIAS (523)) -- era `memory`, e com `memory` a
++  # aprovação NUNCA funcionou em produção: nesta versão `getAgentCheckpointer`
++  # devolve nada pra `memory`, o cliente é descartado logo depois de pausar, e a
++  # retomada reconstrói o agente sem estado -> encerra em 20ms sem rodar a
++  # ferramenta e a UI mostra "Cancelado" (5 de 5 tentativas em 23/09). `mongo` é
++  # o padrão da própria LibreChat: grava a pausa no MongoDB que já sobe junto
++  # (`librechat-mongodb`), com TTL próprio -- sobrevive entre requisições.
+   agents:
+     toolApproval:
+       enabled: true
+@@ -123,7 +128,7 @@ endpoints:
+       ask:
+         - "*"
+     checkpointer:
+-      type: memory
++      type: mongo
+   custom:
+     - name: "Seth"
+       apiKey: "loopback-sem-chave"
+diff --git a/redesign/systemd/obsidian-app.service b/redesign/systemd/obsidian-app.service
+index dd978a9..c5314c8 100644
+--- a/redesign/systemd/obsidian-app.service
++++ b/redesign/systemd/obsidian-app.service
+@@ -2,6 +2,9 @@
+ Description=Obsidian.app (Fase 7-adjacente) -- backend real da API REST/MCP que o proxy obsidian-ro-proxy (:27125) usa, e que a Seth le via query_canon
+ Documentation=file:///home/orusoua/agata/redesign/obsidian/ro_proxy.py
+ After=graphical-session.target
++# PartOf (MEMÓRIAS (523)): sem isto `seth-parar` (que para agata.target) deixava o
++# Obsidian de pé -- contra a ordem de 10/09/2026, "parar Seth parando tudo".
++PartOf=agata.target
+ Wants=graphical-session.target
+ 
+ [Service]
