@@ -1,0 +1,69 @@
+diff --git a/redesign/obsidian/ro_proxy.py b/redesign/obsidian/ro_proxy.py
+index 3239119..e432ff8 100644
+--- a/redesign/obsidian/ro_proxy.py
++++ b/redesign/obsidian/ro_proxy.py
+@@ -158,6 +158,18 @@ def _serve():
+ 
+ if __name__ == "__main__":
+     if "--selftest" in sys.argv:
++        # Porta LIVRE própria, nunca a de produção (achado de (504), fechado em
++        # (527)): com o obsidian-ro-proxy.service de pé na 27125, o bind da
++        # thread de teste falhava EM SILÊNCIO (exceção engolida na thread
++        # daemon) e as requisições iam pro serviço de PRODUÇÃO -- "SELFTEST OK"
++        # validando o código velho, não o editado. OBS_BIND explícito continua
++        # valendo (quem o passa escolheu a porta de propósito).
++        if "OBS_BIND" not in os.environ:
++            import socket
++            with socket.socket() as _s:
++                _s.bind(("127.0.0.1", 0))
++                BIND = f"127.0.0.1:{_s.getsockname()[1]}"
++        print(f"selftest em {BIND} (não na porta de produção)")
+         t = threading.Thread(target=_serve, daemon=True)
+         t.start()
+         import time
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 13283bf..87d622d 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -206,7 +206,13 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+                 if not texto.strip() else "há diferença em relação a HEAD -- arquivos listados abaixo.")
+     if nome == "git_sync":
+         m = re.search(r"\b([0-9a-f]{40})\s+refs/heads/main\b", texto)
+-        if m is None or not head_local:
++        if m is None:
++            # Achado na varredura tripla (527): com a rede instável o remoto não
++            # respondeu, a saída veio vazia com exit=0 e NENHUMA leitura --
++            # silêncio que um modelo pode ler como "tudo certo".
++            return (f"o remoto NÃO respondeu com o SHA de main (exit={codigo}) -- "
++                    f"sync NÃO verificado. Isto é `lacuna`, não 'sincronizado'.")
++        if not head_local:
+             return None
+         remoto = m.group(1)
+         return (f"remoto = HEAD local ({remoto[:7]}) -- sincronizado." if remoto == head_local
+@@ -365,6 +371,8 @@ def _selftest() -> int:
+     casos.append(("git_sync igual", "sincronizado" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, sha) or "")))
+     casos.append(("git_sync diferente", "DIFERENTE" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, "b" * 40) or "")))
+     casos.append(("git_sync sem HEAD local -> sem leitura", _leitura("git_sync", f"{sha}\trefs/heads/main", 0, None) is None))
++    casos.append(("git_sync remoto mudo -> lacuna", "NÃO verificado" in (_leitura("git_sync", "", 0, sha) or "")))
++    casos.append(("git_sync erro de rede -> lacuna", "exit=128" in (_leitura("git_sync", "fatal: unable to access", 128, sha) or "")))
+     casos.append(("perimetro repete RESULTADO",
+                   "OK -- 16 OK" in (_leitura("perimetro", "x\n=== RESULTADO GERAL: OK -- 16 OK · 0 FALHA ===\n", 0) or "")))
+     casos.append(("selos exit!=0 -> FALHOU", "FALHOU" in (_leitura("selos", "", 1) or "")))
+diff --git a/scripts/perimetro/p15_roster_remoto.sh b/scripts/perimetro/p15_roster_remoto.sh
+index 310ad97..100718f 100644
+--- a/scripts/perimetro/p15_roster_remoto.sh
++++ b/scripts/perimetro/p15_roster_remoto.sh
+@@ -20,7 +20,12 @@ p15_roster_remoto() {
+   corte=$(( $(date +%s) - 86400 ))
+   fams=$(awk -F'\t' -v c="$corte" 'NF>=3 && ($1 + 0) >= c {print $3}' "$log" | sort -u | grep -c .)
+   if [ "${fams:-0}" -lt 2 ]; then
+-    echo "AVISO (P-15): so ${fams:-0} familia(s) do roster remoto teve(tiveram) sucesso nas ultimas 24h. A segunda opiniao externa pode estar degradada -- o sistema pode estar andando com fallback local. Nao falha o commit; olhe scripts/conselho_remoto.py e o OmniRoute."
++    # Texto corrigido na varredura tripla (MEMORIAS (527)): o log so recebe
++    # SUCESSO do conselho_remoto.py -- nao registra tentativa. "0 familias"
++    # tanto pode ser roster quebrado quanto ninguem ter chamado o Conselho em
++    # 24h. Em 23/09/2026 o aviso dizia "degradada" enquanto 4 de 5 membros
++    # respondiam a chamada direta. O aviso agora diz o que mediu, nao o que supoe.
++    echo "AVISO (P-15): so ${fams:-0} familia(s) do roster remoto com SUCESSO registrado nas ultimas 24h. Este controle so enxerga sucessos do scripts/conselho_remoto.py -- 0 pode ser so falta de uso, nao prova degradacao. Pra medir de verdade: python3 scripts/pesquisar_modelos_gratuitos.py (sonda o roster). Nao falha o commit."
+   else
+     echo "roster remoto OK -- $fams familias com sucesso nas ultimas 24h"
+   fi
