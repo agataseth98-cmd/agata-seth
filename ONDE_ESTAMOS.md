@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[PRONTO — falta sua assinatura] As ferramentas da Seth vão explicar o que o resultado quer dizer.** Foi o caso de hoje: ela leu "nenhum serviço com falha" como "nenhum serviço ativo". Procurei outros casos iguais e achei mais 7. O mais sério: quando a Seth lê o PROJETO.md inteiro, ela só recebe 44% dele, e não sabia disso. Agora cada resultado vem com uma linha dizendo o que significa (calculada pela Máquina, não opinião), e os cortes dizem quanto ficou de fora.
+- Assine: `bash scripts/aprovar.sh saidas-autoexplicativas-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (525).
+
 **[APLICADO E TESTADO DO ZERO — tudo funcionando] A Seth voltou a usar as ferramentas.** Conferi sua assinatura e apliquei. Refiz o teste inteiro com você vendo: o "Parar Seth" agora fecha tudo, inclusive o Obsidian; subiu tudo do zero; você aprovou (pela minha mão) uma verificação da Máquina, e ela rodou de verdade.
 - Um detalhe achado: a Seth entendeu errado o resultado. "Nenhum serviço com falha" ela leu como "nenhum serviço ativo". Motivo: a explicação do comando não chega até ela junto com o resultado. Dá pra consertar; precisa de mais uma assinatura quando você quiser.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (524).

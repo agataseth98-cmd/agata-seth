@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1aeec004fd3f4aa0a9b4dda623ef4c86c17f360f
-  Escrito em: 23/09/2026 19:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 32962a733fc3dbb8ce68699f4a2027695cb333d1
+  Escrito em: 23/09/2026 19:29 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1aeec004fd3f4aa0a9b4dda623ef4c86c17f360f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1aeec004fd3f4aa0a9b4dda623ef4c86c17f360f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1aeec004fd3f4aa0a9b4dda623ef4c86c17f360f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, aguardando assinatura (P-8): as ferramentas da Seth passam a entregar o SENTIDO junto com o resultado. Nasce do achado de (524) (a Seth leu "0 unidades em falha" como "sem unidades ativas") e de uma auditoria pedida pelo Humano atrás de outros casos do mesmo tipo: mais 5 no verificador e 2 no MCP do canon.**
+
+**A classe de falha:** a ferramenta devolve um fato cru, e o modelo precisa adivinhar o sentido. Quando adivinha errado, erra com fluência, que é o modo de falha mais caro do projeto (Regra 2). O conserto é mecânico e fica no limite (Doutrina de defesa proporcional): o sentido é CALCULADO na Máquina e viaja com o resultado. Nunca é opinião; onde não há leitura segura, não há linha de leitura.
+
+**1. `redesign/router/seth_verificador.py`.** Toda saída ganha `[o que é: <descrição do comando>]`; antes, a descrição só aparecia em `listar`. Onde o sentido dá pra calcular, entra também `[leitura: …]`, no TOPO, pra sobreviver a corte:
+- `servicos`: conta "N loaded units listed" → 0 = "nenhuma em falha, saudável"; N > 0 = "N em FALHA". É o caso de (524). A descrição também ficou explícita.
+- `git_status`: árvore limpa ou N arquivos; à frente/atrás do remoto rastreado, com a ressalva de que isso é da última busca local.
+- `git_diff_stat`: vazio = "nada difere de HEAD".
+- `git_sync`: antes devolvia só o SHA do remoto, e o modelo tinha de comparar sozinho. Agora o verificador lê o HEAD local (`git rev-parse HEAD`, argv fixo) e diz "sincronizado" ou "DIFERENTE: local X, remoto Y". Sem o HEAD local, fica sem leitura; não inventa.
+- `perimetro`: repete a linha `RESULTADO GERAL` no topo. A saída tem centenas de linhas, e o veredito ficava no fim, que é justamente o pedaço que um corte leva embora.
+- `selos` / `suite_controles`: `exit=0` = passou; senão, FALHOU.
+- `estado`: sem leitura, de propósito. Ele já é o próprio resumo de fatos.
+Testado: `--selftest` foi de 11 pra **22/22 PASS**, com os 11 casos novos (incluindo o texto exato que a Seth leu ao contrário e o "sem HEAD local → sem leitura"). Também rodei os 5 comandos rápidos de verdade na Máquina com o código novo: as leituras batem com os fatos (1 arquivo modificado = o próprio verificador em edição; `git_sync` = "sincronizado", `32962a7`).
+
+**2. `redesign/librechat/canon-mcp.mjs`.** (a) `query_canon` sem resultado: antes dizia só "sem linha casando". Agora avisa que isso NÃO prova ausência, que o grep é regex (parênteses e ponto são especiais; exemplo de escape da entrada (522)) e que é preciso testar o padrão contra um positivo conhecido — a falha do Catálogo (250)/(251). (b) Corte de resposta longa (`clamp`): antes dizia "cortado em 40000 chars". Agora diz "mostrando 40000 de N chars (~X%)" e que o resto não foi lido — a falha do Catálogo "ler parte truncada e não declarar a fração", (250). **Achado lateral, medido:** `query_canon` com `doc: PROJETO` sem grep devolve **44%** do arquivo (40.000 de 90.255 chars). Toda leitura do PROJETO inteiro pela Seth até hoje foi parcial, sem aviso da fração. Testado pelo protocolo stdio real (`tools/call`) contra o canon: busca sem resultado, busca com resultado e corte, os três certos.
+
+**Auditado e sem ação:** pontes Discord e navegador — já devolvem erro explícito de allowlist e o flag `truncado`. `vault_consultar` — a listagem já traz total e "de X a Y" desde (389).
+
+**Depois de assinada:** reiniciar `seth-verificador.service`. O `canon-mcp.mjs` chega ao runtime pelo atalho `seth`, que sincroniza e reinicia o LibreChat se mudou. Conferir com uma chamada real.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: leitura de `seth_verificador.py`, `canon-mcp.mjs` e das pontes Discord/navegador; `--selftest` 22/22; `_executar()` real nos 5 comandos rápidos; `node --check` + 3 `tools/call` reais pelo stdio contra `:27125`; `git apply --check` + aplicação + selftest numa cópia limpa de HEAD. Autorização: Humano — "sim, prepare a proposta, e já audite outras oportunidades como essa, e me entregue para assinatura".
 
 (524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23` (523). Teste refeito do zero, com o Humano assistindo: o "Parar Seth" agora derruba o Obsidian, e a ferramenta aprovada rodou de ponta a ponta. Achado novo: a Seth leu errado a saída do verificador, porque a descrição do comando não chega até ela.**
 
