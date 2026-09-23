@@ -26,18 +26,53 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b29b407825053d78fafea4e36bfeffbb329ac7d9
-  Escrito em: 23/09/2026 20:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 56d16b514aab06b1698af076629de3819868e660
+  Escrito em: 23/09/2026 20:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "repita 3x a varredura, confronte, aprimore, proponha e registre"), feita por três métodos independentes: Máquina, canon e uso real. 20 achados confrontados: 3 descartados como não-defeito, 3 consertados numa proposta P-8 aguardando assinatura, 14 abertos (parte é decisão do Humano, parte só se resolve com ele ou com o tempo). Corrige minha frase de (526), "única pendência é a HuggingFace", que era exagero.**
+
+**Por que três métodos, e não três rodadas iguais.** Repetir o mesmo método repete o mesmo ponto cego. Cada varredura olhou por um lado:
+- **A — Máquina:** `perimetro.sh`, units com falha e reinícios, erros de journal nas últimas 2h, disco/RAM, containers, conexões do OmniRoute (só colunas de estado).
+- **B — Canon:** frases de pendência nas entradas (495)-(526), mapeadas pra entrada de origem, mais as lacunas do PROJETO e o backlog.
+- **C — Uso real:** as 5 ferramentas do MCP do canon pelo stdio real (as leituras todas; a escrita só com argumento vazio, sem escrever nada), resposta da Seth pelo gateway, voz de ida e volta, embeddings, MCPs Discord/navegador, timers e o que eles produziram.
+
+**Confronto.**
+- **Descartados, conferidos e não defeito:**
+  - (a) A consolidação noturna dizia "success" sem arquivo novo desde 09/09 — o journal de 22/09 23:00 mostra `0 temas`, `propostas escritas: []`. É legítimo.
+  - (b) P-17 acusa o P-16 com 27 SKIP seguidos — por desenho, porque o P-16 só roda quando um controle é staged.
+  - (c) O Whisper ouviu "sede" em vez de "Seth" — limite conhecido do modelo `base`.
+- **Consertados, proposta `propostas/varredura-tripla-saidas-honestas-2026-09-23.diff`, aguardando assinatura:**
+  1. **`git_sync` mudo:** achado na C. Com a rede instável, o remoto não respondeu, e a saída veio vazia, com `exit=0` e sem nenhuma leitura. Agora sai `[leitura: o remoto NÃO respondeu… sync NÃO verificado. Isto é lacuna]`. Selftest do verificador 22 → 24/24.
+  2. **P-15 dizia mais do que mede:** A disse "degradada"; a C e a sessão (4 de 5 membros respondendo a chamada direta) disseram o contrário. O log só recebe sucessos do `conselho_remoto.py`, então 0 pode ser só falta de uso. O texto passa a dizer isso e aponta a sonda que mede de verdade.
+  3. **Autoteste do `ro_proxy` testando a produção:** estava aberto desde (504). Agora usa uma porta livre própria. Testado: `selftest em 127.0.0.1:49579`, GET 200, PUT/POST de escrita 403, com o serviço de produção de pé na 27125.
+- **Abertos, com dono:**
+  - **Decisão do Humano:**
+    - B8 — rede do LibreChat (ISO-05).
+    - B9 — ligar a proveniência de um dado ao efeito que ele pode causar.
+    - (514)/(515) — `gpt-oss-120b` na fila da Seth: hoje é tier 0 e oscila (bloqueado 3 vezes em 4 dias, (518)).
+    - (513) — 3 modelos achados pelo discovery e nunca avaliados.
+    - (512) — `verificar_num_ctx.py` possivelmente redundante: remover só com ordem.
+    - Nova da A — conexão `deepseek` com `is_active=0` no OmniRoute. Não está em nenhum combo, então não afeta a Seth; manter ou remover é escolha dele.
+    - Nova da C — **latência:** o `estado_para_eco.sh` leva ~0,46 s normalmente e **8 s** quando o GitHub não responde (medido 3 vezes: 458 / 8032 / 464 ms). Isso entra em todo turno da Seth — um "olá" levou 44,5 s com a rede ruim e 11,4 s logo depois. Opção: guardar o resultado do `ls-remote` por ~60 s no gateway. Custo: o `sync` pode ficar até 60 s atrasado. Troca de desenho, não conserto.
+  - **Só com o Humano ou com `sudo`:** SMART das 2 NVMe; remoção do `agata-rest.service`; autor da mudança do `~/.config/agata/.env` de 22/09 16:48; a pasta `BKPdoBKP do Agata` (24 GB); `~/.config/autostart/fix-display-resolution.desktop` com `Undefined escape sequence` na linha 4, arquivo pessoal dele que não abri.
+  - **Com o tempo:** (518) — o Obsidian esperando a tela, que só se prova no próximo boot. HuggingFace — 01/10, (522).
+  - **Comportamento do modelo, sem conserto de código:** cabeçalho esquecido (526), hora repetida (523), escrita não pedida no diário ao dizer "olá" (523). A trava de aprovação agora pega o terceiro.
+  - **Achado novo da A, baixo risco:** o Obsidian gera core dump toda vez que é parado (`systemd-coredump` às 18:52 e 19:18, os dois `stop` de hoje). Parece o encerramento do Electron dentro do Flatpak, não falha em uso. Não investigado.
+  - **(508) Goose × Playwright:** a causa segue não investigada, de propósito (risco de travar o mouse). Mitigado com teto de 2 min.
+
+**Aprimoramento do próprio método, registrado:** duas afirmações minhas de hoje só caíram porque o Humano perguntou "tens completa certeza?". A frase "única pendência" de (526) e a hipótese de "sucesso sem arquivo" da consolidação (descartada acima) eram leitura de uma fonte só. A varredura tripla pegou as duas. Pra "está tudo certo" daqui pra frente: pelo menos 2 dos 3 métodos (Máquina, canon, uso real) concordando, nunca 1.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: A — `perimetro.sh`, `systemctl --failed`/`NRestarts`, `journalctl -p err`, `df`/`free`, `docker ps`, `sqlite3 -readonly` (colunas de estado); B — extrator Python ligando cada frase de pendência à sua entrada (495)-(526), `grep` no PROJETO e backlog; C — 13 `tools/call` reais no `canon-mcp.mjs` pelo stdio, `:20126` cronometrado duas vezes, Piper → Whisper, Kokoro, embeddings, `initialize` nos MCPs, `list-timers` + journal da consolidação; consertos testados (`--selftest` 24/24, `ro_proxy --selftest` na porta livre, `bash -n`) e `git apply --check` + aplicação numa cópia limpa de HEAD. Autorização: Humano — "repita 3x a varredura, confronte aprimore, proponha e registre".
 
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplicativas-2026-09-23` (525). Conferido com a Seth, ao vivo: a mesma pergunta que ela errou em (524) agora vem certa, usando a leitura calculada pela Máquina.**
 
