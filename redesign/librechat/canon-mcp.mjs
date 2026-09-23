@@ -65,9 +65,15 @@ async function vaultGet(rel) {
   return { ct, body: await r.text() };
 }
 
+// O corte diz o TOTAL e a fração (MEMÓRIAS (525); Catálogo de falhas, (250):
+// "ler parte truncada e não declarar a fração"). Sem o total, quem lê não sabe
+// quanto ficou de fora e tende a tratar o pedaço como o todo.
 function clamp(s, nota) {
   if (s.length <= MAX) return s;
-  return s.slice(0, MAX) + `\n\n[...cortado em ${MAX} chars${nota ? " — " + nota : ""}]`;
+  const pct = Math.round((MAX / s.length) * 100);
+  return s.slice(0, MAX) +
+    `\n\n[...CORTADO: mostrando ${MAX} de ${s.length} chars (~${pct}%)${nota ? " — " + nota : ""}. ` +
+    `O resto NÃO foi lido — não conclua nada sobre ele.]`;
 }
 
 // ---- query_canon -------------------------------------------------------------
@@ -98,7 +104,15 @@ async function queryCanon(a) {
     const ctx = Math.max(0, Math.min(20, a.contexto ?? 3));
     const hits = [];
     linhas.forEach((ln, i) => { if (re.test(ln)) hits.push(i); });
-    if (!hits.length) return `(${file}) sem linha casando /${a.grep}/i`;
+    // Ausência de match NÃO prova ausência (Catálogo de falhas, (250)/(251):
+    // "grep negativo usado como prova de ausência sem validar o padrão").
+    // O grep é REGEX: "(522)" vira grupo, "." casa qualquer coisa -- um padrão
+    // mal escrito devolve vazio sobre algo que existe. MEMÓRIAS (525).
+    if (!hits.length) return `(${file}) sem linha casando /${a.grep}/i. ` +
+      `ATENÇÃO: isto NÃO prova que o conteúdo não existe — o grep é regex ` +
+      `(parênteses, ponto e colchete são especiais; ex.: entrada (522) = "\\(522\\)"). ` +
+      `Antes de afirmar ausência, teste o padrão contra algo que você sabe que existe, ` +
+      `ou afrouxe o padrão.`;
     const want = new Set();
     hits.forEach((i) => { for (let j = i - ctx; j <= i + ctx; j++) if (j >= 0 && j < linhas.length) want.add(j); });
     const ordered = [...want].sort((x, y) => x - y);

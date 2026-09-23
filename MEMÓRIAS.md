@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 32962a733fc3dbb8ce68699f4a2027695cb333d1
-  Escrito em: 23/09/2026 19:29 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b29b407825053d78fafea4e36bfeffbb329ac7d9
+  Escrito em: 23/09/2026 20:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/32962a733fc3dbb8ce68699f4a2027695cb333d1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b29b407825053d78fafea4e36bfeffbb329ac7d9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplicativas-2026-09-23` (525). Conferido com a Seth, ao vivo: a mesma pergunta que ela errou em (524) agora vem certa, usando a leitura calculada pela Máquina.**
+
+**Verificação.** O `sha256sum` do `.diff` bateu com o `diff-sha256:`. `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers`: `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; par movido pra `propostas/aplicadas/`. `seth_verificador.py --selftest` 22/22 na árvore real. `seth-verificador.service` reiniciado (`active`). `canon-mcp.mjs` copiado pro runtime (`cmp` igual) e `docker restart librechat` (`/health` 200 em ~4s). Uma chamada direta a `:20141/verificar` (`servicos`) já voltou com `[o que é: …]` e `[leitura: nenhuma unidade de usuário em falha -- saudável.]`.
+
+**Conferência real, no navegador, com o Humano vendo** (gravação: `seth-leitura-correta-servicos-2026-09-23.gif`): conversa nova, "Use maquina_verificar com comando 'servicos'…". Painel de aprovação com `{"comando": "servicos"}`; aprovado e continuado. A ferramenta rodou, e a Seth respondeu: *"Nenhum serviço está falhando — a verificação mostra '0 loaded units listed' e 'nenhuma unidade de usuário em falha'."* Em (524) ela tinha concluído o contrário a partir da mesma saída crua.
+
+**Falha do modelo nesta mesma resposta, sem ação de sistema:** a resposta veio sem a linha de cabeçalho `Agata · <modelo> · t=<n> · <hora>` (Regra 1, inegociável). É falha de execução do modelo que atendeu o turno, da mesma família já catalogada; a doutrina do `seth_gateway` já manda o cabeçalho. Registrada pra não virar "tudo passou".
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify`; `git apply`; `--selftest` 22/22; `systemctl --user restart` + `is-active`; `cmp` do runtime + `docker restart` + `/health`; `curl :20141/verificar`; Claude in Chrome ao vivo com a aprovação da ferramenta e a resposta lida da página. Autorização: Humano — assinou e disse "feito".
 
 (525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, aguardando assinatura (P-8): as ferramentas da Seth passam a entregar o SENTIDO junto com o resultado. Nasce do achado de (524) (a Seth leu "0 unidades em falha" como "sem unidades ativas") e de uma auditoria pedida pelo Humano atrás de outros casos do mesmo tipo: mais 5 no verificador e 2 no MCP do canon.**
 
