@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO E TESTADO DO ZERO — tudo funcionando] A Seth voltou a usar as ferramentas.** Conferi sua assinatura e apliquei. Refiz o teste inteiro com você vendo: o "Parar Seth" agora fecha tudo, inclusive o Obsidian; subiu tudo do zero; você aprovou (pela minha mão) uma verificação da Máquina, e ela rodou de verdade.
+- Um detalhe achado: a Seth entendeu errado o resultado. "Nenhum serviço com falha" ela leu como "nenhum serviço ativo". Motivo: a explicação do comando não chega até ela junto com o resultado. Dá pra consertar; precisa de mais uma assinatura quando você quiser.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (524).
+
 **[CONSERTADO E TESTADO COM VOCÊ VENDO — falta 1 assinatura] A Seth não conseguia usar nenhuma ferramenta.** Toda vez que ela ia ler a memória ou verificar a Máquina e você aprovava, a chamada virava "Cancelado". A causa: uma configuração do LibreChat guardava o pedido de aprovação só na memória de curto prazo, e ele se perdia antes da sua resposta chegar. Troquei pra guardar no banco de dados. Você viu funcionar: a Seth leu a memória e respondeu certo.
 - Também: o "Parar Seth" não fechava o Obsidian. Consertado na mesma proposta.
 - Assine: `bash scripts/aprovar.sh hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23`
