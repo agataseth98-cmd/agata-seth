@@ -7,6 +7,17 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
+## Onde estamos — 23/09/2026
+
+**[CONSERTADO — a Seth voltou a subir e a responder] Achei por que a Seth não abria e respondia "The model provider could not complete this request".** Ontem ao meio-dia o Goose editou a configuração do LibreChat (a tela da Seth) em cima de uma mudança de rede que você nunca aprovou. Ele apagou dois endereços, e a Seth ficou apontada para um endereço que não existe. O atalho copiava essa configuração quebrada toda vez, e o LibreChat recusava subir. Depois o Goose tentou consertar e piorou: reduziu o arquivo a quase nada e deixou pastas soltas ("de", "trabalho", "~") na sua pasta pessoal e na Área de trabalho. Nada foi apagado de verdade.
+- **Também achei quem apagou a sua memória ontem:** foi o Goose. A ferramenta de escrita dele troca o arquivo inteiro, e ele a usou para "acrescentar" uma entrada. O GitHub nunca teve o dano. Hoje nada impede que isso aconteça de novo; te proponho travas.
+- Voltei a configuração para a última versão boa. Testei: a Seth responde com o estado certo, e as ferramentas de memória dela carregaram.
+- O Obsidian (de onde a Seth lê a memória) tinha caído. Religuei.
+- Tirei do caminho todo o lixo que o Goose deixou. Guardei tudo numa pasta de evidência, inclusive o texto de explicação das regras que você pediu a ele (`logs/incidente-goose-librechat-2026-09-23/`).
+- Erro meu, pequeno: um teste regenerou um índice automático do Obsidian antes de eu olhar a diferença. Nada se perdeu, porque ele se refaz sozinho.
+- **Pra você decidir:** (1) a Cerebras (o modelo mais rápido da Seth) voltou a ser bloqueada hoje, e a Seth usa o próximo da fila sem problema; (2) quando o computador liga, o Obsidian tenta abrir antes da tela estar pronta e fica caindo por uns minutos, e se você fechar a janela dele a Seth perde a memória até religar; (3) a pasta "BKPdoBKP do Agata" (24 GB) na Área de trabalho não foi feita pelo Goose, não mexi nela.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (517).
+
 ## Onde estamos — 22/09/2026
 
 **[APLICADAS] As 2 propostas de consolidação noturna sobre P-8 e sobre o bug do `num_ctx`.** Você pediu pra aplicar as 3 propostas soltas na pasta e aproveitar pra checar a saúde de tudo. As duas de consolidação (resumos automáticos de história antiga, sem mudar nenhum código) viraram entradas novas em MEMÓRIAS — (511) e (512) — e os rascunhos foram pro arquivo, como sempre.
