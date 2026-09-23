@@ -2,6 +2,9 @@
 Description=Obsidian.app (Fase 7-adjacente) -- backend real da API REST/MCP que o proxy obsidian-ro-proxy (:27125) usa, e que a Seth le via query_canon
 Documentation=file:///home/orusoua/agata/redesign/obsidian/ro_proxy.py
 After=graphical-session.target
+# PartOf (MEMÓRIAS (523)): sem isto `seth-parar` (que para agata.target) deixava o
+# Obsidian de pé -- contra a ordem de 10/09/2026, "parar Seth parando tudo".
+PartOf=agata.target
 Wants=graphical-session.target
 
 [Service]

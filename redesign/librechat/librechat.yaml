@@ -114,8 +114,13 @@ endpoints:
   # Humano antes de rodar. Testado de ponta a ponta numa cópia isolada antes
   # de entrar aqui -- schema aceito sem erro, aprovação e rejeição confirmadas
   # funcionando (rejeitar => "Cancelado", ferramenta nunca chamada de verdade).
-  # `checkpointer: memory` -- estado da pausa não sobrevive a restart do
-  # container (aceitável: só uma sessão em andamento por vez nesta Máquina).
+  # `checkpointer: mongo` (MEMÓRIAS (523)) -- era `memory`, e com `memory` a
+  # aprovação NUNCA funcionou em produção: nesta versão `getAgentCheckpointer`
+  # devolve nada pra `memory`, o cliente é descartado logo depois de pausar, e a
+  # retomada reconstrói o agente sem estado -> encerra em 20ms sem rodar a
+  # ferramenta e a UI mostra "Cancelado" (5 de 5 tentativas em 23/09). `mongo` é
+  # o padrão da própria LibreChat: grava a pausa no MongoDB que já sobe junto
+  # (`librechat-mongodb`), com TTL próprio -- sobrevive entre requisições.
   agents:
     toolApproval:
       enabled: true
@@ -123,7 +128,7 @@ endpoints:
       ask:
         - "*"
     checkpointer:
-      type: memory
+      type: mongo
   custom:
     - name: "Seth"
       apiKey: "loopback-sem-chave"
