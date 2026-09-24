@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
+  palavras-chave: assinado, verificado, aplicado, geminis, fila, seth, tabelas, config, modelos, gratuitos, batem, viva, omniroute, proposta, esperando, assinatura
 (534) DIÁRIO — 23/09/2026 · **Os 2 Gemini avaliados em (532) entram na fila da Seth, por ordem do Humano ("faça pelo menos os geminis antes de terminar, quero testar a Seth tinindo"). Já estão em uso: a `seth-pesado` e a `seth-livre` responderam pelo `gemini-3-flash-preview` onde antes cairiam no 429 do 2.5. A documentação das filas vai em proposta P-8.**
   palavras-chave: gemini, avaliados, entram, fila, seth, ordem, humano, faça, geminis, terminar, quero, testar, tinindo, estão, uso, pesado, livre, responderam, flash, preview, cairiam, documentação, filas, vai, proposta
 (533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: itens, plano, últimos, investigados, item, manifests, sistema, runtime, recovery, existem, forma, distribuída, faltava, construir, zero, limpeza, documentação, achado, real, corrigido, redesign, readme, listava, escopo, desatualizado, caminhos, sessões, anteriores, mesma, sessão, acrescentaram, ação, estão, resposta, aplicados, prontos, pra, assinatura, devolvidos, decisão, desenho, fechados, existirem, ajuste, pontual, pulado, registro
 (506) DIÁRIO — 21/09/2026 · **Item 9 (2ª passada do perímetro sensível ao índice final, achado GOV-02) pronto e testado, aguardando assinatura. No meio do trabalho, cometi um erro real testando o hook — `git reset --hard` apagou 10 arquivos pendentes de assinatura — recuperado por inteiro a partir dos próprios `.diff` já commitados, nada perdido de verdade. Registrado sem suavizar, doutrina "Fraqueza vira força".**
   palavras-chave: item, passada, perímetro, sensível, índice, final, achado, gov, pronto, testado, aguardando, assinatura, meio, trabalho, cometi, erro, real, testando, hook, git, reset, hard, apagou, arquivos, pendentes, recuperado, inteiro, partir, próprios, diff, commitados, nada, perdido, verdade, registrado, suavizar, doutrina, fraqueza, vira, força
-(505) DIÁRIO — 21/09/2026 · **Item 6 (capability broker) investigado e DEVOLVIDO como decisão de desenho (backlog B9) — não forçado como checkbox raso. Item 7 (allowlist Discord + revisão Browser): achado real (nenhum canal era travado), corrigido e testado; revisão do lado Browser não achou gap.**
-  palavras-chave: item, capability, broker, investigado, devolvido, decisão, desenho, backlog, forçado, checkbox, raso, allowlist, discord, revisão, browser, achado, real, canal, era, travado, corrigido, testado, lado, achou, gap
+(505) DIÁRIO — 21/09/2026 · **Item 6 (capability broker) investigado e DEVOLVIDO …
+  palavras-chave: item, capability, broker, investigado, devolvido
 (504) DIÁRIO — 21/09/2026 · **Item 5 do plano de ação de (500) (corpo limitado + …
   palavras-chave: item, plano, ação, corpo, limitado
 (503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apres …
