@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO E PROVADO AO VIVO] A volta curta passou nos 3 pontos.** O atalho agora sincroniza tudo (testei com uma armadilha: ele consertou sozinho). A Seth ficou rápida — 1 segundo por resposta, antes chegava a 44. E o Goose, numa sessão de verdade, parou e pediu confirmação antes de rodar comando e antes de criar arquivo; o que eu neguei, ele não fez. Nada esperando assinatura.
+- Tem uma consolidação noturna nova esperando você olhar em `propostas/` (sem pressa).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (533).
+
 **[AFINADO — 1 assinatura + 1 comando seu pra fechar a rede] Executei o que você decidiu.**
 - **Goose:** agora pede sua confirmação antes de rodar comando, escrever arquivo ou agir no navegador — no mesmo ritmo que eu trabalho. Ganhou as lições de hoje por escrito.
 - **B9 fechado:** nenhuma escrita acontece sem seu clique, nem pela Seth nem pelo Goose.

@@ -21,7 +21,12 @@ systemctl --user start piper-tts.service 2>/dev/null || true
 # rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
 # so reinicia o container se algo mudou.
 _lc_changed=0
+# docker-compose.yml entrou na lista em (532): antes o atalho sincronizava o
+# librechat.yaml mas NÃO o compose -- os dois podiam divergir (yaml falando com
+# 172.29.7.1, compose ainda em modo host), exatamente a quebra de (517). Os dois
+# andam juntos agora. `compose up -d` abaixo aplica a mudança de compose sozinho.
 for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
+             "docker-compose.yml|$HOME/librechat/docker-compose.yml" \
              "canon-mcp.mjs|$HOME/librechat/data/mcp/canon-mcp.mjs"; do
   _src=~/agata/redesign/librechat/"${_pair%%|*}"; _dst="${_pair#*|}"
   if [ -f "$_src" ] && ! cmp -s "$_src" "$_dst"; then

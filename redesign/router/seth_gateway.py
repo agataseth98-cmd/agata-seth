@@ -235,7 +235,7 @@ def _estado() -> str:
                   if l.startswith(("HEAD:", "TOPO-MEMÓRIAS:", "sync:",
                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
                                     "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:",
-                                    "ALERTA-HISTORIA:"))]
+                                    "ALERTA-HISTORIA:", "SYNC-REMOTO-IDADE:"))]
         return "\n".join(linhas)
     except Exception:
         return ""
