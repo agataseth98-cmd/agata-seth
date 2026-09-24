@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 786d90d30502d591debc6f43b761ee5a089484b3
-  Escrito em: 24/09/2026 10:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 27409c516cb4dd4b586ca409fcd0f945af1e134c
+  Escrito em: 24/09/2026 11:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -97,7 +97,7 @@ data são do relógio da Máquina, a Seth não os fornece); `POST /diario` anexa
 verificação pós-escrita aborta com 409 se a operação não for insert/append puro; sem `PUT`/
 `PATCH`/`DELETE`, não faz `git add`/`commit`, não lê segredo; `fcntl.flock` + `os.replace`
 atômico; fonte `redesign/router/seth_escriba.py`, MEMÓRIAS (318)) · a stack Docker do
-**LibreChat** (`librechat` em `network_mode: host` bind `127.0.0.1:3080`, + `librechat-mongodb`
+**LibreChat** (`librechat` na bridge `librechat`/`br-librechat` desde MEMÓRIAS (538) — B8, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host`, 7 portas; + `librechat-mongodb`
 e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose em
 `~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
 `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
@@ -237,8 +237,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   Os dois sobem/descem sob demanda via `discord-mcp.service`/`navegador-mcp.service`
   (`redesign/systemd/`, sem `[Install]`), amarrados ao ciclo de `~/.local/bin/seth`/`seth-parar`.
   Transporte HTTP (não stdio, diferente do `canon-mcp.mjs`) — os dois rodam no host (Brave
-  real, API do Discord), o LibreChat alcança via `127.0.0.1` porque o container usa
-  `network_mode: host`. `librechat.yaml` ganhou `mcpSettings.allowedDomains: ["127.0.0.1"]`
+  real, API do Discord), o LibreChat alcança via `172.29.7.1` (relé `librechat-ponte-host`,
+  B8 — MEMÓRIAS (538); antes era `127.0.0.1` com `network_mode: host`). `librechat.yaml` ganhou `mcpSettings.allowedDomains: ["127.0.0.1"]` (+ `"172.29.7.1"` em (538))
   (sem isso o próprio LibreChat bloqueia servidor MCP remoto, guarda contra SSRF).
 
 ## Segurança
