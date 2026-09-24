@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[APLICADO — falta você testar] O conserto do Hyprland está no ar.** Conferi sua assinatura e apliquei. Na próxima vez que reiniciar, escolha o Hyprland no login. Ele deve abrir.
+- Achado lateral, sem pressa: o Obsidian tenta abrir antes de você entrar, falha umas 20 vezes e só depois abre. Não perde nada, mas dá pra consertar se você quiser.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (537).
+
 **[ACHADO — falta sua assinatura] O Hyprland não abria por culpa do próprio Agata, não do Hyprland.** Um serviço do Agata (o que abre o Obsidian sozinho) avisava ao computador, logo no boot, que já havia uma tela aberta. Quando você escolhia o Hyprland, ele achava que já existia outra sessão e se recusava a abrir. Não precisa reinstalar nada.
 - Assine: `bash scripts/aprovar.sh obsidian-sem-puxar-sessao-grafica-2026-09-24`. Depois eu aplico, e você reinicia e entra no Hyprland para confirmar.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (536).
