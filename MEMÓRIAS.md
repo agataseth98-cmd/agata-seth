@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9ab1014e2c1a01acf9e2ebcce0e573ff065428e3
-  Escrito em: 24/09/2026 11:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5646fc64806b988233d062859737e96367f3b692
+  Escrito em: 24/09/2026 12:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5646fc64806b988233d062859737e96367f3b692/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5646fc64806b988233d062859737e96367f3b692/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5646fc64806b988233d062859737e96367f3b692/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(540) DIÁRIO — 24/09/2026 · **A suspensão do notebook volta a funcionar, em S3 (`deep`), provada nos 4 caminhos: 2 por despertar do RTC, tampa e botão. Um efeito colateral meu, de (536), apareceu no caminho: a contenção que bloqueava toda suspensão tinha parado de subir sem aviso. A atualização do PROJETO vai na proposta P-8 `suspensao-deep-2026-09-24`, aguardando assinatura.**
+
+**Pedido do Humano:** "preciso que o botão de suspensão volte a funcionar, por que o note esquenta muito na mochila."
+
+**Achados, medidos na Máquina.**
+- Numa madrugada (24/09, 01:04:52) houve `PM: suspend entry (s2idle)` sem `suspend exit`, e o boot seguinte só às 08:51. O notebook travou dormindo. Foi a única tentativa de suspensão do mês.
+- Existia uma contenção nunca registrada no canon: `predator-suspend-inhibit.service` (user, 18/08, `systemd-inhibit --what=idle:sleep --mode=block`), `WantedBy=graphical-session.target`. Ela só subia porque o `obsidian-app` puxava esse target. **Com (536), parou de subir sem nenhum aviso.** O Humano pediu o contrário, então não houve perda, mas foi uma mudança de comportamento que eu não previ nem declarei. No Hyprland (uwsm) o target sobe de verdade, e a contenção voltaria a bloquear tudo. Por isso ficou **desabilitada** (`systemctl --user disable`, a unit continua no disco).
+- O XFCE estava com `presentation-mode true` e sem ação definida pra tampa ou pro botão.
+
+**Teste com despertar automático do RTC** (script do Humano com `sudo`, `rtcwake -m no -s 40` + `systemctl suspend`): `s2idle` e `deep` voltaram os dois. Mas `low_power_idle_system_residency_us` = **0**, ou seja, no `s2idle` o hardware não entra em baixo consumo. Isso explica o calor. O `deep`, que travava a GPU em (99), voltou limpo com o driver 615 (open, notificadores do kernel).
+
+**Aplicado, tudo fora do repo e reversível:** `/etc/systemd/sleep.conf.d/10-agata-deep.conf` (`MemorySleepMode=deep`, sem tocar no GRUB); XFCE com tampa e botão de suspender = suspender, botão de energia = perguntar e modo apresentação desligado; contenção desabilitada. **Provado pelo caminho real:** `systemctl suspend` → `suspend entry (deep)` → volta em 54 s; tampa fechada às 12:00:34 → `deep` → aberta às 12:04:20, voltou; botão às 12:04:39 → `deep` → voltou às 12:06:03. Ruído conhecido: o teclado USB externo `1-10.3` (`HCT USB Entry Keyboard`) dá `failed to resume async` e reconecta.
+
+**Vigiar:** o loop espontâneo de suspender e acordar de (124). Se voltar, remover o arquivo `10-agata-deep.conf` desfaz.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `journalctl` do boot anterior e do atual; `systemd-inhibit --list`; `xfconf-query`; `/proc/driver/nvidia/params`; `/sys/power/mem_sleep` e `low_power_idle_*_residency_us`; saída dos 2 scripts de `sudo` do Humano; `journalctl -f` acompanhando a tampa e o botão ao vivo. Autorização: Humano — o pedido acima, e rodou os dois scripts ("feito agata").
 
 (539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
 
