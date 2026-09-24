@@ -9,6 +9,14 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[TUDO APLICADO E TESTADO] Rede da Seth isolada, Obsidian certo, discos saudáveis.** Nada esperando assinatura.
+- **Rede da Seth (B8):** ela alcança só as 7 portas que usa. O resto da Máquina ficou fora do alcance. Ela responde normal, e o acesso pelo celular continua funcionando.
+- **Obsidian:** espera você entrar antes de abrir, e o "Parar Seth" voltou a fechá-lo. Testei os dois.
+- **Discos:** os dois estão saudáveis. Mostram muitos desligamentos bruscos (509 e 914), o mesmo problema de desligar que já conhecemos.
+- **Descartado:** a consolidação repetida de 23/09 foi para o arquivo.
+- **Falta você:** reiniciar e entrar pelo Hyprland para confirmar que abre.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (539).
+
 **[PRONTO — 2 assinaturas + 1 comando seu] Pendências do começo do dia.**
 - **Obsidian:** agora ele espera você entrar antes de abrir, e não tenta mais 20 vezes. Assine: `bash scripts/aprovar.sh obsidian-espera-login-2026-09-24`
 - **Rede da Seth (B8):** a Seth passa a enxergar só as 7 portas que usa, e não a Máquina inteira. Assine: `bash scripts/aprovar.sh b8-librechat-bridge-2026-09-24`. Depois rode o comando com senha que eu te passo (libera essas 7 portas no firewall e lê a saúde dos 2 discos).

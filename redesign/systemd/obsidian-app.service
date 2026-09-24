@@ -24,7 +24,15 @@ Environment=DISPLAY=:0
 # a do greeter e do usuario lightdm) e, depois, o socket.
 ExecStartPre=/bin/sh -c 'until [ -n "$(loginctl show-user "$(id -un)" -p Display --value 2>/dev/null)" ] && [ -S /tmp/.X11-unix/X0 ]; do sleep 2; done'
 TimeoutStartSec=infinity
+# O app roda no escopo PROPRIO do Flatpak (app-flatpak-*.scope), fora deste servico:
+# parar o servico nao o fecha. Antes de (536) ele morria "de carona" -- o escopo e
+# PartOf=graphical-session.target, que este servico puxava. Sem isso (MEMÓRIAS (539)):
+# - ExecStartPre fecha instancia antiga, senao o `flatpak run` entrega a vez a ela,
+#   sai com 0 e o servico fica inactive sem ser dono do app;
+# - ExecStop fecha o app de fato (`seth-parar` -> agata.target -> PartOf).
+ExecStartPre=-/usr/bin/flatpak kill md.obsidian.Obsidian
 ExecStart=/usr/bin/flatpak run md.obsidian.Obsidian
+ExecStop=/usr/bin/flatpak kill md.obsidian.Obsidian
 Restart=on-failure
 RestartSec=5
 # A API REST do Obsidian (plugin "Local REST API with MCP") so existe enquanto

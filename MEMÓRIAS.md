@@ -26,18 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 27409c516cb4dd4b586ca409fcd0f945af1e134c
-  Escrito em: 24/09/2026 11:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9ab1014e2c1a01acf9e2ebcce0e573ff065428e3
+  Escrito em: 24/09/2026 11:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/27409c516cb4dd4b586ca409fcd0f945af1e134c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ab1014e2c1a01acf9e2ebcce0e573ff065428e3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
+
+**Verificação.** Nos dois pares, o `sha256sum` do `.diff` bateu com o `diff-sha256:`, e `ssh-keygen -Y verify` deu `Good signature` de `agata-humano`. `git apply --check` limpo; aplicados; pares movidos pra `propostas/aplicadas/`. O Humano rodou o script de `sudo` e removeu o `agata-rest.service` (`could not be found`).
+
+**B8, provado.** Backup do runtime em `~/librechat/bak-antes-B8-2026-09-24/`; `compose down`; runtime = repo (`cmp` nos 3 arquivos); `up -d`. A `br-librechat` está em 172.29.7.1/24, e a regra do ufw está instalada (`[1] … on br-librechat ALLOW IN`). Com `fetch` de dentro do container `librechat`:
+- As 7 portas liberadas respondem: 20126, 27125 e 20141 com 200; 8890, 20135, 20136 e 20140 com 404, que é o serviço vivo sem rota na raiz.
+- As 6 de controle ficam sem resposta: 20128 (OmniRoute), 20127, 11434 (Ollama), 27017, 7700 e 22.
+- Na Máquina, `:3080` escuta só em `127.0.0.1`. `/health` dá 200 local e pelo tailnet. O MCP carregou 3 servidores e 5 ferramentas, e o canon-mcp saiu "pronto (proxy http://172.29.7.1:27125)".
+- Uma chamada real à Seth de dentro da bridge (`seth-rapido`) voltou HTTP 200 em 2,9 s, com cabeçalho.
+
+**Obsidian: a espera nova funciona.** O restart passou pela espera em 0 s com a sessão aberta, sem nenhuma queda.
+
+**Regressão, minha.** Parar o `obsidian-app` deixa o app vivo: 8 processos, canon 200. O Flatpak põe o app num escopo próprio (`app-flatpak-*.scope`) com `PartOf=graphical-session.target`. Até (536), o `seth-parar` fechava o Obsidian **de carona**: o serviço parava, a sessão gráfica ficava sem ninguém que a puxasse e parava, e o escopo caía junto. Isso explica os escopos parando no mesmo segundo em 23/09 às 22:30. Ao tirar o `Wants=`, tirei esse caminho, e o `seth-parar` deixou de fechar o Obsidian. A (523) tinha "provado" o `PartOf=agata.target` sem saber que o efeito vinha por esse outro caminho. Lado B do mesmo mecanismo: se já há uma instância aberta, o `flatpak run` entrega a vez a ela, sai com 0, e o serviço fica `inactive` sem ser dono do app. Foi o que aconteceu no restart de hoje.
+
+**Proposta `obsidian-dono-do-app-2026-09-24`:** `ExecStartPre=-flatpak kill` (o serviço sempre é dono da instância) e `ExecStop=flatpak kill` (parar fecha o app de verdade). Leva junto 2 frases do PROJETO que ficaram falsas hoje: `agata-rest` "ainda existe" e SMART "não medido". **Testado** numa unit temporária (`systemd-run --user`, com as mesmas linhas) sem tocar a instalada: subiu `active` com canon 200; ao parar, o app morreu (canon 403). A produção foi religada consistente: `active`, canon 200. `git apply --check --cached` e `systemd-analyze verify` limpos. Até a assinatura, o `seth-parar` não fecha o Obsidian. É o único efeito, e não afeta a Seth.
+
+**O P-4 barrou o commit desta entrada, e com razão.** O manifesto `config/portas-agata.txt` exige que cada porta escute só em `127.0.0.1`, e o relé do B8 escuta as mesmas 7 portas em `172.29.7.1`. Eu não tinha levado o P-4 em conta no desenho de (538), e a subida real mostrou isso. **Proposta `p4-aceita-rele-b8-2026-09-24`:** o `bind_esperado` passa a aceitar uma lista separada por vírgula, declarada porta a porta e sem curinga, e só as 7 portas do relé ganham `127.0.0.1,172.29.7.1`. Testado com 8 casos sintéticos no `p4_bind`, 8/8 PASS. Continuam SUSPEITO: `172.29.7.1` numa porta fora da lista (20128, 11434), `0.0.0.0`, `172.29.7.10` (a armadilha de prefixo) e um IP da rede local. Contra a Máquina viva, com o relé de pé: zero SUSPEITO. Esta entrada e a aplicação acima só entram no canon depois da assinatura, junto com a mudança do P-4. Até lá o B8 roda na Máquina, e o repositório fica atrás dela.
+
+**Fechamento, na mesma entrada, antes do commit.** O Humano assinou as duas propostas novas ("feito agata"). Nos dois pares, o `sha256sum` bateu e o `ssh-keygen -Y verify` deu `Good signature` de `agata-humano`; aplicados, pares em `propostas/aplicadas/`. **Obsidian dono do app, provado com a unit instalada** (`cmp` = repo, `daemon-reload`): restart → `active`, canon 200; stop → `inactive`, **0 escopos `app-flatpak-md.obsidian*`**, canon 403; start → `active`, canon 200, e `graphical-session.target` segue `inactive`. O `seth-parar` volta a fechar o Obsidian, agora pelo próprio serviço. **P-4:** o hook deste commit roda com o relé de pé. **Consolidação `num-ctx-16814` de 23/09:** descartada pelo Humano ("pode descartar") e movida pra `extras/arquivo/consolidacoes-noturnas/`, como as descartadas em (368). A de 09/09 (`omniroute-504`) continua em `propostas/`, sem decisão.
+
+**SMART, com a leitura do Humano:** os dois NVMe dão `PASSED`, 0 erro de mídia, uso de 2% e 3%, spare 100%. Achado: `Unsafe Shutdowns` 509 (`HFS512…`) e 914 (`NE-512`). É o padrão de desligamento não-limpo já registrado no PROJETO, "Máquinas", agora visto pelo próprio disco.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` (2 pares); `git apply`; `cmp` do runtime; `docker compose down/up`; `ip addr`; `fetch` de dentro do container em 13 portas; `ss -tlnH`; `/health` local e tailnet; log do MCP; chamada real ao `:20126` pela bridge; `systemctl --user restart/stop/start` + `pgrep` + `curl :27125`; `systemctl --user show` do escopo (`PartOf`); `systemd-run --user` com as linhas propostas; saída do script de `sudo` (ufw + `smartctl -a`). Autorização: Humano — assinou as duas e rodou o script ("feito agata").
 
 (538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
 
