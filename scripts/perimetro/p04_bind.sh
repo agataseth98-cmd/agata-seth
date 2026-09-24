@@ -48,13 +48,19 @@ p4_bind() {
     while IFS= read -r linha_ss; do
       [ -z "$linha_ss" ] && continue
       endereco="$(echo "$linha_ss" | awk '{print $5}')"
-      case "$endereco" in
-        "$bind_esperado":*|\[::1\]:*) ;;
-        *)
+      # bind_esperado pode ser LISTA separada por vírgula (MEMÓRIAS (539)): o relé
+      # do B8 (librechat-ponte-host) escuta as MESMAS portas em 172.29.7.1, o
+      # gateway da bridge do LibreChat. Cada endereço aceito é declarado porta a
+      # porta no manifesto -- nunca curinga.
+      local ok=0 aceito
+      case "$endereco" in \[::1\]:*) ok=1 ;; esac
+      for aceito in ${bind_esperado//,/ }; do
+        case "$endereco" in "$aceito":*) ok=1 ;; esac
+      done
+      if [ "$ok" = 0 ]; then
           echo "SUSPEITO (P-4): '$nome' (porta $porta, manifesto $manifesto) bindado em '$endereco', esperado '$bind_esperado' -- $linha_ss"
           ruim=1
-          ;;
-      esac
+      fi
     done <<< "$(echo "$saida" | awk -v p=":$porta\$" '$5 ~ p {print}')"
   done < "$manifesto"
   return "$ruim"

@@ -31,9 +31,15 @@ Editou `~/librechat/librechat.yaml` ou o compose? Copie a versao sem-segredo par
 
 ## Rede
 
-A app roda em `network_mode: host` para alcancar o `seth_gateway` em
-`127.0.0.1:20126` -- mesmo padrao que o Open WebUI usava nesta maquina. Mongo e
-Meili ficam numa bridge privada (`librechat`) e so publicam em `127.0.0.1`.
+Desde MEMÓRIAS (538) (B8 / ISO-05) a app NAO usa `network_mode: host`: fica na
+bridge `librechat` (172.29.7.0/24, interface `br-librechat`) e publica so
+`127.0.0.1:3080`. Para falar com a Maquina, passa pelo `librechat-ponte-host`
+(socat em modo host) que repassa SO 7 portas a partir de `172.29.7.1`: 20126
+seth_gateway · 8890 piper · 27125 canon · 20135 discord · 20136 navegador ·
+20140 escriba · 20141 verificador. O ufw da Maquina precisa liberar essas 7
+portas na `br-librechat` (regra instalada com sudo, uma vez). Porta nova =
+compose + `librechat.yaml` + regra do ufw, juntos. Mongo e Meili: pelo nome do
+servico, dentro da bridge.
 
 ## Operacao
 

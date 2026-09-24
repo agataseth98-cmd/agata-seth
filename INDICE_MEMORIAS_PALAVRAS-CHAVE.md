@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
+  palavras-chave: assinadas, verificadas, aplicadas, obsidian, espera, login, librechat, bridge, provado, dentro, container, teste, achou, regressão, minha, vinda, parar, serviço, fecha, app, barrou, commit, causa, relé, propostas, conserto, dono, aceita, rele, foram, mesma, entrada
 (538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
   palavras-chave: varredura, pendências, carregamento, ordem, humano, conserte, tudo, estava, quebrado, início, deste, chat, propostas, aguardando, assinatura, obsidian, esperando, login, verdade, rede, librechat, itens, fechados, diagnóstico, resto, depende, sudo, data, decisão
 (537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, automática, quarentena, tema, aprovacao, assinada, aprovada, humano, edição, conteúdo, entradas, resumidas, obsoleta
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e 9 do plano de ação da auditoria de Marcos (500) entram no canon de uma vez, via a proposta única `plano-marcos-lote-2026-09-21`. Com isto, 6 dos 10 itens do plano estão de fato no ar (1, 2 aplicados antes; 4/5/7/9 agora); 2 devolvidos pra decisão do Humano (3, 6); 2 fechados sem precisar de aplicação (8, 10).**
   palavras-chave: assinado, verificado, aplicado, itens, plano, ação, auditoria, marcos, entram, canon, proposta, única, lote, estão, fato, aplicados, agora, devolvidos, pra, decisão, humano, fechados, precisar, aplicação
-(509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
-  palavras-chave: humano, pediu, una, única, assinatura, diff, pendentes, itens, viram, proposta, plano, marcos, lote, testada, trocar
+(509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" …
+  palavras-chave: humano, pediu, una, única, assinatura
 (508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e r …
   palavras-chave: humano, voltou, perdi, mouse, again, documente
 (507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois inve …

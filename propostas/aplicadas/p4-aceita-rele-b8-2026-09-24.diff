@@ -1,0 +1,70 @@
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 0e890c7..eab7d5e 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -6,6 +6,12 @@
+ # Formato: porta|nome|bind_esperado -- um por linha, `#` comenta.
+ # `bind_esperado` é o endereço IPv4 que a porta TEM que usar; loopback IPv6
+ # (::1) é sempre aceito também, por equivalência.
++# Pode ser uma LISTA separada por vírgula (MEMÓRIAS (539)), sem espaço: as 7
++# portas que o LibreChat usa aceitam também 172.29.7.1 -- o relé socat do B8
++# (`librechat-ponte-host`) escuta nelas no gateway da bridge `br-librechat`.
++# Esse endereço só é alcançável da própria Máquina e da bridge; o ufw libera
++# só essas 7 portas na `br-librechat`. Porta nova no relé = compose +
++# librechat.yaml + ufw + ESTA lista, juntos.
+ #
+ # Adicionar serviço novo aqui é obrigatório pra ele entrar na checagem de
+ # bind do P-4 -- sem entrada aqui, o P-4 simplesmente não vê a porta (não é
+@@ -18,16 +24,16 @@
+ # determinada, PROJETO.md "Serviços (boot)") -- não dá pra declarar
+ # `bind_esperado` pra algo que não se sabe o que é.
+ 
+-20126|seth-gateway|127.0.0.1
++20126|seth-gateway|127.0.0.1,172.29.7.1
+ 20127|omniroute-sanitizer|127.0.0.1
+ 20128|omniroute|127.0.0.1
+ 20130|openvino-whisper|127.0.0.1
+ 20134|openvino-embeddings|127.0.0.1
+-20135|discord-mcp|127.0.0.1
+-20136|navegador-mcp|127.0.0.1
+-20140|seth-escriba|127.0.0.1
+-20141|seth-verificador|127.0.0.1
+-27125|obsidian-ro-proxy|127.0.0.1
+-8890|piper-tts|127.0.0.1
++20135|discord-mcp|127.0.0.1,172.29.7.1
++20136|navegador-mcp|127.0.0.1,172.29.7.1
++20140|seth-escriba|127.0.0.1,172.29.7.1
++20141|seth-verificador|127.0.0.1,172.29.7.1
++27125|obsidian-ro-proxy|127.0.0.1,172.29.7.1
++8890|piper-tts|127.0.0.1,172.29.7.1
+ 8880|kokoro-tts|127.0.0.1
+ 11434|ollama|127.0.0.1
+diff --git a/scripts/perimetro/p04_bind.sh b/scripts/perimetro/p04_bind.sh
+index 32d494e..2c0aacd 100644
+--- a/scripts/perimetro/p04_bind.sh
++++ b/scripts/perimetro/p04_bind.sh
+@@ -48,13 +48,19 @@ p4_bind() {
+     while IFS= read -r linha_ss; do
+       [ -z "$linha_ss" ] && continue
+       endereco="$(echo "$linha_ss" | awk '{print $5}')"
+-      case "$endereco" in
+-        "$bind_esperado":*|\[::1\]:*) ;;
+-        *)
++      # bind_esperado pode ser LISTA separada por vírgula (MEMÓRIAS (539)): o relé
++      # do B8 (librechat-ponte-host) escuta as MESMAS portas em 172.29.7.1, o
++      # gateway da bridge do LibreChat. Cada endereço aceito é declarado porta a
++      # porta no manifesto -- nunca curinga.
++      local ok=0 aceito
++      case "$endereco" in \[::1\]:*) ok=1 ;; esac
++      for aceito in ${bind_esperado//,/ }; do
++        case "$endereco" in "$aceito":*) ok=1 ;; esac
++      done
++      if [ "$ok" = 0 ]; then
+           echo "SUSPEITO (P-4): '$nome' (porta $porta, manifesto $manifesto) bindado em '$endereco', esperado '$bind_esperado' -- $linha_ss"
+           ruim=1
+-          ;;
+-      esac
++      fi
+     done <<< "$(echo "$saida" | awk -v p=":$porta\$" '$5 ~ p {print}')"
+   done < "$manifesto"
+   return "$ruim"
