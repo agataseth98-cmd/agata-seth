@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
 (540) DIÁRIO — 24/09/2026 · **A suspensão do notebook volta a funcionar, em S3 (`deep`), provada nos 4 caminhos: 2 por despertar do RTC, tampa e botão. Um efeito colateral meu, de (536), apareceu no caminho: a contenção que bloqueava toda suspensão tinha parado de subir sem aviso. A atualização do PROJETO vai na proposta P-8 `suspensao-deep-2026-09-24`, aguardando assinatura.**
 (539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
 (538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-gratuitos.md` sobre a Cerebras fechada — Humano logou na própria conta e pediu pra eu olhar direto no painel `cloud.cerebras.ai`, aberto no navegador dele.**
 (513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
 (512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
-(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
+(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quar …
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e …
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" …
 (508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e r …

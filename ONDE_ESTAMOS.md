@@ -9,10 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
-**[FEITO E TESTADO — 1 assinatura pra anotar] O notebook volta a suspender de verdade.** Testei com você: fechar a tampa e apertar o botão fazem o notebook dormir de verdade, e ele acorda normal. Antes ele "dormia acordado" (por isso esquentava na mochila) e, numa madrugada, travou dormindo.
-- Assine a anotação no manual do sistema: `bash scripts/aprovar.sh suspensao-deep-2026-09-24`
+**[FEITO, TESTADO E ANOTADO] O notebook volta a suspender de verdade.** Nada esperando assinatura. Testei com você: fechar a tampa e apertar o botão fazem o notebook dormir de verdade, e ele acorda normal. Antes ele "dormia acordado" (por isso esquentava na mochila) e, numa madrugada, travou dormindo.
 - Se um dia ele voltar a acordar sozinho sem parar, me avise. Desfazer é um comando só.
-- Detalhe técnico: `MEMÓRIAS.md`, entrada (540).
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (540) e (541).
 
 **[TUDO APLICADO E TESTADO] Rede da Seth isolada, Obsidian certo, discos saudáveis.** Nada esperando assinatura.
 - **Rede da Seth (B8):** ela alcança só as 7 portas que usa. O resto da Máquina ficou fora do alcance. Ela responde normal, e o acesso pelo celular continua funcionando.
