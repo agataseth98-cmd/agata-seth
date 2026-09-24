@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7
-  Escrito em: 24/09/2026 13:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c2f93de61a7e400247b70704b1f8f01b41bb9a42
+  Escrito em: 24/09/2026 14:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: proposta P-8 `goose-fallback-2026-09-24`, aguardando assinatura, com 3 skills no repositório, `p8_verificar.sh`, o MCP do canon ligado, permissões com o prefixo certo, `.agents/` e `redesign/goose/` em quarentena, e um defeito real do `estado_para_eco.sh` corrigido (atrás/à-frente invertido). Desenho do sistema com a bússola publicado como página.**
+
+**Pedido:** "faça um desenho de como ficaria o sistema com tudo que nos já temos melhorado por essa bussola… e prepare o estado da arte para o Goose conseguir ser o fallback do Code que o sistema merece."
+
+**Achados de caminho, medidos:**
+- **`.agents/` estava fora da quarentena P-8.** O Goose 1.48 lê skills de `.agents/skills/<nome>/SKILL.md` no projeto (texto embutido no binário, lido com `strings`, sem executar nada). Uma skill muda o comportamento do agente sem assinatura. A brecha foi fechada **antes** da primeira skill entrar, com `.agents/*` e `redesign/goose/*` em `_p8_eh_comportamento`, testado caminho a caminho.
+- **As permissões do Goose não pegariam as ferramentas do canon:** ferramenta de extensão ganha o prefixo (`canon__…`), e o `permission.yaml` só tinha os nomes sem prefixo. O `AGENTS.md` mandava usar `memoria_acrescentar`, que nunca existiu no Goose (532).
+- **O `estado_para_eco.sh` dizia o contrário do fato.** O `git rev-list --left-right --count HEAD...remoto` devolve primeiro o que só o HEAD tem, mas o rótulo dizia `atrás/à-frente`. Um branch 1 commit à frente saía `1/0`, e dois modelos leram "1 commit atrás". A ordem foi invertida: agora sai `0/1`. É a linha que toda sessão lê (bússola B8).
+
+**O kit (10 arquivos):** skills `agata-carregar`, `agata-aplicar-proposta` e `agata-mudanca-segura` (a última é a lição T1 de (536)/(539)/(540) virando procedimento); `scripts/p8_verificar.sh`, a verificação de aprovação que eu fazia à mão 7 vezes por dia (hash + assinatura contra `HEAD:` + `apply --check`, só leitura). Testado numa cópia descartável com a aprovação real da (541): **PODE APLICAR**; `.diff` adulterado → FALHA 2; assinatura adulterada → FALHA 3; nome com ponto → recusado. `redesign/goose/` traz o `AGENTS.md` com a seção "Fallback do Claude Code" e a identidade honesta, mais `permission.yaml`, o bloco da extensão `canon` e o README de instalação.
+
+**Teste com o Goose de verdade** (sessão interativa via `pexpect`, com as skills na árvore e o canon por `--with-extension`, sem instalar nada no runtime):
+- Chamada de ferramenta: o Goose pediu `maquina_verificar git_sync`, recebeu aprovação, rodou pelo canon e recebeu a leitura da Máquina. **Funciona.**
+- Qualidade do modelo, fraca e instável: depois da ferramenta, o GLM respondeu só "Pronto." (4 tokens); numa sessão, o Gemini 2.5 pensou e não escreveu nada (não se repetiu); o Gemini 3 Flash deu 503 "alta demanda"; um modelo assinou "gemma-2-27b-it" (Regra 1). **`lacuna`:** qual modelo deve liderar o `seth-codigo` pro papel de fallback. É decisão do Humano, com teste quando os provedores estiverem estáveis.
+- O modo não interativo (`goose run`) recusa ferramenta em modo `approve`, o que é a trava funcionando.
+
+**Erros meus no caminho, sem efeito fora da sessão:** o `pkill -f` casou a linha do meu próprio shell e o matou; a primeira versão do driver de teste lia o menu redesenhado como pedido novo e "negava" à toa.
+
+**Desenho:** página "Planta do Agata" (artifact privado) com as 7 camadas (Humano → Máquina), o que já existe, o que a bússola acrescenta e onde o Goose entra, mais a tabela dos testes acima.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `strings` do binário do Goose; leitura de `config.yaml`/`permission.yaml`/`AGENTS.md`; MCP do canon no host por stdio (`tools/list`); `p8_verificar.sh` em worktree descartável (4 casos); `_p8_eh_comportamento` em 6 caminhos; `estado_para_eco.sh` antes e depois; `goose run` com modelo forçado; 3 sessões `goose session` por `pexpect` + leitura do `sessions.db` (`sqlite3 -readonly`); `curl :20126` com `seth-codigo`; `git apply --check`. Autorização: Humano — o pedido acima.
 
 (542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Engenharia de Sistemas Agênticos", horizonte 2100) auditada, destilada e ligada ao Agata como bússola. O original fica verbatim em `extras/bussola/`, e ao lado a auditoria com 12 princípios (B1–B12) mais 5 que o tratado não vê (T1–T5). Proposta P-8 `bussola-2026-09-24` referencia a bússola no PROJETO, aguardando assinatura.**
 

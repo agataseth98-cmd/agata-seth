@@ -9,6 +9,12 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[PRONTO — falta sua assinatura] O Goose pode substituir o Claude Code quando ele faltar.** Ele passa a ter os mesmos procedimentos que eu sigo (carregar, aplicar proposta, mudar algo na máquina com segurança), acesso ao canon e as mesmas travas. Testei com ele de verdade: as ferramentas funcionam. O ponto fraco é o modelo grátis por trás dele, que às vezes responde mal. Qual modelo usar fica para você decidir.
+- No caminho achei e consertei um erro: o sistema dizia "atrás" quando era "à frente".
+- O desenho do sistema com a bússola está numa página só sua (link na conversa).
+- Assine: `bash scripts/aprovar.sh goose-fallback-2026-09-24`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (543).
+
 **[PRONTO — falta sua assinatura] Sua pesquisa virou a bússola do sistema.** Conferi as 8 fontes que ela cita: 7 existem e dizem o que o texto afirma, 1 (OpenAI) bloqueou o acesso. Enxuguei as 86 seções em 12 princípios e mostrei, para cada um, o que o Agata já faz e o que falta. Acrescentei 5 lições que só o nosso sistema ensinou, a principal delas vinda dos erros de hoje. O texto original ficou guardado sem mudanças.
 - Leia: `extras/bussola/auditoria-e-bussola.md`
 - Assine para ela passar a orientar o sistema: `bash scripts/aprovar.sh bussola-2026-09-24`
