@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO] O manual das filas da Seth está em dia com o que roda de verdade.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura — a Seth está pronta pro seu teste.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (535).
+
 **[FEITO — a Seth está pronta pra você testar] Os 2 Gemini novos estão na fila da Seth e já trabalhando.** Quando o Gemini antigo fica sem cota (aconteceu hoje), agora ela cai num Gemini novo em vez de ficar lenta ou falhar — testei: respondeu em menos de 2 segundos.
 - Falta só assinar a atualização do manual das filas: `bash scripts/aprovar.sh geminis-na-fila-da-seth-2026-09-23` (não bloqueia o teste — a fila já está valendo).
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (534).

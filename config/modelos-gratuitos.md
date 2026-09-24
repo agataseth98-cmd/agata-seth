@@ -163,8 +163,9 @@ remota antes do fallback local, nunca na frente.
 |---|---|---|
 | 0 | `llama-cpp/phi-4-mini` | **novo, local, $0** — leve, resposta rápida pra pedido trivial |
 | 1 | `zai/glm-4.7-flash` | estável quando a z.ai não está em 529 |
-| 2 | `cerebras/gpt-oss-120b` | oportunista — banido agora, entra se recuperar |
-| 3 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local, sempre disponível |
+| 2 | `gemini/gemini-3.1-flash-lite` | **novo 23/09/2026 (MEMÓRIAS (534))** — leve, cota própria; mesmo teste do de cima (3/3, tool-call OK) |
+| 3 | `cerebras/gpt-oss-120b` | oportunista — banido agora, entra se recuperar |
+| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local, sempre disponível |
 
 ### `seth-livre` (LibreChat, rota normal — favorece conversação)
 | ordem | modelo | por quê |
@@ -172,20 +173,24 @@ remota antes do fallback local, nunca na frente.
 | 0 | `llama-cpp/nemotron-3.5-lightning` | **novo, local, $0** — geral/conversação, poupa token de nuvem |
 | 1 | `zai/glm-4.7-flash` | mais capaz dos free-tier estáveis |
 | 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
-| 3 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | backup em nuvem do mesmo peso do tier 0, se o local cair |
-| 4 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente; crédito mensal pequeno |
-| 5 | `mistral/ministral-8b-latest` | último recurso remoto pequeno |
-| 6 | `cerebras/gpt-oss-120b` | oportunista — banido agora |
-| 7 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
+| 3 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+| 4 | `gemini/gemini-3.1-flash-lite` | **novo 23/09/2026 (MEMÓRIAS (534))** — leve, cota própria; mesmo teste do de cima (3/3, tool-call OK) |
+| 5 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | backup em nuvem do mesmo peso do tier 0, se o local cair |
+| 6 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente; crédito mensal pequeno |
+| 7 | `mistral/ministral-8b-latest` | último recurso remoto pequeno |
+| 8 | `cerebras/gpt-oss-120b` | oportunista — banido agora |
+| 9 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
 
 ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
 | ordem | modelo | por quê |
 |---|---|---|
 | 0 | `llama-cpp/qwen3-coder-30b-a3b` | **novo, local, $0** — cobre o gatilho "código" direto, sem sair da Máquina |
 | 1 | `gemini/gemini-2.5-flash` | contexto grande, `max_tokens ≥ 10000` |
-| 2 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente, crédito pequeno |
-| 3 | `cerebras/gpt-oss-120b` | oportunista |
-| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
+| 2 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+| 3 | `llama-cpp/gpt-oss-20b` | local, agentic/tool-use (estava na fila real e faltava nesta tabela — achado em (534)) |
+| 4 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente, crédito pequeno |
+| 5 | `cerebras/gpt-oss-120b` | oportunista |
+| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
 
 ### `seth-codigo` (Goose — novo, 20/09/2026)
 | ordem | modelo | por quê |
@@ -193,10 +198,11 @@ remota antes do fallback local, nunca na frente.
 | 0 | `llama-cpp/qwen3-coder-30b-a3b` | **especialista em código, local, $0** |
 | 1 | `zai/glm-4.7-flash` | generalista capaz, cobre código também |
 | 2 | `gemini/gemini-2.5-flash` | contexto grande |
-| 3 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente |
-| 4 | `mistral/ministral-8b-latest` | pequeno, último remoto |
-| 5 | `cerebras/gpt-oss-120b` | oportunista |
-| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
+| 3 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+| 4 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente |
+| 5 | `mistral/ministral-8b-latest` | pequeno, último remoto |
+| 6 | `cerebras/gpt-oss-120b` | oportunista |
+| 7 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
 
 **Recriar / reverter** (se o `storage.sqlite` for perdido):
 `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
@@ -204,8 +210,10 @@ corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
 `{id, kind:"model", model:"<id>", weight:0}`. IDs: `seth-livre`
 `563700ea-bf7d-45f0-97ab-c336f84b2361` · `seth-rapido`
 `d37e5f27-d216-4e85-94f5-3621ad860260` · `seth-pesado`
-`3980b8a1-776b-475a-9e8b-76c65f1e6cf5` · `seth-codigo` (criado 20/09/2026, POST —
-`id` fica no `.diff`/log da sessão, não fixado aqui à mão pra não citar de memória).
+`3980b8a1-776b-475a-9e8b-76c65f1e6cf5` · `seth-codigo`
+`ba22778c-e758-4188-9518-ef647b5a6886` (lido da API viva em 23/09/2026, (534)).
+**Fonte da verdade da ordem é o próprio OmniRoute** (`GET /api/combos/<id>`); estas
+tabelas são o espelho, conferido contra a API em (534).
 Sincronizar as tabelas acima quando mudar.
 
 O fundo LOCAL usa a connection `ollama-local` já existente (`baseUrl`
