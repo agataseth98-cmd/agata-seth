@@ -158,6 +158,18 @@ def _serve():
 
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
+        # Porta LIVRE própria, nunca a de produção (achado de (504), fechado em
+        # (527)): com o obsidian-ro-proxy.service de pé na 27125, o bind da
+        # thread de teste falhava EM SILÊNCIO (exceção engolida na thread
+        # daemon) e as requisições iam pro serviço de PRODUÇÃO -- "SELFTEST OK"
+        # validando o código velho, não o editado. OBS_BIND explícito continua
+        # valendo (quem o passa escolheu a porta de propósito).
+        if "OBS_BIND" not in os.environ:
+            import socket
+            with socket.socket() as _s:
+                _s.bind(("127.0.0.1", 0))
+                BIND = f"127.0.0.1:{_s.getsockname()[1]}"
+        print(f"selftest em {BIND} (não na porta de produção)")
         t = threading.Thread(target=_serve, daemon=True)
         t.start()
         import time

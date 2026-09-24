@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 56d16b514aab06b1698af076629de3819868e660
-  Escrito em: 23/09/2026 20:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3cf778e4e0b7de673166d31a484fcefc05c72f3c
+  Escrito em: 23/09/2026 21:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cf778e4e0b7de673166d31a484fcefc05c72f3c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cf778e4e0b7de673166d31a484fcefc05c72f3c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3cf778e4e0b7de673166d31a484fcefc05c72f3c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
+
+**Verificação.** Na primeira conferência, depois do "done" do Humano, o `APROVADO-` não existia — o comando não tinha chegado a gravar. Pedi pra rodar de novo, sem aplicar nada no escuro. Na segunda: o `sha256sum` do `.diff` bateu com o `diff-sha256:`, e `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers` deu `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; par movido pra `propostas/aplicadas/`.
+
+**Conferido em produção, não só em teste.**
+- `seth-verificador.service` e `obsidian-ro-proxy.service` reiniciados (`active active`); o canon pelo proxy responde 200.
+- `seth_verificador.py --selftest`: 24/24. `maquina_verificar git_sync` ao vivo: `[leitura: remoto = HEAD local (3cf778e) -- sincronizado.]`.
+- `ro_proxy.py --selftest` rodou com a produção de pé: `selftest em 127.0.0.1:33061 (não na porta de produção)`, `SELFTEST OK`. Antes (504), essa mesma situação dava falso OK.
+- P-15 chamado direto: o aviso agora diz "0 pode ser so falta de uso, nao prova degradacao" e aponta a sonda.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` (depois de uma primeira conferência negativa); `git apply`; `--selftest` 24/24; `systemctl --user restart` + `is-active`; `curl :27125` + `:20141/verificar`; `ro_proxy --selftest` com a produção de pé; `p15_roster_remoto` chamado direto. Autorização: Humano — assinou ("done", "acho que foi").
 
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "repita 3x a varredura, confronte, aprimore, proponha e registre"), feita por três métodos independentes: Máquina, canon e uso real. 20 achados confrontados: 3 descartados como não-defeito, 3 consertados numa proposta P-8 aguardando assinatura, 14 abertos (parte é decisão do Humano, parte só se resolve com ele ou com o tempo). Corrige minha frase de (526), "única pendência é a HuggingFace", que era exagero.**
 

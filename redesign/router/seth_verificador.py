@@ -206,7 +206,13 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
                 if not texto.strip() else "há diferença em relação a HEAD -- arquivos listados abaixo.")
     if nome == "git_sync":
         m = re.search(r"\b([0-9a-f]{40})\s+refs/heads/main\b", texto)
-        if m is None or not head_local:
+        if m is None:
+            # Achado na varredura tripla (527): com a rede instável o remoto não
+            # respondeu, a saída veio vazia com exit=0 e NENHUMA leitura --
+            # silêncio que um modelo pode ler como "tudo certo".
+            return (f"o remoto NÃO respondeu com o SHA de main (exit={codigo}) -- "
+                    f"sync NÃO verificado. Isto é `lacuna`, não 'sincronizado'.")
+        if not head_local:
             return None
         remoto = m.group(1)
         return (f"remoto = HEAD local ({remoto[:7]}) -- sincronizado." if remoto == head_local
@@ -365,6 +371,8 @@ def _selftest() -> int:
     casos.append(("git_sync igual", "sincronizado" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, sha) or "")))
     casos.append(("git_sync diferente", "DIFERENTE" in (_leitura("git_sync", f"{sha}\trefs/heads/main\n", 0, "b" * 40) or "")))
     casos.append(("git_sync sem HEAD local -> sem leitura", _leitura("git_sync", f"{sha}\trefs/heads/main", 0, None) is None))
+    casos.append(("git_sync remoto mudo -> lacuna", "NÃO verificado" in (_leitura("git_sync", "", 0, sha) or "")))
+    casos.append(("git_sync erro de rede -> lacuna", "exit=128" in (_leitura("git_sync", "fatal: unable to access", 128, sha) or "")))
     casos.append(("perimetro repete RESULTADO",
                   "OK -- 16 OK" in (_leitura("perimetro", "x\n=== RESULTADO GERAL: OK -- 16 OK · 0 FALHA ===\n", 0) or "")))
     casos.append(("selos exit!=0 -> FALHOU", "FALHOU" in (_leitura("selos", "", 1) or "")))
