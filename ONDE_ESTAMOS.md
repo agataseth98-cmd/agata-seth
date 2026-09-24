@@ -9,6 +9,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[PRONTO — 2 assinaturas + 1 comando seu] Pendências do começo do dia.**
+- **Obsidian:** agora ele espera você entrar antes de abrir, e não tenta mais 20 vezes. Assine: `bash scripts/aprovar.sh obsidian-espera-login-2026-09-24`
+- **Rede da Seth (B8):** a Seth passa a enxergar só as 7 portas que usa, e não a Máquina inteira. Assine: `bash scripts/aprovar.sh b8-librechat-bridge-2026-09-24`. Depois rode o comando com senha que eu te passo (libera essas 7 portas no firewall e lê a saúde dos 2 discos).
+- **Já resolvido:** os 3 modelos "nunca avaliados" (2 já estão na fila, 1 é pago) e o erro do Obsidian ao fechar (inofensivo).
+- **Sua decisão:** apagar o serviço velho `agata-rest` (eu não pude, a sessão bloqueou); descartar a consolidação de 23/09, que repete a de 21/09.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (538).
+
 **[APLICADO — falta você testar] O conserto do Hyprland está no ar.** Conferi sua assinatura e apliquei. Na próxima vez que reiniciar, escolha o Hyprland no login. Ele deve abrir.
 - Achado lateral, sem pressa: o Obsidian tenta abrir antes de você entrar, falha umas 20 vezes e só depois abre. Não perde nada, mas dá pra consertar se você quiser.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (537).

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
 (537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
 (535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e 9 do plano de ação da auditoria de Marcos (500) entram no canon de uma vez, via a proposta única `plano-marcos-lote-2026-09-21`. Com isto, 6 dos 10 itens do plano estão de fato no ar (1, 2 aplicados antes; 4/5/7/9 agora); 2 devolvidos pra decisão do Humano (3, 6); 2 fechados sem precisar de aplicação (8, 10).**
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
-(508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e resolva." — a mesma classe de trava do Goose/Playwright de (485) voltou, mesmo com o conserto de lá de pé. Achado, resolvido na hora (processo travado morto, mouse solto), e mitigado com um teto automático de tempo — a causa raiz de POR QUE trava não foi investigada a fundo, por decisão explícita de não arriscar travar o mouse de novo só pra reproduzir.**
+(508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e r …
 (507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois inve …
 (506) DIÁRIO — 21/09/2026 · **Item 9 (2ª passada do perímetro sensível ao índice …
 (505) DIÁRIO — 21/09/2026 · **Item 6 (capability broker) investigado e DEVOLVIDO …
