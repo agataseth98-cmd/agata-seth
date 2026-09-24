@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 008dbba98a99ebecfe983c4f5545815134055381
-  Escrito em: 23/09/2026 22:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9d21bea97f3aaf33f18167e696fca6bd4d56a6eb
+  Escrito em: 23/09/2026 23:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
+
+**Verificação.** O `sha256sum` do `.diff` bateu com o `diff-sha256:`. `ssh-keygen -Y verify`: `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; par movido pra `propostas/aplicadas/`. O atalho `~/.local/bin/seth` foi reinstalado a partir do repo (`cmp` igual), com o antigo guardado na pasta de evidência.
+
+**1. O atalho sincroniza o compose — provado com armadilha.** Acrescentei de propósito uma linha-marcador ao `~/librechat/docker-compose.yml` do runtime, deixando-o diferente do repositório. Depois: `seth-parar` (0 containers, Obsidian inativo) → atalho `seth` → saída "deploy: …docker-compose.yml sincronizado da fonte versionada". `cmp` com o repo: igual, e o marcador sumiu (0 ocorrências). Os 10 serviços e os 4 containers de pé. É o conserto da causa-raiz de (517).
+
+**2. Cache de 60 s — provado com a Seth ao vivo.** Com o cache apagado, o primeiro `_estado()` pegou o GitHub caído e saiu `sync: não verificado`. É o certo: falha não foi guardada. Três "olá" seguidos pelo `:20126`: 3,4 s (mediu e guardou), depois **1,08 s e 1,15 s** (cache com 4 e 5 s). Em (527), com rede ruim, um "olá" chegou a 44,5 s. O bloco injetado na Seth passou a trazer `SYNC-REMOTO-IDADE: 16s (cache)`.
+
+**3. Goose pede confirmação — provado numa sessão real** (`goose session` num terminal virtual controlado por `pexpect`; os logs `passo1..4.log` ficaram no scratchpad da sessão). Na 1ª tentativa o modelo escreveu "vou executar o date", mas **não chamou a ferramenta**, então não houve o que barrar: inconclusivo, e não contei como sucesso. Na 2ª, meu script digitou mas o Enter se perdeu (falha minha). Na 3ª e na 4ª, com envio confirmado: o pedido de shell `date` parou com **"Goose would like to call the above tool, do you allow?"** (Allow / Always Allow / Deny / Cancel). Aprovado, rodou de verdade (`qua 23 set 2026 23:22:49 -03`). O pedido de criar `/tmp/teste-goose.txt` parou com o mesmo painel pra `write`; selecionei **Deny**, e o arquivo **não existe** (`ls`).
+
+**Falhas do modelo do Goose, sem conserto de código:**
+- (a) Afirmou que o bloco de estado veio "sem a linha `HORA-MAQUINA:`". O `_estado()` do gateway, conferido, **tem** a linha (`HORA-MAQUINA: 2026-09-23 23:19`): foi o modelo deixando de ler.
+- (b) Repetiu a hora 23:22:49 em 3 respostas seguidas (hora herdada, Regra 1.1).
+- (c) Viu o `sync: FALHA` (a minha aplicação ainda não commitada) e parou pra avisar, como a regra nova do `AGENTS.md` manda. Mas ofereceu `git checkout -- PROJETO.md`, o que **descartaria a aplicação assinada**. Ele perguntou antes, e a trava segurou. `AGENTS.md` do Goose ganhou duas linhas: nunca sugerir descartar canon como saída pra `sync: FALHA` (mostrar `git diff --stat` e perguntar de quem é a mudança); medir a hora de novo a cada resposta.
+
+**Achado lateral, sem ação:** a consolidação noturna das 23:00 gerou `propostas/consolidacao-num-ctx-16814-2026-09-23.md`. Fica pra revisão do Humano, como sempre.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify`; `git apply`; `cmp` do atalho; marcador proposital no compose + `seth-parar`/`seth` + `cmp`/`grep -c`; `_estado()` importado do gateway + 3 chamadas cronometradas ao `:20126`; 4 sessões reais do Goose via `pexpect` (tela lida, Allow/Deny enviados por tecla), `ls` do arquivo negado, `grep` do log pela saída do `date`. Autorização: Humano — "faremos segundo seu conselho", assinou ("feito agata") e "consegue realizar esses testes para mim?".
 
 (532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas, mais a ordem "afina o Goose pra seguir nossa toada, aliás, afina o sistema todo". Goose afinado; B9 fechado com o risco que sobra declarado; deepseek removido; 2 Gemini avaliados; B8 tentado, bloqueado pelo firewall e revertido. Proposta `afinacao-sistema-2026-09-23` aguardando assinatura (cache de 60 s, atalho sincronizando o compose, PROJETO corrigido). Duas afirmações minhas caíram no caminho, a pedido do Humano ("tem certeza?").**
 

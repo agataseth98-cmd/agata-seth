@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
+  palavras-chave: assinado, verificado, aplicado, afinacao, sistema, volta, curta, recomendei, provou, vivo, pontos, tinham, rodado, atalho, sincroniza, compose, cache, deixa, seth, rápida, goose, pede, confirmação, agir
 (532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas, mais a ordem "afina o Goose pra seguir nossa toada, aliás, afina o sistema todo". Goose afinado; B9 fechado com o risco que sobra declarado; deepseek removido; 2 Gemini avaliados; B8 tentado, bloqueado pelo firewall e revertido. Proposta `afinacao-sistema-2026-09-23` aguardando assinatura (cache de 60 s, atalho sincronizando o compose, PROJETO corrigido). Duas afirmações minhas caíram no caminho, a pedido do Humano ("tem certeza?").**
   palavras-chave: decisões, tomadas, humano, executadas, ordem, afina, goose, pra, seguir, nossa, toada, aliás, sistema, afinado, fechado, risco, sobra, declarado, deepseek, removido, gemini, avaliados, tentado, bloqueado, firewall, revertido, proposta, afinacao, aguardando, assinatura, cache, atalho, sincronizando, compose, projeto, corrigido, afirmações, minhas, caíram, caminho, pedido, tem, certeza
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, capability, broker, investigado, devolvido, decisão, desenho, backlog, forçado, checkbox, raso, allowlist, discord, revisão, browser, achado, real, canal, era, travado, corrigido, testado, lado, achou, gap
 (504) DIÁRIO — 21/09/2026 · **Item 5 do plano de ação de (500) (corpo limitado + concorrência limitada nos 8 servidores HTTP crus do sistema) pronto e testado, aguardando assinatura. Achado de bônus: P-8 tinha um buraco de cobertura real (`redesign/igpu/*.py` nunca esteve na quarentena) — corrigido no mesmo lote, testado ao vivo.**
   palavras-chave: item, plano, ação, corpo, limitado, concorrência, limitada, servidores, http, crus, sistema, pronto, testado, aguardando, assinatura, achado, bônus, tinha, buraco, cobertura, real, redesign, igpu, nunca, esteve, quarentena, corrigido, mesmo, lote, vivo
-(503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apresente assinatura quando for extremamente necessário") — plano de ação de (500) continua sem ele presente. Item 3 investigado e DEVOLVIDO como decisão de desenho (backlog B8), não forçado. Item 4 (Whisper) achou vulnerabilidade real (leitura arbitrária de arquivo), corrigida e testada, aguardando assinatura.**
-  palavras-chave: humano, saiu, vou, sair, prossiga, fim, apresente, assinatura, for, extremamente, necessário, plano, ação, continua, ele, presente, item, investigado, devolvido, decisão, desenho, backlog, forçado, whisper, achou, vulnerabilidade, real, leitura, arbitrária, arquivo, corrigida, testada, aguardando
+(503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apres …
+  palavras-chave: humano, saiu, vou, sair, prossiga, fim, apres
 (502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (50 …
   palavras-chave: item, plano, ação, auditoria, marcos
 (501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de açã …

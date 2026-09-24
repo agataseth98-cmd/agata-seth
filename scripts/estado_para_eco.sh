@@ -12,6 +12,8 @@
 # Q1 convergiu em "só imprimir"; Q3 convergiu em "obrigatório quando há shell";
 # Q2 decidida pelo Humano — "hash + frase", as duas).
 #
+# Escrita única, fora do repo: o cache do ls-remote em ~/.cache/agata/ (ver
+# "cache" abaixo). No repo, READ-ONLY.
 # READ-ONLY: só lê arquivos e consulta o remoto (git ls-remote). Nunca
 # git add/commit/push, nunca escreve no repo. Uma rede indisponível vira
 # `sync: não verificado`, não erro.
@@ -93,7 +95,29 @@ fi
 # timeout próprio e mais curto, o pico de rede vira só `sync: não verificado`
 # (linha abaixo), e o resto do estado sai normal. `LS_REMOTE_TIMEOUT_ECO`
 # como saída de emergência, mesmo padrão de `LC_ALL_ECO` acima.
-remoto=$(timeout "${LS_REMOTE_TIMEOUT_ECO:-8}" git ls-remote origin main 2>/dev/null | awk '{print $1}' | head -c 40 || true)
+# Cache de ${ECO_LSREMOTE_CACHE_S:-60}s (decisão do Humano, MEMÓRIAS (532)): o seth_gateway
+# roda este script em TODO turno da Seth, e com o GitHub instável o ls-remote
+# custava até 8s por resposta (medido em (527): 458/8032/464 ms). Só se guarda
+# medição BEM-SUCEDIDA; falha nunca é cacheada (não vira PASS velho). A idade da
+# medição vai numa linha própria, SYNC-REMOTO-IDADE -- a linha `sync:` mantém
+# as três formas canônicas de REGRAS, nunca uma quarta. `ECO_LSREMOTE_CACHE_S=0`
+# desliga o cache. `maquina_verificar git_sync` continua medindo ao vivo, sempre.
+_cache_ls="$HOME/.cache/agata/ls-remote-main"
+_agora=$(date +%s); remoto=""; idade_remoto=""
+if [ "${ECO_LSREMOTE_CACHE_S:-60}" -gt 0 ] 2>/dev/null && [ -f "$_cache_ls" ]; then
+  read -r _t _sha < "$_cache_ls" || true
+  if [ -n "${_t:-}" ] && [ "${#_sha}" = 40 ] && [ $(( _agora - _t )) -ge 0 ] \
+     && [ $(( _agora - _t )) -lt "${ECO_LSREMOTE_CACHE_S:-60}" ]; then
+    remoto="$_sha"; idade_remoto="$(( _agora - _t ))s (cache)"
+  fi
+fi
+if [ -z "$remoto" ]; then
+  remoto=$(timeout "${LS_REMOTE_TIMEOUT_ECO:-8}" git ls-remote origin main 2>/dev/null | awk '{print $1}' | head -c 40 || true)
+  if [ "${#remoto}" = 40 ]; then
+    idade_remoto="0s (medido agora)"
+    mkdir -p "$(dirname "$_cache_ls")" 2>/dev/null && printf '%s %s\n' "$_agora" "$remoto" > "$_cache_ls" 2>/dev/null || true
+  fi
+fi
 if [ -z "$remoto" ]; then
   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
 elif [ "$remoto" != "$head_full" ]; then
@@ -186,7 +210,8 @@ cat <<FIM
 HEAD: $head7 $head_subject
 TOPO-MEMÓRIAS: $topo_linha
 $sync_linha
-${alerta_historia:+$alerta_historia
+${idade_remoto:+SYNC-REMOTO-IDADE: $idade_remoto
+}${alerta_historia:+$alerta_historia
 }IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
 ${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
