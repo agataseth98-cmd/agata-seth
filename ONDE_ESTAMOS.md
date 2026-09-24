@@ -9,6 +9,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[FEITO — 1 assinatura pra fechar] Voltaram os dois modelos mais rápidos (Groq e Cerebras).** Eles estavam bloqueados havia semanas, e a culpa era nossa: nossos programas se apresentavam de um jeito que o site deles barra. Já corrigi, e eles respondem em menos de meio segundo. Testei também todos os modelos grátis das suas contas: 10 funcionam bem, inclusive usando ferramentas.
+- Assine pra corrigir de vez, na origem: `bash scripts/aprovar.sh ua-python-urllib-2026-09-24`
+- A pesquisa mundial de modelos novos está rodando (a primeira tentativa bateu no limite de gasto da sua conta Claude).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (545).
+
 **[PRONTO — falta sua assinatura] O Goose pode substituir o Claude Code quando ele faltar.** Ele passa a ter os mesmos procedimentos que eu sigo (carregar, aplicar proposta, mudar algo na máquina com segurança), acesso ao canon e as mesmas travas. Testei com ele de verdade: as ferramentas funcionam. O ponto fraco é o modelo grátis por trás dele, que às vezes responde mal. Qual modelo usar fica para você decidir.
 - No caminho achei e consertei um erro: o sistema dizia "atrás" quando era "à frente".
 - Ampliei a proteção: a pasta de instruções do próprio Claude Code também passa a exigir sua assinatura (a proposta mudou; assine esta versão).

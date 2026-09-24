@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(545) DIÁRIO — 24/09/2026 · **Groq e Cerebras de volta à fila: o 403 da Cloudflare (erro 1010) que durou semanas nunca foi o OmniRoute. É o user-agent `Python-urllib` dos nossos próprios scripts, repassado pelo proxy `:20127` e pelo OmniRoute até o provedor. Corrigido já, de forma reversível, nas duas conexões do OmniRoute; a classe fecha na proposta P-8 `ua-python-urllib-2026-09-24`, aguardando assinatura.**
+  palavras-chave: groq, cerebras, volta, fila, cloudflare, erro, durou, semanas, nunca, omniroute, user, agent, python, urllib, nossos, próprios, scripts, repassado, proxy, provedor, corrigido, forma, reversível, conexões, classe, fecha, proposta, aguardando, assinatura
 (544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
   palavras-chave: proposta, goose, fallback, passa, pôr, claude, quarentena, assinatura, diff, mudou, então, hash, tem, feita, versão
 (543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: proposta P-8 `goose-fallback-2026-09-24`, aguardando assinatura, com 3 skills no repositório, `p8_verificar.sh`, o MCP do canon ligado, permissões com o prefixo certo, `.agents/` e `redesign/goose/` em quarentena, e um defeito real do `estado_para_eco.sh` corrigido (atrás/à-frente invertido). Desenho do sistema com a bússola publicado como página.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: seth, subia, the, model, provider, could, not, complete, this, request, possível, acessar, site, causa, config, versionada, librechat, quebrada, edição, feita, goose, nunca, commitada, restaurada, head, testada, ponta, corrige, pontos, corrupção, memórias, deixa, lacuna, arquivos, chamou, trabalho, legítimo, eram, exatamente, defeito
 (516) DIÁRIO — 22/09/2026 · **Working tree local tinha `MEMÓRIAS.md`, `PROJETO.md`, `INDICE_MEMORIAS.md`, `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` e `.hidrata.md` corrompidos, não commitados — restaurados do HEAD (`dc1be36`), nenhuma entrada perdida.**
   palavras-chave: working, tree, local, tinha, memórias, projeto, indice, memorias, palavras, chave, hidrata, corrompidos, commitados, restaurados, head, entrada, perdida
-(515) CORREÇÃO — 22/09/2026 · **Corrige (514): `cerebras/gpt-oss-120b` NÃO está mais bloqueado — testado ao vivo, 3 de 3 chamadas com sucesso, minutos depois de eu ter registrado o contrário.**
-  palavras-chave: corrige, cerebras, gpt, oss, bloqueado, testado, vivo, chamadas, sucesso, minutos, ter, registrado, contrário
+(515) CORREÇÃO — 22/09/2026 · **Corrige (514): `cerebras/gpt-oss-120b` NÃO está …
+  palavras-chave: corrige, cerebras, gpt, oss
 (514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-g …
   palavras-chave: lacuna, verificado, config, modelos
 (513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada …

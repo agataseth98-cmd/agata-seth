@@ -26,18 +26,43 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e718063873e5318fd90e36bcab5547fedd906f36
-  Escrito em: 24/09/2026 14:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 30a566a080aceb054254015aa280c965c45815c5
+  Escrito em: 24/09/2026 15:13 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(545) DIÁRIO — 24/09/2026 · **Groq e Cerebras de volta à fila: o 403 da Cloudflare (erro 1010) que durou semanas nunca foi o OmniRoute. É o user-agent `Python-urllib` dos nossos próprios scripts, repassado pelo proxy `:20127` e pelo OmniRoute até o provedor. Corrigido já, de forma reversível, nas duas conexões do OmniRoute; a classe fecha na proposta P-8 `ua-python-urllib-2026-09-24`, aguardando assinatura.**
+
+**Como apareceu.** Pedido do Humano: "precisamos de uma fila com mais modelos… encontre os melhores e melhores formas de tê-los". Testando ao vivo com as chaves dele, Groq (`qwen/qwen3.8-27b`, `openai/gpt-oss-120b`) e Cerebras (`gpt-oss-120b`, `qwen-3.8-27b`) responderam 200, com tool-calling, direto, em 0,26–0,51 s. Pelo `:20127` deram 403 1010. Testei vários UAs direto (curl, node, undici, "OmniRoute/3.8.50", Chrome com sec-ch) e todos passavam. O que faltava testar era o UA que o meu próprio teste mandava ao `:20127`.
+
+**Causa, achada por um agente só leitura e conferida na Máquina:**
+- Sem chave nenhuma, `-A 'Python-urllib/3.14'` → 403 nos dois provedores; outro UA → chega à autenticação.
+- Pelo `:20127`, a mesma chamada: UA padrão do Python → 403; `User-Agent: agata-seth/1.0` → **200** (Groq 267 ms, Cerebras 434 ms).
+- No código do OmniRoute (fonte TS no pacote): `forwardOpencodeClientHeaders` repassa o UA do cliente; não há impersonação TLS ativa (`ENABLE_TLS_FINGERPRINT` ausente).
+- O `_passar()` do proxy copiava todos os headers, e o UA não está em `_HOP_BY_HOP`.
+- Os callers Python (`conselho_remoto.py`, `pesquisar_modelos_gratuitos.py`, `grafo.py`) não definem UA.
+- O comentário em `conselho_remoto.py` ("banindo o user-agent do OmniRoute") e as linhas de `config/modelos-gratuitos.md` que dizem o mesmo estavam **errados**. É a classe da (525): uma explicação plausível repetida sem medir o elo que faltava.
+
+**Feito agora (runtime, fora do repo, reversível):** backup `~/.omniroute/storage.sqlite.bak-antes-customUA-2026-09-24` (600), depois `PUT /api/providers/<id>` com `providerSpecificData.customUserAgent = "agata-seth/1.0"` nas conexões `groq` e `cerebras` (o campo existe no OmniRoute e vence o UA repassado). Conferido: com o UA padrão do Python, os 4 modelos passaram a dar **200 pelo `:20127`**, sem reiniciar nada. Desfazer: limpar o campo na tela de provedores ou restaurar o backup.
+
+**Proposta `ua-python-urllib-2026-09-24` (fecha a classe no nosso lado):** `_ua_de_saida()` no `proxy.py` troca UA ausente ou `Python-urllib/*` por `agata-seth/1.0`; UA de outro cliente (LibreChat) passa intacto. Selftest ganhou 2 casos: **6/6 PASS**. O comentário errado do `conselho_remoto.py` foi corrigido por anotação, sem apagar. **Não testado:** o selftest novo contra o `proxy.py` antigo, para ver o vermelho antes do verde.
+
+**Medido no mesmo pedido, pra fila (chaves do Humano, direto):**
+- **OK com tool-calling:** Gemini `3-flash-preview`, `2.5-flash`, `3.5-flash-lite`; Mistral `ministral-14b`, `codestral`; Z.ai `glm-4.7-flash`.
+- **Indisponíveis:** Gemini 3.5–3.8 Flash em 503; 3.1-pro com 429 sem cota; GLM 5.x pedem saldo; Mistral medium, small e magistral com 429.
+- **Gemma 4 pela API do Gemini** vaza `<thought>` no texto.
+- **OpenRouter `:free`:** 24 modelos hoje; OK `nemotron-3-super-120b`, `nemotron-3-ultra`, `cohere/north-mini-code`, `dots-3-note`, `nex-n2.5-pro`; 429 no provedor `qwen3.8-27b:free`, `gemma-4-31b:free`, `laguna`; `inkling:free` só "em agentic harnesses".
+- **A pesquisa mundial por agentes caiu** no limite de gasto mensal da conta Claude do Humano (nenhum resultado entregue) e foi relançada; resultado em entrada própria.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `testa_modelos.py` (chaves lidas no processo, nunca impressas) em 25 modelos básico + 10 com tools + 9 OpenRouter; curl sem chave com UAs variados; chamadas ao `:20127` com e sem UA; `.backup` do sqlite; `PUT`/`GET /api/providers/<id>`; `proxy.py --selftest`; relatório do agente conferido item a item. Autorização: Humano — o pedido acima e "pode usar agentes para essas tarefas".
 
 (544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
 
