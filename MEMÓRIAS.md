@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9d21bea97f3aaf33f18167e696fca6bd4d56a6eb
-  Escrito em: 23/09/2026 23:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 919196643e95c48192553b268ec3de3a7d3f8c9d
+  Escrito em: 23/09/2026 23:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9d21bea97f3aaf33f18167e696fca6bd4d56a6eb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/919196643e95c48192553b268ec3de3a7d3f8c9d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/919196643e95c48192553b268ec3de3a7d3f8c9d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/919196643e95c48192553b268ec3de3a7d3f8c9d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(534) DIÁRIO — 23/09/2026 · **Os 2 Gemini avaliados em (532) entram na fila da Seth, por ordem do Humano ("faça pelo menos os geminis antes de terminar, quero testar a Seth tinindo"). Já estão em uso: a `seth-pesado` e a `seth-livre` responderam pelo `gemini-3-flash-preview` onde antes cairiam no 429 do 2.5. A documentação das filas vai em proposta P-8.**
+
+**Onde cada um entrou, e por quê.** Os dois entram logo **depois** do `gemini/gemini-2.5-flash`: é o 2.5 que estoura a cota (429 em (532), ~20 req/dia), e os novos têm cota **própria**, então a queda de um cai no outro.
+- `seth-rapido`: `gemini-3.1-flash-lite` (leve) depois do GLM, que ali é o único remoto antes da Cerebras.
+- `seth-livre`: `gemini-3-flash-preview` e depois `gemini-3.1-flash-lite`.
+- `seth-pesado` e `seth-codigo`: `gemini-3-flash-preview`.
+
+**Como.** Backup do banco antes (`~/.omniroute/storage.sqlite.bak-antes-geminis-2026-09-23`, `600`). Edição pela API do próprio OmniRoute (`GET` + `PUT /api/combos/<id>`, o mesmo objeto com só a lista de modelos mudada) — o formato "Recriar / reverter" que o `config/modelos-gratuitos.md` já documenta. Primeiro uma fila só (`seth-rapido`), conferida pela API; depois as outras três, cada uma conferida. Todas `PUT 200`, com a ordem lida de volta da API.
+
+**Provado em uso.** Chamadas reais aos combos pelo `:20127`: `seth-pesado` respondeu duas vezes pelo **`gemini-3-flash-preview`** (1,9 s e 1,6 s). O local estava desligado, o 2.5 em 429, e o novo segurou. `seth-livre` também caiu no `gemini-3-flash-preview` (17,6 s — o GLM estava lento de novo). `seth-rapido` foi respondido pelo GLM (1,5 s).
+
+**Achado de caminho:** as tabelas de `config/modelos-gratuitos.md` já estavam atrás da fila real antes de hoje. A do `seth-pesado` não tinha o `llama-cpp/gpt-oss-20b`, e faltava o id do `seth-codigo` (`ba22778c-…`). **Proposta `propostas/geminis-na-fila-da-seth-2026-09-23.diff`, aguardando assinatura:** as 4 tabelas regeneradas a partir da API viva (o texto "por quê" antigo foi mantido, linhas novas explicadas), o id do `seth-codigo` e uma nota de que a fonte da verdade da ordem é o OmniRoute, com as tabelas sendo espelho. **Risco declarado:** `gemini-3-flash-preview` é *preview*, e o Google pode mudá-lo ou tirá-lo do ar. Se isso acontecer, a fila pula pro próximo; não quebra.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `.backup` do sqlite; `GET`/`PUT /api/combos/<id>` com a ordem lida de volta; 4 chamadas reais aos combos mostrando qual modelo respondeu; tabelas geradas da API viva; `git apply --check` contra HEAD. Autorização: Humano — "faça pelo menos os geminis antes de terminar, quero testar a Seth tinindo".
 
 (533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
 
