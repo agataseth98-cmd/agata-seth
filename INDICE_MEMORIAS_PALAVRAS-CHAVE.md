@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas, mais a ordem "afina o Goose pra seguir nossa toada, aliás, afina o sistema todo". Goose afinado; B9 fechado com o risco que sobra declarado; deepseek removido; 2 Gemini avaliados; B8 tentado, bloqueado pelo firewall e revertido. Proposta `afinacao-sistema-2026-09-23` aguardando assinatura (cache de 60 s, atalho sincronizando o compose, PROJETO corrigido). Duas afirmações minhas caíram no caminho, a pedido do Humano ("tem certeza?").**
+  palavras-chave: decisões, tomadas, humano, executadas, ordem, afina, goose, pra, seguir, nossa, toada, aliás, sistema, afinado, fechado, risco, sobra, declarado, deepseek, removido, gemini, avaliados, tentado, bloqueado, firewall, revertido, proposta, afinacao, aguardando, assinatura, cache, atalho, sincronizando, compose, projeto, corrigido, afirmações, minhas, caíram, caminho, pedido, tem, certeza
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
   palavras-chave: teste, seth, refeito, zero, aplicações, dia, passou, inteiro, erro, meu, registrado, estimei, hora, cabeça, mediu, estava, certa
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, plano, ação, corpo, limitado, concorrência, limitada, servidores, http, crus, sistema, pronto, testado, aguardando, assinatura, achado, bônus, tinha, buraco, cobertura, real, redesign, igpu, nunca, esteve, quarentena, corrigido, mesmo, lote, vivo
 (503) DIÁRIO — 21/09/2026 · **Humano saiu ("vou sair prossiga até o fim... apresente assinatura quando for extremamente necessário") — plano de ação de (500) continua sem ele presente. Item 3 investigado e DEVOLVIDO como decisão de desenho (backlog B8), não forçado. Item 4 (Whisper) achou vulnerabilidade real (leitura arbitrária de arquivo), corrigida e testada, aguardando assinatura.**
   palavras-chave: humano, saiu, vou, sair, prossiga, fim, apresente, assinatura, for, extremamente, necessário, plano, ação, continua, ele, presente, item, investigado, devolvido, decisão, desenho, backlog, forçado, whisper, achou, vulnerabilidade, real, leitura, arbitrária, arquivo, corrigida, testada, aguardando
-(502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (500) fechado — achado NET-01 (anti-SSRF incompleto). Assinado, verificado, aplicado pelo fluxo de branch+PR (2º uso desde (501)).**
-  palavras-chave: item, plano, ação, auditoria, marcos, fechado, achado, net, anti, ssrf, incompleto, assinado, verificado, aplicado, fluxo, branch, uso, desde
+(502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (50 …
+  palavras-chave: item, plano, ação, auditoria, marcos
 (501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de açã …
   palavras-chave: ordem, humano, vamos, fazer, tudo, plano, açã
 (500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, …

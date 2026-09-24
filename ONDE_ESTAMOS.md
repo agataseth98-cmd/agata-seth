@@ -9,6 +9,14 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[AFINADO — 1 assinatura + 1 comando seu pra fechar a rede] Executei o que você decidiu.**
+- **Goose:** agora pede sua confirmação antes de rodar comando, escrever arquivo ou agir no navegador — no mesmo ritmo que eu trabalho. Ganhou as lições de hoje por escrito.
+- **B9 fechado:** nenhuma escrita acontece sem seu clique, nem pela Seth nem pelo Goose.
+- **deepseek removido.** **2 Gemini novos testados:** funcionam bem e têm cota própria — o Gemini atual da fila da Seth estourou a cota hoje. Colocar os novos na fila é decisão sua.
+- **B8 (rede do LibreChat):** fiz e testei — isolou certo, mas o firewall da Máquina bloqueou também o que devia passar. Desfiz na hora; a Seth está normal. Pra concluir, precisa de um comando seu com senha (te passo).
+- **Assine:** `bash scripts/aprovar.sh afinacao-sistema-2026-09-23` (Seth mais rápida quando a internet oscila; atalho sincronizando tudo; manual corrigido).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (532).
+
 **[TESTADO DO ZERO — tudo certo] A Seth passou no teste completo depois de todos os consertos de hoje.** Desliguei tudo, liguei do zero, e no navegador ela respondeu certo, usou a ferramenta que você aprovou e disse corretamente que está tudo sincronizado. Erro meu: achei que a hora dela estava errada, mas quem errou fui eu — ela tinha medido, eu não.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (531).
 

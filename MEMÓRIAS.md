@@ -26,18 +26,43 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 220d17da2a29aa8d152c16a2eb570fc7e4e3c73b
-  Escrito em: 23/09/2026 22:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 008dbba98a99ebecfe983c4f5545815134055381
+  Escrito em: 23/09/2026 22:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008dbba98a99ebecfe983c4f5545815134055381/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas, mais a ordem "afina o Goose pra seguir nossa toada, aliás, afina o sistema todo". Goose afinado; B9 fechado com o risco que sobra declarado; deepseek removido; 2 Gemini avaliados; B8 tentado, bloqueado pelo firewall e revertido. Proposta `afinacao-sistema-2026-09-23` aguardando assinatura (cache de 60 s, atalho sincronizando o compose, PROJETO corrigido). Duas afirmações minhas caíram no caminho, a pedido do Humano ("tem certeza?").**
+
+**Fatos que mudaram a pauta antes de decidir, conferidos por 2 métodos (banco + API viva do OmniRoute):**
+- **Cerebras nunca foi o tier 0 da Seth.** O tier 0 de todos os combos é um modelo local sob demanda (`llama-cpp/*`), seguido do `zai/glm-4.7-flash`; a Cerebras é a 7ª de 8 no `seth-livre`, 3ª de 4 no `seth-rapido`, 5ª de 6 no `seth-pesado` e 6ª de 7 no `seth-codigo`. Eu vinha repetindo "tier 0" em (518)/(527) a partir do texto do PROJETO, sem medir. O PROJETO estava desatualizado, e a correção vai na proposta.
+- **`verificar_num_ctx.py` não existe desde `ecf5809`** (remoção dos scripts da era Hermes). O item (512) já estava resolvido; ninguém tinha registrado.
+
+**Correções minhas, depois do "tem certeza?" do Humano:**
+- (a) **"A aprovação cobre o B9" estava incompleto.** A aprovação só vale dentro do LibreChat, e o Goose tinha `shell` liberado.
+- (b) Em seguida escrevi que o Goose "escreve na MEMÓRIAS por `memoria_acrescentar`". **Também errado:** a extensão do canon não está ligada no Goose (`config.yaml`); o `memoria_acrescentar` no `permission.yaml` era resto de configuração antiga.
+- (c) **"DeepSeek não tem camada grátis" foi afirmação de memória de treino, sem fonte.** Declarada como `lacuna`. A remoção valeu por outro motivo: a conexão estava desligada e nunca foi usada.
+
+**Executado:**
+1. **Goose afinado** (fora do repo, backups `.bak-2026-09-23-toada`). `shell`, ações no navegador (clicar, digitar, tecla), `memoria_acrescentar` e `diario_anotar` passam a pedir confirmação, somando-se a `write`/`edit` de (518). Continuam livres só leitura e navegação passiva. `AGENTS.md` ganhou a seção "Nossa toada", com as lições do dia: medir antes de afirmar, 2 de 3 métodos, não descartar alarme sem causa, não rodar CLI de terceiro sem ler, ler a linha `[leitura: …]`. **Não testado numa sessão real do Goose.**
+2. **B9 FECHADO**, por decisão do Humano, agora com a condição cumprida nos dois clientes que escrevem (LibreChat com aprovação, Goose em `ask_before`). Risco residual declarado no `backlog.md`: um processo local comprometido ainda pode dar POST direto no `seth_escriba`.
+3. **2 Gemini avaliados, não colocados na fila.** `gemini-3-flash-preview` e `gemini-3.1-flash-lite` acertaram 3 de 3 respostas (1,3 a 16,6 s) e fizeram chamada de ferramenta em streaming com os argumentos inteiros (`{"numero":522}`). No mesmo teste, o `gemini-2.5-flash`, que está nas filas da Seth, deu 429 (cota estourada, em parte pelos meus testes de hoje). Os novos têm cota própria e seriam um reforço real. **Colocar na fila é decisão do Humano, pendente.**
+4. **deepseek removido** pela API do OmniRoute (`DELETE /api/providers/<id>` → "Connection deleted successfully"), com `.backup` do `storage.sqlite` antes (`~/.omniroute/storage.sqlite.bak-antes-remover-deepseek-2026-09-23`, `600`). A chave continua no `.env`, e dá pra recriar.
+5. **B8 tentado ao vivo e revertido.** O desenho completo foi feito no runtime: bridge `librechat` 172.29.7.0/24, relé socat nas **7** portas (a tentativa de 21/09 esquecia escriba, verificador e Piper), Mongo/Meili pelo nome do serviço, `HOST=0.0.0.0` só dentro do container, porta publicada só em `127.0.0.1:3080`, e as URLs do YAML mais o env do `canon-mcp` apontando pra 172.29.7.1. **O isolamento funcionou, e as 7 portas permitidas também ficaram inalcançáveis:** de dentro do container, timeout em todas, inclusive nas bloqueadas. Meu primeiro teste marcou "bloqueada" sem distinguir de "nada funciona", e só o segundo, com `fetch` do Node, pegou isso. Causa: `ufw` ativo bloqueando o tráfego da bridge pro host. Da própria Máquina, 172.29.7.1:20126 responde 200 e o socat escuta nas 7. **Revertido pro modo host** (compose e YAML iguais ao repo, `/health` em ~6 s, MCP com 3 servidores e 5 ferramentas). Config da tentativa guardada em `logs/incidente-goose-librechat-2026-09-23/*B8-tentativa*`. **Falta** o nome fixo da interface da bridge (`br-librechat`) e uma regra `ufw` com `sudo`, que só o Humano roda.
+
+**Proposta `propostas/afinacao-sistema-2026-09-23.diff`, aguardando assinatura:**
+- **Cache de 60 s do `ls-remote`** em `estado_para_eco.sh`, como decidido. Só guarda medição bem-sucedida; falha nunca vira PASS velho. A idade sai numa linha nova, `SYNC-REMOTO-IDADE:`, e a linha `sync:` continua nas três formas de REGRAS. O gateway repassa a linha nova. `maquina_verificar git_sync` continua ao vivo. Testado: 1ª medida 620 ms → dentro de 60 s, 72 ms ("1s (cache)"); cache desligado mede sempre; falha de rede com HOME limpo = "não verificado" e nenhum arquivo de cache criado. Gateway `--selftest` OK.
+- **Atalho `seth` sincroniza também o `docker-compose.yml`**, e não só o YAML. É a causa-raiz de (517): os dois podiam divergir.
+- **PROJETO:** o "Tier 0 = Cerebras" riscado e corrigido com a ordem real, apontando o OmniRoute como fonte da verdade.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sqlite3 -readonly` + `GET /api/combos` (2 métodos, ordem das filas); `git log --diff-filter=D`; leitura do `permission.yaml`/`config.yaml` do Goose; 3+1 chamadas reais por Gemini no `:20127`; `DELETE /api/providers` + contagem depois; B8: `docker compose config`, `down`/`up`, `fetch` de dentro do container nas 7+6 portas, `ss` e `curl` da Máquina, `systemctl is-active ufw`, reversão com `cmp` + `/health` + log MCP; cache: 4 cenários cronometrados; `git apply --check` + aplicação numa cópia limpa. Autorização: Humano — respostas às 4 perguntas (B8 "Fazer agora", B9 "Fechar", cache "60s", "Avaliar 2 Gemini" + "Remover deepseek") e "afina o goose para seguir nossa toada, aliás, afina o sistema todo".
 
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
 
