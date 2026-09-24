@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[APLICADO] Os testes das regras de checagem voltaram a rodar sozinhos.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (530).
+
 **[ERRO MEU, ACHADO E CORRIGIDO — falta sua assinatura] Um alarme que eu tinha descartado era verdadeiro.** Na varredura tripla, deixei de lado um aviso dizendo que um teste automático "não roda há 33 vezes", como se fosse normal. Não era: desde 21/09, quando mudam as regras de checagem do sistema, os testes delas deixaram de rodar sozinhos. Rodei os testes agora (todos passaram, nada quebrou) e preparei o conserto.
 - Assine: `bash scripts/aprovar.sh p16-reconhece-controles-extraidos-2026-09-23`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (529).

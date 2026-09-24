@@ -201,7 +201,11 @@ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "k
 # Prova de que não é decorativo: na primeira corrida, a suíte reprovou o
 # próprio conserto que a (419) tinha acabado de fazer -- o P-7 pulava commits
 # de permutação que traziam entrada nova. Consertado antes de entrar no canon.
-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
+# Corrigido em (529): desde a extração de (437) cada controle mora em
+# scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
+# mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
+# SKIP crônico; foi lido como "por desenho" em (527), e era isto).
+P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
 
 
 # --- P-17 ----------------------------------------------------------------
