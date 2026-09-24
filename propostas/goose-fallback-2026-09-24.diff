@@ -373,10 +373,10 @@ index 0000000..0192c3d
 +else echo "FALHA 4: não aplica na árvore atual -- $out"; exit 1; fi
 +echo "PODE APLICAR: $nome"
 diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
-index 68f0644..528448e 100644
+index 68f0644..4a0a60d 100644
 --- a/scripts/perimetro/p08_quarentena.sh
 +++ b/scripts/perimetro/p08_quarentena.sh
-@@ -90,6 +90,13 @@ _p8_eh_comportamento() {
+@@ -90,6 +90,14 @@ _p8_eh_comportamento() {
      # nenhuma, `git add`, rodar perimetro.sh -- P-8 dizia OK antes deste
      # conserto (ver commit desta entrada pro antes/depois).
      redesign/igpu/*.py) return 0 ;;
@@ -384,9 +384,10 @@ index 68f0644..528448e 100644
 +    # (MEMÓRIAS (543)): .agents/skills/*/SKILL.md são instruções que o agente
 +    # carrega e SEGUE (Goose e qualquer cliente do padrão Agent Skills) -- mudam
 +    # comportamento tanto quanto um prompt de config/. redesign/goose/* é a fonte
-+    # versionada do AGENTS.md e das permissões do Goose. Fechado ANTES da
++    # versionada do AGENTS.md e das permissões do Goose. .claude/* (skills e
++    # settings do Claude Code, MEMÓRIAS (544)) é a mesma classe. Fechado ANTES da
 +    # primeira skill entrar, mesma disciplina do .github/* acima.
-+    .agents/*|redesign/goose/*) return 0 ;;
++    .agents/*|.claude/*|redesign/goose/*) return 0 ;;
      *) return 1 ;;
    esac
  }

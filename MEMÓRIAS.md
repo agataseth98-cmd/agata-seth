@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c2f93de61a7e400247b70704b1f8f01b41bb9a42
-  Escrito em: 24/09/2026 14:19 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e718063873e5318fd90e36bcab5547fedd906f36
+  Escrito em: 24/09/2026 14:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2f93de61a7e400247b70704b1f8f01b41bb9a42/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e718063873e5318fd90e36bcab5547fedd906f36/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
+
+**Como apareceu:** conferindo o PR #40, depois do aviso de inscrição, vi que o repositório já tem `.claude/skills/` (as skills oficiais do Obsidian, desde (324)). São instruções que o Claude Code carrega e segue, e estavam fora de `_p8_eh_comportamento`: a mesma classe do `.agents/` de (543). Um `.claude/settings.json`, que define permissões do Claude Code, entraria sem assinatura. Diferente de `.agents/`, aqui a brecha **já tinha conteúdo dentro**, as 5 skills do Obsidian: inofensivas, mas nunca passaram por P-8.
+
+**Mudança:** `.agents/*|.claude/*|redesign/goose/*` numa só linha, com o comentário apontando esta entrada. Testado: `.claude/skills/x/SKILL.md` e `.claude/settings.json` → quarentena; `extras/` → livre. `git apply --check` limpo.
+
+**PR #40 (bússola), no mesmo aviso:** CI `suite-adversarial` verde, `MERGEABLE`/`CLEAN`, sem revisão nem comentário. Só espera o merge do Humano.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `gh pr view 40` (checks, mergeable, reviews); `git ls-tree HEAD .claude`; `_p8_eh_comportamento` em 5 caminhos; `git apply --check`. Autorização: Humano — mandato de (543), a proposta ainda não assinada.
 
 (543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: proposta P-8 `goose-fallback-2026-09-24`, aguardando assinatura, com 3 skills no repositório, `p8_verificar.sh`, o MCP do canon ligado, permissões com o prefixo certo, `.agents/` e `redesign/goose/` em quarentena, e um defeito real do `estado_para_eco.sh` corrigido (atrás/à-frente invertido). Desenho do sistema com a bússola publicado como página.**
 
