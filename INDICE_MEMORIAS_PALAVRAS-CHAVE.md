@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
+  palavras-chave: assinado, verificado, aplicado, suspensao, deep, projeto, máquinas, registra, suspensão, contenção, desabilitada, proposta, esperando, assinatura
 (540) DIÁRIO — 24/09/2026 · **A suspensão do notebook volta a funcionar, em S3 (`deep`), provada nos 4 caminhos: 2 por despertar do RTC, tampa e botão. Um efeito colateral meu, de (536), apareceu no caminho: a contenção que bloqueava toda suspensão tinha parado de subir sem aviso. A atualização do PROJETO vai na proposta P-8 `suspensao-deep-2026-09-24`, aguardando assinatura.**
   palavras-chave: suspensão, notebook, volta, funcionar, deep, provada, caminhos, despertar, rtc, tampa, botão, efeito, colateral, meu, apareceu, caminho, contenção, bloqueava, tinha, parado, subir, aviso, atualização, projeto, vai, proposta, suspensao, aguardando, assinatura
 (539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, roster, modelos, grátis, investigada, fundo, aplicada, veio, dado, embasava, estava, errado, causa, raiz, era, bug, próprio, script, sondagem, achado, bônus, projeto, descrevia, membros, existe, dias, real, tem
 (512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
   palavras-chave: consolidação, automática, bug, ctx, tema, aprovada, humano, edição, conteúdo, entradas, resumidas, veredito, fechado, reconfirmado
-(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quarentena P-8 (tema `aprovacao-assinada-p8`), aprovada pelo Humano sem edição de conteúdo — 15 entradas resumidas, nenhuma obsoleta.**
-  palavras-chave: consolidação, automática, quarentena, tema, aprovacao, assinada, aprovada, humano, edição, conteúdo, entradas, resumidas, obsoleta
+(511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quar …
+  palavras-chave: consolidação, automática, quar
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e …
   palavras-chave: assinado, verificado, aplicado, itens
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" …
