@@ -9,6 +9,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[TESTADO DO ZERO — tudo certo] A Seth passou no teste completo depois de todos os consertos de hoje.** Desliguei tudo, liguei do zero, e no navegador ela respondeu certo, usou a ferramenta que você aprovou e disse corretamente que está tudo sincronizado. Erro meu: achei que a hora dela estava errada, mas quem errou fui eu — ela tinha medido, eu não.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (531).
+
 **[APLICADO] Os testes das regras de checagem voltaram a rodar sozinhos.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (530).
 

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
+  palavras-chave: teste, seth, refeito, zero, aplicações, dia, passou, inteiro, erro, meu, registrado, estimei, hora, cabeça, mediu, estava, certa
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
   palavras-chave: assinado, verificado, aplicado, reconhece, controles, extraidos, volta, rodar, suíte, regressão, controle, muda, inclusive, scripts, perimetro, pnn
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: humano, saiu, vou, sair, prossiga, fim, apresente, assinatura, for, extremamente, necessário, plano, ação, continua, ele, presente, item, investigado, devolvido, decisão, desenho, backlog, forçado, whisper, achou, vulnerabilidade, real, leitura, arbitrária, arquivo, corrigida, testada, aguardando
 (502) DIÁRIO — 21/09/2026 · **Item 2 do plano de ação da auditoria de Marcos (500) fechado — achado NET-01 (anti-SSRF incompleto). Assinado, verificado, aplicado pelo fluxo de branch+PR (2º uso desde (501)).**
   palavras-chave: item, plano, ação, auditoria, marcos, fechado, achado, net, anti, ssrf, incompleto, assinado, verificado, aplicado, fluxo, branch, uso, desde
-(501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de ação priorizado da auditoria de Marcos (500), item por item. Item 1 (GOV-03) fechado de verdade: `main` protegido no GitHub, PR obrigatório + `suite-adversarial` como status check exigido + force-push e deleção bloqueados. Esta própria entrada é o primeiro teste real do fluxo novo — branch + PR + checagem verde + merge, não mais push direto.**
-  palavras-chave: ordem, humano, vamos, fazer, tudo, plano, ação, priorizado, auditoria, marcos, item, gov, fechado, verdade, main, protegido, github, obrigatório, suite, adversarial, status, check, exigido, force, push, deleção, bloqueados, própria, entrada, primeiro, teste, real, fluxo, novo, branch, checagem, verde, merge, direto
+(501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de açã …
+  palavras-chave: ordem, humano, vamos, fazer, tudo, plano, açã
 (500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, …
   palavras-chave: auditoria, técnica, externa, marcos, recebida, pdf
 (499) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (488): o tema d …
