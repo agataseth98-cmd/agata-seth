@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[FEITO — a Seth está pronta pra você testar] Os 2 Gemini novos estão na fila da Seth e já trabalhando.** Quando o Gemini antigo fica sem cota (aconteceu hoje), agora ela cai num Gemini novo em vez de ficar lenta ou falhar — testei: respondeu em menos de 2 segundos.
+- Falta só assinar a atualização do manual das filas: `bash scripts/aprovar.sh geminis-na-fila-da-seth-2026-09-23` (não bloqueia o teste — a fila já está valendo).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (534).
+
 **[APLICADO E PROVADO AO VIVO] A volta curta passou nos 3 pontos.** O atalho agora sincroniza tudo (testei com uma armadilha: ele consertou sozinho). A Seth ficou rápida — 1 segundo por resposta, antes chegava a 44. E o Goose, numa sessão de verdade, parou e pediu confirmação antes de rodar comando e antes de criar arquivo; o que eu neguei, ele não fez. Nada esperando assinatura.
 - Tem uma consolidação noturna nova esperando você olhar em `propostas/` (sem pressa).
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (533).
