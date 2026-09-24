@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 90301914c176c4f8db0a5c0588c2368300048691
-  Escrito em: 24/09/2026 10:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 786d90d30502d591debc6f43b761ee5a089484b3
+  Escrito em: 24/09/2026 10:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/786d90d30502d591debc6f43b761ee5a089484b3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
+
+**Propostas, aguardando assinatura:**
+- **`obsidian-espera-login-2026-09-24`:** conserta o achado de (537). O `ExecStartPre` passa a esperar que o logind declare uma sessão gráfica do usuário (`loginctl show-user -p Display`, que fica vazio até o login; a sessão da tela de login é do usuário `lightdm`) e, depois, o socket X11. Testado: com a sessão aberta, a espera termina na hora; com o usuário `lightdm`, continua esperando (`timeout` → 124). `systemd-analyze verify` limpo.
+- **`b8-librechat-bridge-2026-09-24`:** refaz o B8 de (532) a partir da tentativa guardada em `logs/incidente-goose-librechat-2026-09-23/`, que já tinha as 7 portas e as 10 URLs. Acrescenta o que faltou naquela vez: o nome fixo da interface (`br-librechat`), pra regra do ufw casar por interface. README e as 2 linhas do PROJETO que diziam `network_mode: host` vão junto. Testado: `docker compose config` com o `.env` real e o YAML carregando. **Não testado:** a subida real. A rede muda de 172.18.0.0/16 pra 172.29.7.0/24 e precisa ser recriada à mão na primeira vez, porque o atalho `seth` engole erro de compose (`|| true`). **Depende** da regra do ufw, no script de `sudo` abaixo.
+
+**Fechados por diagnóstico, sem código:**
+- **(513), 3 modelos do discovery nunca avaliados:** já estava resolvido. Os 2 Gemini entraram na fila em (532)/(534), e `openrouter/auto` é pago, como a própria (513) já dizia.
+- **Core dump do Obsidian ao parar (527):** o `coredumpctl` mostra `SIGTRAP` no processo principal (`/app/obsidian --ozone-platform=x11`) nas paradas de 23/09 (18:52, 19:18, 22:30), no mesmo segundo do `Stopping` do systemd. É o Electron abortando de propósito quando os subprocessos morrem antes dele. Não há perda em uso: é risco de fundo (Doutrina de defesa proporcional), registrado sem conserto. As dezenas de `SIGSEGV` antes do login são outra coisa, o achado de (537), consertado na proposta acima.
+
+**Com o Humano:**
+- **Script de `sudo`** (fora do repo, no scratchpad da sessão): regra do ufw pro B8 e SMART dos 2 NVMe (só leitura).
+- **`agata-rest.service`:** a remoção foi barrada pelo modo de permissão da sessão por ser destrutiva, então a decisão e o comando ficam com o Humano.
+- **Consolidação de 23/09 (`num-ctx-16814`):** repete a de 21/09, já aprovada em (512) (mesmo tema, mesmas entradas, mais a própria (512)). Recomendação: descartar. Achado: o gerador não pula tema já consolidado. A de 09/09 (`omniroute-504`) também está parada em `propostas/`.
+- **HuggingFace:** só em 01/10 (522).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `loginctl show-user/show-session`; teste do `ExecStartPre` com a sessão e simulando `lightdm` (`timeout`); `systemd-analyze --user verify`; `diff` repo × `logs/…/antes-B8` (iguais) e × `B8-tentativa`; `docker compose config` com o `.env` real; `yaml.safe_load`; `docker network inspect`; `coredumpctl list/info`; `git apply --check` das duas propostas. Autorização: Humano — "já conserte o obsidian e conserte tudo que estava quebrado no inicio deste chat também".
 
 (537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
 

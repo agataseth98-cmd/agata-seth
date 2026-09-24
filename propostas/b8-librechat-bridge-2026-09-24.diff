@@ -1,0 +1,207 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 2c23ab0..acf6124 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -97,7 +97,7 @@ data são do relógio da Máquina, a Seth não os fornece); `POST /diario` anexa
+ verificação pós-escrita aborta com 409 se a operação não for insert/append puro; sem `PUT`/
+ `PATCH`/`DELETE`, não faz `git add`/`commit`, não lê segredo; `fcntl.flock` + `os.replace`
+ atômico; fonte `redesign/router/seth_escriba.py`, MEMÓRIAS (318)) · a stack Docker do
+-**LibreChat** (`librechat` em `network_mode: host` bind `127.0.0.1:3080`, + `librechat-mongodb`
++**LibreChat** (`librechat` na bridge `librechat`/`br-librechat` desde MEMÓRIAS (538) — B8, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host`, 7 portas; + `librechat-mongodb`
+ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose em
+ `~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
+ `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
+@@ -237,8 +237,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   Os dois sobem/descem sob demanda via `discord-mcp.service`/`navegador-mcp.service`
+   (`redesign/systemd/`, sem `[Install]`), amarrados ao ciclo de `~/.local/bin/seth`/`seth-parar`.
+   Transporte HTTP (não stdio, diferente do `canon-mcp.mjs`) — os dois rodam no host (Brave
+-  real, API do Discord), o LibreChat alcança via `127.0.0.1` porque o container usa
+-  `network_mode: host`. `librechat.yaml` ganhou `mcpSettings.allowedDomains: ["127.0.0.1"]`
++  real, API do Discord), o LibreChat alcança via `172.29.7.1` (relé `librechat-ponte-host`,
++  B8 — MEMÓRIAS (538); antes era `127.0.0.1` com `network_mode: host`). `librechat.yaml` ganhou `mcpSettings.allowedDomains: ["127.0.0.1"]` (+ `"172.29.7.1"` em (538))
+   (sem isso o próprio LibreChat bloqueia servidor MCP remoto, guarda contra SSRF).
+ 
+ ## Segurança
+diff --git a/redesign/librechat/README.md b/redesign/librechat/README.md
+index e4b6e48..cee2881 100644
+--- a/redesign/librechat/README.md
++++ b/redesign/librechat/README.md
+@@ -31,9 +31,15 @@ Editou `~/librechat/librechat.yaml` ou o compose? Copie a versao sem-segredo par
+ 
+ ## Rede
+ 
+-A app roda em `network_mode: host` para alcancar o `seth_gateway` em
+-`127.0.0.1:20126` -- mesmo padrao que o Open WebUI usava nesta maquina. Mongo e
+-Meili ficam numa bridge privada (`librechat`) e so publicam em `127.0.0.1`.
++Desde MEMÓRIAS (538) (B8 / ISO-05) a app NAO usa `network_mode: host`: fica na
++bridge `librechat` (172.29.7.0/24, interface `br-librechat`) e publica so
++`127.0.0.1:3080`. Para falar com a Maquina, passa pelo `librechat-ponte-host`
++(socat em modo host) que repassa SO 7 portas a partir de `172.29.7.1`: 20126
++seth_gateway · 8890 piper · 27125 canon · 20135 discord · 20136 navegador ·
++20140 escriba · 20141 verificador. O ufw da Maquina precisa liberar essas 7
++portas na `br-librechat` (regra instalada com sudo, uma vez). Porta nova =
++compose + `librechat.yaml` + regra do ufw, juntos. Mongo e Meili: pelo nome do
++servico, dentro da bridge.
+ 
+ ## Operacao
+ 
+diff --git a/redesign/librechat/docker-compose.yml b/redesign/librechat/docker-compose.yml
+index 05cf7cb..0a407f3 100644
+--- a/redesign/librechat/docker-compose.yml
++++ b/redesign/librechat/docker-compose.yml
+@@ -5,9 +5,18 @@
+ #   librechat              a app (api + cliente)
+ #
+ # NAO tem rag_api nem pgvector de proposito (MEMORIAS (115)/(293): sem busca por embedding).
+-# A app roda em network_mode:host para alcancar o seth_gateway em 127.0.0.1:20126 --
+-# mesmo padrao que o Open WebUI usava nesta maquina. Mongo/Meili ficam numa bridge
+-# privada e so publicam em 127.0.0.1.
++# B8 / ISO-05 (auditoria de Marcos; MEMORIAS (532)): a app NAO usa mais
++# network_mode:host -- antes ela enxergava TODA a rede local da Maquina (qualquer
++# porta), nao so as que precisa. Agora fica na bridge `librechat` (subnet fixa
++# 172.29.7.0/24) e so alcanca a Maquina pelo `librechat-ponte-host`: um container
++# minusculo (socat, sem interpretador de proposito geral) em network_mode:host que
++# encaminha SO as 7 portas que a app usa, a partir do gateway da bridge (172.29.7.1):
++#   20126 seth_gateway · 8890 piper-tts · 27125 obsidian-ro-proxy (canon)
++#   20135 discord-mcp · 20136 navegador-mcp · 20140 seth_escriba · 20141 seth_verificador
++# A tentativa de 21/09 cobria 4 e esqueceu escriba/verificador/piper -- e o
++# librechat.yaml meio-convertido derrubou a Seth em 22/09 ((517)). Porta nova que a
++# app precise = entra aqui E no librechat.yaml, nos dois, no mesmo commit.
++# Mongo/Meili: a app fala com eles pelo NOME do servico, dentro da bridge.
+ #
+ # restart:"no" em tudo -- nada sobe no boot. Os atalhos `seth` / `Parar Seth` controlam.
+ # Fonte versionada: ~/agata/redesign/librechat/docker-compose.yml
+@@ -36,6 +45,21 @@ services:
+     volumes:
+       - librechat-meili-data:/meili_data
+ 
++  librechat-ponte-host:
++    container_name: librechat-ponte-host
++    image: alpine/socat:1.8.0.1
++    restart: "no"
++    network_mode: host
++    depends_on:
++      - librechat-mongodb
++    entrypoint: ["/bin/sh", "-c"]
++    command:
++      - |
++        for p in 20126 8890 27125 20135 20136 20140 20141; do
++          socat TCP-LISTEN:$$p,bind=172.29.7.1,fork,reuseaddr TCP:127.0.0.1:$$p &
++        done
++        wait
++
+   librechat:
+     container_name: librechat
+     # Pin por digest, não por tag (achado (328), sem pin/healthcheck; corrigido
+@@ -52,14 +76,23 @@ services:
+     # ferramenta confirmadas funcionando.
+     image: ghcr.io/danny-avila/librechat@sha256:b07248d86e020c44101170bde2dbb4ab547df30dd223b4aacd6218cc90e8632b
+     restart: "no"
+-    network_mode: host
++    networks: [librechat]
++    ports:
++      - "127.0.0.1:3080:3080"
+     depends_on:
+       - librechat-mongodb
+       - librechat-meilisearch
++      - librechat-ponte-host
+     env_file:
+       - .env
+     environment:
+       - CONFIG_PATH=/app/librechat.yaml
++      # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
++      # escuta em todas as interfaces DO CONTAINER -- na Maquina so 127.0.0.1:3080
++      # e publicado (acima) -- e acha Mongo/Meili pelo nome do servico.
++      - HOST=0.0.0.0
++      - MONGO_URI=mongodb://librechat-mongodb:27017/LibreChat
++      - MEILI_HOST=http://librechat-meilisearch:7700
+     volumes:
+       - ./librechat.yaml:/app/librechat.yaml:ro
+       - ./images:/app/client/public/images
+@@ -78,6 +111,16 @@ services:
+ networks:
+   librechat:
+     name: librechat
++    # Nome FIXO da interface (MEMÓRIAS (538)): a regra do ufw que libera as 7 portas
++    # do rele casa por interface (`in on br-librechat`); com o nome aleatorio do
++    # docker (br-<hash>) a regra quebraria a cada recriacao da rede. Na 1a tentativa
++    # (532) o ufw bloqueou tudo justamente por falta dessa regra.
++    driver_opts:
++      com.docker.network.bridge.name: br-librechat
++    ipam:
++      config:
++        - subnet: 172.29.7.0/24
++          gateway: 172.29.7.1
+ 
+ volumes:
+   librechat-mongo-data:
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 20b39ee..c7e8869 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -12,12 +12,14 @@
+ version: 1.3.13
+ cache: true
+ 
+-# Servidores MCP remotos (discord/navegador, skills novas 05/09/2026) so
+-# respondem em 127.0.0.1 -- host-side, network_mode: host. Sem isto, o
+-# LibreChat bloqueia qualquer server MCP com `url:` por seguranca (SSRF).
++# Servidores MCP remotos (discord/navegador, skills novas 05/09/2026) rodam na
++# Maquina em 127.0.0.1; a app (bridge `librechat`, B8 -- MEMORIAS (532)) os alcança
++# via 172.29.7.1, o gateway da bridge, pelo rele `librechat-ponte-host`. Sem esta
++# lista, o LibreChat bloqueia qualquer server MCP com `url:` por seguranca (SSRF).
+ mcpSettings:
+   allowedDomains:
+     - "127.0.0.1"
++    - "172.29.7.1"   # gateway da bridge `librechat` -> librechat-ponte-host (B8, MEMÓRIAS (532))
+ 
+ interface:
+   mcpServers:
+@@ -132,7 +134,7 @@ endpoints:
+   custom:
+     - name: "Seth"
+       apiKey: "loopback-sem-chave"
+-      baseURL: "http://127.0.0.1:20126/v1"
++      baseURL: "http://172.29.7.1:20126/v1"
+       iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"   # fallback do rosto quando a UI nao passa por spec
+       # Default = `seth-livre` (MEMÓRIAS (390)): combo CUSTOM do OmniRoute
+       # (storage.sqlite, curada por nós), strategy=priority, cascata
+@@ -187,7 +189,7 @@ endpoints:
+ speech:
+   tts:
+     openai:
+-      url: "http://127.0.0.1:8890/v1/audio/speech"
++      url: "http://172.29.7.1:8890/v1/audio/speech"
+       apiKey: "loopback-sem-chave"
+       model: "tts-1"
+       voices:
+@@ -206,7 +208,9 @@ mcpServers:
+     args:
+       - /app/data/mcp/canon-mcp.mjs
+     env:
+-      CANON_PROXY: http://127.0.0.1:27125
++      CANON_PROXY: http://172.29.7.1:27125
++      SETH_ESCRIBA: http://172.29.7.1:20140      # sem isto o canon-mcp usa 127.0.0.1 (padrão dele) e a escrita some
++      SETH_VERIFICADOR: http://172.29.7.1:20141  # idem pra maquina_verificar
+     startup: true   # ligado: read-only, ~40 MB, e a espinha da hidratacao da Seth
+     chatMenu: true
+     serverInstructions: true
+@@ -214,15 +218,15 @@ mcpServers:
+     description: "Vault do Agata (canon read-only) via :27125 -- query_canon, vault_consultar"
+   discord:
+     type: streamable-http
+-    url: http://127.0.0.1:20135/mcp
+-    startup: false   # sob demanda -- network_mode: host, 127.0.0.1 do container == do host
++    url: http://172.29.7.1:20135/mcp
++    startup: false   # sob demanda -- via 172.29.7.1 (rele librechat-ponte-host, B8)
+     chatMenu: true
+     serverInstructions: true
+     timeout: 30000
+     description: "Ponte Discord (poll, nao push) -- ler_mensagens, enviar_mensagem sanitizada. Skill nova, 05/09/2026."
+   navegador:
+     type: streamable-http
+-    url: http://127.0.0.1:20136/mcp
++    url: http://172.29.7.1:20136/mcp
+     startup: false   # sob demanda -- Brave real roda no host, nao dentro do container
+     chatMenu: true
+     serverInstructions: true

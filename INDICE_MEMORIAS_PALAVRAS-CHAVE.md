@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
+  palavras-chave: varredura, pendências, carregamento, ordem, humano, conserte, tudo, estava, quebrado, início, deste, chat, propostas, aguardando, assinatura, obsidian, esperando, login, verdade, rede, librechat, itens, fechados, diagnóstico, resto, depende, sudo, data, decisão
 (537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
   palavras-chave: assinado, verificado, aplicado, obsidian, puxar, sessao, grafica, puxa, sessão, gráfica, aplicação, aberto, caiu, religado, achado, novo, espera, tela, passa, login
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, itens, plano, ação, auditoria, marcos, entram, canon, proposta, única, lote, estão, fato, aplicados, agora, devolvidos, pra, decisão, humano, fechados, precisar, aplicação
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" — os 4 `.diff` pendentes (itens 4/5/7/9) viram 1 proposta só, `plano-marcos-lote-2026-09-21`, testada antes de trocar.**
   palavras-chave: humano, pediu, una, única, assinatura, diff, pendentes, itens, viram, proposta, plano, marcos, lote, testada, trocar
-(508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e resolva." — a mesma classe de trava do Goose/Playwright de (485) voltou, mesmo com o conserto de lá de pé. Achado, resolvido na hora (processo travado morto, mouse solto), e mitigado com um teto automático de tempo — a causa raiz de POR QUE trava não foi investigada a fundo, por decisão explícita de não arriscar travar o mouse de novo só pra reproduzir.**
-  palavras-chave: humano, voltou, perdi, mouse, again, documente, resolva, mesma, classe, trava, goose, playwright, mesmo, conserto, achado, resolvido, hora, processo, travado, morto, solto, mitigado, teto, automático, tempo, causa, raiz, investigada, fundo, decisão, explícita, arriscar, travar, novo, pra, reproduzir
+(508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e r …
+  palavras-chave: humano, voltou, perdi, mouse, again, documente
 (507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois inve …
   palavras-chave: itens, plano, últimos, inve
 (506) DIÁRIO — 21/09/2026 · **Item 9 (2ª passada do perímetro sensível ao índice …

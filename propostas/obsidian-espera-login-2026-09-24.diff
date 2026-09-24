@@ -1,0 +1,17 @@
+diff --git a/redesign/systemd/obsidian-app.service b/redesign/systemd/obsidian-app.service
+index de54987..ca26495 100644
+--- a/redesign/systemd/obsidian-app.service
++++ b/redesign/systemd/obsidian-app.service
+@@ -18,7 +18,11 @@ Environment=DISPLAY=:0
+ # agata.target sobe no boot, antes do login grafico; sem isto o Obsidian caia com
+ # status=139 (sem socket X11) em loop -- 85+ reinicios ate o Humano entrar na sessao.
+ # Espera sem prazo (o login pode demorar horas) e sem gastar reinicio.
+-ExecStartPre=/bin/sh -c 'until [ -S /tmp/.X11-unix/X0 ]; do sleep 2; done'
++# Corrigido em MEMÓRIAS (538): o socket X0 sozinho nao basta -- quem o cria no boot e o X
++# da tela de login (LightDM), e o Obsidian caia 22x com SIGSEGV ate o login. Agora espera
++# o logind declarar uma sessao grafica DO USUARIO (show-user -p Display: vazio ate o login;
++# a do greeter e do usuario lightdm) e, depois, o socket.
++ExecStartPre=/bin/sh -c 'until [ -n "$(loginctl show-user "$(id -un)" -p Display --value 2>/dev/null)" ] && [ -S /tmp/.X11-unix/X0 ]; do sleep 2; done'
+ TimeoutStartSec=infinity
+ ExecStart=/usr/bin/flatpak run md.obsidian.Obsidian
+ Restart=on-failure
