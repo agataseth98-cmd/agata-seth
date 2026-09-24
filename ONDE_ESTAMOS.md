@@ -9,6 +9,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 23/09/2026
 
+**[ERRO MEU, ACHADO E CORRIGIDO — falta sua assinatura] Um alarme que eu tinha descartado era verdadeiro.** Na varredura tripla, deixei de lado um aviso dizendo que um teste automático "não roda há 33 vezes", como se fosse normal. Não era: desde 21/09, quando mudam as regras de checagem do sistema, os testes delas deixaram de rodar sozinhos. Rodei os testes agora (todos passaram, nada quebrou) e preparei o conserto.
+- Assine: `bash scripts/aprovar.sh p16-reconhece-controles-extraidos-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (529).
+
+**[APLICADO] Os 3 consertos da varredura tripla estão no ar e conferidos.** Nada mais esperando sua assinatura. Seguem abertas só as decisões listadas logo abaixo, sem pressa.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (528).
+
 **[VARREDURA TRIPLA FEITA — 1 assinatura + decisões suas] Olhei o sistema de 3 jeitos diferentes e comparei.** Achei 20 coisas: 3 não eram problema, 3 consertei (esperam sua assinatura), e 14 ficam abertas. Minha frase de antes ("só falta a HuggingFace") estava exagerada; está corrigida.
 - **Pra assinar:** `bash scripts/aprovar.sh varredura-tripla-saidas-honestas-2026-09-23` (3 lugares onde o sistema dizia mais do que sabia).
 - **Pra você decidir, quando quiser:** a Cerebras continuar em 1º na fila da Seth; 3 modelos grátis nunca avaliados; apagar um script talvez inútil; uma conexão "deepseek" desligada; e se vale deixar a Seth mais rápida quando a internet oscila (ela pode ficar até 1 minuto atrasada sobre o GitHub).

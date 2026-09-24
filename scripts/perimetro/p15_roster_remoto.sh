@@ -20,7 +20,12 @@ p15_roster_remoto() {
   corte=$(( $(date +%s) - 86400 ))
   fams=$(awk -F'\t' -v c="$corte" 'NF>=3 && ($1 + 0) >= c {print $3}' "$log" | sort -u | grep -c .)
   if [ "${fams:-0}" -lt 2 ]; then
-    echo "AVISO (P-15): so ${fams:-0} familia(s) do roster remoto teve(tiveram) sucesso nas ultimas 24h. A segunda opiniao externa pode estar degradada -- o sistema pode estar andando com fallback local. Nao falha o commit; olhe scripts/conselho_remoto.py e o OmniRoute."
+    # Texto corrigido na varredura tripla (MEMORIAS (527)): o log so recebe
+    # SUCESSO do conselho_remoto.py -- nao registra tentativa. "0 familias"
+    # tanto pode ser roster quebrado quanto ninguem ter chamado o Conselho em
+    # 24h. Em 23/09/2026 o aviso dizia "degradada" enquanto 4 de 5 membros
+    # respondiam a chamada direta. O aviso agora diz o que mediu, nao o que supoe.
+    echo "AVISO (P-15): so ${fams:-0} familia(s) do roster remoto com SUCESSO registrado nas ultimas 24h. Este controle so enxerga sucessos do scripts/conselho_remoto.py -- 0 pode ser so falta de uso, nao prova degradacao. Pra medir de verdade: python3 scripts/pesquisar_modelos_gratuitos.py (sonda o roster). Nao falha o commit."
   else
     echo "roster remoto OK -- $fams familias com sucesso nas ultimas 24h"
   fi

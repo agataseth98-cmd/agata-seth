@@ -26,18 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 56d16b514aab06b1698af076629de3819868e660
-  Escrito em: 23/09/2026 20:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ff8a6a27980ffed071e4c4959721ed423a4ab95b
+  Escrito em: 23/09/2026 21:08 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56d16b514aab06b1698af076629de3819868e660/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
+
+**Como apareceu.** No commit de (528), o `p15_roster_remoto.sh` estava staged, e o P-16 disse "nenhum arquivo de controle staged". Contradição direta, pega lendo a saída do próprio hook.
+
+**Causa, conferida no código.** `scripts/perimetro.sh`, `P16_ARQUIVOS_DE_CONTROLE` = `^(scripts/(perimetro|varredura_segredo|…)\.(sh|py)|\.githooks/.*)$`. Esse padrão casa `scripts/perimetro.sh`, mas **não** casa `scripts/perimetro/pNN_*.sh`. Antes de (437) cada controle vivia dentro do monolito, e o padrão estava certo. A extração mudou onde os controles moram, e o padrão não acompanhou. Pelo `git log -- scripts/perimetro/`, pelo menos `4d3659a` (P-8, 21/09) e `4b91c80` (P-19) mudaram controles individuais sem a suíte rodar. É a mesma classe da morte silenciosa do P-7 em (419) — e o P-17, criado justamente pra isso, **estava gritando**.
+
+**Corrige (527) explicitamente:** lá eu escrevi "(b) P-17 acusa o P-16 com 27 SKIP seguidos — por desenho". Errado. O SKIP crônico era o sintoma. Descartar um alarme sem conferir a causa é a falha do Catálogo "perceber que a evidência não sustenta a conclusão e deixar passar". Pior: foi logo depois de eu escrever, na mesma (527), que "está tudo certo" pede 2 de 3 métodos concordando. Aqui só um método olhou, e com pressa.
+
+**O que fiz agora.**
+- **Rodei a suíte que devia ter rodado:** `testar_perimetro.sh` com o P-15 novo de (528) deu `SUITE OK -- 31 caso(s), 0 falha(s)`. O que entrou hoje não quebrou nenhum controle.
+- **Proposta `propostas/p16-reconhece-controles-extraidos-2026-09-23.diff`:** o padrão ganha `perimetro/[a-z0-9_]+`, com comentário explicando.
+- **Testado:** o novo padrão casa os controles individuais, o `perimetro.sh`, a suíte e os ganchos, e não casa `conselho_remoto.py`, o canon nem a cópia sombra congelada. Num clone descartável, com o conserto e uma mudança staged no `p15_roster_remoto.sh`, o P-16 rodou a suíte: `P-16: controle staged (scripts/perimetro/p15_roster_remoto.sh) -- rodando a suíte` → `SUITE OK -- 31`.
+- **Não toquei** em `scripts/perimetro-sombra-referencia.sh`: é o monolito congelado de antes da extração, que só registra divergência de exit, e mexer nele anularia o propósito.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: saída do hook do commit de (528) contradizendo o staged; `grep` do padrão em `perimetro.sh`; `git log -- scripts/perimetro/`; `testar_perimetro.sh` real (31/31); teste do padrão contra 8 caminhos; clone descartável com uma mudança staged num controle e `perimetro.sh` completo; `git apply --check` contra HEAD. Autorização: Humano — mandato de (527) ("confronte, aprimore, proponha e registre") e (528).
+
+(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
+
+**Verificação.** Na primeira conferência, depois do "done" do Humano, o `APROVADO-` não existia — o comando não tinha chegado a gravar. Pedi pra rodar de novo, sem aplicar nada no escuro. Na segunda: o `sha256sum` do `.diff` bateu com o `diff-sha256:`, e `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers` deu `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; par movido pra `propostas/aplicadas/`.
+
+**Conferido em produção, não só em teste.**
+- `seth-verificador.service` e `obsidian-ro-proxy.service` reiniciados (`active active`); o canon pelo proxy responde 200.
+- `seth_verificador.py --selftest`: 24/24. `maquina_verificar git_sync` ao vivo: `[leitura: remoto = HEAD local (3cf778e) -- sincronizado.]`.
+- `ro_proxy.py --selftest` rodou com a produção de pé: `selftest em 127.0.0.1:33061 (não na porta de produção)`, `SELFTEST OK`. Antes (504), essa mesma situação dava falso OK.
+- P-15 chamado direto: o aviso agora diz "0 pode ser so falta de uso, nao prova degradacao" e aponta a sonda.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify` (depois de uma primeira conferência negativa); `git apply`; `--selftest` 24/24; `systemctl --user restart` + `is-active`; `curl :27125` + `:20141/verificar`; `ro_proxy --selftest` com a produção de pé; `p15_roster_remoto` chamado direto. Autorização: Humano — assinou ("done", "acho que foi").
 
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "repita 3x a varredura, confronte, aprimore, proponha e registre"), feita por três métodos independentes: Máquina, canon e uso real. 20 achados confrontados: 3 descartados como não-defeito, 3 consertados numa proposta P-8 aguardando assinatura, 14 abertos (parte é decisão do Humano, parte só se resolve com ele ou com o tempo). Corrige minha frase de (526), "única pendência é a HuggingFace", que era exagero.**
 
