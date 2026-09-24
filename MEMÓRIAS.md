@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ff8a6a27980ffed071e4c4959721ed423a4ab95b
-  Escrito em: 23/09/2026 21:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e9ab18d02e48b14b503a3808c1d441e8bab6f98c
+  Escrito em: 23/09/2026 21:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ff8a6a27980ffed071e4c4959721ed423a4ab95b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
+
+**Verificação.** O `sha256sum` do `.diff` bateu com o `diff-sha256:`. `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers`: `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; `bash -n` limpo; par movido pra `propostas/aplicadas/`.
+
+**Primeiro uso real: este próprio commit.** Ele toca `scripts/perimetro.sh`, então o P-16 tem de reconhecer a mudança e rodar a suíte. O resultado fica na saída do hook deste commit e é conferido na resposta que fecha o pedido. Depois dele, o P-17 deve parar de acusar o SKIP crônico do P-16 nos commits que mexem em controle.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify`; `git apply`; `bash -n`. Autorização: Humano — assinou ("ok").
 
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
 

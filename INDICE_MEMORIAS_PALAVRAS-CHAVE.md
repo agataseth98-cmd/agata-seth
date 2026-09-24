@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
+  palavras-chave: assinado, verificado, aplicado, reconhece, controles, extraidos, volta, rodar, suíte, regressão, controle, muda, inclusive, scripts, perimetro, pnn
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
   palavras-chave: corrige, aviso, skip, corridas, descartei, desenho, era, defeito, real, desde, extração, controles, pra, arquivos, próprios, reconhece, mudança, controle, individual, suíte, regressão, deixou, rodar, ela, devia, proposta, conserto, sob, aguardando, assinatura
 (528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, plano, ação, auditoria, marcos, fechado, achado, net, anti, ssrf, incompleto, assinado, verificado, aplicado, fluxo, branch, uso, desde
 (501) DIÁRIO — 21/09/2026 · **Ordem do Humano: "vamos fazer tudo" — plano de ação priorizado da auditoria de Marcos (500), item por item. Item 1 (GOV-03) fechado de verdade: `main` protegido no GitHub, PR obrigatório + `suite-adversarial` como status check exigido + force-push e deleção bloqueados. Esta própria entrada é o primeiro teste real do fluxo novo — branch + PR + checagem verde + merge, não mais push direto.**
   palavras-chave: ordem, humano, vamos, fazer, tudo, plano, ação, priorizado, auditoria, marcos, item, gov, fechado, verdade, main, protegido, github, obrigatório, suite, adversarial, status, check, exigido, force, push, deleção, bloqueados, própria, entrada, primeiro, teste, real, fluxo, novo, branch, checagem, verde, merge, direto
-(500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, 12 páginas, snapshot `5d88f54` = (481)) e auditada na Máquina — camada C da cadeia (REGRAS, "Cadeia de auditoria em camadas"): não aceitei o relatório de cara, conferi contra o real. Os 3 achados HIGH batem exatos com o estado atual. Nenhum é tocado pelos 18 commits desta sessão desde o snapshot.**
-  palavras-chave: auditoria, técnica, externa, marcos, recebida, pdf, páginas, snapshot, auditada, máquina, camada, cadeia, regras, camadas, aceitei, relatório, cara, conferi, contra, real, achados, high, batem, exatos, estado, atual, tocado, commits, desta, sessão, desde
+(500) DIÁRIO — 21/09/2026 · **Auditoria técnica externa de Marcos recebida (PDF, …
+  palavras-chave: auditoria, técnica, externa, marcos, recebida, pdf
 (499) CORREÇÃO — 21/09/2026 · **Correção sobre a própria entrada (488): o tema d …
   palavras-chave: correção, própria, entrada, tema
 (498) DIÁRIO — 21/09/2026 · **Humano voltou testando a Seth: imagens sumiram + u …
