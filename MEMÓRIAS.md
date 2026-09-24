@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 064f96867fe6613d37a937090c21121ed8dc9722
-  Escrito em: 23/09/2026 23:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): abfa036c44a10378bed0bdda1d7f7c8ac22eb544
+  Escrito em: 24/09/2026 10:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/064f96867fe6613d37a937090c21121ed8dc9722/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/064f96867fe6613d37a937090c21121ed8dc9722/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/064f96867fe6613d37a937090c21121ed8dc9722/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
+
+**Causa.** Com `Linger=yes`, o `agata.target` sobe no boot. O `Wants=graphical-session.target` do `obsidian-app.service`, que entrou em (518)/(519), ativava a sessão gráfica antes de qualquer login. Na hora do login, o `uwsm` recusava o Hyprland: `A compositor or graphical-session* target is already active!`, no journal de 23/09 às 15:36. O `list-dependencies --reverse` mostra essa unit como o único puxador. O `Wants=` sobrava, porque a espera pela tela já é feita pelo `ExecStartPre`.
+
+**Proposta.** Tirar o `Wants=` e manter o `After=` só como ordenação. Testado: `git apply --check` limpo e `systemd-analyze --user verify` limpo. **Não testado:** boot real com login no Hyprland. **Risco:** no Hyprland, o socket X11 que o Obsidian espera vem do Xwayland. Se o Xwayland não usar `:0`, o Obsidian fica esperando, e o `query_canon` devolve 403 até o app abrir.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `journalctl` do sistema e do usuário; `systemctl --user list-dependencies --reverse`; `loginctl show-user -p Linger`; `git apply --check`; `systemd-analyze --user verify`. Autorização: Humano — "consegue diagnosticar daqui"; versão enxuta a pedido dele ("troque pela versão enxuta antes do merge").
 
 (535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
 

@@ -7,6 +7,12 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
+## Onde estamos — 24/09/2026
+
+**[ACHADO — falta sua assinatura] O Hyprland não abria por culpa do próprio Agata, não do Hyprland.** Um serviço do Agata (o que abre o Obsidian sozinho) avisava ao computador, logo no boot, que já havia uma tela aberta. Quando você escolhia o Hyprland, ele achava que já existia outra sessão e se recusava a abrir. Não precisa reinstalar nada.
+- Assine: `bash scripts/aprovar.sh obsidian-sem-puxar-sessao-grafica-2026-09-24`. Depois eu aplico, e você reinicia e entra no Hyprland para confirmar.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (536).
+
 ## Onde estamos — 23/09/2026
 
 **[APLICADO] O manual das filas da Seth está em dia com o que roda de verdade.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura — a Seth está pronta pro seu teste.
