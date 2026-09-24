@@ -9,6 +9,12 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[PRONTO — falta sua assinatura] Sua pesquisa virou a bússola do sistema.** Conferi as 8 fontes que ela cita: 7 existem e dizem o que o texto afirma, 1 (OpenAI) bloqueou o acesso. Enxuguei as 86 seções em 12 princípios e mostrei, para cada um, o que o Agata já faz e o que falta. Acrescentei 5 lições que só o nosso sistema ensinou, a principal delas vinda dos erros de hoje. O texto original ficou guardado sem mudanças.
+- Leia: `extras/bussola/auditoria-e-bussola.md`
+- Assine para ela passar a orientar o sistema: `bash scripts/aprovar.sh bussola-2026-09-24`
+- Ela orienta, mas não cria tarefa sozinha. As 5 melhorias que ela sugere ficam para você escolher.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (542).
+
 **[FEITO, TESTADO E ANOTADO] O notebook volta a suspender de verdade.** Nada esperando assinatura. Testei com você: fechar a tampa e apertar o botão fazem o notebook dormir de verdade, e ele acorda normal. Antes ele "dormia acordado" (por isso esquentava na mochila) e, numa madrugada, travou dormindo.
 - Se um dia ele voltar a acordar sozinho sem parar, me avise. Desfazer é um comando só.
 - Detalhe técnico: `MEMÓRIAS.md`, entradas (540) e (541).

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Engenharia de Sistemas Agênticos", horizonte 2100) auditada, destilada e ligada ao Agata como bússola. O original fica verbatim em `extras/bussola/`, e ao lado a auditoria com 12 princípios (B1–B12) mais 5 que o tratado não vê (T1–T5). Proposta P-8 `bussola-2026-09-24` referencia a bússola no PROJETO, aguardando assinatura.**
+  palavras-chave: pesquisa, humano, tratado, convergente, engenharia, sistemas, agênticos, horizonte, auditada, destilada, ligada, agata, bússola, original, fica, verbatim, extras, bussola, lado, auditoria, princípios, proposta, referencia, projeto, aguardando, assinatura
 (541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
   palavras-chave: assinado, verificado, aplicado, suspensao, deep, projeto, máquinas, registra, suspensão, contenção, desabilitada, proposta, esperando, assinatura
 (540) DIÁRIO — 24/09/2026 · **A suspensão do notebook volta a funcionar, em S3 (`deep`), provada nos 4 caminhos: 2 por despertar do RTC, tampa e botão. Um efeito colateral meu, de (536), apareceu no caminho: a contenção que bloqueava toda suspensão tinha parado de subir sem aviso. A atualização do PROJETO vai na proposta P-8 `suspensao-deep-2026-09-24`, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: lacuna, verificado, config, modelos, gratuitos, cerebras, fechada, humano, logou, própria, conta, pediu, pra, olhar, direto, painel, cloud, aberto, navegador, dele
 (513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
   palavras-chave: proposta, roster, modelos, grátis, investigada, fundo, aplicada, veio, dado, embasava, estava, errado, causa, raiz, era, bug, próprio, script, sondagem, achado, bônus, projeto, descrevia, membros, existe, dias, real, tem
-(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
-  palavras-chave: consolidação, automática, bug, ctx, tema, aprovada, humano, edição, conteúdo, entradas, resumidas, veredito, fechado, reconfirmado
+(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug …
+  palavras-chave: consolidação, automática, bug
 (511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quar …
   palavras-chave: consolidação, automática, quar
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e …

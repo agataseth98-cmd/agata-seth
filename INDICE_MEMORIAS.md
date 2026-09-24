@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Engenharia de Sistemas Agênticos", horizonte 2100) auditada, destilada e ligada ao Agata como bússola. O original fica verbatim em `extras/bussola/`, e ao lado a auditoria com 12 princípios (B1–B12) mais 5 que o tratado não vê (T1–T5). Proposta P-8 `bussola-2026-09-24` referencia a bússola no PROJETO, aguardando assinatura.**
 (541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
 (540) DIÁRIO — 24/09/2026 · **A suspensão do notebook volta a funcionar, em S3 (`deep`), provada nos 4 caminhos: 2 por despertar do RTC, tampa e botão. Um efeito colateral meu, de (536), apareceu no caminho: a contenção que bloqueava toda suspensão tinha parado de subir sem aviso. A atualização do PROJETO vai na proposta P-8 `suspensao-deep-2026-09-24`, aguardando assinatura.**
 (539) DIÁRIO — 24/09/2026 · **Assinadas, verificadas, aplicadas: `obsidian-espera-login-2026-09-24` e `b8-librechat-bridge-2026-09-24` (538). O B8 está no ar e provado de dentro do container. O teste do Obsidian achou uma regressão minha, vinda de (536)/(537): parar o serviço não fecha mais o app. O P-4 barrou o commit por causa do relé. As duas propostas de conserto (`obsidian-dono-do-app-2026-09-24` e `p4-aceita-rele-b8-2026-09-24`) foram assinadas e aplicadas nesta mesma entrada.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (515) CORREÇÃO — 22/09/2026 · **Corrige (514): `cerebras/gpt-oss-120b` NÃO está mais bloqueado — testado ao vivo, 3 de 3 chamadas com sucesso, minutos depois de eu ter registrado o contrário.**
 (514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-gratuitos.md` sobre a Cerebras fechada — Humano logou na própria conta e pediu pra eu olhar direto no painel `cloud.cerebras.ai`, aberto no navegador dele.**
 (513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
-(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug de `num_ctx`/#16814 (tema `num-ctx-16814`), aprovada pelo Humano sem edição de conteúdo — 14 entradas resumidas, veredito já fechado reconfirmado.**
+(512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug …
 (511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quar …
 (510) DIÁRIO — 21/09/2026 · **Assinado, verificado, aplicado: os itens 4, 5, 7 e …
 (509) DIÁRIO — 21/09/2026 · **Humano pediu: "una todos em uma única assinatura" …

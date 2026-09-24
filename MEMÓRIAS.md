@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 199842d373e55a5e6bc1201fd146515d1d82e8ee
-  Escrito em: 24/09/2026 12:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7
+  Escrito em: 24/09/2026 13:35 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/199842d373e55a5e6bc1201fd146515d1d82e8ee/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/199842d373e55a5e6bc1201fd146515d1d82e8ee/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/199842d373e55a5e6bc1201fd146515d1d82e8ee/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3d4b79d4ab9ef90f59f65feffbcad805c60d5cd7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Engenharia de Sistemas Agênticos", horizonte 2100) auditada, destilada e ligada ao Agata como bússola. O original fica verbatim em `extras/bussola/`, e ao lado a auditoria com 12 princípios (B1–B12) mais 5 que o tratado não vê (T1–T5). Proposta P-8 `bussola-2026-09-24` referencia a bússola no PROJETO, aguardando assinatura.**
+
+**Pedido:** "quero que audite melhore otimize transcenda e utilize como bussola para o sistema".
+
+**Auditoria de fontes, ao vivo.** 7 das 8 referências existem e dizem o que o tratado atribui, com citação literal: DeepSeek Harness, os 2 artigos de Fowler/Böckeler, OpenCodeReview, OutSystems, Fullstack Agent e AI Memory Vault. **`lacuna`: OpenAI** (403 no WebFetch e no `curl`), então o "mapa em vez de manual" fica como alegação da fonte secundária. Duas imprecisões achadas: "Agent = Model + Harness" também está em Fowler, não só na DeepSeek; e a página da OutSystems é material de venda. As URLs trazem `utm_source=chatgpt.com`, então o tratado foi montado com um modelo externo. Pela Regra 2, é dado.
+
+**Crítica.** O tratado contradiz a própria tese: prega um mapa e entrega um manual de 86 seções, com repetição. Traz eras datadas sem evidência, níveis de autonomia inventados, uma "equação" vazia, nenhum caso de falha e premissa empresarial em vez de um operador só com modelos grátis.
+
+**O que o Agata já cumpre, com evidência:** 12 princípios mapeados um a um a mecanismos existentes. O mais forte em relação ao corpus é B7: a raiz de confiança é verificada contra `HEAD:` (367), a resposta concreta ao risco de o agente modificar o próprio controle.
+
+**Transcender (T1–T5), a partir de falhas medidas.** O principal é T1: o harness quebra nas fronteiras que não modela. A evidência é deste mesmo dia: (536) desligou em silêncio a contenção de suspensão (540) e o fechamento do Obsidian (539), e o P-4 não conhecia o relé do B8 (539). Nenhum sensor pegou os dois primeiros. O portão das três perguntas, no item 2 ("o que mais isto toca?"), existia e não foi aplicado na (536).
+
+**Regra de uso, escrita na própria bússola:** orienta, não gera backlog (Contenção de escopo). As 5 lacunas candidatas (manifesto de acoplamentos, mutation testing do harness, PROJETO como mapa, trajetória da Seth no canon, critério de determinismo) ficam para o Humano escolher. REGRAS vence em qualquer conflito.
+
+**Mudança estrutural?** A proposta só acrescenta uma referência no "Plano vigente" do PROJETO. Se o Humano entender que é "algo grande do PROJETO", REGRAS pede segunda opinião de outro modelo (o material é público, cabe no Conselho Remoto) ou o risco assumido por escrito.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: WebFetch das 8 URLs com pedido de citação literal; `curl` com agente de navegador na da OpenAI (403); `grep` das entradas citadas no próprio canon; `git apply --check`. Autorização: Humano — o pedido acima.
 
 (541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
 
