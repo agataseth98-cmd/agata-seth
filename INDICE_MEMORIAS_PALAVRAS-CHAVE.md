@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
+  palavras-chave: assinado, verificado, aplicado, obsidian, puxar, sessao, grafica, puxa, sessão, gráfica, aplicação, aberto, caiu, religado, achado, novo, espera, tela, passa, login
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
   palavras-chave: hyprland, abria, porque, obsidian, app, service, agata, ativava, sessão, gráfica, boot, proposta, puxar, sessao, grafica, aguardando, assinatura
 (535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: humano, pediu, una, única, assinatura, diff, pendentes, itens, viram, proposta, plano, marcos, lote, testada, trocar
 (508) DIÁRIO — 21/09/2026 · **Humano voltou: "perdi o mouse again. documente e resolva." — a mesma classe de trava do Goose/Playwright de (485) voltou, mesmo com o conserto de lá de pé. Achado, resolvido na hora (processo travado morto, mouse solto), e mitigado com um teto automático de tempo — a causa raiz de POR QUE trava não foi investigada a fundo, por decisão explícita de não arriscar travar o mouse de novo só pra reproduzir.**
   palavras-chave: humano, voltou, perdi, mouse, again, documente, resolva, mesma, classe, trava, goose, playwright, mesmo, conserto, achado, resolvido, hora, processo, travado, morto, solto, mitigado, teto, automático, tempo, causa, raiz, investigada, fundo, decisão, explícita, arriscar, travar, novo, pra, reproduzir
-(507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois investigados. Item 8 (manifests de sistema/runtime/recovery): já existem, de forma distribuída, não faltava construir do zero. Item 10 (limpeza de documentação): achado real e corrigido — `redesign/README.md` listava o escopo do P-8 desatualizado, sem os dois caminhos que sessões anteriores e esta mesma sessão acrescentaram. Com isto, os 10 itens do plano de ação de (500) estão todos com uma resposta real — 5 aplicados/prontos pra assinatura (2, 4, 5, 7, 9), 2 devolvidos como decisão de desenho (3, 6), 2 fechados por já existirem (8) ou por ajuste pontual (10). Nenhum pulado sem registro.**
-  palavras-chave: itens, plano, últimos, investigados, item, manifests, sistema, runtime, recovery, existem, forma, distribuída, faltava, construir, zero, limpeza, documentação, achado, real, corrigido, redesign, readme, listava, escopo, desatualizado, caminhos, sessões, anteriores, mesma, sessão, acrescentaram, ação, estão, resposta, aplicados, prontos, pra, assinatura, devolvidos, decisão, desenho, fechados, existirem, ajuste, pontual, pulado, registro
+(507) DIÁRIO — 21/09/2026 · **Itens 8 e 10 do plano de (500) — últimos dois inve …
+  palavras-chave: itens, plano, últimos, inve
 (506) DIÁRIO — 21/09/2026 · **Item 9 (2ª passada do perímetro sensível ao índice …
   palavras-chave: item, passada, perímetro, sensível, índice
 (505) DIÁRIO — 21/09/2026 · **Item 6 (capability broker) investigado e DEVOLVIDO …

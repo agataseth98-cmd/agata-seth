@@ -5,7 +5,11 @@ After=graphical-session.target
 # PartOf (MEMÓRIAS (523)): sem isto `seth-parar` (que para agata.target) deixava o
 # Obsidian de pé -- contra a ordem de 10/09/2026, "parar Seth parando tudo".
 PartOf=agata.target
-Wants=graphical-session.target
+# SEM Wants=graphical-session.target (MEMÓRIAS (536), 24/09/2026): com linger, agata.target
+# sobe no boot e o Wants ATIVAVA graphical-session.target antes de qualquer login; o uwsm
+# entao recusava abrir o Hyprland ("A compositor or graphical-session* target is already
+# active!"). A espera pela tela ja e feita pelo ExecStartPre abaixo; o After= fica so
+# como ordenacao (nao puxa o target).
 
 [Service]
 Type=simple

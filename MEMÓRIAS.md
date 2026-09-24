@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): abfa036c44a10378bed0bdda1d7f7c8ac22eb544
-  Escrito em: 24/09/2026 10:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 90301914c176c4f8db0a5c0588c2368300048691
+  Escrito em: 24/09/2026 10:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abfa036c44a10378bed0bdda1d7f7c8ac22eb544/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90301914c176c4f8db0a5c0588c2368300048691/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
+
+**Verificação.** O `sha256sum` do `.diff` bateu com o `diff-sha256:`. `ssh-keygen -Y verify` contra `HEAD:propostas/.allowed_signers` deu `Good signature` de `agata-humano`. `git apply --check` limpo; aplicado; par movido pra `propostas/aplicadas/`. A unit foi copiada pro runtime (`cmp` igual) e o systemd recarregado com `daemon-reload`.
+
+**Prova ao vivo.** Depois do reload, `Wants=` ficou vazio e `list-dependencies --reverse graphical-session.target` não mostra mais nenhum puxador. Com o `obsidian-app` religado, o target continua `inactive`. Falta o boot real com login no Hyprland, que é do Humano.
+
+**Efeito da aplicação, que eu não tinha previsto.** Sem ninguém o puxando, o `graphical-session.target` parou no reload, às 10:44:37. Os escopos Flatpak do Obsidian estavam ligados a ele e pararam junto, e o canon pelo `:27125` passou a responder 403. Religuei (`systemctl --user start obsidian-app`): ficou `active` e o canon voltou a dar 200, às 10:45. Isso só acontece uma vez, na transição. No próximo boot o target já não sobe.
+
+**Achado, sem conserto agora.** O journal deste boot mostra 22 quedas `status=139` do `obsidian-app` entre 08:51 e 08:54, antes do login. O `ExecStartPre` de (518) espera o socket `/tmp/.X11-unix/X0`, mas quem cria esse socket às 08:51 é o X da tela de login (LightDM), não a sessão do Humano. A espera passa cedo demais, e o Obsidian cai sem permissão no display até o login. O `Restart=on-failure` segura, e o app sobe depois do login. É ruído, não perda. O conserto certo seria esperar a sessão do usuário, e ele é candidato a P-8 se o Humano quiser.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `sha256sum` + `ssh-keygen -Y verify`; `git apply`; `cmp`; `daemon-reload`; `systemctl --user show -p Wants` e `list-dependencies --reverse`; `journalctl --user` (o loop 139 e a parada das 10:44:37); `ls` de `/tmp/.X11-unix` contra o horário do login; `curl :27125` antes e depois de religar. Autorização: Humano — assinou ("feito agata").
 
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
 
