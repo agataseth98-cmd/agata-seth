@@ -26,18 +26,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e9ab18d02e48b14b503a3808c1d441e8bab6f98c
-  Escrito em: 23/09/2026 21:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 220d17da2a29aa8d152c16a2eb570fc7e4e3c73b
+  Escrito em: 23/09/2026 22:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9ab18d02e48b14b503a3808c1d441e8bab6f98c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/220d17da2a29aa8d152c16a2eb570fc7e4e3c73b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
+
+**Do zero.** `seth-parar`: os 12 serviços inativos, incluindo o Obsidian, 0 containers, 0 portas. Atalho `seth`: os 12 ativos, 4 containers, canon 200, runtime igual ao repositório (`cmp` de `librechat.yaml` e `canon-mcp.mjs`).
+
+**No navegador, com o Humano vendo** (gravação: `seth-teste-do-zero-2026-09-23-noite.gif`):
+- **"olá":** bloco de prontidão com `REGRAS=c193e365` / `MEMÓRIAS=a71f7da7` / `HEAD=220d17d` e topo (530), todos conferidos na Máquina, e hora `22:31`. Ela usou a linha `TOPO-PROPOSTA-JA-APLICADA` como a doutrina manda.
+- **`maquina_verificar git_sync`:** painel de aprovação → Aprovar → Continuar → a ferramenta rodou (no banco, a saída traz `[leitura: remoto = HEAD local (220d17d) -- sincronizado.]`, a leitura nova de (528)). Resposta com cabeçalho completo (`t=2`, hora nova `22:32`) e conclusão certa, conferida com `git ls-remote` (`220d17d` = HEAD).
+- Nenhum dos três defeitos de hoje se repetiu: "Cancelado" (523), leitura invertida (524) e cabeçalho ausente (526).
+
+**Erro meu, registrado sem suavizar:** ao ver "22:31" na resposta dela, eu escrevi que eram "umas 21:22" e tratei a hora dela como suspeita, antes de medir. Medi em seguida: `22:31:42`. Ela estava certa. Eu tinha estimado a hora a partir da minha última medição, que era de mais de uma hora antes. É a falha que a Regra 1.1 proíbe ("herdar hora de cabeçalho anterior") e que eu mesmo audito nela. O cabeçalho do auditor é item da auditoria (Regra 1).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `seth-parar`/`seth` com `systemctl`/`docker ps`/`ss`/`cmp`; Claude in Chrome ao vivo + GIF; `sha256sum`/`git rev-parse`/`date` conferindo a resposta dela; `mongosh` com a saída real da ferramenta; `git ls-remote`. Autorização: Humano — "recomece o teste da Seth".
 
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
 
