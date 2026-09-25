@@ -18,12 +18,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f8613f61e505742ba450899bb779c51c70a9f385
-  Escrito em: 25/09/2026 11:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74
+  Escrito em: 25/09/2026 13:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -148,6 +148,21 @@ Quando não houver oráculo de Máquina (ex: planejamento, avaliação de risco,
 *Motivo:* mitiga alucinação consistente em domínios subjetivos sem violar a primazia da Máquina em fatos verificáveis, transformando a fricção entre modelos em sinal de alerta, não em ruído. Nasce da proposta "3X" registrada em MEMÓRIAS (67), estreitada por objeção do modelo proponente, e da segunda opinião pedida no protocolo "Segunda opinião" — parecer recebido e auditado em MEMÓRIAS (246)/(247).
 
 Não é linha vermelha (parágrafo acima) — é portão de verificação, não regra que nunca cede.
+
+## Economia de tokens — mecanismo de Regra 7
+
+Regra 7 já autoriza otimizar custo ("Custo, forma, hidratação, apresentação — otimize à vontade"); isto é o mecanismo, não regra nova (ver "não infle as REGRAS por reflexo").
+
+**Meios mecânicos** (medíveis, sem depender de ferramenta de um fornecedor — Regra 6):
+- Referência já fixada nesta sessão (hash, caminho, número de MEMÓRIAS) substitui reler ou requotar o conteúdo inteiro de novo.
+- Leituras independentes se pedem juntas, não uma chamada de ferramenta de cada vez.
+- Varredura ou exploração cujo rastro bruto não precisa sobreviver à decisão roda isolada; só a conclusão volta ao histórico principal.
+
+**Ferramenta cognitiva** (julgamento, não script):
+- Resposta do tamanho da pergunta (Regra 5) — fechada recebe fechada; detalhe que ninguém pediu é o mesmo desperdício da Regra 7, só que em texto em vez de ferramenta.
+- Medir antes de rodar as três passadas da Regra 8 custa menos e diverge menos do que rodar às cegas — ver MEMÓRIAS (556).
+
+*Motivo:* ordem do Humano, 25/09/2026 (MEMÓRIAS (556)).
 
 ---
 

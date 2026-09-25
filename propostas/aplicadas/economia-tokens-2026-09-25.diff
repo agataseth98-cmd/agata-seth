@@ -1,0 +1,26 @@
+diff --git a/REGRAS.md b/REGRAS.md
+index 3d36a32..6998a1a 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -149,6 +149,21 @@ Quando não houver oráculo de Máquina (ex: planejamento, avaliação de risco,
+ 
+ Não é linha vermelha (parágrafo acima) — é portão de verificação, não regra que nunca cede.
+ 
++## Economia de tokens — mecanismo de Regra 7
++
++Regra 7 já autoriza otimizar custo ("Custo, forma, hidratação, apresentação — otimize à vontade"); isto é o mecanismo, não regra nova (ver "não infle as REGRAS por reflexo").
++
++**Meios mecânicos** (medíveis, sem depender de ferramenta de um fornecedor — Regra 6):
++- Referência já fixada nesta sessão (hash, caminho, número de MEMÓRIAS) substitui reler ou requotar o conteúdo inteiro de novo.
++- Leituras independentes se pedem juntas, não uma chamada de ferramenta de cada vez.
++- Varredura ou exploração cujo rastro bruto não precisa sobreviver à decisão roda isolada; só a conclusão volta ao histórico principal.
++
++**Ferramenta cognitiva** (julgamento, não script):
++- Resposta do tamanho da pergunta (Regra 5) — fechada recebe fechada; detalhe que ninguém pediu é o mesmo desperdício da Regra 7, só que em texto em vez de ferramenta.
++- Medir antes de rodar as três passadas da Regra 8 custa menos e diverge menos do que rodar às cegas — ver MEMÓRIAS (556).
++
++*Motivo:* ordem do Humano, 25/09/2026 (MEMÓRIAS (556)).
++
+ ---
+ 
+ ## Glossário: sincronizar · carregar · hidratação · atualizar
