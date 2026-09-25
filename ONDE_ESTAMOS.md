@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
+**[APLICADO] Primeiro pedaço do plano de replicar o sistema numa segunda máquina está pronto e testado.** É a peça que deixa uma futura cópia guardar a memória do cliente no Obsidian, sem tocar em nada seu. Ainda não está ligada a nada do seu uso diário — é fundação pra quando o resto do plano existir.
+- Leia o plano quando quiser: `propostas/plano-replicabilidade-2026-09-25.md`.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (554).
+
 **[APLICADO] A Seth ganhou a mesma verificação que o Goose ganhou ontem.** Ela agora consegue checar sozinha se uma proposta assinada está pronta pra aplicar, sem você precisar rodar o comando na mão. Descobri no caminho que ela já tinha as ferramentas de navegador e Discord ligadas — o texto que dizia o contrário estava desatualizado, não o sistema.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (553).
 
