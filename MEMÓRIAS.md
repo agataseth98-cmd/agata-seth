@@ -26,18 +26,43 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bc97e05936fbc5b5f1d5db079f7e15d04f86bca1
-  Escrito em: 24/09/2026 22:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cfbf5daefbf759277647a6669759c9144fcc6848
+  Escrito em: 25/09/2026 08:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
+
+**Pedido do Humano:** "leia as duas consolidações e recomende", depois "sim, arquive as três e conserte o gerador".
+
+**O que estava errado, conferido contra os títulos reais:**
+- **Repetição.** `aprova-o-assinada-p-8` teve a 4ª versão (17, 18, 21 e 24/09), e `omniroute-504` também (08/09 aprovada, (396) de 09/09, a de 09/09 parada em `propostas/`, e a de 24/09). **Causa, no código:** o `orientar` usa as 15 refs de número mais **baixo** do tema (`sorted(...)[:15]`), então o conjunto quase não muda. E o tema entra em toda noite em que ≥2 entradas novas citam uma palavra dele ("assinada", "omniroute").
+- **Conteúdo trocado.** O portão de (371) só conferia se o número citado existia. Casos: na de 24/09, (364) virou "registra criação manual sem mintar" (a real é o registro do 504 no PROJETO); na de 21/09, aprovada em (512), (128) virou "valida código HTTP" (a real é a troca de líder do projeto pra Gemini), (139) virou "determina qual ramo é real" (a real é a Trava 1 da ferramenta `memory`) e (234) virou "especifica runners" (a real é o relatório final da bancada). (512) conferiu o resumo contra o PROJETO, não entrada por entrada, e por isso não pegou. A consolidação de 21/09 **não se apaga** (Regra 4): esta entrada é a correção dela, e quem ler (512) deve ler esta junto.
+
+**Arquivados** (decisão do Humano) em `extras/arquivo/consolidacoes-noturnas/`: `aprova-o-assinada-p-8-2026-09-24`, `omniroute-504-2026-09-24` e `omniroute-504-2026-09-09`.
+
+**Proposta (`redesign/grafo/flows/consolidacao.py`):**
+- **(a) Não repetir.** Se as refs do tema já estão todas numa consolidação anterior do mesmo tema (pendente, aplicada ou descartada), pula sem chamar o modelo.
+- **(b) Portão de conteúdo.** Cada "(NNN) <trecho>" tem de dividir ao menos uma palavra de conteudo (≥5 letras, fora de uma lista de verbos genéricos) com o título real no índice; trecho curto demais não é julgado.
+
+**Testes, com as funções do módulo real:** 9/9. Reprovou as 3 consolidações com erro conhecido, inclusive a (380) "rajada de chamadas". Aprovou um texto correto e uma lista de refs sem descrição. Refs antigas → pula; ref nova → não pula; tema inédito → nada visto.
+
+**Caminho real:** `consolidacao.py --temas "omniroute 504"` com o venv do serviço deu `pulado: refs ja consolidadas antes`, nenhum arquivo escrito. **Não testado:** uma noite inteira do timer; o comportamento em tema com refs novas de verdade depende do modelo local.
+
+**Limites declarados:**
+- Descrição errada que repete por acaso uma palavra do título passa.
+- Falso positivo provável: (403) descrita certo, reprovada porque o título do índice é curto. Erro pelo lado seguro: no máximo deixa de gravar um rascunho.
+- **A causa de fundo, as refs mais antigas no lugar das mais recentes, fica como está:** trocar mudaria o que "consolidar" significa e é decisão do Humano. Com (a), o efeito dela, a repetição, some.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: leitura dos 2 rascunhos e de `consolidacao.py`; títulos reais de 14 entradas por `grep`; protótipo do portão (1ª versão com regex quebrado que marcava tudo, achado e corrigido antes de valer); testes das funções importadas (9/9); execução real com `redesign/grafo/.venv`; `git apply --check`. Autorização: Humano — "sim, arquive as três e conserte o gerador".
 
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
 

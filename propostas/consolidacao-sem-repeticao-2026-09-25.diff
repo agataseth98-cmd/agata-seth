@@ -1,0 +1,102 @@
+diff --git a/redesign/grafo/flows/consolidacao.py b/redesign/grafo/flows/consolidacao.py
+index 24a8ef2..c94ff5b 100644
+--- a/redesign/grafo/flows/consolidacao.py
++++ b/redesign/grafo/flows/consolidacao.py
+@@ -37,6 +37,7 @@ import subprocess
+ import sys
+ import time
+ import urllib.request
++import unicodedata
+ from datetime import date
+ from pathlib import Path
+ 
+@@ -202,6 +203,68 @@ def _portao(corpo, refs_validas):
+     return True, "ok"
+ 
+ 
++# ------------------------------------------ MEMORIAS (549): repeticao e conteudo
++# Achado em 24-25/09/2026: o gerador reconsolidava o MESMO tema quase toda noite
++# (4x `aprova-o-assinada-p-8`, 4x `omniroute-504`) -- as refs sao as 15 de numero
++# mais BAIXO do tema, entao o conjunto quase nao muda; e o portao so conferia se o
++# NUMERO citado existia, nao se o que se dizia dele batia com a entrada: (364) virou
++# "criacao manual sem mintar" (e' sobre 504), e a de 21/09 aprovada em (512) tinha
++# (128)/(139)/(234) descritas com o conteudo de outras entradas.
++_PAUSA = set("""registra registro define aplica aplicada adiciona corrige propoe confirma
++detalha estabelece introduz valida consolida fecha move trata mantem permite atualiza
++alerta indica descobre coloca sanitiza cobre limita evolui persiste entrada entradas
++estado tema sobre para mais como quando porque depois antes ainda sistema agata memorias
++projeto regras titulo titulos proposta propostas consolidacao consolidado obsoleto
++obsoleta redundante""".split())
++
++
++def _sem_acento(t):
++    return "".join(c for c in unicodedata.normalize("NFD", (t or "").lower())
++                   if unicodedata.category(c) != "Mn")
++
++
++def _palavras(t):
++    """Palavras de conteudo (>=5 letras, fora da lista de verbos/genericos), pelo
++    prefixo de 5 -- 'registro'/'registra', 'consolidacoes'/'consolidar' casam."""
++    return {w[:5] for w in re.findall(r"[a-z0-9]{5,}", _sem_acento(t)) if w not in _PAUSA}
++
++
++def _portao_conteudo(corpo, titulos_por_num):
++    """(ok, motivo). Para cada '(NNN) <trecho>', o trecho tem de dividir ao menos
++    uma palavra de conteudo com o TITULO real da entrada NNN. Trecho curto demais
++    (<2 palavras de conteudo, ex. lista '(a), (b)') nao e' julgado. Limite conhecido:
++    descricao errada que por acaso repete uma palavra do titulo passa (caso (380))."""
++    ruins = []
++    for m in re.finditer(r"\((\d{1,4})\)([^()]{0,160})", corpo or ""):
++        n, trecho = int(m.group(1)), m.group(2)
++        pw = _palavras(trecho)
++        if len(pw) < 2:
++            continue
++        if not (pw & _palavras(titulos_por_num.get(n, {}).get("titulo", ""))):
++            ruins.append(f"({n}) \"{' '.join(trecho.split())[:50]}\"")
++    if ruins:
++        return False, "descricao nao bate com o titulo real: " + "; ".join(ruins)
++    return True, "ok"
++
++
++def _refs_ja_consolidadas(repo, slug):
++    """Uniao das refs de TODA consolidacao anterior do mesmo tema -- pendente em
++    propostas/, aprovada em propostas/aplicadas/ ou descartada em
++    extras/arquivo/consolidacoes-noturnas/ (descartada tambem conta: o Humano ja
++    viu aquele conjunto)."""
++    vistas = set()
++    for pasta in ("propostas", "propostas/aplicadas", "extras/arquivo/consolidacoes-noturnas"):
++        for f in (Path(repo) / pasta).glob(f"consolidacao-{slug}-*.md"):
++            try:
++                txt = f.read_text(encoding="utf-8")
++            except Exception:  # noqa: BLE001
++                continue
++            m = re.search(r"^\*\*Refs:\*\*(.*)$", txt, re.M)
++            if m:
++                vistas |= {int(x) for x in re.findall(r"\((\d{1,4})\)", m.group(1))}
++    return vistas
++
++
+ def _log_reprovado(tema, dia, motivo, corpo):
+     REPROVADOS.parent.mkdir(parents=True, exist_ok=True)
+     resumo = " ".join((corpo or "").strip().split())[:300]
+@@ -270,6 +333,11 @@ def consolidar(s: Estado) -> dict:
+         if alvo.exists():
+             escritos.append((str(alvo.relative_to(repo)), "ja_existe"))
+             continue
++        # MEMORIAS (549): nada de novo em relacao ao que o Humano ja viu -> nao escreve.
++        refs_num = {int(re.sub(r"\D", "", r)) for r in a["refs"] if re.sub(r"\D", "", r)}
++        if refs_num and refs_num <= _refs_ja_consolidadas(repo, slug):
++            escritos.append((f"consolidacao-{slug}-{hoje}", "pulado: refs ja consolidadas antes"))
++            continue
+         titulos_txt = "\n".join(f"  {ref}: {a['titulos'].get(ref, '(titulo indisponivel)')}"
+                                 for ref in a["refs"])
+         pedido = (
+@@ -287,6 +355,8 @@ def consolidar(s: Estado) -> dict:
+         # PORTAO (MEMORIAS (371)): so escreve `.md` se passar. Reprovado -> log,
+         # nenhum arquivo em propostas/ -- garbage nao chega a triagem.
+         ok, motivo = _portao(corpo, a["refs"])
++        if ok:  # MEMORIAS (549): o que se diz de cada (NNN) tem de bater com o titulo
++            ok, motivo = _portao_conteudo(corpo, _indice(repo))
+         if not ok:
+             _log_reprovado(tema, hoje, motivo, corpo)
+             escritos.append((f"consolidacao-{slug}-{hoje}", f"reprovado: {motivo}"))
