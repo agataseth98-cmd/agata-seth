@@ -11,9 +11,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
-**[PRONTO — falta sua assinatura] O resumo noturno parou de se repetir e de inventar.** Toda noite ele refazia os mesmos resumos, e às vezes descrevia uma entrada com o conteúdo de outra. Uma dessas você chegou a aprovar em 21/09 sem ter como perceber; isso está corrigido no registro. Arquivei os 3 resumos repetidos.
-- Assine: `bash scripts/aprovar.sh consolidacao-sem-repeticao-2026-09-25`
-- Detalhe técnico: `MEMÓRIAS.md`, entrada (549).
+**[APLICADO] O resumo noturno parou de se repetir e de inventar.** Nada esperando você. Toda noite ele refazia os mesmos resumos, e às vezes descrevia uma entrada com o conteúdo de outra. Uma dessas você chegou a aprovar em 21/09 sem ter como perceber; isso está corrigido no registro. Arquivei os 3 resumos repetidos.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (549) e (550).
 
 **[TUDO APLICADO — nada esperando você] As 4 mudanças de hoje estão no oficial.** A bússola, a fila nova, a correção do Groq e o Goose como substituto do Claude Code. Testei o Goose de verdade: ele consultou a memória do sistema sozinho e respondeu certo, em 4 segundos.
 - Desta vez, eu mesmo fiz a inclusão no GitHub, com a sua autorização. Na próxima, vou lembrar você desta conversa antes de fazer.

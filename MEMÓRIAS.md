@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cfbf5daefbf759277647a6669759c9144fcc6848
-  Escrito em: 25/09/2026 08:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4799b601cc66965dd396de2758ccca11cb88ecde
+  Escrito em: 25/09/2026 08:41 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
+
+**Verificação.** `scripts/p8_verificar.sh` deu `PODE APLICAR`: hash `e45d72ee2098` batendo, `Good signature` de `agata-humano` e `apply --check` limpo. Na 1ª tentativa o `APROVADO-` não existia; o Humano rodou de novo. Merge do PR #45 feito pelo Humano (link pedido, sem automatizar). Par movido pra `propostas/aplicadas/`.
+
+**Conferido depois de aplicar, pelo caminho real:** `consolidacao.py --temas "omniroute 504"` com o venv do serviço → `pulado: refs ja consolidadas antes`, 0 arquivos novos em `propostas/`. A prova da noite inteira (timer das 23:00) fica pra próxima execução.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`; `git apply`; execução real do flow. Autorização: Humano — assinou e fez o merge ("feito").
 
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
 
