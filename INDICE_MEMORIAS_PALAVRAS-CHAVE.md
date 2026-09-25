@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
+  palavras-chave: fase, plano, replicabilidade, mecanismo, nome, falado, primeira, fatia, token, sistema, pontos, regras, agata, nunca, caminhos, serviços, internos, resolvido, githooks, gerar, hidratacao, partir, config, identidade, env, quarentena, aguardando, assinatura
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
   palavras-chave: achados, corrigido, quarentena, mail, exemplo, readme, librechat, user, agent, discord, script, gera, âncora, sha, foram, pro, mesmo, errar, primeiro, precisar
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, reconhece, controles, extraidos, volta, rodar, suíte, regressão, controle, muda, inclusive, scripts, perimetro, pnn
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
   palavras-chave: corrige, aviso, skip, corridas, descartei, desenho, era, defeito, real, desde, extração, controles, pra, arquivos, próprios, reconhece, mudança, controle, individual, suíte, regressão, deixou, rodar, ela, devia, proposta, conserto, sob, aguardando, assinatura
-(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
-  palavras-chave: assinado, verificado, aplicado, varredura, tripla, saidas, honestas, consertos, foram, conferidos, produção, proposta, esperando, assinatura
+(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla- …
+  palavras-chave: assinado, verificado, aplicado, varredura, tripla
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "rep …
   palavras-chave: varredura, tripla, sistema, ordem, humano, rep
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplic …
