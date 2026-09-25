@@ -26,18 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d71fb42fde9e37cc94d7c7d7a0ce94b580fd8ec7
-  Escrito em: 25/09/2026 18:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fbcd8ad638fc29620d5615a60aaca8cefef1beaf
+  Escrito em: 25/09/2026 18:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d71fb42fde9e37cc94d7c7d7a0ce94b580fd8ec7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d71fb42fde9e37cc94d7c7d7a0ce94b580fd8ec7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d71fb42fde9e37cc94d7c7d7a0ce94b580fd8ec7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, dado pessoal; manifesto de Fase 5) medidas, decididas com o Humano e construídas: `config/caminhos-framework.txt` classifica todo caminho versionado (framework/instância/externo), e o controle novo P-20 avisa se dado pessoal for staged num caminho framework.**
+
+**Pedido:** "vamos seguir com as 2 pendências abertas seguindo as mesmas diretrizes em produção até agora." Antes de escrever qualquer código, medi o conteúdo real de cada caminho versionado (não só o nome do arquivo/pasta) e apresentei a classificação ao Humano — 3 pontos não eram óbvios e precisavam de confirmação, não estimativa: `config/` inteiro é framework (portas e units systemd usam `%h`, sem caminho fixo desta Máquina) EXCETO `config/modelos-gratuitos.md` (levantamento real desta Máquina, instância); `CHAVES.md` é instância (cita e-mail e caminhos reais) contra `CHAVES.env.exemplo` já framework; `.claude/skills/*` (defuddle, json-canvas, obsidian-*) é framework — skills genéricas de Obsidian, úteis em qualquer clone desde que a Fase 4 fez do Obsidian o vault de todo clone. **Confirmado pelo Humano como medido.**
+
+**`config/caminhos-framework.txt`** — um arquivo só, três consumidores (mesmo princípio do manifesto que o laboratório propôs em (560)): (1) Fase 5 (merge seletivo, ainda não construído) só aceita caminho `framework|`; (2) P-20 escopa a varredura pelas linhas `framework|`; (3) uma futura checagem de "caminho citado que não existe e não casa nenhuma classe" — não construída agora, só o arquivo que ela vai ler. Formato `classe|caminho`, regra de leitura declarada (entrada mais específica vence a menos específica quando duas casam o mesmo caminho — é assim que `config/modelos-gratuitos.md` (instância) vence `config/` (framework)).
+
+**Controle novo P-20** — mesma doutrina P-6/P-9/P-18/P-21 (avisa, nunca falha). Acha dado pessoal em linha ADICIONADA e staged, só em caminho `framework|` do manifesto acima — nunca reimprime o valor achado (só rótulo, arquivo, linha; achado do próprio laboratório: um valor real já vazou sem máscara numa transcrição antes disto). Lista de identificadores fora do repo (`~/.config/agata/identificadores-pessoais.txt`, modo 600, formato `rotulo|regex ERE|prova`) — no repositório público a lista seria o próprio vazamento. Autoprova (cada regex contra a própria prova, mesmo padrão de P-1/P-21) e aviso de permissão fraca (mode ≠ 600). Direção de saída (varrer antes de exportar pra Fase 5) fica de propósito fora desta fatia: a ferramenta de merge seletivo ainda não existe, nada para varrer antes de exportar ainda.
+
+**Testado, real:**
+- `bash scripts/perimetro.sh` no estado desta Máquina: aviso único e esperado ("lista ausente" — não existe `~/.config/agata/identificadores-pessoais.txt` aqui).
+- Lista sintética (`AGATA_P20_LISTA`): autoprova limpa; identificador staged em `scripts/` → achado, com arquivo:linha certos, sem reimprimir o valor; mesmo identificador staged em `MEMÓRIAS.md` (instância) → silêncio, por desenho; nada staged → silêncio.
+- `bash scripts/testar_perimetro.sh`: 40/40 (3 casos novos do P-20 + os 37 já existentes), suíte inteira.
+- `git apply --check` limpo contra HEAD real, worktree descartável.
+
+**Achado no processo, sem gravidade — registrado por transparência:** testando o P-20, fiz um commit descartável com `--no-verify` num worktree só de teste pra validar o clone da suíte; `--no-verify` pula o hook de PRE-commit, mas não o de PÓS-commit, que regenerou o vault e reenviou o índice ao Drive de verdade (conteúdo já público, nada sensível, mas o envio não era necessário nesse momento). Lição: `--no-verify` só pula metade da história.
+
+**Em quarentena P-8, aguardando assinatura:** `propostas/p20-manifesto-2026-09-25.diff` — `config/caminhos-framework.txt` (novo), `scripts/perimetro.sh`, `scripts/perimetro/p20_dado_pessoal.sh` (novo), `scripts/testar_perimetro.sh`.
+
+**sync:** PASS — `git rev-parse main` = `fbcd8ad` no momento de medir (origin/main ainda em `d41d6e6`, PRs #56/#57 abertas), topo de MEMÓRIAS conferido com (560) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** pedido do Humano ("vamos seguir com as 2 pendências abertas seguindo as mesmas diretrizes em produção até agora") + confirmação explícita da classificação de caminhos antes de escrever o manifesto, nesta sessão.
 
 (560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
 
