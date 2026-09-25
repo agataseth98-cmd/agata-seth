@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "repita 3x a varredura, confronte, aprimore, proponha e registre"), feita por três métodos independentes: Máquina, canon e uso real. 20 achados confrontados: 3 descartados como não-defeito, 3 consertados numa proposta P-8 aguardando assinatura, 14 abertos (parte é decisão do Humano, parte só se resolve com ele ou com o tempo). Corrige minha frase de (526), "única pendência é a HuggingFace", que era exagero.**
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplicativas-2026-09-23` (525). Conferido com a Seth, ao vivo: a mesma pergunta que ela errou em (524) agora vem certa, usando a leitura calculada pela Máquina.**
-(525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, aguardando assinatura (P-8): as ferramentas da Seth passam a entregar o SENTIDO junto com o resultado. Nasce do achado de (524) (a Seth leu "0 unidades em falha" como "sem unidades ativas") e de uma auditoria pedida pelo Humano atrás de outros casos do mesmo tipo: mais 5 no verificador e 2 no MCP do canon.**
+(525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, agu …
 (524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer …
 (523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano …
 (522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (info …

@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a9f8fafde602441d30d49c60f57aa2b3951289f2
-  Escrito em: 25/09/2026 11:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 67916542da81e6f381372eef43b1de9cbf25bf24
+  Escrito em: 25/09/2026 11:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f8fafde602441d30d49c60f57aa2b3951289f2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f8fafde602441d30d49c60f57aa2b3951289f2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f8fafde602441d30d49c60f57aa2b3951289f2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67916542da81e6f381372eef43b1de9cbf25bf24/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67916542da81e6f381372eef43b1de9cbf25bf24/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67916542da81e6f381372eef43b1de9cbf25bf24/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
+
+**Pedido do Humano:** depois de (554), escolheu seguir direto pra Fase 1 do plano ("Fase 1 -- segredo com template"). Mesmo padrão já usado em `redesign/librechat/env.exemplo` (visto antes de escrever, não inventado): comentário por variável dizendo de onde tirar a chave (link do provedor), placeholder vazio, nunca um valor real.
+
+**O que entrou:**
+- `CHAVES.env.exemplo` (raiz) — modelo de `~/.config/agata/.env`: 8 provedores de modelo grátis (Groq, OpenRouter, Google/Gemini, Zhipu, Cerebras, DeepSeek, HuggingFace, Mistral) + `DISCORD_BOT_TOKEN`, cada um com o link de onde criar a chave.
+- `CHAVES.md`, seção nova "Checklist: testar que uma chave funcionou, e como rotacionar" — uma linha por segredo (os 8 provedores agrupados + Discord + restic + Obsidian + Google OAuth + OmniRoute + LibreChat), cada uma com um comando REAL de teste, não descrição vaga. "Rotacionar" definido uma vez, no topo da tabela, em vez de repetido em cada linha.
+
+**Por que sem `propostas/*.diff` assinado:** conferi contra a lista de quarentena do P-8 (PROJETO.md, "Quarentena estrutural") antes de comitar — `CHAVES.md`/`CHAVES.env.exemplo` não são `REGRAS.md`/`PROJETO.md`/`scripts/*`/`.githooks/*`/`config/*`, e nenhum script os lê em runtime (o `.exemplo` é só leitura humana). `perimetro.sh` (P-8) confirmou: `veredito: OK` com os dois staged, sem exigir par. P-1 (varredura de segredo) também limpo nos dois arquivos — só nome de variável, nenhum valor.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `redesign/librechat/env.exemplo` antes de escrever, pra seguir o mesmo padrão já validado; `perimetro.sh` completo (P-1 e P-8 conferidos especificamente); cada comando de teste da tabela conferido contra o mecanismo real que ele testa (script/endpoint citado existe e faz o que a linha diz). Autorização: Humano — "Fase 1 -- segredo com template" (resposta à pergunta de priorização depois de (554)).
 
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
 

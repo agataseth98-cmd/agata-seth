@@ -11,6 +11,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
+**[APLICADO] Segundo pedaço do plano de replicar o sistema: os segredos agora têm um modelo pra copiar.** `CHAVES.env.exemplo` mostra a forma de cada chave (sem nenhum valor real) e `CHAVES.md` ganhou uma lista de como testar que cada uma funcionou. Não precisou de sua assinatura — não muda nada do que já roda, só documenta.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (555).
+
 **[APLICADO] Primeiro pedaço do plano de replicar o sistema numa segunda máquina está pronto e testado.** É a peça que deixa uma futura cópia guardar a memória do cliente no Obsidian, sem tocar em nada seu. Ainda não está ligada a nada do seu uso diário — é fundação pra quando o resto do plano existir.
 - Leia o plano quando quiser: `propostas/plano-replicabilidade-2026-09-25.md`.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (554).

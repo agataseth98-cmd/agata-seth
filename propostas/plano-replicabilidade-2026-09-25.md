@@ -58,11 +58,18 @@ conferido ao vivo antes de apagar). Sem relação direta com replicação, mas
 tirou ruído do caminho.
 
 ### Fase 1 — Segredo fora do repo, com template (baixo custo, sem risco)
-`CHAVES.md` vira `CHAVES.md.example` (nomes de variável, sem valor real) +
-um `~/.config/agata/.env.example` versionado. Procedimento escrito: de onde
-cada chave vem (link do provedor), como testar que funcionou, como rotacionar.
-Hoje é prosa espalhada; vira checklist executável. **Não toca em nenhum
-segredo real, só documenta a forma.**
+**[IMPLEMENTADO 25/09/2026]** `CHAVES.env.exemplo` (raiz do repo, mesmo
+padrão já usado em `redesign/librechat/env.exemplo`) documenta a FORMA de
+`~/.config/agata/.env` — nome de cada variável + link de onde tirar a chave
+—, nunca um valor real. `CHAVES.md` ganhou a seção "Checklist: testar que
+uma chave funcionou, e como rotacionar", com um comando real por segredo (8
+linhas: 1 por família de provedor de modelo + Discord + restic + Obsidian +
+Google OAuth + OmniRoute + LibreChat). Hoje era prosa espalhada; virou
+checklist executável. **Nenhum segredo real tocado** — conferido pelo
+próprio P-1 do perímetro antes de comitar (varredura de segredo limpa nos
+dois arquivos). `CHAVES.md`/`CHAVES.env.exemplo` não são "muda
+comportamento" — fora do escopo do P-8 (nenhum script lê o `.exemplo` em
+runtime), então esta entrada não precisou de proposta assinada.
 
 ### Fase 2 — Identidade parametrizada
 Levantamento de todo lugar que hardcoda "Agata"/"Seth" (nome, ícone, banco
