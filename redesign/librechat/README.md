@@ -58,7 +58,7 @@ Conta unica -- `ALLOW_REGISTRATION=false`. Recriar/trocar senha:
 # gera o hash e grava direto no Mongo (o `npm run reset-password` do container e interativo e nao aceita pipe)
 HASH=$(docker compose -f ~/librechat/docker-compose.yml exec -T librechat node -e 'console.log(require("bcryptjs").hashSync(process.argv[1],10))' 'NOVASENHA')
 docker compose -f ~/librechat/docker-compose.yml exec -T librechat-mongodb mongosh LibreChat --quiet \
-  --eval 'db.users.updateOne({email:"agata.seth98@gmail.com"},{$set:{password:"'"$HASH"'"}})'
+  --eval 'db.users.updateOne({email:"SEU-EMAIL-DE-LOGIN@dominio.com"},{$set:{password:"'"$HASH"'"}})'
 ```
 
 ## Voz

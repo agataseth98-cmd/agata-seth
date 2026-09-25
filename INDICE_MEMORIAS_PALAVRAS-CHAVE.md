@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
+  palavras-chave: achados, corrigido, quarentena, mail, exemplo, readme, librechat, user, agent, discord, script, gera, âncora, sha, foram, pro, mesmo, errar, primeiro, precisar
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
   palavras-chave: relatório, laboratório, nuvem, ensaio, fase, replicabilidade, três, achados, verificados, máquina, verificável, economia, tokens, registrada, mecanismo, regra, aplicada
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: corrige, aviso, skip, corridas, descartei, desenho, era, defeito, real, desde, extração, controles, pra, arquivos, próprios, reconhece, mudança, controle, individual, suíte, regressão, deixou, rodar, ela, devia, proposta, conserto, sob, aguardando, assinatura
 (528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
   palavras-chave: assinado, verificado, aplicado, varredura, tripla, saidas, honestas, consertos, foram, conferidos, produção, proposta, esperando, assinatura
-(527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "repita 3x a varredura, confronte, aprimore, proponha e registre"), feita por três métodos independentes: Máquina, canon e uso real. 20 achados confrontados: 3 descartados como não-defeito, 3 consertados numa proposta P-8 aguardando assinatura, 14 abertos (parte é decisão do Humano, parte só se resolve com ele ou com o tempo). Corrige minha frase de (526), "única pendência é a HuggingFace", que era exagero.**
-  palavras-chave: varredura, tripla, sistema, ordem, humano, repita, confronte, aprimore, proponha, registre, feita, três, métodos, independentes, máquina, canon, uso, real, achados, confrontados, descartados, defeito, consertados, proposta, aguardando, assinatura, abertos, parte, decisão, resolve, ele, tempo, corrige, minha, frase, única, pendência, huggingface, era, exagero
+(527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "rep …
+  palavras-chave: varredura, tripla, sistema, ordem, humano, rep
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplic …
   palavras-chave: assinado, verificado, aplicado, saidas, autoexplic
 (525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, agu …

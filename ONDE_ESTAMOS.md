@@ -11,6 +11,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
+**[APLICADO — 1 de 3, os outros 2 juntos numa assinatura só] Os achados do laboratório viraram conserto.** O e-mail do README do LibreChat virou só um exemplo genérico — na verdade não era segredo nenhum, é a conta que você já confirmou ser só do projeto, mas um clone não devia copiar ela mesmo assim. Os outros 2 (o bot do Discord entregando a URL do repositório oficial; o script que gera os links do canon fazendo o mesmo) esperam uma assinatura só — achei no meio do caminho que o do Discord também precisava de quarentena, e não tinha visto isso de cara.
+- Assine: `bash scripts/aprovar.sh fase2-slug-dinamico-2026-09-25`
+- Ainda aberto, sem conserto ainda: o resumo de "quantas propostas estão esperando" não vê proposta assinada guardada num branch ainda não juntado.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (557).
+
 **[APLICADO] O laboratório da nuvem mandou um relatório sobre a fase de replicar o sistema; conferi 3 achados na Máquina (todos batem) e economia de tokens virou regra prática, a seu pedido — você já assinou.** Achados confirmados, ainda sem conserto (decisão sua): seu e-mail vaza num README que um clone herdaria; o bot do Discord entrega a URL do repositório oficial num cabeçalho técnico; e o resumo de "quantas propostas estão esperando" não vê proposta assinada guardada num branch ainda não juntado. O que apliquei: uma seção nova em `REGRAS.md` dizendo, na prática, como economizar tokens (não reler o que já sei, juntar pedidos, não carregar rastro de busca que não precisa sobreviver).
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (556).
 

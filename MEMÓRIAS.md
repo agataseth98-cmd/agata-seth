@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74
-  Escrito em: 25/09/2026 13:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c062a6fac77a423adfb362d98721e1d6af4bd543
+  Escrito em: 25/09/2026 14:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
+
+**Por que os 3 são a mesma classe de problema:** um clone herdaria um valor específico desta instância (URL do GitHub oficial, e-mail de exemplo) em vez do próprio. Não é "vazamento de segredo" (Regra 2 — o e-mail já é uma conta só-do-projeto, confirmada pelo Humano em MEMÓRIAS, `memoria/frio/MEMORIAS-FRIO-2026-09-06-7.md:71` — não editado, história não se edita) — é higiene de replicabilidade (Fase 2/5 do plano), a mesma classe que já motivou a pergunta de mecanismo (variável de ambiente vs. find-replace) ainda em aberto.
+
+**Erro meu, achado pelo próprio P-8 antes de commitar (não passou pra frente):** editei `redesign/mcp/discord/servidor.py` achando que `redesign/*` fora da lista curta de `propostas/README.md` bastava pra dispensar quarentena. Rodei `perimetro.sh` antes de commitar (disciplina de sempre) e o P-8 real (`scripts/perimetro/p08_quarentena.sh`, `_p8_eh_comportamento`) recusou: `redesign/mcp/*` está coberto desde 09/09/2026 (achado da auditoria, mesma classe de `redesign/router/*`) — `propostas/README.md` descreve só a lista ORIGINAL de 20/08, nunca atualizada com as 6 ampliações posteriores. **Lacuna registrada, não corrigida agora** (fora do pedido de hoje): a documentação do mecanismo P-8 está desatualizada em relação ao código que o aplica de verdade.
+
+**Aplicado agora, sem P-8 (confirmado: `redesign/librechat/*.md` não está em nenhum padrão de `_p8_eh_comportamento`, só `.mjs`/`.yaml`/`.yml` daquele diretório estão):**
+- `redesign/librechat/README.md:61`: e-mail de exemplo do comando de troca de senha virou `SEU-EMAIL-DE-LOGIN@dominio.com` — clareza de documentação, não segurança.
+
+**Em quarentena P-8, aguardando assinatura, um só `.diff` pros dois:** `propostas/fase2-slug-dinamico-2026-09-25.diff` —
+- `scripts/atualizar_ancora_prompt.py` ganha `_repo_slug()`: lê `git remote get-url origin`, cai no valor conhecido se falhar. Hoje esse script escreve a URL do repositório OFICIAL no bloco ANCORA-SHA de REGRAS.md/PROJETO.md/MEMÓRIAS.md/PROMPT_CARREGAMENTO.md de QUALQUER clone — corrige os outros 3 dos "5 arquivos com o slug" que o laboratório contou, automaticamente, sem tocar nesses 4 arquivos diretamente (são gerados pelo hook).
+- `redesign/mcp/discord/servidor.py` ganha `_user_agent()`, mesmo padrão: lê `git remote get-url origin`, monta o cabeçalho a partir do remoto de quem estiver rodando; sem git ou sem remoto reconhecível, cai num genérico (`https://github.com`).
+- Testados os dois nos mesmos 3 casos (repo real, remoto fake `cliente-x/copia-agata`, sem remoto algum) e regressão byte a byte do bloco ANCORA-SHA gerado pro repo real (idêntico ao de hoje). `git apply --check` conferido limpo contra HEAD num worktree descartável, depois do erro acima — não confiei só no `git diff` da árvore suja.
+
+**`redesign/LOG.md` (5º arquivo do slug): não mexido, de propósito.** É registro histórico de eventos passados, mesmo espírito de "história não se edita" — mesmo não sendo MEMÓRIAS.md formalmente.
+
+**sync:** PASS — `git rev-parse origin/main` = `c062a6f`, topo de MEMÓRIAS conferido com (556) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem do Humano ("os dois na ordem mais segura" — item 2, achados do laboratório) nesta sessão.
 
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
 

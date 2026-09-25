@@ -1,0 +1,87 @@
+diff --git a/scripts/atualizar_ancora_prompt.py b/scripts/atualizar_ancora_prompt.py
+index 4419094..746eb83 100755
+--- a/scripts/atualizar_ancora_prompt.py
++++ b/scripts/atualizar_ancora_prompt.py
+@@ -28,9 +28,28 @@ que não reconhece.
+ Uso: atualizar_ancora_prompt.py <caminho-do-prompt> <sha-do-head-anterior> <data-hora-local>
+ """
+ import re
++import subprocess
+ import sys
+ 
+-REPO = "agataseth98-cmd/agata-seth"
++
++def _repo_slug():
++    """owner/repo do remoto `origin` -- pra um clone (Fase 2, plano de
++    replicabilidade) gerar URLs pinadas do PRÓPRIO repositório, não do oficial.
++    Fail-soft (mesma régua do resto do arquivo): git ausente ou sem remoto
++    reconhecível cai no valor conhecido, nunca aborta o commit por isso.
++    """
++    try:
++        saida = subprocess.run(
++            ["git", "remote", "get-url", "origin"],
++            capture_output=True, text=True, timeout=5, check=True,
++        ).stdout.strip()
++    except Exception:
++        return None
++    m = re.search(r"github\.com[:/]+([^/]+/[^/]+?)(?:\.git)?$", saida)
++    return m.group(1) if m else None
++
++
++REPO = _repo_slug() or "agataseth98-cmd/agata-seth"
+ ARQUIVOS = ["REGRAS.md", "PROJETO.md", "MEMÓRIAS.md"]
+ INICIO = "<!-- ANCORA-SHA:INICIO"
+ FIM = "<!-- ANCORA-SHA:FIM -->"
+diff --git a/redesign/mcp/discord/servidor.py b/redesign/mcp/discord/servidor.py
+index 24c8a0d..bfae1af 100644
+--- a/redesign/mcp/discord/servidor.py
++++ b/redesign/mcp/discord/servidor.py
+@@ -48,6 +48,8 @@ from __future__ import annotations
+ 
+ import json
+ import os
++import re
++import subprocess
+ import sys
+ import urllib.error
+ import urllib.request
+@@ -64,6 +66,30 @@ API_BASE = "https://discord.com/api/v10"
+ _TIMEOUT_PADRAO = 20
+ _LIMITE_MAXIMO = 100  # teto da própria API do Discord por página
+ 
++
++def _user_agent() -> str:
++    """URL do próprio remoto `origin` no User-Agent (formato que o Discord pede:
++    nome + URL de contato) -- um clone (Fase 2, plano de replicabilidade) não
++    deve carregar a URL do repositório oficial de outra instância. Fail-soft:
++    sem git ou sem remoto reconhecível, usa um identificador genérico, nunca
++    aborta por isso (mesma régua do restante do servidor)."""
++    try:
++        url = subprocess.run(
++            ["git", "remote", "get-url", "origin"],
++            capture_output=True, text=True, timeout=5, check=True,
++        ).stdout.strip()
++        if re.search(r"github\.com[:/]+[^/]+/[^/]+", url):
++            url = re.sub(r"^git@([^:]+):", r"https://\1/", url)
++            url = re.sub(r"\.git$", "", url)
++        else:
++            url = "https://github.com"
++    except Exception:
++        url = "https://github.com"
++    return f"AgataDiscordBridge ({url}, 1.0)"
++
++
++_USER_AGENT = _user_agent()
++
+ mcp = FastMCP("agata-discord")
+ 
+ 
+@@ -108,7 +134,7 @@ def _run_http(method: str, path: str, body: dict | None = None) -> dict:
+         headers={
+             "Authorization": f"Bot {tok}",
+             "Content-Type": "application/json",
+-            "User-Agent": "AgataDiscordBridge (https://github.com/agataseth98-cmd/agata-seth, 1.0)",
++            "User-Agent": _USER_AGENT,
+         },
+     )
+     try:
