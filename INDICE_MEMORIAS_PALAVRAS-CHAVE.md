@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
+  palavras-chave: lote, aplicado, propostas, assinadas, dia, estão, canon, bussola, goose, fallback, claude, python, urllib, fila, nova, code, instalado, provado, prs, foram, mergeados, mim, autorização, explícita, humano, desta
 (547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem do Humano ("os modelos locais agora serão os últimos"). Remotos primeiro, depois os `llama-cpp/*` sob demanda, e o Ollama como fundo final. Aplicado e provado: os 4 combos respondem pelo 1º remoto em 1,3–2,1 s. A proposta `fila-nova-2026-09-24`, ainda não assinada, foi regenerada com a ordem nova, e o `.diff` mudou.**
   palavras-chave: locais, fim, filas, seth, ordem, humano, modelos, agora, serão, últimos, remotos, primeiro, llama, cpp, sob, demanda, ollama, fundo, final, aplicado, provado, combos, respondem, remoto, proposta, fila, nova, assinada, regenerada, diff, mudou
 (546) DIÁRIO — 24/09/2026 · **Fila nova da Seth aplicada no OmniRoute, por ordem do Humano ("sim, aplique a fila nova"): só modelos medidos hoje com as chaves dele, respondendo e com tool-call. O Groq `gpt-oss-120b` entrou como 1º remoto de rápido/livre/pesado, e o Codestral como 1º remoto do código. Saíram HuggingFace (402) e Cerebras (crédito de trial, não grátis). As tabelas vão para `config/modelos-gratuitos.md` na proposta P-8 `fila-nova-2026-09-24`, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: gancho, post, merge, pronto, testado, aguardando, assinatura, git, pull, roda, mesmos, passos, commit, fecha, candidato, registrado, feito, github, deixava, vault, atrás, head, barrava, próximo, edição, real
 (519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-historia-apagada-2026-09-23` (518) e `conselho-remoto-corrige-sonda-e-doc-2026-09-22` (513). A HuggingFace não está só sem crédito: a conexão está DESLIGADA no OmniRoute desde 22/09 às 10:11. A Cerebras voltou a responder às 18:03.**
   palavras-chave: assinadas, verificadas, aplicadas, alerta, historia, apagada, remoto, corrige, sonda, doc, huggingface, crédito, conexão, desligada, omniroute, desde, cerebras, voltou, responder
-(518) DIÁRIO — 23/09/2026 · **Pendências de (517) resolvidas com o mandato "pode fazer tudo da melhor forma para o sistema". O Goose ficou travado pra escrever arquivo sem perguntar. O Obsidian parou de cair no boot. Um alerta novo de "história apagada" está pronto e espera assinatura (P-8). A Cerebras fica na fila, com o motivo medido. O container órfão foi removido.**
-  palavras-chave: pendências, resolvidas, mandato, pode, fazer, tudo, melhor, forma, sistema, goose, ficou, travado, pra, escrever, arquivo, perguntar, obsidian, parou, cair, boot, alerta, novo, história, apagada, pronto, espera, assinatura, cerebras, fica, fila, motivo, medido, container, órfão, removido
+(518) DIÁRIO — 23/09/2026 · **Pendências de (517) resolvidas com o mandato "pode …
+  palavras-chave: pendências, resolvidas, mandato, pode
 (517) DIÁRIO — 23/09/2026 · **A Seth não subia ("The model provider could not co …
   palavras-chave: seth, subia, the, model, provider, could, not
 (516) DIÁRIO — 22/09/2026 · **Working tree local tinha `MEMÓRIAS.md`, `PROJETO.m …

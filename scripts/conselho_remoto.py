@@ -162,7 +162,11 @@ ROSTER = [
 # provedor (403 browser_signature_banned, retryable:false, owner_action_required:
 # true) -- não é credencial nem cota, não adianta esperar o breaker, é o dono do
 # site banindo o user-agent do OmniRoute. Mesma classe do banimento do Groq, que
-# já não estava neste ROSTER. Substituído por um modelo novo do catálogo :free da
+# já não estava neste ROSTER.
+# [CORRIGIDO 24/09/2026, MEMÓRIAS (545)] O UA banido NUNCA foi o do OmniRoute: é o
+# `Python-urllib/*` DESTE script (urllib sem User-Agent próprio), repassado pelo
+# proxy :20127 e pelo OmniRoute até o provedor. O proxy agora troca esse UA;
+# Groq e Cerebras voltaram a responder 200 pelo caminho completo. Substituído por um modelo novo do catálogo :free da
 # OpenRouter, testado ao vivo no mesmo dia (config/modelos-gratuitos.md).
 # Modelos que gastam o orçamento em "reasoning" antes de responder precisam de
 # teto alto pra sobrar espaço pro conteúdo visível (medido em (374): Gemini

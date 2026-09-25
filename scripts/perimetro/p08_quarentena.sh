@@ -90,6 +90,14 @@ _p8_eh_comportamento() {
     # nenhuma, `git add`, rodar perimetro.sh -- P-8 dizia OK antes deste
     # conserto (ver commit desta entrada pro antes/depois).
     redesign/igpu/*.py) return 0 ;;
+    # Buraco achado 24/09/2026 montando o Goose como fallback do Claude Code
+    # (MEMÓRIAS (543)): .agents/skills/*/SKILL.md são instruções que o agente
+    # carrega e SEGUE (Goose e qualquer cliente do padrão Agent Skills) -- mudam
+    # comportamento tanto quanto um prompt de config/. redesign/goose/* é a fonte
+    # versionada do AGENTS.md e das permissões do Goose. .claude/* (skills e
+    # settings do Claude Code, MEMÓRIAS (544)) é a mesma classe. Fechado ANTES da
+    # primeira skill entrar, mesma disciplina do .github/* acima.
+    .agents/*|.claude/*|redesign/goose/*) return 0 ;;
     *) return 1 ;;
   esac
 }

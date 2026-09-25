@@ -1,0 +1,13 @@
+  canon:
+    enabled: true
+    type: stdio
+    name: canon
+    cmd: node
+    args: ["/home/orusoua/agata/redesign/librechat/canon-mcp.mjs"]
+    env:
+      CANON_PROXY: "http://127.0.0.1:27125"
+      SETH_ESCRIBA: "http://127.0.0.1:20140"
+      SETH_VERIFICADOR: "http://127.0.0.1:20141"
+    description: 'Canon do Agata (MCP, mesmo servidor da Seth): query_canon, vault_consultar, maquina_verificar (read-only), memoria_acrescentar, diario_anotar (append-only via seth_escriba). MEMÓRIAS (543).'
+    display_name: Canon Agata
+    timeout: 120

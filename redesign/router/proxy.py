@@ -72,6 +72,27 @@ _HOP_BY_HOP = {
     "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
 }
 
+# User-Agent de saída (MEMÓRIAS (545)). O Cloudflare do Groq e do Cerebras bane o
+# prefixo `Python-urllib` (403 error 1010, "browser_signature_banned") ANTES da
+# autenticação -- medido sem chave nenhuma. Nossos chamadores Python (conselho_remoto,
+# pesquisar_modelos_gratuitos, grafo) não mandam UA próprio; este proxy repassava o
+# deles, e o próprio urllib daqui poria `Python-urllib` se nada viesse. O OmniRoute
+# repassa o UA do cliente ao provedor. Resultado: meses de 403 atribuídos ao
+# "user-agent do OmniRoute", que nunca foi a causa.
+UA_SAIDA = "agata-seth/1.0"
+
+
+def _ua_de_saida(headers: dict) -> dict:
+    """Troca UA ausente ou `Python-urllib/*` por UA_SAIDA. UA de outro cliente
+    (ex.: LibreChat) passa intacto -- só corrige o que se sabe banido."""
+    chave = next((k for k in headers if k.lower() == "user-agent"), None)
+    atual = headers.get(chave, "") if chave else ""
+    if not atual or atual.lower().startswith("python-urllib"):
+        if chave:
+            del headers[chave]
+        headers["User-Agent"] = UA_SAIDA
+    return headers
+
 
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
@@ -151,10 +172,10 @@ class _Handler(BaseHTTPRequestHandler):
     # --------------------------------------------------------------------- #
     def _passar(self, corpo: bytes, metodo: str):
         url = UPSTREAM + self.path
-        headers = {
+        headers = _ua_de_saida({
             k: v for k, v in self.headers.items()
             if k.lower() not in _HOP_BY_HOP
-        }
+        })
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
             up = urllib.request.urlopen(req, timeout=180)
@@ -226,12 +247,14 @@ def _porta_livre() -> int:
 
 class _DummyUpstream(BaseHTTPRequestHandler):
     tocado = False
+    ua_recebido = None
 
     def log_message(self, *a):
         pass
 
     def do_POST(self):
         type(self).tocado = True
+        type(self).ua_recebido = self.headers.get("User-Agent")
         n = int(self.headers.get("Content-Length") or 0)
         _ = self.rfile.read(n)
         corpo = json.dumps({"choices": [{"message": {"role": "assistant", "content": "ok-dummy"}}],
@@ -301,6 +324,23 @@ def _selftest() -> int:
     except Exception as e:  # noqa: BLE001
         print(f"FALHA  pedido limpo levantou {type(e).__name__}: {e}")
         falhas += 1
+
+    # 1b. UA de saída (MEMÓRIAS (545)): o urllib deste selftest manda `Python-urllib/*`,
+    # exatamente o UA que o Cloudflare do Groq/Cerebras bane -> o upstream tem de
+    # receber UA_SAIDA. E um UA de outro cliente tem de passar intacto.
+    for ua_in, esperado in ((None, UA_SAIDA), ("LibreChat/0.8", "LibreChat/0.8")):
+        _DummyUpstream.ua_recebido = None
+        h = dict(com_token)
+        if ua_in:
+            h["User-Agent"] = ua_in
+        try:
+            urllib.request.urlopen(urllib.request.Request(base, data=limpo, headers=h), timeout=10).read()
+            ok = _DummyUpstream.ua_recebido == esperado
+            print(f"{'PASS' if ok else 'FALHA'}  UA de entrada {ua_in or 'Python-urllib (padrão)'!r} -> upstream recebeu {_DummyUpstream.ua_recebido!r}")
+            falhas += 0 if ok else 1
+        except Exception as e:  # noqa: BLE001
+            print(f"FALHA  teste de UA levantou {type(e).__name__}: {e}")
+            falhas += 1
 
     # 2. pedido com segredo plantado (gerado na hora), token certo -> 4xx do proxy, upstream NAO tocado
     _DummyUpstream.tocado = False

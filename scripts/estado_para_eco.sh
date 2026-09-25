@@ -121,7 +121,10 @@ fi
 if [ -z "$remoto" ]; then
   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
 elif [ "$remoto" != "$head_full" ]; then
-  atras_a_frente=$(git rev-list --left-right --count "$head_full...$remoto" 2>/dev/null | tr '\t' '/' || echo "?/?")
+  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/' || echo "?/?")
+  # (MEMÓRIAS (543)) ordem remoto...HEAD: a 1a coluna do --left-right é o que SÓ o remoto tem (= atrás),
+  # a 2a o que só o HEAD tem (= à frente) -- casa com o rótulo abaixo. Antes estava invertido: um
+  # branch 1 à frente saía "atrás/à-frente: 1/0" e dois modelos leram "1 commit atrás".
   extra=""; [ -n "$sujos" ] && extra=" + árvore suja: $sujos"
   sync_linha="sync: FALHA · HEAD local=$head7 diverge do remoto=$(printf %s "$remoto" | cut -c1-7) (atrás/à-frente: ${atras_a_frente:-?/?})$extra"
   SAIDA=$(( SAIDA < 1 ? 1 : SAIDA ))

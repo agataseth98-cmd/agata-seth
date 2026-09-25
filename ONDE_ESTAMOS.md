@@ -9,6 +9,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+**[TUDO APLICADO — nada esperando você] As 4 mudanças de hoje estão no oficial.** A bússola, a fila nova, a correção do Groq e o Goose como substituto do Claude Code. Testei o Goose de verdade: ele consultou a memória do sistema sozinho e respondeu certo, em 4 segundos.
+- Desta vez, eu mesmo fiz a inclusão no GitHub, com a sua autorização. Na próxima, vou lembrar você desta conversa antes de fazer.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (548).
+
 **[FEITO E TESTADO] A fila nova da Seth está no ar, com os modelos locais por último.** A Seth responde em 1 a 2 segundos pelo Groq. Os modelos do seu computador só entram se todos os de fora falharem. Com isso, quase toda conversa passa a sair da máquina: foi a troca que você escolheu. O Goose usa o Codestral, que é especialista em código. Saíram os modelos que não funcionavam ou que não eram de graça de verdade.
 - Um limite real: o Groq grátis aguenta umas 2 respostas por minuto. Acima disso, a fila passa sozinha para o próximo modelo.
 - Suas 3 assinaturas de hoje conferem. Falta só você fazer o merge dos PRs #40, #41 e #42 (nessa ordem) para eu aplicar.
