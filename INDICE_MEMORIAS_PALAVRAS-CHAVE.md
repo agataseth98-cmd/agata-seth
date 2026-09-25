@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
+  palavras-chave: proposta, manifesto, corrigida, aplicar, achei, buraco, real, próprio, harness, teste, testar, perimetro, tentando, versão, assinada, assinatura, ficou, inválida, conteúdo, mudou, precisa, nova
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, dado pessoal; manifesto de Fase 5) medidas, decididas com o Humano e construídas: `config/caminhos-framework.txt` classifica todo caminho versionado (framework/instância/externo), e o controle novo P-20 avisa se dado pessoal for staged num caminho framework.**
   palavras-chave: pendências, plano, replicabilidade, dado, pessoal, manifesto, fase, medidas, decididas, humano, construídas, config, caminhos, framework, txt, classifica, caminho, versionado, instância, externo, controle, novo, avisa, for, staged
 (560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: gemini, avaliados, entram, fila, seth, ordem, humano, faça, geminis, terminar, quero, testar, tinindo, estão, uso, pesado, livre, responderam, flash, preview, cairiam, documentação, filas, vai, proposta
 (533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
   palavras-chave: assinado, verificado, aplicado, afinacao, sistema, volta, curta, recomendei, provou, vivo, pontos, tinham, rodado, atalho, sincroniza, compose, cache, deixa, seth, rápida, goose, pede, confirmação, agir
-(532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas, mais a ordem "afina o Goose pra seguir nossa toada, aliás, afina o sistema todo". Goose afinado; B9 fechado com o risco que sobra declarado; deepseek removido; 2 Gemini avaliados; B8 tentado, bloqueado pelo firewall e revertido. Proposta `afinacao-sistema-2026-09-23` aguardando assinatura (cache de 60 s, atalho sincronizando o compose, PROJETO corrigido). Duas afirmações minhas caíram no caminho, a pedido do Humano ("tem certeza?").**
-  palavras-chave: decisões, tomadas, humano, executadas, ordem, afina, goose, pra, seguir, nossa, toada, aliás, sistema, afinado, fechado, risco, sobra, declarado, deepseek, removido, gemini, avaliados, tentado, bloqueado, firewall, revertido, proposta, afinacao, aguardando, assinatura, cache, atalho, sincronizando, compose, projeto, corrigido, afirmações, minhas, caíram, caminho, pedido, tem, certeza
+(532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas …
+  palavras-chave: decisões, tomadas, humano, executadas
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as …
   palavras-chave: teste, seth, refeito, zero
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-con …

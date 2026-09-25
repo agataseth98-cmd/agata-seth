@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fbcd8ad638fc29620d5615a60aaca8cefef1beaf
-  Escrito em: 25/09/2026 18:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3863d8a137d29193c06d58e01a371970e06026a3
+  Escrito em: 25/09/2026 19:27 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fbcd8ad638fc29620d5615a60aaca8cefef1beaf/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3863d8a137d29193c06d58e01a371970e06026a3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3863d8a137d29193c06d58e01a371970e06026a3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3863d8a137d29193c06d58e01a371970e06026a3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
+
+**O que aconteceu:** ao aplicar a proposta já assinada de (561), `bash scripts/testar_perimetro.sh` reprovou o caso novo do P-20 ("esperava PEGA, obteve 0"), bloqueando o commit pelo P-16. Medindo antes de insistir: `_montar_clone()` (o harness que monta o clone descartável da suíte) só sobrepõe `scripts/` e `.githooks/` da árvore de trabalho por cima do clone — nunca `config/`. O P-20 é o primeiro controle do perímetro que lê um arquivo fora de `scripts//.githooks/` (`config/caminhos-framework.txt`), e como esse manifesto também só estava staged (não commitado, por ser parte da mesma proposta P-8), o clone da suíte nunca o via — testava um P-20 real, mas sem o manifesto que ele precisa pra funcionar, relatando "0 acusações" mesmo com o achado staged de verdade.
+
+**Corrigido:** `_montar_clone()` ganhou `cp -a "$RAIZ/config/." "$CLONE/repo/config/"`, mesma disciplina que já existia pra `scripts/`/`.githooks/` desde a lição do item 10 (achado documentado no próprio comentário do harness). Testado três vezes: (1) suíte isolada, 40/40; (2) `bash scripts/perimetro.sh` completo, só P-8 pendente (esperado); (3) num worktree descartável, do zero (não confiando na árvore já suja de testes anteriores) — `git apply` limpo, `40/40` de novo, P-16 `veredito: OK`.
+
+**Assinatura antiga (de 561) preservada, não descartada — guardada em `/tmp/p20-assinatura-antiga-backup/`, fora do repo, sem servir mais (o hash do `.diff` mudou).** Lição do erro de hoje mais cedo (git clean apagando assinatura): mover pra um lugar seguro antes de decidir o que fazer, nunca apagar direto.
+
+**Em quarentena P-8, aguardando assinatura nova (substitui a de (561), mesmo nome de arquivo, conteúdo maior):** `propostas/p20-manifesto-2026-09-25.diff` — agora cobre também a correção do harness em `scripts/testar_perimetro.sh`.
+
+**sync:** PASS — `git rev-parse main` = `3863d8a` no momento de medir, topo de MEMÓRIAS conferido com (561) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** decorre da mesma ordem de (561) ("seguindo as mesmas diretrizes em produção") — correção de bug achado testando antes de aplicar, sem pedir instrução nova pra isso.
 
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, dado pessoal; manifesto de Fase 5) medidas, decididas com o Humano e construídas: `config/caminhos-framework.txt` classifica todo caminho versionado (framework/instância/externo), e o controle novo P-20 avisa se dado pessoal for staged num caminho framework.**
 
