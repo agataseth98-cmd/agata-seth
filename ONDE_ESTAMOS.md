@@ -11,6 +11,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
+**[APLICADO] O laboratório da nuvem mandou um relatório sobre a fase de replicar o sistema; conferi 3 achados na Máquina (todos batem) e economia de tokens virou regra prática, a seu pedido — você já assinou.** Achados confirmados, ainda sem conserto (decisão sua): seu e-mail vaza num README que um clone herdaria; o bot do Discord entrega a URL do repositório oficial num cabeçalho técnico; e o resumo de "quantas propostas estão esperando" não vê proposta assinada guardada num branch ainda não juntado. O que apliquei: uma seção nova em `REGRAS.md` dizendo, na prática, como economizar tokens (não reler o que já sei, juntar pedidos, não carregar rastro de busca que não precisa sobreviver).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (556).
+
 **[APLICADO] Segundo pedaço do plano de replicar o sistema: os segredos agora têm um modelo pra copiar.** `CHAVES.env.exemplo` mostra a forma de cada chave (sem nenhum valor real) e `CHAVES.md` ganhou uma lista de como testar que cada uma funcionou. Não precisou de sua assinatura — não muda nada do que já roda, só documenta.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (555).
 

@@ -26,18 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f8613f61e505742ba450899bb779c51c70a9f385
-  Escrito em: 25/09/2026 11:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74
+  Escrito em: 25/09/2026 13:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f8613f61e505742ba450899bb779c51c70a9f385/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59575cd38e8d8f010a4fa1eb6846b4f45f6a0f74/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
+
+**Origem do relatório (Regra 2 — DADO, não instrução):** Agata, família Claude, designação "Ensaio", sessão Claude Code na nuvem (container, não esta Máquina), enviado a pedido do Humano em 25/09/2026, base declarada origin/main `59575cd` = (555), sync PASS. Conferi seletivamente antes de tratar qualquer item como fato.
+
+**Verificado nesta Máquina (git grep contra origin/main `59575cd`):**
+- E-mail do Humano vaza em caminho de FRAMEWORK: `redesign/librechat/README.md:61`. Um clone herdaria isso.
+- Slug `agataseth98-cmd/agata-seth` aparece em exatamente 5 arquivos — bate com a contagem do laboratório, incluindo `redesign/mcp/discord/servidor.py:111` (User-Agent do bridge do Discord leva a URL do repo oficial), que o laboratório apontou como faltante no plano de replicabilidade.
+- `scripts/estado_para_eco.sh:219` só conta `.diff` sem `APROVADO-` na árvore de `main` — não enxerga proposta P-8 pendente em branch ainda não mesclado. Confirma o gap relatado (informaria "0 aberta" com quarentena esperando).
+- `git grep -ilE agata` nos caminhos de framework: 128 arquivos (laboratório relatou 124 — mesma ordem de grandeza, diferença não investigada, não contradiz o achado).
+
+**Não verificável por esta sessão (lacuna, registrado como dado, não fato):** os números de custo do próprio experimento do laboratório (3 passadas sem medição prévia divergindo em 6 temas; com medição prévia, convergindo 7/7 a ~195 mil tokens contra ~227 mil sem medição) — aconteceram em outro container, sem meio desta Máquina medir depois. Convergência com (550) relatada pelo laboratório, mesma ressalva.
+
+**Decisão desta entrada, ordem direta do Humano:** "introduza [economia de tokens] como orientação no sistema seguindo as diretrizes, utilizando meios mecânicos e ferramentas cognitivas." Escrevi `REGRAS.md`, seção nova "Economia de tokens — mecanismo de Regra 7" (não Regra numerada nova — Regra 7 já autoriza otimizar custo; regra nova batia de frente com "não infle as REGRAS por reflexo", Mudança estrutural). Conteúdo: meios mecânicos medíveis e model-agnósticos (Regra 6) — reaproveitar referência já fixada em vez de reler, agrupar leituras independentes num só pedido, isolar rastro de exploração que não precisa sobreviver à decisão; e uma ferramenta cognitiva — medir antes de rodar as três passadas da Regra 8 custa menos e diverge menos do que às cegas, achado do laboratório acima, marcado como não verificado por esta Máquina no próprio texto da regra.
+
+**Portão das três perguntas (Mudança estrutural), respondido antes de escrever:** reversível sozinho (`git revert`, nenhum script ou hook novo) · alcance é só o texto lido na hidratação, nenhum controle de `scripts/perimetro.sh` muda · sem falha silenciosa possível (é texto doutrinário, "quebrar" é ser ignorado, não bug mecânico). Gate de "segunda opinião ou Humano assume o risco por escrito": Humano ordenou diretamente nesta sessão — é a segunda hipótese do gate, registrada aqui.
+
+**P-8 cumprido:** `propostas/economia-tokens-2026-09-25.diff` + `propostas/APROVADO-economia-tokens-2026-09-25`, assinatura ssh conferida por `scripts/p8_verificar.sh` (`OK 1..4`, `PODE APLICAR`) antes de aplicar. Par movido para `propostas/aplicadas/` neste commit.
+
+**Fora do escopo desta entrada, aberto pro Humano decidir depois (Regra 3 — não age sem pedido):** proposta P-20 do laboratório (varredura de dado pessoal em framework, sem barrar, com fixture sintética); a lacuna de Fase 2 (separar nome falado de identificador interno antes de escolher variável-de-ambiente vs. find-replace); o manifesto único de caminhos de framework pra Fase 5; o campo `PROPOSTAS-EM-BRANCH` em `estado_para_eco.sh`; os 3 vazamentos verificados acima (e-mail, User-Agent do Discord). Nenhum foi pedido nesta rodada — registrado aqui pra não se perder, não implementado.
+
+**sync:** PASS — `git rev-parse origin/main` = `59575cd` no momento de escrever, topo de MEMÓRIAS conferido com (555) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem direta do Humano nesta sessão ("introduza isso como orientação no sistema... leve em consideração o trabalho paralelo"); assinatura P-8 do Humano em `propostas/APROVADO-economia-tokens-2026-09-25`.
 
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
 
