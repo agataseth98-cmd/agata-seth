@@ -1,0 +1,27 @@
+user:
+  always_allow:
+  - canon__query_canon
+  - canon__vault_consultar
+  - todo__todo_write
+  - browse
+  - extensionmanager__search_available_extensions
+  - playwright__browser_tabs
+  - playwright__browser_navigate
+  - read_image
+  - tree
+  - playwright__browser_snapshot
+  - playwright__browser_console_messages
+  - playwright__browser_wait_for
+  ask_before:
+  - canon__diario_anotar
+  - canon__maquina_verificar
+  - canon__memoria_acrescentar
+  - diario_anotar
+  - edit
+  - memoria_acrescentar
+  - playwright__browser_click
+  - playwright__browser_press_key
+  - playwright__browser_type
+  - shell
+  - write
+  never_allow: []
