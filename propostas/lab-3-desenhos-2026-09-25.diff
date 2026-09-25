@@ -1,0 +1,392 @@
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index bfcce4f..1004da4 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -12,8 +12,8 @@
+ # Q1 convergiu em "só imprimir"; Q3 convergiu em "obrigatório quando há shell";
+ # Q2 decidida pelo Humano — "hash + frase", as duas).
+ #
+-# Escrita única, fora do repo: o cache do ls-remote em ~/.cache/agata/ (ver
+-# "cache" abaixo). No repo, READ-ONLY.
++# Escrita única, fora do repo: os caches do ls-remote em ~/.cache/agata/ (main
++# e refs/heads/proposta/*, ver "cache" abaixo). No repo, READ-ONLY.
+ # READ-ONLY: só lê arquivos e consulta o remoto (git ls-remote). Nunca
+ # git add/commit/push, nunca escreve no repo. Uma rede indisponível vira
+ # `sync: não verificado`, não erro.
+@@ -144,6 +144,65 @@ for d in propostas/*.diff; do
+ done
+ shopt -u nullglob
+ 
++# --- PROPOSTAS-EM-BRANCH: proposta P-8 que só existe em branch remoto ---
++# PROPOSTAS-ABERTAS acima só conta .diff na árvore DESTE checkout. No fluxo
++# por PR a proposta vive num branch remoto até o merge -- em 24/09/2026 o eco
++# disse "0" com 3 esperando assinatura, todas em refs/heads/proposta/*
++# (laboratório "Ensaio"). Só leitura: um ls-remote, nunca fetch. Num clone não
++# raso, SHA sem objeto local não pode ser ancestral do HEAD, então conta como
++# fora; com o objeto, merge-base --is-ancestor decide.
++# NENHUM prefixo fixo: medido em 25/09/2026 contra origin real que o convênio
++# de nome MUDOU no mesmo repositório -- proposta/* (22-24/09) e aplica/* (hoje)
++# convivem; um filtro só por "proposta/" ficaria cego pro que se usa agora.
++# Olha TODO head remoto, exceto main -- falso positivo (branch de rascunho sem
++# relação com P-8) é aviso a mais, não perigo; falso negativo (proposta real
++# invisível) é o próprio ponto cego que este campo existe pra fechar.
++# Aviso: nunca mexe em SAIDA nem no HASH-ESTADO.
++# set -e: o laço só usa `if` -- `[ ] && x` como último comando do corpo deixaria
++# o status do while em 1 e derrubaria o script sem mensagem.
++propostas_branch_linha=""
++if [ -z "$remoto" ]; then
++  propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: remoto inacessível (mesma medição do sync)"
++elif [ "$(git rev-parse --is-shallow-repository 2>/dev/null || echo false)" = "true" ]; then
++  propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: clone raso, ancestralidade não é confiável"
++else
++  _cache_prop="$HOME/.cache/agata/ls-remote-propostas"
++  _refs_prop=""; _refs_ok=0
++  if [ "${ECO_LSREMOTE_CACHE_S:-60}" -gt 0 ] 2>/dev/null && [ -f "$_cache_prop" ]; then
++    _t_prop=$(head -n 1 "$_cache_prop" 2>/dev/null || true)
++    if [ -n "$_t_prop" ] && [ "$_t_prop" -ge 0 ] 2>/dev/null \
++       && [ $(( _agora - _t_prop )) -ge 0 ] \
++       && [ $(( _agora - _t_prop )) -lt "${ECO_LSREMOTE_CACHE_S:-60}" ]; then
++      _refs_prop=$(tail -n +2 "$_cache_prop" 2>/dev/null || true)
++      _refs_ok=1
++    fi
++  fi
++  if [ "$_refs_ok" = 0 ]; then
++    if _refs_prop=$(timeout "${LS_REMOTE_TIMEOUT_ECO:-8}" git ls-remote --heads origin 2>/dev/null); then
++      _refs_ok=1
++      { mkdir -p "$(dirname "$_cache_prop")" && printf '%s\n%s\n' "$_agora" "$_refs_prop" > "$_cache_prop"; } 2>/dev/null || true
++    fi
++  fi
++  if [ "$_refs_ok" = 0 ]; then
++    propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: ls-remote de refs/heads/* falhou"
++  else
++    _n_prop=0; _nomes_prop=""
++    while read -r _sha_p _ref_p; do
++      if [ -z "${_sha_p:-}" ]; then continue; fi
++      if [ "$_ref_p" = "refs/heads/main" ]; then continue; fi
++      if git cat-file -e "${_sha_p}^{commit}" 2>/dev/null \
++         && git merge-base --is-ancestor "$_sha_p" HEAD 2>/dev/null; then
++        continue
++      fi
++      _n_prop=$((_n_prop + 1))
++      if [ "$_n_prop" -le 5 ]; then
++        _nomes_prop="${_nomes_prop:+$_nomes_prop, }${_ref_p#refs/heads/}"
++      fi
++    done <<<"$_refs_prop"
++    propostas_branch_linha="PROPOSTAS-EM-BRANCH: $_n_prop (branch remoto fora do HEAD, qualquer nome, exceto main)${_nomes_prop:+ -- $_nomes_prop}"
++  fi
++fi
++
+ # --- TOPO-PROPOSTA-JA-APLICADA: a entrada do topo cita uma proposta que já
+ # saiu de propostas/ pra propostas/aplicadas/? (achado auditando um
+ # carregamento real da Seth, MEMÓRIAS (464)/(465)). Aplicar uma proposta
+@@ -217,6 +276,7 @@ ${idade_remoto:+SYNC-REMOTO-IDADE: $idade_remoto
+ }${alerta_historia:+$alerta_historia
+ }IDADE-HIDRATACAO: $idade_hidratacao
+ PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
++$propostas_branch_linha
+ ${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
+ }HORA-MAQUINA: $hora_maquina
+ HASH-ESTADO: $hash_estado
+diff --git a/scripts/gerar_indice_derivado.py b/scripts/gerar_indice_derivado.py
+index ffd59ff..098245a 100644
+--- a/scripts/gerar_indice_derivado.py
++++ b/scripts/gerar_indice_derivado.py
+@@ -28,11 +28,15 @@ sem .git, mesmo padrão de gerar_obsidian.py).
+ Verificação embutida antes de escrever (aborta, nada é gravado):
+   1. as fontes são exatamente REGRAS/PROJETO + as camadas de memória achadas
+      no disco, cada uma filha direta da raiz do repo;
+-  2. REGRAS.md e PROJETO.md aparecem no indice.md como bloco verbatim contíguo;
++  2. REGRAS.md e PROJETO.md -- com {{NOME_SISTEMA}} trocado pelo campo "Nome do
++     sistema:" do PROJETO.md (Fase 2), e nada mais -- aparecem no indice.md como
++     bloco verbatim contíguo; a Parte 3 (títulos) é história e NÃO é resolvida;
+   3. cada linha de título da Parte 3 é uma linha verbatim de alguma camada de
+      memória lida (quente, morno ou um chunk frio);
+   4. indice.md == HEADER + REGRAS + SEP + PROJETO + SEP + títulos  (byte a byte)
+      -- prova de que não há nada além do boilerplate fixo e do canon.
++O manifesto guarda o sha256 do arquivo CRU (o que sha256sum mede no disco) e o
++nome usado na resolução.
+ """
+ import hashlib
+ import os
+@@ -57,6 +61,12 @@ FRIO_NOME = re.compile(
+ 
+ SEP = "\n\n" + "=" * 64 + "\n"
+ 
++# Fase 2 (plano de replicabilidade, MEMÓRIAS (559)): mesmo resolvedor de
++# scripts/gerar_obsidian.py -- campo "Nome do sistema:" do PROJETO.md, "Agata"
++# sem ele.
++TOKEN_NOME = "{{NOME_SISTEMA}}"
++CAMPO_NOME = re.compile(r"^Nome do sistema:\s*(.+)$", re.MULTILINE)
++
+ 
+ def camadas_frio_recente_primeiro():
+     """Nomes dos chunks MEMORIAS-FRIO-*.md em memoria/frio/, do mais pro menos
+@@ -151,8 +161,17 @@ def main():
+             abortar(f"fonte ausente: {p}")
+         caminhos[nome] = p
+ 
+-    regras = open(caminhos["REGRAS.md"], encoding="utf-8").read()
+-    projeto = open(caminhos["PROJETO.md"], encoding="utf-8").read()
++    regras_cru = open(caminhos["REGRAS.md"], encoding="utf-8").read()
++    projeto_cru = open(caminhos["PROJETO.md"], encoding="utf-8").read()
++    m_nome = CAMPO_NOME.search(projeto_cru)
++    nome_sistema = m_nome.group(1).strip() if m_nome else "Agata"
++    # O nome vai pro índice e pro NotebookLM: uma linha, curto, sem o marcador.
++    if not nome_sistema or len(nome_sistema) > 60 or TOKEN_NOME in nome_sistema:
++        abortar(f"campo 'Nome do sistema:' do PROJETO.md inválido: {nome_sistema[:60]!r}")
++    # Partes 1-2 levam o texto RESOLVIDO, que é o que o leitor externo precisa.
++    # As checagens verbatim abaixo comparam esta MESMA versão dos dois lados.
++    regras = regras_cru.replace(TOKEN_NOME, nome_sistema)
++    projeto = projeto_cru.replace(TOKEN_NOME, nome_sistema)
+     mem_txt = open(caminhos["MEMÓRIAS.md"], encoding="utf-8").read()
+ 
+     # Camadas extra de memória (Fase 4, MEMÓRIAS (357)): morno + frio, mais
+@@ -179,13 +198,14 @@ def main():
+     fontes_citadas = ", ".join(("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md") + tuple(camadas_extra_nomes))
+     header = (
+         "---\n"
+-        f"gerado-de: canon público do sistema Agata ({fontes_citadas})\n"
++        f"gerado-de: canon público do sistema {nome_sistema} ({fontes_citadas})\n"
++        f"nome-sistema: {nome_sistema} (campo 'Nome do sistema:' do PROJETO.md)\n"
+         f"canon: {sha}\n"
+         f"data: {data}\n"
+         "nota: camada de leitura derivada, só-leitura. Não é canon. "
+         "Correção é entrada nova em MEMÓRIAS, nunca edição aqui.\n"
+         "---\n\n"
+-        "# Índice derivado — canon público do Agata\n\n"
++        f"# Índice derivado — canon público do {nome_sistema}\n\n"
+         "Mapa para consulta externa. Três partes: as regras na íntegra, o estado\n"
+         "atual na íntegra, e a linha do tempo das entradas de memória -- quente +\n"
+         "morno + frio (Fase 4) -- (só os\n"
+@@ -225,7 +245,9 @@ def main():
+     def h(s):
+         return hashlib.sha256(s.encode("utf-8")).hexdigest()
+ 
+-    linhas_fontes = [f"  REGRAS.md    {h(regras)}\n", f"  PROJETO.md   {h(projeto)}\n",
++    # Hash do arquivo CRU: é o que `sha256sum` mede no disco, e é o que este
++    # manifesto promete que bate.
++    linhas_fontes = [f"  REGRAS.md    {h(regras_cru)}\n", f"  PROJETO.md   {h(projeto_cru)}\n",
+                      f"  MEMÓRIAS.md  {h(mem_txt)}\n"]
+     for nome in camadas_extra_nomes:
+         linhas_fontes.append(f"  {nome}  {h(camadas_extra_txt[nome])}\n")
+@@ -238,6 +260,8 @@ def main():
+         "# Manifesto — índice derivado do canon público\n\n"
+         f"Fontes (sha256, no commit {sha}):\n"
+         + "".join(linhas_fontes) + "\n"
++        f"Nome do sistema: {nome_sistema} -- Partes 1-2 = a fonte acima com "
++        f"'{TOKEN_NOME}' trocado por esse nome, e nada mais. Parte 3 não é resolvida.\n\n"
+         "Saída:\n"
+         f"  indice.md    {h(indice)}   (Parte 3: {len(titulos)} linhas de título)\n\n"
+         "Regenerar: python3 scripts/gerar_indice_derivado.py\n"
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index cfd7fa9..59ec26b 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -56,6 +56,7 @@ source "$_PERIMETRO_DIR/perimetro/p16_testes_dos_controles.sh"
+ source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
+ source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
+ source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
++source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -330,6 +331,12 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-21" "O nome do sistema não sai como marcador cru" "MEMÓRIAS (559); plano de replicabilidade, Fase 2"
++  p21_nome_sistema
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
+   PERIMETRO_ESTADO=""
+   p12_backup_verificavel; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p21_nome_sistema.sh b/scripts/perimetro/p21_nome_sistema.sh
+new file mode 100644
+index 0000000..f3c61da
+--- /dev/null
++++ b/scripts/perimetro/p21_nome_sistema.sh
+@@ -0,0 +1,124 @@
++#!/usr/bin/env bash
++# P-21 -- o nome do sistema não sai como marcador cru (Fase 2 do plano de
++# replicabilidade, MEMÓRIAS (559); desenho do laboratório "Ensaio", 25/09/2026).
++# AVISA, nunca falha -- doutrina P-6/P-9/P-18: higiene de texto, não segurança.
++#
++# Três checagens, cada uma com escopo fechado:
++#  (i)   fonte lida crua por LLM que usa o marcador traz a regra de resolução
++#        nas primeiras 40 linhas;
++#  (ii)  saída GERADA não traz o marcador onde ele devia ter sido resolvido --
++#        só nas partes resolvidas: vault regras/ e canon/, Partes 1-2 do índice,
++#        posições faladas no .hidrata.md. História fica fora de propósito:
++#        (558)/(559) citam o marcador e são verbatim para sempre (Regra 4);
++#  (iii) linha nova de MEMÓRIAS (staged) que COMEÇA por uma posição falada --
++#        modelo copiando a linha de turno sem resolver.
++#
++# O marcador é montado em pedaços: escrito inteiro, este arquivo seria uma fonte
++# com marcador sem a regra no topo (mesma convenção de _vs_k, varredura_segredo.sh).
++# Sem `grep -q` no fim de pipeline: com pipefail, grep saindo cedo dá SIGPIPE no
++# produtor e o pipeline "falha" tendo casado. Sempre `grep -c ... || true`.
++
++_p21_tok() { printf '%s%s%s' '{{' 'NOME_SISTEMA' '}}'; }
++
++P21_REGRA='campo "Nome do sistema:"'
++P21_FONTES=("REGRAS.md" "PROMPT_CARREGAMENTO.md" ".agents/skills/*/SKILL.md" ".claude/skills/*/SKILL.md")
++P21_VAULT_RESOLVIDO=("memoria/obsidian/regras" "memoria/obsidian/canon")
++P21_INDICE="memoria/missoes/agata-sistema/derivado/indice.md"
++P21_HIDRATA=(".hidrata.md")
++
++# Posições faladas, ancoradas no começo da linha. Casam só onde o marcador
++# substitui o nome falado; citação no meio da linha ou entre crases não casa.
++_p21_padroes() {
++  local t; t="$(_p21_tok | sed 's/[{}]/\\&/g')"
++  printf '%s\n' \
++    "^[[:space:]]*${t}[[:space:]]+·" \
++    "^# REGRAS\\.md — Sistema ${t}" \
++    "^Você não é um assistente genérico.* sistema ${t}" \
++    "^1\\. Sou Modelo do ${t}"
++}
++
++_p21_autoprova() {
++  local t i ruim=0 n; t="$(_p21_tok)"
++  local provas=(
++    "$t · modelo · t=1 (contado no contexto)"
++    "# REGRAS.md — Sistema $t"
++    "Você não é um assistente genérico nesta conversa. Você é um MODELO do sistema $t."
++    "1. Sou Modelo do $t, não assistente genérico?"
++  )
++  local padroes=(); mapfile -t padroes < <(_p21_padroes)
++  if [ "${#provas[@]}" -ne "${#padroes[@]}" ]; then
++    echo "AVISO (P-21): ${#padroes[@]} padrões e ${#provas[@]} provas -- alguém mudou um lado sem o outro. Por que importa: padrão sem prova pode estar cego sem ninguém saber. O que fazer: parear _p21_padroes e _p21_autoprova."
++    return 1
++  fi
++  for i in "${!padroes[@]}"; do
++    n=$(printf '%s\n' "${provas[$i]}" | grep -cE -- "${padroes[$i]}" 2>/dev/null || true)
++    if [ "${n:-0}" -lt 1 ]; then
++      echo "AVISO (P-21): o padrão '${padroes[$i]}' não casa a própria prova -- esta régua está cega. O que fazer: consertar o padrão antes de confiar no P-21."
++      ruim=1
++    fi
++    # negativo: o marcador citado no meio da linha nunca pode casar
++    n=$(printf 'a entrada discute %s sem resolver\n' "$t" | grep -cE -- "${padroes[$i]}" 2>/dev/null || true)
++    if [ "${n:-0}" -gt 0 ]; then
++      echo "AVISO (P-21): o padrão '${padroes[$i]}' casa citação no meio da linha -- ia acusar entrada que só discute o marcador. O que fazer: reancorar o padrão."
++      ruim=1
++    fi
++  done
++  return "$ruim"
++}
++
++p21_nome_sistema() {
++  local t f d p n adic; t="$(_p21_tok)"
++  _p21_autoprova || true
++
++  # (i) fonte crua com marcador e sem regra de resolução no topo
++  while IFS= read -r f; do
++    if [ -z "$f" ] || [ ! -f "$f" ]; then continue; fi
++    n=$(grep -cF -- "$t" "$f" 2>/dev/null || true)
++    if [ "${n:-0}" -eq 0 ]; then continue; fi
++    n=$(head -n 40 "$f" | grep -cF -- "$P21_REGRA" || true)
++    if [ "${n:-0}" -eq 0 ]; then
++      echo "AVISO (P-21): $f usa o marcador do nome do sistema, mas não traz a regra de resolução nas primeiras 40 linhas. Por que importa: quem lê o arquivo cru não sabe o que escrever no lugar e tende a copiar o marcador. O que fazer: copiar para o topo de $f a frase de REGRAS.md que cita o $P21_REGRA."
++    fi
++  done < <(git ls-files -- "${P21_FONTES[@]}" 2>/dev/null)
++
++  # (ii-a) vault: só as pastas que o gerador resolve inteiras
++  for d in "${P21_VAULT_RESOLVIDO[@]}"; do
++    if [ ! -d "$d" ]; then continue; fi
++    while IFS= read -r f; do
++      if [ -z "$f" ]; then continue; fi
++      echo "AVISO (P-21): $f (vault, parte resolvida) traz o marcador cru. Por que importa: a Seth e o Humano leem o vault como se fosse o texto final. O que fazer: python3 scripts/gerar_obsidian.py e conferir o campo 'Nome do sistema:' do PROJETO.md."
++    done < <(grep -rlF -- "$t" "$d" 2>/dev/null || true)
++  done
++
++  # (ii-b) índice: só Partes 1-2 (a Parte 3 é história verbatim)
++  if [ -f "$P21_INDICE" ]; then
++    n=$(awk '/^## PARTE 1 /{p=1} /^## PARTE 3 /{p=0} p' "$P21_INDICE" | grep -cF -- "$t" || true)
++    if [ "${n:-0}" -gt 0 ]; then
++      echo "AVISO (P-21): $P21_INDICE tem $n linha(s) com o marcador cru nas Partes 1-2. Por que importa: o índice vai assim para o Drive e o NotebookLM. O que fazer: python3 scripts/gerar_indice_derivado.py (a versão que resolve o nome)."
++    fi
++  fi
++
++  # (ii-c) .hidrata: só posições faladas
++  local padroes=(); mapfile -t padroes < <(_p21_padroes)
++  for f in "${P21_HIDRATA[@]}"; do
++    if [ ! -f "$f" ]; then continue; fi
++    for p in "${padroes[@]}"; do
++      n=$(grep -cE -- "$p" "$f" 2>/dev/null || true)
++      if [ "${n:-0}" -gt 0 ]; then
++        echo "AVISO (P-21): $f tem $n linha(s) com o marcador numa posição falada. Por que importa: é o texto que a Seth recebe. O que fazer: conferir .githooks/gerar-hidratacao.sh e o campo 'Nome do sistema:' do PROJETO.md."
++      fi
++    done
++  done
++
++  # (iii) entrada nova de MEMÓRIAS começando por posição falada
++  adic=$(git diff --cached -U0 -- "MEMÓRIAS.md" 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' || true)
++  if [ -n "$adic" ]; then
++    for p in "${padroes[@]}"; do
++      n=$(printf '%s\n' "$adic" | grep -cE -- "$p" || true)
++      if [ "${n:-0}" -gt 0 ]; then
++        echo "AVISO (P-21): entrada nova de MEMÓRIAS.md tem $n linha(s) começando com o marcador do nome numa posição falada. Por que importa: é modelo copiando a linha de turno sem resolver, e vira história (Regra 4). O que fazer: corrigir antes do commit, trocando o marcador pelo nome do campo 'Nome do sistema:'."
++      fi
++    done
++  fi
++  return 0
++}
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index bd6d050..acaa175 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -93,11 +93,14 @@ PY
+ _entrada_no_fim() { printf '\n%s\n' "$1" >> "MEMÓRIAS.md"; }
+ 
+ # Quantos SUSPEITO/FALHA o controle $1 emitiu no estado atual do indice.
++# Conta também o "AVISO (<ctrl>)" do PRÓPRIO controle: controle de aviso só
++# (P-21; P-18/P-19 no futuro) passa a ser testável aqui, sem virar FALHA-class.
++# Nenhum dos controles com _caso hoje emite "AVISO (P-N)" -- medido 25/09/2026.
+ _acusacoes() {
+   local ctrl="$1"
+   ( cd "$CLONE/repo" && bash scripts/perimetro.sh 2>&1 ) \
+     | sed -n "/^=== ${ctrl} ===/,/^=== /p" \
+-    | grep -cE "^(SUSPEITO|FALHA)" || true
++    | grep -cE "^(SUSPEITO|FALHA|AVISO \(${ctrl}\))" || true
+ }
+ 
+ # _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
+@@ -183,6 +186,7 @@ declare -A SEM_TESTE=(
+ # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
+ declare -A NIVEL=(
+   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
++  [P-21]=L1
+   [P-2]=L3
+   [P-3]=L4 [P-13]=L4 [P-15]=L4
+   [P-4]=L2 [P-9]=L2 [P-10]=L2
+@@ -413,6 +417,28 @@ _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
+ printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
+ EOF
+ 
++# --- P-21: marcador do nome do sistema -----------------------------------
++# Marcador montado em pedaços (_k): escrito inteiro, este arquivo não é fonte
++# do P-21 (i), mas manter a convenção do P-1 evita surpresa se o escopo crescer.
++_P21T="$(_k "{{" "NOME_SISTEMA" "}}")"
++
++_caso P-21 PEGA "(i) SKILL.md novo usa o marcador sem a regra no topo" <<EOF
++mkdir -p .agents/skills/teste-p21 && printf '# Carregar o %s\n' '$_P21T' > .agents/skills/teste-p21/SKILL.md && git add .agents/skills/teste-p21/SKILL.md
++EOF
++
++_caso P-21 PASSA "(i) FALSO POSITIVO: SKILL.md novo com a regra no topo" <<EOF
++mkdir -p .agents/skills/teste-p21 && printf 'Onde aparecer %s, escreva o valor do campo "Nome do sistema:" de PROJETO.md.\n\n# Carregar o %s\n' '$_P21T' '$_P21T' > .agents/skills/teste-p21/SKILL.md && git add .agents/skills/teste-p21/SKILL.md
++EOF
++
++_caso P-21 PEGA "(iii) entrada nova de MEMORIAS começando pela linha de turno crua" <<EOF
++_nova_entrada "(9999) DIARIO — 01/01/2026 · teste.
++$_P21T · modelo · t=1 (contado no contexto)" && git add "MEMÓRIAS.md"
++EOF
++
++_caso P-21 PASSA "(iii) FALSO POSITIVO: entrada que só discute o marcador no meio da linha" <<EOF
++_nova_entrada "(9999) DIARIO — 01/01/2026 · o marcador $_P21T foi resolvido pelo gerador." && git add "MEMÓRIAS.md"
++EOF
++
+ # --------------------------------------------------------------- veredito --
+ echo
+ if [ "$FALHOU" -eq 0 ]; then

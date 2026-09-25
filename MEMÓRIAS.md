@@ -26,18 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a832ffb63fb5adc8538333f1b5cc4c930a852e5a
-  Escrito em: 25/09/2026 15:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d41d6e667e69e407f5321008036b85b406fcff72
+  Escrito em: 25/09/2026 16:14 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a832ffb63fb5adc8538333f1b5cc4c930a852e5a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a832ffb63fb5adc8538333f1b5cc4c930a852e5a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a832ffb63fb5adc8538333f1b5cc4c930a852e5a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41d6e667e69e407f5321008036b85b406fcff72/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41d6e667e69e407f5321008036b85b406fcff72/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41d6e667e69e407f5321008036b85b406fcff72/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
+
+**Pedido:** "vamos resolver essas 3 coisas então, quer que o laboratório crie a solução e eu trago para vc executar?" — pedi ao laboratório os 3 itens registrados como pendência em (559)/(556), escopados com os 2 erros de hoje como aviso explícito (`set -e`/pipefail sem `|| true`; comando destrutivo sem separar o que descarta). O laboratório devolveu (via Humano, não consegue mandar mensagem entre sessões) 5 peças: 2 diffs prontos, 1 controle novo com arquivo+diffs+testes, e 2 desenhos completos (P-20 e manifesto de Fase 5) sem diff, porque têm decisão do Humano em aberto.
+
+**Erro real do laboratório, achado por ele mesmo antes de eu medir (correção própria, registrada):** o item 3d(ii) do parecer anterior ("nenhuma saída gerada contém `{{`") estava largo demais — (558)/(559) citam o marcador e são história verbatim; a checagem certa vale só nas PARTES RESOLVIDAS (vault `regras/`/`canon/`, Partes 1-2 do índice, posições faladas do `.hidrata.md`), nunca na história. O P-21 entregue já vem com essa correção.
+
+**Achei e corrigi antes de testar, medindo contra o repositório real (não confiando no número do laboratório):** o convênio de nome de branch mudou no meio do projeto — `proposta/*` (22-24/09) e `aplica/*` (hoje, usado a sessão inteira) convivem no mesmo `origin`. O desenho original de `PROPOSTAS-EM-BRANCH` filtrava só `refs/heads/proposta/*`, que teria ficado cego pra qualquer proposta de hoje. Ampliei pra todo head remoto exceto `main` — falso positivo (branch de rascunho) é aviso a mais, falso negativo é o próprio ponto cego que o campo existe pra fechar.
+
+**Meu erro, achado testando o item 2 (não do laboratório):** apliquei o diff de `gerar_indice_derivado.py` mas esqueci de trocar `h(regras)`/`h(projeto)` por `h(regras_cru)`/`h(projeto_cru)` na linha do manifesto — o manifesto saiu com o hash do texto JÁ resolvido, batendo a promessa "sha256sum das fontes bate com os valores acima" contra o arquivo cru real (`sha256sum REGRAS.md` ≠ o valor do manifesto). Reproduzido, corrigido, testado de novo — bate.
+
+**Testado, cada peça, real (não só `git apply --check`):**
+- `PROPOSTAS-EM-BRANCH`: 4 cenários — sem pendência (0), com pendência real (branch `aplica/*` novo, empurrado pro `origin` real do GitHub e apagado depois), timeout curto (lacuna), clone raso (lacuna). A simulação inicial com clones aninhados enganou a mim mesmo (`git clone` copia o HEAD commitado, não edição não-commitada) — troquei pro remoto real assim que percebi.
+- `gerar_indice_derivado.py`: rodada real, `py_compile`, nome trocado/ausente/inválido (>60 chars, aborta sem gravar), `preparar_export_indice.py` continua passando `PADROES_SEGREDO` (16/16).
+- P-21: `bash scripts/perimetro.sh` limpo (sem AVISO) no estado real; `bash scripts/testar_perimetro.sh` 37/37 (4 casos novos do P-21 + os 33 já existentes), suíte inteira, não só o filtro.
+- `git apply --check` limpo contra HEAD real, worktree descartável.
+
+**O que o laboratório entregou sem diff, por desenho (decisão do Humano, não construído agora):** P-20 (varredura de dado pessoal, lista em `~/.config/agata/identificadores-pessoais.txt`, formato `rotulo|regex|prova`) e o manifesto único de caminhos de framework/instância/externo pra Fase 5 (`config/caminhos-framework.txt`) — os dois têm classificação de caminho que só o Humano decide (ex: `CHAVES.md` é instância ou framework?). Medição à parte do laboratório: o "36 de 102" citado em (556) veio de varredura manual da sessão anterior, não de script — não existe hoje nenhum checador de caminhos citados no repositório.
+
+**Achado de brinde do laboratório, não corrigido agora:** o slug oficial (`agataseth98-cmd/agata-seth`) continua fixo no TEXTO ESTÁTICO de `PROMPT_CARREGAMENTO.md` (7×, fora do bloco da âncora — "Repositório oficial", 3 URLs, feed de commits, `git ls-remote`, URL da API) e `REGRAS.md` (1×, "Repositório oficial, sincronize antes de tudo"). O slug dinâmico de (557) só cobriu o bloco da âncora e o User-Agent do Discord — este texto fica de fora, registrado, não decidido.
+
+**Em quarentena P-8, aguardando assinatura:** `propostas/lab-3-desenhos-2026-09-25.diff` — `scripts/estado_para_eco.sh`, `scripts/gerar_indice_derivado.py`, `scripts/perimetro.sh`, `scripts/perimetro/p21_nome_sistema.sh` (novo), `scripts/testar_perimetro.sh`.
+
+**Descartado, sem chegar a canon, marcado "rascunho não canônico" pelo próprio autor:** um segundo texto, colado junto com os 3 desenhos, era um relatório acadêmico extenso de uma sessão de laboratório de 24/09/2026 (formato ABNT, CRediT, declaração de uso de IA). Não processado — não foi pedido, e o próprio cabeçalho do rascunho diz que precisa de uma sessão na Máquina pra sincronizar, numerar e comitar antes de virar canon, o que não aconteceu.
+
+**sync:** PASS — `git rev-parse origin/main`/`main` = `d41d6e6`, topo de MEMÓRIAS conferido com (559) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** pedido do Humano ("vamos resolver essas 3 coisas... quer que o laboratório crie a solução e eu trago para vc executar?") nesta sessão.
 
 (559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
 
