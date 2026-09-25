@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
+  palavras-chave: desenhos, laboratório, ensaio, pedido, humano, testados, reunidos, proposta, estado, eco, ganha, propostas, branch, gerar, indice, derivado, resolve, nome, sistema, controle, novo, avisa, marcador, sair, cru, erros, corrigidos, medição, erro, meu, transcrição, incompleta, diff, achado, testando
 (559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
   palavras-chave: proposta, fase, nome, sistema, redesenhada, fonte, sai, config, agata, identidade, env, fora, repo, vai, campo, projeto, versionado, leitor, alcança, erros, meus, caminho, achados, dano, permanente, assinaturas, anteriores, foram, perdidas, precisam, refeitas
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: decisões, tomadas, humano, executadas, ordem, afina, goose, pra, seguir, nossa, toada, aliás, sistema, afinado, fechado, risco, sobra, declarado, deepseek, removido, gemini, avaliados, tentado, bloqueado, firewall, revertido, proposta, afinacao, aguardando, assinatura, cache, atalho, sincronizando, compose, projeto, corrigido, afirmações, minhas, caíram, caminho, pedido, tem, certeza
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
   palavras-chave: teste, seth, refeito, zero, aplicações, dia, passou, inteiro, erro, meu, registrado, estimei, hora, cabeça, mediu, estava, certa
-(530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
-  palavras-chave: assinado, verificado, aplicado, reconhece, controles, extraidos, volta, rodar, suíte, regressão, controle, muda, inclusive, scripts, perimetro, pnn
+(530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-con …
+  palavras-chave: assinado, verificado, aplicado, reconhece, con
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP po …
   palavras-chave: corrige, aviso, skip
 (528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla- …
