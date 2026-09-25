@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bc97e05936fbc5b5f1d5db079f7e15d04f86bca1
-  Escrito em: 24/09/2026 22:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cfbf5daefbf759277647a6669759c9144fcc6848
+  Escrito em: 25/09/2026 08:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc97e05936fbc5b5f1d5db079f7e15d04f86bca1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cfbf5daefbf759277647a6669759c9144fcc6848/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 

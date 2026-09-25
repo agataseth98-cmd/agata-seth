@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
+  palavras-chave: consolidação, noturna, repetia, temas, descrevia, entradas, conteúdo, corrige, ctx, aprovada, ali, edição, tinha, descritas, errado, três, rascunhos, repetidos, foram, arquivados, conserto, gerador, proposta, consolidacao, repeticao, aguardando, assinatura
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
   palavras-chave: lote, aplicado, propostas, assinadas, dia, estão, canon, bussola, goose, fallback, claude, python, urllib, fila, nova, code, instalado, provado, prs, foram, mergeados, mim, autorização, explícita, humano, desta
 (547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem do Humano ("os modelos locais agora serão os últimos"). Remotos primeiro, depois os `llama-cpp/*` sob demanda, e o Ollama como fundo final. Aplicado e provado: os 4 combos respondem pelo 1º remoto em 1,3–2,1 s. A proposta `fila-nova-2026-09-24`, ainda não assinada, foi regenerada com a ordem nova, e o `.diff` mudou.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, post, merge, regenera, derivados, git, pull, máquina, roda, mesmo, commit
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando assinatura (P-8): depois de `git pull`, roda os mesmos passos do `post-commit`. Fecha o candidato registrado em (519): merge feito pelo GitHub deixava o vault atrás do HEAD, e o P-10 barrava o próximo commit sem edição real nenhuma.**
   palavras-chave: gancho, post, merge, pronto, testado, aguardando, assinatura, git, pull, roda, mesmos, passos, commit, fecha, candidato, registrado, feito, github, deixava, vault, atrás, head, barrava, próximo, edição, real
-(519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-historia-apagada-2026-09-23` (518) e `conselho-remoto-corrige-sonda-e-doc-2026-09-22` (513). A HuggingFace não está só sem crédito: a conexão está DESLIGADA no OmniRoute desde 22/09 às 10:11. A Cerebras voltou a responder às 18:03.**
-  palavras-chave: assinadas, verificadas, aplicadas, alerta, historia, apagada, remoto, corrige, sonda, doc, huggingface, crédito, conexão, desligada, omniroute, desde, cerebras, voltou, responder
+(519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-histor …
+  palavras-chave: assinadas, verificadas, aplicadas, alerta, histor
 (518) DIÁRIO — 23/09/2026 · **Pendências de (517) resolvidas com o mandato "pode …
   palavras-chave: pendências, resolvidas, mandato, pode
 (517) DIÁRIO — 23/09/2026 · **A Seth não subia ("The model provider could not co …
