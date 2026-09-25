@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c062a6fac77a423adfb362d98721e1d6af4bd543
-  Escrito em: 25/09/2026 14:03 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30
+  Escrito em: 25/09/2026 14:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c062a6fac77a423adfb362d98721e1d6af4bd543/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
+
+**Medição antes do desenho (Regra 8 / economia de tokens, (556)):** separei os 129 arquivos de framework que citam "agata" — 104 têm identificador estrutural junto (caminho, serviço systemd, variável de ambiente), só 25 são nome falado puro, e mesmo desses a maioria ainda tinha algum identificador que meu primeiro regex não pegou (nome de skill, de unit systemd). Apresentei ao Humano com a recomendação: só o nome falado vira variável; a infraestrutura interna continua "agata" por baixo do capô. **Escolhido: "Só o nome falado vira variável (Recomendado)".**
+
+**Desenho, confirmado com o Humano antes de tocar em REGRAS.md** (perto de uma linha vermelha — Regra 1 exige declarar modelo+turno; o token troca só a palavra decorativa que abre o formato, não a exigência em si): `{{NOME_SISTEMA}}` nas 5 linhas onde "Agata" é falado (linha 4 do preâmbulo anti-fabricação, título, as 2 linhas do formato de cabeçalho/turno, item 1 da checagem de prontidão). `.githooks/gerar-hidratacao.sh` resolve o token na saída (`.hidrata.md`/`.hidrata-<modelo>.md`), lendo `NOME_SISTEMA=` de `~/.config/agata/identidade.env`; sem esse arquivo, cai em "Agata". **REGRAS.md em si nunca muda de conteúdo entre clones** — só a saída gerada — o que evita conflito de merge numa atualização futura (Fase 5).
+
+**Testado, não só afirmado:**
+- Sem `identidade.env`: `.hidrata.md` regenerado byte a byte idêntico ao de antes desta mudança (`diff` vazio).
+- Com `identidade.env` simulado (`NOME_SISTEMA=Seth`, `$HOME` fake): as 5 linhas saem com "Seth"; conferi que nenhuma das 29 ocorrências de caminho/serviço estrutural (`agata.target`, `~/.config/agata`, `seth_gateway`, `seth_escriba`) foi tocada.
+- `git apply --check` limpo contra HEAD num worktree descartável (não só a árvore suja de teste).
+- `scripts/perimetro.sh` no worktree: 15 OK, só P-8 FALHA (esperado, sem assinatura ainda) — nenhum outro controle regrediu.
+
+**Escopo desta fatia, deliberadamente estreito — o que NÃO foi feito, e por quê:** `PROMPT_CARREGAMENTO.md` e os 2 `SKILL.md` (`agata-carregar`, `agata-mudanca-segura`) também têm o nome falado, mas nenhum dos dois tem hoje um gerador que resolveria o token — `PROMPT_CARREGAMENTO.md` é colado à mão pelo Humano (não passa por `gerar-hidratacao.sh`), e `atualizar_ancora_prompt.py` promete explicitamente nunca tocar o resto desse arquivo além do bloco ANCORA-SHA. Colocar o token nesses 3 arquivos sem um resolvedor pioraria o comportamento de hoje (token aparecendo cru). Fica como pendência explícita, não decisão de deixar quebrado — mecanismo ainda por desenhar.
+
+**sync:** PASS — `git rev-parse origin/main` = `c062a6f` na hora de medir, topo de MEMÓRIAS conferido com (557) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem do Humano ("os dois na ordem mais segura") + confirmação explícita do desenho antes de escrever o diff, nesta sessão.
 
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
 

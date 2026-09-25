@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as aplicações do dia: passou por inteiro. Um erro meu registrado: estimei a hora de cabeça, e a Seth, que mediu, estava certa.**
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
 (529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
-(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla-saidas-honestas-2026-09-23` (527). Os 3 consertos foram conferidos em produção. Nenhuma proposta esperando assinatura.**
+(528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla- …
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "rep …
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplic …
 (525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, agu …
