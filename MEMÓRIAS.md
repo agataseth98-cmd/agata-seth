@@ -26,18 +26,54 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 30a566a080aceb054254015aa280c965c45815c5
-  Escrito em: 24/09/2026 15:13 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79b6ebe114b01adfb61d0fec8e014e789029bf5a
+  Escrito em: 24/09/2026 22:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/30a566a080aceb054254015aa280c965c45815c5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79b6ebe114b01adfb61d0fec8e014e789029bf5a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79b6ebe114b01adfb61d0fec8e014e789029bf5a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79b6ebe114b01adfb61d0fec8e014e789029bf5a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem do Humano ("os modelos locais agora serão os últimos"). Remotos primeiro, depois os `llama-cpp/*` sob demanda, e o Ollama como fundo final. Aplicado e provado: os 4 combos respondem pelo 1º remoto em 1,3–2,1 s. A proposta `fila-nova-2026-09-24`, ainda não assinada, foi regenerada com a ordem nova, e o `.diff` mudou.**
+
+**Como.** Backup `~/.omniroute/storage.sqlite.bak-antes-locais-no-fim-2026-09-24` (600). Mesma ordem relativa entre os remotos de (546), com os locais movidos para o fim. `PUT /api/combos/<id>` com a ordem relida da API: 4/4 conferem.
+
+**Prova pelo `:20126`, com 25 s entre combos para não estourar o TPM do Groq visto em (546):**
+- `seth-rapido`, `seth-livre` e `seth-pesado` → `openai/gpt-oss-120b` (Groq), 2,1 / 1,3 / 1,5 s
+- `seth-codigo` → `codestral-latest`, 1,5 s
+
+No `call_logs`, o pedido feito ao `seth-livre` aparece como `seth-rapido`: o roteador de complexidade (416) classificou "oi" como trivial. É por desenho.
+
+**Efeito colateral declarado:** com os locais no fim, quase toda conversa passa a sair da Máquina (Groq, Mistral, Z.ai, Google, OpenRouter). Antes, o local sob demanda ligado respondia primeiro. É a troca que o Humano escolheu: velocidade e qualidade no lugar de privacidade e custo zero de rede. O Conselho Remoto já tratava só material público; a Seth conversa sobre tudo.
+
+**Proposta regenerada:** as tabelas saem da API viva, com as notas de cada modelo preservadas. O PROJETO, no parágrafo do roteamento por complexidade, ganha a anotação de que o 1º agora é remoto (o texto de (532) dizia "tier 0 é local").
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `.backup` do sqlite; `PUT`/`GET /api/combos`; 4 chamadas cronometradas ao `:20126`; `call_logs` (`sqlite3 -readonly`); `git apply --check`. Autorização: Humano — "os modelos locais agora serão os últimos".
+
+(546) DIÁRIO — 24/09/2026 · **Fila nova da Seth aplicada no OmniRoute, por ordem do Humano ("sim, aplique a fila nova"): só modelos medidos hoje com as chaves dele, respondendo e com tool-call. O Groq `gpt-oss-120b` entrou como 1º remoto de rápido/livre/pesado, e o Codestral como 1º remoto do código. Saíram HuggingFace (402) e Cerebras (crédito de trial, não grátis). As tabelas vão para `config/modelos-gratuitos.md` na proposta P-8 `fila-nova-2026-09-24`, aguardando assinatura.**
+
+**Como.** Backup `~/.omniroute/storage.sqlite.bak-antes-fila-nova-2026-09-24` (600). `PUT /api/combos/<id>` com o mesmo objeto e só a lista de modelos trocada, com a ordem lida de volta da API: **4/4 conferem**. Primeiro o `seth-rapido`, testado; depois os outros três. Os locais ficaram onde o Humano os pôs (topo).
+
+**Achado ao testar o `seth-rapido`:** o 1º remoto planejado, `groq/qwen/qwen3.8-27b`, dava 429 "Request too large". O free do Groq limita esse modelo a **1.000 tokens de saída/min**, e a Seth pede mais por padrão. Com `max_tokens` 900 funciona; sem limite, cai sempre. O `groq/openai/gpt-oss-120b` responde com o padrão, então entrou no lugar.
+
+**Provado pelo caminho real (`:20126`, com hidratação):**
+- `seth-rapido` → `openai/gpt-oss-120b` (Groq), 2,8 s
+- `seth-livre` → `openai/gpt-oss-120b`, 1,4 s
+- `seth-codigo` → `codestral-latest`, 1,0 s
+- `seth-pesado` → desceu até o `nemotron-3-ultra:free` (35 s). Pelo `call_logs`: Groq em 429 de **TPM 8.000** (os 3 testes seguidos, ~2.700 tokens de entrada cada, gastaram o minuto) e Gemini 3 Flash em 503. A fila fez o que devia. Limite real a registrar: o Groq free sustenta ≈2 chamadas da Seth por minuto, somando todos os combos.
+
+**Nas tabelas:** o "princípio" de 20/09 ("Cerebras e Groq nunca tier 0") e a linha `groq/openai/gpt-oss-*` de "Fora — não usar" foram riscados com a correção ao lado, sem apagar. A hipótese que os sustentava (Cloudflare punindo tráfego repetitivo) caiu em (545).
+
+**Assinaturas pendentes conferidas:** `APROVADO-` de `bussola-2026-09-24`, `goose-fallback-2026-09-24` (a versão com `.claude/*`) e `ua-python-urllib-2026-09-24` presentes, criados às 15:29. Nos três, o hash bate e o `ssh-keygen -Y verify` dá `Good signature` de `agata-humano`. **Aplicação bloqueada só pelo merge dos PRs #40–#42**, que é do Humano.
+
+**Contexto do pedido:** a pesquisa mundial por agentes foi parada pelo Humano ("o caminho me parece errado"). As 5 varreduras que chegaram a terminar ficam em `extras/combustivel/varredura-bruta-2026-09-24.json` como dado não verificado. A fila saiu só da medição na Máquina.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `.backup` do sqlite; `GET`/`PUT /api/combos` com a ordem relida; `testa_combo.py` e `curl :20126` por combo; `call_logs` (`sqlite3 -readonly`); testes com/sem `max_tokens` no Groq; tabelas geradas da API viva; `sha256sum` + `ssh-keygen -Y verify` dos 3 `APROVADO-`; `git apply --check`. Autorização: Humano — "sim, aplique a fila nova".
 
 (545) DIÁRIO — 24/09/2026 · **Groq e Cerebras de volta à fila: o 403 da Cloudflare (erro 1010) que durou semanas nunca foi o OmniRoute. É o user-agent `Python-urllib` dos nossos próprios scripts, repassado pelo proxy `:20127` e pelo OmniRoute até o provedor. Corrigido já, de forma reversível, nas duas conexões do OmniRoute; a classe fecha na proposta P-8 `ua-python-urllib-2026-09-24`, aguardando assinatura.**
 

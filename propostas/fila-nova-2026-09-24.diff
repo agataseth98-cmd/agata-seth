@@ -1,0 +1,131 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 68d4236..f546838 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -55,7 +55,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ ## Cérebro
+ - **Principal, sob regime de auditoria desde MEMÓRIAS (140): `qwen3.5-9b-64k` local** (Ollama, `custom:qwen-local-ctx-override`) — **não** a tag oficial `qwen3.5:9b`, que reproduz o bug de (121)/#16814. Promovido por decisão do Humano, risco assumido por escrito (mesma cláusula de (102)): cada resposta é auditada pelo Humano; o objetivo é medir o modelo sob a exposição mais alta, não confiar nele. Duas travas cumpridas antes da promoção: ferramenta `memory` testada isolada e confirmada honesta (MEMÓRIAS (139) — a anomalia de (138) era fabricação do modelo, não bug do mecanismo); `num_ctx` confirmado íntegro pelo caminho default, sem override de CLI (`KvSize:65536`, zero truncamento, `prompt_tokens=38.048`). Monitoramento contínuo de VRAM em `~/agata_vram_producao_*.log`, fora do scratchpad de sessão. **Critério de saída do regime, respondido em (141): até o Humano pedir o contrário — evento, não prazo nem contagem.**
+ - **Fallback: `gemini-2.5-flash`** (Google API, grátis) — papel invertido do histórico: era principal até (140), agora é o alívio quando o Qwen local falha ou não completa. Teto do free tier ~20 requisições/dia — estourar gera 429 (agora do lado do fallback, não do principal). **Circuit breaker ativo** (plugin `gemini_quota_guard`, hook `pre_api_request`): conta requisições reais e avisa a partir da 15ª do dia, sem bloquear nem rerotear (MEMÓRIAS (122)).
+-- **Roteamento por complexidade — REABERTO em (416)** (estava APOSENTADO desde (383)). A (383) aposentou o B4 (aprovado em (64), nunca implementado) porque a premissa de (64) — Gemini titular, "simples→barato" — morreu com a inversão de (140). **Premissa nova de (416):** a Seth não roda mais no qwen local titular — roda na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), onde toda requisição começa no tier 0 e só cai por falha; quando o topo está lento (2–25s medido), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Mecanismo:** classificador heurístico (só regras, ~µs, sem inferência extra) no `seth_gateway`, no request — reescreve `model` **só** quando o Agent pede `seth-livre`; specs manuais passam intactas. 3 rotas / 3 combos `priority`, todos terminando nos mesmos modelos confiáveis (misroteamento degrada, nunca quebra): `seth-rapido` (trivial: <400 chars, sem tools, ≤2 msgs user) · `seth-livre` (normal) · `seth-pesado` (>6000 chars OU código OU >10 msgs). ~~Tier 0 dos três: `cerebras/gpt-oss-120b`~~ **[DESATUALIZADO — conferido em 23/09/2026, MEMÓRIAS (532), no banco e na API viva do OmniRoute]:** o tier 0 de todos os combos da Seth é um modelo LOCAL sob demanda (`llama-cpp/*`); depois vem `zai/glm-4.7-flash`. `cerebras/gpt-oss-120b` fica perto do fim de cada combo (7º de 8 no `seth-livre`, 3º de 4 no `seth-rapido`), só antes do último recurso local. Fonte da verdade da ordem: o próprio OmniRoute (`/api/combos`), não este parágrafo. Free-only; risco assumido pelo Humano por escrito + 2ª opinião do Conselho tentada (voltou fora-do-formato, ver (416)). Combos em `config/modelos-gratuitos.md`.
++- **Roteamento por complexidade — REABERTO em (416)** (estava APOSENTADO desde (383)). A (383) aposentou o B4 (aprovado em (64), nunca implementado) porque a premissa de (64) — Gemini titular, "simples→barato" — morreu com a inversão de (140). **Premissa nova de (416):** a Seth não roda mais no qwen local titular — roda na cascata cloud `seth-livre` (OmniRoute, `strategy: priority`), onde toda requisição começa no tier 0 e só cai por falha; quando o topo está lento (2–25s medido), "oi" paga o mesmo que uma análise longa, e não há escalonamento pra tarefa pesada. **Mecanismo:** classificador heurístico (só regras, ~µs, sem inferência extra) no `seth_gateway`, no request — reescreve `model` **só** quando o Agent pede `seth-livre`; specs manuais passam intactas. 3 rotas / 3 combos `priority`, todos terminando nos mesmos modelos confiáveis (misroteamento degrada, nunca quebra): `seth-rapido` (trivial: <400 chars, sem tools, ≤2 msgs user) · `seth-livre` (normal) · `seth-pesado` (>6000 chars OU código OU >10 msgs). ~~Tier 0 dos três: `cerebras/gpt-oss-120b`~~ **[DESATUALIZADO — conferido em 23/09/2026, MEMÓRIAS (532), no banco e na API viva do OmniRoute]:** o tier 0 de todos os combos da Seth é um modelo LOCAL sob demanda (`llama-cpp/*`); depois vem `zai/glm-4.7-flash`. `cerebras/gpt-oss-120b` fica perto do fim de cada combo (7º de 8 no `seth-livre`, 3º de 4 no `seth-rapido`), só antes do último recurso local. Fonte da verdade da ordem: o próprio OmniRoute (`/api/combos`), não este parágrafo. **[Mudou de novo em 24/09/2026, MEMÓRIAS (546)/(547)]:** por ordem do Humano, os locais passaram para o FIM de cada combo; o 1º agora é `groq/openai/gpt-oss-120b` (rápido/livre/pesado) e `mistral/codestral-latest` (código). Tabelas em `config/modelos-gratuitos.md`. Free-only; risco assumido pelo Humano por escrito + 2ª opinião do Conselho tentada (voltou fora-do-formato, ver (416)). Combos em `config/modelos-gratuitos.md`.
+ - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
+ - **Fundo local da cadeia da Seth (H4, MEMÓRIAS (402)/(403)):** o combo `seth-livre` (frontend da Seth, `:20126`→sanitizador→OmniRoute) ganhou um tier 5 local — `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) que o OmniRoute já tinha. Só entra se os 4 provedores grátis externos falharem no mesmo minuto (cenário de (390)). Medido em (403): o OmniRoute repassa a string do `model` direto pro Ollama — não precisa de shim (o `seth_local_shim` de (402) foi retirado em (403), era cano a mais).
+ - **4 modelos locais novos via `llama.cpp`, 20/09/2026** (ordem do Humano, mesmo motor do `Qwen3-30B-A3B-Instruct-2507` acima): `nemotron-3.5-lightning` (geral), `qwen3-coder-30b-a3b` (código), `phi-4-mini` (leve), `gpt-oss-20b` (agentic) — os 4 testados ao vivo, respondendo, com tokens/s reais medidos por `llama-bench`. `gpt-oss-20b` levou 2 tentativas: o quant `unsloth` (Q4_K_M) travava com `Assertion 'found' failed` no sampler do llama.cpp em toda chamada; o quant `ggml-org` (MXFP4 nativo) funciona limpo — o bug era do quant, não do motor. Cada um sobe **sob demanda**, serviço systemd próprio, não cabem todos ao mesmo tempo nos 38GB de RAM. Tabela completa, portas e ressalvas: `config/modelos-gratuitos.md`.
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index ea08738..cb5e006 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -57,7 +57,7 @@ em `conselho_remoto.py` classifica qualquer `openrouter/...` como família únic
+ |---|---|
+ | `cerebras/gemma-4-31b` | **Reconfirmado banido, 20/09/2026 (sessão da tarde, horário exato não registrado no momento do teste — falha minha, corrigida aqui em vez de inventar).** Cloudflare, `error_name: browser_signature_banned`, `retryable: false`, `owner_action_required: true` (`ray_id a3e1ee6c5ed24ceb`, zona `api.cerebras.ai`) — o texto do próprio erro diz pra não reenviar, é o user-agent do OmniRoute banido pelo dono do site (Cerebras), não credencial nem cota. Mesma classe do bloqueio do Groq abaixo. Achado externo, não confirmado por nós: uma busca (20/09/2026) sugere que a Cerebras trocou o free tier por um trial de US$5 com cartão — **não verificado na fonte primária** (`cloud.cerebras.ai`), citado aqui só como pista pro Humano conferir, nunca como fato. **Verificado 22/09/2026, direto no painel `cloud.cerebras.ai` (Humano logado, olhado ao vivo): confirma o achado externo — saldo `$4.51`, banner "Qwen 3.8 27B is now available on Cerebras PayGo" (é trial com crédito, não free tier). Achado extra, não previsto: `gemma-4-31b` está listado como "Archived Models" pela própria Cerebras — descontinuado do lado deles, motivo adicional ao banimento de Cloudflare.** |
+ | `cerebras/gpt-oss-120b` | **Reconfirmado banido, 20/09/2026 — mesmo bloqueio Cloudflare da linha de cima, mesmo teste ao vivo.** Isto CONTRADIZ a linha "SUPERADO" abaixo, que dizia essa entrada ter voltado a funcionar em (416) — e é hoje o **tier 0** dos três combos da Seth (`seth-rapido`/`seth-livre`/`seth-pesado`, ver seção abaixo), que agora cai pro tier 1 em toda chamada. Nada quebra (o `priority` do OmniRoute já faz o fallthrough sozinho, testado), só fica mais lento. Riscado, não apagado, pelo mesmo motivo da linha de baixo: a avaliação MUDA de novo, fingir que nunca oscilou é que seria desonesto. **[CORRIGIDO 22/09/2026, MEMÓRIAS (515) — a linha abaixo, escrita minutos antes só por inferência de log, estava ERRADA pra este modelo; ver a correção antes de confiar nela.]** ~~Verificado 22/09/2026 no painel: última chamada com sucesso nos logs é 16/09/2026 — zero sucesso nos 6 dias seguintes, consistente com o banimento de 20/09 continuando ativo hoje~~ **Testado AO VIVO 22/09/2026 (pedido do Humano, "pra termos certeza do bloqueio"), não só inferido: `gpt-oss-120b` respondeu com sucesso 3 de 3 vezes (`finish_reason: stop`), connection voltou a `testStatus: active`. O bloqueio de Cloudflare de 20/09/2026 não está mais em efeito para este modelo agora — pode ter sido temporário, ou específico daquele dia. Sem "Archived" na conta, limite normal (5 req/min · 2.400/dia). Continua fora do ROSTER e nunca-tier-0 por princípio de tráfego (não por estar bloqueado) — mudar isso é decisão do Humano, não decidida aqui.** |
+-| `groq/openai/gpt-oss-*` | Cloudflare fichou o cliente do OmniRoute como bot (`403 browser_signature_banned`), persistente; e gpt-oss queima reasoning. Reconfirmado ao vivo 20/09/2026 — mesmo bloqueio, ainda não recuperou. |
++| ~~`groq/openai/gpt-oss-*`~~ | ~~Cloudflare fichou o cliente do OmniRoute como bot (`403 browser_signature_banned`), persistente; e gpt-oss queima reasoning. Reconfirmado ao vivo 20/09/2026 — mesmo bloqueio, ainda não recuperou.~~ **[SUPERADO 24/09/2026, MEMÓRIAS (545)/(546)]** O bloqueio era o UA `Python-urllib` dos nossos scripts, não o OmniRoute; corrigido, `groq/openai/gpt-oss-120b` responde em 0,4 s com tool-call e é o 1º remoto das filas. |
+ | `openrouter/auto` | **PAGO** — "Auto Best Available" da OpenRouter, não é alias grátis (o painel de Combos do OmniRoute avisa). |
+ | `openrouter/minimax/minimax-m3:free` | rota 404 — modelo saiu do free tier. |
+ | ~~`cerebras/gpt-oss-120b`~~ | **[SUPERADO por (416), 09/09/2026 — não está mais fora.]** O motivo antigo era "queima o orçamento em reasoning e devolve vazio". Medição nova, ao vivo: grátis, ~0,4s, tools+stream OK — virou **tier 0** dos três combos da Seth (tabela abaixo). Esta linha ficou aqui contradizendo a de baixo até a auditoria de (419) achar; mantida riscada em vez de apagada porque saber que a avaliação MUDOU vale mais que fingir que nunca houve a outra. Intermitente: quando cai, o `priority` desce sozinho. **[Por sua vez superada de novo, 20/09/2026 — ver a linha nova de `cerebras/gpt-oss-120b` acima. Oscila; as duas notas ficam, não se apaga história de config também.]** |
+@@ -149,60 +149,55 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+   combos novo): sempre `seth-codigo`, sem heurística — Goose é sempre trabalho de
+   código, não precisa de tiering por tamanho.
+ 
+-Princípio novo, 20/09/2026: **Cerebras e Groq nunca são tier 0 em combo nenhum.** Os
+-dois estão atrás do Cloudflare do próprio provedor e já levaram bloqueio persistente
+-duas vezes (`groq/openai/gpt-oss-*` desde antes; `cerebras/gemma-4-31b` e
+-`cerebras/gpt-oss-120b` reconfirmados banidos em 20/09 — ver "Fora — não usar").
+-Hipótese de trabalho, não provada: martelar os dois como primeira tentativa em todo
+-combo, toda hora, é tráfego repetitivo pro mesmo endpoint — o padrão que detector de
+-bot de Cloudflare mais pune. Os dois continuam no sistema, só como última tentativa
+-remota antes do fallback local, nunca na frente.
++~~Princípio novo, 20/09/2026: **Cerebras e Groq nunca são tier 0 em combo nenhum.**~~ **[SUPERADO 24/09/2026, MEMÓRIAS (545)/(546)]** A hipótese que o sustentava ("martelar o mesmo endpoint é o que o detector de bot da Cloudflare pune") era falsa: o 403 1010 vinha do user-agent `Python-urllib` dos nossos scripts, repassado até o provedor. Corrigido, o Groq entrou como **1º remoto** das filas. A Cerebras saiu das filas por outro motivo: não é grátis (consome o crédito de trial de US$5 da conta, (515)). O texto antigo fica riscado, não apagado.
++
++**Fila de 24/09/2026 (MEMÓRIAS (546)), ordem pedida pelo Humano ("sim, aplique a fila nova"), gerada da API viva.** Critério: só entra modelo medido NESTE dia com as chaves do Humano, respondendo e fazendo tool-call. **Locais por último (ordem do Humano, 24/09/2026, MEMÓRIAS (547): "os modelos locais agora serão os últimos")** — remotos primeiro, depois `llama-cpp/*` (sob demanda), e o Ollama como fundo final sempre disponível. Saíram: `huggingface/…` (402, créditos esgotados), `cerebras/gpt-oss-120b` (crédito de trial, não grátis), `mistral/ministral-8b-latest` (trocado pelo 14b). **Fora por teto de saída:** `groq/qwen/qwen3.8-27b` responde, mas o free limita a **1.000 tokens de saída/min** e a Seth pede mais por padrão → 429 sempre.
+ 
+ ### `seth-rapido` (LibreChat, trivial)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `llama-cpp/phi-4-mini` | **novo, local, $0** — leve, resposta rápida pra pedido trivial |
+-| 1 | `zai/glm-4.7-flash` | estável quando a z.ai não está em 529 |
+-| 2 | `gemini/gemini-3.1-flash-lite` | **novo 23/09/2026 (MEMÓRIAS (534))** — leve, cota própria; mesmo teste do de cima (3/3, tool-call OK) |
+-| 3 | `cerebras/gpt-oss-120b` | oportunista — banido agora, entra se recuperar |
+-| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local, sempre disponível |
++| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
++| 1 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 2 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 3 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
++| 4 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
++| 5 | `llama-cpp/phi-4-mini` | local, $0 — leve; sob demanda (desligado = pula em ~25 ms) |
++| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-livre` (LibreChat, rota normal — favorece conversação)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `llama-cpp/nemotron-3.5-lightning` | **novo, local, $0** — geral/conversação, poupa token de nuvem |
+-| 1 | `zai/glm-4.7-flash` | mais capaz dos free-tier estáveis |
+-| 2 | `gemini/gemini-2.5-flash` | fallback histórico; teto ~20 req/dia |
+-| 3 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+-| 4 | `gemini/gemini-3.1-flash-lite` | **novo 23/09/2026 (MEMÓRIAS (534))** — leve, cota própria; mesmo teste do de cima (3/3, tool-call OK) |
+-| 5 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | backup em nuvem do mesmo peso do tier 0, se o local cair |
+-| 6 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | infra independente; crédito mensal pequeno |
+-| 7 | `mistral/ministral-8b-latest` | último recurso remoto pequeno |
+-| 8 | `cerebras/gpt-oss-120b` | oportunista — banido agora |
+-| 9 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
++| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
++| 1 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
++| 3 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
++| 4 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 5 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
++| 6 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 7 | `llama-cpp/nemotron-3.5-lightning` | local, $0 — geral/conversa; sob demanda |
++| 8 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `llama-cpp/qwen3-coder-30b-a3b` | **novo, local, $0** — cobre o gatilho "código" direto, sem sair da Máquina |
+-| 1 | `gemini/gemini-2.5-flash` | contexto grande, `max_tokens ≥ 10000` |
+-| 2 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+-| 3 | `llama-cpp/gpt-oss-20b` | local, agentic/tool-use (estava na fila real e faltava nesta tabela — achado em (534)) |
+-| 4 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente, crédito pequeno |
+-| 5 | `cerebras/gpt-oss-120b` | oportunista |
+-| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
+-
+-### `seth-codigo` (Goose — novo, 20/09/2026)
++| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
++| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
++| 2 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 3 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
++| 4 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
++| 5 | `llama-cpp/gpt-oss-20b` | local, agentic/tool-use |
++| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++
++### `seth-codigo` (Goose)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `llama-cpp/qwen3-coder-30b-a3b` | **especialista em código, local, $0** |
+-| 1 | `zai/glm-4.7-flash` | generalista capaz, cobre código também |
+-| 2 | `gemini/gemini-2.5-flash` | contexto grande |
+-| 3 | `gemini/gemini-3-flash-preview` | **novo 23/09/2026 (MEMÓRIAS (534))** — cota PRÓPRIA, separada do 2.5; pega quando o 2.5 dá 429. Avaliado: 3/3 respostas, tool-call em stream com args inteiros. É *preview*: pode mudar ou sumir |
+-| 4 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | independente |
+-| 5 | `mistral/ministral-8b-latest` | pequeno, último remoto |
+-| 6 | `cerebras/gpt-oss-120b` | oportunista |
+-| 7 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final |
++| 0 | `mistral/codestral-latest` | **novo 24/09 (546)** — especialista em código, 0,44 s, tool-call OK |
++| 1 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
++| 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
++| 3 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
++| 4 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 5 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
++| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ **Recriar / reverter** (se o `storage.sqlite` for perdido):
+ `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
+@@ -211,7 +206,7 @@ corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
+ `563700ea-bf7d-45f0-97ab-c336f84b2361` · `seth-rapido`
+ `d37e5f27-d216-4e85-94f5-3621ad860260` · `seth-pesado`
+ `3980b8a1-776b-475a-9e8b-76c65f1e6cf5` · `seth-codigo`
+-`ba22778c-e758-4188-9518-ef647b5a6886` (lido da API viva em 23/09/2026, (534)).
++`ba22778c-e758-4188-9518-ef647b5a6886` (lido da API viva em 23/09/2026, (534); reconferido em 24/09/2026, (546)).
+ **Fonte da verdade da ordem é o próprio OmniRoute** (`GET /api/combos/<id>`); estas
+ tabelas são o espelho, conferido contra a API em (534).
+ Sincronizar as tabelas acima quando mudar.
