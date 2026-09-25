@@ -9,11 +9,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
-**[FEITO E TESTADO] A fila nova da Seth está no ar.** Agora a Seth responde em 1 a 3 segundos, pelo Groq, quando o modelo local está desligado. O Goose usa o Codestral, que é especialista em código. Saíram os modelos que não funcionavam ou que não eram de graça de verdade.
+**[FEITO E TESTADO] A fila nova da Seth está no ar, com os modelos locais por último.** A Seth responde em 1 a 2 segundos pelo Groq. Os modelos do seu computador só entram se todos os de fora falharem. Com isso, quase toda conversa passa a sair da máquina: foi a troca que você escolheu. O Goose usa o Codestral, que é especialista em código. Saíram os modelos que não funcionavam ou que não eram de graça de verdade.
 - Um limite real: o Groq grátis aguenta umas 2 respostas por minuto. Acima disso, a fila passa sozinha para o próximo modelo.
 - Suas 3 assinaturas de hoje conferem. Falta só você fazer o merge dos PRs #40, #41 e #42 (nessa ordem) para eu aplicar.
 - Para anotar a fila no manual: `bash scripts/aprovar.sh fila-nova-2026-09-24` (depois do merge do PR novo).
-- Detalhe técnico: `MEMÓRIAS.md`, entrada (546).
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (546) e (547).
 
 **[FEITO — 1 assinatura pra fechar] Voltaram os dois modelos mais rápidos (Groq e Cerebras).** Eles estavam bloqueados havia semanas, e a culpa era nossa: nossos programas se apresentavam de um jeito que o site deles barra. Já corrigi, e eles respondem em menos de meio segundo. Testei também todos os modelos grátis das suas contas: 10 funcionam bem, inclusive usando ferramentas.
 - Assine pra corrigir de vez, na origem: `bash scripts/aprovar.sh ua-python-urllib-2026-09-24`
