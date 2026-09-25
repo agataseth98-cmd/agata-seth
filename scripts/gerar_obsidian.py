@@ -386,6 +386,13 @@ def main():
     reg_txt = ler(os.path.join(REPO, "REGRAS.md"))
     proj_txt = ler(os.path.join(REPO, "PROJETO.md"))
     ref_txt = ler(os.path.join(REPO, "PROJETO_REFERENCIA.md"))
+    # Fase 2 (plano de replicabilidade, 25/09/2026, "opção C"): {{NOME_SISTEMA}} em
+    # REGRAS.md resolve pro campo "Nome do sistema:" de PROJETO.md, nunca "Agata"
+    # hardcoded -- sem o campo (clone antes da Fase 3), cai em "Agata".
+    _m_nome = re.search(r"^Nome do sistema:\s*(.+)$", proj_txt or "", re.MULTILINE)
+    _nome_sistema = _m_nome.group(1).strip() if _m_nome else "Agata"
+    if reg_txt:
+        reg_txt = reg_txt.replace("{{NOME_SISTEMA}}", _nome_sistema)
     entradas = todas_entradas_todas_camadas()
     nums = {e["num"] for e in entradas}
 
@@ -535,6 +542,9 @@ def main():
         txt = ler(os.path.join(REPO, arq))
         if txt is None:
             continue
+        # PROMPT_CARREGAMENTO.md carrega {{NOME_SISTEMA}} (Fase 2); os outros 3
+        # desta lista não têm o token -- replace() sem ocorrência é no-op.
+        txt = txt.replace("{{NOME_SISTEMA}}", _nome_sistema)
         b = slug(arq, "canon-")
         NOTAS.add(b)
         linhas = fm({"tipo-nota": "canon", "arquivo": arq, "resumo": yq(desc),
