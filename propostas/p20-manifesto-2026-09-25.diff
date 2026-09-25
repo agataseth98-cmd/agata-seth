@@ -1,0 +1,275 @@
+diff --git a/config/caminhos-framework.txt b/config/caminhos-framework.txt
+new file mode 100644
+index 0000000..944d4f0
+--- /dev/null
++++ b/config/caminhos-framework.txt
+@@ -0,0 +1,71 @@
++# Manifesto declarativo de caminhos -- plano de replicabilidade, Fase 5 (item
++# "manifesto único", desenhado pelo laboratório-nuvem "Ensaio", 25/09/2026,
++# MEMÓRIAS (560)). Um arquivo só, três consumidores (princípio "Elegância e
++# eficiência"):
++#   1. Fase 5 (merge seletivo, ainda não construído): só caminhos `framework`
++#      entram na atualização a partir do `upstream`; o resto é recusado, MESMO
++#      que o upstream um dia tente empurrar algo neles por engano -- mesma
++#      disciplina de allowlist que o P-8 já aplica a `git add -A`, aplicada
++#      agora à direção de ENTRADA, não só à de saída.
++#   2. P-20 (varredura de dado pessoal): escopo de "caminho que vai pro
++#      clone" = as linhas `framework|` daqui.
++#   3. Checagem de caminho citado (ainda não construída): caminho citado em
++#      REGRAS/PROJETO que não existe em HEAD E não casa nenhuma linha aqui
++#      vira aviso -- resolve a precisão ≈0 do grep ingênuo medida pelo
++#      laboratório ("36 de 102", turno 28 da sessão de 24/09).
++#
++# Formato: classe|caminho (pathspec do git relativo à raiz do repo, ou um
++# prefixo absoluto de $HOME/máquina para "externo"). `#` comenta.
++#   framework = vai pro clone e recebe atualização do upstream (Fase 5)
++#   instancia = nunca sai desta instância; o merge seletivo recusa
++#   externo   = caminho fora do repo que o canon cita e é legítimo (máquina)
++#
++# Levantamento medido em 25/09/2026 contra o conteúdo real dos arquivos (não
++# só o nome) -- classificação confirmada pelo Humano no mesmo dia. Duas
++# exceções por CONTEÚDO, não por pasta: `config/modelos-gratuitos.md` é
++# levantamento real desta Máquina (instância), mesmo estando dentro de
++# `config/` (framework); `CHAVES.md` cita e-mail e caminhos desta instância
++# (instância), ao contrário de `CHAVES.env.exemplo` (framework, sem valor
++# real). Regra de leitura: a entrada MAIS ESPECÍFICA (arquivo) vence a menos
++# específica (pasta) quando as duas casam o mesmo caminho.
++#
++# Lacuna aberta (não resolvida agora): esta lista cobre o que existe hoje na
++# raiz e nos diretórios de topo. Caminho novo, sem entrada aqui, cai fora de
++# `framework` por padrão (comportamento seguro) -- mas fica sem aviso próprio
++# até a checagem do consumidor 3 existir.
++
++framework|REGRAS.md
++framework|PROMPT_CARREGAMENTO.md
++framework|CHAVES.env.exemplo
++framework|.gitignore
++framework|scripts/
++framework|.githooks/
++framework|.github/
++framework|redesign/
++framework|config/
++instancia|config/modelos-gratuitos.md
++framework|.agents/
++framework|.claude/skills/
++
++instancia|PROJETO.md
++instancia|PROJETO_REFERENCIA.md
++instancia|MEMÓRIAS.md
++instancia|MEMORIAS-MORNO.md
++instancia|memoria/
++instancia|ONDE_ESTAMOS.md
++instancia|CHAVES.md
++instancia|SELOS.txt
++instancia|SETH-DIARIO.md
++instancia|INDICE_MEMORIAS.md
++instancia|INDICE_MEMORIAS_PALAVRAS-CHAVE.md
++instancia|PROCEDIMENTO_LOGIN.md
++instancia|.hidrata.md
++instancia|propostas/
++instancia|extras/
++
++externo|/etc/
++externo|~/.config/agata/
++externo|~/.cache/agata/
++externo|~/librechat/
++externo|/var/lib/agata/
++externo|/usr/local/lib/agata/
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 59ec26b..a99587a 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -57,6 +57,7 @@ source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
+ source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
+ source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
+ source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
++source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -337,6 +338,12 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework" "MEMÓRIAS (560); plano de replicabilidade, Fase 5"
++  p20_dado_pessoal
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
+   PERIMETRO_ESTADO=""
+   p12_backup_verificavel; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p20_dado_pessoal.sh b/scripts/perimetro/p20_dado_pessoal.sh
+new file mode 100644
+index 0000000..01ed1ff
+--- /dev/null
++++ b/scripts/perimetro/p20_dado_pessoal.sh
+@@ -0,0 +1,126 @@
++#!/usr/bin/env bash
++# P-20 -- dado pessoal em caminho de framework (plano de replicabilidade,
++# MEMÓRIAS (560); desenhado pelo laboratório-nuvem "Ensaio", 25/09/2026).
++# AVISA, nunca falha -- mesma doutrina de P-6/P-9/P-18/P-21: nenhum dos
++# mecanismos de sanitização existentes (P-1, sanitizar.py, P-3) procura dado
++# PESSOAL, só SEGREDO -- são classes diferentes (achado do laboratório,
++# medido contra o repositório real: e-mail do Humano, IP/hostname do tailnet
++# vazavam sem que nenhum controle enxergasse).
++#
++# Escopo desta fatia: só a direção de ENTRADA (commit), só linhas ADICIONADAS,
++# só em caminho `framework|` do manifesto (config/caminhos-framework.txt) --
++# um clone herda framework inteiro, nunca instância. A direção de SAÍDA
++# (Fase 5, antes de exportar pro upstream) é a mesma função, chamada com
++# --varrer <lista>; NÃO construída agora porque a ferramenta de merge
++# seletivo da Fase 5 ainda não existe (nada para varrer antes de exportar).
++#
++# Lista de identificadores fora do repo, de propósito: no repositório PÚBLICO
++# a lista seria o próprio vazamento. ~/.config/agata/identificadores-pessoais.txt
++# (modo 600), formato "rotulo|regex ERE|prova" por linha -- a prova é o
++# próprio dado real, sem problema porque o arquivo é privado. Testável via
++# AGATA_P20_LISTA=<caminho> (só suíte/teste, nunca produção).
++#
++# Nunca reimprime o valor achado (achado do laboratório, L-3: o valor de um
++# identificador saiu sem máscara numa transcrição antes). Só rótulo, arquivo
++# e linha.
++
++_p20_lista() {
++  printf '%s' "${AGATA_P20_LISTA:-$HOME/.config/agata/identificadores-pessoais.txt}"
++}
++
++# Caminhos framework|, lidos do manifesto declarado -- nunca hardcoded aqui,
++# senão duas fontes de verdade divergiriam (mesmo motivo do manifesto existir).
++_p20_pathspecs_framework() {
++  local manifesto="config/caminhos-framework.txt" linha classe caminho
++  [ -f "$manifesto" ] || return 0
++  while IFS='|' read -r classe caminho; do
++    case "$classe" in \#*|"") continue ;; esac
++    [ "$classe" = "framework" ] || continue
++    printf '%s\n' "$caminho"
++  done < "$manifesto"
++}
++
++# Carrega a lista em 3 arrays paralelos (rótulo/regex/prova). Retorna 1 se o
++# arquivo não existe -- SKIP de propósito (aviso próprio, não erro de bash).
++_p20_carregar() {
++  local lista; lista="$(_p20_lista)"
++  P20_ROTULOS=(); P20_REGEX=(); P20_PROVAS=()
++  [ -f "$lista" ] || return 1
++  local linha rotulo regex prova
++  while IFS='|' read -r rotulo regex prova; do
++    case "$rotulo" in \#*|"") continue ;; esac
++    P20_ROTULOS+=("$rotulo"); P20_REGEX+=("$regex"); P20_PROVAS+=("$prova")
++  done < "$lista"
++  return 0
++}
++
++# Autoprova: cada regex tem que casar a própria prova, e só a própria --
++# régua cega (não casa) é o mesmo perigo de P-1 (_autoprova_padroes):
++# controle que "passa limpo" por não enxergar não é controle.
++_p20_autoprova() {
++  local i ruim=0 n
++  for i in "${!P20_ROTULOS[@]}"; do
++    n=$(printf '%s\n' "${P20_PROVAS[$i]}" | grep -cE -- "${P20_REGEX[$i]}" 2>/dev/null || true)
++    if [ "${n:-0}" -lt 1 ]; then
++      echo "AVISO (P-20): o identificador '${P20_ROTULOS[$i]}' tem regex que não casa a própria prova (ou está malformada) -- esta régua está cega e o dado passaria como limpo. O que fazer: corrigir a linha no arquivo de identificadores."
++      ruim=1
++    fi
++  done
++  return "$ruim"
++}
++
++_p20_permissao_ok() {
++  local lista modo; lista="$(_p20_lista)"
++  modo="$(stat -c '%a' "$lista" 2>/dev/null || stat -f '%Lp' "$lista" 2>/dev/null || true)"
++  [ -n "$modo" ] || return 0
++  if [ "$modo" != "600" ]; then
++    echo "AVISO (P-20): a lista de identificadores tem permissão $modo, mais aberta que 600 -- outros usuários da Máquina leem o dado pessoal. O que fazer: chmod 600 $(_p20_lista)."
++  fi
++}
++
++p20_dado_pessoal() {
++  if ! _p20_carregar; then
++    echo "AVISO (P-20): lista de identificadores ausente ($(_p20_lista)) -- o P-20 não tem o que procurar e não protege nada. O que fazer: criar o arquivo com modo 600, uma linha por identificador, no formato rotulo|regex|prova."
++    return 0
++  fi
++  [ "${#P20_ROTULOS[@]}" -eq 0 ] && return 0
++  _p20_autoprova || true
++  _p20_permissao_ok || true
++
++  local pathspecs=(); mapfile -t pathspecs < <(_p20_pathspecs_framework)
++  [ "${#pathspecs[@]}" -eq 0 ] && return 0
++
++  local arquivo diff_arquivo i linha_num conteudo
++  while IFS= read -r arquivo; do
++    [ -z "$arquivo" ] && continue
++    diff_arquivo="$(git diff --cached -U0 -- "$arquivo" 2>/dev/null)"
++    [ -z "$diff_arquivo" ] && continue
++    for i in "${!P20_ROTULOS[@]}"; do
++      # linhas ADICIONADAS (+, nunca +++ do cabeçalho), com o número de linha
++      # real do lado novo -- grep -n aqui numera o DIFF, não o arquivo; por
++      # isso usamos `git diff --cached -U0` com o próprio contexto de hunk
++      # (mínimo, U0) e extraímos o número do cabeçalho @@ na mesma passada.
++      while IFS= read -r bloco; do
++        [ -z "$bloco" ] && continue
++        linha_num="${bloco%%:*}"
++        conteudo="${bloco#*:}"
++        if printf '%s\n' "$conteudo" | grep -qE -- "${P20_REGEX[$i]}" 2>/dev/null; then
++          echo "AVISO (P-20): $arquivo:$linha_num tem um identificador pessoal (${P20_ROTULOS[$i]}) num caminho que vai para os clones. Por que importa: o repositório é público e o framework é copiado para toda instância nova (plano de replicabilidade, Fase 5). O que fazer: trocar por um exemplo genérico, ou mover o trecho para PROJETO.md/MEMÓRIAS.md, que são instância e não vão."
++        fi
++      done < <(_p20_linhas_adicionadas_numeradas "$diff_arquivo")
++    done
++  done < <(git diff --cached --name-only -- "${pathspecs[@]}" 2>/dev/null)
++  return 0
++}
++
++# Converte um diff -U0 de UM arquivo em "numero_da_linha_nova:conteudo", só
++# das linhas adicionadas -- awk lê os cabeçalhos @@ -a,b +c,d @@ pra saber o
++# número real da linha nova, sem depender de `git blame`/`grep -n` (que numera
++# o próprio diff, não o arquivo).
++_p20_linhas_adicionadas_numeradas() {
++  awk '
++    /^@@/ { match($0, /\+([0-9]+)/, m); n = m[1]; next }
++    /^\+\+\+/ { next }
++    /^\+/ { print n":"substr($0,2); n++; next }
++  ' <<<"$1"
++}
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index acaa175..eccfb5a 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -186,7 +186,7 @@ declare -A SEM_TESTE=(
+ # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
+ declare -A NIVEL=(
+   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
+-  [P-21]=L1
++  [P-21]=L1 [P-20]=L1
+   [P-2]=L3
+   [P-3]=L4 [P-13]=L4 [P-15]=L4
+   [P-4]=L2 [P-9]=L2 [P-10]=L2
+@@ -439,6 +439,27 @@ _caso P-21 PASSA "(iii) FALSO POSITIVO: entrada que só discute o marcador no me
+ _nova_entrada "(9999) DIARIO — 01/01/2026 · o marcador $_P21T foi resolvido pelo gerador." && git add "MEMÓRIAS.md"
+ EOF
+ 
++# --- P-20: dado pessoal em caminho de framework --------------------------
++# Fixture fora do clone (mktemp em /tmp) -- sobrevive a _reset (que só mexe
++# em $CLONE/repo) e é exportada uma vez só; os dois subshells de _caso
++# (setup e _acusacoes) herdam AGATA_P20_LISTA por serem filhos deste processo.
++_P20_LISTA_TESTE="$(mktemp -d -t p20-teste.XXXXXX)/lista.txt"
++printf 'fulano-teste|fulano\.teste@exemplo\.invalid|fulano.teste@exemplo.invalid\n' > "$_P20_LISTA_TESTE"
++chmod 600 "$_P20_LISTA_TESTE"
++export AGATA_P20_LISTA="$_P20_LISTA_TESTE"
++
++_caso P-20 PEGA "identificador staged em caminho framework (scripts/)" <<'EOF'
++printf '# contato: fulano.teste@exemplo.invalid\n' >> scripts/estado_para_eco.sh && git add scripts/estado_para_eco.sh
++EOF
++
++_caso P-20 PASSA "FALSO NEGATIVO por desenho: mesmo identificador em MEMORIAS.md (instância, não framework)" <<'EOF'
++printf '\ncontato de teste: fulano.teste@exemplo.invalid\n' >> "MEMÓRIAS.md" && git add "MEMÓRIAS.md"
++EOF
++
++_caso P-20 PASSA "nada staged" <<'EOF'
++true
++EOF
++
+ # --------------------------------------------------------------- veredito --
+ echo
+ if [ "$FALHOU" -eq 0 ]; then

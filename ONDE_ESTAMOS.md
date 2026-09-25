@@ -11,7 +11,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
-**[PRONTO — falta sua assinatura] Pediu pro laboratório resolver as 3 pendências de hoje; ele mandou 3 desenhos, testei os 3 de verdade e achei 2 erros — um dele, um meu.** O resumo de "quantas propostas estão esperando" agora enxerga proposta assinada guardada num branch (achei que o filtro dele ficaria cego pro jeito que uso branch hoje — corrigido). O índice pro Drive/NotebookLM passa a mostrar o nome certo do sistema (achei um erro meu copiando o desenho — o hash do manifesto batia com o texto errado — corrigido e testado de novo). E um controle novo avisa sozinho se algum dia o marcador do nome aparecer cru em algum lugar que devia estar resolvido.
+**[PRONTO — falta sua assinatura] As outras 2 pendências (dado pessoal; lista única de caminhos) viraram código.** Você confirmou como eu classifiquei cada pasta do repositório (o que vai pra todo clone, o que é só desta Máquina). Com isso: um arquivo só lista os dois grupos, e um controle novo avisa se um dado pessoal (e-mail, IP) for adicionado num arquivo que vai pra clone — sem nunca mostrar o valor achado, só onde está.
+- Assine: `bash scripts/aprovar.sh p20-manifesto-2026-09-25`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (561).
+
+**[FEITO E APLICADO] Pediu pro laboratório resolver as 3 pendências de hoje; ele mandou 3 desenhos, testei os 3 de verdade e achei 2 erros — um dele, um meu.** O resumo de "quantas propostas estão esperando" agora enxerga proposta assinada guardada num branch (achei que o filtro dele ficaria cego pro jeito que uso branch hoje — corrigido). O índice pro Drive/NotebookLM passa a mostrar o nome certo do sistema (achei um erro meu copiando o desenho — o hash do manifesto batia com o texto errado — corrigido e testado de novo). E um controle novo avisa sozinho se algum dia o marcador do nome aparecer cru em algum lugar que devia estar resolvido.
 - Assine: `bash scripts/aprovar.sh lab-3-desenhos-2026-09-25`
 - As outras 2 pendências que o laboratório também desenhou (varredura de dado pessoal; lista única de caminhos pra Fase 5) precisam de decisão sua antes de virar código — ficam registradas, não construídas ainda.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (560).
