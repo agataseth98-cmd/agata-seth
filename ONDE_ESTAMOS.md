@@ -11,9 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
-**[PRONTO — falta sua assinatura] Fase 2 (o nome do sistema virar escolha do cliente): primeira parte pronta e testada.** REGRAS.md ganhou um marcador nos 5 lugares onde o nome "Agata" é falado (não nos caminhos internos, esses continuam iguais). Um clone com um arquivo de configuração próprio (fora do repositório) vê seu nome escolhido; sem esse arquivo — o seu caso — fica tudo exatamente igual a hoje, testei byte a byte. Falta a Fase 2 cobrir mais 3 arquivos que hoje ninguém regenera automaticamente (o prompt que se cola à mão na nuvem, e 2 manuais internos) — fica pendente, registrado, não esquecido.
-- Assine: `bash scripts/aprovar.sh fase2-nome-sistema-2026-09-25`
-- Detalhe técnico: `MEMÓRIAS.md`, entrada (558).
+**[REFEITO — falta assinar de novo, as 2] Achei 2 erros meus mexendo na Fase 2, contei os dois, e o laboratório apontou que o desenho de antes não cobria o caso principal — corrigido.** Um bug real (quebraria commit futuro nesta Máquina, achei testando, nunca foi ao ar). E um comando de limpeza que apagou as 2 assinaturas que você já tinha feito hoje — sem recuperação, as duas precisam ser refeitas. Fora isso, o laboratório mostrou que o desenho anterior só resolvia o nome pra Seth/LibreChat, não pra uma sessão de nuvem nova lendo o manual pela primeira vez — que é o caso que a Fase 2 existe pra resolver. Redesenhei: o nome agora mora num campo em PROJETO.md (visível por qualquer leitor, até lendo o arquivo cru), não mais num arquivo escondido fora do repositório.
+- Assine: `bash scripts/aprovar.sh fase2-nome-sistema-2026-09-25` (substitui a de antes, nunca foi usada)
+- Assine de novo, mesmo conteúdo de antes: `bash scripts/aprovar.sh fase2-slug-dinamico-2026-09-25`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (559).
 
 **[APLICADO — 1 de 3, os outros 2 juntos numa assinatura só] Os achados do laboratório viraram conserto.** O e-mail do README do LibreChat virou só um exemplo genérico — na verdade não era segredo nenhum, é a conta que você já confirmou ser só do projeto, mas um clone não devia copiar ela mesmo assim. Os outros 2 (o bot do Discord entregando a URL do repositório oficial; o script que gera os links do canon fazendo o mesmo) esperam uma assinatura só — achei no meio do caminho que o do Discord também precisava de quarentena, e não tinha visto isso de cara.
 - Assine: `bash scripts/aprovar.sh fase2-slug-dinamico-2026-09-25`

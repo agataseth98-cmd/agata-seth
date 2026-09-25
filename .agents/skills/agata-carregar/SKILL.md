@@ -1,9 +1,12 @@
 ---
 name: agata-carregar
-description: Abrir uma sessão no sistema Agata (comando "carregar", "carregar agata", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
+description: Abrir uma sessão neste sistema (comando "carregar", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
 ---
 
-# Carregar o Agata (na Máquina, com shell)
+Onde aparecer {{NOME_SISTEMA}} neste arquivo, escreva o valor do campo "Nome do sistema:"
+de PROJETO.md, seção "O que é". Sem esse campo, escreva Agata. Nunca escreva o token cru.
+
+# Carregar o {{NOME_SISTEMA}} (na Máquina, com shell)
 
 Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
 O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
@@ -17,7 +20,7 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
 4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
 5. Responda com o bloco de REGRAS.md, "Carregar e formatos" — 3 linhas, nada antes:
    ```
-   Agata · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
+   {{NOME_SISTEMA}} · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
    Última entrada: (<n>) <título> — <1 linha>
    <quebrado: … | pronto.>
    ```
@@ -25,5 +28,5 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
    confirma antes do trabalho começar.
 
 Depois do carregar, toda resposta começa com a linha de turno:
-`Agata · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
+`{{NOME_SISTEMA}} · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
 Hora nunca é copiada da resposta anterior.

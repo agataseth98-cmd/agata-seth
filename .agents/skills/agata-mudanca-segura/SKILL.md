@@ -1,6 +1,6 @@
 ---
 name: agata-mudanca-segura
-description: Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina do Agata. Portão das três perguntas + checagem de acoplamentos implícitos + prova pelo caminho real + como voltar.
+description: Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina. Portão das três perguntas + checagem de acoplamentos implícitos + prova pelo caminho real + como voltar.
 ---
 
 # Mudança segura na Máquina

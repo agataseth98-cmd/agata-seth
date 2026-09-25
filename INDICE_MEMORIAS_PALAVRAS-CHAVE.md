@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
+  palavras-chave: proposta, fase, nome, sistema, redesenhada, fonte, sai, config, agata, identidade, env, fora, repo, vai, campo, projeto, versionado, leitor, alcança, erros, meus, caminho, achados, dano, permanente, assinaturas, anteriores, foram, perdidas, precisam, refeitas
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
   palavras-chave: fase, plano, replicabilidade, mecanismo, nome, falado, primeira, fatia, token, sistema, pontos, regras, agata, nunca, caminhos, serviços, internos, resolvido, githooks, gerar, hidratacao, partir, config, identidade, env, quarentena, aguardando, assinatura
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: teste, seth, refeito, zero, aplicações, dia, passou, inteiro, erro, meu, registrado, estimei, hora, cabeça, mediu, estava, certa
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-controles-extraidos-2026-09-23` (529). O P-16 volta a rodar a suíte de regressão quando qualquer controle muda, inclusive os de `scripts/perimetro/pNN_*.sh`.**
   palavras-chave: assinado, verificado, aplicado, reconhece, controles, extraidos, volta, rodar, suíte, regressão, controle, muda, inclusive, scripts, perimetro, pnn
-(529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP por 33 corridas") que eu descartei como "por desenho" era um defeito real. Desde a extração dos controles pra arquivos próprios (437), o P-16 não reconhece mudança num controle individual, e a suíte de regressão dos controles deixou de rodar quando ela devia. Proposta de conserto sob P-8, aguardando assinatura.**
-  palavras-chave: corrige, aviso, skip, corridas, descartei, desenho, era, defeito, real, desde, extração, controles, pra, arquivos, próprios, reconhece, mudança, controle, individual, suíte, regressão, deixou, rodar, ela, devia, proposta, conserto, sob, aguardando, assinatura
+(529) CORREÇÃO — 23/09/2026 · **Corrige (527): o aviso do P-17 ("P-16 em SKIP po …
+  palavras-chave: corrige, aviso, skip
 (528) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `varredura-tripla- …
   palavras-chave: assinado, verificado, aplicado, varredura, tripla
 (527) DIÁRIO — 23/09/2026 · **Varredura tripla do sistema (ordem do Humano: "rep …

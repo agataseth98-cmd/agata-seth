@@ -28,9 +28,28 @@ que não reconhece.
 Uso: atualizar_ancora_prompt.py <caminho-do-prompt> <sha-do-head-anterior> <data-hora-local>
 """
 import re
+import subprocess
 import sys
 
-REPO = "agataseth98-cmd/agata-seth"
+
+def _repo_slug():
+    """owner/repo do remoto `origin` -- pra um clone (Fase 2, plano de
+    replicabilidade) gerar URLs pinadas do PRÓPRIO repositório, não do oficial.
+    Fail-soft (mesma régua do resto do arquivo): git ausente ou sem remoto
+    reconhecível cai no valor conhecido, nunca aborta o commit por isso.
+    """
+    try:
+        saida = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True, text=True, timeout=5, check=True,
+        ).stdout.strip()
+    except Exception:
+        return None
+    m = re.search(r"github\.com[:/]+([^/]+/[^/]+?)(?:\.git)?$", saida)
+    return m.group(1) if m else None
+
+
+REPO = _repo_slug() or "agataseth98-cmd/agata-seth"
 ARQUIVOS = ["REGRAS.md", "PROJETO.md", "MEMÓRIAS.md"]
 INICIO = "<!-- ANCORA-SHA:INICIO"
 FIM = "<!-- ANCORA-SHA:FIM -->"

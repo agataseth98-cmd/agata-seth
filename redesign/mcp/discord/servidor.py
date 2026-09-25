@@ -48,6 +48,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -63,6 +65,30 @@ ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/discord-canais-permitidos.t
 API_BASE = "https://discord.com/api/v10"
 _TIMEOUT_PADRAO = 20
 _LIMITE_MAXIMO = 100  # teto da própria API do Discord por página
+
+
+def _user_agent() -> str:
+    """URL do próprio remoto `origin` no User-Agent (formato que o Discord pede:
+    nome + URL de contato) -- um clone (Fase 2, plano de replicabilidade) não
+    deve carregar a URL do repositório oficial de outra instância. Fail-soft:
+    sem git ou sem remoto reconhecível, usa um identificador genérico, nunca
+    aborta por isso (mesma régua do restante do servidor)."""
+    try:
+        url = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True, text=True, timeout=5, check=True,
+        ).stdout.strip()
+        if re.search(r"github\.com[:/]+[^/]+/[^/]+", url):
+            url = re.sub(r"^git@([^:]+):", r"https://\1/", url)
+            url = re.sub(r"\.git$", "", url)
+        else:
+            url = "https://github.com"
+    except Exception:
+        url = "https://github.com"
+    return f"AgataDiscordBridge ({url}, 1.0)"
+
+
+_USER_AGENT = _user_agent()
 
 mcp = FastMCP("agata-discord")
 
@@ -108,7 +134,7 @@ def _run_http(method: str, path: str, body: dict | None = None) -> dict:
         headers={
             "Authorization": f"Bot {tok}",
             "Content-Type": "application/json",
-            "User-Agent": "AgataDiscordBridge (https://github.com/agataseth98-cmd/agata-seth, 1.0)",
+            "User-Agent": _USER_AGENT,
         },
     )
     try:

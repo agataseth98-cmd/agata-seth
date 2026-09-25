@@ -28,6 +28,23 @@ if ! printf '%s\n' "$_LINHA_TESTE" | awk '/^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|
 fi
 unset _LINHA_TESTE
 
+# --- Nome do sistema (Fase 2, plano de replicabilidade, 25/09/2026 -- fonte
+# movida pra PROJETO.md depois do parecer do laboratório-nuvem "Ensaio": um
+# valor fora do repo (~/.config/agata/identidade.env, desenho original) não
+# é lido por sessão de nuvem nem por leitura crua de REGRAS.md, que são a
+# maioria dos leitores reais -- ver MEMÓRIAS, entrada da Fase 2 "opção C") ---
+# REGRAS.md/PROMPT_CARREGAMENTO.md/SKILL.md carregam o token {{NOME_SISTEMA}}
+# nos pontos onde o nome falado aparece (nunca nos caminhos/serviços internos).
+# Resolvido aqui, na saída gerada -- os arquivos fonte ficam byte-idênticos
+# ao framework oficial fora deste campo, sem conflito de merge (Fase 5).
+# Campo ausente em PROJETO.md (o caso de hoje, nesta Máquina, e todo clone
+# antes da Fase 3 preencher): cai em "Agata", .hidrata.md sai byte a byte
+# igual ao que saía antes desta mudança.
+NOME_SISTEMA="$(sed -n 's/^Nome do sistema: *//p' PROJETO.md 2>/dev/null | head -1)"
+[ -n "$NOME_SISTEMA" ] || NOME_SISTEMA="Agata"
+# escapa pra uso seguro dentro de s/// do sed (barra, &, barra invertida)
+NOME_SISTEMA_SED="$(printf '%s' "$NOME_SISTEMA" | sed -e 's/[\/&\\]/\\&/g')"
+
 OUT=".hidrata.md"
 INDICE="INDICE_MEMORIAS.md"
 # Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
@@ -470,7 +487,12 @@ montar_hermes() {
     echo ""
     echo "# REGRAS.md"
     echo ""
-    cat REGRAS.md
+    # Só REGRAS.md passa pela substituição do token -- nunca PROJETO.md (que
+    # documenta {{NOME_SISTEMA}} como texto, não como placeholder vivo) nem a
+    # janela de MEMÓRIAS (histórico append-only: um entrada citando o token
+    # literal, como esta mesma Fase 2 documentada, não pode sair alterada na
+    # leitura -- achado testando esta mudança, ver MEMÓRIAS da Fase 2/opção C).
+    sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" REGRAS.md
     echo ""
     echo "# PROJETO.md"
     echo ""
