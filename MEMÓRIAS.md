@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c05c6fa24af76aeeb4d4479f235605d85b2f9389
-  Escrito em: 25/09/2026 10:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 863c6675211e9a82b885cf088c515bf2fc60e249
+  Escrito em: 25/09/2026 11:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
+
+**Pedido do Humano, dois esclarecimentos + uma decisão:** "como vai funcionar o carregamento pra LLM na nuvem num clone" e "não herdar rotina automatizada mas receber benefício, como fazer" — respondidos e escritos em `propostas/plano-replicabilidade-2026-09-25.md` (seções da Fase 2 e da Fase 5, sem código ainda, são desenho) — e "fase 4, fazer a recomendada": Obsidian como camada de leitura/escrita do cliente, `MEMÓRIAS.md` como registro mecânico por baixo. Decisão fecha a pergunta em aberto que o plano de (551)-(553) tinha deixado.
+
+**Mecanismo:** nota solta em `memoria/obsidian-inbox/` (frontmatter `titulo:` ou 1ª linha como título) → `scripts/vault_importar_inbox.py` → `POST /memoria` do `seth_escriba`, o MESMO caminho hardened que a Seth já usa pra escrever — zero lógica de escrita nova, zero superfície de ataque nova. Sucesso apaga a nota (o conteúdo já mora em MEMÓRIAS.md); falha deixa a nota intacta e imprime o motivo.
+
+**Achado no caminho, corrigido antes de virar bug real:** `gerar_obsidian.py` faz `shutil.rmtree()` do vault inteiro a cada regeneração (todo commit, via post-commit). Um inbox morando DENTRO de `memoria/obsidian/` seria apagado antes de qualquer nota ser lida — perda de dado do cliente no primeiro commit seguinte à escrita da nota. Corrigido projetando o inbox como pasta IRMÃ, `memoria/obsidian-inbox/`, nunca dentro — e testado de propósito: criei uma nota de teste, rodei `gerar_obsidian.py` de verdade, confirmei que ela sobreviveu.
+
+**Testado, não só escrito:** `--selftest` 9/9 (parsing de nota com/sem frontmatter, nota sem corpo não vira entrada vazia, `seth_escriba` inacessível falha limpo sem apagar a nota) + uma rodada real contra o `seth_escriba` de produção — criou uma entrada de verdade (revertida do working tree antes deste commit, não fazia sentido registrar duas vezes o mesmo teste) + a prova de sobrevivência à regeneração citada acima. `perimetro.sh` completo: 0 FALHA.
+
+**`.gitignore` e `PROJETO.md` no mesmo commit:** `memoria/obsidian-inbox/` protegido contra `git add -A` acidental (mesma cautela do resto da seção); PROJETO.md ganha um ponteiro pro plano, marcando este primeiro passo como implementado e "ainda não ligado a nenhum fluxo automático desta instância" — é infraestrutura pra quando existir bootstrap de clone (Fase 3 do plano), não muda nada do que a Seth faz hoje.
+
+**Sequenciamento, registrado porque quase saiu errado:** esta entrada foi numerada e comitada primeiro em cima do `main` sem (553) (que ainda esperava merge no PR #48) — cherry-pick direto do commit resultante em cima da branch de (553) gerou conflito em TODOS os arquivos gerados (âncoras de SHA, índices). Abortado; refeito do zero aplicando o `.diff` assinado direto na branch de (553), que já continha o número certo. Lição: numerar e comitar sobre um `main` que ainda não tem o PR anterior mergeado é o mesmo erro que a Regra 4 já nomeia ("sincronize antes de numerar") — só que entre duas branches próprias, não entre a cópia local e o remoto.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/vault-inbox-fase4-2026-09-25`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: leitura de `seth_escriba.py` inteiro antes de decidir reusar em vez de reimplementar; `python3 -m py_compile` + `--selftest` (9/9); teste real contra o `:20140` rodando, com reversão do `MEMÓRIAS.md` antes do commit; teste real de sobrevivência do inbox contra `gerar_obsidian.py` rodando de verdade; `perimetro.sh` completo (0 FALHA); `git apply --check` reproduzido limpo em cima da branch de (553) depois do cherry-pick abortado; `p8_verificar.sh` — hash, assinatura, apply --check, os 4 OK, reconferido nesta branch. Autorização: Humano — "o mesmo refinamento... fase 4, fazer a recomendada" + `scripts/aprovar.sh vault-inbox-fase4-2026-09-25` assinado.
 
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
 

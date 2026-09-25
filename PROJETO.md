@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c05c6fa24af76aeeb4d4479f235605d85b2f9389
-  Escrito em: 25/09/2026 10:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 863c6675211e9a82b885cf088c515bf2fc60e249
+  Escrito em: 25/09/2026 11:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/863c6675211e9a82b885cf088c515bf2fc60e249/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -433,6 +433,8 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
 - **Fase 5 (sem prazo — prospecção de horizonte, não backlog):** curador nomeado · espelho do canon fora do GitHub · governança que não dependa de um operador único. Escrita em 31/07/2026 (commit `e6e9b11`, junto com o plano inteiro), em escala de décadas. Os dois termos técnicos que constavam aqui eram candidatos anotados, nunca avaliados: **IPFS** (*InterPlanetary File System*, armazenamento endereçado pelo hash do conteúdo) e **DAO** (*Decentralized Autonomous Organization*, decisão executada por código em vez de administrador). Nenhuma entrada de MEMÓRIAS discute qualquer um dos dois; o mecanismo nunca foi escolhido. Quem se pegar propondo um deles agora, pare — a instrução é de 26/07/2026 e continua valendo.
 
 **Bússola de longo prazo (24/09/2026, MEMÓRIAS (542)):** `extras/bussola/auditoria-e-bussola.md` traz 12 princípios (B1–B12) e 5 aprendidos por incidente (T1–T5), destilados e auditados a partir de um tratado externo sobre engenharia de sistemas agênticos (original verbatim na mesma pasta; 7 das 8 fontes conferidas ao vivo, 1 `lacuna`). **Orienta, não gera tarefa** (REGRAS, "Contenção de escopo"): toda proposta nova é pesada também contra ela, e as lacunas que ela lista só viram trabalho por ordem do Humano. Em conflito, REGRAS vence.
+
+**Plano de replicabilidade (25/09/2026, ordem do Humano):** `propostas/plano-replicabilidade-2026-09-25.md` — como levar o sistema pra uma segunda Máquina com projeto e memória próprios do cliente, nunca acessando o original. Separa framework (vai pro clone) de instância (nunca vai). **Primeiro passo real, implementado e testado nesta data:** `scripts/vault_importar_inbox.py` — o mecanismo da futura "memória em Obsidian" de um clone (nota em `memoria/obsidian-inbox/` vira entrada real em MEMÓRIAS.md pelo MESMO caminho hardened que a Seth já usa, `POST /memoria` do `seth_escriba` — zero lógica de escrita nova). Ainda não ligado a nenhum fluxo automático desta instância; é infraestrutura pronta pra quando a Fase 3 (bootstrap) do plano existir. O resto do plano é bússola, mesma disciplina da bússola acima — não gera tarefa sozinho.
 
 **Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
 

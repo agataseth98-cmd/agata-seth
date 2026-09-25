@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
+  palavras-chave: assinado, verificado, aplicado, vault, inbox, fase, primeiro, pedaço, real, plano, replicabilidade, scripts, importar, mecanismo, trás, memória, obsidian, pra, clone, futuro
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
   palavras-chave: assinado, verificado, aplicado, seth, verificar, ganha, comando, fixo, verificador, mesma, checagem, goose, ganhou, pra, ela, saber, sozinha, proposta, pendente, pode, aplicada
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, saidas, autoexplicativas, conferido, seth, vivo, mesma, pergunta, ela, errou, agora, vem, certa, usando, leitura, calculada, máquina
 (525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, aguardando assinatura (P-8): as ferramentas da Seth passam a entregar o SENTIDO junto com o resultado. Nasce do achado de (524) (a Seth leu "0 unidades em falha" como "sem unidades ativas") e de uma auditoria pedida pelo Humano atrás de outros casos do mesmo tipo: mais 5 no verificador e 2 no MCP do canon.**
   palavras-chave: proposta, saidas, autoexplicativas, aguardando, assinatura, ferramentas, seth, passam, entregar, sentido, junto, resultado, nasce, achado, leu, unidades, falha, ativas, auditoria, pedida, humano, atrás, casos, mesmo, tipo, verificador, mcp, canon
-(524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23` (523). Teste refeito do zero, com o Humano assistindo: o "Parar Seth" agora derruba o Obsidian, e a ferramenta aprovada rodou de ponta a ponta. Achado novo: a Seth leu errado a saída do verificador, porque a descrição do comando não chega até ela.**
-  palavras-chave: assinado, verificado, aplicado, hitl, checkpointer, mongo, obsidian, partof, teste, refeito, zero, humano, assistindo, parar, seth, agora, derruba, ferramenta, aprovada, rodou, ponta, achado, novo, leu, errado, saída, verificador, porque, descrição, comando, chega, ela
+(524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer …
+  palavras-chave: assinado, verificado, aplicado, hitl, checkpointer
 (523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano …
   palavras-chave: teste, saúde, zero, navegador, humano
 (522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (info …

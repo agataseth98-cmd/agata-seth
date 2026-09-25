@@ -48,6 +48,13 @@ home/
 # MEMÓRIAS.md, nunca editada à mão. Regenerável, não versionada (MEMÓRIAS (289)).
 memoria/obsidian/
 
+# Caixa de entrada do vault (Fase 4, plano de replicabilidade, 25/09/2026) --
+# notas do cliente ainda não importadas pra MEMÓRIAS.md por
+# scripts/vault_importar_inbox.py. Transiente por desenho (cada nota vira
+# entrada e é apagada); nunca deve entrar num commit por acidente de
+# `git add -A`, mesma cautela do resto desta seção.
+memoria/obsidian-inbox/
+
 # redesenho (branch redesign) -- artefatos locais, nunca commitar
 redesign/**/.venv/
 redesign/**/__pycache__/
