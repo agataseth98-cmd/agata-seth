@@ -28,11 +28,15 @@ sem .git, mesmo padrão de gerar_obsidian.py).
 Verificação embutida antes de escrever (aborta, nada é gravado):
   1. as fontes são exatamente REGRAS/PROJETO + as camadas de memória achadas
      no disco, cada uma filha direta da raiz do repo;
-  2. REGRAS.md e PROJETO.md aparecem no indice.md como bloco verbatim contíguo;
+  2. REGRAS.md e PROJETO.md -- com {{NOME_SISTEMA}} trocado pelo campo "Nome do
+     sistema:" do PROJETO.md (Fase 2), e nada mais -- aparecem no indice.md como
+     bloco verbatim contíguo; a Parte 3 (títulos) é história e NÃO é resolvida;
   3. cada linha de título da Parte 3 é uma linha verbatim de alguma camada de
      memória lida (quente, morno ou um chunk frio);
   4. indice.md == HEADER + REGRAS + SEP + PROJETO + SEP + títulos  (byte a byte)
      -- prova de que não há nada além do boilerplate fixo e do canon.
+O manifesto guarda o sha256 do arquivo CRU (o que sha256sum mede no disco) e o
+nome usado na resolução.
 """
 import hashlib
 import os
@@ -56,6 +60,12 @@ FRIO_NOME = re.compile(
 )
 
 SEP = "\n\n" + "=" * 64 + "\n"
+
+# Fase 2 (plano de replicabilidade, MEMÓRIAS (559)): mesmo resolvedor de
+# scripts/gerar_obsidian.py -- campo "Nome do sistema:" do PROJETO.md, "Agata"
+# sem ele.
+TOKEN_NOME = "{{NOME_SISTEMA}}"
+CAMPO_NOME = re.compile(r"^Nome do sistema:\s*(.+)$", re.MULTILINE)
 
 
 def camadas_frio_recente_primeiro():
@@ -151,8 +161,17 @@ def main():
             abortar(f"fonte ausente: {p}")
         caminhos[nome] = p
 
-    regras = open(caminhos["REGRAS.md"], encoding="utf-8").read()
-    projeto = open(caminhos["PROJETO.md"], encoding="utf-8").read()
+    regras_cru = open(caminhos["REGRAS.md"], encoding="utf-8").read()
+    projeto_cru = open(caminhos["PROJETO.md"], encoding="utf-8").read()
+    m_nome = CAMPO_NOME.search(projeto_cru)
+    nome_sistema = m_nome.group(1).strip() if m_nome else "Agata"
+    # O nome vai pro índice e pro NotebookLM: uma linha, curto, sem o marcador.
+    if not nome_sistema or len(nome_sistema) > 60 or TOKEN_NOME in nome_sistema:
+        abortar(f"campo 'Nome do sistema:' do PROJETO.md inválido: {nome_sistema[:60]!r}")
+    # Partes 1-2 levam o texto RESOLVIDO, que é o que o leitor externo precisa.
+    # As checagens verbatim abaixo comparam esta MESMA versão dos dois lados.
+    regras = regras_cru.replace(TOKEN_NOME, nome_sistema)
+    projeto = projeto_cru.replace(TOKEN_NOME, nome_sistema)
     mem_txt = open(caminhos["MEMÓRIAS.md"], encoding="utf-8").read()
 
     # Camadas extra de memória (Fase 4, MEMÓRIAS (357)): morno + frio, mais
@@ -179,13 +198,14 @@ def main():
     fontes_citadas = ", ".join(("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md") + tuple(camadas_extra_nomes))
     header = (
         "---\n"
-        f"gerado-de: canon público do sistema Agata ({fontes_citadas})\n"
+        f"gerado-de: canon público do sistema {nome_sistema} ({fontes_citadas})\n"
+        f"nome-sistema: {nome_sistema} (campo 'Nome do sistema:' do PROJETO.md)\n"
         f"canon: {sha}\n"
         f"data: {data}\n"
         "nota: camada de leitura derivada, só-leitura. Não é canon. "
         "Correção é entrada nova em MEMÓRIAS, nunca edição aqui.\n"
         "---\n\n"
-        "# Índice derivado — canon público do Agata\n\n"
+        f"# Índice derivado — canon público do {nome_sistema}\n\n"
         "Mapa para consulta externa. Três partes: as regras na íntegra, o estado\n"
         "atual na íntegra, e a linha do tempo das entradas de memória -- quente +\n"
         "morno + frio (Fase 4) -- (só os\n"
@@ -225,7 +245,9 @@ def main():
     def h(s):
         return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
-    linhas_fontes = [f"  REGRAS.md    {h(regras)}\n", f"  PROJETO.md   {h(projeto)}\n",
+    # Hash do arquivo CRU: é o que `sha256sum` mede no disco, e é o que este
+    # manifesto promete que bate.
+    linhas_fontes = [f"  REGRAS.md    {h(regras_cru)}\n", f"  PROJETO.md   {h(projeto_cru)}\n",
                      f"  MEMÓRIAS.md  {h(mem_txt)}\n"]
     for nome in camadas_extra_nomes:
         linhas_fontes.append(f"  {nome}  {h(camadas_extra_txt[nome])}\n")
@@ -238,6 +260,8 @@ def main():
         "# Manifesto — índice derivado do canon público\n\n"
         f"Fontes (sha256, no commit {sha}):\n"
         + "".join(linhas_fontes) + "\n"
+        f"Nome do sistema: {nome_sistema} -- Partes 1-2 = a fonte acima com "
+        f"'{TOKEN_NOME}' trocado por esse nome, e nada mais. Parte 3 não é resolvida.\n\n"
         "Saída:\n"
         f"  indice.md    {h(indice)}   (Parte 3: {len(titulos)} linhas de título)\n\n"
         "Regenerar: python3 scripts/gerar_indice_derivado.py\n"

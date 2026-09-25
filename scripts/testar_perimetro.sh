@@ -93,11 +93,14 @@ PY
 _entrada_no_fim() { printf '\n%s\n' "$1" >> "MEMÓRIAS.md"; }
 
 # Quantos SUSPEITO/FALHA o controle $1 emitiu no estado atual do indice.
+# Conta também o "AVISO (<ctrl>)" do PRÓPRIO controle: controle de aviso só
+# (P-21; P-18/P-19 no futuro) passa a ser testável aqui, sem virar FALHA-class.
+# Nenhum dos controles com _caso hoje emite "AVISO (P-N)" -- medido 25/09/2026.
 _acusacoes() {
   local ctrl="$1"
   ( cd "$CLONE/repo" && bash scripts/perimetro.sh 2>&1 ) \
     | sed -n "/^=== ${ctrl} ===/,/^=== /p" \
-    | grep -cE "^(SUSPEITO|FALHA)" || true
+    | grep -cE "^(SUSPEITO|FALHA|AVISO \(${ctrl}\))" || true
 }
 
 # _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
@@ -183,6 +186,7 @@ declare -A SEM_TESTE=(
 # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
 declare -A NIVEL=(
   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
+  [P-21]=L1
   [P-2]=L3
   [P-3]=L4 [P-13]=L4 [P-15]=L4
   [P-4]=L2 [P-9]=L2 [P-10]=L2
@@ -411,6 +415,28 @@ LISTA
 
 _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
 printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
+EOF
+
+# --- P-21: marcador do nome do sistema -----------------------------------
+# Marcador montado em pedaços (_k): escrito inteiro, este arquivo não é fonte
+# do P-21 (i), mas manter a convenção do P-1 evita surpresa se o escopo crescer.
+_P21T="$(_k "{{" "NOME_SISTEMA" "}}")"
+
+_caso P-21 PEGA "(i) SKILL.md novo usa o marcador sem a regra no topo" <<EOF
+mkdir -p .agents/skills/teste-p21 && printf '# Carregar o %s\n' '$_P21T' > .agents/skills/teste-p21/SKILL.md && git add .agents/skills/teste-p21/SKILL.md
+EOF
+
+_caso P-21 PASSA "(i) FALSO POSITIVO: SKILL.md novo com a regra no topo" <<EOF
+mkdir -p .agents/skills/teste-p21 && printf 'Onde aparecer %s, escreva o valor do campo "Nome do sistema:" de PROJETO.md.\n\n# Carregar o %s\n' '$_P21T' '$_P21T' > .agents/skills/teste-p21/SKILL.md && git add .agents/skills/teste-p21/SKILL.md
+EOF
+
+_caso P-21 PEGA "(iii) entrada nova de MEMORIAS começando pela linha de turno crua" <<EOF
+_nova_entrada "(9999) DIARIO — 01/01/2026 · teste.
+$_P21T · modelo · t=1 (contado no contexto)" && git add "MEMÓRIAS.md"
+EOF
+
+_caso P-21 PASSA "(iii) FALSO POSITIVO: entrada que só discute o marcador no meio da linha" <<EOF
+_nova_entrada "(9999) DIARIO — 01/01/2026 · o marcador $_P21T foi resolvido pelo gerador." && git add "MEMÓRIAS.md"
 EOF
 
 # --------------------------------------------------------------- veredito --
