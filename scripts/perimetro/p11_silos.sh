@@ -42,7 +42,7 @@ _p11_conteudo_de_silo() {
   # motivo. Esta camada é o que salvou P-14 do mesmo furo (selar.sh
   # --check pegou o que a listagem staged não viu).
   case "$1" in
-    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
+    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|memoria/frio/MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
   esac
   git show ":$1" 2>/dev/null | grep -qaE '^modelo-alvo:[[:space:]]*[A-Za-z]'
 }

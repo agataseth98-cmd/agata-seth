@@ -26,18 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4799b601cc66965dd396de2758ccca11cb88ecde
-  Escrito em: 25/09/2026 08:41 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4f2b4cc1b40af4b8eef8dc581523571253e85a1c
+  Escrito em: 25/09/2026 09:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4799b601cc66965dd396de2758ccca11cb88ecde/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
+
+**Pedido do Humano:** auditoria de coesão apontou os 11 `MEMORIAS-FRIO-*.md` soltos na raiz; escolhida a opção (a) — mover os já selados, redesenhando o P-14 — sobre a opção mais conservadora de só mudar onde os NOVOS nascem.
+
+**O achado que fez a mudança não ser trivial:** `scripts/perimetro/p14_frio_imutavel.sh` foi desenhado, de propósito, pra tratar QUALQUER renomeação de chunk selado como `SUSPEITO`, mesma severidade de P-8 — existe teste de regressão nomeado pra isso, `"REGRESSAO (419): renomear chunk frio selado"`. (419) mostrou que renomear é o vetor clássico pra escapar de quarentena/imutabilidade sem editar nada. Reabrir esse controle sem cuidado reabriria a classe de furo que (419) fechou.
+
+**Conserto, com as duas provas exigidas juntas (nunca uma sozinha):** uma relocação só passa se (1) o `SELOS.txt` que entra no commit tem o MESMO hash de `HEAD` — imutável, o commit em curso não o controla — num path diferente do antigo, e (2) o conteúdo real desse path novo, hasheado agora, bate com esse hash. Um ataque que edita o conteúdo e forja a linha do `SELOS.txt` pra "confirmar" a própria edição não passa: a prova 2 recalcula contra o valor de `HEAD`, nunca contra o que o `SELOS.txt` staged alega. Testado com os dois lados: relocação legítima passa (`PASSA`), relocação com conteúdo editado continua pegando (`PEGA`) — 2 casos novos na suíte, os 3 de regressão do (419) continuam verdes.
+
+**Achado de passagem, corrigido na mesma proposta:** o P-3 (memória nativa do Hermes não pode ir pro índice público) tinha o padrão `memoria/*.md` largo demais e passou a acusar os 11 chunks recém-movidos como escritor automático suspeito. Exclusão pontual (`:!memoria/frio/*`) — testado que ele continua pegando o caso real (`USER.md` direto em `memoria/`).
+
+**10 scripts/hooks atualizados** (leitura e escrita passam a olhar `memoria/frio/`, não mais a raiz): `busca_semantica.py`, `gerar_indice_derivado.py` (inclusive a checagem "filha direta da raiz", agora parametrizada por camada), `gerar_obsidian.py` (inclusive os wikilinks do vault, que precisavam do caminho novo pra resolver certo), `migrar_periodo.py` (chunks novos já nascem em `memoria/frio/`), `.githooks/gerar-hidratacao.sh`, e os módulos `p03/p05/p07/p11/p14` do perímetro.
+
+**Provado rodando de verdade, não só lido:** `selar.sh --check` nos 11 no destino = OK; suíte de controles completa, 33/33; `perimetro.sh` completo no estado real = limpo (só P-8 acusando, esperado, é o próprio portão que este commit atravessa); `gerar_indice_derivado.py` rodado de verdade = 500 títulos, os 11 chunks citados no cabeçalho; `gerar_obsidian.py` rodado de verdade = 837 notas, wikilinks de `moc-memoria.md` apontando pra `memoria/frio/...` certo.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/memorias-frias-fora-da-raiz-2026-09-25`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: trabalho feito inteiro numa worktree descartável (`git worktree`) antes de tocar o repositório real; `selar.sh --check`; suíte `testar_perimetro.sh` completa (33 casos, incluindo 2 novos e os 3 de regressão do (419)); `perimetro.sh` completo antes e depois; execução real (não só sintaxe) de `gerar_indice_derivado.py` e `gerar_obsidian.py`; `python3 -m py_compile` nos `.py`; `bash -n` nos `.sh`; `git apply --check` do `.diff` contra o repo real; `p8_verificar.sh` — hash, assinatura (`ssh-keygen -Y verify` → `Good`), `apply --check`, os 4 OK. Autorização: Humano — "assinado todos" + `scripts/aprovar.sh memorias-frias-fora-da-raiz-2026-09-25` assinado.
+
 
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
 

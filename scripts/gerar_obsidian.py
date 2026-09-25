@@ -53,6 +53,7 @@ CANON, DATA = _canon()
 
 MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
 MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
+FRIO_DIR = os.path.join(REPO, "memoria", "frio")
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
 CAB_ENTRADA = re.compile(
@@ -173,14 +174,19 @@ def parse_entradas(texto):
 
 
 def camadas_frio_recente_primeiro():
-    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
+    """Nomes dos chunks MEMORIAS-FRIO-*.md em memoria/frio/, do mais pro menos
     recente -- mesma regra usada em scripts/gerar_indice_derivado.py e
     .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): maior sufixo
     primeiro, depois sem sufixo, depois "-com-migrado"; datas mais recentes
     primeiro entre dias distintos. Verificado contra o conteúdo real dos 11
-    chunks existentes em 06/09/2026 (primeira/última entrada de cada um)."""
+    chunks existentes em 06/09/2026 (primeira/última entrada de cada um).
+    Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026 (risco
+    assumido por escrito pelo Humano, ver a entrada de MEMÓRIAS junto do
+    commit que fez a mudança); nomes continuam MEMORIAS-FRIO-*.md."""
+    if not os.path.isdir(FRIO_DIR):
+        return []
     achados = []
-    for nome in os.listdir(REPO):
+    for nome in os.listdir(FRIO_DIR):
         m = FRIO_NOME.match(nome)
         if not m:
             continue
@@ -204,7 +210,7 @@ def camadas_fisicas_com_faixa():
             ns = [e["num"] for e in es]
             out.append(("MEMORIAS-MORNO.md", min(ns), max(ns), len(ns)))
     for nome in camadas_frio_recente_primeiro():
-        es = parse_entradas_frio(ler(os.path.join(REPO, nome)))
+        es = parse_entradas_frio(ler(os.path.join(FRIO_DIR, nome)))
         if es:
             ns = [e["num"] for e in es]
             out.append((nome, min(ns), max(ns), len(ns)))
@@ -254,7 +260,7 @@ def todas_entradas_todas_camadas():
     if os.path.isfile(MORNO):
         entradas += parse_entradas_morno(ler(MORNO))
     for nome in camadas_frio_recente_primeiro():
-        entradas += parse_entradas_frio(ler(os.path.join(REPO, nome)))
+        entradas += parse_entradas_frio(ler(os.path.join(FRIO_DIR, nome)))
     return entradas
 
 
@@ -651,7 +657,8 @@ def main():
               "fria — congelados (morno: append-only pelo topo; frio: selado, imutável, P-14). "
               "Listados aqui pra não ficarem soltos no grafo.", ""]
         for nome, a, b, q in fisicas:
-            L.append(f"- {wikilink_arquivo(nome, nome)} — ({a})–({b}), {q} entradas")
+            caminho = f"memoria/frio/{nome}" if FRIO_NOME.match(nome) else nome
+            L.append(f"- {wikilink_arquivo(caminho, nome)} — ({a})–({b}), {q} entradas")
         L.append("")
     escrever("moc-memoria.md", L)
 

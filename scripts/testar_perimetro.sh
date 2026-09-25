@@ -343,6 +343,38 @@ grep -vF " $a " SELOS.txt > /tmp/selos.$$ && mv /tmp/selos.$$ SELOS.txt
 printf '\nadulterado\n' >> "$a" && git add -A
 EOF
 
+# Reabertura de 25/09/2026: memorias frias saindo da raiz para memoria/frio/
+# (risco assumido por escrito pelo Humano). As duas provas que a excecao nova
+# do controle exige, testadas separadas -- a legitima passa, a disfarcada de
+# edicao continua pegando.
+_caso P-14 PASSA "relocação legítima de chunk já selado para memoria/frio/ (mesmo hash de HEAD)" <<'EOF'
+linha=$(head -n1 SELOS.txt)
+hash=$(echo "$linha" | awk '{print $1}')
+a=$(echo "$linha" | awk '{print $2}')
+novo="memoria/frio/$(basename "$a")"
+mkdir -p memoria/frio
+git mv "$a" "$novo"
+awk -v h="$hash" -v old="$a" -v new="$novo" \
+  '{ if ($1==h && $2==old) print h" "new" "$3; else print }' SELOS.txt > /tmp/selos_reloc.$$
+mv /tmp/selos_reloc.$$ SELOS.txt
+git add -A
+EOF
+
+_caso P-14 PEGA "REGRESSAO NOVA (25/09): relocação não perdoa conteúdo editado (hash forjado no SELOS não ajuda)" <<'EOF'
+linha=$(head -n1 SELOS.txt)
+hash=$(echo "$linha" | awk '{print $1}')
+a=$(echo "$linha" | awk '{print $2}')
+novo="memoria/frio/$(basename "$a")"
+mkdir -p memoria/frio
+git mv "$a" "$novo"
+printf '\nadulterado-disfarcado-de-relocacao\n' >> "$novo"
+hash_novo=$(sha256sum "$novo" | cut -d' ' -f1)
+awk -v h="$hash" -v old="$a" -v hn="$hash_novo" -v new="$novo" \
+  '{ if ($1==h && $2==old) print hn" "new" "$3; else print }' SELOS.txt > /tmp/selos_reloc2.$$
+mv /tmp/selos_reloc2.$$ SELOS.txt
+git add -A
+EOF
+
 # --- P-1: regua de segredo ------------------------------------------------
 # (419): os padroes nao pegavam NENHUMA das chaves que este sistema usa.
 #

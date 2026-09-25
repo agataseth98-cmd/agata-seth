@@ -167,10 +167,15 @@ MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
 # dos 11 chunks existentes em 06/09/2026 (primeira/última entrada de cada
 # um), não só deduzido do código.
 listar_frio_recente_primeiro() {
-  local f data seq chave
-  for f in MEMORIAS-FRIO-*.md; do
+  # Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026 (risco
+  # assumido por escrito pelo Humano). $f carrega o caminho completo (é o
+  # que os chamadores usam pra abrir o arquivo); só o casamento de
+  # data/sequência olha o basename.
+  local f base data seq chave
+  for f in memoria/frio/MEMORIAS-FRIO-*.md; do
     [ -f "$f" ] || continue
-    if [[ "$f" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
+    base="${f##*/}"
+    if [[ "$base" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
       data="${BASH_REMATCH[1]}"
       if [ -n "${BASH_REMATCH[4]:-}" ]; then
         seq=0
@@ -204,7 +209,7 @@ _grep_entradas_modernas_todas_camadas() {
 # antigo, sempre depois do grupo moderno acima, então não compete pelas N
 # primeiras vagas completas.
 _grep_entradas_antigas_todas_camadas() {
-  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
+  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md memoria/frio/MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
 }
 
 gerar_indice() {

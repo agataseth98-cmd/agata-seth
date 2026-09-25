@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23` (523). Teste refeito do zero, com o Humano assistindo: o "Parar Seth" agora derruba o Obsidian, e a ferramenta aprovada rodou de ponta a ponta. Achado novo: a Seth leu errado a saída do verificador, porque a descrição do comando não chega até ela.**
 (523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano assistindo: a Seth não conseguia usar NENHUMA ferramenta — toda chamada aprovada virava "Cancelado". Causa achada no código da própria LibreChat: `checkpointer: memory` perde a pausa entre requisições. Trocado pra `mongo` no runtime e testado ao vivo: a ferramenta rodou e a Seth respondeu com o conteúdo lido. Mudança no repositório sob P-8, aguardando assinatura. Corrige as leituras de (487) e (498).**
 (522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (informado pelo Humano). As duas quedas do Obsidian de hoje (15:43 e 17:03, saída 0) foram a janela fechada pelo Humano, não defeito. Unit mantida com `Restart=on-failure`.**
-(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
+(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regene …
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando a …
 (519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-histor …
 (518) DIÁRIO — 23/09/2026 · **Pendências de (517) resolvidas com o mandato "pode …
