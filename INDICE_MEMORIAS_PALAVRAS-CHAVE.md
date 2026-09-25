@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
+  palavras-chave: proposta, goose, fallback, passa, pôr, claude, quarentena, assinatura, diff, mudou, então, hash, tem, feita, versão
+(543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: proposta P-8 `goose-fallback-2026-09-24`, aguardando assinatura, com 3 skills no repositório, `p8_verificar.sh`, o MCP do canon ligado, permissões com o prefixo certo, `.agents/` e `redesign/goose/` em quarentena, e um defeito real do `estado_para_eco.sh` corrigido (atrás/à-frente invertido). Desenho do sistema com a bússola publicado como página.**
+  palavras-chave: goose, preparado, fallback, claude, code, proposta, aguardando, assinatura, skills, repositório, verificar, mcp, canon, ligado, permissões, prefixo, certo, agents, redesign, quarentena, defeito, real, estado, eco, corrigido, atrás, frente, invertido, desenho, sistema, bússola, publicado, página
 (542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Engenharia de Sistemas Agênticos", horizonte 2100) auditada, destilada e ligada ao Agata como bússola. O original fica verbatim em `extras/bussola/`, e ao lado a auditoria com 12 princípios (B1–B12) mais 5 que o tratado não vê (T1–T5). Proposta P-8 `bussola-2026-09-24` referencia a bússola no PROJETO, aguardando assinatura.**
   palavras-chave: pesquisa, humano, tratado, convergente, engenharia, sistemas, agênticos, horizonte, auditada, destilada, ligada, agata, bússola, original, fica, verbatim, extras, bussola, lado, auditoria, princípios, proposta, referencia, projeto, aguardando, assinatura
 (541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-2026-09-24` (540). O PROJETO, em "Máquinas", registra a suspensão em S3 e a contenção desabilitada. Nenhuma proposta esperando assinatura.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: working, tree, local, tinha, memórias, projeto, indice, memorias, palavras, chave, hidrata, corrompidos, commitados, restaurados, head, entrada, perdida
 (515) CORREÇÃO — 22/09/2026 · **Corrige (514): `cerebras/gpt-oss-120b` NÃO está mais bloqueado — testado ao vivo, 3 de 3 chamadas com sucesso, minutos depois de eu ter registrado o contrário.**
   palavras-chave: corrige, cerebras, gpt, oss, bloqueado, testado, vivo, chamadas, sucesso, minutos, ter, registrado, contrário
-(514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-gratuitos.md` sobre a Cerebras fechada — Humano logou na própria conta e pediu pra eu olhar direto no painel `cloud.cerebras.ai`, aberto no navegador dele.**
-  palavras-chave: lacuna, verificado, config, modelos, gratuitos, cerebras, fechada, humano, logou, própria, conta, pediu, pra, olhar, direto, painel, cloud, aberto, navegador, dele
-(513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada a fundo, não aplicada como veio — o dado que a embasava estava errado, e a causa raiz era um bug no PRÓPRIO script de sondagem, não nos modelos. Achado de bônus: PROJETO.md descrevia um ROSTER de 5 membros que não existe mais há 2 dias — o real tem 9.**
-  palavras-chave: proposta, roster, modelos, grátis, investigada, fundo, aplicada, veio, dado, embasava, estava, errado, causa, raiz, era, bug, próprio, script, sondagem, achado, bônus, projeto, descrevia, membros, existe, dias, real, tem
+(514) DIÁRIO — 22/09/2026 · **Lacuna "não verificado" de (513)/`config/modelos-g …
+  palavras-chave: lacuna, verificado, config, modelos
+(513) DIÁRIO — 22/09/2026 · **3ª proposta (roster de modelos grátis) investigada …
+  palavras-chave: proposta, roster, modelos, grátis, investigada
 (512) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre o bug …
   palavras-chave: consolidação, automática, bug
 (511) DIÁRIO — 22/09/2026 · **Consolidação automática de 21/09/2026 sobre a quar …

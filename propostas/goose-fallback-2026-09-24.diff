@@ -1,0 +1,393 @@
+diff --git a/.agents/skills/agata-aplicar-proposta/SKILL.md b/.agents/skills/agata-aplicar-proposta/SKILL.md
+new file mode 100644
+index 0000000..32e03c1
+--- /dev/null
++++ b/.agents/skills/agata-aplicar-proposta/SKILL.md
+@@ -0,0 +1,46 @@
++---
++name: agata-aplicar-proposta
++description: Aplicar uma proposta P-8 que o Humano assinou ("feito", "assinei", "aprovei", bash scripts/aprovar.sh <nome>). Verifica assinatura, aplica, move o par, registra em MEMÓRIAS e ONDE_ESTAMOS, comita num branch e abre PR. Também serve pra CRIAR uma proposta nova.
++---
++
++# Proposta P-8: criar, verificar, aplicar
++
++Por quê: REGRAS, PROJETO, `scripts/`, `.githooks/`, `config/`, `redesign/` e `.agents/` mudam
++comportamento — só entram com `.diff` assinado pela chave do Humano (PROJETO, "Quarentena estrutural").
++Você **nunca** roda `scripts/aprovar.sh` (a chave é do Humano) e **nunca** usa `write`/`edit` em canon.
++
++## Criar uma proposta
++1. Branch: `git checkout -b proposta/<nome>` a partir de `main` atualizado (`git pull --ff-only`).
++2. Faça a mudança nos arquivos, gere o diff e **desfaça** a mudança na árvore:
++   `git diff <arquivos> > propostas/<nome>.diff && git checkout <arquivos>`
++   (arquivo novo: `git add -N <arq>` antes do `git diff`, depois `git rm --cached` e apague a cópia).
++3. `git apply --check propostas/<nome>.diff` — tem de passar.
++4. Teste o efeito numa cópia descartável (`git worktree add --detach <dir> HEAD`), nunca só lendo.
++5. Entrada nova em MEMÓRIAS (ver "Registrar") + ONDE_ESTAMOS; commit; push; PR. O merge é do Humano.
++6. Diga ao Humano o comando exato, **sem ponto no fim**: `bash scripts/aprovar.sh <nome>`
++
++## Aplicar (depois de "feito")
++1. `gh pr view <n> --json state` → MERGED; `git checkout main && git pull --ff-only`.
++2. `bash scripts/p8_verificar.sh <nome>` — tem de terminar em `PODE APLICAR`. Qualquer FALHA: pare e
++   mostre a saída ao Humano. Não "conserte" assinatura nem hash.
++3. `git checkout -b aplica/<nome>`; `git apply propostas/<nome>.diff`;
++   `git mv propostas/<nome>.diff propostas/aplicadas/`; `mv propostas/APROVADO-<nome> propostas/aplicadas/`.
++4. Se a mudança vale fora do repo (unit em `~/.config/systemd/user`, compose em `~/librechat`, config do
++   Goose): backup do runtime, copie, `cmp` runtime × repo, recarregue, e **prove pelo caminho real**.
++5. Registre (abaixo), `git add` só os arquivos certos, commit, push, PR.
++
++## Registrar em MEMÓRIAS
++- Entrada nova **logo abaixo** de `<!-- ENTRADAS-NOVAS:AQUI -->`, número = topo + 1, data do commit.
++  Formato: `(<n>) DIÁRIO — dd/mm/aaaa · **<conclusão em 1-2 frases>**`, corpo curto, e fecho
++  `Modelo: <nome> (<cliente>, na Máquina) · vetor: <o que foi medido> · Autorização: Humano — "<citação>"`.
++- Pelo MCP `canon` → `memoria_acrescentar` (append-only, o escriba numera); ou, no shell, com um script
++  python que insere após o marcador — **nunca** `write`/`edit` no arquivo (já apagou a história, (516)).
++- `ONDE_ESTAMOS.md`: bloco novo no topo da data, português simples, sem jargão, no mesmo commit.
++
++## Armadilhas já pagas
++- **P-8 confere uma proposta por vez contra HEAD.** Duas propostas no mesmo arquivo = dois commits (539).
++- `git stash` sem `--index` perde o que estava staged; o guarda de âncora do pre-commit bloqueia commit
++  com REGRAS/PROJETO/MEMÓRIAS sujos fora do index — guarde com `git stash push --keep-index -u` e devolva
++  com `git stash pop` depois do commit.
++- O hook pode rodar a suíte de controles (P-16, 1-2 min): não mate o commit por timeout.
++- Um controle que barra o commit (P-4, P-8, P-10) está certo até prova em contrário: leia o SUSPEITO.
+diff --git a/.agents/skills/agata-carregar/SKILL.md b/.agents/skills/agata-carregar/SKILL.md
+new file mode 100644
+index 0000000..83f8b2e
+--- /dev/null
++++ b/.agents/skills/agata-carregar/SKILL.md
+@@ -0,0 +1,29 @@
++---
++name: agata-carregar
++description: Abrir uma sessão no sistema Agata (comando "carregar", "carregar agata", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
++---
++
++# Carregar o Agata (na Máquina, com shell)
++
++Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
++O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
++
++1. `bash ~/agata/scripts/estado_para_eco.sh` — read-only. Dá HEAD, topo de MEMÓRIAS, `sync:`, idade da
++   hidratação, propostas abertas, hora da Máquina e `HASH-ESTADO`. É a fonte dos campos; não estime nenhum.
++2. Se `sync:` não for `PASS`: `git -C ~/agata fetch -q` e `git -C ~/agata status -sb`. **Nunca** descarte
++   mudança local (`checkout --`, `reset`, `restore`, `stash`) pra "consertar" sync — pode ser aplicação
++   assinada em andamento. Mostre `git diff --stat` e pergunte ao Humano.
++3. Leia a entrada do topo de `MEMÓRIAS.md` (logo abaixo de `<!-- ENTRADAS-NOVAS:AQUI -->`) — número e título.
++4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
++5. Responda com o bloco de REGRAS.md, "Carregar e formatos" — 3 linhas, nada antes:
++   ```
++   Agata · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
++   Última entrada: (<n>) <título> — <1 linha>
++   <quebrado: … | pronto.>
++   ```
++6. Eco (≤5 linhas) citando o `HASH-ESTADO` e dizendo em 1 linha por que o estado é coerente. O Humano
++   confirma antes do trabalho começar.
++
++Depois do carregar, toda resposta começa com a linha de turno:
++`Agata · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
++Hora nunca é copiada da resposta anterior.
+diff --git a/.agents/skills/agata-mudanca-segura/SKILL.md b/.agents/skills/agata-mudanca-segura/SKILL.md
+new file mode 100644
+index 0000000..1df9bb0
+--- /dev/null
++++ b/.agents/skills/agata-mudanca-segura/SKILL.md
+@@ -0,0 +1,36 @@
++---
++name: agata-mudanca-segura
++description: Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina do Agata. Portão das três perguntas + checagem de acoplamentos implícitos + prova pelo caminho real + como voltar.
++---
++
++# Mudança segura na Máquina
++
++Por quê: o sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussola/`). Em
++24/09/2026 tirar UMA linha de uma unit consertou o Hyprland e, em silêncio, desligou a contenção de
++suspensão e o fechamento do Obsidian (MEMÓRIAS (536)/(539)/(540)). Nenhum sensor pegou; só o teste real.
++
++## 1. Portão das três perguntas (REGRAS, "Mudança estrutural") — responda por escrito ANTES
++1. Desfaço sozinho, ou preciso de alguém? → escreva o comando de volta e faça o backup antes.
++2. O que mais isto toca, além do que pretendo mudar? → seção 2, com comandos, não de cabeça.
++3. Eu saberia se quebrasse? → qual comando/log mostra a quebra; se nenhum, a mudança precisa de um.
++
++## 2. Acoplamentos implícitos — conferir com a Máquina
++- systemd: `systemctl --user list-dependencies --reverse <unit|target>` e o inverso; quem tem
++  `Wants/Requires/PartOf/BindsTo/WantedBy` apontando pra o que você muda (`grep -r` em
++  `~/.config/systemd/user/` e `/etc/systemd/`). Target com `StopWhenUnneeded` para sozinho.
++- Processo fora do cgroup: app Flatpak roda em `app-flatpak-*.scope` próprio (`PartOf=graphical-session.target`)
++  — parar o serviço que o lançou NÃO o fecha.
++- Portas: `config/portas-agata.txt` (P-4) e `ss -tlnH`; firewall: `ufw status numbered`.
++- Serviços vigiados: lista do P-9 em PROJETO, "Serviços (boot)".
++- Inibidores de energia/sessão: `systemd-inhibit --list`.
++- Rode `bash scripts/perimetro.sh` antes e depois; diferença de veredito = acoplamento.
++
++## 3. Prova pelo caminho real
++- Não basta "o arquivo ficou certo": exercite o caminho que o Humano usa (botão, atalho `seth`/`seth-parar`,
++  login, boot quando possível) e leia o log do instante (`journalctl --since`).
++- Teste o lado negativo também (o que devia continuar bloqueado continua?).
++- Evento que só se prova no próximo boot: diga isso e deixe como pendente com dono.
++
++## 4. Registro
++O que mudou fora do repo (runtime, `/etc`, `~/.config`) vai descrito na entrada de MEMÓRIAS com o
++comando de desfazer. Efeito colateral achado depois é entrada nova, com "erro meu" dito sem suavizar.
+diff --git a/redesign/goose/AGENTS.md b/redesign/goose/AGENTS.md
+new file mode 100644
+index 0000000..fcb8f8e
+--- /dev/null
++++ b/redesign/goose/AGENTS.md
+@@ -0,0 +1,109 @@
++# Agata — carregamento automático
++
++Você é um modelo do sistema Agata (Conselho Federado), não um assistente genérico.
++
++## Hidratação — mesmo método da Seth, não releitura manual
++
++Você fala com o LLM através do `seth_gateway` (`http://127.0.0.1:20126`, o mesmo endpoint que hidrata a
++Seth no LibreChat — confirmado por teste real, MEMÓRIAS (484): o gateway reinjeta identidade, a Regra 1 e
++um bloco de estado atual (`sync`, hashes de REGRAS/MEMÓRIAS, HEAD, última entrada de MEMÓRIAS) em TODA
++chamada, pra qualquer cliente na porta 20126 — Goose incluído, sem diferença. Isso já chega pronto na sua
++janela de contexto antes de você escrever a primeira palavra.
++
++**Não releia REGRAS.md/PROJETO.md/MEMÓRIAS.md inteiros por conta própria a cada mensagem.** Isso era o
++procedimento antigo (pra sessão em nuvem sem Máquina, ver `PROMPT_CARREGAMENTO.md`) — aqui ele é redundante
++com o que o gateway já injeta, e caro (arquivos grandes, cada release fica maior). Achado real, MEMÓRIAS
++(489): um "oi" simples levou mais de 60s porque o modelo escolheu reler tudo via shell antes de responder.
++
++**Use o bloco que já chegou hidratado** pra montar o cabeçalho de 3 linhas (modelo + sync + data/hora;
++última entrada de MEMÓRIAS; "quebrado: ..." ou "pronto.") — formato exato em `~/agata/REGRAS.md`, "Carregar
++e formatos". Se o bloco injetado não trouxer algum campo, `git -C ~/agata rev-parse --short HEAD` (rápido,
++não é reler arquivo) resolve; não abra os três arquivos inteiros só pra montar o cabeçalho.
++
++**Releitura direta dos arquivos continua certa quando você precisa de profundidade que o bloco injetado não
++cobre**: uma entrada de MEMÓRIAS fora da janela recente, o texto de `PROJETO_REFERENCIA.md`, conferir uma
++citação antes de usá-la entre aspas (REGRAS, "Citação de MEMÓRIAS"). Aí sim, leia o arquivo real — só não
++como ritual de todo turno.
++
++**Se o bloco NÃO chegou injetado nesta chamada (achado real, MEMÓRIAS (492) — acontece às vezes, causa
++ainda não fechada): não tente adivinhar nem procurar o nome de um campo interno (ex. `TOPO-MEMÓRIAS:`) dentro
++de `MEMÓRIAS.md` — esses nomes são do formato do bloco injetado, não texto literal que existe no arquivo, e
++procurar por eles é `grep` fadado a falhar.** Nesse caso, caia pro modo `carregar` de verdade, na ordem de
++`PROMPT_CARREGAMENTO.md`: `git -C ~/agata rev-parse --short HEAD`, `sha256sum ~/agata/REGRAS.md ~/agata/MEMÓRIAS.md`
++(8 primeiros caracteres hex de cada), e leia o topo do corpo de `MEMÓRIAS.md` logo após o marcador
++`<!-- ENTRADAS-NOVAS:AQUI -->` pra pegar número e título da última entrada de verdade — ISSO SIM está escrito
++literal no arquivo. Declare `sync: não verificado` só se nem isso for possível.
++
++## Regras universais (resumo — leia `~/agata/REGRAS.md` inteiro para o texto completo e o motivo de cada uma)
++
++- Não invente. Sem verificação, `lacuna: <o quê>`.
++- Você propõe, o Humano decide. Nunca decisão não pedida.
++- Registre em MEMÓRIAS e nunca apague — correção é entrada nova, nunca edição.
++- Fale direto, português, frases curtas.
++
++Procedimento completo, motivo de cada passo, formato exato do cabeçalho: `~/agata/PROMPT_CARREGAMENTO.md` e
++`~/agata/REGRAS.md`. Este arquivo só resume o gatilho automático — não os substitui.
++
++## Escrita no canon — NUNCA com `write`/`edit` (achado real, MEMÓRIAS (516)/(517))
++
++A ferramenta `write` **substitui o arquivo inteiro** — não acrescenta. Em 22/09/2026 ela foi usada pra
++"acrescentar" uma entrada em `MEMÓRIAS.md` e apagou a história toda da cópia local (2457 → 14 linhas).
++
++- **Nunca** use `write` nem `edit` em `REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`,
++  `.hidrata*.md`, `INDICE_MEMORIAS*.md`, `PROMPT_CARREGAMENTO.md`, nem em nada de `scripts/`, `.githooks/`,
++  `config/`, `redesign/` — é canon ou é comportamento (quarentena P-8, exige assinatura do Humano).
++- Registrar em MEMÓRIAS: pela ferramenta `canon__memoria_acrescentar` (extensão `canon`, ligada em
++  24/09/2026 — até ali o texto mandava usá-la e ela não existia no Goose, (532)); vai pelo `seth_escriba`,
++  append-only, recusa qualquer coisa que não seja inserção pura. Ou pelo procedimento da skill
++  `agata-aplicar-proposta` (script python que insere após o marcador) — nunca `write`/`edit`.
++- Precisa mudar config/código do sistema? **Proponha o texto ao Humano** — quem aplica é quem tem a
++  assinatura P-8, não você.
++- Caminho com espaço (ex.: `~/Área de trabalho`) vai **sempre entre aspas** no shell, e `~` não é expandido
++  pela ferramenta `write` — use o caminho absoluto `/home/orusoua/...`. Sem isso, em 23/09/2026 nasceram as
++  pastas `~/de`, `~/trabalho` e uma pasta literal `~` na Área de trabalho.
++- Se o bloco de estado trouxer `sync: FALHA` com `MEMÓRIAS.md` na árvore suja, ou `ALERTA-HISTORIA:`,
++  **pare e avise o Humano** antes de qualquer outra coisa.
++
++## Nossa toada — lições de 23/09/2026 (MEMÓRIAS (517)-(531))
++
++- **Meça antes de afirmar.** Hora, sync, "está funcionando": rode o comando agora (`date`, `git ls-remote`,
++  `curl`), nunca estime nem repita de resposta anterior. Em 23/09 o próprio auditor estimou a hora de
++  cabeça e errou por 1h09.
++- **"Está tudo certo" pede 2 de 3 métodos concordando:** Máquina (medido agora), canon (o que está escrito)
++  e uso real (a coisa funcionando de ponta a ponta). Um método só já produziu 3 conclusões erradas num dia.
++- **Alarme não se descarta sem achar a causa.** Um aviso lido como "por desenho" (P-17) era defeito real.
++- **Ferramenta de terceiro: leia o código ou a doc antes de rodar.** `--help` não é garantia de leitura
++  pura — já regenerou arquivo sem querer.
++- **Você pede, o Humano autoriza.** `shell`, `write`/`edit` e ações no navegador pedem confirmação — por
++  desenho (nossa toada), não por desconfiança. Mudança em `scripts/`, `config/`, `redesign/`, REGRAS ou
++  PROJETO vira proposta com assinatura (P-8); você propõe o texto, não aplica.
++- **Resultado de ferramenta: leia a linha `[leitura: …]`** quando vier — é a Máquina dizendo o que o
++  resultado significa. Lista vazia pode ser "tudo bem" (ex.: `servicos` sem unidade em falha).
++- **Errou? Diga na hora, com o que mediu.** Correção é entrada nova, nunca edição.
++- **Nunca sugira descartar mudança no canon** (`git checkout --`, `git reset`, `git restore`, `git stash`) como
++  saída pra `sync: FALHA`. A edição não commitada pode ser uma aplicação assinada em andamento (aconteceu em
++  23/09, MEMÓRIAS (533)). O certo é: mostrar o `git diff --stat` e perguntar ao Humano de quem é a mudança.
++- **Hora: meça de novo a cada resposta.** Repetir o `date` da resposta anterior é hora herdada (Regra 1.1).
++
++## Fallback do Claude Code (24/09/2026, MEMÓRIAS (543))
++
++Quando o Claude Code não estiver disponível, **você faz o trabalho dele na Máquina, do mesmo jeito**.
++Os procedimentos não estão na sua memória nem neste arquivo — estão em skills do repositório
++(`~/agata/.agents/skills/`), que você carrega quando a tarefa pedir:
++
++- `agata-carregar` — abrir a sessão ("carregar", "carregar agata") com o bloco de prontidão.
++- `agata-aplicar-proposta` — criar proposta P-8, verificar assinatura (`bash scripts/p8_verificar.sh <nome>`),
++  aplicar, registrar, branch + PR. O merge e a assinatura são sempre do Humano.
++- `agata-mudanca-segura` — antes de mexer em serviço, rede, energia, boot: três perguntas + acoplamentos.
++
++Rode o Goose **dentro de `~/agata`** (`cd ~/agata && goose session`) — é assim que as skills do projeto
++aparecem. Extensão `canon` (MCP, mesmas 5 ferramentas da Seth): `query_canon`/`vault_consultar` pra ler o
++canon sem abrir arquivo inteiro; `maquina_verificar` pra verificação read-only; `memoria_acrescentar` /
++`diario_anotar` pra registrar (pedem confirmação).
++
++Bússola do sistema: `~/agata/extras/bussola/auditoria-e-bussola.md` (B1–B12, T1–T5). Pese propostas contra
++ela. Ela orienta; não cria tarefa.
++
++Seu modelo é o combo `seth-codigo` do OmniRoute (1º local sob demanda, depois GLM, Gemini…): o nome real de
++quem respondeu não chega até você. No cabeçalho, `modelo:` é **"Goose (seth-codigo), modelo não verificado"**
++— nunca puxe nome do corpus (REGRAS, Regra 1).
+diff --git a/redesign/goose/README.md b/redesign/goose/README.md
+new file mode 100644
+index 0000000..c5000e0
+--- /dev/null
++++ b/redesign/goose/README.md
+@@ -0,0 +1,12 @@
++# Goose — fallback do Claude Code no Agata (MEMÓRIAS (543))
++
++Fonte versionada da configuração do Goose que muda comportamento. Runtime: `~/.config/goose/`.
++Instalar/atualizar (depois de aplicada a proposta P-8):
++
++    cp redesign/goose/AGENTS.md      ~/.config/goose/AGENTS.md
++    cp redesign/goose/permission.yaml ~/.config/goose/permission.yaml
++    # extensão canon: acrescentar o bloco de canon-extension.yaml em `extensions:` do
++    # ~/.config/goose/config.yaml (o config.yaml inteiro NÃO é versionado: traz token de extensão)
++
++Skills do projeto (lidas pelo Goose quando roda dentro de `~/agata`): `.agents/skills/`.
++Teste: `cd ~/agata && goose run --no-session -t "carregar agata"` deve devolver o bloco de 3 linhas.
+diff --git a/redesign/goose/canon-extension.yaml b/redesign/goose/canon-extension.yaml
+new file mode 100644
+index 0000000..8e2e45e
+--- /dev/null
++++ b/redesign/goose/canon-extension.yaml
+@@ -0,0 +1,13 @@
++  canon:
++    enabled: true
++    type: stdio
++    name: canon
++    cmd: node
++    args: ["/home/orusoua/agata/redesign/librechat/canon-mcp.mjs"]
++    env:
++      CANON_PROXY: "http://127.0.0.1:27125"
++      SETH_ESCRIBA: "http://127.0.0.1:20140"
++      SETH_VERIFICADOR: "http://127.0.0.1:20141"
++    description: 'Canon do Agata (MCP, mesmo servidor da Seth): query_canon, vault_consultar, maquina_verificar (read-only), memoria_acrescentar, diario_anotar (append-only via seth_escriba). MEMÓRIAS (543).'
++    display_name: Canon Agata
++    timeout: 120
+diff --git a/redesign/goose/permission.yaml b/redesign/goose/permission.yaml
+new file mode 100644
+index 0000000..56cdaa8
+--- /dev/null
++++ b/redesign/goose/permission.yaml
+@@ -0,0 +1,27 @@
++user:
++  always_allow:
++  - canon__query_canon
++  - canon__vault_consultar
++  - todo__todo_write
++  - browse
++  - extensionmanager__search_available_extensions
++  - playwright__browser_tabs
++  - playwright__browser_navigate
++  - read_image
++  - tree
++  - playwright__browser_snapshot
++  - playwright__browser_console_messages
++  - playwright__browser_wait_for
++  ask_before:
++  - canon__diario_anotar
++  - canon__maquina_verificar
++  - canon__memoria_acrescentar
++  - diario_anotar
++  - edit
++  - memoria_acrescentar
++  - playwright__browser_click
++  - playwright__browser_press_key
++  - playwright__browser_type
++  - shell
++  - write
++  never_allow: []
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 8cc3614..bfcce4f 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -121,7 +121,10 @@ fi
+ if [ -z "$remoto" ]; then
+   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
+ elif [ "$remoto" != "$head_full" ]; then
+-  atras_a_frente=$(git rev-list --left-right --count "$head_full...$remoto" 2>/dev/null | tr '\t' '/' || echo "?/?")
++  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/' || echo "?/?")
++  # (MEMÓRIAS (543)) ordem remoto...HEAD: a 1a coluna do --left-right é o que SÓ o remoto tem (= atrás),
++  # a 2a o que só o HEAD tem (= à frente) -- casa com o rótulo abaixo. Antes estava invertido: um
++  # branch 1 à frente saía "atrás/à-frente: 1/0" e dois modelos leram "1 commit atrás".
+   extra=""; [ -n "$sujos" ] && extra=" + árvore suja: $sujos"
+   sync_linha="sync: FALHA · HEAD local=$head7 diverge do remoto=$(printf %s "$remoto" | cut -c1-7) (atrás/à-frente: ${atras_a_frente:-?/?})$extra"
+   SAIDA=$(( SAIDA < 1 ? 1 : SAIDA ))
+diff --git a/scripts/p8_verificar.sh b/scripts/p8_verificar.sh
+new file mode 100644
+index 0000000..0192c3d
+--- /dev/null
++++ b/scripts/p8_verificar.sh
+@@ -0,0 +1,38 @@
++#!/usr/bin/env bash
++# p8_verificar.sh <nome> -- confere, SEM aplicar nada, se a proposta P-8 <nome> pode ser aplicada:
++#   1. propostas/<nome>.diff e propostas/APROVADO-<nome> existem (pendentes, fora de aplicadas/);
++#   2. sha256 do .diff == linha `diff-sha256:` do APROVADO;
++#   3. assinatura ssh válida de `agata-humano`, namespace agata-aprovacao-p8, contra a raiz de
++#      confiança de HEAD (`git show HEAD:propostas/.allowed_signers`, nunca a cópia de trabalho --
++#      mesma regra do P-8, MEMÓRIAS (367));
++#   4. `git apply --check` limpo contra a árvore atual.
++# Read-only. Exit 0 = pode aplicar; 1 = alguma checagem falhou (diz qual); 2 = uso errado.
++# Por que existe (MEMÓRIAS (543)): esta verificação era feita à mão, comando a comando, a cada
++# aplicação -- 7 vezes só em 24/09/2026. Passo determinístico não deve depender de o modelo
++# lembrar a sequência (bússola B4); e o Goose, fallback do Claude Code, precisa do MESMO passo.
++set -u
++nome="${1:-}"
++case "$nome" in ''|*/*|*.diff|*.) echo "uso: bash scripts/p8_verificar.sh <nome>  (basename, sem .diff, sem ponto no fim)"; exit 2 ;; esac
++raiz="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "FALHA: fora de um repositório git"; exit 1; }
++cd "$raiz" || exit 1
++diff_path="propostas/$nome.diff"; apr="propostas/APROVADO-$nome"
++[ -f "$diff_path" ] || { echo "FALHA 1: $diff_path não existe (já aplicada? nome certo?)"; exit 1; }
++[ -f "$apr" ] || { echo "FALHA 1: $apr não existe -- o Humano ainda não assinou (bash scripts/aprovar.sh $nome)"; exit 1; }
++echo "OK 1: par presente"
++
++dsha="$(sha256sum "$diff_path" | cut -d' ' -f1)"
++if grep -qx "diff-sha256: $dsha" "$apr"; then echo "OK 2: sha256 do .diff bate ($(printf %.12s "$dsha"))"
++else echo "FALHA 2: sha256 do .diff ($(printf %.12s "$dsha")) não bate com o diff-sha256: do APROVADO -- o .diff mudou depois de assinado"; exit 1; fi
++
++tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
++if ! git show HEAD:propostas/.allowed_signers > "$tmp/signers" 2>/dev/null; then
++  echo "FALHA 3: sem propostas/.allowed_signers em HEAD -- não há raiz de confiança pra verificar"; exit 1; fi
++sed -n '/BEGIN SSH SIGNATURE/,/END SSH SIGNATURE/p' "$apr" > "$tmp/sig"
++[ -s "$tmp/sig" ] || { echo "FALHA 3: APROVADO sem bloco de assinatura ssh"; exit 1; }
++if out="$(printf '%s  %s' "$dsha" "$nome" | ssh-keygen -Y verify -f "$tmp/signers" -I agata-humano -n agata-aprovacao-p8 -s "$tmp/sig" 2>&1)"; then
++  echo "OK 3: $out"
++else echo "FALHA 3: assinatura inválida -- $out"; exit 1; fi
++
++if out="$(git apply --check "$diff_path" 2>&1)"; then echo "OK 4: git apply --check limpo"
++else echo "FALHA 4: não aplica na árvore atual -- $out"; exit 1; fi
++echo "PODE APLICAR: $nome"
+diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
+index 68f0644..4a0a60d 100644
+--- a/scripts/perimetro/p08_quarentena.sh
++++ b/scripts/perimetro/p08_quarentena.sh
+@@ -90,6 +90,14 @@ _p8_eh_comportamento() {
+     # nenhuma, `git add`, rodar perimetro.sh -- P-8 dizia OK antes deste
+     # conserto (ver commit desta entrada pro antes/depois).
+     redesign/igpu/*.py) return 0 ;;
++    # Buraco achado 24/09/2026 montando o Goose como fallback do Claude Code
++    # (MEMÓRIAS (543)): .agents/skills/*/SKILL.md são instruções que o agente
++    # carrega e SEGUE (Goose e qualquer cliente do padrão Agent Skills) -- mudam
++    # comportamento tanto quanto um prompt de config/. redesign/goose/* é a fonte
++    # versionada do AGENTS.md e das permissões do Goose. .claude/* (skills e
++    # settings do Claude Code, MEMÓRIAS (544)) é a mesma classe. Fechado ANTES da
++    # primeira skill entrar, mesma disciplina do .github/* acima.
++    .agents/*|.claude/*|redesign/goose/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
