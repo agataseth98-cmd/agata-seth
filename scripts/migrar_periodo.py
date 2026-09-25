@@ -198,11 +198,15 @@ def main():
         # colidir e sobrescrever um chunk já selado. Achado testando de
         # verdade: a primeira versão deste script sobrescrevia o chunk do
         # dia anterior sem aviso na segunda passada do mesmo dia.
+        # Chunks novos nascem em memoria/frio/ desde 25/09/2026 (risco
+        # assumido por escrito pelo Humano) -- não mais na raiz do repo.
+        pasta_frio = RAIZ / "memoria" / "frio"
+        pasta_frio.mkdir(parents=True, exist_ok=True)
         seq = 1
         while True:
             sufixo_seq = "" if seq == 1 else f"-{seq}"
             nome_chunk = f"MEMORIAS-FRIO-{data_str}{sufixo_seq}{nome_extra}.md"
-            caminho_frio = RAIZ / nome_chunk
+            caminho_frio = pasta_frio / nome_chunk
             if not caminho_frio.exists():
                 break
             seq += 1
@@ -220,7 +224,7 @@ def main():
         hash_frio = hashlib.sha256(caminho_frio.read_bytes()).hexdigest()
         data_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         with open(RAIZ / "SELOS.txt", "a", encoding="utf-8") as f:
-            f.write(f"{hash_frio} {nome_chunk} {data_iso}\n")
+            f.write(f"{hash_frio} memoria/frio/{nome_chunk} {data_iso}\n")
         print(f"selo registrado em SELOS.txt: {hash_frio}")
 
     print("\naplicado.")

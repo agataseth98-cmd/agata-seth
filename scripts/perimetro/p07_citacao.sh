@@ -67,7 +67,7 @@ p7_citacao() {
   elif [ -f MEMORIAS-MORNO.md ]; then
     cat MEMORIAS-MORNO.md >> "$tmp_combinado"
   fi
-  for f in MEMORIAS-FRIO-*.md; do
+  for f in MEMORIAS-FRIO-*.md memoria/frio/MEMORIAS-FRIO-*.md; do
     [ -e "$f" ] || continue
     cat "$f" >> "$tmp_combinado"
   done

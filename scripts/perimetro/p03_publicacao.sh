@@ -15,12 +15,24 @@
 # Se .gitignore falhou ou foi forçado (`git add -f`), `git ls-files` ainda
 # mostra o arquivo rastreado -- é isso que a checagem mede, não a presença
 # da regra no .gitignore (regra existir não prova que foi respeitada).
+#
+# `memoria/frio/` é exceção deliberada desde 25/09/2026 (risco assumido por
+# escrito pelo Humano): os chunks selados MORAM lá de propósito, rastreados
+# e versionados -- não são escritor automático não-intencional, são o
+# canon (P-14 garante a imutabilidade deles depois de selados). O pathspec
+# de exclusão ':!memoria/frio/*' tira só essa pasta; um USER.md/MEMORY.md
+# batendo direto em memoria/ (a classe real que este controle existe pra
+# pegar) continua caindo no SUSPEITO — medido antes de aplicar.
 p3_publicacao() {
   local escritores=("memoria/*.md" "*.bundle")
   local ruim=0
   local padrao achados
   for padrao in "${escritores[@]}"; do
-    achados="$(git ls-files -- "$padrao")"
+    if [ "$padrao" = "memoria/*.md" ]; then
+      achados="$(git ls-files -- "$padrao" ":!memoria/frio/*")"
+    else
+      achados="$(git ls-files -- "$padrao")"
+    fi
     if [ -n "$achados" ]; then
       echo "SUSPEITO (P-3): escritor automático '$padrao' tem arquivo RASTREADO, deveria estar fora do índice:"
       echo "$achados" | sed 's/^/  /'

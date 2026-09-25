@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
+  palavras-chave: assinado, verificado, aplicado, fix, teste, segunda, linha, defesa, github, actions, suite, adversarial, pegou, bug, real, novo, lógica, segurança, próprio
+(551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
+  palavras-chave: assinado, verificado, aplicado, memorias, frias, fora, raiz, chunks, frios, saíram, repositório, memoria, frio, redesenhado, distinguir, relocação, legítima, edição, disfarçada, abrir, mão, pegar, segunda
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
   palavras-chave: assinado, verificado, aplicado, consolidacao, repeticao, gerador, noturno, pula, tema, consolidado, reprova, descrição, bate, título, real, proposta, esperando, assinatura
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, hitl, checkpointer, mongo, obsidian, partof, teste, refeito, zero, humano, assistindo, parar, seth, agora, derruba, ferramenta, aprovada, rodou, ponta, achado, novo, leu, errado, saída, verificador, porque, descrição, comando, chega, ela
 (523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano assistindo: a Seth não conseguia usar NENHUMA ferramenta — toda chamada aprovada virava "Cancelado". Causa achada no código da própria LibreChat: `checkpointer: memory` perde a pausa entre requisições. Trocado pra `mongo` no runtime e testado ao vivo: a ferramenta rodou e a Seth respondeu com o conteúdo lido. Mudança no repositório sob P-8, aguardando assinatura. Corrige as leituras de (487) e (498).**
   palavras-chave: teste, saúde, zero, navegador, humano, assistindo, seth, conseguia, usar, ferramenta, chamada, aprovada, virava, cancelado, causa, achada, código, própria, librechat, checkpointer, memory, perde, pausa, requisições, trocado, pra, mongo, runtime, testado, vivo, rodou, respondeu, conteúdo, lido, mudança, repositório, sob, aguardando, assinatura, corrige, leituras
-(522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (informado pelo Humano). As duas quedas do Obsidian de hoje (15:43 e 17:03, saída 0) foram a janela fechada pelo Humano, não defeito. Unit mantida com `Restart=on-failure`.**
-  palavras-chave: huggingface, renova, créditos, informado, humano, quedas, obsidian, hoje, saída, foram, janela, fechada, defeito, unit, mantida, restart, failure
-(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regenera-derivados-2026-09-23` (520). Depois de `git pull`, a Máquina roda o mesmo `post-commit`.**
-  palavras-chave: assinado, verificado, aplicado, post, merge, regenera, derivados, git, pull, máquina, roda, mesmo, commit
+(522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (info …
+  palavras-chave: huggingface, renova, créditos, info
+(521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regene …
+  palavras-chave: assinado, verificado, aplicado, post, merge, regene
 (520) DIÁRIO — 23/09/2026 · **Gancho `post-merge` pronto e testado, aguardando a …
   palavras-chave: gancho, post, merge, pronto, testado, aguardando
 (519) DIÁRIO — 23/09/2026 · **Assinadas, verificadas e aplicadas: `alerta-histor …

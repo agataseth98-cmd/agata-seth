@@ -41,6 +41,7 @@ import subprocess
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRIO_DIR = os.path.join(REPO, "memoria", "frio")
 FONTES = ("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md")
 SAIDA_DIR = os.path.join(REPO, "memoria", "missoes", "agata-sistema", "derivado")
 PROIBIDO = os.path.join("memoria", "missoes")
@@ -58,7 +59,7 @@ SEP = "\n\n" + "=" * 64 + "\n"
 
 
 def camadas_frio_recente_primeiro():
-    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
+    """Nomes dos chunks MEMORIAS-FRIO-*.md em memoria/frio/, do mais pro menos
     recente. Mesma regra de ordem do .githooks/gerar-hidratacao.sh (Fase 4,
     MEMÓRIAS (357)): cada passada de scripts/migrar_periodo.py congela o
     trecho mais ANTIGO de morno -- "-com-migrado" é sempre a primeira passada
@@ -68,9 +69,12 @@ def camadas_frio_recente_primeiro():
     sem sufixo, depois "-com-migrado"; entre dias distintos, data mais
     recente primeiro. Verificado contra o conteúdo real dos 11 chunks
     existentes em 06/09/2026 (primeira/última entrada de cada um), não só
-    deduzido do código."""
+    deduzido do código. Moradia mudou de raiz do repo para memoria/frio/ em
+    25/09/2026 (risco assumido por escrito pelo Humano)."""
+    if not os.path.isdir(FRIO_DIR):
+        return []
     achados = []
-    for nome in os.listdir(REPO):
+    for nome in os.listdir(FRIO_DIR):
         m = FRIO_NOME.match(nome)
         if not m:
             continue
@@ -131,11 +135,11 @@ def linhas_titulo_camada_moderna(texto, exige_marcador):
 
 def main():
     # 1. conjunto de entrada fixo: REGRAS/PROJETO + quente, cada um filha
-    # direta da raiz do repo -- mais as camadas extra de memória (morno, se
-    # existir, e todo chunk frio achado no disco), sob a mesma checagem.
-    def validar_filha_direta(nome, p):
-        if os.path.dirname(os.path.realpath(p)) != os.path.realpath(REPO):
-            abortar(f"fonte {nome} não é filha direta da raiz do repo.")
+    # direta da raiz do repo -- morno idem; frio, filha direta de
+    # memoria/frio/ desde 25/09/2026 -- sob a mesma checagem de fronteira.
+    def validar_filha_direta(nome, p, esperado=REPO):
+        if os.path.dirname(os.path.realpath(p)) != os.path.realpath(esperado):
+            abortar(f"fonte {nome} não é filha direta de {esperado}.")
         if PROIBIDO in os.path.realpath(p):
             abortar(f"fonte {nome} resolve para dentro de {PROIBIDO}/ -- proibido.")
 
@@ -161,8 +165,9 @@ def main():
 
     camadas_extra_txt = {}
     for nome in camadas_extra_nomes:
-        p = os.path.join(REPO, nome)
-        validar_filha_direta(nome, p)
+        pasta = FRIO_DIR if FRIO_NOME.match(nome) else REPO
+        p = os.path.join(pasta, nome)
+        validar_filha_direta(nome, p, esperado=pasta)
         camadas_extra_txt[nome] = open(p, encoding="utf-8").read()
 
     sha, data = carimbo()

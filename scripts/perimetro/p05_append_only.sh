@@ -149,7 +149,7 @@ _p5_periodo_verificar() {
       tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")
     fi
   done
-  staged_frio="$(git diff --cached --name-only --diff-filter=A -- 'MEMORIAS-FRIO-*.md' 2>/dev/null)"
+  staged_frio="$(git diff --cached --name-only --diff-filter=A -- 'MEMORIAS-FRIO-*.md' 'memoria/frio/MEMORIAS-FRIO-*.md' 2>/dev/null)"
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")

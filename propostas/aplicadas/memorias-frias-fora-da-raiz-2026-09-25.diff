@@ -1,0 +1,445 @@
+diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
+index 379f870..f065e8a 100755
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -167,10 +167,15 @@ MARCADOR_ENTRADAS_NOVAS="<!-- ENTRADAS-NOVAS:AQUI"
+ # dos 11 chunks existentes em 06/09/2026 (primeira/última entrada de cada
+ # um), não só deduzido do código.
+ listar_frio_recente_primeiro() {
+-  local f data seq chave
+-  for f in MEMORIAS-FRIO-*.md; do
++  # Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026 (risco
++  # assumido por escrito pelo Humano). $f carrega o caminho completo (é o
++  # que os chamadores usam pra abrir o arquivo); só o casamento de
++  # data/sequência olha o basename.
++  local f base data seq chave
++  for f in memoria/frio/MEMORIAS-FRIO-*.md; do
+     [ -f "$f" ] || continue
+-    if [[ "$f" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
++    base="${f##*/}"
++    if [[ "$base" =~ ^MEMORIAS-FRIO-([0-9]{4}-[0-9]{2}-[0-9]{2})(-([0-9]+))?(-com-migrado)?\.md$ ]]; then
+       data="${BASH_REMATCH[1]}"
+       if [ -n "${BASH_REMATCH[4]:-}" ]; then
+         seq=0
+@@ -204,7 +209,7 @@ _grep_entradas_modernas_todas_camadas() {
+ # antigo, sempre depois do grupo moderno acima, então não compete pelas N
+ # primeiras vagas completas.
+ _grep_entradas_antigas_todas_camadas() {
+-  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
++  grep -hE '^### [0-9]{4}-[0-9]{2}-[0-9]{2} \([0-9]+\)' MEMÓRIAS.md MEMORIAS-MORNO.md memoria/frio/MEMORIAS-FRIO-*.md 2>/dev/null | sed -E 's/^### //' || true
+ }
+ 
+ gerar_indice() {
+diff --git a/PROJETO.md b/PROJETO.md
+index 3ae11a1..3e197a9 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -427,7 +427,7 @@ Adotada pelo Humano, 17/08/2026 (MEMÓRIAS (201)). Critério de julgamento pra d
+ - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+ - **Fase 2:** hook com silos por modelo · eco pós-carregar (sem nonce — TES-002 aposentado em (417)).
+ - **Fase 3:** ~~GLM membro pleno (MOD-002)~~ **[SUPERADO 06/09/2026, MEMÓRIAS (355)]** — a decisão de (352) (ninguém tem papel fixo, rotação justa entre 4 modelos grátis) vai na direção oposta de promover um modelo específico a membro pleno; item fechado sem implementar, não substituído por outro. · ~~válvula de discordância sintética~~ **[IMPLEMENTADO 06/09/2026, MEMÓRIAS (356)]** — `scripts/checar_discordancia.sh`, P-13.
+-- **Fase 4: MEMÓRIAS por período — [IMPLEMENTADO 06/09/2026, MEMÓRIAS (357)], período de aderência até 04/10/2026.** Quente (`MEMÓRIAS.md`) / morno (`MEMORIAS-MORNO.md`) / frio (`MEMORIAS-FRIO-<data>[-N].md`, congelado a ~500 linhas, `git tag` + SHA-256 via `scripts/selar.sh`, `--check` agora é P-14). Migração e verificação: `scripts/migrar_periodo.py` + `scripts/verificar_migracao_periodo.py`. P-5 e P-7 já cobrem as três camadas; **fila de aderência fechada [06/09/2026, MEMÓRIAS (358)]:** `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (via `.githooks/gerar-hidratacao.sh`), `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` agora cobrem quente+morno+frio, não só quente (`scripts/consultar_indice.py` não precisou de mudança — só lê o índice já gerado). **Capivara com consentimento por trecho:** ainda não implementado — Capivara é projeto externo, à parte, sem acesso desenhado ainda; fica pra depois da janela de aderência, item novo, não coberto por esta rodada.
++- **Fase 4: MEMÓRIAS por período — [IMPLEMENTADO 06/09/2026, MEMÓRIAS (357)], período de aderência até 04/10/2026.** Quente (`MEMÓRIAS.md`) / morno (`MEMORIAS-MORNO.md`) / frio (`memoria/frio/MEMORIAS-FRIO-<data>[-N].md` — pasta própria desde 25/09/2026, antes soltos na raiz —, congelado a ~500 linhas, `git tag` + SHA-256 via `scripts/selar.sh`, `--check` agora é P-14). Migração e verificação: `scripts/migrar_periodo.py` + `scripts/verificar_migracao_periodo.py`. P-5 e P-7 já cobrem as três camadas; **fila de aderência fechada [06/09/2026, MEMÓRIAS (358)]:** `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (via `.githooks/gerar-hidratacao.sh`), `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` agora cobrem quente+morno+frio, não só quente (`scripts/consultar_indice.py` não precisou de mudança — só lê o índice já gerado). **Capivara com consentimento por trecho:** ainda não implementado — Capivara é projeto externo, à parte, sem acesso desenhado ainda; fica pra depois da janela de aderência, item novo, não coberto por esta rodada.
+ - **Fase 5 (sem prazo — prospecção de horizonte, não backlog):** curador nomeado · espelho do canon fora do GitHub · governança que não dependa de um operador único. Escrita em 31/07/2026 (commit `e6e9b11`, junto com o plano inteiro), em escala de décadas. Os dois termos técnicos que constavam aqui eram candidatos anotados, nunca avaliados: **IPFS** (*InterPlanetary File System*, armazenamento endereçado pelo hash do conteúdo) e **DAO** (*Decentralized Autonomous Organization*, decisão executada por código em vez de administrador). Nenhuma entrada de MEMÓRIAS discute qualquer um dos dois; o mecanismo nunca foi escolhido. Quem se pegar propondo um deles agora, pare — a instrução é de 26/07/2026 e continua valendo.
+ 
+ **Bússola de longo prazo (24/09/2026, MEMÓRIAS (542)):** `extras/bussola/auditoria-e-bussola.md` traz 12 princípios (B1–B12) e 5 aprendidos por incidente (T1–T5), destilados e auditados a partir de um tratado externo sobre engenharia de sistemas agênticos (original verbatim na mesma pasta; 7 das 8 fontes conferidas ao vivo, 1 `lacuna`). **Orienta, não gera tarefa** (REGRAS, "Contenção de escopo"): toda proposta nova é pesada também contra ela, e as lacunas que ela lista só viram trabalho por ordem do Humano. Em conflito, REGRAS vence.
+diff --git a/SELOS.txt b/SELOS.txt
+index bee6eab..f6858d7 100644
+--- a/SELOS.txt
++++ b/SELOS.txt
+@@ -1,11 +1,11 @@
+-8783d29d9f8d0158d71f91e7c6879c725fbac20419834b34aea71e4a15ebdfd2 MEMORIAS-FRIO-2026-09-06-com-migrado.md 2026-09-06T22:25:58Z
+-df0c919b284699fa758a3a4d438aa8b48b731d08837fe9526e951b4c5bb70ca4 MEMORIAS-FRIO-2026-09-06.md 2026-09-06T22:25:58Z
+-9631e34114ce8c6599b013a434b1c4e26f7ddd8b337b83314d35475fabca6083 MEMORIAS-FRIO-2026-09-06-2.md 2026-09-06T22:25:58Z
+-0ae8db0d129d31ecf058bf4853fc41b0fffc19abb442b0c8d52b98e25314565c MEMORIAS-FRIO-2026-09-06-3.md 2026-09-06T22:25:58Z
+-5bd813d3ea1dcb9460bb256508821e6e1168a21b2c8467044bf4d92865b591eb MEMORIAS-FRIO-2026-09-06-4.md 2026-09-06T22:25:58Z
+-39bf049cca8ef71a2e8c86d5573a274f88dfd74fc7117739f40d5ebc2ebe1771 MEMORIAS-FRIO-2026-09-06-5.md 2026-09-06T22:25:58Z
+-ed3224fc731a159994d72621e1978c264d86e7f488e948a2c2a8f14e6018c33a MEMORIAS-FRIO-2026-09-06-6.md 2026-09-06T22:25:58Z
+-0ba0efee85e558da9a9e1f077b27f4f8e7cda2a268db8af62676f7d918bf6628 MEMORIAS-FRIO-2026-09-06-7.md 2026-09-06T22:25:59Z
+-c29d4c7f45986ee09bd531d28cb5bc4f03ec8b2ddda4f893f81b8bdfc9daa867 MEMORIAS-FRIO-2026-09-06-8.md 2026-09-06T22:25:59Z
+-33d5e33e9b67e259f85174d9846ec84ea91a8c860e76976a72a6a8680cceece1 MEMORIAS-FRIO-2026-09-06-9.md 2026-09-06T22:25:59Z
+-bfe575776e1caa1b1cbde717b85b878e22bcb8b48d207315fa2ee1acc6c242f5 MEMORIAS-FRIO-2026-09-06-10.md 2026-09-06T22:38:31Z
++8783d29d9f8d0158d71f91e7c6879c725fbac20419834b34aea71e4a15ebdfd2 memoria/frio/MEMORIAS-FRIO-2026-09-06-com-migrado.md 2026-09-06T22:25:58Z
++df0c919b284699fa758a3a4d438aa8b48b731d08837fe9526e951b4c5bb70ca4 memoria/frio/MEMORIAS-FRIO-2026-09-06.md 2026-09-06T22:25:58Z
++9631e34114ce8c6599b013a434b1c4e26f7ddd8b337b83314d35475fabca6083 memoria/frio/MEMORIAS-FRIO-2026-09-06-2.md 2026-09-06T22:25:58Z
++0ae8db0d129d31ecf058bf4853fc41b0fffc19abb442b0c8d52b98e25314565c memoria/frio/MEMORIAS-FRIO-2026-09-06-3.md 2026-09-06T22:25:58Z
++5bd813d3ea1dcb9460bb256508821e6e1168a21b2c8467044bf4d92865b591eb memoria/frio/MEMORIAS-FRIO-2026-09-06-4.md 2026-09-06T22:25:58Z
++39bf049cca8ef71a2e8c86d5573a274f88dfd74fc7117739f40d5ebc2ebe1771 memoria/frio/MEMORIAS-FRIO-2026-09-06-5.md 2026-09-06T22:25:58Z
++ed3224fc731a159994d72621e1978c264d86e7f488e948a2c2a8f14e6018c33a memoria/frio/MEMORIAS-FRIO-2026-09-06-6.md 2026-09-06T22:25:58Z
++0ba0efee85e558da9a9e1f077b27f4f8e7cda2a268db8af62676f7d918bf6628 memoria/frio/MEMORIAS-FRIO-2026-09-06-7.md 2026-09-06T22:25:59Z
++c29d4c7f45986ee09bd531d28cb5bc4f03ec8b2ddda4f893f81b8bdfc9daa867 memoria/frio/MEMORIAS-FRIO-2026-09-06-8.md 2026-09-06T22:25:59Z
++33d5e33e9b67e259f85174d9846ec84ea91a8c860e76976a72a6a8680cceece1 memoria/frio/MEMORIAS-FRIO-2026-09-06-9.md 2026-09-06T22:25:59Z
++bfe575776e1caa1b1cbde717b85b878e22bcb8b48d207315fa2ee1acc6c242f5 memoria/frio/MEMORIAS-FRIO-2026-09-06-10.md 2026-09-06T22:38:31Z
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index d0a8ab7..998235a 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -49,6 +49,7 @@ import urllib.request
+ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
+ MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
++FRIO_DIR = os.path.join(REPO, "memoria", "frio")
+ EMBED_URL = os.environ.get("AGATA_EMBED_URL", "http://127.0.0.1:20134/embed")
+ CACHE_DIR = os.environ.get(
+     "AGATA_BUSCA_CACHE", os.path.expanduser("~/.cache/agata/busca_semantica")
+@@ -68,9 +69,12 @@ def _camadas_frio_recente_primeiro():
+     """Mesma regra de ordem de scripts/gerar_indice_derivado.py e
+     .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): mais recente
+     primeiro é maior sufixo primeiro, depois sem sufixo, depois
+-    "-com-migrado"; datas mais recentes primeiro entre dias distintos."""
++    "-com-migrado"; datas mais recentes primeiro entre dias distintos.
++    Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026."""
++    if not os.path.isdir(FRIO_DIR):
++        return []
+     achados = []
+-    for nome in os.listdir(REPO):
++    for nome in os.listdir(FRIO_DIR):
+         m = FRIO_NOME.match(nome)
+         if not m:
+             continue
+@@ -78,7 +82,7 @@ def _camadas_frio_recente_primeiro():
+         seq = 0 if com_migrado else int(seq_str or 1)
+         achados.append((data, seq, nome))
+     achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
+-    return [os.path.join(REPO, nome) for _, _, nome in achados]
++    return [os.path.join(FRIO_DIR, nome) for _, _, nome in achados]
+ 
+ 
+ def _parse_entradas_bloco(corpo):
+diff --git a/scripts/gerar_indice_derivado.py b/scripts/gerar_indice_derivado.py
+index 6a1af82..ffd59ff 100644
+--- a/scripts/gerar_indice_derivado.py
++++ b/scripts/gerar_indice_derivado.py
+@@ -41,6 +41,7 @@ import subprocess
+ import sys
+ 
+ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++FRIO_DIR = os.path.join(REPO, "memoria", "frio")
+ FONTES = ("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md")
+ SAIDA_DIR = os.path.join(REPO, "memoria", "missoes", "agata-sistema", "derivado")
+ PROIBIDO = os.path.join("memoria", "missoes")
+@@ -58,7 +59,7 @@ SEP = "\n\n" + "=" * 64 + "\n"
+ 
+ 
+ def camadas_frio_recente_primeiro():
+-    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
++    """Nomes dos chunks MEMORIAS-FRIO-*.md em memoria/frio/, do mais pro menos
+     recente. Mesma regra de ordem do .githooks/gerar-hidratacao.sh (Fase 4,
+     MEMÓRIAS (357)): cada passada de scripts/migrar_periodo.py congela o
+     trecho mais ANTIGO de morno -- "-com-migrado" é sempre a primeira passada
+@@ -68,9 +69,12 @@ def camadas_frio_recente_primeiro():
+     sem sufixo, depois "-com-migrado"; entre dias distintos, data mais
+     recente primeiro. Verificado contra o conteúdo real dos 11 chunks
+     existentes em 06/09/2026 (primeira/última entrada de cada um), não só
+-    deduzido do código."""
++    deduzido do código. Moradia mudou de raiz do repo para memoria/frio/ em
++    25/09/2026 (risco assumido por escrito pelo Humano)."""
++    if not os.path.isdir(FRIO_DIR):
++        return []
+     achados = []
+-    for nome in os.listdir(REPO):
++    for nome in os.listdir(FRIO_DIR):
+         m = FRIO_NOME.match(nome)
+         if not m:
+             continue
+@@ -131,11 +135,11 @@ def linhas_titulo_camada_moderna(texto, exige_marcador):
+ 
+ def main():
+     # 1. conjunto de entrada fixo: REGRAS/PROJETO + quente, cada um filha
+-    # direta da raiz do repo -- mais as camadas extra de memória (morno, se
+-    # existir, e todo chunk frio achado no disco), sob a mesma checagem.
+-    def validar_filha_direta(nome, p):
+-        if os.path.dirname(os.path.realpath(p)) != os.path.realpath(REPO):
+-            abortar(f"fonte {nome} não é filha direta da raiz do repo.")
++    # direta da raiz do repo -- morno idem; frio, filha direta de
++    # memoria/frio/ desde 25/09/2026 -- sob a mesma checagem de fronteira.
++    def validar_filha_direta(nome, p, esperado=REPO):
++        if os.path.dirname(os.path.realpath(p)) != os.path.realpath(esperado):
++            abortar(f"fonte {nome} não é filha direta de {esperado}.")
+         if PROIBIDO in os.path.realpath(p):
+             abortar(f"fonte {nome} resolve para dentro de {PROIBIDO}/ -- proibido.")
+ 
+@@ -161,8 +165,9 @@ def main():
+ 
+     camadas_extra_txt = {}
+     for nome in camadas_extra_nomes:
+-        p = os.path.join(REPO, nome)
+-        validar_filha_direta(nome, p)
++        pasta = FRIO_DIR if FRIO_NOME.match(nome) else REPO
++        p = os.path.join(pasta, nome)
++        validar_filha_direta(nome, p, esperado=pasta)
+         camadas_extra_txt[nome] = open(p, encoding="utf-8").read()
+ 
+     sha, data = carimbo()
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 4572354..2e5418d 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -53,6 +53,7 @@ CANON, DATA = _canon()
+ 
+ MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
+ MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
++FRIO_DIR = os.path.join(REPO, "memoria", "frio")
+ MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
+ FIM_MODERNO = re.compile(r"^## Migrado de DIÁRIO\.md", re.M)
+ CAB_ENTRADA = re.compile(
+@@ -173,14 +174,19 @@ def parse_entradas(texto):
+ 
+ 
+ def camadas_frio_recente_primeiro():
+-    """Nomes dos chunks MEMORIAS-FRIO-*.md na raiz do repo, do mais pro menos
++    """Nomes dos chunks MEMORIAS-FRIO-*.md em memoria/frio/, do mais pro menos
+     recente -- mesma regra usada em scripts/gerar_indice_derivado.py e
+     .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): maior sufixo
+     primeiro, depois sem sufixo, depois "-com-migrado"; datas mais recentes
+     primeiro entre dias distintos. Verificado contra o conteúdo real dos 11
+-    chunks existentes em 06/09/2026 (primeira/última entrada de cada um)."""
++    chunks existentes em 06/09/2026 (primeira/última entrada de cada um).
++    Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026 (risco
++    assumido por escrito pelo Humano, ver a entrada de MEMÓRIAS junto do
++    commit que fez a mudança); nomes continuam MEMORIAS-FRIO-*.md."""
++    if not os.path.isdir(FRIO_DIR):
++        return []
+     achados = []
+-    for nome in os.listdir(REPO):
++    for nome in os.listdir(FRIO_DIR):
+         m = FRIO_NOME.match(nome)
+         if not m:
+             continue
+@@ -204,7 +210,7 @@ def camadas_fisicas_com_faixa():
+             ns = [e["num"] for e in es]
+             out.append(("MEMORIAS-MORNO.md", min(ns), max(ns), len(ns)))
+     for nome in camadas_frio_recente_primeiro():
+-        es = parse_entradas_frio(ler(os.path.join(REPO, nome)))
++        es = parse_entradas_frio(ler(os.path.join(FRIO_DIR, nome)))
+         if es:
+             ns = [e["num"] for e in es]
+             out.append((nome, min(ns), max(ns), len(ns)))
+@@ -254,7 +260,7 @@ def todas_entradas_todas_camadas():
+     if os.path.isfile(MORNO):
+         entradas += parse_entradas_morno(ler(MORNO))
+     for nome in camadas_frio_recente_primeiro():
+-        entradas += parse_entradas_frio(ler(os.path.join(REPO, nome)))
++        entradas += parse_entradas_frio(ler(os.path.join(FRIO_DIR, nome)))
+     return entradas
+ 
+ 
+@@ -651,7 +657,8 @@ def main():
+               "fria — congelados (morno: append-only pelo topo; frio: selado, imutável, P-14). "
+               "Listados aqui pra não ficarem soltos no grafo.", ""]
+         for nome, a, b, q in fisicas:
+-            L.append(f"- {wikilink_arquivo(nome, nome)} — ({a})–({b}), {q} entradas")
++            caminho = f"memoria/frio/{nome}" if FRIO_NOME.match(nome) else nome
++            L.append(f"- {wikilink_arquivo(caminho, nome)} — ({a})–({b}), {q} entradas")
+         L.append("")
+     escrever("moc-memoria.md", L)
+ 
+diff --git a/scripts/migrar_periodo.py b/scripts/migrar_periodo.py
+index 59f6b18..767b4b8 100644
+--- a/scripts/migrar_periodo.py
++++ b/scripts/migrar_periodo.py
+@@ -198,11 +198,15 @@ def main():
+         # colidir e sobrescrever um chunk já selado. Achado testando de
+         # verdade: a primeira versão deste script sobrescrevia o chunk do
+         # dia anterior sem aviso na segunda passada do mesmo dia.
++        # Chunks novos nascem em memoria/frio/ desde 25/09/2026 (risco
++        # assumido por escrito pelo Humano) -- não mais na raiz do repo.
++        pasta_frio = RAIZ / "memoria" / "frio"
++        pasta_frio.mkdir(parents=True, exist_ok=True)
+         seq = 1
+         while True:
+             sufixo_seq = "" if seq == 1 else f"-{seq}"
+             nome_chunk = f"MEMORIAS-FRIO-{data_str}{sufixo_seq}{nome_extra}.md"
+-            caminho_frio = RAIZ / nome_chunk
++            caminho_frio = pasta_frio / nome_chunk
+             if not caminho_frio.exists():
+                 break
+             seq += 1
+@@ -220,7 +224,7 @@ def main():
+         hash_frio = hashlib.sha256(caminho_frio.read_bytes()).hexdigest()
+         data_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+         with open(RAIZ / "SELOS.txt", "a", encoding="utf-8") as f:
+-            f.write(f"{hash_frio} {nome_chunk} {data_iso}\n")
++            f.write(f"{hash_frio} memoria/frio/{nome_chunk} {data_iso}\n")
+         print(f"selo registrado em SELOS.txt: {hash_frio}")
+ 
+     print("\naplicado.")
+diff --git a/scripts/perimetro/p03_publicacao.sh b/scripts/perimetro/p03_publicacao.sh
+index 3231ab4..0df019d 100644
+--- a/scripts/perimetro/p03_publicacao.sh
++++ b/scripts/perimetro/p03_publicacao.sh
+@@ -15,12 +15,24 @@
+ # Se .gitignore falhou ou foi forçado (`git add -f`), `git ls-files` ainda
+ # mostra o arquivo rastreado -- é isso que a checagem mede, não a presença
+ # da regra no .gitignore (regra existir não prova que foi respeitada).
++#
++# `memoria/frio/` é exceção deliberada desde 25/09/2026 (risco assumido por
++# escrito pelo Humano): os chunks selados MORAM lá de propósito, rastreados
++# e versionados -- não são escritor automático não-intencional, são o
++# canon (P-14 garante a imutabilidade deles depois de selados). O pathspec
++# de exclusão ':!memoria/frio/*' tira só essa pasta; um USER.md/MEMORY.md
++# batendo direto em memoria/ (a classe real que este controle existe pra
++# pegar) continua caindo no SUSPEITO — medido antes de aplicar.
+ p3_publicacao() {
+   local escritores=("memoria/*.md" "*.bundle")
+   local ruim=0
+   local padrao achados
+   for padrao in "${escritores[@]}"; do
+-    achados="$(git ls-files -- "$padrao")"
++    if [ "$padrao" = "memoria/*.md" ]; then
++      achados="$(git ls-files -- "$padrao" ":!memoria/frio/*")"
++    else
++      achados="$(git ls-files -- "$padrao")"
++    fi
+     if [ -n "$achados" ]; then
+       echo "SUSPEITO (P-3): escritor automático '$padrao' tem arquivo RASTREADO, deveria estar fora do índice:"
+       echo "$achados" | sed 's/^/  /'
+diff --git a/scripts/perimetro/p05_append_only.sh b/scripts/perimetro/p05_append_only.sh
+index 66cfb19..ddd0d42 100644
+--- a/scripts/perimetro/p05_append_only.sh
++++ b/scripts/perimetro/p05_append_only.sh
+@@ -149,7 +149,7 @@ _p5_periodo_verificar() {
+       tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")
+     fi
+   done
+-  staged_frio="$(git diff --cached --name-only --diff-filter=A -- 'MEMORIAS-FRIO-*.md' 2>/dev/null)"
++  staged_frio="$(git diff --cached --name-only --diff-filter=A -- 'MEMORIAS-FRIO-*.md' 'memoria/frio/MEMORIAS-FRIO-*.md' 2>/dev/null)"
+   while IFS= read -r f; do
+     [ -z "$f" ] && continue
+     tmp="$(mktemp)"; git show ":$f" > "$tmp"; depois+=("$tmp")
+diff --git a/scripts/perimetro/p07_citacao.sh b/scripts/perimetro/p07_citacao.sh
+index fc706ff..04319e1 100644
+--- a/scripts/perimetro/p07_citacao.sh
++++ b/scripts/perimetro/p07_citacao.sh
+@@ -67,7 +67,7 @@ p7_citacao() {
+   elif [ -f MEMORIAS-MORNO.md ]; then
+     cat MEMORIAS-MORNO.md >> "$tmp_combinado"
+   fi
+-  for f in MEMORIAS-FRIO-*.md; do
++  for f in MEMORIAS-FRIO-*.md memoria/frio/MEMORIAS-FRIO-*.md; do
+     [ -e "$f" ] || continue
+     cat "$f" >> "$tmp_combinado"
+   done
+diff --git a/scripts/perimetro/p11_silos.sh b/scripts/perimetro/p11_silos.sh
+index 2723cfb..528cb0e 100644
+--- a/scripts/perimetro/p11_silos.sh
++++ b/scripts/perimetro/p11_silos.sh
+@@ -42,7 +42,7 @@ _p11_conteudo_de_silo() {
+   # motivo. Esta camada é o que salvou P-14 do mesmo furo (selar.sh
+   # --check pegou o que a listagem staged não viu).
+   case "$1" in
+-    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
++    MEMÓRIAS.md|MEMORIAS-MORNO.md|MEMORIAS-FRIO-*.md|memoria/frio/MEMORIAS-FRIO-*.md|REGRAS.md|PROJETO.md|.hidrata.md|INDICE_MEMORIAS*.md) return 1 ;;
+   esac
+   git show ":$1" 2>/dev/null | grep -qaE '^modelo-alvo:[[:space:]]*[A-Za-z]'
+ }
+diff --git a/scripts/perimetro/p14_frio_imutavel.sh b/scripts/perimetro/p14_frio_imutavel.sh
+index 63fd9bc..097ade1 100644
+--- a/scripts/perimetro/p14_frio_imutavel.sh
++++ b/scripts/perimetro/p14_frio_imutavel.sh
+@@ -2,17 +2,28 @@
+ # Extraido de scripts/perimetro.sh (item 10 do plano de mitigacao da
+ # auditoria do Marcos, MEMORIAS (437)) -- corte-e-cola, corpo identico ao
+ # de antes, nao e reescrita de logica.
+-
+-# --- P-14 -----------------------------------------------------------------
+-# "Depois de selado, imutável" (MEMÓRIAS por período, Fase 4, MEMÓRIAS
+-# (357)). Um chunk MEMORIAS-FRIO-*.md listado em SELOS.txt nunca mais
+-# recebe escrita nenhuma -- nem sequer voltar a aparecer staged. Diferente
+-# de P-5 (que permite crescer): aqui a garantia é imutabilidade TOTAL.
+-# FALHA-class, mesma severidade de P-8 -- violar um selo é o mesmo tipo de
+-# "história editada" que Regra 4 existe pra impedir, só que na camada fria.
++#
++# Reaberto em 25/09/2026 (memórias frias saindo da raiz para
++# memoria/frio/, risco assumido por escrito pelo Humano -- ver a entrada
++# de MEMÓRIAS que acompanha este commit) para distinguir RELOCAÇÃO
++# legítima de EDIÇÃO disfarçada. Até aqui, qualquer path selado
++# reaparecendo staged era SUSPEITO sem exceção (o teste
++# "REGRESSAO (419): renomear chunk frio selado" existe exatamente pra
++# isso). Essa dureza continua -- a exceção nova exige as DUAS provas
++# juntas, nunca uma sozinha:
++#   1. o SELOS.txt que vai entrar NESTE commit tem uma linha com o MESMO
++#      hash de HEAD (imutável, não vem do commit em curso) num path
++#      DIFERENTE do antigo;
++#   2. o conteúdo REAL desse path novo, hasheado agora (nunca confiando
++#      no texto do SELOS.txt como prova), bate com esse mesmo hash de
++#      HEAD.
++# Um ataque que edita o conteúdo e forja a linha do SELOS.txt pra
++# "confirmar" a própria edição não passa: a prova 2 recalcula o hash do
++# disco contra o valor de HEAD, que o commit em curso não controla.
++# Sem as duas provas, cai no mesmo SUSPEITO de sempre -- nada relaxou.
+ p14_frio_imutavel() {
+   [ -f SELOS.txt ] || return 0
+-  local ruim=0 arquivo staged tmp_saida selos_lista
++  local ruim=0 arquivo staged tmp_saida selos_lista selos_lista_staged novo_path atual
+   # A lista de selos vem de HEAD:SELOS.txt, não do disco. Se viesse do
+   # disco, apagar a linha de um chunk e reescrever o chunk no MESMO commit
+   # tiraria os dois do radar: o loop abaixo nunca veria o nome, e o
+@@ -42,10 +53,22 @@ p14_frio_imutavel() {
+   # enxergar o mesmo conjunto de paths -- controle que enxerga menos do que
+   # devia é falha do controle (REGRAS, Princípios: Segurança).
+   staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only)"
+-  while read -r _ arquivo _; do
++  # Versão do SELOS.txt que vai entrar neste commit (índice); cai pro
++  # disco se SELOS.txt não estiver staged -- mesmo bootstrap de sempre.
++  selos_lista_staged="$(git show :SELOS.txt 2>/dev/null)" || selos_lista_staged=""
++  [ -z "$selos_lista_staged" ] && selos_lista_staged="$(cat SELOS.txt 2>/dev/null)"
++  while read -r hash_h arquivo _; do
+     [ -z "$arquivo" ] && continue
+     if echo "$staged" | grep -qxF "$arquivo"; then
+-      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece staged neste commit -- chunk frio nunca recebe escrita depois de selado. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
++      novo_path="$(echo "$selos_lista_staged" | awk -v h="$hash_h" -v velho="$arquivo" '$1==h && $2!=velho {print $2; exit}')"
++      if [ -n "$novo_path" ]; then
++        atual="$(sha256sum "$novo_path" 2>/dev/null | cut -d' ' -f1)"
++        if [ "$atual" = "$hash_h" ]; then
++          echo "INFO (P-14): '$arquivo' relocado para '$novo_path' -- hash de HEAD ($hash_h) confere no destino, conteúdo intacto. Tratado como mudança de local, não de história."
++          continue
++        fi
++      fi
++      echo "SUSPEITO (P-14): '$arquivo' está selado (SELOS.txt), já existia num commit anterior, e aparece staged neste commit -- chunk frio nunca recebe escrita depois de selado, e não achei destino de relocação com o mesmo hash de HEAD e conteúdo confere. O que fazer: 'git restore --staged $arquivo'; se o conteúdo mudou de verdade, o arquivo foi violado -- restaure também o conteúdo."
+       ruim=1
+     fi
+   done <<< "$selos_lista"
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 7893b3f..caf7eb9 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -343,6 +343,38 @@ grep -vF " $a " SELOS.txt > /tmp/selos.$$ && mv /tmp/selos.$$ SELOS.txt
+ printf '\nadulterado\n' >> "$a" && git add -A
+ EOF
+ 
++# Reabertura de 25/09/2026: memorias frias saindo da raiz para memoria/frio/
++# (risco assumido por escrito pelo Humano). As duas provas que a excecao nova
++# do controle exige, testadas separadas -- a legitima passa, a disfarcada de
++# edicao continua pegando.
++_caso P-14 PASSA "relocação legítima de chunk já selado para memoria/frio/ (mesmo hash de HEAD)" <<'EOF'
++linha=$(head -n1 SELOS.txt)
++hash=$(echo "$linha" | awk '{print $1}')
++a=$(echo "$linha" | awk '{print $2}')
++novo="memoria/frio/$(basename "$a")"
++mkdir -p memoria/frio
++git mv "$a" "$novo"
++awk -v h="$hash" -v old="$a" -v new="$novo" \
++  '{ if ($1==h && $2==old) print h" "new" "$3; else print }' SELOS.txt > /tmp/selos_reloc.$$
++mv /tmp/selos_reloc.$$ SELOS.txt
++git add -A
++EOF
++
++_caso P-14 PEGA "REGRESSAO NOVA (25/09): relocação não perdoa conteúdo editado (hash forjado no SELOS não ajuda)" <<'EOF'
++linha=$(head -n1 SELOS.txt)
++hash=$(echo "$linha" | awk '{print $1}')
++a=$(echo "$linha" | awk '{print $2}')
++novo="memoria/frio/$(basename "$a")"
++mkdir -p memoria/frio
++git mv "$a" "$novo"
++printf '\nadulterado-disfarcado-de-relocacao\n' >> "$novo"
++hash_novo=$(sha256sum "$novo" | cut -d' ' -f1)
++awk -v h="$hash" -v old="$a" -v hn="$hash_novo" -v new="$novo" \
++  '{ if ($1==h && $2==old) print hn" "new" "$3; else print }' SELOS.txt > /tmp/selos_reloc2.$$
++mv /tmp/selos_reloc2.$$ SELOS.txt
++git add -A
++EOF
++
+ # --- P-1: regua de segredo ------------------------------------------------
+ # (419): os padroes nao pegavam NENHUMA das chaves que este sistema usa.
+ #

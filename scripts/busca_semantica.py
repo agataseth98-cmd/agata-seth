@@ -49,6 +49,7 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMORIAS = os.path.join(REPO, "MEMÓRIAS.md")
 MORNO = os.path.join(REPO, "MEMORIAS-MORNO.md")
+FRIO_DIR = os.path.join(REPO, "memoria", "frio")
 EMBED_URL = os.environ.get("AGATA_EMBED_URL", "http://127.0.0.1:20134/embed")
 CACHE_DIR = os.environ.get(
     "AGATA_BUSCA_CACHE", os.path.expanduser("~/.cache/agata/busca_semantica")
@@ -68,9 +69,12 @@ def _camadas_frio_recente_primeiro():
     """Mesma regra de ordem de scripts/gerar_indice_derivado.py e
     .githooks/gerar-hidratacao.sh (Fase 4, MEMÓRIAS (357)): mais recente
     primeiro é maior sufixo primeiro, depois sem sufixo, depois
-    "-com-migrado"; datas mais recentes primeiro entre dias distintos."""
+    "-com-migrado"; datas mais recentes primeiro entre dias distintos.
+    Moradia mudou de raiz do repo para memoria/frio/ em 25/09/2026."""
+    if not os.path.isdir(FRIO_DIR):
+        return []
     achados = []
-    for nome in os.listdir(REPO):
+    for nome in os.listdir(FRIO_DIR):
         m = FRIO_NOME.match(nome)
         if not m:
             continue
@@ -78,7 +82,7 @@ def _camadas_frio_recente_primeiro():
         seq = 0 if com_migrado else int(seq_str or 1)
         achados.append((data, seq, nome))
     achados.sort(key=lambda t: (t[0], t[1]), reverse=True)
-    return [os.path.join(REPO, nome) for _, _, nome in achados]
+    return [os.path.join(FRIO_DIR, nome) for _, _, nome in achados]
 
 
 def _parse_entradas_bloco(corpo):
