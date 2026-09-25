@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
+  palavras-chave: fase, plano, replicabilidade, chaves, env, exemplo, checklist, teste, rotação, proposta, assinada, muda, comportamento, script, runtime
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
   palavras-chave: assinado, verificado, aplicado, vault, inbox, fase, primeiro, pedaço, real, plano, replicabilidade, scripts, importar, mecanismo, trás, memória, obsidian, pra, clone, futuro
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: varredura, tripla, sistema, ordem, humano, repita, confronte, aprimore, proponha, registre, feita, três, métodos, independentes, máquina, canon, uso, real, achados, confrontados, descartados, defeito, consertados, proposta, aguardando, assinatura, abertos, parte, decisão, resolve, ele, tempo, corrige, minha, frase, única, pendência, huggingface, era, exagero
 (526) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `saidas-autoexplicativas-2026-09-23` (525). Conferido com a Seth, ao vivo: a mesma pergunta que ela errou em (524) agora vem certa, usando a leitura calculada pela Máquina.**
   palavras-chave: assinado, verificado, aplicado, saidas, autoexplicativas, conferido, seth, vivo, mesma, pergunta, ela, errou, agora, vem, certa, usando, leitura, calculada, máquina
-(525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, aguardando assinatura (P-8): as ferramentas da Seth passam a entregar o SENTIDO junto com o resultado. Nasce do achado de (524) (a Seth leu "0 unidades em falha" como "sem unidades ativas") e de uma auditoria pedida pelo Humano atrás de outros casos do mesmo tipo: mais 5 no verificador e 2 no MCP do canon.**
-  palavras-chave: proposta, saidas, autoexplicativas, aguardando, assinatura, ferramentas, seth, passam, entregar, sentido, junto, resultado, nasce, achado, leu, unidades, falha, ativas, auditoria, pedida, humano, atrás, casos, mesmo, tipo, verificador, mcp, canon
+(525) DIÁRIO — 23/09/2026 · **Proposta `saidas-autoexplicativas-2026-09-23`, agu …
+  palavras-chave: proposta, saidas, autoexplicativas, agu
 (524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer …
   palavras-chave: assinado, verificado, aplicado, hitl, checkpointer
 (523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano …
