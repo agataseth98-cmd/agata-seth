@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5abffbe3c6a617f7205101a436dc75ebb42b7304
-  Escrito em: 25/09/2026 10:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c05c6fa24af76aeeb4d4479f235605d85b2f9389
+  Escrito em: 25/09/2026 10:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -86,9 +86,11 @@ do próprio processo `omniroute` (respondem 426 e 404) — **`lacuna`: função 
 registrada como desconhecida em vez de adivinhada. Todas em `127.0.0.1`, conferidas por `ss -tlnp`.
 **Sob demanda** (`seth`/`Parar Seth`): `seth-gateway.service` (`:20126`, reidrata a Seth) ·
 `seth-verificador.service` (`:20141`, **único caminho de EXECUÇÃO da Seth — READ-ONLY**:
-`POST /verificar` roda UM comando de uma lista fechada de 9 verificações
+`POST /verificar` roda UM comando de uma lista fechada de 10 verificações
 (`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`,
-`suite_controles`, `servicos`), argv fixo no código, **sem shell**, saída redigida pela
+`suite_controles`, `servicos`, `p8_verificar` — a mesma checagem de `scripts/p8_verificar.sh`
+que o Goose ganhou em (543), 25/09/2026: hash + assinatura + `apply --check` de uma proposta
+P-8 pendente, sem aplicar nada), argv fixo no código, **sem shell**, saída redigida pela
 mesma régua de segredo do P-1, teto com total declarado. Não escreve, não commita, não
 aceita comando livre. Nasceu do pedido da Seth por interpretador de código, (423) —
 ela ganhou o poder de verificar, não o de mudar) ·

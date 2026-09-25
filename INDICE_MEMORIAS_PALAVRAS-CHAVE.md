@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
+  palavras-chave: assinado, verificado, aplicado, seth, verificar, ganha, comando, fixo, verificador, mesma, checagem, goose, ganhou, pra, ela, saber, sozinha, proposta, pendente, pode, aplicada
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
   palavras-chave: assinado, verificado, aplicado, fix, teste, segunda, linha, defesa, github, actions, suite, adversarial, pegou, bug, real, novo, lógica, segurança, próprio
 (551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, saidas, autoexplicativas, aguardando, assinatura, ferramentas, seth, passam, entregar, sentido, junto, resultado, nasce, achado, leu, unidades, falha, ativas, auditoria, pedida, humano, atrás, casos, mesmo, tipo, verificador, mcp, canon
 (524) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23` (523). Teste refeito do zero, com o Humano assistindo: o "Parar Seth" agora derruba o Obsidian, e a ferramenta aprovada rodou de ponta a ponta. Achado novo: a Seth leu errado a saída do verificador, porque a descrição do comando não chega até ela.**
   palavras-chave: assinado, verificado, aplicado, hitl, checkpointer, mongo, obsidian, partof, teste, refeito, zero, humano, assistindo, parar, seth, agora, derruba, ferramenta, aprovada, rodou, ponta, achado, novo, leu, errado, saída, verificador, porque, descrição, comando, chega, ela
-(523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano assistindo: a Seth não conseguia usar NENHUMA ferramenta — toda chamada aprovada virava "Cancelado". Causa achada no código da própria LibreChat: `checkpointer: memory` perde a pausa entre requisições. Trocado pra `mongo` no runtime e testado ao vivo: a ferramenta rodou e a Seth respondeu com o conteúdo lido. Mudança no repositório sob P-8, aguardando assinatura. Corrige as leituras de (487) e (498).**
-  palavras-chave: teste, saúde, zero, navegador, humano, assistindo, seth, conseguia, usar, ferramenta, chamada, aprovada, virava, cancelado, causa, achada, código, própria, librechat, checkpointer, memory, perde, pausa, requisições, trocado, pra, mongo, runtime, testado, vivo, rodou, respondeu, conteúdo, lido, mudança, repositório, sob, aguardando, assinatura, corrige, leituras
+(523) DIÁRIO — 23/09/2026 · **Teste de saúde do zero, no navegador, com o Humano …
+  palavras-chave: teste, saúde, zero, navegador, humano
 (522) DIÁRIO — 23/09/2026 · **HuggingFace renova os créditos em 01/10/2026 (info …
   palavras-chave: huggingface, renova, créditos, info
 (521) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `post-merge-regene …

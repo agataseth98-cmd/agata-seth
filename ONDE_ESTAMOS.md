@@ -11,6 +11,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 25/09/2026
 
+**[APLICADO] A Seth ganhou a mesma verificação que o Goose ganhou ontem.** Ela agora consegue checar sozinha se uma proposta assinada está pronta pra aplicar, sem você precisar rodar o comando na mão. Descobri no caminho que ela já tinha as ferramentas de navegador e Discord ligadas — o texto que dizia o contrário estava desatualizado, não o sistema.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (553).
+
 **[APLICADO] As memórias frias saíram da raiz do repositório.** Os 11 arquivos antigos foram para uma pasta própria (`memoria/frio/`), sem perder nada — conferi hash de cada um antes e depois. No caminho achei e consertei um controle de segurança que ficaria confuso com a mudança de lugar, e testei os dois lados: mudar de lugar sem mexer no conteúdo passa limpo; mudar o conteúdo escondido atrás de uma mudança de lugar continua sendo pego.
 - A verificação automática do GitHub pegou um erro meu num dos testes novos — corrigi, testei nos dois lados de novo, sem afetar a proteção real.
 - Detalhe técnico: `MEMÓRIAS.md`, entradas (551) e (552).

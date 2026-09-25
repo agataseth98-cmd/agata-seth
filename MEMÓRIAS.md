@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5abffbe3c6a617f7205101a436dc75ebb42b7304
-  Escrito em: 25/09/2026 10:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c05c6fa24af76aeeb4d4479f235605d85b2f9389
+  Escrito em: 25/09/2026 10:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c05c6fa24af76aeeb4d4479f235605d85b2f9389/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
+
+**Pedido do Humano:** "o mesmo refinamento que foi feito no Goose seja feito na Seth dentro do escopo dela." Antes de escrever qualquer coisa, conferi na Máquina (Mongo, não o texto do PROJETO.md) o que o Agent dela (`agent_4KlxSMeX5Y8cWQVODkJfH`) já tinha: **14 tools, MCP canon+discord+navegador todos anexados** — o PROJETO.md estava desatualizado dizendo só "MCP canon anexado"; a Seth já tinha paridade com o Goose nas ferramentas de ação. O gap real era outro: o canal de verificação dela (`seth_verificador`, 9 comandos fixos, read-only, sem shell) não tinha nada equivalente a `scripts/p8_verificar.sh` — ela não conseguia responder "essa proposta pode ser aplicada?" sozinha.
+
+**Conserto, mesma disciplina dos outros 9 comandos:** `nome` (a proposta) é o único ponto variável, validado por regex (`^[a-z0-9][a-z0-9._-]{0,80}$`, sem `/` nem `..`) ANTES de virar elemento de `argv` — nunca interpolado como texto, nunca chega a um shell. Read-only por natureza (o próprio `p8_verificar.sh` não aplica nada). Leitura calculada nova: "PODE APLICAR" ou "NÃO PODE APLICAR — parou na checagem N de 4", pro mesmo motivo do achado de (525) — a Seth não deve receber saída crua sem o sentido dela já calculado.
+
+**Testado:** 8 nomes maliciosos rejeitados (`../etc/passwd`, barra, maiúscula, espaço, 100 chars) antes de virarem argv; `git_log` passou a recusar o parâmetro `nome` também (achado no próprio selftest — antes ele aceitava em silêncio, sem usar; não era brecha de segurança, mas quebrava a disciplina de "cada comando declara exatamente o que aceita"). Selftest: **36/36**. Confirmei que o serviço rodando ainda tinha o código velho (9 comandos) antes de aplicar — a mudança só existia na worktree isolada até este commit.
+
+**PROJETO.md corrigido no mesmo commit:** "9 verificações" → "10", `p8_verificar` listado, e a frase sobre o Agent da Seth atualizada pra citar a paridade real com discord/navegador, não só canon.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/seth-p8-verificar-2026-09-25`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `mongosh` direto no `LibreChat.agents` pra conferir os tools reais do Agent (não confiei no PROJETO.md); leitura de `redesign/router/seth_verificador.py` inteiro antes de mexer; `python3 -m py_compile` + `--selftest` (36/36, incluindo o caso que achou a lacuna do `git_log`); `perimetro.sh` completo antes e depois (0 FALHA); `curl` real contra o `:20141` rodando, confirmando que o código velho ainda respondia antes do commit; `git apply --check` numa worktree fresca baseada no `main` já com (551)/(552); `p8_verificar.sh` — hash, assinatura, `apply --check`, os 4 OK. Autorização: Humano — "o mesmo refinamento que foi feito no goose seja feito na Seth" + `scripts/aprovar.sh seth-p8-verificar-2026-09-25` assinado.
+
 
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
 
