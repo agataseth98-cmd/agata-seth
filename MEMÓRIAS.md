@@ -26,18 +26,52 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30
-  Escrito em: 25/09/2026 14:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79965e038b5a140585ca2195e084ce784024c6e5
+  Escrito em: 25/09/2026 15:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1ec9a7c96c021fd7bba6d97b2b9b370b045ab30/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79965e038b5a140585ca2195e084ce784024c6e5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79965e038b5a140585ca2195e084ce784024c6e5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79965e038b5a140585ca2195e084ce784024c6e5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
+
+**Erro 1 — bug real, achado testando, não em produção:** `set -euo pipefail` + `sed` num arquivo ausente (`~/.config/agata/identidade.env`, o caso desta Máquina) matava `gerar-hidratacao.sh` inteiro — `2>/dev/null` esconde a mensagem, não o código de saída, e `pipefail` propaga a falha do `sed` através do `| head -1`. Teria quebrado todo commit futuro que tocasse REGRAS/PROJETO/MEMÓRIAS nesta Máquina. Não commitado — a própria disciplina de rodar `perimetro.sh`/testar antes de commitar pegou o sintoma (três tentativas de commit "sumindo" sem terminar); a causa raiz só apareceu rodando o hook direto com `bash -x`.
+
+**Erro 2 — meu, comando destrutivo sem checar o que ia junto:** limpando o resíduo do Erro 1, rodei `git clean -fd propostas/aplicadas/` sem separar o que era descartável (cópias soltas de `.diff` que o `git checkout` já tinha restaurado no lugar certo) do que não era (os dois `APROVADO-*` que o Humano tinha acabado de assinar, nunca commitados, sem cópia em lugar nenhum). Os dois foram apagados, sem recuperação possível — nenhum estava no histórico do git. Contado ao Humano assim que descoberto, antes de continuar. As propostas em si (os `.diff`) sobreviveram intactas.
+
+**Parecer do laboratório-nuvem "Ensaio" (Regra 2 — DADO, conferido antes de tratar como fato), formato "Segunda opinião" de REGRAS.md, uma passada só:** o desenho de (558) resolve `{{NOME_SISTEMA}}` só num caminho de leitura (`gerar-hidratacao.sh` → `.hidrata.md`). Mediu (não afirmou sem mostrar) que pelo menos 7 outros leitores reais leem REGRAS.md/PROMPT_CARREGAMENTO.md CRU e nunca resolveriam o token, entre eles o mais importante pro propósito da própria Fase 2: `PROMPT_CARREGAMENTO.md` linha 87 manda toda sessão de nuvem nova ler REGRAS.md inteiro, cru, pelas URLs raw — exatamente o caso de "clone, primeira sessão" que a Fase 2 existe pra resolver. Verifiquei 3 achados do parecer direto na Máquina antes de aceitar: a linha 87 batia; `.claude/skills/` não tem `agata-carregar` (só skills do Obsidian — Claude Code não lê `.agents/skills/`); nenhum dos 5 scripts citados (`canon-mcp.mjs`, `consulta.py`, `gerar_obsidian.py`, `gerar_indice_derivado.py`, `grafo/tools.py`) resolvia o token. Os três batem.
+
+**Redesenho aplicado (opção C do parecer, escolhida pelo Humano):**
+- **Fonte única:** `PROJETO.md`, seção "O que é", campo `Nome do sistema: Agata`. PROJETO é instância (nunca some no merge seletivo da Fase 5), versionado, lido por todo caminho — inclusive fetch raw de sessão de nuvem. `~/.config/agata/identidade.env` sai do desenho.
+- **Regra de resolução, texto literal, em cada arquivo que carrega o token:** REGRAS.md (dentro do comentário "PARE. LEIA ISTO", antes da 1ª ocorrência), PROMPT_CARREGAMENTO.md (antes da linha 1) — cobre até um modelo lendo o arquivo cru, sem executar nada.
+- **Nas 2 `SKILL.md`:** `description` do frontmatter fica sem nome nem token (é o que o carregador de skill compara pra ativar — token não casa com nada); título e os 2 moldes de cabeçalho de `agata-carregar` ficam literais com o token, pro modelo fraco ter o molde pronto.
+- **`gerar-hidratacao.sh`:** `NOME_SISTEMA` agora lê `PROJETO.md` (sempre existe no repo — elimina a classe inteira do Erro 1, não só o sintoma) em vez de `identidade.env`.
+- **`scripts/gerar_obsidian.py`:** ganhou a mesma resolução (não estava no parecer original do laboratório como consumidor a corrigir, achei testando o vault de verdade) — sem isso, `PROMPT_CARREGAMENTO.md` reapareceria cru dentro do vault Obsidian.
+- **Deixado de fora, com motivo, não esquecido:** `scripts/gerar_indice_derivado.py` (o índice pro Drive/NotebookLM) tem um invariante próprio — "REGRAS.md aparece verbatim no índice, byte a byte, ou aborta" — resolver o token ali exige mexer nesse autoteste junto, não só na substituição; adiado, é o caminho de menor tráfego dos citados no parecer. A checagem determinística que o parecer propôs (3d — controle novo tipo P-1, avisa se um arquivo com o token não tem a regra junto, ou se saída gerada ainda tem `{{`, ou se entrada nova de MEMÓRIAS repete o token cru) também não foi construída agora — é rede de segurança contra regressão futura, não parte do conserto de hoje.
+
+**Bug achado testando o próprio redesenho, corrigido antes de qualquer commit:** a primeira versão aplicava a substituição no texto inteiro montado por `gerar-hidratacao.sh` (REGRAS + PROJETO + janela de MEMÓRIAS) — isso alterava, na leitura de `.hidrata.md`, o texto de entradas HISTÓRICAS de MEMÓRIAS que citam `{{NOME_SISTEMA}}` literalmente (como esta mesma entrada e a (558) citam). O arquivo `MEMÓRIAS.md` nunca foi tocado — mas um modelo lendo `.hidrata.md` veria a entrada (558) dizendo "Token `Agata`" em vez de "Token `{{NOME_SISTEMA}}`", uma alteração de fato na leitura de história append-only, mesmo sem editar o arquivo fonte. Corrigido: a substituição agora roda só no bloco de REGRAS.md, nunca na janela de MEMÓRIAS nem em PROJETO.md (que também cita o token, como documentação, não como placeholder vivo).
+
+**Testado, cada peça:**
+- `gerar-hidratacao.sh` sem `PROJETO.md` tendo o campo: cai em "Agata" (não se aplica mais — o campo é adicionado nesta mesma proposta, sempre presente a partir daqui; testado mesmo assim, resiliente).
+- Com campo `Agata`: as 5 linhas de REGRAS.md saem "Agata" dentro de `.hidrata.md`, MEMÓRIAS/PROJETO com o token intacto onde citado como documentação.
+- Com campo trocado pra um nome de teste: as mesmas 5 linhas saem com o nome novo; MEMÓRIAS continua intocada.
+- `scripts/gerar_obsidian.py`: vault regenerado de verdade (852 notas); token cru só sobra nos 4 lugares esperados (citação histórica em MEMÓRIAS, documentação em PROJETO.md) — conferido caminho por caminho, não só contagem.
+- `git apply --check` limpo contra HEAD real, worktree descartável.
+- `scripts/perimetro.sh`: só P-8 falha (os 6 arquivos quarentenados sem assinatura, esperado) — nenhum outro controle regride.
+
+**Em quarentena P-8, aguardando assinatura (substitui o `.diff` de (558), que nunca foi assinado nem aplicado):** `propostas/fase2-nome-sistema-2026-09-25.diff` — agora cobre REGRAS.md, PROJETO.md, `.githooks/gerar-hidratacao.sh`, `scripts/gerar_obsidian.py`, os 2 `SKILL.md`.
+
+**Também precisa de assinatura nova, sem mudança de conteúdo:** `propostas/fase2-slug-dinamico-2026-09-25.diff` — a assinatura anterior foi uma das duas apagadas no Erro 2. O `.diff` em si está intacto, conferido de novo (`git apply --check` limpo).
+
+**sync:** PASS — `git rev-parse origin/main`/`main` = `79965e0`, topo de MEMÓRIAS conferido com (558) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem do Humano ("Adotar a opção C do laboratório") nesta sessão, depois de eu relatar os dois erros sem suavizar.
 
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
 

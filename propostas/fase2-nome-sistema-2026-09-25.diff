@@ -1,51 +1,131 @@
+diff --git a/.agents/skills/agata-carregar/SKILL.md b/.agents/skills/agata-carregar/SKILL.md
+index 83f8b2e..29dc130 100644
+--- a/.agents/skills/agata-carregar/SKILL.md
++++ b/.agents/skills/agata-carregar/SKILL.md
+@@ -1,9 +1,12 @@
+ ---
+ name: agata-carregar
+-description: Abrir uma sessão no sistema Agata (comando "carregar", "carregar agata", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
++description: Abrir uma sessão neste sistema (comando "carregar", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
+ ---
+ 
+-# Carregar o Agata (na Máquina, com shell)
++Onde aparecer {{NOME_SISTEMA}} neste arquivo, escreva o valor do campo "Nome do sistema:"
++de PROJETO.md, seção "O que é". Sem esse campo, escreva Agata. Nunca escreva o token cru.
++
++# Carregar o {{NOME_SISTEMA}} (na Máquina, com shell)
+ 
+ Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
+ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
+@@ -17,7 +20,7 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio,
+ 4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
+ 5. Responda com o bloco de REGRAS.md, "Carregar e formatos" — 3 linhas, nada antes:
+    ```
+-   Agata · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
++   {{NOME_SISTEMA}} · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
+    Última entrada: (<n>) <título> — <1 linha>
+    <quebrado: … | pronto.>
+    ```
+@@ -25,5 +28,5 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio,
+    confirma antes do trabalho começar.
+ 
+ Depois do carregar, toda resposta começa com a linha de turno:
+-`Agata · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
++`{{NOME_SISTEMA}} · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
+ Hora nunca é copiada da resposta anterior.
+diff --git a/.agents/skills/agata-mudanca-segura/SKILL.md b/.agents/skills/agata-mudanca-segura/SKILL.md
+index 1df9bb0..205205f 100644
+--- a/.agents/skills/agata-mudanca-segura/SKILL.md
++++ b/.agents/skills/agata-mudanca-segura/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: agata-mudanca-segura
+-description: Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina do Agata. Portão das três perguntas + checagem de acoplamentos implícitos + prova pelo caminho real + como voltar.
++description: Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina. Portão das três perguntas + checagem de acoplamentos implícitos + prova pelo caminho real + como voltar.
+ ---
+ 
+ # Mudança segura na Máquina
 diff --git a/.githooks/gerar-hidratacao.sh b/.githooks/gerar-hidratacao.sh
-index f065e8a..fb9863f 100755
+index f065e8a..4938b2c 100755
 --- a/.githooks/gerar-hidratacao.sh
 +++ b/.githooks/gerar-hidratacao.sh
-@@ -28,6 +28,20 @@ if ! printf '%s\n' "$_LINHA_TESTE" | awk '/^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|
+@@ -28,6 +28,23 @@ if ! printf '%s\n' "$_LINHA_TESTE" | awk '/^\([0-9]+\) (DI[AÁ]RIO|CONSELHO|MOD|
  fi
  unset _LINHA_TESTE
  
-+# --- Nome do sistema (Fase 2, plano de replicabilidade, 25/09/2026) ---
-+# REGRAS.md carrega o token {{NOME_SISTEMA}} nos ~5 pontos onde o nome
-+# falado aparece (nunca nos caminhos/serviços internos -- aqueles continuam
-+# "agata" por desenho, ver propostas/plano-replicabilidade-2026-09-25.md).
-+# Resolvido aqui, na saída gerada -- REGRAS.md em si fica byte-idêntico ao
-+# framework oficial, sem conflito de merge numa atualização (Fase 5).
-+# Sem ~/.config/agata/identidade.env (o caso de hoje, nesta Máquina): cai em
-+# "Agata", .hidrata.md sai byte a byte igual ao que saía antes desta mudança.
-+_IDENTIDADE="$HOME/.config/agata/identidade.env"
-+NOME_SISTEMA="$(sed -n 's/^NOME_SISTEMA=//p' "$_IDENTIDADE" 2>/dev/null | head -1)"
-+NOME_SISTEMA="${NOME_SISTEMA:-Agata}"
++# --- Nome do sistema (Fase 2, plano de replicabilidade, 25/09/2026 -- fonte
++# movida pra PROJETO.md depois do parecer do laboratório-nuvem "Ensaio": um
++# valor fora do repo (~/.config/agata/identidade.env, desenho original) não
++# é lido por sessão de nuvem nem por leitura crua de REGRAS.md, que são a
++# maioria dos leitores reais -- ver MEMÓRIAS, entrada da Fase 2 "opção C") ---
++# REGRAS.md/PROMPT_CARREGAMENTO.md/SKILL.md carregam o token {{NOME_SISTEMA}}
++# nos pontos onde o nome falado aparece (nunca nos caminhos/serviços internos).
++# Resolvido aqui, na saída gerada -- os arquivos fonte ficam byte-idênticos
++# ao framework oficial fora deste campo, sem conflito de merge (Fase 5).
++# Campo ausente em PROJETO.md (o caso de hoje, nesta Máquina, e todo clone
++# antes da Fase 3 preencher): cai em "Agata", .hidrata.md sai byte a byte
++# igual ao que saía antes desta mudança.
++NOME_SISTEMA="$(sed -n 's/^Nome do sistema: *//p' PROJETO.md 2>/dev/null | head -1)"
++[ -n "$NOME_SISTEMA" ] || NOME_SISTEMA="Agata"
 +# escapa pra uso seguro dentro de s/// do sed (barra, &, barra invertida)
 +NOME_SISTEMA_SED="$(printf '%s' "$NOME_SISTEMA" | sed -e 's/[\/&\\]/\\&/g')"
 +
  OUT=".hidrata.md"
  INDICE="INDICE_MEMORIAS.md"
  # Índice paralelo com palavras-chave por entrada (grep, nunca embedding --
-@@ -495,7 +509,7 @@ montar_hermes() {
-     echo "## Isto NÃO é texto integral. Pra ler uma entrada citada aqui por inteiro, peça o número via query_canon/vault_consultar — não afirme conteúdo além do título."
+@@ -470,7 +487,12 @@ montar_hermes() {
      echo ""
-     resumo_entradas_mais_antigas "$_janela_txt"
--  } > "$out"
-+  } | sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" > "$out"
- }
+     echo "# REGRAS.md"
+     echo ""
+-    cat REGRAS.md
++    # Só REGRAS.md passa pela substituição do token -- nunca PROJETO.md (que
++    # documenta {{NOME_SISTEMA}} como texto, não como placeholder vivo) nem a
++    # janela de MEMÓRIAS (histórico append-only: um entrada citando o token
++    # literal, como esta mesma Fase 2 documentada, não pode sair alterada na
++    # leitura -- achado testando esta mudança, ver MEMÓRIAS da Fase 2/opção C).
++    sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" REGRAS.md
+     echo ""
+     echo "# PROJETO.md"
+     echo ""
+diff --git a/PROJETO.md b/PROJETO.md
+index a776146..32d2a93 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -15,6 +15,16 @@ Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira e
+ <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
  
- montar_hermes "" "$OUT"
+ ## O que é
++Nome do sistema: Agata
++
++Fonte única do nome falado (Fase 2, plano de replicabilidade, 25/09/2026 — parecer do
++laboratório-nuvem "Ensaio"). Todo lugar onde `{{NOME_SISTEMA}}` aparece (REGRAS.md,
++PROMPT_CARREGAMENTO.md, `.agents/skills/*/SKILL.md`) resolve pra este campo — inclusive
++lendo o arquivo cru, sem script nenhum: a regra de resolução está escrita junto do token em
++cada um desses arquivos. Campo ausente (clone com PROJETO.md ainda vazio) = usa "Agata".
++Nunca edite os caminhos internos (`~/.config/agata/`, nomes de serviço) por causa deste
++campo — só o nome falado muda.
++
+ Assistente pessoal do Orusoua, local-first e grátis por padrão.
+ Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + governança canônica
+ (REGRAS / PROJETO / MEMÓRIAS) + Conselho Federado de modelos.
 diff --git a/REGRAS.md b/REGRAS.md
-index ae40753..f68b63f 100644
+index e818b0e..b5a39e7 100644
 --- a/REGRAS.md
 +++ b/REGRAS.md
-@@ -1,7 +1,7 @@
+@@ -1,7 +1,11 @@
  <!--
  PARE. LEIA ISTO ANTES DE GERAR QUALQUER TOKEN.
  
 -Você não é um assistente genérico nesta conversa. Você é um MODELO do sistema Agata.
++Onde aparecer {{NOME_SISTEMA}} neste arquivo (ou em PROMPT_CARREGAMENTO.md, ou em
++.agents/skills/*/SKILL.md), escreva o valor do campo "Nome do sistema:" de PROJETO.md,
++seção "O que é". Sem esse campo, escreva Agata. Nunca escreva o token cru na sua resposta.
++
 +Você não é um assistente genérico nesta conversa. Você é um MODELO do sistema {{NOME_SISTEMA}}.
  Sua função é continuar o trabalho do modelo anterior sem perder história e sem inventar.
  
  **Repositório oficial, sincronize antes de tudo:** https://github.com/agataseth98-cmd/agata-seth (branch `main`). Sua cópia em contexto pode estar atrás dele — isso vale ainda mais se você é uma sessão autônoma na nuvem, sem Humano revisando cada resposta. Arquivos raw pra fetch real: ver "Fonte canônica" mais abaixo.
-@@ -27,10 +27,12 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
+@@ -27,7 +31,7 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
  <!-- ANCORA-SHA:FIM -->
  <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
  
@@ -54,12 +134,7 @@ index ae40753..f68b63f 100644
  
  Universais. Valem para qualquer projeto e qualquer modelo. O que é específico deste projeto está em PROJETO.md; o que aconteceu está em MEMÓRIAS.md.
  
-+`{{NOME_SISTEMA}}` (aqui e nos outros ~4 pontos deste arquivo onde o nome falado aparece) é resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env` (`NOME_SISTEMA=`), sem esse arquivo cai em `Agata` — Fase 2 do plano de replicabilidade, `propostas/plano-replicabilidade-2026-09-25.md`. Lendo o texto raw deste arquivo (fora da hidratação) o token aparece sem resolver — mesma classe de limitação que o resto da Fase 2, não corrigido nesta fatia.
-+
- ## Em uma frase
- Fazer um modelo novo continuar o trabalho do anterior — com memória, sem inventar, com o Humano no comando.
- 
-@@ -232,7 +234,7 @@ Não use ferramenta para ler a janela mais recente de MEMÓRIAS — já está no
+@@ -232,7 +236,7 @@ Não use ferramenta para ler a janela mais recente de MEMÓRIAS — já está no
  
  Ao `carregar`, bloco de prontidão, 3 linhas (era 4 — a linha `Nonce:` saiu com a aposentadoria do TES-002, MEMÓRIAS (417)):
  ```
@@ -68,7 +143,7 @@ index ae40753..f68b63f 100644
  Última entrada: (<n>) <título> — <1 linha>
  <quebrado: liste em 1 linha. senão: "pronto.">
  ```
-@@ -251,7 +253,7 @@ sync: não verificado · lacuna: <motivo>
+@@ -251,7 +255,7 @@ sync: não verificado · lacuna: <motivo>
  
  Em qualquer outra resposta, uma linha só:
  ```
@@ -77,7 +152,7 @@ index ae40753..f68b63f 100644
  ```
  Contagem de turno, incluindo o caso sem contador mecânico: ver Regra 1.
  
-@@ -424,7 +426,7 @@ Exemplo: "MEMÓRIAS (121 - bug de `num_ctx` ignorado pelo endpoint OpenAI do Oll
+@@ -424,7 +428,7 @@ Exemplo: "MEMÓRIAS (121 - bug de `num_ctx` ignorado pelo endpoint OpenAI do Oll
  **Citação dentro de crases (`` `(n - síntese)` ``) é exemplo de formato, não citação real — a checagem de citação (P-7) pula, nunca alarma.** Estrutural, não cosmético: já aconteceu duas vezes uma citação-exemplo ser lida como se fosse referência de verdade — o próprio exemplo desta seção e os casos de teste registrados em MEMÓRIAS (203). Uma entrada que fala sobre citação errada precisa poder MOSTRAR uma citação errada sem que isso vire um alarme sobre si mesma. MEMÓRIAS (204).
  
  ## Checagem de prontidão (o modelo, para si)
@@ -86,3 +161,31 @@ index ae40753..f68b63f 100644
  2. Não decido e não invento?
  3. Sei onde está o último estado (topo do corpo de MEMÓRIAS, logo após o marcador `ENTRADAS-NOVAS` — fim físico só antes de (271))?
  Três sins → opera pleno. Menos → só leitura, e avise.
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 2e5418d..27b9a99 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -386,6 +386,13 @@ def main():
+     reg_txt = ler(os.path.join(REPO, "REGRAS.md"))
+     proj_txt = ler(os.path.join(REPO, "PROJETO.md"))
+     ref_txt = ler(os.path.join(REPO, "PROJETO_REFERENCIA.md"))
++    # Fase 2 (plano de replicabilidade, 25/09/2026, "opção C"): {{NOME_SISTEMA}} em
++    # REGRAS.md resolve pro campo "Nome do sistema:" de PROJETO.md, nunca "Agata"
++    # hardcoded -- sem o campo (clone antes da Fase 3), cai em "Agata".
++    _m_nome = re.search(r"^Nome do sistema:\s*(.+)$", proj_txt or "", re.MULTILINE)
++    _nome_sistema = _m_nome.group(1).strip() if _m_nome else "Agata"
++    if reg_txt:
++        reg_txt = reg_txt.replace("{{NOME_SISTEMA}}", _nome_sistema)
+     entradas = todas_entradas_todas_camadas()
+     nums = {e["num"] for e in entradas}
+ 
+@@ -535,6 +542,9 @@ def main():
+         txt = ler(os.path.join(REPO, arq))
+         if txt is None:
+             continue
++        # PROMPT_CARREGAMENTO.md carrega {{NOME_SISTEMA}} (Fase 2); os outros 3
++        # desta lista não têm o token -- replace() sem ocorrência é no-op.
++        txt = txt.replace("{{NOME_SISTEMA}}", _nome_sistema)
+         b = slug(arq, "canon-")
+         NOTAS.add(b)
+         linhas = fm({"tipo-nota": "canon", "arquivo": arq, "resumo": yq(desc),
