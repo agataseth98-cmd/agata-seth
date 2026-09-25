@@ -12,8 +12,8 @@
 # Q1 convergiu em "só imprimir"; Q3 convergiu em "obrigatório quando há shell";
 # Q2 decidida pelo Humano — "hash + frase", as duas).
 #
-# Escrita única, fora do repo: o cache do ls-remote em ~/.cache/agata/ (ver
-# "cache" abaixo). No repo, READ-ONLY.
+# Escrita única, fora do repo: os caches do ls-remote em ~/.cache/agata/ (main
+# e refs/heads/proposta/*, ver "cache" abaixo). No repo, READ-ONLY.
 # READ-ONLY: só lê arquivos e consulta o remoto (git ls-remote). Nunca
 # git add/commit/push, nunca escreve no repo. Uma rede indisponível vira
 # `sync: não verificado`, não erro.
@@ -144,6 +144,65 @@ for d in propostas/*.diff; do
 done
 shopt -u nullglob
 
+# --- PROPOSTAS-EM-BRANCH: proposta P-8 que só existe em branch remoto ---
+# PROPOSTAS-ABERTAS acima só conta .diff na árvore DESTE checkout. No fluxo
+# por PR a proposta vive num branch remoto até o merge -- em 24/09/2026 o eco
+# disse "0" com 3 esperando assinatura, todas em refs/heads/proposta/*
+# (laboratório "Ensaio"). Só leitura: um ls-remote, nunca fetch. Num clone não
+# raso, SHA sem objeto local não pode ser ancestral do HEAD, então conta como
+# fora; com o objeto, merge-base --is-ancestor decide.
+# NENHUM prefixo fixo: medido em 25/09/2026 contra origin real que o convênio
+# de nome MUDOU no mesmo repositório -- proposta/* (22-24/09) e aplica/* (hoje)
+# convivem; um filtro só por "proposta/" ficaria cego pro que se usa agora.
+# Olha TODO head remoto, exceto main -- falso positivo (branch de rascunho sem
+# relação com P-8) é aviso a mais, não perigo; falso negativo (proposta real
+# invisível) é o próprio ponto cego que este campo existe pra fechar.
+# Aviso: nunca mexe em SAIDA nem no HASH-ESTADO.
+# set -e: o laço só usa `if` -- `[ ] && x` como último comando do corpo deixaria
+# o status do while em 1 e derrubaria o script sem mensagem.
+propostas_branch_linha=""
+if [ -z "$remoto" ]; then
+  propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: remoto inacessível (mesma medição do sync)"
+elif [ "$(git rev-parse --is-shallow-repository 2>/dev/null || echo false)" = "true" ]; then
+  propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: clone raso, ancestralidade não é confiável"
+else
+  _cache_prop="$HOME/.cache/agata/ls-remote-propostas"
+  _refs_prop=""; _refs_ok=0
+  if [ "${ECO_LSREMOTE_CACHE_S:-60}" -gt 0 ] 2>/dev/null && [ -f "$_cache_prop" ]; then
+    _t_prop=$(head -n 1 "$_cache_prop" 2>/dev/null || true)
+    if [ -n "$_t_prop" ] && [ "$_t_prop" -ge 0 ] 2>/dev/null \
+       && [ $(( _agora - _t_prop )) -ge 0 ] \
+       && [ $(( _agora - _t_prop )) -lt "${ECO_LSREMOTE_CACHE_S:-60}" ]; then
+      _refs_prop=$(tail -n +2 "$_cache_prop" 2>/dev/null || true)
+      _refs_ok=1
+    fi
+  fi
+  if [ "$_refs_ok" = 0 ]; then
+    if _refs_prop=$(timeout "${LS_REMOTE_TIMEOUT_ECO:-8}" git ls-remote --heads origin 2>/dev/null); then
+      _refs_ok=1
+      { mkdir -p "$(dirname "$_cache_prop")" && printf '%s\n%s\n' "$_agora" "$_refs_prop" > "$_cache_prop"; } 2>/dev/null || true
+    fi
+  fi
+  if [ "$_refs_ok" = 0 ]; then
+    propostas_branch_linha="PROPOSTAS-EM-BRANCH: lacuna: ls-remote de refs/heads/* falhou"
+  else
+    _n_prop=0; _nomes_prop=""
+    while read -r _sha_p _ref_p; do
+      if [ -z "${_sha_p:-}" ]; then continue; fi
+      if [ "$_ref_p" = "refs/heads/main" ]; then continue; fi
+      if git cat-file -e "${_sha_p}^{commit}" 2>/dev/null \
+         && git merge-base --is-ancestor "$_sha_p" HEAD 2>/dev/null; then
+        continue
+      fi
+      _n_prop=$((_n_prop + 1))
+      if [ "$_n_prop" -le 5 ]; then
+        _nomes_prop="${_nomes_prop:+$_nomes_prop, }${_ref_p#refs/heads/}"
+      fi
+    done <<<"$_refs_prop"
+    propostas_branch_linha="PROPOSTAS-EM-BRANCH: $_n_prop (branch remoto fora do HEAD, qualquer nome, exceto main)${_nomes_prop:+ -- $_nomes_prop}"
+  fi
+fi
+
 # --- TOPO-PROPOSTA-JA-APLICADA: a entrada do topo cita uma proposta que já
 # saiu de propostas/ pra propostas/aplicadas/? (achado auditando um
 # carregamento real da Seth, MEMÓRIAS (464)/(465)). Aplicar uma proposta
@@ -217,6 +276,7 @@ ${idade_remoto:+SYNC-REMOTO-IDADE: $idade_remoto
 }${alerta_historia:+$alerta_historia
 }IDADE-HIDRATACAO: $idade_hidratacao
 PROPOSTAS-ABERTAS: $abertas (.diff sem APROVADO-)
+$propostas_branch_linha
 ${topo_proposta_aplicada:+TOPO-PROPOSTA-JA-APLICADA: '$topo_proposta_aplicada' citada no topo já está em propostas/aplicadas/ -- o texto da entrada pode estar desatualizado, confira "git log" ou ONDE_ESTAMOS.md antes de afirmar que ainda está pendente.
 }HORA-MAQUINA: $hora_maquina
 HASH-ESTADO: $hash_estado
