@@ -107,20 +107,53 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "Unidades de usuário em FALHA (`systemctl --user --failed`). "
         "'0 loaded units listed' = nenhuma falhando = saudável.",
     ),
+    "p8_verificar": (
+        ["bash", "scripts/p8_verificar.sh"], 60,
+        "Confere se uma proposta P-8 PENDENTE (propostas/<nome>.diff + "
+        "APROVADO-<nome>) pode ser aplicada: par presente, hash do .diff bate "
+        "com o assinado, assinatura ssh válida contra a raiz de confiança de "
+        "HEAD, `git apply --check` limpo. Use o parâmetro `nome` (o nome da "
+        "proposta, sem '.diff'). Read-only -- nunca aplica nada.",
+    ),
 }
 
+# `nome` de proposta: mesma forma usada em toda a árvore de `propostas/` --
+# minúsculas, dígitos, ponto, hífen, underscore. `p8_verificar.sh` já recusa
+# `/`, `.diff` no fim e ponto sozinho no fim; esta régua é a segunda camada
+# (defesa em profundidade, mesmo espírito do resto deste arquivo) ANTES do
+# nome virar argv -- barra aqui, nunca deixa a validação inteira pro script
+# de baixo.
+_RX_NOME_PROPOSTA = re.compile(r"^[a-z0-9][a-z0-9._-]{0,80}$")
 
-def _argv(nome: str, n: int | None) -> list[str]:
-    """argv final. `n` é o ÚNICO ponto variável, e entra como inteiro."""
+
+def _argv(nome: str, n: int | None, prop_nome: str | None = None) -> list[str]:
+    """argv final. `n` e `prop_nome` são os ÚNICOS pontos variáveis, cada um
+    tipado e validado antes de virar elemento de argv -- nunca interpolado
+    como texto."""
     base = list(COMANDOS[nome][0])
     if nome == "git_log":
+        if prop_nome is not None:
+            raise ValueError("'git_log' não aceita o parâmetro nome")
         if n is None:
             n = 10
         if not isinstance(n, int) or isinstance(n, bool) or not (1 <= n <= 50):
             raise ValueError("n tem de ser inteiro entre 1 e 50")
         base.append(str(int(n)))
-    elif n is not None:
-        raise ValueError(f"'{nome}' não aceita o parâmetro n")
+    elif nome == "p8_verificar":
+        if n is not None:
+            raise ValueError("'p8_verificar' não aceita o parâmetro n -- use 'nome'")
+        if not isinstance(prop_nome, str) or "/" in prop_nome or ".." in prop_nome \
+                or not _RX_NOME_PROPOSTA.match(prop_nome):
+            raise ValueError(
+                "'nome' inválido ou ausente -- só minúsculas, dígitos, ponto, "
+                "hífen e underscore, sem '/' nem '..'"
+            )
+        base.append(prop_nome)
+    else:
+        if n is not None:
+            raise ValueError(f"'{nome}' não aceita o parâmetro n")
+        if prop_nome is not None:
+            raise ValueError(f"'{nome}' não aceita o parâmetro nome")
     return base
 
 
@@ -224,11 +257,17 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
     if nome in ("selos", "suite_controles"):
         return ("exit=0 -- passou." if codigo == 0
                 else f"exit={codigo} -- FALHOU; o motivo está na saída abaixo.")
+    if nome == "p8_verificar":
+        if re.search(r"^PODE APLICAR:", texto, re.M):
+            return "PODE APLICAR -- as 4 checagens passaram (par presente, hash, assinatura, apply --check)."
+        m = re.search(r"^FALHA (\d):", texto, re.M)
+        return (f"NÃO PODE APLICAR -- parou na checagem {m.group(1)} de 4; motivo na saída abaixo."
+                if m else "NÃO PODE APLICAR -- ver saída abaixo (uso incorreto ou par ausente).")
     return None
 
 
-def _executar(nome: str, n: int | None) -> str:
-    argv = _argv(nome, n)
+def _executar(nome: str, n: int | None, prop_nome: str | None = None) -> str:
+    argv = _argv(nome, n, prop_nome)
     _, timeout, _desc = COMANDOS[nome]
     try:
         r = subprocess.run(argv, cwd=str(REPO), capture_output=True, text=True,
@@ -318,7 +357,7 @@ class _H(BaseHTTPRequestHandler):
                         "assinada (P-8), não por parâmetro.",
             })
         try:
-            texto = _executar(nome, pedido.get("n"))
+            texto = _executar(nome, pedido.get("n"), pedido.get("nome"))
         except ValueError as e:
             return self._resp(400, {"erro": str(e)})
         except RuntimeError as e:
@@ -377,6 +416,29 @@ def _selftest() -> int:
                   "OK -- 16 OK" in (_leitura("perimetro", "x\n=== RESULTADO GERAL: OK -- 16 OK · 0 FALHA ===\n", 0) or "")))
     casos.append(("selos exit!=0 -> FALHOU", "FALHOU" in (_leitura("selos", "", 1) or "")))
     casos.append(("estado sem leitura inventada", _leitura("estado", "HEAD: x", 0) is None))
+    # 9. p8_verificar -- validação de `nome` (defesa em profundidade, ANTES do script de baixo)
+    for mau in (None, "", "../etc/passwd", "nome/com/barra", "Maiuscula", "espaço aqui", "a" * 100):
+        try:
+            _argv("p8_verificar", None, mau)
+            casos.append((f"p8_verificar nome={mau!r} recusado", False))
+        except ValueError:
+            casos.append((f"p8_verificar nome={mau!r} recusado", True))
+    casos.append(("p8_verificar nome válido -> argv",
+                  _argv("p8_verificar", None, "memorias-frias-fora-da-raiz-2026-09-25")[-1]
+                  == "memorias-frias-fora-da-raiz-2026-09-25"))
+    try:
+        _argv("p8_verificar", 3, "nome-ok"); casos.append(("p8_verificar recusa n", False))
+    except ValueError:
+        casos.append(("p8_verificar recusa n", True))
+    try:
+        _argv("git_log", None, "nome-ok"); casos.append(("git_log recusa nome", False))
+    except ValueError:
+        casos.append(("git_log recusa nome", True))
+    # 10. leitura calculada do p8_verificar
+    casos.append(("p8_verificar PODE APLICAR -> leitura",
+                  "PODE APLICAR" == (_leitura("p8_verificar", "OK 1: par presente\nPODE APLICAR: x\n", 0) or "")[:12]))
+    casos.append(("p8_verificar FALHA 2 -> leitura cita a checagem",
+                  "checagem 2" in (_leitura("p8_verificar", "OK 1: par presente\nFALHA 2: sha256 não bate\n", 1) or "")))
     for nome, passou in casos:
         print(("PASS  " if passou else "FALHA ") + nome)
         ok += 1 if passou else 0
