@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4f2b4cc1b40af4b8eef8dc581523571253e85a1c
-  Escrito em: 25/09/2026 09:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5abffbe3c6a617f7205101a436dc75ebb42b7304
+  Escrito em: 25/09/2026 10:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4f2b4cc1b40af4b8eef8dc581523571253e85a1c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5abffbe3c6a617f7205101a436dc75ebb42b7304/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
+
+**O que aconteceu:** empurrei a branch de (551) pra abrir o PR, e o CI (que roda num runner do GitHub, fora desta Máquina, sobre o COMMIT já feito — não sobre a working tree que eu tinha testado) falhou. Reproduzi localmente clonando a branch do zero (mesma coisa que o runner faz) e confirmei: o teste `"REGRESSAO (419): renomear chunk frio selado"`, escrito em (551), monta o novo nome com `"RENOMEADO-$a"` — um PREFIXO. Enquanto eu testava numa worktree cujo HEAD ainda não tinha a migração, `$a` era um nome solto (`MEMORIAS-FRIO-....md`) e o prefixo dava um arquivo válido na raiz. Contra o HEAD real da branch (que já tem `memoria/frio/...` no `SELOS.txt`), o mesmo prefixo produz `"RENOMEADO-memoria/frio/....md"` — um `git mv` pra um diretório que não existe, e o `git mv` falha antes até de chegar no `git add`. `ERRO` de setup, não `FALHA` de veredito: o teste nunca chegou a rodar.
+
+**Conserto:** sufixo em vez de prefixo (`"$a.renomeado"`) — funciona em qualquer profundidade de path, porque nunca precisa criar diretório novo. A lógica do próprio P-14 (a parte que decide PEGA/PASSA) nunca esteve errada; só o fixture do teste tinha uma suposição implícita (nome sem diretório) que deixou de valer.
+
+**Prova:** clonei a branch de novo, do zero (mesmo procedimento do runner, `git clone` + `checkout` + `testar_perimetro.sh`) — **33/33**, incluindo os 3 de regressão originais do (419) e os 2 novos de (551). `perimetro.sh` completo: 17 OK · 0 SKIP · 2 PARCIAL · 0 FALHA (o SKIP de P-10 que existia em (551), por `gerar_obsidian.py` estar staged naquele commit, não se aplica mais — já não há controle staged novo aqui).
+
+**Lição, registrada porque generaliza:** testar contra uma worktree isolada prova a LÓGICA; testar contra um clone do HEAD real (ou o próprio CI) prova que o fixture não tem suposição implícita sobre o estado que só era verdade ANTES da mudança que o teste deveria validar DEPOIS. As duas provas são necessárias — a primeira sozinha não bastou aqui.
+
+Par `.diff`/`APROVADO-` (assinado) em `propostas/aplicadas/fix-ci-p14-teste-2026-09-25`.
+
+Modelo: Claude Sonnet 5 (Claude Code, na Máquina) · vetor: `pull_request_read` (`get_status`, `get_check_runs`) achou o `suite-adversarial` em `failure`; reprodução real com `git clone` fresco da branch (não a worktree de desenho) + `testar_perimetro.sh` — reproduziu o `ERRO` idêntico ao do CI; conserto testado contra o mesmo clone fresco, 33/33; `perimetro.sh` completo antes e depois; `git apply --check` do `.diff` contra a branch; `p8_verificar.sh` — hash, assinatura, `apply --check`, os 4 OK. Autorização: Humano — "assinado" + `scripts/aprovar.sh fix-ci-p14-teste-2026-09-25` assinado.
+
 
 (551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
 

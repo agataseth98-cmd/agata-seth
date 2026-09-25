@@ -334,7 +334,12 @@ a=$(awk 'NR==1{print $2}' SELOS.txt); printf '\nadulterado\n' >> "$a" && git add
 EOF
 
 _caso P-14 PEGA "REGRESSAO (419): renomear chunk frio selado" <<'EOF'
-a=$(awk 'NR==1{print $2}' SELOS.txt); git mv "$a" "RENOMEADO-$a" && git add -A
+# Sufixo, nunca prefixo: $a pode ja' trazer diretorio (memoria/frio/...) desde
+# 25/09/2026 -- "RENOMEADO-$a" quebrava o git mv tentando criar um diretorio
+# "RENOMEADO-memoria/" que nao existe. Sufixo funciona em qualquer profundidade
+# de path, achado rodando contra o clone limpo da branch (nao so' contra a
+# worktree de desenho, que ainda tinha o layout antigo no HEAD do teste).
+a=$(awk 'NR==1{print $2}' SELOS.txt); git mv "$a" "$a.renomeado" && git add -A
 EOF
 
 _caso P-14 PEGA "REGRESSAO (419): apagar a linha do SELOS e reescrever o chunk" <<'EOF'

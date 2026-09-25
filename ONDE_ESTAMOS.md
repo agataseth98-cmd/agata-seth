@@ -12,7 +12,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 ## Onde estamos — 25/09/2026
 
 **[APLICADO] As memórias frias saíram da raiz do repositório.** Os 11 arquivos antigos foram para uma pasta própria (`memoria/frio/`), sem perder nada — conferi hash de cada um antes e depois. No caminho achei e consertei um controle de segurança que ficaria confuso com a mudança de lugar, e testei os dois lados: mudar de lugar sem mexer no conteúdo passa limpo; mudar o conteúdo escondido atrás de uma mudança de lugar continua sendo pego.
-- Detalhe técnico: `MEMÓRIAS.md`, entrada (551).
+- A verificação automática do GitHub pegou um erro meu num dos testes novos — corrigi, testei nos dois lados de novo, sem afetar a proteção real.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (551) e (552).
 
 **[APLICADO] O resumo noturno parou de se repetir e de inventar.** Nada esperando você. Toda noite ele refazia os mesmos resumos, e às vezes descrevia uma entrada com o conteúdo de outra. Uma dessas você chegou a aprovar em 21/09 sem ter como perceber; isso está corrigido no registro. Arquivei os 3 resumos repetidos.
 - Detalhe técnico: `MEMÓRIAS.md`, entradas (549) e (550).
