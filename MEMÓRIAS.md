@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1d7edf35008484c1961856b753725d0bcba0d6c
-  Escrito em: 26/09/2026 13:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2ace15c411e98c2ab2ca4758436b94517929aaec
+  Escrito em: 26/09/2026 13:44 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ace15c411e98c2ab2ca4758436b94517929aaec/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ace15c411e98c2ab2ca4758436b94517929aaec/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ace15c411e98c2ab2ca4758436b94517929aaec/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(570) DIÁRIO — 26/09/2026 · **Proposta P-8 `dropin-ollama-split-2026-09-26` aberta: divide o `override.conf` único do Ollama em 2 drop-ins versionáveis, framework/instância — mais uma pendência de F3.2 de (567). Aguardando assinatura.** Pedido: "sudo sim, me envie... descida a partir dessa informação" — autorização pra prosseguir com a parte que precisa de `sudo` (não a rodo eu mesma, P-2: preparo e envio o comando pro Humano).
+
+**Achado no caminho, antes de escrever qualquer proposta:** `redesign/systemd/*` está na lista de quarentena do P-8 (`scripts/perimetro/p08_quarentena.sh`, achado de 09/09/2026 — a mesma classe de buraco de `redesign/router/*`) — minha suposição de que só `REGRAS.md/PROJETO.md/scripts/*/.githooks/*/config/*` precisavam de proposta estava incompleta; `bash scripts/perimetro.sh` com os 3 arquivos staged direto confirmou SUSPEITO no P-8 antes de qualquer commit real, exatamente como devia. Refeito pelo processo certo: worktree descartável, `git apply --check` limpo contra HEAD real, `.diff` copiado pra `propostas/`, árvore de trabalho restaurada (nada dos 3 arquivos reais entrou em `main` ainda).
+
+**Conteúdo da proposta:** `redesign/systemd/dropin-ollama-bind.conf` (framework, 2 variáveis invariantes — `OLLAMA_HOST=127.0.0.1:11434`, `OLLAMA_FLASH_ATTENTION=1`), `redesign/systemd/dropin-ollama-gpu.exemplo.conf` (exemplo, não instala direto — mesmo tratamento de `CHAVES.env.exemplo` vs `CHAVES.md`, valores reais desta Máquina ficam só em `/etc`, nunca versionados), e a linha correspondente em `redesign/systemd/README.md`. Depois de assinada e aplicada, a instalação real em `/etc/systemd/system/ollama.service.d/` (sudo, fora do repo, `externo|/etc/` no manifesto de (561)) é um passo separado — comando enviado ao Humano, não rodado por mim (P-2).
+
+**sync:** PASS — `git rev-parse main` = `2ace15c` no momento de medir, topo de MEMÓRIAS conferido com (569) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura de `redesign/systemd/README.md` e `p08_quarentena.sh` antes de desenhar; worktree descartável (`/tmp/agata-check-dropin`) pra verificar `git apply --check` contra HEAD real antes de tocar o repo de verdade · **Autorização:** "sudo sim, me envie... descida a partir dessa informação" — item de F3.2 já registrado em (567), sem decisão de arquitetura nova (o formato 2-drop-ins já vinha proposto pelo laboratório).
 
 (569) DIÁRIO — 26/09/2026 · **`requisitos.txt` novo pra `redesign/grafo/` e `redesign/igpu/` — fecha uma das pendências que sobraram pra F3.2 depois de (567): o bootstrap não recriava esses dois venvs de forma determinística.** Pedido: "faça como for melhor para o sistema... de maneira obssessiva" — medição pura, sem decisão de arquitetura em aberto, não precisava voltar ao Humano antes de agir.
 

@@ -11,6 +11,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[PRONTO — falta sua assinatura] Você autorizou o passo com sudo; a parte que dá pra fazer sem tocar no sistema de verdade eu já fiz — o resto é um comando pra você rodar.** O jeito de configurar o Ollama (5 variáveis num arquivo só, misturando "sempre igual" com "depende da sua placa de vídeo") vira 2 arquivos separados — um vai pro clone de qualquer pessoa, o outro é só um exemplo (os valores reais da sua GPU não saem daqui, ficam só nesta Máquina). No caminho, o próprio sistema de segurança (P-8) me avisou que eu tinha esquecido de pedir aprovação antes de mexer nessa pasta — corrigido antes de qualquer commit real entrar.
+- Assine: `bash scripts/aprovar.sh dropin-ollama-split-2026-09-26`
+- **Depois de assinar e eu aplicar**, o comando com `sudo` pra instalar de verdade no sistema vem numa mensagem separada — não escrevo isso aqui porque muda a cada vez (`sudo install...`) e você vai rodar ele mesmo, no seu terminal.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (570).
+
 **[FEITO E APLICADO — código de verdade, primeiro pedaço da Fase 3 já escrito] Os dois venvs (grafo do agente; STT/embeddings na iGPU) ganharam lista de pacotes travada, testada do zero.** Antes, só existiam num texto de manual — sem eles, um clone novo não recriava os dois ambientes do jeito certo. Testei cada um instalando do zero, num lugar descartável, e confirmando que o código de verdade roda em cima. Achei um problema real no caminho: o venv da iGPU precisa de um endereço extra pra baixar o PyTorch certo (sem ele, a instalação trava com erro) — documentado, com o comando certo, nos dois lugares.
 - Nada pra assinar aqui — não mexe em regra nem em controle, só soma um arquivo de lista.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (569).

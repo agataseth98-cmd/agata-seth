@@ -1,0 +1,50 @@
+diff --git a/redesign/systemd/README.md b/redesign/systemd/README.md
+index d72fbf6..3e3085d 100644
+--- a/redesign/systemd/README.md
++++ b/redesign/systemd/README.md
+@@ -15,6 +15,8 @@ Só `agata.target` está em `default.target.wants/`; os membros só em `agata.ta
+ | `dropin-generico.conf` | `<unit>.service.d/agata.conf` em `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy` | `[Unit] PartOf=agata.target` + `[Install] WantedBy=agata.target`. |
+ | `dropin-omniroute.conf` | `omniroute.service.d/agata.conf` | igual ao genérico + `[Service] SuccessExitStatus=143 SIGTERM` — `omniroute` é `Type=simple` e o `ExecStop=omniroute stop` mata o próprio main (sai 143); sem isto o stop normal fica `failed`. |
+ | `dropin-llamacpp.conf` | `llamacpp-agata.service.d/agata.conf` | **só** `PartOf=agata.target` (sem `WantedBy`): o MoE **para** com o `agata down` (libera a VRAM da 4060) mas **não sobe** junto — fica sob demanda (`agata up --moe`). |
++| `dropin-ollama-bind.conf` | `/etc/systemd/system/ollama.service.d/agata-bind.conf` (**sudo**, unit de `system`, não `--user`) | 2 variáveis invariantes (bind `127.0.0.1`, flash attention) — framework, igual em qualquer clone. Achado do laboratório "Ensaio" (MEMÓRIAS 567): antes, essas 2 viviam misturadas com hardware num `override.conf` único, só em prosa (`PROJETO.md`), sem template versionado. |
++| `dropin-ollama-gpu.exemplo.conf` | `/etc/systemd/system/ollama.service.d/agata-gpu.conf` (**sudo**) | **exemplo**, não instala direto — 3 variáveis de hardware (VRAM/GPU desta Máquina), ajustar antes de usar. Nunca versionado com valor real (mesmo tratamento de `CHAVES.env.exemplo`). |
+ | `openvino-whisper.service` · `openvino-embeddings.service` · `obsidian-ro-proxy.service` | `~/.config/systemd/user/<nome>` | **unidades base** (Fase 2/6). Promovidas ao repo em 03/09 (chat 6, otimização B1) — antes só existiam fora do git. Trazem o fix do chat 5 (`After=default.target` removido, `[Install] WantedBy=agata.target`). |
+ | `agata-jogo` | `~/.local/bin/agata-jogo` (`install -Dm755`, **sem sudo**) | **P7-02 (chat 6).** Wrapper: `stop agata.target` (drena) + `ollama stop` dos modelos ativos → roda o jogo via `game-performance` (wrapper oficial do CachyOS) → `trap EXIT` re-sobe `agata.target`. **Substitui o Feral GameMode** — o CachyOS já roda `ananicy-cpp` (renice automático) e GameMode brigaria com ele. `gamemode.ini.exemplo` foi removido. |
+ 
+diff --git a/redesign/systemd/dropin-ollama-bind.conf b/redesign/systemd/dropin-ollama-bind.conf
+new file mode 100644
+index 0000000..c2f3277
+--- /dev/null
++++ b/redesign/systemd/dropin-ollama-bind.conf
+@@ -0,0 +1,11 @@
++# Agata -- Ollama: bind de rede + flash attention. Invariante de segurança
++# do P-4 (OLLAMA_HOST nunca 0.0.0.0, config/portas-agata.txt:39) e padrão
++# seguro (FLASH_ATTENTION=1) -- os dois iguais em qualquer clone, não
++# dependem de hardware. Instala com sudo em
++# /etc/systemd/system/ollama.service.d/agata-bind.conf -- NUNCA sobrescrever
++# override.conf inteiro pra chegar aqui (lição MEMÓRIAS 127/130: um `tee`
++# destrutivo já apagou 3 variáveis assim). Ver dropin-ollama-gpu.exemplo.conf,
++# ao lado, para o perfil de hardware (instância, não este arquivo).
++[Service]
++Environment="OLLAMA_HOST=127.0.0.1:11434"
++Environment="OLLAMA_FLASH_ATTENTION=1"
+diff --git a/redesign/systemd/dropin-ollama-gpu.exemplo.conf b/redesign/systemd/dropin-ollama-gpu.exemplo.conf
+new file mode 100644
+index 0000000..dc6c40a
+--- /dev/null
++++ b/redesign/systemd/dropin-ollama-gpu.exemplo.conf
+@@ -0,0 +1,14 @@
++# EXEMPLO -- não é o arquivo real desta Máquina (instância, fora do git,
++# mesmo tratamento de CHAVES.env.exemplo vs CHAVES.md). Perfil de hardware
++# do Ollama: calibrado pra 1 GPU NVIDIA com 8 GB de VRAM (q4_0 pra caber).
++# Instala com sudo em /etc/systemd/system/ollama.service.d/agata-gpu.conf --
++# NUNCA sobrescrever override.conf inteiro (lição MEMÓRIAS 127/130). Ajuste
++# os 3 valores pro hardware real antes de instalar: NUM_GPU pro tanto de
++# camadas que a VRAM aguenta (999 = "todas", seguro só com VRAM sobrando ou
++# quantização agressiva), CUDA_VISIBLE_DEVICES pro índice da GPU certa
++# (`nvidia-smi -L`), KV_CACHE_TYPE pro nível de quantização do cache
++# (q4_0/q8_0/f16 -- mais memória = f16, menos = q4_0).
++[Service]
++Environment="OLLAMA_NUM_GPU=999"
++Environment="CUDA_VISIBLE_DEVICES=0"
++Environment="OLLAMA_KV_CACHE_TYPE=q4_0"
