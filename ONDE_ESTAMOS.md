@@ -11,6 +11,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[FEITO, sem assinatura — é decisão, não código ainda] As 5 perguntas em aberto da Fase 3 (instalação do zero) foram respondidas.** Rodei a checagem tripla que o sistema usa pra decisão sem resposta certa (3 consultas independentes a um modelo local, sem uma influenciar a outra). 4 das 5 bateram nas 3 consultas: o jeito de nascer um clone novo com segurança, o nome do repositório virar configurável, o envio automático pra nuvem vir desligado por padrão, e o próprio instalador escrever a primeira linha do histórico. Na 5ª (se a pasta do sistema fica sempre "~/agata" ou vira escolha do cliente) as consultas discordaram — não decido por maioria nesse caso, então te perguntei direto: você escolheu deixar configurável.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (564).
+
 **[PRONTO — falta sua assinatura] O laboratório começou a olhar a Fase 3 (deixar o sistema fácil de instalar do zero) e achou um problema pequeno, sem relação com isso, de bônus — e consertar esse problema achou mais dois.** Uma linha de exemplo num manual (não é senha de verdade, é só texto de exemplo) batia sem querer no alarme que protege contra vazar chave de API. Corrigido — mas aí o próprio arquivo que registra o conserto passou a bater no mesmo alarme (é assim que um "antes e depois" funciona), e minha própria prova de que o alarme continua funcionando também bateu nele. Ajustei os três: o alarme agora não escaneia o texto do registro de propostas (só o código de verdade, onde a proteção real está), e as provas foram reescritas pra não se auto-acusarem.
 - Assine: `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (563).

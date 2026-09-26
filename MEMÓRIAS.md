@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a5fc3b4c839a97c669f82606117c9b30b1aa2914
-  Escrito em: 26/09/2026 11:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638
+  Escrito em: 26/09/2026 12:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisões não verificáveis da Fase 3 que o laboratório "Ensaio" listou em aberto — 4 convergiram 3/3, 1 divergiu e subiu pro Humano, que decidiu direto (não por maioria, como a regra manda).**
+
+**Pedido:** "continue" (retomando o combinado — Regra 8 com modelos locais pras 5 decisões de (560)/(563)). **Desvio declarado** (mesmo espírito do laboratório em (556)-(560)): as 3 passadas rodaram no mesmo modelo local por família — só há Qwen nesta Máquina hoje (`qwen3:4b`, `qwen3.5:9b`, `rlm-qwen3-8b-teste`, tamanhos/checkpoints diferentes) — sem família diferente disponível. Prompt único cobrindo as 5 decisões, rodado 3 vezes via API HTTP do Ollama (`/api/generate`, `stream: false`), sem histórico compartilhado entre as chamadas.
+
+**Achado no caminho, registrado por transparência:** a primeira tentativa usou `ollama run` interativo — o terminal grava códigos de controle (spinner) no arquivo de saída junto com o texto, e a primeira leitura consumiu ~48 mil tokens antes de eu perceber e trocar pra chamada de API direta (JSON limpo). Erro de método, não de resultado — nenhuma passada foi perdida, só a forma de capturar. Registrado porque é exatamente a classe de desperdício que a Regra 7/economia de tokens (556) existe pra evitar, e eu mesmo caí nela. `qwen3.5:9b` também gastou o orçamento inteiro de saída "pensando" sem nunca responder (`done_reason: length`, resposta vazia) — resolvido com `"think": false` na chamada.
+
+**Convergência 3/3 (as 4 sem divergência):**
+1. **Nascimento do clone (P-8 no primeiro commit):** opção (i) — o bootstrap faz o primeiro commit pulando a checagem de assinatura só essa vez (sem histórico pra comparar), e roda a checagem completa de segurança logo depois, que tem que passar limpa. Não a opção (ii) (aceitar só contra uma tag oficial assinada) — exigiria infraestrutura nova de assinatura de pacotes, sem ganho claro sobre (i) já que a checagem completa roda de qualquer jeito na sequência.
+3. **Slug do repositório oficial no texto estático:** vira marcador substituível, mesmo mecanismo já usado pro nome do sistema (Fase 2, (558)/(559)) — não fica só documentado como limitação.
+4. **Envio automático pro Google Drive:** desligado por padrão num clone novo — o cliente liga quando configurar a própria conta, nunca como comportamento herdado.
+5. **Primeira entrada do histórico de um clone:** o próprio script de bootstrap escreve, automática e genérica — não espera um assistente de boas-vindas conversar antes.
+
+**Divergência (item 2), decidida pelo Humano direto — Regra 8 proíbe maioria:** caminho `~/agata`, hoje fixo em vários scripts. 2 passadas recomendaram manter fixo (simplicidade), 1 recomendou virar variável configurável (flexibilidade pra cliente em máquina diferente). **Decisão do Humano: virar variável configurável.**
+
+**Não construído agora — isto é insumo pra quando a Fase 3 for escrita de verdade, não um `.diff`.** Nenhuma das 5 decisões vira código nesta entrada.
+
+**sync:** PASS — `git rev-parse main` = `8972e7c` no momento de medir, topo de MEMÓRIAS conferido com (563) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem do Humano ("continue"), decisão do item divergente dada diretamente nesta sessão.
 
 (563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
 
