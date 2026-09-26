@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[PRONTO — falta sua assinatura] Achei e consertei um bug real: um clone novo (Fase 3) quebraria de verdade, não só avisaria, a partir do 2º commit.** O programa que gera as notas do Obsidian tentava listar uma pasta que só existe DEPOIS da primeira proposta ser aplicada — num clone recém-nascido, ela ainda não existe, e o programa quebrava. Medi o problema de verdade (reproduzi o erro) antes de mexer, e testei o conserto nos 2 casos (pasta ausente e pasta presente).
+- Assine: `bash scripts/aprovar.sh p10-prop-dir-fix-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (574).
+
 **[FEITO E APLICADO — as 2 assinaturas de hoje entraram] O conserto do buraco de segurança e a divisão do Ollama, os dois assinados, já estão no código de verdade.** Conferi as duas assinaturas antes de mexer em qualquer coisa. Falta só UM passo, que precisa de `sudo` e é seu: instalar de verdade os 2 arquivos do Ollama no sistema. Mando o comando certo agora, numa mensagem separada.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (573).

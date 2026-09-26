@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(574) DIÁRIO — 26/09/2026 · **Proposta P-8 `p10-prop-dir-fix-2026-09-26` aberta: fecha o bug do `os.listdir` em `scripts/gerar_obsidian.py` que faz um esqueleto de gênese virar FALHA (não SKIP) no P-10. Aguardando assinatura.** Pedido: "prossiga com o desenvolvimento, utilize o lab caso necessário, e pare só quando não tiver jeito ou comprometa a segurança" — item já medido em (567)/(571), sem decisão de arquitetura nova, seguro prosseguir sem perguntar.
+  palavras-chave: proposta, prop, dir, fix, aberta, fecha, bug, listdir, scripts, gerar, obsidian, faz, esqueleto, gênese, virar, falha, skip, aguardando, assinatura, pedido, prossiga, desenvolvimento, utilize, lab, caso, necessário, pare, tiver, jeito, comprometa, segurança, item, medido, decisão, arquitetura, nova, seguro, prosseguir, perguntar
 (573) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do buraco real de quarentena (571) e a divisão do drop-in do Ollama (570).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada — par presente, sha256 bate, assinatura ED25519 boa, `git apply --check` limpo).
   palavras-chave: propostas, pendentes, assinadas, humano, aplicadas, juntas, conserto, buraco, real, quarentena, divisão, drop, ollama, assinatura, conferida, scripts, verificar, aplicar, par, presente, sha, bate, boa, git, apply, check, limpo
 (572) DIÁRIO — 26/09/2026 · **Humano relatou "perdemos o labo por ataque externo": as sessões `Ágata-Code` e `Agata-lab` teriam sido derrubadas e sumido dos fixados do dashboard do Claude. Verificado ao vivo no navegador: as duas já apareciam em "Fixados", nas duas abas, sem eu clicar em nada.** Registro separando fato de hipótese, como o próprio Humano pediu.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fila, nova, seth, aplicada, omniroute, ordem, humano, sim, aplique, modelos, medidos, hoje, chaves, dele, respondendo, tool, call, groq, gpt, oss, entrou, remoto, rápido, livre, pesado, codestral, código, saíram, huggingface, cerebras, crédito, trial, grátis, tabelas, vão, config, gratuitos, proposta, aguardando, assinatura
 (545) DIÁRIO — 24/09/2026 · **Groq e Cerebras de volta à fila: o 403 da Cloudflare (erro 1010) que durou semanas nunca foi o OmniRoute. É o user-agent `Python-urllib` dos nossos próprios scripts, repassado pelo proxy `:20127` e pelo OmniRoute até o provedor. Corrigido já, de forma reversível, nas duas conexões do OmniRoute; a classe fecha na proposta P-8 `ua-python-urllib-2026-09-24`, aguardando assinatura.**
   palavras-chave: groq, cerebras, volta, fila, cloudflare, erro, durou, semanas, nunca, omniroute, user, agent, python, urllib, nossos, próprios, scripts, repassado, proxy, provedor, corrigido, forma, reversível, conexões, classe, fecha, proposta, aguardando, assinatura
-(544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
-  palavras-chave: proposta, goose, fallback, passa, pôr, claude, quarentena, assinatura, diff, mudou, então, hash, tem, feita, versão
+(544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa …
+  palavras-chave: proposta, goose, fallback, passa
 (543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: pr …
   palavras-chave: goose, preparado, fallback, claude, code
 (542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Eng …
