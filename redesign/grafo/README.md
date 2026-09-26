@@ -21,7 +21,8 @@
 ## venv
 
 `redesign/grafo/.venv` (gitignorado, `redesign/**/.venv/`). `langgraph 1.2.11`,
-`langgraph-checkpoint-sqlite 3.1.1`, `langchain-core 1.6.1`.
+`langgraph-checkpoint-sqlite 3.1.1`, `langchain-core 1.6.1`. Pin exato e
+testado em `redesign/grafo/requisitos.txt` — `pip install -r` recria o venv.
 
 ## `durabilidade.py` — padrão do P4-00 (veredito A)
 

@@ -76,7 +76,9 @@ Sobe healthy em ~6 s.
 `redesign/igpu/.venv` (gitignorado, `redesign/**/.venv/`). OpenVINO 2026.3.1, openvino-genai
 2026.3.1, optimum-intel 2.1.0, transformers 4.57.6 (fixado — o 5.5.4 não muda o bug do
 export mas 4.57 é o alvo testado), torch 2.14 (puxou ~2 GB de libs CUDA à toa — venv
-descartável). ~6.2 GB no total.
+descartável). ~6.2 GB no total. Pin exato e testado em `redesign/igpu/requisitos.txt`
+— `pip install --extra-index-url https://download.pytorch.org/whl/cpu -r` recria o
+venv; sem esse índice o `torch==2.14.0+cpu` não instala (testado, 26/09/2026).
 
 ## `embeddings_server.py` — embeddings na iGPU (P2-03)
 

@@ -1,0 +1,22 @@
+# iGPU Intel via OpenVINO — STT (P2-02) e embeddings (P2-03)
+# Instalar num venv isolado: redesign/igpu/.venv (gitignorado, ~6.2 GB)
+#   python3 -m venv redesign/igpu/.venv
+#   redesign/igpu/.venv/bin/pip install --extra-index-url https://download.pytorch.org/whl/cpu \
+#       -r redesign/igpu/requisitos.txt
+# O --extra-index-url É OBRIGATÓRIO: testado sem ele (26/09/2026) e o pip do
+# PyPI não tem o build torch==2.14.0+cpu (só oferece o default, que traz CUDA
+# à toa neste venv CPU-only) -- instalação falha com "No matching distribution".
+# pin exato (mesma filosofia do redesign/mcp/requisitos.txt): reprodutibilidade.
+# transformers fixado em 4.57.6 de propósito — o 5.5.4 não corrige o bug do
+# optimum-cli export (NormalizedConfig, whisper), mas 4.57 é o alvo testado;
+# não subir sem re-rodar a exportação dos dois modelos (whisper + e5-small).
+# Medido por pip freeze real do venv desta Máquina (02/09/2026, README.md confere)
+# e testado do zero num venv descartável (26/09/2026): instala limpo com o
+# índice acima, os 3 imports reais (optimum.intel, transformers, openvino_genai)
+# funcionam.
+numpy==2.4.6
+openvino==2026.3.1
+openvino-genai==2026.3.1.0
+optimum-intel==2.1.0
+transformers==4.57.6
+torch==2.14.0+cpu
