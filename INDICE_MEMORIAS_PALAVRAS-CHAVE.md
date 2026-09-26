@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
+  palavras-chave: falso, positivo, latente, corrigido, achado, laboratório, nuvem, ensaio, medindo, pra, fase, bootstrap, verificado, mim, aplicar, redesign, router, goose, tinha, placeholder, config, valor, caracteres, openai, api, key, casa, padrão, genérico, chave, acusava, hoje, porque, estava, commitado, olha, staged
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
   palavras-chave: proposta, manifesto, corrigida, aplicar, achei, buraco, real, próprio, harness, teste, testar, perimetro, tentando, versão, assinada, assinatura, ficou, inválida, conteúdo, mudou, precisa, nova
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, dado pessoal; manifesto de Fase 5) medidas, decididas com o Humano e construídas: `config/caminhos-framework.txt` classifica todo caminho versionado (framework/instância/externo), e o controle novo P-20 avisa se dado pessoal for staged num caminho framework.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, geminis, fila, seth, tabelas, config, modelos, gratuitos, batem, viva, omniroute, proposta, esperando, assinatura
 (534) DIÁRIO — 23/09/2026 · **Os 2 Gemini avaliados em (532) entram na fila da Seth, por ordem do Humano ("faça pelo menos os geminis antes de terminar, quero testar a Seth tinindo"). Já estão em uso: a `seth-pesado` e a `seth-livre` responderam pelo `gemini-3-flash-preview` onde antes cairiam no 429 do 2.5. A documentação das filas vai em proposta P-8.**
   palavras-chave: gemini, avaliados, entram, fila, seth, ordem, humano, faça, geminis, terminar, quero, testar, tinindo, estão, uso, pesado, livre, responderam, flash, preview, cairiam, documentação, filas, vai, proposta
-(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
-  palavras-chave: assinado, verificado, aplicado, afinacao, sistema, volta, curta, recomendei, provou, vivo, pontos, tinham, rodado, atalho, sincroniza, compose, cache, deixa, seth, rápida, goose, pede, confirmação, agir
+(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema- …
+  palavras-chave: assinado, verificado, aplicado, afinacao, sistema
 (532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas …
   palavras-chave: decisões, tomadas, humano, executadas
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as …

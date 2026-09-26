@@ -9,6 +9,12 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+## Onde estamos — 26/09/2026
+
+**[PRONTO — falta sua assinatura] O laboratório começou a olhar a Fase 3 (deixar o sistema fácil de instalar do zero) e achou um problema pequeno, sem relação com isso, de bônus — e consertar esse problema achou mais dois.** Uma linha de exemplo num manual (não é senha de verdade, é só texto de exemplo) batia sem querer no alarme que protege contra vazar chave de API. Corrigido — mas aí o próprio arquivo que registra o conserto passou a bater no mesmo alarme (é assim que um "antes e depois" funciona), e minha própria prova de que o alarme continua funcionando também bateu nele. Ajustei os três: o alarme agora não escaneia o texto do registro de propostas (só o código de verdade, onde a proteção real está), e as provas foram reescritas pra não se auto-acusarem.
+- Assine: `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (563).
+
 ## Onde estamos — 25/09/2026
 
 **[REFEITO — assinatura antiga não serve mais, precisa assinar de novo] As outras 2 pendências (dado pessoal; lista única de caminhos) viraram código — mas achei um furo no teste na hora de aplicar, e a assinatura que você já tinha feito ficou velha.** Um arquivo só lista os dois grupos de pasta (o que vai pra todo clone, o que é só desta Máquina), e um controle novo avisa se dado pessoal (e-mail, IP) for adicionado num arquivo que vai pra clone — sem nunca mostrar o valor achado, só onde está. No caminho, achei que o próprio teste automático não enxergava esse arquivo de lista (corrigido, testado 3 vezes).

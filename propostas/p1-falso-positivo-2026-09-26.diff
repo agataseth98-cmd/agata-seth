@@ -1,0 +1,76 @@
+diff --git a/redesign/router/goose.md b/redesign/router/goose.md
+index 96c970b..0ad7527 100644
+--- a/redesign/router/goose.md
++++ b/redesign/router/goose.md
+@@ -29,7 +29,7 @@ predecessor de 2024 — **deprecado, não usado**.
+ GOOSE_PROVIDER: openai
+ GOOSE_MODEL: ollama-local/qwen3.5:9b
+ OPENAI_HOST: http://127.0.0.1:20127     # proxy sanitizador (NAO :20128 direto)
+-OPENAI_API_KEY: nao-usada-proxy-loopback
++OPENAI_API_KEY: nao-usada-proxy
+ GOOSE_MODE: approve                      # pede confirmacao antes de cada acao de ferramenta
+ ```
+ 
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 63baa53..a49ec52 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -424,6 +424,33 @@ _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
+ printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
+ EOF
+ 
++# Achado do laboratório "Ensaio" 26/09/2026, medindo pra Fase 3: um valor de
++# placeholder de config com 24 caracteres depois de "KEY:" casava o padrão
++# genérico -- só não acusava hoje porque já estava commitado (P-1 só olha
++# staged); qualquer edição futura daquela linha acusaria. Corrigido no
++# arquivo (valor encurtado pra <16 chars); este caso prova que o padrão
++# continua pegando chave de verdade do mesmo tamanho. Valor montado via _k
++# (mesma convenção do P-1/P-20/P-21): escrito contíguo, esta linha do
++# ARQUIVO FONTE viraria ela mesma um achado quando testar_perimetro.sh for
++# staged de novo por outro motivo -- exatamente a 2ª classe de achado desta
++# entrada (auto-referência do próprio teste, não só do .diff da proposta).
++_caso P-1 PEGA "FALSO NEGATIVO evitado: placeholder de 16+ chars ainda é achado" <<'EOF'
++printf 'OPENAI_API_KEY: %s\n' "$(_k "valor-longo-" "o-bastante")" > texto.md && git add texto.md
++EOF
++
++_caso P-1 PASSA "FALSO POSITIVO evitado: placeholder curto (<16 chars) não acusa" <<'EOF'
++printf 'OPENAI_API_KEY: nao-usada-proxy\n' > texto.md && git add texto.md
++EOF
++
++# Achado 26/09/2026 (mesmo laboratório): um .diff novo em propostas/ que
++# CORRIGE um falso positivo do P-1 reproduz a linha antiga no hunk e o
++# arquivo inteiro entra como "adicionado" -- bloquearia pra sempre a própria
++# proposta que conserta o achado. propostas/*.diff sai do escopo por linha;
++# o arquivo REAL fora de propostas/ continua pegando normalmente (caso acima).
++_caso P-1 PASSA "propostas/*.diff com hunk mostrando chave removida não acusa" <<'EOF'
++mkdir -p propostas && printf -- '-OPENAI_API_KEY: %s\n+OPENAI_API_KEY: curto\n' "$(_k "valor-longo-" "o-bastante")" > propostas/teste-p1-2026-09-26.diff && git add propostas/teste-p1-2026-09-26.diff
++EOF
++
+ # --- P-21: marcador do nome do sistema -----------------------------------
+ # Marcador montado em pedaços (_k): escrito inteiro, este arquivo não é fonte
+ # do P-21 (i), mas manter a convenção do P-1 evita surpresa se o escopo crescer.
+diff --git a/scripts/varredura_segredo.sh b/scripts/varredura_segredo.sh
+index 0fa1910..8373b0f 100755
+--- a/scripts/varredura_segredo.sh
++++ b/scripts/varredura_segredo.sh
+@@ -137,6 +137,20 @@ checar_segredo() {
+   local arquivo diff_arquivo p linhas
+   while IFS= read -r arquivo; do
+     [ -z "$arquivo" ] && continue
++    # propostas/*.diff (e propostas/aplicadas/*.diff) ficam fora do escopo
++    # por linha (achado 26/09/2026, laboratório "Ensaio" medindo pra Fase 3):
++    # um .diff é, por natureza, texto que reproduz linha removida/adicionada
++    # do arquivo real -- uma proposta que CORRIGE um falso positivo do P-1
++    # (ex: encurtar um placeholder tipo "KEY: <24 chars>") necessariamente
++    # mostra a linha antiga no hunk, e o .diff inteiro entra como "adicionado"
++    # por ser arquivo novo em propostas/ -- bloqueando pra sempre a própria
++    # proposta que conserta o achado. Não é buraco: o arquivo REAL (aqui,
++    # redesign/router/goose.md) continua escaneado normalmente quando staged
++    # -- antes de virar proposta, e de novo quando a proposta é aplicada --,
++    # que é a defesa de verdade. O .diff em si é só o formato do processo P-8.
++    case "$arquivo" in
++      propostas/*.diff|propostas/aplicadas/*.diff) continue ;;
++    esac
+     diff_arquivo="$(git diff --cached -U0 -- "$arquivo")"
+     for p in "${PADROES_SEGREDO[@]}"; do
+       linhas="$(echo "$diff_arquivo" | grep -nE '^\+' | grep -vE '^\+\+\+' | grep -E -- "$p")"

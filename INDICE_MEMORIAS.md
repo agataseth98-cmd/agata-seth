@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, dado pessoal; manifesto de Fase 5) medidas, decididas com o Humano e construídas: `config/caminhos-framework.txt` classifica todo caminho versionado (framework/instância/externo), e o controle novo P-20 avisa se dado pessoal for staged num caminho framework.**
 (560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
 (535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
 (534) DIÁRIO — 23/09/2026 · **Os 2 Gemini avaliados em (532) entram na fila da Seth, por ordem do Humano ("faça pelo menos os geminis antes de terminar, quero testar a Seth tinindo"). Já estão em uso: a `seth-pesado` e a `seth-livre` responderam pelo `gemini-3-flash-preview` onde antes cairiam no 429 do 2.5. A documentação das filas vai em proposta P-8.**
-(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema-2026-09-23` (532). A volta curta que eu recomendei provou ao vivo os 3 pontos que ainda não tinham rodado: o atalho sincroniza o compose, o cache deixa a Seth rápida, e o Goose pede confirmação antes de agir.**
+(533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema- …
 (532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas …
 (531) DIÁRIO — 23/09/2026 · **Teste da Seth refeito do zero, depois de todas as …
 (530) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `p16-reconhece-con …

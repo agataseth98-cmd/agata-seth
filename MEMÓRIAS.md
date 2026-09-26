@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 78b48889e0945479f63e4fa0067e31080d1d0214
-  Escrito em: 25/09/2026 21:15 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a5fc3b4c839a97c669f82606117c9b30b1aa2914
+  Escrito em: 26/09/2026 11:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/78b48889e0945479f63e4fa0067e31080d1d0214/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/78b48889e0945479f63e4fa0067e31080d1d0214/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/78b48889e0945479f63e4fa0067e31080d1d0214/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a5fc3b4c839a97c669f82606117c9b30b1aa2914/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
+
+**Pedido:** "peça ajuda ao laboratório" (Fase 3) → laboratório montou um repositório de teste de verdade num container e rodou `perimetro.sh`/`testar_perimetro.sh` dentro — achado real, não teórico, no caminho de medir a Fase 3, não o objetivo dela. Verifiquei na Máquina antes de aceitar (Regra 2): a linha existe em `redesign/router/goose.md:32`, e testei o padrão `[A-Za-z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)[A-Za-z0-9_]*[[:space:]]*[:=][[:space:]]*["']?[A-Za-z0-9/+_-]{16,}["']?` contra o valor real — casa.
+
+**Correção:** valor do placeholder encurtado pra 15 caracteres (abaixo do limiar `{16,}` do padrão), sem perder o sentido (a frase seguinte já explica "Sem chave: loopback é a proteção"). Não é enfraquecimento do controle: uma chave real de 15 caracteres continua rara e o padrão é só um entre 12; o achado é sobre este ARQUIVO especificamente, não sobre a régua em geral.
+
+**Segundo achado, no próprio caminho de corrigir o primeiro (Regra 2 -- medido, não suposto):** ao gerar o `.diff` desta proposta, o P-1 bloqueou o commit -- o `.diff` novo em `propostas/` reproduz de verdade a linha antiga removida (é assim que um diff funciona), e o arquivo inteiro entra como "adicionado" por ser novo. Isso bloquearia pra sempre a própria proposta que conserta o achado -- e bloquearia de novo na hora de aplicar a proposta assinada. Não é vazamento: verifiquei que não é segredo real, é o texto do achado se auto-citando. Perguntei ao Humano como seguir; decisão: **P-1 passa a ignorar `propostas/*.diff` e `propostas/aplicadas/*.diff` no escopo por linha** (`scripts/varredura_segredo.sh`) -- o arquivo REAL (aqui, `redesign/router/goose.md`) continua escaneado normalmente quando staged, antes de virar proposta e de novo quando a proposta é aplicada, que é a defesa de verdade; o `.diff` em si é só o formato do processo P-8, e escaneá-lo de novo é redundante e cria essa classe de falso positivo toda vez que uma proposta mexe perto de algo com cara de chave.
+
+**Terceiro achado, no mesmo caminho:** minha própria fixture de teste em `testar_perimetro.sh` (o caso PEGA, escrito pra provar que o padrão continua pegando chave de verdade) também virou auto-referência -- ao ficar staged por qualquer outro motivo futuro, o ARQUIVO FONTE do teste conteria a string contígua e se acusaria sozinho. Corrigido com a mesma convenção que P-1/P-20/P-21 já usam (`_k`, valor montado em pedaços, nunca contíguo no arquivo fonte).
+
+**Testado:** 4 casos novos/ajustados em `testar_perimetro.sh` -- PEGA confirmando que um placeholder de 16+ caracteres continua sendo achado fora de `propostas/`; PASSA confirmando que o valor corrigido em `goose.md` não acusa mais; PASSA confirmando que um `.diff` novo em `propostas/` com hunk mostrando chave removida não acusa; e a fixture da régua em si, montada via `_k`. Suíte inteira: 43/43, reproduzindo o cenário real (staged o `.diff` de verdade) antes e depois da isenção -- bloqueava antes, limpo depois. `git apply --check` limpo contra HEAD real, worktree descartável.
+
+**Erro meu no caminho, sem dano:** um `git checkout -- .` apagou os primeiros consertos com `_k` (restaurou do índice staged antes deles, não do HEAD -- mesma classe de erro já catalogada nesta sessão). Achado rodando os testes de novo, refeito sem `git checkout` solto desta vez.
+
+**Em quarentena P-8, aguardando assinatura:** `propostas/p1-falso-positivo-2026-09-26.diff` — `redesign/router/goose.md` (quarentena: `redesign/router/*`), `scripts/testar_perimetro.sh` e `scripts/varredura_segredo.sh`.
+
+**sync:** PASS — `git rev-parse main` = `a5fc3b4` no momento de medir, topo de MEMÓRIAS conferido com (562) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** ordem do Humano ("Sim, conserte agora (Recomendado)") nesta sessão, depois de eu verificar o achado do laboratório na Máquina.
 
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
 
