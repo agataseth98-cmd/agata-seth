@@ -1,0 +1,15 @@
+# Grafo P4-02 — máquina de estados do agente (checkpoint em SQLite)
+# Instalar num venv isolado: redesign/grafo/.venv (gitignorado)
+#   python3 -m venv redesign/grafo/.venv
+#   redesign/grafo/.venv/bin/pip install -r redesign/grafo/requisitos.txt
+# pin exato (mesma filosofia do redesign/mcp/requisitos.txt): reprodutibilidade —
+# grafo.py importa langgraph.types/graph/checkpoint.sqlite tardiamente (dentro de
+# função, não no topo do arquivo); langchain-core é dependência transitiva de
+# langgraph, mas fixada aqui também para não deixar uma minor solta puxar churn.
+# Medido por pip freeze real do venv desta Máquina (02/09/2026, README.md confere)
+# e testado do zero num venv descartável (26/09/2026): instala limpo, os 4
+# imports reais de grafo.py (langgraph.types, langgraph.graph, langgraph.checkpoint.sqlite,
+# Command) funcionam.
+langgraph==1.2.11
+langgraph-checkpoint-sqlite==3.1.1
+langchain-core==1.6.1

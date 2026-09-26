@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5856b8efc0295a8659bb645fb65ae2e5dcb706ac
-  Escrito em: 26/09/2026 13:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1d7edf35008484c1961856b753725d0bcba0d6c
+  Escrito em: 26/09/2026 13:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5856b8efc0295a8659bb645fb65ae2e5dcb706ac/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5856b8efc0295a8659bb645fb65ae2e5dcb706ac/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5856b8efc0295a8659bb645fb65ae2e5dcb706ac/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d7edf35008484c1961856b753725d0bcba0d6c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(569) DIÁRIO — 26/09/2026 · **`requisitos.txt` novo pra `redesign/grafo/` e `redesign/igpu/` — fecha uma das pendências que sobraram pra F3.2 depois de (567): o bootstrap não recriava esses dois venvs de forma determinística.** Pedido: "faça como for melhor para o sistema... de maneira obssessiva" — medição pura, sem decisão de arquitetura em aberto, não precisava voltar ao Humano antes de agir.
+
+**`redesign/grafo/requisitos.txt`:** 3 pacotes de topo (`langgraph==1.2.11`, `langgraph-checkpoint-sqlite==3.1.1`, `langchain-core==1.6.1` — os 2 primeiros são os que `grafo.py` importa tardiamente, `langchain-core` é transitivo mas fixado pela mesma filosofia de `redesign/mcp/requisitos.txt`). Confirmado por `pip freeze` do venv real e testado do zero num venv descartável: instala limpo, os 4 imports reais de `grafo.py` (`langgraph.types`, `langgraph.graph`, `langgraph.checkpoint.sqlite`, `Command`) funcionam.
+
+**`redesign/igpu/requisitos.txt`:** 6 pacotes (`numpy`, `openvino`, `openvino-genai`, `optimum-intel`, `transformers==4.57.6` fixado por bug conhecido, `torch==2.14.0+cpu`). **Achado testando (não estava no README):** sem `--extra-index-url https://download.pytorch.org/whl/cpu`, o `pip install` **falha** — o PyPI não tem o build `+cpu` do torch, só o default (que traz CUDA à toa). Com o índice certo, instala limpo e os 3 imports reais (`optimum.intel`, `transformers`, `openvino_genai`) funcionam. Os dois README.md (`redesign/grafo/`, `redesign/igpu/`) ganharam uma linha apontando pro `requisitos.txt` e, no caso do igpu, o comando completo com o índice extra.
+
+**sync:** PASS — `git rev-parse main` = `d1d7edf` no momento de medir, topo de MEMÓRIAS conferido com (568) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `pip freeze` dos dois venvs reais desta Máquina; `grep`/leitura dos imports reais em `redesign/grafo/*.py` e `redesign/igpu/*.py` pra separar dependência direta de transitiva; dois venvs descartáveis no scratchpad, instalação do zero a partir só do `requisitos.txt`, import real testado, removidos depois · **Autorização:** "faça como for melhor para o sistema... de maneira obssessiva" — item de medição pura da lista de pendências F3.2 que (567) deixou registrada, sem decisão de arquitetura pendente.
 
 (568) CORREÇÃO — 26/09/2026 · **Correção à citação de arquivo:linha em (567): o P-19, no próprio commit que registrou (567), apontou que a linha citada não bate com a fonte.** Eu tinha escrito "`scripts/gerar_obsidian.py:433` faz `os.listdir(propostas/aplicadas)` sem checar existência" — a linha 433 é `prop_dir = os.path.join(REPO, "propostas", "aplicadas")`; o `os.listdir(prop_dir)` está na **434**. Conferido agora, `sed -n '430,436p'`. O conteúdo do achado (o bug existe, é isso que causa o P-10 virar FALHA num esqueleto sem `propostas/aplicadas/`) continua correto — só a linha citada estava errada por um.
 
