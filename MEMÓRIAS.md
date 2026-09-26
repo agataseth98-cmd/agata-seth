@@ -26,18 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fd588b756615f2f49d6718f5bd970e05fe25fdf4
-  Escrito em: 26/09/2026 15:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9628d5c8a63f37b909bfb63c0f0a7b643210f1ce
+  Escrito em: 26/09/2026 17:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd588b756615f2f49d6718f5bd970e05fe25fdf4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd588b756615f2f49d6718f5bd970e05fe25fdf4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fd588b756615f2f49d6718f5bd970e05fe25fdf4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta: template `llamacpp@.service` pra Fase 3 (F3.2), testado AO VIVO com o Humano presente — achou e corrigiu um bug real que o laboratório não podia ver de dentro do container de nuvem. Aguardando assinatura.**
+
+**Contexto:** primeira tentativa de testar de verdade foi bloqueada pelo classificador de segurança do modo automático ("Unauthorized Persistence" — instalar/rodar unit `systemd --user` persistente, mesmo sem sudo, pede autorização explícita). Não tentei contornar; parei, expliquei ao Humano, perguntei. Ele tinha saído ("mercado"), voltou ("já voltei"), autorizou explicitamente ("sim") — só então tentei de novo, com ele presente.
+
+**Achado real, só possível testando numa Máquina de verdade:** a primeira versão do template (proposta original do laboratório "Ensaio" em (567), nunca testada por eles por falta de systemd no container deles) usava `ExecStart=... ${ARGS} ...` esperando que múltiplas flags (`-c 2048`) fossem separadas em argumentos distintos. **O systemd NÃO faz word-splitting de variável expandida em `ExecStart`** — `${ARGS}` com valor `-c 2048` virava UM argumento só, com espaço dentro, e o `llama-server` recusava (`error: invalid argument: -c 2048`), em loop de restart. Corrigido trocando `ExecStart` pra `/bin/sh -c '...'` (o shell faz o split que o systemd não faz; `%i` continua expandido pelo systemd antes de virar texto do script, então segue funcionando dentro das aspas).
+
+**Testado de ponta a ponta**, sob a instância `teste-p8` (nome claramente de teste, nunca colide com as 5 units reais — `llamacpp-agata` etc. seguem intocadas o tempo todo, confirmado `inactive` antes e depois): porta 20199 (fora de qualquer porta em uso), phi-4-mini (menor peso já baixado, 2.5 GB), `-c 2048` via `.env`. `/health` → `{"status":"ok"}`; `/v1/models` → confirma alias `teste-p8` (de `%i`) e `n_ctx: 2048` (de `ARGS`, prova que o split funcionou); `/v1/chat/completions` → resposta real gerada. Depois: parado, `.service` e `.env` de teste removidos, `daemon-reload`, VRAM de volta a 18 MiB (igual a antes), as 5 units reais confirmadas `inactive`, sem nenhuma alteração.
+
+**sync:** PASS — `git rev-parse main` = `9628d5c` no momento de medir, topo de MEMÓRIAS conferido com (574) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável pra escrever os arquivos; teste ao vivo real nesta Máquina (`systemctl --user`, `curl`), com o Humano presente e autorização explícita a cada etapa que o classificador de segurança flagou; `.diff` verificado contra HEAD real num segundo worktree · **Autorização:** "prossiga com o desenvolvimento... pare só quando não tiver jeito ou comprometa a segurança" — parei quando o classificador bloqueou, perguntei, só prossegui com "sim" explícito do Humano já de volta.
+
+(574) DIÁRIO — 26/09/2026 · **Proposta P-8 `p10-prop-dir-fix-2026-09-26` aberta: fecha o bug do `os.listdir` em `scripts/gerar_obsidian.py` que faz um esqueleto de gênese virar FALHA (não SKIP) no P-10. Aguardando assinatura.** Pedido: "prossiga com o desenvolvimento, utilize o lab caso necessário, e pare só quando não tiver jeito ou comprometa a segurança" — item já medido em (567)/(571), sem decisão de arquitetura nova, seguro prosseguir sem perguntar.
+
+**Medido vermelho/verde, não só teórico:** num worktree descartável, com `propostas/aplicadas/` renomeada pra fora do caminho, `python3 scripts/gerar_obsidian.py` (com os env vars que o P-10 usa) quebrava com `FileNotFoundError` na linha 434 — confirmado ao vivo. Correção: `os.listdir(prop_dir) if os.path.isdir(prop_dir) else []` — lista vazia é o estado certo pra "nenhuma proposta ainda". Testado nos 2 cenários: pasta ausente → "0 propostas", sem crash; pasta presente (conteúdo real desta Máquina, 215 propostas) → sem mudança de comportamento. Suíte inteira: 46/46.
+
+**sync:** PASS — `git rev-parse main` = `fb9f57b` no momento de medir, topo de MEMÓRIAS conferido com (573) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável, vermelho medido (pasta renomeada pra fora), correção aplicada, verde medido nos 2 cenários, suíte inteira depois; `.diff` verificado contra HEAD real num segundo worktree · **Autorização:** "prossiga com o desenvolvimento... pare só quando não tiver jeito ou comprometa a segurança" — conserto de bug já medido, sem decisão de arquitetura pendente.
 
 (573) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do buraco real de quarentena (571) e a divisão do drop-in do Ollama (570).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada — par presente, sha256 bate, assinatura ED25519 boa, `git apply --check` limpo).
 

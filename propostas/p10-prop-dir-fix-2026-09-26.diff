@@ -1,0 +1,22 @@
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index 27b9a99..e8d8fdd 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -430,8 +430,16 @@ def main():
+         script_base[rel] = b
+         NOTAS.add(b)
+ 
++    # propostas/aplicadas/ pode não existir ainda -- esqueleto de gênese
++    # recém-nascido, antes da primeira proposta aplicada (achado real em
++    # (567)/(571): sem esta guarda, o P-10 vira FALHA, não SKIP, a partir do
++    # 2º commit de um clone novo, assim que memoria/obsidian/ passa a
++    # existir). Lista vazia é o estado correto pra "nenhuma proposta ainda".
+     prop_dir = os.path.join(REPO, "propostas", "aplicadas")
+-    props = sorted(n[:-5] for n in os.listdir(prop_dir) if n.endswith(".diff"))
++    props = sorted(
++        n[:-5] for n in (os.listdir(prop_dir) if os.path.isdir(prop_dir) else [])
++        if n.endswith(".diff")
++    )
+     prop_base = {p: slug(p, "prop-") for p in props}
+     NOTAS.update(prop_base.values())
+ 
