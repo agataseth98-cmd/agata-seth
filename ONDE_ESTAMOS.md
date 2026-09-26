@@ -9,6 +9,19 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+## Onde estamos — 26/09/2026
+
+**[REFEITO — falta assinar, conserto mais sério desta vez] O laboratório achou um buraco de verdade no conserto do alarme de chave de API, a tempo — nada disso foi assinado ainda.** Minha primeira versão (a de ontem) tirava o arquivo de registro da proposta inteiro do alarme — bom pra parar de se auto-acusar, mas também escondia se a PRÓPRIA proposta introduzisse uma chave nova por engano. Corrigido: agora só a parte que mostra "o que já existia antes" fica de fora; o que a proposta adiciona de novo continua vigiado. Testei os 3 casos que importam antes de mexer: chave nova é pega, remoção de exemplo antigo passa, a proposta de verdade passa.
+- Assine (mesmo comando, conteúdo corrigido): `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (565).
+
+**[FEITO, sem assinatura — é decisão, não código ainda] As 5 perguntas em aberto da Fase 3 (instalação do zero) foram respondidas.** Rodei a checagem tripla que o sistema usa pra decisão sem resposta certa (3 consultas independentes a um modelo local, sem uma influenciar a outra). 4 das 5 bateram nas 3 consultas: o jeito de nascer um clone novo com segurança, o nome do repositório virar configurável, o envio automático pra nuvem vir desligado por padrão, e o próprio instalador escrever a primeira linha do histórico. Na 5ª (se a pasta do sistema fica sempre "~/agata" ou vira escolha do cliente) as consultas discordaram — não decido por maioria nesse caso, então te perguntei direto: você escolheu deixar configurável.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (564).
+
+**[PRONTO — falta sua assinatura] O laboratório começou a olhar a Fase 3 (deixar o sistema fácil de instalar do zero) e achou um problema pequeno, sem relação com isso, de bônus — e consertar esse problema achou mais dois.** Uma linha de exemplo num manual (não é senha de verdade, é só texto de exemplo) batia sem querer no alarme que protege contra vazar chave de API. Corrigido — mas aí o próprio arquivo que registra o conserto passou a bater no mesmo alarme (é assim que um "antes e depois" funciona), e minha própria prova de que o alarme continua funcionando também bateu nele. Ajustei os três: o alarme agora não escaneia o texto do registro de propostas (só o código de verdade, onde a proteção real está), e as provas foram reescritas pra não se auto-acusarem.
+- Assine: `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (563).
+
 ## Onde estamos — 25/09/2026
 
 **[REFEITO — assinatura antiga não serve mais, precisa assinar de novo] As outras 2 pendências (dado pessoal; lista única de caminhos) viraram código — mas achei um furo no teste na hora de aplicar, e a assinatura que você já tinha feito ficou velha.** Um arquivo só lista os dois grupos de pasta (o que vai pra todo clone, o que é só desta Máquina), e um controle novo avisa se dado pessoal (e-mail, IP) for adicionado num arquivo que vai pra clone — sem nunca mostrar o valor achado, só onde está. No caminho, achei que o próprio teste automático não enxergava esse arquivo de lista (corrigido, testado 3 vezes).
