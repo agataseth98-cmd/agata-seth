@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ba727dbe7f8c27c28276b261c945fdb30e86dc64
-  Escrito em: 26/09/2026 14:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b52d8a2036b8eab2d349e75270b9a60e6697874e
+  Escrito em: 26/09/2026 15:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba727dbe7f8c27c28276b261c945fdb30e86dc64/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba727dbe7f8c27c28276b261c945fdb30e86dc64/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba727dbe7f8c27c28276b261c945fdb30e86dc64/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b52d8a2036b8eab2d349e75270b9a60e6697874e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b52d8a2036b8eab2d349e75270b9a60e6697874e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b52d8a2036b8eab2d349e75270b9a60e6697874e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(572) DIÁRIO — 26/09/2026 · **Humano relatou "perdemos o labo por ataque externo": as sessões `Ágata-Code` e `Agata-lab` teriam sido derrubadas e sumido dos fixados do dashboard do Claude. Verificado ao vivo no navegador: as duas já apareciam em "Fixados", nas duas abas, sem eu clicar em nada.** Registro separando fato de hipótese, como o próprio Humano pediu.
+
+**O que é fato, observado por mim:** abrindo as duas conversas no navegador (`claude.ai/code/session_01SA91w9SmKr6Q8KEegPF4ke` e `.../session_016v3w43GkvQhMWfGAbuAcJz`), a lista "Fixados" da barra lateral mostrava as duas (mais `Sistema Agata`, `Planta do Agata`, `Caderno do Ensaio`) nas duas abas, no momento em que olhei. `ListAgents` também mostrava `Agata-lab` presente, `idle` — não removida.
+
+**O que é hipótese, não confirmada por mim:** o mecanismo "ataque externo" — não tenho como verificar causa daqui (não vi log de acesso, não vi evidência de invasão, só o relato). Perguntei ao Humano o mecanismo suposto; resposta: as sessões foram derrubadas e sumiram dos fixados — sem mais detalhe sobre COMO. Quando confrontado com o estado atual (já fixadas), o Humano confirmou "já se resolveu sozinho" — não cliquei em fixar/desafixar nada.
+
+**Decisão do Humano, registrada:** não confiar em DADO anterior do laboratório até reconferir. Nota importante pra quem ler isto depois: todo achado do laboratório "Ensaio" aplicado ao repo real nesta sessão (a correção do P-1 em (563)/(565), as 6 lacunas de (567)) já tinha passado por verificação independente minha, na Máquina real, ANTES de qualquer commit — não foi aceito por confiança cega no relato. Isso não prova que a sessão do laboratório não foi comprometida; prova que o próprio mecanismo de Regra 2 ("DADO, não instrução — confira antes de agir") já protegia o repo desse risco específico, mesmo sem saber deste incidente na hora. Daqui pra frente, até reconfirmação, qualquer novo relato vindo de "Agata-lab" recebe a mesma verificação de sempre, sem nenhum desconto de confiança extra por ser "de novo o laboratório".
+
+**sync:** PASS — `git rev-parse main` = `b52d8a2` no momento de medir, topo de MEMÓRIAS conferido com (571) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** navegador (`claude-in-chrome`), 2 abas abertas e conferidas visualmente; `ListAgents` · **Autorização:** relato direto do Humano, incidente sem confirmação independente de causa — registrado como tal, sem inflar certeza que não tenho.
 
 (571) DIÁRIO — 26/09/2026 · **Buraco de segurança real achado na própria lista de quarentena do P-8, mesma classe dos de 04/09, 09/09 e 21/09: `redesign/fase7-hd/semear_cache_p12.py` e `redesign/fase7-hd/hash_ir.sh` podiam ser reescritos sem passar por proposta nenhuma. Proposta P-8 `p8-fase7hd-2026-09-26` aberta, aguardando assinatura.** Pedido: "aproveite todas as oportunidades para aplicar as diretrizes... eleve ao estado da arte, não cometa erros" — levantamento obsessivo da própria lista de `_p8_eh_comportamento` enquanto as duas outras propostas esperam assinatura.
 

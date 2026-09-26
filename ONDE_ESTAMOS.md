@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[REGISTRADO — fato separado de suspeita] Você avisou que perdeu o laboratório por ataque externo; conferi ao vivo no navegador e as duas conversas já apareciam fixadas, sem eu mexer em nada.** Separei o que eu vi de verdade (as duas conversas estão lá, fixadas) do que ainda não dá pra confirmar (se houve mesmo um ataque, e como). A partir de agora, qualquer coisa que vier do laboratório passa pela mesma conferência de sempre, sem nenhum desconto extra de confiança — o que já era a regra, mas fica reforçado.
+- Nada pra assinar aqui.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (572).
+
 **[PRONTO — falta sua assinatura] Achei um buraco de segurança real, sozinha, revisando o próprio sistema de segurança.** Dois arquivos (`redesign/fase7-hd/semear_cache_p12.py` e `hash_ir.sh` — o que alimenta o número de "cobertura de backup" quando o HD tá desligado) podiam ser reescritos por qualquer sessão futura sem passar por aprovação nenhuma sua — a mesma classe de brecha que já achei 3 vezes antes em outras pastas. Medi o problema de verdade antes de mexer (confirmei que sem o conserto a edição passa despercebida) e testei o conserto depois (confirmei que agora ela é pega). Nada mudou no sistema real ainda — só a proposta está pronta.
 - Assine: `bash scripts/aprovar.sh p8-fase7hd-2026-09-26`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (571).
