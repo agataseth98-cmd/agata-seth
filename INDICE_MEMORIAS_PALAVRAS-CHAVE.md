@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(573) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do buraco real de quarentena (571) e a divisão do drop-in do Ollama (570).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada — par presente, sha256 bate, assinatura ED25519 boa, `git apply --check` limpo).
+  palavras-chave: propostas, pendentes, assinadas, humano, aplicadas, juntas, conserto, buraco, real, quarentena, divisão, drop, ollama, assinatura, conferida, scripts, verificar, aplicar, par, presente, sha, bate, boa, git, apply, check, limpo
 (572) DIÁRIO — 26/09/2026 · **Humano relatou "perdemos o labo por ataque externo": as sessões `Ágata-Code` e `Agata-lab` teriam sido derrubadas e sumido dos fixados do dashboard do Claude. Verificado ao vivo no navegador: as duas já apareciam em "Fixados", nas duas abas, sem eu clicar em nada.** Registro separando fato de hipótese, como o próprio Humano pediu.
   palavras-chave: humano, relatou, perdemos, labo, ataque, externo, sessões, ágata, code, agata, lab, teriam, sido, derrubadas, sumido, fixados, dashboard, claude, verificado, vivo, navegador, apareciam, abas, clicar, nada, registro, separando, fato, hipótese, próprio, pediu
 (571) DIÁRIO — 26/09/2026 · **Buraco de segurança real achado na própria lista de quarentena do P-8, mesma classe dos de 04/09, 09/09 e 21/09: `redesign/fase7-hd/semear_cache_p12.py` e `redesign/fase7-hd/hash_ir.sh` podiam ser reescritos sem passar por proposta nenhuma. Proposta P-8 `p8-fase7hd-2026-09-26` aberta, aguardando assinatura.** Pedido: "aproveite todas as oportunidades para aplicar as diretrizes... eleve ao estado da arte, não cometa erros" — levantamento obsessivo da própria lista de `_p8_eh_comportamento` enquanto as duas outras propostas esperam assinatura.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: groq, cerebras, volta, fila, cloudflare, erro, durou, semanas, nunca, omniroute, user, agent, python, urllib, nossos, próprios, scripts, repassado, proxy, provedor, corrigido, forma, reversível, conexões, classe, fecha, proposta, aguardando, assinatura
 (544) DIÁRIO — 24/09/2026 · **A proposta `goose-fallback-2026-09-24` (543) passa a pôr também `.claude/*` em quarentena P-8, antes da assinatura. O `.diff` mudou, então o hash é outro, e a assinatura tem de ser feita sobre esta versão.**
   palavras-chave: proposta, goose, fallback, passa, pôr, claude, quarentena, assinatura, diff, mudou, então, hash, tem, feita, versão
-(543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: proposta P-8 `goose-fallback-2026-09-24`, aguardando assinatura, com 3 skills no repositório, `p8_verificar.sh`, o MCP do canon ligado, permissões com o prefixo certo, `.agents/` e `redesign/goose/` em quarentena, e um defeito real do `estado_para_eco.sh` corrigido (atrás/à-frente invertido). Desenho do sistema com a bússola publicado como página.**
-  palavras-chave: goose, preparado, fallback, claude, code, proposta, aguardando, assinatura, skills, repositório, verificar, mcp, canon, ligado, permissões, prefixo, certo, agents, redesign, quarentena, defeito, real, estado, eco, corrigido, atrás, frente, invertido, desenho, sistema, bússola, publicado, página
+(543) DIÁRIO — 24/09/2026 · **O Goose preparado como fallback do Claude Code: pr …
+  palavras-chave: goose, preparado, fallback, claude, code
 (542) DIÁRIO — 24/09/2026 · **Pesquisa do Humano (um "Tratado Convergente de Eng …
   palavras-chave: pesquisa, humano, tratado, convergente, eng
 (541) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `suspensao-deep-20 …
