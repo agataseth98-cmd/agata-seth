@@ -57,6 +57,7 @@ source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
 source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
 source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
 source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
+source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -333,6 +334,12 @@ main() {
 
   cabecalho "P-21" "O nome do sistema não sai como marcador cru" "MEMÓRIAS (559); plano de replicabilidade, Fase 2"
   p21_nome_sistema
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
+  echo
+
+  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework" "MEMÓRIAS (560); plano de replicabilidade, Fase 5"
+  p20_dado_pessoal
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
   echo
