@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[FEITO — só leitura e insumo, nada virou código] As 6 lacunas que o laboratório tinha deixado em aberto pra Fase 3 vieram fechadas; conferi na própria Máquina os pontos que só ela responde.** Resumo: o TTS reserva (kokoro) não tem uso real hoje; os 5 servidores de modelo local (`llama.cpp`) existem mas só um deles desliga junto com o resto do sistema — achei isso testando, o laboratório não tinha visto; o jeito de configurar provedor de IA sem tela existe e funciona; as variáveis do Ollama estão mapeadas entre "sempre igual" e "depende do hardware"; e um bug antigo (pasta que falta faz o vault quebrar, não só avisar) ficou confirmado com a causa exata. Nada disso virou código — é material pra quando a instalação-do-zero for escrita de verdade.
+- Nada pra assinar aqui.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (567).
+
 **[FEITO E APLICADO] Você assinou o conserto corrigido do alarme de chave de API, apliquei.** Conferi a assinatura antes de mexer em qualquer coisa. `redesign/router/goose.md`, o alarme (`varredura_segredo.sh`) e o teste automático foram atualizados com a versão corrigida (a que o laboratório revisou, não a insegura de ontem). Suíte de teste inteira: 44/44. Perímetro completo: 0 falha.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (566).

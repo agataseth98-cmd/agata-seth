@@ -26,18 +26,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): da092bb17aa8084d383c8a6d25f8aee72457995a
-  Escrito em: 26/09/2026 13:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 817c7b51aa59b7a1a103f91889dcb2868044a800
+  Escrito em: 26/09/2026 13:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da092bb17aa8084d383c8a6d25f8aee72457995a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da092bb17aa8084d383c8a6d25f8aee72457995a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da092bb17aa8084d383c8a6d25f8aee72457995a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/817c7b51aa59b7a1a103f91889dcb2868044a800/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/817c7b51aa59b7a1a103f91889dcb2868044a800/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/817c7b51aa59b7a1a103f91889dcb2868044a800/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(567) DIÁRIO — 26/09/2026 · **As 6 lacunas de Fase 3 que o laboratório "Ensaio" tinha deixado em aberto vieram fechadas (`lacunas-fase3-2026-09-26.md`, DADO); conferi os itens marcados `[Máquina]` rodando eu mesmo nesta Máquina, por estar nela.** Nenhuma decisão virou código ainda — segue insumo, como (564)/(565).
+
+1. **`kokoro-tts`:** confirmado sem consumidor versionado (TTS do LibreChat usa Piper). Bind real, medido agora: `127.0.0.1:8880` — a divergência que o laboratório apontou (`LOG.md` antigo citava `0.0.0.0`) está resolvida a favor do seguro; o registro antigo ficou desatualizado, não é vulnerabilidade viva. `kokoro-fastapi.service` não existe como unit (confirma: gerido só pelo script `seth`).
+2. **`llamacpp-*`:** confirmadas as 5 units (`llamacpp-agata`, `-nemotron`, `-gptoss20b`, `-phi4mini`, `-qwen3coder`; nomes de arquivo sem hífen extra nas 4 novas, conteúdo bate com o que o laboratório leu em `modelos-gratuitos.md`). **Achado novo, meu, não estava no relatório do laboratório:** só `llamacpp-agata.service.d/` existe — as outras 4 **não têm** o drop-in `PartOf=agata.target`. `agata down` libera a VRAM da `-agata` mas deixa as outras 4 (se estiverem no ar) rodando. Registrado pra quando a Fase 3 decidir o template `llamacpp@.service` — o `PartOf` fixo no template (não no `.env` de instância) resolve isso de graça.
+3. **OmniRoute:** `omniroute --help`/`providers list`/`combo list` confirmados — 13 conexões ativas, 7 combos, CLI não interativo completo, nenhuma chave impressa. **`requestQueue.maxWaitMs` continua sem paradeiro conhecido:** não achei em `key_value` nem `config_audit_log` do `storage.sqlite`, nem em arquivo de config solto em `~/.omniroute/`. Meu grep amplo por engano varreu `call_logs/` (conteúdo de conversa, não segredo, mas ruído grande) — não repetir esse padrão de busca. Continua `lacuna` aberta pra F3.2.
+4. **`override.conf` do Ollama:** confirmado, as 5 variáveis exatas que o laboratório listou, um único arquivo hoje. Bind `127.0.0.1:11434` batendo com P-4.
+5. **`.obsidian/`:** confirmado — só os 3 JSON (`app.json`, `appearance.json`, `core-plugins.json`) estão versionados; `.gitignore` cobre `plugins/`, `community-plugins.json`, `**/data.json`, `workspace*.json`, `graph.json`. Classificação framework/instância do laboratório bate com o repo real.
+6. **Achado colateral do laboratório, verificado no código:** `scripts/gerar_obsidian.py:433` faz `os.listdir(propostas/aplicadas)` sem checar existência — bug real, pré-existente, é exatamente por isso que um esqueleto de gênese sem essa pasta faz o P-10 virar FALHA (não SKIP) assim que `memoria/obsidian/` passa a existir. Confirma a condição (b) que (565) já tinha registrado como pré-requisito de Fase 3, agora com o mecanismo de falha identificado.
+
+**sync:** PASS — `git rev-parse main` = `817c7b5` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (566) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão, comandos diretos na Máquina (`docker inspect`, `systemctl --user cat`, `systemctl cat`, `omniroute providers/combo list`, `sqlite3` contra `storage.sqlite` só leitura, `git ls-files`/`grep` no repo) · **Autorização:** pedido do Humano ("lab"), DADO do laboratório conferido antes de registrar (Regra 2).
 
 (566) DIÁRIO — 26/09/2026 · **Proposta p1-falso-positivo-2026-09-26 (563/565), assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` antes de aplicar — passou nos 3 primeiros testes (par presente, sha256 do `.diff` bate, assinatura ED25519 boa), e falhou só o 4º ("não aplica na árvore atual") pelo motivo certo: o conteúdo já estava na árvore de trabalho desde a construção/teste da correção, então `git apply` reverso confirmou que a árvore batia byte a byte com o `.diff` assinado antes de eu commitar. `redesign/router/goose.md`, `scripts/testar_perimetro.sh` e `scripts/varredura_segredo.sh` (a correção estreita, não a versão insegura de (563)) commitados; par movido pra `propostas/aplicadas/`. Suíte de regressão: 44/44. `scripts/perimetro.sh`: 0 FALHA. ONDE_ESTAMOS.md atualizado no mesmo commit.
 
