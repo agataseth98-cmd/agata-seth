@@ -29,7 +29,7 @@ predecessor de 2024 — **deprecado, não usado**.
 GOOSE_PROVIDER: openai
 GOOSE_MODEL: ollama-local/qwen3.5:9b
 OPENAI_HOST: http://127.0.0.1:20127     # proxy sanitizador (NAO :20128 direto)
-OPENAI_API_KEY: nao-usada-proxy-loopback
+OPENAI_API_KEY: nao-usada-proxy
 GOOSE_MODE: approve                      # pede confirmacao antes de cada acao de ferramenta
 ```
 

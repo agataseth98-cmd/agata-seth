@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[FEITO E APLICADO] Você assinou o conserto corrigido do alarme de chave de API, apliquei.** Conferi a assinatura antes de mexer em qualquer coisa. `redesign/router/goose.md`, o alarme (`varredura_segredo.sh`) e o teste automático foram atualizados com a versão corrigida (a que o laboratório revisou, não a insegura de ontem). Suíte de teste inteira: 44/44. Perímetro completo: 0 falha.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (566).
+
 **[REFEITO — falta assinar, conserto mais sério desta vez] O laboratório achou um buraco de verdade no conserto do alarme de chave de API, a tempo — nada disso foi assinado ainda.** Minha primeira versão (a de ontem) tirava o arquivo de registro da proposta inteiro do alarme — bom pra parar de se auto-acusar, mas também escondia se a PRÓPRIA proposta introduzisse uma chave nova por engano. Corrigido: agora só a parte que mostra "o que já existia antes" fica de fora; o que a proposta adiciona de novo continua vigiado. Testei os 3 casos que importam antes de mexer: chave nova é pega, remoção de exemplo antigo passa, a proposta de verdade passa.
 - Assine (mesmo comando, conteúdo corrigido): `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (565).
