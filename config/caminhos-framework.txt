@@ -1,0 +1,71 @@
+# Manifesto declarativo de caminhos -- plano de replicabilidade, Fase 5 (item
+# "manifesto único", desenhado pelo laboratório-nuvem "Ensaio", 25/09/2026,
+# MEMÓRIAS (560)). Um arquivo só, três consumidores (princípio "Elegância e
+# eficiência"):
+#   1. Fase 5 (merge seletivo, ainda não construído): só caminhos `framework`
+#      entram na atualização a partir do `upstream`; o resto é recusado, MESMO
+#      que o upstream um dia tente empurrar algo neles por engano -- mesma
+#      disciplina de allowlist que o P-8 já aplica a `git add -A`, aplicada
+#      agora à direção de ENTRADA, não só à de saída.
+#   2. P-20 (varredura de dado pessoal): escopo de "caminho que vai pro
+#      clone" = as linhas `framework|` daqui.
+#   3. Checagem de caminho citado (ainda não construída): caminho citado em
+#      REGRAS/PROJETO que não existe em HEAD E não casa nenhuma linha aqui
+#      vira aviso -- resolve a precisão ≈0 do grep ingênuo medida pelo
+#      laboratório ("36 de 102", turno 28 da sessão de 24/09).
+#
+# Formato: classe|caminho (pathspec do git relativo à raiz do repo, ou um
+# prefixo absoluto de $HOME/máquina para "externo"). `#` comenta.
+#   framework = vai pro clone e recebe atualização do upstream (Fase 5)
+#   instancia = nunca sai desta instância; o merge seletivo recusa
+#   externo   = caminho fora do repo que o canon cita e é legítimo (máquina)
+#
+# Levantamento medido em 25/09/2026 contra o conteúdo real dos arquivos (não
+# só o nome) -- classificação confirmada pelo Humano no mesmo dia. Duas
+# exceções por CONTEÚDO, não por pasta: `config/modelos-gratuitos.md` é
+# levantamento real desta Máquina (instância), mesmo estando dentro de
+# `config/` (framework); `CHAVES.md` cita e-mail e caminhos desta instância
+# (instância), ao contrário de `CHAVES.env.exemplo` (framework, sem valor
+# real). Regra de leitura: a entrada MAIS ESPECÍFICA (arquivo) vence a menos
+# específica (pasta) quando as duas casam o mesmo caminho.
+#
+# Lacuna aberta (não resolvida agora): esta lista cobre o que existe hoje na
+# raiz e nos diretórios de topo. Caminho novo, sem entrada aqui, cai fora de
+# `framework` por padrão (comportamento seguro) -- mas fica sem aviso próprio
+# até a checagem do consumidor 3 existir.
+
+framework|REGRAS.md
+framework|PROMPT_CARREGAMENTO.md
+framework|CHAVES.env.exemplo
+framework|.gitignore
+framework|scripts/
+framework|.githooks/
+framework|.github/
+framework|redesign/
+framework|config/
+instancia|config/modelos-gratuitos.md
+framework|.agents/
+framework|.claude/skills/
+
+instancia|PROJETO.md
+instancia|PROJETO_REFERENCIA.md
+instancia|MEMÓRIAS.md
+instancia|MEMORIAS-MORNO.md
+instancia|memoria/
+instancia|ONDE_ESTAMOS.md
+instancia|CHAVES.md
+instancia|SELOS.txt
+instancia|SETH-DIARIO.md
+instancia|INDICE_MEMORIAS.md
+instancia|INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+instancia|PROCEDIMENTO_LOGIN.md
+instancia|.hidrata.md
+instancia|propostas/
+instancia|extras/
+
+externo|/etc/
+externo|~/.config/agata/
+externo|~/.cache/agata/
+externo|~/librechat/
+externo|/var/lib/agata/
+externo|/usr/local/lib/agata/

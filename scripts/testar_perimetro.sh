@@ -51,11 +51,18 @@ _montar_clone() {
   if ! git clone -q --no-hardlinks "$RAIZ" "$CLONE/repo" 2>/dev/null; then
     echo "ABORTADO: nao consegui clonar $RAIZ" >&2; exit 2
   fi
-  # A arvore de trabalho manda: copia scripts/ e .githooks/ por cima do que
-  # veio do HEAD, senao a suite testaria a versao ANTIGA dos controles --
-  # exatamente o falso verde que ela existe pra impedir.
+  # A arvore de trabalho manda: copia scripts/, .githooks/ e config/ por cima
+  # do que veio do HEAD, senao a suite testaria a versao ANTIGA dos controles
+  # -- exatamente o falso verde que ela existe pra impedir. config/ entrou em
+  # 25/09/2026 (P-20, plano de replicabilidade, MEMORIAS (561)): e' o primeiro
+  # controle que le um arquivo de fora de scripts//.githooks/
+  # (config/caminhos-framework.txt) -- sem isto, um controle novo E o
+  # manifesto que ele consulta, staged juntos na mesma proposta P-8, nunca se
+  # veem no clone, e a suite reporta "0 acusacoes" sem executar a logica real
+  # (achado rodando esta suite de verdade contra o P-20, nao teorico).
   cp -a "$RAIZ/scripts/." "$CLONE/repo/scripts/" 2>/dev/null || true
   cp -a "$RAIZ/.githooks/." "$CLONE/repo/.githooks/" 2>/dev/null || true
+  cp -a "$RAIZ/config/." "$CLONE/repo/config/" 2>/dev/null || true
   # `-am` só pega arquivo RASTREADO modificado -- um controle novo que
   # introduza ARQUIVO NOVO (ex.: item 10 do plano de mitigacao da auditoria
   # do Marcos, scripts/perimetro/*.sh) ficava untracked no clone, e o
@@ -186,7 +193,7 @@ declare -A SEM_TESTE=(
 # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
 declare -A NIVEL=(
   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
-  [P-21]=L1
+  [P-21]=L1 [P-20]=L1
   [P-2]=L3
   [P-3]=L4 [P-13]=L4 [P-15]=L4
   [P-4]=L2 [P-9]=L2 [P-10]=L2
@@ -437,6 +444,27 @@ EOF
 
 _caso P-21 PASSA "(iii) FALSO POSITIVO: entrada que só discute o marcador no meio da linha" <<EOF
 _nova_entrada "(9999) DIARIO — 01/01/2026 · o marcador $_P21T foi resolvido pelo gerador." && git add "MEMÓRIAS.md"
+EOF
+
+# --- P-20: dado pessoal em caminho de framework --------------------------
+# Fixture fora do clone (mktemp em /tmp) -- sobrevive a _reset (que só mexe
+# em $CLONE/repo) e é exportada uma vez só; os dois subshells de _caso
+# (setup e _acusacoes) herdam AGATA_P20_LISTA por serem filhos deste processo.
+_P20_LISTA_TESTE="$(mktemp -d -t p20-teste.XXXXXX)/lista.txt"
+printf 'fulano-teste|fulano\.teste@exemplo\.invalid|fulano.teste@exemplo.invalid\n' > "$_P20_LISTA_TESTE"
+chmod 600 "$_P20_LISTA_TESTE"
+export AGATA_P20_LISTA="$_P20_LISTA_TESTE"
+
+_caso P-20 PEGA "identificador staged em caminho framework (scripts/)" <<'EOF'
+printf '# contato: fulano.teste@exemplo.invalid\n' >> scripts/estado_para_eco.sh && git add scripts/estado_para_eco.sh
+EOF
+
+_caso P-20 PASSA "FALSO NEGATIVO por desenho: mesmo identificador em MEMORIAS.md (instância, não framework)" <<'EOF'
+printf '\ncontato de teste: fulano.teste@exemplo.invalid\n' >> "MEMÓRIAS.md" && git add "MEMÓRIAS.md"
+EOF
+
+_caso P-20 PASSA "nada staged" <<'EOF'
+true
 EOF
 
 # --------------------------------------------------------------- veredito --
