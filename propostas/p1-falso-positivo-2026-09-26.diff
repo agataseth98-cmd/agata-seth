@@ -12,10 +12,10 @@ index 96c970b..0ad7527 100644
  ```
  
 diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
-index 63baa53..a49ec52 100755
+index 63baa53..7db82c2 100755
 --- a/scripts/testar_perimetro.sh
 +++ b/scripts/testar_perimetro.sh
-@@ -424,6 +424,33 @@ _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
+@@ -424,6 +424,44 @@ _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
  printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
  EOF
  
@@ -46,31 +46,43 @@ index 63baa53..a49ec52 100755
 +mkdir -p propostas && printf -- '-OPENAI_API_KEY: %s\n+OPENAI_API_KEY: curto\n' "$(_k "valor-longo-" "o-bastante")" > propostas/teste-p1-2026-09-26.diff && git add propostas/teste-p1-2026-09-26.diff
 +EOF
 +
++# Achado de segurança real do laboratório "Ensaio" 26/09/2026, na 1ª versão
++# desta isenção (achada antes de qualquer assinatura -- nunca foi ao ar):
++# tirar o .diff inteiro do escopo escondia também a linha que o hunk
++# ADICIONA -- uma proposta P-8 que introduzisse segredo NOVO dentro de
++# propostas/*.diff passaria limpo, e o .diff já fica público no commit que
++# abre a proposta, antes de qualquer aplicação. Corrigido: só as linhas "+-"
++# (removida) e "+ " (contexto) saem do escopo; "++" (adicionada) continua.
++_caso P-1 PEGA "propostas/*.diff que ADICIONA chave nova continua acusando" <<'EOF'
++mkdir -p propostas && printf -- '+MISTRAL_API_KEY=%s\n' "$(_k "sk-1234567890" "abcdef1234567890")" > propostas/teste-p1-adiciona-2026-09-26.diff && git add propostas/teste-p1-adiciona-2026-09-26.diff
++EOF
++
  # --- P-21: marcador do nome do sistema -----------------------------------
  # Marcador montado em pedaços (_k): escrito inteiro, este arquivo não é fonte
  # do P-21 (i), mas manter a convenção do P-1 evita surpresa se o escopo crescer.
 diff --git a/scripts/varredura_segredo.sh b/scripts/varredura_segredo.sh
-index 0fa1910..8373b0f 100755
+index 0fa1910..0b53e05 100755
 --- a/scripts/varredura_segredo.sh
 +++ b/scripts/varredura_segredo.sh
-@@ -137,6 +137,20 @@ checar_segredo() {
-   local arquivo diff_arquivo p linhas
+@@ -138,6 +138,21 @@ checar_segredo() {
    while IFS= read -r arquivo; do
      [ -z "$arquivo" ] && continue
-+    # propostas/*.diff (e propostas/aplicadas/*.diff) ficam fora do escopo
-+    # por linha (achado 26/09/2026, laboratório "Ensaio" medindo pra Fase 3):
-+    # um .diff é, por natureza, texto que reproduz linha removida/adicionada
-+    # do arquivo real -- uma proposta que CORRIGE um falso positivo do P-1
-+    # (ex: encurtar um placeholder tipo "KEY: <24 chars>") necessariamente
-+    # mostra a linha antiga no hunk, e o .diff inteiro entra como "adicionado"
-+    # por ser arquivo novo em propostas/ -- bloqueando pra sempre a própria
-+    # proposta que conserta o achado. Não é buraco: o arquivo REAL (aqui,
-+    # redesign/router/goose.md) continua escaneado normalmente quando staged
-+    # -- antes de virar proposta, e de novo quando a proposta é aplicada --,
-+    # que é a defesa de verdade. O .diff em si é só o formato do processo P-8.
-+    case "$arquivo" in
-+      propostas/*.diff|propostas/aplicadas/*.diff) continue ;;
-+    esac
      diff_arquivo="$(git diff --cached -U0 -- "$arquivo")"
++    # propostas/*.diff (e propostas/aplicadas/*.diff): só as linhas que o
++    # HUNK INTERNO remove ("+-", ex: o hunk de uma proposta que corrige um
++    # falso positivo do P-1 mostra a linha antiga removida) ou de contexto
++    # ("+ ") saem do escopo -- essas duas reproduzem conteúdo que já estava
++    # no repo antes da proposta. A linha que o hunk interno ADICIONA ("++")
++    # continua escaneada -- é a única parte de um .diff que pode introduzir
++    # segredo NOVO, e o próprio .diff já fica público no commit que abre a
++    # proposta, antes de qualquer aplicação (achado real do laboratório
++    # "Ensaio" 26/09/2026, testando a primeira versão desta correção -- que
++    # tirava o arquivo INTEIRO do escopo e teria deixado passar chave nova
++    # dentro de uma proposta; corrigido aqui, antes de qualquer assinatura).
++    case "$arquivo" in
++      propostas/*.diff|propostas/aplicadas/*.diff)
++        diff_arquivo="$(printf '%s\n' "$diff_arquivo" | grep -vE '^\+[- ]' || true)" ;;
++    esac
      for p in "${PADROES_SEGREDO[@]}"; do
        linhas="$(echo "$diff_arquivo" | grep -nE '^\+' | grep -vE '^\+\+\+' | grep -E -- "$p")"
+       if [ -n "$linhas" ]; then

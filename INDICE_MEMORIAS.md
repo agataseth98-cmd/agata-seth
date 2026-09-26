@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(565) CORREÇÃO — 26/09/2026 · **O laboratório "Ensaio" respondeu à atualização de (564) e achou um buraco de segurança real na proposta de (563), ainda não assinada — corrigido antes de qualquer assinatura. Também corrige a justificativa que (564) deu pra opção (i) da gênese do P-8.**
 (564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisões não verificáveis da Fase 3 que o laboratório "Ensaio" listou em aberto — 4 convergiram 3/3, 1 divergiu e subiu pro Humano, que decidiu direto (não por maioria, como a regra manda).**
 (563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (538) DIÁRIO — 24/09/2026 · **Varredura das pendências do carregamento, por ordem do Humano ("conserte tudo que estava quebrado no início deste chat"). 2 propostas P-8 aguardando assinatura (Obsidian esperando o login de verdade; B8, a rede do LibreChat). 2 itens fechados por diagnóstico. O resto depende de `sudo`, de data ou de decisão do Humano.**
 (537) DIÁRIO — 24/09/2026 · **Assinado, verificado, aplicado: `obsidian-sem-puxar-sessao-grafica-2026-09-24` (536). O Obsidian não puxa mais a sessão gráfica. Na aplicação, o Obsidian aberto caiu uma vez e foi religado. Achado novo: a espera pela tela de (518) passa já na tela de login.**
 (536) DIÁRIO — 24/09/2026 · **O Hyprland não abria porque o `obsidian-app.service` do Agata ativava a sessão gráfica no boot. Proposta P-8 `obsidian-sem-puxar-sessao-grafica-2026-09-24`, aguardando assinatura.**
-(535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-da-seth-2026-09-23` (534). As 4 tabelas de `config/modelos-gratuitos.md` batem com a fila viva do OmniRoute. Nenhuma proposta esperando assinatura.**
+(535) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `geminis-na-fila-d …
 (534) DIÁRIO — 23/09/2026 · **Os 2 Gemini avaliados em (532) entram na fila da S …
 (533) DIÁRIO — 23/09/2026 · **Assinado, verificado, aplicado: `afinacao-sistema- …
 (532) DIÁRIO — 23/09/2026 · **Decisões da (527) tomadas pelo Humano e executadas …

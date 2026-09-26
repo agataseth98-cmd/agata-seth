@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638
-  Escrito em: 26/09/2026 12:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3f9e4272f8e36dd1e84acc6e533b45553c107b97
+  Escrito em: 26/09/2026 12:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8972e7c6c12a6eb2ffe7ccbfd320ca73ac87e638/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f9e4272f8e36dd1e84acc6e533b45553c107b97/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f9e4272f8e36dd1e84acc6e533b45553c107b97/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f9e4272f8e36dd1e84acc6e533b45553c107b97/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(565) CORREÇÃO — 26/09/2026 · **O laboratório "Ensaio" respondeu à atualização de (564) e achou um buraco de segurança real na proposta de (563), ainda não assinada — corrigido antes de qualquer assinatura. Também corrige a justificativa que (564) deu pra opção (i) da gênese do P-8.**
+
+**Achado de segurança, verificado por mim antes de aceitar (Regra 2):** a correção de (563) tirava `propostas/*.diff` **inteiro** do escopo do P-1 (`case ... continue`). Isso escondia não só a linha antiga removida (o problema que (563) resolvia) mas também qualquer linha NOVA que a proposta adicionasse — uma proposta P-8 que introduzisse segredo novo dentro de um `.diff` passaria limpa, e o `.diff` já fica público no commit que abre a proposta, antes de qualquer aplicação. Testei eu mesmo, num worktree descartável: um `.diff` sintético adicionando uma chave de 24+ caracteres passava com `checar_segredo` retornando `0` (limpo) na versão de (563).
+
+**Correção:** em vez de `continue` (pular o arquivo inteiro), a isenção agora filtra só as linhas que o hunk interno REMOVE (`+-`, prefixo duplo: `+` do arquivo novo + `-` do hunk) ou de CONTEXTO (`+ `) — as duas reproduzem conteúdo que já estava no repo antes da proposta. A linha que o hunk interno ADICIONA (`++`) continua escaneada normalmente. Testado nos 3 cenários que o laboratório mediu: `.diff` que adiciona chave nova → pega; `.diff` que remove chave antiga com contexto → passa; a proposta real de (563) → passa. Suíte inteira: 44/44 (1 caso novo, PEGA, pra este cenário).
+
+**Correção à minha própria entrada (564):** eu tinha justificado a opção (i) da gênese dizendo "a checagem completa roda de qualquer jeito na sequência" — dando a entender que isso cobre varredura de segredo. O laboratório mediu (clone de teste de ontem, `f3a-perimetro-2.txt`): P-1 e P-20 só examinam o que está STAGED; depois de um nascimento, não sobra nada staged, e os dois dão "OK" sem ter visto nada. Quem bloqueia a gênese hoje é só o P-8 (sem `HEAD` pra comparar) e o P-16 (suíte com fixture de instância) — nunca foi o P-1/P-20 que precisavam de exceção. **Refinamento pra quando a Fase 3 for escrita de verdade (não construído agora):** o nascimento deve pular só P-8 e P-16, nunca P-1 nem P-20, com a condição da exceção sendo mecânica (`git rev-parse --verify HEAD` falhando) e não uma flag — assim ela se autolimita a exatamente um commit por repo, sem reuso possível depois.
+
+**Ressalva registrada sobre a Regra 8 de (564), sem contestar o resultado:** as 3 passadas receberam um prompt único com as 5 decisões já argumentadas (minhas próprias opções e trade-offs no texto) — convergência de modelos pequenos da mesma família diante de opções pré-argumentadas é evidência mais fraca que convergência sobre medição independente. Vale como contexto de quanto peso dar ao resultado de (564), não como invalidação dele.
+
+**sync:** PASS — `git rev-parse main` = `3f9e427` no momento de medir, topo de MEMÓRIAS conferido com (564) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** resposta do laboratório trazida pelo Humano ("retorno em downloads"), verificação e correção minhas antes de qualquer assinatura.
 
 (564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisões não verificáveis da Fase 3 que o laboratório "Ensaio" listou em aberto — 4 convergiram 3/3, 1 divergiu e subiu pro Humano, que decidiu direto (não por maioria, como a regra manda).**
 

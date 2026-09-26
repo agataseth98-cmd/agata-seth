@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[REFEITO — falta assinar, conserto mais sério desta vez] O laboratório achou um buraco de verdade no conserto do alarme de chave de API, a tempo — nada disso foi assinado ainda.** Minha primeira versão (a de ontem) tirava o arquivo de registro da proposta inteiro do alarme — bom pra parar de se auto-acusar, mas também escondia se a PRÓPRIA proposta introduzisse uma chave nova por engano. Corrigido: agora só a parte que mostra "o que já existia antes" fica de fora; o que a proposta adiciona de novo continua vigiado. Testei os 3 casos que importam antes de mexer: chave nova é pega, remoção de exemplo antigo passa, a proposta de verdade passa.
+- Assine (mesmo comando, conteúdo corrigido): `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (565).
+
 **[FEITO, sem assinatura — é decisão, não código ainda] As 5 perguntas em aberto da Fase 3 (instalação do zero) foram respondidas.** Rodei a checagem tripla que o sistema usa pra decisão sem resposta certa (3 consultas independentes a um modelo local, sem uma influenciar a outra). 4 das 5 bateram nas 3 consultas: o jeito de nascer um clone novo com segurança, o nome do repositório virar configurável, o envio automático pra nuvem vir desligado por padrão, e o próprio instalador escrever a primeira linha do histórico. Na 5ª (se a pasta do sistema fica sempre "~/agata" ou vira escolha do cliente) as consultas discordaram — não decido por maioria nesse caso, então te perguntei direto: você escolheu deixar configurável.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (564).
 
