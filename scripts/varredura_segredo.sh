@@ -138,6 +138,21 @@ checar_segredo() {
   while IFS= read -r arquivo; do
     [ -z "$arquivo" ] && continue
     diff_arquivo="$(git diff --cached -U0 -- "$arquivo")"
+    # propostas/*.diff (e propostas/aplicadas/*.diff): só as linhas que o
+    # HUNK INTERNO remove ("+-", ex: o hunk de uma proposta que corrige um
+    # falso positivo do P-1 mostra a linha antiga removida) ou de contexto
+    # ("+ ") saem do escopo -- essas duas reproduzem conteúdo que já estava
+    # no repo antes da proposta. A linha que o hunk interno ADICIONA ("++")
+    # continua escaneada -- é a única parte de um .diff que pode introduzir
+    # segredo NOVO, e o próprio .diff já fica público no commit que abre a
+    # proposta, antes de qualquer aplicação (achado real do laboratório
+    # "Ensaio" 26/09/2026, testando a primeira versão desta correção -- que
+    # tirava o arquivo INTEIRO do escopo e teria deixado passar chave nova
+    # dentro de uma proposta; corrigido aqui, antes de qualquer assinatura).
+    case "$arquivo" in
+      propostas/*.diff|propostas/aplicadas/*.diff)
+        diff_arquivo="$(printf '%s\n' "$diff_arquivo" | grep -vE '^\+[- ]' || true)" ;;
+    esac
     for p in "${PADROES_SEGREDO[@]}"; do
       linhas="$(echo "$diff_arquivo" | grep -nE '^\+' | grep -vE '^\+\+\+' | grep -E -- "$p")"
       if [ -n "$linhas" ]; then

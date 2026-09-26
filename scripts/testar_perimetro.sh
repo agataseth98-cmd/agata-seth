@@ -424,6 +424,44 @@ _caso P-1 PASSA "FALSO POSITIVO: sha de commit e hash truncado" <<'EOF'
 printf 'commit dc19621 sha256 8783d29d9f8d0158d71f91e7c6879c72 ok\n' > texto.md && git add texto.md
 EOF
 
+# Achado do laboratório "Ensaio" 26/09/2026, medindo pra Fase 3: um valor de
+# placeholder de config com 24 caracteres depois de "KEY:" casava o padrão
+# genérico -- só não acusava hoje porque já estava commitado (P-1 só olha
+# staged); qualquer edição futura daquela linha acusaria. Corrigido no
+# arquivo (valor encurtado pra <16 chars); este caso prova que o padrão
+# continua pegando chave de verdade do mesmo tamanho. Valor montado via _k
+# (mesma convenção do P-1/P-20/P-21): escrito contíguo, esta linha do
+# ARQUIVO FONTE viraria ela mesma um achado quando testar_perimetro.sh for
+# staged de novo por outro motivo -- exatamente a 2ª classe de achado desta
+# entrada (auto-referência do próprio teste, não só do .diff da proposta).
+_caso P-1 PEGA "FALSO NEGATIVO evitado: placeholder de 16+ chars ainda é achado" <<'EOF'
+printf 'OPENAI_API_KEY: %s\n' "$(_k "valor-longo-" "o-bastante")" > texto.md && git add texto.md
+EOF
+
+_caso P-1 PASSA "FALSO POSITIVO evitado: placeholder curto (<16 chars) não acusa" <<'EOF'
+printf 'OPENAI_API_KEY: nao-usada-proxy\n' > texto.md && git add texto.md
+EOF
+
+# Achado 26/09/2026 (mesmo laboratório): um .diff novo em propostas/ que
+# CORRIGE um falso positivo do P-1 reproduz a linha antiga no hunk e o
+# arquivo inteiro entra como "adicionado" -- bloquearia pra sempre a própria
+# proposta que conserta o achado. propostas/*.diff sai do escopo por linha;
+# o arquivo REAL fora de propostas/ continua pegando normalmente (caso acima).
+_caso P-1 PASSA "propostas/*.diff com hunk mostrando chave removida não acusa" <<'EOF'
+mkdir -p propostas && printf -- '-OPENAI_API_KEY: %s\n+OPENAI_API_KEY: curto\n' "$(_k "valor-longo-" "o-bastante")" > propostas/teste-p1-2026-09-26.diff && git add propostas/teste-p1-2026-09-26.diff
+EOF
+
+# Achado de segurança real do laboratório "Ensaio" 26/09/2026, na 1ª versão
+# desta isenção (achada antes de qualquer assinatura -- nunca foi ao ar):
+# tirar o .diff inteiro do escopo escondia também a linha que o hunk
+# ADICIONA -- uma proposta P-8 que introduzisse segredo NOVO dentro de
+# propostas/*.diff passaria limpo, e o .diff já fica público no commit que
+# abre a proposta, antes de qualquer aplicação. Corrigido: só as linhas "+-"
+# (removida) e "+ " (contexto) saem do escopo; "++" (adicionada) continua.
+_caso P-1 PEGA "propostas/*.diff que ADICIONA chave nova continua acusando" <<'EOF'
+mkdir -p propostas && printf -- '+MISTRAL_API_KEY=%s\n' "$(_k "sk-1234567890" "abcdef1234567890")" > propostas/teste-p1-adiciona-2026-09-26.diff && git add propostas/teste-p1-adiciona-2026-09-26.diff
+EOF
+
 # --- P-21: marcador do nome do sistema -----------------------------------
 # Marcador montado em pedaços (_k): escrito inteiro, este arquivo não é fonte
 # do P-21 (i), mas manter a convenção do P-1 evita surpresa se o escopo crescer.
