@@ -98,6 +98,18 @@ _p8_eh_comportamento() {
     # settings do Claude Code, MEMÓRIAS (544)) é a mesma classe. Fechado ANTES da
     # primeira skill entrar, mesma disciplina do .github/* acima.
     .agents/*|.claude/*|redesign/goose/*) return 0 ;;
+    # Buraco achado 26/09/2026 fazendo um levantamento obsessivo da própria
+    # lista, mesma classe dos achados de 04/09, 09/09 e 21/09 acima:
+    # `redesign/fase7-hd/semear_cache_p12.py` é quem ESCREVE
+    # `~/.agata-backup-staging/p12-cobertura.json` -- o cache que o P-12
+    # (`scripts/perimetro/p12_backup_verificavel.sh`, já coberto por
+    # `scripts/*`) lê e reporta como PARCIAL quando o HD está desconectado.
+    # Uma versão adulterada do script podia gravar cobertura falsa (data
+    # recente, hash qualquer) sem passar pelo P-8 -- mesma classe do buraco
+    # do SELOS.txt/P-14 (419). `hash_ir.sh` (rótulo estável do
+    # `ir_sha256_xmlbin` em `models/manifest.json`, já quarentenado) entra
+    # junto por ser a mesma pasta e o mesmo papel de apoio ao P-12.
+    redesign/fase7-hd/*.py|redesign/fase7-hd/*.sh) return 0 ;;
     *) return 1 ;;
   esac
 }
