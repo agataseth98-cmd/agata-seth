@@ -237,6 +237,14 @@ _caso P-8 PEGA "(419): redesign/obsidian/*.py agora e' comportamento" <<'EOF'
 echo "# x" >> redesign/obsidian/ro_proxy.py && git add redesign/obsidian/ro_proxy.py
 EOF
 
+_caso P-8 PEGA "achado 26/09: redesign/fase7-hd/*.py (semeia cache do P-12) agora e' comportamento" <<'EOF'
+echo "# x" >> redesign/fase7-hd/semear_cache_p12.py && git add redesign/fase7-hd/semear_cache_p12.py
+EOF
+
+_caso P-8 PEGA "achado 26/09: redesign/fase7-hd/*.sh (hash_ir.sh, rotulo do manifest) agora e' comportamento" <<'EOF'
+echo "# x" >> redesign/fase7-hd/hash_ir.sh && git add redesign/fase7-hd/hash_ir.sh
+EOF
+
 _caso P-8 PASSA "FALSO POSITIVO: renomear arquivo comum dentro de extras/" <<'EOF'
 f=$(git ls-files 'extras/*.md' | head -1); git mv "$f" "${f%.md}-renomeado.md" && git add -A
 EOF

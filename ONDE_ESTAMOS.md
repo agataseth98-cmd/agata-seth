@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 26/09/2026
 
+**[FEITO E APLICADO — as 2 assinaturas de hoje entraram] O conserto do buraco de segurança e a divisão do Ollama, os dois assinados, já estão no código de verdade.** Conferi as duas assinaturas antes de mexer em qualquer coisa. Falta só UM passo, que precisa de `sudo` e é seu: instalar de verdade os 2 arquivos do Ollama no sistema. Mando o comando certo agora, numa mensagem separada.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (573).
+
 **[REGISTRADO — fato separado de suspeita] Você avisou que perdeu o laboratório por ataque externo; conferi ao vivo no navegador e as duas conversas já apareciam fixadas, sem eu mexer em nada.** Separei o que eu vi de verdade (as duas conversas estão lá, fixadas) do que ainda não dá pra confirmar (se houve mesmo um ataque, e como). A partir de agora, qualquer coisa que vier do laboratório passa pela mesma conferência de sempre, sem nenhum desconto extra de confiança — o que já era a regra, mas fica reforçado.
 - Nada pra assinar aqui.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (572).
