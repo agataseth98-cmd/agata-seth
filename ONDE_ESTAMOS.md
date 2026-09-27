@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura — primeira mudança real rumo à Fase 3] A exceção que deixa um clone nascer do zero (testada 2 vezes, o mecanismo e os 3 ataques) virou proposta de verdade.** Sozinha ela não faz nada visível — só destrava o sistema de segurança pra aceitar UM primeiro commit sem história, quando (e só quando) o repositório não tem nenhum commit ainda. O script que de fato cria um clone novo ainda não existe aqui — isso vem depois, como próxima proposta.
+- Assine: `bash scripts/aprovar.sh genese-p8-p16-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (581).
+
 **[MEDIDO — os 3 ataques que o laboratório testou, testados de novo por mim, desta vez isolando direito] Tentei burlar o próprio sistema de segurança 3 jeitos diferentes, num clone de teste — o sistema bloqueou os 3, sem sujar nada real desta vez.** Corrigido: alterar a "constituição" do sistema sem aprovação, tentar disfarçar como se fosse um nascimento novo de 2 jeitos diferentes — nenhum passou. Ainda não virou decisão sua se isso entra de verdade no sistema — é medição, não proposta ainda.
 - Nada pra assinar aqui — ainda é DADO.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (580).

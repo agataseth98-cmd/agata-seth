@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 890b5b6022a87816b70029534c8ea6d13d981424
-  Escrito em: 26/09/2026 22:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b
+  Escrito em: 27/09/2026 11:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
+
+**Conteúdo:** `_perimetro_eh_genese()` (novo, dentro de `p08_quarentena.sh`, usado também por `p16_testes_dos_controles.sh` — os dois carregados no mesmo shell por `perimetro.sh`) — verdadeira só com as 3 provas juntas (sem HEAD; nenhuma ref; nenhum objeto `commit` no banco). P-1 e P-20 continuam varrendo a árvore inteira no nascimento, sem exceção nenhuma — só P-8 e P-16 ficam SKIP.
+
+**Verificação antes desta proposta:** mecanismo central testado em (579) (1º commit real pelo hook normal, 0 FALHA); os 3 ataques do laboratório testados em (580), com `$HOME` isolado dessa vez (REGRAS.md sem aprovação; o mesmo via `checkout --orphan`; o mesmo apagando refs à mão — os 3 barrados). Suíte completa nesta proposta: 46/46, sem nenhum falso positivo/negativo novo — prova indireta de que a exceção não dispara em repo com história (senão os outros casos P-8/P-16 quebrariam).
+
+**Limitação registrada, não escondida:** não existe caso automatizado na suíte (`testar_perimetro.sh`) pra este cenário — `_montar_clone()` sempre clona a partir de HEAD real (que já tem história), então não dá pra simular "repositório sem nenhum commit" dentro do harness atual sem construir uma infraestrutura de fixture nova. Mesma classe de limitação já documentada pro P-10 (`[P-10]="... exigiria gerar o vault inteiro no clone (minutos por caso)"`). A verificação desta funcionalidade depende do método manual (worktree + `$HOME` isolado) usado em (579)/(580), não da suíte automática.
+
+**O que esta proposta NÃO faz:** não cria `genese.sh` nem qualquer script de bootstrap — só a exceção no mecanismo de quarentena que um script de gênese (ainda não escrito de verdade neste repo) vai precisar pra funcionar. Sozinha, sem um script de gênese real, esta mudança não tem efeito observável no dia a dia — só abre a porta.
+
+**sync:** PASS — `git rev-parse main` = `cf37f5d` no momento de medir, topo de MEMÓRIAS conferido com (580) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável, `.diff` verificado contra HEAD real, suíte inteira rodada nesse worktree (46/46) antes de registrar a proposta · **Autorização:** "vamos seguir com o plano" — item central da Fase 3, já verificado 2 vezes (mecanismo + ataques) antes desta proposta, sem decisão de arquitetura nova a esta altura.
 
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
 
