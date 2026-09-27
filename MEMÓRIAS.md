@@ -26,18 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9628d5c8a63f37b909bfb63c0f0a7b643210f1ce
-  Escrito em: 26/09/2026 17:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b9085f1ef9b78490ceb74b5038a613b2cfaecc32
+  Escrito em: 26/09/2026 21:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9628d5c8a63f37b909bfb63c0f0a7b643210f1ce/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b9085f1ef9b78490ceb74b5038a613b2cfaecc32/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b9085f1ef9b78490ceb74b5038a613b2cfaecc32/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b9085f1ef9b78490ceb74b5038a613b2cfaecc32/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
+
+**1. Correção ao `llamacpp@.service` (571)/(575) — testada ao vivo, PR #73 ainda aberta.** O laboratório apontou, lendo `systemd.service(5)` ("Command lines"): `${ARGS}` (com chaves) vira SEMPRE um argumento só — era exatamente o defeito que eu tinha achado. Mas `$ARGS`, sem chaves, É dividido nos espaços depois de expandido, sem precisar de `/bin/sh -c`. **Verifiquei eu mesma, com o Humano presente e autorização explícita de novo** (mesmo padrão de (575) — a ação foi bloqueada e liberada de novo pelo classificador): instalei a variante `$ARGS` sem chaves, sob a instância `teste-p8`; `ps -o pid,args` no `MainPID` confirmou `-c` e `2048` como dois argumentos separados, `/v1/models` confirmou `n_ctx: 2048`. Testei também se a minha versão anterior (`/bin/sh -c` sem `exec`) tinha o problema de processo órfão que o laboratório alertou (ficar o `sh` como processo principal, sinal de parada não chegar no `llama-server`) — **não tinha, nesta Máquina**: `/bin/sh` é `bash`, que faz `exec` automático do último comando simples de um script `-c`, então o `MainPID` já era o `llama-server` direto. Mas isso é comportamento específico do bash, não garantia documentada de todo `/bin/sh` — a versão do laboratório (`$ARGS` sem chaves, sem shell no meio) é mais simples e não depende disso. Troquei. Suíte: 46/46. Limpo depois — as 5 units reais confirmadas intocadas, VRAM de volta a 18 MiB.
+
+**2. Esboço da gênese (`genese.sh`, `genese-p8-p16.diff`) — DADO, ainda não medido por mim.** Testado pelo laboratório com 3 ataques reais (REGRAS.md sem aprovação; o mesmo via `checkout --orphan`; o mesmo apagando refs à mão) — os 3 barrados. Achado importante: a condição de gênese registrada em (565) (só "sem HEAD") **não bastava** — `checkout --orphan` também fica sem HEAD num repo com história. A versão corrigida exige as 3 provas juntas (sem HEAD, sem ref nenhuma, sem objeto commit nenhum no banco). **Achado novo, crítico:** um clone precisa nascer com `propostas/.allowed_signers` já presente — sem ele, a verificação de assinatura cai em "modo compat" e não exige assinatura nenhuma; um clone nasceria com quarentena mas sem proteção real. O protótipo recusa rodar sem `--chave-publica`. Preciso medir isto eu mesma antes de aplicar qualquer coisa — nada disso entrou no repo real ainda.
+
+**3. `maxWaitMs` do OmniRoute — achado, lido no código-fonte do pacote (`omniroute@3.8.50` do npm).** Variável de ambiente `RATE_LIMIT_MAX_WAIT_MS` (padrão 15000) resolve pra bootstrap; a UI grava direto em `storage.sqlite` (`key_value`, namespace `settings`, chave `resilienceSettings`, JSON sem cifra) — por isso minha busca anterior não achou (procurei em `key_value`/`config_audit_log` sem saber a chave certa). Não medido por mim ainda.
+
+**sync:** PASS — `git rev-parse main` = `b9085f1` no momento de medir, topo de MEMÓRIAS conferido com (576) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura dos 4 arquivos do laboratório (`retorno-carta-code-2026-09-27.md`, `para-code-genese-2026-09-26.md`, `genese.sh`, `genese-p8-p16.diff`); worktree descartável pra reescrever `llamacpp@.service`; teste ao vivo real (2 variantes comparadas, `ps -o pid,ppid,args`, `systemctl --user show -p ExecStart/MainPID`), com o Humano presente e autorização explícita a cada etapa que o classificador de segurança flagou · **Autorização:** correção da PR #73 aberta, achado do laboratório verificado antes de aceitar (Regra 2); gênese e maxWaitMs registrados como DADO, não aplicados.
+
+(576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
+
+**`p10-prop-dir-fix-2026-09-26`:** `scripts/gerar_obsidian.py` aplicado — `propostas/aplicadas/` ausente não quebra mais, esqueleto de gênese não vira FALHA no P-10.
+
+**`llamacpp-template-2026-09-26`:** `redesign/systemd/llamacpp@.service` e `llamacpp.env.exemplo` aplicados — template de instância pra Fase 3, já testado ao vivo antes da assinatura (ver (575)). Nenhum serviço real precisa migrar pra este template agora; fica disponível pra quando uma instância nova precisar.
+
+Os 2 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+
+**sync:** PASS — `git rev-parse main` = `0b25e66` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (575) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano nas duas propostas, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta: template `llamacpp@.service` pra Fase 3 (F3.2), testado AO VIVO com o Humano presente — achou e corrigiu um bug real que o laboratório não podia ver de dentro do container de nuvem. Aguardando assinatura.**
 

@@ -1,0 +1,40 @@
+# Agata -- template de instância pra servidor llama.cpp (Fase 3, F3.2).
+# Pendência de (567): as 5 units reais (llamacpp-agata, -nemotron,
+# -gptoss20b, -phi4mini, -qwen3coder) hoje são 5 arquivos de mão, quase
+# idênticos, achados desatualizados no manifesto (nenhum versionado antes
+# deste template). Este arquivo NÃO substitui as 5 já instaladas nesta
+# Máquina -- é o molde pra Fase 3 instalar uma nova instância só copiando
+# um `.env`, sem reescrever a unit inteira.
+#
+# `--host 127.0.0.1` fica FIXO aqui, nunca no `.env` de instância -- é
+# invariante de segurança do P-4 (config/portas-agata.txt), a mesma
+# disciplina de dropin-ollama-bind.conf ao lado. `-ngl 999` idem: sempre
+# "todas as camadas na GPU", não varia por modelo. O que varia por
+# instância (caminho do peso, porta, --n-cpu-moe, -c, --alias) vem do
+# `.env` -- ver llamacpp.env.exemplo, ao lado (nunca versionado com valor
+# real, mesmo tratamento de CHAVES.env.exemplo).
+#
+# Instala com: `cp llamacpp@.service ~/.config/systemd/user/` (sem sudo,
+# unit de --user) + um `.env` por instância em
+# ~/.config/agata/llamacpp/<nome>.env + `systemctl --user daemon-reload`
+# + `systemctl --user start llamacpp@<nome>`.
+[Unit]
+Description=llama.cpp local -- %i (Agata, template de instância, F3.2)
+Documentation=file:///home/orusoua/agata/redesign/router/llamacpp.md
+After=default.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/agata/llamacpp/%i.env
+# ExecStart via /bin/sh -c, não llama-server direto: o systemd NÃO faz
+# word-splitting de ${ARGS} (achado testando ao vivo, 26/09/2026 -- "-c
+# 2048" virava UM argumento com espaço dentro, "invalid argument"). O sh
+# faz o split que o systemd não faz; %i é expandido pelo systemd ANTES de
+# virar texto do script, então continua funcionando dentro das aspas.
+ExecStart=/bin/sh -c '/usr/sbin/llama-server -m "$MODELO" -ngl 999 --host 127.0.0.1 --port "$PORTA" $ARGS --alias %i --no-webui'
+Restart=on-failure
+RestartSec=3
+Nice=5
+
+[Install]
+WantedBy=default.target

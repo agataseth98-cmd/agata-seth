@@ -9,7 +9,17 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 24/09/2026
 
+## Onde estamos — 27/09/2026
+
+**[PRONTO — falta sua assinatura] O laboratório respondeu à carta com uma correção real, um esboço testado de "nascer um clone do zero", e onde estava o número que faltava.** A correção: o jeito que eu tinha consertado o servidor de modelo (ontem) funcionava, mas de um jeito mais complicado que o necessário — o laboratório achou a forma mais simples, li o manual junto com eles, testei de novo com você presente, confirmado. O esboço de "nascer um clone novo" e o número que faltava (`maxWaitMs`) chegaram também — ainda não medi nenhum dos dois de verdade, fica pra próxima rodada.
+- Assine: `bash scripts/aprovar.sh llamacpp-execstart-fix-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (577).
+
 ## Onde estamos — 26/09/2026
+
+**[FEITO E APLICADO — as 2 assinaturas de agora entraram] O conserto do clone-que-quebraria e o molde de servidor de modelo, os dois assinados, já estão no código de verdade.** Conferi as duas assinaturas antes de mexer em qualquer coisa. Nada precisa de sudo aqui — os dois já estão prontos.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (576).
 
 **[PRONTO — falta sua assinatura] O molde pra instalar um servidor de modelo local novo (Fase 3), testado de verdade com você presente — achei um bug que o laboratório não conseguia ver de onde ele trabalha.** Uma proteção do sistema me travou na primeira tentativa (instalar um serviço, mesmo sem privilégio de administrador, precisa de autorização) — parei, expliquei, você voltou e autorizou. No teste real, o jeito de passar várias opções pro programa não funcionava do jeito que o laboratório desenhou — o systemd trata como um texto só, não várias opções separadas. Corrigido e testado de novo: subiu, respondeu de verdade, gerou uma resposta. Nenhum dos 5 servidores de modelo que já existem foi tocado — testei sob um nome separado, removi tudo depois.
 - Assine: `bash scripts/aprovar.sh llamacpp-template-2026-09-26`
