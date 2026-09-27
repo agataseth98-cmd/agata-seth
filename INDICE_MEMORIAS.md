@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, assinada pelo Humano, aplicada. `testar_perimetro.sh` agora funciona de verdade dentro de um clone recém-nascido — mais um acabamento da Fase 3 fechado.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada pelo Humano, aplicada. `scripts/genese.sh` é código real do canon — a Fase 3 tem, pela primeira vez, um comando que nasce um clone novo de verdade.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `scripts/genese.sh` — o script real que nasce um clone do framework — entra no canon pela primeira vez. Aguardando assinatura.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
-(556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
+(556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fa …
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.ex …
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4 …
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar …
