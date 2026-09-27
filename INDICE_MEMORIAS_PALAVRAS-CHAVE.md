@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta: fecha o `maxWaitMs` — o número que faltava desde a resposta do laboratório de 26/09, verificado por mim antes de propor. Aguardando assinatura.**
+  palavras-chave: proposta, omniroute, maxwait, aberta, fecha, maxwaitms, número, faltava, desde, resposta, laboratório, verificado, mim, propor, aguardando, assinatura
 (586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, assinada pelo Humano, aplicada. `testar_perimetro.sh` agora funciona de verdade dentro de um clone recém-nascido — mais um acabamento da Fase 3 fechado.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, suite, fixtures, genese, assinada, humano, aplicada, testar, perimetro, agora, funciona, verdade, dentro, clone, recém, nascido, acabamento, fase, fechado, assinatura, conferida, scripts, verificar, par, movido, pra, propostas, aplicadas, suíte, falha
 (585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, fase, nome, sistema, redesenhada, fonte, sai, config, agata, identidade, env, fora, repo, vai, campo, projeto, versionado, leitor, alcança, erros, meus, caminho, achados, dano, permanente, assinaturas, anteriores, foram, perdidas, precisam, refeitas
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do nome falado, primeira fatia. Token `{{NOME_SISTEMA}}` nos ~5 pontos de REGRAS.md onde "Agata" é o nome falado (nunca nos caminhos/serviços internos), resolvido por `.githooks/gerar-hidratacao.sh` a partir de `~/.config/agata/identidade.env`. Em quarentena P-8, aguardando assinatura.**
   palavras-chave: fase, plano, replicabilidade, mecanismo, nome, falado, primeira, fatia, token, sistema, pontos, regras, agata, nunca, caminhos, serviços, internos, resolvido, githooks, gerar, hidratacao, partir, config, identidade, env, quarentena, aguardando, assinatura
-(557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena (e-mail de exemplo do README do LibreChat); os outros dois (User-Agent do Discord e o script que gera a âncora de SHA) foram pro mesmo P-8, depois de eu errar sobre o primeiro não precisar de quarentena.**
-  palavras-chave: achados, corrigido, quarentena, mail, exemplo, readme, librechat, user, agent, discord, script, gera, âncora, sha, foram, pro, mesmo, errar, primeiro, precisar
+(557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena ( …
+  palavras-chave: achados, corrigido, quarentena
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fa …
   palavras-chave: relatório, laboratório, nuvem, ensaio
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.ex …
