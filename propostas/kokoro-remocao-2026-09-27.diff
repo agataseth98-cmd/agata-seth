@@ -1,0 +1,110 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index b70e4e9..19824f4 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -32,7 +32,7 @@ Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + govern
+ O executor do loop passou a ser **grafo LangGraph + OmniRoute** (não mais o Hermes). Os modelos
+ são trabalhadores substituíveis; nenhuma ferramenta É o sistema. Hermes-gateway saiu do loop
+ (desabilitado); **LibreChat** (lane de conversa, aponta no `seth_gateway` `:20126`) e a voz
+-(kokoro-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
++(piper-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
+ Tailscale serve, nunca internet pública. (Open WebUI foi trocado por LibreChat em
+ 2026-09-03, MEMÓRIAS (313).) **Tailscale instalado e funcional (06/09/2026, MEMÓRIAS
+ (350)):** `tailscale` 1.102.3, `tailscaled` ativo/habilitado, logado (`agata.seth98@`,
+@@ -115,8 +115,11 @@ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose
+ `~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
+ `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
+ container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
+-LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
++LibreChat na versão velha) +
+ `piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
++**`kokoro-tts` removido (27/09/2026, MEMÓRIAS (593)):** container sem consumidor real (o TTS
++do LibreChat já apontava pro Piper), imagem `:latest` sem versão fixada, comando de criação
++original já perdido — não reconstruível do repo. Decisão do Humano: tirar, não reconstruir.
+ Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
+ **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
+ a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para
+@@ -138,7 +141,7 @@ avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`,
+ `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`,
+ `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service` ou os containers do
+ LibreChat (`librechat`, `librechat-mongodb`,
+-`librechat-meilisearch`) e `kokoro-tts` estiverem `failed`, `disabled`/`masked`, ou
++`librechat-meilisearch`) estiverem `failed`, `disabled`/`masked`, ou
+ (containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). `piper-tts.service`
+ (`:8890`) entrou na lista em 09/09/2026 (MEMÓRIAS (401)) — sobe pelo atalho `seth`, então é
+ serviço declarado como os outros.
+@@ -233,8 +236,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
+   apodrecido desde (390) e nunca tinha sido corrigido pro Goose. `seth-codigo` é um
+   combo próprio, sem heurística de tamanho (Goose é sempre código), tier 0 local —
+   ver `config/modelos-gratuitos.md`, "Combos da Seth".
+-- **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + kokoro-tts (`:8880`,
+-  `--restart=no`, inglês) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
++- **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + Whisper na iGPU.
++  Remoto = HTTPS via Tailscale.
+ - **Escrita da Seth:** `seth_escriba` (`:20140`, `seth-escriba.service`) — ver "Serviços (boot)".
+   A Seth só lê pelo `canon-mcp`/`:27125` (read-only); acrescentar é só por aqui, append-only,
+   sem commit. MEMÓRIAS (318).
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index eab7d5e..7b88e87 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -35,5 +35,4 @@
+ 20141|seth-verificador|127.0.0.1,172.29.7.1
+ 27125|obsidian-ro-proxy|127.0.0.1,172.29.7.1
+ 8890|piper-tts|127.0.0.1,172.29.7.1
+-8880|kokoro-tts|127.0.0.1
+ 11434|ollama|127.0.0.1
+diff --git a/redesign/librechat/README.md b/redesign/librechat/README.md
+index 93943e5..cd8769b 100644
+--- a/redesign/librechat/README.md
++++ b/redesign/librechat/README.md
+@@ -63,8 +63,10 @@ docker compose -f ~/librechat/docker-compose.yml exec -T librechat-mongodb mongo
+ 
+ ## Voz
+ 
+-TTS pelo `kokoro-tts` (`:8880`, ja rodava; OpenAI-compat em `/v1/audio/speech`).
+-Configurado em `librechat.yaml` -> `speech.tts.openai`.
++TTS pelo `piper-tts.service` (`:8890`, pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
++Configurado em `librechat.yaml` -> `speech.tts.openai`. Documentação corrigida 27/09/2026
++(MEMÓRIAS (593)) -- este texto ainda descrevia o `kokoro-tts` (removido), desatualizado desde
++a troca pro Piper.
+ 
+ STT: **pendente**. O `openvino-whisper` (`:20130`) ainda nao expoe
+ `/v1/audio/transcriptions` estilo OpenAI (`/v1/models` responde `not_found`).
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index be92f55..22ddaa0 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -36,7 +36,6 @@ for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
+ done
+ docker compose -f "$LC" up -d >/dev/null 2>&1 || true
+ [ "$_lc_changed" = 1 ] && docker restart librechat >/dev/null 2>&1 || true
+-docker start kokoro-tts >/dev/null 2>&1 || true
+ # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
+ for i in $(seq 1 30); do
+   curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 87dfba2..11d2557 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -6,7 +6,6 @@
+ # Fonte versionada: ~/agata/redesign/systemd/seth-parar
+ LC=~/librechat/docker-compose.yml
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+-docker stop kokoro-tts >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+ systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
+ systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index a99587a..f6045ff 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -173,7 +173,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+ P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service")
+-P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch" "kokoro-tts")
++P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
+ 
+ 
+ 
