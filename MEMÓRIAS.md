@@ -26,18 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 46e2624ec462ff5505a8ab2ab7253369948cea78
-  Escrito em: 27/09/2026 13:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 28701492b80b6cd43701ea0baf0b3aace504a711
+  Escrito em: 27/09/2026 13:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46e2624ec462ff5505a8ab2ab7253369948cea78/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46e2624ec462ff5505a8ab2ab7253369948cea78/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46e2624ec462ff5505a8ab2ab7253369948cea78/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28701492b80b6cd43701ea0baf0b3aace504a711/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28701492b80b6cd43701ea0baf0b3aace504a711/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28701492b80b6cd43701ea0baf0b3aace504a711/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta: fecha o `maxWaitMs` — o número que faltava desde a resposta do laboratório de 26/09, verificado por mim antes de propor. Aguardando assinatura.**
+
+**Verificado, não só confiado:** `omniroute --version` bate (3.8.50); `sqlite3 -readonly ~/.omniroute/storage.sqlite` confirma o valor real gravado nesta Máquina (`45000`, sem imprimir nada sensível — é só um número de configuração); `npm pack omniroute@3.8.50` + leitura direta de `src/lib/resilience/settings.ts` confirma `DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS = Number(process.env.RATE_LIMIT_MAX_WAIT_MS || "15000")` e, em `resolveResilienceSettings`, que o valor gravado no banco (`current`) sempre vence o da variável (`fallback`) — os 3 pontos que o laboratório afirmou, confirmados com os próprios olhos.
+
+**Conteúdo:** `redesign/systemd/dropin-omniroute-resilience.conf` (framework, `Environment=RATE_LIMIT_MAX_WAIT_MS=45000`) + linha no `README.md`. **Aplicar isto nesta Máquina não muda nada** (o banco já tem o valor, que sempre vence) — só garante que um clone novo, com banco vazio, nasça sem reproduzir o `504` de (362).
+
+**sync:** PASS — `git rev-parse main` = `2870149` no momento de medir, topo de MEMÓRIAS conferido com (586) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `omniroute --version`; `sqlite3 -readonly` no banco real; `npm pack` + leitura do código-fonte do pacote num diretório descartável; worktree pra escrever o drop-in, suíte inteira (46/46) + `.diff` verificado contra HEAD real · **Autorização:** "sem pausa, vamos seguir" — item já com resposta pronta do laboratório, verificado antes de propor, sem decisão de arquitetura pendente.
 
 (586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, assinada pelo Humano, aplicada. `testar_perimetro.sh` agora funciona de verdade dentro de um clone recém-nascido — mais um acabamento da Fase 3 fechado.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 

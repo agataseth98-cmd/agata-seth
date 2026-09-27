@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura] Achei o número que faltava — `maxWaitMs` — e conferi com meus próprios olhos, não só confiando no laboratório.** Baixei o programa de verdade (não o que roda aqui, uma cópia à parte) e li o código-fonte pra confirmar. Aplicar isso aqui não muda nada (o valor certo já está configurado nesta Máquina) — só garante que um clone novo nasça sem o mesmo problema de antes.
+- Assine: `bash scripts/aprovar.sh omniroute-maxwait-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (587).
+
 **[FEITO E APLICADO] Mais um acabamento da Fase 3 fechado — o teste automático já funciona de verdade num clone recém-nascido.**
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (586).
