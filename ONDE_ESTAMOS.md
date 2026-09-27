@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura — última pendência da lista antiga fechada] A receita de quais modelos um Agata novo precisa baixar, separada da lista técnica que só existe DEPOIS de baixar.** Não decidi nada novo — só copiei pra um formato executável o que o `PROJETO.md` já registra como o modelo "Principal" desta casa. Deixei bem claro no texto: é uma recomendação calibrada pra esta placa de vídeo, não uma ordem cega pra qualquer hardware.
+- Assine: `bash scripts/aprovar.sh modelos-padrao-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (591).
+
 **[FEITO E APLICADO] O mecanismo do `~/agata` configurável, assinado, já está no código de verdade.** Não muda nada nesta Máquina (você não pediu pra mudar de lugar) — fica pronto pra quando alguém precisar.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (590).
