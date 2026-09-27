@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4a3c58608ab0e9b7232d992aa4c6ffc538d2b755
-  Escrito em: 27/09/2026 13:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 00107f9a0e1d2185317045ee48f41e6539493a39
+  Escrito em: 27/09/2026 14:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a3c58608ab0e9b7232d992aa4c6ffc538d2b755/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a3c58608ab0e9b7232d992aa4c6ffc538d2b755/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a3c58608ab0e9b7232d992aa4c6ffc538d2b755/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
+
+**Não decide nada novo — transcreve o que já está decidido.** `PROJETO.md` já registra `qwen3.5-9b-64k` como "Principal, sob regime de auditoria" (não a tag oficial `qwen3.5:9b`, que reproduz um bug conhecido) — confirmei a citação direto no arquivo antes de escrever aqui. Consumidores reais confirmados: `redesign/grafo/flows/consolidacao.py` (`MODELO_LOCAL`) e o fundo local final de `seth-livre` em `config/modelos-gratuitos.md`.
+
+**Verificado, não assumido:** o `FROM` de `qwen3.5-9b-64k` e de `qwen3.5:9b` apontam pro mesmo blob (`sha256-dec52a4456…`) — confirmei agora, sem deriva desde o teste de `models/RECONSTRUCAO.md` (02/09/2026, blob do recriado batendo com o manifesto). Não repeti o `pull` (caro, já testado e documentado) — só reconfirmei o hash atual.
+
+**Conteúdo:** `config/modelos-padrao.md` (framework — mesmo tratamento do `dropin-ollama-gpu.exemplo.conf`: recomendação com ressalva explícita de reconsiderar por hardware, não mandato cego). Comando testado de reconstrução (`ollama pull` + `ollama create` com o Modelfile exato). **Fora da receita, de propósito, com o motivo de cada exclusão:** `qwen3-30b-a3b` (llama.cpp, já coberto pelo template de (575)/(576)); Whisper/embeddings OpenVINO (mecanismo diferente, já documentado); `qwen3:4b`/`nomic-embed-text` (sem consumidor real encontrado — `grep` não achou nenhum); `rlm-qwen3-8b-teste` (depende de GGUF privado desta Máquina, sem backup, experimento não padrão).
+
+**sync:** PASS — `git rev-parse main` = `00107f9` no momento de medir, topo de MEMÓRIAS conferido com (590) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `python3`/`json` no `manifest.json` real; `grep` no repo inteiro por consumidor de cada modelo; `ollama show --modelfile` pra confirmar hash sem deriva; leitura direta de `PROJETO.md` antes de citar; worktree descartável, suíte inteira (46/46) + `.diff` verificado contra HEAD real · **Autorização:** "vai" — última pendência de (567), transcrição de decisão já tomada, sem decisão de arquitetura nova.
 
 (590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, assinada pelo Humano, aplicada. O mecanismo do `~/agata` configurável — decisão de (564) — é código real do canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/definir_caminho_agata.sh` aplicado. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA. Inerte sem `AGATA_HOME` definido — esta Máquina continua com `~/agata` como diretório real, nada mudou.
 
