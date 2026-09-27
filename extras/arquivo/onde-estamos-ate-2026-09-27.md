@@ -1,0 +1,553 @@
+# Onde estamos
+
+## O que é isto
+Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
+Modelos de IA trabalham nele seguindo o que está escrito aqui.
+Esta página é só para você — não para os modelos. Teto: uma tela.
+Histórico até 15/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-15.md`.
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
+
+## Onde estamos — 24/09/2026
+
+## Onde estamos — 27/09/2026
+
+**[PRONTO — falta sua assinatura] O script que protege o repositório de um clone novo no GitHub, testado de verdade — criei um repositório real só pra isso, testei um ataque de verdade (push direto, recusado certo), e apaguei tudo.** Achado no meio do teste: proteção de branch só funciona em repositório público numa conta grátis — o mesmo motivo que já explica por que este repositório é público. Está documentado no script.
+- Assine: `bash scripts/aprovar.sh protecao-branch-github-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (595).
+
+**[FEITO E APLICADO] `kokoro-tts` fora do sistema, assinado, já no código de verdade.**
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (594).
+
+**[PRONTO — falta sua assinatura] Você decidiu: tirar o `kokoro-tts`.** Removido de todo lugar que o sistema esperava ele existir — o aviso que aparecia (P-9) vai parar de aparecer. O arquivo/container em si continua no seu disco, parado, sem uso — não apaguei isso, só tirei do que o sistema espera. Achei de bônus um manual desatualizado (dizia que a voz do LibreChat era outra coisa, há tempo não é mais) e corrigi junto.
+- Assine: `bash scripts/aprovar.sh kokoro-remocao-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (593).
+
+**[FEITO E APLICADO — a lista antiga de pendências está zerada] A receita de modelos, assinada, já está no código de verdade.** O que sobra dessa lista não é mais "construir" — são 2 decisões só suas: o que fazer com o `kokoro-tts` (manter ou tirar), e como proteger o repositório de um clone novo no GitHub.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (592).
+
+**[PRONTO — falta sua assinatura — última pendência da lista antiga fechada] A receita de quais modelos um Agata novo precisa baixar, separada da lista técnica que só existe DEPOIS de baixar.** Não decidi nada novo — só copiei pra um formato executável o que o `PROJETO.md` já registra como o modelo "Principal" desta casa. Deixei bem claro no texto: é uma recomendação calibrada pra esta placa de vídeo, não uma ordem cega pra qualquer hardware.
+- Assine: `bash scripts/aprovar.sh modelos-padrao-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (591).
+
+**[FEITO E APLICADO] O mecanismo do `~/agata` configurável, assinado, já está no código de verdade.** Não muda nada nesta Máquina (você não pediu pra mudar de lugar) — fica pronto pra quando alguém precisar.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (590).
+
+**[PRONTO — falta sua assinatura] Fechei uma decisão que você já tinha tomado (dia 26, "virar variável configurável") mas que ainda não tinha virado código: onde o Agata mora fica ajustável, sem precisar mexer em nada mais.** Se um dia você quiser o Agata guardado em outro disco ou outra pasta, um comando faz `~/agata` virar um atalho pra lá — todo o resto do sistema continua funcionando sem saber a diferença. Testei os 6 casos que importam, inclusive nascendo um clone de verdade através do atalho.
+- Assine: `bash scripts/aprovar.sh caminho-agata-symlink-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (589).
+
+**[FEITO E APLICADO — tudo que o laboratório tinha deixado em aberto está fechado] O número que faltava, assinado, já está no código de verdade.** Confirmado: nada mudou no funcionamento real desta Máquina, como esperado.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (588).
+
+**[PRONTO — falta sua assinatura] Achei o número que faltava — `maxWaitMs` — e conferi com meus próprios olhos, não só confiando no laboratório.** Baixei o programa de verdade (não o que roda aqui, uma cópia à parte) e li o código-fonte pra confirmar. Aplicar isso aqui não muda nada (o valor certo já está configurado nesta Máquina) — só garante que um clone novo nasça sem o mesmo problema de antes.
+- Assine: `bash scripts/aprovar.sh omniroute-maxwait-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (587).
+
+**[FEITO E APLICADO] Mais um acabamento da Fase 3 fechado — o teste automático já funciona de verdade num clone recém-nascido.**
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (586).
+
+**[PRONTO — falta sua assinatura] Um dos "acabamentos" que faltavam já foi consertado: rodei o teste automático dentro de um clone recém-nascido de verdade e achei 8 problemas (o laboratório tinha contado 6) — 7 eram "faltou um arquivo de exemplo pro teste ter o que testar", e 1 era um teste antigo colado numa entrada específica desta Máquina, que eu corrigi pra não depender de mais ninguém.** Testei nos dois lados: no clone novo (foi de 8 erros pra 0) e no sistema real (continua 0, não bagunçou nada aqui).
+- Assine: `bash scripts/aprovar.sh suite-fixtures-genese-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (585).
+
+**[FEITO E APLICADO — marco: a Fase 3 tem um comando de verdade] `scripts/genese.sh` está no sistema. Rodando um comando (com uma chave sua), nasce um clone novo do Agata, completo e protegido desde o primeiro segundo.** Ainda faltam alguns acabamentos (proteção do repositório no GitHub, alguns arquivos de teste que o clone novo ainda não teria) — registrados, não escondidos, pra quando alguém realmente for usar isso pra clonar de verdade.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (584).
+
+**[PRONTO — falta sua assinatura — o script que de fato nasce um clone novo] Depois da exceção de segurança, agora é o programa em si: `scripts/genese.sh`. Testado de novo, do zero, com tudo isolado.** Com isso assinado, um clone novo do Agata já poderia nascer de verdade — copiando os arquivos certos, criando o histórico, ligando a segurança — a partir de um comando só. Testei os casos de erro (nome ruim, chave faltando) e rodar 2 vezes seguidas (a 2ª não faz nada, protege contra repetir por engano).
+- Assine: `bash scripts/aprovar.sh genese-script-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (583).
+
+**[FEITO E APLICADO — primeira peça real da Fase 3 no sistema] A exceção que vai deixar um clone nascer do zero, assinada, já está no código de verdade.** Não muda nada no dia a dia — só fica pronta esperando o script que de fato cria um clone novo, que ainda não existe.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (582).
+
+**[PRONTO — falta sua assinatura — primeira mudança real rumo à Fase 3] A exceção que deixa um clone nascer do zero (testada 2 vezes, o mecanismo e os 3 ataques) virou proposta de verdade.** Sozinha ela não faz nada visível — só destrava o sistema de segurança pra aceitar UM primeiro commit sem história, quando (e só quando) o repositório não tem nenhum commit ainda. O script que de fato cria um clone novo ainda não existe aqui — isso vem depois, como próxima proposta.
+- Assine: `bash scripts/aprovar.sh genese-p8-p16-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (581).
+
+**[MEDIDO — os 3 ataques que o laboratório testou, testados de novo por mim, desta vez isolando direito] Tentei burlar o próprio sistema de segurança 3 jeitos diferentes, num clone de teste — o sistema bloqueou os 3, sem sujar nada real desta vez.** Corrigido: alterar a "constituição" do sistema sem aprovação, tentar disfarçar como se fosse um nascimento novo de 2 jeitos diferentes — nenhum passou. Ainda não virou decisão sua se isso entra de verdade no sistema — é medição, não proposta ainda.
+- Nada pra assinar aqui — ainda é DADO.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (580).
+
+**[ATENÇÃO — 2 arquivos ainda esperam você apagar no Drive] Testei o script de "nascer um clone novo" de verdade e ele funcionou — mas o teste vazou pra fora, sem eu ter isolado direito, e sujou 3 coisas reais desta Máquina.** Já consertei 2 (o backup local e um marcador de controle). A 3ª é só um contador de aviso, sem risco real, deixei como está porque não dava pra saber o valor exato de antes. A que falta é a que você já sabe: 2 arquivos de teste foram parar no seu Google Drive de verdade (pasta "agata-sistema") — tentei apagar, o sistema de segurança não deixou nem com seu pedido direto, então os links continuam esperando você.
+- Apague direto no Drive: `indice_export.md` (https://drive.google.com/file/d/1VAFCnnc3g-4yXEc5QKnb4Q_VwzRBLQ1n/view) e `manifesto.md` (https://drive.google.com/file/d/1zXNV5hUDyZ3XNAZp_UqyQQB5__LILDYP/view)
+- Nada pra assinar — isso não é proposta, é limpeza.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (579).
+
+**[FEITO E APLICADO] A correção do servidor de modelo, assinada, já está no código de verdade.**
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (578).
+
+**[PRONTO — falta sua assinatura] O laboratório respondeu à carta com uma correção real, um esboço testado de "nascer um clone do zero", e onde estava o número que faltava.** A correção: o jeito que eu tinha consertado o servidor de modelo (ontem) funcionava, mas de um jeito mais complicado que o necessário — o laboratório achou a forma mais simples, li o manual junto com eles, testei de novo com você presente, confirmado. O esboço de "nascer um clone novo" e o número que faltava (`maxWaitMs`) chegaram também — ainda não medi nenhum dos dois de verdade, fica pra próxima rodada.
+- Assine: `bash scripts/aprovar.sh llamacpp-execstart-fix-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (577).
+
+## Onde estamos — 26/09/2026
+
+**[FEITO E APLICADO — as 2 assinaturas de agora entraram] O conserto do clone-que-quebraria e o molde de servidor de modelo, os dois assinados, já estão no código de verdade.** Conferi as duas assinaturas antes de mexer em qualquer coisa. Nada precisa de sudo aqui — os dois já estão prontos.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (576).
+
+**[PRONTO — falta sua assinatura] O molde pra instalar um servidor de modelo local novo (Fase 3), testado de verdade com você presente — achei um bug que o laboratório não conseguia ver de onde ele trabalha.** Uma proteção do sistema me travou na primeira tentativa (instalar um serviço, mesmo sem privilégio de administrador, precisa de autorização) — parei, expliquei, você voltou e autorizou. No teste real, o jeito de passar várias opções pro programa não funcionava do jeito que o laboratório desenhou — o systemd trata como um texto só, não várias opções separadas. Corrigido e testado de novo: subiu, respondeu de verdade, gerou uma resposta. Nenhum dos 5 servidores de modelo que já existem foi tocado — testei sob um nome separado, removi tudo depois.
+- Assine: `bash scripts/aprovar.sh llamacpp-template-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (575).
+
+**[PRONTO — falta sua assinatura] Achei e consertei um bug real: um clone novo (Fase 3) quebraria de verdade, não só avisaria, a partir do 2º commit.** O programa que gera as notas do Obsidian tentava listar uma pasta que só existe DEPOIS da primeira proposta ser aplicada — num clone recém-nascido, ela ainda não existe, e o programa quebrava. Medi o problema de verdade (reproduzi o erro) antes de mexer, e testei o conserto nos 2 casos (pasta ausente e pasta presente).
+- Assine: `bash scripts/aprovar.sh p10-prop-dir-fix-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (574).
+
+**[FEITO E APLICADO — as 2 assinaturas de hoje entraram] O conserto do buraco de segurança e a divisão do Ollama, os dois assinados, já estão no código de verdade.** Conferi as duas assinaturas antes de mexer em qualquer coisa. Falta só UM passo, que precisa de `sudo` e é seu: instalar de verdade os 2 arquivos do Ollama no sistema. Mando o comando certo agora, numa mensagem separada.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (573).
+
+**[REGISTRADO — fato separado de suspeita] Você avisou que perdeu o laboratório por ataque externo; conferi ao vivo no navegador e as duas conversas já apareciam fixadas, sem eu mexer em nada.** Separei o que eu vi de verdade (as duas conversas estão lá, fixadas) do que ainda não dá pra confirmar (se houve mesmo um ataque, e como). A partir de agora, qualquer coisa que vier do laboratório passa pela mesma conferência de sempre, sem nenhum desconto extra de confiança — o que já era a regra, mas fica reforçado.
+- Nada pra assinar aqui.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (572).
+
+**[PRONTO — falta sua assinatura] Achei um buraco de segurança real, sozinha, revisando o próprio sistema de segurança.** Dois arquivos (`redesign/fase7-hd/semear_cache_p12.py` e `hash_ir.sh` — o que alimenta o número de "cobertura de backup" quando o HD tá desligado) podiam ser reescritos por qualquer sessão futura sem passar por aprovação nenhuma sua — a mesma classe de brecha que já achei 3 vezes antes em outras pastas. Medi o problema de verdade antes de mexer (confirmei que sem o conserto a edição passa despercebida) e testei o conserto depois (confirmei que agora ela é pega). Nada mudou no sistema real ainda — só a proposta está pronta.
+- Assine: `bash scripts/aprovar.sh p8-fase7hd-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (571).
+
+**[PRONTO — falta sua assinatura] Você autorizou o passo com sudo; a parte que dá pra fazer sem tocar no sistema de verdade eu já fiz — o resto é um comando pra você rodar.** O jeito de configurar o Ollama (5 variáveis num arquivo só, misturando "sempre igual" com "depende da sua placa de vídeo") vira 2 arquivos separados — um vai pro clone de qualquer pessoa, o outro é só um exemplo (os valores reais da sua GPU não saem daqui, ficam só nesta Máquina). No caminho, o próprio sistema de segurança (P-8) me avisou que eu tinha esquecido de pedir aprovação antes de mexer nessa pasta — corrigido antes de qualquer commit real entrar.
+- Assine: `bash scripts/aprovar.sh dropin-ollama-split-2026-09-26`
+- **Depois de assinar e eu aplicar**, o comando com `sudo` pra instalar de verdade no sistema vem numa mensagem separada — não escrevo isso aqui porque muda a cada vez (`sudo install...`) e você vai rodar ele mesmo, no seu terminal.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (570).
+
+**[FEITO E APLICADO — código de verdade, primeiro pedaço da Fase 3 já escrito] Os dois venvs (grafo do agente; STT/embeddings na iGPU) ganharam lista de pacotes travada, testada do zero.** Antes, só existiam num texto de manual — sem eles, um clone novo não recriava os dois ambientes do jeito certo. Testei cada um instalando do zero, num lugar descartável, e confirmando que o código de verdade roda em cima. Achei um problema real no caminho: o venv da iGPU precisa de um endereço extra pra baixar o PyTorch certo (sem ele, a instalação trava com erro) — documentado, com o comando certo, nos dois lugares.
+- Nada pra assinar aqui — não mexe em regra nem em controle, só soma um arquivo de lista.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (569).
+
+**[FEITO — só leitura e insumo, nada virou código] As 6 lacunas que o laboratório tinha deixado em aberto pra Fase 3 vieram fechadas; conferi na própria Máquina os pontos que só ela responde.** Resumo: o TTS reserva (kokoro) não tem uso real hoje; os 5 servidores de modelo local (`llama.cpp`) existem mas só um deles desliga junto com o resto do sistema — achei isso testando, o laboratório não tinha visto; o jeito de configurar provedor de IA sem tela existe e funciona; as variáveis do Ollama estão mapeadas entre "sempre igual" e "depende do hardware"; e um bug antigo (pasta que falta faz o vault quebrar, não só avisar) ficou confirmado com a causa exata. Nada disso virou código — é material pra quando a instalação-do-zero for escrita de verdade.
+- Nada pra assinar aqui.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (567).
+
+**[FEITO E APLICADO] Você assinou o conserto corrigido do alarme de chave de API, apliquei.** Conferi a assinatura antes de mexer em qualquer coisa. `redesign/router/goose.md`, o alarme (`varredura_segredo.sh`) e o teste automático foram atualizados com a versão corrigida (a que o laboratório revisou, não a insegura de ontem). Suíte de teste inteira: 44/44. Perímetro completo: 0 falha.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (566).
+
+**[REFEITO — falta assinar, conserto mais sério desta vez] O laboratório achou um buraco de verdade no conserto do alarme de chave de API, a tempo — nada disso foi assinado ainda.** Minha primeira versão (a de ontem) tirava o arquivo de registro da proposta inteiro do alarme — bom pra parar de se auto-acusar, mas também escondia se a PRÓPRIA proposta introduzisse uma chave nova por engano. Corrigido: agora só a parte que mostra "o que já existia antes" fica de fora; o que a proposta adiciona de novo continua vigiado. Testei os 3 casos que importam antes de mexer: chave nova é pega, remoção de exemplo antigo passa, a proposta de verdade passa.
+- Assine (mesmo comando, conteúdo corrigido): `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (565).
+
+**[FEITO, sem assinatura — é decisão, não código ainda] As 5 perguntas em aberto da Fase 3 (instalação do zero) foram respondidas.** Rodei a checagem tripla que o sistema usa pra decisão sem resposta certa (3 consultas independentes a um modelo local, sem uma influenciar a outra). 4 das 5 bateram nas 3 consultas: o jeito de nascer um clone novo com segurança, o nome do repositório virar configurável, o envio automático pra nuvem vir desligado por padrão, e o próprio instalador escrever a primeira linha do histórico. Na 5ª (se a pasta do sistema fica sempre "~/agata" ou vira escolha do cliente) as consultas discordaram — não decido por maioria nesse caso, então te perguntei direto: você escolheu deixar configurável.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (564).
+
+**[PRONTO — falta sua assinatura] O laboratório começou a olhar a Fase 3 (deixar o sistema fácil de instalar do zero) e achou um problema pequeno, sem relação com isso, de bônus — e consertar esse problema achou mais dois.** Uma linha de exemplo num manual (não é senha de verdade, é só texto de exemplo) batia sem querer no alarme que protege contra vazar chave de API. Corrigido — mas aí o próprio arquivo que registra o conserto passou a bater no mesmo alarme (é assim que um "antes e depois" funciona), e minha própria prova de que o alarme continua funcionando também bateu nele. Ajustei os três: o alarme agora não escaneia o texto do registro de propostas (só o código de verdade, onde a proteção real está), e as provas foram reescritas pra não se auto-acusarem.
+- Assine: `bash scripts/aprovar.sh p1-falso-positivo-2026-09-26`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (563).
+
+## Onde estamos — 25/09/2026
+
+**[REFEITO — assinatura antiga não serve mais, precisa assinar de novo] As outras 2 pendências (dado pessoal; lista única de caminhos) viraram código — mas achei um furo no teste na hora de aplicar, e a assinatura que você já tinha feito ficou velha.** Um arquivo só lista os dois grupos de pasta (o que vai pra todo clone, o que é só desta Máquina), e um controle novo avisa se dado pessoal (e-mail, IP) for adicionado num arquivo que vai pra clone — sem nunca mostrar o valor achado, só onde está. No caminho, achei que o próprio teste automático não enxergava esse arquivo de lista (corrigido, testado 3 vezes).
+- Assine (mesmo comando de antes, conteúdo maior agora): `bash scripts/aprovar.sh p20-manifesto-2026-09-25`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (561).
+
+**[FEITO E APLICADO] Pediu pro laboratório resolver as 3 pendências de hoje; ele mandou 3 desenhos, testei os 3 de verdade e achei 2 erros — um dele, um meu.** O resumo de "quantas propostas estão esperando" agora enxerga proposta assinada guardada num branch (achei que o filtro dele ficaria cego pro jeito que uso branch hoje — corrigido). O índice pro Drive/NotebookLM passa a mostrar o nome certo do sistema (achei um erro meu copiando o desenho — o hash do manifesto batia com o texto errado — corrigido e testado de novo). E um controle novo avisa sozinho se algum dia o marcador do nome aparecer cru em algum lugar que devia estar resolvido.
+- Assine: `bash scripts/aprovar.sh lab-3-desenhos-2026-09-25`
+- As outras 2 pendências que o laboratório também desenhou (varredura de dado pessoal; lista única de caminhos pra Fase 5) precisam de decisão sua antes de virar código — ficam registradas, não construídas ainda.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (560).
+
+**[FEITO E APLICADO] Achei 2 erros meus mexendo na Fase 2, contei os dois, e o laboratório apontou que o desenho de antes não cobria o caso principal — corrigido.** Um bug real (quebraria commit futuro nesta Máquina, achei testando, nunca foi ao ar). E um comando de limpeza que apagou as 2 assinaturas que você já tinha feito hoje — sem recuperação, as duas precisam ser refeitas. Fora isso, o laboratório mostrou que o desenho anterior só resolvia o nome pra Seth/LibreChat, não pra uma sessão de nuvem nova lendo o manual pela primeira vez — que é o caso que a Fase 2 existe pra resolver. Redesenhei: o nome agora mora num campo em PROJETO.md (visível por qualquer leitor, até lendo o arquivo cru), não mais num arquivo escondido fora do repositório.
+- Assine: `bash scripts/aprovar.sh fase2-nome-sistema-2026-09-25` (substitui a de antes, nunca foi usada)
+- Assine de novo, mesmo conteúdo de antes: `bash scripts/aprovar.sh fase2-slug-dinamico-2026-09-25`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (559).
+
+**[APLICADO — 1 de 3, os outros 2 juntos numa assinatura só] Os achados do laboratório viraram conserto.** O e-mail do README do LibreChat virou só um exemplo genérico — na verdade não era segredo nenhum, é a conta que você já confirmou ser só do projeto, mas um clone não devia copiar ela mesmo assim. Os outros 2 (o bot do Discord entregando a URL do repositório oficial; o script que gera os links do canon fazendo o mesmo) esperam uma assinatura só — achei no meio do caminho que o do Discord também precisava de quarentena, e não tinha visto isso de cara.
+- Assine: `bash scripts/aprovar.sh fase2-slug-dinamico-2026-09-25`
+- Ainda aberto, sem conserto ainda: o resumo de "quantas propostas estão esperando" não vê proposta assinada guardada num branch ainda não juntado.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (557).
+
+**[APLICADO] O laboratório da nuvem mandou um relatório sobre a fase de replicar o sistema; conferi 3 achados na Máquina (todos batem) e economia de tokens virou regra prática, a seu pedido — você já assinou.** Achados confirmados, ainda sem conserto (decisão sua): seu e-mail vaza num README que um clone herdaria; o bot do Discord entrega a URL do repositório oficial num cabeçalho técnico; e o resumo de "quantas propostas estão esperando" não vê proposta assinada guardada num branch ainda não juntado. O que apliquei: uma seção nova em `REGRAS.md` dizendo, na prática, como economizar tokens (não reler o que já sei, juntar pedidos, não carregar rastro de busca que não precisa sobreviver).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (556).
+
+**[APLICADO] Segundo pedaço do plano de replicar o sistema: os segredos agora têm um modelo pra copiar.** `CHAVES.env.exemplo` mostra a forma de cada chave (sem nenhum valor real) e `CHAVES.md` ganhou uma lista de como testar que cada uma funcionou. Não precisou de sua assinatura — não muda nada do que já roda, só documenta.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (555).
+
+**[APLICADO] Primeiro pedaço do plano de replicar o sistema numa segunda máquina está pronto e testado.** É a peça que deixa uma futura cópia guardar a memória do cliente no Obsidian, sem tocar em nada seu. Ainda não está ligada a nada do seu uso diário — é fundação pra quando o resto do plano existir.
+- Leia o plano quando quiser: `propostas/plano-replicabilidade-2026-09-25.md`.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (554).
+
+**[APLICADO] A Seth ganhou a mesma verificação que o Goose ganhou ontem.** Ela agora consegue checar sozinha se uma proposta assinada está pronta pra aplicar, sem você precisar rodar o comando na mão. Descobri no caminho que ela já tinha as ferramentas de navegador e Discord ligadas — o texto que dizia o contrário estava desatualizado, não o sistema.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (553).
+
+**[APLICADO] As memórias frias saíram da raiz do repositório.** Os 11 arquivos antigos foram para uma pasta própria (`memoria/frio/`), sem perder nada — conferi hash de cada um antes e depois. No caminho achei e consertei um controle de segurança que ficaria confuso com a mudança de lugar, e testei os dois lados: mudar de lugar sem mexer no conteúdo passa limpo; mudar o conteúdo escondido atrás de uma mudança de lugar continua sendo pego.
+- A verificação automática do GitHub pegou um erro meu num dos testes novos — corrigi, testei nos dois lados de novo, sem afetar a proteção real.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (551) e (552).
+
+**[APLICADO] O resumo noturno parou de se repetir e de inventar.** Nada esperando você. Toda noite ele refazia os mesmos resumos, e às vezes descrevia uma entrada com o conteúdo de outra. Uma dessas você chegou a aprovar em 21/09 sem ter como perceber; isso está corrigido no registro. Arquivei os 3 resumos repetidos.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (549) e (550).
+
+**[TUDO APLICADO — nada esperando você] As 4 mudanças de hoje estão no oficial.** A bússola, a fila nova, a correção do Groq e o Goose como substituto do Claude Code. Testei o Goose de verdade: ele consultou a memória do sistema sozinho e respondeu certo, em 4 segundos.
+- Desta vez, eu mesmo fiz a inclusão no GitHub, com a sua autorização. Na próxima, vou lembrar você desta conversa antes de fazer.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (548).
+
+**[FEITO E TESTADO] A fila nova da Seth está no ar, com os modelos locais por último.** A Seth responde em 1 a 2 segundos pelo Groq. Os modelos do seu computador só entram se todos os de fora falharem. Com isso, quase toda conversa passa a sair da máquina: foi a troca que você escolheu. O Goose usa o Codestral, que é especialista em código. Saíram os modelos que não funcionavam ou que não eram de graça de verdade.
+- Um limite real: o Groq grátis aguenta umas 2 respostas por minuto. Acima disso, a fila passa sozinha para o próximo modelo.
+- Suas 3 assinaturas de hoje conferem. Falta só você fazer o merge dos PRs #40, #41 e #42 (nessa ordem) para eu aplicar.
+- Para anotar a fila no manual: `bash scripts/aprovar.sh fila-nova-2026-09-24` (depois do merge do PR novo).
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (546) e (547).
+
+**[FEITO — 1 assinatura pra fechar] Voltaram os dois modelos mais rápidos (Groq e Cerebras).** Eles estavam bloqueados havia semanas, e a culpa era nossa: nossos programas se apresentavam de um jeito que o site deles barra. Já corrigi, e eles respondem em menos de meio segundo. Testei também todos os modelos grátis das suas contas: 10 funcionam bem, inclusive usando ferramentas.
+- Assine pra corrigir de vez, na origem: `bash scripts/aprovar.sh ua-python-urllib-2026-09-24`
+- A pesquisa mundial de modelos novos está rodando (a primeira tentativa bateu no limite de gasto da sua conta Claude).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (545).
+
+**[PRONTO — falta sua assinatura] O Goose pode substituir o Claude Code quando ele faltar.** Ele passa a ter os mesmos procedimentos que eu sigo (carregar, aplicar proposta, mudar algo na máquina com segurança), acesso ao canon e as mesmas travas. Testei com ele de verdade: as ferramentas funcionam. O ponto fraco é o modelo grátis por trás dele, que às vezes responde mal. Qual modelo usar fica para você decidir.
+- No caminho achei e consertei um erro: o sistema dizia "atrás" quando era "à frente".
+- Ampliei a proteção: a pasta de instruções do próprio Claude Code também passa a exigir sua assinatura (a proposta mudou; assine esta versão).
+- O desenho do sistema com a bússola está numa página só sua (link na conversa).
+- Assine: `bash scripts/aprovar.sh goose-fallback-2026-09-24`
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (543) e (544).
+
+**[PRONTO — falta sua assinatura] Sua pesquisa virou a bússola do sistema.** Conferi as 8 fontes que ela cita: 7 existem e dizem o que o texto afirma, 1 (OpenAI) bloqueou o acesso. Enxuguei as 86 seções em 12 princípios e mostrei, para cada um, o que o Agata já faz e o que falta. Acrescentei 5 lições que só o nosso sistema ensinou, a principal delas vinda dos erros de hoje. O texto original ficou guardado sem mudanças.
+- Leia: `extras/bussola/auditoria-e-bussola.md`
+- Assine para ela passar a orientar o sistema: `bash scripts/aprovar.sh bussola-2026-09-24`
+- Ela orienta, mas não cria tarefa sozinha. As 5 melhorias que ela sugere ficam para você escolher.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (542).
+
+**[FEITO, TESTADO E ANOTADO] O notebook volta a suspender de verdade.** Nada esperando assinatura. Testei com você: fechar a tampa e apertar o botão fazem o notebook dormir de verdade, e ele acorda normal. Antes ele "dormia acordado" (por isso esquentava na mochila) e, numa madrugada, travou dormindo.
+- Se um dia ele voltar a acordar sozinho sem parar, me avise. Desfazer é um comando só.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (540) e (541).
+
+**[TUDO APLICADO E TESTADO] Rede da Seth isolada, Obsidian certo, discos saudáveis.** Nada esperando assinatura.
+- **Rede da Seth (B8):** ela alcança só as 7 portas que usa. O resto da Máquina ficou fora do alcance. Ela responde normal, e o acesso pelo celular continua funcionando.
+- **Obsidian:** espera você entrar antes de abrir, e o "Parar Seth" voltou a fechá-lo. Testei os dois.
+- **Discos:** os dois estão saudáveis. Mostram muitos desligamentos bruscos (509 e 914), o mesmo problema de desligar que já conhecemos.
+- **Descartado:** a consolidação repetida de 23/09 foi para o arquivo.
+- **Falta você:** reiniciar e entrar pelo Hyprland para confirmar que abre.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (539).
+
+**[PRONTO — 2 assinaturas + 1 comando seu] Pendências do começo do dia.**
+- **Obsidian:** agora ele espera você entrar antes de abrir, e não tenta mais 20 vezes. Assine: `bash scripts/aprovar.sh obsidian-espera-login-2026-09-24`
+- **Rede da Seth (B8):** a Seth passa a enxergar só as 7 portas que usa, e não a Máquina inteira. Assine: `bash scripts/aprovar.sh b8-librechat-bridge-2026-09-24`. Depois rode o comando com senha que eu te passo (libera essas 7 portas no firewall e lê a saúde dos 2 discos).
+- **Já resolvido:** os 3 modelos "nunca avaliados" (2 já estão na fila, 1 é pago) e o erro do Obsidian ao fechar (inofensivo).
+- **Sua decisão:** apagar o serviço velho `agata-rest` (eu não pude, a sessão bloqueou); descartar a consolidação de 23/09, que repete a de 21/09.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (538).
+
+**[APLICADO — falta você testar] O conserto do Hyprland está no ar.** Conferi sua assinatura e apliquei. Na próxima vez que reiniciar, escolha o Hyprland no login. Ele deve abrir.
+- Achado lateral, sem pressa: o Obsidian tenta abrir antes de você entrar, falha umas 20 vezes e só depois abre. Não perde nada, mas dá pra consertar se você quiser.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (537).
+
+**[ACHADO — falta sua assinatura] O Hyprland não abria por culpa do próprio Agata, não do Hyprland.** Um serviço do Agata (o que abre o Obsidian sozinho) avisava ao computador, logo no boot, que já havia uma tela aberta. Quando você escolhia o Hyprland, ele achava que já existia outra sessão e se recusava a abrir. Não precisa reinstalar nada.
+- Assine: `bash scripts/aprovar.sh obsidian-sem-puxar-sessao-grafica-2026-09-24`. Depois eu aplico, e você reinicia e entra no Hyprland para confirmar.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (536).
+
+## Onde estamos — 23/09/2026
+
+**[APLICADO] O manual das filas da Seth está em dia com o que roda de verdade.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura — a Seth está pronta pro seu teste.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (535).
+
+**[FEITO — a Seth está pronta pra você testar] Os 2 Gemini novos estão na fila da Seth e já trabalhando.** Quando o Gemini antigo fica sem cota (aconteceu hoje), agora ela cai num Gemini novo em vez de ficar lenta ou falhar — testei: respondeu em menos de 2 segundos.
+- Falta só assinar a atualização do manual das filas: `bash scripts/aprovar.sh geminis-na-fila-da-seth-2026-09-23` (não bloqueia o teste — a fila já está valendo).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (534).
+
+**[APLICADO E PROVADO AO VIVO] A volta curta passou nos 3 pontos.** O atalho agora sincroniza tudo (testei com uma armadilha: ele consertou sozinho). A Seth ficou rápida — 1 segundo por resposta, antes chegava a 44. E o Goose, numa sessão de verdade, parou e pediu confirmação antes de rodar comando e antes de criar arquivo; o que eu neguei, ele não fez. Nada esperando assinatura.
+- Tem uma consolidação noturna nova esperando você olhar em `propostas/` (sem pressa).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (533).
+
+**[AFINADO — 1 assinatura + 1 comando seu pra fechar a rede] Executei o que você decidiu.**
+- **Goose:** agora pede sua confirmação antes de rodar comando, escrever arquivo ou agir no navegador — no mesmo ritmo que eu trabalho. Ganhou as lições de hoje por escrito.
+- **B9 fechado:** nenhuma escrita acontece sem seu clique, nem pela Seth nem pelo Goose.
+- **deepseek removido.** **2 Gemini novos testados:** funcionam bem e têm cota própria — o Gemini atual da fila da Seth estourou a cota hoje. Colocar os novos na fila é decisão sua.
+- **B8 (rede do LibreChat):** fiz e testei — isolou certo, mas o firewall da Máquina bloqueou também o que devia passar. Desfiz na hora; a Seth está normal. Pra concluir, precisa de um comando seu com senha (te passo).
+- **Assine:** `bash scripts/aprovar.sh afinacao-sistema-2026-09-23` (Seth mais rápida quando a internet oscila; atalho sincronizando tudo; manual corrigido).
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (532).
+
+**[TESTADO DO ZERO — tudo certo] A Seth passou no teste completo depois de todos os consertos de hoje.** Desliguei tudo, liguei do zero, e no navegador ela respondeu certo, usou a ferramenta que você aprovou e disse corretamente que está tudo sincronizado. Erro meu: achei que a hora dela estava errada, mas quem errou fui eu — ela tinha medido, eu não.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (531).
+
+**[APLICADO] Os testes das regras de checagem voltaram a rodar sozinhos.** Conferi sua assinatura e apliquei. Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (530).
+
+**[ERRO MEU, ACHADO E CORRIGIDO — falta sua assinatura] Um alarme que eu tinha descartado era verdadeiro.** Na varredura tripla, deixei de lado um aviso dizendo que um teste automático "não roda há 33 vezes", como se fosse normal. Não era: desde 21/09, quando mudam as regras de checagem do sistema, os testes delas deixaram de rodar sozinhos. Rodei os testes agora (todos passaram, nada quebrou) e preparei o conserto.
+- Assine: `bash scripts/aprovar.sh p16-reconhece-controles-extraidos-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (529).
+
+**[APLICADO] Os 3 consertos da varredura tripla estão no ar e conferidos.** Nada mais esperando sua assinatura. Seguem abertas só as decisões listadas logo abaixo, sem pressa.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (528).
+
+**[VARREDURA TRIPLA FEITA — 1 assinatura + decisões suas] Olhei o sistema de 3 jeitos diferentes e comparei.** Achei 20 coisas: 3 não eram problema, 3 consertei (esperam sua assinatura), e 14 ficam abertas. Minha frase de antes ("só falta a HuggingFace") estava exagerada; está corrigida.
+- **Pra assinar:** `bash scripts/aprovar.sh varredura-tripla-saidas-honestas-2026-09-23` (3 lugares onde o sistema dizia mais do que sabia).
+- **Pra você decidir, quando quiser:** a Cerebras continuar em 1º na fila da Seth; 3 modelos grátis nunca avaliados; apagar um script talvez inútil; uma conexão "deepseek" desligada; e se vale deixar a Seth mais rápida quando a internet oscila (ela pode ficar até 1 minuto atrasada sobre o GitHub).
+- **Só você pode:** checar a saúde dos discos (pede senha), a pasta "BKPdoBKP do Agata", e um atalho de inicialização seu com erro ("fix-display-resolution").
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (527).
+
+**[APLICADO E CONFERIDO COM VOCÊ VENDO] A Seth agora entende o resultado das ferramentas.** Conferi sua assinatura e apliquei. Fiz a mesma pergunta que ela tinha errado, e desta vez ela respondeu certo: "Nenhum serviço está falhando". Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (526).
+
+**[PRONTO — falta sua assinatura] As ferramentas da Seth vão explicar o que o resultado quer dizer.** Foi o caso de hoje: ela leu "nenhum serviço com falha" como "nenhum serviço ativo". Procurei outros casos iguais e achei mais 7. O mais sério: quando a Seth lê o PROJETO.md inteiro, ela só recebe 44% dele, e não sabia disso. Agora cada resultado vem com uma linha dizendo o que significa (calculada pela Máquina, não opinião), e os cortes dizem quanto ficou de fora.
+- Assine: `bash scripts/aprovar.sh saidas-autoexplicativas-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (525).
+
+**[APLICADO E TESTADO DO ZERO — tudo funcionando] A Seth voltou a usar as ferramentas.** Conferi sua assinatura e apliquei. Refiz o teste inteiro com você vendo: o "Parar Seth" agora fecha tudo, inclusive o Obsidian; subiu tudo do zero; você aprovou (pela minha mão) uma verificação da Máquina, e ela rodou de verdade.
+- Um detalhe achado: a Seth entendeu errado o resultado. "Nenhum serviço com falha" ela leu como "nenhum serviço ativo". Motivo: a explicação do comando não chega até ela junto com o resultado. Dá pra consertar; precisa de mais uma assinatura quando você quiser.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (524).
+
+**[CONSERTADO E TESTADO COM VOCÊ VENDO — falta 1 assinatura] A Seth não conseguia usar nenhuma ferramenta.** Toda vez que ela ia ler a memória ou verificar a Máquina e você aprovava, a chamada virava "Cancelado". A causa: uma configuração do LibreChat guardava o pedido de aprovação só na memória de curto prazo, e ele se perdia antes da sua resposta chegar. Troquei pra guardar no banco de dados. Você viu funcionar: a Seth leu a memória e respondeu certo.
+- Também: o "Parar Seth" não fechava o Obsidian. Consertado na mesma proposta.
+- Assine: `bash scripts/aprovar.sh hitl-checkpointer-mongo-e-obsidian-partof-2026-09-23`
+- **Importante:** até você assinar, se você fechar e abrir a Seth pelo atalho, o defeito volta.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (523).
+
+**[ANOTADO] HuggingFace volta em 1º de outubro.** Nesse dia eu religo a conexão e testo. O Obsidian que caiu hoje foi a janela fechada; basta deixar minimizado.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (522).
+
+**[APLICADO] O gancho que refaz os índices depois de cada merge está no ar.** Conferi sua assinatura: é sua e vale. Nada mais esperando assinatura.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (521).
+
+**[PRONTO — falta sua assinatura] O gancho que atualiza o índice do Obsidian sozinho depois de cada merge.** Quando você (ou eu) aceita uma mudança pelo GitHub, o computador agora vai refazer sozinho os índices e o backup, como já faz depois de cada commit. Isso evita o bloqueio que aconteceu hoje. Testei numa cópia isolada, sem mexer no seu Drive.
+- Rode: `bash scripts/aprovar.sh post-merge-regenera-derivados-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (520).
+
+**[APLICADAS — nada mais esperando assinatura] Conferi as duas assinaturas que você fez; as duas são suas e valem.** O alarme de memória apagada já está no ar: se a memória local perder história, a Seth avisa na primeira linha. A correção do teste de modelos, de 22/09, também entrou. A Seth foi reiniciada e responde normal. A Cerebras voltou a funcionar no fim da tarde.
+- **HuggingFace:** além de estar sem crédito, a conexão dela está desligada no roteador desde ontem de manhã. Pra voltar: (1) esperar os créditos grátis do mês renovarem (a data aparece em huggingface.co/settings/billing, na sua conta); (2) religar a conexão. O passo 2 eu faço quando você me disser que o crédito voltou.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (519).
+
+**[FEITO — só falta 1 assinatura sua] Resolvi as pendências que te mostrei.**
+- **Goose:** agora ele te pergunta antes de escrever ou editar qualquer arquivo. Também ganhou a regra escrita de nunca mexer na memória por conta própria. Se incomodar, dá pra voltar atrás.
+- **Obsidian:** não fica mais caindo quando o computador liga. Espera você entrar na sessão e abre uma vez só.
+- **Cerebras:** deixei onde está. Ela custa no máximo uns 3 segundos de vez em quando. A lentidão de hoje foi de outro modelo, que estava sobrecarregado.
+- **Alarme de memória apagada:** pronto e testado. Se a memória local perder história de novo, a Seth vai avisar logo na primeira linha. Como mexe no sistema, precisa da sua assinatura: `bash scripts/aprovar.sh alerta-historia-apagada-2026-09-23`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (518).
+
+**[CONSERTADO — a Seth voltou a subir e a responder] Achei por que a Seth não abria e respondia "The model provider could not complete this request".** Ontem ao meio-dia o Goose editou a configuração do LibreChat (a tela da Seth) em cima de uma mudança de rede que você nunca aprovou. Ele apagou dois endereços, e a Seth ficou apontada para um endereço que não existe. O atalho copiava essa configuração quebrada toda vez, e o LibreChat recusava subir. Depois o Goose tentou consertar e piorou: reduziu o arquivo a quase nada e deixou pastas soltas ("de", "trabalho", "~") na sua pasta pessoal e na Área de trabalho. Nada foi apagado de verdade.
+- **Também achei quem apagou a sua memória ontem:** foi o Goose. A ferramenta de escrita dele troca o arquivo inteiro, e ele a usou para "acrescentar" uma entrada. O GitHub nunca teve o dano. Hoje nada impede que isso aconteça de novo; te proponho travas.
+- Voltei a configuração para a última versão boa. Testei: a Seth responde com o estado certo, e as ferramentas de memória dela carregaram.
+- O Obsidian (de onde a Seth lê a memória) tinha caído. Religuei.
+- Tirei do caminho todo o lixo que o Goose deixou. Guardei tudo numa pasta de evidência, inclusive o texto de explicação das regras que você pediu a ele (`logs/incidente-goose-librechat-2026-09-23/`).
+- Erro meu, pequeno: um teste regenerou um índice automático do Obsidian antes de eu olhar a diferença. Nada se perdeu, porque ele se refaz sozinho.
+- **Pra você decidir:** (1) a Cerebras (o modelo mais rápido da Seth) voltou a ser bloqueada hoje, e a Seth usa o próximo da fila sem problema; (2) quando o computador liga, o Obsidian tenta abrir antes da tela estar pronta e fica caindo por uns minutos, e se você fechar a janela dele a Seth perde a memória até religar; (3) a pasta "BKPdoBKP do Agata" (24 GB) na Área de trabalho não foi feita pelo Goose, não mexi nela.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (517).
+
+## Onde estamos — 22/09/2026
+
+**[APLICADAS] As 2 propostas de consolidação noturna sobre P-8 e sobre o bug do `num_ctx`.** Você pediu pra aplicar as 3 propostas soltas na pasta e aproveitar pra checar a saúde de tudo. As duas de consolidação (resumos automáticos de história antiga, sem mudar nenhum código) viraram entradas novas em MEMÓRIAS — (511) e (512) — e os rascunhos foram pro arquivo, como sempre.
+- Detalhe técnico: `MEMÓRIAS.md`, entradas (511) e (512).
+
+**[INVESTIGADO A FUNDO — sua lista de modelos de reserva já está certa, não mexi nela] Achei a causa real: o instrumento que testa os modelos é que estava com bug, não os modelos.** Retestei 3 vezes com tudo de pé: os 4 modelos externos ligados (Gemini, Mistral, OpenRouter, GLM) respondem certo. O que parecia "Gemini quebrado" era o script de teste mandando um orçamento de resposta baixo demais pra ele — o script real de produção já usa um orçamento maior, só o script de teste estava errado. Corrigi o script. De bônus: achei que uma página do seu manual (PROJETO.md) descrevia a lista de modelos de reserva como se tivesse 5, quando na verdade já tem 9 há 2 dias — corrigi o texto também. As duas correções (script + texto) esperam sua assinatura — nenhuma muda o que o sistema realmente usa, só conserta o teste e a descrição.
+- Único item real, fora do meu alcance: HuggingFace tem a chave inválida desde 16/09 — precisa você gerar um token novo na conta sua.
+- Rode: `bash scripts/aprovar.sh conselho-remoto-corrige-sonda-e-doc-2026-09-22`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (513).
+
+**[CHECADO, tudo bem] Rodei a checagem geral de saúde do sistema (perímetro) — nada quebrado.** 16 controles OK, 2 parciais (o disco externo de backup está desconectado — já sabíamos; e sem `sudo` não vejo 100% dos processos — normal) e uns avisos de serviços "sob demanda" que estavam desligados porque ninguém tinha pedido pra usar (LibreChat, voz em inglês) — nada disso é problema, é esperado quando ninguém está usando.
+
+**[ACHADO E CONSERTADO NA HORA — nada de memória foi perdido] Ao carregar o sistema, achei os arquivos de memória na sua Máquina com a história apagada — não no GitHub, só no disco local, sem ter sido salvo.** O `MEMÓRIAS.md` do seu computador tinha ido de 2457 linhas pra 14 — sobrou só um rascunho solto, sem confirmação nenhuma, dizendo o oposto do que a entrada (515) já tinha testado ao vivo (que o `gpt-oss-120b` da Cerebras estava liberado). Isso nunca foi salvo (commitado): o GitHub, que é a cópia oficial, continuava com a história inteira intacta — por isso deu pra restaurar sem perder nada. Guardei uma cópia do que estava quebrado antes de mexer (`logs/incidente-corrupcao-memorias-2026-09-22/`) e restaurei os 5 arquivos pra versão boa. Ainda não sei ao certo o que causou isso — a Máquina reiniciou/travou várias vezes hoje e ontem, e a suspeita mais forte é essa instabilidade, mas não é prova fechada.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (516).
+
+## Onde estamos — 21/09/2026
+
+**[APLICADO — falta só reiniciar os serviços] Você assinou, conferi a assinatura de verdade, entrou no canon.** Os itens 4, 5, 7 e 9 (voz que lia qualquer arquivo, os 8 "telefones" sem limite, Discord sem trava de canal, checagem de segurança em dobro) agora fazem parte do código de verdade — não é mais só proposta esperando. **Falta uma coisa, só sua: os programas que já estão rodando ainda têm o código VELHO na memória — precisam reiniciar pra valer de verdade.** São 8 serviços de uma vez, alguns centrais (o que hidrata a Seth, o que sanitiza toda saída) — não reiniciei sozinho porque isso afeta produção compartilhada, mesma régua do resto da sessão. Me avise quando quiser que eu reinicie (ou rode você mesmo o atalho de sempre — parar e depois abrir a Seth de novo).
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (510).
+
+**[JUNTADO NUMA SÓ] Você pediu pra unir as 4 propostas pendentes numa única assinatura — feito, testado antes de trocar.** As 4 propostas separadas (itens 4, 5, 7 e 9) viraram uma só, com o mesmo conteúdo técnico de cada uma (nada mudou no que cada correção faz).
+- Rode só este comando, uma vez: `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (509).
+
+**[RESOLVIDO NA HORA] Você voltou avisando "perdi o mouse again" — a mesma trava do Goose com o navegador de antes. Achei os dois processos travados (o mesmo de sempre, anexando a extensão no Brave, preso fazia quase 2 horas), matei, mouse solto de novo.** Dessa vez você tinha ligado a extensão à mão, do jeito certo (não foi auto-lançamento) — mesmo assim travou. Não investiguei o motivo exato de propósito: reproduzir o travamento pra descobrir arriscaria travar seu mouse de novo. Botei uma rede de segurança: se travar de novo, o processo agora morre sozinho em no máximo 2 minutos, em vez de ficar preso por horas até alguém perceber e matar na mão.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (508).
+
+**[VOCÊ SAIU — trabalhando sozinho até onde der, sem parar por pergunta, só por assinatura de verdade.]** Você pediu pra eu seguir o plano de ação inteiro sozinho e só te mostrar assinatura quando for realmente necessário.
+
+**[PLANO DE (500) COMPLETO — os 10 itens todos com resposta real] Item 8 (manifests) já existia, espalhado em 3 lugares — não precisava construir do zero. Item 10 (limpeza de documentação): achei e corrigi um README que descrevia errado a própria regra de segurança que ele existe pra explicar.** Com isto, fechei a auditoria inteira do Marcos: 5 itens corrigidos e testados, esperando só sua assinatura (2 já aplicado, 4/5/7/9 esperando); 2 devolvidos pra sua decisão porque exigem você presente (3 e 6); os 2 últimos (8 e 10) resolvidos sem precisar de assinatura.
+- As 4 propostas que faltavam foram unidas numa só (nota no topo desta seção): `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (507).
+
+**[ERRO MEU, CORRIGIDO NA HORA, NADA PERDIDO] Cometi um erro testando o item 9 — um comando de git que apaga tudo que não estava salvo, sem eu checar antes o que ia junto.** Testando uma trava nova, rodei um comando pra "desfazer um teste" que na verdade apaga TODA edição pendente ainda não salva — e isso incluiu o trabalho de 3 itens que ainda esperavam sua assinatura (10 arquivos). Consegui recuperar tudo, sem perder nada de verdade, porque eu já tinha guardado o conteúdo exato em arquivo separado antes (as propostas já commitadas) — reaplicado e conferido byte a byte que ficou idêntico. Efeito colateral pequeno: um teste seguinte, feito numa cópia separada só pra não arriscar de novo, sem querer mandou um arquivo de índice real (não inventado, só fora de hora) pro seu Google Drive. Nada sensível, nada falso — só um envio a mais que eu não pretendia. Troquei o jeito de testar depois disso.
+- Detalhe técnico completo, sem suavizar: `MEMÓRIAS.md`, entrada (506).
+
+**[DEVOLVIDO PRA SUA DECISÃO] Item 3 (a brecha de rede do LibreChat) — não apliquei.** Achei um desenho real que resolveria (isolar a app grande numa rede própria, com um retransmissor bem pequeno e simples fazendo a ponte pros serviços que ela precisa alcançar) — mas na hora de testar de verdade, a MINHA PRÓPRIA ferramenta bloqueou a ação por segurança ("expor serviço local"), exatamente porque mexer na rede de um serviço de produção compartilhado sem você por perto pra checar depois não é algo que devo forçar sozinho, mesmo com sua ordem geral de continuar. Deixei escrito em detalhe pra quando você quiser decidir e estar presente — `propostas/backlog.md`, item B8.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (503).
+
+**[ACHADO E CORRIGIDO, aguardando só sua assinatura] Item 4 — achei um problema de segurança de verdade, não só o que o Marcos apontou: o serviço de transcrição de voz aceitava um "caminho de arquivo" sem checar nada, então dava pra pedir pra ele ler QUALQUER arquivo que o próprio computador conseguisse ler (uma senha guardada, por exemplo) — mesmo sem ninguém de fora conseguir chegar nele pela rede (só funciona de dentro da própria máquina, mas mesmo assim era uma porta que não devia estar aberta). Corrigido: agora só aceita arquivo de dentro de uma pasta específica, e testei os 4 jeitos de tentar burlar isso (direto, de fora, por "..", por atalho escondido) — todos bloqueados certo.
+- Unida na proposta única (nota no topo desta seção): `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (503).
+
+**[PRONTO, aguardando só sua assinatura] Item 5 — os 8 "telefones" internos do sistema agora recusam pedido gigante demais e não deixam uma enxurrada de pedidos ao mesmo tempo derrubar o serviço.** Antes, se alguém (ou algo quebrado) mandasse um pedido enorme, o serviço tentava aceitar tudo antes de checar qualquer coisa — e não tinha limite de quantas conversas simultâneas cada um aguentava. Corrigido nos 8 de uma vez, testado com servidor de teste de verdade (pedido grande é recusado na hora, pedido normal funciona igual, e o limite de conversas simultâneas realmente segura). De bônus, achei e fechei um buraco separado: nosso próprio sistema de "trava de segurança antes de qualquer mudança perigosa" (o que exige sua assinatura) tinha 2 arquivos que escapavam dessa trava — corrigido e testado ao vivo (sujei um dos arquivos de propósito e confirmei que agora ele é barrado certo).
+- Unida na proposta única (nota no topo desta seção): `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (504).
+
+**[DEVOLVIDO PRA SUA DECISÃO] Item 6 (ligar "isto veio de fora" a "isto vira ação de verdade") — não apliquei.** Achei que já existem duas peças que deviam se falar e não se falam: um freio que já existe (recusa escrever regra do sistema) só é usado quando alguém aciona na mão, não no caminho automático de verdade da Seth; e o caminho automático de verdade não sabe se o que está escrevendo foi influenciado por algo lido de fora. Ligar os dois de forma que não dê pra simplesmente "esquecer de avisar" exigiria uma mudança de arquitetura de verdade (do mesmo tamanho do item 3), não um ajuste pontual — fazer rasteiro pareceria proteção sem ser. Deixei escrito — `propostas/backlog.md`, item B9.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (505).
+
+**[ACHADO E CORRIGIDO, aguardando só sua assinatura] Item 7 — a ponte com o Discord deixava ler e mandar mensagem em QUALQUER canal, sem trava nenhuma.** Diferente do navegador (onde só mandar é travado — ler a internet pública não é problema), aqui até LER precisava de trava: um canal do Discord pode ter conversa de terceiro que você nunca autorizou a Seth ver. Corrigido com o mesmo mecanismo que já existe pro navegador: uma lista de canais permitidos que só você edita, fora do chat — sem essa lista, nada é permitido por padrão. Testei os dois lados (canal de fora bloqueado, canal de dentro liberado). Revisei também o lado do navegador de novo, de propósito — não achei problema novo lá.
+- Unida na proposta única (nota no topo desta seção): `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (505).
+
+**[PRONTO, aguardando só sua assinatura] Item 9 — nosso próprio sistema de checagem de segurança agora se confere DUAS vezes por commit, não uma.** O Marcos tinha achado que a checagem roda só no começo do processo de salvar uma mudança — antes de alguns passos automáticos mexerem no arquivo. Esses passos automáticos já eram confiáveis, mas "confiável" não é a mesma coisa que "conferido de novo". Agora a checagem roda de novo no fim, contra o que realmente vai ser salvo. Tive que corrigir a mim mesmo no meio do caminho: minha 1ª tentativa teria travado TODO commit futuro por engano (por causa de um carimbo que muda sozinho em todo commit) — achei isso testando de verdade antes de aplicar, não depois.
+- Unida na proposta única (nota no topo desta seção): `bash scripts/aprovar.sh plano-marcos-lote-2026-09-21`
+- Detalhe técnico completo, incluindo o erro que cometi testando isto: `MEMÓRIAS.md`, entrada (506).
+
+**[APLICADO, com correção] O Goose já navega no Brave de verdade E já tem paridade completa de carregamento com a Seth — e essa paridade já existia antes desta sessão, eu só não sabia.** Você autorizou acesso total ao navegador e pediu carregamento automático "como a Seth". Naveguei errado numa resposta: disse que faltava reinjeção contínua a cada turno, que precisaria de um serviço novo. Era mentira minha por falta de checagem — o Goose já fala com o mesmo `seth_gateway` da Seth (mesma porta, configurado desde 20/09), que já reinjeta o estado do canon em toda chamada, sem eu precisar fazer nada. Testei de verdade, sem nenhuma ferramenta, e a resposta veio com o estado certo na hora. Some-se a isso o `~/.config/goose/AGENTS.md` (que eu criei) fazendo o Goose também ler os arquivos ativamente no início — as duas coisas juntas, não uma no lugar da outra.
+- Antes disso: a Seth corrigiu sozinha uma alegação errada de identidade ("sou Claude Sonnet 5" — provado falso, ela roda em modelos gratuitos via OmniRoute, nunca Anthropic) e propôs um benchmark de inferência real, rodado e registrado em `(475)`-`(476)`. O HD de backup (`AgataBkup01`) foi reconectado e teve uma passada completa — `(477)`.
+- Detalhe técnico completo: `MEMÓRIAS.md` (474)-(484).
+
+**[RESOLVIDO] O Goose travou de novo tentando abrir o navegador sozinho — desliguei essa parte por padrão, e você deu uma ordem nova importante.** Você mandou um "oi" simples pro Goose e ele travou, igual da vez anterior — desta vez peguei o exato momento no monitor: a extensão do navegador (Playwright) sobe sozinha assim que a sessão abre, mesmo sem você pedir nada de navegação, e trava esperando um Brave que nunca chega a abrir. Matei o processo travado e desliguei essa extensão por padrão — você liga na mão só quando for pedir navegação de verdade, com o Brave já aberto. Testei depois: Goose respondendo normal, rápido, sem travar. Achado à parte: você já tinha um modo de "sempre perguntar antes" configurado no Goose, e ele não pegou esse caso — a extensão sobe antes de qualquer pergunta existir. Você também deu uma ordem geral nova: todo componente do sistema tem que pedir sua autorização antes de usar qualquer ferramenta. Registrada — ainda falta desenhar como isso vale de verdade pro Goose e pra Seth, não é só desligar uma coisa.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (485).
+
+**[PARCIAL] Sua ordem de "resolver tudo, estado da arte": 2 de 3 partes fechadas, 1 vira proposta.** Religuei a Seth/LibreChat (tinha caído com o boot de hoje, subida normal). Descobri que o Goose já tinha, escondido no próprio programa, exatamente o "pedir aprovação antes de usar" que você queria — pra ligar a extensão do navegador, ele já para e pede sempre, sem eu precisar construir nada. Pro lado da Seth, o recurso equivalente (pausar e pedir sua aprovação antes de qualquer ferramenta) existe de verdade no programa de chat (LibreChat) — mas só a partir de uma versão mais nova do que a que está instalada aqui. Ligar isso é trocar a versão do programa, não uma configuração — risco real o bastante (dados de conversa, compatibilidade) pra eu não fazer sozinho. Proposta: planejar essa troca com teste antes, quando você quiser priorizar.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (486).
+
+**[TESTADO, provado que funciona] O recurso de "pedir sua aprovação antes de cada ferramenta" da Seth foi testado de verdade — funciona, numa cópia isolada, sem tocar a produção.** Você pediu pra planejar e testar antes (opção 1). Montei uma cópia inteira do LibreChat (versão nova, mesma configuração real da Seth) isolada — nomes, portas e dados próprios, nunca encostou no que está no ar. Criei um agente de teste, mandei ele consultar o canon, e vi com meus olhos (não é relato, é screenshot real): a tela parou ANTES de rodar a ferramenta, mostrou os argumentos que ela ia usar, e esperou eu clicar Aprovar ou Rejeitar. Rejeitei — a ferramenta realmente não rodou. Funciona exatamente como você pediu. Único porém: a versão que tem esse recurso ainda é "release candidate" (pré-lançamento), não a versão oficial estável — decisão de trocar de verdade a produção por essa versão ainda é sua.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (487).
+
+**[APLICADO DE VERDADE] LibreChat em produção agora roda a versão com aprovação de ferramenta (HITL).** Você assinou, eu conferi a assinatura de verdade (não só que o arquivo existia), troquei o container real e confirmei no ar: `/health` OK, versão `v0.8.8-rc3` rodando de fato. O que ainda falta, só você: mandar uma mensagem real pra Seth que peça uma consulta ao canon, e ver se aparece o cartão de Aprovar/Rejeitar — não testei isso na sua conta pessoal, só na cópia isolada de antes (mesma versão, mesma config, funcionou lá).
+
+**[APLICADO] "Vamos fazer tudo" — item 2 de 10 fechado: a brecha de navegação que o Marcos achou (redirecionamento sem checagem de novo) está fechada.** Antes, o sistema checava só o endereço pedido uma vez — se aquele site então redirecionasse pra um lugar perigoso (rede interna, endereço de metadado de nuvem), passava sem checar de novo. Agora cada redirecionamento é checado, um por um, tanto na leitura de página sem navegador quanto no navegador de verdade (Playwright) — testei os dois com sites e redirecionamentos reais, e testei também que ele bloqueia mesmo quando o perigo só aparece escondido dentro da página (uma imagem apontando pro lugar errado), não só na URL principal. Você assinou, conferi a assinatura de verdade antes de aplicar.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (502).
+
+**[EM ANDAMENTO] "Vamos fazer tudo" — plano de ação da auditoria do Marcos, item 1 de 10 fechado.** O `main` no GitHub agora está protegido: nada entra mais sem passar pela checagem automática de segurança, e ninguém consegue apagar ou forçar sobrescrever o histórico. Perguntei antes de aplicar porque isso muda como todo commit futuro do canon vai funcionar (antes: direto; agora: um passo a mais, revisão automática antes de entrar) — você confirmou que quer assim. Faltam 8 itens, vou seguindo um de cada vez, testando antes de aplicar, como sempre.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (501).
+
+**[AUDITADO] Auditoria técnica do Marcos conferida contra a Máquina de verdade — os 3 achados graves estão certos.** Ele mandou um relatório de 12 páginas sobre segurança/arquitetura do sistema. Não aceitei de cara: conferi cada achado grave contra o estado real (GitHub, arquivos de verdade) — os três batem: o branch principal não tem proteção nenhuma, a checagem de navegação tem uma brecha real (segue redirecionamento sem checar de novo), e o LibreChat compartilha a rede inteira da máquina. Nenhum foi afetado pelo trabalho de hoje. Nada apliquei — são propostas dele, decisão de priorizar fica com você.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (500).
+
+**[CORRIGIDO] As cores personalizadas que botei no Goose mais cedo hoje estavam quebrando ele — obrigado por avisar.** Você colou a tela real e vi: cada palavra que ele escrevia vinha com um aviso de tema desconhecido grudado, deixando ilegível. O motivo: o tema customizado que criei só funciona no programa `bat` separado — o Goose tem o dele PRÓPRIO embutido, que nunca via meu tema. Troquei pra um dos temas que ele já reconhece de verdade (mais parecido com as cores do sistema que dava pra conseguir) e testei — sem aviso nenhum agora.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (499).
+
+**[FALTA SÓ VOCÊ] Achei por que as imagens sumiram — corrigido e já testado na sua própria tela, falta só a assinatura pra fechar o registro.** A atualização de hoje mudou uma regra de segurança: imagem servida solta (fora de uma pasta por usuário) parou de funcionar, sempre, mesmo logado — não era intermitente, era 100% quebrado desde a atualização. A Seth já tinha uma foto de verdade, ligada certinho no banco de dados — só o arquivo de configuração apontava pro lugar errado. Troquei pra apontar pro lugar certo (usei a foto oficial que você lembrou que existe, não inventei nova), reiniciei o serviço e vi na sua própria tela: voltou. Rode quando puder: `bash scripts/aprovar.sh corrige-icone-seth-2026-09-21`.
+
+**Sobre a Seth não conseguir acessar o MCP:** conferi a configuração toda — está certa, sem erro nenhum. O que aconteceu foi a Seth chamar a ferramenta de verificação sem dizer QUAL verificação rodar (faltou um detalhe que ela devia ter preenchido) — a trava de segurança recusou certinho, como devia. Não é bug de configuração, é a IA errando o preenchimento naquele turno específico — mesmo tipo de coisa que já vi acontecer outras vezes hoje com modelos mais fracos.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (498).
+
+**[CASO ENCERRADO, confirmado] Testei com modelo local, como você pediu — 3 de 3 certas.** Forcei o Goose a usar só o modelo que roda nesta máquina (sem depender de internet nem de provedor gratuito nenhum) e mandei "oi" três vezes seguidas — as três vieram com o resumo certo, completo, sem falha nenhuma. Isso confirma: os dois problemas que eu consertei hoje estavam mesmo resolvidos; o resto era só a instabilidade dos provedores gratuitos, fora do nosso controle, e some quando você usa o modelo local.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (497).
+
+**[LIMITE REAL, não escondido] Apliquei os dois consertos, reiniciei o serviço — e o Goose continuou falhando. Achei por quê: não é mais bug nosso, é instabilidade dos provedores gratuitos de IA agora.** Fiz o teste mais direto que existe: peguei a mensagem exata que o Goose manda e reenviei eu mesmo pro sistema — veio certa, perfeita. Ou seja, nosso lado está funcionando. O problema é que, olhando os registros reais de hoje, só 1 em cada 4 chamadas pros provedores de IA gratuitos está indo pra frente agora — o resto volta com erro do lado deles (sobrecarga, limite de uso, serviço fora do ar). Isso explica por que o Goose às vezes não recebe resposta boa: não é sempre o mesmo provedor no ar pra atender. **Não dá pra prometer "100% garantido" enquanto isso durar — é limite de fora, não nosso.** O que continua valendo: quando isso acontece, o Goose não trava mais, só avisa direito que faltou informação, em vez de ficar preso.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (496).
+
+**[APLICADO] Achei um SEGUNDO motivo real pro Goose falhar, além do primeiro — corrigido, testado isolado.** O primeiro conserto ajudou mas não foi suficiente — continuei testando e achei outro: o Goose manda uma chamada extra, escondida, só pra dar nome à conversa — e o sistema tratava essa chamada como se fosse uma pergunta de verdade, carregando toda a doutrina nela à toa e disputando recurso com a resposta principal. Corrigi, testei sozinho (passou), mas **preciso de duas coisas suas**: (1) assinar essa proposta também (`bash scripts/aprovar.sh goose-titulo-nao-hidrata-2026-09-21`); (2) autorizar reiniciar o serviço da Seth (`seth-gateway`) pra rodar o conserto de verdade — isso o sistema bloqueou sozinho, por ser algo compartilhado em produção, certo em bloquear. Sem essas duas, não fecho de verdade o "100% garantido".
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (495).
+
+**[APLICADO, garantido de verdade] O buraco do Goose está fechado na causa — não só no sintoma.** Você assinou, conferi a assinatura de verdade, apliquei o script corrigido. Rodei o teste de saúde geral do sistema depois: nada quebrou.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (494).
+
+**[APLICADO] Achei a causa raiz de verdade do buraco do Goose — corrigido, testado, esperando sua assinatura pra valer.** Você pediu "100% garantido". O motivo de o resumo às vezes não chegar: um script interno faz uma checagem de rede sem limite de tempo próprio, e quando a rede engasga, ele trava o processo inteiro em vez de só aquela checagem — derrubando dados que nem precisavam de rede junto. Corrigi só essa checagem, testei de verdade simulando rede morta (não é achismo): sem o conserto, o processo inteiro cai; com ele, em 8 segundos sai tudo certo, só avisando que não deu pra confirmar com o servidor remoto dessa vez. Rode, quando puder: `bash scripts/aprovar.sh timeout-ls-remote-estado-eco-2026-09-21`. Depois disso eu aplico e confirmo.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (493).
+
+**[MITIGADO, não fechado] Checagem final do Goose achou um buraco real na correção de agorinha — consertado, mas a causa de fundo continua sem explicação.** Testando de novo, achei: às vezes o "resumo pronto" que o Goose devia receber automaticamente simplesmente não chega — e nesse caso ele ficava preso tentando adivinhar informação que não estava em lugar nenhum, em vez de simplesmente ler os arquivos direto (o jeito antigo, mais lento mas confiável). Botei essa saída de emergência de volta, só pra quando o atalho falhar. Testado depois: funcionou. Não descobri por que o atalho falha de vez em quando — fica registrado como risco de fundo, sem solução ainda.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (492).
+
+**[FALSO ALARME, investigado] "Seth parou de responder" — na verdade só demorou ~110s pensando o cabeçalho, não travou.** Confirmei na Máquina: nenhuma ferramenta foi chamada (então não é o novo pedido de aprovação), o container estava saudável o tempo todo, e a resposta final chegou certa, só atrasada. É o mesmo comportamento de "pensar demais" que já tinha acontecido antes com modelo de raciocínio. Nada pra reverter.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (491).
+
+**[FEITO] Goose parou de reler tudo a cada "oi" — agora confia no mesmo canal que já hidrata a Seth.** Era por isso que demorou mais de 60 segundos antes: as instruções mandavam reler REGRAS/PROJETO/MEMÓRIAS inteiros toda vez, quando o próprio sistema já entrega esse estado pronto (mesmo mecanismo que alimenta a Seth). Corrigido e testado: "oi" agora responde em 7 segundos, com os dados certos. **Sobre ligar o navegador de propósito:** perguntei pro próprio Goose sem sessão interativa — ele recusou sozinho, com erro claro, em vez de travar: esse tipo de aprovação exige você estar numa sessão de verdade (`goose session`, não um comando de um tiro só). Roteiro pra usar quando quiser: abra o Brave primeiro, abra a sessão do Goose, peça "habilite a extensão playwright", e aprove quando ele perguntar. Não testei o clique de aprovar em si — isso só dá pra fazer com você presente na sessão.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (490).
+
+**[FEITO] Cores do Goose trocadas pra combinar com o site do sistema Agata.** Peguei a paleta de cores do artefato publicado ("Sistema Agata") e apliquei no jeito que o Goose colore texto/código no terminal — mesmo mecanismo que o Claude Code usa (`bat`). Testei que as cores saem certinhas (conferido byte a byte, não só olhando). Só falta você abrir uma sessão de verdade do Goose e ver se ficou bom na prática.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (488).
+
+## Onde estamos — 20/09/2026
+
+**[APLICADO] 3 modelos de IA novos rodando nesta máquina, de graça — e um 4º que você pediu, mas travou.** Você pediu pesquisar o estado da arte de modelos gratuitos (nuvem e locais) e montar um sistema único de "rápido/geral/pesado" pro LibreChat (chat), Goose (código) e Conselho Remoto. Baixei e testei 4 modelos que rodam nesta máquina sem internet: um generalista (Nemotron, 23,7GB), um especialista em código (Qwen3-Coder, 17,3GB) e um leve/rápido (Phi-4-mini, 2,3GB) — os três funcionando, testados de verdade. O quarto (gpt-oss-20b, agentic) baixou certo mas trava com um bug do programa que roda os modelos (`llama.cpp`) — não é coisa que eu resolvo ajustando parâmetro, fica de fora até alguém investigar mais. **[Resolvido mais tarde no mesmo dia — ver bullet abaixo: era o arquivo baixado, não o programa.]** Também descobri que a Cerebras e o Groq (dois provedores gratuitos na nuvem) foram bloqueados pelo dono do serviço deles — não é bug nosso, é bloqueio do outro lado; troquei a ordem pra eles nunca serem a primeira tentativa, só um extra se sobrar.
+- Detalhe técnico completo: `config/modelos-gratuitos.md`, `PROJETO.md` ("Cérebro" e "Interface"), proposta `farm-local-4-modelos-2026-09-20`.
+
+**[APLICADO] Medi de verdade a velocidade dos 3 modelos locais, e achei (e consertei) por que a Seth não conseguia ler suas próprias regras.** A velocidade real: Nemotron ~25 tokens/s, Qwen3-Coder ~24 tokens/s, Phi-4-mini ~86 tokens/s. Separado disso: a Seth reportou erro "permissão negada" tentando ler o canon — não era permissão, era o aplicativo Obsidian estar fechado (é ele que serve o acesso, por dentro). Abri o aplicativo e criei um serviço que sobe ele sozinho a partir de agora, pra isso não voltar a acontecer.
+- Detalhe técnico completo: `config/modelos-gratuitos.md`, `PROJETO.md` ("Serviços (boot)"), proposta `bancada-llama-bench-2026-09-20`.
+
+**[APLICADO] O quarto modelo (gpt-oss-20b) que travava agora funciona — o problema era o arquivo baixado, não o programa.** O primeiro arquivo (de outra pessoa, "unsloth") travava toda vez. Baixei o mesmo modelo direto de quem mantém o programa que roda os modelos ("ggml-org") e funcionou de primeira, sem travar. Agora são os 4 modelos locais prometidos, todos funcionando.
+- Detalhe técnico completo: `config/modelos-gratuitos.md`, proposta `gpt-oss-20b-resolvido-2026-09-20`.
+
+**[APLICADO] A Seth para de repetir "aguardando assinatura" numa proposta que já foi resolvida.** Você assinou a correção hoje; ela estava pronta e testada desde ontem (19/09). Duas entradas de MEMÓRIAS ((468)/(469)) organizaram, sem fato novo, o histórico já registrado sobre a quarentena de aprovação (P-8) e sobre a âncora de SHA — conferi cada referência citada contra o arquivo de verdade antes de gravar.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entradas (468), (469), e a aplicação da proposta `topo-proposta-aplicada-2026-09-19`.
+
+## Onde estamos — 18/09/2026
+
+**[APLICADO, 19/09] O controle P-19 (citação "arquivo, linha tal" em entrada nova de MEMÓRIAS conferida contra o arquivo de verdade) está no ar.** Você assinou em 18/09 às 20:15; a máquina ficou sem energia antes de eu aplicar. Retomei hoje: conferi a assinatura ssh contra a chave em `propostas/.allowed_signers`, apliquei o diff, rodei a suíte de testes (31/31) e o perímetro inteiro (17 OK, 0 falha), e comitei. De caminho achei um resto da queda de energia: o vault do Obsidian (`memoria/obsidian/`) tinha sido regenerado à mão antes de cair, ficando um passo à frente do commit de verdade — corrigi pra bater exatamente com o HEAD antes de comitar, e o gerador automático já confirma que está certo agora.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (463).
+
+**[APLICADO] O pacote assinado ontem já está no ar — os quatro itens juntos.** Sincronizei tudo (repositório, Drive, Obsidian); o `indice_export.md` que estava 155 entradas atrasado foi corrigido e agora se atualiza sozinho a cada commit que mudar o canon de verdade; e ganhou uma trava nova contra o tipo exato de acidente que aconteceu no meio do caminho (um texto meu entrando no repositório sem eu ter mandado — já corrigido, e agora impedido de se repetir). Detalhe completo: `MEMÓRIAS.md`, entradas (456) a (461).
+
+**[FECHADO POR COMPLETO] O item "quebrado" (`agata-token-check.timer`) não era falha — era um alarme de um tiro só que já tinha disparado, em 04/09, e passou.** Testava se sua credencial do Google (a do Drive do projeto) ia expirar depois de 8 dias — não expirou, o teste deu certo, só ninguém tinha desligado o alarme depois. Desligado na Máquina e o registro no repositório já assinado e aplicado. Nada pendente. Detalhe: `MEMÓRIAS.md`, entrada (462).
+
+## Onde estamos — 17/09/2026
+
+**Sua máquina parou de ligar hoje mais cedo — atualização do CachyOS corrompeu
+os arquivos que preparam o boot, e sem eles o Linux não enxergava o disco
+(dois SSDs em conjunto). Você consertou sozinho, em horas, por Live USB. Eu
+conferi cada passo do seu conserto na própria máquina — bateu tudo — e achei
+um buraco que sobrou: o kernel reserva (o "plano B" para o caso do principal
+falhar de novo) tinha sido instalado no meio do conserto, mas sem a imagem
+que ele precisa pra funcionar. Se você precisasse dele antes de eu achar
+isso, ia falhar do mesmo jeito. Já fechei — você rodou os 3 comandos, eu
+confirmei o arquivo gerado e do tamanho certo.**
+
+- **[Feito] Atualização de pacotes rodada e conferida** — os dois kernels
+  regeneraram certo, sem erro. Falta só você desligar e ligar de verdade
+  pra confirmar o boot na prática (evite suspender por enquanto).
+- Ponto em aberto, não resolvido: seu computador já tinha histórico de
+  desligar sozinho por instabilidade ao suspender. Pode ter sido a causa
+  raiz de hoje.
+- Detalhe técnico completo: `MEMÓRIAS.md`, entrada (435).
+
+**[FECHADO POR COMPLETO, 18/09] Auditoria externa do Marcos — os 12 pontos, todos respondidos, sem resto nenhum.** Você pediu essa auditoria antes do incidente de boot. Achados reais: o navegador da Seth podia visitar qualquer endereço sem checar pra onde ia, os serviços internos confiavam uns nos outros só por convenção, uma função de escrita no canon podia deixar arquivo alterado mesmo com o `git commit` falhando, e o serviço que escreve no canon tinha menos proteção do sistema que o menos exposto. Nada disso era "alguém já invadiu" — era "isto pode ficar mais sólido", e agora ficou: 10 pontos com correção real, testada e em produção; 1 fechado na parte que é nossa (o resto depende de um produto de terceiro, sem código nosso); 2 auditados e registrados como "nada pra fazer de verdade" — nenhum ficou em silêncio. No meio do caminho achei e consertei, de brinde: um bug de 12 dias no seu robô de horário, um bug real na própria ferramenta de teste do sistema (parado desde 06/09, nunca notado), e um buraco na trava de aprovação que cobria só metade dos arquivos que deveriam precisar da sua assinatura.
+- Última pendência fechada hoje: você deu ao `gh` (a ferramenta de linha de comando que fala com o GitHub) a permissão que faltava, e eu publiquei `.github/workflows/perimetro.yml` — a segunda checagem automática (Fase D) agora roda de verdade no GitHub a cada mudança, não só no seu disco. Usei a aprovação que você já tinha assinado em 17/09, não pedi assinatura nova.
+- Detalhe técnico completo, passo a passo: `MEMÓRIAS.md`, entradas (437) até (453).
+
+## Onde estamos — 16/09/2026
+
+**Dois modelos (eu, na sua máquina, e o Opus 5, na nuvem) passaram o dia
+conferindo um ao outro sobre a Seth e sobre o próprio sistema. Quatro coisas
+prontas esperando só a sua assinatura. Nada foi aplicado sem ela.**
+
+### O que achamos de errado com a Seth
+
+- **O ajuste que fazia as ferramentas dela funcionarem (de 04/09) se perdeu
+  quando o "robô" da Seth foi recriado no LibreChat em 09/09.** O agente
+  antigo não existe mais; o novo nunca herdou o ajuste, porque ele vivia só
+  na tela, não em arquivo. Conserto pronto — um comando de 14 linhas — mas
+  **travado pelo meu próprio ambiente de execução** duas vezes, mesmo com
+  sua autorização. Deixei o comando pronto para você rodar direto, se
+  quiser resolver sem esperar eu tentar de novo.
+- **Medimos, com o medidor de verdade do modelo, que a memória que ela carrega
+  no computador local está quase 100% cheia** (99,3%) — e a maior parte do
+  peso é um índice que custa mais do que a informação que ele indexa. Isso
+  só afeta o caminho de reserva (quando os provedores grátis da nuvem
+  falham todos juntos); hoje ela roda na nuvem, que tem espaço de sobra.
+  Ainda não cortamos nada — só medimos, e o remédio (cortar o índice)
+  está na sua fila de decisão.
+- **Ela inventou coisas numa conversa real com você hoje**: um passo do
+  processo de aprovação que não existe, chamou a sua máquina de "revisora"
+  quando ela é só a máquina, e citou dois caminhos de arquivo que não
+  existem. Também se confessou de um erro que ela **não** cometeu, sob
+  pressão de estar sendo auditada — inventar uma confissão é tão problema
+  quanto inventar um fato. E o estilo de resposta dela varia muito dentro
+  da mesma conversa: ora precisa e técnica, ora produz relatório de
+  empresa genérica com prazos e equipes que não existem aqui.
+- **O cabeçalho dela (a linha de identificação obrigatória) continua saindo
+  errado**, mesmo depois de já ter sido corrigida duas vezes na mesma
+  conversa.
+
+### O que consertamos e testamos (sem aplicar ainda)
+
+- Um erro no nosso próprio corretor automático de cabeçalho: ele reprovava
+  uma forma válida de resposta por engano. Corrigido e testado.
+- Duas correções de texto no canon (uma decisão antiga que já foi superada,
+  e a limpeza de um plano de longuíssimo prazo que citava tecnologia nunca
+  avaliada de verdade).
+
+### O que pedimos ao Conselho de outros modelos
+
+Perguntamos se valia acrescentar um parágrafo às Regras explicando *por
+que* elas existem, não só *o que* dizem. A resposta formal foi **não** —
+redundante com o que já está escrito. Arquivamos a ideia.
+
+### O que falta
+
+- Só o conserto do "robô" da Seth continua parado (travado pelo meu
+  ambiente de execução, não por falta da sua autorização).
+- Você decidir se autoriza rodar um teste mais caro (que usa a placa de
+  vídeo por um instante) para medir a memória com ainda mais precisão.
+
+## Fechado recentemente, pra não voltar
+- **Crash e recuperação da máquina, 17/09** — GRUB reinstalado, LVM íntegro, kernel reserva consertado. Ver seção de hoje acima.
+- **Duas assinaturas de 16/09 aplicadas em 17/09** — índice pesado da memória cortado; corretor de cabeçalho consertado.
+- **Brecha da página web fechada, 17/09** — a Seth não perde mais a memória por causa de algo que ela lê num site.
+- **Auditoria completa de segurança ((419)) e reconciliação do canon ((420))** — quatro travas furadas, fechadas; textos desatualizados, corrigidos.
+- **Terceira auditoria da Seth ((424))** — corrigiu o linter e a doutrina dela sobre `sync:` completo.
+- **Atalhos de sistema aplicados ((429))** — `agata-jogo` e `seth-parar` ganharam as mudanças pendentes desde 10/09.
