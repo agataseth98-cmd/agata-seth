@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
+  palavras-chave: proposta, suite, fixtures, genese, aberta, fecha, falhas, recontado, verdade, testar, perimetro, dava, dentro, clone, recém, nascido, aguardando, assinatura
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada pelo Humano, aplicada. `scripts/genese.sh` é código real do canon — a Fase 3 tem, pela primeira vez, um comando que nasce um clone novo de verdade.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, genese, script, assinada, humano, aplicada, scripts, código, real, canon, fase, tem, primeira, comando, nasce, clone, novo, verdade, assinatura, conferida, verificar, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `scripts/genese.sh` — o script real que nasce um clone do framework — entra no canon pela primeira vez. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: achados, corrigido, quarentena, mail, exemplo, readme, librechat, user, agent, discord, script, gera, âncora, sha, foram, pro, mesmo, errar, primeiro, precisar
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
   palavras-chave: relatório, laboratório, nuvem, ensaio, fase, replicabilidade, três, achados, verificados, máquina, verificável, economia, tokens, registrada, mecanismo, regra, aplicada
-(555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
-  palavras-chave: fase, plano, replicabilidade, chaves, env, exemplo, checklist, teste, rotação, proposta, assinada, muda, comportamento, script, runtime
+(555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.ex …
+  palavras-chave: fase, plano, replicabilidade, chaves, env
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4 …
   palavras-chave: assinado, verificado, aplicado, vault, inbox, fase
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar …

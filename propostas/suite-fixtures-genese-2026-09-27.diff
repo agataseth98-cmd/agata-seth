@@ -1,0 +1,48 @@
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 3ab586c..076b45f 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -71,6 +71,27 @@ _montar_clone() {
+   # (rastreado, sobrevive ao reset) que tentava `source` arquivos que já
+   # não existiam mais, silenciosamente sem funcao nenhuma das extraidas.
+   # Achado rodando esta suite de verdade contra o item 10, nao teorico.
++  #
++  # Fixtures de instância sintéticas, só pra suíte -- achado 27/09/2026
++  # rodando esta suíte de dentro de um clone nascido por scripts/genese.sh
++  # (Fase 3): extras/*.md e SELOS.txt/chunk frio são `instancia`
++  # (config/caminhos-framework.txt), então um clone de gênese não os tem
++  # ainda -- 7 casos de P-8/P-14 falhavam no SETUP, não no controle. Nunca
++  # sobrescreve o que já existir de verdade (os `if` só disparam quando
++  # falta).
++  if [ -z "$(cd "$CLONE/repo" && git ls-files 'extras/*.md' 2>/dev/null)" ]; then
++    mkdir -p "$CLONE/repo/extras"
++    printf '# fixture da suíte\n\nTexto qualquer, sem relação com o sistema real.\n' \
++      > "$CLONE/repo/extras/fixture-teste-suite.md"
++  fi
++  if [ ! -s "$CLONE/repo/SELOS.txt" ]; then
++    mkdir -p "$CLONE/repo/memoria/frio"
++    printf '# fixture da suíte -- chunk frio sintético, selado abaixo.\n' \
++      > "$CLONE/repo/memoria/frio/MEMORIAS-FRIO-fixture-teste.md"
++    _hash_fixture="$(sha256sum "$CLONE/repo/memoria/frio/MEMORIAS-FRIO-fixture-teste.md" | cut -d' ' -f1)"
++    printf '%s memoria/frio/MEMORIAS-FRIO-fixture-teste.md %s\n' \
++      "$_hash_fixture" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$CLONE/repo/SELOS.txt"
++  fi
+   ( cd "$CLONE/repo" && git add -A && git -c user.email=teste@agata -c user.name=teste \
+       commit -q --no-verify -am "base da suite: arvore de trabalho" 2>/dev/null ) || true
+ }
+@@ -343,7 +364,14 @@ git add "MEMÓRIAS.md"
+ EOF
+ 
+ _caso P-7 PASSA "FALSO POSITIVO: citacao real com sintese coerente" <<'EOF'
+-_nova_entrada "(9999) DIARIO — 01/01/2026 · teste citando (417 - TES-001 e TES-002 aposentados por decisao do Humano)."
++# Auto-contido (achado 27/09/2026, testando a suite dentro de um clone
++# nascido por scripts/genese.sh): citava a entrada real (417) desta
++# instancia -- um clone novo nao tem (417), so a (1) da genese, e o
++# caso falhava no SETUP. Corrigido pra criar a propria entrada "antiga"
++# sintetica e citar ela mesma, sem depender de nenhuma historia real --
++# vale pro repo real e pra qualquer clone, gênese ou não.
++_nova_entrada "(9998) DIÁRIO — 01/01/2026 · fixture: TES-001 e TES-002 aposentados por decisao do Humano."
++_nova_entrada "(9999) DIARIO — 01/01/2026 · teste citando (9998 - TES-001 e TES-002 aposentados por decisao do Humano)."
+ git add "MEMÓRIAS.md"
+ EOF
+ 
