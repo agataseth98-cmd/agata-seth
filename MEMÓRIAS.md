@@ -26,18 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): df3325bc753422b637cda959cba6b7c2b6647979
-  Escrito em: 26/09/2026 22:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 890b5b6022a87816b70029534c8ea6d13d981424
+  Escrito em: 26/09/2026 22:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/890b5b6022a87816b70029534c8ea6d13d981424/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
+
+**Isolamento:** `HOME`/`XDG_CACHE_HOME`/`XDG_CONFIG_HOME` apontando pra um diretório descartável no scratchpad, framework = worktree com `genese-p8-p16.diff` aplicado, chave SSH de teste nova. Nesse ambiente, `subir_esfera_projeto.py` falhou de propósito no nascimento (fail-soft: "export/envio ao Drive falhou (rede, token, ou varredura de segredo)") — sem credencial na `$HOME` falsa, não tinha como acertar, e o commit não travou por causa disso. Confirmado depois: bundle real e contador do P-17 desta Máquina idênticos a antes de começar.
+
+**Os 3 ataques, testados dentro do clone recém-nascido:**
+1. **Editar `REGRAS.md` no lugar, sem `APROVADO-`** → `RESULTADO GERAL: FALHOU`, commit bloqueado. Confirmado: nenhum commit novo em `git log`.
+2. **O mesmo via `git checkout --orphan`** → também `FALHOU` (2 FALHA — P-8 pegou os 197 arquivos "novos" da orphan branch também). Confirma a correção de (565): a condição "sem HEAD" sozinha não bastaria aqui (orphan não tem HEAD), mas a condição 2 (nenhuma ref) falha primeiro, porque `refs/heads/main` continua existindo.
+3. **O mesmo apagando todas as refs à mão** (`git update-ref -d` em cada uma) → também `FALHOU`. Confirma a condição 3: mesmo sem ref nenhuma, os objetos `commit` continuam no banco (`git cat-file --batch-all-objects`), e é isso que barra.
+
+**Não testado por ataque, só por leitura de código (mesma conclusão do laboratório):** a alegação sobre `propostas/.allowed_signers` — já tinha lido `_p8_assinatura_ok` antes nesta sessão, confirma o `return 0` de "modo compat" quando o arquivo não existe nem em HEAD nem na working-tree. Não montei um clone sem `--chave-publica` pra forçar o cenário porque o `genese.sh` recusa rodar sem ela (a exigência já é o desenho certo); testar o "modo compat" isolado exigiria um clone fora do `genese.sh`, fica pra se algum dia for preciso.
+
+**Estado da gênese agora:** mecanismo central + os 3 ataques verificados por mim, de ponta a ponta, com o cuidado de isolamento que (579) exigiu. Ainda não decidido: se isto vira proposta P-8 pra aplicar de verdade (a exceção mecânica em `p08_quarentena.sh`/`p16_testes_dos_controles.sh`) — é mudança de comportamento real do canon, pede decisão do Humano sobre quando a Fase 3 começa a virar código de verdade, não só validação.
+
+**sync:** PASS — `git rev-parse main` = `890b5b6` no momento de medir, topo de MEMÓRIAS conferido com (579) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável como framework; `$HOME`/`XDG_CACHE_HOME`/`XDG_CONFIG_HOME` isolados num diretório descartável; os 3 ataques rodados de verdade dentro do clone isolado, cada um conferido por `git log`/`git status` depois; estado real da Máquina conferido antes e depois (bundle, contador do P-17) · **Autorização:** "foda-se o Drive por enquanto, segue" — continuar medindo o DADO do laboratório, aplicando a lição do incidente de (579).
 
 (579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
 

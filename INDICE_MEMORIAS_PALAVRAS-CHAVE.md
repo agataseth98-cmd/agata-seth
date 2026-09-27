@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
+  palavras-chave: testei, ataques, laboratório, contra, exceção, gênese, desta, home, isolado, regra, registrou, barrados, confirmado, verdade, zero, vazamento, pro, estado, real, máquina
 (579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
   palavras-chave: testei, genese, diff, laboratório, verdade, mecanismo, bateu, eles, mediram, teste, isolar, home, contaminou, pedaços, estado, real, compartilhado, desta, máquina, incidente, hipótese, corrigi, documento, tentar, reconstruir, valor, tenho, saber, nada, aplicado, repo, gênese, continua, dado
 (578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/llamacpp@.service` aplicado com a versão final do `ExecStart` (`$ARGS` sem chaves, sem `/bin/sh -c`), já testada ao vivo antes da assinatura (ver (577)). Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, fix, teste, segunda, linha, defesa, github, actions, suite, adversarial, pegou, bug, real, novo, lógica, segurança, próprio
 (551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
   palavras-chave: assinado, verificado, aplicado, memorias, frias, fora, raiz, chunks, frios, saíram, repositório, memoria, frio, redesenhado, distinguir, relocação, legítima, edição, disfarçada, abrir, mão, pegar, segunda
-(550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
-  palavras-chave: assinado, verificado, aplicado, consolidacao, repeticao, gerador, noturno, pula, tema, consolidado, reprova, descrição, bate, título, real, proposta, esperando, assinatura
+(550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem- …
+  palavras-chave: assinado, verificado, aplicado, consolidacao
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia …
   palavras-chave: consolidação, noturna, repetia, temas, descrevia
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia est …
