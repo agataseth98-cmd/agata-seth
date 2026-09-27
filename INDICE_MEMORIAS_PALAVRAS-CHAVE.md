@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
+  palavras-chave: proposta, genese, aberta, exceção, mecânica, gênese, vira, código, verdade, scripts, perimetro, dado, testado, worktree, primeira, mudança, comportamento, real, rumo, fase, aguardando, assinatura
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
   palavras-chave: testei, ataques, laboratório, contra, exceção, gênese, desta, home, isolado, regra, registrou, barrados, confirmado, verdade, zero, vazamento, pro, estado, real, máquina
 (579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, seth, verificar, ganha, comando, fixo, verificador, mesma, checagem, goose, ganhou, pra, ela, saber, sozinha, proposta, pendente, pode, aplicada
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
   palavras-chave: assinado, verificado, aplicado, fix, teste, segunda, linha, defesa, github, actions, suite, adversarial, pegou, bug, real, novo, lógica, segurança, próprio
-(551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fora-da-raiz-2026-09-25`. Os 11 chunks frios saíram da raiz do repositório para `memoria/frio/`; o P-14 foi redesenhado para distinguir relocação legítima de edição disfarçada, sem abrir mão de pegar a segunda.**
-  palavras-chave: assinado, verificado, aplicado, memorias, frias, fora, raiz, chunks, frios, saíram, repositório, memoria, frio, redesenhado, distinguir, relocação, legítima, edição, disfarçada, abrir, mão, pegar, segunda
+(551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fo …
+  palavras-chave: assinado, verificado, aplicado, memorias, frias
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem- …
   palavras-chave: assinado, verificado, aplicado, consolidacao
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia …
