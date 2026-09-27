@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e4d0e734bc092e923afd6e0983eb9acf55bea2ca
-  Escrito em: 27/09/2026 11:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5c2070fcaef5378c218eeae73ee1f88a8843d143
+  Escrito em: 27/09/2026 12:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4d0e734bc092e923afd6e0983eb9acf55bea2ca/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4d0e734bc092e923afd6e0983eb9acf55bea2ca/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e4d0e734bc092e923afd6e0983eb9acf55bea2ca/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada pelo Humano, aplicada. `scripts/genese.sh` é código real do canon — a Fase 3 tem, pela primeira vez, um comando que nasce um clone novo de verdade.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+
+**Estado real da Fase 3 agora:** `bash scripts/genese.sh --framework <checkout> --destino <dir> --origin <url> --chave-publica <arq.pub> --nome <nome> --aplicar` nasce um clone completo, testado de ponta a ponta (mecanismo, os 3 ataques do laboratório, idempotência, validação de erro — (579)/(580)/(583)). O que ainda falta, registrado e não escondido: proteção de branch no GitHub do repo novo fica fora do escopo deste script; a suíte `testar_perimetro.sh` do clone ainda ficaria vermelha (6 ERRO, fixtures de instância ausentes — `SELOS.txt`/chunk frio, `extras/`) até alguém escrever esse passo; o texto de `PROJETO.md`/`MEMÓRIAS.md` que o script escreve é mínimo, de propósito (a redação de verdade é decisão de quem nasce o clone, não do script).
+
+**sync:** PASS — `git rev-parse main` = `5c2070f` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (583) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `scripts/genese.sh` — o script real que nasce um clone do framework — entra no canon pela primeira vez. Aguardando assinatura.**
 
