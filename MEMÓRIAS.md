@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 77126be953a13c8e392fa3173e5f4ca1e8f7d20e
-  Escrito em: 27/09/2026 14:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aa270dbeca0ee6c3561f26eb0b75671c596a3012
+  Escrito em: 27/09/2026 14:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` aberta: `scripts/proteger_branch_github.sh`, testado ao vivo contra um repositório real do GitHub, criado e apagado só pra isso. Decisão do Humano — opção C (script separado, não embutido em `genese.sh`). Aguardando assinatura.**
+
+**Receita exata do `agata-seth` real** (`gh api repos/.../branches/main/protection`, lida antes de escrever qualquer código): PR obrigatório, 0 aprovações exigidas, check `suite-adversarial` obrigatório e atualizado (`strict`), `enforce_admins`, sem force-push, sem deleção.
+
+**Testado de ponta a ponta, com autorização explícita a cada etapa que criava recurso externo real:** criei `agataseth98-cmd/agata-teste-protecao-branch` (privado), 1º commit, `--repo ... ` sem `--aplicar` → `PULADO` (simulação limpa). **Achado real:** `--aplicar` num repo **privado** falhou — a API do GitHub recusa proteção de branch em conta free fora de repositório público (`agata-seth` só funciona porque é público). Autorização pedida e concedida pra tornar o repo de teste público; `--aplicar` aí sim → `FEITO`, releitura da API confirma os 4 pontos. Idempotência confirmada (rodar de novo, mesmo resultado). **Confirmação final, a mais forte:** um `git push` direto pra `main` do repo de teste foi recusado pelo GitHub com a mesma mensagem que este repo real já mostrou várias vezes nesta sessão ("Changes must be made through a pull request"). Repo de teste apagado pelo Humano depois (eu não tinha o escopo `delete_repo` no token do `gh` — não pedi expansão sem perguntar).
+
+**Achado no caminho, antes de testar:** o `set -e` do script mataria a checagem de releitura silenciosamente (o `python3 ... ; if [ \$? -eq 0 ]` corre depois do `set -e` já ter matado o script no exit≠0 do python). Corrigido pra `if python3 ...; then` antes de qualquer teste ao vivo.
+
+**sync:** PASS — `git rev-parse main` = `aa270db` no momento de medir, topo de MEMÓRIAS conferido com (594) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `gh api` pra ler a proteção real do `agata-seth` antes de escrever o script; worktree descartável; repositório de teste real criado, protegido, atacado com push direto, e removido — cada etapa de exposição externa (criar, tornar público) com autorização explícita separada; suíte inteira (46/46) + `.diff` verificado contra HEAD real · **Autorização:** "vamos com c" + autorizações pontuais pra cada ação externa (criar repo, tornar público) durante o teste.
+
+(594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada pelo Humano, aplicada. `kokoro-tts` está fora do sistema.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Os 6 arquivos aplicados. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, confirmado P-9 sem menção ao `kokoro-tts`. O container físico continua parado no disco — não apagado, decisão separada.
+
+**sync:** PASS — `git rev-parse main` = `732d135` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (593) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
 
