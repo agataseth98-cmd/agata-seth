@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/perimetro/p08_quarentena.sh` e `scripts/perimetro/p16_testes_dos_controles.sh` aplicados — a exceção mecânica de gênese (`_perimetro_eh_genese`) agora é código real do canon, não só DADO testado em worktree. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+  palavras-chave: proposta, genese, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, perimetro, quarentena, testes, controles, aplicados, exceção, mecânica, gênese, agora, código, real, canon, dado, testado, worktree, par, movido, pra, propostas, aplicadas, suíte, falha
 (581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
   palavras-chave: proposta, genese, aberta, exceção, mecânica, gênese, vira, código, verdade, scripts, perimetro, dado, testado, worktree, primeira, mudança, comportamento, real, rumo, fase, aguardando, assinatura
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, vault, inbox, fase, primeiro, pedaço, real, plano, replicabilidade, scripts, importar, mecanismo, trás, memória, obsidian, pra, clone, futuro
 (553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
   palavras-chave: assinado, verificado, aplicado, seth, verificar, ganha, comando, fixo, verificador, mesma, checagem, goose, ganhou, pra, ela, saber, sozinha, proposta, pendente, pode, aplicada
-(552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-teste-2026-09-25`. A segunda linha de defesa (GitHub Actions, `suite-adversarial`) pegou um bug real no teste novo de (551) — não na lógica de segurança, no próprio teste.**
-  palavras-chave: assinado, verificado, aplicado, fix, teste, segunda, linha, defesa, github, actions, suite, adversarial, pegou, bug, real, novo, lógica, segurança, próprio
+(552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-test …
+  palavras-chave: assinado, verificado, aplicado, fix, test
 (551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fo …
   palavras-chave: assinado, verificado, aplicado, memorias, frias
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem- …

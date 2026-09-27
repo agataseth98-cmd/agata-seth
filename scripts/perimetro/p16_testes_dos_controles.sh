@@ -9,6 +9,10 @@ p16_testes_dos_controles() {
     echo "P-16: rodando DENTRO da suíte -- pulado (senão recursa infinitamente)."
     PERIMETRO_ESTADO="SKIP"; return 0
   fi
+  if _perimetro_eh_genese; then
+    echo "P-16: gênese -- sem commit anterior; a suíte roda depois do nascimento."
+    PERIMETRO_ESTADO="SKIP"; return 0
+  fi
   local staged tocados
   staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only 2>/dev/null)"
   tocados="$(echo "$staged" | grep -E "$P16_ARQUIVOS_DE_CONTROLE" || true)"

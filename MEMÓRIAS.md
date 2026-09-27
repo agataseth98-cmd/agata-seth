@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b
-  Escrito em: 27/09/2026 11:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9ada885af52a3af1b0cfb1876020a4b1eb75bd6b
+  Escrito em: 27/09/2026 11:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf37f5d3bfa667d65477d4ac6aaa60abcc3d813b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ada885af52a3af1b0cfb1876020a4b1eb75bd6b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ada885af52a3af1b0cfb1876020a4b1eb75bd6b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9ada885af52a3af1b0cfb1876020a4b1eb75bd6b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/perimetro/p08_quarentena.sh` e `scripts/perimetro/p16_testes_dos_controles.sh` aplicados — a exceção mecânica de gênese (`_perimetro_eh_genese`) agora é código real do canon, não só DADO testado em worktree. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+
+**O que muda de verdade:** nada, ainda — a exceção só entra em jogo quando um repositório não tem nenhum commit, e este repo (o único que existe hoje) tem centenas. Sem um script de gênese real, esta mudança fica inerte até a Fase 3 escrever esse script.
+
+**sync:** PASS — `git rev-parse main` = `9ada885` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (581) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
 
