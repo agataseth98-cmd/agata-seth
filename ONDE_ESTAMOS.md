@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[FEITO E APLICADO — a lista antiga de pendências está zerada] A receita de modelos, assinada, já está no código de verdade.** O que sobra dessa lista não é mais "construir" — são 2 decisões só suas: o que fazer com o `kokoro-tts` (manter ou tirar), e como proteger o repositório de um clone novo no GitHub.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (592).
+
 **[PRONTO — falta sua assinatura — última pendência da lista antiga fechada] A receita de quais modelos um Agata novo precisa baixar, separada da lista técnica que só existe DEPOIS de baixar.** Não decidi nada novo — só copiei pra um formato executável o que o `PROJETO.md` já registra como o modelo "Principal" desta casa. Deixei bem claro no texto: é uma recomendação calibrada pra esta placa de vídeo, não uma ordem cega pra qualquer hardware.
 - Assine: `bash scripts/aprovar.sh modelos-padrao-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (591).

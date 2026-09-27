@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
+  palavras-chave: proposta, modelos, padrao, assinada, humano, aplicada, lista, pendências, registrada, fechada, assinatura, conferida, scripts, verificar, config, aplicado, par, movido, pra, propostas, aplicadas, perimetro, falha
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
   palavras-chave: proposta, modelos, padrao, aberta, última, pendência, receita, padrão, separada, manifest, json, aguardando, assinatura
 (590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, assinada pelo Humano, aplicada. O mecanismo do `~/agata` configurável — decisão de (564) — é código real do canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/definir_caminho_agata.sh` aplicado. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA. Inerte sem `AGATA_HOME` definido — esta Máquina continua com `~/agata` como diretório real, nada mudou.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: regra, verificação, tripla, rodada, decisões, verificáveis, fase, laboratório, ensaio, listou, aberto, convergiram, divergiu, subiu, pro, humano, decidiu, direto, maioria, manda
 (563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
   palavras-chave: falso, positivo, latente, corrigido, achado, laboratório, nuvem, ensaio, medindo, pra, fase, bootstrap, verificado, mim, aplicar, redesign, router, goose, tinha, placeholder, config, valor, caracteres, openai, api, key, casa, padrão, genérico, chave, acusava, hoje, porque, estava, commitado, olha, staged
-(562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigida antes de aplicar — achei um buraco real no próprio harness de teste (`testar_perimetro.sh`) tentando aplicar a versão assinada. A assinatura de (561) ficou inválida (conteúdo mudou); precisa de assinatura nova.**
-  palavras-chave: proposta, manifesto, corrigida, aplicar, achei, buraco, real, próprio, harness, teste, testar, perimetro, tentando, versão, assinada, assinatura, ficou, inválida, conteúdo, mudou, precisa, nova
+(562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigid …
+  palavras-chave: proposta, manifesto, corrigid
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, …
   palavras-chave: pendências, plano, replicabilidade
 (560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Huma …

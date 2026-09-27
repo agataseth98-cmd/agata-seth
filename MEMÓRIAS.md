@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 00107f9a0e1d2185317045ee48f41e6539493a39
-  Escrito em: 27/09/2026 14:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6d384be9b792f7921ef61dc9b2b0c9c59e2ee57f
+  Escrito em: 27/09/2026 14:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00107f9a0e1d2185317045ee48f41e6539493a39/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d384be9b792f7921ef61dc9b2b0c9c59e2ee57f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d384be9b792f7921ef61dc9b2b0c9c59e2ee57f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6d384be9b792f7921ef61dc9b2b0c9c59e2ee57f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
+
+**O que resta de (567), fora de F3.2:** a decisão sobre `kokoro-tts` (compose ou fora — decisão do Humano, não construção) e a proteção de branch no GitHub de um repo novo (fora do escopo de `genese.sh`, precisa de decisão sobre como testar sem criar um repo real de verdade).
+
+**sync:** PASS — `git rev-parse main` = `6d384be` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (591) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
 
