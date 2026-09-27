@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[FEITO E APLICADO — tudo que o laboratório tinha deixado em aberto está fechado] O número que faltava, assinado, já está no código de verdade.** Confirmado: nada mudou no funcionamento real desta Máquina, como esperado.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (588).
+
 **[PRONTO — falta sua assinatura] Achei o número que faltava — `maxWaitMs` — e conferi com meus próprios olhos, não só confiando no laboratório.** Baixei o programa de verdade (não o que roda aqui, uma cópia à parte) e li o código-fonte pra confirmar. Aplicar isso aqui não muda nada (o valor certo já está configurado nesta Máquina) — só garante que um clone novo nasça sem o mesmo problema de antes.
 - Assine: `bash scripts/aprovar.sh omniroute-maxwait-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (587).
