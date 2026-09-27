@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
+  palavras-chave: proposta, kokoro, remocao, aberta, decisão, humano, tirar, tts, sistema, aguardando, assinatura
 (592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, modelos, padrao, assinada, humano, aplicada, lista, pendências, registrada, fechada, assinatura, conferida, scripts, verificar, config, aplicado, par, movido, pra, propostas, aplicadas, perimetro, falha
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: laboratório, ensaio, respondeu, atualização, achou, buraco, segurança, real, proposta, assinada, corrigido, assinatura, corrige, justificativa, deu, pra, opção, gênese
 (564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisões não verificáveis da Fase 3 que o laboratório "Ensaio" listou em aberto — 4 convergiram 3/3, 1 divergiu e subiu pro Humano, que decidiu direto (não por maioria, como a regra manda).**
   palavras-chave: regra, verificação, tripla, rodada, decisões, verificáveis, fase, laboratório, ensaio, listou, aberto, convergiram, divergiu, subiu, pro, humano, decidiu, direto, maioria, manda
-(563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pelo laboratório-nuvem "Ensaio" medindo pra Fase 3 (bootstrap) e verificado por mim antes de aplicar: `redesign/router/goose.md:32` tinha um placeholder de config, valor com 24 caracteres depois de "OPENAI_API_KEY:", que casa o padrão genérico de chave do P-1 — não acusava hoje só porque já estava commitado (P-1 só olha staged).**
-  palavras-chave: falso, positivo, latente, corrigido, achado, laboratório, nuvem, ensaio, medindo, pra, fase, bootstrap, verificado, mim, aplicar, redesign, router, goose, tinha, placeholder, config, valor, caracteres, openai, api, key, casa, padrão, genérico, chave, acusava, hoje, porque, estava, commitado, olha, staged
+(563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pe …
+  palavras-chave: falso, positivo, latente, corrigido, achado
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigid …
   palavras-chave: proposta, manifesto, corrigid
 (561) DIÁRIO — 25/09/2026 · **As 2 pendências do plano de replicabilidade (P-20, …

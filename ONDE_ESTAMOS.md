@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura] Você decidiu: tirar o `kokoro-tts`. Feito.** Removido de todo lugar que o sistema esperava ele existir — o aviso que aparecia (P-9) vai parar de aparecer. O arquivo/container em si continua no seu disco, parado, sem uso — não apaguei isso, só tirei do que o sistema espera. Achei de bônus um manual desatualizado (dizia que a voz do LibreChat era outra coisa, há tempo não é mais) e corrigi junto.
+- Assine: `bash scripts/aprovar.sh kokoro-remocao-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (593).
+
 **[FEITO E APLICADO — a lista antiga de pendências está zerada] A receita de modelos, assinada, já está no código de verdade.** O que sobra dessa lista não é mais "construir" — são 2 decisões só suas: o que fazer com o `kokoro-tts` (manter ou tirar), e como proteger o repositório de um clone novo no GitHub.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (592).
