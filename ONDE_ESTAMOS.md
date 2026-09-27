@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[FEITO E APLICADO] A correção do servidor de modelo, assinada, já está no código de verdade.**
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (578).
+
 **[PRONTO — falta sua assinatura] O laboratório respondeu à carta com uma correção real, um esboço testado de "nascer um clone do zero", e onde estava o número que faltava.** A correção: o jeito que eu tinha consertado o servidor de modelo (ontem) funcionava, mas de um jeito mais complicado que o necessário — o laboratório achou a forma mais simples, li o manual junto com eles, testei de novo com você presente, confirmado. O esboço de "nascer um clone novo" e o número que faltava (`maxWaitMs`) chegaram também — ainda não medi nenhum dos dois de verdade, fica pra próxima rodada.
 - Assine: `bash scripts/aprovar.sh llamacpp-execstart-fix-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (577).

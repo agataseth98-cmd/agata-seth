@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/llamacpp@.service` aplicado com a versão final do `ExecStart` (`$ARGS` sem chaves, sem `/bin/sh -c`), já testada ao vivo antes da assinatura (ver (577)). Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
+  palavras-chave: proposta, llamacpp, execstart, fix, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, redesign, systemd, service, aplicado, versão, final, args, chaves, bin, testada, vivo, par, movido, pra, propostas, aplicadas, perimetro, falha
 (577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
   palavras-chave: laboratório, ensaio, respondeu, carta, entregas, grandes, correção, real, llamacpp, service, aplicado, mesclado, corrigida, fechar, esboço, testado, script, gênese, paradeiro, maxwaitms, proposta, execstart, fix, aberta, pra, estreita, seguem, dado, medidos, mim
 (576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, consolidacao, repeticao, gerador, noturno, pula, tema, consolidado, reprova, descrição, bate, título, real, proposta, esperando, assinatura
 (549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
   palavras-chave: consolidação, noturna, repetia, temas, descrevia, entradas, conteúdo, corrige, ctx, aprovada, ali, edição, tinha, descritas, errado, três, rascunhos, repetidos, foram, arquivados, conserto, gerador, proposta, consolidacao, repeticao, aguardando, assinatura
-(548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
-  palavras-chave: lote, aplicado, propostas, assinadas, dia, estão, canon, bussola, goose, fallback, claude, python, urllib, fila, nova, code, instalado, provado, prs, foram, mergeados, mim, autorização, explícita, humano, desta
+(548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia est …
+  palavras-chave: lote, aplicado, propostas, assinadas, dia, est
 (547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem …
   palavras-chave: locais, fim, filas, seth, ordem
 (546) DIÁRIO — 24/09/2026 · **Fila nova da Seth aplicada no OmniRoute, por ordem …
