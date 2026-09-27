@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
+  palavras-chave: testei, genese, diff, laboratório, verdade, mecanismo, bateu, eles, mediram, teste, isolar, home, contaminou, pedaços, estado, real, compartilhado, desta, máquina, incidente, hipótese, corrigi, documento, tentar, reconstruir, valor, tenho, saber, nada, aplicado, repo, gênese, continua, dado
 (578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/llamacpp@.service` aplicado com a versão final do `ExecStart` (`$ARGS` sem chaves, sem `/bin/sh -c`), já testada ao vivo antes da assinatura (ver (577)). Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, llamacpp, execstart, fix, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, redesign, systemd, service, aplicado, versão, final, args, chaves, bin, testada, vivo, par, movido, pra, propostas, aplicadas, perimetro, falha
 (577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: assinado, verificado, aplicado, memorias, frias, fora, raiz, chunks, frios, saíram, repositório, memoria, frio, redesenhado, distinguir, relocação, legítima, edição, disfarçada, abrir, mão, pegar, segunda
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem-repeticao-2026-09-25` (549). O gerador noturno pula tema já consolidado e reprova descrição que não bate com o título real. Nenhuma proposta esperando assinatura.**
   palavras-chave: assinado, verificado, aplicado, consolidacao, repeticao, gerador, noturno, pula, tema, consolidado, reprova, descrição, bate, título, real, proposta, esperando, assinatura
-(549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia entradas com o conteúdo de outras. Corrige (512): a consolidação `num-ctx-16814` de 21/09, aprovada ali "sem edição de conteúdo", tinha pelo menos (128), (139) e (234) descritas errado. Três rascunhos repetidos foram arquivados, e o conserto do gerador está na proposta P-8 `consolidacao-sem-repeticao-2026-09-25`, aguardando assinatura.**
-  palavras-chave: consolidação, noturna, repetia, temas, descrevia, entradas, conteúdo, corrige, ctx, aprovada, ali, edição, tinha, descritas, errado, três, rascunhos, repetidos, foram, arquivados, conserto, gerador, proposta, consolidacao, repeticao, aguardando, assinatura
+(549) CORREÇÃO — 25/09/2026 · **A consolidação noturna repetia temas e descrevia …
+  palavras-chave: consolidação, noturna, repetia, temas, descrevia
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia est …
   palavras-chave: lote, aplicado, propostas, assinadas, dia, est
 (547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem …

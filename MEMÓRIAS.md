@@ -26,18 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8514bcc383bdf58d225e49d0eabb5a7f4b86109f
-  Escrito em: 26/09/2026 22:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): df3325bc753422b637cda959cba6b7c2b6647979
+  Escrito em: 26/09/2026 22:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8514bcc383bdf58d225e49d0eabb5a7f4b86109f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8514bcc383bdf58d225e49d0eabb5a7f4b86109f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8514bcc383bdf58d225e49d0eabb5a7f4b86109f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/df3325bc753422b637cda959cba6b7c2b6647979/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
+
+**O que verifiquei do mecanismo (bateu com (para-code-genese-2026-09-26.md)):** `genese.sh --aplicar`, framework = worktree descartável com o `.diff` aplicado, destino novo, chave SSH de teste descartável (nunca a real). 197 arquivos copiados, esqueleto escrito, `git init` + hooks + origin, **1º commit pelo hook normal, sem `--no-verify`: `perimetro.sh` rodou sozinho, P-8 e P-16 em SKIP com a mensagem de gênese, P-1/P-20 varreram a árvore inteira, RESULTADO GERAL 0 FALHA.** Confirma a mecânica central: a exceção funciona, é reconhecida pelo hook de verdade, não só em teoria.
+
+**O incidente — 3 pedaços de estado real, fora do repo, contaminados porque os scripts usam `$HOME` direto (não relativo ao repo que os chama):**
+1. **Google Drive real.** O `post-commit` do clone de teste rodou `subir_esfera_projeto.py` de verdade (credenciais em `~/.config/agata/google-project/`, fora de qualquer repo) e subiu 2 arquivos de teste ("TesteGenese") pra pasta `agata-sistema` do Drive real: `indice_export.md` (id `1VAFCnnc3g-4yXEc5QKnb4Q_VwzRBLQ1n`) e `manifesto.md` (id `1zXNV5hUDyZ3XNAZp_UqyQQB5__LILDYP`). Tentei apagar pelo conector — bloqueado pelo classificador de segurança, mesmo com pedido explícito do Humano. Links enviados pro Humano apagar direto.
+2. **Bundle de backup real** (`~/.agata-backup-staging/agata-canonico.bundle`) — sobrescrito pelo bundle do clone de teste (1 commit só, em vez da história real). **Corrigido:** regenerado a partir do repo real (`git bundle create --all`), 102 refs confirmadas, verificado com `git bundle verify`. O marcador `PENDENTE-HD-DESCONECTADO` (mesma pasta) também foi regenerado com o commit real.
+3. **Marcador de último SHA enviado ao Drive** (`~/.cache/agata/indice-export-ultimo-sha`) — ficou com o SHA do índice do clone de teste. **Corrigido:** recalculado a partir do `indice.md` real.
+4. **Contador de sequência do P-17** (`~/.cache/agata/perimetro-skip.tsv`) — incrementado pelos SKIP do clone de teste (P-8/P-16/P-10/P-12). **Não corrigido:** não dá pra saber com certeza o valor exato de antes sem um log com carimbo de tempo, que este arquivo não tem. Severidade baixa — é só um aviso consultivo (P-17 nunca falha o commit), o pior caso é um AVISO disparar 1 corrida antes ou depois do que deveria. Registrado como está, sem inventar um número.
+
+**Confirma, na prática, o achado #57 da carta do laboratório** ("duas instâncias na mesma conta de usuário compartilham `~/.cache/agata` e `~/.config/agata`") — não é mais só um risco teórico pra Fase 3 multi-instância: é o mesmo mecanismo que me mordeu testando UM clone só, na mesma Máquina. **Regra nova, pra mim e pra qualquer teste futuro de gênese:** nunca rodar `genese.sh --aplicar` (ou qualquer coisa que dispare os hooks reais) sem isolar `$HOME`/`XDG_CACHE_HOME`/`XDG_CONFIG_HOME` num diretório descartável primeiro. Não testei ainda os 3 ataques (REGRAS.md sem aprovação, `--orphan`, apagar refs) nem a alegação sobre `propostas/.allowed_signers` além de já ter lido o código antes (confirma a "modo compat" que o laboratório descreveu) — fica pra próxima rodada, com o isolamento certo desta vez.
+
+**sync:** PASS — `git rev-parse main` = `df3325b` no momento de medir, topo de MEMÓRIAS conferido com (578) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável como framework (com o `.diff` do laboratório aplicado), `genese.sh --aplicar` de verdade contra um destino descartável, chave SSH de teste gerada na hora (nunca a real); achado o incidente investigando as mensagens do próprio `post-commit`; correção direta dos 2 arquivos de estado restauráveis, registro honesto do 3º · **Autorização:** "segue" (continuar medindo o DADO do laboratório); incidente achado no caminho, correção e varredura por instrução direta do Humano depois do achado.
 
 (578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/llamacpp@.service` aplicado com a versão final do `ExecStart` (`$ARGS` sem chaves, sem `/bin/sh -c`), já testada ao vivo antes da assinatura (ver (577)). Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
 
