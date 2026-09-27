@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura] O script que protege o repositório de um clone novo no GitHub, testado de verdade — criei um repositório real só pra isso, testei um ataque de verdade (push direto, recusado certo), e apaguei tudo.** Achado no meio do teste: proteção de branch só funciona em repositório público numa conta grátis — o mesmo motivo que já explica por que este repositório é público. Está documentado no script.
+- Assine: `bash scripts/aprovar.sh protecao-branch-github-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (595).
+
 **[FEITO E APLICADO] `kokoro-tts` fora do sistema, assinado, já no código de verdade.**
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (594).
