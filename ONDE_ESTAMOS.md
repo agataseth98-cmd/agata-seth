@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura] Um dos "acabamentos" que faltavam já foi consertado: rodei o teste automático dentro de um clone recém-nascido de verdade e achei 8 problemas (o laboratório tinha contado 6) — 7 eram "faltou um arquivo de exemplo pro teste ter o que testar", e 1 era um teste antigo colado numa entrada específica desta Máquina, que eu corrigi pra não depender de mais ninguém.** Testei nos dois lados: no clone novo (foi de 8 erros pra 0) e no sistema real (continua 0, não bagunçou nada aqui).
+- Assine: `bash scripts/aprovar.sh suite-fixtures-genese-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (585).
+
 **[FEITO E APLICADO — marco: a Fase 3 tem um comando de verdade] `scripts/genese.sh` está no sistema. Rodando um comando (com uma chave sua), nasce um clone novo do Agata, completo e protegido desde o primeiro segundo.** Ainda faltam alguns acabamentos (proteção do repositório no GitHub, alguns arquivos de teste que o clone novo ainda não teria) — registrados, não escondidos, pra quando alguém realmente for usar isso pra clonar de verdade.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (584).

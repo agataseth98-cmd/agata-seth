@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5c2070fcaef5378c218eeae73ee1f88a8843d143
-  Escrito em: 27/09/2026 12:03 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 66e55d2171923c2f1111d33c4d5c0cdb7933fe5c
+  Escrito em: 27/09/2026 12:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c2070fcaef5378c218eeae73ee1f88a8843d143/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66e55d2171923c2f1111d33c4d5c0cdb7933fe5c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66e55d2171923c2f1111d33c4d5c0cdb7933fe5c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66e55d2171923c2f1111d33c4d5c0cdb7933fe5c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
+
+**Medido, não repetindo o número do laboratório:** rodei a suíte de dentro de um clone isolado nascido agora — 8 falhas, não 6: 3 `SETUP falhou` no P-8 (sem `extras/`), 4 `SETUP falhou` no P-14 (sem `SELOS.txt`/chunk frio), e **1 achado meu, fora da conta do laboratório** — o caso "P-7 FALSO POSITIVO: citação real com síntese coerente" cita a entrada (417) desta instância, que não existe num clone novo (só tem a (1) da gênese).
+
+**Correção em 2 partes:**
+1. `_montar_clone()` sintetiza `extras/*.md` e `SELOS.txt`+chunk frio quando ausentes (nunca sobrescreve o que existir de verdade — `if [ -z/-s ... ]` guarda os dois). Mesma disciplina de quando `config/` entrou nesse mecanismo (561): sem fixture, um controle real fica sem o que testar e a suíte relata "0 falha" sem ter rodado a lógica.
+2. O caso do P-7 deixa de citar (417) e passa a criar sua própria entrada "antiga" sintética (`(9998)`) e citar ela mesma — **correção geral, não só pra gênese**: o teste ficava acoplado à história específica deste repo por acidente; agora funciona igual em qualquer clone, com qualquer história.
+
+**Verificado nos 2 lados:** clone de gênese isolado (mesmo `$HOME` isolado de (579)/(580)/(583)) → 8 falhas viram 0, `SUITE OK -- 46 caso(s)`; repo real (que já tem `extras/`/`SELOS.txt` de verdade) → continua `SUITE OK -- 46 caso(s)`, confirmando que a síntese não interfere quando a fixture real existe.
+
+**sync:** PASS — `git rev-parse main` = `66e55d2` no momento de medir, topo de MEMÓRIAS conferido com (584) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** clone de gênese isolado (mesmo método de (580)), suíte rodada antes (vermelho, 8 falhas) e depois (verde, 0) da correção; suíte rodada também no repo real pra confirmar não-interferência; `.diff` verificado contra HEAD real num worktree separado · **Autorização:** "ok prossiga" — item natural depois de (584), Fase 3 só fica utilizável de verdade com a suíte funcionando no clone que nasce.
 
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada pelo Humano, aplicada. `scripts/genese.sh` é código real do canon — a Fase 3 tem, pela primeira vez, um comando que nasce um clone novo de verdade.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 
