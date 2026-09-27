@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[FEITO E APLICADO] O mecanismo do `~/agata` configurável, assinado, já está no código de verdade.** Não muda nada nesta Máquina (você não pediu pra mudar de lugar) — fica pronto pra quando alguém precisar.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (590).
+
 **[PRONTO — falta sua assinatura] Fechei uma decisão que você já tinha tomado (dia 26, "virar variável configurável") mas que ainda não tinha virado código: onde o Agata mora fica ajustável, sem precisar mexer em nada mais.** Se um dia você quiser o Agata guardado em outro disco ou outra pasta, um comando faz `~/agata` virar um atalho pra lá — todo o resto do sistema continua funcionando sem saber a diferença. Testei os 6 casos que importam, inclusive nascendo um clone de verdade através do atalho.
 - Assine: `bash scripts/aprovar.sh caminho-agata-symlink-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (589).
