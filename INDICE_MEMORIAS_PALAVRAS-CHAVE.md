@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
+  palavras-chave: laboratório, ensaio, respondeu, carta, entregas, grandes, correção, real, llamacpp, service, aplicado, mesclado, corrigida, fechar, esboço, testado, script, gênese, paradeiro, maxwaitms, proposta, execstart, fix, aberta, pra, estreita, seguem, dado, medidos, mim
 (576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
   palavras-chave: propostas, pendentes, assinadas, humano, aplicadas, juntas, conserto, listdir, gerar, obsidian, template, llamacpp, service, testado, vivo, assinatura, conferida, scripts, verificar, aplicar
 (575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta: template `llamacpp@.service` pra Fase 3 (F3.2), testado AO VIVO com o Humano presente — achou e corrigiu um bug real que o laboratório não podia ver de dentro do container de nuvem. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: consolidação, noturna, repetia, temas, descrevia, entradas, conteúdo, corrige, ctx, aprovada, ali, edição, tinha, descritas, errado, três, rascunhos, repetidos, foram, arquivados, conserto, gerador, proposta, consolidacao, repeticao, aguardando, assinatura
 (548) DIÁRIO — 24/09/2026 · **Lote aplicado. As 4 propostas assinadas do dia estão no canon: `bussola`, `goose-fallback` (com `.claude/*`), `ua-python-urllib` e `fila-nova`. O Goose como fallback do Claude Code foi instalado e provado. Os PRs #40–#43 foram mergeados por mim, com autorização explícita do Humano "desta vez".**
   palavras-chave: lote, aplicado, propostas, assinadas, dia, estão, canon, bussola, goose, fallback, claude, python, urllib, fila, nova, code, instalado, provado, prs, foram, mergeados, mim, autorização, explícita, humano, desta
-(547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem do Humano ("os modelos locais agora serão os últimos"). Remotos primeiro, depois os `llama-cpp/*` sob demanda, e o Ollama como fundo final. Aplicado e provado: os 4 combos respondem pelo 1º remoto em 1,3–2,1 s. A proposta `fila-nova-2026-09-24`, ainda não assinada, foi regenerada com a ordem nova, e o `.diff` mudou.**
-  palavras-chave: locais, fim, filas, seth, ordem, humano, modelos, agora, serão, últimos, remotos, primeiro, llama, cpp, sob, demanda, ollama, fundo, final, aplicado, provado, combos, respondem, remoto, proposta, fila, nova, assinada, regenerada, diff, mudou
+(547) DIÁRIO — 24/09/2026 · **Locais no fim de todas as filas da Seth, por ordem …
+  palavras-chave: locais, fim, filas, seth, ordem
 (546) DIÁRIO — 24/09/2026 · **Fila nova da Seth aplicada no OmniRoute, por ordem …
   palavras-chave: fila, nova, seth, aplicada, omniroute, ordem
 (545) DIÁRIO — 24/09/2026 · **Groq e Cerebras de volta à fila: o 403 da Cloudfla …
