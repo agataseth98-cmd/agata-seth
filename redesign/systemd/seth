@@ -36,7 +36,6 @@ for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
 done
 docker compose -f "$LC" up -d >/dev/null 2>&1 || true
 [ "$_lc_changed" = 1 ] && docker restart librechat >/dev/null 2>&1 || true
-docker start kokoro-tts >/dev/null 2>&1 || true
 # espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
 for i in $(seq 1 30); do
   curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2

@@ -63,8 +63,10 @@ docker compose -f ~/librechat/docker-compose.yml exec -T librechat-mongodb mongo
 
 ## Voz
 
-TTS pelo `kokoro-tts` (`:8880`, ja rodava; OpenAI-compat em `/v1/audio/speech`).
-Configurado em `librechat.yaml` -> `speech.tts.openai`.
+TTS pelo `piper-tts.service` (`:8890`, pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
+Configurado em `librechat.yaml` -> `speech.tts.openai`. Documentação corrigida 27/09/2026
+(MEMÓRIAS (593)) -- este texto ainda descrevia o `kokoro-tts` (removido), desatualizado desde
+a troca pro Piper.
 
 STT: **pendente**. O `openvino-whisper` (`:20130`) ainda nao expoe
 `/v1/audio/transcriptions` estilo OpenAI (`/v1/models` responde `not_found`).

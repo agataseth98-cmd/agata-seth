@@ -11,7 +11,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
-**[PRONTO — falta sua assinatura] Você decidiu: tirar o `kokoro-tts`. Feito.** Removido de todo lugar que o sistema esperava ele existir — o aviso que aparecia (P-9) vai parar de aparecer. O arquivo/container em si continua no seu disco, parado, sem uso — não apaguei isso, só tirei do que o sistema espera. Achei de bônus um manual desatualizado (dizia que a voz do LibreChat era outra coisa, há tempo não é mais) e corrigi junto.
+**[FEITO E APLICADO] `kokoro-tts` fora do sistema, assinado, já no código de verdade.**
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (594).
+
+**[PRONTO — falta sua assinatura] Você decidiu: tirar o `kokoro-tts`.** Removido de todo lugar que o sistema esperava ele existir — o aviso que aparecia (P-9) vai parar de aparecer. O arquivo/container em si continua no seu disco, parado, sem uso — não apaguei isso, só tirei do que o sistema espera. Achei de bônus um manual desatualizado (dizia que a voz do LibreChat era outra coisa, há tempo não é mais) e corrigi junto.
 - Assine: `bash scripts/aprovar.sh kokoro-remocao-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (593).
 

@@ -5,12 +5,12 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 77126be953a13c8e392fa3173e5f4ca1e8f7d20e
-  Escrito em: 27/09/2026 14:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 732d135c0c659ee499e5e0b11661c2c3a381c615
+  Escrito em: 27/09/2026 14:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/77126be953a13c8e392fa3173e5f4ca1e8f7d20e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/732d135c0c659ee499e5e0b11661c2c3a381c615/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/732d135c0c659ee499e5e0b11661c2c3a381c615/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/732d135c0c659ee499e5e0b11661c2c3a381c615/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -32,7 +32,7 @@ Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + govern
 O executor do loop passou a ser **grafo LangGraph + OmniRoute** (não mais o Hermes). Os modelos
 são trabalhadores substituíveis; nenhuma ferramenta É o sistema. Hermes-gateway saiu do loop
 (desabilitado); **LibreChat** (lane de conversa, aponta no `seth_gateway` `:20126`) e a voz
-(kokoro-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
+(piper-tts) seguem como frontends à parte. Acesso multi-dispositivo por LibreChat sobre
 Tailscale serve, nunca internet pública. (Open WebUI foi trocado por LibreChat em
 2026-09-03, MEMÓRIAS (313).) **Tailscale instalado e funcional (06/09/2026, MEMÓRIAS
 (350)):** `tailscale` 1.102.3, `tailscaled` ativo/habilitado, logado (`agata.seth98@`,
@@ -115,8 +115,11 @@ e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo; compose 
 `~/librechat/`, fonte versionada em `redesign/librechat/` — o atalho `seth` sincroniza
 `librechat.yaml` e `data/mcp/canon-mcp.mjs` pro `~/librechat/` antes de subir e reinicia o
 container só se algo mudou, MEMÓRIAS (401); antes o `cp` era manual e esquecê-lo deixava o
-LibreChat na versão velha) + `kokoro-tts` (`:8880`, inglês) +
+LibreChat na versão velha) +
 `piper-tts.service` (`:8890`, voz pt-BR local, shim OpenAI-compat stdlib, MEMÓRIAS (387)).
+**`kokoro-tts` removido (27/09/2026, MEMÓRIAS (593)):** container sem consumidor real (o TTS
+do LibreChat já apontava pro Piper), imagem `:latest` sem versão fixada, comando de criação
+original já perdido — não reconstruível do repo. Decisão do Humano: tirar, não reconstruir.
 Ainda de pé no boot: `ollama.service` (produção, `:11434`, intocado) · `agata-consolidacao.timer`.
 **Hermes removido por inteiro (2026-09-03, MEMÓRIAS (312)):** `~/.hermes/` apagado (~1,5 GB),
 a unit `hermes-gateway.service` não existe mais, `SOUL.md` removido. Segredos movidos para
@@ -138,7 +141,7 @@ avisa (nunca falha) se `ollama.service`, `agata-consolidacao.timer`,
 `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`,
 `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service` ou os containers do
 LibreChat (`librechat`, `librechat-mongodb`,
-`librechat-meilisearch`) e `kokoro-tts` estiverem `failed`, `disabled`/`masked`, ou
+`librechat-meilisearch`) estiverem `failed`, `disabled`/`masked`, ou
 (containers) fora do ar. `hermes-gateway.service` saiu da lista (Fase 8). `piper-tts.service`
 (`:8890`) entrou na lista em 09/09/2026 (MEMÓRIAS (401)) — sobe pelo atalho `seth`, então é
 serviço declarado como os outros.
@@ -233,8 +236,8 @@ Leftovers pré-Hermes — **não recriar**. `agata.service` e `agatha.service` c
   apodrecido desde (390) e nunca tinha sido corrigido pro Goose. `seth-codigo` é um
   combo próprio, sem heurística de tamanho (Goose é sempre código), tier 0 local —
   ver `config/modelos-gratuitos.md`, "Combos da Seth".
-- **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + kokoro-tts (`:8880`,
-  `--restart=no`, inglês) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+- **Voz:** piper-tts (`:8890`, pt-BR local, default desde MEMÓRIAS (387)) + Whisper na iGPU.
+  Remoto = HTTPS via Tailscale.
 - **Escrita da Seth:** `seth_escriba` (`:20140`, `seth-escriba.service`) — ver "Serviços (boot)".
   A Seth só lê pelo `canon-mcp`/`:27125` (read-only); acrescentar é só por aqui, append-only,
   sem commit. MEMÓRIAS (318).

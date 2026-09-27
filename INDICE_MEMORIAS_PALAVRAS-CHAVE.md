@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada pelo Humano, aplicada. `kokoro-tts` está fora do sistema.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Os 6 arquivos aplicados. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, confirmado P-9 sem menção ao `kokoro-tts`. O container físico continua parado no disco — não apagado, decisão separada.
+  palavras-chave: proposta, kokoro, remocao, assinada, humano, aplicada, tts, fora, sistema, assinatura, conferida, scripts, verificar, arquivos, aplicados, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, confirmado, menção, container, físico, continua, parado, disco, apagado, decisão, separada
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
   palavras-chave: proposta, kokoro, remocao, aberta, decisão, humano, tirar, tts, sistema, aguardando, assinatura
 (592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, falso, positivo, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, aplicar, passou, primeiros, testes, par, presente, sha, diff, bate, boa, falhou, aplica, árvore, atual, motivo, certo, conteúdo, estava, trabalho, desde, construção, teste, correção, então, git, apply, reverso, confirmou, batia, byte, assinado, commitar, redesign, router, goose, testar, perimetro, varredura, segredo, estreita, versão, insegura, commitados, movido, pra, propostas, aplicadas, suíte, regressão, falha, estamos, atualizado, mesmo, commit
 (565) CORREÇÃO — 26/09/2026 · **O laboratório "Ensaio" respondeu à atualização de (564) e achou um buraco de segurança real na proposta de (563), ainda não assinada — corrigido antes de qualquer assinatura. Também corrige a justificativa que (564) deu pra opção (i) da gênese do P-8.**
   palavras-chave: laboratório, ensaio, respondeu, atualização, achou, buraco, segurança, real, proposta, assinada, corrigido, assinatura, corrige, justificativa, deu, pra, opção, gênese
-(564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisões não verificáveis da Fase 3 que o laboratório "Ensaio" listou em aberto — 4 convergiram 3/3, 1 divergiu e subiu pro Humano, que decidiu direto (não por maioria, como a regra manda).**
-  palavras-chave: regra, verificação, tripla, rodada, decisões, verificáveis, fase, laboratório, ensaio, listou, aberto, convergiram, divergiu, subiu, pro, humano, decidiu, direto, maioria, manda
+(564) CONSELHO — 26/09/2026 · **Regra 8 (verificação tripla) rodada nas 5 decisõ …
+  palavras-chave: regra, verificação, tripla, rodada, decisõ
 (563) DIÁRIO — 26/09/2026 · **Falso positivo latente do P-1 corrigido, achado pe …
   palavras-chave: falso, positivo, latente, corrigido, achado
 (562) DIÁRIO — 25/09/2026 · **Proposta `p20-manifesto-2026-09-25` (561) corrigid …
