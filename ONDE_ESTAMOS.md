@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[FEITO E APLICADO — primeira peça real da Fase 3 no sistema] A exceção que vai deixar um clone nascer do zero, assinada, já está no código de verdade.** Não muda nada no dia a dia — só fica pronta esperando o script que de fato cria um clone novo, que ainda não existe.
+- Nada pra assinar aqui — já está pronto.
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (582).
+
 **[PRONTO — falta sua assinatura — primeira mudança real rumo à Fase 3] A exceção que deixa um clone nascer do zero (testada 2 vezes, o mecanismo e os 3 ataques) virou proposta de verdade.** Sozinha ela não faz nada visível — só destrava o sistema de segurança pra aceitar UM primeiro commit sem história, quando (e só quando) o repositório não tem nenhum commit ainda. O script que de fato cria um clone novo ainda não existe aqui — isso vem depois, como próxima proposta.
 - Assine: `bash scripts/aprovar.sh genese-p8-p16-2026-09-27`
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (581).
