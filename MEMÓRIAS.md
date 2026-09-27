@@ -26,18 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aa270dbeca0ee6c3561f26eb0b75671c596a3012
-  Escrito em: 27/09/2026 14:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4215ec3362fe7b5ef8ecec67c2dd107325211c35
+  Escrito em: 27/09/2026 15:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa270dbeca0ee6c3561f26eb0b75671c596a3012/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, assinada pelo Humano, aplicada. `scripts/proteger_branch_github.sh` é código real do canon. Todas as pendências abertas de Fase 3 (F3.2 + as 2 decisões do Humano) estão fechadas.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+
+**Pedido do Humano, registrado:** cota de uso pode acabar antes de quarta-feira — consolidar a "transferência de modelo" nos dois sentidos (pesos de IA + mecanismo inteiro de replicação) de forma otimizada e funcional, deixando fácil retomar se a sessão cortar. Próximo passo: verificação de integração de ponta a ponta (não só peça por peça) e consolidação da documentação de retomada.
+
+**sync:** PASS — `git rev-parse main` = `4215ec3` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (595) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** turno local desta sessão · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` aberta: `scripts/proteger_branch_github.sh`, testado ao vivo contra um repositório real do GitHub, criado e apagado só pra isso. Decisão do Humano — opção C (script separado, não embutido em `genese.sh`). Aguardando assinatura.**
 
