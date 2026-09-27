@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` aberta: o mecanismo do `~/agata` configurável — decisão do Humano em (564), "falta o mecanismo" registrado em (567). Aguardando assinatura.**
+  palavras-chave: proposta, caminho, agata, symlink, aberta, mecanismo, configurável, decisão, humano, falta, registrado, aguardando, assinatura
 (588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assinada pelo Humano, aplicada. Todos os itens que o laboratório tinha deixado em aberto — o mecanismo de gênese, o `maxWaitMs`, o template llamacpp — estão fechados no canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/dropin-omniroute-resilience.conf` + `README.md` aplicados. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA. Confirmado como esperado: nada mudou no comportamento real desta Máquina (o banco já tinha o valor).
   palavras-chave: proposta, omniroute, maxwait, assinada, humano, aplicada, itens, laboratório, tinha, deixado, aberto, mecanismo, gênese, maxwaitms, template, llamacpp, estão, fechados, canon, agora, assinatura, conferida, scripts, verificar, redesign, systemd, dropin, resilience, conf, readme, aplicados, par, movido, pra, propostas, aplicadas, perimetro, falha, confirmado, esperado, nada, mudou, comportamento, real, desta, máquina, banco, valor
 (587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta: fecha o `maxWaitMs` — o número que faltava desde a resposta do laboratório de 26/09, verificado por mim antes de propor. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pendências, plano, replicabilidade, dado, pessoal, manifesto, fase, medidas, decididas, humano, construídas, config, caminhos, framework, txt, classifica, caminho, versionado, instância, externo, controle, novo, avisa, for, staged
 (560) DIÁRIO — 25/09/2026 · **3 desenhos do laboratório "Ensaio" (pedido do Humano) testados e reunidos numa proposta P-8: `estado_para_eco.sh` ganha `PROPOSTAS-EM-BRANCH`, `gerar_indice_derivado.py` resolve o nome do sistema, e um controle novo P-21 avisa se o marcador `{{NOME_SISTEMA}}` sair cru. 2 erros do laboratório corrigidos por medição e 1 erro meu (transcrição incompleta do diff) achado testando.**
   palavras-chave: desenhos, laboratório, ensaio, pedido, humano, testados, reunidos, proposta, estado, eco, ganha, propostas, branch, gerar, indice, derivado, resolve, nome, sistema, controle, novo, avisa, marcador, sair, cru, erros, corrigidos, medição, erro, meu, transcrição, incompleta, diff, achado, testando
-(559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) redesenhada — a fonte do nome sai de `~/.config/agata/identidade.env` (fora do repo) e vai para um campo em PROJETO.md (versionado, todo leitor alcança). Dois erros meus no caminho, os dois achados antes de qualquer dano permanente; as duas assinaturas anteriores foram perdidas e precisam ser refeitas.**
-  palavras-chave: proposta, fase, nome, sistema, redesenhada, fonte, sai, config, agata, identidade, env, fora, repo, vai, campo, projeto, versionado, leitor, alcança, erros, meus, caminho, achados, dano, permanente, assinaturas, anteriores, foram, perdidas, precisam, refeitas
+(559) DIÁRIO — 25/09/2026 · **Proposta `fase2-nome-sistema-2026-09-25` (558) red …
+  palavras-chave: proposta, fase, nome, sistema, red
 (558) DIÁRIO — 25/09/2026 · **Fase 2 do plano de replicabilidade: mecanismo do n …
   palavras-chave: fase, plano, replicabilidade, mecanismo
 (557) DIÁRIO — 25/09/2026 · **Um dos achados de (556) corrigido sem quarentena ( …
