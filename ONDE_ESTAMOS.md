@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (463)).
 
 ## Onde estamos — 27/09/2026
 
+**[PRONTO — falta sua assinatura — o script que de fato nasce um clone novo] Depois da exceção de segurança, agora é o programa em si: `scripts/genese.sh`. Testado de novo, do zero, com tudo isolado.** Com isso assinado, um clone novo do Agata já poderia nascer de verdade — copiando os arquivos certos, criando o histórico, ligando a segurança — a partir de um comando só. Testei os casos de erro (nome ruim, chave faltando) e rodar 2 vezes seguidas (a 2ª não faz nada, protege contra repetir por engano).
+- Assine: `bash scripts/aprovar.sh genese-script-2026-09-27`
+- Detalhe técnico: `MEMÓRIAS.md`, entrada (583).
+
 **[FEITO E APLICADO — primeira peça real da Fase 3 no sistema] A exceção que vai deixar um clone nascer do zero, assinada, já está no código de verdade.** Não muda nada no dia a dia — só fica pronta esperando o script que de fato cria um clone novo, que ainda não existe.
 - Nada pra assinar aqui — já está pronto.
 - Detalhe técnico: `MEMÓRIAS.md`, entrada (582).

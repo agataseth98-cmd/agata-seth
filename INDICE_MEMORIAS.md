@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `scripts/genese.sh` — o script real que nasce um clone do framework — entra no canon pela primeira vez. Aguardando assinatura.**
 (582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/perimetro/p08_quarentena.sh` e `scripts/perimetro/p16_testes_dos_controles.sh` aplicados — a exceção mecânica de gênese (`_perimetro_eh_genese`) agora é código real do canon, não só DADO testado em worktree. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (556) DIÁRIO — 25/09/2026 · **Relatório do laboratório-nuvem "Ensaio" sobre a fase de replicabilidade — três achados verificados nesta Máquina, um não verificável; e economia de tokens registrada como mecanismo (Regra 7), aplicada com P-8.**
 (555) DIÁRIO — 25/09/2026 · **Fase 1 do plano de replicabilidade: `CHAVES.env.exemplo` + checklist de teste/rotação em `CHAVES.md`. Sem proposta assinada — não é "muda comportamento", nenhum script lê o `.exemplo` em runtime.**
 (554) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `vault-inbox-fase4-2026-09-25`. Primeiro pedaço real do plano de replicabilidade: `scripts/vault_importar_inbox.py`, o mecanismo por trás de "memória em Obsidian" pra um clone futuro.**
-(553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar-2026-09-25`. A Seth ganha um 10º comando fixo no `seth_verificador` — `p8_verificar` —, a mesma checagem que o Goose ganhou em (543), pra ela saber sozinha se uma proposta P-8 pendente pode ser aplicada.**
+(553) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `seth-p8-verificar …
 (552) CORREÇÃO — 25/09/2026 · **Assinado, verificado, aplicado: `fix-ci-p14-test …
 (551) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `memorias-frias-fo …
 (550) DIÁRIO — 25/09/2026 · **Assinado, verificado, aplicado: `consolidacao-sem- …
