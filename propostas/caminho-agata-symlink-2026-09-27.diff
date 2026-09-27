@@ -1,0 +1,60 @@
+diff --git a/scripts/definir_caminho_agata.sh b/scripts/definir_caminho_agata.sh
+new file mode 100755
+index 0000000..745349e
+--- /dev/null
++++ b/scripts/definir_caminho_agata.sh
+@@ -0,0 +1,54 @@
++#!/usr/bin/env bash
++# Fase 3 (F3.2): mecanismo do "~/agata configurável" -- decisão do Humano
++# em MEMÓRIAS (564) ("virar variável configurável"), medido pelo
++# laboratório "Ensaio" em (567): 12 units com 28 ocorrências de %h/agata
++# + 29 arquivos de código com ~/agata, $HOME/agata ou
++# expanduser("~/agata") -- todos esses arquivos são TEMPLATE, copiados
++# verbatim por scripts/genese.sh, e continuam dizendo "~/agata" depois
++# da cópia, não importa onde o --destino de fato colocou o repo.
++#
++# Solução, a mais barata das duas medidas: um symlink. ~/agata some das
++# instruções de instalação; vira sempre "o lugar onde o Agata mora",
++# real ou apontado. genese.sh roda normalmente com --destino
++# "$HOME/agata" -- o symlink resolve pro destino real de forma
++# transparente pro sistema operacional, sem tocar nenhum dos 41
++# arquivos.
++#
++# Uso:
++#   scripts/definir_caminho_agata.sh                 # sem AGATA_HOME: nada a fazer
++#   AGATA_HOME=/mnt/disco/agata-dados scripts/definir_caminho_agata.sh
++#
++# Nunca sobrescreve: ~/agata já existindo como diretório REAL (não
++# symlink) -> recusa. Rodar de novo com o MESMO AGATA_HOME é idempotente
++# (symlink já aponta pro lugar certo -> nada feito).
++set -euo pipefail
++
++ALVO="$HOME/agata"
++DESTINO="${AGATA_HOME:-$ALVO}"
++
++passo() { printf '%-8s %s\n' "$1" "$2"; }
++
++if [ "$DESTINO" = "$ALVO" ]; then
++  passo "PULADO" "AGATA_HOME não definido (ou igual a $ALVO) -- caso padrão, nada a fazer"
++  exit 0
++fi
++
++if [ -e "$ALVO" ] && [ ! -L "$ALVO" ]; then
++  passo "FALHOU" "$ALVO já existe e não é um link -- não sobrescrevo. Mova ou remova antes."
++  exit 1
++fi
++
++if [ -L "$ALVO" ]; then
++  ATUAL="$(readlink -f "$ALVO")"
++  ESPERADO="$(mkdir -p "$DESTINO" && readlink -f "$DESTINO")"
++  if [ "$ATUAL" = "$ESPERADO" ]; then
++    passo "PULADO" "$ALVO já aponta pra $DESTINO -- nada feito"
++    exit 0
++  fi
++  passo "FALHOU" "$ALVO já é um link, mas aponta pra '$ATUAL' -- diferente do pedido ('$ESPERADO'). Remova o link antigo à mão se for isso mesmo que você quer."
++  exit 1
++fi
++
++mkdir -p "$DESTINO"
++ln -s "$DESTINO" "$ALVO"
++passo "FEITO" "$ALVO -> $DESTINO"

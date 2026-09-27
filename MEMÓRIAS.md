@@ -26,18 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 04de753c69d9f5714ef98bba1daf925e573c2979
-  Escrito em: 27/09/2026 13:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 07fc928416c342f3f298bb7825e8054b9beced88
+  Escrito em: 27/09/2026 13:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04de753c69d9f5714ef98bba1daf925e573c2979/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04de753c69d9f5714ef98bba1daf925e573c2979/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04de753c69d9f5714ef98bba1daf925e573c2979/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/07fc928416c342f3f298bb7825e8054b9beced88/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/07fc928416c342f3f298bb7825e8054b9beced88/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/07fc928416c342f3f298bb7825e8054b9beced88/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` aberta: o mecanismo do `~/agata` configurável — decisão do Humano em (564), "falta o mecanismo" registrado em (567). Aguardando assinatura.**
+
+**Por que symlink, não reescrever:** o laboratório mediu 12 units + 28 ocorrências de `%h/agata`, mais 29 arquivos de código com `~/agata`/`$HOME/agata`/`expanduser("~/agata")` — todos TEMPLATE, copiados verbatim por `scripts/genese.sh`. Reescrever custaria 41 arquivos; um symlink em `~/agata` apontando pro destino real resolve os 41 de graça, sem tocar em nenhum.
+
+**Conteúdo:** `scripts/definir_caminho_agata.sh` — sem `AGATA_HOME` definido (ou igual a `$HOME/agata`), não faz nada (caso padrão). Com `AGATA_HOME` apontando pra outro lugar: cria `~/agata` como symlink, idempotente (rodar de novo com o mesmo valor não faz nada), recusa se `~/agata` já existe como diretório real ou já é link pra outro lugar diferente do pedido — nunca sobrescreve.
+
+**Testado, com `$HOME` isolado, os 6 cenários:** sem `AGATA_HOME` → PULADO; `AGATA_HOME` novo → symlink criado; rodar de novo, mesmo valor → PULADO (idempotência); `~/agata` já é diretório real → FALHOU, nada tocado (arquivo de teste dentro sobreviveu intacto); `~/agata` já é link pra outro lugar → FALHOU, link antigo intacto; **integração de ponta a ponta** — `scripts/genese.sh --destino "$HOME/agata"` rodando através do symlink recém-criado: o clone nasceu de verdade, `git log` confirma o commit no destino REAL (não no link), `~/agata` continua sendo só o link. Suíte inteira: 46/46. Estado real desta Máquina (bundle, contador P-17) confirmado intocado.
+
+**sync:** PASS — `git rev-parse main` = `07fc928` no momento de medir, topo de MEMÓRIAS conferido com (588) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável; `$HOME` isolado desde o início, 6 cenários testados de verdade (incluindo integração real com `genese.sh` através do symlink); estado real desta Máquina conferido antes/depois; `.diff` verificado contra HEAD real num worktree separado · **Autorização:** "vai" — item já decidido pelo Humano (564), só faltava o mecanismo, sem decisão de arquitetura nova.
 
 (588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assinada pelo Humano, aplicada. Todos os itens que o laboratório tinha deixado em aberto — o mecanismo de gênese, o `maxWaitMs`, o template llamacpp — estão fechados no canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/dropin-omniroute-resilience.conf` + `README.md` aplicados. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA. Confirmado como esperado: nada mudou no comportamento real desta Máquina (o banco já tinha o valor).
 
