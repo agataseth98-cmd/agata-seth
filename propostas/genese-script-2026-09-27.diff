@@ -1,0 +1,183 @@
+diff --git a/scripts/genese.sh b/scripts/genese.sh
+new file mode 100755
+index 0000000..4b3d9c4
+--- /dev/null
++++ b/scripts/genese.sh
+@@ -0,0 +1,177 @@
++#!/usr/bin/env bash
++# genese.sh -- Fase 3 (bootstrap): faz nascer um clone do framework num
++# diretório vazio. Copia só os caminhos `framework` de
++# config/caminhos-framework.txt, escreve o esqueleto de instância, liga os
++# hooks e faz o 1º commit PELO HOOK NORMAL (sem --no-verify). A exceção de
++# gênese mora no P-8/P-16 e é mecânica (_perimetro_eh_genese, aplicada em
++# MEMÓRIAS (582)): não existe flag nem variável que a ligue.
++#
++# Origem: protótipo do laboratório-nuvem "Ensaio" (26/09/2026), medido e
++# corrigido pela Ágata-Code nesta Máquina antes de entrar no canon --
++# mecanismo central + os 3 ataques do laboratório (REGRAS.md sem aprovação;
++# o mesmo via `checkout --orphan`; o mesmo apagando refs à mão), MEMÓRIAS
++# (579)/(580).
++#
++# Padrão: simulação. Só age com --aplicar. Nunca sobrescreve: destino que já
++# existe e não está vazio -> recusa (ou PULADO, se já for um clone nascido).
++#
++# AVISO, achado testando (MEMÓRIAS (579)): este script dispara os hooks de
++# verdade (pre-commit/post-commit), que tocam estado FORA do clone novo --
++# ~/.agata-backup-staging (bundle de backup), ~/.cache/agata (índice
++# enviado ao Drive, contador do P-17) e, se houver credencial, o Google
++# Drive real. Rodar sem isolar HOME contaminou os 3 primeiros e chegou a
++# subir 2 arquivos de teste pro Drive real numa sessão de teste -- corrigido
++# na hora, registrado em (579). Pra testar (não pra nascer um clone de
++# verdade), isole primeiro:
++#   export HOME=/caminho/descartavel XDG_CACHE_HOME=$HOME/.cache XDG_CONFIG_HOME=$HOME/.config
++set -euo pipefail
++
++uso() {
++  cat >&2 <<'EOF'
++uso: genese.sh --framework DIR --destino DIR --origin URL --chave-publica ARQ.pub [--nome NOME] [--aplicar]
++  --framework      checkout do framework (a fonte da cópia)
++  --destino        diretório vazio ou inexistente (onde o clone nasce)
++  --origin         URL do repo do cliente no GitHub (a âncora precisa dele ANTES do 1º commit)
++  --chave-publica  chave ssh pública do Humano do cliente (vira a raiz de confiança do P-8)
++  --nome           "Nome do sistema:" do PROJETO.md (padrão: Agata)
++  --aplicar        sem isto, só mostra o plano
++EOF
++  exit 2
++}
++
++FW="" DEST="" ORIGIN="" CHAVE="" NOME="Agata" APLICAR=0
++while [ $# -gt 0 ]; do
++  case "$1" in
++    --framework) FW="${2:-}"; shift 2 ;;
++    --destino) DEST="${2:-}"; shift 2 ;;
++    --origin) ORIGIN="${2:-}"; shift 2 ;;
++    --chave-publica) CHAVE="${2:-}"; shift 2 ;;
++    --nome) NOME="${2:-}"; shift 2 ;;
++    --aplicar) APLICAR=1; shift ;;
++    *) uso ;;
++  esac
++done
++[ -n "$FW" ] && [ -n "$DEST" ] && [ -n "$ORIGIN" ] && [ -n "$CHAVE" ] || uso
++
++passo() { printf '%-8s %s\n' "$1" "$2"; }
++falha() { passo "FALHOU" "$1"; exit 1; }
++
++# --- 0. Pré-condições: checar, nunca consertar sozinho ---------------------
++for bin in git gawk python3; do
++  command -v "$bin" >/dev/null 2>&1 || falha "falta '$bin' (camada 0; no Debian/Ubuntu o awk padrão é mawk e o gerar-hidratacao.sh aborta)"
++done
++if ! locale -a 2>/dev/null | grep -qiE '^(c|en_us|pt_br)\.utf-?8$'; then
++  falha "nenhum locale UTF-8 disponível (o gerar-hidratacao.sh aborta sem ele)"
++fi
++export LC_ALL="${LC_ALL:-C.UTF-8}" LANG="${LANG:-C.UTF-8}"
++export USER="${USER:-$(id -un)}"   # .githooks/post-commit usa $USER sob set -u
++
++MANIFESTO="$FW/config/caminhos-framework.txt"
++[ -f "$MANIFESTO" ] || falha "framework sem config/caminhos-framework.txt: $FW"
++
++# Nome: uma linha, sem marcador nem caractere que quebre substituição de texto.
++if ! printf '%s' "$NOME" | grep -qE '^[^{}/&\\"'"'"'`$]{1,40}$'; then
++  falha "nome inválido: '$NOME' (1 a 40 caracteres, sem { } / & \\ aspas \` \$)"
++fi
++# origin: mesma regra do atualizar_ancora_prompt.py (_repo_slug); sem isto a
++# âncora cai no slug oficial.
++if ! printf '%s' "$ORIGIN" | grep -qE 'github\.com[:/]+[^/]+/[^/]+?(\.git)?$'; then
++  falha "origin não reconhecido como repo do GitHub: $ORIGIN"
++fi
++[ -f "$CHAVE" ] || falha "chave pública não encontrada: $CHAVE"
++LINHA_CHAVE="$(awk 'NF>=2 && $1 ~ /^ssh-(ed25519|rsa)$|^ecdsa-/ {print $1" "$2; exit}' "$CHAVE")"
++[ -n "$LINHA_CHAVE" ] || falha "arquivo não parece chave ssh pública: $CHAVE"
++
++# Idempotência: nunca sobrescreve.
++if [ -e "$DEST" ] && [ -n "$(ls -A "$DEST" 2>/dev/null)" ]; then
++  if git -C "$DEST" rev-parse --verify --quiet HEAD >/dev/null 2>&1; then
++    passo "PULADO" "$DEST já é um clone nascido (HEAD $(git -C "$DEST" rev-parse --short HEAD)); nada feito"
++    exit 0
++  fi
++  falha "destino existe e não está vazio: $DEST (a gênese nunca sobrescreve)"
++fi
++
++# --- 1. Plano de cópia pelo manifesto --------------------------------------
++# "mais específico ganha": um caminho `instancia` dentro de um `framework` sai.
++mapfile -t FW_PATHS < <(grep -vE '^\s*(#|$)' "$MANIFESTO" | awk -F'|' '$1=="framework"{print $2}')
++mapfile -t INST_PATHS < <(grep -vE '^\s*(#|$)' "$MANIFESTO" | awk -F'|' '$1=="instancia"{print $2}')
++LISTA="$(mktemp)"; trap 'rm -f "$LISTA"' EXIT
++git -C "$FW" -c core.quotepath=off ls-files -- "${FW_PATHS[@]}" > "$LISTA"
++for ip in "${INST_PATHS[@]}"; do
++  case "$ip" in */) grep -vF -- "$ip" "$LISTA" > "$LISTA.n" || true ;; *) grep -vxF -- "$ip" "$LISTA" > "$LISTA.n" || true ;; esac
++  mv "$LISTA.n" "$LISTA"
++done
++N_ARQ="$(wc -l < "$LISTA")"
++FW_SHA="$(git -C "$FW" rev-parse --short HEAD)"
++
++passo "PLANO" "copiar $N_ARQ arquivos de framework de $FW ($FW_SHA) para $DEST"
++passo "PLANO" "esqueleto: PROJETO.md (Nome do sistema: $NOME), MEMÓRIAS.md (entrada (1)), propostas/aplicadas/, propostas/.allowed_signers"
++passo "PLANO" "git init, core.hooksPath=.githooks, origin=$ORIGIN, 1º commit pelo hook normal"
++if [ "$APLICAR" -ne 1 ]; then
++  passo "PULADO" "simulação (use --aplicar para agir)"; exit 0
++fi
++
++# --- 2. Cópia ---------------------------------------------------------------
++mkdir -p "$DEST"
++( cd "$FW" && tr '\n' '\0' < "$LISTA" | xargs -0 tar -cf - -- ) | tar -xf - -C "$DEST"
++passo "FEITO" "$N_ARQ arquivos copiados"
++
++# --- 3. Esqueleto de instância (tem que nascer completo: depois do 1º commit o
++#        PROJETO já está sob o P-8) ------------------------------------------
++ANCORA_INI='<!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->'
++ANCORA_FIM='<!-- ANCORA-SHA:FIM -->'
++HOJE="$(date +%d/%m/%Y)"
++cat > "$DEST/PROJETO.md" <<EOF
++# PROJETO.md — Sistema {{NOME_SISTEMA}}
++
++$ANCORA_INI
++$ANCORA_FIM
++
++## O que é
++Nome do sistema: $NOME
++
++Clone nascido do framework em $HOJE (framework $FW_SHA). Estado atual do
++sistema desta instância: escreva aqui, pelo fluxo de proposta (P-8).
++EOF
++cat > "$DEST/MEMÓRIAS.md" <<EOF
++# MEMÓRIAS.md — Sistema {{NOME_SISTEMA}}
++
++**Você está lendo o arquivo de história. É append-only: nada se apaga, nada se edita — só se acrescenta.**
++Entrada nova entra logo abaixo do marcador \`ENTRADAS-NOVAS\`, mais recente primeiro. Correção nunca é edição: é entrada nova apontando a que corrige.
++
++$ANCORA_INI
++$ANCORA_FIM
++
++---
++
++<!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
++
++(1) DIÁRIO — $HOJE · **Nascimento desta instância a partir do framework ($FW_SHA), por scripts de gênese. Nenhuma memória foi herdada do repositório de origem.**
++
++Modelo: gênese automática · vetor: genese.sh · Autorização: quem executou a gênese.
++EOF
++mkdir -p "$DEST/propostas/aplicadas"
++: > "$DEST/propostas/aplicadas/.gitkeep"
++printf 'agata-humano %s\n' "$LINHA_CHAVE" > "$DEST/propostas/.allowed_signers"
++passo "FEITO" "esqueleto escrito (raiz de confiança do P-8 com a chave de $CHAVE)"
++
++# --- 4. Repo, hooks, origin -------------------------------------------------
++git -C "$DEST" init -q -b main
++git -C "$DEST" config core.hooksPath .githooks
++git -C "$DEST" remote add origin "$ORIGIN"
++passo "FEITO" "git init + hooks + origin"
++
++# --- 5. 1º commit pelo hook normal (sem --no-verify) -------------------------
++git -C "$DEST" add -A
++if git -C "$DEST" commit -q -m "gênese: nascimento a partir do framework $FW_SHA"; then
++  passo "FEITO" "1º commit $(git -C "$DEST" rev-parse --short HEAD)"
++else
++  falha "o pre-commit barrou o 1º commit (ver a saída acima)"
++fi
++
++# --- 6. Conferência pós-nascimento ------------------------------------------
++if ( cd "$DEST" && bash scripts/perimetro.sh >/dev/null 2>&1 ); then
++  passo "OK" "perimetro.sh sem FALHA depois do nascimento"
++else
++  falha "perimetro.sh com FALHA depois do nascimento: rode 'bash scripts/perimetro.sh' em $DEST"
++fi
