@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8e4e72b22ead996609d8c85657dacb75587c9fcb
-  Escrito em: 30/09/2026 19:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 95ee4e273546b4176579564a7da01cd641e85850
+  Escrito em: 30/09/2026 19:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8e4e72b22ead996609d8c85657dacb75587c9fcb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8e4e72b22ead996609d8c85657dacb75587c9fcb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8e4e72b22ead996609d8c85657dacb75587c9fcb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
+
+**Sintoma:** `node: error while loading shared libraries: libsimdjson.so.34: cannot open shared object file`, `omniroute.service` em `failed`/`start-limit-hit` (1658 tentativas de restart). Toda chamada de modelo ficou indisponível nesse intervalo — Seth, Conselho Remoto, Goose, tudo passa pelo OmniRoute. P-9 avisou certo (`AVISO SÓ`), não é falha do controle.
+
+**Causa raiz, lida no `pacman.log` e no journal, não suposta:** `nodejs-lts-krypton` foi recompilado às 11:08 do mesmo dia (`24.21.0-1 → 24.21.0-2`) contra uma versão do `simdjson` que fornece `.so.34`. O pacote `simdjson` desta Máquina vinha do repositório `cachyos-extra-v3` (prioridade mais alta), ainda travado em `4.6.11` (só `.so.33`) — o repositório `extra` padrão já tinha `5.0.1` disponível, mas não é escolhido por padrão enquanto o v3 não publica a mesma versão. É o `cachyos-extra-v3` atrasado em relação ao `extra`, não decisão de ninguém.
+
+**Correção:** `sudo pacman -S extra/simdjson` (forçando o repositório `extra`, contornando a prioridade do v3 só pra este pacote) — rodado pelo Humano. Confirmado depois, medido: `simdjson 1:5.0.1-1`, `libsimdjson.so.34` presente via `ldconfig -p`, `node --version` funcionando. `systemctl --user reset-failed omniroute.service` + `restart`: subiu limpo em 5,5s, `/v1/models` respondendo 200 direto no OmniRoute e através do `seth-gateway`.
+
+**Usado pra testar de ponta a ponta:** com o gateway de volta, entreguei a carta 2 do laboratório "Ensaio" direto pra Seth via `seth_gateway` (`/v1/chat/completions`, sem passar pela UI do LibreChat) — conteúdo conferido byte a byte contra o arquivo original antes de enviar. Resposta recebida, sem afirmação nova sobre a Máquina a conferir desta vez. Auditoria completa: `~/Área de trabalho/ensaio-2026-09-30/harness-lab/resposta-carta2-seth-2026-09-30.md` (DADO, fora do canon).
+
+**sync:** PASS — `git rev-parse main` = `95ee4e2` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (604) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `journalctl --user -u omniroute.service`; `pacman -Q`/`grep` em `/var/log/pacman.log`; `ldconfig -p`; medição antes/depois da correção; `curl` real contra `:20128`/`:20126` confirmando 200; entrega da carta 2 conferida byte a byte (`difflib`) antes do envio · **Autorização:** Humano, "manda vc" (entrega direta) + "feito pequenina" (confirmação de ter rodado o `pacman -S extra/simdjson`).
 
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 
