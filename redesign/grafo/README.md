@@ -62,7 +62,7 @@ hidratar → rotear → trabalhar → verificar → portao → registrar_e_commi
 
 ```fish
 redesign/grafo/.venv/bin/python redesign/grafo/grafo.py run "<pedido>" --repo <dir> [--thread <id>] [--tipo trabalho|conselho|verificacao]
-redesign/grafo/.venv/bin/python redesign/grafo/grafo.py resume --thread <id> --repo <dir> [--recusar]
+redesign/grafo/.venv/bin/python redesign/grafo/grafo.py resume --thread <id> --repo <dir> (--aprovar | --recusar)
 ```
 
 ## Verificação (aceite P4-01) — testado num clone `git clone --local`
@@ -167,7 +167,7 @@ divisor de fração foi bug do 1º script de teste (mascarou o TTR real, que pas
 | `verify [--entrada <arq>]` | `perimetro.sh` (+ cabeçalho + citações se `--entrada`). exit 0/≠0. **SEM MODELO** | não |
 | `commit-entry <arq> [--alvo] [--posicao fim\|apos-marcador]` | `tools.commit_entry` — append-only + `git commit` idempotente. **SEM MODELO** | não |
 | `run "<pedido>" [--tipo] [--com-envelope] [--repo]` | dispara o grafo (`grafo.run`) | sim |
-| `resume --thread <id> [--recusar] [--repo]` | retoma do checkpoint | — |
+| `resume --thread <id> (--aprovar \| --recusar) [--repo]` | retoma do checkpoint | — |
 | `logs [--thread <id>]` | tail do `eventos.ndjson` (event-stream / WAL) | — |
 
 ### Verificação (aceite P4-04)

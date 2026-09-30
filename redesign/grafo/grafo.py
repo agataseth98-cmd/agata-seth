@@ -173,7 +173,9 @@ def portao(s: Estado) -> dict:
                      else "ATENCAO: verificacao com pendencia -- ver estado.verificacao"),
     }
     decisao = interrupt({"perguntas": perguntas, "diff_proposto": diff, "verificacao": v})
-    aprovado = bool(decisao.get("aprovado")) if isinstance(decisao, dict) else bool(decisao)
+    # Falha fechada: só o booleano True aprova. bool("false") / bool("não") / bool(1) eram
+    # aprovação (achado do laboratório "Ensaio", 29-30/09/2026).
+    aprovado = isinstance(decisao, dict) and decisao.get("aprovado") is True
     return {"diff_proposto": diff,
             "portao": {**perguntas, "aprovado": aprovado},
             "eventos": [f"portao:{'aprovado' if aprovado else 'recusado'}"],
@@ -182,7 +184,7 @@ def portao(s: Estado) -> dict:
 
 def registrar_e_commitar(s: Estado) -> dict:
     """Efeito externo. Idempotente pela chave (thread, node, passo) -- padrao P4-00."""
-    if not s.get("portao", {}).get("aprovado"):
+    if s.get("portao", {}).get("aprovado") is not True:
         return {"eventos": ["registrar:pulado(nao aprovado)"],
                 "decisao_log": ["nada registrado -- portao recusou"]}
     try:
@@ -259,6 +261,23 @@ def run(entrada, repo, thread_id, tipo, com_envelope=False):
         cm.__exit__(None, None, None)
 
 
+def decisao_resume(args):
+    """Decisão explícita do Humano para o portão: True = --aprovar, False = --recusar.
+
+    Falha fechada: argumento desconhecido, nenhum dos dois ou os dois -> ValueError. Antes, qualquer
+    coisa diferente de exatamente `--recusar` (inclusive `--recusa` digitado errado) APROVAVA.
+    """
+    conhecidos = {"--aprovar", "--recusar", "--thread", "--repo"}
+    flags = [x for x in args if x.startswith("--")]
+    desconhecidos = [x for x in flags if x not in conhecidos]
+    if desconhecidos:
+        raise ValueError(f"argumento desconhecido: {' '.join(desconhecidos)}")
+    ap, rc = "--aprovar" in flags, "--recusar" in flags
+    if ap == rc:
+        raise ValueError("diga exatamente um: --aprovar ou --recusar")
+    return ap
+
+
 def resume(thread_id, repo, aprovar):
     from langgraph.types import Command
     graph, cm = build()
@@ -294,6 +313,10 @@ if __name__ == "__main__":
         run(a[1], g("--repo", str(AGATA)), g("--thread", f"loop-{os.getpid()}"),
             g("--tipo", "trabalho"), "--com-envelope" in a)
     elif mode == "resume":
-        resume(g("--thread"), g("--repo", str(AGATA)), "--recusar" not in a)
+        try:
+            aprovar = decisao_resume(a[1:])
+        except ValueError as e:
+            print(f"ERRO: {e}", file=sys.stderr); sys.exit(2)
+        resume(g("--thread"), g("--repo", str(AGATA)), aprovar)
     else:
         print(__doc__); sys.exit(2)

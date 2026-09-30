@@ -8,7 +8,7 @@
     agata verify [--entrada <arq>]   perimetro.sh (+ cabecalho + citacoes se --entrada). exit 0/!=0. SEM MODELO.
     agata commit-entry <arq> [--alvo redesign/LOG.md] [--posicao fim|apos-marcador]   append-only + git commit. SEM MODELO.
     agata run "<pedido>" [--tipo trabalho|conselho|verificacao] [--com-envelope] [--repo <dir>]
-    agata resume --thread <id> [--recusar] [--repo <dir>]
+    agata resume --thread <id> (--aprovar | --recusar) [--repo <dir>]
     agata logs [--thread <id>]        tail do event-stream (eventos.ndjson)
 
 `verify` e `commit-entry` NAO importam langgraph nem tocam modelo -- sao a espinha
@@ -196,7 +196,13 @@ def main(argv):
         return cmd_run(rest[0], g("--tipo", "trabalho"), "--com-envelope" in rest,
                        g("--repo"), g("--thread"))
     if cmd == "resume":
-        return cmd_resume(g("--thread"), "--recusar" in rest, g("--repo"))
+        import grafo  # decisao_resume: falha fechada (--aprovar | --recusar, nada mais)
+        try:
+            aprovar = grafo.decisao_resume(rest)
+        except ValueError as e:
+            print(f"ERRO: {e}", file=sys.stderr)
+            return 2
+        return cmd_resume(g("--thread"), not aprovar, g("--repo"))
     if cmd == "logs":
         return cmd_logs(g("--thread"))
     print(__doc__)

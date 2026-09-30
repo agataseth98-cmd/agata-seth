@@ -29,3 +29,8 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 ReadWritePaths=%h/agata
+# Dentro da raiz gravável, o que NÃO é do escriba fica só-leitura (laboratório "Ensaio",
+# 30/09/2026): ele escreve só MEMÓRIAS.md, SETH-DIARIO.md e os temporários do os.replace
+# na raiz. O caminho mais específico prevalece; REGRAS/PROJETO montados só-leitura também
+# barram um os.replace por cima deles. Prefixo "-" = ignora caminho ausente (instância nova).
+ReadOnlyPaths=-%h/agata/.git -%h/agata/.githooks -%h/agata/scripts -%h/agata/redesign -%h/agata/config -%h/agata/propostas -%h/agata/REGRAS.md -%h/agata/PROJETO.md -%h/agata/SELOS.txt
