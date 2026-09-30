@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
+  palavras-chave: propostas, modelos, gratuitos, autoria, conteúdo, desconhecidos, achado, pendente, auditoria, seth, investigado, saída, scripts, pesquisar, vigia, combustível, conferido, máquina, erro, arquivo, pede, mudança, roster, proposta, aberta
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
   palavras-chave: terceiro, item, retomada, restringir, readwritepaths, escriba, memoria, propostas, tem, premissa, errada, proposta, aberta
 (598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` aberta: as 5 instâncias llama.cpp (`llamacpp-agata` + as 4 novas de 20/09) nunca entraram em `config/portas-agata.txt` — o P-4 não as via. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: humano, relatou, perdemos, labo, ataque, externo, sessões, ágata, code, agata, lab, teriam, sido, derrubadas, sumido, fixados, dashboard, claude, verificado, vivo, navegador, apareciam, abas, clicar, nada, registro, separando, fato, hipótese, próprio, pediu
 (571) DIÁRIO — 26/09/2026 · **Buraco de segurança real achado na própria lista de quarentena do P-8, mesma classe dos de 04/09, 09/09 e 21/09: `redesign/fase7-hd/semear_cache_p12.py` e `redesign/fase7-hd/hash_ir.sh` podiam ser reescritos sem passar por proposta nenhuma. Proposta P-8 `p8-fase7hd-2026-09-26` aberta, aguardando assinatura.** Pedido: "aproveite todas as oportunidades para aplicar as diretrizes... eleve ao estado da arte, não cometa erros" — levantamento obsessivo da própria lista de `_p8_eh_comportamento` enquanto as duas outras propostas esperam assinatura.
   palavras-chave: buraco, segurança, real, achado, própria, lista, quarentena, mesma, classe, redesign, fase, semear, cache, hash, podiam, reescritos, passar, proposta, aberta, aguardando, assinatura, pedido, aproveite, oportunidades, aplicar, diretrizes, eleve, estado, arte, cometa, erros, levantamento, obsessivo, comportamento, enquanto, propostas, esperam
-(570) DIÁRIO — 26/09/2026 · **Proposta P-8 `dropin-ollama-split-2026-09-26` aberta: divide o `override.conf` único do Ollama em 2 drop-ins versionáveis, framework/instância — mais uma pendência de F3.2 de (567). Aguardando assinatura.** Pedido: "sudo sim, me envie... descida a partir dessa informação" — autorização pra prosseguir com a parte que precisa de `sudo` (não a rodo eu mesma, P-2: preparo e envio o comando pro Humano).
-  palavras-chave: proposta, dropin, ollama, split, aberta, divide, override, conf, único, drop, ins, versionáveis, framework, instância, pendência, aguardando, assinatura, pedido, sudo, sim, envie, descida, partir, dessa, informação, autorização, pra, prosseguir, parte, precisa, rodo, mesma, preparo, envio, comando, pro, humano
+(570) DIÁRIO — 26/09/2026 · **Proposta P-8 `dropin-ollama-split-2026-09-26` aber …
+  palavras-chave: proposta, dropin, ollama, split, aber
 (569) DIÁRIO — 26/09/2026 · **`requisitos.txt` novo pra `redesign/grafo/` e `red …
   palavras-chave: requisitos, txt, novo, pra, redesign, grafo, red
 (568) CORREÇÃO — 26/09/2026 · **Correção à citação de arquivo:linha em (567): o …
