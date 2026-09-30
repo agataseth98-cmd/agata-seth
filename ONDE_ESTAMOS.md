@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (605)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (606)).
 
 ## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
@@ -19,6 +19,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (605)).
 **`~/.config/agata/identificadores-pessoais.txt` criado**, com 3 identificadores já confirmados vazando no repositório (e-mail, IP e hostname do tailnet). O P-20 agora tem o que procurar. Se você tiver mais dado pessoal pra proteger (nome, CPF, telefone, endereço), me diga o valor e eu acrescento uma linha.
 
 **Susto resolvido: o `omniroute` ficou fora do ar por ~1h40 hoje** (repositório do sistema atrasado, nada a ver com o Agata) — você rodou o `sudo pacman -S extra/simdjson` que eu pedi, confirmei que funcionou e reiniciei o serviço. Com ele de volta, entreguei a carta 2 do laboratório direto pra Seth (sem precisar você copiar e colar) — resposta dela auditada, sem problema desta vez. Detalhe: `MEMÓRIAS.md` (605), resposta completa em `ensaio-2026-09-30/harness-lab/resposta-carta2-seth-2026-09-30.md`.
+
+**Achado ao procurar mais coisa quebrada: o `kokoro-tts` tinha voltado a subir sozinho.** A remoção dele (594, 27/09) só tinha sido feita no repositório — os atalhos `seth`/`Parar Seth` instalados na sua Área de trabalho nunca foram atualizados, e voltaram a ligar o container hoje quando abri a Seth pra você. Corrigido: os dois atalhos reinstalados, container parado de novo. Detalhe: `MEMÓRIAS.md` (606).
 
 **O que existe e funciona hoje, testado de verdade (não só escrito):**
 - `bash scripts/genese.sh --framework <checkout> --destino <dir> --origin <url> --chave-publica <arq.pub> --nome <nome> --aplicar` nasce um clone completo — copia o framework, escreve o esqueleto, protege com sua chave desde o 1º commit.
