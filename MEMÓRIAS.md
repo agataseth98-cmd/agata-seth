@@ -26,18 +26,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): edb5da934edcd857fa3f80f3e708c0cc284a48cc
-  Escrito em: 30/09/2026 19:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5c6a606485fc3d3209e9f7bfbcb1eefc44380045
+  Escrito em: 30/09/2026 19:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c6a606485fc3d3209e9f7bfbcb1eefc44380045/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c6a606485fc3d3209e9f7bfbcb1eefc44380045/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5c6a606485fc3d3209e9f7bfbcb1eefc44380045/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+
+**O que muda de verdade, agora, nesta Máquina:**
+- `agata resume`/`grafo.py resume` (nos dois pontos de entrada) exige `--aprovar` ou `--recusar`, nada mais aprova por omissão ou digitação errada — testado nos arquivos reais: `--thread x` sozinho e `--thread x --recusa` (typo) dão `ERRO` + `exit 2` nos dois.
+- `config/portas-agata.txt` tem as 5 portas do llama.cpp; o P-4 já enxerga `20129`/`20142`-`20145`.
+- `redesign/systemd/seth-escriba.service` **instalado e reiniciado de verdade** (`cp` pra `~/.config/systemd/user/`, `daemon-reload`, `restart`) — não fiquei só no repo. `systemctl --user show` confirma o `ReadOnlyPaths` novo ativo. Testado contra o serviço rodando de verdade, dois lados:
+  - `POST /diario` real (`:20140`) gravou normal em `SETH-DIARIO.md`, no lugar certo, logo abaixo do marcador;
+  - um `systemd-run` com os mesmos parâmetros do serviço, mirando o repositório REAL (não um clone), tentando `touch scripts/NAO-DEVERIA-EXISTIR.txt`: bloqueado ("Sistema de arquivos somente para leitura"), nada criado — conferido com `ls` depois.
+
+**sync:** PASS — `git rev-parse main` = `5c6a606` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (603) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `scripts/p8_verificar.sh` nas 3 assinaturas; `git apply` + `py_compile`; suíte inteira; `perimetro.sh`; instalação real da unit do escriba (`daemon-reload`+`restart`, não só o arquivo no repo) com teste positivo (`POST /diario` real) e negativo (`systemd-run` contra o repo real tentando escrever em `scripts/`) · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar ("assina as 3 propostas" → "feito").
 
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
 
