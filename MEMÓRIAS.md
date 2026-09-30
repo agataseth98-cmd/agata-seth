@@ -26,18 +26,33 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1e41771de685fadee67f7fabde9c2703dd344e5a
-  Escrito em: 30/09/2026 18:00 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 00a927be673c48d5968e5c7c429c55bf1b1197e3
+  Escrito em: 30/09/2026 18:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
+
+**Item por item, contra o estado real do OmniRoute e de MEMÓRIAS:**
+- `zai/glm-4.7-flash` (529, sobrecarga): transiente, mesmo padrão já documentado.
+- `huggingface/meta-llama/Llama-3.3-70B-Instruct` (401 no arquivo do lab): a conexão real está `is_active=0` no `storage.sqlite`, mas isso já é decisão registrada — MEMÓRIAS (514)/(515): crédito mensal grátis esgotado (402, não credencial), **"Deixado no ROSTER — o circuit breaker pula pra próxima família sozinho"**. Nada novo aqui.
+- Os 4 `llama-cpp/*` locais (502 ECONNREFUSED): os serviços `llamacpp-*` estavam `inactive` no momento do teste do lab — esperado, são sob demanda, não cabem todos rodando juntos (PROJETO, "Cérebro"). Conferido em `provider_connections`: as portas de cada um batem exatamente com `config/modelos-gratuitos.md` (20142/20143/20144/20145), nenhuma confusão de porta.
+
+**O que sobra como decisão real, não fix:** o arquivo achou 2 modelos novos fora do pool respondendo OK (`gemini/gemini-3-flash-preview`, `gemini/gemini-3.1-flash-lite`) que não estão no `ROSTER` nem na tabela "Fora — não usar". Candidatos a entrar, mas isso é curadoria (que família confiar), não bug — mesma classe de decisão de (379) (entrada de HuggingFace/Mistral, com chave e teste ao vivo antes). Não decidido aqui; fica para o Humano.
+
+**Arquivo movido de não-rastreado para o canon**, como registro histórico (mesmo tratamento de `modelos-gratuitos-2026-09-25.md`, já versionado) — o script já documenta que "nunca edita nada", então o arquivo em si não é proposta, é insumo.
+
+**sync:** PASS — `git rev-parse main` = `00a927b` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (599) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `systemctl --user is-active` nas 4 units `llamacpp-*`; `sqlite3 -readonly` em `~/.omniroute/storage.sqlite` (`provider_connections`, sem ler token nenhum); `grep` em `config/modelos-gratuitos.md` e MEMÓRIAS (514)/(515) antes de concluir · **Autorização:** pedido direto do Humano ("3-agora") sobre o item 3 da lista de decisões pendentes.
 
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
 

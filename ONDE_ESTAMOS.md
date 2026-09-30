@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (599)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (600)).
 
 ## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
@@ -13,6 +13,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (599)).
 - `propostas/portao-resume-exige-flag-2026-09-30.diff` — o comando que aprova uma mudança do grafo (`agata resume`) aprovava sozinho se você digitasse o "recusar" errado, ou não digitasse nada. Agora exige um dos dois, certo.
 - `propostas/p4-llamacpp-portas-2026-09-30.diff` — 5 portas dos modelos locais (llama.cpp) não estavam na lista que o sistema confere; agora estão.
 - Uma terceira sugestão do laboratório (restringir onde a Seth pode escrever) **não virou proposta** — a ideia partia de um engano sobre como a Seth escreve; registrado em `MEMÓRIAS.md` (599), nada mudou no sistema por causa dela.
+
+**Arquivo `propostas/modelos-gratuitos-2026-09-28.md` investigado e explicado** (era o "não rastreado" que a Seth não sabia identificar) — é pesquisa do "vigia de combustível", nada nele pede mudança agora. 2 modelos novos (`gemini-3-flash-preview`, `gemini-3.1-flash-lite`) apareceram funcionando fora do roster — decidir se entram é seu, quando quiser. Detalhe: `MEMÓRIAS.md` (600).
+
+**`~/.config/agata/identificadores-pessoais.txt` criado**, com 3 identificadores já confirmados vazando no repositório (e-mail, IP e hostname do tailnet). O P-20 agora tem o que procurar. Se você tiver mais dado pessoal pra proteger (nome, CPF, telefone, endereço), me diga o valor e eu acrescento uma linha.
 
 **O que existe e funciona hoje, testado de verdade (não só escrito):**
 - `bash scripts/genese.sh --framework <checkout> --destino <dir> --origin <url> --chave-publica <arq.pub> --nome <nome> --aplicar` nasce um clone completo — copia o framework, escreve o esqueleto, protege com sua chave desde o 1º commit.
