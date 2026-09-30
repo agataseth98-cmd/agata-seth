@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
+  palavras-chave: omniroute, service, ficou, fora, descompasso, repositórios, sistema, bug, agata, achado, diagnosticado, corrigido, sessão, autorização, humano, pro, sudo
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: propostas, pendentes, grafo, resume, falha, fechada, llamacpp, portas, escriba, readonly, interno, assinadas, humano, aplicadas, três, assinatura, conferida, scripts, verificar, pares, movidos, pra, suíte, perimetro
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: laboratório, ensaio, respondeu, carta, entregas, grandes, correção, real, llamacpp, service, aplicado, mesclado, corrigida, fechar, esboço, testado, script, gênese, paradeiro, maxwaitms, proposta, execstart, fix, aberta, pra, estreita, seguem, dado, medidos, mim
 (576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
   palavras-chave: propostas, pendentes, assinadas, humano, aplicadas, juntas, conserto, listdir, gerar, obsidian, template, llamacpp, service, testado, vivo, assinatura, conferida, scripts, verificar, aplicar
-(575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta: template `llamacpp@.service` pra Fase 3 (F3.2), testado AO VIVO com o Humano presente — achou e corrigiu um bug real que o laboratório não podia ver de dentro do container de nuvem. Aguardando assinatura.**
-  palavras-chave: proposta, llamacpp, template, aberta, service, pra, fase, testado, vivo, humano, presente, achou, corrigiu, bug, real, laboratório, podia, dentro, container, nuvem, aguardando, assinatura
+(575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta …
+  palavras-chave: proposta, llamacpp, template, aberta
 (574) DIÁRIO — 26/09/2026 · **Proposta P-8 `p10-prop-dir-fix-2026-09-26` aberta: …
   palavras-chave: proposta, prop, dir, fix, aberta
 (573) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Human …

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
 (602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue pelo laboratório junto com o de cima, NÃO adotado — é redundante com a proposta (598), já aberta e mais completa.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/llamacpp@.service` aplicado com a versão final do `ExecStart` (`$ARGS` sem chaves, sem `/bin/sh -c`), já testada ao vivo antes da assinatura (ver (577)). Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
 (577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
 (576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
-(575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta: template `llamacpp@.service` pra Fase 3 (F3.2), testado AO VIVO com o Humano presente — achou e corrigiu um bug real que o laboratório não podia ver de dentro do container de nuvem. Aguardando assinatura.**
+(575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta …
 (574) DIÁRIO — 26/09/2026 · **Proposta P-8 `p10-prop-dir-fix-2026-09-26` aberta: …
 (573) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Human …
 (572) DIÁRIO — 26/09/2026 · **Humano relatou "perdemos o labo por ataque externo …
