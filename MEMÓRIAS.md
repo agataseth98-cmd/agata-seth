@@ -26,18 +26,57 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 00a927be673c48d5968e5c7c429c55bf1b1197e3
-  Escrito em: 30/09/2026 18:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): edb5da934edcd857fa3f80f3e708c0cc284a48cc
+  Escrito em: 30/09/2026 19:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00a927be673c48d5968e5c7c429c55bf1b1197e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/edb5da934edcd857fa3f80f3e708c0cc284a48cc/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
+
+(599) tinha concluído que restringir `ReadWritePaths` do escriba exigiria reescrever o mecanismo de escrita (mover o temporário pra outra pasta), porque `memoria/`+`propostas/` era a restrição errada. Verdade parcial: a restrição sugerida ali estava errada, mas a conclusão de que "só dá pra restringir mudando código" era precipitada — eu não tinha testado a alternativa óbvia do próprio systemd. Achado do laboratório "Ensaio" (arquivo entregue via `~/Área de trabalho/para-code-p8/`, DADO fora do canon): `ReadOnlyPaths=` pode carimbar de só-leitura caminhos ESPECÍFICOS dentro de uma árvore já coberta por `ReadWritePaths=` — o caminho mais específico vence, é comportamento documentado do systemd, não gambiarra.
+
+**Conteúdo:** `redesign/systemd/seth-escriba.service` ganha `ReadOnlyPaths=-%h/agata/.git -%h/agata/.githooks -%h/agata/scripts -%h/agata/redesign -%h/agata/config -%h/agata/propostas -%h/agata/REGRAS.md -%h/agata/PROJETO.md -%h/agata/SELOS.txt`, sem tocar `ReadWritePaths=%h/agata` (continua igual — é onde `MEMÓRIAS.md`/`SETH-DIARIO.md` vivem, e onde o `os.replace` precisa do diretório pra criar o temporário).
+
+**Testado por mim, não só aceito do lab:** clone descartável (`git clone --local --no-hardlinks`, fora do repo real) + `systemd-run --user --wait --pipe` reproduzindo exatamente os `-p ReadWritePaths=`/`ReadOnlyPaths=` do `.diff` (trocando `%h/agata` pelo caminho do clone). Confirmado ao vivo:
+- `touch` na raiz do clone: grava (esperado);
+- `touch`/`echo >>` em `scripts/`, `redesign/`, `propostas/`, `REGRAS.md`: todos "Sistema de arquivos somente para leitura" (esperado);
+- `touch` em `memoria/` (fora da lista): grava — não é sensível, não precisa travar;
+- **o teste que importa:** chamei `_acrescenta_memoria()` e `_anota_diario()` de `seth_escriba.py` DIRETO (mesmo caminho de produção, `SETH_REPO` apontando pro clone) dentro desse sandbox exato — as duas gravaram normalmente em `MEMÓRIAS.md`/`SETH-DIARIO.md` na raiz, marcador certo, conteúdo certo.
+- `--selftest` do próprio script também passou, mas com ressalva: ele usa `tempfile.mkdtemp()` interno, fora do `SETH_REPO` — não prova nada sobre o sandbox sozinho; o teste que prova é o de cima.
+- **Lacuna declarada:** testei sem `PrivateTmp=yes` (a diretiva já existe hoje no serviço real, o `.diff` não mexe nela) — `systemd-run --user` com `PrivateTmp=yes` deu erro de namespace neste ambiente de nuvem (`226/NAMESPACE`), provavelmente limite deste container, não do desenho. Quem tiver systemd de usuário completo (a Máquina) pode reconfirmar com `PrivateTmp=yes` incluído; não é bloqueio, é honestidade sobre o que ficou de fora desta verificação.
+
+**sync:** PASS — `git rev-parse main` = `edb5da9` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (602) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `git clone --local --no-hardlinks` (2 clones descartáveis); `systemd-run --user --wait --pipe` com os mesmos `-p` do `.diff`; chamada direta às funções reais de escrita (`_acrescenta_memoria`/`_anota_diario`) via `python3 -c`, não só `--selftest`; `git apply --check` contra HEAD real · **Autorização:** achado entregue pelo laboratório "Ensaio" (arquivo do Humano), item 4 da lista de decisões pendentes ("leia e assimile" virou "achei um jeito real, proponho").
+
+(602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue pelo laboratório junto com o de cima, NÃO adotado — é redundante com a proposta (598), já aberta e mais completa.**
+
+O arquivo do lab só acrescenta `20129|llamacpp-moe|127.0.0.1` a `config/portas-agata.txt`. A proposta (598) `p4-llamacpp-portas-2026-09-30`, já aberta nesta sessão antes do pacote do lab chegar, cobre a mesma porta **e mais 4** (`20142`-`20145`, os locais novos de 20/09) — e usa o nome real da unit (`llamacpp-agata`, que é como `PROJETO.md` e o systemd chamam o serviço), não uma descrição (`llamacpp-moe`). Aplicar os dois juntos duplicaria a linha da porta `20129` com nomes diferentes — decidi manter só (598), mais completa e mais consistente com o resto do manifesto. Nenhum arquivo novo em `propostas/`.
+
+**sync:** PASS — `git rev-parse main` = `edb5da9` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (601) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** comparação direta dos dois `.diff` (o do lab e o próprio, já em `propostas/`), `grep` em `PROJETO.md` pelo nome real da unit · **Autorização:** achado entregue pelo laboratório "Ensaio" (arquivo do Humano); decisão de não duplicar é minha, registrada, não pedida.
+
+(601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-30` RETIRADA de `propostas/` antes de ser assinada — substituída por `grafo-resume-falha-fechada-2026-09-30`, mais completa, entregue pelo laboratório "Ensaio". A minha corrigia só o `argv` da CLI; a nova fecha também o `bool()` de dentro do nó `portao` do grafo, que eu tinha achado (lendo o diário do lab) e ainda não tinha corrigido.**
+
+**Por que trocar em vez de empilhar:** as duas mexem nas mesmas linhas de `cli.py`/`grafo.py` — assinar e aplicar as duas juntas não daria certo (a segunda não aplicaria limpo depois da primeira). Como nenhuma das duas foi assinada ainda, troquei a peça em vez de propor duas vezes a mesma coisa. (597) fica como está, registrando o que a sessão sabia até aqui (Regra 4: não se edita história) — esta entrada é a correção.
+
+**O que a nova cobre a mais, testado por mim antes de aceitar:**
+- `decisao_resume()`, função nova: além de exigir exatamente um de `--aprovar`/`--recusar`, rejeita qualquer flag desconhecida (`--xyz`, não só `--recusa`) — testei os 2 pontos de entrada (`grafo.py` `__main__` e `cli.py`) com 4 casos (nada, typo, os dois, flag aleatória): os 4 dão `exit 2` com mensagem, nenhum aprova.
+- `portao()` e `registrar_e_commitar()`, em `grafo.py`: trocam `bool(decisao...)` por `decisao.get("aprovado") is True` — fechei a classe que eu tinha achado no diário do lab (`grafo.py:176`) e não tinha corrigido ainda. Testei os 8 casos que o `bool()` antigo aprovaria por engano (`"false"`, `"não"`, `1`, `decisao=True` solto, string solta, etc.) contra a versão nova: os 8 agora dão `aprovado=False`.
+- `py_compile` limpo nos dois arquivos; suíte inteira (`testar_perimetro.sh`) 46/46 no clone com o `.diff` aplicado; `git apply --check` limpo contra HEAD real.
+
+**sync:** PASS — `git rev-parse main` = `edb5da9` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (600) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** clone descartável (`git clone --local --no-hardlinks`); os 2 pontos de entrada testados com 4 casos de argv cada; teste isolado dos 8 casos do `bool()` vs. `is True`, sem precisar de `langgraph` instalado; `py_compile`; suíte inteira; `git apply --check` contra HEAD real · **Autorização:** achado entregue pelo laboratório "Ensaio" (arquivo do Humano, pasta `para-code-p8/`); troca de proposta é minha, registrada, não pedida.
 
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
 
