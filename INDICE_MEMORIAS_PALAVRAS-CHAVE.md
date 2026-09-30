@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de verdade na Máquina — só no repositório. `~/.local/bin/seth`/`seth-parar` continuavam com as linhas `docker start/stop kokoro-tts` removidas da fonte em 27/09. Achado rodando o `seth` de verdade hoje (o container subiu de novo, contra a decisão do Humano). Corrigido: redeploy dos dois atalhos, container parado.**
+  palavras-chave: remoção, kokoro, tts, nunca, chegou, verdade, máquina, repositório, local, bin, seth, parar, continuavam, linhas, docker, start, stop, removidas, fonte, achado, rodando, hoje, container, subiu, novo, contra, decisão, humano, corrigido, redeploy, atalhos, parado
 (605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
   palavras-chave: omniroute, service, ficou, fora, descompasso, repositórios, sistema, bug, agata, achado, diagnosticado, corrigido, sessão, autorização, humano, pro, sudo
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, llamacpp, execstart, fix, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, redesign, systemd, service, aplicado, versão, final, args, chaves, bin, testada, vivo, par, movido, pra, propostas, aplicadas, perimetro, falha
 (577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 entregas grandes: correção real ao `llamacpp@.service` (já aplicado, mas ainda não mesclado — corrigida antes da PR #73 fechar), o esboço testado do script de gênese, e o paradeiro do `maxWaitMs`. Proposta P-8 `llamacpp-execstart-fix-2026-09-27` aberta pra correção estreita. Gênese e maxWaitMs seguem como DADO, ainda não medidos por mim.**
   palavras-chave: laboratório, ensaio, respondeu, carta, entregas, grandes, correção, real, llamacpp, service, aplicado, mesclado, corrigida, fechar, esboço, testado, script, gênese, paradeiro, maxwaitms, proposta, execstart, fix, aberta, pra, estreita, seguem, dado, medidos, mim
-(576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Humano, aplicadas juntas: o conserto do `os.listdir` em `gerar_obsidian.py` (574) e o template `llamacpp@.service` testado ao vivo (575).** Assinatura das duas conferida por `scripts/p8_verificar.sh` antes de aplicar (4/4 OK cada).
-  palavras-chave: propostas, pendentes, assinadas, humano, aplicadas, juntas, conserto, listdir, gerar, obsidian, template, llamacpp, service, testado, vivo, assinatura, conferida, scripts, verificar, aplicar
+(576) DIÁRIO — 26/09/2026 · **As 2 propostas P-8 pendentes, assinadas pelo Human …
+  palavras-chave: propostas, pendentes, assinadas, human
 (575) DIÁRIO — 26/09/2026 · **Proposta P-8 `llamacpp-template-2026-09-26` aberta …
   palavras-chave: proposta, llamacpp, template, aberta
 (574) DIÁRIO — 26/09/2026 · **Proposta P-8 `p10-prop-dir-fix-2026-09-26` aberta: …

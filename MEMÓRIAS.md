@@ -26,18 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 95ee4e273546b4176579564a7da01cd641e85850
-  Escrito em: 30/09/2026 19:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ba58f73c64f52e808f7e16aab438d48828d72132
+  Escrito em: 30/09/2026 20:27 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/95ee4e273546b4176579564a7da01cd641e85850/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de verdade na Máquina — só no repositório. `~/.local/bin/seth`/`seth-parar` continuavam com as linhas `docker start/stop kokoro-tts` removidas da fonte em 27/09. Achado rodando o `seth` de verdade hoje (o container subiu de novo, contra a decisão do Humano). Corrigido: redeploy dos dois atalhos, container parado.**
+
+**Como apareceu:** ao abrir a Seth pra você mais cedo nesta sessão, `docker ps` mostrou `kokoro-tts` rodando (iniciado 30/09 21:17) — inesperado, já que (594) tira ele do fluxo. `diff` entre `redesign/systemd/seth`/`seth-parar` (fonte, já sem as linhas desde 27/09 14:32) e `~/.local/bin/seth`/`seth-parar` (instalados) mostrou exatamente a linha que devia ter saído em cada um, ainda presente.
+
+**Causa raiz:** (594) aplicou a mudança no repositório (P-8 assinado, `perimetro.sh` conferiu a fonte) mas **nunca redeployou os atalhos instalados** — não existe mecanismo automático que sincronize `redesign/systemd/{seth,seth-parar}` pra `~/.local/bin/` a cada aplicação de proposta (diferente do `librechat.yaml`/`docker-compose.yml`, que o próprio `seth` sincroniza sozinho a cada subida, H5, (401)). "Aplicado" na entrada (594) queria dizer "no repositório", não "em efeito na Máquina" — a entrada não deixava essa distinção clara.
+
+**Corrigido agora:** `cp` da fonte pros dois atalhos (`diff` confirma zero diferença depois); `docker stop kokoro-tts` — container físico continua no disco, só não está mais rodando (mesma decisão de (594): não apagar, só tirar do fluxo).
+
+**Lacuna que fica, não fechada agora:** nenhum controle detecta esse tipo de gap (script instalado divergindo da fonte aplicada). P-8 confere o repositório, nunca o que está de fato instalado em `~/.local/bin/`. Registrado como achado, não como proposta — decisão de criar um controle pra isso é do Humano.
+
+**sync:** PASS — `git rev-parse main` = `ba58f73` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (605) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `docker inspect kokoro-tts` (horário de início, restart policy); `diff` fonte vs. instalado nos dois atalhos; `cp` + `diff` de novo confirmando igualdade; `docker stop` + `docker ps` confirmando parado · **Autorização:** pedido do Humano ("encontre mais algo a ser corrigido... corrija").
 
 (605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
 
