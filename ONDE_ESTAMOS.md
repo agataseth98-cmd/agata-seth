@@ -5,14 +5,14 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (600)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (603)).
 
 ## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **2 propostas novas esperando sua assinatura**, vindas da continuação do laboratório "Ensaio" (pasta `ensaio-2026-09-30/` na Área de trabalho):
-- `propostas/portao-resume-exige-flag-2026-09-30.diff` — o comando que aprova uma mudança do grafo (`agata resume`) aprovava sozinho se você digitasse o "recusar" errado, ou não digitasse nada. Agora exige um dos dois, certo.
+**Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **3 propostas esperando sua assinatura**, da continuação do laboratório "Ensaio" (pasta `ensaio-2026-09-30/` na Área de trabalho + pacote novo em `para-code-p8/`):
+- `propostas/grafo-resume-falha-fechada-2026-09-30.diff` — o comando que aprova uma mudança do grafo (`agata resume`) aprovava sozinho com o "recusar" digitado errado, ou sem digitar nada. Agora exige um dos dois, em dois lugares diferentes do código (substitui uma versão mais simples que eu tinha aberto antes e troquei por esta, mais completa).
 - `propostas/p4-llamacpp-portas-2026-09-30.diff` — 5 portas dos modelos locais (llama.cpp) não estavam na lista que o sistema confere; agora estão.
-- Uma terceira sugestão do laboratório (restringir onde a Seth pode escrever) **não virou proposta** — a ideia partia de um engano sobre como a Seth escreve; registrado em `MEMÓRIAS.md` (599), nada mudou no sistema por causa dela.
+- `propostas/escriba-readonly-interno-2026-09-30.diff` — a Seth passa a não poder escrever em `scripts/`, `config/`, `REGRAS.md` e mais alguns lugares sensíveis, mesmo tendo permissão de escrita geral na pasta. Testei ao vivo: continua escrevendo normal onde precisa (`MEMÓRIAS.md`, seu diário).
 
 **Arquivo `propostas/modelos-gratuitos-2026-09-28.md` investigado e explicado** (era o "não rastreado" que a Seth não sabia identificar) — é pesquisa do "vigia de combustível", nada nele pede mudança agora. 2 modelos novos (`gemini-3-flash-preview`, `gemini-3.1-flash-lite`) apareceram funcionando fora do roster — decidir se entram é seu, quando quiser. Detalhe: `MEMÓRIAS.md` (600).
 
