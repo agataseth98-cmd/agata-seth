@@ -1,0 +1,27 @@
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 7b88e87..d105074 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -23,6 +23,13 @@
+ # confere se estão de pé via `docker ps`; portas :20131/:20132 (função não
+ # determinada, PROJETO.md "Serviços (boot)") -- não dá pra declarar
+ # `bind_esperado` pra algo que não se sabe o que é.
++#
++# Achado do laboratório "Ensaio" (DADO, fora do canon, "carta-2-para-seth-
++# 2026-09-29.md" e "analise-resposta-seth-2026-09-29.md" — não é entrada de
++# MEMÓRIAS): as 5 instâncias llama.cpp (`llamacpp-agata` original + as 4
++# novas de 20/09/2026) nunca entraram aqui -- o P-4 não as via. Bind fixo em
++# `--host 127.0.0.1`, invariante de segurança do template
++# `redesign/systemd/llamacpp@.service` (nunca no `.env` de instância).
+ 
+ 20126|seth-gateway|127.0.0.1,172.29.7.1
+ 20127|omniroute-sanitizer|127.0.0.1
+@@ -36,3 +43,8 @@
+ 27125|obsidian-ro-proxy|127.0.0.1,172.29.7.1
+ 8890|piper-tts|127.0.0.1,172.29.7.1
+ 11434|ollama|127.0.0.1
++20129|llamacpp-agata|127.0.0.1
++20142|llamacpp-nemotron|127.0.0.1
++20143|llamacpp-qwen3coder|127.0.0.1
++20144|llamacpp-gptoss20b|127.0.0.1
++20145|llamacpp-phi4mini|127.0.0.1

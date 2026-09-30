@@ -5,11 +5,14 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (596)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (599)).
 
-## Onde estamos — 27/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
+## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Fase 3 (instalar um Agata novo do zero) está construída e aplicada de ponta a ponta.** Zero PR aberta, zero proposta esperando assinatura, zero assinatura pendente — a fila está limpa agora.
+**Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **2 propostas novas esperando sua assinatura**, vindas da continuação do laboratório "Ensaio" (pasta `ensaio-2026-09-30/` na Área de trabalho):
+- `propostas/portao-resume-exige-flag-2026-09-30.diff` — o comando que aprova uma mudança do grafo (`agata resume`) aprovava sozinho se você digitasse o "recusar" errado, ou não digitasse nada. Agora exige um dos dois, certo.
+- `propostas/p4-llamacpp-portas-2026-09-30.diff` — 5 portas dos modelos locais (llama.cpp) não estavam na lista que o sistema confere; agora estão.
+- Uma terceira sugestão do laboratório (restringir onde a Seth pode escrever) **não virou proposta** — a ideia partia de um engano sobre como a Seth escreve; registrado em `MEMÓRIAS.md` (599), nada mudou no sistema por causa dela.
 
 **O que existe e funciona hoje, testado de verdade (não só escrito):**
 - `bash scripts/genese.sh --framework <checkout> --destino <dir> --origin <url> --chave-publica <arq.pub> --nome <nome> --aplicar` nasce um clone completo — copia o framework, escreve o esqueleto, protege com sua chave desde o 1º commit.

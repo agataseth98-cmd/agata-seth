@@ -1,0 +1,42 @@
+diff --git a/redesign/grafo/cli.py b/redesign/grafo/cli.py
+index c89fd98..3172ae2 100644
+--- a/redesign/grafo/cli.py
++++ b/redesign/grafo/cli.py
+@@ -8,7 +8,7 @@
+     agata verify [--entrada <arq>]   perimetro.sh (+ cabecalho + citacoes se --entrada). exit 0/!=0. SEM MODELO.
+     agata commit-entry <arq> [--alvo redesign/LOG.md] [--posicao fim|apos-marcador]   append-only + git commit. SEM MODELO.
+     agata run "<pedido>" [--tipo trabalho|conselho|verificacao] [--com-envelope] [--repo <dir>]
+-    agata resume --thread <id> [--recusar] [--repo <dir>]
++    agata resume --thread <id> (--aprovar | --recusar) [--repo <dir>]
+     agata logs [--thread <id>]        tail do event-stream (eventos.ndjson)
+ 
+ `verify` e `commit-entry` NAO importam langgraph nem tocam modelo -- sao a espinha
+@@ -196,7 +196,11 @@ def main(argv):
+         return cmd_run(rest[0], g("--tipo", "trabalho"), "--com-envelope" in rest,
+                        g("--repo"), g("--thread"))
+     if cmd == "resume":
+-        return cmd_resume(g("--thread"), "--recusar" in rest, g("--repo"))
++        tem_aprovar, tem_recusar = "--aprovar" in rest, "--recusar" in rest
++        if tem_aprovar is tem_recusar:  # nenhum dos dois, ou os dois -- nunca aprova por omissao/erro de digitacao
++            print("resume exige exatamente um de --aprovar / --recusar", file=sys.stderr)
++            return 2
++        return cmd_resume(g("--thread"), tem_recusar, g("--repo"))
+     if cmd == "logs":
+         return cmd_logs(g("--thread"))
+     print(__doc__)
+diff --git a/redesign/grafo/grafo.py b/redesign/grafo/grafo.py
+index 38600b8..c215a0a 100644
+--- a/redesign/grafo/grafo.py
++++ b/redesign/grafo/grafo.py
+@@ -294,6 +294,10 @@ if __name__ == "__main__":
+         run(a[1], g("--repo", str(AGATA)), g("--thread", f"loop-{os.getpid()}"),
+             g("--tipo", "trabalho"), "--com-envelope" in a)
+     elif mode == "resume":
+-        resume(g("--thread"), g("--repo", str(AGATA)), "--recusar" not in a)
++        tem_aprovar, tem_recusar = "--aprovar" in a, "--recusar" in a
++        if tem_aprovar is tem_recusar:  # nenhum dos dois, ou os dois -- nunca aprova por omissao/erro de digitacao
++            print("resume exige exatamente um de --aprovar / --recusar", file=sys.stderr)
++            sys.exit(2)
++        resume(g("--thread"), g("--repo", str(AGATA)), tem_aprovar)
+     else:
+         print(__doc__); sys.exit(2)

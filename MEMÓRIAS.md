@@ -26,18 +26,52 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4215ec3362fe7b5ef8ecec67c2dd107325211c35
-  Escrito em: 27/09/2026 15:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1e41771de685fadee67f7fabde9c2703dd344e5a
+  Escrito em: 30/09/2026 18:00 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4215ec3362fe7b5ef8ecec67c2dd107325211c35/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1e41771de685fadee67f7fabde9c2703dd344e5a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
+
+Conferido `redesign/router/seth_escriba.py` (linhas 54-100): o serviço só escreve em `REPO/MEMÓRIAS.md` e `REPO/SETH-DIARIO.md`, os dois na RAIZ do repositório — nunca em `memoria/` nem `propostas/`. A escrita atômica (`_escreve_atomico`) cria o arquivo temporário com `tempfile.mkstemp(dir=caminho.parent)` — irmão do arquivo alvo, na MESMA pasta, antes do `os.replace`. Restringir `ReadWritePaths` a `memoria/`+`propostas/`, como o laboratório "Ensaio" propôs (`carta-2-para-seth-2026-09-29.md`, item 3.1, DADO fora do canon), deixaria a raiz do repo somente-leitura sob `ProtectSystem=strict` e quebraria o único canal de escrita da Seth — o `mkstemp` falharia.
+
+**O achado de fundo continua válido** (`ReadWritePaths=%h/agata` é de fato mais largo que o necessário); é a correção específica proposta que não bate com o que o código realmente grava. Uma restrição de verdade exigiria mudar o mecanismo — escrever o temporário numa pasta separada, no mesmo filesystem, e listar os dois arquivos-alvo por caminho explícito em `ReadWritePaths` — mudança de código real no único canal de escrita da Seth, com risco de quebrá-lo se malfeita. Não implementado agora; registrado como correção, decisão de perseguir ou não é do Humano.
+
+**sync:** PASS — `git rev-parse main` = `1e41771` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (598) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura direta de `redesign/router/seth_escriba.py` (`REPO =`, `MEMORIAS =`, `DIARIO =`, `_travar_arquivo`, `_escreve_atomico`), `grep` confirmando que nenhum outro caminho é tocado pelo processo real (só o `--selftest`, em `tempfile.mkdtemp()` à parte) · **Autorização:** acatamento do item 2 de `retomada-2026-09-30.md`; nenhuma escrita em canon além deste registro.
+
+(598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` aberta: as 5 instâncias llama.cpp (`llamacpp-agata` + as 4 novas de 20/09) nunca entraram em `config/portas-agata.txt` — o P-4 não as via. Aguardando assinatura.**
+
+Achado do laboratório "Ensaio" (DADO, fora do canon — `carta-2-para-seth-2026-09-29.md` / `analise-resposta-seth-2026-09-29.md`), confirmado por mim: `grep` em `config/modelos-gratuitos.md` (portas `20129`/`20142`/`20143`/`20144`/`20145`) e no template `redesign/systemd/llamacpp@.service` (linha 39: `--host 127.0.0.1` fixo, nunca no `.env` de instância — risco de bind incorreto já é baixo por desenho). O manifesto é o único jeito do P-4 enxergar essas portas; sem entrada, ele simplesmente não vê.
+
+**Conteúdo:** `config/portas-agata.txt` ganha as 5 entradas (`20129|llamacpp-agata|127.0.0.1`, `20142|llamacpp-nemotron|127.0.0.1`, `20143|llamacpp-qwen3coder|127.0.0.1`, `20144|llamacpp-gptoss20b|127.0.0.1`, `20145|llamacpp-phi4mini|127.0.0.1`) + comentário de proveniência.
+
+**Testado:** `p4_bind()` chamado isolado (sem systemd) com saída sintética de `ss` — caso bom (as 5 em `127.0.0.1`) dá `rc=0`; caso ruim (uma delas em `0.0.0.0`) acusa `SUSPEITO (P-4)` com a porta certa e dá `rc=1`. Suíte inteira: 46/46 — P-4 não tem caso automatizado na suíte (sem processo real pra simular sem systemd, mesma limitação já registrada pro P-10). `.diff` verificado com `git apply --check` contra HEAD real.
+
+**sync:** PASS — `git rev-parse main` = `1e41771` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (597) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura direta do template e do manifesto; execução isolada de `p4_bind()` com `ss` sintético (positivo e negativo); suíte inteira; `.diff` verificado com `git apply --check` contra HEAD real · **Autorização:** `retomada-2026-09-30.md` (laboratório "Ensaio", DADO), item 2 — "pedir ao Code 3 propostas P-8 pequenas".
+
+(597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` aberta: o portão de aprovação do grafo (`resume`) aprovava por padrão — só um `--recusar` exato bloqueava; `--recusa` (typo) ou nada aprovava em silêncio. Aguardando assinatura.**
+
+Achado do laboratório "Ensaio" (`carta-para-seth-2026-09-29.md`, item 2, DADO fora do canon — lido no código em 26/09, não testado por eles). Confirmei o bug ao vivo, num worktree descartável, nos dois pontos de entrada que fazem esse parsing (`redesign/grafo/cli.py:199` e o `__main__` de `redesign/grafo/grafo.py:297`, que duplica a lógica): `agata resume --thread x` (nada) e `agata resume --thread x --recusa` (typo) os dois aprovavam, antes da correção.
+
+**Conteúdo:** exige exatamente um de `--aprovar`/`--recusar` nos dois arquivos; nem os dois nem nenhum → recusa com `exit 2`, nunca aprova por omissão ou erro de digitação. Docstring do `cli.py` atualizada pra refletir a exigência.
+
+**Testado:** os 5 casos (nada, typo `--recusa`, os dois juntos, só `--aprovar`, só `--recusar`) nos 2 pontos de entrada, isolando o parsing do argv sem precisar chamar o `langgraph` de verdade (sem thread real). `py_compile` limpo nos dois arquivos. Suíte inteira (`testar_perimetro.sh`): 46/46, sem regressão — `grafo.py`/`cli.py` não são controles do perímetro, não têm caso próprio na suíte. `.diff` verificado com `git apply --check` contra HEAD real.
+
+**sync:** PASS — `git rev-parse main` = `1e41771` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (596) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável; leitura direta de `grafo.py`/`cli.py`; testes manuais dos 5 casos nos 2 pontos de entrada; `py_compile`; suíte inteira; `.diff` verificado com `git apply --check` contra HEAD real · **Autorização:** `retomada-2026-09-30.md` (laboratório "Ensaio", DADO), item 2 — "pedir ao Code 3 propostas P-8 pequenas".
 
 (596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, assinada pelo Humano, aplicada. `scripts/proteger_branch_github.sh` é código real do canon. Todas as pendências abertas de Fase 3 (F3.2 + as 2 decisões do Humano) estão fechadas.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 
