@@ -5,14 +5,14 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (603)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (604)).
 
 ## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **3 propostas esperando sua assinatura**, da continuação do laboratório "Ensaio" (pasta `ensaio-2026-09-30/` na Área de trabalho + pacote novo em `para-code-p8/`):
-- `propostas/grafo-resume-falha-fechada-2026-09-30.diff` — o comando que aprova uma mudança do grafo (`agata resume`) aprovava sozinho com o "recusar" digitado errado, ou sem digitar nada. Agora exige um dos dois, em dois lugares diferentes do código (substitui uma versão mais simples que eu tinha aberto antes e troquei por esta, mais completa).
-- `propostas/p4-llamacpp-portas-2026-09-30.diff` — 5 portas dos modelos locais (llama.cpp) não estavam na lista que o sistema confere; agora estão.
-- `propostas/escriba-readonly-interno-2026-09-30.diff` — a Seth passa a não poder escrever em `scripts/`, `config/`, `REGRAS.md` e mais alguns lugares sensíveis, mesmo tendo permissão de escrita geral na pasta. Testei ao vivo: continua escrevendo normal onde precisa (`MEMÓRIAS.md`, seu diário).
+**Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **As 3 propostas da continuação do laboratório "Ensaio" foram assinadas por você e já estão aplicadas de verdade nesta Máquina** — fila de assinatura pendente está zerada de novo:
+- `agata resume` exige `--aprovar` ou `--recusar` — digitar "recusar" errado, ou não digitar nada, não aprova mais sozinho.
+- As 5 portas dos modelos locais (llama.cpp) entraram na lista que o sistema confere.
+- A Seth não consegue mais escrever em `scripts/`, `config/`, `REGRAS.md` e outros lugares sensíveis — reinstalei e reiniciei o serviço dela de verdade, testado ao vivo nos dois lados (continua escrevendo normal onde precisa; bloqueado onde não devia).
 
 **Arquivo `propostas/modelos-gratuitos-2026-09-28.md` investigado e explicado** (era o "não rastreado" que a Seth não sabia identificar) — é pesquisa do "vigia de combustível", nada nele pede mudança agora. 2 modelos novos (`gemini-3-flash-preview`, `gemini-3.1-flash-lite`) apareceram funcionando fora do roster — decidir se entram é seu, quando quiser. Detalhe: `MEMÓRIAS.md` (600).
 
