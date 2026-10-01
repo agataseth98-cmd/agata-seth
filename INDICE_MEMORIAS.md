@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` aberta: o mecanismo do `~/agata` configurável — decisão do Humano em (564), "falta o mecanismo" registrado em (567). Aguardando assinatura.**
 (588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assinada pelo Humano, aplicada. Todos os itens que o laboratório tinha deixado em aberto — o mecanismo de gênese, o `maxWaitMs`, o template llamacpp — estão fechados no canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/dropin-omniroute-resilience.conf` + `README.md` aplicados. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA. Confirmado como esperado: nada mudou no comportamento real desta Máquina (o banco já tinha o valor).
 (587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta: fecha o `maxWaitMs` — o número que faltava desde a resposta do laboratório de 26/09, verificado por mim antes de propor. Aguardando assinatura.**
-(586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, assinada pelo Humano, aplicada. `testar_perimetro.sh` agora funciona de verdade dentro de um clone recém-nascido — mais um acabamento da Fase 3 fechado.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+(586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, a …
 (585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` ab …
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada …
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `s …
