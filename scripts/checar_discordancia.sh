@@ -65,11 +65,11 @@ if dias >= 28:
     print(
         f"AVISO (P-13): última discordância real registrada em CONSELHO foi "
         f"({n}), {dia:02d}/{mes:02d}/{ano} -- {dias} dias atrás, >= 28 "
-        f"(REGRAS.md, Regra 4, item 4). Por que importa: sem atrito real "
+        f"(REGRAS.md, O Conselho, item 4). Por que importa: sem atrito real "
         f"por 4 semanas o canon corre o risco de virar eco entre modelos, "
         f"sem ninguém contestando nada de verdade. O que fazer: provocar "
         f"uma discordância SINTÉTICA e registrar como entrada CONSELHO "
-        f"marcada como tal (ver convenção estrutural em REGRAS.md) -- "
+        f"marcada como tal (ver PROTOCOLOS.md, \"Discordância sintética\") -- "
         f"nunca disfarçada de discordância real."
     )
     sys.exit(1)

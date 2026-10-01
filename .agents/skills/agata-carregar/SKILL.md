@@ -1,6 +1,6 @@
 ---
 name: agata-carregar
-description: Abrir uma sessão neste sistema (comando "carregar", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de REGRAS.md.
+description: Abrir uma sessão neste sistema (comando "carregar", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEAD/hora na Máquina e monta o bloco de prontidão de 3 linhas de PROTOCOLOS.md.
 ---
 
 Onde aparecer {{NOME_SISTEMA}} neste arquivo, escreva o valor do campo "Nome do sistema:"
@@ -18,7 +18,7 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
    assinada em andamento. Mostre `git diff --stat` e pergunte ao Humano.
 3. Leia a entrada do topo de `MEMÓRIAS.md` (logo abaixo de `<!-- ENTRADAS-NOVAS:AQUI -->`) — número e título.
 4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
-5. Responda com o bloco de REGRAS.md, "Carregar e formatos" — 3 linhas, nada antes:
+5. Responda com o bloco de PROTOCOLOS.md, "Carregar e formatos" — 3 linhas, nada antes:
    ```
    {{NOME_SISTEMA}} · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
    Última entrada: (<n>) <título> — <1 linha>

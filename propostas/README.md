@@ -6,6 +6,7 @@ Mecanismo criado em 20/08/2026 (item 6 do documento do Humano, proposta do Marco
 
 **QUARENTENA OBRIGATÓRIA** — arquivos que MUDAM COMPORTAMENTO:
 - `REGRAS.md`
+- `PROTOCOLOS.md` e `FALHAS.md` (as camadas do como e do catálogo, separadas de REGRAS em 01/10/2026)
 - `PROJETO.md`
 - `scripts/*`
 - `.githooks/*`

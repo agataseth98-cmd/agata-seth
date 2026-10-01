@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # P-19 -- citação de arquivo:linha em entrada NOVA de MEMÓRIAS.md confere
 # contra a fonte real. Mecaniza a falha mais recorrente do catálogo
-# (REGRAS.md, "Catálogo de falhas conhecidas"): 8 das 20 falhas catalogadas
+# (FALHAS.md, ex-"Catálogo de falhas conhecidas" das REGRAS): 8 das 20 falhas catalogadas
 # -- (59) até (250)/(251) -- são desta família: citar arquivo+linha+trecho
 # sem checar contra a fonte antes de escrever. Duas ocorrências frescas
 # motivaram esta proposta: uma minuta externa (Conselho Remoto, GLM) com

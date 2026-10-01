@@ -12,8 +12,8 @@
 # publicando sozinho apesar do próprio cabeçalho dizer que não).
 #
 # Escopo, proporcional de propósito (ordem do Humano):
-#   QUARENTENA OBRIGATÓRIA -- muda COMPORTAMENTO: REGRAS.md, PROJETO.md,
-#   scripts/*, .githooks/*
+#   QUARENTENA OBRIGATÓRIA -- muda COMPORTAMENTO: REGRAS.md, PROTOCOLOS.md, FALHAS.md, PROJETO.md,
+#   CLAUDE.md, scripts/*, .githooks/*
 #   SEM quarentena -- só REGISTRA o que já aconteceu: MEMÓRIAS.md,
 #   ONDE_ESTAMOS.md, INDICE_MEMORIAS.md, .hidrata.md (gerado)
 # Motivo da linha: registro errado se corrige com entrada nova -- é pra
@@ -58,7 +58,7 @@ _perimetro_eh_genese() {
 
 _p8_eh_comportamento() {
   case "$1" in
-    REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
+    REGRAS.md|PROTOCOLOS.md|FALHAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
     # CLAUDE.md (01/10/2026) -- carregado automaticamente pelo Claude Code em
     # toda sessão nova, sem Humano colar nem revisar antes: diferente de
     # PROMPT_CARREGAMENTO.md (que fica fora da quarentena exatamente porque

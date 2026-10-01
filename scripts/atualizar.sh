@@ -48,8 +48,8 @@ bash .githooks/gerar-hidratacao.sh
 case "$ALVO" in
   MEMORIA) echo "  MEMÓRIAS.md reconciliado; topo reinjetado em .hidrata.md." ;;
   PROJETO) echo "  PROJETO.md reconciliado; reinjetado em .hidrata.md." ;;
-  REGRAS)  echo "  REGRAS.md reconciliado; reinjetado em .hidrata.md." ;;
-  TUDO)    echo "  REGRAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hidrata.md." ;;
+  REGRAS)  echo "  REGRAS.md (+ PROTOCOLOS.md, FALHAS.md) reconciliados; reinjetados em .hidrata.md." ;;
+  TUDO)    echo "  REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hidrata.md." ;;
 esac
 
 echo "atualizar.sh: concluído."

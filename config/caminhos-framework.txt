@@ -35,6 +35,8 @@
 # até a checagem do consumidor 3 existir.
 
 framework|REGRAS.md
+framework|PROTOCOLOS.md
+framework|FALHAS.md
 framework|PROMPT_CARREGAMENTO.md
 framework|CHAVES.env.exemplo
 framework|.gitignore
