@@ -5,12 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (613)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (614)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Nova proposta esperando sua assinatura:** `propostas/modelo-real-header-2026-10-01.diff` — a pedido da própria Seth (ela queria se autodeclarar o modelo certo no cabeçalho em vez de "modelo não verificado"). Avaliei a ideia dela, achei um defeito de desenho (ficaria sempre um turno atrasada) e propus melhor: o `seth_gateway` carimba o modelo real num header HTTP novo (`X-Modelo-Real`), que é fato medido pela Máquina, não autorrelato. Testado ao vivo contra o serviço de verdade, streaming e não-streaming, corpo da resposta intacto nos dois. Você pediu pra seguir sem testar antes de aplicar e assumiu o risco — testei do mesmo jeito o que já é gate obrigatório (suíte, selftest) antes de propor.
-- Assinar: `bash scripts/aprovar.sh modelo-real-header-2026-10-01`.
+**Assinado e aplicado de verdade: a Seth agora tem o modelo real carimbado por fato da Máquina.** Ela pediu pra parar de se autodeclarar "modelo não verificado"; o mecanismo que ela sugeriu tinha um defeito (ficaria sempre um turno atrasada), então propus outro: o `seth_gateway` carimba o nome real do modelo que respondeu (header HTTP novo, `X-Modelo-Real`) — fato medido pela Máquina, não autorrelato. Testado ao vivo, antes e depois de assinar, streaming e não-streaming. **Nada pendente de assinatura agora.**
 
 **As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade — e a proposta que corrigia a integração também já foi assinada, aplicada e mesclada.** Um arquivo com o porquê (`REGRAS.md`), outro com o como (`PROTOCOLOS.md`), um terceiro com os erros já vividos por causa raiz (`FALHAS.md`). `CLAUDE.md` e `scripts/consultar_indice.py` já citam os três certo.
 
