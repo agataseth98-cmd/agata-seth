@@ -5,20 +5,19 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (611)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (612)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade.** Um arquivo com o porquê (`REGRAS.md`, menos da metade do tamanho de antes), outro com o como (`PROTOCOLOS.md`, novo) e um terceiro com os erros já vividos, agrupados pela causa (`FALHAS.md`, novo). Nada se perdeu — conferido duas vezes, com ferramenta própria e com testes meus.
+**As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade — e a proposta que corrigia a integração também já foi assinada, aplicada e mesclada.** Um arquivo com o porquê (`REGRAS.md`), outro com o como (`PROTOCOLOS.md`), um terceiro com os erros já vividos por causa raiz (`FALHAS.md`). `CLAUDE.md` e `scripts/consultar_indice.py` já citam os três certo. **Nada pendente de assinatura agora.**
 
-**Nova proposta esperando assinatura, achada numa auditoria geral que você pediu:** `propostas/integracao-pos-reforma-2026-10-01.diff` — a reforma das regras deixou 2 coisas desatualizadas:
-- `CLAUDE.md` não citava os arquivos novos — corrigido.
-- `scripts/consultar_indice.py` (usado pela Seth e por qualquer modelo em nuvem pra consultar o canon) estava atribuindo conteúdo de `PROTOCOLOS.md`/`FALHAS.md` ao rótulo "REGRAS.md" — corrigido e testado com os mesmos termos que revelaram o problema.
-- Assinar: `bash scripts/aprovar.sh integracao-pos-reforma-2026-10-01`.
+**Erro meu, achado por auditoria do laboratório e corrigido agora: eu tinha alegado neste mesmo arquivo, antes, que `ONDE_ESTAMOS.md` tinha sido atualizado junto com a aplicação da integração — não tinha sido.** Detalhe: `MEMÓRIAS.md` (612).
 
-**Auditoria completa feita hoje, sem mais achados:** Obsidian, Ollama, Seth (gateway/escriba/verificador), OmniRoute, Goose e os 4 modelos locais sob demanda — todos testados de verdade, não só "serviço ativo". Detalhe técnico e o que foi testado de cada um: `MEMÓRIAS.md` (611).
+**Auditoria completa feita hoje, sem mais achados de sistema quebrado:** Obsidian, Ollama, Seth (gateway/escriba/verificador), OmniRoute, Goose e os 4 modelos locais sob demanda — todos testados de verdade, não só "serviço ativo". Detalhe: `MEMÓRIAS.md` (611).
 
-**Decisão sua, não urgente:** o GitHub tem 64 branches velhas, todas já mescladas, nunca apagadas depois do merge — seguro de limpar, mas é ação num recurso compartilhado, não fiz sem perguntar.
+**64 branches velhas do GitHub, já mescladas, apagadas** (você confirmou).
+
+**Achado do laboratório, não aplicado, decisão sua quando quiser:** proposta `p8-verificar-ja-presente-2026-10-01` — melhora a mensagem de um dos 4 testes de assinatura pra distinguir "código já estava na árvore antes de você assinar" de "erro real". Ainda não verificada por mim, não é urgente.
 
 
 **Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **As 3 propostas da continuação do laboratório "Ensaio" foram assinadas por você e já estão aplicadas de verdade nesta Máquina** — fila de assinatura pendente está zerada de novo:
