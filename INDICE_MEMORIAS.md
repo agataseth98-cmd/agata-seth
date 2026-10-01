@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra 4), achado por auditoria do laboratório "Ensaio" (`auditoria-pos-reforma-2026-10-01.md`, DADO) e verificado por mim antes de corrigir — inclusive uma alegação falsa minha num commit real.**
 (611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada pelo Humano, aplicada. `scripts/genese.sh` é código real do canon — a Fase 3 tem, pela primeira vez, um comando que nasce um clone novo de verdade.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `scripts/genese.sh` — o script real que nasce um clone do framework — entra no canon pela primeira vez. Aguardando assinatura.**
-(582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/perimetro/p08_quarentena.sh` e `scripts/perimetro/p16_testes_dos_controles.sh` aplicados — a exceção mecânica de gênese (`_perimetro_eh_genese`) agora é código real do canon, não só DADO testado em worktree. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
+(582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada …
 (581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a …
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceçã …
 (579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do labor …
