@@ -93,7 +93,7 @@ fi
 # NESTE commit -- checado AQUI, depois da âncora acima, de propósito (ver nota
 # no topo do arquivo): a âncora muda os três em todo commit, e isso TEM que
 # contar como "mudou" pra .hidrata.md não ficar defasado sem nenhum commit falhar.
-if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
+if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROTOCOLOS\.md|FALHAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
   bash .githooks/gerar-hidratacao.sh
   # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
   # gerar-hidratacao.sh regenera os três, mas só os dois primeiros entravam

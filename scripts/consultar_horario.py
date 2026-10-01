@@ -9,8 +9,8 @@ originalmente) foi descontinuado pelo mantenedor ("WorldTimeAPI has been
 sunset") e, além disso, devolvia o timestamp na chave `unixtime`, não
 `unix_timestamp` -- o fallback nunca teria funcionado mesmo com o
 serviço no ar. Corrigido em MEMÓRIAS (275): sem um segundo provedor
-testado e vivo pra por no lugar, o fallback real é o que REGRAS.md já
-documenta (Regra 1.1, "Fallback universal"): horário informado pelo
+testado e vivo pra por no lugar, o fallback real é o que PROTOCOLOS.md já
+documenta (Regra 1.1, tabela de selos): horário informado pelo
 Humano, selo `(não verificada)` -- não finge redundância que não existe.
 
 Uso: python3 scripts/consultar_horario.py

@@ -143,7 +143,7 @@ _MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"
 # aceito, registrado, nao escondido (item 11 do mesmo plano e' a unificacao
 # real). Se um padrao mudar num lado, mudar no outro tambem.
 _PADROES_COMPORTAMENTO = (
-    "REGRAS.md", "PROJETO.md", "scripts/*", ".githooks/*", "config/*",
+    "REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "PROJETO.md", "scripts/*", ".githooks/*", "config/*",
     "propostas/.allowed_signers",
     "redesign/router/*", "redesign/mcp/*",
     "redesign/librechat/*.mjs", "redesign/librechat/*.yaml", "redesign/librechat/*.yml",

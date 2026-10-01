@@ -31,7 +31,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # que linter nenhum -- e este roda em dois caminhos vivos
     # (redesign/mcp/servidor.py, tool `lint_header`, e redesign/grafo/tools.py).
     # `modelo:` é a âncora certa por texto de REGRAS, não por escolha minha:
-    # REGRAS.md, "Carregar e formatos", diz literalmente "Misturar as duas
+    # PROTOCOLOS.md, "Carregar e formatos", diz literalmente "Misturar as duas
     # formas (`modelo:` junto com `t=`) é erro de formato" -- é o próprio
     # discriminador que as REGRAS nomeiam. Sobrevive à saída do Nonce e
     # mantém `Última entrada:`/`pronto.` como checagens de verdade (usar
@@ -72,7 +72,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # aqui já tinha apodrecido (a frase mora hoje noutra linha). Número de
     # linha envelhece em silêncio; nome de seção, não.
     if tem_rotulo_modelo and tem_t:
-        falhas.append("mistura bloco de prontidão (modelo:) com t=<n> — REGRAS.md, 'Carregar e formatos': 'Misturar as duas formas (modelo: junto com t=) é erro de formato'")
+        falhas.append("mistura bloco de prontidão (modelo:) com t=<n> — PROTOCOLOS.md, 'Carregar e formatos': 'Misturar as duas formas (modelo: junto com t=) é erro de formato'")
 
     if tem_prontidao:
         if not re.search(r"última entrada\s*:", texto, re.IGNORECASE):
@@ -81,7 +81,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
             falhas.append("bloco de prontidão sem 'pronto.' ou 'quebrado: <o quê>'")
 
     # `sync: PASS` NU é o erro mais caro desta família, e passava aqui.
-    # REGRAS, "'sync' tem preço": PASS exige as três medidas feitas ao vivo --
+    # PROTOCOLOS, "'sync' tem preço": PASS exige as três medidas feitas ao vivo --
     # `sync: PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>`.
     # Sem elas, "PASS" é afirmação, não verificação: quem lê o cabeçalho não
     # tem como conferir nada. Medido em 10/09/2026 num cabeçalho real da Seth:

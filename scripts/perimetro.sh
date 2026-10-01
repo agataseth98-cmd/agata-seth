@@ -288,7 +288,7 @@ main() {
   p5_append_only; _perimetro_veredito "$?"
   echo
 
-  cabecalho "P-7" "Citação de MEMÓRIAS aponta pra entrada real, não fabricada" "REGRAS, Citação de MEMÓRIAS — primeira referência"
+  cabecalho "P-7" "Citação de MEMÓRIAS aponta pra entrada real, não fabricada" "PROTOCOLOS, Citação de MEMÓRIAS — primeira referência"
   PERIMETRO_ESTADO=""
   p7_citacao; _perimetro_veredito "$?"
   echo
@@ -326,7 +326,7 @@ main() {
   CONT_OK=$((CONT_OK + 1))
   echo
 
-  cabecalho "P-19" "Citação de arquivo:linha em entrada nova de MEMÓRIAS confere contra a fonte real" "REGRAS, Catálogo de falhas conhecidas -- família (59)-(250)/(251), 8/20 do catálogo"
+  cabecalho "P-19" "Citação de arquivo:linha em entrada nova de MEMÓRIAS confere contra a fonte real" "FALHAS.md, famílias CIT/FAB -- (59)-(250)/(251), 8/20 do catálogo de origem"
   p19_citacao_arquivo
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))

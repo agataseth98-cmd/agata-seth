@@ -50,7 +50,7 @@ def _repo_slug():
 
 
 REPO = _repo_slug() or "agataseth98-cmd/agata-seth"
-ARQUIVOS = ["REGRAS.md", "PROJETO.md", "MEMÓRIAS.md"]
+ARQUIVOS = ["REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "PROJETO.md", "MEMÓRIAS.md"]
 INICIO = "<!-- ANCORA-SHA:INICIO"
 FIM = "<!-- ANCORA-SHA:FIM -->"
 

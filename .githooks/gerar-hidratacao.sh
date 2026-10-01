@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Regenera ~/agata/.hidrata.md e ~/agata/INDICE_MEMORIAS.md a partir de
-# REGRAS.md + PROJETO.md + uma janela de MEMÓRIAS.md.
+# REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + uma janela de MEMÓRIAS.md.
 # Chamado pelo hook pre-commit. Pode ser rodado manualmente também.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -464,8 +464,8 @@ montar_hermes() {
   {
     echo "<!--"
     echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
-    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
-    echo "Para mudar o conteúdo, edite REGRAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
+    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+    echo "Para mudar o conteúdo, edite REGRAS.md, PROTOCOLOS.md, FALHAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
     echo "o hook pre-commit regenera este arquivo sozinho."
     if [ -n "$modelo" ]; then
       echo ""
@@ -494,6 +494,19 @@ montar_hermes() {
     # leitura -- achado testando esta mudança, ver MEMÓRIAS da Fase 2/opção C).
     sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" REGRAS.md
     echo ""
+    # Reorganização das REGRAS em três camadas (01/10/2026): o COMO (PROTOCOLOS.md)
+    # e o catálogo por causa raiz (FALHAS.md) entram logo depois do PORQUÊ, na
+    # mesma hidratação -- o modelo continua recebendo os formatos obrigatórios e
+    # o catálogo, só que em camadas separadas. Mesmo tratamento do token que
+    # REGRAS.md (são texto normativo vivo, não história). Ausentes (clone antigo,
+    # antes da reorganização): pulados, nunca erro.
+    for _camada in PROTOCOLOS.md FALHAS.md; do
+      [ -f "$_camada" ] || continue
+      echo "# $_camada"
+      echo ""
+      sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" "$_camada"
+      echo ""
+    done
     echo "# PROJETO.md"
     echo ""
     cat PROJETO.md

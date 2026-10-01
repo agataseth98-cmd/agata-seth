@@ -38,7 +38,7 @@ export LC_ALL="${LC_ALL_ECO:-C.UTF-8}"
 cd "$(git rev-parse --show-toplevel)"
 
 MARCADOR="ENTRADAS-NOVAS"
-CANONICOS=(REGRAS.md MEMÓRIAS.md PROJETO.md)
+CANONICOS=(REGRAS.md PROTOCOLOS.md FALHAS.md MEMÓRIAS.md PROJETO.md)
 # Código de saída: 0 = estado utilizável (sync PASS ou não verificado);
 # 1 = sync FALHA — a cópia local não é o canon: HEAD diverge do remoto, OU a
 #     árvore de trabalho tem edição não commitada num dos canônicos (o eco NÃO

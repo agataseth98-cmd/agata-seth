@@ -11,7 +11,7 @@
 # reais, taxa medida). Duas correções em (204), ordem do Humano, antes de
 # habilitar:
 #   1. Citação dentro de crases é EXEMPLO de formato, pulada sem alarme
-#      (ver REGRAS.md, "Citação de MEMÓRIAS -- primeira referência").
+#      (ver PROTOCOLOS.md, "Citação de MEMÓRIAS -- primeira referência").
 #   2. Síntese composta com mais de um número no mesmo parêntese
 #      (`(194 - ...; 196 - ...)`) agora valida CADA número, não só o
 #      primeiro.

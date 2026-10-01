@@ -37,12 +37,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 55f8bfd1fa4e92803b7564831c2c460ade8ad41b
-  Escrito em: 01/10/2026 14:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99afa36e0f35ba6c468f5a53e154f05a6608d92e
+  Escrito em: 01/10/2026 14:31 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
@@ -86,9 +88,9 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
   api.github.com falhava. A checagem da API é um extra para quem a tem, não um pré-requisito do fetch.
 
 NÃO CONSEGUIU ABRIR NENHUM ENDEREÇO? PEÇA — não invente o que não leu.
-Diga ao Humano em 1 linha o que tentou e o que voltou. Peça REGRAS.md e PROJETO.md inteiros, a janela mais recente de MEMÓRIAS.md e a hora de Brasília (selo e procedimento: Regra 1.1). Primeira sessão sem acesso: PROJETO.md, "Fonte canônica". Com os arquivos do Humano: `sync: não verificado`, origem em 1 linha.
+Diga ao Humano em 1 linha o que tentou e o que voltou. Peça REGRAS.md, PROTOCOLOS.md, FALHAS.md e PROJETO.md inteiros, a janela mais recente de MEMÓRIAS.md e a hora de Brasília (selo e procedimento: Regra 1.1). Primeira sessão sem acesso: PROJETO.md, "Fonte canônica". Com os arquivos do Humano: `sync: não verificado`, origem em 1 linha.
 
-LEIA, NESTA ORDEM: REGRAS.md inteiro · a janela mais recente de MEMÓRIAS.md · PROJETO.md inteiro.
+LEIA, NESTA ORDEM: REGRAS.md inteiro · PROTOCOLOS.md inteiro · FALHAS.md inteiro · a janela mais recente de MEMÓRIAS.md · PROJETO.md inteiro.
 A janela de MEMÓRIAS.md começa no marcador `ENTRADAS-NOVAS`. Vai de cima para baixo, mais recente primeiro.
 Fica dentro do orçamento do hook de hidratação, que nunca corta uma entrada no meio. O mecanismo, o motivo da
 ordem invertida e o tamanho da janela estão em PROJETO.md, "Memória e hidratação". Não são copiados aqui:
@@ -96,7 +98,7 @@ mudam sem aviso, e este arquivo não acompanha essas mudanças.
 
 RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno.
 A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira PROJETO.md, "Estado dos bugs e dos testes", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
-A forma exata das duas está em REGRAS.md, "Carregar e formatos", e na Regra 1: as 3 linhas do bloco (a linha
+A forma exata das duas está em PROTOCOLOS.md, "Carregar e formatos", e na Regra 1 (REGRAS.md): as 3 linhas do bloco (a linha
 `Nonce:` saiu — TES-002 aposentado em 09/09/2026, MEMÓRIAS (417)), as três formas de `sync:` com os campos que
 cada uma exige, o selo de origem da hora, a linha por resposta com `t=<n>`. Não há forma reduzida aqui. Use a
 de REGRAS — é a única, e é a que dá pra comparar entre sessões.

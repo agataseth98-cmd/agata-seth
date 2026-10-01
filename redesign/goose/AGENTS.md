@@ -22,7 +22,7 @@ não é reler arquivo) resolve; não abra os três arquivos inteiros só pra mon
 
 **Releitura direta dos arquivos continua certa quando você precisa de profundidade que o bloco injetado não
 cobre**: uma entrada de MEMÓRIAS fora da janela recente, o texto de `PROJETO_REFERENCIA.md`, conferir uma
-citação antes de usá-la entre aspas (REGRAS, "Citação de MEMÓRIAS"). Aí sim, leia o arquivo real — só não
+citação antes de usá-la entre aspas (PROTOCOLOS, "Citação de MEMÓRIAS"). Aí sim, leia o arquivo real — só não
 como ritual de todo turno.
 
 **Se o bloco NÃO chegou injetado nesta chamada (achado real, MEMÓRIAS (492) — acontece às vezes, causa
