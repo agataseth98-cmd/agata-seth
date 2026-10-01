@@ -5,9 +5,12 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (606)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (607)).
 
-## Onde estamos — 30/09/2026 (consolidado, pra retomar rápido se a sessão cortar)
+## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
+
+**Nova proposta esperando assinatura:** `propostas/claude-md-2026-10-01.diff` — cria `CLAUDE.md` (carregado automático pelo Claude Code, evita depender de colar `PROMPT_CARREGAMENTO.md` à mão) e fecha um buraco que achei no caminho: esse arquivo novo não estava coberto pela quarentena do P-8, e deveria estar (ele dirige um modelo sem você revisar antes, igual `config/*`). Veio do plano de auditoria de tokens que você me pediu pra executar — relatório em `~/Área de trabalho/relatorio-otimizacao-tokens-2026-10-01.md`.
+
 
 **Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **As 3 propostas da continuação do laboratório "Ensaio" foram assinadas por você e já estão aplicadas de verdade nesta Máquina** — fila de assinatura pendente está zerada de novo:
 - `agata resume` exige `--aprovar` ou `--recusar` — digitar "recusar" errado, ou não digitar nada, não aprova mais sozinho.
