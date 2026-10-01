@@ -59,6 +59,12 @@ _perimetro_eh_genese() {
 _p8_eh_comportamento() {
   case "$1" in
     REGRAS.md|PROJETO.md|scripts/*|.githooks/*|config/*) return 0 ;;
+    # CLAUDE.md (01/10/2026) -- carregado automaticamente pelo Claude Code em
+    # toda sessão nova, sem Humano colar nem revisar antes: diferente de
+    # PROMPT_CARREGAMENTO.md (que fica fora da quarentena exatamente porque
+    # SEMPRE passa por um Humano colando e lendo a resposta), CLAUDE.md dirige
+    # um modelo sem esse portão. Mesma classe de risco de config/*.
+    CLAUDE.md) return 0 ;;
     # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
     # é mudança de comportamento tanto quanto trocar um script. A
     # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a
