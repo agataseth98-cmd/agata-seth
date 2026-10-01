@@ -26,18 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5
-  Escrito em: 01/10/2026 13:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 55f8bfd1fa4e92803b7564831c2c460ade8ad41b
+  Escrito em: 01/10/2026 14:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/55f8bfd1fa4e92803b7564831c2c460ade8ad41b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
+
+**Método (relatado pela sessão remota, DADO — Regra 2, não fato confirmado por esta sessão):** clone do repositório real; condição ANTIGA = `REGRAS.md` de hoje; condição NOVA = o mesmo clone com `propostas/reforma-documental-tres-camadas-2026-10-01.diff` aplicado localmente (nunca no repositório real). 15 perguntas desenhadas a partir só das pistas do pedido, antes de ler qualquer uma das duas condições com atenção. Gabarito montado antes das passadas. Duas passadas independentes, cada uma como subagente fresco, cada um só com acesso ao seu próprio diretório.
+
+**Placar:** 15/15 nas duas condições, zero erro factual. Esforço de busca comparável (6 chamadas/86s na ANTIGA, 7 chamadas/62s na NOVA, amostra de 1 execução por lado — não separa sinal de ruído).
+
+**Limitações, declaradas pela própria sessão, não escondidas:**
+- Isolamento das duas passadas é por instrução, não por barreira técnica — autorrelato, não fato de Máquina.
+- Perguntas não são cegas de propósito: o pedido já nomeava "bloco de prontidão", "Portão das três perguntas" etc.
+- **Achado relevante:** o `.diff` não é reorganização pura — a seção "Regra 1.1" da condição NOVA corrige uma ambiguidade real que o texto antigo tinha (qual selo usar quando a hora vem da interface), a mesma decisão do Humano de 01/10/2026 já registrada em (609). É um confound real pra qualquer conclusão "só dividir não muda nada" — parte do ganho medido pode vir da correção de conteúdo, não só do rearranjo.
+- N=1 por condição, sem repetição, sem medida de variância.
+
+**O que isto NÃO decide:** não substitui o portão das três perguntas nem a assinatura do Humano. É insumo novo pra pergunta 3 do portão ("eu saberia se quebrasse"), que antes não tinha medição nenhuma do ponto cego específico — agora tem uma, favorável, com as ressalvas acima.
+
+**sync:** PASS — `git rev-parse main` = `55f8bfd` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (609) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** despachei a sessão remota (Agent, isolation remote) com o desenho do experimento; conferi depois que o worktree que a infraestrutura dela deixou no repositório real não tem nenhuma diferença contra `main` (`git diff main worktree-agent-... --stat`, vazio) · **Autorização:** Humano, confirmando explicitamente "continuar o laboratório Ensaio" com a bateria de reconstrução como tarefa.
 
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
 
