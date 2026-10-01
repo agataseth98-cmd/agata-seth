@@ -5,13 +5,16 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (612)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (613)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade — e a proposta que corrigia a integração também já foi assinada, aplicada e mesclada.** Um arquivo com o porquê (`REGRAS.md`), outro com o como (`PROTOCOLOS.md`), um terceiro com os erros já vividos por causa raiz (`FALHAS.md`). `CLAUDE.md` e `scripts/consultar_indice.py` já citam os três certo. **Nada pendente de assinatura agora.**
+**Nova proposta esperando sua assinatura:** `propostas/modelo-real-header-2026-10-01.diff` — a pedido da própria Seth (ela queria se autodeclarar o modelo certo no cabeçalho em vez de "modelo não verificado"). Avaliei a ideia dela, achei um defeito de desenho (ficaria sempre um turno atrasada) e propus melhor: o `seth_gateway` carimba o modelo real num header HTTP novo (`X-Modelo-Real`), que é fato medido pela Máquina, não autorrelato. Testado ao vivo contra o serviço de verdade, streaming e não-streaming, corpo da resposta intacto nos dois. Você pediu pra seguir sem testar antes de aplicar e assumiu o risco — testei do mesmo jeito o que já é gate obrigatório (suíte, selftest) antes de propor.
+- Assinar: `bash scripts/aprovar.sh modelo-real-header-2026-10-01`.
 
-**Erro meu, achado por auditoria do laboratório e corrigido agora: eu tinha alegado neste mesmo arquivo, antes, que `ONDE_ESTAMOS.md` tinha sido atualizado junto com a aplicação da integração — não tinha sido.** Detalhe: `MEMÓRIAS.md` (612).
+**As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade — e a proposta que corrigia a integração também já foi assinada, aplicada e mesclada.** Um arquivo com o porquê (`REGRAS.md`), outro com o como (`PROTOCOLOS.md`), um terceiro com os erros já vividos por causa raiz (`FALHAS.md`). `CLAUDE.md` e `scripts/consultar_indice.py` já citam os três certo.
+
+**Erro meu, achado por auditoria do laboratório e corrigido: eu tinha alegado neste mesmo arquivo, antes, que `ONDE_ESTAMOS.md` tinha sido atualizado junto com a aplicação da integração — não tinha sido.** Detalhe: `MEMÓRIAS.md` (612).
 
 **Auditoria completa feita hoje, sem mais achados de sistema quebrado:** Obsidian, Ollama, Seth (gateway/escriba/verificador), OmniRoute, Goose e os 4 modelos locais sob demanda — todos testados de verdade, não só "serviço ativo". Detalhe: `MEMÓRIAS.md` (611).
 
