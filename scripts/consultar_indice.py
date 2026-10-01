@@ -83,13 +83,25 @@ def main():
         erro(f"índice ausente: {INDICE}\nrode: python3 scripts/gerar_indice_derivado.py")
 
     txt = open(INDICE, encoding="utf-8").read()
-    p1 = txt.find("## PARTE 1")
+    p1 = txt.find("## PARTE 1 ")
+    p1b = txt.find("## PARTE 1b")
+    p1c = txt.find("## PARTE 1c")
     p2 = txt.find("## PARTE 2")
     p3 = txt.find("## PARTE 3")
-    if -1 in (p1, p2, p3):
-        erro("índice sem as 3 partes esperadas — regenere.")
+    if -1 in (p1, p1b, p1c, p2, p3):
+        erro("índice sem as 5 partes esperadas (1, 1b, 1c, 2, 3) — regenere.")
 
-    bloco_regras = txt[p1:p2]
+    # Achado real, 01/10/2026: antes da reorganização em três camadas (609), só
+    # havia PARTE 1 (REGRAS) e PARTE 2 (PROJETO) -- "## PARTE 1" até "## PARTE 2"
+    # era um bloco só. A reforma inseriu PARTE 1b (PROTOCOLOS) e 1c (FALHAS) NO
+    # MEIO desse intervalo sem que este script soubesse -- bloco_regras engolia
+    # as três partes juntas, e secoes_de() atribuía os "## " de PROTOCOLOS/FALHAS
+    # a "REGRAS.md" no rótulo da saída. Achado rodando consultar_indice.py de
+    # verdade contra um termo só de PROTOCOLOS.md ("Regra 1.1") e vendo o
+    # resultado sair rotulado "REGRAS.md" em vez de "PROTOCOLOS.md".
+    bloco_regras = txt[p1:p1b]
+    bloco_protocolos = txt[p1b:p1c]
+    bloco_falhas = txt[p1c:p2]
     bloco_projeto = txt[p2:p3]
     bloco_mem = txt[p3:]
 
@@ -100,7 +112,8 @@ def main():
     print(txt.split('\n', 4)[2])  # a linha canon: <sha> do frontmatter
     print()
 
-    for rotulo, bloco in (("REGRAS.md", bloco_regras), ("PROJETO.md", bloco_projeto)):
+    for rotulo, bloco in (("REGRAS.md", bloco_regras), ("PROTOCOLOS.md", bloco_protocolos),
+                          ("FALHAS.md", bloco_falhas), ("PROJETO.md", bloco_projeto)):
         achados = [(h, c) for h, c in secoes_de(bloco)
                    if not h.startswith("PARTE ") and casa(h + "\n" + c, termos, modo_all)]
         print(f"================  {rotulo}: {len(achados)} seção(ões)  ================")
