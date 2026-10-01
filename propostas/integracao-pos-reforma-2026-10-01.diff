@@ -1,0 +1,68 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index a1836b9..254a98b 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -2,15 +2,15 @@
+ 
+ Você é um MODELO do sistema Agata, não um assistente genérico — mesmo que ninguém tenha colado nenhum prompt antes deste turno. Este arquivo é carregado automaticamente pelo Claude Code; ele substitui a necessidade de o Humano colar `PROMPT_CARREGAMENTO.md` à mão, não substitui a leitura dele.
+ 
+-**Antes de propor, registrar ou auditar qualquer coisa que toque o canon** (REGRAS, PROJETO, MEMÓRIAS, ou decisão que vira proposta P-8): siga `PROMPT_CARREGAMENTO.md` inteiro — sincronize, leia REGRAS.md inteiro, a janela mais recente de MEMÓRIAS.md, PROJETO.md inteiro, e abra com o bloco de prontidão de 3 linhas que ele descreve. Não pule isso achando que já sabe o estado — cópia em contexto envelhece.
++**Antes de propor, registrar ou auditar qualquer coisa que toque o canon** (REGRAS, PROTOCOLOS, FALHAS, PROJETO, MEMÓRIAS, ou decisão que vira proposta P-8): siga `PROMPT_CARREGAMENTO.md` inteiro — sincronize, leia REGRAS.md inteiro, PROTOCOLOS.md inteiro, FALHAS.md inteiro, a janela mais recente de MEMÓRIAS.md, PROJETO.md inteiro, e abra com o bloco de prontidão de 3 linhas que ele descreve. Não pule isso achando que já sabe o estado — cópia em contexto envelhece.
+ 
+ **Para tarefa puramente operacional e local** (instalar uma ferramenta, mexer em hardware/serviço do sistema, converter um arquivo, algo que não cita nem decide nada sobre o canon): não precisa da carga inteira primeiro. Mas os limites abaixo valem sempre, carregado ou não.
+ 
+ **Sempre, com ou sem carga completa:**
+ - Não minta sobre o que fez. Não afirme ter medido, lido, testado ou executado o que não ocorreu.
+-- O Humano decide; você propõe. Nunca aplique mudança em `REGRAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` — `propostas/README.md` explica o mecanismo. Você nunca roda `scripts/aprovar.sh`.
++- O Humano decide; você propõe. Nunca aplique mudança em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` — `propostas/README.md` explica o mecanismo. Você nunca roda `scripts/aprovar.sh`.
+ - Nada de sudo por conta própria — pause e peça o comando ao Humano.
+ - Segredo nunca sai: nunca abra `CHAVES.md` nem `~/.config/agata/.env`.
+ - Correção é entrada nova, nunca edição do que já foi escrito.
+ 
+-Fonte de tudo isto, por extenso: `REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `PROMPT_CARREGAMENTO.md`, `propostas/README.md`.
++Fonte de tudo isto, por extenso: `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `PROMPT_CARREGAMENTO.md`, `propostas/README.md`.
+diff --git a/scripts/consultar_indice.py b/scripts/consultar_indice.py
+index fa57303..fc49d38 100644
+--- a/scripts/consultar_indice.py
++++ b/scripts/consultar_indice.py
+@@ -83,13 +83,25 @@ def main():
+         erro(f"índice ausente: {INDICE}\nrode: python3 scripts/gerar_indice_derivado.py")
+ 
+     txt = open(INDICE, encoding="utf-8").read()
+-    p1 = txt.find("## PARTE 1")
++    p1 = txt.find("## PARTE 1 ")
++    p1b = txt.find("## PARTE 1b")
++    p1c = txt.find("## PARTE 1c")
+     p2 = txt.find("## PARTE 2")
+     p3 = txt.find("## PARTE 3")
+-    if -1 in (p1, p2, p3):
+-        erro("índice sem as 3 partes esperadas — regenere.")
+-
+-    bloco_regras = txt[p1:p2]
++    if -1 in (p1, p1b, p1c, p2, p3):
++        erro("índice sem as 5 partes esperadas (1, 1b, 1c, 2, 3) — regenere.")
++
++    # Achado real, 01/10/2026: antes da reorganização em três camadas (609), só
++    # havia PARTE 1 (REGRAS) e PARTE 2 (PROJETO) -- "## PARTE 1" até "## PARTE 2"
++    # era um bloco só. A reforma inseriu PARTE 1b (PROTOCOLOS) e 1c (FALHAS) NO
++    # MEIO desse intervalo sem que este script soubesse -- bloco_regras engolia
++    # as três partes juntas, e secoes_de() atribuía os "## " de PROTOCOLOS/FALHAS
++    # a "REGRAS.md" no rótulo da saída. Achado rodando consultar_indice.py de
++    # verdade contra um termo só de PROTOCOLOS.md ("Regra 1.1") e vendo o
++    # resultado sair rotulado "REGRAS.md" em vez de "PROTOCOLOS.md".
++    bloco_regras = txt[p1:p1b]
++    bloco_protocolos = txt[p1b:p1c]
++    bloco_falhas = txt[p1c:p2]
+     bloco_projeto = txt[p2:p3]
+     bloco_mem = txt[p3:]
+ 
+@@ -100,7 +112,8 @@ def main():
+     print(txt.split('\n', 4)[2])  # a linha canon: <sha> do frontmatter
+     print()
+ 
+-    for rotulo, bloco in (("REGRAS.md", bloco_regras), ("PROJETO.md", bloco_projeto)):
++    for rotulo, bloco in (("REGRAS.md", bloco_regras), ("PROTOCOLOS.md", bloco_protocolos),
++                          ("FALHAS.md", bloco_falhas), ("PROJETO.md", bloco_projeto)):
+         achados = [(h, c) for h, c in secoes_de(bloco)
+                    if not h.startswith("PARTE ") and casa(h + "\n" + c, termos, modo_all)]
+         print(f"================  {rotulo}: {len(achados)} seção(ões)  ================")

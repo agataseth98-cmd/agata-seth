@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
+  palavras-chave: proposta, integracao, pos, reforma, aberta, auditoria, geral, pedida, humano, levante, tudo, aberto, verifique, integrado, achou, buracos, reais, documental, deixou, pra, trás, aguardando, assinatura
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
   palavras-chave: bateria, reconstrução, rodada, sessão, remota, primeira, medição, ponto, cego, declarado, modelo, entender, pior, regras, separadas, três, arquivos, dispara, alarme, resultado, condições, erro, factual, favorável, proposta, decisivo
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, genese, script, aberta, scripts, real, nasce, clone, framework, entra, canon, primeira, aguardando, assinatura
 (582) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27`, assinada pelo Humano, aplicada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/perimetro/p08_quarentena.sh` e `scripts/perimetro/p16_testes_dos_controles.sh` aplicados — a exceção mecânica de gênese (`_perimetro_eh_genese`) agora é código real do canon, não só DADO testado em worktree. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, genese, assinada, humano, aplicada, assinatura, conferida, scripts, verificar, perimetro, quarentena, testes, controles, aplicados, exceção, mecânica, gênese, agora, código, real, canon, dado, testado, worktree, par, movido, pra, propostas, aplicadas, suíte, falha
-(581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a exceção mecânica de gênese (P-8/P-16) vira código de verdade no `scripts/perimetro/`, não só DADO testado em worktree. Primeira mudança de comportamento real rumo à Fase 3. Aguardando assinatura.**
-  palavras-chave: proposta, genese, aberta, exceção, mecânica, gênese, vira, código, verdade, scripts, perimetro, dado, testado, worktree, primeira, mudança, comportamento, real, rumo, fase, aguardando, assinatura
+(581) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-p8-p16-2026-09-27` aberta: a …
+  palavras-chave: proposta, genese, aberta
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceçã …
   palavras-chave: testei, ataques, laboratório, contra, exceçã
 (579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do labor …

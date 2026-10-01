@@ -26,20 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99afa36e0f35ba6c468f5a53e154f05a6608d92e
-  Escrito em: 01/10/2026 14:31 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 28b13d766b5667d0617b9d7ee22febd7e4247066
+  Escrito em: 01/10/2026 14:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99afa36e0f35ba6c468f5a53e154f05a6608d92e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28b13d766b5667d0617b9d7ee22febd7e4247066/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28b13d766b5667d0617b9d7ee22febd7e4247066/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28b13d766b5667d0617b9d7ee22febd7e4247066/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28b13d766b5667d0617b9d7ee22febd7e4247066/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/28b13d766b5667d0617b9d7ee22febd7e4247066/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
+
+**Auditoria completa feita antes desta proposta, sem achar mais nada quebrado:**
+- 0 PRs abertos, 0 propostas pendentes, `git status` limpo.
+- Obsidian: `obsidian-app`/`obsidian-ro-proxy` ativos, proxy respondendo 200, P-10 bate com HEAD, `query_canon` testado ao vivo com termo real.
+- Ollama (serviço de **sistema**, não `--user` — checagem errada minha na primeira tentativa, corrigida): ativo, geração real testada (`qwen3.5-9b-64k`, resposta correta com orçamento de tokens adequado).
+- Seth: `seth-gateway`/`seth-escriba`/`seth-verificador` ativos; `seth-verificador` rodou um comando real (`estado`) e devolveu `HEAD` correto; `seth-gateway` respondeu 200 em `/v1/models`.
+- OmniRoute + sanitizador: ativos.
+- Goose: testado ao vivo, respondeu corretamente pelo combo `seth-codigo`.
+- `llama-cpp` locais (4 modelos): mecanismo sob demanda confirmado — subi `phi-4-mini` de propósito, falhou por falta de VRAM (o cérebro principal já ocupa ~90% da RTX 4060), que é limite de hardware já documentado em PROJETO.md, não bug; parei o serviço depois do teste, sem deixar crash loop.
+- `kokoro-tts`: continua parado, confirmando que o conserto de (606) não regrediu.
+- `~/.local/bin/seth`/`seth-parar`: ainda sincronizados com a fonte, confirmando que o conserto de (606) se mantém.
+- PROJETO.md cita seções de REGRAS.md que migraram pra PROTOCOLOS.md (Regra 1.1, Segunda opinião, Verificação de canônico) — **não é bug**: a própria proposta (609) deixou isso de propósito, resolvido pelo Mapa no novo REGRAS.md. Conferi que o Mapa cobre as três.
+
+**Achado 1 — `CLAUDE.md` desatualizado pela própria reforma.** Dizia pra ler só `REGRAS.md`/`PROJETO.md`/`MEMÓRIAS.md`, sem citar `PROTOCOLOS.md`/`FALHAS.md` nem protegê-los na lista de "nunca aplique sem par assinado". Corrigido nos 3 pontos.
+
+**Achado 2, mais sério — `scripts/consultar_indice.py` atribuindo conteúdo de PROTOCOLOS.md/FALHAS.md a "REGRAS.md" na saída.** Causa raiz: o script fatiava o índice derivado em só 3 blocos (`## PARTE 1` até `## PARTE 2` = "REGRAS.md" inteiro), desenhado de quando só existiam PARTE 1 e PARTE 2. A reforma inseriu PARTE 1b (PROTOCOLOS) e 1c (FALHAS) **dentro** desse intervalo sem que o script soubesse — toda seção de PROTOCOLOS/FALHAS saía rotulada "REGRAS.md" pra quem consultasse (inclusive `query_canon`, usado por Seth e por todo modelo em nuvem via o índice). Achado rodando `consulta.py`/`consultar_indice.py` de verdade com um termo exclusivo de PROTOCOLOS.md ("Regra 1.1") e vendo o resultado sair como "REGRAS.md". Corrigido: o script agora reconhece as 5 partes (1, 1b, 1c, 2, 3) e rotula os 4 blocos certos.
+
+**Testado depois do conserto, com os termos exatos que revelaram o bug:** `consultar_indice.py "Regra 1.1"` agora mostra acertos distribuídos certo entre REGRAS.md (1, só o ponteiro do Mapa), PROTOCOLOS.md (2, a seção real), FALHAS.md (1) e PROJETO.md (1) — antes, tudo ia pra "REGRAS.md". `consultar_indice.py "FAB-1"` agora acerta em PROTOCOLOS.md, não mais em REGRAS.md. Sintaxe limpa (`ast.parse`), suíte inteira 46/46.
+
+**Redundância achada, fora do escopo desta proposta — decisão do Humano:** 64 branches remotas no GitHub, todas já mescladas em `main` (`git branch -r --no-merged origin/main` = vazio, nenhuma com conteúdo único), nunca apagadas depois do merge. Seguro de limpar, mas é ação em recurso compartilhado — não apaguei sem perguntar.
+
+**sync:** PASS — `git rev-parse main` = `28b13d7` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (610) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** auditoria ao vivo de cada serviço (systemctl, curl, geração real de modelo, comando real do seth-verificador, Goose real); achado do bug de `consultar_indice.py` rodando a ferramenta de verdade contra termos reais, não lendo o código sozinho; correção testada com os mesmos termos antes/depois; `ast.parse` + suíte inteira · **Autorização:** Humano, "levante tudo que está em aberto... verifique se... está tudo integrado... sem redundâncias".
 
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
 
