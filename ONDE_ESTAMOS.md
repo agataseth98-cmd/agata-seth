@@ -5,13 +5,17 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (615)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (616)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Achado grande, levantado, sem código ainda:** seu pedido de travar comando destrutivo (Seth e Goose) virou uma investigação que achou algo mais sério. A Seth não tem capacidade destrutiva hoje (só leitura e anexar). O Goose: testei um `rm -rf` real e achei alarmante — mas quando reconferi com um arquivo de verdade (não confiando no texto dele), descobri que ele tinha **fabricado** a execução, não rodado nada. A "segurança" de hoje contra comando destrutivo é acidente de instabilidade da cascata de modelos grátis, não um portão funcionando. Detalhe completo: `MEMÓRIAS.md` (615).
+**Causa raiz achada da Seth travando/crashando hoje: bug no próprio LibreChat (terceiro), não no nosso código.** Toda vez que uma conversa de verdade pede pra Seth usar uma ferramenta, a conexão com o servidor de ferramentas trava num loop de reconexão e o turno nunca termina — fiquei **1 minuto e 23 segundos** esperando, ao vivo, sem nunca terminar. Confirmado nas duas versões do LibreChat (a antiga que já estava rodando e uma nova que tentei instalar). Não é algo que eu quebrei hoje — já estava assim a manhã inteira, e explica a crash original, o "não respondeu nada" do Goose, tudo junto. Detalhe técnico completo: `MEMÓRIAS.md` (616).
 
-**Seu pedido seguinte, em andamento:** fazer a Seth se identificar com o modelo real na própria fala (não só por fora, no header técnico) — pra você poder auditar à mão quais modelos da cascata são mais confiáveis chamando ferramenta.
+**Tentei atualizar o LibreChat pra versão de hoje (lançada essa mesma data) — revertido.** Não corrigiu o travamento, e descobri no caminho que a imagem `:latest` desse projeto fica desatualizada (não serve pra saber qual é a versão mais nova). Nada quebrado: voltei pra versão que já estava rodando antes de eu mexer.
+
+**Pra resolver de vez, precisa de investigação no código de terceiro** (`danny-avila/LibreChat`) — ou abrir um relato pra eles, ou um mergulho mais fundo numa próxima sessão. Não é ajuste nosso simples.
+
+**Seu pedido de identificação de modelo na fala da Seth continua pendente** — mas antes de fazer isso, a Seth precisa conseguir terminar um turno com ferramenta, que é o que este achado trava.
 
 **Assinado e aplicado de verdade: a Seth já tem o modelo real carimbado por fato da Máquina (header HTTP `X-Modelo-Real`)** — a Regra 1 ainda não some, "modelo não verificado" continua aparecendo no texto que ela mesma escreve (é o que o item acima resolve).
 

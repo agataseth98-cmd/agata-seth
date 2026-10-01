@@ -26,20 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a
-  Escrito em: 01/10/2026 16:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2b95b801a4ecf0a8131bdd2eafeb4fec379df76d
+  Escrito em: 01/10/2026 19:13 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
+
+**O que motivou:** terminar a investigação de (615) — resolver a identificação de modelo da Seth exigia primeiro entender por que ela não conseguia nem completar um turno com ferramenta.
+
+**Tentativa de upgrade do LibreChat (v0.8.8-rc3 → v0.8.8, lançada hoje), testada e REVERTIDA.** Troquei `redesign/librechat/docker-compose.yml` pro digest da `librechat-dev` (achado: a tag `:latest` deste repositório fica presa em v0.8.7, não acompanha release — confirmado rodando `cat package.json` nas duas imagens antes de decidir). Motivação: changelog oficial cita "fix: Anchor Background Results Onto Tool Calls a Resumed Turn Saved Without Step IDs" (#16353), que bate com a crash relatada pelo Humano. Deploy real, boot limpo, `/health` OK — mas o MCP `canon` nunca conectou: loop de `[MCP] Creating streamable-http transport` → `Transport error` → `Circuit breaker: backing off` → repete, apesar de `librechat.yaml` dizer `type: stdio` (schema idêntico ao usado nos testes e2e oficiais da própria imagem, conferido). **Revertido imediatamente** pro digest anterior — não deixei produção pior do que estava.
+
+**Achado real, que muda tudo: o MESMO loop acontece na v0.8.8-rc3 (a que já estava em produção o dia inteiro), reproduzido ao vivo depois da reversão.** Pedi pro Seth, via navegador real (Claude in Chrome, sessão logada do Humano, mesma disciplina de (487)/(489)/(523) — nenhuma senha tocada), consultar `PROTOCOLOS.md` via `query_canon`. Resultado: o MCP conecta limpo na INICIALIZAÇÃO do container (`Initialized in: 35ms`, 5 ferramentas listadas) — mas na hora de USAR numa conversa de verdade, tenta reconectar como `streamable-http`, falha, tenta de novo, disjuntor liga, e o turno fica girando. Esperei **1m23s** antes de desistir — nunca terminou, nunca mostrou erro pro Humano, só o spinner. `Title generation timeout` apareceu nos logs aos 56s (subtarefa separada, não a causa).
+
+**Isto não é causado por nada que eu mudei hoje.** É bug pré-existente, na versão que já estava em produção a manhã inteira — a crash original da Seth, o "não respondeu nada" do Goose (mesma classe: turno que nunca completa) e a investigação de (615) são provavelmente a MESMA causa, não três bugs diferentes.
+
+**Hipótese não confirmada:** a conexão de inicialização (usada só pra listar ferramentas no boot/menu) e a conexão por-requisição (usada quando uma conversa de verdade chama a ferramenta) parecem passar por caminhos de código diferentes no `@librechat/agents` — um respeita `type: stdio`, o outro tenta `streamable-http` de qualquer jeito. Não fui ao código-fonte do pacote pra confirmar (vendored, minificado, fora do nosso repositório) — fica como hipótese, não fato.
+
+**Estado agora:** produção de volta em v0.8.8-rc3 (igual ao início do dia), `canon-mcp.mjs` com os consertos de PROTOCOLOS/FALHAS/scriptSlug (ainda não proposto, pendente desta entrada) — nenhum dos dois resolve o travamento, que é de camada mais funda (LibreChat/`@librechat/agents`, terceiro).
+
+**Pra resolver de verdade:** abrir issue no `danny-avila/LibreChat` com reprodução mínima (servidor MCP `stdio` simples, chamar ferramenta numa conversa real, ver o loop), ou mergulhar no `/app/packages/.../index.cjs` da imagem rodando pra achar os dois caminhos de conexão divergentes. Não feito nesta sessão — escopo de investigação de código de terceiro, não ajuste nosso.
+
+**sync:** PASS — `git rev-parse main` = `2b95b80` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (615) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** upgrade real testado e revertido (não deixei produção pior); reprodução ao vivo via Claude in Chrome na sessão real do Humano, cronometrada (1m23s, não suposição de "está lento"); logs do container lidos brutos, sem filtro, pra não perder o sinal; `mongosh` consultado pra ver se a chamada sequer chegou a registrar (vazio); diff do compose revertido contra o canon, confirmado byte a byte · **Autorização:** Humano, "vai" (upgrade) + "investigue mais a fundo" (a crash, de (615)).
 
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
 
