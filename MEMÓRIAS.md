@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9cd4e5c5e35626fe59cf53e85b236df085bbed9d
-  Escrito em: 01/10/2026 15:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a
+  Escrito em: 01/10/2026 16:55 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e3bcca74881fe7dda0ab2dd0cc94fda89a689a0a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
+
+**Pedido original:** "comandos com poder destrutivos devem passar pela minha autorização tanto com ela [Seth] como com Goose."
+
+**Seth: sem capacidade destrutiva hoje, confirmado olhando o código, não achado novo.** `seth_verificador` é read-only (10 comandos de uma lista fechada, sem shell); `seth_escriba` é append-only. As únicas ações com efeito real no mundo são `enviar_mensagem` (Discord) e `clicar`/`preencher` (navegador) — já atrás de allowlist de canal/domínio, nunca gated por aprovação explícita por chamada. Não é o que o pedido descreve (ela não tem "comando destrutivo" pra gatear), mas fica registrado como zona cinza se um dia quiser mais rigor aí.
+
+**Goose: investigação, 3 rodadas, com autocorreção no meio.**
+1. **1ª rodada — achado (falso):** `goose run` (headless) rodou `rm -rf` sem pedir nada. Alarmante.
+2. **Autocorreção, achada verificando com prova real (arquivo que eu criei e confirmei depois), não confiando no texto do Goose:** era alucinação — `FALHAS.md`, FAB-3. O Goose disse "removido com sucesso", até fabricou um JSON de ferramenta, e o arquivo continuava intacto. `GOOSE_MODE: approve` sem terminal pra perguntar não executa sem permissão — faz o modelo fabricar uma resposta que parece ter executado. É grave de outro jeito (alegação falsa), mas não é "comando destrutivo roda sem autorização".
+3. **`goose session` (interativo, testado por você de verdade no terminal real):** o mesmo pedido voltou com o turno completando (1.51s) e **conteúdo vazio** — sem texto, sem chamada de ferramenta, sem prompt de aprovação visível. Tentei reproduzir via pty automatizado (3 tentativas, TUI não respondeu limpo a input scriptado) — não insisti além disso, pedi pra você testar de verdade em vez de forçar automação que não estava funcionando.
+4. **Reprodução parcial via `seth_gateway` direto:** o mesmo tipo de pedido, por `codestral-latest` (confirmado pelo `X-Modelo-Real` de (613)/(614)), fabricou um "`maquina_verificar{...}` → resultado" como TEXTO solto, `tool_calls: None` — mesmo padrão de fabricação da rodada 1, provedor diferente.
+
+**Conclusão do levantamento:** a "segurança" que fez o `rm -rf` não executar hoje é **acidental** — vem de chamada de ferramenta não confiável na cascata de ~9 provedores grátis (`config/modelos-gratuitos.md`), não de um portão de aprovação funcionando de verdade. Se algum provedor da cascata chamar a ferramenta corretamente via tool_calls real (não fabricar texto), e `GOOSE_MODE` nunca virar `auto`, o comportamento de hoje seria "não executa" — mas isso nunca foi verificado provedor a provedor, e não é garantia, é acidente de confiabilidade.
+
+**Conecta com um problema maior, não investigado até o fim:** o mesmo turno de hoje achou a Seth travando no LibreChat (`resumeCompletion`/`sendCompletion`, "Unhandled error") depois de uma chamada MCP falhar — plausível que seja a mesma família de causa (resposta malformada de algum provedor da cascata depois de uma falha de ferramenta), não confirmado.
+
+**`redesign/systemd/goose-wrapper` escrito e testado nesta sessão (tira a extensão `developer` por padrão de `goose run`, funciona de verdade — confirmado com efeito real em arquivo, não só texto) mas NÃO proposto:** a justificativa original (parar `rm -rf` sem permissão) não se confirmou como risco real hoje. Fica como rascunho, não versionado, se o Humano quiser retomar quando `GOOSE_MODE` ou a cascata mudarem.
+
+**Pedido novo do Humano, decorrente desta investigação:** resolver a identificação do modelo na própria fala da Seth (não só o header `X-Modelo-Real` de (613)/(614)) — objetivo dele: poder conversar com a Seth e, pelo nome do modelo que ela mesma disser, auditar à mão quais provedores da cascata são menos truncados/confiáveis na execução. Vira item separado, próxima entrada.
+
+**sync:** PASS — `git rev-parse main` = `e3bcca7` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (614) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** teste real com arquivo próprio criado e checado antes/depois (não confiei no texto do Goose em nenhuma das 3 rodadas); pty real (`pexpect`) pra tentar automatizar `goose session`, abandonado depois de 3 tentativas sem resultado limpo; pedido ao Humano pra testar de verdade no terminal real dele, resultado colado e analisado; reprodução parcial via `curl` direto no `seth_gateway` com o header `X-Modelo-Real` já em produção · **Autorização:** Humano, "investigue mais a fundo" + "pode registrar".
 
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
 
