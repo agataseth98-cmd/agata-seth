@@ -5,9 +5,12 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (616)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (617)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
+
+**Nova proposta esperando sua assinatura:** `propostas/canon-mcp-protocolos-falhas-2026-10-01.diff` — achei um TERCEIRO lugar (depois de CLAUDE.md e consultar_indice.py, hoje cedo) que a reforma das regras esqueceu de atualizar: o `canon-mcp.mjs` (a ferramenta que a Seth usa pra consultar o canon) não conhecia PROTOCOLOS.md/FALHAS.md. No caminho, achei e corrigi o bug real que bloqueou a Seth mais cedo hoje: ela pediu pra consultar um script citado no PROJETO.md, e a ferramenta não sabia traduzir esse caminho pro nome real do arquivo guardado — corrigido e testado contra a chamada exata que tinha falhado no log de produção.
+- Assinar: `bash scripts/aprovar.sh canon-mcp-protocolos-falhas-2026-10-01`.
 
 **Causa raiz achada da Seth travando/crashando hoje: bug no próprio LibreChat (terceiro), não no nosso código.** Toda vez que uma conversa de verdade pede pra Seth usar uma ferramenta, a conexão com o servidor de ferramentas trava num loop de reconexão e o turno nunca termina — fiquei **1 minuto e 23 segundos** esperando, ao vivo, sem nunca terminar. Confirmado nas duas versões do LibreChat (a antiga que já estava rodando e uma nova que tentei instalar). Não é algo que eu quebrei hoje — já estava assim a manhã inteira, e explica a crash original, o "não respondeu nada" do Goose, tudo junto. Detalhe técnico completo: `MEMÓRIAS.md` (616).
 

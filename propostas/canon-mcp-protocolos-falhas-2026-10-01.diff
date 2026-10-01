@@ -1,0 +1,45 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 70d136b..6fcd4d8 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -23,7 +23,8 @@ const VERIFICADOR = (process.env.SETH_VERIFICADOR || "http://127.0.0.1:20141").r
+ const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
+ 
+ const CANON = {
+-  REGRAS: "REGRAS.md", PROJETO: "PROJETO.md",
++  REGRAS: "REGRAS.md", PROTOCOLOS: "PROTOCOLOS.md", FALHAS: "FALHAS.md",
++  PROJETO: "PROJETO.md",
+   "MEMÓRIAS": "MEMÓRIAS.md", MEMORIAS: "MEMÓRIAS.md",
+   ONDE_ESTAMOS: "ONDE_ESTAMOS.md", CHAVES: "CHAVES.md",
+   PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md",
+@@ -146,9 +147,30 @@ async function queryCanon(a) {
+   return clamp(`(${file}) — ${linhas.length} linhas:\n\n${body}`, "use grep/linhas");
+ }
+ 
++// Mesmo slug de scripts/gerar_obsidian.py::slug() -- a nota de um script NÃO
++// mora no caminho literal (achado 01/10/2026: a Seth pediu "scripts/
++// estado_para_eco.sh", a ferramenta prefixava memoria/obsidian/ ao caminho
++// cru e dava 404 -- o arquivo real é memoria/obsidian/scripts/script-estado-
++// -para-eco-sh.md). Ordem das transformações tem que bater exatamente com o
++// Python: "." -> "-" ANTES de remover não-[\w\s-], prefixo "script-" DEPOIS
++// do corte de 60 chars. Sem o colisor `_slugs` do gerador (SEM colisão
++// hoje, lista fixa de scripts) -- se um nome novo colidir, esta tradução
++// erra, e vault_consultar cai no 404 de novo (fail-soft: só essa consulta).
++function scriptSlug(nome) {
++  let s = nome.normalize("NFKD").replace(/[̀-ͯ]/g, "");
++  s = s.replace(/\./g, "-");
++  s = s.replace(/[^\w\s-]/g, "").trim().toLowerCase();
++  s = s.replace(/[\s_-]+/g, "-").slice(0, 60).replace(/^-+|-+$/g, "") || "x";
++  return "script-" + s;
++}
++
+ // ---- vault_consultar -------------------------------------------------------
+ async function vaultConsultar(a) {
+   let p = String(a.caminho || "").trim().replace(/^\/+/, "");
++  const mScript = p.match(/^(?:scripts|\.githooks)\/([\w.\-]+\.(?:py|sh))$/);
++  if (mScript) {
++    p = "memoria/obsidian/scripts/" + scriptSlug(mScript[1]) + ".md";
++  }
+   const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") ||
+                       p === "SETH-DIARIO.md" || Object.values(CANON).includes(p);
+   if (p && !jaResolvido) p = "memoria/obsidian/" + p;
