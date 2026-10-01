@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
+  palavras-chave: levantamento, pedido, humano, pra, exigir, autorização, comando, destrutivo, seth, goose, virou, investigação, achou, problema, grave, cascata, modelos, grátis, fabrica, execução, ferramenta, rodar, recusar, código, achado, puro
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
   palavras-chave: proposta, modelo, real, header, assinada, humano, aplicada, seth, gateway, carimba, verdade, fato, máquina
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, omniroute, maxwait, aberta, fecha, maxwaitms, número, faltava, desde, resposta, laboratório, verificado, mim, propor, aguardando, assinatura
 (586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, assinada pelo Humano, aplicada. `testar_perimetro.sh` agora funciona de verdade dentro de um clone recém-nascido — mais um acabamento da Fase 3 fechado.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, suite, fixtures, genese, assinada, humano, aplicada, testar, perimetro, agora, funciona, verdade, dentro, clone, recém, nascido, acabamento, fase, fechado, assinatura, conferida, scripts, verificar, par, movido, pra, propostas, aplicadas, suíte, falha
-(585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` aberta: fecha as 8 falhas (não 6 — recontado de verdade) que `testar_perimetro.sh` dava dentro de um clone recém-nascido pelo `genese.sh`. Aguardando assinatura.**
-  palavras-chave: proposta, suite, fixtures, genese, aberta, fecha, falhas, recontado, verdade, testar, perimetro, dava, dentro, clone, recém, nascido, aguardando, assinatura
+(585) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27` ab …
+  palavras-chave: proposta, suite, fixtures, genese
 (584) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27`, assinada …
   palavras-chave: proposta, genese, script, assinada
 (583) DIÁRIO — 27/09/2026 · **Proposta P-8 `genese-script-2026-09-27` aberta: `s …

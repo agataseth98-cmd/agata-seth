@@ -5,11 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (614)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (615)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Assinado e aplicado de verdade: a Seth agora tem o modelo real carimbado por fato da Máquina.** Ela pediu pra parar de se autodeclarar "modelo não verificado"; o mecanismo que ela sugeriu tinha um defeito (ficaria sempre um turno atrasada), então propus outro: o `seth_gateway` carimba o nome real do modelo que respondeu (header HTTP novo, `X-Modelo-Real`) — fato medido pela Máquina, não autorrelato. Testado ao vivo, antes e depois de assinar, streaming e não-streaming. **Nada pendente de assinatura agora.**
+**Achado grande, levantado, sem código ainda:** seu pedido de travar comando destrutivo (Seth e Goose) virou uma investigação que achou algo mais sério. A Seth não tem capacidade destrutiva hoje (só leitura e anexar). O Goose: testei um `rm -rf` real e achei alarmante — mas quando reconferi com um arquivo de verdade (não confiando no texto dele), descobri que ele tinha **fabricado** a execução, não rodado nada. A "segurança" de hoje contra comando destrutivo é acidente de instabilidade da cascata de modelos grátis, não um portão funcionando. Detalhe completo: `MEMÓRIAS.md` (615).
+
+**Seu pedido seguinte, em andamento:** fazer a Seth se identificar com o modelo real na própria fala (não só por fora, no header técnico) — pra você poder auditar à mão quais modelos da cascata são mais confiáveis chamando ferramenta.
+
+**Assinado e aplicado de verdade: a Seth já tem o modelo real carimbado por fato da Máquina (header HTTP `X-Modelo-Real`)** — a Regra 1 ainda não some, "modelo não verificado" continua aparecendo no texto que ela mesma escreve (é o que o item acima resolve).
 
 **As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade — e a proposta que corrigia a integração também já foi assinada, aplicada e mesclada.** Um arquivo com o porquê (`REGRAS.md`), outro com o como (`PROTOCOLOS.md`), um terceiro com os erros já vividos por causa raiz (`FALHAS.md`). `CLAUDE.md` e `scripts/consultar_indice.py` já citam os três certo.
 
