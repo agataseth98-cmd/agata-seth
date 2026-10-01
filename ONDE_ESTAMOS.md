@@ -5,9 +5,14 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (608)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (609)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
+
+**[FEITO, FALTA SUA ASSINATURA] As regras do sistema foram reorganizadas em três partes, sem perder nada.** Antes, princípios e comandos técnicos ficavam misturados no mesmo arquivo, pesado de ler. Agora há três: um com o porquê (as regras), outro com o como (comandos e formatos) e um terceiro com os erros que já aconteceram, agrupados pela causa. O arquivo das regras ficou com menos da metade do tamanho. Nada se perdeu — conferi duas vezes, uma com a ferramenta do laboratório e outra com meus próprios testes.
+- **Antes de assinar:** leia o portão das três perguntas que deixei na entrada (609) de MEMÓRIAS e confirme (ou corrija) as respostas que o laboratório propôs.
+- Depois disso: `bash scripts/aprovar.sh reforma-documental-tres-camadas-2026-10-01`.
+
 
 **`CLAUDE.md` assinado e aplicado.** Toda sessão nova do Claude Code neste repositório carrega identidade e os limites essenciais sozinha agora — não depende mais de você colar `PROMPT_CARREGAMENTO.md` à mão. Veio do plano de auditoria de tokens que você pediu — relatório em `~/Área de trabalho/relatorio-otimizacao-tokens-2026-10-01.md`. No caminho, achei e fechei um buraco: esse arquivo novo não estava coberto pela quarentena do P-8, e deveria estar — já está, agora.
 

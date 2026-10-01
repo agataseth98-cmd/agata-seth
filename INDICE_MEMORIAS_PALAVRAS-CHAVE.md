@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
+  palavras-chave: proposta, reforma, documental, tres, camadas, aberta, regras, reorganizadas, três, quê, protocolos, falhas, catálogo, causa, raiz, conservação, provada, mecanicamente, aguardando, portão, perguntas, assinatura, humano
 (608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo Humano, aplicada. `CLAUDE.md` é código real do canon, e `scripts/perimetro/p08_quarentena.sh` já o cobre.** Assinatura conferida por `scripts/p8_verificar.sh` (3/4 OK — o item 4 deu falso-negativo porque o conteúdo já estava na árvore de trabalho desde que a proposta foi aberta; confirmado com `git apply --check --reverse`, que bateu limpo). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, P-8 confirmando a assinatura contra o par já em `aplicadas/`.
   palavras-chave: proposta, claude, assinada, humano, aplicada, código, real, canon, scripts, perimetro, quarentena, cobre, assinatura, conferida, verificar, item, deu, falso, negativo, porque, conteúdo, estava, árvore, trabalho, desde, aberta, confirmado, git, apply, check, reverse, bateu, limpo, par, movido, pra, propostas, aplicadas, suíte, falha, confirmando, contra
 (607) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` aberta: `CLAUDE.md` novo (identidade + ponteiros, carregado automático pelo Claude Code) + P-8 passa a cobrir `CLAUDE.md` como "muda comportamento". Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, genese, aberta, exceção, mecânica, gênese, vira, código, verdade, scripts, perimetro, dado, testado, worktree, primeira, mudança, comportamento, real, rumo, fase, aguardando, assinatura
 (580) DIÁRIO — 27/09/2026 · **Testei os 3 ataques do laboratório contra a exceção de gênese, desta vez com `$HOME` isolado (regra que (579) registrou) — os 3 barrados, confirmado de verdade. Zero vazamento pro estado real da Máquina, confirmado antes e depois.**
   palavras-chave: testei, ataques, laboratório, contra, exceção, gênese, desta, home, isolado, regra, registrou, barrados, confirmado, verdade, zero, vazamento, pro, estado, real, máquina
-(579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do laboratório de verdade — o mecanismo bateu com o que eles mediram — mas o teste, sem isolar `$HOME`, contaminou 3 pedaços de estado real compartilhado desta Máquina. Incidente real, não hipótese; corrigi 2, documento o 3º sem tentar reconstruir um valor que não tenho como saber. Nada aplicado ao repo real ainda — gênese continua DADO.**
-  palavras-chave: testei, genese, diff, laboratório, verdade, mecanismo, bateu, eles, mediram, teste, isolar, home, contaminou, pedaços, estado, real, compartilhado, desta, máquina, incidente, hipótese, corrigi, documento, tentar, reconstruir, valor, tenho, saber, nada, aplicado, repo, gênese, continua, dado
+(579) DIÁRIO — 27/09/2026 · **Testei o `genese.sh`/`genese-p8-p16.diff` do labor …
+  palavras-chave: testei, genese, diff, labor
 (578) DIÁRIO — 27/09/2026 · **Proposta P-8 `llamacpp-execstart-fix-2026-09-27`, …
   palavras-chave: proposta, llamacpp, execstart, fix
 (577) DIÁRIO — 27/09/2026 · **O laboratório "Ensaio" respondeu à carta com 3 ent …

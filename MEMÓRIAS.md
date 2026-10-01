@@ -26,18 +26,55 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1065a49ed3b4cd158fd6d82cf27da291c6db2efc
-  Escrito em: 01/10/2026 10:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5
+  Escrito em: 01/10/2026 13:48 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1065a49ed3b4cd158fd6d82cf27da291c6db2efc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1065a49ed3b4cd158fd6d82cf27da291c6db2efc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1065a49ed3b4cd158fd6d82cf27da291c6db2efc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d427f6f41837fdc7e2cb6f7aa992fcd3a9d38f5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
+
+**Origem.** Ordem do Humano em 01/10/2026 ("estado de exceção"), a partir de uma análise externa (transcrição de áudio, 20 min) do `REGRAS.md`, com três recomendações: (1) separar a filosofia dos comandos técnicos; (2) reorganizar o catálogo de falhas por causa raiz, no formato sintoma · causa raiz · solução; (3) tirar o jargão aposentado e as justificativas defensivas do texto ativo, mantendo a história em MEMÓRIAS. Desenho e provas: laboratório "Ensaio"; verificação independente e rebase pro HEAD real: eu.
+
+**O que muda.**
+- `REGRAS.md`: de 43,6 KB para 18,3 KB (−58%). Ficam: fundamentos (3 papéis, princípios), as 7 regras com linhas vermelhas (texto literal preservado), Regra 8, O Conselho, governança da mudança (Mudança estrutural e Portão das três perguntas, literais), Sucessão, Contenção de escopo, Modo de teste, NPR, checagens, um **Mapa** de onde mora cada coisa e notas históricas de uma linha.
+- `PROTOCOLOS.md` (novo): Carregar e formatos, Regra 1.1 (selos em tabela única), "sync" tem preço, Verificação de canônico, Fonte canônica, Glossário, Continuidade entre sessões, Citação de MEMÓRIAS, Segunda opinião, Cadeia de auditoria, Discordância sintética, Economia de tokens. Mesmos títulos de seção de antes, pra citação antiga continuar resolvendo. Contingência em blocos `<details>`.
+- `FALHAS.md` (novo): 7 famílias por causa raiz (FAB, MED, IDF, ART, CIT, SIN, INT) e IDs estáveis. As 20 falhas do catálogo antigo, com Sintoma e Faça no lugar verbatim, mais 3 tiradas de cicatrizes que o próprio REGRAS carregava no meio das cláusulas: SIN-3 hora herdada (259), SIN-4 canon descrevendo mecanismo extinto (312)/(331)/(422), INT-3 identidade apagada pra caber num teto (47).
+- `extras/arquivo/REGRAS-ate-2026-10-01.md`: o `REGRAS.md` anterior, verbatim.
+- Fiação: hidratação, pre-commit, quarentena P-8 (`p08_quarentena.sh`, `redesign/grafo/tools.py`, `propostas/README.md`), manifesto de gênese, índice derivado, `PROMPT_CARREGAMENTO.md`, âncora de URLs, `estado_para_eco.sh`, `atualizar.sh`, ponteiros vivos.
+- Correção no caminho: `scripts/checar_discordancia.sh` citava "Regra 4, item 4"; o certo é "O Conselho, item 4".
+
+**Achado meu, não do lab: o `.diff` original (base `7071f6f`) não aplicava mais.** Entre a entrega do lab e esta sessão, apliquei `CLAUDE.md` (608) e mexi em `scripts/perimetro/p08_quarentena.sh` — exatamente o mesmo arquivo que esta reforma também toca, na mesma função (`_p8_eh_comportamento`). Reconciliei à mão: a linha final cobre `REGRAS.md|PROTOCOLOS.md|FALHAS.md|PROJETO.md|...` **e** mantém o caso `CLAUDE.md` que eu tinha acrescentado — as duas mudanças, juntas, sem perder nenhuma. Gerei um `.diff` novo contra o HEAD real (`5d427f6`); hash diferente do que o lab calculou, pelo motivo acima.
+
+**Verificado por mim, não só aceito do lab, antes de propor:**
+- `conservacao.py` (do lab) rodado por mim, num worktree descartável, contra a árvore real: **CONSERVADO** — 60/60 células do catálogo, 66/66 referências, 79/79 trechos `código` (+ 5 retirados de propósito, confirmados no arquivo histórico), 26/26 títulos, arquivo histórico verbatim, 9/9 frases normativas críticas.
+- `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md` aplicados no worktree conferidos byte a byte contra as versões que o lab entregou já revisadas (`leitura/`): idênticos, exceto o bloco `ANCORA-SHA` (auto-gerado, sempre muda).
+- Suíte completa (`testar_perimetro.sh`): 46/46.
+- Vermelho: `.diff` rebaseado staged sem assinatura → P-8 acusa 20 arquivos suspeitos — mesma contagem que o lab relatou.
+- Verde: assinei com chave ed25519 de teste (nunca a real), `propostas/.allowed_signers` trocado só no worktree → `p8_verificar.sh` 4/4 OK, `git apply --check` limpo.
+- `git apply --check` do `.diff` final contra o HEAD real desta Máquina, de novo, agora: limpo.
+
+**Segunda opinião** (Mudança estrutural), pedida pelo lab a outro modelo (Sonnet): condicional, 7 emendas — 5 aceitas e aplicadas (inclusive um defeito real achado por ela: `PROMPT_CARREGAMENTO.md` não lia PROTOCOLOS nem FALHAS, corrigido), 2 retiradas (normas novas não declaradas; uma candidata a falha que era armadilha prevista, não incidente).
+
+**Portão das três perguntas** (`REGRAS.md`, "Mudança estrutural") — respostas propostas pelo lab, **aguardando confirmação ou correção do Humano no momento da assinatura**:
+1. Desfaço sozinho? Sim — commit único, `git revert`, texto anterior verbatim em `extras/arquivo/`.
+2. Alcance: hidratação, caminho de nuvem, skill, índice derivado, vault, âncora, P-8, manifesto de gênese — todos mapeados e na proposta.
+3. Eu saberia se quebrasse? Em boa parte — `conservacao.py`, suíte, perímetro e índice derivado abortam em divergência. Ponto cego declarado: compreensão pior do modelo com as regras separadas não dispara alarme nenhum; sugestão do lab é medir com bateria de reconstrução antes/depois, não feito ainda.
+
+**Decisão do Humano já incorporada:** a hora que a interface mostra leva sempre `(informado pela interface)` — resolve a ambiguidade que o texto antigo também tratava como `(não verificada)` no fallback universal.
+
+**O que NÃO mudou:** nenhuma regra perdeu força; nenhuma linha vermelha foi tocada; nada de MEMÓRIAS foi editado; `PROJETO.md` intocado.
+
+**sync:** PASS — `git rev-parse main` = `5d427f6` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (608) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `git apply --reject` pra isolar o único conflito real; reconciliação manual testada isolada (`_p8_eh_comportamento`); `conservacao.py` rodado por mim num worktree descartável; `diff` byte a byte contra as versões revisadas do lab; suíte inteira; teste vermelho/verde do P-8 com chave ed25519 de teste, nunca a real; `git apply --check` final contra HEAD real · **Autorização:** Humano, "estado de exceção" (ordem ao lab) + "leia primeiro, compreenda o contexto e aplique" (ordem a mim, nesta sessão) — abertura da proposta, não a assinatura, que continua sendo só dele.
 
 (608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo Humano, aplicada. `CLAUDE.md` é código real do canon, e `scripts/perimetro/p08_quarentena.sh` já o cobre.** Assinatura conferida por `scripts/p8_verificar.sh` (3/4 OK — o item 4 deu falso-negativo porque o conteúdo já estava na árvore de trabalho desde que a proposta foi aberta; confirmado com `git apply --check --reverse`, que bateu limpo). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, P-8 confirmando a assinatura contra o par já em `aplicadas/`.
 
