@@ -26,18 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ba58f73c64f52e808f7e16aab438d48828d72132
-  Escrito em: 30/09/2026 20:27 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7071f6f2a35ada30afe61cb4fd49b6728e2b49a8
+  Escrito em: 01/10/2026 10:35 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba58f73c64f52e808f7e16aab438d48828d72132/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7071f6f2a35ada30afe61cb4fd49b6728e2b49a8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7071f6f2a35ada30afe61cb4fd49b6728e2b49a8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7071f6f2a35ada30afe61cb4fd49b6728e2b49a8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(607) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` aberta: `CLAUDE.md` novo (identidade + ponteiros, carregado automático pelo Claude Code) + P-8 passa a cobrir `CLAUDE.md` como "muda comportamento". Aguardando assinatura.**
+
+**Origem:** auditoria pedida pelo Humano com `plano_otimizacao_tokens_claude_code_agata.md` (Fases 0-2 executadas, relatório em `~/Área de trabalho/relatorio-otimizacao-tokens-2026-10-01.md`, DADO fora do canon). Achado principal: o projeto nunca usou o `CLAUDE.md` nativo do Claude Code — toda sessão depende de `PROMPT_CARREGAMENTO.md` sendo colado à mão, ou do modelo decidir sozinho seguir o protocolo. Um `CLAUDE.md` enxuto resolve isso sem duplicar REGRAS/PROJETO/MEMÓRIAS: aponta pra eles, não os substitui.
+
+**Achado de segurança no caminho, antes de propor:** `CLAUDE.md` não estava coberto por `_p8_eh_comportamento` (`scripts/perimetro/p08_quarentena.sh`) — testado (`return 1`, "livre"). Isso importa porque `CLAUDE.md`, ao contrário de `PROMPT_CARREGAMENTO.md`, é carregado automaticamente pelo Claude Code em toda sessão nova, sem Humano colar nem revisar antes — exatamente o traço que `PROJETO.md`, "Quarentena estrutural", usa pra justificar por que `PROMPT_CARREGAMENTO.md` fica FORA da quarentena. Pela lógica do próprio projeto, `CLAUDE.md` deveria estar DENTRO. Fechado na mesma proposta, não depois.
+
+**Conteúdo:**
+1. `CLAUDE.md` (novo, 1780 bytes) — identidade, quando rodar o `carregar` completo vs. quando uma tarefa puramente operacional não precisa, e os limites que valem sempre (não mentir, Humano decide, nunca aplicar em canon sem par assinado, nunca sudo sozinho, nunca abrir segredo, correção é entrada nova).
+2. `scripts/perimetro/p08_quarentena.sh` — `CLAUDE.md` entra em `_p8_eh_comportamento`, com o motivo comentado no próprio código.
+
+**Testado antes de propor, com chave de teste descartável (nunca a real), só em worktree:**
+- Vermelho: `CLAUDE.md` + o script staged sem `APROVADO-` → `perimetro.sh` P-8 `SUSPEITO`, exit 1 — confirmado nos dois arquivos.
+- Gerei um par de chaves ed25519 descartável, troquei `propostas/.allowed_signers` só no worktree (principal `agata-humano`, exigido pelo código — `_p8_eh_comportamento` verifica contra `HEAD:`, então troquei e **commitei** a troca no worktree antes de assinar, pra virar a raiz de confiança válida daquele HEAD local), assinei o `.diff` com `ssh-keygen -Y sign` no formato exato que `scripts/aprovar.sh` produz.
+- Verde: mesmo `perimetro.sh` → P-8 `OK`. Suíte completa (`testar_perimetro.sh`): 46/46.
+- `git apply --check` do `.diff` real (não o de teste) contra o HEAD real desta Máquina: limpo.
+- Nenhuma chave de teste nem `.allowed_signers` trocado tocou o repositório real — tudo descartado com o worktree.
+
+**sync:** PASS — `git rev-parse main` = `7071f6f` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (606) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** worktree descartável (`git worktree add`); `_p8_eh_comportamento` testado isolado antes/depois da mudança; par de chaves ed25519 de teste + assinatura real via `ssh-keygen -Y sign`, nunca a chave do Humano; suíte inteira; `git apply --check` contra HEAD real · **Autorização:** Humano, "execute-o, tem todas as autorizações que me cabe" (plano de otimização) → relatório apresentado → "pode criar".
 
 (606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de verdade na Máquina — só no repositório. `~/.local/bin/seth`/`seth-parar` continuavam com as linhas `docker start/stop kokoro-tts` removidas da fonte em 27/09. Achado rodando o `seth` de verdade hoje (o container subiu de novo, contra a decisão do Humano). Corrigido: redeploy dos dois atalhos, container parado.**
 
