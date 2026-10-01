@@ -26,20 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 46799a5a5c92a1cc73fd7cea9857fb78e821a216
-  Escrito em: 01/10/2026 15:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 50d74f5eb05b77a6bd0b244c9dbb0f20697a923e
+  Escrito em: 01/10/2026 15:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46799a5a5c92a1cc73fd7cea9857fb78e821a216/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46799a5a5c92a1cc73fd7cea9857fb78e821a216/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46799a5a5c92a1cc73fd7cea9857fb78e821a216/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46799a5a5c92a1cc73fd7cea9857fb78e821a216/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/46799a5a5c92a1cc73fd7cea9857fb78e821a216/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
+
+**Origem.** A Seth propôs (DADO, Regra 2) injetar `MODELO-BASE` no bloco de estado pra ela se autodeclarar no cabeçalho. Avaliei antes de aceitar: o mecanismo técnico que ela citou (OmniRoute devolve o modelo real no campo `model` da resposta) é verdadeiro — testei ao vivo, `"model":"openai/gpt-oss-120b"`, não o alias `seth-livre`. Mas o desenho dela tinha um defeito: só dá pra saber o modelo real DEPOIS da resposta terminar, então injetar isso na PRÓXIMA chamada faz a Seth se identificar com o modelo do turno anterior, com 1 turno de atraso — ainda autorrelato, só adiado. Propus no lugar: o `seth_gateway`, que já intercepta a resposta pra filtrar keepalive SSE, carimba o nome real como header HTTP, sem tocar no corpo — fato verificado pela Máquina, não alegação do modelo (REGRAS, Os 3 papéis).
+
+**Portão das três perguntas, uma de cada vez, como manda REGRAS — não as três juntas (erro que acabei de registrar em (612) na auditoria do lab, não repeti aqui):**
+1. Reversibilidade — Humano respondeu "já sei: é reversível, pode seguir".
+2. Alcance — Humano pediu mapeamento antes. Resultado: `grep` em `redesign/router/`, `redesign/mcp/`, `redesign/librechat/` não achou nenhum consumidor do campo `model` da resposta hoje — header novo é aditivo, nada quebra. Achado no mapeamento: `proxy.py` (sanitizador) é passthrough byte a byte da resposta, SSE incluso — por isso o desenho final não reescreve o corpo, só acrescenta header, e para SSE precisa espiar os primeiros pedaços do upstream ANTES de mandar os headers do gateway pro cliente (headers vão antes do corpo em HTTP; o nome do modelo só aparece dentro do corpo).
+3. Silêncio — Humano escolheu **não testar antes de aplicar** ("pode aplicar direto, sem testar antes"), risco assumido por escrito. Rodei ainda assim o selftest próprio do script (11/11, sem regressão) e a suíte inteira (gate do próprio commit, não é teste extra) antes de propor — e um teste real ao vivo contra o `seth-gateway` restartado com o código novo, non-streaming e streaming, confirmando o header aparecendo nos dois modos e o corpo do SSE terminando limpo em `data: [DONE]`.
+
+**Mecanismo:** `_Handler._modelo_de_bytes()` extrai o primeiro `"model":"<nome>"` que não seja `"keepalive"` (regex, mesma classe de checagem que o filtro de keepalive já usava por substring). Não-streaming: lê o corpo inteiro, extrai, manda. Streaming: espia até 8 pedaços de 8192 bytes do upstream (~64 KiB, cobre a janela de keepalive do OmniRoute) ANTES de mandar `end_headers()`; o que foi espiado é passado pra `_stream_sse_filtrado(up, buf_pre)` — processado como se tivesse acabado de chegar, nada se perde, nada se duplica. Sem modelo achado (timeout do peek, erro, resposta sem o campo): segue sem o header, fail-soft, nunca bloqueia a resposta.
+
+**Testado ao vivo, contra o OmniRoute real:** `curl` non-streaming e streaming contra `:20126` depois de restartar o `seth-gateway.service` com o código novo — `X-Modelo-Real: openai/gpt-oss-120b` nos dois, corpo do SSE intacto (`data: [DONE]` no fim). Selftest do script: 11/11. Suíte: 46/46.
+
+**Autocorreção no meio do próprio processo:** depois do teste ao vivo, o serviço real ficou rodando o código sem assinatura — exatamente o achado §3.3 que acabei de registrar em (612) sobre a reforma documental. Achei antes de comitar (não precisei do lab apontar de novo): revertido `redesign/router/seth_gateway.py` pra versão do HEAD, `seth-gateway.service` reiniciado, confirmado por `curl` que o header não aparece mais — a Máquina real volta a rodar só código canônico enquanto a assinatura não vem. Este commit leva só o `.diff`/MEMÓRIAS/ONDE_ESTAMOS; o código de verdade espera a assinatura.
+
+**sync:** PASS — `git rev-parse main` = `50d74f5` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (612) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** avaliação técnica do DADO da Seth antes de aceitar (verifiquei a citação dela contra PROJETO.md linha 161, confirmada; testei ao vivo se o OmniRoute realmente devolve o modelo real); achei o defeito de desenho (atraso de 1 turno) e propus alternativa; Portão rodado pergunta a pergunta, não em lote; mapeamento de alcance real via grep antes de implementar; teste ao vivo non-streaming e streaming contra o serviço restartado · **Autorização:** Humano — "pode fazer eu assumo o risco", confirmando as 3 perguntas do Portão uma a uma, a terceira dispensando teste prévio em worktree.
 
 (612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra 4), achado por auditoria do laboratório "Ensaio" (`auditoria-pos-reforma-2026-10-01.md`, DADO) e verificado por mim antes de corrigir — inclusive uma alegação falsa minha num commit real.**
 
