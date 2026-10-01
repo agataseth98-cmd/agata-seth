@@ -39,6 +39,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import socket
 import sys
 import threading
@@ -535,6 +536,31 @@ class _Handler(BaseHTTPRequestHandler):
                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
         self._passar(corpo, "POST")
 
+    # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
+    # OmniRoute devolve -- "openai/gpt-oss-120b", nunca o alias de roteamento
+    # "seth-livre"/"seth-rapido"). Vira header HTTP novo, nunca reescreve o
+    # corpo -- proxy.py (sanitizador) é passthrough byte a byte de propósito,
+    # e SSE reescrito no meio do conteúdo arrisca corromper o stream que o
+    # LibreChat acumula (mesma classe de risco de MEMÓRIAS (415)). Header é
+    # aditivo: nada no stack lê "X-Modelo-Real" hoje, então nada quebra
+    # (conferido: grep em redesign/router|mcp|librechat não achou consumidor
+    # do campo "model" da resposta). Fato da Máquina, não autorrelato do
+    # modelo (REGRAS, Os 3 papéis) -- pedido da Seth, MEMÓRIAS (612)/turno
+    # seguinte, risco assumido pelo Humano por escrito, sem teste prévio em
+    # worktree (Portão das três perguntas respondido direto nesta sessão).
+    _RE_MODELO = re.compile(rb'"model"\s*:\s*"([^"]+)"')
+    _PEEK_MAX_PEDACOS = 8  # ~64 KiB -- cobre a janela de keepalive do OmniRoute antes do provedor responder
+
+    @classmethod
+    def _modelo_de_bytes(cls, dado: bytes) -> str | None:
+        """Primeiro campo "model" em `dado`, ou None se ausente ou só
+        "keepalive" (sentinela do OmniRoute, nunca o modelo real)."""
+        for m in cls._RE_MODELO.finditer(dado):
+            nome = m.group(1).decode("utf-8", "replace")
+            if nome != "keepalive":
+                return nome
+        return None
+
     def _passar(self, corpo: bytes, metodo: str):
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
@@ -548,23 +574,45 @@ class _Handler(BaseHTTPRequestHandler):
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
+        sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
+        modelo_real = None
+        buf_pre = b""
+        try:
+            if sse:
+                # Espia os primeiros pedaços (sem enviar nada ao cliente ainda --
+                # headers não foram mandados) até achar o "model" real ou esgotar
+                # o limite; o que foi lido entra no stream normal depois, intacto.
+                for _ in range(self._PEEK_MAX_PEDACOS):
+                    pedaco = up.read(8192)
+                    if not pedaco:
+                        break
+                    buf_pre += pedaco
+                    modelo_real = self._modelo_de_bytes(buf_pre)
+                    if modelo_real:
+                        break
+            else:
+                buf_pre = up.read()
+                modelo_real = self._modelo_de_bytes(buf_pre)
+        except (BrokenPipeError, ConnectionResetError):
+            self.close_connection = True
+            up.close()
+            return
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
                 self.send_header(k, v)
         if self._rota:
             self.send_header("X-Seth-Rota", self._rota)
+        if modelo_real:
+            self.send_header("X-Modelo-Real", modelo_real)
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
-        sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
         try:
             if sse:
-                self._stream_sse_filtrado(up)
+                self._stream_sse_filtrado(up, buf_pre)
             else:
-                while True:
-                    pedaco = up.read(8192)
-                    if not pedaco:
-                        break
+                for i in range(0, len(buf_pre), 8192):
+                    pedaco = buf_pre[i:i + 8192]
                     self.wfile.write(f"{len(pedaco):X}\r\n".encode())
                     self.wfile.write(pedaco)
                     self.wfile.write(b"\r\n")
@@ -603,11 +651,12 @@ class _Handler(BaseHTTPRequestHandler):
             return b": ka\n" if linha.endswith(b"\n") else b": ka"
         return linha
 
-    def _stream_sse_filtrado(self, up):
+    def _stream_sse_filtrado(self, up, buf: bytes = b""):
         """Repassa o SSE do upstream, trocando os chunks-sentinela de keepalive
         do OmniRoute por comentários SSE. Line-buffered: um read do upstream pode
-        cair no meio de uma linha."""
-        buf = b""
+        cair no meio de uma linha. `buf` = bytes já lidos de `up` antes desta
+        chamada (espreitada do X-Modelo-Real em _passar) -- processados primeiro,
+        como se tivessem acabado de chegar; nada se perde, nada se duplica."""
         while True:
             pedaco = up.read(8192)
             if not pedaco:

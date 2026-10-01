@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 50d74f5eb05b77a6bd0b244c9dbb0f20697a923e
-  Escrito em: 01/10/2026 15:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9cd4e5c5e35626fe59cf53e85b236df085bbed9d
+  Escrito em: 01/10/2026 15:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50d74f5eb05b77a6bd0b244c9dbb0f20697a923e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cd4e5c5e35626fe59cf53e85b236df085bbed9d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
+
+Assinatura conferida por `scripts/p8_verificar.sh` — 4/4 OK (par presente, sha256 bate, assinatura ed25519 válida, `git apply --check` limpo — desta vez sem o falso-negativo de sempre, porque a árvore tinha sido revertida antes de propor, lição de (612)/(613)). `git apply` real do `.diff` assinado — não reconstrução manual.
+
+**Testado depois de aplicar, antes de comitar:** sintaxe (`ast.parse`), selftest do script (11/11), suíte inteira (46/46), `perimetro.sh` (0 FALHA), e teste ao vivo contra `seth-gateway.service` restartado com o código assinado: `X-Modelo-Real: openai/gpt-oss-120b` presente na resposta real.
+
+**sync:** PASS — `git rev-parse main` = `d626bed` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (613) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `git apply` do diff assinado num branch próprio, nunca reescrita manual; bateria completa de teste depois de aplicar, incluindo um teste ao vivo contra o serviço real restartado · **Autorização:** assinatura do Humano, conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
 
