@@ -5,17 +5,20 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (610)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (611)).
 
 ## Onde estamos — 01/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**[FEITO, FALTA SUA ASSINATURA] As regras do sistema foram reorganizadas em três partes, sem perder nada.** Antes, princípios e comandos técnicos ficavam misturados no mesmo arquivo, pesado de ler. Agora há três: um com o porquê (as regras), outro com o como (comandos e formatos) e um terceiro com os erros que já aconteceram, agrupados pela causa. O arquivo das regras ficou com menos da metade do tamanho. Nada se perdeu — conferi duas vezes, uma com a ferramenta do laboratório e outra com meus próprios testes.
-- **Antes de assinar:** leia o portão das três perguntas que deixei na entrada (609) de MEMÓRIAS e confirme (ou corrija) as respostas que o laboratório propôs.
-- **Medição extra feita hoje:** uma sessão à parte testou se um modelo entende pior as regras divididas em 3 arquivos — resultado: não, mesmo placar nos dois casos. Favorável, mas não decisivo (detalhe: entrada (610)).
-- Depois de ler as duas: `bash scripts/aprovar.sh reforma-documental-tres-camadas-2026-10-01`. **Eu não assino isso — só você pode.**
+**As regras do sistema já estão reorganizadas em três partes, assinado e aplicado de verdade.** Um arquivo com o porquê (`REGRAS.md`, menos da metade do tamanho de antes), outro com o como (`PROTOCOLOS.md`, novo) e um terceiro com os erros já vividos, agrupados pela causa (`FALHAS.md`, novo). Nada se perdeu — conferido duas vezes, com ferramenta própria e com testes meus.
 
+**Nova proposta esperando assinatura, achada numa auditoria geral que você pediu:** `propostas/integracao-pos-reforma-2026-10-01.diff` — a reforma das regras deixou 2 coisas desatualizadas:
+- `CLAUDE.md` não citava os arquivos novos — corrigido.
+- `scripts/consultar_indice.py` (usado pela Seth e por qualquer modelo em nuvem pra consultar o canon) estava atribuindo conteúdo de `PROTOCOLOS.md`/`FALHAS.md` ao rótulo "REGRAS.md" — corrigido e testado com os mesmos termos que revelaram o problema.
+- Assinar: `bash scripts/aprovar.sh integracao-pos-reforma-2026-10-01`.
 
-**`CLAUDE.md` assinado e aplicado.** Toda sessão nova do Claude Code neste repositório carrega identidade e os limites essenciais sozinha agora — não depende mais de você colar `PROMPT_CARREGAMENTO.md` à mão. Veio do plano de auditoria de tokens que você pediu — relatório em `~/Área de trabalho/relatorio-otimizacao-tokens-2026-10-01.md`. No caminho, achei e fechei um buraco: esse arquivo novo não estava coberto pela quarentena do P-8, e deveria estar — já está, agora.
+**Auditoria completa feita hoje, sem mais achados:** Obsidian, Ollama, Seth (gateway/escriba/verificador), OmniRoute, Goose e os 4 modelos locais sob demanda — todos testados de verdade, não só "serviço ativo". Detalhe técnico e o que foi testado de cada um: `MEMÓRIAS.md` (611).
+
+**Decisão sua, não urgente:** o GitHub tem 64 branches velhas, todas já mescladas, nunca apagadas depois do merge — seguro de limpar, mas é ação num recurso compartilhado, não fiz sem perguntar.
 
 
 **Fase 3 (instalar um Agata novo do zero) continua construída e aplicada de ponta a ponta** (estado de 27/09, sem mudança). **As 3 propostas da continuação do laboratório "Ensaio" foram assinadas por você e já estão aplicadas de verdade nesta Máquina** — fila de assinatura pendente está zerada de novo:
