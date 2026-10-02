@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 198ad409af0f9dc388f30ba6465fee2bbe86d5df
-  Escrito em: 02/10/2026 10:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1
+  Escrito em: 02/10/2026 10:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8da6a9f7f2e8ad6b71904028aae8401f4b2bbbd1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
+
+**Pergunta 1 de (612) — "Na sessão de (611), algum serviço rodou com o `consultar_indice.py` antes da assinatura?"** Resposta do Humano: **não**. Fecha a dúvida "plausível, não verificado" que (612) deixou aberta sobre o achado do lab `p8-verificar-ja-presente-2026-10-01` (item 4 de `p8_verificar.sh` como sinal de passo pulado, não falso-negativo inofensivo). **A proposta continua sem abrir** — decisão de abrir como P-8 real segue pendente, do Humano (lembrete também no fechamento desta sessão).
+
+**Pergunta 2 de (612) — "Limpar as 64 branches mescladas?"** Resposta do Humano: **pode**. Mas a ação já tinha sido feita antes desta sessão (confirmado por `git branch -r --no-merged origin/main` vazio em (611)) — por isso nada a fazer NAQUELE lote. **Achado à parte, medido agora, não relatado pelo lab:** `git ls-remote --heads origin` mostra 11 branches além de `main`, todas de PRs #110-#119 desta sessão (`aplica/`, `proposta/`, `registro/` de hoje — `canon-mcp-protocolos-falhas`, `ferramentas-automaticas-seth`, `modelo-real-na-fala-seth`, `causa-raiz-mcp-streamable-http`, `confirmacao-ao-vivo-ferramentas-modelo`, `modelos-gratuitos-e-teste-canon-mcp`, `teste-seth-livre-canon-mcp`), todas já mescladas (`gh pr merge --merge` sem `--delete-branch`). Mesma classe do achado de (611), gerada por mim mesmo nesta sessão — não apago sem perguntar, mesmo com a autorização geral de hoje: ela mirava o lote antigo, não necessariamente este.
+
+**sync:** PASS — `git rev-parse main` = `8da6a9f` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (625) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `git ls-remote --heads origin` real (não `git branch -r` local, que estava com cache desatualizado — achado no caminho: mostrava branches já apagadas, `--prune` não tinha rodado) antes de aceitar "nada a fazer" do lab · **Autorização:** Humano, respostas diretas às 2 perguntas, relaiadas pelo pacote do lab; achado novo registrado por iniciativa própria (Regra 4: registrar o que já aconteceu não precisa de pedido).
 
 (625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
 
