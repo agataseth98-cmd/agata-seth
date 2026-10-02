@@ -7,6 +7,10 @@ Requires=omniroute-sanitizer.service
 Type=simple
 ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
 Environment=SETH_HIDRATA_MODO=compacto
+# Rota pela cota por minuto do tier 0 (02/10/2026): 0 = desligada. Só trocar
+# para 1 DEPOIS de `python3 scripts/combos_sem_cota.py --aplicar` criar os
+# combos -sg no OmniRoute -- sem eles, ligar quebra a Seth (404).
+Environment=SETH_ROTA_COTA=0
 Restart=on-failure
 RestartSec=3
 # Baseline de hardening (item 6 do plano de mitigação da auditoria do

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Humano (direto, sem refazer o Portão) e aplicada. `SETH_ROTA_COTA=0` — nasce desligada.**
+  palavras-chave: rota, cota, tier, assinada, humano, direto, refazer, portão, aplicada, seth, nasce, desligada
 (637) DIÁRIO — 02/10/2026 · **Item 3(c), reporte upstream aberto: issue pública `danny-avila/LibreChat#16694` sobre o `attemptInvokeBody`/`invoke.cjs` devolver `[finalChunk]` sem guarda quando o stream não entrega chunk nenhum.**
   palavras-chave: item, reporte, upstream, aberto, issue, pública, danny, avila, librechat, attemptinvokebody, invoke, cjs, devolver, finalchunk, guarda, stream, entrega, chunk
 (636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: bateria, reconstrução, rodada, sessão, remota, primeira, medição, ponto, cego, declarado, modelo, entender, pior, regras, separadas, três, arquivos, dispara, alarme, resultado, condições, erro, factual, favorável, proposta, decisivo
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
   palavras-chave: proposta, reforma, documental, tres, camadas, aberta, regras, reorganizadas, três, quê, protocolos, falhas, catálogo, causa, raiz, conservação, provada, mecanicamente, aguardando, portão, perguntas, assinatura, humano
-(608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo Humano, aplicada. `CLAUDE.md` é código real do canon, e `scripts/perimetro/p08_quarentena.sh` já o cobre.** Assinatura conferida por `scripts/p8_verificar.sh` (3/4 OK — o item 4 deu falso-negativo porque o conteúdo já estava na árvore de trabalho desde que a proposta foi aberta; confirmado com `git apply --check --reverse`, que bateu limpo). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, P-8 confirmando a assinatura contra o par já em `aplicadas/`.
-  palavras-chave: proposta, claude, assinada, humano, aplicada, código, real, canon, scripts, perimetro, quarentena, cobre, assinatura, conferida, verificar, item, deu, falso, negativo, porque, conteúdo, estava, árvore, trabalho, desde, aberta, confirmado, git, apply, check, reverse, bateu, limpo, par, movido, pra, propostas, aplicadas, suíte, falha, confirmando, contra
+(608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo …
+  palavras-chave: proposta, claude, assinada
 (607) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` aberta: `CLAUD …
   palavras-chave: proposta, claude, aberta, claud
 (606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de ve …

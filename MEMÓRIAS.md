@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ab0e87d266e5ae5d970a203e54153ca6b19b5d0b
-  Escrito em: 02/10/2026 19:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6
+  Escrito em: 02/10/2026 19:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Humano (direto, sem refazer o Portão) e aplicada. `SETH_ROTA_COTA=0` — nasce desligada.**
+
+O Humano assinou enquanto eu processava outro item desta sessão, sem esperar a pergunta "o Portão da v1 vale pra v2?" que o lab tinha sugerido — a assinatura em si é a resposta (decidiu que sim). `p8_verificar` confirmou o sha256 da v2 (`e673038b…`), não o da v1. Aplicado: `selftest` do gateway 15/15 (11a-11j + o 12 do sse-buffer), `selftest` do `combos_sem_cota.py` 4/4, suíte 46/46, perímetro 0 FALHA. Unit do systemd reinstalado (`~/.config/systemd/user/seth-gateway.service`), `seth-gateway` reiniciado, confirmado `SETH_ROTA_COTA=0` no ambiente real do serviço (via `systemctl --user show`). Par movido pra `propostas/aplicadas/`.
+
+**Pendente, não feito nesta entrada (próximos passos do fluxo, conforme o LEIA do lab):**
+1. `python3 scripts/combos_sem_cota.py` (só o plano, sem `--aplicar`) — mostrar a ordem pro Humano confirmar antes de criar os combos `-sg` de verdade no OmniRoute.
+2. Com o OK dele, `--aplicar` — os combos vivem no `storage.sqlite`, fora do repo; registrar os ids criados quando acontecer.
+3. Testar cada `-sg` direto via `curl` em `:20126`.
+4. Calibrar o estimador: ≥30 pedidos medidos, estimativa ≥ real em 95% deles, mediana |erro| ≤15% — só então a P-8 de uma linha que liga `SETH_ROTA_COTA=1`.
+
+**sync:** PASS — `git rev-parse main` = `75cef5b` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (637).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `p8_verificar.sh` real (sha256 conferido contra a v2, não assumido); `selftest`/suíte/perímetro reais após aplicar; `systemctl --user show` real, não assumido do arquivo · **Autorização:** Humano, assinatura via `scripts/aprovar.sh rota-cota-tier0-2026-10-02` (decisão tomada por ele, sem eu precisar perguntar de novo sobre o Portão).
 
 (637) DIÁRIO — 02/10/2026 · **Item 3(c), reporte upstream aberto: issue pública `danny-avila/LibreChat#16694` sobre o `attemptInvokeBody`/`invoke.cjs` devolver `[finalChunk]` sem guarda quando o stream não entrega chunk nenhum.**
 
