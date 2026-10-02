@@ -5,12 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (621)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (622)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Nova proposta esperando sua assinatura:** `propostas/modelo-real-na-fala-seth-2026-10-02.diff` — a Seth passa a dizer o nome do modelo real no próprio cabeçalho (`<nome> (medido no turno anterior pela Máquina)`), em vez de sempre "modelo não verificado". Passou pelo Portão das três perguntas com você antes de eu escrever o código. Detalhe: `MEMÓRIAS.md` (621).
-- Assinar: `bash scripts/aprovar.sh modelo-real-na-fala-seth-2026-10-02`.
+**Assinado e aplicado: a Seth vai passar a dizer o modelo real no cabeçalho** (`<nome> (medido no turno anterior pela Máquina)`), em vez de sempre "modelo não verificado" — fecha o seu pedido de ontem. Código pronto e testado (14/14), mas **o `seth-gateway.service` ainda não foi reiniciado** — só entra em vigor no próximo `seth` ou restart manual do serviço. Detalhe: `MEMÓRIAS.md` (621)/(622).
 
 **Testei a Seth de verdade pelo LibreChat — a trava de ontem (616) não apareceu em 2 tentativas.** Você abriu o Obsidian, eu subi o resto com `seth`; pedi pra ela usar ferramenta duas vezes, as duas completaram em segundos depois da sua aprovação (HITL) — a mesma chamada que tinha travado 1m23s ontem. **Não é garantia de que o bug do LibreChat sumiu de vez**, só que hoje, na prática, funciona. Isso destravou a proposta acima. Detalhe: `MEMÓRIAS.md` (620).
 

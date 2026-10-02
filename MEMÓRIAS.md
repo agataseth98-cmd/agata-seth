@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 654a5d6851c65c2464d356885983102fe59cc597
-  Escrito em: 02/10/2026 09:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5ed5b064bdbb826d32476c0c85a1d206bf4847e2
+  Escrito em: 02/10/2026 09:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
+
+Assinatura conferida por `scripts/p8_verificar.sh` — 4/4 OK. `git apply` real do `.diff` assinado num branch próprio.
+
+**Testado depois de aplicar, antes de comitar:** sintaxe (`ast.parse`), selftest do script — 14/14, incluindo os 3 casos novos ((621) já tinha rodado isso antes de propor; reconfirmado agora contra o código realmente aplicado, não só o `.diff`), `perimetro.sh` 0 FALHA (P-8 reconheceu o par aprovado). **Não reiniciei `seth-gateway.service`** nesta entrada — o código fonte está atualizado, mas o processo em produção só pega a mudança no próximo restart (pelo atalho `seth` ou manual); registrado como passo que falta, não escondido.
+
+**sync:** PASS — `git rev-parse main` = `5ed5b06` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (621) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `p8_verificar.sh` 4/4 antes de aplicar; `git apply` do diff assinado; `ast.parse`; selftest rodado de novo contra o código aplicado (14/14); `perimetro.sh` completo · **Autorização:** assinatura do Humano (`propostas/aplicadas/APROVADO-modelo-real-na-fala-seth-2026-10-02`), conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
 

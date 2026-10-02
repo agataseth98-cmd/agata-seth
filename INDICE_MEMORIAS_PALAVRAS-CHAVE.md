@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
+  palavras-chave: proposta, modelo, real, fala, seth, assinada, humano, aplicada, fecha, pedido, passa, citar, cabeçalho, rotulado, medição, turno, anterior
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
   palavras-chave: proposta, modelo, real, fala, seth, aberta, gateway, passa, guardar, medido, reinjetá, turno, seguinte, pra, citar, nome, certo, verificado, aguardando, assinatura
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, kokoro, remocao, assinada, humano, aplicada, tts, fora, sistema, assinatura, conferida, scripts, verificar, arquivos, aplicados, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, confirmado, menção, container, físico, continua, parado, disco, apagado, decisão, separada
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
   palavras-chave: proposta, kokoro, remocao, aberta, decisão, humano, tirar, tts, sistema, aguardando, assinatura
-(592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
-  palavras-chave: proposta, modelos, padrao, assinada, humano, aplicada, lista, pendências, registrada, fechada, assinatura, conferida, scripts, verificar, config, aplicado, par, movido, pra, propostas, aplicadas, perimetro, falha
+(592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada …
+  palavras-chave: proposta, modelos, padrao, assinada
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a …
   palavras-chave: proposta, modelos, padrao, aberta
 (590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, a …
