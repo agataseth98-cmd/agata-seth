@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 96ea47e240c3b171caea2e4348ffd1eacdac73f0
-  Escrito em: 02/10/2026 19:31 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ab0e87d266e5ae5d970a203e54153ca6b19b5d0b
+  Escrito em: 02/10/2026 19:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/96ea47e240c3b171caea2e4348ffd1eacdac73f0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/96ea47e240c3b171caea2e4348ffd1eacdac73f0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/96ea47e240c3b171caea2e4348ffd1eacdac73f0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/96ea47e240c3b171caea2e4348ffd1eacdac73f0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/96ea47e240c3b171caea2e4348ffd1eacdac73f0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ab0e87d266e5ae5d970a203e54153ca6b19b5d0b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(637) DIÁRIO — 02/10/2026 · **Item 3(c), reporte upstream aberto: issue pública `danny-avila/LibreChat#16694` sobre o `attemptInvokeBody`/`invoke.cjs` devolver `[finalChunk]` sem guarda quando o stream não entrega chunk nenhum.**
+
+O Humano colou o texto final do reporte (título + corpo) e autorizou publicar via `AskUserQuestion` ("Sim, abra a issue"). Antes de postar: busquei duplicata — `search_issues` do MCP do GitHub falhou (422, parece não ter acesso à busca semântica nesse repo com este token), então busquei na web pelo texto exato do erro. Achei `#11619` ("Pruning logic...missing null check in ToolNode.ts"), **já fechado em fev/2026** — conferi o corpo e a pilha de chamada: é outro bug, em `ToolNode.cjs`/`routeMessage`, disparado por poda de contexto (pruning), não pelo `invoke.cjs`/`attemptInvokeBody` que a (629)/(635) acharam. Não é duplicata.
+
+Issue criada: https://github.com/LibreChat-AI/LibreChat/issues/16694. A label `🐛 bug` não pegou (sem permissão do token pra aplicar label; sem importância, o conteúdo está lá).
+
+**O que isso fecha:** o item 3(c) do lab tinha duas partes — a guarda local (prioridade baixa, ainda não desenhada) e o reporte upstream (feito agora). A causa raiz real do crash já está corrigida desde (635)/(636); este reporte é só pra fechar a classe de erro no código deles, não é mais urgente pra nós.
+
+**sync:** PASS — `git rev-parse main` = `ab0e87d` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (636).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `issue_read` real do #11619 antes de descartar como duplicata (não só o título); `issue_write` real, URL conferida na resposta da ferramenta · **Autorização:** Humano, texto do reporte colado + confirmação explícita via `AskUserQuestion` ("Sim, abra a issue") antes de qualquer publicação pública.
 
 (636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
 

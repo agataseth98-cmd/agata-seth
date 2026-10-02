@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (636)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (637)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
@@ -13,6 +13,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (636)).
 
 **Proposta esperando sua assinatura, já na versão 2:** `propostas/rota-cota-tier0-2026-10-02.diff` — reduz a FREQUÊNCIA de travamento (desvia do modelo que só aguenta 8.000 tokens/minuto), mas já não é mais o conserto do travamento em si (isso já foi feito, acima). **Não muda nada no comportamento real ainda** (nasce desligada). Conteúdo idêntico à v1 que já passou pelo Portão com você e teve segunda opinião **condicional** — só ganhou 1 teste a mais, cobrindo uma regressão que já foi corrigida em separado. Detalhe: `MEMÓRIAS.md` (632)/(633)/(634).
 - Assinar: `bash scripts/aprovar.sh rota-cota-tier0-2026-10-02`.
+
+**Reporte aberto no projeto de terceiros (LibreChat):** issue pública sobre o bug real que causava o crash, pra eles consertarem também — [#16694](https://github.com/danny-avila/LibreChat/issues/16694). Já não é urgente pra nós (a causa real já está corrigida acima). Detalhe: `MEMÓRIAS.md` (637).
 
 **Incidente de segurança, causa real corrigida: não foi um subprocesso, foi a função que lê o token interno a cada chamada, nos dois gateways (`seth_gateway.py`/`proxy.py`).** 9 chaves reais do seu `.env` passaram pelo meu contexto durante a tentativa de captura. **Já resolvido:** o arquivo de cache que eu não conseguia apagar sozinho (`b45oi9hr2.txt`) — você já apagou, confirmado. **Ainda exposto, decisão sua:** o transcript real desta conversa (`~/.claude/projects/-home-orusoua-agata/e917ba4a-5c50-40be-8076-683b62fd8c7f.jsonl`) — não mexo nisso sozinho. **Recomendo rotacionar as 9 chaves** (mesmo padrão de (208)/(209)); quando fizer, me avise que ajudo a atualizar `.env` e o `storage.sqlite` do OmniRoute juntos, pra não dar 401 silencioso por rotação parcial. Desenhei (não apliquei) o conserto: token isolado num arquivo próprio, lido uma vez na partida, não mais o `.env` inteiro a cada turno. Detalhe: `MEMÓRIAS.md` (629)/(631).
 
