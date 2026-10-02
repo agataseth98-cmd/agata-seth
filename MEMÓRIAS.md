@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 171ee50a3421dbe544ad7f586f38e241397a69d3
-  Escrito em: 02/10/2026 09:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 654a5d6851c65c2464d356885983102fe59cc597
+  Escrito em: 02/10/2026 09:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/654a5d6851c65c2464d356885983102fe59cc597/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
+
+**Fecha o pedido de (615):** "resolver a identificação do modelo na própria fala da Seth". O bloqueio técnico que impedia testar isso (o turno nem completava com ferramenta) foi medido como superado em (620).
+
+**Desenho, decidido com o Portão das três perguntas (uma por vez, nesta sessão) antes de implementar:**
+1. **Reversibilidade** — confirmado com o Humano: arquivo novo fora do repo + mudanças aditivas no `seth_gateway.py`; reverter o commit e apagar o arquivo volta ao estado de hoje.
+2. **Alcance** — mapeei com `grep` antes de perguntar: nada no stack lê `X-Modelo-Real` nem vai ler o arquivo novo além do próprio `seth_gateway.py` (escreve e lê). Humano confirmou que bastava.
+3. **Silêncio** — pior caso é sempre visível (nome errado dito pela Seth, ou ausência da linha = comportamento de hoje), nunca silencioso; fail-soft (falha de disco não derruba a resposta). Humano autorizou aplicar sem testar antes num worktree separado — ainda assim rodei o selftest e o perímetro antes de propor, mesmo padrão de (613).
+
+**Por que não é a mesma falha que (613) rejeitou.** A ideia original da Seth (MEMÓRIAS (613)) injetava o nome no bloco de estado pra ela se autodeclarar — rejeitada porque virava "autorrelato adiado" (só se sabe o modelo DEPOIS da resposta terminar). Aqui o mecanismo é o mesmo atraso de 1 turno, mas a FONTE é diferente: não é a Seth relatando de memória/corpus (a falha que `FALHAS.md` IDF-1 descreve), é o arquivo que `_lembrar_modelo_real()` grava a partir do MESMO dado que já vira o header `X-Modelo-Real` — fato medido pela Máquina (`X-Modelo-Real` real, não alias de roteamento). A doutrina nova instrui a Seth a rotular isso explicitamente como medição do TURNO ANTERIOR, nunca do atual.
+
+**Mecanismo:**
+- `MODELO_REAL_PATH` (novo, env `SETH_MODELO_REAL_PATH`, default `~/.cache/agata/seth-modelo-real-ultimo.txt` — mesma convenção de outros arquivos efêmeros em `~/.cache/agata/`): grava o nome toda vez que `X-Modelo-Real` é medido (mesmo ponto de código que já grava o header, `_passar`).
+- `_linha_modelo_real_anterior()`: lê o arquivo, devolve `"MODELO-REAL-TURNO-ANTERIOR: <nome>"` ou `""`. Anexada ao bloco de estado em `_hidratacao()` (1º turno) e `_bloco_estado_atual()` (turnos seguintes) — só quando o estado do git (`_estado()`) já veio, preservando o `lacuna` existente pra quando a medição de git falha.
+- `_DOUTRINA_FIXA`: cláusula nova dizendo pra Seth usar o nome quando a linha vier, sempre rotulado `(medido no turno anterior pela Máquina; este turno ainda não medido)` — vale pro mesmo campo nas duas formas do cabeçalho (`modelo:` e `<modelo>`).
+
+**Risco residual declarado, não escondido: o arquivo é GLOBAL, não por conversa.** Duas conversas simultâneas podem fazer uma "herdar" por 1 turno o nome medido na outra. Aceito pelo padrão de uso de hoje (Humano único, uso majoritariamente sequencial) — e, como todo o resto aqui, visível na hora (o Humano vê o nome errado), não silencioso.
+
+**Testado antes de propor:** `node`/`python3 -c "import ast"` (sintaxe limpa); selftest do script — 14/14, incluindo os 3 casos novos (sem medição prévia → `None`; resposta com `"model"` → sidecar gravado; turno seguinte cita o nome rotulado como anterior); `scripts/perimetro.sh` com o arquivo staged confirmou **P-8 bloqueando corretamente** (`SUSPEITO: muda comportamento... sem propostas/APROVADO-<nome>`) antes de eu gerar a proposta — o controle reconheceu a mudança como "muda comportamento" sem eu precisar simular isso. Working tree revertido pro HEAD antes de propor (mesma disciplina de (612)/(613)): o código real só entra depois da assinatura.
+
+**sync:** PASS — `git rev-parse main` = `654a5d6` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (620) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** Portão das três perguntas rodado pergunta a pergunta via AskUserQuestion, não em lote; `grep` real de alcance antes de perguntar a 2ª; `node -c`/`ast.parse`; selftest rodado de verdade (14/14, não só lido o código); `perimetro.sh` rodado com o arquivo staged pra confirmar que P-8 pega a mudança; diff gerado contra HEAD real e `git apply --check` confirmando que aplica limpo; working tree revertido antes de propor · **Autorização:** Humano, "pode começar" (02/10/2026), depois das 3 perguntas do Portão respondidas uma a uma.
 
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
 

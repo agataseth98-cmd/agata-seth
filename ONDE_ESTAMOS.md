@@ -5,19 +5,20 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (620)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (621)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Testei a Seth de verdade pelo LibreChat (depois que você subiu o Obsidian, eu subi o resto com `seth`) — a trava de ontem (616) não apareceu em 2 tentativas.** Pedi pra ela consultar um script e depois uma regra do PROTOCOLOS.md; as duas vezes ela pediu sua aprovação (HITL) e, depois de aprovar, respondeu certo em segundos — a mesma chamada que tinha travado 1m23s ontem. **Não é garantia de que o bug do LibreChat sumiu de vez** (só testei 2 vezes, não ataquei o problema no código deles) — mas na prática, hoje, a Seth completa turno com ferramenta. Detalhe: `MEMÓRIAS.md` (620).
+**Nova proposta esperando sua assinatura:** `propostas/modelo-real-na-fala-seth-2026-10-02.diff` — a Seth passa a dizer o nome do modelo real no próprio cabeçalho (`<nome> (medido no turno anterior pela Máquina)`), em vez de sempre "modelo não verificado". Passou pelo Portão das três perguntas com você antes de eu escrever o código. Detalhe: `MEMÓRIAS.md` (621).
+- Assinar: `bash scripts/aprovar.sh modelo-real-na-fala-seth-2026-10-02`.
 
-**Conserto do `canon-mcp.mjs` assinado, aplicado E testado de ponta a ponta — fechado.** A ferramenta que a Seth usa pra consultar o canon agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado (o que bloqueava a Seth em produção) está corrigido. Detalhe: `MEMÓRIAS.md` (618)/(619).
+**Testei a Seth de verdade pelo LibreChat — a trava de ontem (616) não apareceu em 2 tentativas.** Você abriu o Obsidian, eu subi o resto com `seth`; pedi pra ela usar ferramenta duas vezes, as duas completaram em segundos depois da sua aprovação (HITL) — a mesma chamada que tinha travado 1m23s ontem. **Não é garantia de que o bug do LibreChat sumiu de vez**, só que hoje, na prática, funciona. Isso destravou a proposta acima. Detalhe: `MEMÓRIAS.md` (620).
 
-**Seu pedido de identificação de modelo na fala da Seth continua pendente — mas agora sem o bloqueio técnico.** Antes ela não completava turno com ferramenta; hoje completa (achado acima). O header `X-Modelo-Real` já existe no HTTP (613/614); falta construir a parte que faz a Seth LER esse header e falar o nome certo, em vez de "modelo não verificado" (que ainda aparece no cabeçalho das respostas de hoje). Próximo passo real, não feito ainda.
+**Conserto do `canon-mcp.mjs` assinado, aplicado E testado de ponta a ponta — fechado.** A ferramenta que a Seth usa pra consultar o canon agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado está corrigido. Detalhe: `MEMÓRIAS.md` (618)/(619).
 
 **`propostas/modelos-gratuitos-2026-09-30.md` (estava solto, sem commit) investigado e arquivado — nada pede mudança.** Os modelos com erro no teste eram esperados (locais desligados, HuggingFace com crédito mensal esgotado, já sabido); os 2 Gemini "novos" já estão em produção desde 23/09. Detalhe: `MEMÓRIAS.md` (619).
 
-**Pendência real que sobra de ontem, fora do nosso alcance direto: o bug de terceiro no LibreChat** (loop de reconexão `streamable-http` no MCP, trava qualquer turno com ferramenta) — não testado de novo nesta sessão porque exigiria subir o LibreChat/Docker, que você não pediu. Pra resolver de vez: issue no `danny-avila/LibreChat` ou mergulho no código deles. Seu pedido de identificação de modelo na fala da Seth continua esperando essa resolução.
+**Pendência que sobra, fora do nosso alcance direto: o bug de terceiro no LibreChat** (loop de reconexão `streamable-http` no MCP) — não investigamos o código deles, não há garantia de que não volta. Pra resolver de vez: issue no `danny-avila/LibreChat` ou mergulho no código deles.
 
 ## Histórico — 01/10/2026
 
