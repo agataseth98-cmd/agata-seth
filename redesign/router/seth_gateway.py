@@ -716,22 +716,36 @@ class _Handler(BaseHTTPRequestHandler):
         cair no meio de uma linha. `buf` = bytes já lidos de `up` antes desta
         chamada (espreitada do X-Modelo-Real em _passar) -- processados primeiro,
         como se tivessem acabado de chegar; nada se perde, nada se duplica."""
+        # As linhas completas JÁ presentes em `buf` (vindas da espiada) saem
+        # ANTES de ler mais. Regressão de 9dfd7da (614): sem isto, quando a
+        # espiada lia a resposta inteira até o EOF (resposta pequena -- o caso de
+        # quase toda chamada de ferramenta), o primeiro read() voltava vazio e o
+        # buffer INTEIRO caía no tratamento de "última linha parcial": começando
+        # pelo keepalive do OmniRoute, virava um único ": ka" e o conteúdo real
+        # sumia -> stream sem nenhum chunk -> crash "'tool_calls' in undefined"
+        # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
+        buf = self._escrever_linhas_completas(buf)
         while True:
             pedaco = up.read(8192)
             if not pedaco:
                 break
-            buf += pedaco
-            while b"\n" in buf:
-                linha, buf = buf.split(b"\n", 1)
-                saida = self._filtrar_linha_sse(linha + b"\n")
-                self.wfile.write(f"{len(saida):X}\r\n".encode())
-                self.wfile.write(saida)
-                self.wfile.write(b"\r\n")
+            buf = self._escrever_linhas_completas(buf + pedaco)
         if buf:
             saida = self._filtrar_linha_sse(buf)
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
+
+    def _escrever_linhas_completas(self, buf: bytes) -> bytes:
+        """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
+        devolve o resto -- no máximo uma linha parcial, sem '\\n'."""
+        while b"\n" in buf:
+            linha, buf = buf.split(b"\n", 1)
+            saida = self._filtrar_linha_sse(linha + b"\n")
+            self.wfile.write(f"{len(saida):X}\r\n".encode())
+            self.wfile.write(saida)
+            self.wfile.write(b"\r\n")
+        return buf
 
     def _erro(self, code: int, msg: str):
         corpo = json.dumps({"error": {"type": "seth_gateway_error", "message": msg}},
@@ -945,6 +959,30 @@ def _selftest() -> int:
           f"como turno anterior ({'achou' if ok10c else 'não achou'} a linha)")
     falhas += 0 if ok10c else 1
     _Dummy.modelo_resposta = None
+
+    # 12. regressão de 9dfd7da (614): a espiada do X-Modelo-Real leu a resposta
+    # inteira (pequena, começando pelo keepalive) antes do laço de stream ->
+    # o conteúdo real NÃO pode sumir; tem de sair linha a linha, keepalive -> ": ka".
+    import io
+    ka12 = (b'data: {"id":"chatcmpl-keepalive","model":"keepalive","choices":[{"index":0,'
+            b'"delta":{},"finish_reason":null}]}\n\n')
+    real12 = (b'data: {"id":"chatcmpl-msg_1","model":"m","choices":[{"index":0,"delta":'
+              b'{"tool_calls":[{"index":0,"id":"c1","function":{"name":"f","arguments":"{}"}}]},'
+              b'"finish_reason":"tool_calls"}]}\n\ndata: [DONE]\n\n')
+
+    class _UpVazio:  # a espiada já leu tudo: o próximo read() é EOF
+        def read(self, n=-1):
+            return b""
+
+    h12 = _Handler.__new__(_Handler)
+    h12.wfile = io.BytesIO()
+    h12._stream_sse_filtrado(_UpVazio(), ka12 + real12)
+    saida12 = h12.wfile.getvalue()
+    ok12 = (b"tool_calls" in saida12 and b"[DONE]" in saida12 and b": ka" in saida12
+            and b"chatcmpl-keepalive" not in saida12)
+    print(f"{'PASS' if ok12 else 'FALHA'}  SSE espiado inteiro: conteúdo real preservado, "
+          f"keepalive virou comentário ({len(saida12)} bytes de saída)")
+    falhas += 0 if ok12 else 1
 
     up.shutdown()
     gw.shutdown()
