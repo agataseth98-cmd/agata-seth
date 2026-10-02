@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
+  palavras-chave: proposta, ferramentas, automaticas, seth, assinada, humano, aplicada, leitura, potencial, destrutivo, pedem, aprovação
 (623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
   palavras-chave: pedido, humano, ferramenta, pesquisa, potencial, destrutivo, fica, automática, seth, goose, sempre, pedir, aprovação, lado, aplicado, direto, fora, repo, quarentena, virou, proposta, aguardando, assinatura
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, protecao, branch, github, assinada, humano, aplicada, scripts, proteger, código, real, canon, pendências, abertas, fase, decisões, estão, fechadas, assinatura, conferida, verificar, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha
 (595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` aberta: `scripts/proteger_branch_github.sh`, testado ao vivo contra um repositório real do GitHub, criado e apagado só pra isso. Decisão do Humano — opção C (script separado, não embutido em `genese.sh`). Aguardando assinatura.**
   palavras-chave: proposta, protecao, branch, github, aberta, scripts, proteger, testado, vivo, contra, repositório, real, criado, apagado, pra, decisão, humano, opção, script, separado, embutido, genese, aguardando, assinatura
-(594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada pelo Humano, aplicada. `kokoro-tts` está fora do sistema.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Os 6 arquivos aplicados. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, confirmado P-9 sem menção ao `kokoro-tts`. O container físico continua parado no disco — não apagado, decisão separada.
-  palavras-chave: proposta, kokoro, remocao, assinada, humano, aplicada, tts, fora, sistema, assinatura, conferida, scripts, verificar, arquivos, aplicados, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, confirmado, menção, container, físico, continua, parado, disco, apagado, decisão, separada
+(594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada …
+  palavras-chave: proposta, kokoro, remocao, assinada
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: d …
   palavras-chave: proposta, kokoro, remocao, aberta
 (592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada …

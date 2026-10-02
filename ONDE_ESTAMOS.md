@@ -5,14 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (623)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (624)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Nova proposta esperando sua assinatura:** `propostas/ferramentas-automaticas-seth-2026-10-02.diff` — 9 ferramentas de leitura/sem potencial destrutivo (`query_canon`, `vault_consultar`, `maquina_verificar`, `diario_anotar`, `ler_mensagens`, `navegar`, `ler_pagina`, `screenshot`, `fechar_navegador`) param de pedir sua aprovação na Seth; o resto (`memoria_acrescentar`, `enviar_mensagem`, `clicar`, `preencher`) continua pedindo, como você decidiu. Pro Goose eu já apliquei direto (fora do repo, sem quarentena) — `canon__maquina_verificar`/`canon__diario_anotar` viraram automáticos lá, `canon__memoria_acrescentar` continua pedindo. Detalhe: `MEMÓRIAS.md` (623).
-- Assinar: `bash scripts/aprovar.sh ferramentas-automaticas-seth-2026-10-02`.
+**2 propostas assinadas e aplicadas no código — faltando só reiniciar o stack da Seth pra valerem de verdade:**
+1. **Modelo real no cabeçalho** (`<nome> (medido no turno anterior pela Máquina)`, fecha seu pedido de ontem) — `seth_gateway.py`, falta restart do `seth-gateway.service`. Detalhe: `MEMÓRIAS.md` (621)/(622).
+2. **9 ferramentas de leitura/sem potencial destrutivo automáticas na Seth** (`query_canon`, `vault_consultar`, `maquina_verificar`, `diario_anotar`, `ler_mensagens`, `navegar`, `ler_pagina`, `screenshot`, `fechar_navegador`) — `librechat.yaml`, falta o `seth` recopiar e reiniciar o container. `memoria_acrescentar`/`enviar_mensagem`/`clicar`/`preencher` continuam pedindo aprovação, como você decidiu. **No Goose já está valendo** (`~/.config/goose/permission.yaml`, aplicado direto, fora do repo). Detalhe: `MEMÓRIAS.md` (623)/(624).
 
-**Assinado e aplicado: a Seth vai passar a dizer o modelo real no cabeçalho** (`<nome> (medido no turno anterior pela Máquina)`), em vez de sempre "modelo não verificado" — fecha o seu pedido de ontem. Código pronto e testado (14/14), mas **o `seth-gateway.service` ainda não foi reiniciado** — só entra em vigor no próximo `seth` ou restart manual do serviço. Detalhe: `MEMÓRIAS.md` (621)/(622).
+**Pra ativar as duas de uma vez:** rodar `seth` de novo (sincroniza `librechat.yaml` e reinicia o container; o `seth-gateway.service` precisa de restart separado, `systemctl --user restart seth-gateway.service`, ou ele sobe sozinho da próxima vez que `agata.target` ligar do zero).
 
 **Testei a Seth de verdade pelo LibreChat — a trava de ontem (616) não apareceu em 2 tentativas.** Você abriu o Obsidian, eu subi o resto com `seth`; pedi pra ela usar ferramenta duas vezes, as duas completaram em segundos depois da sua aprovação (HITL) — a mesma chamada que tinha travado 1m23s ontem. **Não é garantia de que o bug do LibreChat sumiu de vez**, só que hoje, na prática, funciona. Isso destravou a proposta acima. Detalhe: `MEMÓRIAS.md` (620).
 
