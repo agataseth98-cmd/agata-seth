@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 52c9e91a8f8879ba0049dd488ba3c8db7e52671a
-  Escrito em: 02/10/2026 16:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8
+  Escrito em: 02/10/2026 18:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e9f33e99fec7d4afa8a17d7ca8e452ee819d5ce8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmado na fonte real (`return { messages: [finalChunk] }`, sem guarda quando o stream não entrega chunk nenhum); M9 reproduziu o sintoma, mas a causa achada é NOSSA, não do LibreChat: sob carga concorrente, conteúdo real que o OmniRoute confirma ter entregue (200, sem erro) chega vazio no cliente — só o `": ka"` do nosso próprio filtro de keepalive.**
+
+**Verificação da alegação do lab sobre o `@librechat/agents`, confirmada na fonte real do bundle (não só aceita):** `invoke.cjs`, função que processa a resposta em streaming — o loop `for await (const chunk of stream)` só popula `finalChunk` quando chega um chunk de verdade; a função termina em `return { messages: [finalChunk] };` **sem nenhuma guarda `??=`** nesse ponto (diferente de outro caminho do mesmo arquivo, o de "preempt restart", que tem `finalChunk ??= new AIMessageChunk(...)`). Se o stream nunca produzir um chunk real, `finalChunk` continua `undefined`, e a função devolve `{ messages: [undefined] }` — exatamente o que faz `invoke.cjs:259` (achado em (629)) estourar.
+
+**M8 — nos 4 crashes, a resposta final veio como stream de verdade ou como JSON?** Verificado nos `call_logs` do OmniRoute: os 4 têm `_streamed: true` e `content`/`tool_calls` reais no corpo que o OmniRoute registrou — **não é o caso de JSON devolvido apesar de `stream:true`** (hipótese do lab não confirma nestes 4 casos específicos). Mas essa flag é a contabilidade INTERNA do OmniRoute sobre o que ele recebeu do provedor — não prova o que efetivamente chegou no cliente do outro lado da nossa relé.
+
+**M9 — reprodução ao vivo, método seguro (curl, sem rastrear processo):** 10 pedidos `stream:true` com os 12 schemas de ferramenta reais, em rajada CONCORRENTE contra `:20126`. **9 de 10 voltaram com `Content-Type: text/event-stream`, HTTP 200, mas corpo de só 5 bytes (`: ka\n`, nosso próprio comentário de keepalive) — zero chunk de dado, zero `[DONE]`.** Conferido nos `call_logs` do OmniRoute pra essa mesma janela: as 10 chamadas de backend correspondentes deram **200, sem erro, com durações reais de 1 a 13,6s** — o OmniRoute entregou conteúdo de verdade pros 10. **O sumiço acontece DEPOIS do OmniRoute, na nossa própria relé (`seth_gateway`/sanitizador), sob carga concorrente** — não é o caso "JSON em vez de stream" que o lab suspeitava, é conteúdo real se perdendo no caminho.
+
+**O que isto muda pro item 3(c):** o mecanismo de `invoke.cjs:259` está confirmado e seria real de qualquer forma — mas a CAUSA RAIZ mais provável de "stream termina sem chunk nenhum" não é um bug isolado do LibreChat que precisa de patch no bundle deles; é algo no NOSSO relé que se agrava sob concorrência. Isso muda o alvo prioritário: investigar `seth_gateway.py`/`proxy.py` sob carga concorrente pesa mais que patchear `invoke.cjs` — o guard continua válido como 2ª linha de defesa (fecha a classe pra qualquer causa futura), mas não é mais o ponto mais provável de correção.
+
+**Limite honesto:** não root-causei ainda ONDE exatamente, no nosso relé, o conteúdo se perde — só reproduzi o sintoma com 9/10 de taxa de falha sob 10 chamadas concorrentes (bem mais frequente que a produção real, mas confirma que o mecanismo é real e sensível a concorrência). Fica pra próxima medição.
+
+**sync:** PASS — `git rev-parse main` = `e9f33e9` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (633) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura direta de `invoke.cjs` no bundle real (não só aceito a citação do lab); `call_logs` do OmniRoute cruzados com os headers reais recebidos por `curl` (não resumo); 10 chamadas reais concorrentes via `curl -N`, headers e corpo inspecionados byte a byte (`xxd`); nenhum segredo no caminho, nenhum `strace` · **Autorização:** Humano, "continue" — seguindo com M8/M9 do pacote do lab.
 
 (633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de corrida propostas são refutadas. Proposta `rota-cota-tier0-2026-10-02` (632) recebeu segunda opinião condicional do Conselho Remoto.**
 
