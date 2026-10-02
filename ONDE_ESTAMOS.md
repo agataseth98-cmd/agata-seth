@@ -5,12 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (635)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (636)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Achei e já consertei a causa do travamento da Seth — era eu mesmo.** Era uma regressão minha de ontem (modelo-real-header, o recurso que faz a Seth citar o próprio modelo): ao espiar a resposta pra achar esse nome, eu acabava lendo respostas pequenas até o fim, e o código seguinte tratava tudo isso como "uma linha só" — se começasse pelo aviso de "continua esperando" do roteador, a resposta inteira (incluindo o resultado real da ferramenta) virava só esse aviso, 5 letras, e o LibreChat travava por receber nada. **Já assinado e aplicado** — falta reiniciar o serviço pra valer em produção e testar uma conversa real. Detalhe: `MEMÓRIAS.md` (629)/(630)/(632)/(633)/(634)/(635).
-- Reiniciar: `systemctl --user restart seth-gateway`.
+**Achei, consertei e CONFIRMEI o fim do travamento da Seth — era eu mesmo.** Era uma regressão minha de ontem (modelo-real-header): ao espiar a resposta pra achar o nome do modelo, eu acabava lendo respostas pequenas até o fim, e o código seguinte tratava tudo isso como "uma linha só" — se começasse pelo aviso de "continua esperando" do roteador, a resposta inteira virava só esse aviso, e o LibreChat travava por receber nada. **Assinado, aplicado, serviço reiniciado, e testado ao vivo: 10 de 10 pedidos concorrentes vieram completos (era 9 de 10 vazios antes), e uma conversa real no LibreChat com ferramenta funcionou sem travar.** Detalhe: `MEMÓRIAS.md` (629)/(630)/(632)/(633)/(634)/(635)/(636).
 
 **Proposta esperando sua assinatura:** `propostas/rota-cota-tier0-2026-10-02.diff` — reduz a FREQUÊNCIA de travamento (desvia do modelo que só aguenta 8.000 tokens/minuto), mas já não é mais o conserto do travamento em si (isso já foi feito, acima). **Não muda nada no comportamento real ainda** (nasce desligada). Já passou pelo Portão com você e teve segunda opinião **condicional**. **Atenção: o laboratório mandou uma versão 2 desta proposta** (sobre a correção do travamento) — antes de assinar, preciso trocar o `.diff` pela v2. Detalhe: `MEMÓRIAS.md` (632)/(633).
 - Ainda não trocado pela v2 nem pronto pra assinar — aviso antes de mandar o comando.
