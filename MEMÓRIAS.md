@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35e598cb68018e31b8435efb4093fc377e6995fe
-  Escrito em: 02/10/2026 14:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): deae0fbf5068c250b6d26ea8958ed519b4ac3db2
+  Escrito em: 02/10/2026 14:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
+
+**O que (629) errou:** eu assumi que o `strace -f` tinha seguido um processo FILHO (`estado_para_eco.sh` ou algo na cadeia dele). Verificado agora, não é isso: `_token_interno()` existe em DOIS lugares — `seth_gateway.py:71` e `proxy.py:51` — e é chamado em TODO request (`seth_gateway.py:626`, dentro de `_passar`; `proxy.py:108`, dentro de `_token_ok`), sem cache. A função abre `~/.config/agata/.env` e itera linha a linha procurando só `AGATA_INTERNAL_TOKEN=` — mas o `read()` de baixo nível que o `strace` capturou pega o BUFFER INTEIRO (8192 B por chamada, todo o arquivo), independente de quanto a lógica Python usa depois. O "PID diferente" que eu vi no log do `strace` era uma THREAD do mesmo processo (`ThreadingHTTPServer` cria 1 thread por requisição; Linux mostra TID como se fosse PID), não um filho de verdade.
+
+**Responsabilidade do lab, registrada:** o pedido de M3 pediu captura de bytes crus sem avisar que havia segredo no caminho nem indicar um método seguro — o lab reconheceu isso, registro aqui por pedido dele mesmo (Regra 4, não é autoacusação minha, é o DADO relaiado).
+
+**Candidato a `FALHAS.md`, não aplicado — precisa de proposta P-8 própria:** "nunca rastrear syscall (`strace`/`ltrace`/`gdb`) de processo que lê segredo" — a família mais próxima é FAB ou uma nova, causa raiz comum "instrumentação de baixo nível captura mais do que a lógica da aplicação usa". Fica para quando o Humano quiser abrir essa proposta.
+
+**Desenho (sem aplicar) do conserto real — token isolado, não o `.env` inteiro:**
+- Novo arquivo `~/.config/agata/agata-internal-token` (permissão 600, só o valor, sem comentário nem outras chaves).
+- Lido UMA vez na partida de cada processo (módulo, não por request) — `seth_gateway.py` e `proxy.py`, as duas pontas.
+- `.env` deixa de ser aberto por qualquer processo que atende turno de verdade (só por quem gera/rotaciona o token).
+- Teste: `--selftest` dos dois arquivos confirma que o token lido bate com o arquivo, e que uma segunda chamada não reabre o arquivo (contador de `open()` mockado, ou checagem de mtime de cache).
+- Isto é proposta P-8 a desenhar em diff de verdade quando o Humano mandar — aqui só o desenho, nada aplicado.
+
+**Caminhos exatos da exposição, pro Humano decidir o que fazer com cada um:**
+- `~/.claude/projects/-home-orusoua-agata/e917ba4a-5c50-40be-8076-683b62fd8c7f.jsonl` — transcript real desta conversa. Não tentei apagar nem editar (proteção do harness contra adulteração de transcript; mesmo sem a proteção, não decidiria isso sozinho).
+- `tool-results/b45oi9hr2.txt` na mesma pasta — **já apagado pelo Humano**, confirmado (arquivo não existe mais).
+- Os outros 3 arquivos em `tool-results/` daquela pasta (`bfips5krh.txt`, `bkxg7qmm4.txt`, `bx8cs73a8.txt`) — conferidos agora, NÃO contêm o vazamento (são de buscas anteriores, sem relação).
+
+**sync:** PASS — `git rev-parse main` = `deae0fb` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (630) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `grep -n _token_interno` nos dois arquivos reais antes de aceitar a correção do lab; leitura do corpo de `_token_interno()` e do ponto de chamada (`_passar`, sem cache) confirmando "todo request, sem cache"; busca por string distintiva do template de `.env` vazado (não pelo nome das chaves, que aparece legitimamente em dezenas de sessões) pra achar o arquivo real de transcript, não um grep ingênuo que acharia 21 falsos positivos · **Autorização:** Humano, pacote do lab "Ensaio", item 0 ("prioridade").
 
 (630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
 

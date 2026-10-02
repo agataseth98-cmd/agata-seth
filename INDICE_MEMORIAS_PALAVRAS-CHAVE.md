@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
+  palavras-chave: corrige, causa, vazamento, segredo, subprocesso, token, interno, chamado, requisição, dentro, próprio, seth, gateway, proxy, abrindo, config, agata, env, inteiro, pra, ler, linha, parte, responsabilidade, pedido, lab, registrada, tal, desenho, aplicado, isolar, arquivo
 (630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
   palavras-chave: janela, limite, real, modelo, medido, parte, desenho, telemetria, turno, aplicar, pacote, lab, ensaio, continuação
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, existe, sim, jeito, barato, restringir, escriba, escreve, precisava, mudar, código, proposta, readonly, interno, aberta, verificada, vivo, clone, sandboxado, aguardando, assinatura
 (602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue pelo laboratório junto com o de cima, NÃO adotado — é redundante com a proposta (598), já aberta e mais completa.**
   palavras-chave: llamacpp, manifesto, diff, entregue, laboratório, junto, cima, adotado, redundante, proposta, aberta, completa
-(601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-30` RETIRADA de `propostas/` antes de ser assinada — substituída por `grafo-resume-falha-fechada-2026-09-30`, mais completa, entregue pelo laboratório "Ensaio". A minha corrigia só o `argv` da CLI; a nova fecha também o `bool()` de dentro do nó `portao` do grafo, que eu tinha achado (lendo o diário do lab) e ainda não tinha corrigido.**
-  palavras-chave: proposta, portao, resume, exige, flag, retirada, propostas, assinada, substituída, grafo, falha, fechada, completa, entregue, laboratório, ensaio, minha, corrigia, argv, cli, nova, fecha, bool, dentro, tinha, achado, lendo, lab, corrigido
+(601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-3 …
+  palavras-chave: proposta, portao, resume, exige, flag
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autor …
   palavras-chave: propostas, modelos, gratuitos, autor
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restrin …
