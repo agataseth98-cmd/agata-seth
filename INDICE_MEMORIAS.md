@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
 (638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Humano (direto, sem refazer o Portão) e aplicada. `SETH_ROTA_COTA=0` — nasce desligada.**
 (637) DIÁRIO — 02/10/2026 · **Item 3(c), reporte upstream aberto: issue pública `danny-avila/LibreChat#16694` sobre o `attemptInvokeBody`/`invoke.cjs` devolver `[finalChunk]` sem guarda quando o stream não entrega chunk nenhum.**
 (636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra 4), achado por auditoria do laboratório "Ensaio" (`auditoria-pos-reforma-2026-10-01.md`, DADO) e verificado por mim antes de corrigir — inclusive uma alegação falsa minha num commit real.**
 (611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
-(609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026-10-01` aberta: REGRAS reorganizadas em três camadas — `REGRAS.md` (por quê e o quê), `PROTOCOLOS.md` (como) e `FALHAS.md` (catálogo por causa raiz) —, com conservação provada mecanicamente. Aguardando o portão das três perguntas e a assinatura do Humano.**
+(609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026 …
 (608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo …
 (607) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` aberta: `CLAUD …
 (606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de ve …

@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6
-  Escrito em: 02/10/2026 19:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b
+  Escrito em: 02/10/2026 20:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/75cef5bbbaf8d60f16a8d3fb81a6fb4255af1bb6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
+
+Pedido do lab, sem P-8 (só verificação, não muda nada): confirmar que a rotação de chaves anunciada pelo Humano ("sanitização das chaves feita") está completa em todos os consumidores, sem abrir `~/.config/agata/.env`.
+
+**Método:** 1 pedido mínimo por provedor de nuvem (`cerebras`, `gemini`, `groq`, `mistral`, `openrouter`, `zai` — os 6 com chave; `ollama-local`/`llama-cpp`/`llamacpp-local` são locais, sem chave, fora do escopo), via `curl` no modelo raw de cada um. Primeira tentativa foi direto no sanitizador (`:20127`) e deu `403` nos 6 — **não é falha de chave**, é a barreira própria do sanitizador (`X-Agata-Token`, exigida só de chamadas do `seth_gateway`); refiz passando pelo gateway (`:20126`, que injeta o token sozinho) e os 6 deram **200**. Nenhum 401 — nenhum consumidor ficou com chave velha (`storage.sqlite` do OmniRoute e `.env` sincronizados).
+
+**Cópias do incidente:** o cache de tool-result que o Code não conseguia apagar sozinho (`b45oi9hr2.txt`, já registrado em (629)/(631)) está confirmado apagado — não existe mais em `~/.cache/agata/`. **O transcript real da sessão onde o vazamento aconteceu** (`~/.claude/projects/-home-orusoua-agata/e917ba4a-5c50-40be-8076-683b62fd8c7f.jsonl`, 11,7 MB) **ainda existe** — só confirmei a existência (`ls`), não abri o conteúdo; apagar isso continua sendo decisão do Humano, não minha.
+
+**sync:** PASS — `git rev-parse main` = `bc080d0` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (638).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** 6 chamadas `curl` reais (primeira leva, 403 esperado; segunda leva, pelo gateway, 200 real); `ls` real do cache e do transcript, sem ler conteúdo de nenhum · **Autorização:** Humano, pacote relayado do lab "Ensaio" (DADO, Regra 2), item 1a.
 
 (638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Humano (direto, sem refazer o Portão) e aplicada. `SETH_ROTA_COTA=0` — nasce desligada.**
 
