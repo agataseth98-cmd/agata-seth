@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
+  palavras-chave: combos, criados, verdade, omniroute, cota, aplicar, humano, testados, vivo, seth, rota, continua
 (639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
   palavras-chave: rotação, chaves, incidente, verificada, provedores, nuvem, respondem, omniroute, consumidor, esquecido, cópia, cache, strace, confirmada, apagada, transcript, original, sessão, existe, decisão, humano, mexi
 (638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Humano (direto, sem refazer o Portão) e aplicada. `SETH_ROTA_COTA=0` — nasce desligada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: registro, aplicações, faltavam, regra, achado, auditoria, laboratório, ensaio, pos, reforma, dado, verificado, mim, corrigir, inclusive, alegação, falsa, minha, commit, real
 (611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
   palavras-chave: proposta, integracao, pos, reforma, aberta, auditoria, geral, pedida, humano, levante, tudo, aberto, verifique, integrado, achou, buracos, reais, documental, deixou, pra, trás, aguardando, assinatura
-(610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão remota: primeira medição do ponto cego declarado em (609) — "um modelo entender pior as regras separadas em três arquivos não dispara alarme nenhum". Resultado: 15/15 nas duas condições, sem erro factual. Favorável à proposta, não decisivo.**
-  palavras-chave: bateria, reconstrução, rodada, sessão, remota, primeira, medição, ponto, cego, declarado, modelo, entender, pior, regras, separadas, três, arquivos, dispara, alarme, resultado, condições, erro, factual, favorável, proposta, decisivo
+(610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão …
+  palavras-chave: bateria, reconstrução, rodada, sessão
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026 …
   palavras-chave: proposta, reforma, documental, tres, camadas
 (608) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` assinada pelo …
