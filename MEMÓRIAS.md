@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2b95b801a4ecf0a8131bdd2eafeb4fec379df76d
-  Escrito em: 01/10/2026 19:13 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e419bfe694661a52f766e7176084a7bd58adc785
+  Escrito em: 01/10/2026 19:23 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2b95b801a4ecf0a8131bdd2eafeb4fec379df76d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
+
+**Achado 1 — `CANON` sem PROTOCOLOS/FALHAS.** `query_canon({doc:"PROTOCOLOS"})` respondia "doc desconhecido" — mesma classe de (611) (CLAUDE.md, consultar_indice.py), terceiro lugar que a reforma documental esqueceu. Corrigido: `CANON` ganha as duas entradas.
+
+**Achado 2, o que de fato bloqueava a Seth hoje mais cedo — `vault_consultar` não traduzia caminho de script pro nome real da nota.** A Seth pediu `scripts/estado_para_eco.sh` (caminho citado de verdade em PROJETO.md); a ferramenta prefixava `memoria/obsidian/` ao caminho cru, sem saber que o nome real do arquivo é um slug (`script-estado-para-eco-sh.md`, gerado por `scripts/gerar_obsidian.py::slug()`). 404, chamada falhou — log real do LibreChat confirmou (`MCP error -32603: não encontrado`). Corrigido: `vaultConsultar` reconhece `scripts/<nome>`/`.githooks/<nome>` e replica a MESMA transformação de slug do gerador Python em JS, testada contra os arquivos reais da vault (3 nomes, bateram exato).
+
+**Testado via stdio JSON-RPC direto (mesmo protocolo que o LibreChat usa), antes de propor:** a chamada exata que falhou no log real agora devolve a nota completa; `query_canon` com PROTOCOLOS/FALHAS devolve conteúdo real, grep incluso.
+
+**Nota, pra não repetir o achado de (612):** o deploy real (`~/librechat/data/mcp/canon-mcp.mjs`) chegou a rodar este código sem assinatura enquanto eu testava — revertido pra fonte canônica (`git checkout --` + recopiado + `docker restart`) antes de abrir esta proposta. `curl :3080/health` confirmou saudável depois.
+
+**sync:** PASS — `git rev-parse main` = `e419bfe` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (616) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `node -c` + teste real via stdio JSON-RPC, reproduzindo a chamada exata do log de produção antes e depois do conserto; slug em JS testado contra os nomes reais gerados por `gerar_obsidian.py` (3 casos, bateram); deploy revertido e `/health` conferido antes de propor · **Autorização:** Humano, investigação decorrente de "pode registrar e resolva o problema da identificação dos modelos" — achado no caminho, corrigido antes de prosseguir.
 
 (616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
 
