@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
+  palavras-chave: janela, limite, real, modelo, medido, parte, desenho, telemetria, turno, aplicar, pacote, lab, ensaio, continuação
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
   palavras-chave: medição, parte, pacote, lab, ensaio, erro, cannot, use, operator, search, for, tool, calls, undefined, reproduzido, causa, raiz, achada, bundle, real, hipótese, poda, contexto, refutada, medidos, incidente, segurança, meio, strace, vazou, segredos, reais, config, agata, env, pro, meu, pra, arquivos, disco
 (628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: llamacpp, manifesto, diff, entregue, laboratório, junto, cima, adotado, redundante, proposta, aberta, completa
 (601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-30` RETIRADA de `propostas/` antes de ser assinada — substituída por `grafo-resume-falha-fechada-2026-09-30`, mais completa, entregue pelo laboratório "Ensaio". A minha corrigia só o `argv` da CLI; a nova fecha também o `bool()` de dentro do nó `portao` do grafo, que eu tinha achado (lendo o diário do lab) e ainda não tinha corrigido.**
   palavras-chave: proposta, portao, resume, exige, flag, retirada, propostas, assinada, substituída, grafo, falha, fechada, completa, entregue, laboratório, ensaio, minha, corrigia, argv, cli, nova, fecha, bool, dentro, tinha, achado, lendo, lab, corrigido
-(600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
-  palavras-chave: propostas, modelos, gratuitos, autoria, conteúdo, desconhecidos, achado, pendente, auditoria, seth, investigado, saída, scripts, pesquisar, vigia, combustível, conferido, máquina, erro, arquivo, pede, mudança, roster, proposta, aberta
+(600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autor …
+  palavras-chave: propostas, modelos, gratuitos, autor
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restrin …
   palavras-chave: terceiro, item, retomada, restrin
 (598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` abert …

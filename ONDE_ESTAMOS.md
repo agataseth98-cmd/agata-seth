@@ -5,11 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (629)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (630)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Achei por que a Seth travava com "Cannot use 'in' operator..." — não é o que o laboratório pensava.** Reproduzi o erro 5 vezes seguidas com pedidos PEQUENOS (não precisava de arquivo grande) — a causa é um bug real no código do LibreChat (`invoke.cjs:259`, linha exata achada), que aparece quando o sistema deles troca de provedor no meio de um turno por limite de taxa. Ainda não sei por que algumas trocas quebram e outras não. Detalhe: `MEMÓRIAS.md` (629).
+**Achei por que a Seth travava com "Cannot use 'in' operator..." — não é o que o laboratório pensava.** Reproduzi o erro 5 vezes seguidas com pedidos PEQUENOS (não precisava de arquivo grande) — a causa é um bug real no código do LibreChat (`invoke.cjs:259`, linha exata achada), que aparece quando o sistema deles troca de provedor no meio de um turno por limite de taxa. Ainda não sei por que algumas trocas quebram e outras não. **Achado extra: o modelo que entra primeiro em TODAS as filas da Seth (`groq/openai/gpt-oss-120b`) só aguenta 8.000 tokens/minuto** — medido nos erros reais de hoje, não suposto. Detalhe: `MEMÓRIAS.md` (629)/(630).
 
 **Incidente de segurança no meio da investigação, contido:** uma ferramenta de diagnóstico (`strace`) capturou por acidente 9 chaves de API reais do seu `~/.config/agata/.env` — um arquivo de log que eu apaguei na hora, mas um segundo arquivo (cache do próprio Claude Code) eu não consegui apagar sozinho. Abri a pasta pra você: `/home/orusoua/.claude/projects/-home-orusoua-agata/e917ba4a-5c50-40be-8076-683b62fd8c7f/tool-results/`, arquivo `b45oi9hr2.txt`. **Recomendo rotacionar as 9 chaves** (mesmo padrão de quando a chave Zhipu vazou em (208)/(209)). Detalhe: `MEMÓRIAS.md` (629).
 

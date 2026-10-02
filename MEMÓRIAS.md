@@ -26,20 +26,43 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df
-  Escrito em: 02/10/2026 13:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35e598cb68018e31b8435efb4093fc377e6995fe
+  Escrito em: 02/10/2026 14:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35e598cb68018e31b8435efb4093fc377e6995fe/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
+
+**A2 — medido, não suposto, pelos erros reais de hoje (`~/.omniroute/call_logs/2026-10-02/`):**
+- **`groq/openai/gpt-oss-120b` (tier 0 dos 3 combos `seth-rapido`/`seth-livre`/`seth-pesado`): TPM = 8000**, confirmado por 429 real ("Rate limit... Limit 8000") e 413 ("Request too large... Limit 8000"), mesma conta (`org_01kwhwa4skf7fte5zmr03k0ea8`). É o tier 0 de TODOS os combos — primeiro suspeito de qualquer cascata.
+- `gemini-3-flash-preview`: 503 (sobrecarga do provedor, sem número) e 504 (nosso `maxWaitMs=45000`, não é limite deles).
+- `glm-4.7-flash`: 529 (sobrecarga, sem número declarado pelo provedor).
+- `ollama-local/qwen3.5-9b-64k` (fundo local de todos os combos): `num_ctx=65536` fixo (Modelfile, já documentado no PROJETO). Injeção compacta medida ao vivo hoje: **3.135 tokens** (`instructionTokens` de um log real do LibreChat) — sobra ~62.400 tokens pra conversa.
+- Os 4 `llama-cpp/*` locais sob demanda: **fora do ar agora** (ECONNREFUSED `:20145`), não entram em nenhuma cascata hoje.
+- Combos confirmados pela API viva do OmniRoute (`/api/combos`), não pelo `config/modelos-gratuitos.md` (que pode estar defasado).
+
+**Parte B — desenho, sem aplicar:**
+- **Lugar exato:** `redesign/router/seth_gateway.py`. `do_POST` (~L579) já tem o `payload` parseado antes de chamar `_passar` — hoje só repassa bytes; precisa passar também `payload.get("tools")` (nomes/contagem). `_passar` (~L622) já tem `modelo_real`, `up.status`, `self._rota` — falta só hora/latência (`time.time()`/`time.monotonic()`).
+- **Mecanismo:** `_registrar_turno(**campos)` grava uma linha JSON em `~/.cache/agata/seth-turnos.jsonl` (fora do repo, mesmo padrão fail-soft de `_lembrar_modelo_real`), chamado no mesmo ponto de `_passar`.
+- **Campos confiáveis:** hora, rota, modelo_real, status, latência, ferramentas oferecidas (com o plumbing do `payload`).
+- **Campo não confiável, achado medindo:** tokens de entrada/saída — a maioria das chamadas reais da Seth (streaming) não carrega `usage` no corpo que passa pelo gateway; só vi em chamadas não-streaming (título). Sem ligar `stream_options.include_usage` (mudança de comportamento, P-8 à parte), fica `lacuna` na maioria das linhas.
+- **Campo impossível sem mudança no LibreChat:** `conversa`/conversationId — confirmado no código deles que o payload que sai pro nosso endpoint é OpenAI puro (`model`/`messages`/`tools`/`stream`), nunca carrega o ID interno da conversa.
+- **Custo:** 1 linha JSON por turno, append-only, desprezível.
+- **Teste:** novo caso no `--selftest`, mesmo padrão do caso 10 que já existe pra `MODELO-REAL-TURNO-ANTERIOR` — confere que o arquivo ganha 1 linha válida depois de uma chamada simulada.
+
+**sync:** PASS — `git rev-parse main` = `35e598c` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (629) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `curl :20128/api/combos`/`/api/models` (API viva do OmniRoute, não o `config/*.md` estático); erros reais de `~/.omniroute/call_logs/2026-10-02/` com números de limite embutidos pelos próprios provedores; leitura direta de `redesign/router/seth_gateway.py` pros pontos de instrumentação; teste do que `usage`/`conversationId` realmente carregam, não suposição · **Autorização:** Humano, continuação do pacote do lab "Ensaio", "sim" pra registrar e reenviar.
 
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
 
