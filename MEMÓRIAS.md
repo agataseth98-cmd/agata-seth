@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a522f96eb6352335aad97a37e0f1e2e1ca88ab39
-  Escrito em: 02/10/2026 10:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 198ad409af0f9dc388f30ba6465fee2bbe86d5df
+  Escrito em: 02/10/2026 10:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a522f96eb6352335aad97a37e0f1e2e1ca88ab39/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a522f96eb6352335aad97a37e0f1e2e1ca88ab39/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a522f96eb6352335aad97a37e0f1e2e1ca88ab39/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a522f96eb6352335aad97a37e0f1e2e1ca88ab39/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a522f96eb6352335aad97a37e0f1e2e1ca88ab39/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/198ad409af0f9dc388f30ba6465fee2bbe86d5df/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
+
+**Ferramentas automáticas (624):** pedi `query_canon` numa conversa nova — rodou direto, **sem** o card de aprovação HITL ("Review 1 action") que apareceu nos testes de (620) pra essa mesma ferramenta. Resposta certa (`FALHAS.md`, trecho de IDF-1).
+
+**Modelo real no cabeçalho (622):** pedi explicitamente o cabeçalho de Regra 1 numa conversa nova (arquivo sidecar é global, por desenho — funcionou mesmo sem turno anterior NESTA conversa). Resposta: `Agata · modelo: glm-4.7-flash (medido no turno anterior pela Máquina; este turno ainda não medido) · sync: PASS...` — nome real, rotulado exatamente como a doutrina manda, não mais "modelo não verificado".
+
+**Achado à parte, não desta mudança — deriva de formato já catalogada.** A Seth misturou os dois formatos do cabeçalho: usei o rótulo `modelo:` certo (formato a), mas manteve `Última entrada:`/`pronto.` (também do formato a) quando eu tinha pedido explicitamente o formato (b), que não leva essas duas linhas. Não é bug do mecanismo novo — é a mesma classe de deriva de formato já registrada em REGRAS/FALHAS (comportamento do modelo da cascata, não do `seth_gateway`). Não investigado a fundo aqui, fora do escopo desta sessão.
+
+**sync:** PASS — `git rev-parse main` = `198ad40` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (624) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `seth` + `systemctl --user restart seth-gateway.service` reais; `docker ps`/`journalctl --user` conferindo os dois restarts; 2 turnos reais via Claude in Chrome, sessão real do Humano, texto extraído por `get_page_text` (não lido de screenshot aproximado) · **Autorização:** Humano, "vai", depois "quero" (mergear os PRs) — continuação direta do pedido original.
 
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
 
