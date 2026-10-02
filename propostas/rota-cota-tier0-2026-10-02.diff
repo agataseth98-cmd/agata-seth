@@ -1,0 +1,395 @@
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index cb5e006..5474c8a 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -199,6 +199,8 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+ | 5 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
+ | 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
++**Gêmeos `-sg` ("sem Groq", 02/10/2026).** `seth-rapido-sg`, `seth-livre-sg` e `seth-pesado-sg` = a MESMA ordem do combo vivo, sem `groq/openai/gpt-oss-120b`. Não se editam à mão: `python3 scripts/combos_sem_cota.py` mostra o plano e `--aplicar` recria a partir do combo vivo (rode de novo sempre que mudar a ordem de um combo da Seth). Uso: o `seth_gateway` manda para o gêmeo quando o pedido não cabe na cota de 8.000 tokens/min que sobra no Groq (`SETH_ROTA_COTA=1` no `seth-gateway.service`; desligado por padrão).
++
+ **Recriar / reverter** (se o `storage.sqlite` for perdido):
+ `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
+ corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index fc328d6..812d3c0 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -43,6 +43,7 @@ import re
+ import socket
+ import sys
+ import threading
++import time
+ import urllib.error
+ import urllib.request
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -536,6 +537,73 @@ def _classificar_rota(payload: dict) -> str:
+     return _ROTA_BASE
+ 
+ 
++# --- Rota pela cota por minuto do tier 0 (02/10/2026) ---------------------------
++# Medido na Máquina (MEMÓRIAS (627)-(631)): os 3 combos da Seth começam no mesmo
++# `groq/openai/gpt-oss-120b`, cujo plano grátis aceita 8.000 tokens POR MINUTO
++# (TPM). Toda chamada do Agent já leva ~3,1 mil tokens de injeção deste gateway
++# + ~3,1 mil do esquema das ferramentas MCP; a 2ª chamada de um turno com
++# ferramenta estoura a cota quase sempre -> 429 -> cascata dentro do OmniRoute.
++# O OmniRoute não deixa "pular" a posição 0 de um combo por pedido; então cada
++# combo da Seth ganha um gêmeo `<rota>-sg` ("sem Groq": mesma ordem, sem o Groq),
++# criado pela API do OmniRoute (config/combos-seth.json), e este gateway escolhe
++# o gêmeo quando o pedido NÃO CABE na cota que sobra no minuto. Contabilidade:
++# janela deslizante de 60 s com os tokens ESTIMADOS dos pedidos que o Groq de
++# fato atendeu (X-Modelo-Real). Só regras, sem rede, sem inferência. Desligado
++# por padrão (SETH_ROTA_COTA=1 liga): sem os combos -sg criados, ligar quebraria
++# a Seth (404 do OmniRoute) -- por isso o liga é uma decisão de implantação.
++_ROTA_COTA_LIGADA = os.environ.get("SETH_ROTA_COTA", "0") == "1"
++_COTA_TPM = int(os.environ.get("SETH_COTA_TPM", "8000"))
++_COTA_MARGEM = float(os.environ.get("SETH_COTA_MARGEM", "0.85"))   # folga do estimador
++_CHARS_POR_TOKEN = float(os.environ.get("SETH_CHARS_POR_TOKEN", "3.0"))  # conservador p/ pt-BR
++_SUFIXO_SEM_COTA = "-sg"
++_ROTAS_COM_TIER0_COTADO = frozenset({"seth-rapido", "seth-livre", "seth-pesado"})
++_MODELO_COTADO = "gpt-oss-120b"   # como aparece no "model" que o OmniRoute devolve
++_JANELA_S = 60.0
++_janela_cota: list[tuple[float, int]] = []
++_janela_lock = threading.Lock()
++
++
++def _estimar_tokens(payload: dict) -> int:
++    """Estimativa conservadora (para mais) dos tokens de ENTRADA + o teto de saída
++    pedido: chars de messages+tools / _CHARS_POR_TOKEN + max_tokens. Sem
++    tokenizador de propósito -- é para decidir rota, não para cobrar."""
++    try:
++        base = len(json.dumps(payload.get("messages") or [], ensure_ascii=False))
++        base += len(json.dumps(payload.get("tools") or [], ensure_ascii=False))
++    except (TypeError, ValueError):
++        return 10**9   # não deu para medir -> trata como "não cabe" (falha fechada)
++    saida = payload.get("max_tokens") or payload.get("max_completion_tokens") or 0
++    try:
++        saida = int(saida)
++    except (TypeError, ValueError):
++        saida = 0
++    return int(base / _CHARS_POR_TOKEN) + max(0, saida)
++
++
++def _cota_usada(agora: float) -> int:
++    with _janela_lock:
++        _janela_cota[:] = [(t, n) for t, n in _janela_cota if agora - t < _JANELA_S]
++        return sum(n for _, n in _janela_cota)
++
++
++def _registrar_uso_cota(modelo_real: str | None, est: int, agora: float) -> None:
++    """Conta na janela só o que o modelo cotado ATENDEU de fato (X-Modelo-Real)."""
++    if modelo_real and _MODELO_COTADO in modelo_real and 0 < est < 10**9:
++        with _janela_lock:
++            _janela_cota.append((agora, est))
++
++
++def _rota_pela_cota(rota: str, est: int, agora: float) -> str:
++    """rota -> rota | rota-sg. Cabe no que sobra da cota do minuto -> mantém o
++    tier 0 rápido; não cabe -> gêmeo sem ele. Desligado ou rota fora da lista
++    -> intacto."""
++    if not _ROTA_COTA_LIGADA or rota not in _ROTAS_COM_TIER0_COTADO:
++        return rota
++    if est + _cota_usada(agora) <= int(_COTA_TPM * _COTA_MARGEM):
++        return rota
++    return rota + _SUFIXO_SEM_COTA
++
++
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -566,6 +634,7 @@ def _injeta(payload: dict) -> dict:
+ class _Handler(BaseHTTPRequestHandler):
+     protocol_version = "HTTP/1.1"
+     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
++    _est = 0     # tokens estimados do pedido hidratado (rota pela cota)
+ 
+     def log_message(self, fmt, *args):
+         pass
+@@ -577,6 +646,9 @@ class _Handler(BaseHTTPRequestHandler):
+         self._passar(b"", "HEAD")
+ 
+     def do_POST(self):
++        # estado por REQUISIÇÃO: com keep-alive o mesmo handler atende vários
++        # pedidos, e uma rota/estimativa velha vazaria pro header do seguinte
++        self._rota, self._est = "", 0
+         corpo = ler_corpo_limitado(self)
+         if corpo is None:
+             return
+@@ -591,7 +663,14 @@ class _Handler(BaseHTTPRequestHandler):
+                 if payload.get("model") == _ROTA_BASE:
+                     self._rota = _classificar_rota(payload)
+                     payload["model"] = self._rota
+-                corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
++                payload = _injeta(payload)
++                if self._rota:
++                    # cota por minuto do tier 0: decidida sobre o pedido JÁ hidratado,
++                    # que é o que de fato chega ao provedor
++                    self._est = _estimar_tokens(payload)
++                    self._rota = _rota_pela_cota(self._rota, self._est, time.monotonic())
++                    payload["model"] = self._rota
++                corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+         self._passar(corpo, "POST")
+ 
+     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
+@@ -661,9 +740,13 @@ class _Handler(BaseHTTPRequestHandler):
+                 self.send_header(k, v)
+         if self._rota:
+             self.send_header("X-Seth-Rota", self._rota)
++        if self._est:
++            self.send_header("X-Seth-Est-Tokens", str(self._est))
+         if modelo_real:
+             self.send_header("X-Modelo-Real", modelo_real)
+             _lembrar_modelo_real(modelo_real)
++            if 200 <= up.status < 300:
++                _registrar_uso_cota(modelo_real, self._est, time.monotonic())
+         self.send_header("Transfer-Encoding", "chunked")
+         self.end_headers()
+         try:
+@@ -946,6 +1029,50 @@ def _selftest() -> int:
+     falhas += 0 if ok10c else 1
+     _Dummy.modelo_resposta = None
+ 
++    # 11. rota pela cota por minuto do tier 0 (funções puras, relógio injetado)
++    global _ROTA_COTA_LIGADA
++    ligada_antes = _ROTA_COTA_LIGADA
++    teto = int(_COTA_TPM * _COTA_MARGEM)
++    _janela_cota.clear()
++    _ROTA_COTA_LIGADA = False
++    c11a = _rota_pela_cota("seth-livre", 10**6, 0.0) == "seth-livre"
++    _ROTA_COTA_LIGADA = True
++    c11b = _rota_pela_cota("seth-livre", teto // 2, 0.0) == "seth-livre"
++    c11c = _rota_pela_cota("seth-pesado", teto + 1, 0.0) == "seth-pesado-sg"
++    _registrar_uso_cota("openai/gpt-oss-120b", teto // 2 + 10, 1.0)
++    c11d = _rota_pela_cota("seth-livre", teto // 2, 2.0) == "seth-livre-sg"   # soma passa do teto
++    _registrar_uso_cota("glm-4.7-flash", 10**4, 3.0)                          # outro modelo não conta
++    c11e = _cota_usada(3.0) == teto // 2 + 10
++    c11f = _rota_pela_cota("seth-livre", teto // 2, 1.0 + _JANELA_S + 0.1) == "seth-livre"  # janela expirou
++    c11g = _rota_pela_cota("seth-codigo", 10**6, 0.0) == "seth-codigo"      # fora da lista: intacto
++    est = _estimar_tokens({"messages": [{"role": "user", "content": "x" * 3000}], "max_tokens": 500})
++    c11h = est >= int(3000 / _CHARS_POR_TOKEN) + 500                         # conservador: nunca abaixo
++    c11i = _estimar_tokens({"messages": [{"x": object()}]}) == 10**9          # não mede -> não cabe
++    # 11j. ponta a ponta pelo gateway real: pedido grande do Agent sai como -sg,
++    # com a estimativa no header (o liga ainda ligado aqui)
++    corpo11 = json.dumps({"model": _ROTA_BASE, "messages": [
++        {"role": "user", "content": "y" * (teto * 4)}]}).encode()
++    r11 = urllib.request.urlopen(urllib.request.Request(
++        base, data=corpo11, headers={"Content-Type": "application/json"}), timeout=10)
++    r11.read()
++    modelo_enviado = json.loads(_Dummy.ultimo_corpo).get("model")
++    c11j = (modelo_enviado == "seth-pesado-sg" and
++            int(r11.headers.get("X-Seth-Est-Tokens") or 0) > teto)
++    _ROTA_COTA_LIGADA = ligada_antes
++    _janela_cota.clear()
++    for n, ok, desc in [("11a", c11a, "desligada -> rota intacta mesmo com pedido enorme"),
++                        ("11b", c11b, "ligada, cabe na cota -> mantém o tier 0"),
++                        ("11c", c11c, "ligada, pedido sozinho passa do teto -> seth-pesado-sg"),
++                        ("11d", c11d, "uso do minuto + pedido passa do teto -> seth-livre-sg"),
++                        ("11e", c11e, "só o modelo cotado entra na janela"),
++                        ("11f", c11f, "janela de 60 s expira -> volta ao tier 0"),
++                        ("11g", c11g, "rota fora da lista (seth-codigo) -> intacta"),
++                        ("11h", c11h, f"estimador conservador ({est} tokens p/ 3000 chars + 500)"),
++                        ("11i", c11i, "payload que não serializa -> trata como não cabe"),
++                        ("11j", c11j, f"ponta a ponta: pedido grande sai como {modelo_enviado!r} + X-Seth-Est-Tokens")]:
++        print(f"{'PASS' if ok else 'FALHA'}  cota {n}: {desc}")
++        falhas += 0 if ok else 1
++
+     up.shutdown()
+     gw.shutdown()
+     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
+diff --git a/redesign/systemd/seth-gateway.service b/redesign/systemd/seth-gateway.service
+index f09e571..4bf30a3 100644
+--- a/redesign/systemd/seth-gateway.service
++++ b/redesign/systemd/seth-gateway.service
+@@ -7,6 +7,10 @@ Requires=omniroute-sanitizer.service
+ Type=simple
+ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
+ Environment=SETH_HIDRATA_MODO=compacto
++# Rota pela cota por minuto do tier 0 (02/10/2026): 0 = desligada. Só trocar
++# para 1 DEPOIS de `python3 scripts/combos_sem_cota.py --aplicar` criar os
++# combos -sg no OmniRoute -- sem eles, ligar quebra a Seth (404).
++Environment=SETH_ROTA_COTA=0
+ Restart=on-failure
+ RestartSec=3
+ # Baseline de hardening (item 6 do plano de mitigação da auditoria do
+diff --git a/scripts/combos_sem_cota.py b/scripts/combos_sem_cota.py
+new file mode 100644
+index 0000000..54ba839
+--- /dev/null
++++ b/scripts/combos_sem_cota.py
+@@ -0,0 +1,176 @@
++#!/usr/bin/env python3
++"""combos_sem_cota.py -- cria/atualiza os combos gêmeos "<rota>-sg" da Seth no OmniRoute.
++
++Por quê (02/10/2026, MEMÓRIAS (627)-(631)): os 3 combos da Seth (seth-rapido,
++seth-livre, seth-pesado) começam no `groq/openai/gpt-oss-120b`, cujo plano grátis
++aceita 8.000 tokens por minuto. O OmniRoute não deixa pular a posição 0 de um
++combo por pedido; então cada combo ganha um gêmeo `-sg` ("sem Groq"): MESMA
++ordem, MESMOS modelos, sem o modelo cotado. O `seth_gateway` escolhe o gêmeo
++quando o pedido não cabe na cota que sobra no minuto (SETH_ROTA_COTA=1).
++
++O gêmeo é DERIVADO do combo vivo a cada execução -- nunca uma lista escrita à
++mão aqui. Assim a ordem que o Humano escolhe na UI (ex.: (546)) continua sendo
++a fonte da verdade, e o gêmeo só repete essa ordem sem o tier cotado.
++
++Uso:
++  python3 scripts/combos_sem_cota.py            # só mostra o plano (padrão, não escreve nada)
++  python3 scripts/combos_sem_cota.py --aplicar  # cria (POST) ou atualiza (PUT) os -sg
++  python3 scripts/combos_sem_cota.py --selftest # testa contra um OmniRoute falso local
++
++Só stdlib. Fala só com o OmniRoute local (OMNIROUTE_URL, padrão
++http://127.0.0.1:20128). Não lê ~/.config/agata/.env nem chave nenhuma.
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import threading
++import urllib.request
++from http.server import BaseHTTPRequestHandler, HTTPServer
++
++BASE = os.environ.get("OMNIROUTE_URL", "http://127.0.0.1:20128").rstrip("/")
++ROTAS = ("seth-rapido", "seth-livre", "seth-pesado")
++SUFIXO = "-sg"
++MODELO_COTADO = "groq/openai/gpt-oss-120b"
++
++
++def _req(metodo: str, caminho: str, corpo: dict | None = None, base: str = BASE):
++    dados = json.dumps(corpo).encode() if corpo is not None else None
++    r = urllib.request.Request(base + caminho, data=dados, method=metodo,
++                               headers={"Content-Type": "application/json"})
++    with urllib.request.urlopen(r, timeout=15) as resp:
++        txt = resp.read().decode("utf-8") or "null"
++    return json.loads(txt)
++
++
++def _lista(resp) -> list:
++    """GET /api/combos pode vir como lista ou como {"combos": [...]}; aceita os dois."""
++    if isinstance(resp, list):
++        return resp
++    if isinstance(resp, dict):
++        for k in ("combos", "data", "items"):
++            if isinstance(resp.get(k), list):
++                return resp[k]
++    raise SystemExit(f"formato inesperado de /api/combos: {type(resp).__name__} -- confira a API antes")
++
++
++def _id_modelo(m) -> str:
++    return (m.get("model") or m.get("id") or "") if isinstance(m, dict) else str(m)
++
++
++def planejar(combos: list) -> list[tuple[str, str | None, dict]]:
++    """[(nome_sg, id_existente_ou_None, corpo)] para cada rota encontrada."""
++    por_nome = {c.get("name"): c for c in combos if isinstance(c, dict)}
++    plano = []
++    for rota in ROTAS:
++        orig = por_nome.get(rota)
++        if orig is None:
++            raise SystemExit(f"combo {rota!r} não existe no OmniRoute -- nada a derivar; pare e confira")
++        modelos = [m for m in orig.get("models") or [] if _id_modelo(m) != MODELO_COTADO]
++        if not modelos:
++            raise SystemExit(f"{rota}: sem o modelo cotado não sobra nenhum -- não crio combo vazio")
++        if len(modelos) == len(orig.get("models") or []):
++            print(f"aviso: {rota} não tem {MODELO_COTADO}; o gêmeo sai igual ao original")
++        nome = rota + SUFIXO
++        corpo = {"name": nome, "strategy": orig.get("strategy", "priority"),
++                 "models": [{k: v for k, v in m.items() if k != "id"} if isinstance(m, dict) else m
++                            for m in modelos]}
++        existente = por_nome.get(nome)
++        plano.append((nome, existente.get("id") if existente else None, corpo))
++    return plano
++
++
++def executar(aplicar: bool, base: str = BASE) -> int:
++    plano = planejar(_lista(_req("GET", "/api/combos", base=base)))
++    for nome, cid, corpo in plano:
++        ordem = " -> ".join(_id_modelo(m) for m in corpo["models"])
++        print(f"{'PUT ' + cid if cid else 'POST'}  {nome}  [{corpo['strategy']}]  {ordem}")
++        if aplicar:
++            if cid:
++                _req("PUT", f"/api/combos/{cid}", corpo, base=base)
++            else:
++                _req("POST", "/api/combos", corpo, base=base)
++    if not aplicar:
++        print("(só o plano -- nada escrito; rode com --aplicar)")
++    else:
++        vivos = {c.get("name") for c in _lista(_req("GET", "/api/combos", base=base))}
++        faltam = [n for n, _, _ in plano if n not in vivos]
++        if faltam:
++            print(f"FALHA: depois de aplicar, não achei {faltam} no GET -- confira a API")
++            return 1
++        print("OK: os 3 combos -sg existem no OmniRoute")
++    return 0
++
++
++def _selftest() -> int:
++    estado = {"combos": [
++        {"id": "a1", "name": "seth-livre", "strategy": "priority", "models": [
++            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
++            {"id": "y", "kind": "model", "model": "zai/glm-4.7-flash", "weight": 0}]},
++        {"id": "a2", "name": "seth-rapido", "strategy": "priority", "models": [
++            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
++            {"id": "z", "kind": "model", "model": "mistral/ministral-14b-latest", "weight": 0}]},
++        {"id": "a3", "name": "seth-pesado", "strategy": "priority", "models": [
++            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
++            {"id": "w", "kind": "model", "model": "gemini/gemini-2.5-flash", "weight": 0}]},
++        {"id": "a4", "name": "seth-livre-sg", "strategy": "priority", "models": []}]}
++
++    class H(BaseHTTPRequestHandler):
++        def log_message(self, *a):
++            pass
++
++        def _resp(self, obj):
++            b = json.dumps(obj).encode()
++            self.send_response(200)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(b)))
++            self.end_headers()
++            self.wfile.write(b)
++
++        def do_GET(self):
++            self._resp(estado["combos"])
++
++        def _corpo(self):
++            return json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++
++        def do_POST(self):
++            c = self._corpo()
++            c["id"] = f"n{len(estado['combos'])}"
++            estado["combos"].append(c)
++            self._resp(c)
++
++        def do_PUT(self):
++            cid = self.path.rsplit("/", 1)[-1]
++            c = self._corpo()
++            for i, x in enumerate(estado["combos"]):
++                if x["id"] == cid:
++                    estado["combos"][i] = {**c, "id": cid}
++            self._resp(c)
++
++    srv = HTTPServer(("127.0.0.1", 0), H)
++    threading.Thread(target=srv.serve_forever, daemon=True).start()
++    base = f"http://127.0.0.1:{srv.server_address[1]}"
++    falhas = 0
++    antes = json.dumps(estado, sort_keys=True)
++    executar(False, base)
++    ok = json.dumps(estado, sort_keys=True) == antes
++    print(f"{'PASS' if ok else 'FALHA'}  sem --aplicar não escreve nada"); falhas += 0 if ok else 1
++    rc = executar(True, base)
++    por = {c["name"]: c for c in estado["combos"]}
++    ok = (rc == 0 and all(r + SUFIXO in por for r in ROTAS)
++          and all(_id_modelo(m) != MODELO_COTADO for r in ROTAS for m in por[r + SUFIXO]["models"]))
++    print(f"{'PASS' if ok else 'FALHA'}  --aplicar cria/atualiza os 3 -sg sem o modelo cotado"); falhas += 0 if ok else 1
++    ok = [_id_modelo(m) for m in por["seth-livre-sg"]["models"]] == ["zai/glm-4.7-flash"] and por["seth-livre-sg"]["id"] == "a4"
++    print(f"{'PASS' if ok else 'FALHA'}  -sg existente é atualizado (PUT no mesmo id), ordem preservada"); falhas += 0 if ok else 1
++    ok = [_id_modelo(m) for m in por["seth-livre"]["models"]][0] == MODELO_COTADO
++    print(f"{'PASS' if ok else 'FALHA'}  combo original intocado"); falhas += 0 if ok else 1
++    srv.shutdown()
++    print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
++    return 0 if not falhas else 1
++
++
++if __name__ == "__main__":
++    if "--selftest" in sys.argv:
++        sys.exit(_selftest())
++    sys.exit(executar("--aplicar" in sys.argv))
