@@ -1,0 +1,49 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index c7e8869..9e99a37 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -123,12 +123,42 @@ endpoints:
+   # ferramenta e a UI mostra "Cancelado" (5 de 5 tentativas em 23/09). `mongo` é
+   # o padrão da própria LibreChat: grava a pausa no MongoDB que já sobe junto
+   # (`librechat-mongodb`), com TTL próprio -- sobrevive entre requisições.
++  # Ajuste de granularidade (MEMÓRIAS (622), pedido do Humano -- ferramenta de
++  # pesquisa/sem potencial destrutivo fica automática, o resto continua
++  # pedindo aprovação). Mecanismo real (lido no bundle rodando, não suposto --
++  # `createToolPolicyHook.cjs` do @librechat/agents): `deny` vence sobre `ask`,
++  # que vence sobre `allow`, que vence sobre o fallback do `mode`. `allow`
++  # abaixo é FAIL-SAFE por desenho: só os nomes listados pulam a aprovação;
++  # qualquer ferramenta nova/não listada cai no `mode: default` (pede
++  # aprovação), nunca vira automática por omissão. Classificação:
++  #   automático -- leitura pura, sem efeito fora do que a Seth já lê:
++  #     query_canon/vault_consultar/maquina_verificar (canon, as 3 são
++  #     read-only por desenho) · diario_anotar (escreve só no SETH-DIARIO.md
++  #     próprio da Seth, nunca entra em MEMÓRIAS nem passa pelo portão) ·
++  #     ler_mensagens (discord, só lê) · navegar/ler_pagina/screenshot/
++  #     fechar_navegador (navegador, perfil ISOLADO sem cookie/senha
++  #     herdada -- README do servidor classifica os 3 primeiros como
++  #     "leitura", fechar_navegador só libera o processo).
++  #   continua pedindo aprovação -- escrita visível ou com efeito fora do
++  #     sistema: memoria_acrescentar (permanente, nunca se apaga -- Regra 4;
++  #     decisão explícita do Humano de manter em "pede aprovação" mesmo sem
++  #     ser tecnicamente destrutivo) · enviar_mensagem (discord, visível a
++  #     terceiros) · clicar/preencher (navegador, trava dupla com a
++  #     allowlist de domínio -- ver redesign/mcp/navegador/README.md).
+   agents:
+     toolApproval:
+       enabled: true
+       mode: default
+-      ask:
+-        - "*"
++      allow:
++        - query_canon_mcp_canon
++        - vault_consultar_mcp_canon
++        - maquina_verificar_mcp_canon
++        - diario_anotar_mcp_canon
++        - ler_mensagens_mcp_discord
++        - navegar_mcp_navegador
++        - ler_pagina_mcp_navegador
++        - screenshot_mcp_navegador
++        - fechar_navegador_mcp_navegador
+     checkpointer:
+       type: mongo
+   custom:

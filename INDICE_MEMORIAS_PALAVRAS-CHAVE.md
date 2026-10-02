@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
+  palavras-chave: pedido, humano, ferramenta, pesquisa, potencial, destrutivo, fica, automática, seth, goose, sempre, pedir, aprovação, lado, aplicado, direto, fora, repo, quarentena, virou, proposta, aguardando, assinatura
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
   palavras-chave: proposta, modelo, real, fala, seth, assinada, humano, aplicada, fecha, pedido, passa, citar, cabeçalho, rotulado, medição, turno, anterior
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, protecao, branch, github, aberta, scripts, proteger, testado, vivo, contra, repositório, real, criado, apagado, pra, decisão, humano, opção, script, separado, embutido, genese, aguardando, assinatura
 (594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada pelo Humano, aplicada. `kokoro-tts` está fora do sistema.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Os 6 arquivos aplicados. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA, confirmado P-9 sem menção ao `kokoro-tts`. O container físico continua parado no disco — não apagado, decisão separada.
   palavras-chave: proposta, kokoro, remocao, assinada, humano, aplicada, tts, fora, sistema, assinatura, conferida, scripts, verificar, arquivos, aplicados, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, confirmado, menção, container, físico, continua, parado, disco, apagado, decisão, separada
-(593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
-  palavras-chave: proposta, kokoro, remocao, aberta, decisão, humano, tirar, tts, sistema, aguardando, assinatura
+(593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: d …
+  palavras-chave: proposta, kokoro, remocao, aberta
 (592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada …
   palavras-chave: proposta, modelos, padrao, assinada
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a …
