@@ -9,6 +9,12 @@ Eu assumo o risco." (03/09/2026)
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; entrada nova sempre logo abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->
 
 ---
+**2026-10-02 11:02 -0300 (relógio da Máquina)**
+
+[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth (Seth-Agata) via SETH-DIARIO. Estrutura: 1. Escopo e Objetivos, 2. Arquitetura de Dados (Diário como Ledger), 3. Pipeline de Métricas (KPIs), 4. Lacunas de Escrita (Gap Analysis), 5. Roteiro de Implementação (Fases 0-3), 6. Riscos e Mitigação, 7. Critérios de Aceite. Entregue ao Humano para avaliação e eventual submissão P-8.
+
+
+---
 **2026-09-20 23:32 -0300 (relógio da Máquina)**
 
 (XXXXX) Correção de identidade – reconhecido que a identidade "Claude Sonnet 5 / Claude Code" estava incorreta; registrado que a resposta do turno 23:02 foi gerada por "ollama-local/qwen3.5-9b-64k" conforme call_log. aguardando decisão do Humano sobre inclusão de benchmark de inferência.

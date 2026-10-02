@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
+  palavras-chave: decisões, humano, proposta, autogovernança, própria, seth, pvt, rev, gerada, viabilidade, técnica, camada, escrita, ela, diario, anotar, dado, regra, nunca, instrução, relaiadas, laboratório, ensaio
 (627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 KB para ~41 KB (−58%), mesmos títulos de seção, nenhum fato vivo removido. A história que ele acumulava fica em MEMÓRIAS — esta entrada é o mapa do que saiu — e verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Proposta P-8 `projeto-estado-corrente-2026-10-02`, assinada pelo Humano, aplicada.**
   palavras-chave: projeto, reduzido, estado, corrente, mesmos, títulos, seção, fato, vivo, removido, história, ele, acumulava, fica, memórias, entrada, mapa, saiu, verbatim, extras, arquivo, ate, proposta, assinada, humano, aplicada
 (626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: propostas, modelos, gratuitos, autoria, conteúdo, desconhecidos, achado, pendente, auditoria, seth, investigado, saída, scripts, pesquisar, vigia, combustível, conferido, máquina, erro, arquivo, pede, mudança, roster, proposta, aberta
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
   palavras-chave: terceiro, item, retomada, restringir, readwritepaths, escriba, memoria, propostas, tem, premissa, errada, proposta, aberta
-(598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` aberta: as 5 instâncias llama.cpp (`llamacpp-agata` + as 4 novas de 20/09) nunca entraram em `config/portas-agata.txt` — o P-4 não as via. Aguardando assinatura.**
-  palavras-chave: proposta, llamacpp, portas, aberta, instâncias, llama, cpp, agata, novas, nunca, entraram, config, txt, aguardando, assinatura
+(598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` abert …
+  palavras-chave: proposta, llamacpp, portas, abert
 (597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` …
   palavras-chave: proposta, portao, resume, exige, flag
 (596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, …

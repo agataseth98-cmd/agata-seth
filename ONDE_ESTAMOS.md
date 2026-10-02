@@ -5,9 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (627)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (628)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
+
+**A Seth propôs um sistema de autogovernança pra si mesma (no próprio diário, não é canon) — você decidiu 3 pontos:** o formato novo do diário dela (Fato/Hipótese/Lição candidata/Pedido) está aprovado; uma ferramenta pra ela mesma rascunhar propostas P-8 foi recusada (continua escrevendo texto, alguém converte depois de verificar); lições se injetarem sozinhas em toda hidratação foi recusado (vira FALHAS.md ou P-8 de verdade, nunca automático). Detalhe: `MEMÓRIAS.md` (628).
 
 **O arquivo do "agora" do sistema (`PROJETO.md`) ficou com menos da metade do tamanho** — de 98 KB para 41 KB. Saiu dele a história de como cada coisa chegou aonde está (itens fechados, correções antigas, listas de modelos de outras datas), que já estava em `MEMÓRIAS.md`. O texto anterior inteiro está guardado em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Nada que vale hoje foi perdido; conferido por ferramenta (8/8) duas vezes, por mim, antes e depois de aplicar — não só aceito do laboratório. Saíram também do arquivo público o IP, o endereço do tailnet e o e-mail da conta. Passou pelo Portão das três perguntas com você e por uma segunda opinião (GLM, favorável). Efeito: todo modelo que carrega o sistema lê um terço a menos. Pendência que sobrou: decidir se `/etc/default/grub.bak.20260812-155431` ainda é necessário (os outros 2 itens de conferência já foram resolvidos: `gemini_quota_guard` não é mais usado por ninguém, o log de VRAM parou de ser escrito em agosto). Detalhe: `MEMÓRIAS.md` (627).
 
