@@ -26,20 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e419bfe694661a52f766e7176084a7bd58adc785
-  Escrito em: 01/10/2026 19:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 620401af14cbd8651a67ea658a61ba7ee18a734a
+  Escrito em: 02/10/2026 08:48 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e419bfe694661a52f766e7176084a7bd58adc785/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
+
+**Assinatura conferida por `scripts/p8_verificar.sh` — 4/4 OK** (par presente, sha256 do `.diff` bate, assinatura ed25519 válida, `git apply --check` limpo). `git apply` real do `.diff` assinado num branch próprio, não reescrita manual.
+
+**Testado antes de comitar:** sintaxe (`node --check`, limpa); `scripts/perimetro.sh` depois de aplicar — 18 OK · 1 SKIP · 2 PARCIAL (pré-existentes, sem relação com esta mudança: falta de sudo e HD de backup desconectado) · 0 FALHA; P-8 reconheceu o par aprovado para o arquivo staged.
+
+**`scriptSlug()` verificado contra o nome real do arquivo problemático, sem precisar subir o stack:** `scriptSlug("estado_para_eco.sh")` devolve `script-estado-para-eco-sh` — bate exato com `memoria/obsidian/scripts/script-estado-para-eco-sh.md`, que já existe no vault local gerado. Lógica conferida linha a linha contra `scripts/gerar_obsidian.py::slug()` (mesma ordem de normalização, mesmo prefixo `script-` aplicado depois do corte de 60 chars).
+
+**Risco residual declarado, não escondido: não repeti o teste end-to-end via stdio JSON-RPC contra o proxy real que a entrada (617) relatou antes de propor.** `obsidian-ro-proxy`/`obsidian-app`/`agata.target` estavam parados (desde 01/10 17:50, achado rodando `systemctl --user status`) — subir o stack abriria o app Obsidian na tela do Humano, efeito visível que não ative sem perguntar. A verificação isolada acima (slug batendo com arquivo real + sintaxe + perímetro limpo) é o que cobre esta aplicação; o teste end-to-end completo fica para a próxima vez que o stack subir por outro motivo.
+
+**Deploy de produção não tocado de propósito.** `~/librechat/data/mcp/canon-mcp.mjs` sincroniza a partir deste arquivo pelo atalho `seth` (PROJETO.md, "Interface") — não copiei manualmente nem reiniciei o container; o próximo `seth` já leva o código novo.
+
+**Par `propostas/canon-mcp-protocolos-falhas-2026-10-01.diff` / `APROVADO-canon-mcp-protocolos-falhas-2026-10-01` movido para `propostas/aplicadas/` neste mesmo commit.**
+
+**sync:** PASS — `git rev-parse main` = `620401a` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (617) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `p8_verificar.sh` 4/4 antes de aplicar; `git apply` do diff assinado; `node --check`; `perimetro.sh` completo lido linha a linha, não só o resultado geral; `scriptSlug` testado contra arquivo real do vault, não só lido o código; `systemctl --user status` real antes de decidir não subir o stack · **Autorização:** assinatura do Humano (`propostas/aplicadas/APROVADO-canon-mcp-protocolos-falhas-2026-10-01`), conferida por `scripts/p8_verificar.sh` antes de aplicar; merge do PR #111 autorizado nesta sessão ("pode mergear").
 
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
 
