@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ad5acc173c2bf97592eba5d93c52cb357a5a0175
-  Escrito em: 02/10/2026 19:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c28189cf38705a68dc554eb9af33fbc8d19d8f3f
+  Escrito em: 02/10/2026 19:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad5acc173c2bf97592eba5d93c52cb357a5a0175/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad5acc173c2bf97592eba5d93c52cb357a5a0175/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad5acc173c2bf97592eba5d93c52cb357a5a0175/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad5acc173c2bf97592eba5d93c52cb357a5a0175/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad5acc173c2bf97592eba5d93c52cb357a5a0175/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(635) CORREÇÃO — 02/10/2026 · **Causa raiz do crash "Cannot use 'in' operator...tool_calls" achada e aplicada: era regressão minha em `9dfd7da` (614, modelo-real-header), não bug isolado do LibreChat. Proposta `sse-buffer-espiado-2026-10-02` assinada e aplicada.**
+
+**Esta entrada corrige o rumo de (629)/(630)/(632)/(633)/(634):** o crash não precisava de patch no `invoke.cjs` deles como alvo prioritário. A causa estava inteiramente no nosso `seth_gateway.py`, introduzida por mim mesmo ao construir o header `X-Modelo-Real` em (613)/(614).
+
+**O mecanismo, verificado por mim na fonte (não só aceito do lab "Ensaio", que achou e mandou a análise e o conserto em `sse-buffer-espiado-2026-10-02.diff`, sha256 `26ba2e82…`):**
+1. `_passar` espia até 8× `read(8192)` pra achar o `X-Modelo-Real` antes de mandar os headers. Numa resposta pequena (quase toda chamada de ferramenta), isso lê a resposta **inteira** até o EOF.
+2. `_stream_sse_filtrado` então faz o PRÓPRIO `read(8192)` primeiro — que já bate EOF, porque a espiada esgotou o stream — e sai do laço principal sem ter processado nenhuma linha.
+3. O buffer inteiro (espiado) cai no tratamento de "última linha parcial", `_filtrar_linha_sse(buf)`. Se o buffer começa pelo keepalive do OmniRoute (`data: {...,"model":"keepalive",...}`), a função devolve **a resposta toda** trocada por um único `": ka\n"` (5 bytes) — o conteúdo real (tool_calls, texto, `[DONE]`) desaparece.
+4. O LibreChat recebe um stream sem nenhum chunk de dado → `finalChunk` fica `undefined` no `invoke.cjs` dele → `"tool_calls" in undefined` → crash.
+
+**Bate com todas as medições anteriores:** explica por que só algumas cascatas quebram (o OmniRoute só manda keepalive quando o provedor demora — 429/529/concorrência aumentam essa chance), por que o M3 isolado saiu limpo (resposta rápida, sem keepalive no caminho), e por que os `call_logs` do OmniRoute sempre mostravam conteúdo real (M8) — ele se perde DEPOIS do OmniRoute, exatamente onde o M9 apontou.
+
+**Verificação independente antes de aceitar (Regra 2):** li `_stream_sse_filtrado` e `_filtrar_linha_sse` linha a linha no código real do canon, confirmei que o primeiro `read()` do laço principal bate EOF quando a espiada já esgotou tudo. Reproduzi local, fora do diff: sem o conserto, o caso de teste do lab (keepalive + tool_calls + `[DONE]`) sai como 10 bytes; com o conserto aplicado, 235 bytes, conteúdo intacto. Testei o `.diff` num worktree descartável antes de comitar a proposta: selftest 15/15 (14 antigos + caso novo 12), suíte 46/46.
+
+**Fluxo seguido:** Portão das três perguntas (com fatos, conforme a correção permanente registrada em (628)/memória do Code) — nenhum "desfaz" pedido nas 3; Humano assumiu o risco direto, sem segunda opinião (urgência + verificação independente já feita); assinatura confirmada; `p8_verificar` → PODE APLICAR; aplicado; selftest 15/15 e suíte 46/46 de novo no repo real; par movido pra `propostas/aplicadas/`.
+
+**Pendente, não feito nesta entrada:** reiniciar `seth-gateway.service` pra a correção valer em produção; repetir o M9 (10 concorrentes em `:20126`, esperado 0/10 com só `": ka"`); testar uma conversa real com ferramenta no LibreChat; Proposta 2 (`rota-cota-tier0` v2, sobre esta) ainda não processada — a v1 original (632) precisa ser substituída pela v2 antes do Humano assinar.
+
+**Lição candidata pro `FALHAS.md` (ainda não formalizada como P-8 própria):** quem espia ou bufferiza um stream antes de repassá-lo tem que testar explicitamente (a) resposta menor que o limite de leitura (cabe tudo num read só) e (b) resposta que COMEÇA por um marcador especial (keepalive, sentinela, etc.) — o `--selftest` de (613)/(614) só testou resposta com `"model"` já no primeiro pedaço, nunca o caso "espiada consome tudo, buffer inteiro começa pelo keepalive". Relacionado a (631): a mesma classe de erro — função nova testada isoladamente, não testada JUNTA com a função vizinha que ela alimenta.
+
+**sync:** PASS — `git rev-parse main` conferido antes de numerar, topo de MEMÓRIAS = (634).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** leitura linha a linha do código real antes de aceitar a causa do lab; reprodução local fora do diff (10 B vs 235 B); teste em worktree descartável; selftest e suíte reais no repo após aplicar, não só os números do lab · **Autorização:** Humano, assinatura via `scripts/aprovar.sh sse-buffer-espiado-2026-10-02`; Portão completo; risco assumido sem segunda opinião, por decisão explícita do Humano.
 
 (634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmado na fonte real (`return { messages: [finalChunk] }`, sem guarda quando o stream não entrega chunk nenhum); M9 reproduziu o sintoma, mas a causa achada é NOSSA, não do LibreChat: sob carga concorrente, conteúdo real que o OmniRoute confirma ter entregue (200, sem erro) chega vazio no cliente — só o `": ka"` do nosso próprio filtro de keepalive.**
 
