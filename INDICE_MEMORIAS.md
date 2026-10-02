@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
 (630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
-(602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue pelo laboratório junto com o de cima, NÃO adotado — é redundante com a proposta (598), já aberta e mais completa.**
+(602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue …
 (601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-3 …
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autor …
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restrin …
