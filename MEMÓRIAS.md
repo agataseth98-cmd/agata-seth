@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c28189cf38705a68dc554eb9af33fbc8d19d8f3f
-  Escrito em: 02/10/2026 19:21 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 645daae00aabee18a01b573d1530b17872bb69c9
+  Escrito em: 02/10/2026 19:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c28189cf38705a68dc554eb9af33fbc8d19d8f3f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/645daae00aabee18a01b573d1530b17872bb69c9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/645daae00aabee18a01b573d1530b17872bb69c9/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/645daae00aabee18a01b573d1530b17872bb69c9/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/645daae00aabee18a01b573d1530b17872bb69c9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/645daae00aabee18a01b573d1530b17872bb69c9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
+
+Depois de aplicar (635), reiniciei `seth-gateway.service` (`systemctl --user restart`, confirmado `active`). Repeti o M9 exatamente como antes (10 pedidos `stream:true` concorrentes, 12 schemas de ferramenta reais, via `curl -N` direto em `:20126`): **10 de 10 vieram com conteúdo real e `data: [DONE]`** (antes: 9 de 10 só `": ka"`). Depois, testei uma conversa real no LibreChat (navegador, Chrome), pedindo pra Seth usar a ferramenta de consulta ao canon — respondeu completo, sem erro, e a geração de título (chamada concorrente separada, de verdade, que acontece em todo turno) também completou normal ("O Portão das Três Perguntas").
+
+**Caso fechado por ora:** a causa raiz medida (M1-M9) está corrigida e confirmada em produção, não só em teste isolado.
+
+**sync:** PASS — `git rev-parse main` = `645daae` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (635).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `systemctl --user status` real; 10 chamadas `curl -N` reais pós-reinício; interação real no navegador via Claude in Chrome, screenshot conferido · **Autorização:** Humano, "vai" (merge da PR de aplicação) seguido da confirmação pedida pelo lab no próprio pacote.
 
 (635) CORREÇÃO — 02/10/2026 · **Causa raiz do crash "Cannot use 'in' operator...tool_calls" achada e aplicada: era regressão minha em `9dfd7da` (614, modelo-real-header), não bug isolado do LibreChat. Proposta `sse-buffer-espiado-2026-10-02` assinada e aplicada.**
 

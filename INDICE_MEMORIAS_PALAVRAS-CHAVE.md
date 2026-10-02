@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
+  palavras-chave: conserto, confirmado, vivo, produção, repetido, vazios, era, conversa, real, ferramenta, librechat, crash, inclusive, chamada, concorrente, geração, título, passa, gateway
 (635) CORREÇÃO — 02/10/2026 · **Causa raiz do crash "Cannot use 'in' operator...tool_calls" achada e aplicada: era regressão minha em `9dfd7da` (614, modelo-real-header), não bug isolado do LibreChat. Proposta `sse-buffer-espiado-2026-10-02` assinada e aplicada.**
   palavras-chave: causa, raiz, crash, cannot, use, operator, tool, calls, achada, aplicada, era, regressão, minha, dfd, modelo, real, header, bug, isolado, librechat, proposta, sse, buffer, espiado, assinada
 (634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmado na fonte real (`return { messages: [finalChunk] }`, sem guarda quando o stream não entrega chunk nenhum); M9 reproduziu o sintoma, mas a causa achada é NOSSA, não do LibreChat: sob carga concorrente, conteúdo real que o OmniRoute confirma ter entregue (200, sem erro) chega vazio no cliente — só o `": ka"` do nosso próprio filtro de keepalive.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, claude, assinada, humano, aplicada, código, real, canon, scripts, perimetro, quarentena, cobre, assinatura, conferida, verificar, item, deu, falso, negativo, porque, conteúdo, estava, árvore, trabalho, desde, aberta, confirmado, git, apply, check, reverse, bateu, limpo, par, movido, pra, propostas, aplicadas, suíte, falha, confirmando, contra
 (607) DIÁRIO — 01/10/2026 · **Proposta P-8 `claude-md-2026-10-01` aberta: `CLAUDE.md` novo (identidade + ponteiros, carregado automático pelo Claude Code) + P-8 passa a cobrir `CLAUDE.md` como "muda comportamento". Aguardando assinatura.**
   palavras-chave: proposta, claude, aberta, novo, identidade, ponteiros, carregado, automático, code, passa, cobrir, muda, comportamento, aguardando, assinatura
-(606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de verdade na Máquina — só no repositório. `~/.local/bin/seth`/`seth-parar` continuavam com as linhas `docker start/stop kokoro-tts` removidas da fonte em 27/09. Achado rodando o `seth` de verdade hoje (o container subiu de novo, contra a decisão do Humano). Corrigido: redeploy dos dois atalhos, container parado.**
-  palavras-chave: remoção, kokoro, tts, nunca, chegou, verdade, máquina, repositório, local, bin, seth, parar, continuavam, linhas, docker, start, stop, removidas, fonte, achado, rodando, hoje, container, subiu, novo, contra, decisão, humano, corrigido, redeploy, atalhos, parado
+(606) DIÁRIO — 30/09/2026 · **A remoção do `kokoro-tts` (594) nunca chegou de ve …
+  palavras-chave: remoção, kokoro, tts, nunca, chegou
 (605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18 …
   palavras-chave: omniroute, service, ficou, fora
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha …
