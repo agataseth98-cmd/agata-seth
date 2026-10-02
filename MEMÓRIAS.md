@@ -26,20 +26,50 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ef10ef9c172b1805baa6aeb184e5ee57605a5747
-  Escrito em: 02/10/2026 11:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df
+  Escrito em: 02/10/2026 13:55 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79e88fe30a75f4b0ee5d876e6a4d4d31fcf8b6df/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
+
+**Reprodução, 5/5, com contexto PEQUENO (não precisou de poda).** `query_canon` com grep estreito, contexto 1-2 linhas — quebrou igual a um pedido de arquivo inteiro. Refuta a hipótese original do lab (poda de contexto do issue #11619).
+
+**Causa exata no bundle real, não só hipótese:** `@librechat/agents/dist/cjs/llm/invoke.cjs:259` — `result.messages?.flatMap((message) => "tool_calls" in message ? ... )`, sem guarda contra `message` undefined dentro do array (diferente de `ToolNode.cjs:2408`, que tem `message &&` antes do `in`).
+
+**M1 (linha do tempo: o padrão existia antes de (624)?) — SIM, o gatilho (429 por TPM) já existia antes do deploy de (624) hoje às 10:18 -03 (confirmado: `docker inspect librechat` `StartedAt`, `git log` do `librechat.yaml`), mas sem crash.** Achei um 429→200 (1 salto, `glm-4.7-flash`) às 12:13 UTC, pré-(624), sem erro correspondente no log. (624) não CRIA o bug (ele é estrutural, em `invoke.cjs`, independente de qualquer config nossa) — a hipótese do lab era que (624) aumenta a FREQUÊNCIA do gatilho (2ª chamada sai em segundos, sem a folga que a aprovação HITL dava antes pro rate limit esfriar). Não cheguei a confirmar ou refutar essa parte — ver M2.
+
+**M2 (contraprova: cascatas rápidas que não quebraram) — achei 10 cascatas no dia inteiro (`~/.omniroute/call_logs/2026-10-02/`), 4 crashes, 6 sem crash.** Comparando estrutura das chamadas (papéis das mensagens, provedor final, stream): **não achei um padrão que separe limpo crash de não-crash.** Dois casos terminando no MESMO modelo (`glm-4.7-flash`), ambos com 1 salto de retentativa (429→200), um quebrou (13:40:06) e outro não (13:19:26 e o de 12:13 pré-624). Um crash teve histórico de mensagens de 4 linhas (igual ao não-crash mais simples); outro teve 6. **Não fechei esse ponto — parece ter componente de corrida (timing), não só estrutura da mensagem.**
+
+**M3 (bytes crus dos dois lados do gateway) — NÃO CONCLUÍDO, parado por incidente de segurança (abaixo).** Risco estrutural do método: qualquer turno dispara o subprocesso `estado_para_eco.sh` do `seth_gateway`, e `strace -f` segue esse filho — não achei um jeito seguro de isolar só o tráfego de rede sem esse risco com as ferramentas disponíveis agora.
+
+**M4 (de onde vêm os ~7.600 tokens de `maxContextTokens` daquela chamada) — PARCIAL, fica `lacuna` na origem exata.** Confirmado real, não fabricado pela Seth: a frase que ela disse ("retorno truncado... limite 9.120") bate com o template literal do bundle (`truncateToolResultContent`, `[truncated: X chars exceeded Y limit]`) — ela estava citando um valor real, não inventando. A fórmula (`calculateMaxToolResultChars`, `Math.floor(ctx*0.3)*4`) implica `maxContextTokens≈7600` pra aquela chamada. **Mongo confirma: o Agent da Seth não tem `model_parameters` nenhum setado** (não é config nossa). Os modelos reais usados nessa sequência (`gpt-oss-120b`, `gemini-3-flash-preview`, `nvidia/nemotron`) não são modelos de janela pequena — não achei de onde vem o 7600 no tempo que investiguei (`maxTokensMap`/`getModelMaxTokens` do bundle, tabela grande, não teve match óbvio). Fica em aberto.
+
+**M5 (sumarização automática) — CONFIRMADO: já dispara sozinha hoje, passa pelo `:20126` (mesmo `seth_gateway`, mesma hidratação — `instructionTokens: 3135` no log), e o resumo vira contexto de trabalho em silêncio.** Log real: `[agents:graph] Summarization triggered` → `Invoking LLM` (`provider: "openAI"`, nosso endpoint custom) → `LLM call complete` → a ferramenta seguinte já roda sobre o contexto resumido, sem marcador visível pro Humano na UI distinguindo "isto é resumo" de "isto é a conversa real". Bate com o risco que o lab apontou: "é RELATO entrando em silêncio".
+
+---
+
+**INCIDENTE DE SEGURANÇA, no meio da tentativa de M3.** `strace -f -e trace=read,write,recvfrom,sendto -p <pid do seth-gateway.service>`, pra capturar os bytes da próxima reprodução. O `-f` segue processos filhos — um subprocesso que o `seth_gateway` lança todo turno (`bash scripts/estado_para_eco.sh`, ou algo na cadeia dele) leu `~/.config/agata/.env` por inteiro durante a captura, incluindo 9 chaves reais (`OPENROUTER_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPU_API_KEY`, `CEREBRAS_API_KEY`, `MISTRAL_API_KEY`, `HF_TOKEN`, `AGATA_INTERNAL_TOKEN`) — confirmei que eram reais, não um template morto: o `AGATA_INTERNAL_TOKEN` capturado bate exato com o header `X-Agata-Token` que o próprio `seth_gateway` manda pro sanitizador segundos depois, no mesmo trace. **Viola diretamente `CLAUDE.md`: "nunca abra... `~/.config/agata/.env`"** — não abri eu mesmo, mas o efeito foi o mesmo.
+
+**Contenção:** apaguei o log do `strace` (`shred -u`) na hora. Um SEGUNDO arquivo, de cache de resultado de ferramenta do próprio Claude Code (`tool-results/b45oi9hr2.txt`, 389 KB, continha a mesma captura), **o harness bloqueou minha tentativa de apagar** (proteção contra adulteração do próprio transcript) — não tentei contornar; avisei o Humano, abri o diretório pra ele (`xdg-open`) e ele vai apagar à mão. O conteúdo também passou pela minha própria conversa/transcript — mesma classe irreversível de (208)/(209) (chave Zhipu exposta em texto puro na conversa).
+
+**Recomendação dada ao Humano, mesmo padrão de (208)/(209): rotacionar as 9 chaves.** Decisão dele, não registrada aqui como feita.
+
+**Por que não investiguei mais fundo qual script exatamente lê o `.env`:** o processo filho já tinha saído quando percebi (confirmado: `pgrep -P <pid do gateway>` vazio) — level de prioridade foi conter, não diagnosticar, com segredo real em jogo.
+
+**sync:** PASS — `git rev-parse main` = `79e88fe` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (628) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** reprodução ao vivo 5x via Claude in Chrome, sessão real do Humano; `docker exec` no bundle real do LibreChat pra achar a linha exata do bug; `~/.omniroute/call_logs/` (JSON por chamada, não resumo) pra M1/M2; `docker inspect`/`git log` pro timestamp do deploy de (624); Mongo (`db.agents.findOne`) pra M4; `grep`/leitura direta do bundle pras fórmulas de truncamento e sumarização; `strace` SEM `-f` não foi tentado ainda (poderia ter evitado o incidente, mas também não capturaria as threads do `ThreadingHTTPServer` — não resolvido) · **Autorização:** Humano, pacote do lab "Ensaio" relaiado + "pode continuar" depois do incidente reportado.
 
 (628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
 

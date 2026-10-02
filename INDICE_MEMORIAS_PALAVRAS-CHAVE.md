@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
+  palavras-chave: medição, parte, pacote, lab, ensaio, erro, cannot, use, operator, search, for, tool, calls, undefined, reproduzido, causa, raiz, achada, bundle, real, hipótese, poda, contexto, refutada, medidos, incidente, segurança, meio, strace, vazou, segredos, reais, config, agata, env, pro, meu, pra, arquivos, disco
 (628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
   palavras-chave: decisões, humano, proposta, autogovernança, própria, seth, pvt, rev, gerada, viabilidade, técnica, camada, escrita, ela, diario, anotar, dado, regra, nunca, instrução, relaiadas, laboratório, ensaio
 (627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 KB para ~41 KB (−58%), mesmos títulos de seção, nenhum fato vivo removido. A história que ele acumulava fica em MEMÓRIAS — esta entrada é o mapa do que saiu — e verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Proposta P-8 `projeto-estado-corrente-2026-10-02`, assinada pelo Humano, aplicada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, portao, resume, exige, flag, retirada, propostas, assinada, substituída, grafo, falha, fechada, completa, entregue, laboratório, ensaio, minha, corrigia, argv, cli, nova, fecha, bool, dentro, tinha, achado, lendo, lab, corrigido
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
   palavras-chave: propostas, modelos, gratuitos, autoria, conteúdo, desconhecidos, achado, pendente, auditoria, seth, investigado, saída, scripts, pesquisar, vigia, combustível, conferido, máquina, erro, arquivo, pede, mudança, roster, proposta, aberta
-(599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
-  palavras-chave: terceiro, item, retomada, restringir, readwritepaths, escriba, memoria, propostas, tem, premissa, errada, proposta, aberta
+(599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restrin …
+  palavras-chave: terceiro, item, retomada, restrin
 (598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` abert …
   palavras-chave: proposta, llamacpp, portas, abert
 (597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` …
