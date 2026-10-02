@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: decisão do Humano — tirar o `kokoro-tts` do sistema. Aguardando assinatura.**
 (592) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27`, assinada pelo Humano, aplicada. Toda a lista de pendências de F3.2 registrada em (567) está fechada.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `config/modelos-padrao.md` aplicado. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA.
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
-(590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, assinada pelo Humano, aplicada. O mecanismo do `~/agata` configurável — decisão de (564) — é código real do canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/definir_caminho_agata.sh` aplicado. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA. Inerte sem `AGATA_HOME` definido — esta Máquina continua com `~/agata` como diretório real, nada mudou.
+(590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, a …
 (589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` ab …
 (588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assin …
 (587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta …

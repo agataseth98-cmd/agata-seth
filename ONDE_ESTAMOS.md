@@ -5,11 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (619)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (620)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Conserto do `canon-mcp.mjs` assinado, aplicado E testado de ponta a ponta — fechado.** A ferramenta que a Seth usa pra consultar o canon agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado (o que bloqueava a Seth em produção) está corrigido e confirmado ao vivo: você abriu o Obsidian, subi só o proxy read-only (sem mexer no resto), e a chamada exata que falhava antes agora devolve a nota certa. Detalhe: `MEMÓRIAS.md` (618)/(619).
+**Testei a Seth de verdade pelo LibreChat (depois que você subiu o Obsidian, eu subi o resto com `seth`) — a trava de ontem (616) não apareceu em 2 tentativas.** Pedi pra ela consultar um script e depois uma regra do PROTOCOLOS.md; as duas vezes ela pediu sua aprovação (HITL) e, depois de aprovar, respondeu certo em segundos — a mesma chamada que tinha travado 1m23s ontem. **Não é garantia de que o bug do LibreChat sumiu de vez** (só testei 2 vezes, não ataquei o problema no código deles) — mas na prática, hoje, a Seth completa turno com ferramenta. Detalhe: `MEMÓRIAS.md` (620).
+
+**Conserto do `canon-mcp.mjs` assinado, aplicado E testado de ponta a ponta — fechado.** A ferramenta que a Seth usa pra consultar o canon agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado (o que bloqueava a Seth em produção) está corrigido. Detalhe: `MEMÓRIAS.md` (618)/(619).
+
+**Seu pedido de identificação de modelo na fala da Seth continua pendente — mas agora sem o bloqueio técnico.** Antes ela não completava turno com ferramenta; hoje completa (achado acima). O header `X-Modelo-Real` já existe no HTTP (613/614); falta construir a parte que faz a Seth LER esse header e falar o nome certo, em vez de "modelo não verificado" (que ainda aparece no cabeçalho das respostas de hoje). Próximo passo real, não feito ainda.
 
 **`propostas/modelos-gratuitos-2026-09-30.md` (estava solto, sem commit) investigado e arquivado — nada pede mudança.** Os modelos com erro no teste eram esperados (locais desligados, HuggingFace com crédito mensal esgotado, já sabido); os 2 Gemini "novos" já estão em produção desde 23/09. Detalhe: `MEMÓRIAS.md` (619).
 
