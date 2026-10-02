@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5ed5b064bdbb826d32476c0c85a1d206bf4847e2
-  Escrito em: 02/10/2026 09:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 65d9677dc6ab2e3b1c5b0895af901263feeb3ce7
+  Escrito em: 02/10/2026 10:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ed5b064bdbb826d32476c0c85a1d206bf4847e2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65d9677dc6ab2e3b1c5b0895af901263feeb3ce7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65d9677dc6ab2e3b1c5b0895af901263feeb3ce7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65d9677dc6ab2e3b1c5b0895af901263feeb3ce7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65d9677dc6ab2e3b1c5b0895af901263feeb3ce7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65d9677dc6ab2e3b1c5b0895af901263feeb3ce7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
+
+**Levantamento antes de mexer, não suposição.** Inventariei as 13 ferramentas reais (canon: 5, discord: 2, navegador: 6) e, pro mecanismo da Seth, li o código rodando de verdade no container (`@librechat/agents/dist/cjs/hooks/createToolPolicyHook.cjs`), não documentação — confirmei a precedência real: `deny` vence `ask`, que vence `allow`, que vence o fallback do `mode`. Hoje: `mode: default` + `ask: ["*"]` = pede aprovação pra tudo, sempre.
+
+**Classificação (Portão das três perguntas rodado antes de escrever qualquer config, duas perguntas resolvidas num único turno pra não repetir o óbvio, a 2ª — dois casos limite — decidida pelo Humano via pergunta própria):**
+- **Automático (leitura pura ou escrita sem alcance fora do sistema):** `query_canon`, `vault_consultar`, `maquina_verificar` (canon — as 3 read-only por desenho) · `diario_anotar` (canon — escreve só no `SETH-DIARIO.md` próprio, nunca entra em MEMÓRIAS nem passa pelo portão; decisão do Humano, 1 de 2 casos-limite perguntados) · `ler_mensagens` (discord — só lê) · `navegar`/`ler_pagina`/`screenshot`/`fechar_navegador` (navegador — perfil ISOLADO sem cookie/senha herdada, confirmado no `README.md` do servidor: os 3 primeiros já são rotulados "leitura" lá, `fechar_navegador` só libera o processo).
+- **Continua pedindo aprovação:** `memoria_acrescentar` (canon — permanente, nunca se apaga por Regra 4; o Humano decidiu EXPLICITAMENTE manter em ask mesmo sabendo que não é "destrutivo" no sentido de apagar — 2º caso-limite, resposta NÃO automatizar) · `enviar_mensagem` (discord — visível a terceiros) · `clicar`/`preencher` (navegador — trava dupla com a allowlist de domínio).
+
+**Lado Goose, aplicado agora.** `~/.config/goose/permission.yaml` (fora do repo — P-8 só cobre o que está em `~/agata`; backup `permission.yaml.bak-2026-10-02` antes de editar, mesma convenção dos backups que já existiam lá). Goose só tem a extensão `canon` ativa (discord/navegador nunca foram ligados nele — `playwright`/`browsermcp`/`chrome-devtools` continuam `enabled: false`, achado confirmado relendo `config.yaml`, não de memória). `canon__query_canon`/`canon__vault_consultar` já estavam em `always_allow` de sessões anteriores — some pra `canon__maquina_verificar` e `canon__diario_anotar` agora; `canon__memoria_acrescentar` continua em `ask_before`, como decidido. `yaml.safe_load` confirmou sintaxe depois de editar.
+
+**Lado Seth, proposta P-8 `ferramentas-automaticas-seth-2026-10-02` aberta, aguardando assinatura.** `redesign/librechat/librechat.yaml`: troca `ask: ["*"]` por `allow: [9 nomes]`, sem tocar `mode: default` — fail-safe por desenho, qualquer ferramenta nova/não listada continua pedindo aprovação por omissão, nunca vira automática sozinha. Nomes exatos (`<tool>_mcp_<servidor>`) confirmados pela própria UI nesta sessão (MEMÓRIAS (620), screenshots reais de `vault_consultar_mcp_canon`/`query_canon_mcp_canon`), não adivinhados. `yaml.safe_load` + `git apply --check` confirmados antes de propor; `seth-gateway.service`/LibreChat não tocados (é `toolApproval`, não `seth_gateway.py` — arquivos diferentes, (622) não interfere aqui).
+
+**sync:** PASS — `git rev-parse main` = `65d9677` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (622) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `createToolPolicyHook.cjs` lido no bundle real rodando (`docker exec`), não suposto; README do servidor `navegador` conferido pra confirmar leitura/escrita por tool; `config.yaml`/`permission.yaml` do Goose lidos antes de editar (não de memória do que "deveria" estar lá); nomes de tool da Seth confirmados por observação direta na UI desta sessão, não por engenharia reversa do bundle minificado; `yaml.safe_load` nos dois arquivos editados; `git apply --check` no diff da proposta · **Autorização:** Humano, "quero que as ferramentas de pesquisa ou que não tem potencial destrutivo fiquem automaticas na Seth e no Goose", com os 2 casos-limite decididos por ele via pergunta direta.
 
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
 
