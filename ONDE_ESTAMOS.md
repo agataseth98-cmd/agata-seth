@@ -5,9 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (625)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (627)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
+
+**O arquivo do "agora" do sistema (`PROJETO.md`) ficou com menos da metade do tamanho** — de 98 KB para 41 KB. Saiu dele a história de como cada coisa chegou aonde está (itens fechados, correções antigas, listas de modelos de outras datas), que já estava em `MEMÓRIAS.md`. O texto anterior inteiro está guardado em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Nada que vale hoje foi perdido; conferido por ferramenta (8/8) duas vezes, por mim, antes e depois de aplicar — não só aceito do laboratório. Saíram também do arquivo público o IP, o endereço do tailnet e o e-mail da conta. Passou pelo Portão das três perguntas com você e por uma segunda opinião (GLM, favorável). Efeito: todo modelo que carrega o sistema lê um terço a menos. Pendência que sobrou: decidir se `/etc/default/grub.bak.20260812-155431` ainda é necessário (os outros 2 itens de conferência já foram resolvidos: `gemini_quota_guard` não é mais usado por ninguém, o log de VRAM parou de ser escrito em agosto). Detalhe: `MEMÓRIAS.md` (627).
 
 **2 pedidos seus, assinados, aplicados, reiniciados E confirmados ao vivo pelo LibreChat — fechados:**
 1. **A Seth diz o modelo real no cabeçalho**, rotulado como medição do turno anterior — testei agora, saiu `glm-4.7-flash (medido no turno anterior pela Máquina...)` em vez de "modelo não verificado". Detalhe: `MEMÓRIAS.md` (621)/(622)/(625).

@@ -392,26 +392,17 @@ janela_memorias() {
   fi
 }
 
-# Checagem de reconciliação (heurística, não semântica): entre as últimas
-# entradas de MEMÓRIAS, quais números NÃO aparecem citados em PROJETO.md.
-# Não é prova de contradição — é sinal barato de deriva possível. Não
-# bloqueia o commit; só avisa no output do hook, pra alguém decidir olhar.
-checar_reconciliacao() {
-  local n_checar=10
-  local avisos=0
-  local corte_cmd="tail"
-  # Mais recente no TOPO da lista de números (formato novo) -> "as últimas
-  # entradas" são as N PRIMEIRAS da lista, não as N últimas.
-  grep -qF "$MARCADOR_ENTRADAS_NOVAS" MEMÓRIAS.md && corte_cmd="head"
-  while read -r num; do
-    [ -z "$num" ] && continue
-    if ! grep -q "($num)" PROJETO.md; then
-      echo "aviso reconciliação: entrada ($num) de MEMÓRIAS não é citada em PROJETO.md" >&2
-      avisos=$((avisos + 1))
-    fi
-  done < <(grep -E '^\([0-9]+\) [A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+(\+[A-ZÁÂÃÀÉÊÍÓÔÕÚÜÇ]+)*( [A-Za-zÁÂÃÀÉÊÍÓÔÕÚÜÇçãõ0-9.-]+)? [—-] ' MEMÓRIAS.md | grep -oE '^\([0-9]+\)' | tr -d '()' | "$corte_cmd" -n "$n_checar")
-  if [ "$avisos" -gt 0 ]; then
-    echo "checagem de reconciliação: $avisos aviso(s) — heurística por citação, não prova de contradição" >&2
+# Teto do PROJETO.md (02/10/2026). Substitui a antiga "checagem de
+# reconciliação", que avisava quando uma entrada recente de MEMÓRIAS não era
+# citada em PROJETO.md -- e com isso premiava historiar o arquivo do "agora"
+# (causa raiz de ele ter chegado a 97,9 KB). PROJETO diz o que vale hoje; o que
+# aconteceu fica em MEMÓRIAS. Não bloqueia o commit; só avisa no output do hook.
+PROJETO_TETO_BYTES="${PROJETO_TETO_BYTES:-48000}"
+checar_teto_projeto() {
+  local tam
+  tam="$(wc -c < PROJETO.md 2>/dev/null || echo 0)"
+  if [ "$tam" -gt "$PROJETO_TETO_BYTES" ]; then
+    echo "aviso: PROJETO.md tem $tam B (teto $PROJETO_TETO_BYTES B) -- história vai para MEMÓRIAS, não para o PROJETO" >&2
   fi
 }
 
@@ -540,7 +531,7 @@ for _m in "${ALVOS_SILO[@]}"; do
   SILO_FILES+=(".hidrata-${_m}.md")
 done
 
-checar_reconciliacao || true
+checar_teto_projeto || true
 
 _silos_txt=""
 for _f in "${SILO_FILES[@]}"; do
