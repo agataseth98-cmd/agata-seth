@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4767b77cf7f578a0bdabeb926e63f3729b92e594
-  Escrito em: 02/10/2026 09:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 171ee50a3421dbe544ad7f586f38e241397a69d3
+  Escrito em: 02/10/2026 09:14 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/171ee50a3421dbe544ad7f586f38e241397a69d3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
+
+**Pedido do Humano: subir o stack e testar de verdade (ele tinha aberto o Obsidian à mão).** Rodei `~/.local/bin/seth` — sincronizou `canon-mcp.mjs` pro deploy (confirmando que o gap declarado em (618) estava mesmo pendente) e reiniciou o container. `agata.target`, `seth-gateway/escriba/verificador`, `discord-mcp`, `navegador-mcp`, `piper-tts` subiram; LibreChat ficou `healthy` em segundos.
+
+**Teste 1 — via Claude in Chrome, sessão real do Humano, mesma disciplina de (487)/(489)/(523)/(616) (nenhuma senha tocada):** pedi pra Seth (agent "Seth (cascata livre)") consultar `scripts/estado_para_eco.sh` via `vault_consultar` — a MESMA chamada que gerou o 404 original e que (616) viu travar. Apareceu o checkpoint HITL da UI ("Review 1 action") com o payload exato (`{"caminho":"scripts/estado_para_eco.sh"}`); aprovei; o turno completou em ~15s com a resposta certa ("Executa um eco do estado do sistema logo após a fase de carregamento"), header de estado batendo (`HEAD=171ee50`, o commit que acabara de ser mergeado).
+
+**Teste 2, mesma conversa:** `query_canon({doc:"PROTOCOLOS", grep:"Regra 1\\.1"})` — aprovado, completou em ~10s. Resposta da Seth foi rasa ("Executa a Regra 1.", não colou o trecho pedido) — qualidade de resposta do modelo, não falha de ferramenta; a chamada em si funcionou.
+
+**Verificado nos logs do container, não só na UI:** `docker logs librechat` no período dos dois testes não mostra nenhuma linha de `streamable-http`/reconexão associada a `[MCP][canon]` — só o init normal (`Initialized in: 51ms`, `stdio`). As linhas `Creating streamable-http transport`/`Streamable-http transport closed` que aparecem no log são de `discord`/`navegador`, que são `type: streamable-http` de propósito (`librechat.yaml`, confirmado) — comportamento correto desses dois, não o bug de (616) (que era especificamente `canon`, configurado `type: stdio`, tentando streamable-http mesmo assim).
+
+**O que isto NÃO prova:** não refiz o reinício que (616) tinha feito (reconstruir a imagem, tentar a v0.8.8), nem rodei dezenas de repetições — é 2/2, não uma bateria. A hipótese de (616) (dois caminhos de código divergentes no `@librechat/agents`, um stdio, um streamable-http) continua sem confirmação no código-fonte deles; pode ter sido mascarada pelo restart do container, por uma condição de corrida que não bateu hoje, ou genuinamente resolvida por algo no caminho (o conserto de (618) mexeu só no `canon-mcp.mjs`, não no LibreChat). **Não declaro o bug de terceiro corrigido — declaro que o bloqueio prático sumiu nas duas tentativas de hoje**, o suficiente pra desbloquear o próximo passo real: construir a identificação de modelo na fala da Seth (pedido de (615), ainda não implementado — o header `X-Modelo-Real` de (613)/(614) existe no HTTP, mas nada ainda faz a Seth lê-lo e falar o nome certo em vez de "modelo não verificado", como os dois testes acima mostram no próprio cabeçalho das respostas).
+
+**sync:** PASS — `git rev-parse main` = `171ee50` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (619) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `seth` rodado de verdade, `systemctl`/`docker ps` conferindo o que subiu; 2 turnos reais via Claude in Chrome na sessão do Humano, cronometrados por observação direta (não estimativa), aprovação HITL real clicada; `docker logs --since` grepado por padrão específico (`streamable-http`), não lido por amostra; `librechat.yaml` conferido pra separar comportamento esperado (discord/navegador) do que seria o bug (canon) · **Autorização:** Humano, "vamos testar", depois de abrir o Obsidian à mão.
 
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
 

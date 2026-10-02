@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
+  palavras-chave: reprodução, vivo, librechat, verdade, chamada, exata, travava, agora, completa, segundos, bug, loop, streamable, http, aparece, causa, provada, sintoma
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
   palavras-chave: fechamentos, teste, end, real, conserto, tinha, ficado, risco, residual, declarado, propostas, modelos, gratuitos, investigado, movido, canon, mesmo, tratamento, nada, pede, mudança
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, modelos, padrao, assinada, humano, aplicada, lista, pendências, registrada, fechada, assinatura, conferida, scripts, verificar, config, aplicado, par, movido, pra, propostas, aplicadas, perimetro, falha
 (591) DIÁRIO — 27/09/2026 · **Proposta P-8 `modelos-padrao-2026-09-27` aberta: a última pendência de (567) — receita padrão de modelos, separada do `manifest.json`. Aguardando assinatura.**
   palavras-chave: proposta, modelos, padrao, aberta, última, pendência, receita, padrão, separada, manifest, json, aguardando, assinatura
-(590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, assinada pelo Humano, aplicada. O mecanismo do `~/agata` configurável — decisão de (564) — é código real do canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `scripts/definir_caminho_agata.sh` aplicado. Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA. Inerte sem `AGATA_HOME` definido — esta Máquina continua com `~/agata` como diretório real, nada mudou.
-  palavras-chave: proposta, caminho, agata, symlink, assinada, humano, aplicada, mecanismo, configurável, decisão, código, real, canon, agora, assinatura, conferida, scripts, verificar, definir, aplicado, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, inerte, home, definido, máquina, continua, diretório, nada, mudou
+(590) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27`, a …
+  palavras-chave: proposta, caminho, agata, symlink
 (589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` ab …
   palavras-chave: proposta, caminho, agata, symlink
 (588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assin …
