@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
+  palavras-chave: auditoria, lab, resposta, seth, head, cabeçalho, cita, nome, campo, errado, script, proposto, quebraria, diario, versionado, ela, pediu, novo, poder, escrita, execução, pra, mesma, recusado, padrão, visto, pvt, rev
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
   palavras-chave: combos, criados, verdade, omniroute, cota, aplicar, humano, testados, vivo, seth, rota, continua
 (639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, modelo, real, header, aberta, seth, gateway, carimba, nome, respondeu, novo, partir, campo, model, omniroute, devolve, fato, máquina, autorrelato, aguardando, assinatura
 (612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra 4), achado por auditoria do laboratório "Ensaio" (`auditoria-pos-reforma-2026-10-01.md`, DADO) e verificado por mim antes de corrigir — inclusive uma alegação falsa minha num commit real.**
   palavras-chave: registro, aplicações, faltavam, regra, achado, auditoria, laboratório, ensaio, pos, reforma, dado, verificado, mim, corrigir, inclusive, alegação, falsa, minha, commit, real
-(611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` aberta: auditoria geral pedida pelo Humano ("levante tudo que está em aberto... verifique se está tudo integrado") achou 2 buracos reais que a reforma documental (609/610) deixou pra trás. Aguardando assinatura.**
-  palavras-chave: proposta, integracao, pos, reforma, aberta, auditoria, geral, pedida, humano, levante, tudo, aberto, verifique, integrado, achou, buracos, reais, documental, deixou, pra, trás, aguardando, assinatura
+(611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` a …
+  palavras-chave: proposta, integracao, pos, reforma
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão …
   palavras-chave: bateria, reconstrução, rodada, sessão
 (609) DIÁRIO — 01/10/2026 · **Proposta P-8 `reforma-documental-tres-camadas-2026 …
