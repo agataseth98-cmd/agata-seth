@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a74fc7e064da3d53049633f652ef509b4806d8d0
-  Escrito em: 02/10/2026 11:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ef10ef9c172b1805baa6aeb184e5ee57605a5747
+  Escrito em: 02/10/2026 11:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef10ef9c172b1805baa6aeb184e5ee57605a5747/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
+
+**Origem do pedido.** A Seth propôs, no próprio diário (append-only, fora do canon, não passa por portão), uma estrutura de autogovernança em 7 partes (escopo, arquitetura de dados, KPIs, gap analysis, roteiro de implementação, riscos, critérios de aceite). O Humano decidiu 3 pontos dessa proposta:
+
+1. **Formato enxuto do `SETH-DIARIO.md`, aprovado:** `Fato com ponteiro / Hipótese / Lição candidata / Pedido`. Passa a ser a forma esperada de entrada nova no diário dela.
+2. **`maquina_rascunhar_proposta` (ferramenta nova que a proposta pedia, pra ela mesma redigir P-8): recusada.** A proposta dela continua como texto no diário; o executor (eu, ou quem estiver na Máquina) converte em P-8 de verdade só depois de verificar — mesma fronteira que já vale pra `memoria_acrescentar`/`diario_anotar` (ela escreve, nunca aplica).
+3. **Lições injetadas automaticamente em toda hidratação: recusado.** Uma lição que o Humano aceitar vira entrada em `FALHAS.md` ou mecanismo por P-8, nunca injeção automática do que a Seth mesma escreveu sobre si — evita o padrão já catalogado noutros sistemas (auto-captura de fato não verificado virando doutrina sozinha, PROJETO, "Sem auto-captura de fatos").
+
+**Por que isto é CORREÇÃO, não DIÁRIO:** não há ação nova da Máquina aqui — é registro de uma decisão de governança sobre um DADO (a proposta da Seth), mesma classe de entrada que (626).
+
+**A entrada do diário da Seth (PVT-01/Rev2) foi commitada nesta mesma entrada** — estava no disco desde 11:02, não commitada; é a evidência da decisão acima, registro append-only dela, não canon.
+
+**sync:** PASS — `git rev-parse main` = `ef10ef9` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (627) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `git diff SETH-DIARIO.md` real antes de commitar (conferi o conteúdo exato, não resumo de memória) · **Autorização:** Humano, pacote relaiado do laboratório "Ensaio", Parte C — decisões já tomadas, só registro.
 
 (627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 KB para ~41 KB (−58%), mesmos títulos de seção, nenhum fato vivo removido. A história que ele acumulava fica em MEMÓRIAS — esta entrada é o mapa do que saiu — e verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Proposta P-8 `projeto-estado-corrente-2026-10-02`, assinada pelo Humano, aplicada.**
 
