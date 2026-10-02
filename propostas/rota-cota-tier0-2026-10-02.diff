@@ -12,7 +12,7 @@ index cb5e006..5474c8a 100644
  `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
  corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
 diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
-index fc328d6..812d3c0 100644
+index 6379ee0..33cb3c2 100644
 --- a/redesign/router/seth_gateway.py
 +++ b/redesign/router/seth_gateway.py
 @@ -43,6 +43,7 @@ import re
@@ -145,10 +145,10 @@ index fc328d6..812d3c0 100644
          self.send_header("Transfer-Encoding", "chunked")
          self.end_headers()
          try:
-@@ -946,6 +1029,50 @@ def _selftest() -> int:
-     falhas += 0 if ok10c else 1
-     _Dummy.modelo_resposta = None
- 
+@@ -983,6 +1066,49 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok12 else 'FALHA'}  SSE espiado inteiro: conteúdo real preservado, "
+           f"keepalive virou comentário ({len(saida12)} bytes de saída)")
+     falhas += 0 if ok12 else 1
 +    # 11. rota pela cota por minuto do tier 0 (funções puras, relógio injetado)
 +    global _ROTA_COTA_LIGADA
 +    ligada_antes = _ROTA_COTA_LIGADA
@@ -192,10 +192,9 @@ index fc328d6..812d3c0 100644
 +                        ("11j", c11j, f"ponta a ponta: pedido grande sai como {modelo_enviado!r} + X-Seth-Est-Tokens")]:
 +        print(f"{'PASS' if ok else 'FALHA'}  cota {n}: {desc}")
 +        falhas += 0 if ok else 1
-+
+ 
      up.shutdown()
      gw.shutdown()
-     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
 diff --git a/redesign/systemd/seth-gateway.service b/redesign/systemd/seth-gateway.service
 index f09e571..4bf30a3 100644
 --- a/redesign/systemd/seth-gateway.service
