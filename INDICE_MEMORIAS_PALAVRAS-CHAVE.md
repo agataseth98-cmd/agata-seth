@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmado na fonte real (`return { messages: [finalChunk] }`, sem guarda quando o stream não entrega chunk nenhum); M9 reproduziu o sintoma, mas a causa achada é NOSSA, não do LibreChat: sob carga concorrente, conteúdo real que o OmniRoute confirma ter entregue (200, sem erro) chega vazio no cliente — só o `": ka"` do nosso próprio filtro de keepalive.**
+  palavras-chave: lab, mecanismo, invoke, cjs, confirmado, fonte, real, return, messages, finalchunk, guarda, stream, entrega, chunk, reproduziu, sintoma, causa, achada, nossa, librechat, sob, carga, concorrente, conteúdo, omniroute, confirma, ter, entregue, erro, chega, vazio, cliente, nosso, próprio, filtro, keepalive
 (633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de corrida propostas são refutadas. Proposta `rota-cota-tier0-2026-10-02` (632) recebeu segunda opinião condicional do Conselho Remoto.**
   palavras-chave: lab, medidos, hipóteses, corrida, propostas, refutadas, proposta, rota, cota, tier, recebeu, segunda, opinião, condicional, remoto
 (632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: remoção, kokoro, tts, nunca, chegou, verdade, máquina, repositório, local, bin, seth, parar, continuavam, linhas, docker, start, stop, removidas, fonte, achado, rodando, hoje, container, subiu, novo, contra, decisão, humano, corrigido, redeploy, atalhos, parado
 (605) DIÁRIO — 30/09/2026 · **`omniroute.service` ficou fora do ar por ~1h40 (18:17-19:55) — descompasso entre dois repositórios do sistema, não bug do Agata. Achado, diagnosticado e corrigido nesta sessão, com autorização do Humano pro `sudo`.**
   palavras-chave: omniroute, service, ficou, fora, descompasso, repositórios, sistema, bug, agata, achado, diagnosticado, corrigido, sessão, autorização, humano, pro, sudo
-(604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
-  palavras-chave: propostas, pendentes, grafo, resume, falha, fechada, llamacpp, portas, escriba, readonly, interno, assinadas, humano, aplicadas, três, assinatura, conferida, scripts, verificar, pares, movidos, pra, suíte, perimetro
+(604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha …
+  palavras-chave: propostas, pendentes, grafo, resume, falha
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de r …
   palavras-chave: correção, existe, sim, jeito, barato
 (602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue …
