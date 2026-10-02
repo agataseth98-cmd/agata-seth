@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de corrida propostas são refutadas. Proposta `rota-cota-tier0-2026-10-02` (632) recebeu segunda opinião condicional do Conselho Remoto.**
+  palavras-chave: lab, medidos, hipóteses, corrida, propostas, refutadas, proposta, rota, cota, tier, recebeu, segunda, opinião, condicional, remoto
 (632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
   palavras-chave: resolvido, método, seguro, chamadas, reais, strace, cascata, omniroute, invisível, fora, tira, filtro, sse, lista, suspeitos, item, lab, rota, tamanho, bloqueado, combos, seth, compartilham, mesmo, modelo, posição, trocar, combo, resolve, devolvido, pra, desenhar
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: omniroute, service, ficou, fora, descompasso, repositórios, sistema, bug, agata, achado, diagnosticado, corrigido, sessão, autorização, humano, pro, sudo
 (604) DIÁRIO — 30/09/2026 · **As 3 propostas P-8 pendentes — `grafo-resume-falha-fechada`, `p4-llamacpp-portas`, `escriba-readonly-interno` — assinadas pelo Humano, aplicadas as três.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK em cada uma). Os 3 pares movidos pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: propostas, pendentes, grafo, resume, falha, fechada, llamacpp, portas, escriba, readonly, interno, assinadas, humano, aplicadas, três, assinatura, conferida, scripts, verificar, pares, movidos, pra, suíte, perimetro
-(603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
-  palavras-chave: correção, existe, sim, jeito, barato, restringir, escriba, escreve, precisava, mudar, código, proposta, readonly, interno, aberta, verificada, vivo, clone, sandboxado, aguardando, assinatura
+(603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de r …
+  palavras-chave: correção, existe, sim, jeito, barato
 (602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue …
   palavras-chave: llamacpp, manifesto, diff, entregue
 (601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-3 …
