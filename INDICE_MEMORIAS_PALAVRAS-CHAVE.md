@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
+  palavras-chave: mudanças, confirmadas, vivo, librechat, restart, stack, seth, systemctl, user, gateway, service, funcionam
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
   palavras-chave: proposta, ferramentas, automaticas, seth, assinada, humano, aplicada, leitura, potencial, destrutivo, pedem, aprovação
 (623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, portao, resume, exige, flag, aberta, portão, aprovação, grafo, aprovava, padrão, recusar, exato, bloqueava, recusa, typo, nada, silêncio, aguardando, assinatura
 (596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, assinada pelo Humano, aplicada. `scripts/proteger_branch_github.sh` é código real do canon. Todas as pendências abertas de Fase 3 (F3.2 + as 2 decisões do Humano) estão fechadas.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
   palavras-chave: proposta, protecao, branch, github, assinada, humano, aplicada, scripts, proteger, código, real, canon, pendências, abertas, fase, decisões, estão, fechadas, assinatura, conferida, verificar, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha
-(595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` aberta: `scripts/proteger_branch_github.sh`, testado ao vivo contra um repositório real do GitHub, criado e apagado só pra isso. Decisão do Humano — opção C (script separado, não embutido em `genese.sh`). Aguardando assinatura.**
-  palavras-chave: proposta, protecao, branch, github, aberta, scripts, proteger, testado, vivo, contra, repositório, real, criado, apagado, pra, decisão, humano, opção, script, separado, embutido, genese, aguardando, assinatura
+(595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` a …
+  palavras-chave: proposta, protecao, branch, github
 (594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada …
   palavras-chave: proposta, kokoro, remocao, assinada
 (593) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27` aberta: d …
