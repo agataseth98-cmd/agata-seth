@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 KB para ~41 KB (−58%), mesmos títulos de seção, nenhum fato vivo removido. A história que ele acumulava fica em MEMÓRIAS — esta entrada é o mapa do que saiu — e verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Proposta P-8 `projeto-estado-corrente-2026-10-02`, assinada pelo Humano, aplicada.**
 (626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
 (625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autoria e conteúdo antes desconhecidos, achado pendente de (599) da auditoria da Seth) investigado: é saída de `scripts/pesquisar_modelos_gratuitos.py`, o "vigia de combustível". Conferido na Máquina — nenhum dos "ERRO" do arquivo pede mudança no `ROSTER`. Nenhuma proposta aberta.**
 (599) DIÁRIO — 30/09/2026 · **Terceiro item de `retomada-2026-09-30.md` (restringir `ReadWritePaths` do escriba a `memoria/`+`propostas/`) tem premissa errada — nenhuma proposta aberta.**
 (598) DIÁRIO — 30/09/2026 · **Proposta P-8 `p4-llamacpp-portas-2026-09-30` aberta: as 5 instâncias llama.cpp (`llamacpp-agata` + as 4 novas de 20/09) nunca entraram em `config/portas-agata.txt` — o P-4 não as via. Aguardando assinatura.**
-(597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` aberta: o portão de aprovação do grafo (`resume`) aprovava por padrão — só um `--recusar` exato bloqueava; `--recusa` (typo) ou nada aprovava em silêncio. Aguardando assinatura.**
+(597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` …
 (596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, …
 (595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` a …
 (594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada …

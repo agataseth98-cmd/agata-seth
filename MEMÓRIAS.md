@@ -26,20 +26,68 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 772f330a457912d52521fe587d1e7f3dbee1227b
-  Escrito em: 02/10/2026 11:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a74fc7e064da3d53049633f652ef509b4806d8d0
+  Escrito em: 02/10/2026 11:44 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/772f330a457912d52521fe587d1e7f3dbee1227b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/772f330a457912d52521fe587d1e7f3dbee1227b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/772f330a457912d52521fe587d1e7f3dbee1227b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/772f330a457912d52521fe587d1e7f3dbee1227b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/772f330a457912d52521fe587d1e7f3dbee1227b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a74fc7e064da3d53049633f652ef509b4806d8d0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 KB para ~41 KB (−58%), mesmos títulos de seção, nenhum fato vivo removido. A história que ele acumulava fica em MEMÓRIAS — esta entrada é o mapa do que saiu — e verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Proposta P-8 `projeto-estado-corrente-2026-10-02`, assinada pelo Humano, aplicada.**
+
+**Origem.** Ordem do Humano em 02/10/2026: "sonde projeto e otimize-o enviando o que não tem mais necessidade para memórias". Mesmo método da reforma das REGRAS (609)/(612): separar o que vale hoje (PROJETO) do que aconteceu (MEMÓRIAS). Desenho e provas: laboratório "Ensaio"; verificação independente, Portão, segunda opinião e aplicação: eu, nesta sessão.
+
+**Verificado por mim antes de propor, não só aceito do lab (Regra 2):** sha256 do `.diff` conferido; `git apply --check` limpo contra o HEAD real, 20 commits à frente da base do lab, nenhum deles tocando os 4 arquivos na região que o diff mexe; `conservacao_projeto.py` (LC_ALL=C.UTF-8) rodado por mim num worktree descartável antes de propor — CONSERVADO 8/8; suíte 46/46; perímetro vermelho sem assinatura (P-8, 3 suspeitos, esperado); diff inspecionado linha a linha — não toca `propostas/.allowed_signers` nem nenhum mecanismo de aprovação, as menções que aparecem nele são texto movido pro arquivo histórico.
+
+**Portão das três perguntas, rodado com o Humano uma de cada vez, sem resposta pronta (ele pediu explicitamente, citando a autocorreção do lab em (612)):** 1) reversibilidade — "desfaz" (ele mesmo, sozinho). 2) alcance — ele pediu o mapeamento primeiro ("não faço ideia"); dei os fatos (só 4 arquivos, consumidores reais de PROJETO.md listados) e ele aceitou. 3) silêncio — dei os fatos (o que é checado mecanicamente vs. o ponto cego real: a lista `RETIRADOS` de ~150 itens é classificação do lab, não prova semântica — o próprio lab marcou 3 itens como pendência em vez de assumir mortos); ele decidiu "pode seguir".
+
+**Segunda opinião pedida pelo Humano (REGRAS, "Mudança estrutural"), via Conselho Remoto — `zai/glm-4.7-flash`, 9,2s:** Posição **sim** (assinar). Fundamentação: "A auditoria por script (8/8 conservado) comprova a eliminação de ruído acidental; o risco residual da classificação humana é mitigado pela natureza física do repositório (histórico inalterado em extras)... a separação de arquivos cria um arquivo de referência estática que é, em essência, o 'estado morto' perfeito, evitando a tentação humana de editar o que deve ser uma fonte única de verdade." Resposta crua: `memoria/missoes/conselho-remoto/20261002-112616-glm-4.7-flash.json`. (O script de rotação marcou "FORA DO FORMATO" porque o checador espera a palavra "Emenda" sempre — falso negativo: o pedido pedia Emenda só se a posição fosse condicional, e o modelo respondeu certo "não se aplica" pra posição "sim".)
+
+**Por que o texto histórico não foi colado dentro desta entrada:** a janela de hidratação acumula entradas inteiras a partir do topo e nunca corta uma entrada no meio — PROJETO, "Memória e hidratação". Uma entrada de ~57 KB no topo entraria inteira em toda hidratação e faria o contrário do que a ordem pediu. Por isso esta entrada guarda o **mapa** (o que saiu, onde está a história) e o arquivo histórico guarda o **texto**.
+
+**Mapa do que saiu (tudo continua nas entradas citadas):**
+- *O que é:* a nota de que o Tailscale "não estava instalado" (340), superada em (350). Saíram também do texto ativo o IP, o hostname do tailnet e o e-mail da conta — identificadores pessoais que o P-20 procura. Ficam no histórico do git e em (350); não se reescreve história.
+- *Máquinas:* a narrativa dos eventos de 12-13/08 (99), (100), (111), (124)/(125) e a contenção de suspensão que parou de subir (536). Fica o estado atual (GRUB, S3, SMART, o que vigiar).
+- *Cérebro:* a avaliação que embasou a promoção do qwen local (119), (120), (138), (139), (162); a primeira inversão de papéis Gemini/qwen (102); o roteamento B4 aprovado e aposentado (64), (383); o tier 0 antigo das cascatas (532) e o alias apodrecido `auto/coding` (390); o guard de cota do Gemini (122), que era plugin do Hermes; a barreira de contexto ≥64k do Hermes. Fica a ordem viva, que mora no OmniRoute e em `config/modelos-gratuitos.md`.
+- *Memória e hidratação:* o teto de entrega do carregador do `hermes-agent` (103)-(105); a medição de 20/08 da janela (205)-(213); a direção de leitura anterior a (271); a "consequência normativa em aberto" sobre MOD sensível, decidida em (430).
+- *Interface:* a migração para `modelSpec custom` que tirou as ferramentas da Seth (392), revertida em (415).
+- *Conselho Remoto:* a escolha original do GLM (44), (182); a chave Zhipu exposta e rotacionada (208), (209); as tentativas com 429 (211)-(213), (225); o backoff de 429 por arquivo (216), que não existe mais no script; os rosters de 4, 5 e 9 nomes (353), (374), (420), (513). Fica a regra: a lista viva é o `ROSTER` de `scripts/conselho_remoto.py`.
+- *Quarentena (P-8):* o incidente que motivou a quarentena (214), o bootstrap do próprio P-8 e os 6 casos de teste de habilitação (218). Fica o mecanismo; o texto completo é `propostas/README.md`.
+- *Estado dos bugs e dos testes:* todos os itens [FECHADO]/[OBSOLETO] e as sessões de manutenção — 429 do Gemini (38), (40), (150); bancada TES-001/TES-002 (66), (68), (69), (73), (243), (360), (406), (408), (409), aposentados em (417); segunda opinião da regra 3X (246)/(247), que virou a Regra 8; truncamento de `num_ctx` (121), (122), (133)-(135); asserção byte a byte do harness A1 (159); timer `agata-token-check` (285), (462); ataque de título por dado externo (432)/(433); manutenção do vault e auditorias da mesma sessão (319), (323), (326), (330), (331)/(332); auditorias da Seth (334)/(335), (336), (337); `HTTPError` da consolidação (340). Ficam só os itens abertos e os mecanismos vivos.
+- *Estado de publicação:* a medição "em dia" de (85), que é foto e não estado. Fica a regra: medir por `sync` em cada sessão.
+- *Seção "Medição de horário para modelos em nuvem":* virou uma linha que aponta para `PROTOCOLOS.md`, "Regra 1.1". A proibição de `web_extractor` foi mantida no PROJETO: só ela não existia em PROTOCOLOS — achado da prova de conservação.
+
+**Correções de estado feitas no caminho (o texto antigo contradizia o canon):**
+- "Nada escuta fora de `127.0.0.1`" deixou de ser verdade com o relé `172.29.7.1` da bridge do LibreChat (538). Agora o texto diz "nada em interface pública" e aponta o manifesto `config/portas-agata.txt` (P-4) como fonte dos binds.
+- A lista de portas da Segurança ainda tinha `8880` (Kokoro), removido em (593)/(594). A lista virou ponteiro para o manifesto.
+- O índice derivado foi descrito como gerado de 3 fontes; desde (609) são REGRAS, PROTOCOLOS, FALHAS, PROJETO e as camadas de MEMÓRIAS.
+- "Infraestrutura pronta pra quando a Fase 3 (bootstrap) do plano existir": a gênese existe desde (584)/(586).
+- `maxWaitMs`: o PROJETO citava só a mudança pela UI (363); acrescentado o drop-in versionado para clones (588).
+
+**Hook:** a checagem de reconciliação do `.githooks/gerar-hidratacao.sh`, que avisava quando uma entrada recente "não é citada em PROJETO.md", foi trocada por um aviso de teto de tamanho do PROJETO (`PROJETO_TETO_BYTES`). A heurística antiga empurrava cada entrada nova para dentro do PROJETO como citação, e é a causa raiz do crescimento de 97,9 KB: ela premiava historiar o arquivo do "agora".
+
+**Ferramenta:** `scripts/testar_preservacao.py --alvo projeto` passa a ler as 3 camadas de MEMÓRIAS (Fase 4) e a aceitar hífen (além de travessão) como separador, como o gerador do índice. Antes, falhava até no PROJETO antigo, porque dava como inexistente toda entrada já migrada.
+
+**Provas, rodadas por mim na árvore real (não só a do lab):** `p8_verificar.sh` 4/4 antes de aplicar; `git apply` do diff assinado; `conservacao_projeto.py` CONSERVADO 8/8 (8 checagens, contra o PROJETO.md real recém-aplicado); `testar_perimetro.sh` 46/46; `perimetro.sh`, ver próxima entrada de linha (rodado depois do commit, no hook).
+
+**Pendências de conferência, resolvidas na Máquina:**
+- `gemini_quota_guard`: confirmado — `grep` recursivo acha só 1 ocorrência, em `scripts/medir_hidratacao.py:115`, dentro de uma STRING de relatório ("monitorado por `gemini_quota_guard`"), não uma chamada real. Nada no sistema usa esse guard hoje — ele era hook `pre_api_request` do Hermes, removido em (312).
+- `~/agata_vram_producao_*.log`: confirmado — existe 1 arquivo só, de 14/08/2026, 287.997 B, `lsof` não mostra processo nenhum com ele aberto, nenhum processo "vram" rodando. **Não é mais escrito** — é log histórico parado, não contínuo.
+- `/etc/default/grub.bak.20260812-155431`: existe (root, 2.227 B, 12/08/2026). Decisão de manter ou apagar é do Humano — não decidi sozinho.
+
+**O que NÃO mudou:** nenhum título de seção citado por código ou canon (29 citações, conferidas pela prova); o campo `Nome do sistema:`; `PROJETO_REFERENCIA.md`; nenhuma regra; nada de MEMÓRIAS editado.
+
+**sync:** PASS — `git rev-parse main` = `a74fc7e` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (626) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `p8_verificar.sh` 4/4 antes de aplicar; `git apply` do diff assinado; `conservacao_projeto.py` com `LC_ALL=C.UTF-8`, rodado duas vezes (worktree antes de propor, árvore real depois de aplicar); `testar_perimetro.sh` 46/46; `git apply --check` contra HEAD real antes de propor; segunda opinião real via `scripts/conselho_remoto.py`, resposta crua guardada e citada literal; as 3 pendências checadas na Máquina (`grep`, `ls`, `lsof`, `ps aux`), não deixadas como suposição · **Autorização:** Humano — ordem original de sondar/otimizar o PROJETO; Portão das três perguntas respondido pergunta a pergunta; segunda opinião pedida e favorável; assinatura conferida por `scripts/p8_verificar.sh` antes de aplicar.
 
 (626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
 

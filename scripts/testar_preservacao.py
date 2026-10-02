@@ -40,7 +40,11 @@ PAT_MEM_NEW = re.compile(r'^\(([0-9]+)\) (DIÁRIO|CONSELHO|MOD[^—]*|CORREÇÃO
 # fundamental de "esta entrada existe em MEMÓRIAS.md", independente de o
 # gerador reconhecer o rótulo ou não. Ver achado real: (134) CORREÇÃO fica
 # de fora do padrão estreito e por isso nunca chegou ao índice.
-PAT_MEM_NEW_LARGO = re.compile(r'^\(([0-9]+)\) ([^—\n]+?) — ([0-9]{2}/[0-9]{2}/[0-9]{4})')
+# Separador: travessão OU hífen -- o mesmo que o gerador do índice aceita
+# (.githooks/gerar-hidratacao.sh, `[—-] `). Há entradas migradas com
+# 'DIARIO - 26/08/2026' (ex.: (272)-(274), camada fria) que existem e eram
+# dadas como inexistentes.
+PAT_MEM_NEW_LARGO = re.compile(r'^\(([0-9]+)\) ([^—\n]+?) [—-] ([0-9]{2}/[0-9]{2}/[0-9]{4})')
 
 
 def falha(msgs, texto):
@@ -225,6 +229,14 @@ def testar_projeto(projeto_path: Path, memorias_path: Path) -> tuple[bool, list[
     passou = True
     texto = projeto_path.read_text(encoding="utf-8")
     memorias_text = memorias_path.read_text(encoding="utf-8")
+    # Fase 4 (MEMÓRIAS (357)): a história mora em 3 camadas. Ponteiro do PROJETO
+    # para entrada já migrada (morno/frio) é válido -- sem isto, todo ponteiro
+    # anterior à janela quente aparecia como "não existe".
+    if memorias_path.name == "MEMÓRIAS.md":
+        base = memorias_path.parent
+        for camada in [base / "MEMORIAS-MORNO.md", *sorted((base / "memoria" / "frio").glob("MEMORIAS-FRIO-*.md"))]:
+            if camada.is_file():
+                memorias_text += "\n" + camada.read_text(encoding="utf-8")
     validos = entradas_validas_memorias(memorias_text)
     max_valido = max(validos) if validos else 0
 
