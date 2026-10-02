@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
+  palavras-chave: respostas, humano, perguntas, abertas, relaiadas, laboratório, ensaio, pacote, projeto, estado, corrente, resposta, nada, fazer, heads, estava, correta, medida, lab, hoje, manhã, minha, própria, sessão, desde, então, deixou, branches, novas, mescladas, apagar, achado, conferir, registrar
 (625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
   palavras-chave: mudanças, confirmadas, vivo, librechat, restart, stack, seth, systemctl, user, gateway, service, funcionam
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, llamacpp, portas, aberta, instâncias, llama, cpp, agata, novas, nunca, entraram, config, txt, aguardando, assinatura
 (597) DIÁRIO — 30/09/2026 · **Proposta P-8 `portao-resume-exige-flag-2026-09-30` aberta: o portão de aprovação do grafo (`resume`) aprovava por padrão — só um `--recusar` exato bloqueava; `--recusa` (typo) ou nada aprovava em silêncio. Aguardando assinatura.**
   palavras-chave: proposta, portao, resume, exige, flag, aberta, portão, aprovação, grafo, aprovava, padrão, recusar, exato, bloqueava, recusa, typo, nada, silêncio, aguardando, assinatura
-(596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, assinada pelo Humano, aplicada. `scripts/proteger_branch_github.sh` é código real do canon. Todas as pendências abertas de Fase 3 (F3.2 + as 2 decisões do Humano) estão fechadas.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). Par movido pra `propostas/aplicadas/`. Suíte: 46/46. `scripts/perimetro.sh`: 0 FALHA.
-  palavras-chave: proposta, protecao, branch, github, assinada, humano, aplicada, scripts, proteger, código, real, canon, pendências, abertas, fase, decisões, estão, fechadas, assinatura, conferida, verificar, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha
+(596) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27`, …
+  palavras-chave: proposta, protecao, branch, github
 (595) DIÁRIO — 27/09/2026 · **Proposta P-8 `protecao-branch-github-2026-09-27` a …
   palavras-chave: proposta, protecao, branch, github
 (594) DIÁRIO — 27/09/2026 · **Proposta P-8 `kokoro-remocao-2026-09-27`, assinada …
