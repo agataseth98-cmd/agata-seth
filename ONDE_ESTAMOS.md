@@ -5,11 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (618)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (619)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
-**Assinado e aplicado: o `canon-mcp.mjs` (ferramenta que a Seth usa pra consultar o canon) agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado está corrigido** — era o terceiro lugar que a reforma das regras tinha esquecido de atualizar (depois de CLAUDE.md e consultar_indice.py). Testado: sintaxe limpa, `scriptSlug` batendo com o nome real do arquivo no vault, `perimetro.sh` 0 FALHA. **Não testado end-to-end contra o proxy real** — o stack (`obsidian-app` etc.) estava parado e subir abriria a janela do Obsidian sem avisar; fica para quando o stack subir por outro motivo. O deploy de produção (`~/librechat/`) ainda não recebeu este código — sincroniza sozinho no próximo `seth`. Detalhe: `MEMÓRIAS.md` (618).
+**Conserto do `canon-mcp.mjs` assinado, aplicado E testado de ponta a ponta — fechado.** A ferramenta que a Seth usa pra consultar o canon agora conhece PROTOCOLOS.md/FALHAS.md, e o bug que traduzia errado o caminho de um script consultado (o que bloqueava a Seth em produção) está corrigido e confirmado ao vivo: você abriu o Obsidian, subi só o proxy read-only (sem mexer no resto), e a chamada exata que falhava antes agora devolve a nota certa. Detalhe: `MEMÓRIAS.md` (618)/(619).
+
+**`propostas/modelos-gratuitos-2026-09-30.md` (estava solto, sem commit) investigado e arquivado — nada pede mudança.** Os modelos com erro no teste eram esperados (locais desligados, HuggingFace com crédito mensal esgotado, já sabido); os 2 Gemini "novos" já estão em produção desde 23/09. Detalhe: `MEMÓRIAS.md` (619).
+
+**Pendência real que sobra de ontem, fora do nosso alcance direto: o bug de terceiro no LibreChat** (loop de reconexão `streamable-http` no MCP, trava qualquer turno com ferramenta) — não testado de novo nesta sessão porque exigiria subir o LibreChat/Docker, que você não pediu. Pra resolver de vez: issue no `danny-avila/LibreChat` ou mergulho no código deles. Seu pedido de identificação de modelo na fala da Seth continua esperando essa resolução.
 
 ## Histórico — 01/10/2026
 

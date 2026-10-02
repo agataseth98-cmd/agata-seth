@@ -26,20 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 620401af14cbd8651a67ea658a61ba7ee18a734a
-  Escrito em: 02/10/2026 08:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4767b77cf7f578a0bdabeb926e63f3729b92e594
+  Escrito em: 02/10/2026 09:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/620401af14cbd8651a67ea658a61ba7ee18a734a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4767b77cf7f578a0bdabeb926e63f3729b92e594/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
+
+**(a) Teste end-to-end do `canon-mcp.mjs` contra o proxy real, pedido pelo Humano depois de abrir o Obsidian à mão.** `obsidian-app` não estava sob o `agata.target` (parado desde 01/10) — o Humano abriu o app diretamente (confirmado por `pgrep`/`flatpak ps`, 1 processo real rodando); o plugin Local REST API já respondia (`:27124` → 200). Subi só `obsidian-ro-proxy.service` (não o `agata.target` inteiro, sem efeito colateral no resto do stack) e rodei o servidor `canon-mcp.mjs` real via stdio JSON-RPC, reproduzindo a chamada exata do log de produção: `vault_consultar({caminho:"scripts/estado_para_eco.sh"})` devolveu a nota completa (antes: 404). `query_canon` com `doc:"PROTOCOLOS"` e `doc:"FALHAS"` + grep real também devolveram conteúdo correto. **Risco residual de (618) fechado.**
+
+**(b) `modelos-gratuitos-2026-09-30.md` (saída de `scripts/pesquisar_modelos_gratuitos.py`, estava untracked desde antes desta sessão) conferido item a item contra o estado real:**
+- `zai/glm-4.7-flash`, `gemini/gemini-2.5-flash`, `mistral/ministral-8b-latest`, `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`: OK, sem surpresa.
+- `huggingface/…` (401 "no active credentials" no arquivo): `sqlite3 -readonly ~/.omniroute/storage.sqlite` confirma `is_active=0`, mesmo estado já documentado em (514)/(515) (crédito mensal esgotado, 402, deixado no ROSTER de propósito — o breaker pula sozinho). O código de erro reportado pelo arquivo (401) é o OmniRoute recusando por conexão inativa, não um 401 novo da própria HuggingFace — nada mudou de fato.
+- Os 4 `llama-cpp/*` (502 ECONNREFUSED): `systemctl --user is-active` confirma as 5 units `llamacpp-*` `inactive` agora — esperado, são sob demanda (PROJETO, "Cérebro"), não é falha.
+- `gemini/gemini-3-flash-preview`, `gemini/gemini-3.1-flash-lite` (fora do pool, OK): **já decididos e em produção** — entraram na fila da Seth em (534), 23/09/2026, não é achado novo como foi em (600) com o arquivo anterior.
+- `openrouter/auto` (fora do pool, OK): já documentado como PAGO (`config/modelos-gratuitos.md` linha 61), falso positivo conhecido do discovery desde (376).
+
+**Nenhuma mudança de ROSTER, nenhuma proposta aberta — arquivo é insumo/registro, não implementa nada por si (o próprio cabeçalho do arquivo diz isso).** Movido de não-rastreado para o canon como histórico, mesmo tratamento dado a `modelos-gratuitos-2026-09-25.md`/`-09-28.md`.
+
+**sync:** PASS — `git rev-parse main` = `4767b77` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (618) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `pgrep`/`flatpak ps` reais antes de decidir não subir o `agata.target` inteiro; `curl` em `:27124`/`:27125`; `canon-mcp.mjs` real via stdio JSON-RPC, reproduzindo a chamada exata do log de produção citada em (617); `sqlite3 -readonly` em `provider_connections`; `systemctl --user is-active` nas 5 units `llamacpp-*`; `grep` em `config/modelos-gratuitos.md` e MEMÓRIAS (514)/(515)/(534)/(376) antes de concluir "nada novo" · **Autorização:** Humano — "abri o obsidian, atualize-o e faça o teste necessário, resolva as últimas pendências de ontem".
 
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
 
