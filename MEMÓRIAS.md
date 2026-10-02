@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bbc5bf06c43afc0381aaa3f9a791e13e423dfaba
-  Escrito em: 02/10/2026 20:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 10f745138517ceb950c596f43dab781a9d1ce4a9
+  Escrito em: 02/10/2026 20:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f745138517ceb950c596f43dab781a9d1ce4a9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f745138517ceb950c596f43dab781a9d1ce4a9/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f745138517ceb950c596f43dab781a9d1ce4a9/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f745138517ceb950c596f43dab781a9d1ce4a9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f745138517ceb950c596f43dab781a9d1ce4a9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
+
+**Certo, auditado pelo lab:** HEAD e os hashes de REGRAS/MEMÓRIAS batem com `origin/main`; modelo rotulado certo como "medido no turno anterior".
+
+**Errado, na resposta dela:**
+1. Cabeçalho "t=6 (base da contagem)" — é o NOME do campo do modelo copiado pro cabeçalho, não uma contagem real de turnos no contexto. `verificar_cabecalho.py` reprovaria isso.
+2. Propôs um script que falha se `SETH-DIARIO.md` estiver no git — ele está, no tree do `origin/main`. Tirar ou não é decisão do Humano, não dela.
+3. Contradiz decisões já tomadas na PVT-01: auditoria/telemetria feita pela PRÓPRIA Seth (conflito de interesse), "commitar `vault_consultar_log.md`" (já decidido que não), e um "portão" em que ELA faria `git apply` + commit depois de receber um "token de assinatura" por mensagem do Discord — **isso trocaria a assinatura ssh do P-8 por uma mensagem de chat. Recusado.**
+4. Cache de 5 min do `maquina_verificar` apresentado como medição atual — é medição velha, família SIN do FALHAS.md. **Recusado.**
+5. Propôs `sha256sum $(which maquina_verificar)` — as ferramentas dela são MCP, não programa instalado; o comando nem funciona assim.
+6. "Próximos passos (hoje)" que ela mesma não executa e que exigiriam P-8 — fora do que ela pode fazer sozinha.
+
+**Aproveitável, já estava no plano, não é tarefa nova:** o registro de chamadas de ferramenta que ela sugeriu é a mesma coisa que a Parte B (telemetria pelo gateway) já cobre.
+
+**2 perguntas do lab, respondidas ao Humano nesta entrada:**
+- Timeout do navegador-mcp hoje: **15.000 ms** (`_TIMEOUT_MS` em `redesign/mcp/navegador/servidor.py:71`).
+- O perímetro cobre corrupção de objeto do git (`git fsck`)? **Não** — `grep fsck` em `scripts/` não acha nada; não é um controle que existe hoje.
+
+**Padrão observado pela 3ª vez (PVT-01, Rev2, esta):** a Seth, quando convidada a propor autogovernança, sistematicamente pede mais poder de escrita e execução pra si mesma. O freio continua mecânico e não muda: P-8 com assinatura do Humano, escrita dela só append-only.
+
+**sync:** PASS — `git rev-parse main` = `10f7451` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (640).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `grep` real no código do `navegador-mcp` pro timeout; `grep` real em `scripts/` pra confirmar ausência de `fsck` · **Autorização:** Humano, pacote do lab (DADO, Regra 2) — "registre em MEMÓRIAS; nada a aplicar".
 
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
 
