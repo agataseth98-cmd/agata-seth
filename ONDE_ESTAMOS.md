@@ -5,18 +5,18 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (639)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (640)).
 
 ## Onde estamos — 02/10/2026 (consolidado, pra retomar rápido se a sessão cortar)
 
 **Achei, consertei e CONFIRMEI o fim do travamento da Seth — era eu mesmo.** Era uma regressão minha de ontem (modelo-real-header): ao espiar a resposta pra achar o nome do modelo, eu acabava lendo respostas pequenas até o fim, e o código seguinte tratava tudo isso como "uma linha só" — se começasse pelo aviso de "continua esperando" do roteador, a resposta inteira virava só esse aviso, e o LibreChat travava por receber nada. **Assinado, aplicado, serviço reiniciado, e testado ao vivo: 10 de 10 pedidos concorrentes vieram completos (era 9 de 10 vazios antes), e uma conversa real no LibreChat com ferramenta funcionou sem travar.** Detalhe: `MEMÓRIAS.md` (629)/(630)/(632)/(633)/(634)/(635)/(636).
 
 **`rota-cota-tier0` v2: assinada e aplicada, mas AINDA DESLIGADA de propósito.** Reduz a FREQUÊNCIA de travamento (desvia do modelo que só aguenta 8.000 tokens/minuto) — o travamento em si já foi corrigido, acima. `SETH_ROTA_COTA=0` no serviço real, confirmado. **Falta, antes de ligar:**
-1. Rodar `python3 scripts/combos_sem_cota.py` (só mostra o plano) e você confirmar a ordem.
-2. Com seu OK, `--aplicar` de verdade no OmniRoute (cria os combos `-sg`).
-3. Testar cada `-sg` e calibrar o estimador com uso real (≥30 pedidos, critério do Conselho Remoto).
+1. ~~Mostrar o plano e você confirmar a ordem~~ — feito.
+2. ~~Criar os 3 combos `-sg` de verdade no OmniRoute~~ — feito, testados, 200 nos 3.
+3. Calibrar o estimador com uso real (≥30 pedidos, critério do Conselho Remoto).
 4. Só então uma P-8 de 1 linha liga `SETH_ROTA_COTA=1`.
-Detalhe: `MEMÓRIAS.md` (632)/(633)/(634)/(638).
+Detalhe: `MEMÓRIAS.md` (632)/(633)/(634)/(638)/(640).
 
 **Reporte aberto no projeto de terceiros (LibreChat):** issue pública sobre o bug real que causava o crash, pra eles consertarem também — [#16694](https://github.com/danny-avila/LibreChat/issues/16694). Já não é urgente pra nós (a causa real já está corrigida acima). Detalhe: `MEMÓRIAS.md` (637).
 

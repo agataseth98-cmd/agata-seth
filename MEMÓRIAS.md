@@ -26,20 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b
-  Escrito em: 02/10/2026 20:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bbc5bf06c43afc0381aaa3f9a791e13e423dfaba
+  Escrito em: 02/10/2026 20:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc080d0ca4ab1efd98dfd4c74d18ea57cd38624b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbc5bf06c43afc0381aaa3f9a791e13e423dfaba/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
+
+Mostrei o plano, expliquei didaticamente (cada `-sg` é cópia fiel do combo vivo, só sem o Groq no topo), Humano confirmou a ordem. A criação em si (`--aplicar`) foi bloqueada pelo classificador de modo automático do Claude Code (ação em recurso compartilhado, fora do repo) — Humano autorizou explicitamente ("manda ver") e eu rodei.
+
+**ids criados no OmniRoute** (vivem no `storage.sqlite`, fora do repo — por isso o registro aqui):
+- `seth-rapido-sg` → `ad39ed43-60c6-48ea-a582-5482d50c215c`
+- `seth-livre-sg` → `722d252e-abcb-4687-90e9-b3dd8d223972`
+- `seth-pesado-sg` → `65478760-0343-4661-98d4-9df6ddf8af57`
+
+Testados direto via `curl` em `:20126` (pedido mínimo, modelo = nome do combo `-sg`): **200 nos 3.**
+
+**`SETH_ROTA_COTA` continua `0`** — criar os combos não liga o desvio sozinho; só confirmei que eles existem e respondem, pra quando o Humano quiser testar o desvio de verdade (próximo passo: calibrar o estimador com uso real antes da P-8 de 1 linha que liga `SETH_ROTA_COTA=1`, critério do Conselho Remoto em (633)).
+
+**Nota de sessão:** Humano avisou franquia de uso em 25% e pediu gestão de eficiência — passei a não reconferir fatos já medidos na mesma sessão (memória operacional nova, `nao-repetir-verificacao-ja-feita`), e tentei ligar `SETH_ROTA_COTA=1` direto foi recusado por mim (quebraria a Seth sem os combos `-sg`, que ainda não existiam no momento do pedido) — expliquei o motivo antes de agir.
+
+**sync:** PASS — `git rev-parse main` = `bbc5bf0` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (639).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `curl` real pro admin API do OmniRoute pra extrair os ids; 3 chamadas `curl` reais em `:20126` pra cada `-sg`, status conferido · **Autorização:** Humano, didática aceita + "1" (confirma ordem) + "manda ver" (autoriza a escrita no recurso compartilhado após bloqueio do classificador).
 
 (639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
 
