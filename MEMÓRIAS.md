@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f61fd27a2f77440a229339558ca7f2ba83af8a9d
-  Escrito em: 02/10/2026 15:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 52c9e91a8f8879ba0049dd488ba3c8db7e52671a
+  Escrito em: 02/10/2026 16:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f61fd27a2f77440a229339558ca7f2ba83af8a9d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f61fd27a2f77440a229339558ca7f2ba83af8a9d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f61fd27a2f77440a229339558ca7f2ba83af8a9d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f61fd27a2f77440a229339558ca7f2ba83af8a9d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f61fd27a2f77440a229339558ca7f2ba83af8a9d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/52c9e91a8f8879ba0049dd488ba3c8db7e52671a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de corrida propostas são refutadas. Proposta `rota-cota-tier0-2026-10-02` (632) recebeu segunda opinião condicional do Conselho Remoto.**
+
+**M6 — sumarização automática no mesmo turno dos 4 crashes?** NÃO. `grep` em `/app/logs/debug-2026-10-02.log` acha só **1 ocorrência** de "Summarization triggered" no dia inteiro — e é o meu próprio teste de contexto grande (16:14:17), não nenhum dos 4 crashes reais (13:33:13, 13:40:06, 13:40:29, 16:12:42). Hipótese refutada: a corrida não é sumarização concorrente.
+
+**M7 — o LibreChat mandou mais de um pedido pro mesmo passo (retry do lado dele)?** NÃO, pelo sinal disponível. Contei as entradas "[agents:graph] Invoking LLM" por `requestId`, junto com o `runId` de cada uma (campo que identifica a EXECUÇÃO do grafo, diferente de retry): dos 4 crashes, 2 têm só 1 "Invoking LLM" (`f18a3498`, `76f1fa34`), e os outros 2 têm 2 chamadas — mas as DUAS com o MESMO `runId` (`2daf0b4f`: `messageCount` 3→5; `6eb3dfbc`, meu teste: `messageCount` 1→3) — padrão normal de fluxo agente (1ª chamada decide usar ferramenta, 2ª processa o resultado), não um retry com `runId` novo. Nenhum dos 4 mostra evidência de múltiplas execuções do grafo pro mesmo pedido.
+
+**Achado reforçado, não pedido pelo lab:** nos 2 crashes com só 1 "Invoking LLM", a cascata de múltiplos provedores (200→529→200 etc.) nos `call_logs` do OmniRoute aconteceu de qualquer forma — confirma de novo que o OmniRoute cascateia por dentro de UMA chamada do LibreChat, invisível pro lado de fora (mesma conclusão do M3 em (632), agora com uma segunda linha de evidência independente).
+
+**Limite honesto, Regra 2:** `log_message` do `seth_gateway` é `pass` hoje — não registra pedido nenhum. Não tenho como contar, pelo lado do NOSSO gateway, quantas vezes ele foi chamado nesse minuto; só infiro pelo `runId`/`Invoking LLM` do lado do LibreChat, que é o melhor sinal disponível sem aplicar a telemetria da Parte B.
+
+**Segunda opinião da proposta `rota-cota-tier0-2026-10-02` (632):** Conselho Remoto, `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` (os 4 locais falharam primeiro, 502, sob demanda hoje), 31,8s. Posição: **condicional**. Fundamentação: concorda com o faseamento (desligado por padrão, correção do bug de keep-alive justifica o diff sozinha), risco residual (a) aceitável, estimativa chars/3 (b) imprecisa mas com calibração empírica prevista. Condição: um critério objetivo de "pronto pra ligar" na **Etapa 2** (não nesta proposta, que não muda comportamento) — diferença mediana estimativa×real ≤15%, p95 não estourar a margem, ou ≥30 requisições medidas antes de autorizar. Resposta crua: `memoria/missoes/conselho-remoto/20261002-160225-nvidia_nemotron-3-ultra-550b-a55b_free.json`.
+
+**sync:** PASS — `git rev-parse main` = `52c9e91` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (632) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `grep -c`/`grep -n -A/-B` no debug log real do container, cruzando `requestId`/`runId`/`messageCount`, não resumo; segunda opinião real via Conselho Remoto, resposta crua guardada e citada literal · **Autorização:** Humano, "continue" — seguindo com M6/M7 enquanto a assinatura da proposta está pendente.
 
 (632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
 
