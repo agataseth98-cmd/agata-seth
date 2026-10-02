@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
+  palavras-chave: proposta, canon, mcp, protocolos, falhas, assinada, humano, aplicada, redesign, librechat, mjs
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
   palavras-chave: proposta, canon, mcp, protocolos, falhas, aberta, mjs, seth, usa, pra, consultar, nunca, tinha, ganhado, terceiro, lugar, mesmo, gap, achado, investigando, respondia, aguardando, assinatura
 (616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, caminho, agata, symlink, assinada, humano, aplicada, mecanismo, configurável, decisão, código, real, canon, agora, assinatura, conferida, scripts, verificar, definir, aplicado, par, movido, pra, propostas, aplicadas, suíte, perimetro, falha, inerte, home, definido, máquina, continua, diretório, nada, mudou
 (589) DIÁRIO — 27/09/2026 · **Proposta P-8 `caminho-agata-symlink-2026-09-27` aberta: o mecanismo do `~/agata` configurável — decisão do Humano em (564), "falta o mecanismo" registrado em (567). Aguardando assinatura.**
   palavras-chave: proposta, caminho, agata, symlink, aberta, mecanismo, configurável, decisão, humano, falta, registrado, aguardando, assinatura
-(588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assinada pelo Humano, aplicada. Todos os itens que o laboratório tinha deixado em aberto — o mecanismo de gênese, o `maxWaitMs`, o template llamacpp — estão fechados no canon agora.** Assinatura conferida por `scripts/p8_verificar.sh` (4/4 OK). `redesign/systemd/dropin-omniroute-resilience.conf` + `README.md` aplicados. Par movido pra `propostas/aplicadas/`. `scripts/perimetro.sh`: 0 FALHA. Confirmado como esperado: nada mudou no comportamento real desta Máquina (o banco já tinha o valor).
-  palavras-chave: proposta, omniroute, maxwait, assinada, humano, aplicada, itens, laboratório, tinha, deixado, aberto, mecanismo, gênese, maxwaitms, template, llamacpp, estão, fechados, canon, agora, assinatura, conferida, scripts, verificar, redesign, systemd, dropin, resilience, conf, readme, aplicados, par, movido, pra, propostas, aplicadas, perimetro, falha, confirmado, esperado, nada, mudou, comportamento, real, desta, máquina, banco, valor
+(588) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27`, assin …
+  palavras-chave: proposta, omniroute, maxwait, assin
 (587) DIÁRIO — 27/09/2026 · **Proposta P-8 `omniroute-maxwait-2026-09-27` aberta …
   palavras-chave: proposta, omniroute, maxwait, aberta
 (586) DIÁRIO — 27/09/2026 · **Proposta P-8 `suite-fixtures-genese-2026-09-27`, a …
