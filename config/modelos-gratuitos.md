@@ -199,6 +199,8 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 | 5 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
 | 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
 
+**Gêmeos `-sg` ("sem Groq", 02/10/2026).** `seth-rapido-sg`, `seth-livre-sg` e `seth-pesado-sg` = a MESMA ordem do combo vivo, sem `groq/openai/gpt-oss-120b`. Não se editam à mão: `python3 scripts/combos_sem_cota.py` mostra o plano e `--aplicar` recria a partir do combo vivo (rode de novo sempre que mudar a ordem de um combo da Seth). Uso: o `seth_gateway` manda para o gêmeo quando o pedido não cabe na cota de 8.000 tokens/min que sobra no Groq (`SETH_ROTA_COTA=1` no `seth-gateway.service`; desligado por padrão).
+
 **Recriar / reverter** (se o `storage.sqlite` for perdido):
 `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
 corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
