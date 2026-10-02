@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
+  palavras-chave: resolvido, método, seguro, chamadas, reais, strace, cascata, omniroute, invisível, fora, tira, filtro, sse, lista, suspeitos, item, lab, rota, tamanho, bloqueado, combos, seth, compartilham, mesmo, modelo, posição, trocar, combo, resolve, devolvido, pra, desenhar
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
   palavras-chave: corrige, causa, vazamento, segredo, subprocesso, token, interno, chamado, requisição, dentro, próprio, seth, gateway, proxy, abrindo, config, agata, env, inteiro, pra, ler, linha, parte, responsabilidade, pedido, lab, registrada, tal, desenho, aplicado, isolar, arquivo
 (630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: propostas, pendentes, grafo, resume, falha, fechada, llamacpp, portas, escriba, readonly, interno, assinadas, humano, aplicadas, três, assinatura, conferida, scripts, verificar, pares, movidos, pra, suíte, perimetro
 (603) DIÁRIO — 30/09/2026 · **Correção de (599): existe sim um jeito barato de restringir onde o escriba escreve — não precisava de mudar código. Proposta P-8 `escriba-readonly-interno-2026-09-30` aberta, verificada ao vivo num clone sandboxado. Aguardando assinatura.**
   palavras-chave: correção, existe, sim, jeito, barato, restringir, escriba, escreve, precisava, mudar, código, proposta, readonly, interno, aberta, verificada, vivo, clone, sandboxado, aguardando, assinatura
-(602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue pelo laboratório junto com o de cima, NÃO adotado — é redundante com a proposta (598), já aberta e mais completa.**
-  palavras-chave: llamacpp, manifesto, diff, entregue, laboratório, junto, cima, adotado, redundante, proposta, aberta, completa
+(602) DIÁRIO — 30/09/2026 · **`p4-llamacpp-manifesto-2026-09-30.diff`, entregue …
+  palavras-chave: llamacpp, manifesto, diff, entregue
 (601) DIÁRIO — 30/09/2026 · **Proposta (597) `portao-resume-exige-flag-2026-09-3 …
   palavras-chave: proposta, portao, resume, exige, flag
 (600) DIÁRIO — 30/09/2026 · **`propostas/modelos-gratuitos-2026-09-28.md` (autor …

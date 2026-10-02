@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): deae0fbf5068c250b6d26ea8958ed519b4ac3db2
-  Escrito em: 02/10/2026 14:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c
+  Escrito em: 02/10/2026 14:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/deae0fbf5068c250b6d26ea8958ed519b4ac3db2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fdf564b60b045c8dc6b7c55a0c321dfddf85cf4c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a `:20126`, sem `strace`): a cascata do OmniRoute é invisível de fora, tira OmniRoute e o filtro SSE (415) da lista de suspeitos. Item 3(a) do lab ("rota pelo tamanho") bloqueado — os 3 combos da Seth compartilham o mesmo modelo na posição 0, trocar de combo não resolve. Devolvido ao lab pra desenhar.**
+
+**M3, método seguro do lab (curl -N direto em `:20126`, nunca `strace`):** 3 chamadas reais, uma com 429(groq)→200 por trás nos `call_logs` do OmniRoute. A resposta que chega no `:20126` é limpa nos 3 casos: 1 `id` só, termina em `data: {"delta":{},"finish_reason":...}` + `data: [DONE]`, zero `": ka"` órfão, zero chunk sem delta — mesmo depois de retentativa interna. **Conclusão: o OmniRoute nunca vaza a tentativa falha pro cliente — a cascata é invisível de fora.** Tira o OmniRoute e o nosso filtro de keepalive SSE ((415)) da lista de suspeitos pra onde o elemento malformado nasce. Reforça achado anterior: cada tentativa é uma chamada HTTP separada nos `call_logs` — quem repete a chamada é o `@librechat/agents` do LibreChat, não o OmniRoute por dentro.
+
+**Decisões do Humano sobre o item 3:** (a) rota pelo tamanho no gateway; (c) desenhar o patch do `invoke.cjs:259` (guard `message &&`) + reportar upstream pro LibreChat.
+
+**Bloqueio achado ao tentar desenhar (a):** os 3 combos da Seth (`seth-rapido`, `seth-livre`, `seth-pesado`) têm o MESMO `groq/openai/gpt-oss-120b` na posição 0 — confirmado na API viva do OmniRoute (`/api/combos`), não suposto. O `seth_gateway` só escolhe QUAL combo usar (`_classificar_rota`); não tem como pular a posição 0 DENTRO de um combo — isso é definido na UI do OmniRoute, fora do nosso código. "Rotear por tamanho pra outro combo" não ataca o gatilho, porque o destino tem o mesmo gargalo. Dois caminhos identificados, nenhum limpo sozinho: (1) combo novo sem Groq na posição 0, requer o Humano mexer na UI do OmniRoute primeiro; (2) `seth_gateway` mandar direto pro próximo modelo do combo quando o pedido for grande, perdendo o resto da cascata de fallback que o OmniRoute dá de graça. **Devolvido ao lab, por pedido do Humano, pra desenhar a solução real** — ainda sem resposta no momento desta entrada.
+
+**Item 3(c) ainda não iniciado** — esperando a resposta do lab sobre (a), porque pode mudar o escopo junto.
+
+**sync:** PASS — `git rev-parse main` = `fdf564b` (== `origin/main`) no momento de medir, topo de MEMÓRIAS conferido com (631) antes de numerar esta.
+
+**Modelo:** Claude Sonnet 5 · **vetor:** 3 chamadas reais via `curl -N` direto em `:20126`, headers e corpo SSE inspecionados linha a linha (não resumo); `/api/combos` ao vivo do OmniRoute pros 3 combos, não `config/modelos-gratuitos.md` (que pode estar defasado) · **Autorização:** Humano, "peça que o Lab resolva" — mensagem enviada, resposta pendente.
 
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
 
