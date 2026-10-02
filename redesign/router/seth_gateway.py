@@ -53,6 +53,17 @@ _bind = os.environ.get("SETH_BIND", "127.0.0.1:20126")
 BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
 HIDRATA_PATH = Path(os.environ.get(
     "SETH_HIDRATA", str(Path.home() / "agata" / ".hidrata-seth.md")))
+# Pedido de (615): a Seth se identificar pelo modelo real na própria fala, não
+# só por header HTTP invisível (X-Modelo-Real, (613)/(614)). Só se sabe o
+# modelo DEPOIS da resposta terminar -- por isso este arquivo guarda o nome
+# do turno ANTERIOR pro PRÓXIMO turno citar, sempre rotulado com o atraso
+# (_DOUTRINA_FIXA abaixo). Fora do repo (estado efêmero, mesmo padrão de
+# ~/.cache/agata/ls-remote-main). Global, não por conversa -- se houver duas
+# conversas simultâneas, uma pode herdar o nome da outra por 1 turno; risco
+# aceito (Portão das três perguntas, MEMÓRIAS (620)/(621)): sempre visível
+# (o Humano vê o nome errado na hora), nunca silencioso.
+MODELO_REAL_PATH = Path(os.environ.get(
+    "SETH_MODELO_REAL_PATH", str(Path.home() / ".cache" / "agata" / "seth-modelo-real-ultimo.txt")))
 
 _ENV_PATH = os.path.expanduser("~/.config/agata/.env")
 
@@ -121,6 +132,14 @@ _DOUTRINA_FIXA = (
     "cascata — `modelo não verificado` é a resposta certa e honesta, não um "
     "rebaixamento. `família <X>, versão não verificada` quando souber a família. "
     "Nunca escreva `modelo: Seth`. (MEMÓRIAS (424).)\n"
+    "  **Se o bloco de estado trouxer `MODELO-REAL-TURNO-ANTERIOR:`, use esse "
+    "nome — é fato da Máquina (medido de verdade no `X-Modelo-Real`), não seu "
+    "palpite. Mas é do TURNO ANTERIOR, nunca deste: só se sabe o modelo DEPOIS "
+    "da resposta terminar. Escreva `<nome> (medido no turno anterior pela "
+    "Máquina; este turno ainda não medido)` — nunca apresente como medição de "
+    "agora. Sem essa linha, siga a regra de cima: `modelo não verificado`. "
+    "Vale pro mesmo campo nas DUAS formas do cabeçalho — `modelo:` em (a), "
+    "`<modelo>` em (b). (MEMÓRIAS (621).)\n"
     "— **(b) Em TODA resposta seguinte**, uma linha só, COM `t=` e SEM "
     "`Última entrada:`/`quebrado:`:\n"
     "`Agata · <modelo> · t=<n> (<base da contagem>) · <hora + selo>`\n"
@@ -249,11 +268,13 @@ def _hidratacao() -> str:
         # Regra 1.1: campo medível não pode sumir em silêncio quando a
         # medição falha -- antes, `est` vazio só omitia o bloco inteiro sem
         # dizer que algo quebrou (achado 04/09/2026, Camada C).
-        bloco_estado = (
-            f"**Estado agora (fatos da Máquina):**\n{est}\n" if est
-            else "**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
-                 "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
-        )
+        if est:
+            linha_modelo = _linha_modelo_real_anterior()
+            corpo = est + (f"\n{linha_modelo}" if linha_modelo else "")
+            bloco_estado = f"**Estado agora (fatos da Máquina):**\n{corpo}\n"
+        else:
+            bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
+                             "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n")
         return f"{MARCADOR}\n{_DOUTRINA_FIXA}{bloco_estado}"
     try:
         st = HIDRATA_PATH.stat()
@@ -272,9 +293,46 @@ def _bloco_estado_atual() -> str:
     est = _estado()
     if not est:
         return ""
+    linha_modelo = _linha_modelo_real_anterior()
+    corpo = est + (f"\n{linha_modelo}" if linha_modelo else "")
     return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
             f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
-            f"use ESTA hora e ESTE `sync:`):**\n{est}\n")
+            f"use ESTA hora e ESTE `sync:`):**\n{corpo}\n")
+
+
+def _lembrar_modelo_real(nome: str) -> None:
+    """Grava o modelo real medido NESTA resposta (`X-Modelo-Real`), pro PRÓXIMO
+    turno poder citá-lo -- só se sabe o modelo depois da resposta terminar, daí
+    o atraso de 1 turno (mesma limitação já aceita em (613)). Best-effort:
+    falha de disco (permissão, cheio) nunca derruba a resposta que está sendo
+    servida -- o pior caso é a linha nova não aparecer no próximo turno."""
+    try:
+        MODELO_REAL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = MODELO_REAL_PATH.with_suffix(".tmp")
+        tmp.write_text(nome, encoding="utf-8")
+        tmp.replace(MODELO_REAL_PATH)
+    except OSError:
+        pass
+
+
+def _modelo_real_anterior() -> str | None:
+    """Último modelo real medido (turno anterior -- de QUALQUER conversa, o
+    arquivo é global, ver nota em MODELO_REAL_PATH). None se nunca mediu ou
+    o arquivo sumiu."""
+    try:
+        nome = MODELO_REAL_PATH.read_text(encoding="utf-8").strip()
+        return nome or None
+    except OSError:
+        return None
+
+
+def _linha_modelo_real_anterior() -> str:
+    """'MODELO-REAL-TURNO-ANTERIOR: <nome>' se houver um medido, ou "" se não.
+    A doutrina (_DOUTRINA_FIXA) instrui a Seth a rotular isto como medição do
+    TURNO ANTERIOR, nunca deste -- é fato da Máquina (X-Modelo-Real), não
+    palpite do modelo (REGRAS, Os 3 papéis; evita a classe FALHAS IDF-1)."""
+    nome = _modelo_real_anterior()
+    return f"MODELO-REAL-TURNO-ANTERIOR: {nome}" if nome else ""
 
 
 # --- chamadas utilitárias do frontend que NÃO devem ser hidratadas ---------
@@ -605,6 +663,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header("X-Seth-Rota", self._rota)
         if modelo_real:
             self.send_header("X-Modelo-Real", modelo_real)
+            _lembrar_modelo_real(modelo_real)
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
         try:
@@ -705,6 +764,7 @@ def _porta_livre() -> int:
 
 class _Dummy(BaseHTTPRequestHandler):
     ultimo_corpo = b""
+    modelo_resposta = None  # teste 10/11 liga isto pra simular "model" na resposta real
 
     def log_message(self, *a):
         pass
@@ -712,7 +772,10 @@ class _Dummy(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
         type(self).ultimo_corpo = self.rfile.read(n)
-        corpo = json.dumps({"choices": [{"message": {"role": "assistant", "content": "ok"}}]}).encode()
+        resp = {"choices": [{"message": {"role": "assistant", "content": "ok"}}]}
+        if type(self).modelo_resposta:
+            resp["model"] = type(self).modelo_resposta
+        corpo = json.dumps(resp).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(corpo)))
@@ -721,9 +784,11 @@ class _Dummy(BaseHTTPRequestHandler):
 
 
 def _selftest() -> int:
-    global UPSTREAM
+    global UPSTREAM, MODELO_REAL_PATH
     up_port, gw_port = _porta_livre(), _porta_livre()
     UPSTREAM = f"http://127.0.0.1:{up_port}"
+    import tempfile
+    MODELO_REAL_PATH = Path(tempfile.mkdtemp()) / "modelo-real.txt"  # isolado do arquivo real
     up = ThreadingHTTPServer(("127.0.0.1", up_port), _Dummy)
     gw = ThreadingHTTPServer(("127.0.0.1", gw_port), _Handler)
     threading.Thread(target=up.serve_forever, daemon=True).start()
@@ -851,6 +916,35 @@ def _selftest() -> int:
                         (9, ok9, f"curto+tools -> seth-livre (deu {r_triv_tools})")]:
         print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
         falhas += 0 if ok else 1
+
+    # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
+    # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
+    # o PRÓXIMO turno já hidratado reinjeta MODELO-REAL-TURNO-ANTERIOR.
+    ok10a = _modelo_real_anterior() is None
+    print(f"{'PASS' if ok10a else 'FALHA'}  modelo real: sem medição prévia -> None")
+    falhas += 0 if ok10a else 1
+
+    _Dummy.modelo_resposta = "teste/modelo-selftest"
+    body10 = json.dumps({"model": "seth", "messages": [
+        {"role": "system", "content": f"{MARCADOR}\nx"},
+        {"role": "user", "content": "oi"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body10, headers={"Content-Type": "application/json"}), timeout=10).read()
+    ok10b = _modelo_real_anterior() == "teste/modelo-selftest"
+    print(f"{'PASS' if ok10b else 'FALHA'}  modelo real: resposta com \"model\" -> sidecar gravado "
+          f"(lido: {_modelo_real_anterior()!r})")
+    falhas += 0 if ok10b else 1
+
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body10, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m10 = json.loads(_Dummy.ultimo_corpo)["messages"]
+    est10 = next((x["content"] for x in m10 if isinstance(x.get("content"), str)
+                  and MARCADOR_ESTADO in x["content"]), "")
+    ok10c = "MODELO-REAL-TURNO-ANTERIOR: teste/modelo-selftest" in est10
+    print(f"{'PASS' if ok10c else 'FALHA'}  modelo real: turno seguinte cita o nome, rotulado "
+          f"como turno anterior ({'achou' if ok10c else 'não achou'} a linha)")
+    falhas += 0 if ok10c else 1
+    _Dummy.modelo_resposta = None
 
     up.shutdown()
     gw.shutdown()
