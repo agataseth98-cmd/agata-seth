@@ -36,7 +36,7 @@ _MIN_CHARS = 32
 # conferido no --selftest; arquivo novo que precise do token entra nesta lista.
 CONSUMIDORES = ("redesign/router/seth_gateway.py", "redesign/router/proxy.py",
                 "redesign/grafo/grafo.py", "scripts/conselho_remoto.py",
-                "scripts/pesquisar_modelos_gratuitos.py")
+                "scripts/pesquisar_modelos_gratuitos.py", "scripts/queda_por_elo.py")
 _cache: dict[str, str] = {}
 _lock = threading.Lock()
 
@@ -143,7 +143,10 @@ def _selftest() -> int:
     alvo_env = "config/agata/" + ".env"          # montado em pedaços: este arquivo não casa consigo
     consumidores = [raiz / c for c in CONSUMIDORES]
     import re
-    abre = re.compile(r"(open\(|expanduser\(|Path\()[^)\n]*" + re.escape(alvo_env) + r"|_ENV_PATH\b")
+    # + qualquer literal que termine em ".env" (pega `Path.home() / ".config/agata/.env"`
+    #   e `... / "agata" / ".env"`, que o padrão de cima deixava passar -- 03/10/2026)
+    abre = re.compile(r"(open\(|expanduser\(|Path\()[^)\n]*" + re.escape(alvo_env) + r"|_ENV_PATH\b"
+                      + r"|\.env[\"']")
     abrem = [str(c.relative_to(raiz)) for c in consumidores if c.is_file()
              and abre.search(c.read_text(encoding="utf-8"))]
     ausentes = [str(c.relative_to(raiz)) for c in consumidores if not c.is_file()]
