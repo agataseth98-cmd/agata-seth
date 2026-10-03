@@ -1,0 +1,28 @@
+diff --git a/FALHAS.md b/FALHAS.md
+index 4bc4f48..dee9557 100644
+--- a/FALHAS.md
++++ b/FALHAS.md
+@@ -30,6 +30,7 @@ O catálogo é organizado pela **causa raiz** — a regra que a falha viola —,
+ | FAB-5 | Grep negativo usado como prova de ausência sem validar o padrão contra um positivo conhecido primeiro | Instrumento de medida não calibrado | Testar o padrão contra uma entrada que existe antes de confiar no resultado vazio | (250)-(251) |
+ | FAB-6 | Ler parte de um arquivo truncado por limite próprio e não declarar a fração lida | Leitura parcial apresentada como completa | Dizer a fração exata ("li até (n); arquivo continua") — parcial que não se declara vira completo na cabeça de quem lê | (250) |
+ | FAB-7 | Perceber que a evidência citada não sustenta a conclusão e deixar a conclusão passar mesmo assim | Conclusão desacoplada da prova | Se a prova não serve, a conclusão volta a "não verificado" — não "corroborada por evidência mais fraca" | (159) |
++| FAB-8 | Selftest verde apresentado como prova de comportamento correto sem o caso real de produção (resposta menor que o buffer de leitura, que começa por um marcador especial) estar entre os testados | Cobertura parcial de teste tratada como cobertura total | Quem espia ou bufferiza um stream testa explicitamente: entrada menor que o limite de leitura (cabe tudo num read só) e entrada que começa pelo marcador especial que o código trata diferente | (635) |
+ 
+ ## MED — Medição recusada
+ *Causa raiz comum:* cautela que vira omissão. É o espelho de FAB: recusar-se a medir o mensurável também falseia o estado.
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 910211d..101fa55 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -108,6 +108,11 @@ Só diga `sync: PASS` com evidência de Máquina desta sessão: hash real (`sha2
+ - Uma cópia isolada **não prova append-only**. Isso só se prova contra o histórico do git ou um hash anterior.
+ - Sem evidência: `sync: não verificado · lacuna: <motivo>`.
+ 
++## Verificação repetida também tem preço
++*Complementa "'sync' tem preço": a exigência é medir com evidência real — não medir de novo o que já foi medido nesta sessão.*
++
++Um fato já confirmado por Máquina nesta mesma sessão (sync, selftest, suíte, existência de arquivo, resultado de um comando) não se reconfere sem motivo novo. Reconferir só quando: (a) uma ação própria pode ter mudado o estado (commit, merge, apply), (b) tempo passou numa operação assíncrona (PR, CI, assinatura externa), ou (c) o Humano pediu explicitamente. Fora isso, reusar o resultado já obtido e dizer isso ("já confirmado acima") — custa menos e não reduz rigor. Rigor é medir uma vez por fato, não medir toda vez que o fato é mencionado.
++
+ ## Verificação de canônico — ordem obrigatória
+ 1. Na Máquina: `git ls-remote` / `git ls-tree origin/main` / `curl` do raw. Fonte superior a tudo.
+ 2. Em modelo de nuvem com execução de código: requisição HTTP direta às URLs raw, com hash e comparação byte a byte.
