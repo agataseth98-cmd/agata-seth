@@ -26,20 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 49e47e004398e6ae1045ff4c926979b3df260903
-  Escrito em: 03/10/2026 11:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f26ec03c32b614f6dbc7183088986603fc2a1965
+  Escrito em: 03/10/2026 12:22 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49e47e004398e6ae1045ff4c926979b3df260903/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49e47e004398e6ae1045ff4c926979b3df260903/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49e47e004398e6ae1045ff4c926979b3df260903/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49e47e004398e6ae1045ff4c926979b3df260903/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49e47e004398e6ae1045ff4c926979b3df260903/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
+
+Proposta `token-interno-arquivo-proprio-2026-10-03`, base `49e47e0` (exata — hash de base do lab bateu com `origin/main` no momento da leitura). Portão com fatos, nenhum "desfaz" nas 3 perguntas; risco assumido direto, sem segunda opinião (mudança de segurança, mas já com verificação independente + mutation test feitos antes de propor).
+
+**Verificação independente antes de aceitar (Regra 2), não só a palavra do lab:** li o `.diff` inteiro linha a linha; testei em worktree descartável — `token_interno --selftest` 11/11; **reproduzi a mutação sugerida** (reabri `~/.config/agata/.env` dentro de `grafo.py`) e confirmei que o selftest reprova (`FALHA nenhum consumidor... -- ainda abrem: ['redesign/grafo/grafo.py']`); `proxy --selftest` 6/6; `seth_gateway --selftest` OK; suíte 46/46.
+
+**Novo `scripts/token_interno.py`** é a fonte única do token: lê `~/.config/agata/token-interno` (arquivo próprio, `0600`, só o token, sem `NOME=`), uma vez por processo, cacheado em memória. Falha fechada: arquivo ausente/symlink/permissão larga/formato errado/token curto → `""` → o sanitizador recusa com 403. `--gerar`/`--rotacionar` nunca imprimem o valor; `--verificar` diz só "ok" ou o motivo. O `--selftest` vigia a classe: reprova se qualquer um dos 5 consumidores (`seth_gateway`, `proxy`, `grafo`, `conselho_remoto`, `pesquisar_modelos_gratuitos`) voltar a abrir o `.env`. O sanitizador agora compara com `hmac.compare_digest`, não `==`.
+
+**Fluxo seguido à risca, na ordem do lab:**
+1. Aplicado o código SEM reiniciar nada — testado no repo real (selftest + suíte), processos antigos continuaram funcionando.
+2. `python3 scripts/token_interno.py --gerar` — token novo gravado, **é também a rotação do token interno que vazou**. `--verificar` → `ok`.
+3. `systemctl --user restart omniroute-sanitizer seth-gateway`, juntos.
+4. Testado ao vivo, os 4 pontos do fluxo: `:20126` → 200; `:20127` direto sem `X-Agata-Token` → 403; conversa real no LibreChat (Chrome, "Diga oi" → "Oi." sem erro); `agata-pesquisa-modelos.service` rodado manualmente (timer só dispara amanhã) — terminou OK, zero `403` no journal.
+
+**Pendência registrada, não minha:** só o Humano, depois de um dia estável, apaga à mão a linha `AGATA_INTERNAL_TOKEN=` do `.env` — ninguém mais lê.
+
+**Efeito colateral do teste do timer:** gerou `propostas/modelos-gratuitos-2026-10-03.md` (pesquisa semanal normal do pool), ainda não commitado — fica pra revisão separada, não faz parte desta proposta.
+
+**sync:** PASS — `git rev-parse main` = `f26ec03` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (642).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `.diff` lido linha a linha; testado em worktree descartável com mutação reproduzida (não só aceita do lab); `p8_verificar.sh`/selftest/suíte reais no repo após aplicar; `curl` real pros 2 pontos de teste; interação real no navegador via Claude in Chrome; `journalctl` real do timer disparado manualmente · **Autorização:** Humano, Portão completo, risco assumido sem segunda opinião, assinatura via `scripts/aprovar.sh token-interno-arquivo-proprio-2026-10-03`.
 
 (642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
 

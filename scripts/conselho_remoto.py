@@ -8,8 +8,8 @@ opiniao" e PROJETO "Conselho Remoto".
 Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
 ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
 chave de PROVEDOR nenhuma -- desde o item 3 do plano de mitigacao da auditoria
-do Marcos (MEMORIAS (437)), le UMA coisa de ~/.config/agata/.env
-(AGATA_INTERNAL_TOKEN) pra se identificar ao proxy, que agora recusa chamada
+do Marcos (MEMORIAS (437)), le UMA coisa: o token interno, de
+~/.config/agata/token-interno (scripts/token_interno.py; nunca o .env, MEMORIAS (629)-(631)) pra se identificar ao proxy, que agora recusa chamada
 sem esse token (fechava uma porta que qualquer processo local podia bater
 direto, sem passar pelo seth_gateway nem por este script).
 
@@ -71,6 +71,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 import time
 import urllib.request
 import urllib.error
@@ -83,23 +84,15 @@ SANITIZADOR_ENDPOINT = os.environ.get(
 )
 COMBO = "conselho"   # legado -- so usado se ROSTER ficar vazio (nunca deveria)
 
-_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
-
-
 def _token_interno() -> str:
-    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
-    Mesma funcao de redesign/router/proxy.py e seth_gateway.py -- duplicacao
-    deliberada, ver comentario em seth_gateway.py. Sem ela, o proxy (item 3
-    do plano de mitigacao, MEMORIAS (437)) recusaria toda chamada deste
-    script com 403."""
-    try:
-        with open(_ENV_PATH, encoding="utf-8") as f:
-            for linha in f:
-                if linha.startswith("AGATA_INTERNAL_TOKEN="):
-                    return linha.split("=", 1)[1].strip()
-    except OSError:
-        pass
-    return ""
+    """Token interno (X-Agata-Token), de `scripts/token_interno.py` -- arquivo
+    próprio, nunca o .env (MEMÓRIAS (629)-(631)). Nunca loga o valor. Sem ele,
+    o proxy (MEMÓRIAS (437)) recusaria toda chamada deste script com 403."""
+    _scripts = str(Path(__file__).resolve().parents[1] / "scripts")
+    if _scripts not in sys.path:
+        sys.path.insert(0, _scripts)
+    import token_interno  # noqa: E402  (scripts/token_interno.py)
+    return token_interno.ler()
 
 DESTINO_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

@@ -25,11 +25,13 @@ Env:
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import shutil
 import socket
 import sys
+from pathlib import Path
 import threading
 import urllib.error
 import urllib.request
@@ -45,11 +47,10 @@ UPSTREAM = os.environ.get("OMNIROUTE_UPSTREAM", "http://127.0.0.1:20128").rstrip
 _bind = os.environ.get("SANITIZER_BIND", "127.0.0.1:20127")
 BIND_HOST, BIND_PORT = _bind.split(":")[0], int(_bind.split(":")[1])
 
-_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
-
-
 def _token_interno() -> str:
-    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
+    """Token interno esperado no X-Agata-Token. Vem de `scripts/token_interno.py`
+    (arquivo próprio, 0600, lido uma vez por processo; nunca o .env -- MEMÓRIAS
+    (629)-(631)). Nunca loga o valor.
 
     Item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
     a fronteira localhost não é fronteira de segurança por si só -- qualquer
@@ -57,15 +58,12 @@ def _token_interno() -> str:
     no OmniRoute em :20128) sem passar pelo seth_gateway. Este token não
     fecha a porta do OmniRoute (produto de terceiro, sem controle de código
     aqui -- residual registrado, não escondido), mas fecha a deste proxy:
-    só quem tem o segredo (hoje, só o seth_gateway) passa."""
-    try:
-        with open(_ENV_PATH, encoding="utf-8") as f:
-            for linha in f:
-                if linha.startswith("AGATA_INTERNAL_TOKEN="):
-                    return linha.split("=", 1)[1].strip()
-    except OSError:
-        pass
-    return ""
+    só quem tem o segredo passa."""
+    _scripts = str(Path(__file__).resolve().parents[2] / "scripts")
+    if _scripts not in sys.path:
+        sys.path.insert(0, _scripts)
+    import token_interno  # noqa: E402  (scripts/token_interno.py)
+    return token_interno.ler()
 
 _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -102,14 +100,14 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _token_ok(self) -> bool:
         """Falha FECHADA (mesma doutrina do resto deste arquivo): sem token
-        configurado em .env, NADA passa -- não é modo aberto de
+        configurado (~/.config/agata/token-interno), NADA passa -- não é modo aberto de
         compatibilidade, é o mesmo padrão de 'sem a régua de segredo, o
         serviço não responde' que P1-02 já usa."""
         esperado = _token_interno()
         if not esperado:
             return False
         recebido = self.headers.get("X-Agata-Token", "")
-        return recebido == esperado
+        return hmac.compare_digest(recebido.encode(), esperado.encode())
 
     def _recusar_sem_token(self):
         self._json(403, {"error": {

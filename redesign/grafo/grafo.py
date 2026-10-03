@@ -34,17 +34,14 @@ PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
 
 
 def _token_interno():
-    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
-    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
-    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403."""
-    try:
-        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
-            for linha in f:
-                if linha.startswith("AGATA_INTERNAL_TOKEN="):
-                    return linha.split("=", 1)[1].strip()
-    except OSError:
-        pass
-    return ""
+    """Token interno (X-Agata-Token), de `scripts/token_interno.py` -- arquivo
+    próprio, nunca o .env (MEMÓRIAS (629)-(631)). Nunca loga o valor. Sem ele,
+    o proxy sanitizador (:20127) recusa a chamada com 403 (MEMÓRIAS (437))."""
+    _scripts = str(Path(__file__).resolve().parents[2] / "scripts")
+    if _scripts not in sys.path:
+        sys.path.insert(0, _scripts)
+    import token_interno  # noqa: E402  (scripts/token_interno.py)
+    return token_interno.ler()
 DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/grafo"))
 DB = DIR_ESTADO / "checkpoints.sqlite"
 LOG_LOOP = "redesign/grafo/loop.log"   # relativo ao repo alvo -- onde registrar_e_commitar escreve

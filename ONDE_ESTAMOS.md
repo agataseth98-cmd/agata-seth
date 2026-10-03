@@ -5,7 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (642)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (643)).
+
+**Incidente de segurança do vazamento (629)-(631): FECHADO.** A causa real — 5 lugares no código que abriam seu `.env` inteiro a cada pedido, só pra pegar 1 linha — não existe mais. Token interno isolado num arquivo próprio, token novo gerado (isso também rotacionou o que tinha vazado), serviços reiniciados, testado ao vivo (LibreChat funcionando, pesquisa semanal de modelos rodou sem erro). Falta só você apagar a linha `AGATA_INTERNAL_TOKEN=` do `.env` quando quiser (não é urgente, ela não é mais lida por ninguém). Detalhe: `MEMÓRIAS.md` (643).
 
 **2 lições de ontem já formalizadas no canon** (FALHAS.md e PROTOCOLOS.md) — assinado e aplicado. Detalhe: `MEMÓRIAS.md` (642).
 
