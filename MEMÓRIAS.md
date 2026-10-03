@@ -26,20 +26,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af
-  Escrito em: 03/10/2026 14:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5715216a159ca71bfacdd02a357548358d31d557
+  Escrito em: 03/10/2026 14:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5715216a159ca71bfacdd02a357548358d31d557/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5715216a159ca71bfacdd02a357548358d31d557/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5715216a159ca71bfacdd02a357548358d31d557/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5715216a159ca71bfacdd02a357548358d31d557/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5715216a159ca71bfacdd02a357548358d31d557/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
+
+**Decisão:** "privadas devem querer uma oportunidade no nosso sistema, não o contrário, isso é inegociável" — confirmado explicitamente via `AskUserQuestion` antes de agir. Atualizei via API do OmniRoute (`PUT /api/combos/<id>`) os 3 combos vivos (`seth-rapido`, `seth-livre`, `seth-pesado`), usando a MESMA lista de modelos que os `-sg` já tinham (o `-sg` é literalmente "o combo sem Groq" desde (640)) — ou seja, reaproveitei uma ordem já testada, não inventei uma nova.
+
+**Isso quebrou `seth-pesado` na hora — investigado em cadeia, 3 causas reais, não 1:**
+1. **Os 2 modelos `llama-cpp` locais do combo (`qwen3-coder-30b-a3b`, `gpt-oss-20b`) não sobem sozinhos** (sem socket de ativação, são units nomeadas que exigem `systemctl --user start` manual) — com o Groq (que quase sempre respondia rápido) fora do caminho, a cascata agora os alcançava, e porta fechada travava a chamada em vez de falhar rápido. Tentei subir os 2 manualmente: **`qwen3coder` deu OOM de CUDA** (17GB não cabe junto com o `gpt-oss-20b` de 11GB numa GPU de 8GB total) — os dois nunca foram desenhados pra rodar ao mesmo tempo. Removi os 2 do combo.
+2. **`gemini/gemini-3-flash-preview` travou 3 vezes seguidas** nesta sessão (direto, isolado, sem mais nada no caminho) — removido do combo também, ficou só `gemini-2.5-flash` + `openrouter/nemotron-3-ultra` + `ollama-local` (confirmados individualmente saudáveis).
+3. **O Ollama ficou preso rodando em CPU** (6,3 tok/s medido no log real do `llama-server`, contra ~43 tok/s normal) — a causa: `llamacpp-qwen3coder.service` tem `Restart=on-failure`, e depois do OOM inicial ele **subiu sozinho em retry automático**, consumindo 6,9 GB dos 8,2 GB de VRAM — sobrou pouco pro Ollama, que caiu pra CPU no carregamento e não migra sozinho. Humano reiniciou o `ollama` (`sudo systemctl restart`, fora do meu alcance — "nada de sudo por conta própria" segue valendo, pausei e pedi) **duas vezes**: a 1ª não resolveu (o `llamacpp-qwen3coder` ainda estava de pé, achado só depois via `nvidia-smi`); parei esse serviço de vez (`stop` manual não dispara `Restart=on-failure`, confirmado via `systemctl show`), Humano reiniciou o Ollama de novo, e aí sim voltou a 42,8 tok/s real, medido no log.
+
+**Estado final, testado de ponta a ponta (confirmação do Humano antes de cada rodada de chamadas reais, 2x bloqueado pelo classificador de modo automático):**
+- `seth-rapido`: `mistral`→`glm`→`gemini-3.5-lite`→`gemini-3.1-lite`→`phi-4-mini`→`ollama-local` (igual ao `-sg` de (640)).
+- `seth-livre`: `glm`→`gemini-3-flash-preview`→`gemini-2.5-flash`→`mistral`→`openrouter(2x)`→`nemotron-lightning`→`ollama-local` (igual ao `-sg`).
+- `seth-pesado`: **mudou de verdade**, não é mais igual ao `-sg` original — `gemini-2.5-flash`→`openrouter/nemotron-ultra`→`ollama-local`. Sem Groq, sem `llama-cpp`, sem `gemini-3-flash-preview`.
+- 3 combos testados via `:20126`, 200 nos 3, depois de deixar os rate-limits dos meus próprios testes recentes esfriarem (confirmado 1min depois).
+
+**O que isso faz com a proposta `rota-cota-tier0`:** com o Groq fora de vez dos combos principais, o propósito original (desviar do Groq antes dele estourar a cota) perde o sentido pros 3 combos vivos — os `-sg` ficam órfãos/redundantes: conferido agora, **são idênticos aos originais nos 3** (as trocas do `seth-pesado` foram aplicadas nos dois juntos, `seth-pesado`/`seth-pesado-sg`, em cada rodada). `SETH_ROTA_COTA` continua `0`; decidir se desliga de vez essa frente (e talvez apagar os `-sg`, já redundantes) fica pro Humano/lab.
+
+**sync:** PASS — `git rev-parse main` = `5715216` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (647).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `PUT`/`GET` reais no admin API do OmniRoute, conferidos a cada troca; `journalctl`/`nvidia-smi`/`systemctl show` reais pra achar as 3 causas, não supostas; chamadas `curl` reais nos 3 combos, pedidos de confirmação do Humano quando o classificador bloqueou · **Autorização:** Humano, "tira o grok" confirmado via `AskUserQuestion`, depois "evite que isso aconteça novamente" (motivou a investigação completa em vez de parar no primeiro conserto).
 
 (647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
 
