@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
+  palavras-chave: pergunta, lab, respondida, librechat, manda, max, tokens, pedidos, reais, seth, raramente, chamadas, sumarização, contexto, conversa, normal, achado, groq, devolve, vazio, baixo, deveria, atingir, maioria, tráfego, real
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
   palavras-chave: medições, pedidas, lab, viés, schema, ferramentas, chars, amostra, teve, prompt, tokens, real, maior, max, diferente, teste, tools, feito, caiu, provedores, diferentes, groq, glm, resultado, decomposto, segurança
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, canon, mcp, protocolos, falhas, assinada, humano, aplicada, redesign, librechat, mjs
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
   palavras-chave: proposta, canon, mcp, protocolos, falhas, aberta, mjs, seth, usa, pra, consultar, nunca, tinha, ganhado, terceiro, lugar, mesmo, gap, achado, investigando, respondia, aguardando, assinatura
-(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
-  palavras-chave: causa, raiz, achada, reproduzida, vivo, mcp, canon, trava, loop, reconexão, streamable, http, mesmo, configurado, type, stdio, sempre, conversa, verdade, tenta, usar, ferramenta, bug, produção, tentativa, upgrade, revertida, explica, crash, seth, respondeu, nada, hang, hoje, inteiro
+(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `can …
+  palavras-chave: causa, raiz, achada, reproduzida, vivo, mcp, can
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autoriza …
   palavras-chave: levantamento, pedido, humano, pra, exigir, autoriza
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), as …

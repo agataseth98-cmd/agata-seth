@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
-(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
+(616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `can …
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autoriza …
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), as …
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` abert …

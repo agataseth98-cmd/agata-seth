@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2904dff329e9d2868fdc519b0aeb35e1e4132425
-  Escrito em: 03/10/2026 13:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 917e4655f96b5b83487a00e92abe835c62b40f6c
+  Escrito em: 03/10/2026 14:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/917e4655f96b5b83487a00e92abe835c62b40f6c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/917e4655f96b5b83487a00e92abe835c62b40f6c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/917e4655f96b5b83487a00e92abe835c62b40f6c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/917e4655f96b5b83487a00e92abe835c62b40f6c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/917e4655f96b5b83487a00e92abe835c62b40f6c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
+
+**Método:** varri os `call_logs` do OmniRoute (todas as datas disponíveis), filtrando por `comboName` em `seth-rapido`/`seth-livre`/`seth-pesado` (642 pedidos no total), excluindo os valores de `max_tokens` que eu mesmo usei nas bancadas de (629)-(645) (5, 50, 100, 200, 400, 1200, 1500, 1800), pra não contaminar a contagem com meus próprios testes sintéticos.
+
+**Resultado:** **496 de 498 pedidos reais não têm `max_tokens` nem `max_completion_tokens` no corpo** — sem limite explícito do lado do cliente (o modelo usa o default dele). Só **2 pedidos** mandam `max_tokens: 800`, e os dois são a MESMA chamada de **sumarização de contexto do LibreChat** (`"You are a context summarizer..."`, `n_mensagens=1`, `stream:false`) — não conversa normal da Seth.
+
+**Leitura:** o problema de (645) (`gpt-oss-120b` com `max_tokens` baixo devolve `content` vazio) é real, mas o tráfego real da Seth quase nunca manda `max_tokens` baixo — só a sumarização manda (800, que pelos meus testes já é alto o bastante pra não esvaziar, já que minha bancada só viu conteúdo vazio consistentemente com 50-400, não com 800+). Risco real residual: pequeno, concentrado na sumarização, não na conversa normal.
+
+**sync:** PASS — `git rev-parse main` = `917e465` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (645).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** varredura real dos `call_logs` do OmniRoute (642 pedidos), filtro explícito dos meus próprios valores de teste pra não contaminar a contagem, leitura do corpo real das 2 chamadas com `max_tokens` presente · **Autorização:** Humano, pacote do lab de 03/10, item 3 — "o LibreChat manda max_tokens nos pedidos da Seth?".
 
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
 
