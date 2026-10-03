@@ -5,7 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (641)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (642)).
+
+**2 lições de ontem já formalizadas no canon** (FALHAS.md e PROTOCOLOS.md) — assinado e aplicado. Detalhe: `MEMÓRIAS.md` (642).
 
 **Padrão confirmado pela 3ª vez: quando a Seth propõe autogovernança pra si mesma, ela pede mais poder de escrita/execução.** Lab auditou a resposta dela de hoje à noite e achou os mesmos sinais de antes (PVT-01, Rev2) — incluindo trocar a assinatura ssh do Portão por uma mensagem de Discord, recusado. O freio mecânico (P-8, sua assinatura, escrita dela só append-only) não muda. Detalhe: `MEMÓRIAS.md` (641).
 

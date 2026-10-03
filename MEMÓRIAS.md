@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7e6c55309fa973af38894362afde2dc0a69c4fbf
-  Escrito em: 03/10/2026 10:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 363dfe2f683effa39febcad01dcfd256a71bb9b4
+  Escrito em: 03/10/2026 10:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7e6c55309fa973af38894362afde2dc0a69c4fbf/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7e6c55309fa973af38894362afde2dc0a69c4fbf/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7e6c55309fa973af38894362afde2dc0a69c4fbf/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7e6c55309fa973af38894362afde2dc0a69c4fbf/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7e6c55309fa973af38894362afde2dc0a69c4fbf/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/363dfe2f683effa39febcad01dcfd256a71bb9b4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/363dfe2f683effa39febcad01dcfd256a71bb9b4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/363dfe2f683effa39febcad01dcfd256a71bb9b4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/363dfe2f683effa39febcad01dcfd256a71bb9b4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/363dfe2f683effa39febcad01dcfd256a71bb9b4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
+
+Proposta `licoes-canonizadas-2026-10-03`: Portão com fatos, nenhum "desfaz" pedido nas 3; risco assumido direto, sem segunda opinião (texto puro, suíte 46/46, sem código executável). Assinado, `p8_verificar` → PODE APLICAR, aplicado, suíte 46/46 de novo no repo real, par movido pra `propostas/aplicadas/`.
+
+**FAB-8:** "Selftest verde apresentado como prova de comportamento correto sem o caso real de produção (resposta menor que o buffer de leitura, que começa por um marcador especial) estar entre os testados" — a lição ficou como candidata em (635)/(637), agora formal.
+
+**PROTOCOLOS.md, nova seção:** complementa "'sync' tem preço" — exige medir com evidência real, mas também não medir de novo o que já foi medido nesta sessão. Fato só se reconfere se uma ação própria mudou o estado, tempo passou numa operação assíncrona, ou o Humano pediu.
+
+**sync:** PASS — `git rev-parse main` = `363dfe2` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (641).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `.diff` testado num worktree descartável antes de comitar (suíte 46/46, `git apply --check` limpo); `p8_verificar.sh` real; suíte real no repo após aplicar · **Autorização:** Humano, Portão completo (3 perguntas com fatos), risco assumido sem segunda opinião, assinatura via `scripts/aprovar.sh licoes-canonizadas-2026-10-03`.
 
 (641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
 

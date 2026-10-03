@@ -30,6 +30,7 @@ O catálogo é organizado pela **causa raiz** — a regra que a falha viola —,
 | FAB-5 | Grep negativo usado como prova de ausência sem validar o padrão contra um positivo conhecido primeiro | Instrumento de medida não calibrado | Testar o padrão contra uma entrada que existe antes de confiar no resultado vazio | (250)-(251) |
 | FAB-6 | Ler parte de um arquivo truncado por limite próprio e não declarar a fração lida | Leitura parcial apresentada como completa | Dizer a fração exata ("li até (n); arquivo continua") — parcial que não se declara vira completo na cabeça de quem lê | (250) |
 | FAB-7 | Perceber que a evidência citada não sustenta a conclusão e deixar a conclusão passar mesmo assim | Conclusão desacoplada da prova | Se a prova não serve, a conclusão volta a "não verificado" — não "corroborada por evidência mais fraca" | (159) |
+| FAB-8 | Selftest verde apresentado como prova de comportamento correto sem o caso real de produção (resposta menor que o buffer de leitura, que começa por um marcador especial) estar entre os testados | Cobertura parcial de teste tratada como cobertura total | Quem espia ou bufferiza um stream testa explicitamente: entrada menor que o limite de leitura (cabe tudo num read só) e entrada que começa pelo marcador especial que o código trata diferente | (635) |
 
 ## MED — Medição recusada
 *Causa raiz comum:* cautela que vira omissão. É o espelho de FAB: recusar-se a medir o mensurável também falseia o estado.

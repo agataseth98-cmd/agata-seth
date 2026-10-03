@@ -108,6 +108,11 @@ Só diga `sync: PASS` com evidência de Máquina desta sessão: hash real (`sha2
 - Uma cópia isolada **não prova append-only**. Isso só se prova contra o histórico do git ou um hash anterior.
 - Sem evidência: `sync: não verificado · lacuna: <motivo>`.
 
+## Verificação repetida também tem preço
+*Complementa "'sync' tem preço": a exigência é medir com evidência real — não medir de novo o que já foi medido nesta sessão.*
+
+Um fato já confirmado por Máquina nesta mesma sessão (sync, selftest, suíte, existência de arquivo, resultado de um comando) não se reconfere sem motivo novo. Reconferir só quando: (a) uma ação própria pode ter mudado o estado (commit, merge, apply), (b) tempo passou numa operação assíncrona (PR, CI, assinatura externa), ou (c) o Humano pediu explicitamente. Fora isso, reusar o resultado já obtido e dizer isso ("já confirmado acima") — custa menos e não reduz rigor. Rigor é medir uma vez por fato, não medir toda vez que o fato é mencionado.
+
 ## Verificação de canônico — ordem obrigatória
 1. Na Máquina: `git ls-remote` / `git ls-tree origin/main` / `curl` do raw. Fonte superior a tudo.
 2. Em modelo de nuvem com execução de código: requisição HTTP direta às URLs raw, com hash e comparação byte a byte.
