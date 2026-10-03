@@ -5,7 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (647)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (648)).
+
+**Groq fora de vez dos 3 combos da Seth, por sua decisão.** Isso destampou 2 problemas reais que já existiam e estavam escondidos: 2 modelos locais que não cabem juntos na GPU (achado: deu "sem memória" tentando os 2 ao mesmo tempo), e o Ollama preso rodando no processador em vez da placa de vídeo (achado só depois de reiniciar 2 vezes — a causa era outro serviço comendo toda a memória da GPU sozinho, via retentativa automática do systemd). Os 3 combos testados de ponta a ponta, funcionando. Detalhe: `MEMÓRIAS.md` (648).
 
 **Medi a calibração da rota-cota — ainda não está pronta pra ligar.** A estimativa de tokens sempre fica ACIMA do real (bom, lado seguro), mas fica alta demais (18% em vez do limite de 15% combinado com o conselho). Amostra pequena (6, não 30 — o Groq é um modelo "pensante" que só responde se eu pedir resposta grande o bastante, o que tornou o teste mais lento). Não recomendo ligar `SETH_ROTA_COTA=1` com esses números. Detalhe: `MEMÓRIAS.md` (644).
 
