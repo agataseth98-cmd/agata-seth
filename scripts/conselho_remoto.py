@@ -127,30 +127,13 @@ ROSTER = [
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
     "huggingface/meta-llama/Llama-3.3-70B-Instruct",
     "mistral/ministral-8b-latest",
-    "llama-cpp/nemotron-3.5-lightning",
-    "llama-cpp/qwen3-coder-30b-a3b",
-    "llama-cpp/phi-4-mini",
-    "llama-cpp/gpt-oss-20b",
 ]
-# Os 4 modelos locais planejados entraram em 20/09/2026, ordem do Humano
-# ("todos os llms tanto locais quanto em nuvem entram no conselho e são
-# avaliados de acordo com a sua performance") -- NÃO reverte a decisão de
-# (352) ("ninguém tem papel fixo"), estende o mesmo princípio: cada um tem
-# família PRÓPRIA em _familia() (não um "local" genérico) pra competir pela
-# rotação igual aos de nuvem, não ficar decorando o ROSTER sem nunca ser
-# chamado -- veja o motivo técnico no comentário de _familia() abaixo.
-# `llama-cpp/gpt-oss-20b` ENTROU NA SEGUNDA TENTATIVA (mesmo dia): a primeira
-# versão baixada (`unsloth/gpt-oss-20b-GGUF`, requantizada em Q4_K_M) travava
-# com `Assertion 'found' failed` em `llama_sampler_dist_apply`, sempre, em 3
-# tentativas de parâmetro diferentes. Trocado pelo arquivo do próprio
-# `ggml-org` (mantenedor do llama.cpp), formato nativo MXFP4 do gpt-oss (não
-# uma requantização de terceiro) -- carrega e responde limpo, confirmando que
-# o problema era o quant, não o llama.cpp nem o modelo em si.
-# Custo dos 4: $0 (rodam nesta Máquina, sem chamada de rede);
-# tempo de resposta depende do serviço systemd `llamacpp-<nome>` estar de pé
-# (sobem sob demanda, como o
-# `llamacpp-agata` original) -- se não estiver, a chamada falha e o breaker
-# trata como qualquer outra falha, sem quebrar a rotação.
+# Os 4 `llama-cpp/*` (entraram em 20/09/2026, família própria em _familia())
+# SAÍRAM em 03/10/2026, decisão do Humano (MEMÓRIAS (648)/(649)): descobertos
+# travando a Seth quando offline (não sobem sozinhos) e disputando a mesma
+# GPU de 8GB entre si (OOM de CUDA tentando 2 ao mesmo tempo) -- risco real
+# de competir pela VRAM com o que a Seth usa (`ollama-local`), tirado de todo
+# caminho automático, não só dos combos da Seth.
 # "cerebras/gemma-4-31b" saiu em 20/09/2026: banido pelo Cloudflare do lado do
 # provedor (403 browser_signature_banned, retryable:false, owner_action_required:
 # true) -- não é credencial nem cota, não adianta esperar o breaker, é o dono do
@@ -166,10 +149,6 @@ ROSTER = [
 # 2.5-flash queimou 3836/3996 tokens em reasoning e truncou). Default = TETO.
 MAX_TOKENS_POR_MODELO = {
     "gemini/gemini-2.5-flash": 12_000,
-    # Medido ao vivo 20/09/2026: com max_tokens=400 devolveu content vazio,
-    # finish=length -- reasoning consumiu tudo (mesmo padrão do Gemini acima).
-    # Com max_tokens=3000, finish=stop, resposta real usando 622 tokens no total.
-    "llama-cpp/nemotron-3.5-lightning": 6_000,
 }
 ROTACAO_ESTADO = os.path.join(DESTINO_DIR, "rotacao-estado.json")
 BREAKER_ESTADO = os.path.join(DESTINO_DIR, "breaker.json")
@@ -248,26 +227,10 @@ def _familia(modelo):
     # `huggingface/meta-llama/Llama-3.3-70B-Instruct` e o casamento e' por
     # substring, primeira chave que bate ganha. Sem isto cairia em "local"
     # (errado -- e' chamada remota) e o P-15 contaria familia de menos.
-    # Os 4 checks "nemotron-3.5-lightning"/"qwen3-coder"/"gpt-oss-20b"/
-    # "phi-4-mini" (20/09/2026) têm que vir ANTES de "qwen"/"llama": os 4
-    # modelos locais novos usam o prefixo `llama-cpp/...` (contém "llama") e
-    # um deles se chama `qwen3-coder-30b-a3b` (contém "qwen") -- sem checar a
-    # forma específica primeiro, os 4 cairiam juntos no "local" genérico e
-    # perderiam a família própria que o Humano pediu (avaliar cada um pela
-    # performance, não empilhar tudo numa família só onde só o primeiro do
-    # ROSTER seria chamado de verdade -- ver comentário do ROSTER acima).
-    # "gpt-oss-20b" tem que vir ANTES de "cerebras"/"groq" não fazer
-    # diferença aqui (aqueles casam por "cerebras"/"groq", não por
-    # "gpt-oss"), mas depois de nada que já contenha "gpt-oss-20b" por
-    # engano -- não existe hoje, registrado pra quem for mexer de novo.
     for chave, fam in (("glm", "zhipu"), ("zai", "zhipu"), ("gemini", "google"),
                        ("cerebras", "cerebras"), ("groq", "groq"),
                        ("huggingface", "huggingface"), ("mistral", "mistral"),
                        ("openrouter", "openrouter"),
-                       ("nemotron-3.5-lightning", "local-nemotron"),
-                       ("qwen3-coder", "local-qwencoder"),
-                       ("gpt-oss-20b", "local-gptoss20b"),
-                       ("phi-4-mini", "local-phi4mini"),
                        ("qwen", "local"),
                        ("llama", "local"), ("minimax", "openrouter")):
         if chave in m:

@@ -26,20 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 10a084ff1ae544494e5344b5896fa7769327921b
-  Escrito em: 03/10/2026 15:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ecd72d40d8642038cebd4415d807b07dfd344e24
+  Escrito em: 03/10/2026 15:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10a084ff1ae544494e5344b5896fa7769327921b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10a084ff1ae544494e5344b5896fa7769327921b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10a084ff1ae544494e5344b5896fa7769327921b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10a084ff1ae544494e5344b5896fa7769327921b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10a084ff1ae544494e5344b5896fa7769327921b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd72d40d8642038cebd4415d807b07dfd344e24/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd72d40d8642038cebd4415d807b07dfd344e24/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd72d40d8642038cebd4415d807b07dfd344e24/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd72d40d8642038cebd4415d807b07dfd344e24/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd72d40d8642038cebd4415d807b07dfd344e24/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
+
+Resposta do lab à avaliação de (648): concordou com o quadro, 3 acréscimos — (1) `llamacpp@.service` ainda tem `Restart=on-failure` (contido, não resolvido — fica pro pacote de remoção do lab), desligar `rota-cota` de vez; (2) alarme de Ollama em CPU via `/api/ps` (`size_vram < size`); (3) proposta de "teste de queda por elo" (fila temporária sem cada elo + 1 pedido real). Humano confirmou os 3 via pergunta direta: desligar+apagar `-sg`, tirar `llama-cpp` de tudo (não só da Seth), e pediu o teste de queda ao lab.
+
+**Medição segura do item 2, feita:** `GET /api/ps` do Ollama com o modelo 100% na GPU agora: `size` = `size_vram` = 6.257.912.052 bytes — confirma que o critério (`size_vram < size` ⇒ parte em CPU) funciona. **Não reproduzi o caso parcial-CPU de propósito** — isso recriaria o problema que acabei de corrigir em (648), risco desnecessário; decisão minha, não pedida.
+
+**Combos `-sg` apagados** (`DELETE /api/combos/<id>`, OmniRoute): `seth-rapido-sg`, `seth-livre-sg`, `seth-pesado-sg` — os 3, 200 cada.
+
+**`llama-cpp/*` removido do roster do Conselho Remoto** (`scripts/conselho_remoto.py`): os 4 (`nemotron-3.5-lightning`, `qwen3-coder-30b-a3b`, `phi-4-mini`, `gpt-oss-20b`) saem do `ROSTER`, a entrada deles em `MAX_TOKENS_POR_MODELO`, e as 4 exceções específicas em `_familia()` que só existiam pra eles. Conferido antes de propor: as 4 entradas em `rotacao-estado.json` já estavam em 0 (nunca escolhidos de verdade); `_familia()` continua classificando certo huggingface/mistral/groq; o fallback de último recurso (`FALLBACK_OLLAMA`/`qwen3.5-9b-64k`) é um caminho DIFERENTE, não tocado, e já confirmado saudável hoje em (648).
+
+**Portão com fatos, 3 rodadas na pergunta 2 (alcance)** até o Humano se dar por satisfeito — cada rodada trouxe um fato novo e concreto (arquivo real de contagem, redução de 9→5 no roster, confirmação no código de que o fallback extremo usa outro caminho). Nenhum "desfaz" pedido.
+
+**Segunda opinião pedida — e um achado irônico no meio do processo:** ao rodar `conselho_remoto.py` pro pedido de segunda opinião (ROSTER ainda com os 4 `llama-cpp`, proposta ainda não aplicada), a rotação **escolheu `llama-cpp/nemotron-3.5-lightning` primeiro — e ele falhou na hora** (`ECONNREFUSED`, porta fechada, exatamente o sintoma que a proposta descreve), e os outros 3 também falharam em sequência (mesma causa), antes de cair no `openrouter/nemotron-3-ultra` que respondeu. **Posição: SIM.** Resposta saiu tecnicamente completa (os 4 itens do formato, incluindo "3. —" pra "sem emenda", coerente já que a posição foi "sim" direto) mas o script a classificou como "FORA DO FORMATO" por não ter a palavra literal "Emenda" — li o conteúdo real antes de aceitar, não só o veredito mecânico do script.
+
+**Durante o trabalho, achei 2 serviços nossos caídos** (`omniroute-sanitizer`, `seth-gateway`) — não relacionados à proposta, provavelmente do `stop` que o Humano fez no `omniroute` antes (confirmado por ele: foi de propósito). Religuei os 2 (`systemctl --user start`), confirmado ativos antes de seguir.
+
+**sync:** PASS — `git rev-parse main` = `ecd72d4` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (648).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `DELETE`/`GET` reais no admin API do OmniRoute; `.diff` testado em worktree descartável antes de comitar (sintaxe, `_familia()`, suíte 46/46); leitura real de `rotacao-estado.json` antes de responder ao Portão; segunda opinião real rodada (não simulada), conteúdo lido manualmente quando o filtro mecânico do script discordou do conteúdo · **Autorização:** Humano, 3 confirmações via `AskUserQuestion` (desligar+apagar rota-cota, tirar llama-cpp de tudo, pedir teste de queda ao lab), Portão completo, segunda opinião favorável, assinatura via `scripts/aprovar.sh tira-llamacpp-conselho-2026-10-03`.
 
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
 

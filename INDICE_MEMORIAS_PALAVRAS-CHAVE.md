@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
+  palavras-chave: frente, rota, cota, desligada, combos, apagados, omniroute, llama, cpp, removidos, caminho, automático, inclusive, roster, remoto, assinado, segunda, opinião, favorável, irônica, próprio, rodou, deles, falhou, vivo, durante, pedido
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
   palavras-chave: decisão, humano, groq, removido, combos, principais, seth, desvio, condicional, remoção, real, expôs, problemas, reais, pré, existentes, achados, corrigidos, hora, modelos, llama, cpp, locais, cabem, juntos, gpu, travam, cascata, offline, ollama, preso, rodando, cpu, falta, vram, achado, reinícios
 (647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, modelo, real, fala, seth, aberta, gateway, passa, guardar, medido, reinjetá, turno, seguinte, pra, citar, nome, certo, verificado, aguardando, assinatura
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
   palavras-chave: reprodução, vivo, librechat, verdade, chamada, exata, travava, agora, completa, segundos, bug, loop, streamable, http, aparece, causa, provada, sintoma
-(619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do conserto de (618), que tinha ficado como risco residual declarado; (b) `propostas/modelos-gratuitos-2026-09-30.md` investigado e movido para o canon — mesmo tratamento de (600), nada pede mudança.**
-  palavras-chave: fechamentos, teste, end, real, conserto, tinha, ficado, risco, residual, declarado, propostas, modelos, gratuitos, investigado, movido, canon, mesmo, tratamento, nada, pede, mudança
+(619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do con …
+  palavras-chave: fechamentos, teste, end, real, con
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` …
   palavras-chave: proposta, canon, mcp, protocolos, falhas
 (617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10- …
