@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
 (642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
 (641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
-(613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
+(613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` abert …
 (612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra …
 (611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` a …
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão …

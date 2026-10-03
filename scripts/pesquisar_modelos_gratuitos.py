@@ -54,19 +54,16 @@ CANDIDATOS_COM_CHAVE = ["Mistral AI", "GitHub Models", "HuggingFace Inference",
 
 
 def _token_interno():
-    """Le AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
-    Item 3 do plano de mitigacao da auditoria do Marcos (MEMORIAS (437)):
-    sem ele, o proxy sanitizador (:20127) recusa a chamada com 403. Enviado
-    tambem nas chamadas diretas ao OmniRoute (:20128) por simplicidade --
-    ele nao conhece o header e o ignora, sem quebrar nada."""
-    try:
-        with open(os.path.expanduser("~/.config/agata/.env"), encoding="utf-8") as f:
-            for linha in f:
-                if linha.startswith("AGATA_INTERNAL_TOKEN="):
-                    return linha.split("=", 1)[1].strip()
-    except OSError:
-        pass
-    return ""
+    """Token interno (X-Agata-Token), de `scripts/token_interno.py` -- arquivo
+    próprio, nunca o .env (MEMÓRIAS (629)-(631)). Nunca loga o valor. Sem ele,
+    o proxy sanitizador (:20127) recusa a chamada com 403 (MEMÓRIAS (437)).
+    Enviado também nas chamadas diretas ao OmniRoute (:20128) por
+    simplicidade -- ele não conhece o header e o ignora."""
+    _scripts = str(Path(__file__).resolve().parents[1] / "scripts")
+    if _scripts not in sys.path:
+        sys.path.insert(0, _scripts)
+    import token_interno  # noqa: E402  (scripts/token_interno.py)
+    return token_interno.ler()
 
 
 def _http(url, metodo="GET", body=None, timeout=45):

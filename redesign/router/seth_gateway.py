@@ -10,7 +10,7 @@ mensagem `system` e repassa para :20127 (que sanitiza segredo) -> OmniRoute.
 Assim qualquer frontend que apontar para :20126 fala com a Seth hidratada,
 sem o Hermes. GET (/v1/models, /health) e streaming passam direto.
 
-Só stdlib. Não instala nada. Lê UMA coisa de ~/.config/agata/.env desde o
+Só stdlib. Não instala nada. Lê UMA coisa de ~/.config/agata/token-interno desde o
 item 3 do plano de mitigação da auditoria do Marcos (MEMÓRIAS (437)):
 AGATA_INTERNAL_TOKEN, que este processo anexa em toda chamada ao proxy
 sanitizador -- a fronteira localhost sozinha não provava quem estava do
@@ -66,23 +66,17 @@ HIDRATA_PATH = Path(os.environ.get(
 MODELO_REAL_PATH = Path(os.environ.get(
     "SETH_MODELO_REAL_PATH", str(Path.home() / ".cache" / "agata" / "seth-modelo-real-ultimo.txt")))
 
-_ENV_PATH = os.path.expanduser("~/.config/agata/.env")
-
-
 def _token_interno() -> str:
-    """Lê AGATA_INTERNAL_TOKEN de ~/.config/agata/.env. Nunca loga o valor.
-    Mesma função de redesign/router/proxy.py -- duplicação deliberada,
-    igual à de _e_comportamento em redesign/grafo/tools.py: são só 8
-    linhas, e as duas cópias lêem o MESMO arquivo pela MESMA chave, risco
-    de deriva baixo. Unificação real fica pro item 11/Fase E do plano."""
-    try:
-        with open(_ENV_PATH, encoding="utf-8") as f:
-            for linha in f:
-                if linha.startswith("AGATA_INTERNAL_TOKEN="):
-                    return linha.split("=", 1)[1].strip()
-    except OSError:
-        pass
-    return ""
+    """Token interno (X-Agata-Token) que este processo anexa em toda chamada ao
+    sanitizador. Vem de `scripts/token_interno.py`: arquivo próprio
+    (~/.config/agata/token-interno, 0600), lido uma vez por processo. NUNCA abre
+    o .env -- antes abria o arquivo inteiro a cada pedido, e foi por aí que as
+    chaves vazaram (MEMÓRIAS (629)-(631)). Nunca loga o valor."""
+    _scripts = str(Path(__file__).resolve().parents[2] / "scripts")
+    if _scripts not in sys.path:
+        sys.path.insert(0, _scripts)
+    import token_interno  # noqa: E402  (scripts/token_interno.py)
+    return token_interno.ler()
 MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
 REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
 sys.path.insert(0, str(REPO / "scripts"))
