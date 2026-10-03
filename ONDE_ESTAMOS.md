@@ -7,7 +7,7 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (652)).
 
-**Achado revisado: não é um modelo específico "morto" — a fila `seth-livre` tem instabilidade intermitente.** Medi 2 vezes: na 1ª o `glm-4.7-flash` ficou lento mas OK; na 2ª ele voltou rápido, mas outro modelo da mesma fila (`gemini-3-flash-preview`, que já travou 3x antes hoje) deu timeout — e dessa vez a FILA INTEIRA falhou, não só um elo. **Decisão sua, se quiser:** vale reordenar o `seth-livre` pra tirar o `gemini-3-flash-preview` (já instável repetidamente)? Detalhe: `MEMÓRIAS.md` (652).
+**Regime de fallback ativado até quarta, 07/10 (crédito de R$40, sem sessão até lá — seu pedido: economia máxima de tokens).** O `seth-livre` tinha os 2 modelos mais instáveis (`glm-4.7-flash`, `gemini-3-flash-preview`) nos 2 primeiros lugares da fila — foi isso que fez a fila inteira falhar numa medição. Reordenei: os 2 foram pro fim (antes só do modelo local), promovendo os mais estáveis. Testado ao vivo, funcionando. Nenhuma bancada nova rodada — economia, os dados já existiam. Detalhe: `MEMÓRIAS.md` (653).
 
 **`llamacpp-agata` (item 1 de antes): já estava seguro, sem ação de risco pendente.** Conferido de verdade — já estava desligado e sem rodar, GPU livre. Removido do combo `auto` também. Falta só a parte formal (versionar o conserto no repo), que o lab vai montar.
 
