@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
+  palavras-chave: medições, pedidas, lab, viés, schema, ferramentas, chars, amostra, teve, prompt, tokens, real, maior, max, diferente, teste, tools, feito, caiu, provedores, diferentes, groq, glm, resultado, decomposto, segurança
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
   palavras-chave: calibração, estimador, rota, cota, medida, estimativa, real, amostras, respondidas, groq, mediana, erro, passa, critério, remoto, amostra, pequena, dificuldade, gpt, oss, modelo, raciocínio, devolve, conteúdo, vazio, max, tokens, pequeno, recomendo, ligar, seth
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, canon, mcp, protocolos, falhas, aberta, mjs, seth, usa, pra, consultar, nunca, tinha, ganhado, terceiro, lugar, mesmo, gap, achado, investigando, respondia, aguardando, assinatura
 (616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `canon` trava em loop de reconexão (`streamable-http`, mesmo configurado `type: stdio`) sempre que uma conversa de verdade tenta usar ferramenta — mesmo bug em v0.8.8-rc3 (produção) e v0.8.8 (tentativa de upgrade, revertida). Explica a crash da Seth, o "não respondeu nada" e o hang de hoje inteiro.**
   palavras-chave: causa, raiz, achada, reproduzida, vivo, mcp, canon, trava, loop, reconexão, streamable, http, mesmo, configurado, type, stdio, sempre, conversa, verdade, tenta, usar, ferramenta, bug, produção, tentativa, upgrade, revertida, explica, crash, seth, respondeu, nada, hang, hoje, inteiro
-(615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
-  palavras-chave: levantamento, pedido, humano, pra, exigir, autorização, comando, destrutivo, seth, goose, virou, investigação, achou, problema, grave, cascata, modelos, grátis, fabrica, execução, ferramenta, rodar, recusar, código, achado, puro
+(615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autoriza …
+  palavras-chave: levantamento, pedido, humano, pra, exigir, autoriza
 (614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), as …
   palavras-chave: proposta, modelo, real, header
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` abert …

@@ -26,20 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2
-  Escrito em: 03/10/2026 13:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2904dff329e9d2868fdc519b0aeb35e1e4132425
+  Escrito em: 03/10/2026 13:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2904dff329e9d2868fdc519b0aeb35e1e4132425/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
+
+**(a) Tamanho do schema das 12 ferramentas:** `json.dumps(tools)` = **8.407 caracteres**. Pelo estimador atual (chars/3): **2.802 tokens estimados** só pro schema.
+
+**(b) O que mudou na 4ª amostra (viés +1.512 em vez de +1.095-1.097 das outras 5):** recalculei o diff exato das 6 amostras de (644) — 1096, 1095, 1095, **1512**, 1095, 1097. A 4ª teve `prompt_tokens` real = 4.802 (as outras: 4.551-4.564, ~250 tokens a menos) e `max_tokens` = 1.500 — **igual** a duas outras amostras (#3 e #5, que tiveram diff normal). Ou seja: **não foi o `max_tokens` que mudou, foi o tamanho real da conversa** (não registrei qual das `CONVERSAS` da bancada caiu nessa amostra especificamente — só o `prompt_tokens` real, limite honesto). Confirma a leitura do lab: o viés tem um termo fixo dominante (~1095) mais uma componente pequena proporcional ao texto real.
+
+**(c) Mesma conversa, com e sem tools, pedida no mesmo minuto:** `model: seth-livre`, mesma mensagem (pergunta sobre circuit breaker), `max_tokens: 1500` nos dois.
+- **Sem tools:** `X-Modelo-Real: openai/gpt-oss-120b` (Groq respondeu) — `prompt_tokens` real = **2.672**.
+- **Com tools:** `X-Modelo-Real: glm-4.7-flash` (Groq NÃO respondeu desta vez) — `prompt_tokens` real = **5.377**.
+- Diferença real observada: **2.705 tokens** — muito próxima da estimativa de chars/3 do schema sozinho (2.802, item a), **mas** essa diferença não isola limpo o custo das tools: os dois pedidos caíram em **tokenizadores diferentes** (Groq vs GLM), então parte da diferença pode vir do tokenizador, não só do schema. **Limite honesto, declarado antes de o lab usar o número:** não é uma medição pura do "custo das tools no tokenizador do Groq" como pedido — é o melhor que consegui numa tentativa, dado que o Groq só respondeu numa das duas chamadas.
+
+**sync:** PASS — `git rev-parse main` = `2904dff` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (644).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `json.dumps` real do schema capturado dos `call_logs`; recálculo aritmético direto das 6 amostras já registradas em (644); 2 chamadas `urllib` reais em `:20126`, headers e `usage` capturados por chamada · **Autorização:** Humano, pacote do lab de 03/10 — "meça, sem aplicar nada".
 
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
 
