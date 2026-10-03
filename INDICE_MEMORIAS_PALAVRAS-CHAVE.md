@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(654) DIÁRIO — 03/10/2026 · **Teste de ponta a ponta pedido pelo Humano achou `seth-pesado` lento/travado no elo 0 (`gemini-2.5-flash`, provável cota diária esgotada) — reordenado igual ao `seth-livre`: `gemini-2.5-flash` desceu, `openrouter/nemotron-3-ultra` assumiu o elo 0. Testado ao vivo, 200. E: o Humano fixou "economia de tokens" como padrão PERMANENTE do sistema, não medida temporária até quarta.**
+  palavras-chave: teste, ponta, pedido, humano, achou, seth, pesado, lento, travado, elo, gemini, flash, provável, cota, diária, esgotada, reordenado, igual, livre, desceu, openrouter, nemotron, ultra, assumiu, testado, vivo, fixou, economia, tokens, padrão, permanente, sistema, medida, temporária, quarta
 (653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
   palavras-chave: seth, livre, reordenado, pra, regime, fallback, crédito, sessão, pedido, humano, economia, máxima, tokens, elos, instáveis, zai, glm, flash, gemini, preview, dupla, explica, fila, inteira, ter, falhado, desceram, pro, fim, ollama, local, testado, vivo
 (652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: respostas, humano, perguntas, abertas, relaiadas, laboratório, ensaio, pacote, projeto, estado, corrente, resposta, nada, fazer, heads, estava, correta, medida, lab, hoje, manhã, minha, própria, sessão, desde, então, deixou, branches, novas, mescladas, apagar, achado, conferir, registrar
 (625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
   palavras-chave: mudanças, confirmadas, vivo, librechat, restart, stack, seth, systemctl, user, gateway, service, funcionam
-(624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
-  palavras-chave: proposta, ferramentas, automaticas, seth, assinada, humano, aplicada, leitura, potencial, destrutivo, pedem, aprovação
+(624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` …
+  palavras-chave: proposta, ferramentas, automaticas, seth
 (623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem poten …
   palavras-chave: pedido, humano, ferramenta, pesquisa, poten
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (62 …

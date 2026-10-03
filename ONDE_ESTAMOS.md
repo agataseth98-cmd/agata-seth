@@ -5,9 +5,13 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (652)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (654)).
 
-**Regime de fallback ativado até quarta, 07/10 (crédito de R$40, sem sessão até lá — seu pedido: economia máxima de tokens).** O `seth-livre` tinha os 2 modelos mais instáveis (`glm-4.7-flash`, `gemini-3-flash-preview`) nos 2 primeiros lugares da fila — foi isso que fez a fila inteira falhar numa medição. Reordenei: os 2 foram pro fim (antes só do modelo local), promovendo os mais estáveis. Testado ao vivo, funcionando. Nenhuma bancada nova rodada — economia, os dados já existiam. Detalhe: `MEMÓRIAS.md` (653).
+**"Economia de tokens" é o padrão PERMANENTE do sistema a partir de agora — você confirmou que não é só até quarta.** Antes de qualquer bancada de medição nova, a regra passa a ser: perguntar se o dado já existe antes de medir de novo. O mecanismo já existia (Regra 7, `PROTOCOLOS.md`); fica elevado a prioridade agora. Formalizar no texto normativo (`PROTOCOLOS.md`/`REGRAS.md`) exige sua assinatura (P-8) — fica pendente pra quando quiser. Detalhe: `MEMÓRIAS.md` (654).
+
+**Teste de ponta a ponta (seu pedido) achou o `seth-pesado` lento/travado — reordenado igual ao `seth-livre`.** `gemini-2.5-flash` (provável cota diária esgotada pelos meus próprios testes) desceu, `openrouter/nemotron-3-ultra` assumiu o topo. Testado ao vivo, funcionando. `seth-rapido`/`seth-codigo`(Goose) confirmados OK no mesmo teste. Detalhe: `MEMÓRIAS.md` (654).
+
+**`seth-livre` já tinha sido reordenado (regime de fallback, crédito de R$40, sem sessão até 07/10).** Os 2 elos mais instáveis (`glm-4.7-flash`, `gemini-3-flash-preview`) foram pro fim da fila. Testado ao vivo, funcionando. Detalhe: `MEMÓRIAS.md` (653).
 
 **`llamacpp-agata` (item 1 de antes): já estava seguro, sem ação de risco pendente.** Conferido de verdade — já estava desligado e sem rodar, GPU livre. Removido do combo `auto` também. Falta só a parte formal (versionar o conserto no repo), que o lab vai montar.
 
