@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 73b645c43f404834d91bdbf70eda1422baf0ba72
-  Escrito em: 03/10/2026 17:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58e611e4be9848ab6086e352fab185f5ca4300a2
+  Escrito em: 03/10/2026 18:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
+
+**Motivo:** a decisão deixada pendente em (652) — reordenar pra reduzir o risco de fila inteira falhar de novo, sem supervisão até quarta. Portão com fatos (reversibilidade: 1 PUT desfaz; alcance: só este combo; silêncio: testado na hora) feito por `AskUserQuestion`, 3 opções, Humano escolheu "reordenar agora" em vez de remover de vez os 2 flakeys — mantém os 7 elos de diversidade grátis.
+
+**Ordem nova:** `gemini/gemini-2.5-flash` → `mistral/ministral-14b-latest` → `openrouter/nvidia/nemotron-3-super-120b-a12b:free` → `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` → `zai/glm-4.7-flash` → `gemini/gemini-3-flash-preview` → `ollama-local/qwen3.5-9b-64k:latest`. `seth-rapido`/`seth-pesado`/`seth-codigo` intocados — só esse combo tinha os 2 flakeys concentrados no topo (elo 0 e elo 1).
+
+**Checado antes de mudar, sem rodar bancada nova (economia — os dados de instabilidade já estavam medidos em (648)/(651)/(652)):** `perimetro.sh` limpo (18 OK, 2 PARCIAL já conhecidos e sem ação — rodar sem sudo, HD de backup desconectado —, 0 FALHA). `propostas/` sem `.diff` órfão esperando assinatura. `ollama` local frio (`/api/ps` vazio) — aceitável, é o fallback de último recurso, paga cold-start (~30s) só se for chamado.
+
+**Teste real pós-mudança:** 1 pedido em `:20126`, `model: seth-livre` → 200, `X-Modelo-Real: ministral-14b-latest` (o `gemini-2.5-flash` promovido ao topo não respondeu nessa tentativa — cascata funcionou como desenhado, caiu pro próximo).
+
+**Fora do escopo desta sessão, por pedido explícito de economia:** nenhuma medição nova, nenhuma bancada, nenhuma 2ª opinião (risco baixo, mudança de ordem só, sem código/canon) — próxima sessão só 07/10/2026 ou quando o Humano voltar.
+
+**sync:** PASS — `git rev-parse main` = `58e611e` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (652).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `GET`/`PUT` reais no admin API do OmniRoute (combo lido antes e depois da troca); `perimetro.sh` e `GET /api/ps` do Ollama reais; 1 pedido real em `:20126` confirmado pelo header `X-Modelo-Real` · **Autorização:** Humano, "priorize tudo que possa deixar o agata em regime de fallback até a data, economia máxima de tokens" + confirmação explícita via `AskUserQuestion` pra reordenar (não remover).
 
 (652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
 

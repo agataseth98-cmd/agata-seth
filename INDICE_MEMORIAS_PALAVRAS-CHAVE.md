@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
+  palavras-chave: seth, livre, reordenado, pra, regime, fallback, crédito, sessão, pedido, humano, economia, máxima, tokens, elos, instáveis, zai, glm, flash, gemini, preview, dupla, explica, fila, inteira, ter, falhado, desceram, pro, fim, ollama, local, testado, vivo
 (652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
   palavras-chave: llamacpp, agata, estava, disabled, inactive, risco, ativo, agora, removido, combo, auto, medição, seth, livre, pedida, lab, mostra, padrão, diferente, esperado, modelo, específico, morto, instabilidade, intermitente, desta, fila, inteira, falhou, atenção
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: mudanças, confirmadas, vivo, librechat, restart, stack, seth, systemctl, user, gateway, service, funcionam
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
   palavras-chave: proposta, ferramentas, automaticas, seth, assinada, humano, aplicada, leitura, potencial, destrutivo, pedem, aprovação
-(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
-  palavras-chave: pedido, humano, ferramenta, pesquisa, potencial, destrutivo, fica, automática, seth, goose, sempre, pedir, aprovação, lado, aplicado, direto, fora, repo, quarentena, virou, proposta, aguardando, assinatura
+(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem poten …
+  palavras-chave: pedido, humano, ferramenta, pesquisa, poten
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (62 …
   palavras-chave: proposta, modelo, real, fala, seth
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` …

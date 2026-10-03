@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
 (652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
 (650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de (612), relaiadas pelo laboratório "Ensaio" no pacote `projeto-estado-corrente-2026-10-02`. A 2ª resposta ("nada a fazer, 3 heads") estava correta quando medida pelo lab hoje de manhã — minha própria sessão desde então deixou 11 branches novas mescladas sem apagar, achado ao conferir antes de registrar.**
 (625) DIÁRIO — 02/10/2026 · **As duas mudanças de (622)/(624) confirmadas ao vivo pelo LibreChat, depois do restart do stack (`seth` + `systemctl --user restart seth-gateway.service`). As duas funcionam.**
 (624) DIÁRIO — 02/10/2026 · **Proposta `ferramentas-automaticas-seth-2026-10-02` (623), assinada pelo Humano, aplicada. 9 ferramentas de leitura/sem potencial destrutivo não pedem mais aprovação na Seth.**
-(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
+(623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem poten …
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (62 …
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` …
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a c …
