@@ -26,20 +26,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 56cafcaf67e71d36232f937b050054a0e546c981
-  Escrito em: 03/10/2026 15:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fcf98c578256aed9f30d33b26a34fea730bba522
+  Escrito em: 03/10/2026 16:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56cafcaf67e71d36232f937b050054a0e546c981/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56cafcaf67e71d36232f937b050054a0e546c981/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56cafcaf67e71d36232f937b050054a0e546c981/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56cafcaf67e71d36232f937b050054a0e546c981/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/56cafcaf67e71d36232f937b050054a0e546c981/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fcf98c578256aed9f30d33b26a34fea730bba522/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fcf98c578256aed9f30d33b26a34fea730bba522/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fcf98c578256aed9f30d33b26a34fea730bba522/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fcf98c578256aed9f30d33b26a34fea730bba522/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fcf98c578256aed9f30d33b26a34fea730bba522/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
+
+Portão com fatos, nenhum "desfaz" nas 3 perguntas; segunda opinião pedida — **mesma situação de antes**: resposta completa (0/1/2/3, posição SIM) mas classificada "FORA DO FORMATO" pelo verificador mecânico do script por não ter a palavra literal "Emenda"; li o conteúdo real do JSON salvo antes de aceitar. Fundamentação do `glm-4.7-flash`: "Remover a lógica obsoleta é a medida de limpeza estrutural mais segura [...] previne o 'lockout' da GPU causado pelo loop de reinicialização excessiva [...] sem fragilizar a integridade dos dados."
+
+**Verificado por mim antes de propor (não só aceito do lab):** `.diff` lido linha a linha, testado em worktree descartável — `selftest` do gateway OK (teste 13 novo cobre o reset do `_rota`, os 11x sumiram), `teste_p9_ollama.sh` isolado 8/8, suíte 46/46, `grep` confirmou nenhum resto de `SETH_ROTA_COTA`/`X-Seth-Est-Tokens`/`combos_sem_cota` em código vivo (só em MEMÓRIAS/histórico).
+
+**Assinado, `p8_verificar` → PODE APLICAR, aplicado**, confirmado de novo no repo real (`selftest`, `teste_p9_ollama.sh`, suíte), par movido pra `propostas/aplicadas/`. `seth-gateway.service`/`llamacpp@.service` reinstalados (`cp` + `daemon-reload`), **só** `seth-gateway` reiniciado (Ollama/OmniRoute intocados, como o fluxo pedia).
+
+**As 5 conferências do fluxo, feitas:**
+- **(a) filas vivas:** confirmou exatamente o aviso do LEIA — `seth-rapido` ainda tinha `llama-cpp/phi-4-mini`, `seth-livre` tinha `llama-cpp/nemotron-3.5-lightning`. Removidos via `PUT`, mantendo o resto da ordem. **Achado a mais, não previsto no LEIA:** `seth-codigo` também tinha `llama-cpp/qwen3-coder-30b-a3b` (removido — a decisão "fora de todo caminho automático" cobre o Goose também; o Groq de lá ficou intocado, decisão separada e pendente); e 2 combos residuais antigos, `cheap` e `auto` (não usados nos 200 pedidos mais recentes, mas ainda existentes como caminho no OmniRoute), tinham `llama-cpp/phi-4-mini` e `llama-cpp/nemotron-3.5-lightning` — removidos também. **Não mexido:** `llamacpp-local/qwen3-30b-a3b` no combo `auto` — é um provider diferente (`llamacpp-agata`, instância original de antes de 20/09), fora do escopo da decisão (que mirou especificamente os "4 modelos de 20/09/2026"). Confirmado ao fim: zero `llama-cpp/*` em qualquer combo do OmniRoute.
+- **(b)** `systemctl --user list-unit-files 'llamacpp*'`: nenhuma `enabled` — as 4 (`gptoss20b`, `nemotron`, `phi4mini`, `qwen3coder`) já `static` (sem `[Install]`), `llamacpp-agata` já `disabled`. Nenhuma ação necessária.
+- **(c)** `perimetro.sh` sem aviso de Ollama (GPU plena) — confirmado.
+- **(d)** conversa real no LibreChat: achei o container `librechat` fora do ar (achado pelo próprio P-9 nesta mesma rodada do perímetro) — subi com o atalho `seth`, testei "ler PROTOCOLOS.md e resumir" com ferramenta real, resposta completa sem erro.
+- **(e)** headers de 2 pedidos reais em `:20126`: nenhum `X-Seth-Est-Tokens` nos dois; `X-Seth-Rota` presente só no que passou por classificação (confirma o comportamento esperado).
+
+**Fica fora desta P-8, registrado pro Humano:** se o Groq sai também do `seth-codigo` (Goose) — decisão dele, não tomada aqui. O lab desenha o "teste de queda por elo" em seguida, separado.
+
+**sync:** PASS — `git rev-parse main` = `fcf98c5` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (649).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `.diff` lido linha a linha, testado em worktree descartável antes de comitar; `p8_verificar.sh`/selftest/P-9 isolado/suíte reais no repo após aplicar; `curl`/`PUT` reais no admin API do OmniRoute pra achar e corrigir os 5 resíduos não previstos; `docker ps` real achou o LibreChat fora do ar; interação real no navegador via Claude in Chrome; `curl -sD-` real nos 2 headers · **Autorização:** Humano, Portão completo, segunda opinião favorável (conteúdo lido manualmente, não só o veredito mecânico), assinatura via `scripts/aprovar.sh pos-groq-2026-10-03`.
 
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
 

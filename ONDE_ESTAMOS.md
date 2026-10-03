@@ -5,9 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (649)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (650)).
 
-**A frente "desviar do Groq" está desligada de vez (os 3 combos reserva apagados), e os 4 modelos locais problemáticos saíram de TODO caminho automático** — incluindo o Conselho Remoto, que até tentou usar um deles durante o próprio pedido de segunda opinião e falhou na hora, confirmando ao vivo o motivo da decisão. Detalhe: `MEMÓRIAS.md` (649).
+**Capítulo "pós-Groq" fechado por completo.** O código da rota-cota saiu de vez (era reversão limpa de 2 propostas), o reinício automático dos 4 modelos locais problemáticos foi desligado (eles só sobem à mão agora), e um alarme novo avisa (sem nunca travar nada) se o modelo principal da IA local cair pra rodar no processador. Na conferência final achei mais 5 lugares (3 filas da Seth/Goose + 2 filas antigas esquecidas) que ainda tinham os modelos problemáticos — todos limpos. LibreChat tinha caído sozinho no meio do trabalho — religado, testado com ferramenta real, funcionando. Detalhe: `MEMÓRIAS.md` (650).
 
 **Groq fora de vez dos 3 combos da Seth, por sua decisão.** Isso destampou 2 problemas reais que já existiam e estavam escondidos: 2 modelos locais que não cabem juntos na GPU (achado: deu "sem memória" tentando os 2 ao mesmo tempo), e o Ollama preso rodando no processador em vez da placa de vídeo (achado só depois de reiniciar 2 vezes — a causa era outro serviço comendo toda a memória da GPU sozinho, via retentativa automática do systemd). Os 3 combos testados de ponta a ponta, funcionando. Detalhe: `MEMÓRIAS.md` (648).
 
