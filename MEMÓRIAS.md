@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58e611e4be9848ab6086e352fab185f5ca4300a2
-  Escrito em: 03/10/2026 18:51 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0065d7db8dad3bf3aae6bc10405bb1e59fa686a1
+  Escrito em: 03/10/2026 19:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58e611e4be9848ab6086e352fab185f5ca4300a2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(654) DIÁRIO — 03/10/2026 · **Teste de ponta a ponta pedido pelo Humano achou `seth-pesado` lento/travado no elo 0 (`gemini-2.5-flash`, provável cota diária esgotada) — reordenado igual ao `seth-livre`: `gemini-2.5-flash` desceu, `openrouter/nemotron-3-ultra` assumiu o elo 0. Testado ao vivo, 200. E: o Humano fixou "economia de tokens" como padrão PERMANENTE do sistema, não medida temporária até quarta.**
+
+**Achado, no teste pedido ("teste o funcionamento de toda a arquitetura"):** 1 pedido real por combo. `seth-rapido` OK (`ministral-14b-latest`). `seth-livre` OK pós-(653) (`ministral-14b-latest`). `seth-codigo` (via Goose) OK (`codestral-latest`). **`seth-pesado` falhou 2x** — 502 "upstream OmniRoute inacessível: timed out" na 1ª, 60s sem resposta na 2ª (`curl: (28) Operation timed out`). Combina com o bug residual já catalogado em PROJETO.md ("OmniRoute lento sob provedor travado") — suspeita, não confirmada por log do provedor: `gemini-2.5-flash` (elo 0 do `seth-pesado`, ~20 pedidos/dia) esgotado pelo uso de hoje nos testes do `seth-livre`.
+
+**Reordenado, mesmo padrão de (653) — descer o elo problemático, não remover:** `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` → `gemini/gemini-2.5-flash` → `ollama-local/qwen3.5-9b-64k:latest` (antes: `gemini-2.5-flash` → `openrouter/nemotron-3-ultra` → `ollama-local`). `seth-rapido`/`seth-livre`/`seth-codigo` intocados. Testado ao vivo: 200, `X-Modelo-Real: nvidia/nemotron-3-ultra-550b-a55b:free`.
+
+**Decisão do Humano, registrada pra não esquecer:** perguntei se "economia de tokens" era só pro período sem sessão (até 07/10) — resposta: não, "o padrão, 'economia de tokens'" — **é o modo de operação permanente do sistema a partir de agora**, não uma medida de emergência da semana. Já existe mecanismo pra isso (Regra 7 + `PROTOCOLOS.md`, "Economia de tokens — mecanismo de Regra 7" + "Verificação repetida também tem preço") — esta entrada eleva a prioridade dele: daqui em diante, antes de qualquer bancada de medição nova, perguntar se o dado já existe em MEMÓRIAS/sessão atual primeiro. Não editei `PROTOCOLOS.md`/`REGRAS.md` agora — estão sob quarentena P-8 (exigem sua assinatura com senha, que você não tem por quê gastar agora); o texto formal fica pendente pra quando você quiser assinar. O registro aqui já vale como decisão sua, com data (Regra 4).
+
+**sync:** PASS — `git rev-parse main` = `0065d7d` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (653).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** 4 pedidos reais em `:20126` (1 por combo) antes da troca; `GET`/`PUT` reais no admin API do OmniRoute pro `seth-pesado`; 1 pedido real depois, confirmado por `X-Modelo-Real` · **Autorização:** Humano, "teste o funcionamento de toda a arquitetura" + "reordene a lista Pesada" + "o padrão, 'economia de tokens'" (3 instruções diretas nesta sessão).
 
 (653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
 
