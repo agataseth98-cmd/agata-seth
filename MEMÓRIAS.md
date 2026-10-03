@@ -26,20 +26,47 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f26ec03c32b614f6dbc7183088986603fc2a1965
-  Escrito em: 03/10/2026 12:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2
+  Escrito em: 03/10/2026 13:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f26ec03c32b614f6dbc7183088986603fc2a1965/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99592307ff550e61af4a8da3f0ee3b5d5ce4c5e2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
+
+**Método:** bancada de pedidos reais `stream:false` em `:20126`, `model: seth-livre`, com os 12 esquemas de ferramenta, conversas de tamanho variado, espaçados (≥90s). 3 rodadas ao todo (27 pedidos únicos): as 2 primeiras (`max_tokens` 50-400) deram **zero** amostras do Groq — todas caíram em `glm-4.7-flash` ou `502`. A 3ª rodada (`max_tokens` 1200-1800) rendeu 6 amostras reais do Groq.
+
+**Achado que explica o "zero Groq" das 2 primeiras rodadas, verificado no corpo real da resposta do OmniRoute (não suposto):** `openai/gpt-oss-120b` é modelo de **raciocínio** — devolve um campo `reasoning` separado do `content`. Com `max_tokens` baixo, ele gasta TODO o orçamento "pensando" sobre a doutrina do cabeçalho da Seth (texto de raciocínio real visto: "We need to respond with correct header... According to rules, first response..."), bate em `finish_reason: "length"` e devolve **`"content": ""`** — HTTP 200, mas vazio. O OmniRoute descarta essa resposta (mesmo sendo 200) e cai pro próximo da cascata (`glm`). Isso é uma classe de problema PARECIDA com a de (635) — resposta "bem-sucedida" tecnicamente, vazia na prática — mas em outro ponto (dentro do próprio OmniRoute, na validação pós-chamada, não no nosso relé) e não investigada a fundo aqui; registro como achado lateral, não como bug nosso.
+
+**Números, só as 6 amostras do Groq (as únicas válidas pro critério — "confira pelo X-Modelo-Real que foi mesmo ele"):**
+
+| `X-Seth-Est-Tokens` | real (`prompt_tokens`+`max_tokens`) | diferença |
+|---|---|---|
+| 7447 | 6351 | +17,3% |
+| 6848 | 5753 | +19,0% |
+| 7148 | 6053 | +18,1% |
+| 7814 | 6302 | +24,0% |
+| 7148 | 6053 | +18,1% |
+| 7461 | 6364 | +17,2% |
+
+**Contra o critério do Conselho Remoto (632)/(633):** estimativa ≥ real em **6/6 = 100%** (bate o ≥95%) — o lado seguro (nunca subestimar) está garantido nesta amostra. **Mediana do |erro| = 18,1%** — **não bate** o ≤15% combinado. A estimativa é sistematicamente generosa (sempre superestima por 17-24%), o que é seguro pra não estourar a cota de verdade, mas dispararia o desvio pro combo `-sg` com mais frequência do que o necessário.
+
+**Limite honesto:** N=6 é bem menor que os 30 pedidos que o lab pediu — a dificuldade real de fazer o Groq responder com conteúdo (preciso de `max_tokens` alto) tornou a bancada mais lenta e cara do que o previsto ("uns 20 minutos" virou bem mais, por causa das 2 rodadas desperdiçadas). Não tentei uma 4ª rodada maior por tempo; os números acima são o que foi medido, não uma amostra completa.
+
+**Decisão, minha leitura dos fatos — não decido por ninguém:** com o critério combinado não batido (mediana de erro acima do limite, mesmo que N pequeno), **não recomendo** a P-8 de uma linha que liga `SETH_ROTA_COTA=1` ainda. O lado seguro está garantido; o que falta é reduzir a folga da estimativa (ou aceitar a folga maior como intencional, dado que super-estimar é o risco preferido) — decisão do Humano/lab.
+
+**sync:** PASS — `git rev-parse main` = `9959230` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (643).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** 27 pedidos `curl`/`urllib` reais em `:20126`, headers e corpo capturados por chamada; corpo real da resposta do Groq lido direto do `call_log` do OmniRoute (não resumo) pra entender o "zero Groq" das 2 primeiras rodadas · **Autorização:** Humano, pacote do lab de 03/10 — "dá para medir já, sem esperar o uso normal".
 
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
 
