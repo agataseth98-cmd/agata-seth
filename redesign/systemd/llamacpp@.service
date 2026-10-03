@@ -37,9 +37,11 @@ EnvironmentFile=%h/.config/agata/llamacpp/%i.env
 # garantia documentada de todo /bin/sh. Reconfirmado ao vivo nesta
 # Máquina: MainPID já é o llama-server direto, sem processo intermediário).
 ExecStart=/usr/sbin/llama-server -m ${MODELO} -ngl 999 --host 127.0.0.1 --port ${PORTA} $ARGS --alias %i --no-webui
-Restart=on-failure
-RestartSec=3
+# Sob demanda, só à mão (03/10/2026, MEMÓRIAS (648)/(649)): nada de reinício
+# automático nem de [Install]. Com Restart=on-failure, um modelo que deu OOM
+# na GPU voltava sozinho 3 s depois, tomava a VRAM e empurrava o Ollama para a
+# CPU (6,3 contra ~43 tok/s). Sem [Install], nenhuma instância pode ser
+# "enable"d e subir no login. A GPU de 8 GB não comporta este modelo junto com
+# o que o Ollama mantém carregado: suba só depois de conferir `nvidia-smi`.
+Restart=no
 Nice=5
-
-[Install]
-WantedBy=default.target

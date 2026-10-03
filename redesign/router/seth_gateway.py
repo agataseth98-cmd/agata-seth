@@ -43,7 +43,6 @@ import re
 import socket
 import sys
 import threading
-import time
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -531,82 +530,6 @@ def _classificar_rota(payload: dict) -> str:
     return _ROTA_BASE
 
 
-# --- Rota pela cota por minuto do tier 0 (02/10/2026) ---------------------------
-# Medido na Máquina (MEMÓRIAS (627)-(631)): os 3 combos da Seth começam no mesmo
-# `groq/openai/gpt-oss-120b`, cujo plano grátis aceita 8.000 tokens POR MINUTO
-# (TPM). Toda chamada do Agent já leva ~3,1 mil tokens de injeção deste gateway
-# + ~3,1 mil do esquema das ferramentas MCP; a 2ª chamada de um turno com
-# ferramenta estoura a cota quase sempre -> 429 -> cascata dentro do OmniRoute.
-# O OmniRoute não deixa "pular" a posição 0 de um combo por pedido; então cada
-# combo da Seth ganha um gêmeo `<rota>-sg` ("sem Groq": mesma ordem, sem o Groq),
-# criado pela API do OmniRoute (config/combos-seth.json), e este gateway escolhe
-# o gêmeo quando o pedido NÃO CABE na cota que sobra no minuto. Contabilidade:
-# janela deslizante de 60 s com os tokens ESTIMADOS dos pedidos que o Groq de
-# fato atendeu (X-Modelo-Real). Só regras, sem rede, sem inferência. Desligado
-# por padrão (SETH_ROTA_COTA=1 liga): sem os combos -sg criados, ligar quebraria
-# a Seth (404 do OmniRoute) -- por isso o liga é uma decisão de implantação.
-_ROTA_COTA_LIGADA = os.environ.get("SETH_ROTA_COTA", "0") == "1"
-_COTA_TPM = int(os.environ.get("SETH_COTA_TPM", "8000"))
-_COTA_MARGEM = float(os.environ.get("SETH_COTA_MARGEM", "0.85"))   # folga do estimador
-_CHARS_POR_TOKEN = float(os.environ.get("SETH_CHARS_POR_TOKEN", "3.0"))  # conservador p/ pt-BR
-# Taxa própria para o esquema das ferramentas (03/10/2026, MEMÓRIAS (644)-(646)):
-# a calibração contra o Groq deu sobra quase CONSTANTE (~1.095 tokens) -- termo
-# fixo, não proporcional. O esquema das tools é o candidato (8.407 chars, igual em
-# todo pedido), mas o gpt-oss pode contá-lo diferente do GLM. Padrão = a taxa do
-# texto, ou seja, sem mudança de comportamento até a medição isolada no Groq
-# decidir o valor (vai no seth-gateway.service, não no código).
-_CHARS_POR_TOKEN_TOOLS = float(os.environ.get("SETH_CHARS_POR_TOKEN_TOOLS", str(_CHARS_POR_TOKEN)))
-_SUFIXO_SEM_COTA = "-sg"
-_ROTAS_COM_TIER0_COTADO = frozenset({"seth-rapido", "seth-livre", "seth-pesado"})
-_MODELO_COTADO = "gpt-oss-120b"   # como aparece no "model" que o OmniRoute devolve
-_JANELA_S = 60.0
-_janela_cota: list[tuple[float, int]] = []
-_janela_lock = threading.Lock()
-
-
-def _estimar_tokens(payload: dict) -> int:
-    """Estimativa conservadora (para mais) dos tokens de ENTRADA + o teto de saída
-    pedido: chars de messages / _CHARS_POR_TOKEN + chars de tools /
-    _CHARS_POR_TOKEN_TOOLS + max_tokens. Sem tokenizador de propósito -- é para
-    decidir rota, não para cobrar."""
-    try:
-        chars_msgs = len(json.dumps(payload.get("messages") or [], ensure_ascii=False))
-        chars_tools = len(json.dumps(payload.get("tools") or [], ensure_ascii=False))
-    except (TypeError, ValueError):
-        return 10**9   # não deu para medir -> trata como "não cabe" (falha fechada)
-    saida = payload.get("max_tokens") or payload.get("max_completion_tokens") or 0
-    try:
-        saida = int(saida)
-    except (TypeError, ValueError):
-        saida = 0
-    return (int(chars_msgs / _CHARS_POR_TOKEN) + int(chars_tools / _CHARS_POR_TOKEN_TOOLS)
-            + max(0, saida))
-
-
-def _cota_usada(agora: float) -> int:
-    with _janela_lock:
-        _janela_cota[:] = [(t, n) for t, n in _janela_cota if agora - t < _JANELA_S]
-        return sum(n for _, n in _janela_cota)
-
-
-def _registrar_uso_cota(modelo_real: str | None, est: int, agora: float) -> None:
-    """Conta na janela só o que o modelo cotado ATENDEU de fato (X-Modelo-Real)."""
-    if modelo_real and _MODELO_COTADO in modelo_real and 0 < est < 10**9:
-        with _janela_lock:
-            _janela_cota.append((agora, est))
-
-
-def _rota_pela_cota(rota: str, est: int, agora: float) -> str:
-    """rota -> rota | rota-sg. Cabe no que sobra da cota do minuto -> mantém o
-    tier 0 rápido; não cabe -> gêmeo sem ele. Desligado ou rota fora da lista
-    -> intacto."""
-    if not _ROTA_COTA_LIGADA or rota not in _ROTAS_COM_TIER0_COTADO:
-        return rota
-    if est + _cota_usada(agora) <= int(_COTA_TPM * _COTA_MARGEM):
-        return rota
-    return rota + _SUFIXO_SEM_COTA
-
-
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
@@ -637,7 +560,6 @@ def _injeta(payload: dict) -> dict:
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
-    _est = 0     # tokens estimados do pedido hidratado (rota pela cota)
 
     def log_message(self, fmt, *args):
         pass
@@ -650,8 +572,8 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         # estado por REQUISIÇÃO: com keep-alive o mesmo handler atende vários
-        # pedidos, e uma rota/estimativa velha vazaria pro header do seguinte
-        self._rota, self._est = "", 0
+        # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
+        self._rota = ""
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -666,14 +588,7 @@ class _Handler(BaseHTTPRequestHandler):
                 if payload.get("model") == _ROTA_BASE:
                     self._rota = _classificar_rota(payload)
                     payload["model"] = self._rota
-                payload = _injeta(payload)
-                if self._rota:
-                    # cota por minuto do tier 0: decidida sobre o pedido JÁ hidratado,
-                    # que é o que de fato chega ao provedor
-                    self._est = _estimar_tokens(payload)
-                    self._rota = _rota_pela_cota(self._rota, self._est, time.monotonic())
-                    payload["model"] = self._rota
-                corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+                corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
         self._passar(corpo, "POST")
 
     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
@@ -743,13 +658,9 @@ class _Handler(BaseHTTPRequestHandler):
                 self.send_header(k, v)
         if self._rota:
             self.send_header("X-Seth-Rota", self._rota)
-        if self._est:
-            self.send_header("X-Seth-Est-Tokens", str(self._est))
         if modelo_real:
             self.send_header("X-Modelo-Real", modelo_real)
             _lembrar_modelo_real(modelo_real)
-            if 200 <= up.status < 300:
-                _registrar_uso_cota(modelo_real, self._est, time.monotonic())
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
         try:
@@ -1069,61 +980,24 @@ def _selftest() -> int:
     print(f"{'PASS' if ok12 else 'FALHA'}  SSE espiado inteiro: conteúdo real preservado, "
           f"keepalive virou comentário ({len(saida12)} bytes de saída)")
     falhas += 0 if ok12 else 1
-    # 11. rota pela cota por minuto do tier 0 (funções puras, relógio injetado)
-    global _ROTA_COTA_LIGADA
-    ligada_antes = _ROTA_COTA_LIGADA
-    teto = int(_COTA_TPM * _COTA_MARGEM)
-    _janela_cota.clear()
-    _ROTA_COTA_LIGADA = False
-    c11a = _rota_pela_cota("seth-livre", 10**6, 0.0) == "seth-livre"
-    _ROTA_COTA_LIGADA = True
-    c11b = _rota_pela_cota("seth-livre", teto // 2, 0.0) == "seth-livre"
-    c11c = _rota_pela_cota("seth-pesado", teto + 1, 0.0) == "seth-pesado-sg"
-    _registrar_uso_cota("openai/gpt-oss-120b", teto // 2 + 10, 1.0)
-    c11d = _rota_pela_cota("seth-livre", teto // 2, 2.0) == "seth-livre-sg"   # soma passa do teto
-    _registrar_uso_cota("glm-4.7-flash", 10**4, 3.0)                          # outro modelo não conta
-    c11e = _cota_usada(3.0) == teto // 2 + 10
-    c11f = _rota_pela_cota("seth-livre", teto // 2, 1.0 + _JANELA_S + 0.1) == "seth-livre"  # janela expirou
-    c11g = _rota_pela_cota("seth-codigo", 10**6, 0.0) == "seth-codigo"      # fora da lista: intacto
-    est = _estimar_tokens({"messages": [{"role": "user", "content": "x" * 3000}], "max_tokens": 500})
-    c11h = est >= int(3000 / _CHARS_POR_TOKEN) + 500                         # conservador: nunca abaixo
-    c11i = _estimar_tokens({"messages": [{"x": object()}]}) == 10**9          # não mede -> não cabe
-    global _CHARS_POR_TOKEN_TOOLS
-    tools_antes = _CHARS_POR_TOKEN_TOOLS
-    p11k = {"messages": [{"role": "user", "content": "x" * 900}],
-            "tools": [{"type": "function", "function": {"name": "f", "description": "y" * 2000}}]}
-    igual = _estimar_tokens(p11k)                       # padrão: mesma taxa (sem mudança)
-    _CHARS_POR_TOKEN_TOOLS = 2 * _CHARS_POR_TOKEN
-    menor = _estimar_tokens(p11k)                       # tools com taxa própria: só o termo delas cai
-    _CHARS_POR_TOKEN_TOOLS = tools_antes
-    chars_t = len(json.dumps(p11k["tools"], ensure_ascii=False))
-    c11k = (tools_antes == _CHARS_POR_TOKEN and
-            igual - menor == int(chars_t / _CHARS_POR_TOKEN) - int(chars_t / (_CHARS_POR_TOKEN * 2)))
-    # 11j. ponta a ponta pelo gateway real: pedido grande do Agent sai como -sg,
-    # com a estimativa no header (o liga ainda ligado aqui)
-    corpo11 = json.dumps({"model": _ROTA_BASE, "messages": [
-        {"role": "user", "content": "y" * (teto * 4)}]}).encode()
-    r11 = urllib.request.urlopen(urllib.request.Request(
-        base, data=corpo11, headers={"Content-Type": "application/json"}), timeout=10)
-    r11.read()
-    modelo_enviado = json.loads(_Dummy.ultimo_corpo).get("model")
-    c11j = (modelo_enviado == "seth-pesado-sg" and
-            int(r11.headers.get("X-Seth-Est-Tokens") or 0) > teto)
-    _ROTA_COTA_LIGADA = ligada_antes
-    _janela_cota.clear()
-    for n, ok, desc in [("11a", c11a, "desligada -> rota intacta mesmo com pedido enorme"),
-                        ("11b", c11b, "ligada, cabe na cota -> mantém o tier 0"),
-                        ("11c", c11c, "ligada, pedido sozinho passa do teto -> seth-pesado-sg"),
-                        ("11d", c11d, "uso do minuto + pedido passa do teto -> seth-livre-sg"),
-                        ("11e", c11e, "só o modelo cotado entra na janela"),
-                        ("11f", c11f, "janela de 60 s expira -> volta ao tier 0"),
-                        ("11g", c11g, "rota fora da lista (seth-codigo) -> intacta"),
-                        ("11h", c11h, f"estimador conservador ({est} tokens p/ 3000 chars + 500)"),
-                        ("11i", c11i, "payload que não serializa -> trata como não cabe"),
-                        ("11k", c11k, "taxa das tools: padrão = a do texto; separada, só o termo das tools muda"),
-                        ("11j", c11j, f"ponta a ponta: pedido grande sai como {modelo_enviado!r} + X-Seth-Est-Tokens")]:
-        print(f"{'PASS' if ok else 'FALHA'}  cota {n}: {desc}")
-        falhas += 0 if ok else 1
+
+    # 13. keep-alive: a rota de um pedido não vaza pro X-Seth-Rota do seguinte.
+    # Mesma conexão HTTP/1.1, mesmo handler: 1º pedido seth-livre (classificado),
+    # 2º pedido seth-codigo (não classificado) -- este não pode sair com rota.
+    import http.client
+    c13 = http.client.HTTPConnection("127.0.0.1", gw_port, timeout=10)
+    rotas13 = []
+    for modelo13 in (_ROTA_BASE, "seth-codigo"):
+        c13.request("POST", "/v1/chat/completions", body=json.dumps({
+            "model": modelo13, "messages": [{"role": "user", "content": "oi"}]}),
+            headers={"Content-Type": "application/json"})
+        r13 = c13.getresponse()
+        r13.read()
+        rotas13.append(r13.getheader("X-Seth-Rota"))
+    c13.close()
+    ok13 = bool(rotas13[0]) and rotas13[1] is None
+    print(f"{'PASS' if ok13 else 'FALHA'}  keep-alive: rota não vaza pro pedido seguinte {rotas13}")
+    falhas += 0 if ok13 else 1
 
     up.shutdown()
     gw.shutdown()

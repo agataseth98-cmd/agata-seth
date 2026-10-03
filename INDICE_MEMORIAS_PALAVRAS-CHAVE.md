@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
+  palavras-chave: pos, groq, assinada, aplicada, rota, cota, sai, código, reversão, exata, conserto, fica, sozinho, teste, próprio, llamacpp, service, trava, restart, install, novo, avisa, ollama, cpu, conferências, pós, aplicação, acharam, resíduos, llama, cpp, combos, pacote, previa, limpos
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
   palavras-chave: frente, rota, cota, desligada, combos, apagados, omniroute, llama, cpp, removidos, caminho, automático, inclusive, roster, remoto, assinado, segunda, opinião, favorável, irônica, próprio, rodou, deles, falhou, vivo, durante, pedido
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, modelo, real, fala, seth, assinada, humano, aplicada, fecha, pedido, passa, citar, cabeçalho, rotulado, medição, turno, anterior
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
   palavras-chave: proposta, modelo, real, fala, seth, aberta, gateway, passa, guardar, medido, reinjetá, turno, seguinte, pra, citar, nome, certo, verificado, aguardando, assinatura
-(620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a chamada exata que travava 1m23s em (616) agora completa em segundos, 2/2. O bug do loop `streamable-http` não aparece mais — mas a causa não está provada, só o sintoma.**
-  palavras-chave: reprodução, vivo, librechat, verdade, chamada, exata, travava, agora, completa, segundos, bug, loop, streamable, http, aparece, causa, provada, sintoma
+(620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a c …
+  palavras-chave: reprodução, vivo, librechat, verdade
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do con …
   palavras-chave: fechamentos, teste, end, real, con
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` …
