@@ -5,14 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (651)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (652)).
 
-**Novo achado: um dos modelos de nuvem (`glm-4.7-flash`, z.ai) está respondendo devagar demais hoje (timeout) e é a PRIMEIRA opção de uma das filas da Seth (`seth-livre`)** — todo pedido ali paga esse atraso antes de cair pro próximo. As outras 3 filas estão saudáveis. Ferramenta nova (`scripts/queda_por_elo.py`) achou isso rodando de verdade, com seu OK. Detalhe: `MEMÓRIAS.md` (651).
+**Achado revisado: não é um modelo específico "morto" — a fila `seth-livre` tem instabilidade intermitente.** Medi 2 vezes: na 1ª o `glm-4.7-flash` ficou lento mas OK; na 2ª ele voltou rápido, mas outro modelo da mesma fila (`gemini-3-flash-preview`, que já travou 3x antes hoje) deu timeout — e dessa vez a FILA INTEIRA falhou, não só um elo. **Decisão sua, se quiser:** vale reordenar o `seth-livre` pra tirar o `gemini-3-flash-preview` (já instável repetidamente)? Detalhe: `MEMÓRIAS.md` (652).
 
-**3 decisões pendentes, trazidas pelo lab:**
-1. **`llamacpp-agata` (o modelo MoE local de 30B) tem o mesmo risco de GPU que já corrigimos nos outros 4** — reinicia sozinho se falhar e pode tomar a memória da placa de vídeo do Ollama de novo. Conferido de verdade, não suposto. Quer que eu aplique o mesmo conserto nele?
-2. O verificador do Conselho Remoto tem rejeitado respostas certas 2 vezes por exigir uma palavra exata — um ajuste pequeno resolveria. Quer que o lab desenhe?
-3. Se o Groq sai também do `seth-codigo` (o combo do Goose) — ainda sua decisão.
+**`llamacpp-agata` (item 1 de antes): já estava seguro, sem ação de risco pendente.** Conferido de verdade — já estava desligado e sem rodar, GPU livre. Removido do combo `auto` também. Falta só a parte formal (versionar o conserto no repo), que o lab vai montar.
+
+**2 decisões ainda pendentes:**
+1. O verificador do Conselho Remoto tem rejeitado respostas certas por exigir uma palavra exata — achei um jeito de contornar pedindo diferente, mas o conserto formal ainda é com você: quer que o lab desenhe?
+2. Se o Groq sai também do `seth-codigo` (o combo do Goose) — ainda sua decisão.
 
 **Capítulo "pós-Groq" fechado por completo.** O código da rota-cota saiu de vez (era reversão limpa de 2 propostas), o reinício automático dos 4 modelos locais problemáticos foi desligado (eles só sobem à mão agora), e um alarme novo avisa (sem nunca travar nada) se o modelo principal da IA local cair pra rodar no processador. Na conferência final achei mais 5 lugares (3 filas da Seth/Goose + 2 filas antigas esquecidas) que ainda tinham os modelos problemáticos — todos limpos. LibreChat tinha caído sozinho no meio do trabalho — religado, testado com ferramenta real, funcionando. Detalhe: `MEMÓRIAS.md` (650).
 

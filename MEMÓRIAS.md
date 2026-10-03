@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8a3d52dbcf2371caf848017ce14f14aedf353d91
-  Escrito em: 03/10/2026 16:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 73b645c43f404834d91bdbf70eda1422baf0ba72
+  Escrito em: 03/10/2026 17:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/73b645c43f404834d91bdbf70eda1422baf0ba72/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
+
+**`llamacpp-agata`, os 3 passos de leitura/ação do lab:**
+- `systemctl --user is-active llamacpp-agata` → `inactive`; `is-enabled` → `disabled`; `nvidia-smi` → 43 MiB de 8.188 MiB usados (GPU praticamente livre). **Já estava no estado seguro antes de eu mexer** — diferente do que (651) temia, não havia reinício automático pendente agora.
+- `systemctl --user disable --now llamacpp-agata` rodado com seu OK — sem efeito real (já estava assim), confirmado de novo.
+- `perimetro.sh | grep P-9`: sem aviso de Ollama em CPU — Ollama não precisou de restart.
+- `llamacpp-local/qwen3-30b-a3b` removido do combo `auto` via `PUT` (com seu OK), mantendo o resto: `zai/glm-4.7-flash`→`gemini/gemini-2.5-flash`→`cerebras/gpt-oss-120b`→`groq/openai/gpt-oss-120b`→`ollama-local/qwen3.5:9b`.
+- **Pendente, pro lab montar a P-8:** mandei o conteúdo real de `systemctl --user cat llamacpp-agata` (sem `Environment=` nenhum no arquivo, nada a mascarar) — texto completo repassado ao lab, pra eles versionarem em `redesign/systemd/` com `Restart=no`/sem `[Install]`, igual ao `llamacpp@.service`, e corrigirem a frase do PROJETO.md que ainda diz "sem WantedBy" (desatualizada — o arquivo real tem `WantedBy=default.target`).
+
+**As 2 medições do `glm-4.7-flash`, pedidas pelo lab (2x, intervalo encurtado a pedido do Humano — não os 10 min sugeridos):**
+
+| medição | `zai/glm-4.7-flash` | outros elos | fila inteira |
+|---|---|---|---|
+| 1ª | OK, mas lento (50,5s) | 7/7 vivos | OK via `gemini-2.5-flash`, 27,5s |
+| 2ª | OK, rápido (1,6s) | 6/7 vivos — **`gemini/gemini-3-flash-preview` TIMEOUT** (92,1s) | **TIMEOUT, 92,1s — RISCO: a fila inteira falhou** |
+
+**Leitura:** não é "`glm-4.7-flash` morto" como a entrada (651) registrou — é instabilidade intermitente na cascata como um todo, afetando elos diferentes em momentos diferentes (`glm` na 1ª, `gemini-3-flash-preview` — já com histórico de travar 3x em (648) — na 2ª). O achado mais sério não é um elo específico, é que **a Fase B (pedido pra fila inteira, roteamento real do OmniRoute) falhou de verdade na 2ª medição** — isso é `RISCO`, código de saída 1, diferente da `ATENÇÃO` mais branda da 1ª rodada completa em (651).
+
+**Decisão que fica com o Humano, como o lab já avisou:** se vale reordenar o `seth-livre` (ex: tirar `gemini-3-flash-preview`, que já demonstrou instabilidade repetida nesta sessão inteira — (648) e agora aqui de novo) — não decidida nesta entrada, só medida.
+
+**sync:** PASS — `git rev-parse main` = `73b645c` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (651).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `systemctl --user is-active`/`is-enabled`/`cat` reais; `nvidia-smi` real; `PUT` real no admin API do OmniRoute; 2 execuções reais de `queda_por_elo.py --executar`, não simuladas · **Autorização:** Humano, confirmação explícita pro `llamacpp-agata` (disable + tirar do combo), "arranca fora" pro intervalo de 10 min entre as medições (rodei a 2ª direto).
 
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
 

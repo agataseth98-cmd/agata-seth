@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` (sem risco ativo agora), removido do combo `auto`. 2ª medição do `seth-livre` (pedida pelo lab) mostra um padrão diferente do esperado: não é um modelo específico morto — é instabilidade intermitente, e desta vez a FILA INTEIRA falhou (`RISCO`, não só `ATENÇÃO`).**
+  palavras-chave: llamacpp, agata, estava, disabled, inactive, risco, ativo, agora, removido, combo, auto, medição, seth, livre, pedida, lab, mostra, padrão, diferente, esperado, modelo, específico, morto, instabilidade, intermitente, desta, fila, inteira, falhou, atenção
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
   palavras-chave: queda, elo, assinada, aplicada, segunda, opinião, favorável, emenda, formato, bateu, limpo, desta, rodada, verdade, achado, real, zai, glm, flash, morto, timeout, seth, livre, pedido, ali, paga, custo, fallback, zero, chunks, fila, remoto, vivo
 (650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, ferramentas, automaticas, seth, assinada, humano, aplicada, leitura, potencial, destrutivo, pedem, aprovação
 (623) DIÁRIO — 02/10/2026 · **Pedido do Humano: ferramenta de pesquisa/sem potencial destrutivo fica automática na Seth e no Goose, em vez de sempre pedir aprovação. Lado Goose aplicado direto (fora do repo, sem quarentena); lado Seth virou proposta P-8, aguardando assinatura.**
   palavras-chave: pedido, humano, ferramenta, pesquisa, potencial, destrutivo, fica, automática, seth, goose, sempre, pedir, aprovação, lado, aplicado, direto, fora, repo, quarentena, virou, proposta, aguardando, assinatura
-(622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
-  palavras-chave: proposta, modelo, real, fala, seth, assinada, humano, aplicada, fecha, pedido, passa, citar, cabeçalho, rotulado, medição, turno, anterior
+(622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (62 …
+  palavras-chave: proposta, modelo, real, fala, seth
 (621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` …
   palavras-chave: proposta, modelo, real, fala, seth
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a c …
