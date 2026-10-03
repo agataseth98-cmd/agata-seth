@@ -26,20 +26,54 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfbe755f2b84217995b4cb26652dd60c4deb0220
-  Escrito em: 03/10/2026 16:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8a3d52dbcf2371caf848017ce14f14aedf353d91
+  Escrito em: 03/10/2026 16:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfbe755f2b84217995b4cb26652dd60c4deb0220/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfbe755f2b84217995b4cb26652dd60c4deb0220/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfbe755f2b84217995b4cb26652dd60c4deb0220/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfbe755f2b84217995b4cb26652dd60c4deb0220/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfbe755f2b84217995b4cb26652dd60c4deb0220/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8a3d52dbcf2371caf848017ce14f14aedf353d91/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
+
+**O lab corrigiu o próprio desenho inicial de (649)** antes de propor: "fila temporária sem o elo" só mediria de verdade o elo 0 (pra elos 2+, o pedido cairia igual nas duas filas, sem medir nada). O desenho novo mede direto — 1 pedido por modelo distinto (Fase A) + 1 por fila inteira (Fase B) — sem criar nem apagar combo nenhum.
+
+**Verificado por mim antes de propor:** `.diff` lido linha a linha, testado em worktree descartável — `queda_por_elo --selftest` 21/21, `token_interno --selftest` OK, **reproduzi a mutação** do ponto cego achado pelo lab (duas formas de escrever o caminho do `.env` que o verificador antigo não pegava — reintroduzi uma via `pesquisar_modelos_gratuitos.py` mutado e confirmei que o selftest reprova), suíte 46/46.
+
+**Portão com fatos, nenhum "desfaz" nas 3.** Segunda opinião pedida com um ajuste no formato do pedido (pedi explicitamente "3. Emenda — ... escreva 'nenhuma' se não for condicional") — **resolveu o falso positivo "FORA DO FORMATO" que vinha acontecendo em (649)/(650)**. `openrouter/nemotron-3-ultra`: **SIM, Emenda: nenhuma**. "A fricção manual é virtude, não defeito [...] transforma o diagnóstico em ato deliberado de governança."
+
+**Assinado, `p8_verificar` → PODE APLICAR, aplicado**, confirmado de novo no repo real (`queda_por_elo --selftest`, `token_interno --selftest`, suíte). Par movido pra `propostas/aplicadas/`. Nada a reiniciar (confirmado).
+
+**Execução real, com seu OK** (16 pedidos, ~gasto de cota grátis): `python3 scripts/queda_por_elo.py --executar --json ~/.cache/agata/queda-por-elo-2026-10-03.json`.
+
+**Resultado — 15/16 pedidos `OK`, 1 `TIMEOUT`:**
+
+| fila | elos vivos | fila inteira | observação |
+|---|---|---|---|
+| `seth-rapido` | 4/5 | OK (via `ministral-14b-latest`, 0,8s) | `zai/glm-4.7-flash` morto, não é o elo 0 |
+| `seth-livre` | 6/7 | OK (via `glm-4.7-flash`?!, 2,0s) | **`zai/glm-4.7-flash` morto (TIMEOUT), E é o elo 0** — todo pedido paga o timeout antes do fallback |
+| `seth-pesado` | 3/3 | OK (via `gemini-2.5-flash`, 8,6s) | sem mortos, saudável |
+| `seth-codigo` | 5/6 | OK (via `codestral-latest`, 0,6s) | `zai/glm-4.7-flash` morto, não é o elo 0 |
+
+**Nota sobre a Fase B de `seth-livre`:** o relatório mostra "via glm-4.7-flash" — mas o `zai/glm-4.7-flash` deu TIMEOUT na Fase A (92,1s). Isso é esperado e não é contradição: a Fase B manda 1 pedido isolado pra fila INTEIRA (não pro modelo isolado), e o roteamento interno do OmniRoute pode ter dado certo nessa tentativa específica — o modelo é instável (timeout intermitente), não morto de forma permanente. **Nenhum `ZERO_CHUNKS`** em nenhum dos 16 pedidos — sem sinal do crash de (635) hoje.
+
+**Achado lateral do lab, ponto cego real no `token_interno.py`:** a guarda "nenhum consumidor abre o `.env`" não pegava `open(str(Path.home() / ".config/agata/.env"))` nem a forma dividida em 3 partes. Corrigido: qualquer literal terminado em `.env` reprova agora. Testado por mutação, as 2 formas pegam; os 6 consumidores existentes continuam passando sem falso positivo.
+
+**3 pontos trazidos pelo lab do relato de (650), ainda não decididos:**
+1. **`llamacpp-agata.service` (`:20129`) tem `Restart=on-failure` E `[Install] WantedBy=default.target`** — confirmei com `systemctl --user cat llamacpp-agata` (comando real, não suposto). **Mesma classe de risco que o `llamacpp@.service` tinha antes do conserto de (649)/(650)**: se der OOM, reinicia sozinho e pode tomar a VRAM do Ollama de novo. Decisão pendente do Humano: corrigir essa unit também (não versionada, vive só em `~/.config/systemd/user/`), e se `llamacpp-local/qwen3-30b-a3b` sai do combo `auto` pelo mesmo princípio de (649).
+2. **O verificador mecânico do Conselho Remoto reprovou resposta certa 2 vezes seguidas** (649)/(650) por exigir a palavra literal "Emenda" — nesta entrada, pedir isso explicitamente no formato do PEDIDO resolveu, mas o verificador em si continua rígido. Candidato a proposta pequena do lab, se o Humano quiser.
+3. **O Groq no `seth-codigo`** continua decisão do Humano, não tocado.
+
+**sync:** PASS — `git rev-parse main` = `8a3d52d` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (650).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `.diff` lido linha a linha, testado em worktree descartável com mutação reproduzida antes de comitar; `p8_verificar.sh`/selftest/suíte reais no repo após aplicar; `systemctl --user cat` real pro achado do `llamacpp-agata`; execução real de `queda_por_elo.py --executar` (16 pedidos reais, não simulados) · **Autorização:** Humano, Portão completo, segunda opinião favorável, assinatura via `scripts/aprovar.sh queda-por-elo-2026-10-03`, OK explícito pra rodar os 16 pedidos reais.
 
 (650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
 

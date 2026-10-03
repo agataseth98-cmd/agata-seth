@@ -205,6 +205,7 @@ corpo `{"name":"<nome>","strategy":"priority","models":[…]}`, cada model =
 **Fonte da verdade da ordem é o próprio OmniRoute** (`GET /api/combos/<id>`); estas
 tabelas são o espelho, conferido contra a API em (534).
 Sincronizar as tabelas acima quando mudar.
+**Conferir a saúde de cada elo** (depois de mudar fila, ou uma vez por semana): `python3 scripts/queda_por_elo.py` mostra o plano; com `--executar`, faz 1 pedido com ferramenta por modelo distinto e 1 por fila. Diz qual elo está morto, qual fila depende de um remoto só e se algum devolve stream sem chunks, a assinatura de (635). Só lê o OmniRoute, nunca muda combo.
 
 O fundo LOCAL usa a connection `ollama-local` já existente (`baseUrl`
 `http://127.0.0.1:11434`). O OmniRoute repassa a string do `model` depois do prefixo

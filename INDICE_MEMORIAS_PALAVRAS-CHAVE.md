@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
+  palavras-chave: queda, elo, assinada, aplicada, segunda, opinião, favorável, emenda, formato, bateu, limpo, desta, rodada, verdade, achado, real, zai, glm, flash, morto, timeout, seth, livre, pedido, ali, paga, custo, fallback, zero, chunks, fila, remoto, vivo
 (650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
   palavras-chave: pos, groq, assinada, aplicada, rota, cota, sai, código, reversão, exata, conserto, fica, sozinho, teste, próprio, llamacpp, service, trava, restart, install, novo, avisa, ollama, cpu, conferências, pós, aplicação, acharam, resíduos, llama, cpp, combos, pacote, previa, limpos
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pedido, humano, ferramenta, pesquisa, potencial, destrutivo, fica, automática, seth, goose, sempre, pedir, aprovação, lado, aplicado, direto, fora, repo, quarentena, virou, proposta, aguardando, assinatura
 (622) DIÁRIO — 02/10/2026 · **Proposta `modelo-real-na-fala-seth-2026-10-02` (621), assinada pelo Humano, aplicada. Fecha o pedido de (615): a Seth passa a citar o modelo real no cabeçalho, rotulado como medição do turno anterior.**
   palavras-chave: proposta, modelo, real, fala, seth, assinada, humano, aplicada, fecha, pedido, passa, citar, cabeçalho, rotulado, medição, turno, anterior
-(621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` aberta: `seth_gateway.py` passa a guardar o modelo real medido (`X-Modelo-Real`) e reinjetá-lo no turno SEGUINTE, pra Seth citar o nome certo em vez de "modelo não verificado". Aguardando assinatura.**
-  palavras-chave: proposta, modelo, real, fala, seth, aberta, gateway, passa, guardar, medido, reinjetá, turno, seguinte, pra, citar, nome, certo, verificado, aguardando, assinatura
+(621) DIÁRIO — 02/10/2026 · **Proposta P-8 `modelo-real-na-fala-seth-2026-10-02` …
+  palavras-chave: proposta, modelo, real, fala, seth
 (620) DIÁRIO — 02/10/2026 · **Reprodução ao vivo, pelo LibreChat de verdade: a c …
   palavras-chave: reprodução, vivo, librechat, verdade
 (619) DIÁRIO — 02/10/2026 · **Dois fechamentos: (a) teste end-to-end real do con …
