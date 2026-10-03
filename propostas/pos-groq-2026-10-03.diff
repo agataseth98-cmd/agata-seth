@@ -1,0 +1,634 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index ccdff7c..736d192 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -54,10 +54,10 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ 
+ ## Cérebro
+ Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/modelos-gratuitos.md` — não este texto.
+-- **Seth (conversa e agente):** cascatas grátis do OmniRoute (`strategy: priority`). Remotos primeiro, depois `llama-cpp/*` sob demanda, Ollama no fundo (546)/(547). Classificador heurístico no `seth_gateway` (só regras, ~µs) reescreve `model` **só** quando o Agent pede `seth-livre`: `seth-rapido` (<400 chars, sem tools, ≤2 msgs do usuário) · `seth-livre` (normal) · `seth-pesado` (>6000 chars, código ou >10 msgs). Todas as rotas terminam nos mesmos modelos confiáveis — rotear errado degrada, nunca quebra (416). Goose usa o combo próprio `seth-codigo`.
++- **Seth (conversa e agente):** cascatas grátis do OmniRoute (`strategy: priority`). Remotos primeiro, Ollama no fundo (546)/(547); desde 03/10/2026 sem Groq nas 3 filas do LibreChat e sem `llama-cpp/*` em fila automática nenhuma (648)/(649). Ordem viva por rota: `config/modelos-gratuitos.md`. Classificador heurístico no `seth_gateway` (só regras, ~µs) reescreve `model` **só** quando o Agent pede `seth-livre`: `seth-rapido` (<400 chars, sem tools, ≤2 msgs do usuário) · `seth-livre` (normal) · `seth-pesado` (>6000 chars, código ou >10 msgs). Todas as rotas terminam nos mesmos modelos confiáveis — rotear errado degrada, nunca quebra (416). Goose usa o combo próprio `seth-codigo`.
+ - **Local principal: `qwen3.5-9b-64k`** (Ollama, `custom:qwen-local-ctx-override`) — nunca a tag oficial `qwen3.5:9b`, que reproduz o bug de `num_ctx` (121). Convenção: `PARAMETER num_ctx 65536` em Modelfile próprio, tag `-64k`, porque o endpoint OpenAI-compatível do Ollama ignora `num_ctx` por desenho ([`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814); (133)-(135)). VRAM de pico em uso real: 89-92% dos 8.188 MiB (log em `~/agata_vram_producao_*.log`). **Regime de auditoria** desde (140): cada resposta é auditada pelo Humano; sai do regime quando o Humano pedir, evento e não prazo (141).
+ - **Fundo local da cadeia da Seth:** `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) do OmniRoute; entra só se todos os remotos falharem (402)/(403).
+-- **Locais sob demanda (`llama.cpp`):** `llamacpp-agata` (MoE `Qwen3-30B-A3B-Instruct-2507`, `:20129`, `--n-cpu-moe 36`, ~31 tok/s, `PartOf` sem `WantedBy`) e 4 modelos de 20/09/2026 — `nemotron-3.5-lightning` (geral), `qwen3-coder-30b-a3b` (código), `phi-4-mini` (leve), `gpt-oss-20b` (agentic, quant `ggml-org` MXFP4; o `unsloth` Q4_K_M trava o sampler). Um serviço systemd cada; não cabem todos ao mesmo tempo; com o local principal na GPU, subir outro pode falhar por VRAM — limite de hardware, não bug (611). Portas e ressalvas: `config/modelos-gratuitos.md`, `config/portas-agata.txt`.
++- **Locais sob demanda (`llama.cpp`):** `llamacpp-agata` (MoE `Qwen3-30B-A3B-Instruct-2507`, `:20129`, `--n-cpu-moe 36`, ~31 tok/s, `PartOf` sem `WantedBy`) e 4 modelos de 20/09/2026 — `nemotron-3.5-lightning` (geral), `qwen3-coder-30b-a3b` (código), `phi-4-mini` (leve), `gpt-oss-20b` (agentic, quant `ggml-org` MXFP4; o `unsloth` Q4_K_M trava o sampler). Um serviço systemd cada; não cabem todos ao mesmo tempo; com o local principal na GPU, subir outro pode falhar por VRAM — limite de hardware, não bug (611). **Fora de todo caminho automático desde 03/10/2026** (combos e Conselho Remoto, (649)): um que voltou sozinho depois de OOM empurrou o Ollama para a CPU (648). `llamacpp@.service` não tem `Restart` nem `[Install]`: só sobe à mão, depois de conferir `nvidia-smi`. Portas e ressalvas: `config/modelos-gratuitos.md`, `config/portas-agata.txt`.
+ - **`gemini-2.5-flash`** (Google API, grátis, ~20 requisições/dia): alívio quando o local falha (140).
+ - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.
+ - **Limite de classe:** modelo local neste hardware tem teto de ~14b/9GB — `PROJETO_REFERENCIA.md`, "VM do Marcos".
+@@ -84,7 +84,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ 
+ **`agata-consolidacao.timer`** (220)/(311): 23:00 diário, `ExecStart` = `redesign/grafo/flows/consolidacao.py`. Saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon. Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` + `~/.cache/agata/` — contenção de kernel, não de prompt. **`lacuna` carregada:** o resumo de 1 linha do log já alegou sucesso sem o arquivo existir — confira `propostas/`, nunca só o log.
+ 
+-**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar.
++**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar. Avisa também quando o Ollama tem modelo carregado só em parte na GPU (`/api/ps`, `size_vram < size`) e diz quem ocupa a VRAM (648)/(649) — todas as unidades estavam `active` enquanto a Seth rodava a 6,3 tok/s.
+ 
+ **Não recriar:** `agata.service`, `agatha.service`, `agata-rest.service` (ausentes, (107)/(539)), `hermes-gateway.service` (Hermes removido, (312)), `kokoro-tts` (removido, (593)/(594)).
+ 
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 5474c8a..aabd5b5 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -95,6 +95,8 @@ tempo nos 38GB de RAM desta Máquina) e sua própria conexão no OmniRoute (cat
+ '{"baseUrl":"http://127.0.0.1:<porta>/v1"}'` permite múltiplas conexões do mesmo tipo
+ catálogo, distinguidas pelo `defaultModel`/porta, não por um `provider` customizado).
+ 
++**Desde 03/10/2026 (MEMÓRIAS (648)/(649)) nenhum destes está em fila automática** (combos da Seth, `seth-codigo`, Conselho Remoto). A coluna "Papel" abaixo é o papel que tiveram até lá; ficam como registro da medição e para uso à mão.
++
+ | Modelo | Porta | RAM (Q4_K_M) | Papel | Ajuste de offload |
+ |---|---|---|---|---|
+ | `llama-cpp/nemotron-3.5-lightning` | 20142 | **23,7GB** (Q4_K_M, medido — corrigido de um ~19GB citado antes, de um quant Q4_0 diferente) | Geral/conversação — tier 0 do `seth-livre` (LibreChat) | **`--n-cpu-moe 44`**, confirmado pela bancada. `36` (copiado do Qwen3-30B-A3B) deu OOM ao carregar. `42` passou no `llama-bench` (que testa com prompt/gen curtos, sem reservar o `-c 8192` inteiro) mas **falhou no servidor real** com `-c 8192` — 1,1GB faltando no buffer de computação. `llama-bench` não é proxy confiável de VRAM do servidor real quando o contexto configurado é grande; só o teste com o `-c` de produção prova. `44` é o mínimo real que carrega com `-c 8192`: **75,2 tok/s prompt-processing, 24,6 tok/s geração** (`llama-bench -p 128 -n 128 -r 3`), 7081MiB de VRAM (~86%, mais apertado que os ~76% do Qwen3-30B-A3B original). **Precisa de `max_tokens` alto** — mesmo padrão do Gemini: com 400 devolveu vazio (`finish=length`, todo o orçamento em reasoning); com 3000 respondeu certo usando só 622 no total. `MAX_TOKENS_POR_MODELO["llama-cpp/nemotron-3.5-lightning"] = 6000` no `conselho_remoto.py`. Testado ao vivo direto, pelo OmniRoute e pelo combo `seth-livre`. |
+@@ -153,53 +155,44 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+ 
+ **Fila de 24/09/2026 (MEMÓRIAS (546)), ordem pedida pelo Humano ("sim, aplique a fila nova"), gerada da API viva.** Critério: só entra modelo medido NESTE dia com as chaves do Humano, respondendo e fazendo tool-call. **Locais por último (ordem do Humano, 24/09/2026, MEMÓRIAS (547): "os modelos locais agora serão os últimos")** — remotos primeiro, depois `llama-cpp/*` (sob demanda), e o Ollama como fundo final sempre disponível. Saíram: `huggingface/…` (402, créditos esgotados), `cerebras/gpt-oss-120b` (crédito de trial, não grátis), `mistral/ministral-8b-latest` (trocado pelo 14b). **Fora por teto de saída:** `groq/qwen/qwen3.8-27b` responde, mas o free limita a **1.000 tokens de saída/min** e a Seth pede mais por padrão → 429 sempre.
+ 
++**Fila de 03/10/2026 (MEMÓRIAS (648)/(649)), por decisão do Humano:** o Groq saiu das 3 filas do LibreChat ("privadas devem querer uma oportunidade no nosso sistema, não o contrário") e os 4 `llama-cpp/*` saíram de todo caminho automático (não cabem na GPU de 8 GB junto com o modelo que o Ollama mantém carregado). O `seth-pesado` perdeu também o `gemini-3-flash-preview` (travou 3 vezes seguidas, isolado). As linhas abaixo mantêm o "por quê" medido em 24/09.
++
+ ### `seth-rapido` (LibreChat, trivial)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
+-| 1 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
+-| 2 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 3 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
+-| 4 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
+-| 5 | `llama-cpp/phi-4-mini` | local, $0 — leve; sob demanda (desligado = pula em ~25 ms) |
+-| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++| 0 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 1 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 2 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
++| 3 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
++| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-livre` (LibreChat, rota normal — favorece conversação)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
+-| 1 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+-| 3 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+-| 4 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
+-| 5 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
+-| 6 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+-| 7 | `llama-cpp/nemotron-3.5-lightning` | local, $0 — geral/conversa; sob demanda |
+-| 8 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++| 0 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
++| 2 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
++| 3 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 4 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
++| 5 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
+-| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+-| 2 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+-| 3 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+-| 4 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
+-| 5 | `llama-cpp/gpt-oss-20b` | local, agentic/tool-use |
+-| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
++| 1 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 2 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-codigo` (Goose)
+ | ordem | modelo | por quê |
+ |---|---|---|
+ | 0 | `mistral/codestral-latest` | **novo 24/09 (546)** — especialista em código, 0,44 s, tool-call OK |
+-| 1 | `groq/openai/gpt-oss-120b` | **novo 24/09 (MEMÓRIAS (546))** — 0,4 s, tool-call OK. Free: 30 RPM, 1.000 RPD, **8.000 TPM** (≈2 chamadas da Seth/min; acima disso desce na fila). Voltou depois do conserto do UA (545) |
++| 1 | `groq/openai/gpt-oss-120b` | **decisão pendente do Humano (03/10/2026):** a saída do Groq em (648) cobriu só as 3 filas do LibreChat; se valer também para o Goose, esta linha sai pela API e daqui. 0,4 s, tool-call OK; free 8.000 TPM. |
+ | 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+ | 3 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
+ | 4 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 5 | `llama-cpp/qwen3-coder-30b-a3b` | local, $0 — código; sob demanda |
+-| 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+-
+-**Gêmeos `-sg` ("sem Groq", 02/10/2026).** `seth-rapido-sg`, `seth-livre-sg` e `seth-pesado-sg` = a MESMA ordem do combo vivo, sem `groq/openai/gpt-oss-120b`. Não se editam à mão: `python3 scripts/combos_sem_cota.py` mostra o plano e `--aplicar` recria a partir do combo vivo (rode de novo sempre que mudar a ordem de um combo da Seth). Uso: o `seth_gateway` manda para o gêmeo quando o pedido não cabe na cota de 8.000 tokens/min que sobra no Groq (`SETH_ROTA_COTA=1` no `seth-gateway.service`; desligado por padrão).
++| 5 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ **Recriar / reverter** (se o `storage.sqlite` for perdido):
+ `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 58100f2..e797a46 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -43,7 +43,6 @@ import re
+ import socket
+ import sys
+ import threading
+-import time
+ import urllib.error
+ import urllib.request
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -531,82 +530,6 @@ def _classificar_rota(payload: dict) -> str:
+     return _ROTA_BASE
+ 
+ 
+-# --- Rota pela cota por minuto do tier 0 (02/10/2026) ---------------------------
+-# Medido na Máquina (MEMÓRIAS (627)-(631)): os 3 combos da Seth começam no mesmo
+-# `groq/openai/gpt-oss-120b`, cujo plano grátis aceita 8.000 tokens POR MINUTO
+-# (TPM). Toda chamada do Agent já leva ~3,1 mil tokens de injeção deste gateway
+-# + ~3,1 mil do esquema das ferramentas MCP; a 2ª chamada de um turno com
+-# ferramenta estoura a cota quase sempre -> 429 -> cascata dentro do OmniRoute.
+-# O OmniRoute não deixa "pular" a posição 0 de um combo por pedido; então cada
+-# combo da Seth ganha um gêmeo `<rota>-sg` ("sem Groq": mesma ordem, sem o Groq),
+-# criado pela API do OmniRoute (config/combos-seth.json), e este gateway escolhe
+-# o gêmeo quando o pedido NÃO CABE na cota que sobra no minuto. Contabilidade:
+-# janela deslizante de 60 s com os tokens ESTIMADOS dos pedidos que o Groq de
+-# fato atendeu (X-Modelo-Real). Só regras, sem rede, sem inferência. Desligado
+-# por padrão (SETH_ROTA_COTA=1 liga): sem os combos -sg criados, ligar quebraria
+-# a Seth (404 do OmniRoute) -- por isso o liga é uma decisão de implantação.
+-_ROTA_COTA_LIGADA = os.environ.get("SETH_ROTA_COTA", "0") == "1"
+-_COTA_TPM = int(os.environ.get("SETH_COTA_TPM", "8000"))
+-_COTA_MARGEM = float(os.environ.get("SETH_COTA_MARGEM", "0.85"))   # folga do estimador
+-_CHARS_POR_TOKEN = float(os.environ.get("SETH_CHARS_POR_TOKEN", "3.0"))  # conservador p/ pt-BR
+-# Taxa própria para o esquema das ferramentas (03/10/2026, MEMÓRIAS (644)-(646)):
+-# a calibração contra o Groq deu sobra quase CONSTANTE (~1.095 tokens) -- termo
+-# fixo, não proporcional. O esquema das tools é o candidato (8.407 chars, igual em
+-# todo pedido), mas o gpt-oss pode contá-lo diferente do GLM. Padrão = a taxa do
+-# texto, ou seja, sem mudança de comportamento até a medição isolada no Groq
+-# decidir o valor (vai no seth-gateway.service, não no código).
+-_CHARS_POR_TOKEN_TOOLS = float(os.environ.get("SETH_CHARS_POR_TOKEN_TOOLS", str(_CHARS_POR_TOKEN)))
+-_SUFIXO_SEM_COTA = "-sg"
+-_ROTAS_COM_TIER0_COTADO = frozenset({"seth-rapido", "seth-livre", "seth-pesado"})
+-_MODELO_COTADO = "gpt-oss-120b"   # como aparece no "model" que o OmniRoute devolve
+-_JANELA_S = 60.0
+-_janela_cota: list[tuple[float, int]] = []
+-_janela_lock = threading.Lock()
+-
+-
+-def _estimar_tokens(payload: dict) -> int:
+-    """Estimativa conservadora (para mais) dos tokens de ENTRADA + o teto de saída
+-    pedido: chars de messages / _CHARS_POR_TOKEN + chars de tools /
+-    _CHARS_POR_TOKEN_TOOLS + max_tokens. Sem tokenizador de propósito -- é para
+-    decidir rota, não para cobrar."""
+-    try:
+-        chars_msgs = len(json.dumps(payload.get("messages") or [], ensure_ascii=False))
+-        chars_tools = len(json.dumps(payload.get("tools") or [], ensure_ascii=False))
+-    except (TypeError, ValueError):
+-        return 10**9   # não deu para medir -> trata como "não cabe" (falha fechada)
+-    saida = payload.get("max_tokens") or payload.get("max_completion_tokens") or 0
+-    try:
+-        saida = int(saida)
+-    except (TypeError, ValueError):
+-        saida = 0
+-    return (int(chars_msgs / _CHARS_POR_TOKEN) + int(chars_tools / _CHARS_POR_TOKEN_TOOLS)
+-            + max(0, saida))
+-
+-
+-def _cota_usada(agora: float) -> int:
+-    with _janela_lock:
+-        _janela_cota[:] = [(t, n) for t, n in _janela_cota if agora - t < _JANELA_S]
+-        return sum(n for _, n in _janela_cota)
+-
+-
+-def _registrar_uso_cota(modelo_real: str | None, est: int, agora: float) -> None:
+-    """Conta na janela só o que o modelo cotado ATENDEU de fato (X-Modelo-Real)."""
+-    if modelo_real and _MODELO_COTADO in modelo_real and 0 < est < 10**9:
+-        with _janela_lock:
+-            _janela_cota.append((agora, est))
+-
+-
+-def _rota_pela_cota(rota: str, est: int, agora: float) -> str:
+-    """rota -> rota | rota-sg. Cabe no que sobra da cota do minuto -> mantém o
+-    tier 0 rápido; não cabe -> gêmeo sem ele. Desligado ou rota fora da lista
+-    -> intacto."""
+-    if not _ROTA_COTA_LIGADA or rota not in _ROTAS_COM_TIER0_COTADO:
+-        return rota
+-    if est + _cota_usada(agora) <= int(_COTA_TPM * _COTA_MARGEM):
+-        return rota
+-    return rota + _SUFIXO_SEM_COTA
+-
+-
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -637,7 +560,6 @@ def _injeta(payload: dict) -> dict:
+ class _Handler(BaseHTTPRequestHandler):
+     protocol_version = "HTTP/1.1"
+     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
+-    _est = 0     # tokens estimados do pedido hidratado (rota pela cota)
+ 
+     def log_message(self, fmt, *args):
+         pass
+@@ -650,8 +572,8 @@ class _Handler(BaseHTTPRequestHandler):
+ 
+     def do_POST(self):
+         # estado por REQUISIÇÃO: com keep-alive o mesmo handler atende vários
+-        # pedidos, e uma rota/estimativa velha vazaria pro header do seguinte
+-        self._rota, self._est = "", 0
++        # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
++        self._rota = ""
+         corpo = ler_corpo_limitado(self)
+         if corpo is None:
+             return
+@@ -666,14 +588,7 @@ class _Handler(BaseHTTPRequestHandler):
+                 if payload.get("model") == _ROTA_BASE:
+                     self._rota = _classificar_rota(payload)
+                     payload["model"] = self._rota
+-                payload = _injeta(payload)
+-                if self._rota:
+-                    # cota por minuto do tier 0: decidida sobre o pedido JÁ hidratado,
+-                    # que é o que de fato chega ao provedor
+-                    self._est = _estimar_tokens(payload)
+-                    self._rota = _rota_pela_cota(self._rota, self._est, time.monotonic())
+-                    payload["model"] = self._rota
+-                corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
++                corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
+         self._passar(corpo, "POST")
+ 
+     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
+@@ -743,13 +658,9 @@ class _Handler(BaseHTTPRequestHandler):
+                 self.send_header(k, v)
+         if self._rota:
+             self.send_header("X-Seth-Rota", self._rota)
+-        if self._est:
+-            self.send_header("X-Seth-Est-Tokens", str(self._est))
+         if modelo_real:
+             self.send_header("X-Modelo-Real", modelo_real)
+             _lembrar_modelo_real(modelo_real)
+-            if 200 <= up.status < 300:
+-                _registrar_uso_cota(modelo_real, self._est, time.monotonic())
+         self.send_header("Transfer-Encoding", "chunked")
+         self.end_headers()
+         try:
+@@ -1069,61 +980,24 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok12 else 'FALHA'}  SSE espiado inteiro: conteúdo real preservado, "
+           f"keepalive virou comentário ({len(saida12)} bytes de saída)")
+     falhas += 0 if ok12 else 1
+-    # 11. rota pela cota por minuto do tier 0 (funções puras, relógio injetado)
+-    global _ROTA_COTA_LIGADA
+-    ligada_antes = _ROTA_COTA_LIGADA
+-    teto = int(_COTA_TPM * _COTA_MARGEM)
+-    _janela_cota.clear()
+-    _ROTA_COTA_LIGADA = False
+-    c11a = _rota_pela_cota("seth-livre", 10**6, 0.0) == "seth-livre"
+-    _ROTA_COTA_LIGADA = True
+-    c11b = _rota_pela_cota("seth-livre", teto // 2, 0.0) == "seth-livre"
+-    c11c = _rota_pela_cota("seth-pesado", teto + 1, 0.0) == "seth-pesado-sg"
+-    _registrar_uso_cota("openai/gpt-oss-120b", teto // 2 + 10, 1.0)
+-    c11d = _rota_pela_cota("seth-livre", teto // 2, 2.0) == "seth-livre-sg"   # soma passa do teto
+-    _registrar_uso_cota("glm-4.7-flash", 10**4, 3.0)                          # outro modelo não conta
+-    c11e = _cota_usada(3.0) == teto // 2 + 10
+-    c11f = _rota_pela_cota("seth-livre", teto // 2, 1.0 + _JANELA_S + 0.1) == "seth-livre"  # janela expirou
+-    c11g = _rota_pela_cota("seth-codigo", 10**6, 0.0) == "seth-codigo"      # fora da lista: intacto
+-    est = _estimar_tokens({"messages": [{"role": "user", "content": "x" * 3000}], "max_tokens": 500})
+-    c11h = est >= int(3000 / _CHARS_POR_TOKEN) + 500                         # conservador: nunca abaixo
+-    c11i = _estimar_tokens({"messages": [{"x": object()}]}) == 10**9          # não mede -> não cabe
+-    global _CHARS_POR_TOKEN_TOOLS
+-    tools_antes = _CHARS_POR_TOKEN_TOOLS
+-    p11k = {"messages": [{"role": "user", "content": "x" * 900}],
+-            "tools": [{"type": "function", "function": {"name": "f", "description": "y" * 2000}}]}
+-    igual = _estimar_tokens(p11k)                       # padrão: mesma taxa (sem mudança)
+-    _CHARS_POR_TOKEN_TOOLS = 2 * _CHARS_POR_TOKEN
+-    menor = _estimar_tokens(p11k)                       # tools com taxa própria: só o termo delas cai
+-    _CHARS_POR_TOKEN_TOOLS = tools_antes
+-    chars_t = len(json.dumps(p11k["tools"], ensure_ascii=False))
+-    c11k = (tools_antes == _CHARS_POR_TOKEN and
+-            igual - menor == int(chars_t / _CHARS_POR_TOKEN) - int(chars_t / (_CHARS_POR_TOKEN * 2)))
+-    # 11j. ponta a ponta pelo gateway real: pedido grande do Agent sai como -sg,
+-    # com a estimativa no header (o liga ainda ligado aqui)
+-    corpo11 = json.dumps({"model": _ROTA_BASE, "messages": [
+-        {"role": "user", "content": "y" * (teto * 4)}]}).encode()
+-    r11 = urllib.request.urlopen(urllib.request.Request(
+-        base, data=corpo11, headers={"Content-Type": "application/json"}), timeout=10)
+-    r11.read()
+-    modelo_enviado = json.loads(_Dummy.ultimo_corpo).get("model")
+-    c11j = (modelo_enviado == "seth-pesado-sg" and
+-            int(r11.headers.get("X-Seth-Est-Tokens") or 0) > teto)
+-    _ROTA_COTA_LIGADA = ligada_antes
+-    _janela_cota.clear()
+-    for n, ok, desc in [("11a", c11a, "desligada -> rota intacta mesmo com pedido enorme"),
+-                        ("11b", c11b, "ligada, cabe na cota -> mantém o tier 0"),
+-                        ("11c", c11c, "ligada, pedido sozinho passa do teto -> seth-pesado-sg"),
+-                        ("11d", c11d, "uso do minuto + pedido passa do teto -> seth-livre-sg"),
+-                        ("11e", c11e, "só o modelo cotado entra na janela"),
+-                        ("11f", c11f, "janela de 60 s expira -> volta ao tier 0"),
+-                        ("11g", c11g, "rota fora da lista (seth-codigo) -> intacta"),
+-                        ("11h", c11h, f"estimador conservador ({est} tokens p/ 3000 chars + 500)"),
+-                        ("11i", c11i, "payload que não serializa -> trata como não cabe"),
+-                        ("11k", c11k, "taxa das tools: padrão = a do texto; separada, só o termo das tools muda"),
+-                        ("11j", c11j, f"ponta a ponta: pedido grande sai como {modelo_enviado!r} + X-Seth-Est-Tokens")]:
+-        print(f"{'PASS' if ok else 'FALHA'}  cota {n}: {desc}")
+-        falhas += 0 if ok else 1
++
++    # 13. keep-alive: a rota de um pedido não vaza pro X-Seth-Rota do seguinte.
++    # Mesma conexão HTTP/1.1, mesmo handler: 1º pedido seth-livre (classificado),
++    # 2º pedido seth-codigo (não classificado) -- este não pode sair com rota.
++    import http.client
++    c13 = http.client.HTTPConnection("127.0.0.1", gw_port, timeout=10)
++    rotas13 = []
++    for modelo13 in (_ROTA_BASE, "seth-codigo"):
++        c13.request("POST", "/v1/chat/completions", body=json.dumps({
++            "model": modelo13, "messages": [{"role": "user", "content": "oi"}]}),
++            headers={"Content-Type": "application/json"})
++        r13 = c13.getresponse()
++        r13.read()
++        rotas13.append(r13.getheader("X-Seth-Rota"))
++    c13.close()
++    ok13 = bool(rotas13[0]) and rotas13[1] is None
++    print(f"{'PASS' if ok13 else 'FALHA'}  keep-alive: rota não vaza pro pedido seguinte {rotas13}")
++    falhas += 0 if ok13 else 1
+ 
+     up.shutdown()
+     gw.shutdown()
+diff --git a/redesign/systemd/llamacpp@.service b/redesign/systemd/llamacpp@.service
+index e0a46ba..15ff3ce 100644
+--- a/redesign/systemd/llamacpp@.service
++++ b/redesign/systemd/llamacpp@.service
+@@ -37,9 +37,11 @@ EnvironmentFile=%h/.config/agata/llamacpp/%i.env
+ # garantia documentada de todo /bin/sh. Reconfirmado ao vivo nesta
+ # Máquina: MainPID já é o llama-server direto, sem processo intermediário).
+ ExecStart=/usr/sbin/llama-server -m ${MODELO} -ngl 999 --host 127.0.0.1 --port ${PORTA} $ARGS --alias %i --no-webui
+-Restart=on-failure
+-RestartSec=3
++# Sob demanda, só à mão (03/10/2026, MEMÓRIAS (648)/(649)): nada de reinício
++# automático nem de [Install]. Com Restart=on-failure, um modelo que deu OOM
++# na GPU voltava sozinho 3 s depois, tomava a VRAM e empurrava o Ollama para a
++# CPU (6,3 contra ~43 tok/s). Sem [Install], nenhuma instância pode ser
++# "enable"d e subir no login. A GPU de 8 GB não comporta este modelo junto com
++# o que o Ollama mantém carregado: suba só depois de conferir `nvidia-smi`.
++Restart=no
+ Nice=5
+-
+-[Install]
+-WantedBy=default.target
+diff --git a/redesign/systemd/seth-gateway.service b/redesign/systemd/seth-gateway.service
+index 80422c8..f09e571 100644
+--- a/redesign/systemd/seth-gateway.service
++++ b/redesign/systemd/seth-gateway.service
+@@ -7,14 +7,6 @@ Requires=omniroute-sanitizer.service
+ Type=simple
+ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_gateway.py
+ Environment=SETH_HIDRATA_MODO=compacto
+-# Rota pela cota por minuto do tier 0 (02/10/2026): 0 = desligada. Só trocar
+-# para 1 DEPOIS de `python3 scripts/combos_sem_cota.py --aplicar` criar os
+-# combos -sg no OmniRoute -- sem eles, ligar quebra a Seth (404).
+-Environment=SETH_ROTA_COTA=0
+-# Taxa chars/token do esquema das ferramentas no estimador da cota (03/10/2026).
+-# Sem esta linha = a mesma do texto (3.0). Valor decidido pela medição isolada no
+-# Groq (mesma conversa com e sem tools, as duas atendidas por ele) -- MEMÓRIAS (646).
+-#Environment=SETH_CHARS_POR_TOKEN_TOOLS=
+ Restart=on-failure
+ RestartSec=3
+ # Baseline de hardening (item 6 do plano de mitigação da auditoria do
+diff --git a/scripts/combos_sem_cota.py b/scripts/combos_sem_cota.py
+deleted file mode 100644
+index 54ba839..0000000
+--- a/scripts/combos_sem_cota.py
++++ /dev/null
+@@ -1,176 +0,0 @@
+-#!/usr/bin/env python3
+-"""combos_sem_cota.py -- cria/atualiza os combos gêmeos "<rota>-sg" da Seth no OmniRoute.
+-
+-Por quê (02/10/2026, MEMÓRIAS (627)-(631)): os 3 combos da Seth (seth-rapido,
+-seth-livre, seth-pesado) começam no `groq/openai/gpt-oss-120b`, cujo plano grátis
+-aceita 8.000 tokens por minuto. O OmniRoute não deixa pular a posição 0 de um
+-combo por pedido; então cada combo ganha um gêmeo `-sg` ("sem Groq"): MESMA
+-ordem, MESMOS modelos, sem o modelo cotado. O `seth_gateway` escolhe o gêmeo
+-quando o pedido não cabe na cota que sobra no minuto (SETH_ROTA_COTA=1).
+-
+-O gêmeo é DERIVADO do combo vivo a cada execução -- nunca uma lista escrita à
+-mão aqui. Assim a ordem que o Humano escolhe na UI (ex.: (546)) continua sendo
+-a fonte da verdade, e o gêmeo só repete essa ordem sem o tier cotado.
+-
+-Uso:
+-  python3 scripts/combos_sem_cota.py            # só mostra o plano (padrão, não escreve nada)
+-  python3 scripts/combos_sem_cota.py --aplicar  # cria (POST) ou atualiza (PUT) os -sg
+-  python3 scripts/combos_sem_cota.py --selftest # testa contra um OmniRoute falso local
+-
+-Só stdlib. Fala só com o OmniRoute local (OMNIROUTE_URL, padrão
+-http://127.0.0.1:20128). Não lê ~/.config/agata/.env nem chave nenhuma.
+-"""
+-from __future__ import annotations
+-
+-import json
+-import os
+-import sys
+-import threading
+-import urllib.request
+-from http.server import BaseHTTPRequestHandler, HTTPServer
+-
+-BASE = os.environ.get("OMNIROUTE_URL", "http://127.0.0.1:20128").rstrip("/")
+-ROTAS = ("seth-rapido", "seth-livre", "seth-pesado")
+-SUFIXO = "-sg"
+-MODELO_COTADO = "groq/openai/gpt-oss-120b"
+-
+-
+-def _req(metodo: str, caminho: str, corpo: dict | None = None, base: str = BASE):
+-    dados = json.dumps(corpo).encode() if corpo is not None else None
+-    r = urllib.request.Request(base + caminho, data=dados, method=metodo,
+-                               headers={"Content-Type": "application/json"})
+-    with urllib.request.urlopen(r, timeout=15) as resp:
+-        txt = resp.read().decode("utf-8") or "null"
+-    return json.loads(txt)
+-
+-
+-def _lista(resp) -> list:
+-    """GET /api/combos pode vir como lista ou como {"combos": [...]}; aceita os dois."""
+-    if isinstance(resp, list):
+-        return resp
+-    if isinstance(resp, dict):
+-        for k in ("combos", "data", "items"):
+-            if isinstance(resp.get(k), list):
+-                return resp[k]
+-    raise SystemExit(f"formato inesperado de /api/combos: {type(resp).__name__} -- confira a API antes")
+-
+-
+-def _id_modelo(m) -> str:
+-    return (m.get("model") or m.get("id") or "") if isinstance(m, dict) else str(m)
+-
+-
+-def planejar(combos: list) -> list[tuple[str, str | None, dict]]:
+-    """[(nome_sg, id_existente_ou_None, corpo)] para cada rota encontrada."""
+-    por_nome = {c.get("name"): c for c in combos if isinstance(c, dict)}
+-    plano = []
+-    for rota in ROTAS:
+-        orig = por_nome.get(rota)
+-        if orig is None:
+-            raise SystemExit(f"combo {rota!r} não existe no OmniRoute -- nada a derivar; pare e confira")
+-        modelos = [m for m in orig.get("models") or [] if _id_modelo(m) != MODELO_COTADO]
+-        if not modelos:
+-            raise SystemExit(f"{rota}: sem o modelo cotado não sobra nenhum -- não crio combo vazio")
+-        if len(modelos) == len(orig.get("models") or []):
+-            print(f"aviso: {rota} não tem {MODELO_COTADO}; o gêmeo sai igual ao original")
+-        nome = rota + SUFIXO
+-        corpo = {"name": nome, "strategy": orig.get("strategy", "priority"),
+-                 "models": [{k: v for k, v in m.items() if k != "id"} if isinstance(m, dict) else m
+-                            for m in modelos]}
+-        existente = por_nome.get(nome)
+-        plano.append((nome, existente.get("id") if existente else None, corpo))
+-    return plano
+-
+-
+-def executar(aplicar: bool, base: str = BASE) -> int:
+-    plano = planejar(_lista(_req("GET", "/api/combos", base=base)))
+-    for nome, cid, corpo in plano:
+-        ordem = " -> ".join(_id_modelo(m) for m in corpo["models"])
+-        print(f"{'PUT ' + cid if cid else 'POST'}  {nome}  [{corpo['strategy']}]  {ordem}")
+-        if aplicar:
+-            if cid:
+-                _req("PUT", f"/api/combos/{cid}", corpo, base=base)
+-            else:
+-                _req("POST", "/api/combos", corpo, base=base)
+-    if not aplicar:
+-        print("(só o plano -- nada escrito; rode com --aplicar)")
+-    else:
+-        vivos = {c.get("name") for c in _lista(_req("GET", "/api/combos", base=base))}
+-        faltam = [n for n, _, _ in plano if n not in vivos]
+-        if faltam:
+-            print(f"FALHA: depois de aplicar, não achei {faltam} no GET -- confira a API")
+-            return 1
+-        print("OK: os 3 combos -sg existem no OmniRoute")
+-    return 0
+-
+-
+-def _selftest() -> int:
+-    estado = {"combos": [
+-        {"id": "a1", "name": "seth-livre", "strategy": "priority", "models": [
+-            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
+-            {"id": "y", "kind": "model", "model": "zai/glm-4.7-flash", "weight": 0}]},
+-        {"id": "a2", "name": "seth-rapido", "strategy": "priority", "models": [
+-            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
+-            {"id": "z", "kind": "model", "model": "mistral/ministral-14b-latest", "weight": 0}]},
+-        {"id": "a3", "name": "seth-pesado", "strategy": "priority", "models": [
+-            {"id": "x", "kind": "model", "model": MODELO_COTADO, "weight": 0},
+-            {"id": "w", "kind": "model", "model": "gemini/gemini-2.5-flash", "weight": 0}]},
+-        {"id": "a4", "name": "seth-livre-sg", "strategy": "priority", "models": []}]}
+-
+-    class H(BaseHTTPRequestHandler):
+-        def log_message(self, *a):
+-            pass
+-
+-        def _resp(self, obj):
+-            b = json.dumps(obj).encode()
+-            self.send_response(200)
+-            self.send_header("Content-Type", "application/json")
+-            self.send_header("Content-Length", str(len(b)))
+-            self.end_headers()
+-            self.wfile.write(b)
+-
+-        def do_GET(self):
+-            self._resp(estado["combos"])
+-
+-        def _corpo(self):
+-            return json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
+-
+-        def do_POST(self):
+-            c = self._corpo()
+-            c["id"] = f"n{len(estado['combos'])}"
+-            estado["combos"].append(c)
+-            self._resp(c)
+-
+-        def do_PUT(self):
+-            cid = self.path.rsplit("/", 1)[-1]
+-            c = self._corpo()
+-            for i, x in enumerate(estado["combos"]):
+-                if x["id"] == cid:
+-                    estado["combos"][i] = {**c, "id": cid}
+-            self._resp(c)
+-
+-    srv = HTTPServer(("127.0.0.1", 0), H)
+-    threading.Thread(target=srv.serve_forever, daemon=True).start()
+-    base = f"http://127.0.0.1:{srv.server_address[1]}"
+-    falhas = 0
+-    antes = json.dumps(estado, sort_keys=True)
+-    executar(False, base)
+-    ok = json.dumps(estado, sort_keys=True) == antes
+-    print(f"{'PASS' if ok else 'FALHA'}  sem --aplicar não escreve nada"); falhas += 0 if ok else 1
+-    rc = executar(True, base)
+-    por = {c["name"]: c for c in estado["combos"]}
+-    ok = (rc == 0 and all(r + SUFIXO in por for r in ROTAS)
+-          and all(_id_modelo(m) != MODELO_COTADO for r in ROTAS for m in por[r + SUFIXO]["models"]))
+-    print(f"{'PASS' if ok else 'FALHA'}  --aplicar cria/atualiza os 3 -sg sem o modelo cotado"); falhas += 0 if ok else 1
+-    ok = [_id_modelo(m) for m in por["seth-livre-sg"]["models"]] == ["zai/glm-4.7-flash"] and por["seth-livre-sg"]["id"] == "a4"
+-    print(f"{'PASS' if ok else 'FALHA'}  -sg existente é atualizado (PUT no mesmo id), ordem preservada"); falhas += 0 if ok else 1
+-    ok = [_id_modelo(m) for m in por["seth-livre"]["models"]][0] == MODELO_COTADO
+-    print(f"{'PASS' if ok else 'FALHA'}  combo original intocado"); falhas += 0 if ok else 1
+-    srv.shutdown()
+-    print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
+-    return 0 if not falhas else 1
+-
+-
+-if __name__ == "__main__":
+-    if "--selftest" in sys.argv:
+-        sys.exit(_selftest())
+-    sys.exit(executar("--aplicar" in sys.argv))
+diff --git a/scripts/perimetro/p09_servicos_declarados.sh b/scripts/perimetro/p09_servicos_declarados.sh
+index 73e539c..572bfff 100644
+--- a/scripts/perimetro/p09_servicos_declarados.sh
++++ b/scripts/perimetro/p09_servicos_declarados.sh
+@@ -1,7 +1,8 @@
+ #!/usr/bin/env bash
+ # Extraido de scripts/perimetro.sh (item 10 do plano de mitigacao da
+ # auditoria do Marcos, MEMORIAS (437)) -- corte-e-cola, corpo identico ao
+-# de antes, nao e reescrita de logica.
++# de antes, nao e reescrita de logica. Acrescimo posterior: _p9_ollama_na_gpu
++# (03/10/2026), abaixo.
+ 
+ p9_servicos_declarados() {
+   local avisos=0 u estado habilitada rodando
+@@ -38,6 +39,48 @@ p9_servicos_declarados() {
+       fi
+     done
+   fi
++  _p9_ollama_na_gpu
++  return 0
++}
++
++# Ollama com parte do modelo na CPU (03/10/2026, MEMÓRIAS (648)/(649)): um
++# llama-cpp que voltou sozinho depois de OOM tomou a VRAM, o Ollama subiu o
++# modelo dividido e a Seth caiu de ~43 para 6,3 tok/s -- com TODAS as unidades
++# "active". Nenhuma checagem de estado de unidade vê isso; o /api/ps vê:
++# `size_vram < size` = parte do modelo fora da GPU. Mesma doutrina do resto do
++# P-9: AVISA, nunca falha. Ollama fora do ar ou sem modelo carregado -> silêncio
++# (o primeiro já é coberto por ollama.service acima; o segundo é o repouso
++# normal). Só localhost, timeout curto: o perímetro roda a cada commit.
++# P9_OLLAMA_PS_URL existe só para o teste isolado apontar um servidor falso.
++_p9_ollama_na_gpu() {
++  local url="${P9_OLLAMA_PS_URL:-http://127.0.0.1:11434/api/ps}" saida
++  saida="$(python3 - "$url" <<'PYEOF' 2>/dev/null
++import json, sys, urllib.request
++sem_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))  # localhost nunca via proxy
++try:
++    with sem_proxy.open(sys.argv[1], timeout=2) as r:
++        modelos = json.load(r).get("models") or []
++except Exception:
++    sys.exit(0)
++for m in modelos:
++    if not isinstance(m, dict):
++        continue
++    try:
++        total, vram = int(m.get("size") or 0), int(m.get("size_vram") or 0)
++    except (TypeError, ValueError):
++        continue
++    if total > 0 and vram < total:
++        print(f"{m.get('name') or m.get('model') or '?'}\t{100 * vram // total}")
++PYEOF
++)"
++  [ -z "$saida" ] && return 0
++  local nome pct quem=""
++  if command -v nvidia-smi >/dev/null 2>&1; then
++    quem="$(nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader 2>/dev/null | tr '\n' ';' | sed 's/;$//')"
++  fi
++  while IFS=$'\t' read -r nome pct; do
++    echo "AVISO (P-9): Ollama com '$nome' só ${pct}% na GPU (o resto na CPU, várias vezes mais lento) -- o que fazer: 'nvidia-smi' para ver quem tomou a VRAM${quem:+ (agora: $quem)}; pare o intruso (ex.: 'systemctl --user stop llamacpp@<modelo>') e recarregue o modelo do Ollama."
++  done <<< "$saida"
+   return 0
+ }
+ 
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 076b45f..1c5f038 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -183,7 +183,7 @@ declare -A SEM_TESTE=(
+   [P-3]="depende do estado do REMOTO (publicacao); um clone descartavel nao reproduz a condicao"
+   [P-4]="depende de portas e processos VIVOS da Maquina; dentro do clone nao ha o que bindar"
+   [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
+-  [P-9]="depende de unidades systemd vivas do usuario; o clone nao tem servicos"
++  [P-9]="depende de unidades systemd vivas do usuario; o clone nao tem servicos. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
+   [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
+   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
+   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
