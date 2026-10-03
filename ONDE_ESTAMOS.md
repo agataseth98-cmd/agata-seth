@@ -5,7 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (643)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (644)).
+
+**Medi a calibração da rota-cota — ainda não está pronta pra ligar.** A estimativa de tokens sempre fica ACIMA do real (bom, lado seguro), mas fica alta demais (18% em vez do limite de 15% combinado com o conselho). Amostra pequena (6, não 30 — o Groq é um modelo "pensante" que só responde se eu pedir resposta grande o bastante, o que tornou o teste mais lento). Não recomendo ligar `SETH_ROTA_COTA=1` com esses números. Detalhe: `MEMÓRIAS.md` (644).
 
 **Incidente de segurança do vazamento (629)-(631): FECHADO.** A causa real — 5 lugares no código que abriam seu `.env` inteiro a cada pedido, só pra pegar 1 linha — não existe mais. Token interno isolado num arquivo próprio, token novo gerado (isso também rotacionou o que tinha vazado), serviços reiniciados, testado ao vivo (LibreChat funcionando, pesquisa semanal de modelos rodou sem erro). Falta só você apagar a linha `AGATA_INTERNAL_TOKEN=` do `.env` quando quiser (não é urgente, ela não é mais lida por ninguém). Detalhe: `MEMÓRIAS.md` (643).
 

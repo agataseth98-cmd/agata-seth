@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
+  palavras-chave: calibração, estimador, rota, cota, medida, estimativa, real, amostras, respondidas, groq, mediana, erro, passa, critério, remoto, amostra, pequena, dificuldade, gpt, oss, modelo, raciocínio, devolve, conteúdo, vazio, max, tokens, pequeno, recomendo, ligar, seth
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de vez: as 5 cópias de `_token_interno()` não abrem mais `~/.config/agata/.env`. Assinado, aplicado, token rotacionado, serviços reiniciados, testado ao vivo nos 4 pontos. Último item do incidente.**
   palavras-chave: causa, raiz, vazamento, fechada, cópias, token, interno, abrem, config, agata, env, assinado, aplicado, rotacionado, serviços, reiniciados, testado, vivo, pontos, último, item, incidente
 (642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, achada, reproduzida, vivo, mcp, canon, trava, loop, reconexão, streamable, http, mesmo, configurado, type, stdio, sempre, conversa, verdade, tenta, usar, ferramenta, bug, produção, tentativa, upgrade, revertida, explica, crash, seth, respondeu, nada, hang, hoje, inteiro
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autorização antes de comando destrutivo (Seth e Goose) virou uma investigação que achou um problema mais grave — a cascata de modelos grátis fabrica execução de ferramenta em vez de rodar ou recusar. Sem código ainda, achado puro.**
   palavras-chave: levantamento, pedido, humano, pra, exigir, autorização, comando, destrutivo, seth, goose, virou, investigação, achou, problema, grave, cascata, modelos, grátis, fabrica, execução, ferramenta, rodar, recusar, código, achado, puro
-(614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), assinada pelo Humano, aplicada. `seth_gateway` carimba `X-Modelo-Real` de verdade, fato da Máquina.**
-  palavras-chave: proposta, modelo, real, header, assinada, humano, aplicada, seth, gateway, carimba, verdade, fato, máquina
+(614) DIÁRIO — 01/10/2026 · **Proposta `modelo-real-header-2026-10-01` (613), as …
+  palavras-chave: proposta, modelo, real, header
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` abert …
   palavras-chave: proposta, modelo, real, header, abert
 (612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra …
