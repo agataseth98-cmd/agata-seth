@@ -11,6 +11,10 @@ Environment=SETH_HIDRATA_MODO=compacto
 # para 1 DEPOIS de `python3 scripts/combos_sem_cota.py --aplicar` criar os
 # combos -sg no OmniRoute -- sem eles, ligar quebra a Seth (404).
 Environment=SETH_ROTA_COTA=0
+# Taxa chars/token do esquema das ferramentas no estimador da cota (03/10/2026).
+# Sem esta linha = a mesma do texto (3.0). Valor decidido pela medição isolada no
+# Groq (mesma conversa com e sem tools, as duas atendidas por ele) -- MEMÓRIAS (646).
+#Environment=SETH_CHARS_POR_TOKEN_TOOLS=
 Restart=on-failure
 RestartSec=3
 # Baseline de hardening (item 6 do plano de mitigação da auditoria do

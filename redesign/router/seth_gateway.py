@@ -549,6 +549,13 @@ _ROTA_COTA_LIGADA = os.environ.get("SETH_ROTA_COTA", "0") == "1"
 _COTA_TPM = int(os.environ.get("SETH_COTA_TPM", "8000"))
 _COTA_MARGEM = float(os.environ.get("SETH_COTA_MARGEM", "0.85"))   # folga do estimador
 _CHARS_POR_TOKEN = float(os.environ.get("SETH_CHARS_POR_TOKEN", "3.0"))  # conservador p/ pt-BR
+# Taxa própria para o esquema das ferramentas (03/10/2026, MEMÓRIAS (644)-(646)):
+# a calibração contra o Groq deu sobra quase CONSTANTE (~1.095 tokens) -- termo
+# fixo, não proporcional. O esquema das tools é o candidato (8.407 chars, igual em
+# todo pedido), mas o gpt-oss pode contá-lo diferente do GLM. Padrão = a taxa do
+# texto, ou seja, sem mudança de comportamento até a medição isolada no Groq
+# decidir o valor (vai no seth-gateway.service, não no código).
+_CHARS_POR_TOKEN_TOOLS = float(os.environ.get("SETH_CHARS_POR_TOKEN_TOOLS", str(_CHARS_POR_TOKEN)))
 _SUFIXO_SEM_COTA = "-sg"
 _ROTAS_COM_TIER0_COTADO = frozenset({"seth-rapido", "seth-livre", "seth-pesado"})
 _MODELO_COTADO = "gpt-oss-120b"   # como aparece no "model" que o OmniRoute devolve
@@ -559,11 +566,12 @@ _janela_lock = threading.Lock()
 
 def _estimar_tokens(payload: dict) -> int:
     """Estimativa conservadora (para mais) dos tokens de ENTRADA + o teto de saída
-    pedido: chars de messages+tools / _CHARS_POR_TOKEN + max_tokens. Sem
-    tokenizador de propósito -- é para decidir rota, não para cobrar."""
+    pedido: chars de messages / _CHARS_POR_TOKEN + chars de tools /
+    _CHARS_POR_TOKEN_TOOLS + max_tokens. Sem tokenizador de propósito -- é para
+    decidir rota, não para cobrar."""
     try:
-        base = len(json.dumps(payload.get("messages") or [], ensure_ascii=False))
-        base += len(json.dumps(payload.get("tools") or [], ensure_ascii=False))
+        chars_msgs = len(json.dumps(payload.get("messages") or [], ensure_ascii=False))
+        chars_tools = len(json.dumps(payload.get("tools") or [], ensure_ascii=False))
     except (TypeError, ValueError):
         return 10**9   # não deu para medir -> trata como "não cabe" (falha fechada)
     saida = payload.get("max_tokens") or payload.get("max_completion_tokens") or 0
@@ -571,7 +579,8 @@ def _estimar_tokens(payload: dict) -> int:
         saida = int(saida)
     except (TypeError, ValueError):
         saida = 0
-    return int(base / _CHARS_POR_TOKEN) + max(0, saida)
+    return (int(chars_msgs / _CHARS_POR_TOKEN) + int(chars_tools / _CHARS_POR_TOKEN_TOOLS)
+            + max(0, saida))
 
 
 def _cota_usada(agora: float) -> int:
@@ -1079,6 +1088,17 @@ def _selftest() -> int:
     est = _estimar_tokens({"messages": [{"role": "user", "content": "x" * 3000}], "max_tokens": 500})
     c11h = est >= int(3000 / _CHARS_POR_TOKEN) + 500                         # conservador: nunca abaixo
     c11i = _estimar_tokens({"messages": [{"x": object()}]}) == 10**9          # não mede -> não cabe
+    global _CHARS_POR_TOKEN_TOOLS
+    tools_antes = _CHARS_POR_TOKEN_TOOLS
+    p11k = {"messages": [{"role": "user", "content": "x" * 900}],
+            "tools": [{"type": "function", "function": {"name": "f", "description": "y" * 2000}}]}
+    igual = _estimar_tokens(p11k)                       # padrão: mesma taxa (sem mudança)
+    _CHARS_POR_TOKEN_TOOLS = 2 * _CHARS_POR_TOKEN
+    menor = _estimar_tokens(p11k)                       # tools com taxa própria: só o termo delas cai
+    _CHARS_POR_TOKEN_TOOLS = tools_antes
+    chars_t = len(json.dumps(p11k["tools"], ensure_ascii=False))
+    c11k = (tools_antes == _CHARS_POR_TOKEN and
+            igual - menor == int(chars_t / _CHARS_POR_TOKEN) - int(chars_t / (_CHARS_POR_TOKEN * 2)))
     # 11j. ponta a ponta pelo gateway real: pedido grande do Agent sai como -sg,
     # com a estimativa no header (o liga ainda ligado aqui)
     corpo11 = json.dumps({"model": _ROTA_BASE, "messages": [
@@ -1100,6 +1120,7 @@ def _selftest() -> int:
                         ("11g", c11g, "rota fora da lista (seth-codigo) -> intacta"),
                         ("11h", c11h, f"estimador conservador ({est} tokens p/ 3000 chars + 500)"),
                         ("11i", c11i, "payload que não serializa -> trata como não cabe"),
+                        ("11k", c11k, "taxa das tools: padrão = a do texto; separada, só o termo das tools muda"),
                         ("11j", c11j, f"ponta a ponta: pedido grande sai como {modelo_enviado!r} + X-Seth-Est-Tokens")]:
         print(f"{'PASS' if ok else 'FALHA'}  cota {n}: {desc}")
         falhas += 0 if ok else 1
