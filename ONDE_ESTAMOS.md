@@ -5,11 +5,11 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (648)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (649)).
+
+**A frente "desviar do Groq" está desligada de vez (os 3 combos reserva apagados), e os 4 modelos locais problemáticos saíram de TODO caminho automático** — incluindo o Conselho Remoto, que até tentou usar um deles durante o próprio pedido de segunda opinião e falhou na hora, confirmando ao vivo o motivo da decisão. Detalhe: `MEMÓRIAS.md` (649).
 
 **Groq fora de vez dos 3 combos da Seth, por sua decisão.** Isso destampou 2 problemas reais que já existiam e estavam escondidos: 2 modelos locais que não cabem juntos na GPU (achado: deu "sem memória" tentando os 2 ao mesmo tempo), e o Ollama preso rodando no processador em vez da placa de vídeo (achado só depois de reiniciar 2 vezes — a causa era outro serviço comendo toda a memória da GPU sozinho, via retentativa automática do systemd). Os 3 combos testados de ponta a ponta, funcionando. Detalhe: `MEMÓRIAS.md` (648).
-
-**Medi a calibração da rota-cota — ainda não está pronta pra ligar.** A estimativa de tokens sempre fica ACIMA do real (bom, lado seguro), mas fica alta demais (18% em vez do limite de 15% combinado com o conselho). Amostra pequena (6, não 30 — o Groq é um modelo "pensante" que só responde se eu pedir resposta grande o bastante, o que tornou o teste mais lento). Não recomendo ligar `SETH_ROTA_COTA=1` com esses números. Detalhe: `MEMÓRIAS.md` (644).
 
 **Incidente de segurança do vazamento (629)-(631): FECHADO.** A causa real — 5 lugares no código que abriam seu `.env` inteiro a cada pedido, só pra pegar 1 linha — não existe mais. Token interno isolado num arquivo próprio, token novo gerado (isso também rotacionou o que tinha vazado), serviços reiniciados, testado ao vivo (LibreChat funcionando, pesquisa semanal de modelos rodou sem erro). Falta só você apagar a linha `AGATA_INTERNAL_TOKEN=` do `.env` quando quiser (não é urgente, ela não é mais lida por ninguém). Detalhe: `MEMÓRIAS.md` (643).
 
@@ -21,12 +21,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (648)).
 
 **Achei, consertei e CONFIRMEI o fim do travamento da Seth — era eu mesmo.** Era uma regressão minha de ontem (modelo-real-header): ao espiar a resposta pra achar o nome do modelo, eu acabava lendo respostas pequenas até o fim, e o código seguinte tratava tudo isso como "uma linha só" — se começasse pelo aviso de "continua esperando" do roteador, a resposta inteira virava só esse aviso, e o LibreChat travava por receber nada. **Assinado, aplicado, serviço reiniciado, e testado ao vivo: 10 de 10 pedidos concorrentes vieram completos (era 9 de 10 vazios antes), e uma conversa real no LibreChat com ferramenta funcionou sem travar.** Detalhe: `MEMÓRIAS.md` (629)/(630)/(632)/(633)/(634)/(635)/(636).
 
-**`rota-cota-tier0` v2: assinada e aplicada, mas AINDA DESLIGADA de propósito.** Reduz a FREQUÊNCIA de travamento (desvia do modelo que só aguenta 8.000 tokens/minuto) — o travamento em si já foi corrigido, acima. `SETH_ROTA_COTA=0` no serviço real, confirmado. **Falta, antes de ligar:**
-1. ~~Mostrar o plano e você confirmar a ordem~~ — feito.
-2. ~~Criar os 3 combos `-sg` de verdade no OmniRoute~~ — feito, testados, 200 nos 3.
-3. Calibrar o estimador com uso real (≥30 pedidos, critério do Conselho Remoto).
-4. Só então uma P-8 de 1 linha liga `SETH_ROTA_COTA=1`.
-Detalhe: `MEMÓRIAS.md` (632)/(633)/(634)/(638)/(640).
+**`rota-cota-tier0` (desviar do modelo que só aguenta 8.000 tokens/minuto): desligada de vez em 03/10 — o Groq saiu dos combos principais, o propósito desta frente deixou de existir.** Histórico: assinada, aplicada, testada, calibrada parcialmente (18% de folga, acima do combinado) — depois, o Groq foi removido de vez (648), tornando a frente obsoleta. `SETH_ROTA_COTA=0`, combos `-sg` apagados. Detalhe: `MEMÓRIAS.md` (632)/(633)/(634)/(638)/(640)/(644)/(648)/(649).
 
 **Reporte aberto no projeto de terceiros (LibreChat):** issue pública sobre o bug real que causava o crash, pra eles consertarem também — [#16694](https://github.com/danny-avila/LibreChat/issues/16694). Já não é urgente pra nós (a causa real já está corrigida acima). Detalhe: `MEMÓRIAS.md` (637).
 
