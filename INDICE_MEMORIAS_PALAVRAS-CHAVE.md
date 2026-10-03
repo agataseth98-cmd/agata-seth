@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
+  palavras-chave: lições, desta, sessão, canonizadas, falhas, fab, selftest, verde, caso, real, produção, coberto, lição, protocolos, nova, seção, verificação, repetida, tem, preço, pedido, humano, franquia, assinado, aplicado
 (641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
   palavras-chave: auditoria, lab, resposta, seth, head, cabeçalho, cita, nome, campo, errado, script, proposto, quebraria, diario, versionado, ela, pediu, novo, poder, escrita, execução, pra, mesma, recusado, padrão, visto, pvt, rev
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, modelo, real, header, assinada, humano, aplicada, seth, gateway, carimba, verdade, fato, máquina
 (613) DIÁRIO — 01/10/2026 · **Proposta P-8 `modelo-real-header-2026-10-01` aberta: `seth_gateway` carimba o nome real do modelo que respondeu (`X-Modelo-Real`, header novo) a partir do campo `model` que o OmniRoute devolve — fato da Máquina, não autorrelato da Seth. Aguardando assinatura.**
   palavras-chave: proposta, modelo, real, header, aberta, seth, gateway, carimba, nome, respondeu, novo, partir, campo, model, omniroute, devolve, fato, máquina, autorrelato, aguardando, assinatura
-(612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra 4), achado por auditoria do laboratório "Ensaio" (`auditoria-pos-reforma-2026-10-01.md`, DADO) e verificado por mim antes de corrigir — inclusive uma alegação falsa minha num commit real.**
-  palavras-chave: registro, aplicações, faltavam, regra, achado, auditoria, laboratório, ensaio, pos, reforma, dado, verificado, mim, corrigir, inclusive, alegação, falsa, minha, commit, real
+(612) CORREÇÃO — 01/10/2026 · **Registro das duas aplicações que faltavam (Regra …
+  palavras-chave: registro, aplicações, faltavam, regra
 (611) DIÁRIO — 01/10/2026 · **Proposta P-8 `integracao-pos-reforma-2026-10-01` a …
   palavras-chave: proposta, integracao, pos, reforma
 (610) DIÁRIO — 01/10/2026 · **Bateria de reconstrução v0.1 rodada por uma sessão …
