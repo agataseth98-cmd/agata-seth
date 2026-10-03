@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ca277fa7e4d531393fe0079680ba7d383db0bf09
-  Escrito em: 03/10/2026 14:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af
+  Escrito em: 03/10/2026 14:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca277fa7e4d531393fe0079680ba7d383db0bf09/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca277fa7e4d531393fe0079680ba7d383db0bf09/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca277fa7e4d531393fe0079680ba7d383db0bf09/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca277fa7e4d531393fe0079680ba7d383db0bf09/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca277fa7e4d531393fe0079680ba7d383db0bf09/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3598720ed7e7a9fa0717dc86cb7bf04ba9b8b8af/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
+
+Portão com fatos, nenhum "desfaz" nas 3 perguntas; risco assumido direto, sem segunda opinião (baixo risco, sem efeito prático enquanto `SETH_ROTA_COTA` continuar `0`). Assinado, `p8_verificar` → PODE APLICAR, aplicado. `selftest` do gateway 16/16 (11a-11k, o 11k novo cobre a taxa separada), suíte 46/46, par movido pra `propostas/aplicadas/`.
+
+**O que muda:** `_estimar_tokens` agora soma `chars_msgs/_CHARS_POR_TOKEN + chars_tools/_CHARS_POR_TOKEN_TOOLS + max_tokens`, em vez de um único termo combinado. `_CHARS_POR_TOKEN_TOOLS` lê de `SETH_CHARS_POR_TOKEN_TOOLS` (env), default = `_CHARS_POR_TOKEN` (3.0) — ou seja, **comportamento idêntico ao de antes até alguém configurar a variável**. O `seth-gateway.service` ganhou uma linha comentada, pronta pra receber o valor assim que a medição isolada no Groq decidir.
+
+**Pendente:** medição (c) isolada no Groq (3 pares, mesma conversa com/sem tools, ≥65s entre os dois do par, só conta par com os dois no Groq) rodando em background nesta sessão — resultado numa entrada separada.
+
+**sync:** PASS — `git rev-parse main` = `3598720` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (646).
+
+**Modelo:** Claude Sonnet 5 · **vetor:** `.diff` lido linha a linha, testado em worktree descartável antes de comitar (selftest 16/16, suíte 46/46); `p8_verificar.sh`/selftest/suíte reais no repo após aplicar · **Autorização:** Humano, Portão completo, risco assumido sem segunda opinião, assinatura via `scripts/aprovar.sh estimador-taxa-tools-2026-10-03`.
 
 (646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
 

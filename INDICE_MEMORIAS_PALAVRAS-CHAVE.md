@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
+  palavras-chave: estimador, taxa, tools, assinada, aplicada, separa, ferramentas, seth, chars, token, default, mesma, texto, mudança, comportamento, valor, real, medido, configurado
 (646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
   palavras-chave: pergunta, lab, respondida, librechat, manda, max, tokens, pedidos, reais, seth, raramente, chamadas, sumarização, contexto, conversa, normal, achado, groq, devolve, vazio, baixo, deveria, atingir, maioria, tráfego, real
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: fechamentos, teste, end, real, conserto, tinha, ficado, risco, residual, declarado, propostas, modelos, gratuitos, investigado, movido, canon, mesmo, tratamento, nada, pede, mudança
 (618) DIÁRIO — 02/10/2026 · **Proposta `canon-mcp-protocolos-falhas-2026-10-01` (617), assinada pelo Humano, aplicada em `redesign/librechat/canon-mcp.mjs`.**
   palavras-chave: proposta, canon, mcp, protocolos, falhas, assinada, humano, aplicada, redesign, librechat, mjs
-(617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10-01` aberta: `canon-mcp.mjs` (o MCP que a Seth usa pra consultar o canon) nunca tinha ganhado PROTOCOLOS.md/FALHAS.md — terceiro lugar com o mesmo gap de (611), achado investigando por que a Seth não respondia. Aguardando assinatura.**
-  palavras-chave: proposta, canon, mcp, protocolos, falhas, aberta, mjs, seth, usa, pra, consultar, nunca, tinha, ganhado, terceiro, lugar, mesmo, gap, achado, investigando, respondia, aguardando, assinatura
+(617) DIÁRIO — 01/10/2026 · **Proposta P-8 `canon-mcp-protocolos-falhas-2026-10- …
+  palavras-chave: proposta, canon, mcp, protocolos, falhas
 (616) DIÁRIO — 01/10/2026 · **Causa raiz achada, reproduzida ao vivo: o MCP `can …
   palavras-chave: causa, raiz, achada, reproduzida, vivo, mcp, can
 (615) DIÁRIO — 01/10/2026 · **Levantamento: pedido do Humano pra exigir autoriza …
