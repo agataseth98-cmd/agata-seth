@@ -103,3 +103,20 @@ Segundo plugin de comunidade, pedido do Humano em 13/10/2026 ("gráfico em 3D co
 **Recusados (estado da arte medido, out/2026):** InfraNodus (manda o texto para servidores deles e para a OpenAI); Smart Connections (duplica o embedding local que já existe e grava cache dentro do repo — os recursos dele vêm do nosso índice: `parecidas`, trechos `#^bN`, `scripts/agata_busca.sh`).
 
 **Rollback:** `rm -rf ~/agata/.obsidian/plugins/brain-atlas` e tirar `"brain-atlas"` de `.obsidian/community-plugins.json`.
+
+## Grafo 3D navegável — New 3D Graph (MEMÓRIAS (674))
+
+Pedido do Humano: parar o giro e navegar "como o gráfico, em todas as direções", com zoom para ler as notas. O Brain Atlas não faz isso (só gira em volta do centro, zoom de 0,55× a 6×, rótulos só nas notas centrais) — fica como panorama, **parado** (`idleAutoRotate: false`).
+
+| item | valor |
+|---|---|
+| plugin | `Apoo711/obsidian-3d-graph` (**New 3D Graph**) **2.8.1** (MIT), versão fixa |
+| sha256 `main.js` | `5e4d995fd85592de320877bcd42c3c96c73cdcb6f437d34dffa45b415578ecfd` |
+| sha256 `manifest.json` | `599e47cfbc7210ba832d8810b628604a150d56e59e38fe083bf88866549b3ca7` |
+| sha256 `styles.css` | `ee541114387b5cbc3d691515209f6609ea15fa94b562d058e9cd6fb7af6c4f02` |
+| origem | **sem** atestação do GitHub (o autor não publica) — a trava é o sha256 fixo |
+| rede | 2 `fetch` revisados: o carregador do motor de física (WASM local) e a opção `jsonUrl` da biblioteca 3d-force-graph, que o plugin não usa. `new Function` = gerador de física da ngraph (biblioteca padrão). Sem `fs`/`child_process`/`electron`. O instalador aborta se o número de chamadas mudar. |
+| navegação | arrastar (girar), botão direito (deslocar), roda (zoom), WASD (voar), clique (foco + ligações) |
+| configuração | `redesign/obsidian/grafo-3d.json` → `.obsidian/plugins/new-3d-graph/data.json`: fundo e rótulos na paleta da Agata, rótulos a partir de 420 unidades, 16 grupos de cor (`tag:regiao/<região>` — o gerador põe a tag em cada nota — e `path:`/`file:` para os documentos de fora do vault) |
+
+**Rollback:** `rm -rf ~/agata/.obsidian/plugins/new-3d-graph` e tirar `"new-3d-graph"` de `.obsidian/community-plugins.json`.

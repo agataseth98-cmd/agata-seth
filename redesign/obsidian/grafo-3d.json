@@ -1,0 +1,98 @@
+{
+  "_nota": "Configuração do plugin New 3D Graph versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/new-3d-graph/data.json. Cores das regiões: config/agata-identidade.json -- MEMÓRIAS (674).",
+  "groups": [
+    {
+      "query": "tag:regiao/temporal",
+      "color": "#52c7ff"
+    },
+    {
+      "query": "tag:regiao/frontal",
+      "color": "#ab8fe0"
+    },
+    {
+      "query": "tag:regiao/parietal",
+      "color": "#45ddc8"
+    },
+    {
+      "query": "tag:regiao/cerebellum",
+      "color": "#ec6e88"
+    },
+    {
+      "query": "tag:regiao/occipital",
+      "color": "#e0a458"
+    },
+    {
+      "query": "tag:regiao/stem",
+      "color": "#eef1fa"
+    },
+    {
+      "query": "path:memoria/missoes",
+      "color": "#e0a458"
+    },
+    {
+      "query": "path:redesign",
+      "color": "#e0a458"
+    },
+    {
+      "query": "path:extras",
+      "color": "#e0a458"
+    },
+    {
+      "query": "path:memoria/frio",
+      "color": "#52c7ff"
+    },
+    {
+      "query": "path:propostas",
+      "color": "#ab8fe0"
+    },
+    {
+      "query": "file:REGRAS.md",
+      "color": "#ab8fe0"
+    },
+    {
+      "query": "file:PROTOCOLOS.md",
+      "color": "#ab8fe0"
+    },
+    {
+      "query": "file:PROJETO.md",
+      "color": "#ab8fe0"
+    },
+    {
+      "query": "file:MEMÓRIAS.md",
+      "color": "#52c7ff"
+    },
+    {
+      "query": "file:FALHAS.md",
+      "color": "#ec6e88"
+    }
+  ],
+  "useThemeColors": false,
+  "backgroundColor": "#0a0e1a",
+  "colorNode": "#8c96b2",
+  "colorTag": "#ab8fe0",
+  "colorAttachment": "#45ddc8",
+  "colorLink": "#2a3860",
+  "colorHighlight": "#52c7ff",
+  "nodeSize": 1.6,
+  "linkThickness": 0.6,
+  "showNeighboringNodes": true,
+  "showAttachments": false,
+  "showTags": false,
+  "hideOrphans": false,
+  "showNodeLabels": true,
+  "showLabelsOnHoverOnly": false,
+  "labelDistance": 420,
+  "labelFadeThreshold": 0.6,
+  "labelTextSize": 4,
+  "labelTextColorDark": "#eef1fa",
+  "labelBackgroundColor": "#121a30",
+  "labelBackgroundOpacity": 0.75,
+  "labelOcclusion": false,
+  "useKeyboardControls": true,
+  "keyboardMoveSpeed": 3,
+  "zoomOnClick": true,
+  "rotateSpeed": 1,
+  "panSpeed": 1.5,
+  "zoomSpeed": 1.5,
+  "useWasmPhysics": true
+}
