@@ -78,7 +78,22 @@ _p20_permissao_ok() {
   fi
 }
 
+# Camada do decisor local (scripts/perimetro/p20_decisor.py): texto pessoal
+# escrito à mão no canon PÚBLICO, que a régua de identificadores não enxerga.
+# Independe da lista; só AVISO; decisor fora do ar -> silêncio.
+P20_CANON_PUBLICO=("MEMÓRIAS.md" "PROJETO.md" "ONDE_ESTAMOS.md")
+
+_p20_decisor_canon() {
+  local arquivo diff_arquivo
+  for arquivo in "${P20_CANON_PUBLICO[@]}"; do
+    diff_arquivo="$(git diff --cached -U0 -- "$arquivo" 2>/dev/null)"
+    [ -z "$diff_arquivo" ] && continue
+    printf '%s\n' "$diff_arquivo" | python3 "$_PERIMETRO_DIR/perimetro/p20_decisor.py" "$arquivo" 2>/dev/null || true
+  done
+}
+
 p20_dado_pessoal() {
+  _p20_decisor_canon
   if ! _p20_carregar; then
     echo "AVISO (P-20): lista de identificadores ausente ($(_p20_lista)) -- o P-20 não tem o que procurar e não protege nada. O que fazer: criar o arquivo com modo 600, uma linha por identificador, no formato rotulo|regex|prova."
     return 0

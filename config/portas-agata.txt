@@ -20,9 +20,14 @@
 #
 # Fora deste manifesto de propósito: contêineres Docker (LibreChat/Mongo/
 # Meilisearch) -- o bind deles é outra camada (docker network), P-9 já
-# confere se estão de pé via `docker ps`; portas :20131/:20132 (função não
-# determinada, PROJETO.md "Serviços (boot)") -- não dá pra declarar
-# `bind_esperado` pra algo que não se sabe o que é.
+# confere se estão de pé via `docker ps`. Exceção: o Ollaya (decisor local,
+# PROJETO.md "Decisor local") é contêiner mas entra aqui, porque o bind
+# 127.0.0.1 é invariante de segurança dele (docker-proxy, `-p 127.0.0.1:...`).
+# :20131/:20132 deixaram de ser lacuna em 13/10/2026 (lido no código do
+# OmniRoute 3.8.50): :20131 = `embedWsProxy` (proxy WebSocket das UIs
+# embutidas, src/lib/services/embedWsProxy.ts); :20132 = `liveServer`
+# (WebSocket do painel em tempo real, /live-ws, src/server/ws/liveServer.ts).
+# Os dois sobem com o próprio `omniroute`, só em loopback.
 #
 # Achado do laboratório "Ensaio" (DADO, fora do canon, "carta-2-para-seth-
 # 2026-09-29.md" e "analise-resposta-seth-2026-09-29.md" — não é entrada de
@@ -48,3 +53,6 @@
 20143|llamacpp-qwen3coder|127.0.0.1
 20144|llamacpp-gptoss20b|127.0.0.1
 20145|llamacpp-phi4mini|127.0.0.1
+20131|omniroute-embed-ws|127.0.0.1
+20132|omniroute-live-ws|127.0.0.1
+11435|ollaya|127.0.0.1

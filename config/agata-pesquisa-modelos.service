@@ -5,6 +5,8 @@ Description=Ágata — pesquisa/saúde semanal do pool de modelos gratuitos (MEM
 [Service]
 Type=oneshot
 WorkingDirectory=%h/agata
+# sem OmniRoute de pé a sonda só grava "connection refused" (13/10/2026)
+ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/
 ExecStart=/usr/bin/python3 %h/agata/scripts/pesquisar_modelos_gratuitos.py --repo %h/agata
 ProtectSystem=strict
 ProtectHome=read-only

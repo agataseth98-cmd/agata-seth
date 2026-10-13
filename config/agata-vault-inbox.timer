@@ -1,0 +1,9 @@
+[Unit]
+Description=Ágata — confere o inbox do Obsidian a cada 15 min (só age se houver nota)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target

@@ -41,10 +41,12 @@ Env: AGATA_REPO (default ~/agata), SETH_ESCRIBA_URL (default http://127.0.0.1:20
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -53,6 +55,24 @@ REPO = Path(os.environ.get("AGATA_REPO", os.path.expanduser("~/agata")))
 # IRMÃ de memoria/obsidian/, nunca dentro -- ver docstring do módulo.
 INBOX = REPO / "memoria" / "obsidian-inbox"
 ESCRIBA_URL = os.environ.get("SETH_ESCRIBA_URL", "http://127.0.0.1:20140")
+
+# Nota pronta = "decide e confere" (PROJETO.md, "Decisor local"). O Obsidian
+# salva sozinho a cada poucos segundos enquanto se digita, e MEMÓRIAS é
+# append-only: importar no meio da digitação gravaria entrada parcial para
+# sempre. Trava exata: a nota está parada há QUIETO_MIN minutos. Por cima, o
+# decisor local só pode BARRAR (parece rascunho pela metade); fora do ar ->
+# vale só a trava. Nota parada há LIBERA_MIN não consulta o decisor: um dia
+# intocada = pronta, e nada fica preso no inbox para sempre por um falso
+# "rascunho" (13/10/2026: nota completa deu 0,82, rascunho cortado 0,60).
+QUIETO_MIN = int(os.environ.get("AGATA_INBOX_QUIETO_MIN", "10"))
+LIBERA_MIN = 24 * 60
+LIMIAR_CONCLUIDA = 0.7
+_PERGUNTA_CONCLUIDA = {"concluida": {
+    "type": "noul",
+    "instructions": "This note is a finished thought, not a half-written draft "
+                    "that stops mid-sentence or mid-idea."}}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "redesign" / "router"))
+import decisor  # noqa: E402  (redesign/router/decisor.py)
 
 
 def _parse_nota(texto: str) -> tuple[str, str] | None:
@@ -86,6 +106,34 @@ def _parse_nota(texto: str) -> tuple[str, str] | None:
     return titulo, corpo
 
 
+def _id_nota(caminho: Path) -> str:
+    """Identifica a nota nos logs sem gravar o nome (pode ser pessoal)."""
+    return hashlib.sha256(caminho.name.encode()).hexdigest()[:12]
+
+
+def _pronta(caminho: Path, agora: float) -> tuple[bool, str, str]:
+    """(pode importar?, motivo, via). Trava exata primeiro; o decisor só barra.
+    `via` diz por qual caminho a nota passou -- é o que a avaliação mede."""
+    parada_min = (agora - caminho.stat().st_mtime) / 60
+    if parada_min < QUIETO_MIN:
+        return False, f"salva há {parada_min:.0f} min (< {QUIETO_MIN}) -- pode estar em edição", ""
+    parsed = _parse_nota(caminho.read_text(encoding="utf-8"))
+    if parsed is None:
+        return True, "", "sem-titulo-corpo"  # _importar_um dá o motivo exato
+    if parada_min >= LIBERA_MIN:
+        return True, "", "24h"
+    titulo, corpo = parsed
+    r = decisor.decidir("inbox", f"{titulo}\n\n{corpo}"[:4000], _PERGUNTA_CONCLUIDA,
+                        meta={"nota": _id_nota(caminho), "chars": len(corpo),
+                              "parada_min": round(parada_min)})
+    p = decisor.probabilidade(r, "concluida")
+    if p is None:
+        return True, "", "sem-decisor"
+    if p < LIMIAR_CONCLUIDA:
+        return False, f"decisor: parece rascunho pela metade (p={p:.2f}) -- complete e espere", ""
+    return True, "", "decisor"
+
+
 def _importar_um(caminho: Path) -> tuple[bool, str]:
     parsed = _parse_nota(caminho.read_text(encoding="utf-8"))
     if parsed is None:
@@ -116,16 +164,28 @@ def main() -> int:
     if not notas:
         print("inbox vazio -- nada a importar")
         return 0
-    falhas = 0
+    falhas = aguardando = 0
+    agora = time.time()
     for nota in notas:
+        pronta, motivo, via = _pronta(nota, agora)
+        if not pronta:
+            aguardando += 1
+            print(f"AGUARDA {nota.name}: {motivo}")
+            continue
+        parsed = _parse_nota(nota.read_text(encoding="utf-8"))
+        chars = len(parsed[1]) if parsed else 0
         ok, msg = _importar_um(nota)
         if ok:
             print(f"OK     {nota.name}: {msg}")
+            decisor.registrar_avaliacao("inbox", {"evento": "importada", "nota": _id_nota(nota),
+                                                  "chars": chars, "via": via})
             nota.unlink()
         else:
             falhas += 1
             print(f"PULADA {nota.name}: {msg}")
-    print(f"\n{len(notas) - falhas} importada(s), {falhas} pulada(s), {len(notas)} no total")
+    importadas = len(notas) - falhas - aguardando
+    print(f"\n{importadas} importada(s), {aguardando} aguardando, {falhas} pulada(s), "
+          f"{len(notas)} no total")
     return 1 if falhas else 0
 
 
@@ -161,6 +221,27 @@ def _selftest() -> int:
         casos.append(("seth_escriba inacessível -> falha limpa, nao crash", ok_imp is False and "inacessível" in msg))
         casos.append(("nota nao apagada quando falha", p.exists()))
         ESCRIBA_URL = _url_original
+        # 8-10. nota pronta: trava exata (tempo parado) + decisor que só barra
+        agora = time.time()
+        os.utime(p, (agora, agora))
+        casos.append(("nota recém-salva -> aguarda (trava exata)", _pronta(p, agora)[0] is False))
+        velha = agora - (QUIETO_MIN + 1) * 60
+        os.utime(p, (velha, velha))
+        _decidir_original = decisor.decidir
+        decisor.decidir = lambda *a, **k: None
+        casos.append(("nota parada + decisor fora do ar -> importa (só a trava)",
+                      _pronta(p, agora)[0] is True))
+        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.3}}
+        barrada, motivo, _ = _pronta(p, agora)
+        casos.append(("nota parada + decisor diz rascunho -> barrada", barrada is False and "rascunho" in motivo))
+        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.95}}
+        casos.append(("nota parada + decisor diz concluída -> importa", _pronta(p, agora)[0] is True))
+        dia = agora - (LIBERA_MIN + 1) * 60
+        os.utime(p, (dia, dia))
+        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.1}}
+        casos.append(("nota parada há 1 dia -> importa sem perguntar ao decisor",
+                      _pronta(p, agora)[0] is True))
+        decisor.decidir = _decidir_original
     for nome, passou in casos:
         print(("PASS  " if passou else "FALHA ") + nome)
         ok += 1 if passou else 0

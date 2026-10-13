@@ -145,6 +145,10 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
   - **`seth-rapido`** (trivial: <400 chars, sem `tools`, ≤2 msgs user)
   - **`seth-livre`** (normal — tudo que não é trivial nem pesado)
   - **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs)
+  - **Desde 13/10/2026, roteador-sombra** (PROJETO.md, "Decisor local"): o decisor
+    local (`winnow:e4b`, CPU) escolhe também entre rapido/livre/pesado/**codigo** pelo
+    significado e só registra em `~/.cache/agata/decisor/roteador.jsonl`; a rota de
+    verdade segue a heurística acima até o Humano aprovar o relatório de divergência.
 - **Goose** (`~/.config/goose/config.yaml`, `model: seth-codigo`, 20/09/2026 —
   **antes** apontava pra `auto/coding`, um alias que o próprio PROJETO.md já
   documentava como apodrecido desde (390); nunca tinha sido atualizado pro sistema de
@@ -157,42 +161,44 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 
 **Fila de 03/10/2026 (MEMÓRIAS (648)/(649)), por decisão do Humano:** o Groq saiu das 3 filas do LibreChat ("privadas devem querer uma oportunidade no nosso sistema, não o contrário") e os 4 `llama-cpp/*` saíram de todo caminho automático (não cabem na GPU de 8 GB junto com o modelo que o Ollama mantém carregado). O `seth-pesado` perdeu também o `gemini-3-flash-preview` (travou 3 vezes seguidas, isolado). As linhas abaixo mantêm o "por quê" medido em 24/09.
 
+**Fila de 13/10/2026, por decisão do Humano:** o Groq saiu também do `seth-codigo` (Goose), e o `zai/glm-4.7-flash` saiu do `seth-rapido` (155 dos 323 travamentos de 30 s do `app.log` do OmniRoute eram dele; 529 de novo em 13/10). As tabelas do `seth-livre` e do `seth-pesado` foram alinhadas à ordem viva de (653)/(654), que esta página não registrava.
+
 ### `seth-rapido` (LibreChat, trivial)
 | ordem | modelo | por quê |
 |---|---|---|
 | 0 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
-| 1 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
-| 2 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
-| 3 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
-| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+| 1 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
+| 2 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
+| 3 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
 
 ### `seth-livre` (LibreChat, rota normal — favorece conversação)
 | ordem | modelo | por quê |
 |---|---|---|
-| 0 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
-| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
-| 2 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
-| 3 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
-| 4 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
-| 5 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+| 1 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
+| 2 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
+| 3 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+| 4 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |
+| 5 | `gemini/gemini-3-flash-preview` | desceu em (653); mantido no fim por decisão do Humano (13/10/2026), sem travar desde então. *Preview* |
 | 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
 
 ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
 | ordem | modelo | por quê |
 |---|---|---|
-| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
-| 1 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+| 0 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | subiu em (654), quando o `gemini-2.5-flash` esgotou a cota diária no topo |
+| 1 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
 | 2 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
 
 ### `seth-codigo` (Goose)
 | ordem | modelo | por quê |
 |---|---|---|
 | 0 | `mistral/codestral-latest` | **novo 24/09 (546)** — especialista em código, 0,44 s, tool-call OK |
-| 1 | `groq/openai/gpt-oss-120b` | **decisão pendente do Humano (03/10/2026):** a saída do Groq em (648) cobriu só as 3 filas do LibreChat; se valer também para o Goose, esta linha sai pela API e daqui. 0,4 s, tool-call OK; free 8.000 TPM. |
-| 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
-| 3 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
-| 4 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
-| 5 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+| 2 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
+| 3 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+
+O `groq/openai/gpt-oss-120b` saiu também desta fila em 13/10/2026 — decisão do Humano: a regra de (648) vale para o Goose.
 
 **Recriar / reverter** (se o `storage.sqlite` for perdido):
 `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),

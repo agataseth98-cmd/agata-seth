@@ -1,0 +1,27 @@
+[Unit]
+Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROJETO.md "Decisor local")
+# Só loopback. Quem usa (seth_gateway em sombra, inbox do vault, P-20,
+# consolidação) segue pela regra determinística se isto estiver fora do ar.
+After=docker.service
+PartOf=agata.target
+
+[Service]
+Type=simple
+# Imagem CPU pinada por digest (0.13.0, 13/10/2026): projeto novo, versões
+# saindo a cada poucos dias -- atualizar é decisão explícita, nunca `latest`.
+# Teto de memória porque a Máquina está sem swap, e oom-score-adj=1000: se a
+# RAM acabar, o kernel mata ESTE contêiner antes de qualquer outro processo
+# (guarda pedida nos pareceres de 13/10/2026). CPU limitada para não disputar
+# com o resto (winnow:e4b leva ~4 s por decisão com folga).
+ExecStartPre=-/usr/bin/docker rm -f ollaya
+ExecStart=/usr/bin/docker run --rm --name ollaya \
+  -p 127.0.0.1:11435:11435 \
+  -v %h/.cache/agata/ollaya:/home/ollaya/.ollaya \
+  --memory=8g --cpus=8 --oom-score-adj=1000 \
+  ghcr.io/ollaya-dev/ollaya@sha256:31f749def61165d7bbb15def4e3d799a403461e0b8b777f359a924bb9b845ce6
+ExecStop=/usr/bin/docker stop ollaya
+Restart=on-failure
+RestartSec=15
+
+[Install]
+WantedBy=agata.target
