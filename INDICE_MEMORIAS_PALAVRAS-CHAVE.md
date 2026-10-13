@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(677) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-vault-rotulos-2026-10-13` (assinada pelo Humano): catálogo da auditoria e regra "testar `vault_buscar` antes de avaliar a memória" no ar; grafo 3D com o nome da nota ao passar o mouse, de qualquer distância.**
+  palavras-chave: execução, aplicada, seth, vault, rotulos, assinada, humano, catálogo, auditoria, regra, testar, buscar, avaliar, memória, grafo, nome, nota, passar, mouse, distância
 (676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
   palavras-chave: proposta, seth, vault, rotulos, pedido, humano, pode, preparar, gráfico, consigo, saber, bolinha, auditoria, vira, regra, catálogo, grafo, passa, mostrar, nome, nota, passar, mouse, distância, aguardando, assinatura
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: frente, rota, cota, desligada, combos, apagados, omniroute, llama, cpp, removidos, caminho, automático, inclusive, roster, remoto, assinado, segunda, opinião, favorável, irônica, próprio, rodou, deles, falhou, vivo, durante, pedido
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
   palavras-chave: decisão, humano, groq, removido, combos, principais, seth, desvio, condicional, remoção, real, expôs, problemas, reais, pré, existentes, achados, corrigidos, hora, modelos, llama, cpp, locais, cabem, juntos, gpu, travam, cascata, offline, ollama, preso, rodando, cpu, falta, vram, achado, reinícios
-(647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
-  palavras-chave: estimador, taxa, tools, assinada, aplicada, separa, ferramentas, seth, chars, token, default, mesma, texto, mudança, comportamento, valor, real, medido, configurado
+(647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e apl …
+  palavras-chave: estimador, taxa, tools, assinada, apl
 (646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o Libre …
   palavras-chave: pergunta, lab, respondida, libre
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): …

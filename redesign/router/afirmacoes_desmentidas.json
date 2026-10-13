@@ -50,9 +50,9 @@
     {
       "id": "vault-sem-entrada-nova",
       "tema": "vault|obsidian|entradas/",
-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh",
-      "correcao": "o vault é regenerado a cada commit e, desde (670), a listagem de diretório vem do disco -- a entrada nova está lá; abra o arquivo",
-      "origem": "(666)/(670)"
+      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá",
+      "correcao": "o vault é regenerado no post-commit de CADA commit (não há ciclo noturno) e a listagem vem do disco desde (670) -- a entrada nova está lá; abra o arquivo",
+      "origem": "(666)/(670)/(676)"
     },
     {
       "id": "leitura-parcial",
@@ -60,6 +60,13 @@
       "sinal": "persist|estrutura|limita|ainda|continua",
       "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
       "origem": "(668)/(670)"
+    },
+    {
+      "id": "merge-nao-publicado",
+      "tema": "main local|merge local|mergead\\w* no main",
+      "sinal": "transit|não publicad|nao publicad|só local|so local",
+      "correcao": "PR juntado no GitHub JÁ está publicado (origin/main); o main local só fica atrás até o git pull -- meça com git_sync",
+      "origem": "(676)"
     }
   ]
 }

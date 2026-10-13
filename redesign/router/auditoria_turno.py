@@ -320,6 +320,10 @@ def _selftest() -> int:
              "* **Ferramenta de \"diff de hidratação\"**."), u()]).count("já desmentida") == 3),
         ("busca semântica como limitação -> acusa (vault_buscar existe, (670))", "vault_buscar" in linha_estado(
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Limitações:**\n- Sem busca semântica nativa"), u()])),
+        ("vault 'precisa regenerar' / 'ciclo noturno' -> acusa (676)", "não há ciclo noturno" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n- Vault precisa regenerar para ter (673); será regenerado no ciclo noturno"), u()])),
+        ("merge 'no main local, não publicado' -> acusa (676)", "JÁ está publicado" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n2. Merge da proposta no main local — estado transitório, não publicado"), u()])),
         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
              "- O bloco de estado deve ser copiado manualmente de ONDE_ESTAMOS.md."), u()]).count("já desmentida") == 2),
@@ -344,7 +348,7 @@ def _selftest() -> int:
     ]
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
-                  len(linhas) == 19 and all("análise" not in l and "corpo" not in l for l in linhas)))
+                  len(linhas) == 21 and all("análise" not in l and "corpo" not in l for l in linhas)))
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)

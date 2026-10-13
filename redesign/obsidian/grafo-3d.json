@@ -1,5 +1,5 @@
 {
-  "_nota": "Configuração do plugin New 3D Graph versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/new-3d-graph/data.json. Cores das regiões: config/agata-identidade.json -- MEMÓRIAS (674).",
+  "_nota": "Configuração do plugin New 3D Graph versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/new-3d-graph/data.json. Cores das regiões: config/agata-identidade.json -- MEMÓRIAS (674)/(676): nome ao passar o mouse, de qualquer distância.",
   "groups": [
     {
       "query": "tag:regiao/temporal",
@@ -80,13 +80,13 @@
   "showTags": false,
   "hideOrphans": false,
   "showNodeLabels": true,
-  "showLabelsOnHoverOnly": false,
-  "labelDistance": 420,
-  "labelFadeThreshold": 0.6,
-  "labelTextSize": 4,
+  "showLabelsOnHoverOnly": true,
+  "labelDistance": 6000,
+  "labelFadeThreshold": 0.95,
+  "labelTextSize": 6,
   "labelTextColorDark": "#eef1fa",
   "labelBackgroundColor": "#121a30",
-  "labelBackgroundOpacity": 0.75,
+  "labelBackgroundOpacity": 0.85,
   "labelOcclusion": false,
   "useKeyboardControls": true,
   "keyboardMoveSpeed": 3,
