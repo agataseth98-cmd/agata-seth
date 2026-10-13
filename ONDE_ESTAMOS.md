@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (665)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (666)).
 
 **13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** O defeito achado no teste (o decisor anotava errado quando discordava da regra) e os 2 consertos do Conselho Remoto também já estão valendo — assinados e aplicados (entrada (659)). O que já está valendo:
 - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
@@ -25,7 +25,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (665)).
 
 **Auditei a resposta da Seth sobre memórias (entrada (660)).** Ela descreveu bem o sistema, mas apontou como "faltando" 3 coisas que já existem — porque a instrução que o sistema dá a ela não as mencionava. Conserto assinado e aplicado (entrada (661)): as faltas falsas sumiram, mas o cabeçalho dela ainda sai errado e ela inventou outras coisas — você mandou automatizar: a conferência que eu fazia à mão agora roda sozinha a cada mensagem da Seth e do Goose, sem gastar token. Assinado, aplicado e testado (entrada (663)): na 2ª mensagem a Seth já abriu corrigindo o erro da 1ª.
 
-**13/10, à tarde: a Seth no LibreChat ainda errava — e parte do erro era meu (entrada (664)).** No modo de ferramentas, uma resposta dela são vários passos, e a minha conferência automática conferia o próprio passo em andamento. Conserto pronto, junto com 2 dos 3 pedidos dela (ela não enxergava parte dos documentos que já podia ler). Assinado e aplicado (entrada (665)). Falta o teste com você: na mesma conversa do LibreChat, peça "reavalie seu sistema de memórias".
+**13/10, à tarde: a Seth no LibreChat ainda errava — e parte do erro era meu (entrada (664)).** No modo de ferramentas, uma resposta dela são vários passos, e a minha conferência automática conferia o próprio passo em andamento. Conserto pronto, junto com 2 dos 3 pedidos dela (ela não enxergava parte dos documentos que já podia ler). Assinado e aplicado (entrada (665)). Você testou; a Seth melhorou, e um pedido dela era verdadeiro: o LibreChat cortava o que as ferramentas devolvem antes de ela ler (entrada (666)). Conserto pronto — janela maior, Discord e navegador como plugins sob demanda —, para assinar: `bash scripts/aprovar.sh contexto-e-plugins-2026-10-13`.
 
 **Decisões que esperam você** (cada uma fecha com uma resposta curta; guardadas a seu pedido em 13/10):
 1. **Curador** — quem cuida do sistema se você não puder (REGRAS, "Sucessão": pode ler tudo, acrescentar a MEMÓRIAS e tocar a fase atual; não pode apagar, reescrever história nem mudar REGRAS). Hoje é você. Fecha com: um nome, ou "não haverá curador, o sistema para comigo".

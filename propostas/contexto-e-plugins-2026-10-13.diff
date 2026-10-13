@@ -1,0 +1,221 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index b3e85cb..201bbe5 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -106,7 +106,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ 
+ ## Interface
+ - **Executor / loop:** grafo + OmniRoute pelo CLI `agata` (`~/.local/bin/agata` → `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
+-- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`.
++- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`. No passo de continuação, a correção do turno anterior que ainda não foi escrita vai junto com o `MESMA-RESPOSTA` (666). **Agent "Seth" no LibreChat** (parâmetros no Mongo, fonte versionada em `redesign/librechat/agente-seth.json`, aplicar/conferir com `aplicar_agente_seth.sh [--conferir]`): janela de 56 mil tokens (o menor modelo, o Ollama local, tem 65.536; o gateway soma ~3 mil invisíveis ao LibreChat); sem isso o LibreChat usa 32 mil e, com a calibração dobrando a contagem, corta saída de ferramenta ("fading") — achado de (666). Discord e navegador são plugins sob demanda (`defer_loading`, a Seth os acha com `tool_search`).
+ - **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
+ - **Goose** (`~/.local/bin/goose`, `:20126`) — agente/código (`goose session`) e shell de fallback operacional; `model: seth-codigo` em `~/.config/goose/config.yaml` (combo próprio, sempre código, sem heurística de tamanho). Codex CLI terciário.
+ - **Voz:** piper-tts (`:8890`, pt-BR local, default desde (387)) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+diff --git a/redesign/librechat/agente-seth.json b/redesign/librechat/agente-seth.json
+new file mode 100644
+index 0000000..be547c9
+--- /dev/null
++++ b/redesign/librechat/agente-seth.json
+@@ -0,0 +1,19 @@
++{
++  "_como_usar": "Parâmetros do Agent \"Seth\" no LibreChat que não estão no librechat.yaml (moram no Mongo). Fonte versionada: aplicar e conferir com redesign/librechat/aplicar_agente_seth.sh. MEMÓRIAS (666).",
++  "agent_id": "agent_4KlxSMeX5Y8cWQVODkJfH",
++  "model_parameters": {
++    "maxContextTokens": 56000
++  },
++  "_por_que_56000": "O menor modelo que pode responder é o Ollama local (num_ctx 65536). O gateway injeta ~3 mil tokens de hidratação que o LibreChat não conta, e a resposta precisa de espaço: 56000 + ~3000 + ~4000 < 65536. Antes, sem valor, o LibreChat usava 32000 (30400 com a reserva) e, com a calibração dobrando a contagem, cortava saídas de ferramenta em 456 caracteres.",
++  "plugins_sob_demanda": [
++    "ler_mensagens_mcp_discord",
++    "enviar_mensagem_mcp_discord",
++    "navegar_mcp_navegador",
++    "ler_pagina_mcp_navegador",
++    "clicar_mcp_navegador",
++    "preencher_mcp_navegador",
++    "screenshot_mcp_navegador",
++    "fechar_navegador_mcp_navegador"
++  ],
++  "_por_que_sob_demanda": "Premissa do deepseek-harness pedida pelo Humano: tudo é plugin e só entra quando precisa. O LibreChat já tem isso (capacidade deferred_tools, ligada por padrão): ferramenta com defer_loading=true sai da lista enviada ao modelo, e o modelo a encontra com tool_search quando precisar. As 4 do canon ficam sempre carregadas — são usadas em quase toda resposta."
++}
+diff --git a/redesign/librechat/aplicar_agente_seth.sh b/redesign/librechat/aplicar_agente_seth.sh
+new file mode 100755
+index 0000000..2cb0913
+--- /dev/null
++++ b/redesign/librechat/aplicar_agente_seth.sh
+@@ -0,0 +1,43 @@
++#!/usr/bin/env bash
++# Aplica no Agent "Seth" do LibreChat (Mongo) os parâmetros versionados em
++# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)).
++#   aplicar_agente_seth.sh            backup do documento + aplica + confere
++#   aplicar_agente_seth.sh --conferir só confere; saída 1 se divergir
++# Depois de aplicar, `docker restart librechat` (o LibreChat guarda o Agent em cache).
++set -euo pipefail
++AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++CFG="$(python3 -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))))' "$AQUI/agente-seth.json")"
++MONGO=(docker exec -i librechat-mongodb mongosh --quiet LibreChat)
++
++conferir() {
++  "${MONGO[@]}" --eval "
++    const c = $CFG;
++    const a = db.agents.findOne({id: c.agent_id});
++    if (!a) { print('FALHA: Agent ' + c.agent_id + ' não existe'); quit(1); }
++    const erros = [];
++    const mp = a.model_parameters || {};
++    for (const [k, v] of Object.entries(c.model_parameters))
++      if (mp[k] !== v) erros.push('model_parameters.' + k + ' = ' + mp[k] + ', esperado ' + v);
++    const to = a.tool_options || {};
++    for (const t of c.plugins_sob_demanda) {
++      if (!(a.tools || []).includes(t)) erros.push('ferramenta ' + t + ' não está no Agent');
++      else if (!(to[t] && to[t].defer_loading === true)) erros.push(t + ' sem defer_loading');
++    }
++    if (erros.length) { erros.forEach(e => print('DIVERGE: ' + e)); quit(1); }
++    print('OK: Agent ' + c.agent_id + ' bate com agente-seth.json');"
++}
++
++if [ "${1:-}" = "--conferir" ]; then conferir; exit $?; fi
++
++BK="$HOME/.cache/agata/agente-seth.bak-$(date +%Y%m%d-%H%M%S).json"
++mkdir -p "$(dirname "$BK")"
++"${MONGO[@]}" --eval "const c=$CFG; print(EJSON.stringify(db.agents.findOne({id: c.agent_id}), null, 1))" > "$BK"
++echo "backup: $BK"
++"${MONGO[@]}" --eval "
++  const c = $CFG;
++  const set = {};
++  for (const [k, v] of Object.entries(c.model_parameters)) set['model_parameters.' + k] = v;
++  for (const t of c.plugins_sob_demanda) set['tool_options.' + t + '.defer_loading'] = true;
++  const r = db.agents.updateOne({id: c.agent_id}, {\$set: set});
++  print('alterados: ' + r.modifiedCount);"
++conferir
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+index 9cfe32a..571be81 100644
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -46,6 +46,13 @@
+       "sinal": "aceit|passa",
+       "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
+       "origem": "(661)"
++    },
++    {
++      "id": "vault-sem-entrada-nova",
++      "tema": "vault|obsidian|entradas/",
++      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada",
++      "correcao": "o vault é regenerado no post-commit de cada commit e o arquivo da entrada já existe; o que pode atrasar é só a LISTAGEM do Obsidian (391)/(400) — leia o arquivo",
++      "origem": "(666)"
+     }
+   ]
+ }
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index d314fcb..52ced49 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -66,6 +66,14 @@ def _texto(conteudo) -> str:
+     return ""
+ 
+ 
++def _em_andamento(msgs: list) -> str:
++    """Texto que o assistente já escreveu NESTA resposta (depois do último pedido do usuário)."""
++    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
++    inicio = usuarios[-1] + 1 if usuarios else 0
++    return "\n".join(_texto(m.get("content")) for m in msgs[inicio:]
++                     if isinstance(m, dict) and m.get("role") == "assistant")
++
++
+ def _turnos(msgs: list) -> tuple[list[str], bool]:
+     """(texto de cada resposta do assistente, por turno do usuário, em ordem;
+     o pedido atual é continuação de uma resposta já começada?)."""
+@@ -139,11 +147,12 @@ def _desmentidas(texto: str) -> list[str]:
+     return achados
+ 
+ 
+-def auditar(msgs: list) -> list[str] | None:
++def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
+     """Achados sobre a resposta do turno anterior; [] = limpa; None = não há turno
+-    anterior, ou o pedido é continuação (não se audita a resposta em andamento)."""
++    anterior. Na continuação só se audita com `na_continuacao=True` -- a resposta
++    em andamento nunca entra, só o turno anterior a ela."""
+     respostas, continuacao = _turnos(msgs)
+-    if continuacao or not respostas:
++    if (continuacao and not na_continuacao) or not respostas:
+         return None
+     texto, n = respostas[-1], len(respostas)
+     cabs = _cabecalhos(texto)
+@@ -187,7 +196,18 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
+     anterior. Nunca levanta exceção: auditoria quebrada não derruba a resposta."""
+     try:
+         if e_continuacao(msgs):
+-            return LINHA_CONTINUACAO
++            # (665) no modo Agent o texto costuma sair só no ÚLTIMO passo, que antes
++            # recebia só `MESMA-RESPOSTA`: a correção pendente se perdia. Ela vai junto
++            # até aparecer escrita nesta resposta. Sem log: é o mesmo turno de antes.
++            if "correção do turno anterior" in _em_andamento(msgs).lower():
++                return LINHA_CONTINUACAO
++            pendentes = auditar(msgs, na_continuacao=True)
++            if not pendentes:
++                return LINHA_CONTINUACAO
++            return ("MESMA-RESPOSTA: continuação da sua resposta depois de ferramenta. Se ainda não "
++                    "escreveu nada nesta resposta, abra com o cabeçalho e logo depois a correção; "
++                    "se já escreveu, não abra cabeçalho de novo. AINDA FALTA corrigir o turno "
++                    "anterior: " + " | ".join(pendentes))
+         achados = auditar(msgs)
+     except Exception as e:  # noqa: BLE001 -- best-effort, como o modelo real (621)
+         _registrar(cliente, None, f"{type(e).__name__}: {e}"[:160])
+@@ -230,9 +250,14 @@ def _selftest() -> int:
+         ("1ª resposta com linha de turno -> acusa", "1ª resposta" in linha_estado([u(), a(linha(1, "11:39") + "\n\nx"), u()])),
+         ("passo 1 do loop Agent audita o turno anterior (t=3 (3))", "qualificador" in linha_estado(
+             [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie")])),
+-        ("passos seguintes do loop: MESMA-RESPOSTA, sem reauditar", linha_estado(
++        ("passos seguintes do loop, correção já escrita: só MESMA-RESPOSTA", linha_estado(
+             [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie"),
+-             {"role": "assistant", "content": "Agata · m · t=4 (4) · x", "tool_calls": [{"id": "1"}]}, res]) == LINHA_CONTINUACAO),
++             {"role": "assistant", "content": "Agata · m · t=4 (contado no contexto) · x\nCorreção do turno anterior: ok",
++              "tool_calls": [{"id": "1"}]}, res]) == LINHA_CONTINUACAO),
++        ("passos seguintes, correção ainda não escrita (caso de (665)): leva o que falta", "AINDA FALTA" in linha_estado(
++            [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie"), ferr, res, ferr, res])),
++        ("passos seguintes de um turno anterior limpo: só MESMA-RESPOSTA", linha_estado(
++            [u(), a(pront), u(), t2, u("reavalie"), ferr, res]) == LINHA_CONTINUACAO),
+         ("resposta com 2 cabeçalhos (texto, ferramenta, texto) -> acusa", "2 cabeçalhos" in linha_estado(
+             [u(), a(pront), u("q"), a(linha(2, "13:09") + "\nCorreção do turno anterior: x"), ferr, res,
+              a(linha(2, "13:10") + "\n\ncorpo"), u()])),
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 473aa6f..df29c1a 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -226,6 +226,9 @@ _DOUTRINA_FIXA = (
+     "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
+     "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
+     "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
++    "**Plugins sob demanda:** Discord e navegador não aparecem na sua lista de "
++    "ferramentas até você precisar — busque com `tool_search` (ex.: \"navegador\", "
++    "\"discord\") e use. As do canon estão sempre carregadas. (MEMÓRIAS (666).)\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+     "hidratação mínima; o resto é sob demanda.\n"
+diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
+index 2144a9c..decdbe5 100755
+--- a/scripts/estado_para_eco.sh
++++ b/scripts/estado_para_eco.sh
+@@ -121,7 +121,12 @@ fi
+ if [ -z "$remoto" ]; then
+   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
+ elif [ "$remoto" != "$head_full" ]; then
+-  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/' || echo "?/?")
++  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/')
++  # (664) "?/?" sozinho não dizia por quê: é o commit remoto que ainda não foi baixado aqui.
++  [ -n "$atras_a_frente" ] || atras_a_frente="?/? — commit remoto ainda não baixado aqui; git_sync mede"
++  # (664) o FALHA de 13/10 era o HEAD num branch de trabalho, não o main atrás: dizer o branch.
++  _branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
++  [ -n "$_branch" ] && [ "$_branch" != "main" ] && atras_a_frente="$atras_a_frente; HEAD no branch $_branch, não no main"
+   # (MEMÓRIAS (543)) ordem remoto...HEAD: a 1a coluna do --left-right é o que SÓ o remoto tem (= atrás),
+   # a 2a o que só o HEAD tem (= à frente) -- casa com o rótulo abaixo. Antes estava invertido: um
+   # branch 1 à frente saía "atrás/à-frente: 1/0" e dois modelos leram "1 commit atrás".
+diff --git a/.gitignore b/.gitignore
+index af12933..1fa959d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -96,3 +96,7 @@ memoria/*.log
+ 
+ # TTS Piper -- voz .onnx ~60MB, baixada por redesign/router/tts-piper/instalar.sh (MEMÓRIAS (387))
+ redesign/router/tts-piper/voices/
++
++# Relatórios da pesquisa semanal automática de modelos (scripts/pesquisar_modelos_gratuitos.py):
++# ficam no disco pro Humano ler, mas não são proposta pendente -- decisão do Humano, MEMÓRIAS (666).
++propostas/modelos-gratuitos-*.md

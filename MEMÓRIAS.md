@@ -26,20 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa5a08f250db315365b138b6dea32b70bb68553d
-  Escrito em: 13/10/2026 13:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9e187e50ec15ba814628749631583cdccf18b3d3
+  Escrito em: 13/10/2026 14:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(666) DIÁRIO — 13/10/2026 · **Auditoria da resposta da Seth das 13:45 (pedido do Humano depois de (665)): melhorou — um cabeçalho só, hora certa, as 3 faltas desmentidas não voltaram —, mas não fez a correção. E dos 3 pedidos novos dela, o mais sério era verdadeiro: o LibreChat corta a saída das ferramentas antes de entregá-la ao modelo ("fading"), por usar uma janela padrão pequena e dobrar a contagem. Proposta `contexto-e-plugins-2026-10-13` (8 arquivos), aguardando assinatura.**
+
+**Conferido na resposta das 13:45** (Mongo, `contextMeta`/`metadata` do LibreChat, `git`):
+- Melhorou: um cabeçalho, hora 13:45, nenhuma das 3 faltas de (660). A auditoria do 1º passo trouxe os 8 achados.
+- **Não corrigiu nada** — defeito do meu desenho em (664): ela só escreveu no último passo, que recebeu `MESMA-RESPOSTA` sem os achados.
+- Errado: `t=6` na 5ª resposta; nome de modelo sem ressalva de novo; "sem busca semântica" de novo; "o vault ainda não tem a (665)" — falso, o `0665.md` foi gerado às 13:41, antes da resposta.
+- **Certo:** `sync: FALHA` — eu tinha deixado o repositório num branch de trabalho (HEAD ≠ `main`). Voltei para o `main`: `sync: PASS`.
+- **Certo, e o mais importante:** "o `estado` truncou (1373 chars exceeded 456 limit)". O Mongo guarda a saída inteira (1.444 caracteres, "completo"), mas o LibreChat corta resultados antes de passá-los ao modelo — a mensagem existe no código dele (`[truncated: X chars exceeded Y limit]`). A conta, lida no `metadata.contextUsage` da própria mensagem: janela de 30.400 tokens (padrão de 32.000 para modelo desconhecido, menos 5%); 9.319 tokens de mensagens multiplicados por uma calibração de **2,02** (o provedor conta o dobro — inclusive a hidratação que o gateway injeta e o LibreChat não vê); 3.394 tokens de definição de 12 ferramentas. Com a pressão alta, o "fading" mascara resultados a 10% de um orçamento de 3.800 tokens: 10% de 4.560 caracteres = **456**.
+
+**Os pedidos dela:**
+- Saída de ferramenta cortada → **verdadeiro, aplicar.** Decisão do Humano: janela "o máximo possível". O máximo seguro é 56.000: o menor modelo que pode responder, o Ollama local, tem `num_ctx` 65.536, e o gateway soma ~3 mil tokens que o LibreChat não conta, mais o espaço da resposta.
+- "Quanto divergiu" no `sync: FALHA` (`?/?`) → **verdadeiro, aplicar.** O "?/?" passa a dizer o motivo (commit remoto ainda não baixado) e, se o HEAD não estiver no `main`, em qual branch está — teria explicado sozinho o FALHA dela.
+- "Decidir sobre os 3 relatórios não rastreados" → decisão do Humano: ignorar no git e apagar os antigos. Apagados já os de 03/10 e 05/10, mantido o de 13/10; a linha `propostas/modelos-gratuitos-*.md` no `.gitignore` vai na proposta — o `.gitignore` também é quarentena P-8, e o perímetro barrou meu primeiro commit com ele solto (eu o tinha tomado por arquivo de registro). Os de 25/09, 28/09 e 30/09 já estão commitados no histórico e ficaram.
+
+**Ferramentas, pela premissa que o Humano indicou** (`deepseek-ai/deepseek-harness`: "tudo é plugin", divulgação progressiva via ToolSearch): o LibreChat já tem isso nativo — capacidade `deferred_tools`, ligada por padrão; ferramenta com `defer_loading: true` sai da lista enviada ao modelo e é achada com `tool_search`. Discord e navegador (8 ferramentas, ~2 mil tokens por mensagem) viram plugins sob demanda; as 4 do canon ficam sempre carregadas.
+
+**A proposta:** `auditoria_turno.py` — no passo de continuação, a correção pendente vai junto até aparecer escrita na resposta; catálogo com o item "vault sem a entrada nova"; `estado_para_eco.sh` — motivo do "?/?" e o branch; `redesign/librechat/agente-seth.json` + `aplicar_agente_seth.sh [--conferir]` — janela de 56.000 e os 8 plugins sob demanda, versionados (antes moravam só no Mongo, sem fonte nem conferência); 1 linha na doutrina sobre `tool_search` (+224 caracteres, contra ~2 mil tokens a menos por mensagem); PROJETO.
+
+**Verificado:** nos textos reais, a auditoria acha 4 problemas na resposta das 13:45 (contagem, ressalva, vault, busca semântica) e um passo de continuação dela agora levaria a correção pendente; `auditoria_turno.py --selftest` 21/21; `seth_gateway.py --selftest`; `bash -n`; o `estado` testado num branch descartável ("2/0; HEAD no branch …") e aceito pelo linter; `aplicar_agente_seth.sh --conferir` mostra as 9 divergências de hoje; `perimetro.sh` 0 FALHA na worktree com o `.diff`.
+
+**Assinar:** `bash scripts/aprovar.sh contexto-e-plugins-2026-10-13`
+
+**sync:** PASS — `main` = `9e187e5` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (665).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: mensagem e metadados de contexto lidos no Mongo; código do LibreChat (`truncation.cjs`, `fading.cjs`) lido no contêiner; `num_ctx` do Ollama medido; repositório indicado lido pela API do GitHub · Autorização: Humano — "resolva … caso sejam autênticos e viáveis aplique", "o máximo possível", "a premissa deste repo", "1 e 2".
 
 (665) DIÁRIO — 13/10/2026 · **`auditoria-agente-2026-10-13` aplicada (assinatura verificada, PR #166 juntado): `canon-mcp.mjs` novo copiado para o LibreChat, gateway, verificador e LibreChat reiniciados. Pelo caminho real, a conversa verdadeira de (664) com um "reavalie" no fim levou a auditoria com os 8 achados da resposta das 13:10. O teste do conteúdo da resposta fica para o LibreChat, com as ferramentas — pela API direta não serve.**
 
