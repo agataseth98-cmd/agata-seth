@@ -216,6 +216,11 @@ _DOUTRINA_FIXA = (
     "pelo `HASH-ESTADO`; e o que foi recusado de propósito está na \"Fronteira de "
     "recusas\" (`PROJETO_REFERENCIA`). Falta que já existe ou foi recusada é "
     "afirmação errada, não sugestão (MEMÓRIAS (660)).\n\n"
+    "**AUDITORIA-TURNO-ANTERIOR:** se o bloco de estado trouxer essa linha com "
+    "achados, a Máquina conferiu a SUA resposta anterior e achou erro. Logo "
+    "depois do cabeçalho, corrija em 1 linha (`Correção do turno anterior: …`) "
+    "e siga; acerte o cabeçalho desta resposta. `OK` = nada a corrigir. "
+    "(MEMÓRIAS (662).)\n\n"
     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
     "hidratação mínima; o resto é sob demanda.\n"
@@ -262,8 +267,9 @@ def _estado() -> str:
         return ""
 
 
-def _hidratacao() -> str:
-    """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro."""
+def _hidratacao(extra: str = "") -> str:
+    """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
+    `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
     if MODO == "compacto":
         est = _estado()
         # Regra 1.1: campo medível não pode sumir em silêncio quando a
@@ -271,11 +277,12 @@ def _hidratacao() -> str:
         # dizer que algo quebrou (achado 04/09/2026, Camada C).
         if est:
             linha_modelo = _linha_modelo_real_anterior()
-            corpo = est + (f"\n{linha_modelo}" if linha_modelo else "")
+            corpo = est + (f"\n{linha_modelo}" if linha_modelo else "") + (f"\n{extra}" if extra else "")
             bloco_estado = f"**Estado agora (fatos da Máquina):**\n{corpo}\n"
         else:
             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
-                             "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n")
+                             "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
+                             + (f"{extra}\n" if extra else ""))
         return f"{MARCADOR}\n{_DOUTRINA_FIXA}{bloco_estado}"
     try:
         st = HIDRATA_PATH.stat()
@@ -287,7 +294,7 @@ def _hidratacao() -> str:
     return f"{MARCADOR}\n" + _CACHE["texto"]
 
 
-def _bloco_estado_atual() -> str:
+def _bloco_estado_atual(extra: str = "") -> str:
     """Bloco de estado FRESCO pra reinjetar em turno já hidratado (MEMÓRIAS (417)).
     String vazia se estado_para_eco.sh não deu saída — nesse caso não reinjeta
     nada (a Seth fica com o bloco velho do 1º turno, honesto via IDADE-HIDRATACAO)."""
@@ -295,7 +302,7 @@ def _bloco_estado_atual() -> str:
     if not est:
         return ""
     linha_modelo = _linha_modelo_real_anterior()
-    corpo = est + (f"\n{linha_modelo}" if linha_modelo else "")
+    corpo = est + (f"\n{linha_modelo}" if linha_modelo else "") + (f"\n{extra}" if extra else "")
     return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
             f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
             f"use ESTA hora e ESTE `sync:`):**\n{corpo}\n")
@@ -492,6 +499,7 @@ def _classificar_rota(payload: dict) -> str:
 # thread fora do caminho da resposta (winnow:e4b leva ~4 s na CPU) e registra em
 # ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
 import decisor  # noqa: E402  (mesmo diretório)
+import auditoria_turno  # noqa: E402  (mesmo diretório)
 
 _PERGUNTA_ROTA = {"rota": {
     "type": "choice",
@@ -570,6 +578,8 @@ def _injeta(payload: dict) -> dict:
     # chamada de título/utilidade do frontend: repassa crua, sem hidratar.
     if _e_chamada_utilitaria(payload):
         return payload
+    # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
+    auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
@@ -580,11 +590,11 @@ def _injeta(payload: dict) -> dict:
         msgs = [m for m in msgs if not (
             isinstance(m, dict) and m.get("role") == "system"
             and isinstance(m.get("content"), str) and MARCADOR_ESTADO in m["content"])]
-        bloco = _bloco_estado_atual()
+        bloco = _bloco_estado_atual(auditoria)
         payload["messages"] = ([{"role": "system", "content": bloco}] + msgs
                                if bloco else msgs)
         return payload
-    sys_msg = {"role": "system", "content": _hidratacao()}
+    sys_msg = {"role": "system", "content": _hidratacao(auditoria)}
     # se o frontend já mandou um system próprio, o nosso entra ANTES dele
     payload["messages"] = [sys_msg] + msgs
     return payload
@@ -1026,7 +1036,7 @@ def _selftest() -> int:
     # tamanho tem de ver o pedido do usuário, não o pedido já hidratado (657).
     _decidir_antes, _log_antes = decisor.decidir, decisor.LOG_DIR
     _hid_antes = globals()["_hidratacao"]
-    globals()["_hidratacao"] = lambda: MARCADOR + "\n" + "h" * 9000  # a real tem ~8,8 mil
+    globals()["_hidratacao"] = lambda extra="": MARCADOR + "\n" + "h" * 9000  # a real tem ~8,8 mil
     decisor.LOG_DIR = Path(tempfile.mkdtemp())
     divs = decisor.LOG_DIR / "roteador-avaliacao.jsonl"
 
@@ -1055,6 +1065,22 @@ def _selftest() -> int:
     print(f"{'PASS' if ok9e else 'FALHA'}  sombra pelo caminho completo: modelo diz pesado "
           f"-> 1 divergência registrada")
     falhas += (0 if ok9d else 1) + (0 if ok9e else 1)
+
+    # 9f. auditoria do turno anterior pelo caminho completo (662): resposta anterior
+    # com cabeçalho errado -> o pedido seguinte leva AUDITORIA-TURNO-ANTERIOR.
+    _aud_log = auditoria_turno.LOG
+    auditoria_turno.LOG = Path(tempfile.mkdtemp()) / "aud.jsonl"
+    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "oi"},
+        {"role": "assistant", "content": "Agata · m · t=1 · 2026-10-13 12:43 -0300 (relógio da Máquina)\n\nok"},
+        {"role": "user", "content": "e agora?"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read()
+    m9f = json.loads(_Dummy.ultimo_corpo)["messages"]
+    sys9f = " ".join(x["content"] for x in m9f if x.get("role") == "system" and isinstance(x.get("content"), str))
+    ok9f = "AUDITORIA-TURNO-ANTERIOR:" in sys9f and "qualificador" in sys9f
+    auditoria_turno.LOG = _aud_log
+    print(f"{'PASS' if ok9f else 'FALHA'}  auditoria do turno anterior chega ao bloco de estado")
+    falhas += 0 if ok9f else 1
 
     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);

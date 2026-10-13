@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 216eaa6acc7b230b6a3142d43a5bb249bc75865c
-  Escrito em: 13/10/2026 12:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 81902f2dca356b3dc469e1ee4439adc8dd563dde
+  Escrito em: 13/10/2026 13:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -106,7 +106,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 
 ## Interface
 - **Executor / loop:** grafo + OmniRoute pelo CLI `agata` (`~/.local/bin/agata` → `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
-- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614).
+- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa em prosa fica fora, por não ser determinística (`redesign/router/auditoria_turno.py`, (662)).
 - **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
 - **Goose** (`~/.local/bin/goose`, `:20126`) — agente/código (`goose session`) e shell de fallback operacional; `model: seth-codigo` em `~/.config/goose/config.yaml` (combo próprio, sempre código, sem heurística de tamanho). Codex CLI terciário.
 - **Voz:** piper-tts (`:8890`, pt-BR local, default desde (387)) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
