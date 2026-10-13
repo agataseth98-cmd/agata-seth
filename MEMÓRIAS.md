@@ -26,20 +26,55 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 33c9235c149019134d50fd7b472ba62fc64792cc
-  Escrito em: 13/10/2026 18:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 49ec42e11646a17893a6bc7685de790a99cef9a1
+  Escrito em: 13/10/2026 19:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedido do Humano ("audite a última resposta da Seth e aplique o que for coerente"). Achado principal, erro meu: o `vault_buscar` NUNCA chegou à Seth — o Agent do LibreChat só carrega as ferramentas listadas em `agents.tools`, e eu não a listei; (671) e (677) afirmaram que estava "no ar para a Seth", e não estava. Proposta `seth-auditoria-1830-2026-10-13` pronta, aguardando assinatura.**
+
+**Correção de (671)/(677), Regra 4:** o servidor MCP `canon` oferece `vault_buscar` (6 ferramentas no log do LibreChat), mas o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` tem lista própria (`tools`), que não a inclui. Medido no Mongo. A Seth procurou ("memória|memory|vault|busca|search") com `tool_search` e só achou ferramentas do navegador. A regra de (676), "teste `vault_buscar` antes de avaliar a memória", pedia o que ela não tinha.
+
+**Auditoria dos 6 turnos (Mongo, só leitura):**
+- ✓ **Turnos 2–4, com ferramentas** (`vault_consultar`, `query_canon`, índice): (49) é a entrada mais antiga do vault; 05/06/2026 · (2) é a mais antiga do índice; a regra da numeração antes de (49) está certa.
+- ✗ **"Extras", pedido 3 vezes:** ela **não consegue ler `extras/`**. O `vault_consultar` só resolve `memoria/`, `redesign/` e os docs do canon. Respondeu sobre o canon atual sem abrir `extras/`.
+- ✗ **Turnos 5 e 6 sem nenhuma ferramenta**, respostas longas de memória:
+  - controles trocados — P-8 como "append-only" (é a quarentena), P-14 como "portão de escrita" (é o frio imutável), "17 controles" (são 23);
+  - o portão das três perguntas com o conteúdo inventado ("o que muda / por que / como testar"; as reais, REGRAS: reversibilidade, alcance, silêncio);
+  - "assinatura = Humano disse sim no chat" (é assinatura ssh, `aprovar.sh` + `.allowed_signers`, (366));
+  - limitações já desmentidas: vault "em lote/lag", "leitura parcial silenciosa", "busca semântica só no vault" — o índice lê MEMÓRIAS, morno e frio direto;
+  - "18.331 notas no 3D" — são ligações; notas, 1.579;
+  - "estado da arte 2026" **sem nenhuma fonte**, com o navegador disponível sob demanda;
+  - hora que volta: o turno 17 diz 18:27, depois de 18:30 no turno 16.
+
+**Sugestões dela recusadas, com motivo:** vetor/LanceDB como camada primária (recusa (115), de pé; a busca por sentido já existe como secundária); OPA/Rego e sigstore no portão (a aprovação já é assinatura ssh conferida pelo P-8); TEE/ZK nos controles; extensão de VS Code; "cursor" de paginação (a leitura já vem inteira desde (668)). Todas partem de limitações que não existem ou contrariam decisões registradas.
+
+**Mudanças (proposta):**
+1. **`agente-seth.json`** ganha `ferramentas_sempre` (as 5 do canon, carregadas sempre, `vault_buscar` entre elas). O `aplicar_agente_seth.sh` faz `$addToSet` em `tools` e o `--conferir` acusa ferramenta faltando — já acusa hoje: "vault_buscar_mcp_canon não está no Agent".
+2. **`extras/` legível** pelo `vault_consultar` e pela `busca_texto`, **exceto `extras/arquivo-redesign/`**: é para onde foi o dossiê de auditoria sobre a própria Seth (AUDITORIA-01, CONSELHO-*), que a decisão de 04/09 (Camada C, comentário no `canon-mcp.mjs`) tirou do alcance dela. Coerente com aquela decisão; o Humano pode reabrir. Testado: lista `extras/`, lê `O_Despertar_de_Agata.md`, recusa `arquivo-redesign/AUDITORIA-01.md`.
+3. **Catálogo da auditoria:** `tres-perguntas` (conteúdo errado → as três reais), `assinatura-no-chat` (→ ssh), vault "em lote/batch/lag", leitura parcial "silenciosa", correção da busca semântica ("lê o canon direto"). Sinal do `sync-pass-aceito` apertado: "passa" solto dava falso positivo em "`sync` passa a incluir".
+4. **Auditoria determinística nova:** contagem de controles ("N controles" ≠ número de `scripts/perimetro.sh`) e hora que volta no tempo. 4 casos novos no selftest (log esperado 21 → 25).
+5. **Doutrina:** sobre o próprio sistema, consultar no mesmo turno, nunca de memória; controle P-N só com a descrição lida; estado da arte só com navegador e fonte por item, senão "não verificado"; `extras/` pelo `vault_consultar`. A doutrina vai a 10.411 caracteres.
+
+**Re-auditadas com o código novo:** turno 16 → 5 achados (três perguntas, vault, leitura parcial, busca, "17 controles"); turno 17 → 3 (vault, leitura parcial, assinatura no chat) + hora que volta.
+
+**Verificado:** `auditoria_turno.py`, `seth_gateway.py` e `seth_verificador.py` (43/43) com selftest OK na worktree com o `.diff`; `node --check` do canon-mcp; `canon-mcp` ponta a ponta em `extras/`; `perimetro.sh` 0 FALHA.
+
+**Assinar** (depois de juntar o PR e `git pull --ff-only`): `bash scripts/aprovar.sh seth-auditoria-1830-2026-10-13`
+
+**sync:** PASS — `main` = `49ec42e` (== `origin/main`, PR #178 juntado) antes do branch; topo de MEMÓRIAS = (677).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: Mongo do LibreChat (6 turnos, chamadas de ferramenta, `agents.tools`), REGRAS:169, `scripts/perimetro.sh`, `git ls-files extras`, canon-mcp por stdio, selftests, perímetro · Autorização: Humano — "audite a última resposta da Seth e aplique o que for coerente".
 
 (677) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-vault-rotulos-2026-10-13` (assinada pelo Humano): catálogo da auditoria e regra "testar `vault_buscar` antes de avaliar a memória" no ar; grafo 3D com o nome da nota ao passar o mouse, de qualquer distância.**
 
