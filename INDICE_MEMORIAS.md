@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
 (674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assinada pelo Humano): `cerebro.md` com as 6 regiões contadas e o Brain Atlas com limite de 30 mil ligações — todas as 18.331 entram no 3D.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
 (647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
-(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
+(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o Libre …
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): …
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estim …
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de v …
