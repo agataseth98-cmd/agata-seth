@@ -58,6 +58,7 @@ source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
 source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
 source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
 source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
+source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -172,7 +173,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
 # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
 # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
 # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service")
+P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer" "agata-avaliacao-decisor.timer")
 P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
 
 
@@ -338,8 +339,14 @@ main() {
   CONT_OK=$((CONT_OK + 1))
   echo
 
-  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework" "MEMÓRIAS (560); plano de replicabilidade, Fase 5"
+  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework nem por texto livre do canon público" "MEMÓRIAS (560)/(430); camada do decisor local"
   p20_dado_pessoal
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
+  echo
+
+  cabecalho "P-22" "Derivados de hidratação não divergem do HEAD sem a fonte mudar" "MEMÓRIAS (333)/(349)"
+  p22_derivados_drift
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
   echo

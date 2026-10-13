@@ -44,9 +44,32 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))            # redesign/grafo
 sys.path.insert(0, str(HERE.parent.parent / "obsidian"))
+sys.path.insert(0, str(HERE.parent.parent / "router"))
 from estado import Estado                        # noqa: E402
 from durabilidade import WAL, idem_key           # noqa: E402
 import consulta as C                             # noqa: E402
+import decisor                                   # noqa: E402  (redesign/router/decisor.py)
+
+# Terceira trava, DEPOIS das duas mecânicas (371)/(549): o decisor local dá
+# nota de utilidade e só pode REPROVAR -- nunca aprova o que elas barraram.
+# Fora do ar -> valem só as mecânicas (PROJETO.md, "Decisor local").
+LIMIAR_UTIL = 1.5
+_PERGUNTA_UTIL = {"util": {
+    "type": "score",
+    "instructions": "How much does this proposal consolidate useful, verifiable "
+                    "knowledge from the cited entries?",
+    "criteria": ["nothing: restates titles or is vague",
+                 "little: mostly repetition with a minor point",
+                 "useful: a real synthesis a reader would want",
+                 "clear, useful and checkable against the cited entries"]}}
+
+
+def _portao_decisor(corpo: str, tema: str) -> tuple[bool, str]:
+    n = decisor.nota(decisor.decidir("consolidacao", corpo[:4000], _PERGUNTA_UTIL,
+                                     meta={"tema": tema, "chars": len(corpo)}), "util")
+    if n is not None and n < LIMIAR_UTIL:
+        return False, f"decisor: utilidade {n:.2f} < {LIMIAR_UTIL}"
+    return True, ""
 
 DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/consolidacao"))
 DB = DIR_ESTADO / "checkpoints.sqlite"
@@ -357,6 +380,8 @@ def consolidar(s: Estado) -> dict:
         ok, motivo = _portao(corpo, a["refs"])
         if ok:  # MEMORIAS (549): o que se diz de cada (NNN) tem de bater com o titulo
             ok, motivo = _portao_conteudo(corpo, _indice(repo))
+        if ok:
+            ok, motivo = _portao_decisor(corpo, tema)
         if not ok:
             _log_reprovado(tema, hoje, motivo, corpo)
             escritos.append((f"consolidacao-{slug}-{hoje}", f"reprovado: {motivo}"))
@@ -374,7 +399,9 @@ def consolidar(s: Estado) -> dict:
             f.flush()
             os.fsync(f.fileno())
         wal.done("consolidacao", "consolidar", slug, chave)
-        escritos.append((str(alvo.relative_to(repo)), "novo"))
+        no_disco = alvo.is_file() and alvo.stat().st_size > 0
+        escritos.append((str(alvo.relative_to(repo)),
+                         "novo" if no_disco else "falhou: arquivo ausente ou vazio após escrita"))
     return {"commit_sha": "",  # NADA commitado -- so arquivo em propostas/
             "eventos": [f"consolidar:{escritos}"],
             "decisao_log": [f"propostas escritas: {escritos}"]}
@@ -434,8 +461,26 @@ def run(repo, temas=None):
         cm.__exit__(None, None, None)
 
 
+def _selftest() -> int:
+    original, casos = decisor.decidir, []
+    for nome, resp, quer in [
+        ("decisor fora do ar -> passa (valem as mecânicas)", None, True),
+        ("nota 0.4 -> reprova", {"util": {"type": "score", "score": 0.4}}, False),
+        ("nota 2.6 -> passa", {"util": {"type": "score", "score": 2.6}}, True)]:
+        decisor.decidir = lambda *a, _r=resp, **k: _r
+        casos.append((nome, _portao_decisor("texto", "tema")[0] is quer))
+    decisor.decidir = original
+    for nome, ok in casos:
+        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+    falhas = sum(not ok for _, ok in casos)
+    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
+    return 1 if falhas else 0
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
+    if a == ["--selftest"]:
+        sys.exit(_selftest())
     g = lambda f, d=None: a[a.index(f) + 1] if f in a else d
     repo = g("--repo", os.path.expanduser("~/agata"))
     temas = g("--temas")

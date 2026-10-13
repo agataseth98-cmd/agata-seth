@@ -199,6 +199,10 @@ endpoints:
       # fica pequena e rápida, sem carregar REGRAS+PROJETO+estado.
       titleConvo: true
       titleModel: "seth-livre"
+      # structured: a chamada de título leva schema com "title" e o seth_gateway
+      # a reconhece pelo canal, nunca por texto (o padrão "completion" obrigava
+      # a detecção por substring, que o usuário consegue colar).
+      titleMethod: "structured"
       modelDisplayLabel: "Seth"
       forcePrompt: false
 

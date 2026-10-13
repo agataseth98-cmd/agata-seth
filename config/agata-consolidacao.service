@@ -6,6 +6,8 @@ Type=oneshot
 WorkingDirectory=%h/agata
 # C2 (redesenho, Fase 8): era `hermes chat` -- agora o flow do grafo (P6-03).
 # Saida so em propostas/consolidacao-<data>.md; nunca toca canon.
+# no boot a recuperacao do timer chegava antes do OmniRoute (13/10/2026)
+ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/
 ExecStart=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
 ProtectSystem=strict
 ProtectHome=read-only

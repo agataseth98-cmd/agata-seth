@@ -339,18 +339,12 @@ def _linha_modelo_real_anterior() -> str:
 # o timeout de 45s do `title.js`, cujo `AbortController` compartilhado fazia a
 # resposta PRINCIPAL ser gravada vazia (MEMÓRIAS (411)).
 #
-# Detector: strings LITERAIS que o `@librechat/agents` põe no prompt de título
-# ou no schema de saída estruturada (`dist/*/utils/title.*`). São texto GERADO
-# pelo frontend, nunca conteúdo de usuário -- casar por elas não tem falso
-# positivo prático. Se um usuário colar exatamente uma dessas frases, o pior
-# caso é aquele turno sair sem hidratação (`Última entrada: lacuna`),
-# recuperável. Fonte conferida no container em 09/09/2026.
-_SINAIS_TITULO = (
-    "A concise title in the detected language",
-    "A concise title for the conversation in 5 words or less",
-    "Provide a concise, 5-word-or-less title for the conversation",
-    "Analyze this conversation and provide",
-)
+# LibreChat: detectado só pelo schema (`_schema_pede_titulo`), nunca por texto.
+# `librechat.yaml` fixa `titleMethod: "structured"` no endpoint Seth; sem isso o
+# `generateTitle` do @librechat/agents usa "completion" por padrão (run.cjs,
+# conferido no container em 13/10/2026) e o título só seria reconhecível por
+# substring -- que um usuário consegue colar. Se o título algum dia chegar sem
+# schema, ele é HIDRATADO: degrada (chamada maior), nunca rouba hidratação de turno real.
 
 # Sinal separado pro Goose (achado 21/09/2026, MEMÓRIAS (495)): ele também faz
 # uma chamada de "nomear a sessão" pro MESMO endpoint (:20126), sistema PRÓPRIO
@@ -364,13 +358,8 @@ _SINAIS_TITULO = (
 #     {"role":"user","content":"---BEGIN USER MESSAGES---\n...\n---END USER
 #       MESSAGES---\n\nGenerate a short title for the above messages."}],
 #    "stream":true,"stream_options":{"include_usage":true}}
-# Diferença estrutural do padrão LibreChat: o texto-gatilho está na PRIMEIRA
-# mensagem (system), não na última -- por isso checado à parte de
-# `_SINAIS_TITULO` (que só olha `msgs[-1]`), em QUALQUER posição/papel.
-# Mesma classe de risco residual já declarada acima para `_SINAIS_TITULO`:
-# string literal do PRÓPRIO cliente, não conteúdo de usuário -- colar esse
-# texto exato como mensagem própria no pior caso perde só a hidratação
-# daquele turno.
+# O texto-gatilho vem numa mensagem `system` montada pelo próprio Goose. Só
+# `role == "system"` conta: conteúdo de usuário (inclusive colado) nunca dispara.
 _SINAIS_TITULO_GOOSE = (
     "Generate a short title (four words or less) that describes the topic "
     "of the user's messages",
@@ -378,16 +367,14 @@ _SINAIS_TITULO_GOOSE = (
 
 
 def _e_chamada_titulo_goose(payload: dict) -> bool:
-    """Sinal 3 de `_e_chamada_utilitaria`: chamada de nomear-sessão do Goose,
-    que carrega o texto-gatilho na PRIMEIRA mensagem (system), não na
-    última. Varre todas as mensagens (posição não importa aqui), mas só
-    quando `len(messages) <= 2` -- mesmo limite dos outros sinais, é sempre
-    one-shot."""
+    """Sinal 2 de `_e_chamada_utilitaria`: chamada de nomear-sessão do Goose.
+    Só mensagens `system` (montadas pelo cliente) e só com `len(messages) <= 2`
+    -- é sempre one-shot."""
     msgs = payload.get("messages")
     if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
         return False
     for m in msgs:
-        if not isinstance(m, dict):
+        if not isinstance(m, dict) or m.get("role") != "system":
             continue
         conteudo = m.get("content")
         if isinstance(conteudo, list):
@@ -430,54 +417,16 @@ def _schema_pede_titulo(payload: dict) -> bool:
 
 def _e_chamada_utilitaria(payload: dict) -> bool:
     """True se o corpo é uma chamada de título/utilidade do frontend, nunca
-    um turno de chat real da Seth. Três sinais, checados nesta ordem
-    (achado 21/09/2026, MEMÓRIAS (495): 3º sinal cobre o Goose, não só o
-    LibreChat):
+    um turno de chat real da Seth. Dois sinais, nenhum lê conteúdo de usuário:
 
-    1. `_schema_pede_titulo` -- sinal de CANAL, não de conteúdo. Se bater,
-       basta: nenhuma posição de mensagem importa, porque dado externo não
-       consegue forjar `response_format`/`tools`.
-    2. Sem (1): o `@librechat/agents` também tem um caminho SEM structured
-       output (`createCompletionTitleRunnable`, mesmo arquivo, usado quando
-       o provedor não suporta) -- prompt de completion puro, sem
-       `response_format`. Aí vale a correção de (419)/MEMÓRIAS (431): a
-       string-gatilho só conta se estiver na ÚLTIMA mensagem, com
-       `role` user/system, E `len(messages) <= 2` -- a chamada de título é
-       sempre one-shot (um H, no máximo um turno de usuário antes).
-       `content` normalizado antes do teste de substring: lista de partes
-       vira texto concatenado, `None`/outro tipo vira string vazia -- nunca
-       `TypeError`, nunca falso negativo silencioso por testar `in` numa
-       lista (achado de auditoria, 16/09/2026).
-    3. `_e_chamada_titulo_goose` -- mesma ideia do (2), mas pro Goose: o
-       texto-gatilho vem na PRIMEIRA mensagem (system), não na última, então
-       tem checagem própria (varre todas as mensagens do payload).
+    1. `_schema_pede_titulo` -- LibreChat (`titleMethod: "structured"`): sinal
+       de CANAL; dado externo não forja `response_format`/`tools`.
+    2. `_e_chamada_titulo_goose` -- Goose: texto-gatilho só em `role: system`.
 
-    Residual CONHECIDO, não fechado por este desenho: colar um texto com a
-    string-gatilho como a PRIMEIRA mensagem de uma conversa nova ainda bate
-    a condição 2 (role user, len<=2) sem ser uma chamada de título de
-    verdade -- mesma classe de risco que qualquer detector por conteúdo,
-    registrado em vez de escondido (Doutrina de defesa proporcional,
-    PROJETO.md: risco residual declarado é mais seguro que estado seguro
-    não declarado)."""
-    if _schema_pede_titulo(payload):
-        return True
-    if _e_chamada_titulo_goose(payload):
-        return True
-
-    msgs = payload.get("messages")
-    if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
-        return False
-    ultima = msgs[-1]
-    if not isinstance(ultima, dict) or ultima.get("role") not in ("user", "system"):
-        return False
-    conteudo = ultima.get("content")
-    if isinstance(conteudo, list):
-        texto = " ".join(p.get("text", "") for p in conteudo if isinstance(p, dict))
-    elif isinstance(conteudo, str):
-        texto = conteudo
-    else:
-        texto = ""
-    return any(s in texto for s in _SINAIS_TITULO)
+    Fecha o residual de (419)/(431)/(433): o antigo sinal por substring na
+    última mensagem de usuário saiu em 13/10/2026 -- colar a frase-gatilho
+    não tira mais a hidratação de um turno real."""
+    return _schema_pede_titulo(payload) or _e_chamada_titulo_goose(payload)
 
 
 # --- Roteador por complexidade (MEMÓRIAS (416); reabre a (383) com premissa nova) --
@@ -528,6 +477,79 @@ def _classificar_rota(payload: dict) -> str:
     if total < _LIMIAR_TRIVIAL_CHARS and not tem_tools and n_user <= 2:
         return "seth-rapido"
     return _ROTA_BASE
+
+
+# --- Roteador-sombra: decisor local (PROJETO.md, "Decisor local") -----------
+# O modelo de decisão escolhe a rota pelo SIGNIFICADO do pedido; as travas
+# exatas abaixo continuam valendo por cima dele. Hoje só em SOMBRA: decide numa
+# thread fora do caminho da resposta (winnow:e4b leva ~4 s na CPU) e registra em
+# ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
+import decisor  # noqa: E402  (mesmo diretório)
+
+_PERGUNTA_ROTA = {"rota": {
+    "type": "choice",
+    "instructions": "What kind of AI model does this user request need?",
+    "criteria": {
+        "rapido": "a greeting, thanks, confirmation or trivial one-line question",
+        "livre": "normal conversation, everyday explanation or writing help, no hard reasoning",
+        "pesado": "hard reasoning, proof, deep technical analysis or complex planning",
+        "codigo": "writing, fixing or explaining programming code, SQL or a script"}}}
+_LIMIAR_ROTA = 0.6
+_SOMBRA_LIVRE = threading.Semaphore(1)
+
+
+def _rota_com_travas(escolhida: str | None, payload: dict) -> str:
+    """Rota final a partir da escolha do modelo, com as travas exatas por cima.
+    Sem escolha (confiança baixa, decisor fora) -> heurística de sempre."""
+    if escolhida is None:
+        return _classificar_rota(payload)
+    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    total, _, _ = _texto_e_sinais(msgs)
+    if total > _LIMIAR_PESADO_CHARS or len(msgs) > _LIMIAR_PESADO_MSGS:
+        return "seth-pesado"
+    if escolhida == "rapido" and payload.get("tools"):
+        return "seth-livre"
+    return f"seth-{escolhida}"
+
+
+def _ultimo_texto_usuario(msgs: list) -> str:
+    for m in reversed(msgs):
+        if isinstance(m, dict) and m.get("role") == "user":
+            c = m.get("content")
+            if isinstance(c, list):
+                return " ".join(p.get("text", "") for p in c if isinstance(p, dict))
+            return c if isinstance(c, str) else ""
+    return ""
+
+
+def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+    """Dispara a decisão-sombra sem esperar. Uma por vez: se o decisor ainda
+    está ocupado, este pedido fica sem sombra (nunca empilha CPU)."""
+    if not _SOMBRA_LIVRE.acquire(blocking=False):
+        return
+    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    texto = _ultimo_texto_usuario(msgs)[-4000:]
+    total, n_user, cerca = _texto_e_sinais(msgs)
+    meta = {"heuristica": rota_heuristica, "chars": total, "n_msgs": len(msgs),
+            "n_user": n_user, "cerca_codigo": cerca, "tools": bool(payload.get("tools"))}
+
+    def _rodar():
+        try:
+            if not texto:
+                return
+            r = decisor.decidir("roteador", texto, _PERGUNTA_ROTA, meta=meta)
+            escolhida = decisor.escolha(r, "rota", _LIMIAR_ROTA)
+            final = _rota_com_travas(escolhida, payload)
+            if escolhida is not None and final != rota_heuristica:
+                # avaliação em produção: o Humano julga as divergências
+                decisor.registrar_avaliacao("roteador", {
+                    "heuristica": rota_heuristica, "modelo": final,
+                    "confianca": r["rota"]["confidence"], "chars": total,
+                    "trecho": texto[:200]})
+        finally:
+            _SOMBRA_LIVRE.release()
+
+    threading.Thread(target=_rodar, daemon=True).start()
 
 
 def _injeta(payload: dict) -> dict:
@@ -587,6 +609,8 @@ class _Handler(BaseHTTPRequestHandler):
                 # roteador por complexidade: só o alvo "seth-livre" do Agent
                 if payload.get("model") == _ROTA_BASE:
                     self._rota = _classificar_rota(payload)
+                    if not _e_chamada_utilitaria(payload):
+                        _sombra_rota(payload, self._rota)
                     payload["model"] = self._rota
                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
         self._passar(corpo, "POST")
@@ -848,11 +872,13 @@ def _selftest() -> int:
           f"(est={len(est_b)})")
     falhas += 0 if ok2b else 1
 
-    # 3. chamada de TÍTULO do LibreChat -> repassada crua, SEM system hidratado
+    # 3. chamada de TÍTULO do LibreChat (titleMethod structured: schema com "title")
+    #    -> repassada crua, SEM system hidratado
     body3 = json.dumps({"model": "seth", "messages": [
-        {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
-         "detected language\n2. A concise title in the detected language (5 words "
-         "or less, no punctuation or quotation)\n\nUser: oi\nAssistant: ok"}]}).encode()
+        {"role": "user", "content": "User: oi\nAssistant: ok"}],
+        "response_format": {"type": "json_schema", "json_schema": {"name": "title", "schema": {
+            "type": "object", "properties": {"title": {"type": "string"}},
+            "required": ["title"]}}}}).encode()
     urllib.request.urlopen(urllib.request.Request(
         base, data=body3, headers={"Content-Type": "application/json"}), timeout=10).read()
     m3 = json.loads(_Dummy.ultimo_corpo)["messages"]
@@ -860,6 +886,31 @@ def _selftest() -> int:
     print(f"{'PASS' if ok3 else 'FALHA'}  chamada de título -> repassada sem hidratar "
           f"(messages={len(m3)}, role0={m3[0]['role']})")
     falhas += 0 if ok3 else 1
+
+    # 3c. usuário COLA a frase-gatilho antiga do título (sem schema) -> hidrata
+    #     (residual de (419)/(431)/(433) fechado)
+    body3c = json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
+         "detected language\n2. A concise title in the detected language"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body3c, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m3c = json.loads(_Dummy.ultimo_corpo)["messages"]
+    ok3c = len(m3c) == 2 and m3c[0]["role"] == "system" and MARCADOR in m3c[0]["content"]
+    print(f"{'PASS' if ok3c else 'FALHA'}  frase de título colada pelo usuário -> hidratou "
+          f"(messages={len(m3c)})")
+    falhas += 0 if ok3c else 1
+
+    # 3d. gatilho do Goose vindo em mensagem de USUÁRIO -> hidrata
+    body3d = json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "Generate a short title (four words or less) that "
+         "describes the topic of the user's messages"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body3d, headers={"Content-Type": "application/json"}), timeout=10).read()
+    m3d = json.loads(_Dummy.ultimo_corpo)["messages"]
+    ok3d = len(m3d) == 2 and m3d[0]["role"] == "system" and MARCADOR in m3d[0]["content"]
+    print(f"{'PASS' if ok3d else 'FALHA'}  gatilho do Goose como mensagem de usuário -> "
+          f"hidratou (messages={len(m3d)})")
+    falhas += 0 if ok3d else 1
 
     # 3b. chamada de TÍTULO do Goose (payload real capturado com proxy, MEMÓRIAS (495)) ->
     # repassada crua, SEM system hidratado. Gatilho na PRIMEIRA mensagem (system), não na
@@ -927,6 +978,38 @@ def _selftest() -> int:
                         (9, ok9, f"curto+tools -> seth-livre (deu {r_triv_tools})")]:
         print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
         falhas += 0 if ok else 1
+
+    # 9b. travas exatas sobre a escolha do decisor (pura, sem rede)
+    curto = {"messages": [{"role": "user", "content": "prove que há infinitos primos"}]}
+    travas = [
+        ("sem escolha -> heurística", _rota_com_travas(None, curto), "seth-rapido"),
+        ("codigo -> seth-codigo", _rota_com_travas("codigo", curto), "seth-codigo"),
+        ("pesado curto -> seth-pesado", _rota_com_travas("pesado", curto), "seth-pesado"),
+        (">6000 chars vence o modelo", _rota_com_travas(
+            "rapido", {"messages": [{"role": "user", "content": "z" * 7000}]}), "seth-pesado"),
+        ("rapido com tools -> seth-livre", _rota_com_travas(
+            "rapido", {"tools": [{"x": 1}], **curto}), "seth-livre"),
+    ]
+    for desc, deu, quer in travas:
+        ok = deu == quer
+        print(f"{'PASS' if ok else 'FALHA'}  trava: {desc} (deu {deu})")
+        falhas += 0 if ok else 1
+
+    # 9c. sombra com decisor fora do ar: o pedido passa pela heurística, sem esperar
+    import time as _t
+    _url_antes, decisor.URL = decisor.URL, "http://127.0.0.1:9"
+    _log_antes, decisor.LOG_DIR = decisor.LOG_DIR, Path(tempfile.mkdtemp())
+    t0 = _t.monotonic()
+    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read()
+    dt = _t.monotonic() - t0
+    rota_sombra = json.loads(_Dummy.ultimo_corpo)["model"]
+    decisor.URL, decisor.LOG_DIR = _url_antes, _log_antes
+    ok9c = rota_sombra == "seth-rapido" and dt < 2
+    print(f"{'PASS' if ok9c else 'FALHA'}  sombra com decisor fora -> heurística, "
+          f"sem bloquear (rota {rota_sombra}, {dt * 1000:.0f} ms)")
+    falhas += 0 if ok9c else 1
 
     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);

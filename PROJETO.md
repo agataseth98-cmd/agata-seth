@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7b780a0036fc274714ad1b86fed129b58e48217e
-  Escrito em: 13/10/2026 11:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a
+  Escrito em: 13/10/2026 11:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -63,13 +63,14 @@ Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/
 - **Limite de classe:** modelo local neste hardware tem teto de ~14b/9GB — `PROJETO_REFERENCIA.md`, "VM do Marcos".
 
 ## Serviços (boot)
-Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind real — fonte da verdade, não esta seção. `:20131`/`:20132` pertencem ao próprio `omniroute` (426 e 404): `lacuna`, função não determinada (420).
+Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind real — fonte da verdade, não esta seção. `:20131`/`:20132` são do próprio `omniroute`, só loopback: `embedWsProxy` (proxy WebSocket das UIs embutidas) e `liveServer` (WebSocket do painel, `/live-ws`) — lido no código do OmniRoute 3.8.50 em 13/10/2026, deixou de ser `lacuna` (420).
 
 **`agata.target`** (`systemd --user`, habilitado no boot) puxa:
 - `omniroute` (`:20128`) e `omniroute-sanitizer` (`:20127` — os callers usam este; `sanitizar_payload()` em `redesign/router/sanitizar.py`, `--autoteste`, sanitiza segredo antes do egresso e bloqueia payload profundo ou largo demais (328)). `requestQueue.maxWaitMs = 45000` no banco do OmniRoute (362)/(363); clone novo herda o valor pelo drop-in `redesign/systemd/dropin-omniroute-resilience.conf` (`RATE_LIMIT_MAX_WAIT_MS`) (588).
 - `openvino-whisper` (`:20130`, STT na iGPU) e `openvino-embeddings` (`:20134`, embeddings na iGPU); venv `igpu/.venv` com `torch==2.14.0+cpu`, sem libs CUDA.
 - `obsidian-ro-proxy` (`:27125`, só leitura, `ro_proxy.py`) e `obsidian-app.service` (Flatpak `md.obsidian.Obsidian`, `After=graphical-session.target`) — o app é o **backend real** do proxy: com ele fechado, o proxy devolve **403** ("upstream inacessível"), que parece permissão negada e não é.
 - `agata-drain` (oneshot: drena o WAL do grafo no stop, nunca corta um commit).
+- `ollaya` (`:11435`, contêiner CPU pinado por digest) — decisor local; ver "Decisor local".
 
 **Sob demanda pelo atalho `seth` / `Parar Seth`:**
 - `seth-gateway` (`:20126`) — reidrata a Seth; ver "Interface".
@@ -78,13 +79,13 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 - Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
 - `piper-tts` (`:8890`, voz pt-BR local) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
 
-**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-consolidacao.timer`.
+**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-consolidacao.timer` · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele (13/10/2026).
 
 **Manuais:** `agata-warmup.service` pré-aquece o modelo local pesado (cold-start do Ollama). `agata-jogo` (`~/.local/bin/`) lança jogo com o Agata fora da RTX 4060, via `game-performance` da distro — **não** Feral GameMode, que briga com o `ananicy-cpp`.
 
-**`agata-consolidacao.timer`** (220)/(311): 23:00 diário, `ExecStart` = `redesign/grafo/flows/consolidacao.py`. Saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon. Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` + `~/.cache/agata/` — contenção de kernel, não de prompt. **`lacuna` carregada:** o resumo de 1 linha do log já alegou sucesso sem o arquivo existir — confira `propostas/`, nunca só o log.
+**`agata-consolidacao.timer`** (220)/(311): 23:00 diário, `ExecStart` = `redesign/grafo/flows/consolidacao.py`. Saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon. Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` + `~/.cache/agata/` — contenção de kernel, não de prompt. Três travas antes de escrever: as duas mecânicas (371)/(549) e a nota de utilidade do decisor local, que só reprova. "novo" no log só depois de conferir o arquivo no disco (tamanho > 0), não pela intenção de escrever.
 
-**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar. Avisa também quando o Ollama tem modelo carregado só em parte na GPU (`/api/ps`, `size_vram < size`) e diz quem ocupa a VRAM (648)/(649) — todas as unidades estavam `active` enquanto a Seth rodava a 6,3 tok/s.
+**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service`, `ollaya.service`, `agata-vault-inbox.timer`, `agata-avaliacao-decisor.timer` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar. Avisa também quando o Ollama tem modelo carregado só em parte na GPU (`/api/ps`, `size_vram < size`) e diz quem ocupa a VRAM (648)/(649) — todas as unidades estavam `active` enquanto a Seth rodava a 6,3 tok/s.
 
 **Não recriar:** `agata.service`, `agatha.service`, `agata-rest.service` (ausentes, (107)/(539)), `hermes-gateway.service` (Hermes removido, (312)), `kokoro-tts` (removido, (593)/(594)).
 
@@ -153,14 +154,19 @@ Adotada pelo Humano, 17/08/2026 (201). Ferramenta de decisão situacional do Hum
 O formato de "pedido de decisão" (itens numerados, marcador de aguardando, ordem de execução) não é canonizado: canoniza-se a versão que sobreviver ao uso.
 
 ## Estado dos bugs e dos testes
-Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIAS e, até 02/10/2026, verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`.
-- **OmniRoute lento sob provedor travado:** a conexão pooled para o provedor trava ~30s, fora do nosso controle. `maxWaitMs = 45000` só dá folga para a auto-recuperação terminar em vez de estourar `504`. Efeito residual: chamada isolada lenta (~45s), não falha; combos com fallback sofrem menos (362)/(363).
-- **Cold-start do Ollama:** a 1ª chamada a modelo não carregado (~30s de load) pode estourar a fila; a 2ª responde em ~0,5s. Mitigação: `systemctl --user start agata-warmup.service` antes de usar o modelo local pesado.
-- **Filtro de título do `seth_gateway`** (433): o sinal forte é o *schema* que o `@librechat/agents` exige (`response_format`/`tools` com propriedade `"title"`). Sem esse sinal, vale só o fallback: `messages[-1]`, `role in ("user","system")` e `len(messages) <= 2`. **Risco residual:** a string-gatilho como primeira mensagem de uma conversa nova ainda casa a condição de fallback — mesma classe de qualquer detector por conteúdo.
-- **Hidratação suspeita na Seth** (sem bug confirmado com esse nome): `curl` no `:20126` forçando o caminho suspeito, capturar o payload que sai (o `--selftest` do gateway mostra o que `_injeta` monta) e testar em ordem: (a) não injetada, (b) injetada mas truncada, (c) recebida e ignorada (420).
-- **Manifesto do HD:** a fórmula original de `ir_sha256_xmlbin` não reproduz. `redesign/fase7-hd/hash_ir.sh` fixa uma fórmula reproduzível daqui para frente; a garantia real é o teste de restore do restic (`diff -rq` restaurado vs. vivo).
-- **Drift dos derivados de hidratação** (333): três arquivos derivados já voltaram a um estado velho; causa raiz não confirmada (hipótese: "Recuperação de arquivo"/"Sync" do Obsidian) — `lacuna` até o Humano checar dentro do app.
+Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIAS e, até 02/10/2026, verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Fechados em 13/10/2026 (MEMÓRIAS (655)): cold-start do Ollama, filtro de título, hidratação suspeita, manifesto do HD, drift dos derivados (agora P-22), portas `:20131`/`:20132`, log da consolidação.
+- **Risco de fundo, não bug — provedor travado no OmniRoute:** a conexão pooled espera até `OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS` (padrão 30000) antes de tentar de novo num socket novo. Disparou 323 vezes de 02/09 a 10/10/2026 — 155 `api.z.ai`, 90 Gemini, **55 o próprio Ollama local** (todos até 23/09, quando o `llama.cpp` empurrava o Ollama para a CPU (648); nenhum depois). Por isso o valor **não** baixa: um fundo local lento seria cortado. Cold-start medido em 13/10/2026: 9,1 s, resposta com tool-call (modelo fora da GPU, ainda no cache de disco; logo após reboot pode demorar mais — coberto pelo retry em socket novo dentro dos 45 s). Mitigação: `maxWaitMs = 45000` (362)/(363) e os provedores instáveis no fim das filas ou fora delas (653)/(654)/(655). Desde 04/10, 1 disparo. Medir: `grep -c "response-start timeout" ~/.omniroute/logs/application/app.log`.
+- **Como testar uma fila sem se enganar** (655): `scripts/queda_por_elo.py`, nunca `curl` com `max_tokens` minúsculo — modelo com raciocínio interno devolve vazio e o OmniRoute cai pro próximo elo — e nunca dois pedidos Mistral no mesmo segundo (limite 1 req/s → 429). Pelo `:20126`, mensagem curta vira `seth-rapido` antes de chegar ao OmniRoute.
 - Os protocolos TES-001/TES-002 foram aposentados em 09/09/2026 — (417); o que cobriam está em `PROTOCOLOS.md`, "Cadeia de auditoria em camadas", no P-7 e em `FALHAS.md`.
+
+## Decisor local
+Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
+- **Padrão "decide e confere".** A regra determinística continua e sempre vence. O modelo decide **dentro** do que ela permite, ou só **restringe** (barra, avisa) — nunca libera o que ela barrou, nunca reprova commit (hook só aceita checagem determinística). Confiança baixa, timeout ou serviço fora → vale a regra de antes; nada quebra se o `ollaya` cair. Cada decisão: `~/.cache/agata/decisor/<uso>.jsonl` (respostas, latência, metadados; nunca o texto avaliado). Única exceção, só enquanto durar a avaliação: 200 caracteres de cada divergência do roteador, em arquivo modo 600, para o Humano julgar.
+- **Onde decide hoje:** roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
+- **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
+- **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
+- **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo. Inbox se mede sozinho (nota barrada que depois foi editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); roteador que concorda com a regra em 95% ou mais "não vale" (só gasta CPU). Avisa na área de trabalho (notificação e `avaliacao-decisor.md`) no 3º e no 7º dia, depois a cada 7, e na hora se o serviço reiniciar 3+ vezes ou mais da metade das decisões de 24 h falhar. Termina quando o Humano mandar aprovar ou remover: `--encerrar aprovado|removido` apaga os trechos guardados; "removido" já para o `ollaya` (todos os usos caem na regra) e o código sai por proposta P-8.
+- **Risco declarado:** projeto independente com semanas de vida (versão nova a cada poucos dias — atualizar é decisão explícita, nunca `latest`); pesos baixados uma vez do Hugging Face dos autores; ~4 s de CPU por decisão, por isso nenhum uso fica no caminho quente da resposta.
 
 ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
 - **Fase 0 — Saneamento:** publicar no remoto as entradas acumuladas.
@@ -172,7 +178,7 @@ Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIA
 
 **Bússola de longo prazo** (542): `extras/bussola/auditoria-e-bussola.md` — 12 princípios (B1–B12) e 5 aprendidos por incidente (T1–T5). Orienta, não gera tarefa (REGRAS, "Contenção de escopo"); em conflito, REGRAS vence.
 
-**Replicabilidade** (25/09/2026): `propostas/plano-replicabilidade-2026-09-25.md` separa framework (vai para o clone) de instância (nunca vai). A gênese existe e foi testada de ponta a ponta: `scripts/genese.sh` (584)/(586). `scripts/vault_importar_inbox.py` (nota de `memoria/obsidian-inbox/` → entrada em MEMÓRIAS pelo `POST /memoria` do `seth_escriba`) está pronto e não ligado a fluxo automático nesta instância. O resto do plano é bússola.
+**Replicabilidade** (25/09/2026): `propostas/plano-replicabilidade-2026-09-25.md` separa framework (vai para o clone) de instância (nunca vai). A gênese existe e foi testada de ponta a ponta: `scripts/genese.sh` (584)/(586). `scripts/vault_importar_inbox.py` (nota de `memoria/obsidian-inbox/` → entrada em MEMÓRIAS pelo `POST /memoria` do `seth_escriba`) roda sozinho desde 13/10/2026 pelo `agata-vault-inbox.timer` (decisão do Humano, (655)); ver "Serviços (boot)". O resto do plano é bússola.
 
 **Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
 

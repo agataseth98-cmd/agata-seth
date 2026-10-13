@@ -1,0 +1,18 @@
+[Unit]
+Description=Ágata — importa notas prontas do inbox do Obsidian para MEMÓRIAS (via seth_escriba)
+# Nota pronta = parada há 10 min + decisor local não acha que é rascunho
+# (scripts/vault_importar_inbox.py). O escriba grava no working tree e NÃO
+# comita: o Humano revisa `git diff MEMÓRIAS.md` antes de qualquer commit.
+Wants=seth-escriba.service
+After=seth-escriba.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+ExecCondition=/usr/bin/bash -c 'compgen -G "%h/agata/memoria/obsidian-inbox/*.md" >/dev/null'
+ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20140/ 30
+ExecStart=/usr/bin/python3 %h/agata/scripts/vault_importar_inbox.py
+ProtectSystem=strict
+ProtectHome=read-only
+# apaga só a nota importada; o log do decisor vai para ~/.cache/agata/decisor
+ReadWritePaths=-%h/agata/memoria/obsidian-inbox %h/.cache/agata

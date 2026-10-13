@@ -5,9 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (656)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (657)).
 
-**13/10: todas as falhas da lista do sistema resolvidas numa proposta só — esperando a sua assinatura.** Para assinar: `bash scripts/aprovar.sh fechamento-e-decisor-2026-10-13`. Depois que você assinar e juntar o PR, eu aplico, instalo e meço de novo. O que ela faz, em uma linha cada:
+**13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** Um defeito achado no teste (o decisor anota errado quando discorda da regra) vai numa proposta pequena nova. O que já está valendo:
 - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
 - a pesquisa semanal e a consolidação noturna esperam o roteador de modelos subir (hoje cedo elas rodaram 1 segundo antes dele e gravaram só erro);
 - um alarme novo (P-22) avisa se aqueles arquivos de memória voltarem a ficar velhos sozinhos;

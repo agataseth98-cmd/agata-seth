@@ -38,6 +38,11 @@ set -uo pipefail
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FILTRO="${1:-}"
 export AGATA_TESTE_PERIMETRO=1   # impede o P-16 de recursar dentro do clone
+# Decisor local sempre "fora do ar" na suíte: veredito determinístico, sem
+# depender do Ollaya. A direção PEGA da camada do decisor é provada pelo
+# --selftest de scripts/perimetro/p20_decisor.py.
+export AGATA_DECISOR_URL="http://127.0.0.1:9"
+export AGATA_DECISOR_LOG="$(mktemp -d -t decisor-teste.XXXXXX)"
 
 OK=0; FALHOU=0; PULADO=0
 falhas_detalhe=()
@@ -214,7 +219,7 @@ declare -A SEM_TESTE=(
 # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
 declare -A NIVEL=(
   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
-  [P-21]=L1 [P-20]=L1
+  [P-21]=L1 [P-20]=L1 [P-22]=L1
   [P-2]=L3
   [P-3]=L4 [P-13]=L4 [P-15]=L4
   [P-4]=L2 [P-9]=L2 [P-10]=L2
@@ -538,6 +543,27 @@ printf '\ncontato de teste: fulano.teste@exemplo.invalid\n' >> "MEMÓRIAS.md" &&
 EOF
 
 _caso P-20 PASSA "nada staged" <<'EOF'
+true
+EOF
+
+_caso P-20 PASSA "camada do decisor com decisor fora do ar: texto pessoal em MEMÓRIAS.md não vira aviso nem falha" <<'EOF'
+printf '\nconsulta médica marcada, endereço de casa e telefone da família\n' >> "MEMÓRIAS.md" && git add "MEMÓRIAS.md"
+EOF
+
+# --- P-22: derivados de hidratação divergindo do HEAD sem a fonte mudar ----
+_caso P-22 PEGA "drift de (333): .hidrata.md diferente do HEAD, fontes intactas" <<'EOF'
+printf 'conteudo velho\n' > .hidrata.md
+EOF
+
+_caso P-22 PEGA "drift num índice, mesmo sem nada staged" <<'EOF'
+printf 'indice truncado\n' > INDICE_MEMORIAS.md
+EOF
+
+_caso P-22 PASSA "fonte mudou junto (regeneração legítima)" <<'EOF'
+printf '\nlinha nova\n' >> "MEMÓRIAS.md" && printf 'regenerado\n' >> .hidrata.md
+EOF
+
+_caso P-22 PASSA "nada mudou" <<'EOF'
 true
 EOF
 

@@ -1,0 +1,9 @@
+[Unit]
+Description=Ágata — avaliação diária do decisor local, 20:00 (com recuperação se a máquina estava desligada)
+
+[Timer]
+OnCalendar=*-*-* 20:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

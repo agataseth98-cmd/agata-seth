@@ -1,0 +1,13 @@
+[Unit]
+Description=Ágata — avaliação diária do decisor local (vale a pena? avisa o Humano)
+# scripts/avaliar_decisor.py: veredito por uso, relatório na área de trabalho,
+# notificação no 3º e no 7º dia, depois semanal, e na hora se houver alarme.
+# Para sozinho depois de `--encerrar aprovado|removido`.
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+ExecStart=/usr/bin/python3 %h/agata/scripts/avaliar_decisor.py
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.cache/agata "-%h/Área de trabalho"
