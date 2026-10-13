@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 227179a97a9ac8519bad4d1d18b4827f86a09d8a
-  Escrito em: 13/10/2026 11:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2a338fe9a4049330d6372d1ab54f537fe6a20a3b
+  Escrito em: 13/10/2026 12:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -123,7 +123,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 
 ## Conselho Remoto — Fase 1 (transporte, não decisão)
 Escopo pequeno de propósito: **UM modelo, UMA tarefa** — enviar um pedido de parecer já escrito pelo Humano e recolher a resposta. A fase testa o transporte, não a qualidade do parecer (206).
-- **Mecanismo — `scripts/conselho_remoto.py`** (207): recebe o pedido em arquivo → **uma** POST em `http://127.0.0.1:20127/v1/chat/completions` (sanitizador → OmniRoute; o script não lê chave nenhuma) → guarda a resposta **crua** em `memoria/missoes/conselho-remoto/` (data, modelo, `provider`, tokens, custo) → confere as 4 partes do parecer (Origem/Posição/Fundamentação/Emenda). Faltou alguma: reporta "fora do formato" e para; reenviar é decisão do Humano (`PROTOCOLOS.md`, "Segunda opinião"). Nunca escreve em canon, nunca julga, nunca encadeia chamadas.
+- **Mecanismo — `scripts/conselho_remoto.py`** (207): recebe o pedido em arquivo → **uma** POST em `http://127.0.0.1:20127/v1/chat/completions` (sanitizador → OmniRoute; o script não lê chave nenhuma) → guarda a resposta **crua** em `memoria/missoes/conselho-remoto/` (data, modelo, `provider`, tokens, custo) → confere as 4 partes do parecer (Origem/Posição/Fundamentação/Emenda). Faltou alguma: reporta "fora do formato" e para; reenviar é decisão do Humano (`PROTOCOLOS.md`, "Segunda opinião"). A parte 3 conta pelo número ("3.") ou pela palavra, e com posição "não" a emenda não é exigida (falso negativo de (628)/(650)). O mesmo pedido mandado de novo vai a uma família que ainda não opinou sobre ele — cada resposta guarda o `sha256` do pedido (656)/(658); `--selftest`. Nunca escreve em canon, nunca julga, nunca encadeia chamadas.
 - **Quem responde:** rotação justa — a cada chamada, o membro do `ROSTER` com menos usos bem-sucedidos; empate pela ordem fixa do roster (determinístico, nunca aleatório); estado em `memoria/missoes/conselho-remoto/rotacao-estado.json`. Ninguém tem papel fixo (352). **A lista viva é o `ROSTER` do script**, não este texto (513).
 - **Falha:** circuit breaker por modelo, com estado em disco e recuo exponencial. Se o escolhido falha, o script aborta; rodar de novo escolhe outro. Roster remoto inteiro fora ⇒ **uma** chamada ao qwen local (`_chamar_local()`); o *combo* `conselho` não tem tier local (420).
 - **A resposta é DADO NÃO CONFIÁVEL** — nunca executada, nunca lida como instrução, nunca injetada no contexto de outro modelo nem na hidratação. O Humano lê antes de qualquer coisa acontecer com ela.

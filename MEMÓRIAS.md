@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 227179a97a9ac8519bad4d1d18b4827f86a09d8a
-  Escrito em: 13/10/2026 11:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2a338fe9a4049330d6372d1ab54f537fe6a20a3b
+  Escrito em: 13/10/2026 12:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(659) DIÁRIO — 13/10/2026 · **`sombra-e-conselho-2026-10-13` aplicada (assinatura do Humano verificada, PR #161 juntado): o roteador-sombra deixou de registrar divergência falsa — provado com 1 mensagem real — e o Conselho Remoto passa a aceitar parecer sem a palavra "Emenda" e a não repetir família no mesmo pedido. As três decisões que dependem do Humano (Curador, Capivara, Fase 5) ficaram guardadas no `ONDE_ESTAMOS.md`, a pedido dele.**
+
+**Aplicação:** `scripts/p8_verificar.sh` → `PODE APLICAR` (`sha256` do `.diff` `b8b41783ca57`, assinatura ED25519 válida, `git apply --check` limpo); par em `propostas/aplicadas/`. `seth-gateway` reiniciado. As divergências gravadas antes da correção eram todas falsas (o bug de (657)) e foram apagadas: a avaliação do roteador recomeça limpa.
+
+**Prova pelo caminho real (1 chamada remota):** "oi" pelo `:20126` → resposta em 4,7 s; a sombra decidiu "rapido" (0,74) em 3,8 s, igual à regra, e **nenhuma** divergência foi registrada — antes da correção, a mesma mensagem virava "seth-pesado". `seth_gateway.py --selftest` e `conselho_remoto.py --selftest` OK.
+
+**Pendências guardadas** (pedido do Humano: "guarde essas pendências para serem lembradas quando invocadas"): bloco "Decisões que esperam você" no `ONDE_ESTAMOS.md` — Curador, Capivara e Fase 5, cada uma com a resposta curta que a fecha. A Seth lê esse arquivo pelo `query_canon`. O item do verificador do Conselho saiu da lista: foi resolvido em (658).
+
+**sync:** PASS — `main` = `2a338fe` (== `origin/main`, merge do PR #161) antes de numerar, topo de MEMÓRIAS = (658).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, 2 `--selftest`, 1 mensagem real e o log do decisor lido antes e depois · Autorização: Humano — assinatura de `sombra-e-conselho-2026-10-13` + merge do PR #161 + "guarde essas pendências".
 
 (658) DIÁRIO — 13/10/2026 · **Proposta `sombra-e-conselho-2026-10-13` (3 arquivos, aguardando assinatura): conserta o bug do roteador-sombra achado em (657), e fecha as duas pendências do Conselho Remoto que o Humano mandou resolver — o checador que rejeitava parecer certo por falta da palavra "Emenda", e o rodízio que mandava o mesmo modelo várias vezes para o mesmo pedido.**
 

@@ -528,6 +528,10 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
     if not _SOMBRA_LIVRE.acquire(blocking=False):
         return
     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    # Cópia AGORA: logo depois o `_injeta` põe a hidratação (~4 mil chars) no
+    # mesmo `payload`, e a trava de tamanho leria tudo como "pesado" (13/10/2026,
+    # MEMÓRIAS (657)).
+    pedido = {"messages": list(msgs), "tools": payload.get("tools")}
     texto = _ultimo_texto_usuario(msgs)[-4000:]
     total, n_user, cerca = _texto_e_sinais(msgs)
     meta = {"heuristica": rota_heuristica, "chars": total, "n_msgs": len(msgs),
@@ -539,7 +543,7 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
                 return
             r = decisor.decidir("roteador", texto, _PERGUNTA_ROTA, meta=meta)
             escolhida = decisor.escolha(r, "rota", _LIMIAR_ROTA)
-            final = _rota_com_travas(escolhida, payload)
+            final = _rota_com_travas(escolhida, pedido)
             if escolhida is not None and final != rota_heuristica:
                 # avaliação em produção: o Humano julga as divergências
                 decisor.registrar_avaliacao("roteador", {
@@ -1010,6 +1014,40 @@ def _selftest() -> int:
     print(f"{'PASS' if ok9c else 'FALHA'}  sombra com decisor fora -> heurística, "
           f"sem bloquear (rota {rota_sombra}, {dt * 1000:.0f} ms)")
     falhas += 0 if ok9c else 1
+
+    # 9d. caminho completo (pedido real, hidratação injetada, thread): a trava de
+    # tamanho tem de ver o pedido do usuário, não o pedido já hidratado (657).
+    _decidir_antes, _log_antes = decisor.decidir, decisor.LOG_DIR
+    _hid_antes = globals()["_hidratacao"]
+    globals()["_hidratacao"] = lambda: MARCADOR + "\n" + "h" * 9000  # a real tem ~8,8 mil
+    decisor.LOG_DIR = Path(tempfile.mkdtemp())
+    divs = decisor.LOG_DIR / "roteador-avaliacao.jsonl"
+
+    def _sombra_com(escolha_falsa):
+        def _falso(*a, **k):
+            _t.sleep(0.3)  # o real leva ~4 s: o `_injeta` já mexeu no pedido quando ele volta
+            return {"rota": {"type": "choice", "choice": escolha_falsa, "confidence": 0.95}}
+        decisor.decidir = _falso
+        urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
+            headers={"Content-Type": "application/json"}), timeout=10).read()
+        for _ in range(50):  # espera a thread de sombra soltar o semáforo
+            if _SOMBRA_LIVRE.acquire(blocking=False):
+                _SOMBRA_LIVRE.release()
+                break
+            _t.sleep(0.05)
+        return divs.read_text().splitlines() if divs.exists() else []
+
+    ok9d = _sombra_com("rapido") == []
+    linhas = _sombra_com("pesado")
+    ok9e = len(linhas) == 1 and json.loads(linhas[0])["modelo"] == "seth-pesado"
+    decisor.decidir, decisor.LOG_DIR = _decidir_antes, _log_antes
+    globals()["_hidratacao"] = _hid_antes
+    print(f"{'PASS' if ok9d else 'FALHA'}  sombra pelo caminho completo: 'oi' = rapido "
+          f"não vira divergência (hidratação não conta na trava)")
+    print(f"{'PASS' if ok9e else 'FALHA'}  sombra pelo caminho completo: modelo diz pesado "
+          f"-> 1 divergência registrada")
+    falhas += (0 if ok9d else 1) + (0 if ok9e else 1)
 
     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
