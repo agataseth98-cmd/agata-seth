@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35c876d8eb023252268ecbd7220df96d6220c82b
-  Escrito em: 13/10/2026 16:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b862d1978ec83d9dbb658bf331ae6c327450b7d0
+  Escrito em: 13/10/2026 16:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
+
+**Medido:** a tabela de (670) contava só **entradas de MEMÓRIAS**, que caem em 3 regiões (temporal 549, frontal 32, cerebelo 40) — por isso o "—". As outras regiões tinham notas: parietal 87, tronco 20, occipital 474 (documentos de `redesign/`, `extras/` e missões). As 6 regiões já estavam ligadas no plugin (`enabledLobes` todas `true`). **O desligado de verdade:** o vault visível tem **1.579 notas** e **18.331 ligações únicas** (wikilinks, contadas no disco, sem pastas ocultas) — com `edgeCap` 12.000 o Brain Atlas descartava ~6 mil ligações. `nodeCap` 2.500 bastava.
+
+**Correção de rota, minha:** o plano dizia "o vault tem ~4.900 notas, metade fica de fora". Errado — a contagem incluía 3.036 notas de missões em pastas ocultas (`.npm-global`, `.cache`, `.venv`…), que o Obsidian não mostra. Medido de novo antes de mudar: o corte era de **ligações**, não de notas.
+
+**Mudanças:** `redesign/obsidian/brain-atlas.json` — `nodeCap` 4.000, `edgeCap` 30.000. `scripts/gerar_obsidian.py` — `cerebro.md` escrito no fim do run, com a tabela "Notas" (tudo o que o Brain Atlas vê na região, na ordem dele: `brain_region` da nota gerada → `noteRegionMap` → pasta ancestral em `folderRegionMap` → lobo do `defaultKind`, lidos do mesmo `brain-atlas.json`) e "Entradas de MEMÓRIAS"; marcador de cor por região e total ("1.566 notas no cérebro", das listas versionadas — determinístico para o P-10); aviso "todas as regiões estão ligadas" (FRO · PAR · TEM · OCC · CER · STM; **All** religa). De passagem: o Obsidian regrava `appearance.json`/`core-plugins.json` sem a quebra de linha final — comitado como ele grava, para a árvore não ficar suja.
+
+**Verificado:** 2ª execução do gerador regrava 0 arquivos; P-10 simulado (worktree com o `.diff` comitado) **bate**; `perimetro.sh` 0 FALHA.
+
+**Assinar** (depois de juntar o PR e `git pull --ff-only`): `bash scripts/aprovar.sh cerebro-tudo-ligado-2026-10-13`
+
+**sync:** PASS — `main` = `origin/main` (PR #172 juntado) antes do branch; topo de MEMÓRIAS = (671).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: contagem de `brain_region` no vault, `data.json` do plugin, `find`/`git ls-files` das notas visíveis e ocultas, contagem de wikilinks únicos, P-10 simulado, perímetro · Autorização: Humano — "Ligue tudo".
 
 (671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada pelo Humano): cérebro 3D instalado, vault regenerado com regiões e ligações por sentido, listagem do vault em dia, `vault_buscar` no ar para a Seth, tema da Agata no LibreChat. Falta o Humano ver na tela.**
 
