@@ -1,0 +1,51 @@
+{
+  "_como_usar": "Afirmações que uma resposta já fez, foram conferidas na Máquina e se mostraram falsas. A auditoria do turno anterior (auditoria_turno.py) acusa quando uma resposta as repete. Casa quando o `tema` aparece numa linha e: (a) o item tem `sinal` próprio e ele aparece na mesma linha; ou (b) sem `sinal` próprio, a linha tem o `sinal_global` (ausência/crítica) ou está numa seção cujo título o tenha (\"O que falta\", \"Limitações\"). Cada auditoria nova que achar afirmação falsa recorrente acrescenta uma linha aqui. Regex em Python, sem diferenciar maiúsculas.",
+  "sinal_global": "falt|não há|nao ha|não existe|nao existe|inexist|ausen|carec|sem (um|uma|a|o)? ?(índice|indice|busca|verifica|ferramenta)|poderia melhorar|melhori|limita|ponto fraco|pontos fracos|risco|desafio|precisa de|seria bom",
+  "itens": [
+    {
+      "id": "indice",
+      "tema": "índice.{0,40}(data|tema|entrada)|(data|tema|entrada).{0,40}índice|indice.{0,40}(data|tema|entrada)",
+      "correcao": "o índice existe: query_canon doc=INDICE_MEMORIAS (por data, grep \"dd/mm/aaaa\") e doc=INDICE_MEMORIAS_PALAVRAS-CHAVE (por tema)",
+      "origem": "(660)"
+    },
+    {
+      "id": "integridade-vault",
+      "tema": "integridade.{0,30}vault|vault.{0,40}integridade|verifica\\w*.{0,25}(do |o )?vault",
+      "correcao": "já existe: o P-10 regenera o vault a partir do HEAD e compara o sha256; maquina_verificar perimetro roda",
+      "origem": "(660)"
+    },
+    {
+      "id": "diff-hidratacao",
+      "tema": "diff.{0,15}hidrata|hidrata\\w*.{0,30}(diff|compar)",
+      "correcao": "desnecessário: o gateway mede o estado de novo a cada pedido (417) e maquina_verificar estado mede ao vivo",
+      "origem": "(660)/(664)"
+    },
+    {
+      "id": "busca-semantica",
+      "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
+      "correcao": "recusa deliberada, não falta: sem RAG por embedding de propósito (115)/(293)/(313), \"Fronteira de recusas\" em PROJETO_REFERENCIA",
+      "origem": "(660)"
+    },
+    {
+      "id": "indices-manuais",
+      "tema": "índices?|indices?",
+      "sinal": "(são|é|ficam|sao|e) manua|atualiza\\w* manualmente|não (são|é) atualizad|nao (sao|e) atualizad|esquecer de atualizar",
+      "correcao": "os índices são gerados pelo hook a cada commit (\"GERADO AUTOMATICAMENTE\", .githooks/gerar-hidratacao.sh)",
+      "origem": "(661)"
+    },
+    {
+      "id": "hidratacao-manual",
+      "tema": "hidrata\\w*|bloco de estado",
+      "sinal": "(é|deve ser|precisa ser|tem de ser) copiad|copiad\\w* (manual|à mão|a mão)|manualmente|(feita|feito) à mão",
+      "correcao": "a hidratação é injetada pelo seth_gateway a cada pedido (estado_para_eco.sh), não copiada à mão",
+      "origem": "(661)"
+    },
+    {
+      "id": "sync-pass-aceito",
+      "tema": "sync:?\\s*PASS",
+      "sinal": "aceit|passa",
+      "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
+      "origem": "(661)"
+    }
+  ]
+}

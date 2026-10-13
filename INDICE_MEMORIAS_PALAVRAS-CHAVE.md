@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(665) DIÁRIO — 13/10/2026 · **`auditoria-agente-2026-10-13` aplicada (assinatura verificada, PR #166 juntado): `canon-mcp.mjs` novo copiado para o LibreChat, gateway, verificador e LibreChat reiniciados. Pelo caminho real, a conversa verdadeira de (664) com um "reavalie" no fim levou a auditoria com os 8 achados da resposta das 13:10. O teste do conteúdo da resposta fica para o LibreChat, com as ferramentas — pela API direta não serve.**
+  palavras-chave: auditoria, agente, aplicada, assinatura, verificada, juntado, canon, mcp, mjs, novo, copiado, librechat, gateway, verificador, reiniciados, caminho, real, conversa, verdadeira, reavalie, fim, levou, achados, resposta, teste, conteúdo, fica, ferramentas, api, direta, serve
 (664) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta real da Seth no LibreChat (13:10): os dois cabeçalhos, a hora de 2,5 h antes e o nome "ministral-14b" vêm do modo Agent e de um defeito da auditoria de (662/663) — e não de modelo fraco: quem respondeu foram nemotron-3-ultra e gemini-2.5-flash. As 3 "faltas" falsas voltaram ("mantidas") por âncora na resposta errada da mesma conversa. Dos 3 pedidos dela, 2 tinham núcleo verdadeiro e entram. Proposta `auditoria-agente-2026-10-13` (6 arquivos), aguardando assinatura.**
   palavras-chave: auditoria, resposta, real, seth, librechat, cabeçalhos, hora, nome, ministral, vêm, modo, agent, defeito, modelo, fraco, quem, respondeu, foram, nemotron, ultra, gemini, flash, faltas, falsas, voltaram, mantidas, âncora, errada, mesma, conversa, pedidos, dela, tinham, núcleo, verdadeiro, entram, proposta, agente, arquivos, aguardando, assinatura
 (663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura verificada, PR #164 juntado) e provada com 2 mensagens reais em streaming: a 1ª resposta da Seth saiu com o cabeçalho errado, a auditoria registrou 4 achados, e a 2ª resposta abriu com "Correção do turno anterior: …" reconhecendo o erro — e veio com cabeçalho aprovado pelo linter.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: item, reporte, upstream, aberto, issue, pública, danny, avila, librechat, attemptinvokebody, invoke, cjs, devolver, finalchunk, guarda, stream, entrega, chunk
 (636) DIÁRIO — 02/10/2026 · **Conserto de (635) confirmado ao vivo, em produção: M9 repetido (0/10 vazios, era 9/10) e conversa real com ferramenta no LibreChat, sem crash — inclusive a chamada concorrente de geração de título, que também passa pelo gateway.**
   palavras-chave: conserto, confirmado, vivo, produção, repetido, vazios, era, conversa, real, ferramenta, librechat, crash, inclusive, chamada, concorrente, geração, título, passa, gateway
-(635) CORREÇÃO — 02/10/2026 · **Causa raiz do crash "Cannot use 'in' operator...tool_calls" achada e aplicada: era regressão minha em `9dfd7da` (614, modelo-real-header), não bug isolado do LibreChat. Proposta `sse-buffer-espiado-2026-10-02` assinada e aplicada.**
-  palavras-chave: causa, raiz, crash, cannot, use, operator, tool, calls, achada, aplicada, era, regressão, minha, dfd, modelo, real, header, bug, isolado, librechat, proposta, sse, buffer, espiado, assinada
+(635) CORREÇÃO — 02/10/2026 · **Causa raiz do crash "Cannot use 'in' operator... …
+  palavras-chave: causa, raiz, crash, cannot, use, operator
 (634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmad …
   palavras-chave: lab, mecanismo, invoke, cjs, confirmad
 (633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de cor …

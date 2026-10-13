@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1
-  Escrito em: 13/10/2026 13:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa5a08f250db315365b138b6dea32b70bb68553d
+  Escrito em: 13/10/2026 13:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa5a08f250db315365b138b6dea32b70bb68553d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(665) DIÁRIO — 13/10/2026 · **`auditoria-agente-2026-10-13` aplicada (assinatura verificada, PR #166 juntado): `canon-mcp.mjs` novo copiado para o LibreChat, gateway, verificador e LibreChat reiniciados. Pelo caminho real, a conversa verdadeira de (664) com um "reavalie" no fim levou a auditoria com os 8 achados da resposta das 13:10. O teste do conteúdo da resposta fica para o LibreChat, com as ferramentas — pela API direta não serve.**
+
+**Aplicação:** `scripts/p8_verificar.sh` → `PODE APLICAR`; par em `propostas/aplicadas/`; `canon-mcp.mjs` copiado para `~/librechat/data/mcp/` (backup do anterior em `~/.cache/agata/`), `cmp` igual; `seth-gateway` e `seth-verificador` reiniciados; contêiner `librechat` reiniciado, `/health` OK.
+
+**Prova (1 chamada remota, streaming):** o histórico real da conversa `6fdfaf8d…` (lido do Mongo, só os textos das respostas, sem as chamadas de ferramenta) + "reavalie seu sistema de memórias". O log da auditoria registrou 8 achados sobre a resposta das 13:10 — 2 cabeçalhos, hora copiada, nome sem ressalva, `t=` sem base e as 4 afirmações desmentidas —, os mesmos medidos em (664). A resposta, porém, não serve de teste: sem ferramentas na API direta, o `nemotron-3-ultra` escreveu uma chamada de ferramenta como texto (60 caracteres). Mesmo limite de método de (661): o cliente real é o LibreChat com ferramentas.
+
+**Falta:** o Humano repete "reavalie seu sistema de memórias" na mesma conversa do LibreChat; a resposta é conferida no Mongo.
+
+**sync:** PASS — `main` = merge do PR #166 (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (664).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, `cmp`, `/health`, 1 chamada real e o log da auditoria lido · Autorização: Humano — assinatura de `auditoria-agente-2026-10-13` + merge do PR #166 + "ok".
 
 (664) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta real da Seth no LibreChat (13:10): os dois cabeçalhos, a hora de 2,5 h antes e o nome "ministral-14b" vêm do modo Agent e de um defeito da auditoria de (662/663) — e não de modelo fraco: quem respondeu foram nemotron-3-ultra e gemini-2.5-flash. As 3 "faltas" falsas voltaram ("mantidas") por âncora na resposta errada da mesma conversa. Dos 3 pedidos dela, 2 tinham núcleo verdadeiro e entram. Proposta `auditoria-agente-2026-10-13` (6 arquivos), aguardando assinatura.**
 

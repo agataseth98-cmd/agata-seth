@@ -69,7 +69,8 @@ CORPO_MAX = 4096  # pedido é minúsculo; corpo grande é erro ou abuso
 COMANDOS: dict[str, tuple[list[str], int, str]] = {
     "perimetro": (
         ["bash", "scripts/perimetro.sh"], 300,
-        "Roda os 17 controles do perímetro e devolve o veredito de cada um. "
+        "Roda todos os controles do perímetro e devolve o veredito de cada um "
+        "(inclui P-10, vault Obsidian × HEAD, e P-22, derivados × HEAD). "
         "É a verificação mais completa que existe no sistema.",
     ),
     "estado": (

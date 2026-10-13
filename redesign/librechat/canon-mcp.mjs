@@ -26,6 +26,7 @@ const CANON = {
   REGRAS: "REGRAS.md", PROTOCOLOS: "PROTOCOLOS.md", FALHAS: "FALHAS.md",
   PROJETO: "PROJETO.md",
   "MEMÓRIAS": "MEMÓRIAS.md", MEMORIAS: "MEMÓRIAS.md",
+  MEMORIAS_MORNO: "MEMORIAS-MORNO.md",
   ONDE_ESTAMOS: "ONDE_ESTAMOS.md", CHAVES: "CHAVES.md",
   PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md",
   PROMPT_CARREGAMENTO: "PROMPT_CARREGAMENTO.md",
@@ -35,6 +36,12 @@ const CANON = {
   ACESSO_GRADUADO: "redesign/ACESSO-GRADUADO.md",
   "ACESSO-GRADUADO": "redesign/ACESSO-GRADUADO.md",
 };
+// Lista que o MODELO enxerga, gerada do próprio mapa (um nome por arquivo, o
+// primeiro): escrita à mão, ela ficou atrás do mapa e a Seth não sabia que
+// podia ler PROTOCOLOS, FALHAS e o índice por palavra-chave (MEMÓRIAS (664)).
+const DOCS = [];
+{ const vistos = new Set();
+  for (const [nome, arq] of Object.entries(CANON)) if (!vistos.has(arq)) { vistos.add(arq); DOCS.push(nome); } }
 const DENY = /\.(secret|token|pass|key|gpg|env|pem)$/i;
 
 // Achado 04/09/2026 (Camada C): a linha "redesign/ + .md" abaixo liberava
@@ -250,8 +257,9 @@ const TOOLS = [
     description:
       "Roda uma VERIFICACAO na Maquina e devolve a saida real (read-only). " +
       "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
-      "Lista fechada: perimetro (os 17 controles), estado, git_status, git_log, git_diff_stat, " +
-      "git_sync (SHA do remoto), selos, suite_controles, servicos. " +
+      "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
+      "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
+      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar. " +
       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
     inputSchema: {
       type: "object",
@@ -266,14 +274,16 @@ const TOOLS = [
   {
     name: "query_canon",
     description:
-      "Lê um documento do canon do Agata direto da fonte (REGRAS, PROJETO, MEMÓRIAS, " +
-      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
+      `Lê um documento do canon do Agata direto da fonte: ${DOCS.join(", ")}. ` +
       "Use SEMPRE antes de afirmar qualquer coisa sobre regra, estado ou histórico — não confie na memória. " +
-      "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo).",
+      "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo). " +
+      "Achar entrada: por data, doc=INDICE_MEMORIAS com grep \"dd/mm/aaaa\"; por tema, " +
+      "doc=INDICE_MEMORIAS_PALAVRAS-CHAVE; texto de entrada que saiu da janela quente, " +
+      "doc=MEMORIAS_MORNO com grep \"(N)\" (as mais antigas: vault_consultar entradas/).",
     inputSchema: {
       type: "object",
       properties: {
-        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
+        doc: { type: "string", description: DOCS.join(" | ") },
         grep: { type: "string", description: "regex (case-insensitive); devolve só os trechos casando com contexto" },
         contexto: { type: "number", description: "linhas de contexto ao redor de cada hit do grep (0–20, default 3)" },
         linhas: { type: "string", description: 'intervalo "N-M" (ex: "1-120")' },
