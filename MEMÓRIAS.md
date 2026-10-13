@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e
-  Escrito em: 13/10/2026 14:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 13e306d573cd099e93e1833de7af6e2ab48f4559
+  Escrito em: 13/10/2026 15:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/13e306d573cd099e93e1833de7af6e2ab48f4559/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/13e306d573cd099e93e1833de7af6e2ab48f4559/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/13e306d573cd099e93e1833de7af6e2ab48f4559/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/13e306d573cd099e93e1833de7af6e2ab48f4559/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/13e306d573cd099e93e1833de7af6e2ab48f4559/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assinada pelo Humano): quando o `scripts/aprovar.sh` não acha o `.diff`, consulta o GitHub (só `git fetch`, sem puxar) e diz o comando exato — `git pull` se o arquivo já está em `origin/main`, "junte o PR primeiro" se só está no branch da proposta. Fecha a causa do "não encontra a assinatura" de (668).**
+
+**Verificado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`; `bash -n` OK; caminho de nome inexistente testado (mensagem de erro sem dica, como esperado). O caminho com dica não foi exercitado em produção — só acontece quando o Humano assina antes de baixar o merge; fica para o próximo caso real.
+
+**Segue aberto (de (668)):** a conferência em uso real da Seth no LibreChat (sem narração; saída de ferramenta inteira) espera uma mensagem do Humano.
+
+**sync:** PASS — `main` = `origin/main` (PR #169 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (668).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, bash -n, execução do script com nome inexistente · Autorização: Humano — assinatura de `aprovar-avisa-pull-2026-10-13`.
 
 (668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assinada pelo Humano): filas `-longo` criadas no OmniRoute, janela do Agent da Seth em 96 mil com Discord e navegador como plugins sob demanda, diretrizes comuns no Goose, gateway reiniciado. Junto, proposta nova `aprovar-avisa-pull-2026-10-13`, a pedido do Humano: o `aprovar.sh` passa a dizer quando o `.diff` já está no GitHub mas não na cópia local.**
 

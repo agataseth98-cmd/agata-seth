@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assinada pelo Humano): quando o `scripts/aprovar.sh` não acha o `.diff`, consulta o GitHub (só `git fetch`, sem puxar) e diz o comando exato — `git pull` se o arquivo já está em `origin/main`, "junte o PR primeiro" se só está no branch da proposta. Fecha a causa do "não encontra a assinatura" de (668).**
+  palavras-chave: execução, aplicada, aprovar, avisa, pull, assinada, humano, scripts, acha, diff, consulta, github, git, fetch, puxar, diz, comando, exato, arquivo, origin, main, junte, primeiro, branch, proposta, fecha, causa, encontra, assinatura
 (668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assinada pelo Humano): filas `-longo` criadas no OmniRoute, janela do Agent da Seth em 96 mil com Discord e navegador como plugins sob demanda, diretrizes comuns no Goose, gateway reiniciado. Junto, proposta nova `aprovar-avisa-pull-2026-10-13`, a pedido do Humano: o `aprovar.sh` passa a dizer quando o `.diff` já está no GitHub mas não na cópia local.**
   palavras-chave: execução, aplicada, contexto, plugins, assinada, humano, filas, longo, criadas, omniroute, janela, agent, seth, mil, discord, navegador, sob, demanda, diretrizes, comuns, goose, gateway, reiniciado, junto, proposta, nova, aprovar, avisa, pull, pedido, passa, dizer, diff, github, cópia, local
 (667) CONSELHO — 13/10/2026 · **Revisão de `contexto-e-plugins-2026-10-13` antes da assinatura, a pedido do Humano: a janela fixa de (666) vira janela por perfil de modelo (1ª peça do projeto Capivara); o "modo conciso" (sem narrar o processo) vira padrão de resposta nas REGRAS, com 3 pareceres condicionais acatados; e as mesmas diretrizes passam a valer em toda plataforma, com `AGENTS.md` na raiz e o controle P-23. Proposta agora com 21 arquivos, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, lab, resposta, seth, head, cabeçalho, cita, nome, campo, errado, script, proposto, quebraria, diario, versionado, ela, pediu, novo, poder, escrita, execução, pra, mesma, recusado, padrão, visto, pvt, rev
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute (`combos_sem_cota.py --aplicar`, com OK do Humano) e testados ao vivo — 200 nos 3. `SETH_ROTA_COTA` continua em `0`.**
   palavras-chave: combos, criados, verdade, omniroute, cota, aplicar, humano, testados, vivo, seth, rota, continua
-(639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verificada: os 6 provedores de nuvem respondem 200 pelo OmniRoute, sem nenhum 401 de consumidor esquecido. Cópia de cache do `strace` confirmada apagada; transcript original da sessão ainda existe (decisão do Humano, não mexi).**
-  palavras-chave: rotação, chaves, incidente, verificada, provedores, nuvem, respondem, omniroute, consumidor, esquecido, cópia, cache, strace, confirmada, apagada, transcript, original, sessão, existe, decisão, humano, mexi
+(639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verifi …
+  palavras-chave: rotação, chaves, incidente, verifi
 (638) CORREÇÃO — 02/10/2026 · **`rota-cota-tier0-2026-10-02` v2 assinada pelo Hu …
   palavras-chave: rota, cota, tier, assinada
 (637) DIÁRIO — 02/10/2026 · **Item 3(c), reporte upstream aberto: issue pública …
