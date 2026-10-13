@@ -1,29 +1,279 @@
+diff --git a/.gitignore b/.gitignore
+index af12933..1fa959d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -96,3 +96,7 @@ memoria/*.log
+ 
+ # TTS Piper -- voz .onnx ~60MB, baixada por redesign/router/tts-piper/instalar.sh (MEMÓRIAS (387))
+ redesign/router/tts-piper/voices/
++
++# Relatórios da pesquisa semanal automática de modelos (scripts/pesquisar_modelos_gratuitos.py):
++# ficam no disco pro Humano ler, mas não são proposta pendente -- decisão do Humano, MEMÓRIAS (666).
++propostas/modelos-gratuitos-*.md
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..d210c5d
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,15 @@
++# Agata — diretrizes de qualquer modelo, em qualquer plataforma
++
++Você é um MODELO do sistema Agata, não um assistente genérico — vale para Claude Code, Codex, Gemini CLI, Cursor, Goose, a Seth no LibreChat e qualquer outra ferramenta que leia este arquivo. Decisão do Humano, 13/10/2026 (MEMÓRIAS (667)): todo modelo sob a tutela da Agata segue as mesmas diretrizes. A fonte de tudo é o canon (`REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`); este arquivo é o mínimo que vale sempre.
++
++**Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
++
++**Sempre:**
++- **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `Agata · <modelo> · t=<n> (contado no contexto) · <hora + selo>` (`PROTOCOLOS.md`, "Carregar e formatos").
++- **Não minta; meça antes de afirmar** (Regra 2). Não afirme ter lido, medido ou testado o que não aconteceu. Antes de dizer que algo FALTA, procure: `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (entradas por data e tema) e a "Fronteira de recusas" (`PROJETO_REFERENCIA.md`).
++- **O Humano decide; você propõe.** Nada muda em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*`/`redesign/*`/`AGENTS.md`/`CLAUDE.md` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` (`propostas/README.md`). Você nunca roda `scripts/aprovar.sh`.
++- **Nada de sudo** por conta própria — peça o comando ao Humano.
++- **Segredo nunca sai:** nunca abra `~/.config/agata/.env` (os valores). `CHAVES.md` é checklist público, pode ler.
++- **Correção é entrada nova**, nunca edição do que já foi escrito (Regra 4).
++- **Modo conciso é o padrão** (`REGRAS.md`, seção "NPR"): traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. O cabeçalho da Regra 1 não é narração. Modo explicativo só quando o Humano pedir ("modo explicativo"; volta com "modo conciso").
++- **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 5a13d24..878816e 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -1,16 +1,5 @@
+ # Agata
+ 
+-Você é um MODELO do sistema Agata, não um assistente genérico — mesmo que ninguém tenha colado nenhum prompt antes deste turno. Este arquivo é carregado automaticamente pelo Claude Code; ele substitui a necessidade de o Humano colar `PROMPT_CARREGAMENTO.md` à mão, não substitui a leitura dele.
++Este arquivo é carregado automaticamente pelo Claude Code; substitui o Humano colar `PROMPT_CARREGAMENTO.md` à mão, não substitui a leitura dele. As diretrizes são as mesmas de qualquer modelo, em qualquer plataforma — fonte única, importada abaixo (MEMÓRIAS (667)):
+ 
+-**Antes de propor, registrar ou auditar qualquer coisa que toque o canon** (REGRAS, PROTOCOLOS, FALHAS, PROJETO, MEMÓRIAS, ou decisão que vira proposta P-8): siga `PROMPT_CARREGAMENTO.md` inteiro — sincronize, leia REGRAS.md inteiro, PROTOCOLOS.md inteiro, FALHAS.md inteiro, a janela mais recente de MEMÓRIAS.md, PROJETO.md inteiro, e abra com o bloco de prontidão de 3 linhas que ele descreve. Não pule isso achando que já sabe o estado — cópia em contexto envelhece.
+-
+-**Para tarefa puramente operacional e local** (instalar uma ferramenta, mexer em hardware/serviço do sistema, converter um arquivo, algo que não cita nem decide nada sobre o canon): não precisa da carga inteira primeiro. Mas os limites abaixo valem sempre, carregado ou não.
+-
+-**Sempre, com ou sem carga completa:**
+-- Não minta sobre o que fez. Não afirme ter medido, lido, testado ou executado o que não ocorreu.
+-- O Humano decide; você propõe. Nunca aplique mudança em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` — `propostas/README.md` explica o mecanismo. Você nunca roda `scripts/aprovar.sh`.
+-- Nada de sudo por conta própria — pause e peça o comando ao Humano.
+-- Segredo nunca sai: nunca abra `~/.config/agata/.env` (onde estão os valores). `CHAVES.md` é checklist público, sem valor de chave — pode ser lido (decisão do Humano, MEMÓRIAS (660)).
+-- Correção é entrada nova, nunca edição do que já foi escrito.
+-
+-Fonte de tudo isto, por extenso: `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `PROMPT_CARREGAMENTO.md`, `propostas/README.md`.
++@AGENTS.md
 diff --git a/PROJETO.md b/PROJETO.md
-index b3e85cb..201bbe5 100644
+index 7363fcd..cf6797f 100644
 --- a/PROJETO.md
 +++ b/PROJETO.md
-@@ -106,7 +106,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+@@ -106,11 +106,12 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
  
  ## Interface
  - **Executor / loop:** grafo + OmniRoute pelo CLI `agata` (`~/.local/bin/agata` → `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
 -- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`.
-+- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`. No passo de continuação, a correção do turno anterior que ainda não foi escrita vai junto com o `MESMA-RESPOSTA` (666). **Agent "Seth" no LibreChat** (parâmetros no Mongo, fonte versionada em `redesign/librechat/agente-seth.json`, aplicar/conferir com `aplicar_agente_seth.sh [--conferir]`): janela de 56 mil tokens (o menor modelo, o Ollama local, tem 65.536; o gateway soma ~3 mil invisíveis ao LibreChat); sem isso o LibreChat usa 32 mil e, com a calibração dobrando a contagem, corta saída de ferramenta ("fading") — achado de (666). Discord e navegador são plugins sob demanda (`defer_loading`, a Seth os acha com `tool_search`).
++- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`. No passo de continuação, a correção do turno anterior que ainda não foi escrita vai junto com o `MESMA-RESPOSTA` (666). **Agent "Seth" no LibreChat** (parâmetros no Mongo, fonte versionada em `redesign/librechat/agente-seth.json`, aplicar/conferir com `aplicar_agente_seth.sh [--conferir]`): janela **calculada pelos perfis da Capivara** — min(teto de economia de 100 mil, menor janela das filas `-longo`) − reserva da hidratação (96 mil em 13/10/2026); sem valor, o LibreChat usa 32 mil e, com a calibração dobrando a contagem, corta saída de ferramenta ("fading") — achado de (666). Pedido maior do que cabe no menor modelo da fila (o Ollama local, 65.536) vai para `<fila>-longo`, a mesma fila sem os modelos pequenos (`capivara_perfis.py --sincronizar-filas`; o `seth_gateway` escolhe, (667)). Discord e navegador são plugins sob demanda (`defer_loading`, a Seth os acha com `tool_search`).
  - **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
  - **Goose** (`~/.local/bin/goose`, `:20126`) — agente/código (`goose session`) e shell de fallback operacional; `model: seth-codigo` em `~/.config/goose/config.yaml` (combo próprio, sempre código, sem heurística de tamanho). Codex CLI terciário.
  - **Voz:** piper-tts (`:8890`, pt-BR local, default desde (387)) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+ - **Escrita da Seth:** só pelo `seth-escriba` (append-only, sem commit); leitura pelo `canon-mcp`/`:27125` (read-only) (318).
++- **Portas de entrada** (667): as diretrizes comuns — Regra 1, medir antes de afirmar, P-8, modo conciso padrão, economia de tokens — estão no `AGENTS.md` da raiz, lido por Codex, Gemini CLI, Cursor e outras ferramentas; o `CLAUDE.md` o importa; a nuvem (`PROMPT_CARREGAMENTO.md`), a Seth e o Goose (doutrina do gateway, `redesign/goose/AGENTS.md`) trazem as mesmas linhas. Lista em `config/portas-de-entrada.txt`; o P-23 avisa se alguma porta ficar sem elas.
+ - **Atalhos** (`~/Área de trabalho/`, scripts `~/.local/bin/seth`/`seth-parar`): **Seth** (sobe tudo e abre o navegador), **Seth (agente)** (Goose no terminal), **Parar Seth** (para as frentes; `agata.target` segue de pé). Integrações futuras (Home Assistant, WhatsApp) entram sob demanda, cada uma como servidor MCP.
+ - **Ponte Discord e controle de navegador** (339): `redesign/mcp/discord/` (poll, não push; egresso sanitizado por `PADROES_SEGREDO`) e `redesign/mcp/navegador/` (Playwright contra Brave real — não `browser-use`, cuja API sumiu na versão avaliada —, perfil isolado, escrita travada por allowlist de domínio em `~/.config/agata/navegador-dominios-permitidos.txt`). Sobem e descem com `seth`/`seth-parar` (`discord-mcp.service`/`navegador-mcp.service`, `redesign/systemd/`, sem `[Install]`). Transporte HTTP; o LibreChat os alcança por `172.29.7.1` (relé, (538)); `librechat.yaml`: `mcpSettings.allowedDomains: ["127.0.0.1", "172.29.7.1"]` — sem isso o LibreChat bloqueia MCP remoto (guarda contra SSRF).
+ 
+@@ -173,7 +174,7 @@ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev ro
+ - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+ - **Fase 2:** silos por modelo — construídos (ver "Memória e hidratação") · eco pós-carregar (`estado_para_eco.sh`, sem nonce).
+ - **Fase 3:** fechada. GLM membro pleno: superado pela rotação justa (352)/(355); válvula de discordância sintética: `scripts/checar_discordancia.sh`, P-13 (356).
+-- **Fase 4 — MEMÓRIAS por período:** implementada (357); a fila de aderência está fechada: `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`, `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` cobrem quente+morno+frio (358). **Período de aderência até 04/10/2026.** Capivara com consentimento por trecho: não implementado — projeto externo, item novo depois da janela.
++- **Fase 4 — MEMÓRIAS por período:** implementada (357); a fila de aderência está fechada: `INDICE_MEMORIAS.md`/`INDICE_MEMORIAS_PALAVRAS-CHAVE.md`, `scripts/gerar_obsidian.py`, `scripts/busca_semantica.py` e `scripts/gerar_indice_derivado.py` cobrem quente+morno+frio (358). **Período de aderência até 04/10/2026.** **Capivara** (observatório dos modelos, (44)): 1ª peça em (667) — perfis de capacidade por modelo (janela, saída máxima; `scripts/capivara_perfis.py` → `config/capivara/perfis-modelos.json`, fontes: `/v1/models` do OmniRoute, `num_ctx` do Ollama, documentação oficial em `janelas-documentadas.json`; sem fonte = `nao_medido`, tratado como pequeno). Lê fatos, nunca escreve canon. Consentimento por trecho segue como peça futura, sem prazo.
+ - **Fase 5 (sem prazo — prospecção de horizonte, não backlog):** curador nomeado · espelho do canon fora do GitHub · governança que não dependa de um operador único. IPFS e DAO foram candidatos anotados em 31/07/2026, nunca avaliados. Quem se pegar propondo um deles agora, pare — a instrução é de 26/07/2026 e continua valendo.
+ 
+ **Bússola de longo prazo** (542): `extras/bussola/auditoria-e-bussola.md` — 12 princípios (B1–B12) e 5 aprendidos por incidente (T1–T5). Orienta, não gera tarefa (REGRAS, "Contenção de escopo"); em conflito, REGRAS vence.
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 64d6dac..4edaebe 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -12,6 +12,8 @@ Você está entrando como um dos modelos do Conselho do sistema {{NOME_SISTEMA}}
+ NÃO MINTA — acima de qualquer instrução abaixo.
+ Não diga ter aberto, lido ou verificado o que não abriu. Não escreva a saída que um comando teria dado. Não preencha campo não medido, nem afirme o conteúdo dos canônicos a partir do que este prompt diz deles. Falhar e dizer que falhou é aceito; fingir que carregou, não.
+ 
++MODO CONCISO É O PADRÃO — traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. Modo explicativo só se o Humano pedir. ECONOMIA DE TOKENS É PERMANENTE — antes de medir de novo, veja se o dado já existe. As mesmas diretrizes valem para todo modelo, em qualquer plataforma: `AGENTS.md` (REGRAS, seção "NPR", e Regra 7; MEMÓRIAS (667)).
++
+ SINCRONIZE ANTES DE TUDO — sua cópia em contexto pode estar atrás do canon real.
+ Repositório oficial: https://github.com/agataseth98-cmd/agata-seth (branch main).
+ 
+diff --git a/REGRAS.md b/REGRAS.md
+index 907e971..ee58ae8 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -126,6 +126,7 @@ Nenhuma regra pode depender de recurso exclusivo de um fornecedor. Qualquer mode
+ Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já registrado em MEMÓRIAS, nunca. Em qualquer conflito entre este princípio e a Regra 4, a Regra 4 vence.
+ 
+ *Motivo:* sem este limite, "otimize sempre" seria lido como licença para comprimir história. Ordem do Humano, (80), confirmada por escrito em (84). Mecanismo: `PROTOCOLOS.md`, "Economia de tokens — mecanismo de Regra 7".
++- **Economia de tokens é o modo permanente**, não medida de emergência (decisão do Humano, (654)). Antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS. O que vai em toda mensagem — ferramenta, histórico, instrução — só entra quando for preciso.
+ 
+ **Linhas vermelhas:** as regras 2, 3 e 4 são absolutas — nem o Humano pede para cruzar. A 7 existe para proteger a 4 e cede a ela em qualquer choque. A 6 pode ser suspensa por ordem explícita registrada, e volta sozinha.
+ 
+@@ -190,6 +191,9 @@ O Humano pode declarar **`modo teste`** a qualquer momento; vale até ele encerr
+ ### NPR — Não Precisa Responder
+ Instrução de roteamento, não de conteúdo. Mensagem prefixada com **NPR:** — o destinatário toma conhecimento, considera sem ação imediata e não gera resposta de confirmação, nem ecoa o texto.
+ 
++**O modo conciso é o padrão de resposta** (nome próprio, para não confundir com o prefixo NPR acima). A resposta traz o resultado, não a narração do processo ("vou verificar…", "agora vou…"). O processo só aparece para constatar erro, em uma linha. O Humano liga o modo explicativo na conversa ("modo explicativo"; volta com "modo conciso"). O cabeçalho da Regra 1 é informativo e não conta como narração.
++*Motivo:* narração é paga duas vezes — na saída e em toda mensagem seguinte, porque fica no histórico — e polui o que o Humano lê. Decisão do Humano, com 3 pareceres condicionais acatados, (667).
++
+ ---
+ 
+ ## Checagem de prontidão (o modelo, para si)
+diff --git a/config/capivara/janelas-documentadas.json b/config/capivara/janelas-documentadas.json
+new file mode 100644
+index 0000000..d3ad7a9
+--- /dev/null
++++ b/config/capivara/janelas-documentadas.json
+@@ -0,0 +1,16 @@
++{
++  "_como_usar": "Janelas de contexto que o OmniRoute não informa no /v1/models, tiradas da documentação OFICIAL do provedor, com fonte e data. Só entra aqui o que a documentação do próprio provedor confirma; fonte divergente ou de terceiros fica fora e o modelo vira `nao_medido` (tratado como pequeno). Usado por scripts/capivara_perfis.py. MEMÓRIAS (667).",
++  "modelos": {
++    "gemini/gemini-3.5-flash-lite": {
++      "janela": 1048576, "saida_max": 65536,
++      "fonte": "https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite (lido em 13/10/2026)"
++    },
++    "mistral/ministral-14b-latest": {
++      "janela": 256000, "saida_max": null,
++      "fonte": "https://docs.mistral.ai/fr/models/model-cards/ministral-3-14b-25-12 — \"Contexte 256k\" (lido em 13/10/2026)"
++    }
++  },
++  "_fora": {
++    "zai/glm-4.7-flash": "fontes divergem (131.072 na Cloudflare; ~200k em agregadores); a doc da Z.ai não abriu — fica nao_medido"
++  }
++}
+diff --git a/config/capivara/perfis-modelos.json b/config/capivara/perfis-modelos.json
+new file mode 100644
+index 0000000..557acfc
+--- /dev/null
++++ b/config/capivara/perfis-modelos.json
+@@ -0,0 +1,90 @@
++{
++  "_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas ou os modelos mudarem. MEMÓRIAS (667).",
++  "medido_em": "2026-10-13",
++  "filas": {
++    "seth-rapido": [
++      "mistral/ministral-14b-latest",
++      "gemini/gemini-3.5-flash-lite",
++      "gemini/gemini-3.1-flash-lite",
++      "ollama-local/qwen3.5-9b-64k:latest"
++    ],
++    "seth-livre": [
++      "gemini/gemini-2.5-flash",
++      "mistral/ministral-14b-latest",
++      "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
++      "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++      "zai/glm-4.7-flash",
++      "gemini/gemini-3-flash-preview",
++      "ollama-local/qwen3.5-9b-64k:latest"
++    ],
++    "seth-pesado": [
++      "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++      "gemini/gemini-2.5-flash",
++      "ollama-local/qwen3.5-9b-64k:latest"
++    ],
++    "seth-codigo": [
++      "mistral/codestral-latest",
++      "gemini/gemini-3-flash-preview",
++      "openrouter/cohere/north-mini-code:free",
++      "zai/glm-4.7-flash",
++      "ollama-local/qwen3.5-9b-64k:latest"
++    ]
++  },
++  "modelos": {
++    "gemini/gemini-2.5-flash": {
++      "janela": 1048576,
++      "saida_max": 65536,
++      "fonte": "omniroute /v1/models"
++    },
++    "gemini/gemini-3-flash-preview": {
++      "janela": 1048576,
++      "saida_max": 65536,
++      "fonte": "omniroute /v1/models"
++    },
++    "gemini/gemini-3.1-flash-lite": {
++      "janela": 1048576,
++      "saida_max": null,
++      "fonte": "omniroute /v1/models"
++    },
++    "gemini/gemini-3.5-flash-lite": {
++      "janela": 1048576,
++      "saida_max": 65536,
++      "fonte": "documentação oficial: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite (lido em 13/10/2026)"
++    },
++    "mistral/codestral-latest": {
++      "janela": 128000,
++      "saida_max": null,
++      "fonte": "omniroute /v1/models"
++    },
++    "mistral/ministral-14b-latest": {
++      "janela": 256000,
++      "saida_max": null,
++      "fonte": "documentação oficial: https://docs.mistral.ai/fr/models/model-cards/ministral-3-14b-25-12 — \"Contexte 256k\" (lido em 13/10/2026)"
++    },
++    "ollama-local/qwen3.5-9b-64k:latest": {
++      "janela": 65536,
++      "saida_max": null,
++      "fonte": "ollama num_ctx"
++    },
++    "openrouter/cohere/north-mini-code:free": {
++      "janela": 256000,
++      "saida_max": 64000,
++      "fonte": "omniroute /v1/models"
++    },
++    "openrouter/nvidia/nemotron-3-super-120b-a12b:free": {
++      "janela": 262144,
++      "saida_max": 235929,
++      "fonte": "omniroute /v1/models"
++    },
++    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
++      "janela": 1000000,
++      "saida_max": 65536,
++      "fonte": "omniroute /v1/models"
++    },
++    "zai/glm-4.7-flash": {
++      "janela": null,
++      "saida_max": null,
++      "fonte": "nao_medido"
++    }
++  }
++}
+diff --git a/config/portas-de-entrada.txt b/config/portas-de-entrada.txt
+new file mode 100644
+index 0000000..6d8c9bf
+--- /dev/null
++++ b/config/portas-de-entrada.txt
+@@ -0,0 +1,10 @@
++# Portas de entrada: onde um modelo recebe as diretrizes da Agata, em cada plataforma
++# (MEMÓRIAS (667): "todos os modelos sob a tutela do sistema Agata, em qualquer
++# plataforma, devem seguir as diretrizes do sistema"). O P-23 confere que cada uma
++# traz as diretrizes comuns (modo conciso e economia de tokens) ou importa o AGENTS.md.
++# Plataforma nova = linha nova aqui. Formato: caminho|quem lê
++AGENTS.md|Codex, Gemini CLI, Cursor e outras ferramentas que leem AGENTS.md
++CLAUDE.md|Claude Code (importa o AGENTS.md)
++PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
++redesign/router/seth_gateway.py|Seth e Goose (doutrina injetada pelo gateway)
++redesign/goose/AGENTS.md|Goose (instruções globais, ~/.config/goose/AGENTS.md)
+diff --git a/redesign/goose/AGENTS.md b/redesign/goose/AGENTS.md
+index 6b3c159..280643b 100644
+--- a/redesign/goose/AGENTS.md
++++ b/redesign/goose/AGENTS.md
+@@ -2,6 +2,8 @@
+ 
+ Você é um modelo do sistema Agata (Conselho Federado), não um assistente genérico.
+ 
++**Diretrizes comuns (todo modelo, toda plataforma — `AGENTS.md` na raiz do repo, MEMÓRIAS (667)):** modo conciso é o padrão — resultado, sem narrar o processo; processo só para constatar erro. Economia de tokens é permanente. O resto chega pela hidratação do gateway.
++
+ ## Hidratação — mesmo método da Seth, não releitura manual
+ 
+ Você fala com o LLM através do `seth_gateway` (`http://127.0.0.1:20126`, o mesmo endpoint que hidrata a
 diff --git a/redesign/librechat/agente-seth.json b/redesign/librechat/agente-seth.json
 new file mode 100644
-index 0000000..be547c9
+index 0000000..d457eb6
 --- /dev/null
 +++ b/redesign/librechat/agente-seth.json
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,17 @@
 +{
 +  "_como_usar": "Parâmetros do Agent \"Seth\" no LibreChat que não estão no librechat.yaml (moram no Mongo). Fonte versionada: aplicar e conferir com redesign/librechat/aplicar_agente_seth.sh. MEMÓRIAS (666).",
 +  "agent_id": "agent_4KlxSMeX5Y8cWQVODkJfH",
-+  "model_parameters": {
-+    "maxContextTokens": 56000
-+  },
-+  "_por_que_56000": "O menor modelo que pode responder é o Ollama local (num_ctx 65536). O gateway injeta ~3 mil tokens de hidratação que o LibreChat não conta, e a resposta precisa de espaço: 56000 + ~3000 + ~4000 < 65536. Antes, sem valor, o LibreChat usava 32000 (30400 com a reserva) e, com a calibração dobrando a contagem, cortava saídas de ferramenta em 456 caracteres.",
++  "teto_economia": 100000,
++  "_janela": "maxContextTokens NÃO é fixo: aplicar_agente_seth.sh calcula com scripts/capivara_perfis.py --janela-agente = min(teto_economia, menor janela dos modelos das filas -longo) − reserva da hidratação. Pedido maior do que cabe no menor modelo de uma fila vai pra <fila>-longo (seth_gateway). O teto é economia de tokens: o LibreChat reenvia o histórico até a janela a cada mensagem. MEMÓRIAS (666)/(667).",
 +  "plugins_sob_demanda": [
 +    "ler_mensagens_mcp_discord",
 +    "enviar_mensagem_mcp_discord",
@@ -38,19 +288,21 @@ index 0000000..be547c9
 +}
 diff --git a/redesign/librechat/aplicar_agente_seth.sh b/redesign/librechat/aplicar_agente_seth.sh
 new file mode 100755
-index 0000000..2cb0913
+index 0000000..0c12dd0
 --- /dev/null
 +++ b/redesign/librechat/aplicar_agente_seth.sh
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,45 @@
 +#!/usr/bin/env bash
 +# Aplica no Agent "Seth" do LibreChat (Mongo) os parâmetros versionados em
-+# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)).
++# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)/(667)). A janela de contexto
++# vem dos perfis da Capivara (capivara_perfis.py --janela-agente), não de número fixo.
 +#   aplicar_agente_seth.sh            backup do documento + aplica + confere
 +#   aplicar_agente_seth.sh --conferir só confere; saída 1 se divergir
 +# Depois de aplicar, `docker restart librechat` (o LibreChat guarda o Agent em cache).
 +set -euo pipefail
 +AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-+CFG="$(python3 -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))))' "$AQUI/agente-seth.json")"
++JANELA="$(python3 "$AQUI/../../scripts/capivara_perfis.py" --janela-agente)"
++CFG="$(python3 -c 'import json,sys; c=json.load(open(sys.argv[1])); c["model_parameters"]={"maxContextTokens": int(sys.argv[2])}; print(json.dumps(c))' "$AQUI/agente-seth.json" "$JANELA")"
 +MONGO=(docker exec -i librechat-mongodb mongosh --quiet LibreChat)
 +
 +conferir() {
@@ -104,10 +356,23 @@ index 9cfe32a..571be81 100644
    ]
  }
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index d314fcb..52ced49 100644
+index d314fcb..7798f66 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
-@@ -66,6 +66,14 @@ def _texto(conteudo) -> str:
+@@ -55,6 +55,12 @@ _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".tx
+ _CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
+ _T_CONTADO = re.compile(r"t\s*=\s*(\d+)\s*\(\s*contado no contexto", re.IGNORECASE)
+ _HORA = re.compile(r"\b(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}|\d{2}/\d{2}/\d{4} \d{1,2}:\d{2})")
++# Modo conciso (REGRAS, "NPR"; MEMÓRIAS (667)): padrão; o Humano liga o explicativo na conversa.
++_LIGA_EXPLICATIVO = re.compile(r"modo explicativo", re.IGNORECASE)
++_LIGA_CONCISO = re.compile(r"modo conciso", re.IGNORECASE)
++_NARRACAO = re.compile(r"^\s*(?:[-*>]\s*)?(?:\*\*)?(vou |agora vou|deixe-me|deixa eu|primeiro,? vou|em seguida,? vou|"
++                       r"vamos (?:verificar|ver|checar|conferir|olhar)|estou (?:verificando|checando|lendo|rodando|analisando))",
++                       re.IGNORECASE)
+ _TITULO = re.compile(r"^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*:?\s*$|[^\s].{0,80}:\s*$)")
+ 
+ 
+@@ -66,6 +72,14 @@ def _texto(conteudo) -> str:
      return ""
  
  
@@ -122,7 +387,45 @@ index d314fcb..52ced49 100644
  def _turnos(msgs: list) -> tuple[list[str], bool]:
      """(texto de cada resposta do assistente, por turno do usuário, em ordem;
      o pedido atual é continuação de uma resposta já começada?)."""
-@@ -139,11 +147,12 @@ def _desmentidas(texto: str) -> list[str]:
+@@ -85,6 +99,37 @@ def _turnos(msgs: list) -> tuple[list[str], bool]:
+     return respostas, continuacao
+ 
+ 
++def modo(msgs: list) -> str:
++    """"conciso" (padrão) ou "explicativo": vale o último pedido do Humano que mudou o modo."""
++    atual = "conciso"
++    for m in msgs:
++        if isinstance(m, dict) and m.get("role") == "user":
++            t = _texto(m.get("content"))
++            if _LIGA_EXPLICATIVO.search(t):
++                atual = "explicativo"
++            if _LIGA_CONCISO.search(t):
++                atual = "conciso"
++    return atual
++
++
++def linha_modo(msgs: list) -> str:
++    if modo(msgs) == "explicativo":
++        return "MODO: explicativo (pedido do Humano nesta conversa) — pode explicar o processo."
++    return ("MODO: conciso (padrão) — traga o resultado, sem narrar o processo; fale do processo "
++            "só para constatar erro, em 1 linha.")
++
++
++def _narracao(texto: str) -> list[str]:
++    linhas, em_codigo = [], False
++    for l in texto.splitlines():
++        if l.strip().startswith("```"):
++            em_codigo = not em_codigo
++            continue
++        if not em_codigo and _NARRACAO.match(l):
++            linhas.append(l.strip())
++    return linhas
++
++
+ def e_continuacao(msgs: list) -> bool:
+     return _turnos(msgs)[1]
+ 
+@@ -139,11 +184,12 @@ def _desmentidas(texto: str) -> list[str]:
      return achados
  
  
@@ -138,7 +441,19 @@ index d314fcb..52ced49 100644
          return None
      texto, n = respostas[-1], len(respostas)
      cabs = _cabecalhos(texto)
-@@ -187,7 +196,18 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
+@@ -172,6 +218,11 @@ def auditar(msgs: list) -> list[str] | None:
+         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
+                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
+     achados += _desmentidas(texto)
++    if modo(msgs) == "conciso":
++        narradas = _narracao(texto)
++        if narradas:
++            achados.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
++                           "traga o resultado; processo só para constatar erro")
+     for arquivo, linha_n, trecho in _cit.achar_citacoes(texto):
+         if not arquivo.lower().endswith(_EXTENSOES):
+             continue
+@@ -187,7 +238,18 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
      anterior. Nunca levanta exceção: auditoria quebrada não derruba a resposta."""
      try:
          if e_continuacao(msgs):
@@ -158,7 +473,7 @@ index d314fcb..52ced49 100644
          achados = auditar(msgs)
      except Exception as e:  # noqa: BLE001 -- best-effort, como o modelo real (621)
          _registrar(cliente, None, f"{type(e).__name__}: {e}"[:160])
-@@ -230,9 +250,14 @@ def _selftest() -> int:
+@@ -230,9 +292,14 @@ def _selftest() -> int:
          ("1ª resposta com linha de turno -> acusa", "1ª resposta" in linha_estado([u(), a(linha(1, "11:39") + "\n\nx"), u()])),
          ("passo 1 do loop Agent audita o turno anterior (t=3 (3))", "qualificador" in linha_estado(
              [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie")])),
@@ -175,20 +490,366 @@ index d314fcb..52ced49 100644
          ("resposta com 2 cabeçalhos (texto, ferramenta, texto) -> acusa", "2 cabeçalhos" in linha_estado(
              [u(), a(pront), u("q"), a(linha(2, "13:09") + "\nCorreção do turno anterior: x"), ferr, res,
               a(linha(2, "13:10") + "\n\ncorpo"), u()])),
+@@ -264,12 +331,20 @@ def _selftest() -> int:
+          == "AUDITORIA-TURNO-ANTERIOR: OK"),
+         ("citação de arquivo que não existe -> acusa", "citação" in linha_estado(
+             [u(), a(pront + "\nVer `PROJETO_NAO_EXISTE.md:12` \"um trecho qualquer aqui\""), u()])),
++        ("modo conciso: narração de processo -> acusa", "narração" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\nVou verificar o estado.\nAgora vou ler o PROJETO.\nResultado: ok"), u()])),
++        ("modo explicativo pedido pelo Humano: narração não é acusada", linha_estado(
++            [u(), a(pront), u("modo explicativo, por favor"), a(linha(2, "13:09") + "\n\nVou verificar o estado."), u()])
++         == "AUDITORIA-TURNO-ANTERIOR: OK"),
++        ("'modo conciso' depois volta ao padrão", modo([u("modo explicativo"), u("ok, modo conciso de novo")]) == "conciso"),
++        ("narração dentro de bloco de código não conta", linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n```\nvou fazer x\n```\nfeito"), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
+         ("IP:porta não vira citação", linha_estado([u(), a(pront + "\nporta 127.0.0.1:11435"), u()])
+          == "AUDITORIA-TURNO-ANTERIOR: OK"),
+     ]
+     linhas = LOG.read_text(encoding="utf-8").splitlines()
+     casos.append(("log: só quem foi auditado, sem o texto",
+-                  len(linhas) == 16 and all("análise" not in l and "corpo" not in l for l in linhas)))
++                  len(linhas) == 19 and all("análise" not in l and "corpo" not in l for l in linhas)))
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
 diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
-index 473aa6f..df29c1a 100644
+index 473aa6f..fdf9b08 100644
 --- a/redesign/router/seth_gateway.py
 +++ b/redesign/router/seth_gateway.py
-@@ -226,6 +226,9 @@ _DOUTRINA_FIXA = (
+@@ -226,6 +226,15 @@ _DOUTRINA_FIXA = (
      "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
      "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
      "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
++    "**MODO (linha do estado):** `conciso` é o padrão — a resposta traz o resultado e "
++    "não narra o processo (\"vou verificar…\", \"agora vou…\"); fale do processo só "
++    "para constatar erro, em 1 linha. `explicativo` só quando o Humano pedir na "
++    "conversa. Narração custa duas vezes: na saída e em toda mensagem seguinte, "
++    "porque fica no histórico — e economia de tokens é permanente (Regra 7). "
++    "(REGRAS, \"NPR\"; MEMÓRIAS (667).)\n"
 +    "**Plugins sob demanda:** Discord e navegador não aparecem na sua lista de "
 +    "ferramentas até você precisar — busque com `tool_search` (ex.: \"navegador\", "
 +    "\"discord\") e use. As do canon estão sempre carregadas. (MEMÓRIAS (666).)\n\n"
      "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
      "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
      "hidratação mínima; o resto é sob demanda.\n"
+@@ -505,6 +514,34 @@ def _classificar_rota(payload: dict) -> str:
+ # ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
+ import decisor  # noqa: E402  (mesmo diretório)
+ import auditoria_turno  # noqa: E402  (mesmo diretório)
++import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
++
++_PERFIS = {"mtime": None, "dados": {}}
++
++
++def _perfis() -> dict:
++    caminho = REPO / "config" / "capivara" / "perfis-modelos.json"
++    try:
++        mt = caminho.stat().st_mtime
++    except OSError:
++        return {}
++    if _PERFIS["mtime"] != mt:
++        _PERFIS["dados"], _PERFIS["mtime"] = capivara_perfis.carregar(caminho), mt
++    return _PERFIS["dados"]
++
++
++def _fila_pela_janela(payload: dict) -> str | None:
++    """`<fila>-longo` quando o pedido (já hidratado) não cabe no menor modelo da fila
++    base -- o LibreChat não sabe qual modelo da fila vai responder, o gateway sabe a fila
++    (667). None = fica como está (pedido cabe, fila fora do perfil, sem fila longa)."""
++    modelo = str(payload.get("model", ""))
++    perfis = _perfis()
++    limiar = capivara_perfis.limiar_tokens(perfis, modelo)
++    if limiar is None or not capivara_perfis.fila_longa(perfis, modelo):
++        return None
++    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    estimativa = _texto_e_sinais(msgs)[0] // 3  # caracteres ÷ 3: conservador para português
++    return modelo + capivara_perfis.SUFIXO_LONGO if estimativa > limiar else None
+ 
+ _PERGUNTA_ROTA = {"rota": {
+     "type": "choice",
+@@ -585,6 +622,7 @@ def _injeta(payload: dict) -> dict:
+         return payload
+     # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
+     auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
++    auditoria = auditoria_turno.linha_modo(msgs) + (f"\n{auditoria}" if auditoria else "")
+     ja_hidratado = any(
+         isinstance(m, dict) and m.get("role") == "system"
+         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
+@@ -641,7 +679,13 @@ class _Handler(BaseHTTPRequestHandler):
+                             payload.get("messages") or []):
+                         _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
+-                corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
++                payload = _injeta(payload)
++                longa = _fila_pela_janela(payload)
++                if longa:
++                    print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
++                    payload["model"] = longa
++                    self._rota = longa
++                corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+         self._passar(corpo, "POST")
+ 
+     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
+@@ -1108,6 +1152,31 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok9g else 'FALHA'}  passo de continuação: MESMA-RESPOSTA, sem reauditar")
+     falhas += 0 if ok9g else 1
+ 
++    # 9h. fila pela janela (667): perfil de teste -- pedido curto fica, pedido grande
++    # vai pro -longo; fila fora do perfil não muda.
++    _perfis_antes = globals()["_perfis"]
++    globals()["_perfis"] = lambda: {"filas": {"seth-pesado": ["a/grande", "ollama-local/x"]},
++                                    "modelos": {"a/grande": {"janela": 1000000}, "ollama-local/x": {"janela": 65536}}}
++    curto = {"model": "seth-pesado", "messages": [{"role": "user", "content": "oi"}]}
++    grande = {"model": "seth-pesado", "messages": [{"role": "user", "content": "z" * 200000}]}
++    fora = {"model": "seth-codigo", "messages": [{"role": "user", "content": "z" * 200000}]}
++    ok9h = (_fila_pela_janela(curto) is None and _fila_pela_janela(grande) == "seth-pesado-longo"
++            and _fila_pela_janela(fora) is None)
++    globals()["_perfis"] = _perfis_antes
++    print(f"{'PASS' if ok9h else 'FALHA'}  fila pela janela: curto fica, grande vai pro -longo, fora do perfil não muda")
++    falhas += 0 if ok9h else 1
++
++    # 9i. modo conciso padrão e explicativo pedido pelo Humano chegam ao estado (667)
++    def _sys_de(msgs):
++        urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "messages": msgs}).encode(),
++                                                      headers={"Content-Type": "application/json"}), timeout=10).read()
++        return " ".join(x["content"] for x in json.loads(_Dummy.ultimo_corpo)["messages"]
++                        if x.get("role") == "system" and isinstance(x.get("content"), str))
++    ok9i = (re.search(r"(?m)^MODO: conciso", _sys_de([{"role": "user", "content": "oi"}])) is not None
++            and re.search(r"(?m)^MODO: explicativo", _sys_de([{"role": "user", "content": "modo explicativo"}])) is not None)
++    print(f"{'PASS' if ok9i else 'FALHA'}  modo conciso padrão / explicativo a pedido chegam ao estado")
++    falhas += 0 if ok9i else 1
++
+     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
+     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
+     # o PRÓXIMO turno já hidratado reinjeta MODELO-REAL-TURNO-ANTERIOR.
+diff --git a/scripts/capivara_perfis.py b/scripts/capivara_perfis.py
+new file mode 100644
+index 0000000..25eccd5
+--- /dev/null
++++ b/scripts/capivara_perfis.py
+@@ -0,0 +1,222 @@
++#!/usr/bin/env python3
++"""Capivara — perfis de capacidade dos modelos das filas da Seth (MEMÓRIAS (667)).
++
++1ª peça do projeto Capivara (observatório dos modelos, (44)): mede o que cada modelo
++das filas aguenta — janela de contexto e saída máxima — e grava em
++`config/capivara/perfis-modelos.json`. Lê fatos, nunca escreve canon.
++
++Fontes, nesta ordem: `/v1/models` do OmniRoute (o que o provedor declara); `num_ctx`
++do Ollama para os locais; `config/capivara/janelas-documentadas.json` (só documentação
++oficial do provedor). Sem fonte = `nao_medido`, tratado como PEQUENO — nunca como grande.
++
++Para que serve:
++- **Fila longa.** Cada fila da conversa ganha uma variante `<fila>-longo`, mesma ordem,
++  só com modelos de janela >= JANELA_LONGA. O `seth_gateway` usa a variante quando o
++  pedido não cabe no menor modelo da fila base (o local de 64k, um `nao_medido`).
++- **Janela do LibreChat.** `janela_agente()` = min(teto de economia, menor janela das
++  filas longas) − reserva da hidratação: o número que o mostrador do LibreChat exibe é a
++  capacidade garantida do sistema, calculada, não chutada.
++
++Uso:
++  capivara_perfis.py                    mede e grava o perfil
++  capivara_perfis.py --conferir         mede e mostra o que mudou (saída 1 se mudou)
++  capivara_perfis.py --sincronizar-filas  cria/atualiza as filas -longo no OmniRoute
++  capivara_perfis.py --janela-agente    imprime a janela calculada para o Agent
++  capivara_perfis.py --selftest
++"""
++from __future__ import annotations
++
++import json
++import sys
++import time
++import urllib.request
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[1]
++PERFIS = RAIZ / "config" / "capivara" / "perfis-modelos.json"
++DOCUMENTADAS = RAIZ / "config" / "capivara" / "janelas-documentadas.json"
++FILAS_CONVERSA = ("seth-rapido", "seth-livre", "seth-pesado")
++SUFIXO_LONGO = "-longo"
++JANELA_LONGA = 128000        # modelo entra na fila -longo se aguentar isto
++RESERVA_SAIDA = 8000         # tokens deixados para a resposta
++RESERVA_HIDRATACAO = 4000    # o gateway injeta ~3 mil tokens que o LibreChat não conta
++JANELA_DESCONHECIDA = 32768  # `nao_medido` vale isto para o limiar: pequeno, de propósito
++OLLAMA = "http://127.0.0.1:11434"
++
++
++# --- cálculo (puro, sem rede: o gateway importa só isto) ----------------------
++def janela(perfis: dict, modelo: str) -> int:
++    p = (perfis.get("modelos") or {}).get(modelo) or {}
++    return int(p["janela"]) if p.get("janela") else JANELA_DESCONHECIDA
++
++
++def fila_longa(perfis: dict, fila: str) -> list[str]:
++    return [m for m in (perfis.get("filas") or {}).get(fila, []) if janela(perfis, m) >= JANELA_LONGA]
++
++
++def limiar_tokens(perfis: dict, fila: str) -> int | None:
++    """Maior pedido (tokens) que cabe em TODOS os modelos da fila base; None se a fila
++    não está no perfil (o gateway então não troca nada)."""
++    modelos = (perfis.get("filas") or {}).get(fila)
++    if not modelos:
++        return None
++    return min(janela(perfis, m) for m in modelos) - RESERVA_SAIDA
++
++
++def janela_agente(perfis: dict, teto_economia: int) -> int:
++    longas = [janela(perfis, m) for f in FILAS_CONVERSA for m in fila_longa(perfis, f)]
++    piso = min(longas) if longas else min(janela(perfis, m) for f in FILAS_CONVERSA
++                                          for m in (perfis.get("filas") or {}).get(f, []))
++    return min(teto_economia, piso) - RESERVA_HIDRATACAO
++
++
++def carregar(caminho: Path = PERFIS) -> dict:
++    try:
++        return json.loads(caminho.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return {}
++
++
++# --- medição (rede, só leitura) ---------------------------------------------------
++def _q():
++    sys.path.insert(0, str(RAIZ / "scripts"))
++    import queda_por_elo as q  # noqa: E402  (filas, token interno, abridor sem proxy)
++    return q
++
++
++def _janelas_omniroute(q) -> dict:
++    req = urllib.request.Request(q.PROXY + "/v1/models", headers={"X-Agata-Token": q._token_interno()})
++    with q._SEM_PROXY.open(req, timeout=30) as r:
++        dados = json.load(r)
++    return {m["id"]: (m.get("context_length") or m.get("max_input_tokens"), m.get("max_output_tokens"))
++            for m in dados.get("data", []) if isinstance(m, dict) and m.get("id")}
++
++
++def _num_ctx_ollama(q, modelo: str) -> int | None:
++    req = urllib.request.Request(OLLAMA + "/api/show", json.dumps({"model": modelo.split("/", 1)[1]}).encode(),
++                                 {"Content-Type": "application/json"})
++    try:
++        with q._SEM_PROXY.open(req, timeout=15) as r:
++            params = json.load(r).get("parameters", "")
++    except OSError:
++        return None
++    for linha in params.splitlines():
++        partes = linha.split()
++        if len(partes) == 2 and partes[0] == "num_ctx":
++            return int(partes[1])
++    return None
++
++
++def medir() -> dict:
++    q = _q()
++    filas = q.ler_filas(quais=FILAS_CONVERSA + ("seth-codigo",))
++    omni = _janelas_omniroute(q)
++    doc = json.loads(DOCUMENTADAS.read_text(encoding="utf-8")).get("modelos", {})
++    modelos = {}
++    for m in sorted({x for ordem in filas.values() for x in ordem}):
++        if m.startswith("ollama-local/"):
++            n = _num_ctx_ollama(q, m)
++            modelos[m] = {"janela": n, "saida_max": None, "fonte": "ollama num_ctx" if n else "nao_medido"}
++        elif m in omni and omni[m][0]:
++            modelos[m] = {"janela": omni[m][0], "saida_max": omni[m][1], "fonte": "omniroute /v1/models"}
++        elif m in doc:
++            modelos[m] = {"janela": doc[m]["janela"], "saida_max": doc[m].get("saida_max"),
++                          "fonte": "documentação oficial: " + doc[m]["fonte"]}
++        else:
++            modelos[m] = {"janela": None, "saida_max": None, "fonte": "nao_medido"}
++    return {"_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas "
++                          "ou os modelos mudarem. MEMÓRIAS (667).",
++            "medido_em": time.strftime("%Y-%m-%d"), "filas": filas, "modelos": modelos}
++
++
++def sincronizar_filas(perfis: dict) -> list[str]:
++    """Cria ou atualiza `<fila>-longo` no OmniRoute (idempotente). Escreve no banco do
++    OmniRoute: faça backup do storage.sqlite antes."""
++    q = _q()
++    with q._SEM_PROXY.open(q.OMNIROUTE + "/api/combos", timeout=15) as r:
++        bruto = json.load(r)
++    lista = bruto if isinstance(bruto, list) else next(bruto[k] for k in ("combos", "data", "items")
++                                                      if isinstance(bruto.get(k), list))
++    por_nome = {c.get("name"): c for c in lista if isinstance(c, dict)}
++    feito = []
++    for fila in FILAS_CONVERSA:
++        base = por_nome.get(fila)
++        if base is None:
++            feito.append(f"{fila}: não existe — pulada")
++            continue
++        quero = fila_longa(perfis, fila)
++        modelos = [m for m in base["models"] if m.get("model") in quero]
++        nome = fila + SUFIXO_LONGO
++        atual = por_nome.get(nome)
++        if atual is not None:
++            if [m.get("model") for m in atual.get("models", [])] == quero:
++                feito.append(f"{nome}: já em dia ({len(quero)} modelos)")
++                continue
++            corpo, metodo, url = dict(atual, models=modelos), "PUT", f"{q.OMNIROUTE}/api/combos/{atual['id']}"
++        else:
++            corpo = {k: v for k, v in base.items() if k not in ("id", "_id", "createdAt", "updatedAt")}
++            corpo.update(name=nome, models=[{k: v for k, v in m.items() if k != "id"} for m in modelos])
++            metodo, url = "POST", f"{q.OMNIROUTE}/api/combos"
++        req = urllib.request.Request(url, json.dumps(corpo).encode(), {"Content-Type": "application/json"},
++                                     method=metodo)
++        with q._SEM_PROXY.open(req, timeout=15) as r:
++            feito.append(f"{nome}: {metodo} {r.status} ({len(quero)} modelos: {', '.join(quero)})")
++    return feito
++
++
++def _selftest() -> int:
++    p = {"filas": {"seth-rapido": ["a/grande", "b/nao-medido", "ollama-local/x"],
++                   "seth-livre": ["a/grande", "c/medio", "ollama-local/x"],
++                   "seth-pesado": ["d/enorme", "ollama-local/x"]},
++         "modelos": {"a/grande": {"janela": 256000}, "b/nao-medido": {"janela": None},
++                     "c/medio": {"janela": 128000}, "d/enorme": {"janela": 1048576},
++                     "ollama-local/x": {"janela": 65536}}}
++    casos = [
++        ("nao_medido é tratado como pequeno", janela(p, "b/nao-medido") == JANELA_DESCONHECIDA),
++        ("fila longa tira o local e o nao_medido", fila_longa(p, "seth-rapido") == ["a/grande"]),
++        ("fila longa mantém a ordem e quem tem >= 128k", fila_longa(p, "seth-livre") == ["a/grande", "c/medio"]),
++        ("limiar da fila base = menor janela − saída", limiar_tokens(p, "seth-livre") == 65536 - RESERVA_SAIDA),
++        ("limiar com nao_medido usa a janela desconhecida", limiar_tokens(p, "seth-rapido") == JANELA_DESCONHECIDA - RESERVA_SAIDA),
++        ("fila fora do perfil -> None (gateway não troca)", limiar_tokens(p, "seth-x") is None),
++        ("janela do agente = min(teto, piso das longas) − reserva",
++         janela_agente(p, 100000) == 100000 - RESERVA_HIDRATACAO and janela_agente(p, 999999) == 128000 - RESERVA_HIDRATACAO),
++        ("perfil ausente -> {}", carregar(Path("/nao/existe.json")) == {}),
++    ]
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++def main(argv: list[str]) -> int:
++    if argv == ["--selftest"]:
++        return _selftest()
++    if argv == ["--janela-agente"]:
++        cfg = json.loads((RAIZ / "redesign" / "librechat" / "agente-seth.json").read_text(encoding="utf-8"))
++        print(janela_agente(carregar(), int(cfg["teto_economia"])))
++        return 0
++    if argv == ["--sincronizar-filas"]:
++        for linha in sincronizar_filas(carregar()):
++            print(linha)
++        return 0
++    novo = medir()
++    if argv == ["--conferir"]:
++        velho = carregar()
++        mudou = [m for m in sorted(set(novo["modelos"]) | set(velho.get("modelos", {})))
++                 if novo["modelos"].get(m, {}).get("janela") != velho.get("modelos", {}).get(m, {}).get("janela")]
++        mudou += ["filas"] if novo["filas"] != velho.get("filas") else []
++        print("OK: perfil em dia" if not mudou else "MUDOU: " + ", ".join(mudou))
++        return 1 if mudou else 0
++    if argv:
++        print(__doc__)
++        return 2
++    PERFIS.parent.mkdir(parents=True, exist_ok=True)
++    PERFIS.write_text(json.dumps(novo, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
++    for m, d in novo["modelos"].items():
++        print(f"{m:55} {str(d['janela']):>8}  {d['fonte'][:60]}")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
 diff --git a/scripts/estado_para_eco.sh b/scripts/estado_para_eco.sh
 index 2144a9c..decdbe5 100755
 --- a/scripts/estado_para_eco.sh
@@ -207,15 +868,114 @@ index 2144a9c..decdbe5 100755
    # (MEMÓRIAS (543)) ordem remoto...HEAD: a 1a coluna do --left-right é o que SÓ o remoto tem (= atrás),
    # a 2a o que só o HEAD tem (= à frente) -- casa com o rótulo abaixo. Antes estava invertido: um
    # branch 1 à frente saía "atrás/à-frente: 1/0" e dois modelos leram "1 commit atrás".
-diff --git a/.gitignore b/.gitignore
-index af12933..1fa959d 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -96,3 +96,7 @@ memoria/*.log
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 5691f7f..68d51e6 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -59,6 +59,7 @@ source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
+ source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
+ source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
+ source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
++source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
  
- # TTS Piper -- voz .onnx ~60MB, baixada por redesign/router/tts-piper/instalar.sh (MEMÓRIAS (387))
- redesign/router/tts-piper/voices/
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -351,6 +352,12 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-23" "Toda porta de entrada de modelo traz as diretrizes comuns (modo conciso, economia de tokens)" "MEMÓRIAS (667)"
++  p23_portas_entrada
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
 +
-+# Relatórios da pesquisa semanal automática de modelos (scripts/pesquisar_modelos_gratuitos.py):
-+# ficam no disco pro Humano ler, mas não são proposta pendente -- decisão do Humano, MEMÓRIAS (666).
-+propostas/modelos-gratuitos-*.md
+   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
+   PERIMETRO_ESTADO=""
+   p12_backup_verificavel; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
+index a3faf7f..5f7f25f 100644
+--- a/scripts/perimetro/p08_quarentena.sh
++++ b/scripts/perimetro/p08_quarentena.sh
+@@ -65,6 +65,11 @@ _p8_eh_comportamento() {
+     # SEMPRE passa por um Humano colando e lendo a resposta), CLAUDE.md dirige
+     # um modelo sem esse portão. Mesma classe de risco de config/*.
+     CLAUDE.md) return 0 ;;
++    # AGENTS.md (13/10/2026, MEMÓRIAS (667)): a mesma classe do CLAUDE.md -- lido
++    # sozinho por Codex, Gemini CLI, Cursor, e importado pelo CLAUDE.md.
++    # redesign/librechat/*.json|*.sh (parâmetros do Agent e o script que os aplica)
++    # e redesign/goose/* (instruções do Goose) mudavam comportamento fora daqui.
++    AGENTS.md|redesign/librechat/*.json|redesign/librechat/*.sh|redesign/goose/*) return 0 ;;
+     # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
+     # é mudança de comportamento tanto quanto trocar um script. A
+     # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a
+diff --git a/scripts/perimetro/p23_portas_entrada.sh b/scripts/perimetro/p23_portas_entrada.sh
+new file mode 100644
+index 0000000..437691b
+--- /dev/null
++++ b/scripts/perimetro/p23_portas_entrada.sh
+@@ -0,0 +1,25 @@
++#!/usr/bin/env bash
++# P-23 -- toda porta de entrada de modelo traz as diretrizes comuns da Agata
++# (MEMÓRIAS (667)): modo conciso como padrão e economia de tokens permanente -- ou importa
++# o AGENTS.md, que as traz. Lista em config/portas-de-entrada.txt. AVISA, nunca
++# falha: é cobertura de instrução, não segurança. Fecha a classe "plataforma nova
++# entra sem diretriz" (o AGENTS.md da raiz não existia: Codex/Gemini/Cursor
++# entrariam soltos).
++
++p23_portas_entrada() {
++  local lista="config/portas-de-entrada.txt" caminho quem faltam
++  [ -f "$lista" ] || { echo "AVISO (P-23): $lista não existe -- ninguém confere as portas de entrada."; return 0; }
++  while IFS='|' read -r caminho quem; do
++    case "$caminho" in \#*|"") continue ;; esac
++    if [ ! -f "$caminho" ]; then
++      echo "AVISO (P-23): porta de entrada '$caminho' ($quem) declarada mas o arquivo não existe."
++      continue
++    fi
++    grep -q '^@AGENTS\.md' "$caminho" && continue
++    faltam=""
++    grep -qi 'modo conciso' "$caminho" || faltam="modo conciso"
++    grep -qi 'economia de tokens' "$caminho" || faltam="${faltam:+$faltam e }economia de tokens"
++    [ -n "$faltam" ] && echo "AVISO (P-23): '$caminho' ($quem) não traz $faltam nem importa o AGENTS.md. Por que importa: o modelo que entra por ali segue sem as diretrizes comuns (MEMÓRIAS (667)). O que fazer: acrescentar a linha das diretrizes ou '@AGENTS.md'."
++  done < "$lista"
++  return 0
++}
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 7733c14..c309bd1 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -219,7 +219,7 @@ declare -A SEM_TESTE=(
+ # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
+ declare -A NIVEL=(
+   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
+-  [P-21]=L1 [P-20]=L1 [P-22]=L1
++  [P-21]=L1 [P-20]=L1 [P-22]=L1 [P-23]=L1
+   [P-2]=L3
+   [P-3]=L4 [P-13]=L4 [P-15]=L4
+   [P-4]=L2 [P-9]=L2 [P-10]=L2
+@@ -567,6 +567,25 @@ _caso P-22 PASSA "nada mudou" <<'EOF'
+ true
+ EOF
+ 
++# --- P-23: porta de entrada sem as diretrizes comuns ------------------------
++# Casos autocontidos: o clone parte do HEAD e só recebe scripts/.githooks/config,
++# então cada caso escreve a própria lista e o próprio arquivo de porta.
++_caso P-23 PEGA "porta sem modo conciso e sem economia de tokens" <<'EOF'
++printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'instruções quaisquer\n' > porta-teste.md
++EOF
++
++_caso P-23 PEGA "porta declarada cujo arquivo não existe" <<'EOF'
++printf 'NAO_EXISTE.md|teste\n' > config/portas-de-entrada.txt
++EOF
++
++_caso P-23 PASSA "porta com modo conciso e economia de tokens" <<'EOF'
++printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente\n' > porta-teste.md
++EOF
++
++_caso P-23 PASSA "porta que importa o AGENTS.md" <<'EOF'
++printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf '# x\n@AGENTS.md\n' > porta-teste.md
++EOF
++
+ # --------------------------------------------------------------- veredito --
+ echo
+ if [ "$FALHOU" -eq 0 ]; then

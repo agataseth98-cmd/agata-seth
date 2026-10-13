@@ -26,20 +26,40 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9e187e50ec15ba814628749631583cdccf18b3d3
-  Escrito em: 13/10/2026 14:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9c172954b3d8eef20749d178390347d33a992370
+  Escrito em: 13/10/2026 14:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e187e50ec15ba814628749631583cdccf18b3d3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(667) CONSELHO — 13/10/2026 · **Revisão de `contexto-e-plugins-2026-10-13` antes da assinatura, a pedido do Humano: a janela fixa de (666) vira janela por perfil de modelo (1ª peça do projeto Capivara); o "modo conciso" (sem narrar o processo) vira padrão de resposta nas REGRAS, com 3 pareceres condicionais acatados; e as mesmas diretrizes passam a valer em toda plataforma, com `AGENTS.md` na raiz e o controle P-23. Proposta agora com 21 arquivos, aguardando assinatura.**
+
+**Pedidos do Humano:** (1) "acho que perdemos com os outros modelos" — um perfil por modelo, "uma capivara", que troque a janela e sincronize com o mostrador do LibreChat; escolheu "perfil por modelo + teto de economia" e que isso seja o projeto Capivara. (2) NPR como padrão: o modelo não narra o que está fazendo e só fala do processo ao constatar erro. (3) "Todos os modelos que estiverem agindo sob a tutela do sistema Agata, em qualquer plataforma, devem seguir as diretrizes do sistema até aqui."
+
+**Janela — Capivara, 1ª peça.** Janelas medidas no `/v1/models` do OmniRoute: Gemini 2.5/3/3.1 e nemotron-ultra ~1M, nemotron-super 262.144, north-mini-code 256.000, codestral 128.000; Ollama local 65.536 (`num_ctx`); pela documentação oficial, gemini-3.5-flash-lite 1.048.576 e ministral-14b 256.000; glm-4.7-flash sem fonte confiável (131k ou 200k conforme o site) → `nao_medido`, tratado como pequeno. Limite técnico declarado: o LibreChat fixa a janela por Agent e monta o pedido antes de a fila escolher o modelo, então "trocar por mensagem" não existe nele. O desenho: `scripts/capivara_perfis.py` mede e grava `config/capivara/perfis-modelos.json`; cada fila de conversa ganha `<fila>-longo` (só modelos ≥128k); o `seth_gateway` usa a longa quando o pedido não cabe no menor modelo da fila base; a janela do Agent (o mostrador) é calculada: min(teto de economia 100.000, menor janela das longas) − reserva da hidratação = **96.000**. O teto existe porque o LibreChat reenvia o histórico até a janela em toda mensagem.
+
+**Modo conciso — 2ª opinião.** Pedido único ao Conselho Remoto; o 1º parecer (zhipu/glm-4.7-flash) veio condicional, então mais 2 — e o rodízio novo de (658)/(659) entregou 3 famílias diferentes de primeira (zhipu → google/gemini-2.5-flash → openrouter/nemotron-3-ultra). **Convergência 3/3, todos condicionais, no mesmo ponto:** não dar a "NPR" um segundo sentido — hoje é o prefixo de mensagem que dispensa resposta. O item da economia de tokens os três aceitaram. Emenda adotada (a do Gemini): nome próprio, "modo conciso" (alterna com "modo explicativo"), e "o cabeçalho da Regra 1 é informativo e não conta como narração". **Decisão do Humano: "modo conciso".** REGRAS ganha o parágrafo na seção "NPR" e, na Regra 7, o texto formal da economia de tokens permanente decidida em (654) e nunca escrita no canon. O gateway põe `MODO: conciso|explicativo` no estado; a auditoria acusa narração ("Vou…", "Agora vou…") em modo conciso.
+
+**Toda plataforma.** Portas de entrada medidas: Seth e Goose (doutrina do gateway), Claude Code (`CLAUDE.md`), nuvem (`PROMPT_CARREGAMENTO.md`) — e nenhum `AGENTS.md` na raiz, que é o que Codex, Gemini CLI e Cursor leem: entrariam sem diretriz. Agora: `AGENTS.md` na raiz com as diretrizes comuns (Regra 1, medir antes de afirmar, P-8, sem sudo, `.env` nunca, append-only, modo conciso, economia de tokens); o `CLAUDE.md` o importa (`@AGENTS.md`); as mesmas linhas no `PROMPT_CARREGAMENTO.md`, na doutrina e em `redesign/goose/AGENTS.md`; `config/portas-de-entrada.txt` lista as portas e o **P-23** avisa se alguma ficar sem elas. Achado de passagem, mesma classe: a quarentena do P-8 não cobria `redesign/librechat/*.json|*.sh` nem `redesign/goose/*` — entram, junto com o `AGENTS.md`.
+
+**Verificado:** `capivara_perfis.py` medido de verdade e `--selftest`; `seth_gateway.py --selftest` (fila longa, linha de modo); `auditoria_turno.py --selftest`; `verificar_cabecalho.py` 16/16; `testar_perimetro.sh` **55/55** (P-23 com 4 casos); `perimetro.sh` 0 FALHA e P-23 sem aviso na worktree com o `.diff`. A doutrina vai a 9.398 caracteres; os plugins sob demanda de (666) tiram ~2 mil tokens por mensagem.
+
+**Pareceres crus:** os 3 de 13/10/2026 sobre este pedido, no diretório de respostas do Conselho Remoto (camada local).
+
+**Assinar:** `bash scripts/aprovar.sh contexto-e-plugins-2026-10-13`
+
+**sync:** PASS — `main` = `9e187e5` (== `origin/main`); ramo da proposta sobre (666); topo de MEMÓRIAS = (666).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: janelas medidas no OmniRoute e no Ollama, 2 documentações oficiais lidas, 3 chamadas reais ao Conselho Remoto, suíte e perímetro rodados · Autorização: Humano — "perfil por modelo + teto de economia", "é o projeto Capivara", "pedir 2ª opinião", "modo conciso", "todos os modelos … em qualquer plataforma".
 
 (666) DIÁRIO — 13/10/2026 · **Auditoria da resposta da Seth das 13:45 (pedido do Humano depois de (665)): melhorou — um cabeçalho só, hora certa, as 3 faltas desmentidas não voltaram —, mas não fez a correção. E dos 3 pedidos novos dela, o mais sério era verdadeiro: o LibreChat corta a saída das ferramentas antes de entregá-la ao modelo ("fading"), por usar uma janela padrão pequena e dobrar a contagem. Proposta `contexto-e-plugins-2026-10-13` (8 arquivos), aguardando assinatura.**
 
