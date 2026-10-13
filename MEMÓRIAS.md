@@ -26,20 +26,55 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c61fc5c716ee3a38ed279288d862a0e04e597998
-  Escrito em: 13/10/2026 12:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 216eaa6acc7b230b6a3142d43a5bb249bc75865c
+  Escrito em: 13/10/2026 12:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(662) DIÁRIO — 13/10/2026 · **Proposta `auditoria-turno-2026-10-13` (3 arquivos, aguardando assinatura): a conferência que fiz à mão nas respostas da Seth vira automática para a Seth e o Goose — a cada pedido, o gateway confere a resposta anterior do assistente sem chamar modelo nenhum, em ~4,5 ms, e devolve o resultado no bloco de estado como `AUDITORIA-TURNO-ANTERIOR`.**
+
+**Pedido do Humano:** "se isso resolver automatize tudo que for possível na Seth e Goose". (661) resolveu só pela metade; o Humano escolheu automatizar mesmo assim ("Automatizar agora").
+
+**Desenho:** o LibreChat e o Goose mandam a conversa inteira a cada pedido, então a resposta anterior já chega ao gateway — sem capturar stream, sem estado novo. `redesign/router/auditoria_turno.py` reaproveita o que existe: `verificar()` do linter de cabeçalho (corrigido em (660)) e `achar_citacoes()`/`checar()` do verificador do P-19. Confere: cabeçalho (forma, base do `t=`, `sync: PASS` sem medidas, entrada acima do topo); forma certa no lugar certo (1ª resposta = bloco de prontidão; depois, linha de turno); `t=<n> (contado no contexto)` contra o número real de respostas (só em conversa sem ferramentas); citação `` `arquivo:linha` `` com trecho, só para extensões conhecidas. O resultado entra nos dois caminhos de hidratação do gateway, e também quando o estado falha. A doutrina ganha uma linha: com achado, corrigir em 1 linha logo depois do cabeçalho. Log por turno em `~/.cache/agata/auditoria-turno.jsonl`, sem o texto.
+
+**Limite declarado:** não pega afirmação falsa em prosa nem uma (N) real citada para a coisa errada — as invenções de (661) passariam. Isso não é determinístico.
+
+**Verificado:** `auditoria_turno.py --selftest` 11/11 (inclui o cabeçalho real da Seth em (661), "IP:porta" sem falso positivo e o formato do Goose com tool-calls); `seth_gateway.py --selftest` com teste novo pelo caminho completo; na resposta real de 6 mil caracteres de (661), a auditoria acha o erro do cabeçalho em 4,5 ms; `perimetro.sh` 0 FALHA na worktree com o `.diff`; doutrina em 8.468 caracteres (+305). No caminho, um teste meu de (659) que substituía `_hidratacao` sem argumento quebrou com a mudança de assinatura — corrigido no mesmo diff.
+
+**Assinar:** `bash scripts/aprovar.sh auditoria-turno-2026-10-13`
+
+**sync:** PASS — sobre `216eaa6` (aplicação de (661), PR #163); topo de MEMÓRIAS = (661).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 2 `--selftest`, tempo medido na resposta real da Seth, perímetro na worktree · Autorização: Humano — "Automatizar agora".
+
+(661) DIÁRIO — 13/10/2026 · **`seth-memoria-2026-10-13` aplicada (assinatura verificada, PR #162 juntado). Teste com a mesma pergunta à Seth: resolveu pela metade — as 3 "faltas" falsas sumiram (ela agora cita o índice, o `HASH-ESTADO` e a "Fronteira de recusas"), mas o cabeçalho segue reprovado (`t=1` sem base, e o turno era o 2º) e ela inventou afirmações novas. A condição do Humano para automatizar ("se isso resolver") não foi cumprida por inteiro: decisão volta para ele.**
+
+**Aplicação:** `scripts/p8_verificar.sh` → `PODE APLICAR`; par em `propostas/aplicadas/`; `seth-gateway` reiniciado com a doutrina nova (8.163 caracteres).
+
+**Teste, e um erro de método meu, registrado:** 1ª tentativa com `stream: false` → 504 em 122 s. O log do OmniRoute mostra a fila `seth-rapido` inteira caindo: ministral-14b travou até os 45 s, os dois Gemini *flash-lite* deram 503 (demanda alta), e o Ollama local estourou os 45 s — mas o journal do Ollama mostra que ele **respondeu 200** (1.049 tokens a 42 tok/s, 25 s de geração depois de ~30 s carregando), 10 s depois de o OmniRoute desistir. Sem streaming, a resposta inteira precisava caber na janela de 45 s; o LibreChat usa streaming. Mesmo erro de família do `max_tokens: 5` de (655): testar diferente do cliente real. 2ª tentativa com streaming: 1º pedaço em 1,8 s, 27,5 s no total, ministral-14b.
+
+**A resposta, conferida:**
+- **Melhorou:** cita `INDICE_MEMORIAS`/`INDICE_MEMORIAS_PALAVRAS-CHAVE` e `HASH-ESTADO`, menciona a "Fronteira de recusas" e abre uma seção "O que falta (mas já existe)".
+- **Cabeçalho:** `Agata · ministral-14b-latest · t=1 · …` — sem a base de contagem, e `t=1` quando era a 2ª resposta da conversa. O linter reprova; a doutrina, sozinha, não bastou.
+- **Afirmações novas, falsas:** índices "manuais, não atualizados automaticamente" (são gerados pelo hook a cada commit); hidratação "copiada à mão do `ONDE_ESTAMOS.md`" (o gateway injeta); `query_canon --data`/`--grep` (sintaxe inventada; é ferramenta MCP com parâmetros); "(424)" citada para duas coisas que ela não diz; "`sync: PASS` sem hashes é aceito" (o linter rejeita).
+
+**Ressalva do teste:** foi pela API direta, sem as ferramentas MCP do LibreChat — a Seth não podia consultar o canon e respondeu só pela doutrina, no modelo da fila rápida. A conversa original tinha ferramentas. O teste é mais duro que o uso real, não equivalente.
+
+**O que a automação pedida cobriria e o que não:** a auditoria do turno anterior pegaria o cabeçalho (base e plausibilidade) e o `sync: PASS` nu; não pega afirmação falsa em prosa nem citação real de (N) usada para a coisa errada.
+
+**sync:** PASS — `main` = merge do PR #162 (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (660).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`; 2 chamadas reais à Seth; `call_logs` do OmniRoute e journal do Ollama lidos; linter rodado no cabeçalho dela; cada afirmação nova conferida no disco · Autorização: Humano — assinatura de `seth-memoria-2026-10-13` + merge do PR #162 + "ok".
 
 (660) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta da Seth (ministral-14b, 11:42) sobre o sistema de acesso a memórias: a descrição geral está certa, mas as 3 "faltas" que ela aponta já existem, o "ponto fraco" é uma recusa registrada, e a maior parte dos erros vem da doutrina que o sistema injeta nela — ponteiros velhos, nenhuma menção ao índice, e um linter que reprovava cabeçalho correto. Proposta `seth-memoria-2026-10-13` (4 arquivos), aguardando assinatura.**
 
