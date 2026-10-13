@@ -67,6 +67,8 @@ Merge para `main`: so na Fase 8 (Cadeia de auditoria). Ate la vive no branch.
 
 Uso: python3 scripts/conselho_remoto.py <arquivo-com-o-pedido.txt>
 """
+import glob
+import hashlib
 import json
 import os
 import re
@@ -245,17 +247,37 @@ def _disponiveis():
     return [m for m in ROSTER if float(b.get(m, {}).get("cooldown_ate", 0)) <= agora]
 
 
-def escolher_modelo():
+def familias_ja_consultadas(pedido_sha):
+    """Famílias que já deram parecer (remoto, não fallback local) a ESTE texto
+    de pedido -- lido das respostas guardadas, sem estado novo. Resposta antiga,
+    de antes deste campo existir, não conta (não há como casar)."""
+    vistas = set()
+    for caminho in glob.glob(os.path.join(DESTINO_DIR, "*.json")):
+        try:
+            with open(caminho, encoding="utf-8") as f:
+                reg = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if reg.get("pedido_sha256") == pedido_sha and not reg.get("fallback_local"):
+            vistas.add(reg.get("familia"))
+    return vistas
+
+
+def escolher_modelo(excluir_familias=frozenset()):
     """Família MENOS usada primeiro, ENTRE os modelos disponíveis (fora de
     cooldown). Dentro da família, e no empate entre famílias, a ordem do
     ROSTER decide. None = roster inteiro em cooldown. (MEMÓRIAS (381): a
     granularidade passou de modelo pra família; o breaker segue por modelo,
-    então um modelo problemático não resfria a família toda.)"""
+    então um modelo problemático não resfria a família toda.)
+    `excluir_familias`: as que já opinaram sobre o MESMO pedido -- pedir de
+    novo é pedir OUTRA opinião (MEMÓRIAS (656): o contador mandou o mesmo
+    modelo 5 vezes seguidas). Se todas já opinaram, vale a regra de sempre."""
     disp = _disponiveis()
     if not disp:
         return None
+    novas = [m for m in disp if _familia(m) not in excluir_familias]
     cont = _carregar_rotacao()
-    return min(disp, key=lambda m: (cont.get(_familia(m), 0), ROSTER.index(m)))
+    return min(novas or disp, key=lambda m: (cont.get(_familia(m), 0), ROSTER.index(m)))
 
 
 def _registrar_sucesso(modelo_escolhido):
@@ -315,15 +337,24 @@ def checar_conteudo_privado(texto):
     return None
 
 
+_PARTE_3 = re.compile(r"(?m)^[\s*#>_]*3\s*[.):\-–—]")
+_POSICAO_NAO = re.compile(r"posi[çc][ãa]o\W{0,12}n[ãa]o\b", re.IGNORECASE)
+
+
 def checar_formato_parecer(texto):
-    """Confere se as 4 partes do parecer (REGRAS, 'Segunda opiniao') aparecem,
-    generoso o bastante pra aceitar variacao de acento/caixa. Nao julga o
-    CONTEUDO -- so a presenca estrutural das 4 partes."""
+    """Confere se as 4 partes do parecer (PROTOCOLOS, 'Segunda opinião')
+    aparecem, generoso o bastante pra aceitar variacao de acento/caixa. Nao
+    julga o CONTEUDO -- so a presenca estrutural das 4 partes.
+    A parte 3 conta pelo NÚMERO ("3." / "3)") ou pela palavra "emenda": o
+    protocolo numera as partes, e a resposta certa de quem diz "sim" sem emenda
+    ("3. —", "não se aplica") não traz a palavra -- falso negativo registrado
+    em MEMÓRIAS (628) e (650). Com posição "não", a emenda não é exigida."""
     baixo = texto.lower()
     tem_origem = "origem" in baixo
     tem_posicao = "posição" in baixo or "posicao" in baixo
     tem_fundamentacao = "fundamentação" in baixo or "fundamentacao" in baixo
-    tem_emenda = "emenda" in baixo
+    tem_emenda = ("emenda" in baixo or bool(_PARTE_3.search(texto))
+                  or bool(_POSICAO_NAO.search(texto)))
     faltando = []
     if not tem_origem:
         faltando.append("Origem")
@@ -475,7 +506,51 @@ def _salvar(caminho_pedido, modelo_escolhido, resposta, conteudo, duracao_s, ext
     return destino, registro
 
 
+def _selftest():
+    import tempfile
+    global DESTINO_DIR, _disponiveis, _carregar_rotacao
+    casos = []
+    base = "0. Origem — li o pedido.\n1. Posição — {p}\n2. Fundamentação — porque sim.\n"
+    casos.append(("formato completo com a palavra Emenda",
+                  checar_formato_parecer(base.format(p="sim") + "3. Redação exata da emenda — x") == []))
+    casos.append(("posição sim, parte '3. —' sem a palavra -> aceita (falso negativo de (628)/(650))",
+                  checar_formato_parecer(base.format(p="sim") + "3. —") == []))
+    casos.append(("posição não, sem parte 3 -> aceita",
+                  checar_formato_parecer(base.format(p="não.")) == []))
+    casos.append(("posição condicional sem parte 3 -> falta Emenda",
+                  checar_formato_parecer(base.format(p="condicional")) == ["Emenda"]))
+    casos.append(("sem Origem -> falta Origem",
+                  checar_formato_parecer("1. Posição — sim\n2. Fundamentação — x\n3. —") == ["Origem"]))
+    disp_orig, rot_orig, dest_orig = _disponiveis, _carregar_rotacao, DESTINO_DIR
+    _disponiveis = lambda: list(ROSTER)
+    contagem = {_familia(m): 9 for m in ROSTER}
+    contagem[_familia(ROSTER[2])] = 4
+    _carregar_rotacao = lambda: dict(contagem)
+    casos.append(("sem exclusão -> a família menos usada", escolher_modelo() == ROSTER[2]))
+    outra = escolher_modelo({_familia(ROSTER[2])})
+    casos.append(("já opinou neste pedido -> outra família",
+                  outra is not None and _familia(outra) != _familia(ROSTER[2])))
+    casos.append(("todas já opinaram -> regra de sempre",
+                  escolher_modelo(_familias_do_roster()) == ROSTER[2]))
+    DESTINO_DIR = tempfile.mkdtemp()
+    for nome, reg in [("a.json", {"pedido_sha256": "abc", "familia": "zhipu"}),
+                      ("b.json", {"pedido_sha256": "abc", "familia": "local", "fallback_local": True}),
+                      ("c.json", {"pedido_sha256": "outro", "familia": "google"})]:
+        with open(os.path.join(DESTINO_DIR, nome), "w", encoding="utf-8") as f:
+            json.dump(reg, f)
+    casos.append(("famílias já consultadas: só o mesmo pedido, sem fallback local",
+                  familias_ja_consultadas("abc") == {"zhipu"}))
+    _disponiveis, _carregar_rotacao, DESTINO_DIR = disp_orig, rot_orig, dest_orig
+    for nome, ok in casos:
+        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+    falhas = sum(not ok for _, ok in casos)
+    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
+    return 1 if falhas else 0
+
+
 def main():
+    if sys.argv[1:] == ["--selftest"]:
+        return _selftest()
     if len(sys.argv) != 2:
         print(f"uso: {sys.argv[0]} <arquivo-com-o-pedido.txt>", file=sys.stderr)
         return 2
@@ -492,10 +567,17 @@ def main():
         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
         return 1
 
+    pedido_sha = hashlib.sha256(pedido_texto.encode("utf-8")).hexdigest()
+    ja = familias_ja_consultadas(pedido_sha)
+    if ja:
+        print(f"Este pedido já tem parecer de: {', '.join(sorted(ja))}.")
+        if _familias_do_roster() <= ja:
+            print("Todas as famílias do roster já opinaram -- esta será uma repetição.")
+
     # --- rotação com circuit breaker + portão de resposta (MEMÓRIAS (374)) ---
     tentados = []
     for _ in range(len(ROSTER)):
-        modelo = escolher_modelo()
+        modelo = escolher_modelo(ja)
         if modelo is None or modelo in tentados:
             break
         tentados.append(modelo)
@@ -528,7 +610,8 @@ def main():
             continue
 
         _registrar_sucesso(modelo)
-        destino, reg = _salvar(caminho_pedido, modelo, resposta, conteudo, duracao_s)
+        destino, reg = _salvar(caminho_pedido, modelo, resposta, conteudo, duracao_s,
+                               extra={"pedido_sha256": pedido_sha})
         print(f"Guardado: {destino}")
         print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
         if reg["identidade"]["suspeita"]:
@@ -557,7 +640,7 @@ def main():
     conteudo, te, ts, tt = _normalizar(resposta)
     ok, motivo = _portao_resposta(resposta, conteudo)
     destino, _ = _salvar(caminho_pedido, FALLBACK_MODELO, resposta, conteudo, duracao_s,
-                         extra={"fallback_local": True, "portao_ok": ok,
+                         extra={"pedido_sha256": pedido_sha, "fallback_local": True, "portao_ok": ok,
                                 "portao_motivo": motivo, "tentados_remoto": tentados})
     print(f"Guardado (FALLBACK LOCAL): {destino}")
     print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")

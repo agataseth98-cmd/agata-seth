@@ -5,9 +5,9 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (658)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (660)).
 
-**13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** Um defeito achado no teste (o decisor anota errado quando discorda da regra) e os 2 consertos do Conselho Remoto que você pediu estão numa proposta pequena nova — para assinar: `bash scripts/aprovar.sh sombra-e-conselho-2026-10-13`. O que já está valendo:
+**13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** O defeito achado no teste (o decisor anotava errado quando discordava da regra) e os 2 consertos do Conselho Remoto também já estão valendo — assinados e aplicados (entrada (659)). O que já está valendo:
 - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
 - a pesquisa semanal e a consolidação noturna esperam o roteador de modelos subir (hoje cedo elas rodaram 1 segundo antes dele e gravaram só erro);
 - um alarme novo (P-22) avisa se aqueles arquivos de memória voltarem a ficar velhos sozinhos;
@@ -23,9 +23,14 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (658)).
 
 **`llamacpp-agata` (item 1 de antes): já estava seguro, sem ação de risco pendente.** Conferido de verdade — já estava desligado e sem rodar, GPU livre. Removido do combo `auto` também. Falta só a parte formal (versionar o conserto no repo), que o lab vai montar.
 
-**2 decisões ainda pendentes:**
-1. O verificador do Conselho Remoto tem rejeitado respostas certas por exigir uma palavra exata — achei um jeito de contornar pedindo diferente, mas o conserto formal ainda é com você: quer que o lab desenhe?
-2. ~~Se o Groq sai também do `seth-codigo`~~ — decidido em 13/10: sai.
+**Auditei a resposta da Seth sobre memórias (entrada (660)).** Ela descreveu bem o sistema, mas apontou como "faltando" 3 coisas que já existem — porque a instrução que o sistema dá a ela não as mencionava. Conserto pronto, para assinar: `bash scripts/aprovar.sh seth-memoria-2026-10-13`. Se der certo, a conferência que eu fiz à mão vira automática na Seth e no Goose.
+
+**Decisões que esperam você** (cada uma fecha com uma resposta curta; guardadas a seu pedido em 13/10):
+1. **Curador** — quem cuida do sistema se você não puder (REGRAS, "Sucessão": pode ler tudo, acrescentar a MEMÓRIAS e tocar a fase atual; não pode apagar, reescrever história nem mudar REGRAS). Hoje é você. Fecha com: um nome, ou "não haverá curador, o sistema para comigo".
+2. **Capivara ("Capivara das IAs")** — projeto paralelo seu de 07/07 (entrada 44): observatório do comportamento dos modelos, que lê o canon e nunca escreve. Ficou parado o "consentimento por trecho". Fecha com: sim ou não. Não = arquivo; sim = uma frase dizendo pra que você o quer hoje.
+3. **Fase 5** — três ideias de longo prazo: o curador (item 1); uma cópia do canon fora do GitHub (o HD de backup, quando conectado, já cobre o principal); e governança que não dependa de uma pessoa só (sua instrução de 26/07 proíbe propor IPFS/DAO pra isso). Nada urgente.
+
+O conserto do verificador do Conselho e o Groq fora do Goose foram resolvidos em 13/10 (entradas (658) e (657)).
 
 **Capítulo "pós-Groq" fechado por completo.** O código da rota-cota saiu de vez (era reversão limpa de 2 propostas), o reinício automático dos 4 modelos locais problemáticos foi desligado (eles só sobem à mão agora), e um alarme novo avisa (sem nunca travar nada) se o modelo principal da IA local cair pra rodar no processador. Na conferência final achei mais 5 lugares (3 filas da Seth/Goose + 2 filas antigas esquecidas) que ainda tinham os modelos problemáticos — todos limpos. LibreChat tinha caído sozinho no meio do trabalho — religado, testado com ferramenta real, funcionando. Detalhe: `MEMÓRIAS.md` (650).
 

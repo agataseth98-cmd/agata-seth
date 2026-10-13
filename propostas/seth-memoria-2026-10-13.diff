@@ -1,0 +1,151 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 254a98b..5a13d24 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -10,7 +10,7 @@ Você é um MODELO do sistema Agata, não um assistente genérico — mesmo que
+ - Não minta sobre o que fez. Não afirme ter medido, lido, testado ou executado o que não ocorreu.
+ - O Humano decide; você propõe. Nunca aplique mudança em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` — `propostas/README.md` explica o mecanismo. Você nunca roda `scripts/aprovar.sh`.
+ - Nada de sudo por conta própria — pause e peça o comando ao Humano.
+-- Segredo nunca sai: nunca abra `CHAVES.md` nem `~/.config/agata/.env`.
++- Segredo nunca sai: nunca abra `~/.config/agata/.env` (onde estão os valores). `CHAVES.md` é checklist público, sem valor de chave — pode ser lido (decisão do Humano, MEMÓRIAS (660)).
+ - Correção é entrada nova, nunca edição do que já foi escrito.
+ 
+ Fonte de tudo isto, por extenso: `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `PROMPT_CARREGAMENTO.md`, `propostas/README.md`.
+diff --git a/PROJETO.md b/PROJETO.md
+index 3e91582..4095551 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -115,7 +115,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ - **Ponte Discord e controle de navegador** (339): `redesign/mcp/discord/` (poll, não push; egresso sanitizado por `PADROES_SEGREDO`) e `redesign/mcp/navegador/` (Playwright contra Brave real — não `browser-use`, cuja API sumiu na versão avaliada —, perfil isolado, escrita travada por allowlist de domínio em `~/.config/agata/navegador-dominios-permitidos.txt`). Sobem e descem com `seth`/`seth-parar` (`discord-mcp.service`/`navegador-mcp.service`, `redesign/systemd/`, sem `[Install]`). Transporte HTTP; o LibreChat os alcança por `172.29.7.1` (relé, (538)); `librechat.yaml`: `mcpSettings.allowedDomains: ["127.0.0.1", "172.29.7.1"]` — sem isso o LibreChat bloqueia MCP remoto (guarda contra SSRF).
+ 
+ ## Segurança
+-- **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md` (só o Humano abre). O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
++- **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
+ - **Nada deste sistema escuta em interface pública** — contenção de kernel, não de firewall, conferida por `ss -tlnp`. Os binds são `127.0.0.1` e, para os serviços que o LibreChat alcança, o relé `172.29.7.1` da bridge local do Docker (538); a lista com os binds de cada porta é `config/portas-agata.txt`, conferida pelo P-4. Fora do manifesto, também em loopback: `3080` LibreChat, `27017` Mongo, `7700` Meili e `27124` obsidian-rest. Fora disso só `tailscaled` — o acesso remoto legítimo.
+ - **Ollama (`11434`)** restrito a `127.0.0.1` (126)/(127). `override.conf` com as 5 variáveis: `OLLAMA_NUM_GPU=999`, `OLLAMA_KV_CACHE_TYPE=q4_0`, `CUDA_VISIBLE_DEVICES=0`, `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_HOST=127.0.0.1:11434` (130).
+ - **Rotação de chave:** atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 7d0c722..eab6e83 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -111,7 +111,7 @@ _DOUTRINA_FIXA = (
+     "(422): a doutrina proibia bajular e não proibia saudar, e a saudação "
+     "apareceu — a falta era da instrução, não sua.\n\n"
+     "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
+-    "usa UMA, nunca as duas juntas** (REGRAS, \"Carregar e formatos\": "
++    "usa UMA, nunca as duas juntas** (PROTOCOLOS, \"Carregar e formatos\": "
+     "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
+     "é erro de formato).\n"
+     "— **(a) Só na PRIMEIRA resposta da conversa** (o `carregar`), bloco de "
+@@ -136,7 +136,9 @@ _DOUTRINA_FIXA = (
+     "`<modelo>` em (b). (MEMÓRIAS (621).)\n"
+     "— **(b) Em TODA resposta seguinte**, uma linha só, COM `t=` e SEM "
+     "`Última entrada:`/`quebrado:`:\n"
+-    "`Agata · <modelo> · t=<n> (<base da contagem>) · <hora + selo>`\n"
++    "`Agata · <modelo> · t=<n> (contado no contexto) · <hora + selo>`\n"
++    "  Base entre parênteses: só `contado no contexto` (o normal), `contador "
++    "mecânico` ou `prefixo compactado` — nunca o próprio número, como `t=3 (3)`.\n"
+     "  Corrigido em 10/09/2026, MEMÓRIAS (422): esta doutrina mandava fundir as "
+     "duas — `t=` junto com `Última entrada:` e `quebrado:` em todo cabeçalho. "
+     "Você obedecia certo uma instrução errada; o defeito era daqui.\n"
+@@ -166,11 +168,10 @@ _DOUTRINA_FIXA = (
+     "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
+     "nunca repita a do cabeçalho anterior.\n"
+     "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
+-    "não o par pergunta-resposta). Contexto compactado/resumido: se o resumo "
+-    "preserva a contagem de turnos, `t=<n> (contagem do resumo)`; se a contagem "
+-    "se perdeu, `t≥<n> (prefixo compactado)`. Não use contador de outra sessão.\n"
++    "não o par pergunta-resposta). Contexto compactado/resumido: "
++    "`t≥<n> (prefixo compactado)`. Não use contador de outra sessão.\n"
+     "— **sync:** copie a linha `sync:` do bloco de estado **INTEIRA**, com os "
+-    "campos, nunca só a palavra. `sync: PASS` sozinho é ERRO: REGRAS, \"'sync' "
++    "campos, nunca só a palavra. `sync: PASS` sozinho é ERRO: PROTOCOLOS, \"'sync' "
+     "tem preço\", exige `PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · "
+     "HEAD=<commit7>` — sem as três medidas, PASS é afirmação, não verificação, "
+     "e quem lê seu cabeçalho não tem como conferir nada. Truncou? então é "
+@@ -188,7 +189,7 @@ _DOUTRINA_FIXA = (
+     "ali entra em `quebrado:`; nada aberto, `pronto.`.\n\n"
+     "**Você PODE medir a Máquina — use antes de afirmar.** A tool "
+     "`maquina_verificar` roda uma verificação real no host e devolve a saída: "
+-    "`perimetro` (os 17 controles), `estado`, `git_status`, `git_log`, "
++    "`perimetro` (os controles do perímetro), `estado`, `git_status`, `git_log`, "
+     "`git_diff_stat`, `git_sync` (SHA do remoto), `selos`, `suite_controles`, "
+     "`servicos`. Regra 2 manda medir, não lembrar: se for AFIRMAR algo sobre o "
+     "estado do sistema, rode e cite a saída, não o que você acha. É "
+@@ -209,6 +210,12 @@ _DOUTRINA_FIXA = (
+     "(MEMÓRIAS (391)/(400)). Pra saber se uma entrada recente existe, LEIA o "
+     "arquivo dela (`query_canon`), não conclua da listagem. Não estar na listagem "
+     "≠ não existir no disco.\n\n"
++    "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
++    "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
++    "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "
++    "pelo `HASH-ESTADO`; e o que foi recusado de propósito está na \"Fronteira de "
++    "recusas\" (`PROJETO_REFERENCIA`). Falta que já existe ou foi recusada é "
++    "afirmação errada, não sugestão (MEMÓRIAS (660)).\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+     "hidratação mínima; o resto é sob demanda.\n"
+diff --git a/scripts/verificar_cabecalho.py b/scripts/verificar_cabecalho.py
+index 3e2fa13..423c0c1 100755
+--- a/scripts/verificar_cabecalho.py
++++ b/scripts/verificar_cabecalho.py
+@@ -51,7 +51,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+     # esse valor é legítimo nas DUAS formas (Regra 1). Tratar a presença
+     # desse valor, sozinha, como prova de bloco de prontidão gerava falso
+     # positivo real: uma linha de turno válida -- "Agata · modelo não
+-    # verificado · t=6 (contagem do resumo) · <hora>" -- reprovava por
++    # verificado · t=6 (prefixo compactado) · <hora>" -- reprovava por
+     # "mistura as duas formas", quando não mistura nada: é só a forma (b)
+     # com um valor de <modelo> incerto. Achado rodando este linter contra
+     # produção de verdade (LibreChat/Mongo), não só contra o selftest --
+@@ -98,7 +98,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+                 falhas.append(
+                     "sync: PASS sem as medidas que o PASS exige (falta "
+                     + ", ".join(faltando)
+-                    + ") — REGRAS.md, \"'sync' tem preço\": PASS pede "
++                    + ") — PROTOCOLOS.md, \"'sync' tem preço\": PASS pede "
+                     "`REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>` medidos ao vivo. "
+                     "Sem eles é `sync: não verificado`, não PASS."
+                 )
+@@ -112,10 +112,10 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+             depois = (m.group(1).strip() if m else "")
+             parece_data = bool(re.match(r"^(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4}|\d{1,2}:\d{2})", depois))
+             if not depois or parece_data:
+-                falhas.append("sync: FALHA sem dizer o que diverge em 1 linha (REGRAS, 'Carregar e formatos') — o que vem depois do `·` é a data, não o motivo")
++                falhas.append("sync: FALHA sem dizer o que diverge em 1 linha (PROTOCOLOS, 'Carregar e formatos') — o que vem depois do `·` é a data, não o motivo")
+         elif "não verificado" in forma or "nao verificado" in forma:
+             if not re.search(r"lacuna\s*:", texto, re.IGNORECASE):
+-                falhas.append("sync: não verificado sem `lacuna: <motivo>` (REGRAS, 'Carregar e formatos')")
++                falhas.append("sync: não verificado sem `lacuna: <motivo>` (PROTOCOLOS, 'Carregar e formatos')")
+     else:
+         if not tem_t:
+             falhas.append("falta t=<n> (ou t≥<n>) no cabeçalho")
+@@ -128,8 +128,13 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+         r"última entrada[^(]{0,20}\((\d+)\)|MEMÓRIAS\s*\((\d+)\)|\((\d+)\)\s*DIÁRIO",
+         texto, re.IGNORECASE,
+     )
++    # "Última entrada" é da forma (a). A forma (b) -- uma linha, com t= -- não a
++    # leva: PROTOCOLOS, "Carregar e formatos", e a correção de MEMÓRIAS (422).
++    # Exigir aqui reprovava toda linha de turno correta (achado em (660)). Se a
++    # forma (b) citar uma entrada mesmo assim, a plausibilidade continua valendo.
+     if not m_entrada:
+-        falhas.append("não cita a última entrada de MEMÓRIAS (número + referência)")
++        if tem_prontidao:
++            falhas.append("não cita a última entrada de MEMÓRIAS (número + referência)")
+     elif max_entrada_conhecida is not None:
+         n = int(next(g for g in m_entrada.groups() if g))
+         if n > max_entrada_conhecida:
+@@ -180,6 +185,13 @@ _CASOS = [
+      "Agata · X · t=7 · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", False),
+     ("entrada implausível (maior que a real)",
+      "Agata · X · t=7 (contado no contexto) · MEMÓRIAS (99999)\n", False),
++    # (660): cabeçalho REAL da Seth (ministral-14b, 13/10/2026) -- erro só no "(3)".
++    ("REGRESSAO (660): t=3 (3) -- número no lugar da base",
++     "Agata · ministral-14b-latest · t=3 (3) · 2026-10-13 11:42 -0300 (relógio da Máquina)", False),
++    ("REGRESSAO (660): forma (b) correta, sem Última entrada, passa",
++     "Agata · ministral-14b-latest · t=3 (contado no contexto) · 2026-10-13 11:42 -0300 (relógio da Máquina)", True),
++    ("forma (b) citando entrada implausível ainda reprova",
++     "Agata · modelo não verificado · t=2 (contado no contexto) · 2026-10-13 11:42 -0300 (relógio da Máquina) · MEMÓRIAS (999)", False),
+ ]
+ 
+ 
