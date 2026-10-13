@@ -23,8 +23,8 @@
     {
       "id": "busca-semantica",
       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
-      "correcao": "recusa deliberada, não falta: sem RAG por embedding de propósito (115)/(293)/(313), \"Fronteira de recusas\" em PROJETO_REFERENCIA",
-      "origem": "(660)"
+      "correcao": "existe e está ao seu alcance: vault_buscar (modo sentido, embedding local sobre entradas e parágrafos) -- (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
+      "origem": "(660)/(670)"
     },
     {
       "id": "indices-manuais",
@@ -50,9 +50,16 @@
     {
       "id": "vault-sem-entrada-nova",
       "tema": "vault|obsidian|entradas/",
-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada",
-      "correcao": "o vault é regenerado no post-commit de cada commit e o arquivo da entrada já existe; o que pode atrasar é só a LISTAGEM do Obsidian (391)/(400) — leia o arquivo",
-      "origem": "(666)"
+      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh",
+      "correcao": "o vault é regenerado a cada commit e, desde (670), a listagem de diretório vem do disco -- a entrada nova está lá; abra o arquivo",
+      "origem": "(666)/(670)"
+    },
+    {
+      "id": "leitura-parcial",
+      "tema": "leitura parcial|truncad|trunca\\b|cortad|456 chars|fading",
+      "sinal": "persist|estrutura|limita|ainda|continua",
+      "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
+      "origem": "(668)/(670)"
     }
   ]
 }

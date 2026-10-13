@@ -85,6 +85,18 @@ services:
       - librechat-ponte-host
     env_file:
       - .env
+    # Tema da Agata (MEMÓRIAS (670)): o CSS montado abaixo entra por um <link> no
+    # index.html, acrescentado aqui antes de subir (idempotente; o LibreChat lê o
+    # index.html uma vez no boot). Os .br/.gz pré-comprimidos do index saem para
+    # nunca servir a versão sem o tema. O resto é o comando original da imagem.
+    command:
+      - sh
+      - -c
+      - >-
+        grep -q agata-tema.css client/dist/index.html ||
+        sed -i 's#</head>#<link rel="stylesheet" href="/assets/agata-tema.css"></head>#' client/dist/index.html;
+        rm -f client/dist/index.html.br client/dist/index.html.gz;
+        exec npm run backend
     environment:
       - CONFIG_PATH=/app/librechat.yaml
       # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
@@ -99,6 +111,7 @@ services:
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
       - ./data:/app/data
+      - ./agata-tema.css:/app/client/dist/assets/agata-tema.css:ro
     healthcheck:
       # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber
       # quando abrir o navegador -- reusado aqui, não inventado.

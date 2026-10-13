@@ -1,0 +1,59 @@
+/* agata.css -- identidade visual da Agata no Obsidian (MEMÓRIAS (670)).
+ * Cores: config/agata-identidade.json. Ligado em .obsidian/appearance.json
+ * (enabledCssSnippets). Só cor: nenhuma regra de layout. */
+
+.theme-dark {
+  --color-base-00: #0a0e1a;
+  --color-base-05: #0c1120;
+  --color-base-10: #0e1426;
+  --color-base-20: #121a30;
+  --color-base-25: #16203a;
+  --color-base-30: #1e2846;
+  --color-base-35: #2a3860;
+  --color-base-40: #3c4e80;
+  --color-base-50: #5a6c9a;
+  --color-base-60: #8c96b2;
+  --color-base-70: #b8c0d6;
+  --color-base-100: #eef1fa;
+
+  --color-accent: #52c7ff;
+  --color-accent-1: #82d7ff;
+  --color-accent-2: #a8e3ff;
+  --interactive-accent: #0f6fae;
+  --interactive-accent-hover: #1582c8;
+  --text-accent: #52c7ff;
+  --text-accent-hover: #82d7ff;
+  --link-color: #52c7ff;
+  --link-external-color: #ab8fe0;
+  --link-unresolved-color: #e0a458;
+  --tag-color: #45ddc8;
+  --tag-background: rgba(69, 221, 200, 0.1);
+  --text-error: #ec6e88;
+  --text-warning: #e0a458;
+  --text-success: #45ddc8;
+
+  --h1-color: #eef1fa;
+  --h2-color: #52c7ff;
+  --h3-color: #ab8fe0;
+  --h4-color: #45ddc8;
+
+  /* grafo 2D: fundo e linhas na paleta (os nós coloridos vêm dos grupos de cor) */
+  --graph-node: #8c96b2;
+  --graph-node-focused: #52c7ff;
+  --graph-line: rgba(82, 199, 255, 0.18);
+  --graph-text: #eef1fa;
+}
+
+.theme-light {
+  --color-accent: #0f6fae;
+  --interactive-accent: #0f6fae;
+  --text-accent: #0f6fae;
+  --link-color: #0f6fae;
+  --tag-color: #158c7d;
+}
+
+/* callouts do vault (tip/info/warning) na paleta */
+.theme-dark .callout[data-callout="tip"] { --callout-color: 69, 221, 200; }
+.theme-dark .callout[data-callout="info"] { --callout-color: 82, 199, 255; }
+.theme-dark .callout[data-callout="warning"] { --callout-color: 224, 164, 88; }
+.theme-dark .callout[data-callout="abstract"] { --callout-color: 171, 143, 224; }

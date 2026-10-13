@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447
-  Escrito em: 13/10/2026 15:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 35c876d8eb023252268ecbd7220df96d6220c82b
+  Escrito em: 13/10/2026 16:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1480f0bc9c13ed63d7e3dc0ba36c9059ccbc8447/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/35c876d8eb023252268ecbd7220df96d6220c82b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada pelo Humano): cérebro 3D instalado, vault regenerado com regiões e ligações por sentido, listagem do vault em dia, `vault_buscar` no ar para a Seth, tema da Agata no LibreChat. Falta o Humano ver na tela.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. `busca_semantica.py --atualizar`: 13 textos novos (a entrada (670) e seus parágrafos), 3.902 no total. Vault regenerado: 1.013 notas, 620 entradas. `instalar_cerebro.sh`: Brain Atlas 0.2.2 baixado de novo, sha256 e atestação conferidos, sem chamada de rede, ligado; 7 grupos de cor no grafo; `--conferir` OK. `obsidian-ro-proxy`, `seth-verificador` e `seth-gateway` reiniciados, ativos. **Listagem de `entradas/` pelo proxy: 620 itens, termina em `0670.md`** (antes parava em `0660`). LibreChat: `canon-mcp.mjs`, `docker-compose.yml` e `agata-tema.css` copiados para `~/librechat/` (compose anterior guardado na área temporária da sessão); `docker compose up -d librechat`; `/health` OK; o `index.html` servido traz o `<link>` do tema e `/assets/agata-tema.css` responde 200; MCP `canon` com 6 ferramentas (`vault_buscar` entre elas). `redesign/goose/AGENTS.md` copiado para a config do Goose.
+
+**Visto no log, não causado aqui:** erro de índice parcial do Mongo (`meili_excluded_legacy_cleanup_v3`, "Expression not supported in partial index") a cada boot do LibreChat — imagem e Mongo inalterados por esta proposta; já conhecido desde a troca para o RC (487). Fica registrado, não mexido.
+
+**Falta conferir na tela (só o Humano vê):** no Obsidian, Ctrl+R e Ctrl+P → "Brain Atlas: Open" (cérebro, regiões, cores; relatório de classificação sem nota no default); a nota `cerebro.md`, o `mapa-do-sistema.canvas` e a Base; no LibreChat, Ctrl+Shift+R uma vez (o service worker guarda a página antiga) e conferir as cores. Na próxima mensagem à Seth, confiro no Mongo se ela usou `vault_buscar` primeiro e não repetiu as 3 "limitações".
+
+**sync:** PASS — `main` = `origin/main` (PR #171 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (670).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, busca_semantica, gerar_obsidian, instalar_cerebro (sha256 + gh attestation), systemctl, curl no proxy e no LibreChat, log do container · Autorização: Humano — assinatura de `obsidian-cerebro-2026-10-13`.
 
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido do Humano: o Obsidian vira o cérebro da Agata — prioridade 1 nas buscas dos modelos com acesso, busca por sentido viva e na mão da Seth, listagem do vault sempre em dia, gráfico 3D em forma de cérebro e os recursos do Smart Connections feitos com o embedding local; a paleta da Agata no Obsidian e no LibreChat. Antes, auditoria da resposta da Seth das 15:08. Aguardando assinatura.**
 

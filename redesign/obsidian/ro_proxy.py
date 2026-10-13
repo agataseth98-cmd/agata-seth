@@ -12,6 +12,9 @@ O plugin `obsidian-local-rest-api` 5.1.0 NAO tem toggle global de read-only (con
                             `tools/call` cujo `params.name` NAO cair no denylist de escrita.
 - `PUT`/`PATCH`/`DELETE`  -> 403.
 - `/commands/` (executa comando do Obsidian) -> 403 (qualquer metodo).
+- `GET /vault/<dir>/` (listagem de diretório) -> respondida pelo DISCO, no formato do plugin
+  (MEMÓRIAS (670)): o índice do Obsidian fica para trás do disco ((391)/(400)); arquivo,
+  busca e o resto continuam com o plugin. Sem ocultos; caminho preso à raiz do vault.
 - Injeta o Bearer do `:27124` (lido de ~/.config/agata/obsidian.token) -- o cliente do
   proxy NAO precisa do segredo. O proxy so aceita loopback.
 
@@ -36,6 +39,7 @@ from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa
 
 UPSTREAM = os.environ.get("OBS_UPSTREAM", "https://127.0.0.1:27124").rstrip("/")
 BIND = os.environ.get("OBS_BIND", "127.0.0.1:27125")
+VAULT = os.path.realpath(os.environ.get("OBS_VAULT", os.path.expanduser("~/agata")))
 TOKEN_FILE = os.environ.get("OBS_TOKEN_FILE", os.path.expanduser("~/.config/agata/obsidian.token"))
 
 MCP_LEITURA = {
@@ -56,6 +60,40 @@ def _token():
         return open(TOKEN_FILE).read().strip()
     except OSError:
         return ""
+
+
+def _listar_disco(caminho_url: str):
+    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
+    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
+    from urllib.parse import unquote
+    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
+    if any(p.startswith(".") for p in rel.split("/") if p):
+        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
+    alvo = os.path.realpath(os.path.join(VAULT, rel))
+    if alvo != VAULT and not alvo.startswith(VAULT + os.sep):
+        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
+    if not os.path.isdir(alvo):
+        return None
+    def _tem_arquivo(d):
+        for raiz, dirs, arqs in os.walk(d):
+            dirs[:] = [x for x in dirs if not x.startswith(".")]
+            if any(not a.startswith(".") for a in arqs):
+                return True
+        return False
+    itens = []
+    for nome in sorted(os.listdir(alvo)):
+        if nome.startswith("."):
+            continue
+        c = os.path.join(alvo, nome)
+        real = os.path.realpath(c)
+        if real != VAULT and not real.startswith(VAULT + os.sep):
+            continue
+        if os.path.isdir(c):
+            if _tem_arquivo(c):
+                itens.append(nome + "/")
+        else:
+            itens.append(nome)
+    return 200, {"files": itens}
 
 
 def _bloqueia_mcp(body: bytes) -> str | None:
@@ -116,6 +154,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/commands"):
             return self._403("/commands/ nao e' leitura")
+        if self.command == "GET" and self.path.split("?", 1)[0].startswith("/vault/") \
+                and self.path.split("?", 1)[0].endswith("/"):
+            r = _listar_disco(self.path)
+            if r is not None:
+                codigo, obj = r
+                b = json.dumps(obj, ensure_ascii=False, indent=2).encode()
+                self.send_response(codigo)
+                self.send_header("content-type", "application/json")
+                self.send_header("content-length", str(len(b)))
+                self.end_headers()
+                self.wfile.write(b)
+                return
         self._repassa("GET")
 
     do_HEAD = do_GET
@@ -185,10 +235,24 @@ if __name__ == "__main__":
         s1, b1 = _c("GET", "/")
         s2, b2 = _c("PUT", "/vault/x.md", b"x")
         s3, b3 = _c("POST", "/mcp/", b'{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"obsidian_put_content"}}')
+        # (670) listagem pelo disco: arquivo recém-criado aparece; fora do vault, não
+        import tempfile
+        VAULT = os.path.realpath(tempfile.mkdtemp(prefix="vault-teste-"))
+        globals()["VAULT"] = VAULT
+        os.makedirs(os.path.join(VAULT, "entradas"))
+        open(os.path.join(VAULT, "entradas", "9999.md"), "w").write("x")
+        os.makedirs(os.path.join(VAULT, ".oculto"))
+        s4, b4 = _c("GET", "/vault/entradas/")
+        s5, _b5 = _c("GET", "/vault/../")
+        s6, _b6 = _c("GET", "/vault/%2e%2e/%2e%2e/")
+        s7, b7 = _c("GET", "/vault/")
+        print(f"GET lista nova   -> {s4}  {b4!r}   (esperado 200 com 9999.md)")
+        print(f"GET ../ e %2e%2e -> {s5} {s6}   (esperado 403 ou 404, nunca 200)")
         print(f"GET /            -> {s1}  {b1!r}")
         print(f"PUT /vault/x.md  -> {s2}  {b2!r}   (esperado 403)")
         print(f"POST /mcp/ (put) -> {s3}  {b3!r}   (esperado 403)")
-        ok = s1 == 200 and s2 == 403 and s3 == 403
+        ok = (s1 == 200 and s2 == 403 and s3 == 403 and s4 == 200 and b"9999.md" in b4
+              and s5 != 200 and s6 != 200 and b".oculto" not in b7)
         print("SELFTEST", "OK" if ok else "FALHA")
         sys.exit(0 if ok else 1)
     _serve()

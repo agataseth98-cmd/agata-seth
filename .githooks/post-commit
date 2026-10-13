@@ -56,6 +56,19 @@ fi
 # próximo perimetro.sh, sem nenhuma edição real ter acontecido. Corrigido
 # fixando o SHA/data no HEAD que este hook JÁ SABE que é o certo -- mesmo
 # padrão que o P-10 usa passando as env vars pro extract em sandbox.
+# 2a. (670) Índice por sentido ANTES do vault: o gerador só LÊ o índice para
+# escrever `parecidas` e os trechos parecidos -- embedar o que é novo aqui (só a
+# entrada nova e seus parágrafos, segundos) deixa o vault deste commit completo
+# e o P-10 do próximo commit regenera igual. Fail-soft com teto: embedding fora
+# do ar não segura o commit; o vault sai sem a seção para a entrada nova e a
+# próxima busca/commit completa.
+if [ -f scripts/busca_semantica.py ]; then
+  if timeout 120 python3 scripts/busca_semantica.py --atualizar >/dev/null 2>&1; then
+    echo "post-commit: índice por sentido em dia"
+  else
+    echo "post-commit: AVISO — índice por sentido não atualizou (embedding :20134 fora do ar?)" >&2
+  fi
+fi
 if [ -f scripts/gerar_obsidian.py ]; then
   if AGATA_CANON_SHA="$(git rev-parse HEAD)" AGATA_CANON_DATA="$(git log -1 --format=%cI)" \
      python3 scripts/gerar_obsidian.py >/dev/null 2>&1; then

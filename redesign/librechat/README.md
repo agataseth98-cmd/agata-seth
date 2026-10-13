@@ -154,3 +154,8 @@ browser-use -> Brave, Home Assistant, pontes Discord/WhatsApp: cada uma entra
 como bloco em `librechat.yaml` -> `mcpServers`, com `startup: false` (so
 inicializa quando o modelo pedir). Transporte recomendado: Streamable HTTP.
 Ver o desenho da arquitetura da Seth.
+
+## (670) Tema da Agata e `vault_buscar`
+
+- **Tema:** `agata-tema.css` (paleta de `config/agata-identidade.json`) montado em `/app/client/dist/assets/`; o `command` do serviço no `docker-compose.yml` põe o `<link>` no `index.html` antes de subir (idempotente) — o LibreChat v0.8.8 ainda não lê `interface.theme`. Aplicar: copiar `docker-compose.yml` e `agata-tema.css` para `~/librechat/` e `docker compose up -d librechat`. Navegador aberto: Ctrl+Shift+R uma vez (o service worker guarda o shell antigo).
+- **`vault_buscar`** (canon-mcp): busca por sentido e por texto no vault, via `seth_verificador` (`busca_semantica`, `busca_texto`). Prioridade 1 para achar; `query_canon` confirma antes de citar.
