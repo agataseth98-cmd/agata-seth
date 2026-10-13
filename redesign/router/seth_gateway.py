@@ -220,7 +220,12 @@ _DOUTRINA_FIXA = (
     "achados, a Máquina conferiu a SUA resposta anterior e achou erro. Logo "
     "depois do cabeçalho, corrija em 1 linha (`Correção do turno anterior: …`) "
     "e siga; acerte o cabeçalho desta resposta. `OK` = nada a corrigir. "
-    "(MEMÓRIAS (662).)\n\n"
+    "\"afirmação já desmentida\" = algo que você disse e a Máquina já provou "
+    "falso: não repita, nem como \"mantido\" — use a correção que vem junto. "
+    "(MEMÓRIAS (662)/(664).)\n"
+    "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
+    "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
+    "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
     "hidratação mínima; o resto é sob demanda.\n"
@@ -630,7 +635,10 @@ class _Handler(BaseHTTPRequestHandler):
                 # roteador por complexidade: só o alvo "seth-livre" do Agent
                 if payload.get("model") == _ROTA_BASE:
                     self._rota = _classificar_rota(payload)
-                    if not _e_chamada_utilitaria(payload):
+                    # 1 decisão por resposta: no modo Agent os passos depois de
+                    # ferramenta são a mesma resposta (664)
+                    if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
+                            payload.get("messages") or []):
                         _sombra_rota(payload, self._rota)
                     payload["model"] = self._rota
                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
@@ -1081,6 +1089,24 @@ def _selftest() -> int:
     auditoria_turno.LOG = _aud_log
     print(f"{'PASS' if ok9f else 'FALHA'}  auditoria do turno anterior chega ao bloco de estado")
     falhas += 0 if ok9f else 1
+
+    # 9g. passo de continuação do modo Agent (664): depois de ferramenta, o pedido
+    # leva MESMA-RESPOSTA e não reaudita a resposta em andamento.
+    auditoria_turno.LOG = Path(tempfile.mkdtemp()) / "aud.jsonl"
+    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "messages": [
+        {"role": "user", "content": "reavalie"},
+        {"role": "assistant", "content": "Agata · m · t=1 · x", "tool_calls": [{"id": "1", "type": "function",
+         "function": {"name": "f", "arguments": "{}"}}]},
+        {"role": "tool", "tool_call_id": "1", "content": "saída"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read()
+    m9g = json.loads(_Dummy.ultimo_corpo)["messages"]
+    sys9g = " ".join(x["content"] for x in m9g if x.get("role") == "system" and isinstance(x.get("content"), str))
+    # a doutrina também cita os dois rótulos: confere a LINHA de estado, no começo de linha
+    ok9g = (auditoria_turno.LINHA_CONTINUACAO in sys9g
+            and not re.search(r"(?m)^AUDITORIA-TURNO-ANTERIOR: ", sys9g))
+    auditoria_turno.LOG = _aud_log
+    print(f"{'PASS' if ok9g else 'FALHA'}  passo de continuação: MESMA-RESPOSTA, sem reauditar")
+    falhas += 0 if ok9g else 1
 
     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
