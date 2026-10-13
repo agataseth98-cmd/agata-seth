@@ -1,0 +1,1878 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index e5bb8a2..292aca8 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -56,6 +56,19 @@ fi
+ # próximo perimetro.sh, sem nenhuma edição real ter acontecido. Corrigido
+ # fixando o SHA/data no HEAD que este hook JÁ SABE que é o certo -- mesmo
+ # padrão que o P-10 usa passando as env vars pro extract em sandbox.
++# 2a. (670) Índice por sentido ANTES do vault: o gerador só LÊ o índice para
++# escrever `parecidas` e os trechos parecidos -- embedar o que é novo aqui (só a
++# entrada nova e seus parágrafos, segundos) deixa o vault deste commit completo
++# e o P-10 do próximo commit regenera igual. Fail-soft com teto: embedding fora
++# do ar não segura o commit; o vault sai sem a seção para a entrada nova e a
++# próxima busca/commit completa.
++if [ -f scripts/busca_semantica.py ]; then
++  if timeout 120 python3 scripts/busca_semantica.py --atualizar >/dev/null 2>&1; then
++    echo "post-commit: índice por sentido em dia"
++  else
++    echo "post-commit: AVISO — índice por sentido não atualizou (embedding :20134 fora do ar?)" >&2
++  fi
++fi
+ if [ -f scripts/gerar_obsidian.py ]; then
+   if AGATA_CANON_SHA="$(git rev-parse HEAD)" AGATA_CANON_DATA="$(git log -1 --format=%cI)" \
+      python3 scripts/gerar_obsidian.py >/dev/null 2>&1; then
+diff --git a/.obsidian/appearance.json b/.obsidian/appearance.json
+index 9e26dfe..070edb5 100644
+--- a/.obsidian/appearance.json
++++ b/.obsidian/appearance.json
+@@ -1 +1,8 @@
+-{}
+\ No newline at end of file
++{
++  "accentColor": "#52c7ff",
++  "theme": "obsidian",
++  "cssTheme": "",
++  "enabledCssSnippets": [
++    "agata"
++  ]
++}
+diff --git a/.obsidian/core-plugins.json b/.obsidian/core-plugins.json
+index 639b90d..d98c842 100644
+--- a/.obsidian/core-plugins.json
++++ b/.obsidian/core-plugins.json
+@@ -7,7 +7,7 @@
+   "canvas": true,
+   "outgoing-link": true,
+   "tag-pane": true,
+-  "footnotes": false,
++  "footnotes": true,
+   "properties": true,
+   "page-preview": true,
+   "daily-notes": true,
+@@ -19,15 +19,15 @@
+   "bookmarks": true,
+   "markdown-importer": false,
+   "zk-prefixer": false,
+-  "random-note": false,
++  "random-note": true,
+   "outline": true,
+   "word-count": true,
+-  "slides": false,
++  "slides": true,
+   "audio-recorder": false,
+-  "workspaces": false,
++  "workspaces": true,
+   "file-recovery": true,
+   "publish": false,
+   "sync": true,
+   "bases": true,
+   "webviewer": false
+-}
+\ No newline at end of file
++}
+diff --git a/.obsidian/snippets/agata.css b/.obsidian/snippets/agata.css
+new file mode 100644
+index 0000000..8653a34
+--- /dev/null
++++ b/.obsidian/snippets/agata.css
+@@ -0,0 +1,59 @@
++/* agata.css -- identidade visual da Agata no Obsidian (MEMÓRIAS (670)).
++ * Cores: config/agata-identidade.json. Ligado em .obsidian/appearance.json
++ * (enabledCssSnippets). Só cor: nenhuma regra de layout. */
++
++.theme-dark {
++  --color-base-00: #0a0e1a;
++  --color-base-05: #0c1120;
++  --color-base-10: #0e1426;
++  --color-base-20: #121a30;
++  --color-base-25: #16203a;
++  --color-base-30: #1e2846;
++  --color-base-35: #2a3860;
++  --color-base-40: #3c4e80;
++  --color-base-50: #5a6c9a;
++  --color-base-60: #8c96b2;
++  --color-base-70: #b8c0d6;
++  --color-base-100: #eef1fa;
++
++  --color-accent: #52c7ff;
++  --color-accent-1: #82d7ff;
++  --color-accent-2: #a8e3ff;
++  --interactive-accent: #0f6fae;
++  --interactive-accent-hover: #1582c8;
++  --text-accent: #52c7ff;
++  --text-accent-hover: #82d7ff;
++  --link-color: #52c7ff;
++  --link-external-color: #ab8fe0;
++  --link-unresolved-color: #e0a458;
++  --tag-color: #45ddc8;
++  --tag-background: rgba(69, 221, 200, 0.1);
++  --text-error: #ec6e88;
++  --text-warning: #e0a458;
++  --text-success: #45ddc8;
++
++  --h1-color: #eef1fa;
++  --h2-color: #52c7ff;
++  --h3-color: #ab8fe0;
++  --h4-color: #45ddc8;
++
++  /* grafo 2D: fundo e linhas na paleta (os nós coloridos vêm dos grupos de cor) */
++  --graph-node: #8c96b2;
++  --graph-node-focused: #52c7ff;
++  --graph-line: rgba(82, 199, 255, 0.18);
++  --graph-text: #eef1fa;
++}
++
++.theme-light {
++  --color-accent: #0f6fae;
++  --interactive-accent: #0f6fae;
++  --text-accent: #0f6fae;
++  --link-color: #0f6fae;
++  --tag-color: #158c7d;
++}
++
++/* callouts do vault (tip/info/warning) na paleta */
++.theme-dark .callout[data-callout="tip"] { --callout-color: 69, 221, 200; }
++.theme-dark .callout[data-callout="info"] { --callout-color: 82, 199, 255; }
++.theme-dark .callout[data-callout="warning"] { --callout-color: 224, 164, 88; }
++.theme-dark .callout[data-callout="abstract"] { --callout-color: 171, 143, 224; }
+diff --git a/AGENTS.md b/AGENTS.md
+index d210c5d..7b0280d 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -12,4 +12,5 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Segredo nunca sai:** nunca abra `~/.config/agata/.env` (os valores). `CHAVES.md` é checklist público, pode ler.
+ - **Correção é entrada nova**, nunca edição do que já foi escrito (Regra 4).
+ - **Modo conciso é o padrão** (`REGRAS.md`, seção "NPR"): traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. O cabeçalho da Regra 1 não é narração. Modo explicativo só quando o Humano pedir ("modo explicativo"; volta com "modo conciso").
++- **Buscar: o vault Obsidian é a prioridade 1** ((670)): para achar algo na memória, `memoria/obsidian/` primeiro — por sentido (`python3 scripts/busca_semantica.py "frase"`, ou a tool `vault_buscar` onde houver) e por texto (`grep` no vault), navegando por `cita`/`citada_por`/`parecidas`; para citar, confirme o texto exato no canon (o vault é derivado).
+ - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+diff --git a/PROJETO.md b/PROJETO.md
+index ef141c5..f53426f 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -95,8 +95,8 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ - **Hidratação.** O loop do grafo hidrata pelo nó `hidratar` = `scripts/estado_para_eco.sh` (fatos de Máquina: HEAD, topo de MEMÓRIAS, `sync`, `HASH-ESTADO`, `IDADE-HIDRATACAO` (338)) + `query_canon` / `consulta.py` (índice primeiro, sem vector DB) para profundidade sob demanda. O `.hidrata.md`, gerado no `pre-commit` por `.githooks/gerar-hidratacao.sh`, é referência, não a hidratação primária do loop. Sessões em nuvem carregam por `PROMPT_CARREGAMENTO.md`. O spike RLM (consulta vs. injeção) está arquivado: injeção venceu em fidelidade/custo (`redesign/LOG.md`).
+ - **Janela de MEMÓRIAS na hidratação:** entradas inteiras, nunca cortadas, até `JANELA_ORCAMENTO_CHARS=25000`, de cima para baixo a partir do marcador; se a primeira sozinha estourar, entra inteira mesmo assim. Depois dela, um resumo de 1 linha das mais antigas (`JANELA_RESUMO_ANTIGAS_CHARS=8000`, de `INDICE_MEMORIAS.md`) (215)/(338).
+ - **Silos por modelo:** construídos. O hook gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, usado pelo `seth_gateway` no modo `full`), cada um com só o MOD do seu modelo; arquivo único foi rejeitado porque vaza MOD entre modelos. O P-11 impede silo de entrar no canon, por nome, por conteúdo e contra renomeação (419). MOD em MEMÓRIAS: REGRAS, "O Conselho", item 3 (430).
+-- **Vault Obsidian derivado** (290): `memoria/obsidian/`, regerado por `scripts/gerar_obsidian.py` a cada commit (`post-commit`, gitignorado) — uma nota por entrada, regra, seção, script, controle P-N e proposta aplicada, mais MOCs e painel. Camada de leitura; a fonte é o canon. Não editar. Também: `obsidian-skills` oficial e `memoria/obsidian/memorias.base` (Obsidian Bases) (324); a Nota Diária do Obsidian (`AAAA-MM-DD.md`) é gitignorada para nunca publicar rascunho pessoal (329). Uso pela Seth (292): consulta dirigida a partir de `memoria/obsidian/INICIO.md` ou dos `moc-*`, nunca varredura. A listagem de diretório do `:27125` fica atrás do disco: para saber se uma entrada recente existe, **ler o arquivo** (`query_canon`), nunca concluir pela listagem — doutrina fixa do `seth_gateway`, `_DOUTRINA_FIXA` (391)/(400).
+-- **Busca:** sem RAG por embedding, de propósito — `rag_api`/`pgvector` não sobem (115)/(293)/(313). `scripts/busca_semantica.py` é ferramenta secundária, sob demanda, nunca injetada: boa para tema concreto, fraca para pergunta abstrata sobre o próprio sistema (327).
++- **Vault Obsidian derivado** (290): `memoria/obsidian/`, regerado por `scripts/gerar_obsidian.py` a cada commit (`post-commit`, gitignorado) — uma nota por entrada, regra, seção, script, controle P-N e proposta aplicada, mais MOCs e painel. Camada de leitura; a fonte é o canon. Não editar. Também: `obsidian-skills` oficial e `memoria/obsidian/memorias.base` (Obsidian Bases) (324); a Nota Diária do Obsidian (`AAAA-MM-DD.md`) é gitignorada para nunca publicar rascunho pessoal (329). Uso pela Seth (292): consulta dirigida a partir de `memoria/obsidian/INICIO.md` ou dos `moc-*`, nunca varredura. Desde (670) o gerador escreve no lugar (só o que mudou) e a listagem de diretório do `:27125` vem do disco (`ro_proxy.py`), não do índice do Obsidian, que ficava atrás (391)/(400). **Cérebro** (670): cada nota leva `brain_region`/`kind` (`config/agata-identidade.json`) para o gráfico 3D do Brain Atlas (`redesign/obsidian/instalar_cerebro.sh`, versão fixa e conferida); cada entrada leva `parecidas` (5 mais próximas por sentido), `afinidade` e trechos parecidos com link de parágrafo (`#^bN`, segmentação em `scripts/agata_blocos.py`); `cerebro.md`, `mapa-do-sistema.canvas` e mais visões na Base. **Ordem de busca dos modelos com acesso:** o vault é a prioridade 1 — `vault_buscar` (sentido e texto), navegar pela nota, `query_canon` para confirmar antes de citar.
++- **Busca:** sem RAG por embedding, de propósito — `rag_api`/`pgvector` não sobem (115)/(293)/(313). `scripts/busca_semantica.py` é ferramenta secundária, sob demanda, nunca injetada: boa para tema concreto, fraca para pergunta abstrata sobre o próprio sistema (327). Desde (670): índice incremental por entrada e por parágrafo (só o texto novo vai ao embedding; o `post-commit` atualiza antes do vault), ao alcance da Seth e do Goose pela lista fechada do `seth_verificador` (`busca_semantica`, `busca_texto`) e do Humano por `scripts/agata_busca.sh` (`--abrir`, `--contexto`). A recusa de (115) segue: vetor nunca como camada primária nem injetado na hidratação.
+ - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento, nunca por offset ou número de linha (96)/(97). Script: `scripts/achar_ancora_1_62.py`.
+ - **`memoria/missoes/`** — quarto pilar, local por desenho: um arquivo por missão + `INDICE.md`, repositório git próprio sem remote, gitignorado do repo principal (`*.bundle` coberto em toda a árvore (97)/(98)), nunca público, nunca na hidratação; pesquisado sob demanda por quem tem acesso à Máquina. Achável pelo vault via `memoria/obsidian/moc-missoes.md` (325), exceto `segunda-camada/` (esfera pessoal, mais estrita). Relação com o bg-review desligado: `INDICE.md` local e (91)-(95).
+ - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`). Sincronize contra ele no início de **toda** sessão; em sessões autônomas a sincronização falha em silêncio com frequência — verifique, não presuma.
+diff --git a/config/agata-identidade.json b/config/agata-identidade.json
+new file mode 100644
+index 0000000..4929cf7
+--- /dev/null
++++ b/config/agata-identidade.json
+@@ -0,0 +1,25 @@
++{
++  "_fonte": "Paleta do artefato \"Sistema Agata\" (claude.ai/artifact/JUbY9dtNMLteQiQLfwEsrA), lida em MEMÓRIAS (tema do Goose); fonte única para o vault, o grafo, o Canvas e o tema do Obsidian -- MEMÓRIAS (670).",
++  "escuro": {
++    "accent": "#52c7ff",
++    "violet": "#ab8fe0",
++    "teal": "#45ddc8",
++    "amber": "#e0a458",
++    "danger": "#ec6e88",
++    "surface": "#121a30",
++    "ground": "#0a0e1a",
++    "ink": "#eef1fa"
++  },
++  "claro": {
++    "accent": "#0f6fae",
++    "teal": "#158c7d"
++  },
++  "regioes": {
++    "temporal": {"cor": "accent", "kind": "person", "o_que": "memória — entradas de MEMÓRIAS"},
++    "frontal": {"cor": "violet", "kind": "project", "o_que": "decisão e planejamento — REGRAS, PROTOCOLOS, PROJETO, propostas"},
++    "parietal": {"cor": "teal", "kind": "concept", "o_que": "ferramentas — scripts, hooks, controles do perímetro"},
++    "cerebellum": {"cor": "danger", "kind": "incident", "o_que": "correção de erro — falhas, correções, incidentes"},
++    "occipital": {"cor": "amber", "kind": "decision", "o_que": "o que vem de fora — missões, fontes, documentos"},
++    "stem": {"cor": "ink", "kind": "index", "o_que": "roteamento — INICIO, MOCs, linha do tempo, estado"}
++  }
++}
+diff --git a/redesign/goose/AGENTS.md b/redesign/goose/AGENTS.md
+index 280643b..119e573 100644
+--- a/redesign/goose/AGENTS.md
++++ b/redesign/goose/AGENTS.md
+@@ -2,7 +2,7 @@
+ 
+ Você é um modelo do sistema Agata (Conselho Federado), não um assistente genérico.
+ 
+-**Diretrizes comuns (todo modelo, toda plataforma — `AGENTS.md` na raiz do repo, MEMÓRIAS (667)):** modo conciso é o padrão — resultado, sem narrar o processo; processo só para constatar erro. Economia de tokens é permanente. O resto chega pela hidratação do gateway.
++**Diretrizes comuns (todo modelo, toda plataforma — `AGENTS.md` na raiz do repo, MEMÓRIAS (667)):** modo conciso é o padrão — resultado, sem narrar o processo; processo só para constatar erro. Economia de tokens é permanente. Para achar algo na memória, o vault é a prioridade 1: `vault_buscar` (sentido e texto), depois `vault_consultar`, e `query_canon` para confirmar antes de citar ((670)). O resto chega pela hidratação do gateway.
+ 
+ ## Hidratação — mesmo método da Seth, não releitura manual
+ 
+diff --git a/redesign/librechat/README.md b/redesign/librechat/README.md
+index cd8769b..8dae085 100644
+--- a/redesign/librechat/README.md
++++ b/redesign/librechat/README.md
+@@ -154,3 +154,8 @@ browser-use -> Brave, Home Assistant, pontes Discord/WhatsApp: cada uma entra
+ como bloco em `librechat.yaml` -> `mcpServers`, com `startup: false` (so
+ inicializa quando o modelo pedir). Transporte recomendado: Streamable HTTP.
+ Ver o desenho da arquitetura da Seth.
++
++## (670) Tema da Agata e `vault_buscar`
++
++- **Tema:** `agata-tema.css` (paleta de `config/agata-identidade.json`) montado em `/app/client/dist/assets/`; o `command` do serviço no `docker-compose.yml` põe o `<link>` no `index.html` antes de subir (idempotente) — o LibreChat v0.8.8 ainda não lê `interface.theme`. Aplicar: copiar `docker-compose.yml` e `agata-tema.css` para `~/librechat/` e `docker compose up -d librechat`. Navegador aberto: Ctrl+Shift+R uma vez (o service worker guarda o shell antigo).
++- **`vault_buscar`** (canon-mcp): busca por sentido e por texto no vault, via `seth_verificador` (`busca_semantica`, `busca_texto`). Prioridade 1 para achar; `query_canon` confirma antes de citar.
+diff --git a/redesign/librechat/agata-tema.css b/redesign/librechat/agata-tema.css
+new file mode 100644
+index 0000000..db4ce1b
+--- /dev/null
++++ b/redesign/librechat/agata-tema.css
+@@ -0,0 +1,64 @@
++/* agata-tema.css -- paleta da identidade da Agata no LibreChat (MEMÓRIAS (670)).
++ *
++ * Fonte das cores: config/agata-identidade.json (artefato "Sistema Agata").
++ * Como entra: o docker-compose monta este arquivo em /app/client/dist/assets/ e
++ * o comando do container acrescenta um <link> no index.html antes de subir
++ * (idempotente). O LibreChat v0.8.8 ainda não lê `interface.theme` do
++ * librechat.yaml (só o ramo dev) -- quando ler, isto vira tema nativo.
++ *
++ * Só sobrescreve VARIÁVEIS de cor (triplas "R G B", o formato do LibreChat);
++ * nenhuma regra de layout. Tirar o <link> volta tudo ao padrão.
++ */
++
++/* ---------- escuro: fundo #0a0e1a, superfície #121a30, texto #eef1fa ---------- */
++html.dark {
++  --gray-900: 10 14 26;
++  --gray-875: 12 17 32;
++  --gray-850: 14 20 38;
++  --gray-800: 18 26 48;
++  --gray-700: 26 36 64;
++  --gray-650: 34 46 80;
++  --gray-600: 42 56 96;
++  --gray-500: 60 78 128;
++
++  --text-primary: 238 241 250;
++  --text-secondary: 184 192 214;
++  --text-secondary-alt: 150 160 186;
++  --text-tertiary: 140 150 178;
++
++  --accent-primary: 82 199 255;        /* #52c7ff */
++  --accent-primary-hover: 130 215 255;
++  --ring-primary: 82 199 255;
++  --link: 82 199 255;
++  --link-hover: 130 215 255;
++  --link-visited: 171 143 224;         /* #ab8fe0 */
++  --brand-purple: 171 143 224;
++
++  --surface-submit: 15 111 174;        /* #0f6fae */
++  --surface-submit-hover: 21 130 200;
++
++  --border-light: 30 40 70;
++  --border-medium: 42 56 96;
++  --border-medium-alt: 42 56 96;
++  --border-heavy: 60 78 128;
++  --border-xheavy: 90 110 160;
++
++  --text-warning: 224 164 88;          /* #e0a458 */
++  --text-destructive: 236 110 136;     /* #ec6e88 */
++  --status-success: 69 221 200;        /* #45ddc8 */
++  --status-info: 82 199 255;
++  --status-warning: 224 164 88;
++  --status-error: 236 110 136;
++}
++
++/* ---------- claro: só o acento (azul-tinta #0f6fae, turquesa #158c7d) ---------- */
++html:not(.dark) {
++  --accent-primary: 15 111 174;
++  --accent-primary-hover: 10 84 134;
++  --ring-primary: 15 111 174;
++  --link: 15 111 174;
++  --link-hover: 10 84 134;
++  --surface-submit: 15 111 174;
++  --surface-submit-hover: 10 84 134;
++  --status-success: 21 140 125;
++}
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 70b9e3f..8059d88 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -9,6 +9,7 @@
+ //   query_canon      lê um doc de canon (REGRAS/PROJETO/MEMÓRIAS/...), com grep/linhas opcionais
+ //   vault_consultar  lê ou lista uma nota DERIVADA sob memoria/obsidian/
+ //   maquina_verificar  roda UMA verificação da lista fechada no host (:20141), read-only
++//   vault_buscar     busca no vault por SENTIDO e por TEXTO (via verificador, disco) -- (670)
+ //
+ // Trava de acesso (alem do proxy ser read-only):
+ //   - whitelist: só os docs de canon nomeados + tudo sob memoria/obsidian/
+@@ -218,6 +219,7 @@ async function maquinaVerificar(a) {
+   if (!comando) throw new Error("informe `comando`, ou use `listar: true`");
+   const corpo = { comando };
+   if (a?.n !== undefined && a?.n !== null) corpo.n = a.n;
++  if (a?.consulta !== undefined && a?.consulta !== null) corpo.consulta = String(a.consulta);
+   let r;
+   try {
+     r = await fetch(VERIFICADOR + "/verificar", {
+@@ -237,6 +239,32 @@ async function maquinaVerificar(a) {
+   return clamp(j.saida || "(sem saida)", "peca de novo com menos escopo");
+ }
+ 
++// ---- vault_buscar (670) ----------------------------------------------------
++// Prioridade 1 nas buscas (decisão do Humano, 13/10/2026): achar e navegar
++// pelo vault -- por SENTIDO (embedding local, entradas e parágrafos) e por
++// TEXTO (grep no disco, sempre em dia) -- e só então confirmar o texto exato
++// com query_canon. Os dois modos passam pelo seth_verificador: o texto da Seth
++// vira dado de um comando fixo, nunca comando.
++async function vaultBuscar(a) {
++  const consulta = String(a?.consulta || "").trim();
++  if (!consulta) throw new Error("informe `consulta` (a frase ou termo a buscar)");
++  const modo = String(a?.modo || "ambos").toLowerCase();
++  const partes = [];
++  if (modo === "sentido" || modo === "ambos") {
++    const n = Number.isInteger(a?.n) ? a.n : 8;
++    partes.push("## Por sentido\n\n" +
++      await maquinaVerificar({ comando: "busca_semantica", consulta, n }).catch((e) => "(falhou: " + e.message + ")"));
++  }
++  if (modo === "texto" || modo === "ambos") {
++    partes.push("## Por texto (literal, disco)\n\n" +
++      await maquinaVerificar({ comando: "busca_texto", consulta }).catch((e) => "(falhou: " + e.message + ")"));
++  }
++  if (!partes.length) throw new Error("modo inválido -- use sentido, texto ou ambos");
++  partes.push("Próximo passo: abra a nota (vault_consultar entradas/0NNN.md -- ela traz cita, citada_por e " +
++    "parecidas) e, antes de CITAR, confirme o texto exato com query_canon.");
++  return clamp(partes.join("\n\n"), "refine a consulta");
++}
++
+ async function maquinaListar() {
+   let r;
+   try { r = await fetch(VERIFICADOR + "/comandos"); }
+@@ -259,18 +287,38 @@ const TOOLS = [
+       "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
+       "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
+       "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
+-      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar. " +
++      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar, " +
++      "busca_semantica e busca_texto (prefira a tool vault_buscar). " +
+       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
+     inputSchema: {
+       type: "object",
+       properties: {
+         comando: { type: "string", description: "nome da lista fechada (ex.: perimetro, git_status, git_sync)" },
+-        n: { type: "integer", description: "so para git_log: quantos commits (1 a 50, padrao 10)" },
++        n: { type: "integer", description: "git_log: quantos commits (1 a 50, padrao 10); busca_semantica: quantos resultados (1 a 20)" },
++        consulta: { type: "string", description: "so para busca_semantica/busca_texto: a frase a buscar (ate 200 caracteres)" },
+         listar: { type: "boolean", description: "true devolve a lista de comandos em vez de executar" },
+       },
+     },
+   },
+ 
++  {
++    name: "vault_buscar",
++    description:
++      "PRIORIDADE 1 para ACHAR qualquer coisa na memória do sistema (decisão do Humano, (670)). " +
++      "Busca no vault Obsidian por SENTIDO (embedding local sobre todas as entradas de MEMÓRIAS e seus " +
++      "parágrafos -- acha mesmo sem a palavra exata) e por TEXTO literal (disco, sempre em dia). " +
++      "Depois: abra a nota com vault_consultar (cita, citada_por, parecidas) e confirme o texto exato " +
++      "com query_canon antes de citar -- o vault é derivado, o canon é a fonte.",
++    inputSchema: {
++      type: "object",
++      properties: {
++        consulta: { type: "string", description: "frase ou termo (até 200 caracteres)" },
++        modo: { type: "string", description: "sentido | texto | ambos (padrão ambos)" },
++        n: { type: "integer", description: "resultados por sentido (1 a 20, padrão 8)" },
++      },
++      required: ["consulta"],
++    },
++  },
+   {
+     name: "query_canon",
+     description:
+@@ -297,7 +345,10 @@ const TOOLS = [
+       "Lê ou lista uma nota DERIVADA do vault Obsidian sob memoria/obsidian/ (estado, timeline, " +
+       "moc-memoria, moc-regras, moc-projeto, moc-controles, entradas/, regras/, controles/, projeto/), " +
+       "ou o teu próprio SETH-DIARIO.md. É o índice de consulta pontual: entrada antiga fora da janela, " +
+-      "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler.",
++      "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler. " +
++      "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
++      "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
++      "Para BUSCAR, use vault_buscar primeiro.",
+     inputSchema: {
+       type: "object",
+       properties: {
+@@ -370,6 +421,7 @@ async function callTool(name, args) {
+   let text;
+   if (name === "query_canon") text = await queryCanon(args);
+   else if (name === "vault_consultar") text = await vaultConsultar(args);
++  else if (name === "vault_buscar") text = await vaultBuscar(args);
+   else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
+   else if (name === "diario_anotar") text = await diarioAnotar(args);
+   else if (name === "maquina_verificar") text = args?.listar ? await maquinaListar() : await maquinaVerificar(args);
+diff --git a/redesign/librechat/docker-compose.yml b/redesign/librechat/docker-compose.yml
+index 0a407f3..6e66e31 100644
+--- a/redesign/librechat/docker-compose.yml
++++ b/redesign/librechat/docker-compose.yml
+@@ -85,6 +85,18 @@ services:
+       - librechat-ponte-host
+     env_file:
+       - .env
++    # Tema da Agata (MEMÓRIAS (670)): o CSS montado abaixo entra por um <link> no
++    # index.html, acrescentado aqui antes de subir (idempotente; o LibreChat lê o
++    # index.html uma vez no boot). Os .br/.gz pré-comprimidos do index saem para
++    # nunca servir a versão sem o tema. O resto é o comando original da imagem.
++    command:
++      - sh
++      - -c
++      - >-
++        grep -q agata-tema.css client/dist/index.html ||
++        sed -i 's#</head>#<link rel="stylesheet" href="/assets/agata-tema.css"></head>#' client/dist/index.html;
++        rm -f client/dist/index.html.br client/dist/index.html.gz;
++        exec npm run backend
+     environment:
+       - CONFIG_PATH=/app/librechat.yaml
+       # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
+@@ -99,6 +111,7 @@ services:
+       - ./uploads:/app/uploads
+       - ./logs:/app/api/logs
+       - ./data:/app/data
++      - ./agata-tema.css:/app/client/dist/assets/agata-tema.css:ro
+     healthcheck:
+       # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber
+       # quando abrir o navegador -- reusado aqui, não inventado.
+diff --git a/redesign/obsidian/PLUGIN.md b/redesign/obsidian/PLUGIN.md
+index dc8dcc8..57fdf85 100644
+--- a/redesign/obsidian/PLUGIN.md
++++ b/redesign/obsidian/PLUGIN.md
+@@ -82,3 +82,24 @@ printf '[]' > ~/agata/.obsidian/community-plugins.json
+ rm -f ~/.config/agata/obsidian.token
+ git checkout -- redesign/obsidian .gitignore
+ ```
++
++## Cérebro — Brain Atlas (MEMÓRIAS (670))
++
++Segundo plugin de comunidade, pedido do Humano em 13/10/2026 ("gráfico em 3D com visual inspirado no cérebro humano"). Escolha dele entre Brain Atlas e Brain Graph.
++
++| item | valor |
++|---|---|
++| plugin | `colorpulse6/brain-atlas` **0.2.2** (MIT), versão fixa |
++| sha256 `main.js` | `9b137a59e6088ceab2af1d432da2abdfb1be0b37ee0007a087b793b11543de88` |
++| sha256 `manifest.json` | `ef837563693ec9d742d872469bb01f6f50f9f86a9d3462a0596ca0a0923ee27a` |
++| sha256 `styles.css` | `ab63af3bacb08a58159c9b0a91a7db3e16facad205eb94ff6b1b712b71908543` |
++| origem | atestação do GitHub conferida (`gh attestation verify`) |
++| rede | nenhuma: `main.js` sem `fetch`/`XMLHttpRequest`/`WebSocket`/`requestUrl`; lê só metadados (caminho, propriedades, tags, links) |
++| instala | `bash redesign/obsidian/instalar_cerebro.sh` (confere tudo de novo; `--conferir` só confere) |
++| configuração | `redesign/obsidian/brain-atlas.json` → `.obsidian/plugins/brain-atlas/data.json` (preserva neurônios fixados) |
++
++**Regiões:** o gerador do vault escreve `brain_region` e `kind` em cada nota (`config/agata-identidade.json`): memória → temporal, decisão → frontal, ferramentas → parietal, correção → cerebelo, o que vem de fora → occipital, roteamento → tronco. **Cores:** o plugin só tem paletas prontas; "Aurora" é a mais próxima da identidade da Agata, e o `kind` escolhe dentro dela o tom de cada região. Cor exata da Agata vai no tema do Obsidian (`.obsidian/snippets/agata.css`) e nos grupos de cor do grafo 2D.
++
++**Recusados (estado da arte medido, out/2026):** InfraNodus (manda o texto para servidores deles e para a OpenAI); Smart Connections (duplica o embedding local que já existe e grava cache dentro do repo — os recursos dele vêm do nosso índice: `parecidas`, trechos `#^bN`, `scripts/agata_busca.sh`).
++
++**Rollback:** `rm -rf ~/agata/.obsidian/plugins/brain-atlas` e tirar `"brain-atlas"` de `.obsidian/community-plugins.json`.
+diff --git a/redesign/obsidian/brain-atlas.json b/redesign/obsidian/brain-atlas.json
+new file mode 100644
+index 0000000..0c0a743
+--- /dev/null
++++ b/redesign/obsidian/brain-atlas.json
+@@ -0,0 +1,55 @@
++{
++  "_nota": "Configuração do plugin Brain Atlas versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/brain-atlas/data.json, preservando os neurônios que o Humano fixou (pinnedNodePositions). Regiões e cores: config/agata-identidade.json -- MEMÓRIAS (670).",
++  "palette": "aurora",
++  "performancePreset": "smooth",
++  "rendererMode": "auto",
++  "nodeCap": 2500,
++  "edgeCap": 12000,
++  "idleAutoRotate": true,
++  "showLobeLabels": true,
++  "showLegendChip": true,
++  "clickAction": "current",
++  "hubThresholdPercent": 4,
++  "inferKindsFromLinks": false,
++  "treatDateFilesAsDaily": false,
++  "defaultKind": "decision",
++  "frontmatterKindKeys": ["kind"],
++  "frontmatterRegionKeys": ["brain_region"],
++  "folderKindMap": {
++    "frio": "person",
++    "propostas": "project",
++    "scripts": "concept",
++    "missoes": "decision",
++    "redesign": "decision",
++    "extras": "decision"
++  },
++  "folderRegionMap": {
++    "frio": "temporal",
++    "propostas": "frontal",
++    "missoes": "occipital",
++    "redesign": "occipital",
++    "extras": "occipital",
++    "backup": "occipital",
++    "logs": "occipital",
++    "models": "occipital",
++    "config": "parietal"
++  },
++  "noteRegionMap": {
++    "REGRAS.md": "frontal",
++    "PROTOCOLOS.md": "frontal",
++    "PROJETO.md": "frontal",
++    "PROJETO_REFERENCIA.md": "frontal",
++    "FALHAS.md": "cerebellum",
++    "MEMÓRIAS.md": "temporal",
++    "MEMORIAS-MORNO.md": "temporal",
++    "SETH-DIARIO.md": "temporal",
++    "ONDE_ESTAMOS.md": "stem",
++    "AGENTS.md": "stem",
++    "CLAUDE.md": "stem",
++    "PROMPT_CARREGAMENTO.md": "stem",
++    "INDICE_MEMORIAS.md": "stem",
++    "INDICE_MEMORIAS_PALAVRAS-CHAVE.md": "stem",
++    "CHAVES.md": "parietal",
++    "PROCEDIMENTO_LOGIN.md": "cerebellum"
++  }
++}
+diff --git a/redesign/obsidian/instalar_cerebro.sh b/redesign/obsidian/instalar_cerebro.sh
+new file mode 100755
+index 0000000..a90657d
+--- /dev/null
++++ b/redesign/obsidian/instalar_cerebro.sh
+@@ -0,0 +1,121 @@
++#!/usr/bin/env bash
++# redesign/obsidian/instalar_cerebro.sh -- instala/atualiza o "cérebro" do vault
++# (MEMÓRIAS (670)): o plugin Brain Atlas em versão FIXA e conferida, a
++# configuração dele (redesign/obsidian/brain-atlas.json) e os grupos de cor do
++# grafo 2D na paleta da Agata (config/agata-identidade.json).
++#
++#   bash redesign/obsidian/instalar_cerebro.sh            # instala e configura
++#   bash redesign/obsidian/instalar_cerebro.sh --conferir # só confere, não muda nada
++#
++# Segurança do plugin (código de terceiros dentro do Obsidian):
++#   - versão e sha256 fixos aqui; arquivo com hash diferente = aborta, nada instalado;
++#   - atestação de origem do GitHub (`gh attestation verify`), quando o gh existe;
++#   - o main.js não pode conter chamada de rede (fetch/XMLHttpRequest/WebSocket/requestUrl).
++# Depois: no Obsidian, Ctrl+R (recarregar) e Ctrl+P -> "Brain Atlas: Open".
++set -euo pipefail
++
++raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
++obs="$raiz/.obsidian"
++dest="$obs/plugins/brain-atlas"
++VERSAO="0.2.2"
++REPO_GH="colorpulse6/brain-atlas"
++declare -A SHA=(
++  [main.js]=9b137a59e6088ceab2af1d432da2abdfb1be0b37ee0007a087b793b11543de88
++  [manifest.json]=ef837563693ec9d742d872469bb01f6f50f9f86a9d3462a0596ca0a0923ee27a
++  [styles.css]=ab63af3bacb08a58159c9b0a91a7db3e16facad205eb94ff6b1b712b71908543
++)
++
++conferir() {
++  local ok=0
++  for f in "${!SHA[@]}"; do
++    if [ "$(sha256sum "$dest/$f" 2>/dev/null | awk '{print $1}')" = "${SHA[$f]}" ]; then
++      echo "OK: $f $VERSAO"
++    else
++      echo "FALTA/DIFERENTE: $dest/$f"; ok=1
++    fi
++  done
++  python3 - "$obs" <<'PY' || ok=1
++import json, sys, os
++obs = sys.argv[1]
++cp = json.load(open(os.path.join(obs, "community-plugins.json")))
++print("OK: brain-atlas ligado" if "brain-atlas" in cp else "FALTA: brain-atlas em community-plugins.json")
++g = json.load(open(os.path.join(obs, "graph.json")))
++n = sum(1 for c in g.get("colorGroups", []) if "brain_region" in c.get("query", ""))
++print(f"OK: {n} grupos de cor por região no grafo" if n >= 6 else "FALTA: grupos de cor do grafo")
++sys.exit(0 if "brain-atlas" in cp and n >= 6 else 1)
++PY
++  return $ok
++}
++
++if [ "${1:-}" = "--conferir" ]; then
++  conferir
++  exit $?
++fi
++
++tmp="$(mktemp -d)"
++trap 'rm -rf "$tmp"' EXIT
++for f in "${!SHA[@]}"; do
++  curl -fsSL -o "$tmp/$f" "https://github.com/$REPO_GH/releases/download/$VERSAO/$f"
++  got="$(sha256sum "$tmp/$f" | awk '{print $1}')"
++  [ "$got" = "${SHA[$f]}" ] || { echo "ERRO: sha256 de $f não bate ($got) -- nada instalado." >&2; exit 1; }
++  if command -v gh >/dev/null 2>&1; then
++    gh attestation verify "$tmp/$f" -R "$REPO_GH" >/dev/null 2>&1 \
++      || { echo "ERRO: atestação de origem de $f falhou -- nada instalado." >&2; exit 1; }
++  fi
++done
++if grep -qE 'fetch\(|XMLHttpRequest|WebSocket|requestUrl' "$tmp/main.js"; then
++  echo "ERRO: main.js contém chamada de rede -- nada instalado." >&2; exit 1
++fi
++mkdir -p "$dest"
++cp "$tmp/main.js" "$tmp/manifest.json" "$tmp/styles.css" "$dest/"
++
++python3 - "$raiz" <<'PY'
++import json, os, sys
++raiz = sys.argv[1]
++obs = os.path.join(raiz, ".obsidian")
++
++def ler(p, padrao):
++    try:
++        with open(p, encoding="utf-8") as f:
++            return json.load(f)
++    except (OSError, ValueError):
++        return padrao
++
++def gravar(p, d):
++    with open(p + ".tmp", "w", encoding="utf-8") as f:
++        json.dump(d, f, ensure_ascii=False, indent=2)
++    os.replace(p + ".tmp", p)
++
++# 1. configuração do plugin -- preserva os neurônios fixados pelo Humano
++cfg = ler(os.path.join(raiz, "redesign/obsidian/brain-atlas.json"), {})
++cfg.pop("_nota", None)
++dpath = os.path.join(obs, "plugins/brain-atlas/data.json")
++atual = ler(dpath, {})
++if atual.get("pinnedNodePositions"):
++    cfg["pinnedNodePositions"] = atual["pinnedNodePositions"]
++gravar(dpath, cfg)
++
++# 2. ligar o plugin
++cpath = os.path.join(obs, "community-plugins.json")
++cp = ler(cpath, [])
++if "brain-atlas" not in cp:
++    cp.append("brain-atlas")
++gravar(cpath, cp)
++
++# 3. grafo 2D: um grupo de cor por região, na paleta da Agata
++ident = ler(os.path.join(raiz, "config/agata-identidade.json"), {})
++cores, reg = ident.get("escuro", {}), ident.get("regioes", {})
++def rgb(h):
++    return int(h.lstrip("#"), 16)
++grupos = [{"query": f"[brain_region:{r}]", "color": {"a": 1, "rgb": rgb(cores[v["cor"]])}}
++          for r, v in reg.items() if v.get("cor") in cores]
++grupos.append({"query": "path:memoria/missoes", "color": {"a": 1, "rgb": rgb(cores.get("amber", "#e0a458"))}})
++gpath = os.path.join(obs, "graph.json")
++g = ler(gpath, {})
++g.update({"colorGroups": grupos, "showArrow": True, "lineSizeMultiplier": 0.6,
++          "nodeSizeMultiplier": 1.2, "textFadeMultiplier": -1, "showOrphans": True})
++gravar(gpath, g)
++print(f"configurado: Brain Atlas, {len(grupos)} grupos de cor no grafo")
++PY
++conferir
++echo "Agora no Obsidian: Ctrl+R (recarregar), depois Ctrl+P -> \"Brain Atlas: Open\"."
+diff --git a/redesign/obsidian/ro_proxy.py b/redesign/obsidian/ro_proxy.py
+index e432ff8..298557a 100644
+--- a/redesign/obsidian/ro_proxy.py
++++ b/redesign/obsidian/ro_proxy.py
+@@ -12,6 +12,9 @@ O plugin `obsidian-local-rest-api` 5.1.0 NAO tem toggle global de read-only (con
+                             `tools/call` cujo `params.name` NAO cair no denylist de escrita.
+ - `PUT`/`PATCH`/`DELETE`  -> 403.
+ - `/commands/` (executa comando do Obsidian) -> 403 (qualquer metodo).
++- `GET /vault/<dir>/` (listagem de diretório) -> respondida pelo DISCO, no formato do plugin
++  (MEMÓRIAS (670)): o índice do Obsidian fica para trás do disco ((391)/(400)); arquivo,
++  busca e o resto continuam com o plugin. Sem ocultos; caminho preso à raiz do vault.
+ - Injeta o Bearer do `:27124` (lido de ~/.config/agata/obsidian.token) -- o cliente do
+   proxy NAO precisa do segredo. O proxy so aceita loopback.
+ 
+@@ -36,6 +39,7 @@ from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa
+ 
+ UPSTREAM = os.environ.get("OBS_UPSTREAM", "https://127.0.0.1:27124").rstrip("/")
+ BIND = os.environ.get("OBS_BIND", "127.0.0.1:27125")
++VAULT = os.path.realpath(os.environ.get("OBS_VAULT", os.path.expanduser("~/agata")))
+ TOKEN_FILE = os.environ.get("OBS_TOKEN_FILE", os.path.expanduser("~/.config/agata/obsidian.token"))
+ 
+ MCP_LEITURA = {
+@@ -58,6 +62,40 @@ def _token():
+         return ""
+ 
+ 
++def _listar_disco(caminho_url: str):
++    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
++    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
++    from urllib.parse import unquote
++    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
++    if any(p.startswith(".") for p in rel.split("/") if p):
++        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
++    alvo = os.path.realpath(os.path.join(VAULT, rel))
++    if alvo != VAULT and not alvo.startswith(VAULT + os.sep):
++        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
++    if not os.path.isdir(alvo):
++        return None
++    def _tem_arquivo(d):
++        for raiz, dirs, arqs in os.walk(d):
++            dirs[:] = [x for x in dirs if not x.startswith(".")]
++            if any(not a.startswith(".") for a in arqs):
++                return True
++        return False
++    itens = []
++    for nome in sorted(os.listdir(alvo)):
++        if nome.startswith("."):
++            continue
++        c = os.path.join(alvo, nome)
++        real = os.path.realpath(c)
++        if real != VAULT and not real.startswith(VAULT + os.sep):
++            continue
++        if os.path.isdir(c):
++            if _tem_arquivo(c):
++                itens.append(nome + "/")
++        else:
++            itens.append(nome)
++    return 200, {"files": itens}
++
++
+ def _bloqueia_mcp(body: bytes) -> str | None:
+     """Retorna None se pode passar; senao a razao do 403."""
+     try:
+@@ -116,6 +154,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
+     def do_GET(self):
+         if self.path.startswith("/commands"):
+             return self._403("/commands/ nao e' leitura")
++        if self.command == "GET" and self.path.split("?", 1)[0].startswith("/vault/") \
++                and self.path.split("?", 1)[0].endswith("/"):
++            r = _listar_disco(self.path)
++            if r is not None:
++                codigo, obj = r
++                b = json.dumps(obj, ensure_ascii=False, indent=2).encode()
++                self.send_response(codigo)
++                self.send_header("content-type", "application/json")
++                self.send_header("content-length", str(len(b)))
++                self.end_headers()
++                self.wfile.write(b)
++                return
+         self._repassa("GET")
+ 
+     do_HEAD = do_GET
+@@ -185,10 +235,24 @@ if __name__ == "__main__":
+         s1, b1 = _c("GET", "/")
+         s2, b2 = _c("PUT", "/vault/x.md", b"x")
+         s3, b3 = _c("POST", "/mcp/", b'{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"obsidian_put_content"}}')
++        # (670) listagem pelo disco: arquivo recém-criado aparece; fora do vault, não
++        import tempfile
++        VAULT = os.path.realpath(tempfile.mkdtemp(prefix="vault-teste-"))
++        globals()["VAULT"] = VAULT
++        os.makedirs(os.path.join(VAULT, "entradas"))
++        open(os.path.join(VAULT, "entradas", "9999.md"), "w").write("x")
++        os.makedirs(os.path.join(VAULT, ".oculto"))
++        s4, b4 = _c("GET", "/vault/entradas/")
++        s5, _b5 = _c("GET", "/vault/../")
++        s6, _b6 = _c("GET", "/vault/%2e%2e/%2e%2e/")
++        s7, b7 = _c("GET", "/vault/")
++        print(f"GET lista nova   -> {s4}  {b4!r}   (esperado 200 com 9999.md)")
++        print(f"GET ../ e %2e%2e -> {s5} {s6}   (esperado 403 ou 404, nunca 200)")
+         print(f"GET /            -> {s1}  {b1!r}")
+         print(f"PUT /vault/x.md  -> {s2}  {b2!r}   (esperado 403)")
+         print(f"POST /mcp/ (put) -> {s3}  {b3!r}   (esperado 403)")
+-        ok = s1 == 200 and s2 == 403 and s3 == 403
++        ok = (s1 == 200 and s2 == 403 and s3 == 403 and s4 == 200 and b"9999.md" in b4
++              and s5 != 200 and s6 != 200 and b".oculto" not in b7)
+         print("SELFTEST", "OK" if ok else "FALHA")
+         sys.exit(0 if ok else 1)
+     _serve()
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+index 571be81..dc38e44 100644
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -23,8 +23,8 @@
+     {
+       "id": "busca-semantica",
+       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
+-      "correcao": "recusa deliberada, não falta: sem RAG por embedding de propósito (115)/(293)/(313), \"Fronteira de recusas\" em PROJETO_REFERENCIA",
+-      "origem": "(660)"
++      "correcao": "existe e está ao seu alcance: vault_buscar (modo sentido, embedding local sobre entradas e parágrafos) -- (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
++      "origem": "(660)/(670)"
+     },
+     {
+       "id": "indices-manuais",
+@@ -50,9 +50,16 @@
+     {
+       "id": "vault-sem-entrada-nova",
+       "tema": "vault|obsidian|entradas/",
+-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada",
+-      "correcao": "o vault é regenerado no post-commit de cada commit e o arquivo da entrada já existe; o que pode atrasar é só a LISTAGEM do Obsidian (391)/(400) — leia o arquivo",
+-      "origem": "(666)"
++      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh",
++      "correcao": "o vault é regenerado a cada commit e, desde (670), a listagem de diretório vem do disco -- a entrada nova está lá; abra o arquivo",
++      "origem": "(666)/(670)"
++    },
++    {
++      "id": "leitura-parcial",
++      "tema": "leitura parcial|truncad|trunca\\b|cortad|456 chars|fading",
++      "sinal": "persist|estrutura|limita|ainda|continua",
++      "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
++      "origem": "(668)/(670)"
+     }
+   ]
+ }
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 7798f66..220b245 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -318,7 +318,7 @@ def _selftest() -> int:
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n### O que falta / poderia melhorar (mantidos):\n"
+              "* **Índice de entradas por data/tema** no canon.\n* **Verificação de integridade do vault**.\n"
+              "* **Ferramenta de \"diff de hidratação\"**."), u()]).count("já desmentida") == 3),
+-        ("busca semântica como limitação -> acusa (recusa deliberada)", "recusa deliberada" in linha_estado(
++        ("busca semântica como limitação -> acusa (vault_buscar existe, (670))", "vault_buscar" in linha_estado(
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Limitações:**\n- Sem busca semântica nativa"), u()])),
+         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index fdf9b08..fbbc0a4 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -204,12 +204,14 @@ _DOUTRINA_FIXA = (
+     "fim da lista, o intervalo, nem 'vai até X'. É `lacuna: leitura parcial` — "
+     "peça a continuação, um sub-caminho, ou o total. O mesmo vale pro que sobra "
+     "de um tool-result depois de uma compactação.\n\n"
+-    "**Listagem de diretório do vault pode estar VELHA, não truncada:** o índice "
+-    "do Obsidian headless fica atrás do disco — uma listagem de `entradas/` pode "
+-    "terminar antes da entrada mais recente e ainda trazer um total coerente "
+-    "(MEMÓRIAS (391)/(400)). Pra saber se uma entrada recente existe, LEIA o "
+-    "arquivo dela (`query_canon`), não conclua da listagem. Não estar na listagem "
+-    "≠ não existir no disco.\n\n"
++    "**Buscar: o vault é a prioridade 1 (decisão do Humano, (670)).** Para ACHAR "
++    "algo na memória, comece por `vault_buscar` (por sentido — acha sem a palavra "
++    "exata — e por texto, no disco); navegue pela nota (`cita`, `citada_por`, "
++    "`parecidas`, trechos `#^bN`) com `vault_consultar`; e só então CITE, "
++    "confirmando o texto exato com `query_canon` (o vault é derivado; o canon é "
++    "a fonte). A listagem de diretório do vault vem do disco desde (670) — não "
++    "está mais atrasada; a leitura de ferramenta vem inteira desde (668) "
++    "(`[N linha(s), completo]`). Não chame isso de limitação.\n\n"
+     "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
+     "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
+     "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index a3ac086..19d644e 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -116,8 +116,28 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         "HEAD, `git apply --check` limpo. Use o parâmetro `nome` (o nome da "
+         "proposta, sem '.diff'). Read-only -- nunca aplica nada.",
+     ),
++    "busca_semantica": (
++        ["python3", "scripts/busca_semantica.py", "-n"], 90,
++        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS e nos seus parágrafos "
++        "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
++        "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
++        "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
++        "vault_consultar entradas/0NNN.md e confirme o texto exato com query_canon "
++        "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
++    ),
++    "busca_texto": (
++        ["grep", "-rnIiF", "--include=*.md", "-m", "3"], 30,
++        "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
++        "derivado memoria/obsidian/, lendo o DISCO (sempre em dia; o índice do "
++        "Obsidian não entra). Use o parâmetro `consulta` (até 200 caracteres). "
++        "Devolve caminho:linha:trecho, até 3 por nota.",
++    ),
+ }
+ 
++# `consulta` da busca por sentido (670): o texto da Seth vira DADO de um comando
++# fixo -- um único elemento de argv depois de `--`, nunca shell, nunca opção.
++_CONSULTA_MAX = 200
++
+ # `nome` de proposta: mesma forma usada em toda a árvore de `propostas/` --
+ # minúsculas, dígitos, ponto, hífen, underscore. `p8_verificar.sh` já recusa
+ # `/`, `.diff` no fim e ponto sozinho no fim; esta régua é a segunda camada
+@@ -127,11 +147,34 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+ _RX_NOME_PROPOSTA = re.compile(r"^[a-z0-9][a-z0-9._-]{0,80}$")
+ 
+ 
+-def _argv(nome: str, n: int | None, prop_nome: str | None = None) -> list[str]:
++def _argv(nome: str, n: int | None, prop_nome: str | None = None,
++          consulta: str | None = None) -> list[str]:
+     """argv final. `n` e `prop_nome` são os ÚNICOS pontos variáveis, cada um
+     tipado e validado antes de virar elemento de argv -- nunca interpolado
+     como texto."""
+     base = list(COMANDOS[nome][0])
++    if consulta is not None and nome not in ("busca_semantica", "busca_texto"):
++        raise ValueError(f"'{nome}' não aceita o parâmetro consulta")
++    if nome == "busca_texto":
++        if n is not None or prop_nome is not None:
++            raise ValueError("'busca_texto' só aceita o parâmetro consulta")
++        if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
++                or any(c in consulta for c in "\r\n\x00"):
++            raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
++        return base + ["--", consulta.strip(), "memoria/obsidian"]
++    if nome == "busca_semantica":
++        if prop_nome is not None:
++            raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
++        if n is None:
++            n = 8
++        if not isinstance(n, int) or isinstance(n, bool) or not (1 <= n <= 20):
++            raise ValueError("n tem de ser inteiro entre 1 e 20")
++        if not isinstance(consulta, str) or not consulta.strip():
++            raise ValueError("'consulta' ausente -- a frase a buscar por sentido")
++        if len(consulta) > _CONSULTA_MAX or any(c in consulta for c in "\r\n\x00"):
++            raise ValueError(f"'consulta' inválida -- até {_CONSULTA_MAX} caracteres, uma linha só")
++        base += [str(int(n)), "--", consulta.strip()]
++        return base
+     if nome == "git_log":
+         if prop_nome is not None:
+             raise ValueError("'git_log' não aceita o parâmetro nome")
+@@ -213,6 +256,11 @@ def _redigir(texto: str) -> tuple[str, int]:
+ # de um fato fixo da Máquina), nunca opinião. Sem leitura segura -> None, e o
+ # modelo fica com a saída + a descrição.
+ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) -> str | None:
++    if nome == "busca_texto":
++        if codigo == 1:
++            return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
++        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith("memoria/")}
++        return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
+     if nome == "servicos":
+         m = re.search(r"(\d+) loaded units? listed", texto)
+         if m is None:
+@@ -267,8 +315,9 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+     return None
+ 
+ 
+-def _executar(nome: str, n: int | None, prop_nome: str | None = None) -> str:
+-    argv = _argv(nome, n, prop_nome)
++def _executar(nome: str, n: int | None, prop_nome: str | None = None,
++              consulta: str | None = None) -> str:
++    argv = _argv(nome, n, prop_nome, consulta)
+     _, timeout, _desc = COMANDOS[nome]
+     try:
+         r = subprocess.run(argv, cwd=str(REPO), capture_output=True, text=True,
+@@ -358,7 +407,7 @@ class _H(BaseHTTPRequestHandler):
+                         "assinada (P-8), não por parâmetro.",
+             })
+         try:
+-            texto = _executar(nome, pedido.get("n"), pedido.get("nome"))
++            texto = _executar(nome, pedido.get("n"), pedido.get("nome"), pedido.get("consulta"))
+         except ValueError as e:
+             return self._resp(400, {"erro": str(e)})
+         except RuntimeError as e:
+@@ -393,6 +442,20 @@ def _selftest() -> int:
+     # 6. texto inocente não é tocado
+     _, n2 = _redigir("commit dc19621 sha256 8783d29d ok")
+     casos.append(("texto limpo intacto", n2 == 0))
++    # 6b. (670) busca_semantica: a consulta vira UM elemento de argv depois de `--`
++    av = _argv("busca_semantica", None, None, "--reindex; rm -rf ~")
++    casos.append(("consulta vira dado depois de --", av[-2:] == ["--", "--reindex; rm -rf ~"] and av[-3] == "8"))
++    for mau in ["x" * 201, "linha\noutra", "", None]:
++        try:
++            _argv("busca_semantica", None, None, mau); casos.append((f"consulta {str(mau)[:8]!r} recusada", False))
++        except ValueError:
++            casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
++    avt = _argv("busca_texto", None, None, "-e x")
++    casos.append(("busca_texto: consulta é dado", avt[-3:] == ["--", "-e x", "memoria/obsidian"]))
++    try:
++        _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
++    except ValueError:
++        casos.append(("git_status recusa consulta", True))
+     # 7. nenhum argv contém shell
+     casos.append(("nenhum argv usa shell",
+                   all(a[0] not in ("sh", "-c") and "sh -c" not in " ".join(a)
+diff --git a/scripts/agata_blocos.py b/scripts/agata_blocos.py
+new file mode 100644
+index 0000000..4656470
+--- /dev/null
++++ b/scripts/agata_blocos.py
+@@ -0,0 +1,69 @@
++#!/usr/bin/env python3
++"""Segmentação de uma entrada de MEMÓRIAS em blocos (parágrafos) — fonte única
++para scripts/gerar_obsidian.py (que marca cada bloco com `^bN` na nota) e
++scripts/busca_semantica.py (que indexa cada bloco por sentido). Os dois têm de
++concordar no N, senão o link "trecho parecido" abre o parágrafo errado.
++
++Bloco = parágrafo de prosa com pelo menos MIN_CHARS caracteres. Fica de fora o
++que não aceita `^id` no fim sem quebrar a renderização: bloco de código,
++tabela, citação, título, linha horizontal. Lista conta como bloco inteiro (o
++`^id` vai no último item, que é como o Obsidian ancora lista).
++
++Uso: python3 scripts/agata_blocos.py --selftest
++"""
++import re
++import sys
++
++MIN_CHARS = 80
++_NAO_ANCORA = re.compile(r"^\s*(\||>|#|---\s*$|\*\*\*\s*$)")
++
++
++def blocos(linhas):
++    """[(n, primeira_linha_idx, ultima_linha_idx, texto)] -- n começa em 1."""
++    out, atual, em_codigo = [], [], False
++
++    def fecha():
++        if not atual:
++            return
++        texto = "\n".join(ln for _, ln in atual).strip()
++        primeira = atual[0][1]
++        if len(texto) >= MIN_CHARS and not _NAO_ANCORA.match(primeira):
++            out.append((len(out) + 1, atual[0][0], atual[-1][0], texto))
++        atual.clear()
++
++    for i, ln in enumerate(linhas):
++        if ln.lstrip().startswith("```"):
++            fecha()
++            em_codigo = not em_codigo
++            continue
++        if em_codigo:
++            continue
++        if not ln.strip():
++            fecha()
++            continue
++        atual.append((i, ln))
++    fecha()
++    return out
++
++
++def marcar(linhas):
++    """Cópia de `linhas` com ` ^bN` no fim da última linha de cada bloco."""
++    novas = list(linhas)
++    for n, _ini, fim, _t in blocos(linhas):
++        novas[fim] = novas[fim].rstrip() + f" ^b{n}"
++    return novas
++
++
++def _selftest():
++    longo = "x" * 90
++    ls = [longo, "", "curto", "", "```", longo, "```", "", "| a | b |", "", f"- {longo}", f"- {longo}", "", longo]
++    bs = blocos(ls)
++    ok = [b[0] for b in bs] == [1, 2, 3] and [b[1] for b in bs] == [0, 10, 13]
++    m = marcar(ls)
++    ok = ok and m[0].endswith(" ^b1") and m[11].endswith(" ^b2") and m[13].endswith(" ^b3") and m[5] == longo
++    print("SELFTEST", "OK" if ok else f"FALHA {bs}")
++    return 0 if ok else 1
++
++
++if __name__ == "__main__":
++    sys.exit(_selftest() if "--selftest" in sys.argv else 0)
+diff --git a/scripts/agata_busca.sh b/scripts/agata_busca.sh
+new file mode 100755
+index 0000000..b9083e8
+--- /dev/null
++++ b/scripts/agata_busca.sh
+@@ -0,0 +1,37 @@
++#!/usr/bin/env bash
++# scripts/agata_busca.sh -- busca por SENTIDO na memória da Agata, para o Humano
++# (o "Smart Lookup" / "Smart Context" do Obsidian, com o embedding local da
++# Máquina, sem plugin e sem nuvem). MEMÓRIAS (670).
++#
++#   bash scripts/agata_busca.sh "frase"              # 10 entradas e trechos mais próximos
++#   bash scripts/agata_busca.sh "frase" --abrir 1    # abre o 1º resultado no Obsidian
++#   bash scripts/agata_busca.sh --contexto "tema"    # pacote .md na Área de trabalho, p/ colar noutra IA
++#
++# Só leitura: consulta o índice (que se atualiza sozinho) e, no máximo, abre o
++# Obsidian. O pacote de contexto é recorte -- a fonte da verdade é o canon.
++set -euo pipefail
++raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++bs="$raiz/scripts/busca_semantica.py"
++
++if [ "${1:-}" = "--contexto" ]; then
++  tema="${2:?uso: agata_busca.sh --contexto \"tema\"}"
++  mesa="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME")"
++  slug="$(printf '%s' "$tema" | tr -cs '[:alnum:]' '-' | tr '[:upper:]' '[:lower:]' | cut -c1-40)"
++  python3 "$bs" "$tema" -n 12 --contexto "$mesa/contexto-agata-${slug%-}.md"
++  exit 0
++fi
++
++frase="${1:?uso: agata_busca.sh \"frase\" [--abrir N] | --contexto \"tema\"}"
++if [ "${2:-}" = "--abrir" ]; then
++  n="${3:-1}"
++  case "$n" in ''|*[!0-9]*) echo "ERRO: --abrir N, com N número" >&2; exit 1 ;; esac
++  num="$(python3 "$bs" "$frase" -n "$n" --json | python3 -c 'import json,sys; r=json.load(sys.stdin); print(r[int(sys.argv[1])-1]["num"] if len(r)>=int(sys.argv[1]) else "")' "$n")"
++  [ -n "$num" ] || { echo "ERRO: não há resultado $n" >&2; exit 1; }
++  nota="memoria/obsidian/entradas/$(printf '%04d' "$num")"
++  echo "abrindo ($num) no Obsidian: $nota.md"
++  xdg-open "obsidian://open?vault=agata&file=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$nota")" >/dev/null 2>&1 &
++  exit 0
++fi
++python3 "$bs" "$frase" -n 10
++echo
++echo "abrir no Obsidian: bash scripts/agata_busca.sh \"$frase\" --abrir N"
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index 998235a..a37d2d6 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -31,9 +31,17 @@ grava o hash de MEMÓRIAS.md junto do índice; se o canon mudou desde o
+ vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
+ ~275 entradas na iGPU custa segundos reais, não cabe no hot path do hook).
+ 
++Desde (670): índice v2, INCREMENTAL, por entrada e por parágrafo (`indice-v2.json`,
++vetor guardado pela sha256 do texto) -- só o texto novo vai ao embedding. O
++post-commit roda `--atualizar` antes de gerar o vault; a busca se atualiza sozinha.
++O `memorias.json` antigo fica sem uso.
++
+ Uso:
+-  scripts/busca_semantica.py --reindex            # (re)constrói o índice
+-  scripts/busca_semantica.py "frase ou termo"     # top 10 entradas por sentido
++  scripts/busca_semantica.py --atualizar          # embeda só o que falta
++  scripts/busca_semantica.py --reindex            # idem + poda o que não existe mais
++  scripts/busca_semantica.py "frase ou termo"     # top 10 entradas e trechos por sentido
++  scripts/busca_semantica.py "termo" --json       # para ferramentas (seth_verificador)
++  scripts/busca_semantica.py "tema" --contexto ARQ.md   # pacote p/ colar noutra IA
+   scripts/busca_semantica.py "termo" -n 5         # top 5
+   scripts/busca_semantica.py --selftest           # autoteste, sem tocar o índice real
+ """
+@@ -187,68 +195,185 @@ def _embed(textos, input_type):
+     return [d["embedding"] for d in sorted(body["data"], key=lambda d: d["index"])]
+ 
+ 
+-def _cos(a, b):
+-    return sum(x * y for x, y in zip(a, b))
++# ---------------------------------------------------------------- índice v2
++# (670): índice incremental, por ENTRADA e por BLOCO (parágrafo, mesma
++# segmentação de scripts/agata_blocos.py que o vault usa pra marcar `^bN`).
++# Cada vetor é guardado pela sha256 do texto que o gerou -- texto que já tem
++# vetor nunca vai de novo ao embedding; só o novo ou alterado. Sem timer: a
++# reindexação roda no post-commit (antes do vault) e, se estiver atrasada, na
++# própria busca. O vault (gerar_obsidian.py) só LÊ este índice.
++INDICE_V2 = os.path.join(CACHE_DIR, "indice-v2.json")
++MODELO = "multilingual-e5-small"
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++import agata_blocos  # noqa: E402
+ 
+ 
+-def reindex():
+-    if not os.path.isfile(MEMORIAS):
+-        sys.exit("ERRO: MEMÓRIAS.md não encontrado — rode a partir da raiz do repositório.")
+-    entradas, textos = _todas_entradas_todas_camadas()
+-    if not entradas:
+-        sys.exit("ERRO: nenhuma entrada achada — camadas de memória vazias ou marcador quebrado?")
+-    camadas_nomes = [os.path.basename(c) for c in textos]
+-    textos_embed = [
+-        f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
+-        for e in entradas
+-    ]
+-    print(f"Indexando {len(entradas)} entradas ({', '.join(sorted(camadas_nomes))}) "
+-          f"via {EMBED_URL} (iGPU) ...", file=sys.stderr)
+-    vetores = []
+-    LOTE = 16
+-    for i in range(0, len(textos_embed), LOTE):
+-        vetores.extend(_embed(textos_embed[i:i + LOTE], "passage"))
+-        print(f"  {min(i + LOTE, len(textos_embed))}/{len(textos_embed)}", file=sys.stderr)
+-    os.makedirs(CACHE_DIR, exist_ok=True)
+-    payload = {
+-        "camadas_sha256": _hash_camadas(textos),
+-        "camadas": sorted(camadas_nomes),
+-        "modelo": "multilingual-e5-small",
+-        "dim": len(vetores[0]) if vetores else 0,
+-        "entradas": [
+-            {"num": e["num"], "tipo": e["tipo"], "data": e["data"], "titulo": e["titulo"],
+-             "vetor": v}
+-            for e, v in zip(entradas, vetores)
+-        ],
+-    }
+-    with open(VETORES_PATH, "w", encoding="utf-8") as f:
+-        json.dump(payload, f, ensure_ascii=False)
+-    print(f"Índice gravado: {VETORES_PATH} ({len(entradas)} entradas, dim {payload['dim']})",
+-          file=sys.stderr)
+-
+-
+-def buscar(query, n):
+-    if not os.path.isfile(VETORES_PATH):
+-        sys.exit(f"ERRO: índice não existe ainda — rode '{sys.argv[0]} --reindex' primeiro.")
+-    idx = json.load(open(VETORES_PATH, encoding="utf-8"))
+-    if "camadas_sha256" not in idx:
+-        print("AVISO: índice foi gravado por uma versão anterior (só quente, pré-Fase 4) — "
+-              "rode --reindex pra cobrir quente+morno+frio.", file=sys.stderr)
+-    elif os.path.isfile(MEMORIAS):
+-        _, textos_atuais = _todas_entradas_todas_camadas()
+-        if idx.get("camadas_sha256") != _hash_camadas(textos_atuais):
+-            print("AVISO: alguma camada de memória (quente/morno/frio) mudou desde o último "
+-                  "--reindex — resultado pode estar desatualizado. Rode --reindex pra atualizar.",
++def texto_entrada(e):
++    return f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
++
++
++def textos_blocos(e):
++    """[(n, texto)] -- n é o mesmo `^bN` que o vault escreve na nota."""
++    return [(n, t[:1500]) for n, _i, _f, t in agata_blocos.blocos(e["linhas"])]
++
++
++def _h(texto):
++    return hashlib.sha256(("passage\0" + texto).encode("utf-8")).hexdigest()
++
++
++def _b64(vetor):
++    import base64
++    import numpy as np
++    return base64.b64encode(np.asarray(vetor, dtype="<f4").tobytes()).decode()
++
++
++def carregar_indice():
++    """{sha: base64-float32}, ou {} se não houver índice v2."""
++    try:
++        with open(INDICE_V2, encoding="utf-8") as f:
++            d = json.load(f)
++        return d.get("vetores", {}) if d.get("versao") == 2 else {}
++    except (OSError, ValueError):
++        return {}
++
++
++def vetor(vetores, texto):
++    """numpy float32 do texto, ou None se ainda não indexado."""
++    v = vetores.get(_h(texto))
++    if v is None:
++        return None
++    import base64
++    import numpy as np
++    return np.frombuffer(base64.b64decode(v), dtype="<f4")
++
++
++def _itens(entradas):
++    """[(sha, texto)] de todas as entradas e blocos, sem repetição."""
++    vistos, out = set(), []
++    for e in entradas:
++        for t in [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]:
++            h = _h(t)
++            if h not in vistos:
++                vistos.add(h)
++                out.append((h, t))
++    return out
++
++
++def _embed_seguro(textos):
++    try:
++        return _embed(textos, "passage")
++    except SystemExit:
++        return None
++
++
++def atualizar(podar=False, silencioso=False):
++    """Embeda só o que falta. Devolve (novos, total, ok). `podar` remove
++    vetores de texto que não existe mais (só no --reindex explícito: a busca
++    não poda, pra nunca tirar o vetor de uma entrada do HEAD que o vault usa)."""
++    entradas, _ = _todas_entradas_todas_camadas()
++    vetores = carregar_indice()
++    itens = _itens(entradas)
++    faltam = [(h, t) for h, t in itens if h not in vetores]
++    ok = True
++    LOTE = 32
++    for i in range(0, len(faltam), LOTE):
++        lote = faltam[i:i + LOTE]
++        vs = _embed_seguro([t for _h2, t in lote])
++        if vs is None:
++            ok = False
++            print("AVISO: embedding (:20134) fora do ar -- índice parcial; a busca usa o que já tem.",
+                   file=sys.stderr)
+-    qvec = _embed([query], "query")[0]
+-    ranking = sorted(
+-        idx["entradas"],
+-        key=lambda e: _cos(qvec, e["vetor"]),
+-        reverse=True,
+-    )[:n]
+-    for e in ranking:
+-        score = _cos(qvec, e["vetor"])
+-        print(f"{score:.3f}  ({e['num']}) {e['tipo']} — {e['titulo']}")
++            break
++        for (h, _t), v in zip(lote, vs):
++            vetores[h] = _b64(v)
++        if not silencioso and len(faltam) > LOTE:
++            print(f"  {min(i + LOTE, len(faltam))}/{len(faltam)}", file=sys.stderr)
++    if podar:
++        validos = {h for h, _t in itens}
++        vetores = {h: v for h, v in vetores.items() if h in validos}
++    novos = sum(1 for h, _t in faltam if h in vetores)
++    if novos or podar:
++        os.makedirs(CACHE_DIR, exist_ok=True)
++        tmp = INDICE_V2 + ".tmp"
++        with open(tmp, "w", encoding="utf-8") as f:
++            json.dump({"versao": 2, "modelo": MODELO, "vetores": vetores}, f)
++        os.replace(tmp, INDICE_V2)
++    if not silencioso:
++        print(f"índice: {novos} texto(s) novo(s) embedado(s); {len(itens)} no total "
++              f"({len(entradas)} entradas + blocos)", file=sys.stderr)
++    return novos, len(itens), ok
++
++
++def buscar_dados(query, n=10, blocos=True):
++    """[{tipo, num, bloco, score, titulo, data, trecho}] -- entradas e trechos."""
++    import numpy as np
++    atualizar(silencioso=True)
++    entradas, _ = _todas_entradas_todas_camadas()
++    vetores = carregar_indice()
++    q = np.asarray(_embed([query], "query")[0], dtype="<f4")
++    res = []
++    for e in entradas:
++        v = vetor(vetores, texto_entrada(e))
++        if v is not None:
++            res.append({"tipo": "entrada", "num": e["num"], "bloco": None,
++                        "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
++                        "trecho": ""})
++        if blocos:
++            for bn, t in textos_blocos(e):
++                v = vetor(vetores, t)
++                if v is not None:
++                    res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
++                                "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
++                                "trecho": t[:280]})
++    res.sort(key=lambda r: r["score"], reverse=True)
++    # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
++    out, vistos = [], set()
++    for r in res:
++        chave = (r["tipo"], r["num"])
++        if chave in vistos:
++            continue
++        vistos.add(chave)
++        out.append(r)
++        if len(out) >= n:
++            break
++    return out
++
++
++def buscar(query, n, como_json=False):
++    rs = buscar_dados(query, n)
++    if como_json:
++        print(json.dumps(rs, ensure_ascii=False))
++        return
++    for r in rs:
++        if r["tipo"] == "entrada":
++            print(f"{r['score']:.3f}  ({r['num']}) — {r['titulo'][:140]}")
++        else:
++            print(f"{r['score']:.3f}  ({r['num']}) ^b{r['bloco']} — {r['trecho'][:140]}")
++
++
++def contexto(query, n, destino):
++    """Pacote markdown com as entradas mais relevantes, para colar noutra IA
++    (equivalente ao "Smart Context")."""
++    rs = buscar_dados(query, n)
++    entradas = {e["num"]: e for e in _todas_entradas_todas_camadas()[0]}
++    nums = []
++    for r in rs:
++        if r["num"] not in nums:
++            nums.append(r["num"])
++    linhas = [f"# Contexto Agata — \"{query}\"", "",
++              "Entradas de MEMÓRIAS escolhidas por sentido (busca local, embedding na iGPU). "
++              "A fonte da verdade é o canon; isto é recorte.", ""]
++    for num in nums:
++        e = entradas[num]
++        linhas += [f"## ({num}) {e['tipo']} — {e['data']} · {e['titulo']}", "",
++                   "\n".join(e["linhas"]).strip()[:4000], ""]
++    with open(destino, "w", encoding="utf-8") as f:
++        f.write("\n".join(linhas))
++    print(destino)
++
++
++def _cos(a, b):
++    return sum(x * y for x, y in zip(a, b))
+ 
+ 
+ def selftest():
+@@ -261,26 +386,39 @@ def selftest():
+     prox, dist = _cos(vs[0], vs[1]), _cos(vs[0], vs[2])
+     print(f"cos(próximas)={prox:.4f}  cos(distante)={dist:.4f}")
+     ok = prox > dist
+-    print("OK" if ok else "FALHA", "-- frases relacionadas mais parecidas que a não relacionada")
++    # incremental: o mesmo texto dá a mesma chave; texto novo dá chave nova
++    e = {"titulo": "t", "linhas": ["x" * 90, "", "y" * 90]}
++    ok = ok and _h(texto_entrada(e)) == _h(texto_entrada(dict(e))) and len(textos_blocos(e)) == 2
++    print("OK" if ok else "FALHA", "-- sentido + chaves do índice incremental")
+     return 0 if ok else 1
+ 
+ 
+ def main():
+     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+     ap.add_argument("query", nargs="?", help="termo ou frase pra buscar por sentido")
+-    ap.add_argument("--reindex", action="store_true", help="(re)constrói o índice de MEMÓRIAS")
++    ap.add_argument("--reindex", action="store_true",
++                    help="embeda o que falta e poda o que não existe mais (incremental)")
++    ap.add_argument("--atualizar", action="store_true",
++                    help="só embeda o que falta, sem podar (o post-commit usa este)")
+     ap.add_argument("--selftest", action="store_true", help="autoteste, não toca o índice real")
++    ap.add_argument("--json", action="store_true", help="saída em JSON (para ferramentas)")
++    ap.add_argument("--contexto", metavar="ARQUIVO",
++                    help="grava um pacote markdown com as entradas mais relevantes")
+     ap.add_argument("-n", type=int, default=10, help="quantos resultados (default 10)")
+     args = ap.parse_args()
+ 
+     if args.selftest:
+         sys.exit(selftest())
+-    if args.reindex:
+-        reindex()
+-        return
++    if args.reindex or args.atualizar:
++        _n, _t, ok = atualizar(podar=args.reindex)
++        sys.exit(0 if ok else 1)
+     if not args.query:
+-        ap.error("passe uma busca, ou --reindex, ou --selftest")
+-    buscar(args.query, args.n)
++        ap.error("passe uma busca, ou --reindex/--atualizar, ou --selftest")
++    n = max(1, min(args.n, 50))
++    if args.contexto:
++        contexto(args.query, n, args.contexto)
++    else:
++        buscar(args.query, n, como_json=args.json)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/scripts/gerar_obsidian.py b/scripts/gerar_obsidian.py
+index e8d8fdd..b741191 100644
+--- a/scripts/gerar_obsidian.py
++++ b/scripts/gerar_obsidian.py
+@@ -9,13 +9,15 @@ Serve a visualização do Humano E a leitura da Seth (nota plana, sem
+ depender de plugin pra extrair informação).
+ 
+ Nunca editado à mão. Regenerado por este script (e pelo post-commit).
+-Determinístico e idempotente: apaga memoria/obsidian/ e reconstrói.
++Determinístico e idempotente. Desde (670) escreve NO LUGAR: grava só o arquivo
++cujo conteúdo mudou e remove só o que deixou de existir -- apagar a pasta inteira
++a cada commit deixava o índice do Obsidian (e a listagem de diretório) para trás.
+ 
+ Uso: python3 scripts/gerar_obsidian.py
+ """
+ import os
+ import re
+-import shutil
++import json
+ import subprocess
+ import sys
+ import unicodedata
+@@ -121,15 +123,146 @@ def wikilink_arquivo(caminho_relativo_ao_repo, rotulo):
+     return f"[[{caminho_relativo_ao_repo}|{rotulo}]]"
+ 
+ 
+-def escrever(rel, linhas):
++ESCRITOS = set()  # caminhos gerados neste run -- o resto de SAIDA é removido no fim
++
++
++def escrever(rel, linhas, cru=None):
++    """Grava só se o conteúdo mudou (670): o Obsidian não reindexa à toa e a
++    listagem de diretório não fica para trás."""
+     p = os.path.join(SAIDA, rel)
++    ESCRITOS.add(os.path.normpath(p))
++    novo = cru if cru is not None else "\n".join(linhas).rstrip() + "\n"
++    try:
++        with open(p, encoding="utf-8") as f:
++            if f.read() == novo:
++                return
++    except OSError:
++        pass
+     os.makedirs(os.path.dirname(p), exist_ok=True)
+-    with open(p, "w", encoding="utf-8") as f:
+-        f.write("\n".join(linhas).rstrip() + "\n")
++    tmp = p + ".tmp-gerador"
++    with open(tmp, "w", encoding="utf-8") as f:
++        f.write(novo)
++    os.replace(tmp, p)
++
++
++def _limpar_obsoletos():
++    """Remove de SAIDA o que este run não gerou (nota que deixou de existir)."""
++    for raiz, dirs, arquivos in os.walk(SAIDA, topdown=False):
++        for a in arquivos:
++            c = os.path.normpath(os.path.join(raiz, a))
++            if c not in ESCRITOS:
++                os.remove(c)
++        if raiz != SAIDA and not os.listdir(raiz):
++            os.rmdir(raiz)
++
++
++# ------------------------------------------------------------------ cérebro (670)
++# Região anatômica de cada nota (propriedade `brain_region`, lida pelo plugin
++# Brain Atlas) e `kind` (escolhe a cor dentro da paleta do plugin mais próxima
++# da identidade da Agata). Fonte única: config/agata-identidade.json.
++def _identidade():
++    try:
++        with open(os.path.join(REPO, "config", "agata-identidade.json"), encoding="utf-8") as f:
++            return json.load(f)
++    except (OSError, ValueError):
++        return {"escuro": {}, "regioes": {}}
++
++
++IDENT = _identidade()
++_REGIAO_POR_NOTA = {"regra": "frontal", "projeto": "frontal", "referencia": "frontal",
++                    "canon": "frontal", "proposta": "frontal", "script": "parietal",
++                    "controle": "parietal", "moc": "stem", "estado": "stem",
++                    "timeline": "stem", "inicio": "stem"}
++
++
++def regiao_entrada(categoria):
++    c = categoria.upper()
++    if "CORRE" in c or "FALHA" in c or "INCIDENTE" in c:
++        return "cerebellum"
++    if "DECIS" in c or "CONSELHO" in c:
++        return "frontal"
++    return "temporal"
++
++
++def _cerebro(campos):
++    tipo = str(campos.get("tipo-nota", ""))
++    if tipo == "entrada":
++        r = regiao_entrada(str(campos.get("categoria", "")).strip('"'))
++    else:
++        r = _REGIAO_POR_NOTA.get(tipo)
++    if not r:
++        return {}
++    kind = IDENT.get("regioes", {}).get(r, {}).get("kind")
++    return {"brain_region": r, **({"kind": kind} if kind else {})}
++
++
++def _semantica(entradas):
++    """Vizinhos por sentido, só LENDO o índice de scripts/busca_semantica.py
++    (nunca embeda aqui). Sem índice/numpy: dicionários vazios -- a nota sai
++    sem a seção, do mesmo jeito no P-10. Devolve (parecidas, trechos, afinidade,
++    n_entradas_com_vetor, n_blocos_com_vetor)."""
++    try:
++        import numpy as np
++        sys.path.insert(0, os.path.join(REPO, "scripts"))
++        import busca_semantica as bs
++        vetores = bs.carregar_indice()
++    except Exception:
++        return {}, {}, {}, 0, 0
++    if not vetores:
++        return {}, {}, {}, 0, 0
++    nums, mat = [], []
++    bl_dono, bl_n, bl_mat = [], [], []
++    for e in entradas:
++        v = bs.vetor(vetores, bs.texto_entrada(e))
++        if v is not None:
++            nums.append(e["num"])
++            mat.append(v)
++        for bn, t in bs.textos_blocos(e):
++            vb = bs.vetor(vetores, t)
++            if vb is not None:
++                bl_dono.append(e["num"])
++                bl_n.append(bn)
++                bl_mat.append(vb)
++    parecidas, trechos, afinidade = {}, {}, {}
++    if len(nums) > 1:
++        M = np.vstack(mat).astype("float64")
++        S = M @ M.T
++        for i, n in enumerate(nums):
++            ordem = sorted((j for j in range(len(nums)) if j != i),
++                           key=lambda j: (-round(float(S[i, j]), 6), nums[j]))[:5]
++            parecidas[n] = [(nums[j], round(float(S[i, j]), 3)) for j in ordem]
++            afinidade[n] = round(sum(x for _, x in parecidas[n]) / len(parecidas[n]), 2)
++    if len(bl_mat) > 1:
++        B = np.vstack(bl_mat).astype("float64")
++        SB = B @ B.T
++        dono = np.array(bl_dono)
++        por_entrada = {}
++        for i, n in enumerate(bl_dono):
++            por_entrada.setdefault(n, []).append(i)
++        for n, idxs in por_entrada.items():
++            pares = []
++            for i in idxs:
++                outros = np.where(dono != n)[0]
++                if not len(outros):
++                    continue
++                j = int(outros[np.argmax(SB[i, outros])])
++                pares.append((-round(float(SB[i, j]), 6), bl_n[i], bl_dono[j], bl_n[j]))
++            pares.sort()
++            vistos, out = set(), []
++            for sc, meu, outro, seu in pares:
++                if outro in vistos:
++                    continue
++                vistos.add(outro)
++                out.append((meu, outro, seu, round(-sc, 3)))
++                if len(out) == 3:
++                    break
++            trechos[n] = out
++    return parecidas, trechos, afinidade, len(nums), len(bl_mat)
+ 
+ 
+ def fm(campos):
+     out = ["---"]
++    campos = {**campos, **_cerebro(campos)}
+     for k, v in campos.items():
+         out.append(f"{k}: {v}")
+     out += ["---", ""]
+@@ -357,9 +490,8 @@ def _controles_do_perimetro():
+ 
+ 
+ def main():
+-    if os.path.isdir(SAIDA):
+-        shutil.rmtree(SAIDA)
+-    os.makedirs(SAIDA)
++    os.makedirs(SAIDA, exist_ok=True)
++    ESCRITOS.clear()
+ 
+     # Lista de .md rastreados capturada AGORA, com memoria/obsidian/ ainda vazio --
+     # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
+@@ -459,7 +591,8 @@ def main():
+     for b in ["INICIO", "estado", "timeline", "_LEIA",
+               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
+               "moc-controles", "moc-propostas", "moc-esferas",
+-              "moc-documentos", "moc-readmes", "memorias.base"]:
++              "moc-documentos", "moc-readmes", "memorias.base",
++              "mapa-do-sistema.canvas", "cerebro"]:
+         NOTAS.add(b)
+ 
+     # -------- religação de um corpo de texto
+@@ -497,8 +630,17 @@ def main():
+         for a in e["cita"]:
+             citada_por[a].add(e["num"])
+ 
++    parecidas, trechos, afinidade, n_vet, n_blv = _semantica(entradas)
++    sys.path.insert(0, os.path.join(REPO, "scripts"))
++    import agata_blocos
++
++    def _iso(d):
++        m = re.match(r"(\d{2})/(\d{2})/(\d{4})$", d or "")
++        return f"{m.group(3)}-{m.group(2)}-{m.group(1)}" if m else "null"
++
+     for e in entradas:
+-        corpo = "\n".join(e["linhas"]).strip("\n")
++        corpo = "\n".join(agata_blocos.marcar(e["linhas"])).strip("\n")
++        par = parecidas.get(e["num"], [])
+         campos = {
+             "tipo-nota": "entrada",
+             "entrada": e["num"],
+@@ -507,6 +649,9 @@ def main():
+             "titulo": yq(e["titulo"]),
+             "cita": ylist(e["cita"]),
+             "citada_por": ylist(sorted(citada_por[e["num"]])),
++            "dia": _iso(e["data"]),
++            "parecidas": "[" + ", ".join(f'"[[{ent_base[n]}]]"' for n, _ in par) + "]",
++            "afinidade": afinidade.get(e["num"], "null"),
+             "tags": "[memoria/entrada]",
+         }
+         linhas = fm(campos)
+@@ -517,7 +662,17 @@ def main():
+         if citada_por[e["num"]]:
+             linhas.append("## Citada por")
+             linhas += [f"- {link(ent_base[n])}" for n in sorted(citada_por[e["num"]])]
+-        linhas += ["", "---", f"< {link('moc-memoria','MOC memória')} · {link('timeline')} · {link('INICIO')} >"]
++            linhas.append("")
++        if par:
++            linhas.append("## Parecidas (por sentido)")
++            linhas += [f"- {link(ent_base[n])} — {sc:.2f}" for n, sc in par]
++            linhas.append("")
++        if trechos.get(e["num"]):
++            linhas.append("## Trechos parecidos")
++            linhas += [f"- este [[#^b{meu}|parágrafo {meu}]] ↔ [[{ent_base[outro]}#^b{seu}|({outro}), parágrafo {seu}]] — {sc:.2f}"
++                       for meu, outro, seu, sc in trechos[e["num"]]]
++            linhas.append("")
++        linhas += ["---", f"< {link('moc-memoria','MOC memória')} · {link('timeline')} · {link('INICIO')} · {link('cerebro','Cérebro')} >"]
+         escrever(f"entradas/{e['num']:04d}.md", linhas)
+ 
+     # -------- regras (seções de REGRAS.md)
+@@ -837,7 +992,10 @@ def main():
+           "> [!warning] Instantâneo da geração. A verdade viva é o canon + `git`.", "",
+           f"- Última entrada: {link(ent_base[ult['num']])} — {ult['titulo']}",
+           f"- Total de entradas: {len(entradas)}  ·  regras: {len(regra_base)}  ·  "
+-          f"scripts: {len(scripts)}  ·  propostas aplicadas: {len(props)}", "",
++          f"scripts: {len(scripts)}  ·  propostas aplicadas: {len(props)}",
++          f"- Índice por sentido: {n_vet} de {len(entradas)} entradas e {n_blv} parágrafos com vetor"
++          + ("" if n_vet == len(entradas) else
++             " — **atrasado**: rode `python3 scripts/busca_semantica.py --atualizar`"), "",
+           "## Última atualização (de ONDE_ESTAMOS.md)", "",
+           (m_ult.group(1).strip() if m_ult else "(não encontrado)"), "",
+           "---", f"< {link('INICIO')} >"]
+@@ -860,6 +1018,7 @@ def main():
+         "",
+         "formulas:",
+         "  citacoes: 'citada_por.length'",
++        "  sem_citacao: 'citada_por.length == 0'",
+         "",
+         "properties:",
+         "  entrada:",
+@@ -870,40 +1029,191 @@ def main():
+         '    displayName: "Data"',
+         "  titulo:",
+         '    displayName: "Título"',
++        "  brain_region:",
++        '    displayName: "Região"',
++        "  afinidade:",
++        '    displayName: "Afinidade (sentido)"',
++        "  parecidas:",
++        '    displayName: "Parecidas"',
+         "  formula.citacoes:",
+         '    displayName: "Citada por"',
+         "",
+         "views:",
+         "  - type: table",
+         '    name: "Todas as entradas"',
++        "    sort:",
++        "      - property: entrada",
++        "        direction: DESC",
+         "    order:",
+         "      - entrada",
+         "      - categoria",
+         "      - data",
+         "      - titulo",
++        "      - brain_region",
+         "      - formula.citacoes",
+         "  - type: table",
++        '    name: "Últimas 2 semanas"',
++        "    filters:",
++        "      and:",
++        "        - 'dia'",
++        "        - 'date(dia) >= today() - \"14d\"'",
++        "    sort:",
++        "      - property: entrada",
++        "        direction: DESC",
++        "    order:",
++        "      - entrada",
++        "      - categoria",
++        "      - titulo",
++        "  - type: cards",
++        '    name: "Por região do cérebro"',
++        "    groupBy:",
++        "      property: brain_region",
++        "      direction: ASC",
++        "    order:",
++        "      - entrada",
++        "      - titulo",
++        "      - data",
++        "  - type: table",
++        '    name: "Decisões e Conselho"',
++        "    filters: 'brain_region == \"frontal\"'",
++        "    sort:",
++        "      - property: entrada",
++        "        direction: DESC",
++        "    order:",
++        "      - entrada",
++        "      - categoria",
++        "      - data",
++        "      - titulo",
++        "  - type: table",
++        '    name: "Correções (cerebelo)"',
++        "    filters: 'brain_region == \"cerebellum\"'",
++        "    sort:",
++        "      - property: entrada",
++        "        direction: DESC",
++        "    order:",
++        "      - entrada",
++        "      - data",
++        "      - titulo",
++        "  - type: table",
+         '    name: "Mais citadas"',
+         "    limit: 40",
++        "    sort:",
++        "      - property: formula.citacoes",
++        "        direction: DESC",
+         "    order:",
+         "      - entrada",
+         "      - titulo",
+         "      - formula.citacoes",
+-        "  - type: cards",
+-        '    name: "Por categoria"',
+-        "    groupBy:",
+-        "      property: categoria",
++        "  - type: table",
++        '    name: "Mais conectadas por sentido"',
++        "    limit: 40",
++        "    sort:",
++        "      - property: afinidade",
++        "        direction: DESC",
+         "    order:",
+         "      - entrada",
+         "      - titulo",
++        "      - afinidade",
++        "      - parecidas",
++        "  - type: table",
++        '    name: "Órfãs (ninguém cita)"',
++        "    filters: 'citada_por.length == 0'",
++        "    sort:",
++        "      - property: entrada",
++        "        direction: DESC",
++        "    order:",
++        "      - entrada",
+         "      - data",
++        "      - titulo",
++        "      - parecidas",
+     ])
+ 
++    # -------- mapa-do-sistema.canvas (670) -- o cérebro em 2D, para o Humano:
++    # uma região por grupo, com as cores da identidade da Agata.
++    cores = IDENT.get("escuro", {})
++    reg = IDENT.get("regioes", {})
++    def _cor(r):
++        return cores.get(reg.get(r, {}).get("cor", ""), "#52c7ff")
++    import hashlib as _hl
++    def _id(txt):
++        return _hl.sha256(txt.encode("utf-8")).hexdigest()[:16]
++    ultimas = [e["num"] for e in entradas[:6]]
++    grupos_canvas = [
++        ("frontal", "Frontal — decisão e planejamento", -900, -700,
++         [("file", "REGRAS.md"), ("file", "PROTOCOLOS.md"), ("file", "PROJETO.md"),
++          ("file", "memoria/obsidian/moc-propostas.md")]),
++        ("temporal", "Temporal — memória", 100, -700,
++         [("file", "MEMÓRIAS.md"), ("file", "memoria/obsidian/timeline.md")]
++         + [("file", f"memoria/obsidian/entradas/{n:04d}.md") for n in ultimas[:4]]),
++        ("parietal", "Parietal — ferramentas", -900, 100,
++         [("file", "memoria/obsidian/moc-scripts.md"), ("file", "memoria/obsidian/moc-controles.md")]),
++        ("cerebellum", "Cerebelo — correção de erro", 100, 100,
++         [("file", "FALHAS.md"), ("base", "memoria/obsidian/memorias.base")]),
++        ("occipital", "Occipital — o que vem de fora", 1100, 100,
++         [("file", "memoria/obsidian/moc-documentos.md"), ("file", "memoria/obsidian/moc-readmes.md")]),
++        ("stem", "Tronco — roteamento", 1100, -700,
++         [("file", "memoria/obsidian/INICIO.md"), ("file", "memoria/obsidian/estado.md"),
++          ("file", "memoria/obsidian/cerebro.md")]),
++    ]
++    nos, arestas = [], []
++    for r, rotulo, gx, gy, itens in grupos_canvas:
++        alturas = 260
++        cols = 2
++        linhas_g = (len(itens) + cols - 1) // cols
++        gw, gh = 40 + cols * 420, 80 + linhas_g * (alturas + 40)
++        nos.append({"id": _id("g" + r), "type": "group", "x": gx, "y": gy, "width": gw,
++                    "height": gh, "label": rotulo, "color": _cor(r)})
++        for k, (_tp, caminho) in enumerate(itens):
++            nos.append({"id": _id(r + caminho), "type": "file", "file": caminho,
++                        "x": gx + 20 + (k % cols) * 420, "y": gy + 60 + (k // cols) * (alturas + 40),
++                        "width": 400, "height": alturas, "color": _cor(r)})
++    for a, b, rot in [("temporal", "frontal", "memória vira decisão"),
++                      ("cerebellum", "frontal", "falha vira regra"),
++                      ("parietal", "temporal", "a Máquina registra"),
++                      ("stem", "temporal", "hidratação"),
++                      ("occipital", "stem", "entra pelo roteamento")]:
++        arestas.append({"id": _id(a + b), "fromNode": _id("g" + a), "toNode": _id("g" + b),
++                        "toEnd": "arrow", "label": rot, "color": _cor(a)})
++    escrever("mapa-do-sistema.canvas", None,
++             cru=json.dumps({"nodes": nos, "edges": arestas}, ensure_ascii=False, indent=1) + "\n")
++
++    # -------- cerebro.md (670) -- porta de entrada do segundo cérebro
++    cont_reg = {}
++    for e in entradas:
++        r = regiao_entrada(e["tipo"])
++        cont_reg[r] = cont_reg.get(r, 0) + 1
++    L = fm({"tipo-nota": "moc", "tags": "[moc, cerebro]"})
++    L += ["# 🧠 O cérebro da Agata", "",
++          "> [!tip] Abra a paleta de comandos (Ctrl+P) → **Brain Atlas: Open** — o vault inteiro "
++          "vira um cérebro 3D girando. Clique num neurônio para abrir a nota; arraste para fixá-lo. "
++          "Os botões FRO · PAR · TEM · OCC · CER · STM acendem e apagam cada lobo.", "",
++          "## As regiões", "",
++          "| Região | O que guarda | Entradas |", "|---|---|---|"]
++    for r in ["frontal", "temporal", "parietal", "cerebellum", "occipital", "stem"]:
++        L.append(f"| **{r}** | {reg.get(r, {}).get('o_que', '')} | {cont_reg.get(r, '—')} |")
++    L += ["", "As cores seguem a identidade da Agata (azul memória, violeta decisão, turquesa "
++          "ferramenta, rosa correção, âmbar o que vem de fora). As ligações são as citações "
++          "`(N)` e, desde (670), as **sinapses por sentido** (`parecidas`, embedding local).", "",
++          "## Por onde explorar",
++          f"- {link('mapa-do-sistema.canvas', 'Mapa do sistema (Canvas)')} — as regiões em 2D, com as notas abertas.",
++          f"- {link('memorias.base', 'Tabela de MEMÓRIAS (Base)')} — visões: últimas 2 semanas, por região, "
++          "decisões, correções, mais citadas, **mais conectadas por sentido**, **órfãs**.",
++          f"- {link('timeline', 'Linha do tempo')} · {link('estado', 'Estado')} · {link('INICIO', 'Início')}", "",
++          "## Insight do dia",
++          "As **órfãs** (nenhuma entrada as cita) com **afinidade alta** são ideias que o sistema "
++          "esqueceu de ligar: abra a visão “Órfãs” da Base e olhe a coluna Parecidas.", "",
++          "## Busca por sentido no terminal",
++          "`bash scripts/agata_busca.sh \"frase\"` · `--abrir N` abre no Obsidian · "
++          "`--contexto \"tema\"` gera um pacote para colar noutra IA."]
++    escrever("cerebro.md", L)
++
+     # -------- INICIO + _LEIA
+     escrever("INICIO.md", fm({"tipo-nota": "inicio", "canon": yq(CANON), "data": yq(DATA)}) + [
+         "# Agata — vault", "",
+         "> [!tip] Comece aqui. Tudo abaixo é **gerado** de `MEMÓRIAS.md` + canon; "
+         "para corrigir, entrada nova na história, nunca edite aqui.", "",
++        "## 🧠 Cérebro",
++        f"- {link('cerebro','O cérebro da Agata')} — gráfico 3D (Brain Atlas), mapa em Canvas, visões da Base.", "",
+         "## Painéis",
+         f"- {link('estado','Estado do sistema')}  ·  {link('timeline','Linha do tempo')}  ·  "
+         f"{link('memorias.base','Tabela de MEMÓRIAS (Base)')}",
+@@ -930,12 +1240,13 @@ def main():
+         "# _LEIA — pasta gerada", "",
+         "`scripts/gerar_obsidian.py` reconstrói tudo aqui a partir de `MEMÓRIAS.md` "
+         "e dos canônicos. Roda também no `post-commit`.", "",
+-        "- **Não edite nada aqui** — a próxima geração apaga a pasta e reescreve.",
++        "- **Não edite nada aqui** — a próxima geração reescreve o que mudou e remove o que não existe mais.",
+         "- Corrija a história pelo caminho normal: entrada nova em `MEMÓRIAS.md`.",
+         "- Abrir a **raiz do repo** (`~/agata`) como vault; começar por `obsidian/INICIO.md`.",
+         "- Reconstruir à mão: `python3 scripts/gerar_obsidian.py`.",
+     ])
+ 
++    _limpar_obsoletos()
+     n_notas = sum(len(f) for _, _, f in os.walk(SAIDA))
+     print(f"vault gerado: {n_notas} notas em memoria/obsidian/ "
+           f"({len(entradas)} entradas, {len(regra_base)} regras, {len(scripts)} scripts, "
+diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
+index 5f7f25f..3b2c718 100644
+--- a/scripts/perimetro/p08_quarentena.sh
++++ b/scripts/perimetro/p08_quarentena.sh
+@@ -70,6 +70,10 @@ _p8_eh_comportamento() {
+     # redesign/librechat/*.json|*.sh (parâmetros do Agent e o script que os aplica)
+     # e redesign/goose/* (instruções do Goose) mudavam comportamento fora daqui.
+     AGENTS.md|redesign/librechat/*.json|redesign/librechat/*.sh|redesign/goose/*) return 0 ;;
++    # (670): o instalador do cérebro baixa e liga código de terceiros no Obsidian
++    # (versão e sha256 fixos dentro dele) e a configuração que ele aplica; o CSS
++    # do tema entra no index.html do LibreChat.
++    redesign/obsidian/*.sh|redesign/obsidian/*.json|redesign/librechat/*.css) return 0 ;;
+     # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
+     # é mudança de comportamento tanto quanto trocar um script. A
+     # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a
