@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Aplica no Agent "Seth" do LibreChat (Mongo) os parâmetros versionados em
-# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)/(667)). A janela de contexto
+# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)/(667)/(678)): janela,
+# plugins sob demanda e as ferramentas do canon que ficam sempre (ferramentas_sempre). A janela de contexto
 # vem dos perfis da Capivara (capivara_perfis.py --janela-agente), não de número fixo.
 #   aplicar_agente_seth.sh            backup do documento + aplica + confere
 #   aplicar_agente_seth.sh --conferir só confere; saída 1 se divergir
@@ -20,6 +21,8 @@ conferir() {
     const mp = a.model_parameters || {};
     for (const [k, v] of Object.entries(c.model_parameters))
       if (mp[k] !== v) erros.push('model_parameters.' + k + ' = ' + mp[k] + ', esperado ' + v);
+    for (const t of (c.ferramentas_sempre || []))
+      if (!(a.tools || []).includes(t)) erros.push('ferramenta ' + t + ' não está no Agent (ferramentas_sempre)');
     const to = a.tool_options || {};
     for (const t of c.plugins_sob_demanda) {
       if (!(a.tools || []).includes(t)) erros.push('ferramenta ' + t + ' não está no Agent');
@@ -40,6 +43,7 @@ echo "backup: $BK"
   const set = {};
   for (const [k, v] of Object.entries(c.model_parameters)) set['model_parameters.' + k] = v;
   for (const t of c.plugins_sob_demanda) set['tool_options.' + t + '.defer_loading'] = true;
-  const r = db.agents.updateOne({id: c.agent_id}, {\$set: set});
+  const r = db.agents.updateOne({id: c.agent_id},
+    {\$set: set, \$addToSet: {tools: {\$each: (c.ferramentas_sempre || []).concat(c.plugins_sob_demanda)}}});
   print('alterados: ' + r.modifiedCount);"
 conferir

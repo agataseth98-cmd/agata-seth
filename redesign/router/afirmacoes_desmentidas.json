@@ -23,8 +23,8 @@
     {
       "id": "busca-semantica",
       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
-      "correcao": "existe e está ao seu alcance: vault_buscar (modo sentido, embedding local sobre entradas e parágrafos) -- (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
-      "origem": "(660)/(670)"
+      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo -- não só o vault): vault_buscar modo sentido (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
+      "origem": "(660)/(670)/(678)"
     },
     {
       "id": "indices-manuais",
@@ -43,21 +43,21 @@
     {
       "id": "sync-pass-aceito",
       "tema": "sync:?\\s*PASS",
-      "sinal": "aceit|passa",
+      "sinal": "aceit|passa sem|passa s[oó] com|basta",
       "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
       "origem": "(661)"
     },
     {
       "id": "vault-sem-entrada-nova",
       "tema": "vault|obsidian|entradas/",
-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá",
+      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá|em lote|batch|\\blag\\b",
       "correcao": "o vault é regenerado no post-commit de CADA commit (não há ciclo noturno) e a listagem vem do disco desde (670) -- a entrada nova está lá; abra o arquivo",
       "origem": "(666)/(670)/(676)"
     },
     {
       "id": "leitura-parcial",
       "tema": "leitura parcial|truncad|trunca\\b|cortad|456 chars|fading",
-      "sinal": "persist|estrutura|limita|ainda|continua",
+      "sinal": "persist|estrutura|limita|ainda|continua|silencios",
       "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
       "origem": "(668)/(670)"
     },
@@ -67,6 +67,20 @@
       "sinal": "transit|não publicad|nao publicad|só local|so local",
       "correcao": "PR juntado no GitHub JÁ está publicado (origin/main); o main local só fica atrás até o git pull -- meça com git_sync",
       "origem": "(676)"
+    },
+    {
+      "id": "tres-perguntas",
+      "tema": "tr[eê]s perguntas|3 perguntas",
+      "sinal": "o que muda|por que muda|como testar|por qu[eê]\\?|como (se )?testa",
+      "correcao": "as três perguntas do portão (REGRAS, 'Portão das três perguntas') são: 1. desfaço sozinho? (reversibilidade) 2. o que mais isto toca? (alcance) 3. eu saberia se quebrasse? (silêncio)",
+      "origem": "(678)"
+    },
+    {
+      "id": "assinatura-no-chat",
+      "tema": "assinatura|aprova[çc][ãa]o do humano|humano (disse|diz) sim",
+      "sinal": "no chat|na conversa|disse sim|diz sim|sem criptograf|confian[çc]a",
+      "correcao": "a aprovação é ASSINATURA SSH do Humano (scripts/aprovar.sh, chave com passphrase; P-8 confere contra propostas/.allowed_signers do HEAD) -- não um 'sim' no chat",
+      "origem": "(366)/(678)"
     }
   ]
 }
