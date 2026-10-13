@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b862d1978ec83d9dbb658bf331ae6c327450b7d0
-  Escrito em: 13/10/2026 16:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 47163665bb669a1e20588d28b15c02548c870737
+  Escrito em: 13/10/2026 16:35 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b862d1978ec83d9dbb658bf331ae6c327450b7d0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/47163665bb669a1e20588d28b15c02548c870737/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/47163665bb669a1e20588d28b15c02548c870737/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/47163665bb669a1e20588d28b15c02548c870737/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/47163665bb669a1e20588d28b15c02548c870737/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/47163665bb669a1e20588d28b15c02548c870737/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assinada pelo Humano): `cerebro.md` com as 6 regiões contadas e o Brain Atlas com limite de 30 mil ligações — todas as 18.331 entram no 3D.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. Vault regenerado (1.016 notas). `instalar_cerebro.sh` regravou a configuração do plugin, preservando os neurônios fixados. `obsidian-app` reiniciado; o plugin carregou e regravou o próprio `data.json` com `nodeCap` 4.000 e `edgeCap` 30.000; proxy `:27125` de volta. Falta o Humano ver o cérebro com todas as ligações.
+
+**sync:** PASS — `main` = `origin/main` (PR #173 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (672).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, gerar_obsidian, instalar_cerebro, systemctl, `data.json` do plugin relido depois do restart · Autorização: Humano — assinatura de `cerebro-tudo-ligado-2026-10-13`.
 
 (672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
 

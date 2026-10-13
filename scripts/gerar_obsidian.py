@@ -196,6 +196,53 @@ def _cerebro(campos):
     return {"brain_region": r, **({"kind": kind} if kind else {})}
 
 
+def _mapa_atlas():
+    """Mapeamentos do Brain Atlas (redesign/obsidian/brain-atlas.json) -- a mesma
+    fonte que o instalar_cerebro.sh grava no plugin."""
+    try:
+        with open(os.path.join(REPO, "redesign", "obsidian", "brain-atlas.json"), encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        d = {}
+    return d.get("noteRegionMap", {}), d.get("folderRegionMap", {})
+
+
+# lobo padrão do plugin para cada kind (README do Brain Atlas, "Default lobe mapping")
+_LOBO_DO_KIND = {"project": "frontal", "decision": "frontal", "question": "frontal",
+                 "concept": "parietal", "tool": "parietal", "workThread": "parietal",
+                 "person": "temporal", "organization": "temporal", "source": "occipital",
+                 "repo": "occipital", "dailyNote": "cerebellum", "incident": "cerebellum",
+                 "index": "stem"}
+
+
+def _notas_por_regiao(todos_md, missoes_md):
+    """Região de cada .md que o Brain Atlas vê, na ordem dele: a nota gerada já
+    contou pelo próprio `brain_region` (CONT_GERADAS); as outras por
+    noteRegionMap, depois pela pasta ancestral mais próxima em folderRegionMap,
+    senão pelo lobo do defaultKind. Listas versionadas -> determinístico (P-10)."""
+    notas, pastas = _mapa_atlas()
+    try:
+        with open(os.path.join(REPO, "redesign", "obsidian", "brain-atlas.json"), encoding="utf-8") as f:
+            padrao = _LOBO_DO_KIND.get(json.load(f).get("defaultKind", "concept"), "parietal")
+    except (OSError, ValueError):
+        padrao = "parietal"
+    cont = dict(CONT_GERADAS)
+    caminhos = [p for p in todos_md if not p.startswith("memoria/obsidian/")]
+    caminhos += [f"memoria/missoes/{p}" for p in missoes_md]
+    for p in caminhos:
+        if any(parte.startswith(".") for parte in p.split("/")):
+            continue
+        r = notas.get(p)
+        if not r:
+            for pasta in reversed(p.split("/")[:-1]):
+                if pasta in pastas:
+                    r = pastas[pasta]
+                    break
+        r = r or padrao
+        cont[r] = cont.get(r, 0) + 1
+    return cont
+
+
 def _semantica(entradas):
     """Vizinhos por sentido, só LENDO o índice de scripts/busca_semantica.py
     (nunca embeda aqui). Sem índice/numpy: dicionários vazios -- a nota sai
@@ -260,9 +307,14 @@ def _semantica(entradas):
     return parecidas, trechos, afinidade, len(nums), len(bl_mat)
 
 
+CONT_GERADAS = {}  # região -> notas .md geradas neste run (tabela de cerebro.md)
+
+
 def fm(campos):
     out = ["---"]
     campos = {**campos, **_cerebro(campos)}
+    if campos.get("brain_region"):
+        CONT_GERADAS[campos["brain_region"]] = CONT_GERADAS.get(campos["brain_region"], 0) + 1
     for k, v in campos.items():
         out.append(f"{k}: {v}")
     out += ["---", ""]
@@ -492,6 +544,7 @@ def _controles_do_perimetro():
 def main():
     os.makedirs(SAIDA, exist_ok=True)
     ESCRITOS.clear()
+    CONT_GERADAS.clear()
 
     # Lista de .md rastreados capturada AGORA, com memoria/obsidian/ ainda vazio --
     # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
@@ -1177,35 +1230,51 @@ def main():
     escrever("mapa-do-sistema.canvas", None,
              cru=json.dumps({"nodes": nos, "edges": arestas}, ensure_ascii=False, indent=1) + "\n")
 
-    # -------- cerebro.md (670) -- porta de entrada do segundo cérebro
-    cont_reg = {}
-    for e in entradas:
-        r = regiao_entrada(e["tipo"])
-        cont_reg[r] = cont_reg.get(r, 0) + 1
-    L = fm({"tipo-nota": "moc", "tags": "[moc, cerebro]"})
-    L += ["# 🧠 O cérebro da Agata", "",
-          "> [!tip] Abra a paleta de comandos (Ctrl+P) → **Brain Atlas: Open** — o vault inteiro "
-          "vira um cérebro 3D girando. Clique num neurônio para abrir a nota; arraste para fixá-lo. "
-          "Os botões FRO · PAR · TEM · OCC · CER · STM acendem e apagam cada lobo.", "",
-          "## As regiões", "",
-          "| Região | O que guarda | Entradas |", "|---|---|---|"]
-    for r in ["frontal", "temporal", "parietal", "cerebellum", "occipital", "stem"]:
-        L.append(f"| **{r}** | {reg.get(r, {}).get('o_que', '')} | {cont_reg.get(r, '—')} |")
-    L += ["", "As cores seguem a identidade da Agata (azul memória, violeta decisão, turquesa "
-          "ferramenta, rosa correção, âmbar o que vem de fora). As ligações são as citações "
-          "`(N)` e, desde (670), as **sinapses por sentido** (`parecidas`, embedding local).", "",
-          "## Por onde explorar",
-          f"- {link('mapa-do-sistema.canvas', 'Mapa do sistema (Canvas)')} — as regiões em 2D, com as notas abertas.",
-          f"- {link('memorias.base', 'Tabela de MEMÓRIAS (Base)')} — visões: últimas 2 semanas, por região, "
-          "decisões, correções, mais citadas, **mais conectadas por sentido**, **órfãs**.",
-          f"- {link('timeline', 'Linha do tempo')} · {link('estado', 'Estado')} · {link('INICIO', 'Início')}", "",
-          "## Insight do dia",
-          "As **órfãs** (nenhuma entrada as cita) com **afinidade alta** são ideias que o sistema "
-          "esqueceu de ligar: abra a visão “Órfãs” da Base e olhe a coluna Parecidas.", "",
-          "## Busca por sentido no terminal",
-          "`bash scripts/agata_busca.sh \"frase\"` · `--abrir N` abre no Obsidian · "
-          "`--contexto \"tema\"` gera um pacote para colar noutra IA."]
-    escrever("cerebro.md", L)
+    # -------- cerebro.md (670) -- porta de entrada do segundo cérebro. Escrito
+    # no FIM do run (672): a tabela conta todas as notas geradas por região, então
+    # precisa de todas já escritas.
+    def _escrever_cerebro():
+        cont_reg = {}
+        for e in entradas:
+            r = regiao_entrada(e["tipo"])
+            cont_reg[r] = cont_reg.get(r, 0) + 1
+        notas_reg = _notas_por_regiao(todos_md, missoes_md)
+        L = fm({"tipo-nota": "moc", "tags": "[moc, cerebro]"})
+        notas_reg["stem"] = notas_reg.get("stem", 0) + 1  # a própria cerebro.md
+        _corpo_cerebro(L, cont_reg, notas_reg)
+        escrever("cerebro.md", L)
+
+    def _corpo_cerebro(L, cont_reg, notas_reg):
+        L += ["# 🧠 O cérebro da Agata", "",
+              "> [!tip] Abra a paleta de comandos (Ctrl+P) → **Brain Atlas: Open** — o vault inteiro "
+              "vira um cérebro 3D girando. Clique num neurônio para abrir a nota; arraste para fixá-lo. "
+              "Os botões FRO · PAR · TEM · OCC · CER · STM acendem e apagam cada lobo.", "",
+              "> [!info] **Todas as regiões estão ligadas.** Os botões FRO · PAR · TEM · OCC · CER · "
+              "STM apagam e acendem um lobo; **All** liga tudo de novo.", "",
+              "## As regiões", "",
+              "| | Região | O que guarda | Notas | Entradas de MEMÓRIAS |", "|---|---|---|---|---|"]
+        marca = {"temporal": "🟦", "frontal": "🟪", "parietal": "🟩", "cerebellum": "🟥",
+                 "occipital": "🟧", "stem": "⬜"}
+        for r in ["frontal", "temporal", "parietal", "cerebellum", "occipital", "stem"]:
+            L.append(f"| {marca[r]} | **{r}** | {reg.get(r, {}).get('o_que', '')} | "
+                     f"{notas_reg.get(r, 0)} | {cont_reg.get(r, 0)} |")
+        L += ["", f"**{sum(notas_reg.values())} notas no cérebro** — as do vault gerado, os "
+              "documentos versionados do repositório e as missões (a esfera pessoal "
+              "`segunda-camada/` não entra na conta, mas aparece no 3D se estiver no disco)."]
+        L += ["", "As cores seguem a identidade da Agata (azul memória, violeta decisão, turquesa "
+              "ferramenta, rosa correção, âmbar o que vem de fora). As ligações são as citações "
+              "`(N)` e, desde (670), as **sinapses por sentido** (`parecidas`, embedding local).", "",
+              "## Por onde explorar",
+              f"- {link('mapa-do-sistema.canvas', 'Mapa do sistema (Canvas)')} — as regiões em 2D, com as notas abertas.",
+              f"- {link('memorias.base', 'Tabela de MEMÓRIAS (Base)')} — visões: últimas 2 semanas, por região, "
+              "decisões, correções, mais citadas, **mais conectadas por sentido**, **órfãs**.",
+              f"- {link('timeline', 'Linha do tempo')} · {link('estado', 'Estado')} · {link('INICIO', 'Início')}", "",
+              "## Insight do dia",
+              "As **órfãs** (nenhuma entrada as cita) com **afinidade alta** são ideias que o sistema "
+              "esqueceu de ligar: abra a visão “Órfãs” da Base e olhe a coluna Parecidas.", "",
+              "## Busca por sentido no terminal",
+              "`bash scripts/agata_busca.sh \"frase\"` · `--abrir N` abre no Obsidian · "
+              "`--contexto \"tema\"` gera um pacote para colar noutra IA."]
 
     # -------- INICIO + _LEIA
     escrever("INICIO.md", fm({"tipo-nota": "inicio", "canon": yq(CANON), "data": yq(DATA)}) + [
@@ -1246,6 +1315,7 @@ def main():
         "- Reconstruir à mão: `python3 scripts/gerar_obsidian.py`.",
     ])
 
+    _escrever_cerebro()
     _limpar_obsoletos()
     n_notas = sum(len(f) for _, _, f in os.walk(SAIDA))
     print(f"vault gerado: {n_notas} notas em memoria/obsidian/ "
