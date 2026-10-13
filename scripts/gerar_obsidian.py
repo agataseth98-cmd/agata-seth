@@ -9,13 +9,15 @@ Serve a visualização do Humano E a leitura da Seth (nota plana, sem
 depender de plugin pra extrair informação).
 
 Nunca editado à mão. Regenerado por este script (e pelo post-commit).
-Determinístico e idempotente: apaga memoria/obsidian/ e reconstrói.
+Determinístico e idempotente. Desde (670) escreve NO LUGAR: grava só o arquivo
+cujo conteúdo mudou e remove só o que deixou de existir -- apagar a pasta inteira
+a cada commit deixava o índice do Obsidian (e a listagem de diretório) para trás.
 
 Uso: python3 scripts/gerar_obsidian.py
 """
 import os
 import re
-import shutil
+import json
 import subprocess
 import sys
 import unicodedata
@@ -121,15 +123,146 @@ def wikilink_arquivo(caminho_relativo_ao_repo, rotulo):
     return f"[[{caminho_relativo_ao_repo}|{rotulo}]]"
 
 
-def escrever(rel, linhas):
+ESCRITOS = set()  # caminhos gerados neste run -- o resto de SAIDA é removido no fim
+
+
+def escrever(rel, linhas, cru=None):
+    """Grava só se o conteúdo mudou (670): o Obsidian não reindexa à toa e a
+    listagem de diretório não fica para trás."""
     p = os.path.join(SAIDA, rel)
+    ESCRITOS.add(os.path.normpath(p))
+    novo = cru if cru is not None else "\n".join(linhas).rstrip() + "\n"
+    try:
+        with open(p, encoding="utf-8") as f:
+            if f.read() == novo:
+                return
+    except OSError:
+        pass
     os.makedirs(os.path.dirname(p), exist_ok=True)
-    with open(p, "w", encoding="utf-8") as f:
-        f.write("\n".join(linhas).rstrip() + "\n")
+    tmp = p + ".tmp-gerador"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(novo)
+    os.replace(tmp, p)
+
+
+def _limpar_obsoletos():
+    """Remove de SAIDA o que este run não gerou (nota que deixou de existir)."""
+    for raiz, dirs, arquivos in os.walk(SAIDA, topdown=False):
+        for a in arquivos:
+            c = os.path.normpath(os.path.join(raiz, a))
+            if c not in ESCRITOS:
+                os.remove(c)
+        if raiz != SAIDA and not os.listdir(raiz):
+            os.rmdir(raiz)
+
+
+# ------------------------------------------------------------------ cérebro (670)
+# Região anatômica de cada nota (propriedade `brain_region`, lida pelo plugin
+# Brain Atlas) e `kind` (escolhe a cor dentro da paleta do plugin mais próxima
+# da identidade da Agata). Fonte única: config/agata-identidade.json.
+def _identidade():
+    try:
+        with open(os.path.join(REPO, "config", "agata-identidade.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {"escuro": {}, "regioes": {}}
+
+
+IDENT = _identidade()
+_REGIAO_POR_NOTA = {"regra": "frontal", "projeto": "frontal", "referencia": "frontal",
+                    "canon": "frontal", "proposta": "frontal", "script": "parietal",
+                    "controle": "parietal", "moc": "stem", "estado": "stem",
+                    "timeline": "stem", "inicio": "stem"}
+
+
+def regiao_entrada(categoria):
+    c = categoria.upper()
+    if "CORRE" in c or "FALHA" in c or "INCIDENTE" in c:
+        return "cerebellum"
+    if "DECIS" in c or "CONSELHO" in c:
+        return "frontal"
+    return "temporal"
+
+
+def _cerebro(campos):
+    tipo = str(campos.get("tipo-nota", ""))
+    if tipo == "entrada":
+        r = regiao_entrada(str(campos.get("categoria", "")).strip('"'))
+    else:
+        r = _REGIAO_POR_NOTA.get(tipo)
+    if not r:
+        return {}
+    kind = IDENT.get("regioes", {}).get(r, {}).get("kind")
+    return {"brain_region": r, **({"kind": kind} if kind else {})}
+
+
+def _semantica(entradas):
+    """Vizinhos por sentido, só LENDO o índice de scripts/busca_semantica.py
+    (nunca embeda aqui). Sem índice/numpy: dicionários vazios -- a nota sai
+    sem a seção, do mesmo jeito no P-10. Devolve (parecidas, trechos, afinidade,
+    n_entradas_com_vetor, n_blocos_com_vetor)."""
+    try:
+        import numpy as np
+        sys.path.insert(0, os.path.join(REPO, "scripts"))
+        import busca_semantica as bs
+        vetores = bs.carregar_indice()
+    except Exception:
+        return {}, {}, {}, 0, 0
+    if not vetores:
+        return {}, {}, {}, 0, 0
+    nums, mat = [], []
+    bl_dono, bl_n, bl_mat = [], [], []
+    for e in entradas:
+        v = bs.vetor(vetores, bs.texto_entrada(e))
+        if v is not None:
+            nums.append(e["num"])
+            mat.append(v)
+        for bn, t in bs.textos_blocos(e):
+            vb = bs.vetor(vetores, t)
+            if vb is not None:
+                bl_dono.append(e["num"])
+                bl_n.append(bn)
+                bl_mat.append(vb)
+    parecidas, trechos, afinidade = {}, {}, {}
+    if len(nums) > 1:
+        M = np.vstack(mat).astype("float64")
+        S = M @ M.T
+        for i, n in enumerate(nums):
+            ordem = sorted((j for j in range(len(nums)) if j != i),
+                           key=lambda j: (-round(float(S[i, j]), 6), nums[j]))[:5]
+            parecidas[n] = [(nums[j], round(float(S[i, j]), 3)) for j in ordem]
+            afinidade[n] = round(sum(x for _, x in parecidas[n]) / len(parecidas[n]), 2)
+    if len(bl_mat) > 1:
+        B = np.vstack(bl_mat).astype("float64")
+        SB = B @ B.T
+        dono = np.array(bl_dono)
+        por_entrada = {}
+        for i, n in enumerate(bl_dono):
+            por_entrada.setdefault(n, []).append(i)
+        for n, idxs in por_entrada.items():
+            pares = []
+            for i in idxs:
+                outros = np.where(dono != n)[0]
+                if not len(outros):
+                    continue
+                j = int(outros[np.argmax(SB[i, outros])])
+                pares.append((-round(float(SB[i, j]), 6), bl_n[i], bl_dono[j], bl_n[j]))
+            pares.sort()
+            vistos, out = set(), []
+            for sc, meu, outro, seu in pares:
+                if outro in vistos:
+                    continue
+                vistos.add(outro)
+                out.append((meu, outro, seu, round(-sc, 3)))
+                if len(out) == 3:
+                    break
+            trechos[n] = out
+    return parecidas, trechos, afinidade, len(nums), len(bl_mat)
 
 
 def fm(campos):
     out = ["---"]
+    campos = {**campos, **_cerebro(campos)}
     for k, v in campos.items():
         out.append(f"{k}: {v}")
     out += ["---", ""]
@@ -357,9 +490,8 @@ def _controles_do_perimetro():
 
 
 def main():
-    if os.path.isdir(SAIDA):
-        shutil.rmtree(SAIDA)
-    os.makedirs(SAIDA)
+    os.makedirs(SAIDA, exist_ok=True)
+    ESCRITOS.clear()
 
     # Lista de .md rastreados capturada AGORA, com memoria/obsidian/ ainda vazio --
     # antes de qualquer nota deste run existir no disco (ver "documentos soltos").
@@ -459,7 +591,8 @@ def main():
     for b in ["INICIO", "estado", "timeline", "_LEIA",
               "moc-memoria", "moc-regras", "moc-projeto", "moc-scripts",
               "moc-controles", "moc-propostas", "moc-esferas",
-              "moc-documentos", "moc-readmes", "memorias.base"]:
+              "moc-documentos", "moc-readmes", "memorias.base",
+              "mapa-do-sistema.canvas", "cerebro"]:
         NOTAS.add(b)
 
     # -------- religação de um corpo de texto
@@ -497,8 +630,17 @@ def main():
         for a in e["cita"]:
             citada_por[a].add(e["num"])
 
+    parecidas, trechos, afinidade, n_vet, n_blv = _semantica(entradas)
+    sys.path.insert(0, os.path.join(REPO, "scripts"))
+    import agata_blocos
+
+    def _iso(d):
+        m = re.match(r"(\d{2})/(\d{2})/(\d{4})$", d or "")
+        return f"{m.group(3)}-{m.group(2)}-{m.group(1)}" if m else "null"
+
     for e in entradas:
-        corpo = "\n".join(e["linhas"]).strip("\n")
+        corpo = "\n".join(agata_blocos.marcar(e["linhas"])).strip("\n")
+        par = parecidas.get(e["num"], [])
         campos = {
             "tipo-nota": "entrada",
             "entrada": e["num"],
@@ -507,6 +649,9 @@ def main():
             "titulo": yq(e["titulo"]),
             "cita": ylist(e["cita"]),
             "citada_por": ylist(sorted(citada_por[e["num"]])),
+            "dia": _iso(e["data"]),
+            "parecidas": "[" + ", ".join(f'"[[{ent_base[n]}]]"' for n, _ in par) + "]",
+            "afinidade": afinidade.get(e["num"], "null"),
             "tags": "[memoria/entrada]",
         }
         linhas = fm(campos)
@@ -517,7 +662,17 @@ def main():
         if citada_por[e["num"]]:
             linhas.append("## Citada por")
             linhas += [f"- {link(ent_base[n])}" for n in sorted(citada_por[e["num"]])]
-        linhas += ["", "---", f"< {link('moc-memoria','MOC memória')} · {link('timeline')} · {link('INICIO')} >"]
+            linhas.append("")
+        if par:
+            linhas.append("## Parecidas (por sentido)")
+            linhas += [f"- {link(ent_base[n])} — {sc:.2f}" for n, sc in par]
+            linhas.append("")
+        if trechos.get(e["num"]):
+            linhas.append("## Trechos parecidos")
+            linhas += [f"- este [[#^b{meu}|parágrafo {meu}]] ↔ [[{ent_base[outro]}#^b{seu}|({outro}), parágrafo {seu}]] — {sc:.2f}"
+                       for meu, outro, seu, sc in trechos[e["num"]]]
+            linhas.append("")
+        linhas += ["---", f"< {link('moc-memoria','MOC memória')} · {link('timeline')} · {link('INICIO')} · {link('cerebro','Cérebro')} >"]
         escrever(f"entradas/{e['num']:04d}.md", linhas)
 
     # -------- regras (seções de REGRAS.md)
@@ -837,7 +992,10 @@ def main():
           "> [!warning] Instantâneo da geração. A verdade viva é o canon + `git`.", "",
           f"- Última entrada: {link(ent_base[ult['num']])} — {ult['titulo']}",
           f"- Total de entradas: {len(entradas)}  ·  regras: {len(regra_base)}  ·  "
-          f"scripts: {len(scripts)}  ·  propostas aplicadas: {len(props)}", "",
+          f"scripts: {len(scripts)}  ·  propostas aplicadas: {len(props)}",
+          f"- Índice por sentido: {n_vet} de {len(entradas)} entradas e {n_blv} parágrafos com vetor"
+          + ("" if n_vet == len(entradas) else
+             " — **atrasado**: rode `python3 scripts/busca_semantica.py --atualizar`"), "",
           "## Última atualização (de ONDE_ESTAMOS.md)", "",
           (m_ult.group(1).strip() if m_ult else "(não encontrado)"), "",
           "---", f"< {link('INICIO')} >"]
@@ -860,6 +1018,7 @@ def main():
         "",
         "formulas:",
         "  citacoes: 'citada_por.length'",
+        "  sem_citacao: 'citada_por.length == 0'",
         "",
         "properties:",
         "  entrada:",
@@ -870,40 +1029,191 @@ def main():
         '    displayName: "Data"',
         "  titulo:",
         '    displayName: "Título"',
+        "  brain_region:",
+        '    displayName: "Região"',
+        "  afinidade:",
+        '    displayName: "Afinidade (sentido)"',
+        "  parecidas:",
+        '    displayName: "Parecidas"',
         "  formula.citacoes:",
         '    displayName: "Citada por"',
         "",
         "views:",
         "  - type: table",
         '    name: "Todas as entradas"',
+        "    sort:",
+        "      - property: entrada",
+        "        direction: DESC",
         "    order:",
         "      - entrada",
         "      - categoria",
         "      - data",
         "      - titulo",
+        "      - brain_region",
         "      - formula.citacoes",
         "  - type: table",
-        '    name: "Mais citadas"',
-        "    limit: 40",
+        '    name: "Últimas 2 semanas"',
+        "    filters:",
+        "      and:",
+        "        - 'dia'",
+        "        - 'date(dia) >= today() - \"14d\"'",
+        "    sort:",
+        "      - property: entrada",
+        "        direction: DESC",
         "    order:",
         "      - entrada",
+        "      - categoria",
         "      - titulo",
-        "      - formula.citacoes",
         "  - type: cards",
-        '    name: "Por categoria"',
+        '    name: "Por região do cérebro"',
         "    groupBy:",
-        "      property: categoria",
+        "      property: brain_region",
+        "      direction: ASC",
         "    order:",
         "      - entrada",
         "      - titulo",
         "      - data",
+        "  - type: table",
+        '    name: "Decisões e Conselho"',
+        "    filters: 'brain_region == \"frontal\"'",
+        "    sort:",
+        "      - property: entrada",
+        "        direction: DESC",
+        "    order:",
+        "      - entrada",
+        "      - categoria",
+        "      - data",
+        "      - titulo",
+        "  - type: table",
+        '    name: "Correções (cerebelo)"',
+        "    filters: 'brain_region == \"cerebellum\"'",
+        "    sort:",
+        "      - property: entrada",
+        "        direction: DESC",
+        "    order:",
+        "      - entrada",
+        "      - data",
+        "      - titulo",
+        "  - type: table",
+        '    name: "Mais citadas"',
+        "    limit: 40",
+        "    sort:",
+        "      - property: formula.citacoes",
+        "        direction: DESC",
+        "    order:",
+        "      - entrada",
+        "      - titulo",
+        "      - formula.citacoes",
+        "  - type: table",
+        '    name: "Mais conectadas por sentido"',
+        "    limit: 40",
+        "    sort:",
+        "      - property: afinidade",
+        "        direction: DESC",
+        "    order:",
+        "      - entrada",
+        "      - titulo",
+        "      - afinidade",
+        "      - parecidas",
+        "  - type: table",
+        '    name: "Órfãs (ninguém cita)"',
+        "    filters: 'citada_por.length == 0'",
+        "    sort:",
+        "      - property: entrada",
+        "        direction: DESC",
+        "    order:",
+        "      - entrada",
+        "      - data",
+        "      - titulo",
+        "      - parecidas",
     ])
+
+    # -------- mapa-do-sistema.canvas (670) -- o cérebro em 2D, para o Humano:
+    # uma região por grupo, com as cores da identidade da Agata.
+    cores = IDENT.get("escuro", {})
+    reg = IDENT.get("regioes", {})
+    def _cor(r):
+        return cores.get(reg.get(r, {}).get("cor", ""), "#52c7ff")
+    import hashlib as _hl
+    def _id(txt):
+        return _hl.sha256(txt.encode("utf-8")).hexdigest()[:16]
+    ultimas = [e["num"] for e in entradas[:6]]
+    grupos_canvas = [
+        ("frontal", "Frontal — decisão e planejamento", -900, -700,
+         [("file", "REGRAS.md"), ("file", "PROTOCOLOS.md"), ("file", "PROJETO.md"),
+          ("file", "memoria/obsidian/moc-propostas.md")]),
+        ("temporal", "Temporal — memória", 100, -700,
+         [("file", "MEMÓRIAS.md"), ("file", "memoria/obsidian/timeline.md")]
+         + [("file", f"memoria/obsidian/entradas/{n:04d}.md") for n in ultimas[:4]]),
+        ("parietal", "Parietal — ferramentas", -900, 100,
+         [("file", "memoria/obsidian/moc-scripts.md"), ("file", "memoria/obsidian/moc-controles.md")]),
+        ("cerebellum", "Cerebelo — correção de erro", 100, 100,
+         [("file", "FALHAS.md"), ("base", "memoria/obsidian/memorias.base")]),
+        ("occipital", "Occipital — o que vem de fora", 1100, 100,
+         [("file", "memoria/obsidian/moc-documentos.md"), ("file", "memoria/obsidian/moc-readmes.md")]),
+        ("stem", "Tronco — roteamento", 1100, -700,
+         [("file", "memoria/obsidian/INICIO.md"), ("file", "memoria/obsidian/estado.md"),
+          ("file", "memoria/obsidian/cerebro.md")]),
+    ]
+    nos, arestas = [], []
+    for r, rotulo, gx, gy, itens in grupos_canvas:
+        alturas = 260
+        cols = 2
+        linhas_g = (len(itens) + cols - 1) // cols
+        gw, gh = 40 + cols * 420, 80 + linhas_g * (alturas + 40)
+        nos.append({"id": _id("g" + r), "type": "group", "x": gx, "y": gy, "width": gw,
+                    "height": gh, "label": rotulo, "color": _cor(r)})
+        for k, (_tp, caminho) in enumerate(itens):
+            nos.append({"id": _id(r + caminho), "type": "file", "file": caminho,
+                        "x": gx + 20 + (k % cols) * 420, "y": gy + 60 + (k // cols) * (alturas + 40),
+                        "width": 400, "height": alturas, "color": _cor(r)})
+    for a, b, rot in [("temporal", "frontal", "memória vira decisão"),
+                      ("cerebellum", "frontal", "falha vira regra"),
+                      ("parietal", "temporal", "a Máquina registra"),
+                      ("stem", "temporal", "hidratação"),
+                      ("occipital", "stem", "entra pelo roteamento")]:
+        arestas.append({"id": _id(a + b), "fromNode": _id("g" + a), "toNode": _id("g" + b),
+                        "toEnd": "arrow", "label": rot, "color": _cor(a)})
+    escrever("mapa-do-sistema.canvas", None,
+             cru=json.dumps({"nodes": nos, "edges": arestas}, ensure_ascii=False, indent=1) + "\n")
+
+    # -------- cerebro.md (670) -- porta de entrada do segundo cérebro
+    cont_reg = {}
+    for e in entradas:
+        r = regiao_entrada(e["tipo"])
+        cont_reg[r] = cont_reg.get(r, 0) + 1
+    L = fm({"tipo-nota": "moc", "tags": "[moc, cerebro]"})
+    L += ["# 🧠 O cérebro da Agata", "",
+          "> [!tip] Abra a paleta de comandos (Ctrl+P) → **Brain Atlas: Open** — o vault inteiro "
+          "vira um cérebro 3D girando. Clique num neurônio para abrir a nota; arraste para fixá-lo. "
+          "Os botões FRO · PAR · TEM · OCC · CER · STM acendem e apagam cada lobo.", "",
+          "## As regiões", "",
+          "| Região | O que guarda | Entradas |", "|---|---|---|"]
+    for r in ["frontal", "temporal", "parietal", "cerebellum", "occipital", "stem"]:
+        L.append(f"| **{r}** | {reg.get(r, {}).get('o_que', '')} | {cont_reg.get(r, '—')} |")
+    L += ["", "As cores seguem a identidade da Agata (azul memória, violeta decisão, turquesa "
+          "ferramenta, rosa correção, âmbar o que vem de fora). As ligações são as citações "
+          "`(N)` e, desde (670), as **sinapses por sentido** (`parecidas`, embedding local).", "",
+          "## Por onde explorar",
+          f"- {link('mapa-do-sistema.canvas', 'Mapa do sistema (Canvas)')} — as regiões em 2D, com as notas abertas.",
+          f"- {link('memorias.base', 'Tabela de MEMÓRIAS (Base)')} — visões: últimas 2 semanas, por região, "
+          "decisões, correções, mais citadas, **mais conectadas por sentido**, **órfãs**.",
+          f"- {link('timeline', 'Linha do tempo')} · {link('estado', 'Estado')} · {link('INICIO', 'Início')}", "",
+          "## Insight do dia",
+          "As **órfãs** (nenhuma entrada as cita) com **afinidade alta** são ideias que o sistema "
+          "esqueceu de ligar: abra a visão “Órfãs” da Base e olhe a coluna Parecidas.", "",
+          "## Busca por sentido no terminal",
+          "`bash scripts/agata_busca.sh \"frase\"` · `--abrir N` abre no Obsidian · "
+          "`--contexto \"tema\"` gera um pacote para colar noutra IA."]
+    escrever("cerebro.md", L)
 
     # -------- INICIO + _LEIA
     escrever("INICIO.md", fm({"tipo-nota": "inicio", "canon": yq(CANON), "data": yq(DATA)}) + [
         "# Agata — vault", "",
         "> [!tip] Comece aqui. Tudo abaixo é **gerado** de `MEMÓRIAS.md` + canon; "
         "para corrigir, entrada nova na história, nunca edite aqui.", "",
+        "## 🧠 Cérebro",
+        f"- {link('cerebro','O cérebro da Agata')} — gráfico 3D (Brain Atlas), mapa em Canvas, visões da Base.", "",
         "## Painéis",
         f"- {link('estado','Estado do sistema')}  ·  {link('timeline','Linha do tempo')}  ·  "
         f"{link('memorias.base','Tabela de MEMÓRIAS (Base)')}",
@@ -930,12 +1240,13 @@ def main():
         "# _LEIA — pasta gerada", "",
         "`scripts/gerar_obsidian.py` reconstrói tudo aqui a partir de `MEMÓRIAS.md` "
         "e dos canônicos. Roda também no `post-commit`.", "",
-        "- **Não edite nada aqui** — a próxima geração apaga a pasta e reescreve.",
+        "- **Não edite nada aqui** — a próxima geração reescreve o que mudou e remove o que não existe mais.",
         "- Corrija a história pelo caminho normal: entrada nova em `MEMÓRIAS.md`.",
         "- Abrir a **raiz do repo** (`~/agata`) como vault; começar por `obsidian/INICIO.md`.",
         "- Reconstruir à mão: `python3 scripts/gerar_obsidian.py`.",
     ])
 
+    _limpar_obsoletos()
     n_notas = sum(len(f) for _, _, f in os.walk(SAIDA))
     print(f"vault gerado: {n_notas} notas em memoria/obsidian/ "
           f"({len(entradas)} entradas, {len(regra_base)} regras, {len(scripts)} scripts, "

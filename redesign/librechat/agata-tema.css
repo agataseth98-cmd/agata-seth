@@ -1,0 +1,64 @@
+/* agata-tema.css -- paleta da identidade da Agata no LibreChat (MEMÓRIAS (670)).
+ *
+ * Fonte das cores: config/agata-identidade.json (artefato "Sistema Agata").
+ * Como entra: o docker-compose monta este arquivo em /app/client/dist/assets/ e
+ * o comando do container acrescenta um <link> no index.html antes de subir
+ * (idempotente). O LibreChat v0.8.8 ainda não lê `interface.theme` do
+ * librechat.yaml (só o ramo dev) -- quando ler, isto vira tema nativo.
+ *
+ * Só sobrescreve VARIÁVEIS de cor (triplas "R G B", o formato do LibreChat);
+ * nenhuma regra de layout. Tirar o <link> volta tudo ao padrão.
+ */
+
+/* ---------- escuro: fundo #0a0e1a, superfície #121a30, texto #eef1fa ---------- */
+html.dark {
+  --gray-900: 10 14 26;
+  --gray-875: 12 17 32;
+  --gray-850: 14 20 38;
+  --gray-800: 18 26 48;
+  --gray-700: 26 36 64;
+  --gray-650: 34 46 80;
+  --gray-600: 42 56 96;
+  --gray-500: 60 78 128;
+
+  --text-primary: 238 241 250;
+  --text-secondary: 184 192 214;
+  --text-secondary-alt: 150 160 186;
+  --text-tertiary: 140 150 178;
+
+  --accent-primary: 82 199 255;        /* #52c7ff */
+  --accent-primary-hover: 130 215 255;
+  --ring-primary: 82 199 255;
+  --link: 82 199 255;
+  --link-hover: 130 215 255;
+  --link-visited: 171 143 224;         /* #ab8fe0 */
+  --brand-purple: 171 143 224;
+
+  --surface-submit: 15 111 174;        /* #0f6fae */
+  --surface-submit-hover: 21 130 200;
+
+  --border-light: 30 40 70;
+  --border-medium: 42 56 96;
+  --border-medium-alt: 42 56 96;
+  --border-heavy: 60 78 128;
+  --border-xheavy: 90 110 160;
+
+  --text-warning: 224 164 88;          /* #e0a458 */
+  --text-destructive: 236 110 136;     /* #ec6e88 */
+  --status-success: 69 221 200;        /* #45ddc8 */
+  --status-info: 82 199 255;
+  --status-warning: 224 164 88;
+  --status-error: 236 110 136;
+}
+
+/* ---------- claro: só o acento (azul-tinta #0f6fae, turquesa #158c7d) ---------- */
+html:not(.dark) {
+  --accent-primary: 15 111 174;
+  --accent-primary-hover: 10 84 134;
+  --ring-primary: 15 111 174;
+  --link: 15 111 174;
+  --link-hover: 10 84 134;
+  --surface-submit: 15 111 174;
+  --surface-submit-hover: 10 84 134;
+  --status-success: 21 140 125;
+}

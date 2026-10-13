@@ -70,6 +70,10 @@ _p8_eh_comportamento() {
     # redesign/librechat/*.json|*.sh (parâmetros do Agent e o script que os aplica)
     # e redesign/goose/* (instruções do Goose) mudavam comportamento fora daqui.
     AGENTS.md|redesign/librechat/*.json|redesign/librechat/*.sh|redesign/goose/*) return 0 ;;
+    # (670): o instalador do cérebro baixa e liga código de terceiros no Obsidian
+    # (versão e sha256 fixos dentro dele) e a configuração que ele aplica; o CSS
+    # do tema entra no index.html do LibreChat.
+    redesign/obsidian/*.sh|redesign/obsidian/*.json|redesign/librechat/*.css) return 0 ;;
     # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
     # é mudança de comportamento tanto quanto trocar um script. A
     # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a

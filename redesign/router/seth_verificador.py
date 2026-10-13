@@ -116,7 +116,27 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "HEAD, `git apply --check` limpo. Use o parâmetro `nome` (o nome da "
         "proposta, sem '.diff'). Read-only -- nunca aplica nada.",
     ),
+    "busca_semantica": (
+        ["python3", "scripts/busca_semantica.py", "-n"], 90,
+        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS e nos seus parágrafos "
+        "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
+        "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
+        "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
+        "vault_consultar entradas/0NNN.md e confirme o texto exato com query_canon "
+        "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
+    ),
+    "busca_texto": (
+        ["grep", "-rnIiF", "--include=*.md", "-m", "3"], 30,
+        "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
+        "derivado memoria/obsidian/, lendo o DISCO (sempre em dia; o índice do "
+        "Obsidian não entra). Use o parâmetro `consulta` (até 200 caracteres). "
+        "Devolve caminho:linha:trecho, até 3 por nota.",
+    ),
 }
+
+# `consulta` da busca por sentido (670): o texto da Seth vira DADO de um comando
+# fixo -- um único elemento de argv depois de `--`, nunca shell, nunca opção.
+_CONSULTA_MAX = 200
 
 # `nome` de proposta: mesma forma usada em toda a árvore de `propostas/` --
 # minúsculas, dígitos, ponto, hífen, underscore. `p8_verificar.sh` já recusa
@@ -127,11 +147,34 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
 _RX_NOME_PROPOSTA = re.compile(r"^[a-z0-9][a-z0-9._-]{0,80}$")
 
 
-def _argv(nome: str, n: int | None, prop_nome: str | None = None) -> list[str]:
+def _argv(nome: str, n: int | None, prop_nome: str | None = None,
+          consulta: str | None = None) -> list[str]:
     """argv final. `n` e `prop_nome` são os ÚNICOS pontos variáveis, cada um
     tipado e validado antes de virar elemento de argv -- nunca interpolado
     como texto."""
     base = list(COMANDOS[nome][0])
+    if consulta is not None and nome not in ("busca_semantica", "busca_texto"):
+        raise ValueError(f"'{nome}' não aceita o parâmetro consulta")
+    if nome == "busca_texto":
+        if n is not None or prop_nome is not None:
+            raise ValueError("'busca_texto' só aceita o parâmetro consulta")
+        if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
+                or any(c in consulta for c in "\r\n\x00"):
+            raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
+        return base + ["--", consulta.strip(), "memoria/obsidian"]
+    if nome == "busca_semantica":
+        if prop_nome is not None:
+            raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
+        if n is None:
+            n = 8
+        if not isinstance(n, int) or isinstance(n, bool) or not (1 <= n <= 20):
+            raise ValueError("n tem de ser inteiro entre 1 e 20")
+        if not isinstance(consulta, str) or not consulta.strip():
+            raise ValueError("'consulta' ausente -- a frase a buscar por sentido")
+        if len(consulta) > _CONSULTA_MAX or any(c in consulta for c in "\r\n\x00"):
+            raise ValueError(f"'consulta' inválida -- até {_CONSULTA_MAX} caracteres, uma linha só")
+        base += [str(int(n)), "--", consulta.strip()]
+        return base
     if nome == "git_log":
         if prop_nome is not None:
             raise ValueError("'git_log' não aceita o parâmetro nome")
@@ -213,6 +256,11 @@ def _redigir(texto: str) -> tuple[str, int]:
 # de um fato fixo da Máquina), nunca opinião. Sem leitura segura -> None, e o
 # modelo fica com a saída + a descrição.
 def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) -> str | None:
+    if nome == "busca_texto":
+        if codigo == 1:
+            return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
+        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith("memoria/")}
+        return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
     if nome == "servicos":
         m = re.search(r"(\d+) loaded units? listed", texto)
         if m is None:
@@ -267,8 +315,9 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
     return None
 
 
-def _executar(nome: str, n: int | None, prop_nome: str | None = None) -> str:
-    argv = _argv(nome, n, prop_nome)
+def _executar(nome: str, n: int | None, prop_nome: str | None = None,
+              consulta: str | None = None) -> str:
+    argv = _argv(nome, n, prop_nome, consulta)
     _, timeout, _desc = COMANDOS[nome]
     try:
         r = subprocess.run(argv, cwd=str(REPO), capture_output=True, text=True,
@@ -358,7 +407,7 @@ class _H(BaseHTTPRequestHandler):
                         "assinada (P-8), não por parâmetro.",
             })
         try:
-            texto = _executar(nome, pedido.get("n"), pedido.get("nome"))
+            texto = _executar(nome, pedido.get("n"), pedido.get("nome"), pedido.get("consulta"))
         except ValueError as e:
             return self._resp(400, {"erro": str(e)})
         except RuntimeError as e:
@@ -393,6 +442,20 @@ def _selftest() -> int:
     # 6. texto inocente não é tocado
     _, n2 = _redigir("commit dc19621 sha256 8783d29d ok")
     casos.append(("texto limpo intacto", n2 == 0))
+    # 6b. (670) busca_semantica: a consulta vira UM elemento de argv depois de `--`
+    av = _argv("busca_semantica", None, None, "--reindex; rm -rf ~")
+    casos.append(("consulta vira dado depois de --", av[-2:] == ["--", "--reindex; rm -rf ~"] and av[-3] == "8"))
+    for mau in ["x" * 201, "linha\noutra", "", None]:
+        try:
+            _argv("busca_semantica", None, None, mau); casos.append((f"consulta {str(mau)[:8]!r} recusada", False))
+        except ValueError:
+            casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
+    avt = _argv("busca_texto", None, None, "-e x")
+    casos.append(("busca_texto: consulta é dado", avt[-3:] == ["--", "-e x", "memoria/obsidian"]))
+    try:
+        _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
+    except ValueError:
+        casos.append(("git_status recusa consulta", True))
     # 7. nenhum argv contém shell
     casos.append(("nenhum argv usa shell",
                   all(a[0] not in ("sh", "-c") and "sh -c" not in " ".join(a)

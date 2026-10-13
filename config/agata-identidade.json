@@ -1,0 +1,25 @@
+{
+  "_fonte": "Paleta do artefato \"Sistema Agata\" (claude.ai/artifact/JUbY9dtNMLteQiQLfwEsrA), lida em MEMÓRIAS (tema do Goose); fonte única para o vault, o grafo, o Canvas e o tema do Obsidian -- MEMÓRIAS (670).",
+  "escuro": {
+    "accent": "#52c7ff",
+    "violet": "#ab8fe0",
+    "teal": "#45ddc8",
+    "amber": "#e0a458",
+    "danger": "#ec6e88",
+    "surface": "#121a30",
+    "ground": "#0a0e1a",
+    "ink": "#eef1fa"
+  },
+  "claro": {
+    "accent": "#0f6fae",
+    "teal": "#158c7d"
+  },
+  "regioes": {
+    "temporal": {"cor": "accent", "kind": "person", "o_que": "memória — entradas de MEMÓRIAS"},
+    "frontal": {"cor": "violet", "kind": "project", "o_que": "decisão e planejamento — REGRAS, PROTOCOLOS, PROJETO, propostas"},
+    "parietal": {"cor": "teal", "kind": "concept", "o_que": "ferramentas — scripts, hooks, controles do perímetro"},
+    "cerebellum": {"cor": "danger", "kind": "incident", "o_que": "correção de erro — falhas, correções, incidentes"},
+    "occipital": {"cor": "amber", "kind": "decision", "o_que": "o que vem de fora — missões, fontes, documentos"},
+    "stem": {"cor": "ink", "kind": "index", "o_que": "roteamento — INICIO, MOCs, linha do tempo, estado"}
+  }
+}

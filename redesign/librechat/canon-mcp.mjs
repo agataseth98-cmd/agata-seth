@@ -9,6 +9,7 @@
 //   query_canon      lê um doc de canon (REGRAS/PROJETO/MEMÓRIAS/...), com grep/linhas opcionais
 //   vault_consultar  lê ou lista uma nota DERIVADA sob memoria/obsidian/
 //   maquina_verificar  roda UMA verificação da lista fechada no host (:20141), read-only
+//   vault_buscar     busca no vault por SENTIDO e por TEXTO (via verificador, disco) -- (670)
 //
 // Trava de acesso (alem do proxy ser read-only):
 //   - whitelist: só os docs de canon nomeados + tudo sob memoria/obsidian/
@@ -218,6 +219,7 @@ async function maquinaVerificar(a) {
   if (!comando) throw new Error("informe `comando`, ou use `listar: true`");
   const corpo = { comando };
   if (a?.n !== undefined && a?.n !== null) corpo.n = a.n;
+  if (a?.consulta !== undefined && a?.consulta !== null) corpo.consulta = String(a.consulta);
   let r;
   try {
     r = await fetch(VERIFICADOR + "/verificar", {
@@ -235,6 +237,32 @@ async function maquinaVerificar(a) {
     throw new Error((j.erro || ("HTTP " + r.status)) + disp + (j.nota ? "\n" + j.nota : ""));
   }
   return clamp(j.saida || "(sem saida)", "peca de novo com menos escopo");
+}
+
+// ---- vault_buscar (670) ----------------------------------------------------
+// Prioridade 1 nas buscas (decisão do Humano, 13/10/2026): achar e navegar
+// pelo vault -- por SENTIDO (embedding local, entradas e parágrafos) e por
+// TEXTO (grep no disco, sempre em dia) -- e só então confirmar o texto exato
+// com query_canon. Os dois modos passam pelo seth_verificador: o texto da Seth
+// vira dado de um comando fixo, nunca comando.
+async function vaultBuscar(a) {
+  const consulta = String(a?.consulta || "").trim();
+  if (!consulta) throw new Error("informe `consulta` (a frase ou termo a buscar)");
+  const modo = String(a?.modo || "ambos").toLowerCase();
+  const partes = [];
+  if (modo === "sentido" || modo === "ambos") {
+    const n = Number.isInteger(a?.n) ? a.n : 8;
+    partes.push("## Por sentido\n\n" +
+      await maquinaVerificar({ comando: "busca_semantica", consulta, n }).catch((e) => "(falhou: " + e.message + ")"));
+  }
+  if (modo === "texto" || modo === "ambos") {
+    partes.push("## Por texto (literal, disco)\n\n" +
+      await maquinaVerificar({ comando: "busca_texto", consulta }).catch((e) => "(falhou: " + e.message + ")"));
+  }
+  if (!partes.length) throw new Error("modo inválido -- use sentido, texto ou ambos");
+  partes.push("Próximo passo: abra a nota (vault_consultar entradas/0NNN.md -- ela traz cita, citada_por e " +
+    "parecidas) e, antes de CITAR, confirme o texto exato com query_canon.");
+  return clamp(partes.join("\n\n"), "refine a consulta");
 }
 
 async function maquinaListar() {
@@ -259,18 +287,38 @@ const TOOLS = [
       "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
       "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
       "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
-      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar. " +
+      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar, " +
+      "busca_semantica e busca_texto (prefira a tool vault_buscar). " +
       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
     inputSchema: {
       type: "object",
       properties: {
         comando: { type: "string", description: "nome da lista fechada (ex.: perimetro, git_status, git_sync)" },
-        n: { type: "integer", description: "so para git_log: quantos commits (1 a 50, padrao 10)" },
+        n: { type: "integer", description: "git_log: quantos commits (1 a 50, padrao 10); busca_semantica: quantos resultados (1 a 20)" },
+        consulta: { type: "string", description: "so para busca_semantica/busca_texto: a frase a buscar (ate 200 caracteres)" },
         listar: { type: "boolean", description: "true devolve a lista de comandos em vez de executar" },
       },
     },
   },
 
+  {
+    name: "vault_buscar",
+    description:
+      "PRIORIDADE 1 para ACHAR qualquer coisa na memória do sistema (decisão do Humano, (670)). " +
+      "Busca no vault Obsidian por SENTIDO (embedding local sobre todas as entradas de MEMÓRIAS e seus " +
+      "parágrafos -- acha mesmo sem a palavra exata) e por TEXTO literal (disco, sempre em dia). " +
+      "Depois: abra a nota com vault_consultar (cita, citada_por, parecidas) e confirme o texto exato " +
+      "com query_canon antes de citar -- o vault é derivado, o canon é a fonte.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        consulta: { type: "string", description: "frase ou termo (até 200 caracteres)" },
+        modo: { type: "string", description: "sentido | texto | ambos (padrão ambos)" },
+        n: { type: "integer", description: "resultados por sentido (1 a 20, padrão 8)" },
+      },
+      required: ["consulta"],
+    },
+  },
   {
     name: "query_canon",
     description:
@@ -297,7 +345,10 @@ const TOOLS = [
       "Lê ou lista uma nota DERIVADA do vault Obsidian sob memoria/obsidian/ (estado, timeline, " +
       "moc-memoria, moc-regras, moc-projeto, moc-controles, entradas/, regras/, controles/, projeto/), " +
       "ou o teu próprio SETH-DIARIO.md. É o índice de consulta pontual: entrada antiga fora da janela, " +
-      "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler.",
+      "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler. " +
+      "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
+      "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
+      "Para BUSCAR, use vault_buscar primeiro.",
     inputSchema: {
       type: "object",
       properties: {
@@ -370,6 +421,7 @@ async function callTool(name, args) {
   let text;
   if (name === "query_canon") text = await queryCanon(args);
   else if (name === "vault_consultar") text = await vaultConsultar(args);
+  else if (name === "vault_buscar") text = await vaultBuscar(args);
   else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
   else if (name === "diario_anotar") text = await diarioAnotar(args);
   else if (name === "maquina_verificar") text = args?.listar ? await maquinaListar() : await maquinaVerificar(args);

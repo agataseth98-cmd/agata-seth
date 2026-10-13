@@ -1,1 +1,8 @@
-{}
+{
+  "accentColor": "#52c7ff",
+  "theme": "obsidian",
+  "cssTheme": "",
+  "enabledCssSnippets": [
+    "agata"
+  ]
+}

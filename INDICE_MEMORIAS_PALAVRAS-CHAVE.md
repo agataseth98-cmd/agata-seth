@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada pelo Humano): cérebro 3D instalado, vault regenerado com regiões e ligações por sentido, listagem do vault em dia, `vault_buscar` no ar para a Seth, tema da Agata no LibreChat. Falta o Humano ver na tela.**
+  palavras-chave: execução, aplicada, obsidian, cerebro, assinada, humano, cérebro, instalado, vault, regenerado, regiões, ligações, sentido, listagem, dia, buscar, seth, tema, agata, librechat, falta, tela
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido do Humano: o Obsidian vira o cérebro da Agata — prioridade 1 nas buscas dos modelos com acesso, busca por sentido viva e na mão da Seth, listagem do vault sempre em dia, gráfico 3D em forma de cérebro e os recursos do Smart Connections feitos com o embedding local; a paleta da Agata no Obsidian e no LibreChat. Antes, auditoria da resposta da Seth das 15:08. Aguardando assinatura.**
   palavras-chave: proposta, obsidian, cerebro, pedido, humano, vira, cérebro, agata, prioridade, buscas, modelos, acesso, busca, sentido, viva, mão, seth, listagem, vault, sempre, dia, gráfico, forma, recursos, smart, connections, feitos, embedding, local, paleta, librechat, auditoria, resposta, aguardando, assinatura
 (669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assinada pelo Humano): quando o `scripts/aprovar.sh` não acha o `.diff`, consulta o GitHub (só `git fetch`, sem puxar) e diz o comando exato — `git pull` se o arquivo já está em `origin/main`, "junte o PR primeiro" se só está no branch da proposta. Fecha a causa do "não encontra a assinatura" de (668).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, vazamento, fechada, cópias, token, interno, abrem, config, agata, env, assinado, aplicado, rotacionado, serviços, reiniciados, testado, vivo, pontos, último, item, incidente
 (642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` FAB-8 (selftest verde sem o caso real de produção coberto, lição de (635)) e `PROTOCOLOS.md`, nova seção "Verificação repetida também tem preço" (pedido do Humano, franquia em 25%). Assinado e aplicado.**
   palavras-chave: lições, desta, sessão, canonizadas, falhas, fab, selftest, verde, caso, real, produção, coberto, lição, protocolos, nova, seção, verificação, repetida, tem, preço, pedido, humano, franquia, assinado, aplicado
-(641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20:29 (HEAD `10f7451`): cabeçalho cita o nome do campo errado, script proposto quebraria com `SETH-DIARIO.md` já versionado, e ela pediu de novo mais poder de escrita/execução pra si mesma — recusado, padrão já visto em PVT-01/Rev2.**
-  palavras-chave: auditoria, lab, resposta, seth, head, cabeçalho, cita, nome, campo, errado, script, proposto, quebraria, diario, versionado, ela, pediu, novo, poder, escrita, execução, pra, mesma, recusado, padrão, visto, pvt, rev
+(641) CORREÇÃO — 02/10/2026 · **Auditoria do lab à resposta da Seth de 02/10 20: …
+  palavras-chave: auditoria, lab, resposta, seth
 (640) DIÁRIO — 02/10/2026 · **Os 3 combos `-sg` criados de verdade no OmniRoute …
   palavras-chave: combos, criados, verdade, omniroute
 (639) DIÁRIO — 02/10/2026 · **Rotação das chaves do incidente (629)/(630) verifi …

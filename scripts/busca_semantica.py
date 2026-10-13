@@ -31,9 +31,17 @@ grava o hash de MEMÓRIAS.md junto do índice; se o canon mudou desde o
 vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
 ~275 entradas na iGPU custa segundos reais, não cabe no hot path do hook).
 
+Desde (670): índice v2, INCREMENTAL, por entrada e por parágrafo (`indice-v2.json`,
+vetor guardado pela sha256 do texto) -- só o texto novo vai ao embedding. O
+post-commit roda `--atualizar` antes de gerar o vault; a busca se atualiza sozinha.
+O `memorias.json` antigo fica sem uso.
+
 Uso:
-  scripts/busca_semantica.py --reindex            # (re)constrói o índice
-  scripts/busca_semantica.py "frase ou termo"     # top 10 entradas por sentido
+  scripts/busca_semantica.py --atualizar          # embeda só o que falta
+  scripts/busca_semantica.py --reindex            # idem + poda o que não existe mais
+  scripts/busca_semantica.py "frase ou termo"     # top 10 entradas e trechos por sentido
+  scripts/busca_semantica.py "termo" --json       # para ferramentas (seth_verificador)
+  scripts/busca_semantica.py "tema" --contexto ARQ.md   # pacote p/ colar noutra IA
   scripts/busca_semantica.py "termo" -n 5         # top 5
   scripts/busca_semantica.py --selftest           # autoteste, sem tocar o índice real
 """
@@ -187,68 +195,185 @@ def _embed(textos, input_type):
     return [d["embedding"] for d in sorted(body["data"], key=lambda d: d["index"])]
 
 
+# ---------------------------------------------------------------- índice v2
+# (670): índice incremental, por ENTRADA e por BLOCO (parágrafo, mesma
+# segmentação de scripts/agata_blocos.py que o vault usa pra marcar `^bN`).
+# Cada vetor é guardado pela sha256 do texto que o gerou -- texto que já tem
+# vetor nunca vai de novo ao embedding; só o novo ou alterado. Sem timer: a
+# reindexação roda no post-commit (antes do vault) e, se estiver atrasada, na
+# própria busca. O vault (gerar_obsidian.py) só LÊ este índice.
+INDICE_V2 = os.path.join(CACHE_DIR, "indice-v2.json")
+MODELO = "multilingual-e5-small"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import agata_blocos  # noqa: E402
+
+
+def texto_entrada(e):
+    return f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
+
+
+def textos_blocos(e):
+    """[(n, texto)] -- n é o mesmo `^bN` que o vault escreve na nota."""
+    return [(n, t[:1500]) for n, _i, _f, t in agata_blocos.blocos(e["linhas"])]
+
+
+def _h(texto):
+    return hashlib.sha256(("passage\0" + texto).encode("utf-8")).hexdigest()
+
+
+def _b64(vetor):
+    import base64
+    import numpy as np
+    return base64.b64encode(np.asarray(vetor, dtype="<f4").tobytes()).decode()
+
+
+def carregar_indice():
+    """{sha: base64-float32}, ou {} se não houver índice v2."""
+    try:
+        with open(INDICE_V2, encoding="utf-8") as f:
+            d = json.load(f)
+        return d.get("vetores", {}) if d.get("versao") == 2 else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def vetor(vetores, texto):
+    """numpy float32 do texto, ou None se ainda não indexado."""
+    v = vetores.get(_h(texto))
+    if v is None:
+        return None
+    import base64
+    import numpy as np
+    return np.frombuffer(base64.b64decode(v), dtype="<f4")
+
+
+def _itens(entradas):
+    """[(sha, texto)] de todas as entradas e blocos, sem repetição."""
+    vistos, out = set(), []
+    for e in entradas:
+        for t in [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]:
+            h = _h(t)
+            if h not in vistos:
+                vistos.add(h)
+                out.append((h, t))
+    return out
+
+
+def _embed_seguro(textos):
+    try:
+        return _embed(textos, "passage")
+    except SystemExit:
+        return None
+
+
+def atualizar(podar=False, silencioso=False):
+    """Embeda só o que falta. Devolve (novos, total, ok). `podar` remove
+    vetores de texto que não existe mais (só no --reindex explícito: a busca
+    não poda, pra nunca tirar o vetor de uma entrada do HEAD que o vault usa)."""
+    entradas, _ = _todas_entradas_todas_camadas()
+    vetores = carregar_indice()
+    itens = _itens(entradas)
+    faltam = [(h, t) for h, t in itens if h not in vetores]
+    ok = True
+    LOTE = 32
+    for i in range(0, len(faltam), LOTE):
+        lote = faltam[i:i + LOTE]
+        vs = _embed_seguro([t for _h2, t in lote])
+        if vs is None:
+            ok = False
+            print("AVISO: embedding (:20134) fora do ar -- índice parcial; a busca usa o que já tem.",
+                  file=sys.stderr)
+            break
+        for (h, _t), v in zip(lote, vs):
+            vetores[h] = _b64(v)
+        if not silencioso and len(faltam) > LOTE:
+            print(f"  {min(i + LOTE, len(faltam))}/{len(faltam)}", file=sys.stderr)
+    if podar:
+        validos = {h for h, _t in itens}
+        vetores = {h: v for h, v in vetores.items() if h in validos}
+    novos = sum(1 for h, _t in faltam if h in vetores)
+    if novos or podar:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        tmp = INDICE_V2 + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"versao": 2, "modelo": MODELO, "vetores": vetores}, f)
+        os.replace(tmp, INDICE_V2)
+    if not silencioso:
+        print(f"índice: {novos} texto(s) novo(s) embedado(s); {len(itens)} no total "
+              f"({len(entradas)} entradas + blocos)", file=sys.stderr)
+    return novos, len(itens), ok
+
+
+def buscar_dados(query, n=10, blocos=True):
+    """[{tipo, num, bloco, score, titulo, data, trecho}] -- entradas e trechos."""
+    import numpy as np
+    atualizar(silencioso=True)
+    entradas, _ = _todas_entradas_todas_camadas()
+    vetores = carregar_indice()
+    q = np.asarray(_embed([query], "query")[0], dtype="<f4")
+    res = []
+    for e in entradas:
+        v = vetor(vetores, texto_entrada(e))
+        if v is not None:
+            res.append({"tipo": "entrada", "num": e["num"], "bloco": None,
+                        "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
+                        "trecho": ""})
+        if blocos:
+            for bn, t in textos_blocos(e):
+                v = vetor(vetores, t)
+                if v is not None:
+                    res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
+                                "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
+                                "trecho": t[:280]})
+    res.sort(key=lambda r: r["score"], reverse=True)
+    # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
+    out, vistos = [], set()
+    for r in res:
+        chave = (r["tipo"], r["num"])
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        out.append(r)
+        if len(out) >= n:
+            break
+    return out
+
+
+def buscar(query, n, como_json=False):
+    rs = buscar_dados(query, n)
+    if como_json:
+        print(json.dumps(rs, ensure_ascii=False))
+        return
+    for r in rs:
+        if r["tipo"] == "entrada":
+            print(f"{r['score']:.3f}  ({r['num']}) — {r['titulo'][:140]}")
+        else:
+            print(f"{r['score']:.3f}  ({r['num']}) ^b{r['bloco']} — {r['trecho'][:140]}")
+
+
+def contexto(query, n, destino):
+    """Pacote markdown com as entradas mais relevantes, para colar noutra IA
+    (equivalente ao "Smart Context")."""
+    rs = buscar_dados(query, n)
+    entradas = {e["num"]: e for e in _todas_entradas_todas_camadas()[0]}
+    nums = []
+    for r in rs:
+        if r["num"] not in nums:
+            nums.append(r["num"])
+    linhas = [f"# Contexto Agata — \"{query}\"", "",
+              "Entradas de MEMÓRIAS escolhidas por sentido (busca local, embedding na iGPU). "
+              "A fonte da verdade é o canon; isto é recorte.", ""]
+    for num in nums:
+        e = entradas[num]
+        linhas += [f"## ({num}) {e['tipo']} — {e['data']} · {e['titulo']}", "",
+                   "\n".join(e["linhas"]).strip()[:4000], ""]
+    with open(destino, "w", encoding="utf-8") as f:
+        f.write("\n".join(linhas))
+    print(destino)
+
+
 def _cos(a, b):
     return sum(x * y for x, y in zip(a, b))
-
-
-def reindex():
-    if not os.path.isfile(MEMORIAS):
-        sys.exit("ERRO: MEMÓRIAS.md não encontrado — rode a partir da raiz do repositório.")
-    entradas, textos = _todas_entradas_todas_camadas()
-    if not entradas:
-        sys.exit("ERRO: nenhuma entrada achada — camadas de memória vazias ou marcador quebrado?")
-    camadas_nomes = [os.path.basename(c) for c in textos]
-    textos_embed = [
-        f"{e['titulo']}\n\n" + "\n".join(e["linhas"]).strip()[:2000]
-        for e in entradas
-    ]
-    print(f"Indexando {len(entradas)} entradas ({', '.join(sorted(camadas_nomes))}) "
-          f"via {EMBED_URL} (iGPU) ...", file=sys.stderr)
-    vetores = []
-    LOTE = 16
-    for i in range(0, len(textos_embed), LOTE):
-        vetores.extend(_embed(textos_embed[i:i + LOTE], "passage"))
-        print(f"  {min(i + LOTE, len(textos_embed))}/{len(textos_embed)}", file=sys.stderr)
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    payload = {
-        "camadas_sha256": _hash_camadas(textos),
-        "camadas": sorted(camadas_nomes),
-        "modelo": "multilingual-e5-small",
-        "dim": len(vetores[0]) if vetores else 0,
-        "entradas": [
-            {"num": e["num"], "tipo": e["tipo"], "data": e["data"], "titulo": e["titulo"],
-             "vetor": v}
-            for e, v in zip(entradas, vetores)
-        ],
-    }
-    with open(VETORES_PATH, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False)
-    print(f"Índice gravado: {VETORES_PATH} ({len(entradas)} entradas, dim {payload['dim']})",
-          file=sys.stderr)
-
-
-def buscar(query, n):
-    if not os.path.isfile(VETORES_PATH):
-        sys.exit(f"ERRO: índice não existe ainda — rode '{sys.argv[0]} --reindex' primeiro.")
-    idx = json.load(open(VETORES_PATH, encoding="utf-8"))
-    if "camadas_sha256" not in idx:
-        print("AVISO: índice foi gravado por uma versão anterior (só quente, pré-Fase 4) — "
-              "rode --reindex pra cobrir quente+morno+frio.", file=sys.stderr)
-    elif os.path.isfile(MEMORIAS):
-        _, textos_atuais = _todas_entradas_todas_camadas()
-        if idx.get("camadas_sha256") != _hash_camadas(textos_atuais):
-            print("AVISO: alguma camada de memória (quente/morno/frio) mudou desde o último "
-                  "--reindex — resultado pode estar desatualizado. Rode --reindex pra atualizar.",
-                  file=sys.stderr)
-    qvec = _embed([query], "query")[0]
-    ranking = sorted(
-        idx["entradas"],
-        key=lambda e: _cos(qvec, e["vetor"]),
-        reverse=True,
-    )[:n]
-    for e in ranking:
-        score = _cos(qvec, e["vetor"])
-        print(f"{score:.3f}  ({e['num']}) {e['tipo']} — {e['titulo']}")
 
 
 def selftest():
@@ -261,26 +386,39 @@ def selftest():
     prox, dist = _cos(vs[0], vs[1]), _cos(vs[0], vs[2])
     print(f"cos(próximas)={prox:.4f}  cos(distante)={dist:.4f}")
     ok = prox > dist
-    print("OK" if ok else "FALHA", "-- frases relacionadas mais parecidas que a não relacionada")
+    # incremental: o mesmo texto dá a mesma chave; texto novo dá chave nova
+    e = {"titulo": "t", "linhas": ["x" * 90, "", "y" * 90]}
+    ok = ok and _h(texto_entrada(e)) == _h(texto_entrada(dict(e))) and len(textos_blocos(e)) == 2
+    print("OK" if ok else "FALHA", "-- sentido + chaves do índice incremental")
     return 0 if ok else 1
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("query", nargs="?", help="termo ou frase pra buscar por sentido")
-    ap.add_argument("--reindex", action="store_true", help="(re)constrói o índice de MEMÓRIAS")
+    ap.add_argument("--reindex", action="store_true",
+                    help="embeda o que falta e poda o que não existe mais (incremental)")
+    ap.add_argument("--atualizar", action="store_true",
+                    help="só embeda o que falta, sem podar (o post-commit usa este)")
     ap.add_argument("--selftest", action="store_true", help="autoteste, não toca o índice real")
+    ap.add_argument("--json", action="store_true", help="saída em JSON (para ferramentas)")
+    ap.add_argument("--contexto", metavar="ARQUIVO",
+                    help="grava um pacote markdown com as entradas mais relevantes")
     ap.add_argument("-n", type=int, default=10, help="quantos resultados (default 10)")
     args = ap.parse_args()
 
     if args.selftest:
         sys.exit(selftest())
-    if args.reindex:
-        reindex()
-        return
+    if args.reindex or args.atualizar:
+        _n, _t, ok = atualizar(podar=args.reindex)
+        sys.exit(0 if ok else 1)
     if not args.query:
-        ap.error("passe uma busca, ou --reindex, ou --selftest")
-    buscar(args.query, args.n)
+        ap.error("passe uma busca, ou --reindex/--atualizar, ou --selftest")
+    n = max(1, min(args.n, 50))
+    if args.contexto:
+        contexto(args.query, n, args.contexto)
+    else:
+        buscar(args.query, n, como_json=args.json)
 
 
 if __name__ == "__main__":

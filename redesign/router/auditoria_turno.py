@@ -318,7 +318,7 @@ def _selftest() -> int:
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n### O que falta / poderia melhorar (mantidos):\n"
              "* **Índice de entradas por data/tema** no canon.\n* **Verificação de integridade do vault**.\n"
              "* **Ferramenta de \"diff de hidratação\"**."), u()]).count("já desmentida") == 3),
-        ("busca semântica como limitação -> acusa (recusa deliberada)", "recusa deliberada" in linha_estado(
+        ("busca semântica como limitação -> acusa (vault_buscar existe, (670))", "vault_buscar" in linha_estado(
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Limitações:**\n- Sem busca semântica nativa"), u()])),
         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"

@@ -82,3 +82,24 @@ printf '[]' > ~/agata/.obsidian/community-plugins.json
 rm -f ~/.config/agata/obsidian.token
 git checkout -- redesign/obsidian .gitignore
 ```
+
+## Cérebro — Brain Atlas (MEMÓRIAS (670))
+
+Segundo plugin de comunidade, pedido do Humano em 13/10/2026 ("gráfico em 3D com visual inspirado no cérebro humano"). Escolha dele entre Brain Atlas e Brain Graph.
+
+| item | valor |
+|---|---|
+| plugin | `colorpulse6/brain-atlas` **0.2.2** (MIT), versão fixa |
+| sha256 `main.js` | `9b137a59e6088ceab2af1d432da2abdfb1be0b37ee0007a087b793b11543de88` |
+| sha256 `manifest.json` | `ef837563693ec9d742d872469bb01f6f50f9f86a9d3462a0596ca0a0923ee27a` |
+| sha256 `styles.css` | `ab63af3bacb08a58159c9b0a91a7db3e16facad205eb94ff6b1b712b71908543` |
+| origem | atestação do GitHub conferida (`gh attestation verify`) |
+| rede | nenhuma: `main.js` sem `fetch`/`XMLHttpRequest`/`WebSocket`/`requestUrl`; lê só metadados (caminho, propriedades, tags, links) |
+| instala | `bash redesign/obsidian/instalar_cerebro.sh` (confere tudo de novo; `--conferir` só confere) |
+| configuração | `redesign/obsidian/brain-atlas.json` → `.obsidian/plugins/brain-atlas/data.json` (preserva neurônios fixados) |
+
+**Regiões:** o gerador do vault escreve `brain_region` e `kind` em cada nota (`config/agata-identidade.json`): memória → temporal, decisão → frontal, ferramentas → parietal, correção → cerebelo, o que vem de fora → occipital, roteamento → tronco. **Cores:** o plugin só tem paletas prontas; "Aurora" é a mais próxima da identidade da Agata, e o `kind` escolhe dentro dela o tom de cada região. Cor exata da Agata vai no tema do Obsidian (`.obsidian/snippets/agata.css`) e nos grupos de cor do grafo 2D.
+
+**Recusados (estado da arte medido, out/2026):** InfraNodus (manda o texto para servidores deles e para a OpenAI); Smart Connections (duplica o embedding local que já existe e grava cache dentro do repo — os recursos dele vêm do nosso índice: `parecidas`, trechos `#^bN`, `scripts/agata_busca.sh`).
+
+**Rollback:** `rm -rf ~/agata/.obsidian/plugins/brain-atlas` e tirar `"brain-atlas"` de `.obsidian/community-plugins.json`.
