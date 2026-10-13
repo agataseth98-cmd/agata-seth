@@ -151,6 +151,43 @@ def _modelo_do_cabecalho(linha: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _instante(h: str):
+    """'2026-10-13 18:27' ou '13/10/2026 18:27' -> tupla comparável; None se não casar."""
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2}) (\d{1,2}):(\d{2})$", h) or None
+    if m:
+        return tuple(int(x) for x in m.groups())
+    m = re.match(r"(\d{2})/(\d{2})/(\d{4}) (\d{1,2}):(\d{2})$", h)
+    if m:
+        d, mo, a, hh, mi = (int(x) for x in m.groups())
+        return (a, mo, d, hh, mi)
+    return None
+
+
+_N_CONTROLES = re.compile(r"\b(\d{1,2})\s+contro(?:les|is)\b", re.IGNORECASE)
+
+
+def _controles_reais() -> int | None:
+    """Quantos controles o perímetro declara (`cabecalho "P-N"` em scripts/perimetro.sh) -- a fonte."""
+    try:
+        t = (RAIZ / "scripts" / "perimetro.sh").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    n = len(set(re.findall(r'^\s*cabecalho\s+"(P-\d+)"', t, re.MULTILINE)))
+    return n or None
+
+
+def _contagem_controles(texto: str) -> list[str]:
+    """(678) "17 controles" quando o perímetro tem 23: número dito de memória."""
+    real = _controles_reais()
+    if real is None:
+        return []
+    errados = sorted({int(m.group(1)) for m in _N_CONTROLES.finditer(texto)} - {real})
+    if not errados:
+        return []
+    return [f"contagem de controles: a resposta fala em {', '.join(map(str, errados))} controles; o perímetro "
+            f"tem {real} (scripts/perimetro.sh) -- meça com maquina_verificar perimetro, não lembre"]
+
+
 def _catalogo():
     try:
         dados = json.loads(CATALOGO.read_text(encoding="utf-8"))
@@ -213,11 +250,18 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
                       for h in [_HORA.search(c[0])] if h}
         if m_h.group(1) in anteriores:
             achados.append(f"cabeçalho: hora {m_h.group(1)} igual à de um cabeçalho anterior — hora se mede de novo, nunca se copia")
+        # (678) hora que volta no tempo: a Seth escreveu 18:27 depois de 18:30
+        atual, antes = _instante(m_h.group(1)), [_instante(h) for h in anteriores]
+        antes = [x for x in antes if x is not None]
+        if atual is not None and antes and atual < max(antes):
+            achados.append(f"cabeçalho: hora {m_h.group(1)} ANTERIOR à de um cabeçalho anterior desta conversa — "
+                           "a hora vem do relógio da Máquina (HORA-MAQUINA), nunca estimada")
     modelo = _modelo_do_cabecalho(cabs[0][0])
     if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
     achados += _desmentidas(texto)
+    achados += _contagem_controles(texto)
     if modo(msgs) == "conciso":
         narradas = _narracao(texto)
         if narradas:
@@ -324,6 +368,14 @@ def _selftest() -> int:
             [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n- Vault precisa regenerar para ter (673); será regenerado no ciclo noturno"), u()])),
         ("merge 'no main local, não publicado' -> acusa (676)", "JÁ está publicado" in linha_estado(
             [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n2. Merge da proposta no main local — estado transitório, não publicado"), u()])),
+        ("hora que volta no tempo -> acusa (678)", "ANTERIOR" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "18:30")), u(), a(linha(3, "18:27")), u()])),
+        ("'17 controles' com outro número real -> acusa (678)", "contagem de controles" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n### 7. Controles de Perímetro (17 controles)"), u()])),
+        ("três perguntas com conteúdo errado -> acusa (678)", "reversibilidade" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Portão**: 3 perguntas — O que muda? Por que muda? Como testar?"), u()])),
+        ("assinatura 'no chat' -> acusa (678)", "ASSINATURA SSH" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n| Assinatura = \"Humano disse sim no chat\" |"), u()])),
         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
              "- O bloco de estado deve ser copiado manualmente de ONDE_ESTAMOS.md."), u()]).count("já desmentida") == 2),
@@ -348,7 +400,7 @@ def _selftest() -> int:
     ]
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
-                  len(linhas) == 21 and all("análise" not in l and "corpo" not in l for l in linhas)))
+                  len(linhas) == 25 and all("análise" not in l and "corpo" not in l for l in linhas)))
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)

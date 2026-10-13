@@ -61,6 +61,11 @@ function pathOk(p) {
   if (!p || p.includes("..") || p.startsWith("/") || DENY.test(p)) return false;
   if (p.startsWith("memoria/obsidian/")) return true;
   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
+  // (678) extras/ -- arquivo histórico versionado (público no GitHub), pedido do
+  // Humano ("leve extras em consideração"). EXCETO extras/arquivo-redesign/: é
+  // para onde foi o dossiê de auditoria sobre a própria Seth (AUDITORIA-01,
+  // CONSELHO-*) que a decisão de 04/09 (comentário acima) tirou do alcance dela.
+  if (p.startsWith("extras/") && !p.startsWith("extras/arquivo-redesign")) return true;
   return Object.values(CANON).includes(p);
 }
 
@@ -179,7 +184,7 @@ async function vaultConsultar(a) {
   if (mScript) {
     p = "memoria/obsidian/scripts/" + scriptSlug(mScript[1]) + ".md";
   }
-  const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") ||
+  const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") || p.startsWith("extras/") ||
                       p === "SETH-DIARIO.md" || Object.values(CANON).includes(p);
   if (p && !jaResolvido) p = "memoria/obsidian/" + p;
   if (!p) p = "memoria/obsidian/";
@@ -348,11 +353,12 @@ const TOOLS = [
       "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler. " +
       "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
       "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
-      "Para BUSCAR, use vault_buscar primeiro.",
+      "Para BUSCAR, use vault_buscar primeiro. Também lê o arquivo histórico em extras/ (liste \"extras/\"; " +
+      "extras/arquivo-redesign/ fica fora, por decisão de 04/09).",
     inputSchema: {
       type: "object",
       properties: {
-        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); "SETH-DIARIO.md" p/ o teu diário; vazio = listar a raiz' },
+        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); "SETH-DIARIO.md" p/ o teu diário; "extras/" (e subpastas) p/ o arquivo histórico; vazio = listar a raiz' },
       },
     },
   },

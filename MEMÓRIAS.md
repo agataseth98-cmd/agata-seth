@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 49ec42e11646a17893a6bc7685de790a99cef9a1
-  Escrito em: 13/10/2026 19:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 825d0f76f74455d47fc15e781ae4fcd666ddf839
+  Escrito em: 13/10/2026 20:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49ec42e11646a17893a6bc7685de790a99cef9a1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/825d0f76f74455d47fc15e781ae4fcd666ddf839/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/825d0f76f74455d47fc15e781ae4fcd666ddf839/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/825d0f76f74455d47fc15e781ae4fcd666ddf839/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/825d0f76f74455d47fc15e781ae4fcd666ddf839/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/825d0f76f74455d47fc15e781ae4fcd666ddf839/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(679) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-auditoria-1830-2026-10-13` (assinada pelo Humano): `vault_buscar` agora está de verdade no Agent da Seth, `extras/` legível (menos o dossiê de `arquivo-redesign/`), catálogo e checagens novas da auditoria e a doutrina "sistema nunca de memória" no ar. E um erro meu de cabeçalho, registrado.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. `aplicar_agente_seth.sh`: backup do documento do Agent, 1 alterado, `--conferir` OK. Relido no Mongo: `agents.tools` agora tem `vault_buscar_mcp_canon`. `canon-mcp.mjs` copiado para o runtime do LibreChat. `seth-verificador` e `seth-gateway` reiniciados e ativos. `docker restart librechat`: log `[MCP][canon] Tools: maquina_verificar, vault_buscar, query_canon, vault_consultar, memoria_acrescentar, diario_anotar`.
+
+**Erro meu, Regra 1 (hora medida, nunca estimada):** nos cabeçalhos desta sessão, de "t=25" a "t=40", escrevi horas **estimadas**, não lidas do relógio. A última dizia 17:52; a Máquina marcava ~20:00 (`date` às 20:03 -0300). É o mesmo erro que (678) acusou na Seth — "hora que volta / hora não medida". Daqui em diante leio `date` antes de escrever o cabeçalho.
+
+**Falta em uso real:** o Humano pede à Seth uma avaliação da memória ou algo sobre `extras/`; confiro no Mongo se ela chamou `vault_buscar` e `vault_consultar extras/`, e se a auditoria automática do turno seguinte bate.
+
+**sync:** PASS — `main` = `origin/main` (PR #179 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (678).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, aplicar_agente_seth.sh (+ `--conferir`), Mongo (`agents.tools`), log do LibreChat, systemctl, `date` · Autorização: Humano — assinatura de `seth-auditoria-1830-2026-10-13`.
 
 (678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedido do Humano ("audite a última resposta da Seth e aplique o que for coerente"). Achado principal, erro meu: o `vault_buscar` NUNCA chegou à Seth — o Agent do LibreChat só carrega as ferramentas listadas em `agents.tools`, e eu não a listei; (671) e (677) afirmaram que estava "no ar para a Seth", e não estava. Proposta `seth-auditoria-1830-2026-10-13` pronta, aguardando assinatura.**
 

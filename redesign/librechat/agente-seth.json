@@ -3,6 +3,14 @@
   "agent_id": "agent_4KlxSMeX5Y8cWQVODkJfH",
   "teto_economia": 100000,
   "_janela": "maxContextTokens NÃO é fixo: aplicar_agente_seth.sh calcula com scripts/capivara_perfis.py --janela-agente = min(teto_economia, menor janela dos modelos das filas -longo) − reserva da hidratação. Pedido maior do que cabe no menor modelo de uma fila vai pra <fila>-longo (seth_gateway). O teto é economia de tokens: o LibreChat reenvia o histórico até a janela a cada mensagem. MEMÓRIAS (666)/(667).",
+  "ferramentas_sempre": [
+    "maquina_verificar_mcp_canon",
+    "query_canon_mcp_canon",
+    "vault_consultar_mcp_canon",
+    "vault_buscar_mcp_canon",
+    "diario_anotar_mcp_canon"
+  ],
+  "_por_que_sempre": "As ferramentas do canon ficam SEMPRE carregadas (sem defer_loading): são usadas em quase toda resposta, e o vault é a prioridade 1 das buscas (670). O Agent só carrega ferramenta que está em agents.tools -- servidor MCP oferecer não basta; vault_buscar ficou de fora de (671) a (678) por isso.",
   "plugins_sob_demanda": [
     "ler_mensagens_mcp_discord",
     "enviar_mensagem_mcp_discord",

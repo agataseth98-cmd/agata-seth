@@ -126,10 +126,11 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
     ),
     "busca_texto": (
-        ["grep", "-rnIiF", "--include=*.md", "-m", "3"], 30,
+        ["grep", "-rnIiF", "--include=*.md", "--exclude-dir=arquivo-redesign", "-m", "3"], 30,
         "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
-        "derivado memoria/obsidian/, lendo o DISCO (sempre em dia; o índice do "
-        "Obsidian não entra). Use o parâmetro `consulta` (até 200 caracteres). "
+        "derivado memoria/obsidian/ e no arquivo histórico extras/ (menos "
+        "extras/arquivo-redesign/), lendo o DISCO (sempre em dia). Use o "
+        "parâmetro `consulta` (até 200 caracteres). "
         "Devolve caminho:linha:trecho, até 3 por nota.",
     ),
 }
@@ -161,7 +162,7 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
         if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
                 or any(c in consulta for c in "\r\n\x00"):
             raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
-        return base + ["--", consulta.strip(), "memoria/obsidian"]
+        return base + ["--", consulta.strip(), "memoria/obsidian", "extras"]
     if nome == "busca_semantica":
         if prop_nome is not None:
             raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
@@ -259,7 +260,7 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
     if nome == "busca_texto":
         if codigo == 1:
             return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
-        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith("memoria/")}
+        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith(("memoria/", "extras/"))}
         return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
     if nome == "servicos":
         m = re.search(r"(\d+) loaded units? listed", texto)
@@ -451,7 +452,7 @@ def _selftest() -> int:
         except ValueError:
             casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
     avt = _argv("busca_texto", None, None, "-e x")
-    casos.append(("busca_texto: consulta é dado", avt[-3:] == ["--", "-e x", "memoria/obsidian"]))
+    casos.append(("busca_texto: consulta é dado", avt[-4:] == ["--", "-e x", "memoria/obsidian", "extras"]))
     try:
         _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
     except ValueError:
