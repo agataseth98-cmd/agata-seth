@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7f114767bf66b80de5cb20283b648738d97baad0
-  Escrito em: 13/10/2026 16:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1d687fdf61a6218aae26cfe33809b236387028ee
+  Escrito em: 13/10/2026 16:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7f114767bf66b80de5cb20283b648738d97baad0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7f114767bf66b80de5cb20283b648738d97baad0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7f114767bf66b80de5cb20283b648738d97baad0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7f114767bf66b80de5cb20283b648738d97baad0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7f114767bf66b80de5cb20283b648738d97baad0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. Vault regenerado (1.019 notas, cada nota gerada com a tag `regiao/<região>`). `instalar_cerebro.sh`: os 2 plugins baixados de novo, sha256 conferidos (atestação no Brain Atlas; chamadas de rede batendo com o revisado: 0 e 2), os dois ligados, 16 grupos de cor no New 3D Graph. `obsidian-app` reiniciado; proxy `:27125` de volta. Configuração relida do disco: Brain Atlas com `idleAutoRotate` falso; New 3D Graph com 16 grupos e rótulos a 420. **Não medido:** se o New 3D Graph carregou dentro do Obsidian — ele não regrava o `data.json` ao abrir, e o Obsidian (flatpak) não expõe o console daqui; o Humano confirma ao abrir (Ctrl+P → "New 3D Graph: Open 3d graph").
+
+**sync:** PASS — `main` = `origin/main` (PR #175 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (674).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, gerar_obsidian, instalar_cerebro, systemctl, `data.json` dos 2 plugins relidos · Autorização: Humano — assinatura de `cerebro-navegavel-2026-10-13`.
 
 (674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
 

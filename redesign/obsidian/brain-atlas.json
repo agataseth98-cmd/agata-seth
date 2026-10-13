@@ -5,7 +5,7 @@
   "rendererMode": "auto",
   "nodeCap": 4000,
   "edgeCap": 30000,
-  "idleAutoRotate": true,
+  "idleAutoRotate": false,
   "showLobeLabels": true,
   "showLegendChip": true,
   "clickAction": "current",

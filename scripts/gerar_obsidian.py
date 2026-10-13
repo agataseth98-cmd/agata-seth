@@ -315,6 +315,13 @@ def fm(campos):
     campos = {**campos, **_cerebro(campos)}
     if campos.get("brain_region"):
         CONT_GERADAS[campos["brain_region"]] = CONT_GERADAS.get(campos["brain_region"], 0) + 1
+        # (674) tag da região: o grafo 3D navegável (New 3D Graph) colore por tag,
+        # não por propriedade -- mesma região, mesma cor nos dois gráficos.
+        t = str(campos.get("tags", "[]")).strip()
+        if t.startswith("[") and t.endswith("]"):
+            dentro = t[1:-1].strip()
+            nova = f"regiao/{campos['brain_region']}"
+            campos["tags"] = f"[{dentro + ', ' if dentro else ''}{nova}]"
     for k, v in campos.items():
         out.append(f"{k}: {v}")
     out += ["---", ""]
@@ -1246,11 +1253,15 @@ def main():
 
     def _corpo_cerebro(L, cont_reg, notas_reg):
         L += ["# 🧠 O cérebro da Agata", "",
-              "> [!tip] Abra a paleta de comandos (Ctrl+P) → **Brain Atlas: Open** — o vault inteiro "
-              "vira um cérebro 3D girando. Clique num neurônio para abrir a nota; arraste para fixá-lo. "
-              "Os botões FRO · PAR · TEM · OCC · CER · STM acendem e apagam cada lobo.", "",
-              "> [!info] **Todas as regiões estão ligadas.** Os botões FRO · PAR · TEM · OCC · CER · "
-              "STM apagam e acendem um lobo; **All** liga tudo de novo.", "",
+              "> [!tip] **Dois jeitos de ver** (Ctrl+P abre a paleta de comandos)",
+              "> - **Panorama — `Brain Atlas: Open`:** o vault como cérebro anatômico, parado. Arraste "
+              "para girar, roda do mouse para aproximar, clique num neurônio para abrir a nota. "
+              "FRO · PAR · TEM · OCC · CER · STM apagam e acendem um lobo; **All** liga tudo.",
+              "> - **Explorar — `New 3D Graph: Open 3d graph`:** navegação livre, como o gráfico do "
+              "Obsidian em 3D. Arrastar com o botão esquerdo gira; com o direito, **desloca para os "
+              "lados**; a roda dá zoom sem limite; **W A S D** voam pela estrutura; clique numa nota "
+              "para a câmera ir até ela e acender as ligações. Os nomes das notas aparecem quando você "
+              "chega perto. Mesmas cores das regiões.", "",
               "## As regiões", "",
               "| | Região | O que guarda | Notas | Entradas de MEMÓRIAS |", "|---|---|---|---|---|"]
         marca = {"temporal": "🟦", "frontal": "🟪", "parietal": "🟩", "cerebellum": "🟥",
