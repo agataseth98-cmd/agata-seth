@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9c172954b3d8eef20749d178390347d33a992370
-  Escrito em: 13/10/2026 14:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e
+  Escrito em: 13/10/2026 14:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assinada pelo Humano): filas `-longo` criadas no OmniRoute, janela do Agent da Seth em 96 mil com Discord e navegador como plugins sob demanda, diretrizes comuns no Goose, gateway reiniciado. Junto, proposta nova `aprovar-avisa-pull-2026-10-13`, a pedido do Humano: o `aprovar.sh` passa a dizer quando o `.diff` já está no GitHub mas não na cópia local.**
+
+**Erro meu, antes da assinatura:** o Humano juntou o PR #168 no GitHub e rodou `aprovar.sh`, que respondeu "não achei propostas/….diff". Causa medida: a cópia local estava no `main` sem o merge baixado — eu tinha voltado o repo ao `main` (para não repetir o `sync: FALHA` de (666)) e não puxei depois do merge. Conserto: `git pull --ff-only` no `main`; o Humano assinou em seguida. Para não depender de mim: o `aprovar.sh`, quando não acha o `.diff`, faz `git fetch` (só leitura) e, se o arquivo estiver em `origin/main` ou em `origin/proposta/<nome>`, diz o comando exato (`pull` ou "junte o PR primeiro"). Não puxa sozinho — o pull fica com o Humano. É `scripts/*`, então vai como proposta P-8.
+
+**Aplicado:** `p8_verificar` → PODE APLICAR (assinatura ED25519 válida); `git apply`; par movido para `propostas/aplicadas/`. Backup do `storage.sqlite` do OmniRoute antes de `capivara_perfis.py --sincronizar-filas`: `seth-rapido-longo` (3 modelos), `seth-livre-longo` (5), `seth-pesado-longo` (2), todos POST 201, relidos na API. `capivara_perfis.py --conferir`: perfil em dia. `aplicar_agente_seth.sh`: backup do documento do Agent, 1 alterado, `--conferir` OK; LibreChat reiniciado. `redesign/goose/AGENTS.md` copiado para a config do Goose. `seth-gateway` reiniciado, ativo. Selftests do gateway, da auditoria e da Capivara OK; `perimetro.sh` 0 FALHA, com o P-23 rodando.
+
+**Falta conferir em uso real:** o Humano manda uma mensagem à Seth no LibreChat; eu confiro no Mongo que a resposta não narra o processo e que a saída das ferramentas chega inteira (sem `[truncated`), e no log do gateway a 1ª troca para `-longo` quando acontecer.
+
+**Assinar a proposta nova** (depois de juntar este PR e rodar `git pull --ff-only` no `main`): `bash scripts/aprovar.sh aprovar-avisa-pull-2026-10-13`
+
+**sync:** PASS — `main` = `3e996ee` (== `origin/main`) antes do branch `aplica/`; topo de MEMÓRIAS = (667).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, API do OmniRoute, Mongo do LibreChat, systemctl, selftests e perímetro rodados · Autorização: Humano — assinatura de `contexto-e-plugins-2026-10-13`; "assinado, já inclua essa proposta".
 
 (667) CONSELHO — 13/10/2026 · **Revisão de `contexto-e-plugins-2026-10-13` antes da assinatura, a pedido do Humano: a janela fixa de (666) vira janela por perfil de modelo (1ª peça do projeto Capivara); o "modo conciso" (sem narrar o processo) vira padrão de resposta nas REGRAS, com 3 pareceres condicionais acatados; e as mesmas diretrizes passam a valer em toda plataforma, com `AGENTS.md` na raiz e o controle P-23. Proposta agora com 21 arquivos, aguardando assinatura.**
 

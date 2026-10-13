@@ -65,6 +65,11 @@ _p8_eh_comportamento() {
     # SEMPRE passa por um Humano colando e lendo a resposta), CLAUDE.md dirige
     # um modelo sem esse portão. Mesma classe de risco de config/*.
     CLAUDE.md) return 0 ;;
+    # AGENTS.md (13/10/2026, MEMÓRIAS (667)): a mesma classe do CLAUDE.md -- lido
+    # sozinho por Codex, Gemini CLI, Cursor, e importado pelo CLAUDE.md.
+    # redesign/librechat/*.json|*.sh (parâmetros do Agent e o script que os aplica)
+    # e redesign/goose/* (instruções do Goose) mudavam comportamento fora daqui.
+    AGENTS.md|redesign/librechat/*.json|redesign/librechat/*.sh|redesign/goose/*) return 0 ;;
     # A raiz de confiança da aprovação assinada (MEMÓRIAS (366)): trocá-la
     # é mudança de comportamento tanto quanto trocar um script. A
     # verificação em _p8_assinatura_ok usa a versão de HEAD, nunca a

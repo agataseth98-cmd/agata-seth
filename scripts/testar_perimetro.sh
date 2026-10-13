@@ -219,7 +219,7 @@ declare -A SEM_TESTE=(
 # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
 declare -A NIVEL=(
   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
-  [P-21]=L1 [P-20]=L1 [P-22]=L1
+  [P-21]=L1 [P-20]=L1 [P-22]=L1 [P-23]=L1
   [P-2]=L3
   [P-3]=L4 [P-13]=L4 [P-15]=L4
   [P-4]=L2 [P-9]=L2 [P-10]=L2
@@ -565,6 +565,25 @@ EOF
 
 _caso P-22 PASSA "nada mudou" <<'EOF'
 true
+EOF
+
+# --- P-23: porta de entrada sem as diretrizes comuns ------------------------
+# Casos autocontidos: o clone parte do HEAD e só recebe scripts/.githooks/config,
+# então cada caso escreve a própria lista e o próprio arquivo de porta.
+_caso P-23 PEGA "porta sem modo conciso e sem economia de tokens" <<'EOF'
+printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'instruções quaisquer\n' > porta-teste.md
+EOF
+
+_caso P-23 PEGA "porta declarada cujo arquivo não existe" <<'EOF'
+printf 'NAO_EXISTE.md|teste\n' > config/portas-de-entrada.txt
+EOF
+
+_caso P-23 PASSA "porta com modo conciso e economia de tokens" <<'EOF'
+printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente\n' > porta-teste.md
+EOF
+
+_caso P-23 PASSA "porta que importa o AGENTS.md" <<'EOF'
+printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf '# x\n@AGENTS.md\n' > porta-teste.md
 EOF
 
 # --------------------------------------------------------------- veredito --

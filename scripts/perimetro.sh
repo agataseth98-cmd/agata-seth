@@ -59,6 +59,7 @@ source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
 source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
 source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
 source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
+source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -347,6 +348,12 @@ main() {
 
   cabecalho "P-22" "Derivados de hidratação não divergem do HEAD sem a fonte mudar" "MEMÓRIAS (333)/(349)"
   p22_derivados_drift
+  echo "veredito: AVISO SÓ (nunca falha)"
+  CONT_OK=$((CONT_OK + 1))
+  echo
+
+  cabecalho "P-23" "Toda porta de entrada de modelo traz as diretrizes comuns (modo conciso, economia de tokens)" "MEMÓRIAS (667)"
+  p23_portas_entrada
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
   echo

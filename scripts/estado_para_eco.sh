@@ -121,7 +121,12 @@ fi
 if [ -z "$remoto" ]; then
   sync_linha="sync: não verificado · lacuna: remoto inacessível (rede ou credencial)"
 elif [ "$remoto" != "$head_full" ]; then
-  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/' || echo "?/?")
+  atras_a_frente=$(git rev-list --left-right --count "$remoto...$head_full" 2>/dev/null | tr '\t' '/')
+  # (664) "?/?" sozinho não dizia por quê: é o commit remoto que ainda não foi baixado aqui.
+  [ -n "$atras_a_frente" ] || atras_a_frente="?/? — commit remoto ainda não baixado aqui; git_sync mede"
+  # (664) o FALHA de 13/10 era o HEAD num branch de trabalho, não o main atrás: dizer o branch.
+  _branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+  [ -n "$_branch" ] && [ "$_branch" != "main" ] && atras_a_frente="$atras_a_frente; HEAD no branch $_branch, não no main"
   # (MEMÓRIAS (543)) ordem remoto...HEAD: a 1a coluna do --left-right é o que SÓ o remoto tem (= atrás),
   # a 2a o que só o HEAD tem (= à frente) -- casa com o rótulo abaixo. Antes estava invertido: um
   # branch 1 à frente saía "atrás/à-frente: 1/0" e dois modelos leram "1 commit atrás".
