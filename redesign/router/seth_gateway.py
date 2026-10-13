@@ -226,6 +226,15 @@ _DOUTRINA_FIXA = (
     "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
     "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
     "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
+    "**MODO (linha do estado):** `conciso` é o padrão — a resposta traz o resultado e "
+    "não narra o processo (\"vou verificar…\", \"agora vou…\"); fale do processo só "
+    "para constatar erro, em 1 linha. `explicativo` só quando o Humano pedir na "
+    "conversa. Narração custa duas vezes: na saída e em toda mensagem seguinte, "
+    "porque fica no histórico — e economia de tokens é permanente (Regra 7). "
+    "(REGRAS, \"NPR\"; MEMÓRIAS (667).)\n"
+    "**Plugins sob demanda:** Discord e navegador não aparecem na sua lista de "
+    "ferramentas até você precisar — busque com `tool_search` (ex.: \"navegador\", "
+    "\"discord\") e use. As do canon estão sempre carregadas. (MEMÓRIAS (666).)\n\n"
     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
     "hidratação mínima; o resto é sob demanda.\n"
@@ -505,6 +514,34 @@ def _classificar_rota(payload: dict) -> str:
 # ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
 import decisor  # noqa: E402  (mesmo diretório)
 import auditoria_turno  # noqa: E402  (mesmo diretório)
+import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+
+_PERFIS = {"mtime": None, "dados": {}}
+
+
+def _perfis() -> dict:
+    caminho = REPO / "config" / "capivara" / "perfis-modelos.json"
+    try:
+        mt = caminho.stat().st_mtime
+    except OSError:
+        return {}
+    if _PERFIS["mtime"] != mt:
+        _PERFIS["dados"], _PERFIS["mtime"] = capivara_perfis.carregar(caminho), mt
+    return _PERFIS["dados"]
+
+
+def _fila_pela_janela(payload: dict) -> str | None:
+    """`<fila>-longo` quando o pedido (já hidratado) não cabe no menor modelo da fila
+    base -- o LibreChat não sabe qual modelo da fila vai responder, o gateway sabe a fila
+    (667). None = fica como está (pedido cabe, fila fora do perfil, sem fila longa)."""
+    modelo = str(payload.get("model", ""))
+    perfis = _perfis()
+    limiar = capivara_perfis.limiar_tokens(perfis, modelo)
+    if limiar is None or not capivara_perfis.fila_longa(perfis, modelo):
+        return None
+    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    estimativa = _texto_e_sinais(msgs)[0] // 3  # caracteres ÷ 3: conservador para português
+    return modelo + capivara_perfis.SUFIXO_LONGO if estimativa > limiar else None
 
 _PERGUNTA_ROTA = {"rota": {
     "type": "choice",
@@ -585,6 +622,7 @@ def _injeta(payload: dict) -> dict:
         return payload
     # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
     auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
+    auditoria = auditoria_turno.linha_modo(msgs) + (f"\n{auditoria}" if auditoria else "")
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
@@ -641,7 +679,13 @@ class _Handler(BaseHTTPRequestHandler):
                             payload.get("messages") or []):
                         _sombra_rota(payload, self._rota)
                     payload["model"] = self._rota
-                corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
+                payload = _injeta(payload)
+                longa = _fila_pela_janela(payload)
+                if longa:
+                    print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
+                    payload["model"] = longa
+                    self._rota = longa
+                corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self._passar(corpo, "POST")
 
     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
@@ -1107,6 +1151,31 @@ def _selftest() -> int:
     auditoria_turno.LOG = _aud_log
     print(f"{'PASS' if ok9g else 'FALHA'}  passo de continuação: MESMA-RESPOSTA, sem reauditar")
     falhas += 0 if ok9g else 1
+
+    # 9h. fila pela janela (667): perfil de teste -- pedido curto fica, pedido grande
+    # vai pro -longo; fila fora do perfil não muda.
+    _perfis_antes = globals()["_perfis"]
+    globals()["_perfis"] = lambda: {"filas": {"seth-pesado": ["a/grande", "ollama-local/x"]},
+                                    "modelos": {"a/grande": {"janela": 1000000}, "ollama-local/x": {"janela": 65536}}}
+    curto = {"model": "seth-pesado", "messages": [{"role": "user", "content": "oi"}]}
+    grande = {"model": "seth-pesado", "messages": [{"role": "user", "content": "z" * 200000}]}
+    fora = {"model": "seth-codigo", "messages": [{"role": "user", "content": "z" * 200000}]}
+    ok9h = (_fila_pela_janela(curto) is None and _fila_pela_janela(grande) == "seth-pesado-longo"
+            and _fila_pela_janela(fora) is None)
+    globals()["_perfis"] = _perfis_antes
+    print(f"{'PASS' if ok9h else 'FALHA'}  fila pela janela: curto fica, grande vai pro -longo, fora do perfil não muda")
+    falhas += 0 if ok9h else 1
+
+    # 9i. modo conciso padrão e explicativo pedido pelo Humano chegam ao estado (667)
+    def _sys_de(msgs):
+        urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "messages": msgs}).encode(),
+                                                      headers={"Content-Type": "application/json"}), timeout=10).read()
+        return " ".join(x["content"] for x in json.loads(_Dummy.ultimo_corpo)["messages"]
+                        if x.get("role") == "system" and isinstance(x.get("content"), str))
+    ok9i = (re.search(r"(?m)^MODO: conciso", _sys_de([{"role": "user", "content": "oi"}])) is not None
+            and re.search(r"(?m)^MODO: explicativo", _sys_de([{"role": "user", "content": "modo explicativo"}])) is not None)
+    print(f"{'PASS' if ok9i else 'FALHA'}  modo conciso padrão / explicativo a pedido chegam ao estado")
+    falhas += 0 if ok9i else 1
 
     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);

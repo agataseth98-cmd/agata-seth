@@ -1,0 +1,30 @@
+diff --git a/scripts/aprovar.sh b/scripts/aprovar.sh
+index fbf968f..42cfb7a 100755
+--- a/scripts/aprovar.sh
++++ b/scripts/aprovar.sh
+@@ -28,7 +28,24 @@ diff_path=""
+ for d in "$raiz/propostas/$nome.diff" "$raiz/propostas/aplicadas/$nome.diff"; do
+   [ -f "$d" ] && { diff_path="$d"; break; }
+ done
+-[ -n "$diff_path" ] || { echo "ERRO: não achei propostas/$nome.diff (nem em aplicadas/)." >&2; exit 1; }
++if [ -z "$diff_path" ]; then
++  echo "ERRO: não achei propostas/$nome.diff (nem em aplicadas/)." >&2
++  # Caso comum: o PR foi juntado no GitHub e esta cópia não baixou (MEMÓRIAS (668)).
++  # Só lê o remoto -- não puxa nada; quem decide o pull é o Humano.
++  git -C "$raiz" fetch -q origin 2>/dev/null || true
++  for ref in origin/main "origin/proposta/$nome"; do
++    if git -C "$raiz" cat-file -e "$ref:propostas/$nome.diff" 2>/dev/null; then
++      echo "       Ele já está no GitHub ($ref), mas não nesta cópia." >&2
++      if [ "$ref" = origin/main ]; then
++        echo "       Rode:  git -C $raiz checkout main && git -C $raiz pull --ff-only   e assine de novo." >&2
++      else
++        echo "       O PR ainda não foi juntado: junte-o no GitHub, rode  git -C $raiz pull --ff-only  e assine de novo." >&2
++      fi
++      break
++    fi
++  done
++  exit 1
++fi
+ 
+ alvo="$raiz/propostas/APROVADO-$nome"
+ [ -e "$alvo" ] && { echo "ERRO: $alvo já existe -- nada a fazer." >&2; exit 1; }

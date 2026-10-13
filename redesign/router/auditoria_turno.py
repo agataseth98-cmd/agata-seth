@@ -55,6 +55,12 @@ _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".tx
 _CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
 _T_CONTADO = re.compile(r"t\s*=\s*(\d+)\s*\(\s*contado no contexto", re.IGNORECASE)
 _HORA = re.compile(r"\b(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}|\d{2}/\d{2}/\d{4} \d{1,2}:\d{2})")
+# Modo conciso (REGRAS, "NPR"; MEMÓRIAS (667)): padrão; o Humano liga o explicativo na conversa.
+_LIGA_EXPLICATIVO = re.compile(r"modo explicativo", re.IGNORECASE)
+_LIGA_CONCISO = re.compile(r"modo conciso", re.IGNORECASE)
+_NARRACAO = re.compile(r"^\s*(?:[-*>]\s*)?(?:\*\*)?(vou |agora vou|deixe-me|deixa eu|primeiro,? vou|em seguida,? vou|"
+                       r"vamos (?:verificar|ver|checar|conferir|olhar)|estou (?:verificando|checando|lendo|rodando|analisando))",
+                       re.IGNORECASE)
 _TITULO = re.compile(r"^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*:?\s*$|[^\s].{0,80}:\s*$)")
 
 
@@ -64,6 +70,14 @@ def _texto(conteudo) -> str:
     if isinstance(conteudo, list):
         return " ".join(p.get("text", "") for p in conteudo if isinstance(p, dict))
     return ""
+
+
+def _em_andamento(msgs: list) -> str:
+    """Texto que o assistente já escreveu NESTA resposta (depois do último pedido do usuário)."""
+    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
+    inicio = usuarios[-1] + 1 if usuarios else 0
+    return "\n".join(_texto(m.get("content")) for m in msgs[inicio:]
+                     if isinstance(m, dict) and m.get("role") == "assistant")
 
 
 def _turnos(msgs: list) -> tuple[list[str], bool]:
@@ -83,6 +97,37 @@ def _turnos(msgs: list) -> tuple[list[str], bool]:
         if partes:
             respostas.append("\n".join(partes))
     return respostas, continuacao
+
+
+def modo(msgs: list) -> str:
+    """"conciso" (padrão) ou "explicativo": vale o último pedido do Humano que mudou o modo."""
+    atual = "conciso"
+    for m in msgs:
+        if isinstance(m, dict) and m.get("role") == "user":
+            t = _texto(m.get("content"))
+            if _LIGA_EXPLICATIVO.search(t):
+                atual = "explicativo"
+            if _LIGA_CONCISO.search(t):
+                atual = "conciso"
+    return atual
+
+
+def linha_modo(msgs: list) -> str:
+    if modo(msgs) == "explicativo":
+        return "MODO: explicativo (pedido do Humano nesta conversa) — pode explicar o processo."
+    return ("MODO: conciso (padrão) — traga o resultado, sem narrar o processo; fale do processo "
+            "só para constatar erro, em 1 linha.")
+
+
+def _narracao(texto: str) -> list[str]:
+    linhas, em_codigo = [], False
+    for l in texto.splitlines():
+        if l.strip().startswith("```"):
+            em_codigo = not em_codigo
+            continue
+        if not em_codigo and _NARRACAO.match(l):
+            linhas.append(l.strip())
+    return linhas
 
 
 def e_continuacao(msgs: list) -> bool:
@@ -139,11 +184,12 @@ def _desmentidas(texto: str) -> list[str]:
     return achados
 
 
-def auditar(msgs: list) -> list[str] | None:
+def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
     """Achados sobre a resposta do turno anterior; [] = limpa; None = não há turno
-    anterior, ou o pedido é continuação (não se audita a resposta em andamento)."""
+    anterior. Na continuação só se audita com `na_continuacao=True` -- a resposta
+    em andamento nunca entra, só o turno anterior a ela."""
     respostas, continuacao = _turnos(msgs)
-    if continuacao or not respostas:
+    if (continuacao and not na_continuacao) or not respostas:
         return None
     texto, n = respostas[-1], len(respostas)
     cabs = _cabecalhos(texto)
@@ -172,6 +218,11 @@ def auditar(msgs: list) -> list[str] | None:
         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
     achados += _desmentidas(texto)
+    if modo(msgs) == "conciso":
+        narradas = _narracao(texto)
+        if narradas:
+            achados.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
+                           "traga o resultado; processo só para constatar erro")
     for arquivo, linha_n, trecho in _cit.achar_citacoes(texto):
         if not arquivo.lower().endswith(_EXTENSOES):
             continue
@@ -187,7 +238,18 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
     anterior. Nunca levanta exceção: auditoria quebrada não derruba a resposta."""
     try:
         if e_continuacao(msgs):
-            return LINHA_CONTINUACAO
+            # (665) no modo Agent o texto costuma sair só no ÚLTIMO passo, que antes
+            # recebia só `MESMA-RESPOSTA`: a correção pendente se perdia. Ela vai junto
+            # até aparecer escrita nesta resposta. Sem log: é o mesmo turno de antes.
+            if "correção do turno anterior" in _em_andamento(msgs).lower():
+                return LINHA_CONTINUACAO
+            pendentes = auditar(msgs, na_continuacao=True)
+            if not pendentes:
+                return LINHA_CONTINUACAO
+            return ("MESMA-RESPOSTA: continuação da sua resposta depois de ferramenta. Se ainda não "
+                    "escreveu nada nesta resposta, abra com o cabeçalho e logo depois a correção; "
+                    "se já escreveu, não abra cabeçalho de novo. AINDA FALTA corrigir o turno "
+                    "anterior: " + " | ".join(pendentes))
         achados = auditar(msgs)
     except Exception as e:  # noqa: BLE001 -- best-effort, como o modelo real (621)
         _registrar(cliente, None, f"{type(e).__name__}: {e}"[:160])
@@ -230,9 +292,14 @@ def _selftest() -> int:
         ("1ª resposta com linha de turno -> acusa", "1ª resposta" in linha_estado([u(), a(linha(1, "11:39") + "\n\nx"), u()])),
         ("passo 1 do loop Agent audita o turno anterior (t=3 (3))", "qualificador" in linha_estado(
             [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie")])),
-        ("passos seguintes do loop: MESMA-RESPOSTA, sem reauditar", linha_estado(
+        ("passos seguintes do loop, correção já escrita: só MESMA-RESPOSTA", linha_estado(
             [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie"),
-             {"role": "assistant", "content": "Agata · m · t=4 (4) · x", "tool_calls": [{"id": "1"}]}, res]) == LINHA_CONTINUACAO),
+             {"role": "assistant", "content": "Agata · m · t=4 (contado no contexto) · x\nCorreção do turno anterior: ok",
+              "tool_calls": [{"id": "1"}]}, res]) == LINHA_CONTINUACAO),
+        ("passos seguintes, correção ainda não escrita (caso de (665)): leva o que falta", "AINDA FALTA" in linha_estado(
+            [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie"), ferr, res, ferr, res])),
+        ("passos seguintes de um turno anterior limpo: só MESMA-RESPOSTA", linha_estado(
+            [u(), a(pront), u(), t2, u("reavalie"), ferr, res]) == LINHA_CONTINUACAO),
         ("resposta com 2 cabeçalhos (texto, ferramenta, texto) -> acusa", "2 cabeçalhos" in linha_estado(
             [u(), a(pront), u("q"), a(linha(2, "13:09") + "\nCorreção do turno anterior: x"), ferr, res,
              a(linha(2, "13:10") + "\n\ncorpo"), u()])),
@@ -264,12 +331,20 @@ def _selftest() -> int:
          == "AUDITORIA-TURNO-ANTERIOR: OK"),
         ("citação de arquivo que não existe -> acusa", "citação" in linha_estado(
             [u(), a(pront + "\nVer `PROJETO_NAO_EXISTE.md:12` \"um trecho qualquer aqui\""), u()])),
+        ("modo conciso: narração de processo -> acusa", "narração" in linha_estado(
+            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\nVou verificar o estado.\nAgora vou ler o PROJETO.\nResultado: ok"), u()])),
+        ("modo explicativo pedido pelo Humano: narração não é acusada", linha_estado(
+            [u(), a(pront), u("modo explicativo, por favor"), a(linha(2, "13:09") + "\n\nVou verificar o estado."), u()])
+         == "AUDITORIA-TURNO-ANTERIOR: OK"),
+        ("'modo conciso' depois volta ao padrão", modo([u("modo explicativo"), u("ok, modo conciso de novo")]) == "conciso"),
+        ("narração dentro de bloco de código não conta", linha_estado(
+            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n```\nvou fazer x\n```\nfeito"), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
         ("IP:porta não vira citação", linha_estado([u(), a(pront + "\nporta 127.0.0.1:11435"), u()])
          == "AUDITORIA-TURNO-ANTERIOR: OK"),
     ]
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
-                  len(linhas) == 16 and all("análise" not in l and "corpo" not in l for l in linhas)))
+                  len(linhas) == 19 and all("análise" not in l and "corpo" not in l for l in linhas)))
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)

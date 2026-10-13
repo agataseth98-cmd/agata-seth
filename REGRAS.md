@@ -22,14 +22,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9c172954b3d8eef20749d178390347d33a992370
-  Escrito em: 13/10/2026 14:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e
+  Escrito em: 13/10/2026 14:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9c172954b3d8eef20749d178390347d33a992370/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e996ee3d7fa8ab7f8f69e716bd55a594b8eaf5e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -126,6 +126,7 @@ Nenhuma regra pode depender de recurso exclusivo de um fornecedor. Qualquer mode
 Custo, forma, hidratação, apresentação — otimize à vontade. Conteúdo já registrado em MEMÓRIAS, nunca. Em qualquer conflito entre este princípio e a Regra 4, a Regra 4 vence.
 
 *Motivo:* sem este limite, "otimize sempre" seria lido como licença para comprimir história. Ordem do Humano, (80), confirmada por escrito em (84). Mecanismo: `PROTOCOLOS.md`, "Economia de tokens — mecanismo de Regra 7".
+- **Economia de tokens é o modo permanente**, não medida de emergência (decisão do Humano, (654)). Antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS. O que vai em toda mensagem — ferramenta, histórico, instrução — só entra quando for preciso.
 
 **Linhas vermelhas:** as regras 2, 3 e 4 são absolutas — nem o Humano pede para cruzar. A 7 existe para proteger a 4 e cede a ela em qualquer choque. A 6 pode ser suspensa por ordem explícita registrada, e volta sozinha.
 
@@ -189,6 +190,9 @@ O Humano pode declarar **`modo teste`** a qualquer momento; vale até ele encerr
 
 ### NPR — Não Precisa Responder
 Instrução de roteamento, não de conteúdo. Mensagem prefixada com **NPR:** — o destinatário toma conhecimento, considera sem ação imediata e não gera resposta de confirmação, nem ecoa o texto.
+
+**O modo conciso é o padrão de resposta** (nome próprio, para não confundir com o prefixo NPR acima). A resposta traz o resultado, não a narração do processo ("vou verificar…", "agora vou…"). O processo só aparece para constatar erro, em uma linha. O Humano liga o modo explicativo na conversa ("modo explicativo"; volta com "modo conciso"). O cabeçalho da Regra 1 é informativo e não conta como narração.
+*Motivo:* narração é paga duas vezes — na saída e em toda mensagem seguinte, porque fica no histórico — e polui o que o Humano lê. Decisão do Humano, com 3 pareceres condicionais acatados, (667).
 
 ---
 

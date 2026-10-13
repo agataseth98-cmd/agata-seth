@@ -1,0 +1,17 @@
+{
+  "_como_usar": "Parâmetros do Agent \"Seth\" no LibreChat que não estão no librechat.yaml (moram no Mongo). Fonte versionada: aplicar e conferir com redesign/librechat/aplicar_agente_seth.sh. MEMÓRIAS (666).",
+  "agent_id": "agent_4KlxSMeX5Y8cWQVODkJfH",
+  "teto_economia": 100000,
+  "_janela": "maxContextTokens NÃO é fixo: aplicar_agente_seth.sh calcula com scripts/capivara_perfis.py --janela-agente = min(teto_economia, menor janela dos modelos das filas -longo) − reserva da hidratação. Pedido maior do que cabe no menor modelo de uma fila vai pra <fila>-longo (seth_gateway). O teto é economia de tokens: o LibreChat reenvia o histórico até a janela a cada mensagem. MEMÓRIAS (666)/(667).",
+  "plugins_sob_demanda": [
+    "ler_mensagens_mcp_discord",
+    "enviar_mensagem_mcp_discord",
+    "navegar_mcp_navegador",
+    "ler_pagina_mcp_navegador",
+    "clicar_mcp_navegador",
+    "preencher_mcp_navegador",
+    "screenshot_mcp_navegador",
+    "fechar_navegador_mcp_navegador"
+  ],
+  "_por_que_sob_demanda": "Premissa do deepseek-harness pedida pelo Humano: tudo é plugin e só entra quando precisa. O LibreChat já tem isso (capacidade deferred_tools, ligada por padrão): ferramenta com defer_loading=true sai da lista enviada ao modelo, e o modelo a encontra com tool_search quando precisar. As 4 do canon ficam sempre carregadas — são usadas em quase toda resposta."
+}

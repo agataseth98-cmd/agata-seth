@@ -46,6 +46,13 @@
       "sinal": "aceit|passa",
       "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
       "origem": "(661)"
+    },
+    {
+      "id": "vault-sem-entrada-nova",
+      "tema": "vault|obsidian|entradas/",
+      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada",
+      "correcao": "o vault é regenerado no post-commit de cada commit e o arquivo da entrada já existe; o que pode atrasar é só a LISTAGEM do Obsidian (391)/(400) — leia o arquivo",
+      "origem": "(666)"
     }
   ]
 }

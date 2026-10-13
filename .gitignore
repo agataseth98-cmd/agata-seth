@@ -96,3 +96,7 @@ memoria/*.log
 
 # TTS Piper -- voz .onnx ~60MB, baixada por redesign/router/tts-piper/instalar.sh (MEMÓRIAS (387))
 redesign/router/tts-piper/voices/
+
+# Relatórios da pesquisa semanal automática de modelos (scripts/pesquisar_modelos_gratuitos.py):
+# ficam no disco pro Humano ler, mas não são proposta pendente -- decisão do Humano, MEMÓRIAS (666).
+propostas/modelos-gratuitos-*.md

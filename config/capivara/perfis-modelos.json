@@ -1,0 +1,90 @@
+{
+  "_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas ou os modelos mudarem. MEMÓRIAS (667).",
+  "medido_em": "2026-10-13",
+  "filas": {
+    "seth-rapido": [
+      "mistral/ministral-14b-latest",
+      "gemini/gemini-3.5-flash-lite",
+      "gemini/gemini-3.1-flash-lite",
+      "ollama-local/qwen3.5-9b-64k:latest"
+    ],
+    "seth-livre": [
+      "gemini/gemini-2.5-flash",
+      "mistral/ministral-14b-latest",
+      "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
+      "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+      "zai/glm-4.7-flash",
+      "gemini/gemini-3-flash-preview",
+      "ollama-local/qwen3.5-9b-64k:latest"
+    ],
+    "seth-pesado": [
+      "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+      "gemini/gemini-2.5-flash",
+      "ollama-local/qwen3.5-9b-64k:latest"
+    ],
+    "seth-codigo": [
+      "mistral/codestral-latest",
+      "gemini/gemini-3-flash-preview",
+      "openrouter/cohere/north-mini-code:free",
+      "zai/glm-4.7-flash",
+      "ollama-local/qwen3.5-9b-64k:latest"
+    ]
+  },
+  "modelos": {
+    "gemini/gemini-2.5-flash": {
+      "janela": 1048576,
+      "saida_max": 65536,
+      "fonte": "omniroute /v1/models"
+    },
+    "gemini/gemini-3-flash-preview": {
+      "janela": 1048576,
+      "saida_max": 65536,
+      "fonte": "omniroute /v1/models"
+    },
+    "gemini/gemini-3.1-flash-lite": {
+      "janela": 1048576,
+      "saida_max": null,
+      "fonte": "omniroute /v1/models"
+    },
+    "gemini/gemini-3.5-flash-lite": {
+      "janela": 1048576,
+      "saida_max": 65536,
+      "fonte": "documentação oficial: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite (lido em 13/10/2026)"
+    },
+    "mistral/codestral-latest": {
+      "janela": 128000,
+      "saida_max": null,
+      "fonte": "omniroute /v1/models"
+    },
+    "mistral/ministral-14b-latest": {
+      "janela": 256000,
+      "saida_max": null,
+      "fonte": "documentação oficial: https://docs.mistral.ai/fr/models/model-cards/ministral-3-14b-25-12 — \"Contexte 256k\" (lido em 13/10/2026)"
+    },
+    "ollama-local/qwen3.5-9b-64k:latest": {
+      "janela": 65536,
+      "saida_max": null,
+      "fonte": "ollama num_ctx"
+    },
+    "openrouter/cohere/north-mini-code:free": {
+      "janela": 256000,
+      "saida_max": 64000,
+      "fonte": "omniroute /v1/models"
+    },
+    "openrouter/nvidia/nemotron-3-super-120b-a12b:free": {
+      "janela": 262144,
+      "saida_max": 235929,
+      "fonte": "omniroute /v1/models"
+    },
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
+      "janela": 1000000,
+      "saida_max": 65536,
+      "fonte": "omniroute /v1/models"
+    },
+    "zai/glm-4.7-flash": {
+      "janela": null,
+      "saida_max": null,
+      "fonte": "nao_medido"
+    }
+  }
+}
