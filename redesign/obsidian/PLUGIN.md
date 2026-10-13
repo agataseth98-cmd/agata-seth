@@ -119,4 +119,6 @@ Pedido do Humano: parar o giro e navegar "como o gráfico, em todas as direçõe
 | navegação | arrastar (girar), botão direito (deslocar), roda (zoom), WASD (voar), clique (foco + ligações) |
 | configuração | `redesign/obsidian/grafo-3d.json` → `.obsidian/plugins/new-3d-graph/data.json`: fundo e rótulos na paleta da Agata, rótulos a partir de 420 unidades, 16 grupos de cor (`tag:regiao/<região>` — o gerador põe a tag em cada nota — e `path:`/`file:` para os documentos de fora do vault) |
 
+**Rótulos (676):** o plugin só mostra o nome de uma nota quando a câmera está a menos de `labelDistance` dela — inclusive no hover (medido no código). Com o cérebro espalhado, de longe nenhuma bolinha tinha nome. Agora: `showLabelsOnHoverOnly` + `labelDistance` 6000 — passar o mouse mostra o nome da nota e das vizinhas, de qualquer distância, sem poluir a tela com 1.600 nomes. (O slider da tela vai só até 500; o valor vem do `grafo-3d.json`.) O "só para depois" é a física assentando nos primeiros segundos — não configurável.
+
 **Rollback:** `rm -rf ~/agata/.obsidian/plugins/new-3d-graph` e tirar `"new-3d-graph"` de `.obsidian/community-plugins.json`.

@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 92306dd6ef4970d3d501bebe48a3addfd05d2bd4
-  Escrito em: 13/10/2026 17:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 33c9235c149019134d50fd7b472ba62fc64792cc
+  Escrito em: 13/10/2026 18:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33c9235c149019134d50fd7b472ba62fc64792cc/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(677) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-vault-rotulos-2026-10-13` (assinada pelo Humano): catálogo da auditoria e regra "testar `vault_buscar` antes de avaliar a memória" no ar; grafo 3D com o nome da nota ao passar o mouse, de qualquer distância.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. `instalar_cerebro.sh` regravou a configuração do New 3D Graph (relida: hover ligado, distância 6000, letra 6). `seth-gateway` e `obsidian-app` reiniciados, ativos. **Falta conferir em uso real:** o Humano passa o mouse numa bolinha no grafo 3D; e, na próxima avaliação da Seth, confiro no Mongo se ela chamou `vault_buscar` e se a auditoria automática pegou o que pegaria.
+
+**sync:** PASS — `main` = `origin/main` (PR #177 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (676).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, instalar_cerebro, systemctl, `data.json` do plugin relido · Autorização: Humano — assinatura de `seth-vault-rotulos-2026-10-13`.
 
 (676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
 
