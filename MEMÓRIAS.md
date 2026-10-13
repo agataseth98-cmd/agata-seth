@@ -26,20 +26,79 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0065d7db8dad3bf3aae6bc10405bb1e59fa686a1
-  Escrito em: 03/10/2026 19:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7b780a0036fc274714ad1b86fed129b58e48217e
+  Escrito em: 13/10/2026 11:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0065d7db8dad3bf3aae6bc10405bb1e59fa686a1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b780a0036fc274714ad1b86fed129b58e48217e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(656) CONSELHO — 13/10/2026 · **Decisor local (modelos de decisão estilo Jev, Ollaya na CPU): 7 pareceres de 3 famílias — 2 "não", 5 "condicional"; o roteador da Seth foi o ponto mais contestado, por reabrir (383)/(416). O Humano decidiu seguir com os 4 usos e assumiu o risco por escrito, com uma avaliação em produção que avisa se valeu a pena até ele mandar aprovar ou remover.**
+
+**Origem do pedido:** o Humano leu sobre o Ollaya (runtime local de modelos de decisão no estilo Jev, Apache-2.0, poucas semanas de vida) e pediu para refazer o plano de (655) em volta dele — "onde checagem exata é necessária, vamos precisar de um workaround". Um modelo de decisão não gera texto: recebe um texto e perguntas tipadas e devolve probabilidades.
+
+**Medido antes de propor** (20 pedidos pt-BR sintéticos, rotulados à mão por mim, 4 rotas, CPU): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual`, `gliclass` e variações de pergunta 10/20 ou menos em 50–200 ms; a heurística por tamanho do gateway 5/20 (todos os 20 eram curtos — mandou tudo para o rápido). Amostra pequena, feita por quem desenhou o teste: dito no pedido.
+
+**A proposta** (seção "Decisor local" no PROJETO.md, dentro de `fechamento-e-decisor-2026-10-13`): padrão "decide e confere" — a regra determinística sempre vence; o modelo decide dentro dela ou só restringe; nunca em hook; fora do ar → regra de antes. Quatro usos: roteador da Seth em sombra; inbox do Obsidian (só barra rascunho); aviso de dado pessoal no canon público (P-20); nota de utilidade na consolidação (só reprova).
+
+**Pareceres** (mesmo pedido, sem mudar uma vírgula, pelo `scripts/conselho_remoto.py`; objeções conhecidas apontadas no pedido: (383), (416), a doutrina de defesa proporcional, (648)/(649), a Máquina sem swap):
+
+| Família / modelo | Posição | Roteador | Inbox | P-20 | Consolidação |
+|---|---|---|---|---|---|
+| openrouter / nemotron-3-ultra (5 chamadas) | não, condicional, condicional, não, condicional | fora (nas 3 condicionais) | com guardas | sim | só reprovando |
+| mistral / ministral-8b | condicional | em sombra | sim | sim | fora |
+| zhipu / glm-4.7-flash | condicional (na prática, só uso manual) | fora | fora | fora | só manual |
+
+O mesmo modelo, com o mesmo pedido, oscilou entre "não" e "condicional" — o parecer dele não é estável, e isso é dado. O Gemini falhou com 504 (cota diária). **Achado de processo:** o rodízio escolhe a família *menos usada*; o OpenRouter estava 4 usos atrás das outras e ganhou 5 vezes seguidas até empatar, e o GLM, quando escolhido, caía em 529 e passava a vez. Pedir "mais 3 opiniões" ao rodízio não garante 3 famílias diferentes.
+
+**Convergência:** o roteador automático é o mais contestado; os usos em segundo plano têm aceitação parcial, sempre com guarda de recurso; ninguém aceita 20 casos como prova de arquitetura. **Erros de fato nos pareceres**, conferidos na Máquina: a sombra não sincroniza com o fluxo principal (thread separada; com o decisor fora, o pedido passou em 62 ms); reprovar na consolidação não é irreversível (vai para o `reprovados.log`); ninguém propôs "validador central".
+
+**Veredito do Humano** — escolheu "Como proposto, assumo o risco" e escreveu: "Vamos de 2, mas crie uma maneira de irmos checando os resultados em produção por alguns dias e o sistema me avisa se valeu a pena ou até eu pedir para remover ou aprovar de vez". Pela Regra 8, divergência não se decide por maioria — decidiu o Humano.
+
+**O que entrou por causa dos pareceres:** `--oom-score-adj=1000` no contêiner (sem swap, ele morre antes de qualquer outro processo). **O que entrou por causa do veredito:** `scripts/avaliar_decisor.py` + `agata-avaliacao-decisor.timer` (20:00 diário): VALE / NÃO VALE / INCONCLUSIVO por uso, com o motivo; inbox se mede sozinho (barrada e depois editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); notificação e relatório na área de trabalho no 3º e no 7º dia, depois semanal, e na hora se houver alarme (3+ reinícios, ou mais da metade das decisões de 24 h falhando). Para isso o roteador guarda 200 caracteres de cada divergência, modo 600, apagados por `--encerrar`.
+
+**Pareceres crus:** os 7 arquivos de 13/10/2026 no diretório de respostas do Conselho Remoto (camada local, fora do repositório).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 20 pedidos medidos contra o Ollaya local; 7 chamadas reais ao `conselho_remoto.py`, os 7 formatos conferidos pelo script e os 7 textos lidos · Autorização: Humano — pediu a 2ª opinião, depois "peça mais 3 opiniões antes", depois o veredito acima.
+
+(655) DIÁRIO — 13/10/2026 · **As 8 pendências de PROJETO.md, "Estado dos bugs e dos testes", fechadas numa proposta P-8 só (`fechamento-e-decisor-2026-10-13`, 22 arquivos, aguardando assinatura): 7 por correção ou por medição, a 8ª vira risco de fundo declarado, com números. Achado novo: corrida no boot fazia a pesquisa semanal e a consolidação rodarem sem o OmniRoute de pé. E uma correção minha: o diagnóstico "seth-livre instável" que dei mais cedo nesta sessão estava errado.**
+
+**Pedido do Humano:** "resolva tudo de forma econômica elegante e definitiva, comece pelas falhas" (depois de "teste todos os recursos do sistema" e "suba todo o sistema"). A limpeza de disco e o swap da mesma sessão são manutenção da Máquina, fora do canon — precedente (425)/(426).
+
+**Correção do meu próprio diagnóstico (nunca registrado em canon, só dito na conversa).** Mandei 1 pedido por combo pelo `:20126` com `max_tokens: 5`. O "seth-livre" que respondeu em 26 s pelo Ollama local nunca foi `seth-livre`: o classificador do gateway reescreveu a mensagem curta para `seth-rapido`. E a descida até o fundo local foi do próprio teste: o Mistral recusou com 429 porque o pedido anterior tinha usado a mesma chave 0,7 s antes (limite de 1 req/s); o GLM deu 529; os dois Gemini *flash-lite* devolveram 200 **vazio** (o raciocínio interno consome os 5 tokens) e o OmniRoute tratou como falha. Lido nos `call_logs` do OmniRoute, não suposto. O instrumento certo já existia: `scripts/queda_por_elo.py` (passa pelo `:20127`, `max_tokens` 2000, 8 s entre pedidos). Virou linha em "Estado dos bugs".
+
+**Fechados, cada um com a evidência:**
+- **Cold-start do Ollama.** Modelo tirado da GPU (`keep_alive: 0`), 1 chamada fria pelo caminho real: 200, tool-call, 9,1 s. Os 55 estouros de 30 s do Ollama no `app.log` do OmniRoute são todos até 23/09 — época em que o `llama.cpp` empurrava o Ollama para a CPU (648); nenhum desde então.
+- **Filtro de título.** O LibreChat usa `titleMethod = "completion"` por padrão (lido no `run.cjs` do contêiner), então o detector por substring era quem trabalhava. Proposta: `titleMethod: "structured"` no endpoint Seth (o `client.js` repassa esse campo ao `generateTitle`, conferido) e o sinal por substring sai do gateway; o do Goose só vale em mensagem `system`. Fecha o residual de (419)/(431)/(433). `--selftest` com 2 casos novos (frase colada pelo usuário → hidrata).
+- **Hidratação suspeita** (420). 1 pergunta real pelo `:20126` que só a hidratação responde: a Seth respondeu "(654)" em 1,6 s — topo verdadeiro. As 3 hipóteses (não injetada, truncada, ignorada) caem.
+- **Manifesto do HD.** A fórmula antiga é aposentada como irreproduzível; vale o `hash_ir.sh` mais o restore do restic (P-12).
+- **Drift dos derivados** (333)/(349). Causa raiz segue `lacuna`; fecha a classe: P-22 avisa quando `.hidrata.md` ou um dos índices diverge do HEAD sem a fonte ter mudado. Suíte: 2 PEGA, 2 PASSA.
+- **Portas `:20131`/`:20132`** (420). Lido no código do OmniRoute 3.8.50: `embedWsProxy` e `liveServer` (`/live-ws`), loopback. Entram no manifesto de portas do P-4.
+- **Log da consolidação.** "novo" só depois de conferir o arquivo no disco (tamanho > 0).
+
+**Risco de fundo, não bug:** `OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS` (padrão 30000, configurável desde a versão instalada) disparou 323 vezes de 02/09 a 10/10 — 155 `api.z.ai`, 90 Gemini, 55 Ollama. Não baixa, porque cortaria um fundo local lento. Desde 04/10, 1 disparo.
+
+**Achado novo — corrida no boot.** Hoje às 08:22:55 a recuperação do `Persistent=true` disparou a pesquisa semanal e a consolidação, que terminaram 1 s antes de o OmniRoute começar a subir: a pesquisa gravou `propostas/modelos-gratuitos-2026-10-13.md` com 100% "connection refused". Proposta: `ExecCondition` com `scripts/esperar_servico.sh` (espera até 120 s; se não subir, o systemd pula sem escrever nada).
+
+**Decisões do Humano nesta sessão:** `zai/glm-4.7-flash` sai do `seth-rapido` (155 dos 323 travamentos eram dele); o Groq sai também do `seth-codigo` (a regra de (648) vale para o Goose); `gemini-3-flash-preview` fica no fim do `seth-livre` — fecha a decisão aberta em (652)/(653); o importador da inbox do Obsidian passa a rodar sozinho (`agata-vault-inbox.timer`, nota parada há 10 min; parada há 24 h entra sem consulta). A doc das filas (`config/modelos-gratuitos.md`) estava atrás de (653)/(654) e foi alinhada à ordem viva lida no banco do OmniRoute.
+
+**Dentro da mesma proposta, o decisor local** — decisão e pareceres na entrada seguinte, (656).
+
+**Verificado antes de pedir assinatura:** 6 `--selftest` OK (`decisor`, `seth_gateway`, `vault_importar_inbox`, `p20_decisor`, `avaliar_decisor`, `consolidacao`); `testar_perimetro.sh` 51/51; `perimetro.sh` 0 FALHA na árvore e na worktree descartável com o `.diff` aplicado; `git apply --check` OK; árvore devolvida ao HEAD.
+
+**Falta, depois da assinatura:** aplicar, instalar as units, os 2 PUTs nos combos (com backup do `storage.sqlite`), redeploy da Seth, e medir de novo pelo caminho real — entrada própria.
+
+**sync:** PASS — `git rev-parse main` = `7b780a0` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (654).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `call_logs` e `app.log` do OmniRoute lidos; código do OmniRoute e do LibreChat lidos no disco/contêiner; 1 chamada fria ao Ollama e 1 pergunta real à Seth; suíte e perímetro rodados · Autorização: Humano — "resolva tudo de forma econômica elegante e definitiva" + as 4 escolhas acima, uma a uma.
 
 (654) DIÁRIO — 03/10/2026 · **Teste de ponta a ponta pedido pelo Humano achou `seth-pesado` lento/travado no elo 0 (`gemini-2.5-flash`, provável cota diária esgotada) — reordenado igual ao `seth-livre`: `gemini-2.5-flash` desceu, `openrouter/nemotron-3-ultra` assumiu o elo 0. Testado ao vivo, 200. E: o Humano fixou "economia de tokens" como padrão PERMANENTE do sistema, não medida temporária até quarta.**
 
