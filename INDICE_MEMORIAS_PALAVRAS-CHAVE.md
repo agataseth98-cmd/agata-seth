@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
+  palavras-chave: proposta, seth, vault, rotulos, pedido, humano, pode, preparar, gráfico, consigo, saber, bolinha, auditoria, vira, regra, catálogo, grafo, passa, mostrar, nome, nota, passar, mouse, distância, aguardando, assinatura
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
   palavras-chave: execução, aplicada, cerebro, navegavel, assinada, humano, brain, atlas, parado, new, graph, instalado, cores, regiões, obsidian, reiniciado, falta, abrir, navegar
 (674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: decisão, humano, groq, removido, combos, principais, seth, desvio, condicional, remoção, real, expôs, problemas, reais, pré, existentes, achados, corrigidos, hora, modelos, llama, cpp, locais, cabem, juntos, gpu, travam, cascata, offline, ollama, preso, rodando, cpu, falta, vram, achado, reinícios
 (647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e aplicada: o estimador separa a taxa das ferramentas (`SETH_CHARS_POR_TOKEN_TOOLS`), default = mesma taxa do texto, sem mudança de comportamento até o valor real ser medido e configurado.**
   palavras-chave: estimador, taxa, tools, assinada, aplicada, separa, ferramentas, seth, chars, token, default, mesma, texto, mudança, comportamento, valor, real, medido, configurado
-(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o LibreChat manda `max_tokens` em pedidos reais da Seth só raramente (2 de 498, ~0,4%), e só em chamadas de sumarização de contexto — não em conversa normal. O achado "Groq devolve vazio com `max_tokens` baixo" não deveria atingir a maioria do tráfego real.**
-  palavras-chave: pergunta, lab, respondida, librechat, manda, max, tokens, pedidos, reais, seth, raramente, chamadas, sumarização, contexto, conversa, normal, achado, groq, devolve, vazio, baixo, deveria, atingir, maioria, tráfego, real
+(646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o Libre …
+  palavras-chave: pergunta, lab, respondida, libre
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): …
   palavras-chave: medições, pedidas, lab, viés
 (644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estim …

@@ -1,0 +1,114 @@
+diff --git a/redesign/obsidian/PLUGIN.md b/redesign/obsidian/PLUGIN.md
+index 4485149..0e38d31 100644
+--- a/redesign/obsidian/PLUGIN.md
++++ b/redesign/obsidian/PLUGIN.md
+@@ -119,4 +119,6 @@ Pedido do Humano: parar o giro e navegar "como o gráfico, em todas as direçõe
+ | navegação | arrastar (girar), botão direito (deslocar), roda (zoom), WASD (voar), clique (foco + ligações) |
+ | configuração | `redesign/obsidian/grafo-3d.json` → `.obsidian/plugins/new-3d-graph/data.json`: fundo e rótulos na paleta da Agata, rótulos a partir de 420 unidades, 16 grupos de cor (`tag:regiao/<região>` — o gerador põe a tag em cada nota — e `path:`/`file:` para os documentos de fora do vault) |
+ 
++**Rótulos (676):** o plugin só mostra o nome de uma nota quando a câmera está a menos de `labelDistance` dela — inclusive no hover (medido no código). Com o cérebro espalhado, de longe nenhuma bolinha tinha nome. Agora: `showLabelsOnHoverOnly` + `labelDistance` 6000 — passar o mouse mostra o nome da nota e das vizinhas, de qualquer distância, sem poluir a tela com 1.600 nomes. (O slider da tela vai só até 500; o valor vem do `grafo-3d.json`.) O "só para depois" é a física assentando nos primeiros segundos — não configurável.
++
+ **Rollback:** `rm -rf ~/agata/.obsidian/plugins/new-3d-graph` e tirar `"new-3d-graph"` de `.obsidian/community-plugins.json`.
+diff --git a/redesign/obsidian/grafo-3d.json b/redesign/obsidian/grafo-3d.json
+index b2bbe08..49d5ca7 100644
+--- a/redesign/obsidian/grafo-3d.json
++++ b/redesign/obsidian/grafo-3d.json
+@@ -1,5 +1,5 @@
+ {
+-  "_nota": "Configuração do plugin New 3D Graph versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/new-3d-graph/data.json. Cores das regiões: config/agata-identidade.json -- MEMÓRIAS (674).",
++  "_nota": "Configuração do plugin New 3D Graph versionada aqui (o data.json do plugin é gitignorado). instalar_cerebro.sh grava isto em .obsidian/plugins/new-3d-graph/data.json. Cores das regiões: config/agata-identidade.json -- MEMÓRIAS (674)/(676): nome ao passar o mouse, de qualquer distância.",
+   "groups": [
+     {
+       "query": "tag:regiao/temporal",
+@@ -80,13 +80,13 @@
+   "showTags": false,
+   "hideOrphans": false,
+   "showNodeLabels": true,
+-  "showLabelsOnHoverOnly": false,
+-  "labelDistance": 420,
+-  "labelFadeThreshold": 0.6,
+-  "labelTextSize": 4,
++  "showLabelsOnHoverOnly": true,
++  "labelDistance": 6000,
++  "labelFadeThreshold": 0.95,
++  "labelTextSize": 6,
+   "labelTextColorDark": "#eef1fa",
+   "labelBackgroundColor": "#121a30",
+-  "labelBackgroundOpacity": 0.75,
++  "labelBackgroundOpacity": 0.85,
+   "labelOcclusion": false,
+   "useKeyboardControls": true,
+   "keyboardMoveSpeed": 3,
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+index dc38e44..9c1cf96 100644
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -50,9 +50,9 @@
+     {
+       "id": "vault-sem-entrada-nova",
+       "tema": "vault|obsidian|entradas/",
+-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh",
+-      "correcao": "o vault é regenerado a cada commit e, desde (670), a listagem de diretório vem do disco -- a entrada nova está lá; abra o arquivo",
+-      "origem": "(666)/(670)"
++      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá",
++      "correcao": "o vault é regenerado no post-commit de CADA commit (não há ciclo noturno) e a listagem vem do disco desde (670) -- a entrada nova está lá; abra o arquivo",
++      "origem": "(666)/(670)/(676)"
+     },
+     {
+       "id": "leitura-parcial",
+@@ -60,6 +60,13 @@
+       "sinal": "persist|estrutura|limita|ainda|continua",
+       "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
+       "origem": "(668)/(670)"
++    },
++    {
++      "id": "merge-nao-publicado",
++      "tema": "main local|merge local|mergead\\w* no main",
++      "sinal": "transit|não publicad|nao publicad|só local|so local",
++      "correcao": "PR juntado no GitHub JÁ está publicado (origin/main); o main local só fica atrás até o git pull -- meça com git_sync",
++      "origem": "(676)"
+     }
+   ]
+ }
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 220b245..70807c3 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -320,6 +320,10 @@ def _selftest() -> int:
+              "* **Ferramenta de \"diff de hidratação\"**."), u()]).count("já desmentida") == 3),
+         ("busca semântica como limitação -> acusa (vault_buscar existe, (670))", "vault_buscar" in linha_estado(
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Limitações:**\n- Sem busca semântica nativa"), u()])),
++        ("vault 'precisa regenerar' / 'ciclo noturno' -> acusa (676)", "não há ciclo noturno" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n- Vault precisa regenerar para ter (673); será regenerado no ciclo noturno"), u()])),
++        ("merge 'no main local, não publicado' -> acusa (676)", "JÁ está publicado" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n2. Merge da proposta no main local — estado transitório, não publicado"), u()])),
+         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
+              "- O bloco de estado deve ser copiado manualmente de ONDE_ESTAMOS.md."), u()]).count("já desmentida") == 2),
+@@ -344,7 +348,7 @@ def _selftest() -> int:
+     ]
+     linhas = LOG.read_text(encoding="utf-8").splitlines()
+     casos.append(("log: só quem foi auditado, sem o texto",
+-                  len(linhas) == 19 and all("análise" not in l and "corpo" not in l for l in linhas)))
++                  len(linhas) == 21 and all("análise" not in l and "corpo" not in l for l in linhas)))
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index fbbc0a4..fb848d5 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -211,7 +211,12 @@ _DOUTRINA_FIXA = (
+     "confirmando o texto exato com `query_canon` (o vault é derivado; o canon é "
+     "a fonte). A listagem de diretório do vault vem do disco desde (670) — não "
+     "está mais atrasada; a leitura de ferramenta vem inteira desde (668) "
+-    "(`[N linha(s), completo]`). Não chame isso de limitação.\n\n"
++    "(`[N linha(s), completo]`). Não chame isso de limitação. **Ao avaliar ou "
++    "descrever o sistema de memórias, TESTE a busca na mesma resposta** — uma "
++    "chamada de `vault_buscar` sobre o tema avaliado — e relate o que ela "
++    "devolveu; sem esse teste, não afirme nada sobre vault ou busca ((676)). O "
++    "vault é regenerado a cada commit (não há ciclo noturno); PR juntado no "
++    "GitHub já está publicado.\n\n"
+     "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
+     "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
+     "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "

@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1d687fdf61a6218aae26cfe33809b236387028ee
-  Escrito em: 13/10/2026 16:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 92306dd6ef4970d3d501bebe48a3addfd05d2bd4
+  Escrito em: 13/10/2026 17:55 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d687fdf61a6218aae26cfe33809b236387028ee/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306dd6ef4970d3d501bebe48a3addfd05d2bd4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
+
+**Auditoria da Seth, 16:47 (ministral-14b), medida:** ✓ HEAD `7f11476`, topo (673), sync, árvore limpa; a proposta `cerebro-navegavel` estava mesmo pendente; ferramentas inteiras. ✗ "Vault precisa regenerar para ter (673); será regenerado no próximo ciclo noturno" — falso: o vault regenera no post-commit de cada commit, `0673.md` existia, e não há ciclo noturno (inventado). ✗ "Merge da proposta no main local — estado transitório, não publicado" — errado: o PR #173 foi juntado no GitHub. ✗ "Busca semântica inalterada" como limitação, **sem usar `vault_buscar` nenhuma vez**. ✗ Cabeçalho sem a ressalva de (621). **Falha causada por mim:** às 16:42 o `estado` dela saiu com exit 128 e 0 linhas — eu estava trocando de branch no repo naquele instante (reflog 16:41:56); hoje roda normal.
+
+**Rótulos do grafo 3D (medido no `main.js` do New 3D Graph 2.8.1):** o nome de uma nota só aparece quando a câmera está a menos de `labelDistance` dela — **inclusive no hover**; com 420 e o cérebro espalhado, de longe nenhuma bolinha tinha nome. Correção: `showLabelsOnHoverOnly` + `labelDistance` 6000 (o slider da tela vai até 500, o código aceita mais) e letra 6 — passar o mouse mostra o nome da nota e das vizinhas, de qualquer distância, sem 1.600 nomes na tela. O "só para depois" é a física assentando (o plugin não expõe o tempo).
+
+**Mudanças:** catálogo da auditoria — o item do vault acusa "precisa regenerar", "não está no vault", "ciclo noturno", "até lá"; item novo `merge-nao-publicado` ("main local … transitório/não publicado"); 2 casos no selftest (log esperado 19 → 21 linhas). Doutrina do gateway: ao avaliar o sistema de memórias, **testar `vault_buscar` na mesma resposta** e relatar o que voltou; sem o teste, não afirmar nada sobre vault ou busca; "não há ciclo noturno; PR juntado já está publicado". `grafo-3d.json` e `PLUGIN.md` (rótulos). Re-auditada com o catálogo novo, a resposta das 16:47 gera os 3 achados.
+
+**Verificado:** `auditoria_turno.py --selftest` e `seth_gateway.py --selftest` OK na worktree com o `.diff`; `perimetro.sh` 0 FALHA.
+
+**Assinar** (depois de juntar o PR e `git pull --ff-only`): `bash scripts/aprovar.sh seth-vault-rotulos-2026-10-13`
+
+**sync:** PASS — `main` = `origin/main` (PR #176 juntado) antes do branch; topo de MEMÓRIAS = (675).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: Mongo do LibreChat (resposta das 16:47 e ferramentas), reflog do repo, `main.js` do New 3D Graph (laço dos rótulos), selftests, perímetro · Autorização: Humano — "pode preparar"; o pedido dos rótulos.
 
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
 
