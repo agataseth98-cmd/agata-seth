@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(680) DIÁRIO — 13/10/2026 · **Proposta `seth-tema-sync-2026-10-13`, a pedido do Humano ("se puder automatizar e eu assinar … faça"): o atalho `seth` passa a copiar o tema da Agata para o LibreChat junto com o resto da configuração. Teste real da Seth adiado para amanhã — o Humano não lembra a senha do LibreChat. Aguardando assinatura.**
+  palavras-chave: proposta, seth, tema, sync, pedido, humano, puder, automatizar, assinar, faça, atalho, passa, copiar, agata, librechat, junto, resto, configuração, teste, real, adiado, amanhã, lembra, senha, aguardando, assinatura
 (679) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-auditoria-1830-2026-10-13` (assinada pelo Humano): `vault_buscar` agora está de verdade no Agent da Seth, `extras/` legível (menos o dossiê de `arquivo-redesign/`), catálogo e checagens novas da auditoria e a doutrina "sistema nunca de memória" no ar. E um erro meu de cabeçalho, registrado.**
   palavras-chave: execução, aplicada, seth, auditoria, assinada, humano, vault, buscar, agora, verdade, agent, extras, legível, dossiê, arquivo, redesign, catálogo, checagens, novas, doutrina, sistema, nunca, memória, erro, meu, cabeçalho, registrado
 (678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedido do Humano ("audite a última resposta da Seth e aplique o que for coerente"). Achado principal, erro meu: o `vault_buscar` NUNCA chegou à Seth — o Agent do LibreChat só carrega as ferramentas listadas em `agents.tools`, e eu não a listei; (671) e (677) afirmaram que estava "no ar para a Seth", e não estava. Proposta `seth-auditoria-1830-2026-10-13` pronta, aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: llamacpp, agata, estava, disabled, inactive, risco, ativo, agora, removido, combo, auto, medição, seth, livre, pedida, lab, mostra, padrão, diferente, esperado, modelo, específico, morto, instabilidade, intermitente, desta, fila, inteira, falhou, atenção
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, segunda opinião favorável (sem emenda — formato bateu limpo desta vez), e já rodada de verdade: achado real — `zai/glm-4.7-flash` está morto (TIMEOUT) e é o elo 0 do `seth-livre`, todo pedido ali paga o custo do timeout antes do fallback. Nenhum `ZERO_CHUNKS`, nenhuma fila sem remoto vivo.**
   palavras-chave: queda, elo, assinada, aplicada, segunda, opinião, favorável, emenda, formato, bateu, limpo, desta, rodada, verdade, achado, real, zai, glm, flash, morto, timeout, seth, livre, pedido, ali, paga, custo, fallback, zero, chunks, fila, remoto, vivo
-(650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota-cota sai do código (reversão exata), conserto do `_rota` fica sozinho com teste próprio, `llamacpp@.service` trava (`Restart=no`, sem `[Install]`), P-9 novo avisa Ollama em CPU. Conferências pós-aplicação acharam mais 5 resíduos de `llama-cpp/*` em combos que o pacote não previa — todos limpos.**
-  palavras-chave: pos, groq, assinada, aplicada, rota, cota, sai, código, reversão, exata, conserto, fica, sozinho, teste, próprio, llamacpp, service, trava, restart, install, novo, avisa, ollama, cpu, conferências, pós, aplicação, acharam, resíduos, llama, cpp, combos, pacote, previa, limpos
+(650) CORREÇÃO — 03/10/2026 · **`pos-groq-2026-10-03` assinada e aplicada: rota- …
+  palavras-chave: pos, groq, assinada, aplicada, rota
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg …
   palavras-chave: frente, rota, cota, desligada, combos
 (648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 comb …
