@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
+  palavras-chave: proposta, cerebro, navegavel, pedido, humano, parar, ele, girar, usá, uso, gráfico, podendo, direções, zoom, insatisfatório, ler, notas, brain, atlas, fica, parado, panorama, entra, new, graph, explorar, navegação, livre, cores, regiões, agata, aguardando, assinatura
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assinada pelo Humano): `cerebro.md` com as 6 regiões contadas e o Brain Atlas com limite de 30 mil ligações — todas as 18.331 entram no 3D.**
   palavras-chave: execução, aplicada, cerebro, tudo, ligado, assinada, humano, regiões, contadas, brain, atlas, limite, mil, ligações, entram
 (672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pergunta, lab, respondida, librechat, manda, max, tokens, pedidos, reais, seth, raramente, chamadas, sumarização, contexto, conversa, normal, achado, groq, devolve, vazio, baixo, deveria, atingir, maioria, tráfego, real
 (645) DIÁRIO — 03/10/2026 · **3 medições pedidas pelo lab sobre o viés de (644): (a) schema das 12 ferramentas = 8.407 chars; (b) a 4ª amostra teve `prompt_tokens` real maior, não `max_tokens` diferente; (c) teste com/sem tools feito, mas caiu em provedores diferentes (Groq vs glm) — resultado real, não decomposto com segurança.**
   palavras-chave: medições, pedidas, lab, viés, schema, ferramentas, chars, amostra, teve, prompt, tokens, real, maior, max, diferente, teste, tools, feito, caiu, provedores, diferentes, groq, glm, resultado, decomposto, segurança
-(644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estimativa ≥ real em 6/6 (100%) das amostras respondidas pelo Groq, mas mediana do |erro| = 18,1% — passa do critério de ≤15% do Conselho Remoto. Amostra pequena (N=6, não 30) por uma dificuldade real: o Groq (`gpt-oss-120b`) é modelo de raciocínio e devolve conteúdo vazio com `max_tokens` pequeno. Não recomendo ligar `SETH_ROTA_COTA=1` ainda.**
-  palavras-chave: calibração, estimador, rota, cota, medida, estimativa, real, amostras, respondidas, groq, mediana, erro, passa, critério, remoto, amostra, pequena, dificuldade, gpt, oss, modelo, raciocínio, devolve, conteúdo, vazio, max, tokens, pequeno, recomendo, ligar, seth
+(644) DIÁRIO — 03/10/2026 · **Calibração do estimador da rota-cota medida: estim …
+  palavras-chave: calibração, estimador, rota, cota, medida, estim
 (643) CORREÇÃO — 03/10/2026 · **Causa raiz do vazamento (629)-(631) fechada de v …
   palavras-chave: causa, raiz, vazamento, fechada
 (642) CORREÇÃO — 03/10/2026 · **2 lições desta sessão canonizadas: `FALHAS.md` F …
