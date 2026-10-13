@@ -26,20 +26,49 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2a338fe9a4049330d6372d1ab54f537fe6a20a3b
-  Escrito em: 13/10/2026 12:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c61fc5c716ee3a38ed279288d862a0e04e597998
+  Escrito em: 13/10/2026 12:06 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2a338fe9a4049330d6372d1ab54f537fe6a20a3b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(660) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta da Seth (ministral-14b, 11:42) sobre o sistema de acesso a memórias: a descrição geral está certa, mas as 3 "faltas" que ela aponta já existem, o "ponto fraco" é uma recusa registrada, e a maior parte dos erros vem da doutrina que o sistema injeta nela — ponteiros velhos, nenhuma menção ao índice, e um linter que reprovava cabeçalho correto. Proposta `seth-memoria-2026-10-13` (4 arquivos), aguardando assinatura.**
+
+**Pedido do Humano:** seguir com a resposta da Seth "o mesmo procedimento que tomamos até aqui" — conferir na Máquina, achar a causa, corrigir por proposta, provar.
+
+| Afirmação da Seth | Conferido | Causa |
+|---|---|---|
+| Cabeçalho `t=3 (3)` | Erro real: "(3)" não é base de contagem. A 2ª reprovação do linter ("não cita a última entrada") era falsa | Doutrina com `(<base da contagem>)` sem o texto do caso normal, e uma base inventada, "(contagem do resumo)"; o linter exigia "Última entrada" na forma (b), contra (422) e o PROTOCOLOS, "Carregar e formatos" |
+| "'sync' tem preço" e formatos citados como REGRAS | Ponteiro errado | A doutrina ainda manda pro REGRAS; as duas seções foram pro PROTOCOLOS em 01/10. O linter tinha o mesmo ponteiro, e a doutrina ainda dizia "os 17 controles" (hoje são 22) |
+| Tabela canônica × derivada = "PROJETO linhas 176-237" | Conteúdo certo, citação errada | "Memória em duas camadas" é local × nuvem; canon × vault está em "Vault Obsidian derivado" (290) |
+| "Falta índice de entradas por data/tema" | Falso | `INDICE_MEMORIAS` (todas as camadas, data e título) e `INDICE_MEMORIAS_PALAVRAS-CHAVE` existem e o `query_canon` dela lê; a doutrina não os mencionava nenhuma vez |
+| "Falta verificar a integridade do vault" | Já existe | P-10 regenera o vault a partir do HEAD e compara o sha256 |
+| "Falta diff de hidratação" | Já existe | `HASH-ESTADO` no bloco injetado + `maquina_verificar estado` ao vivo |
+| "Ponto fraco: sem busca semântica; pode virar tool" | Contradiz decisão registrada | "sem RAG por embedding, de propósito" (115)/(293)/(313); "Fronteira de recusas": vector store refutado |
+| (391)/(400), (271), entrada ≠ linha, leitura parcial, Conselho sem a camada privada, ferramentas | Corretos | — |
+
+**Achado lateral — norma × mecanismo:** o `query_canon` lê o `CHAVES.md`, mas PROJETO e CLAUDE.md diziam "só o Humano abre". O arquivo é público e não tem valor de chave (checklist de (555)). **Decisão do Humano: muda a regra** — a Seth pode ler; proibido é o `.env` com os valores.
+
+**A proposta:** (a) doutrina fixa: os 2 ponteiros REGRAS → PROTOCOLOS; forma (b) com `(contado no contexto)` explícito e as 3 bases do canon, sem a inventada; "os controles do perímetro" no lugar de um número que envelhece; e uma linha nova — antes de dizer que algo falta, procurar no índice, lembrar P-10 e `HASH-ESTADO`, e conferir a "Fronteira de recusas". A doutrina, injetada em todo turno, passou de 7.675 para 8.163 caracteres. (b) Linter: "Última entrada" só na forma (a), plausibilidade mantida se a (b) citar entrada, 3 ponteiros corrigidos, 3 casos novos (16/16) — o cabeçalho real da Seth agora reprova só no "(3)". (c) PROJETO e CLAUDE.md com a regra nova do `CHAVES.md`.
+
+**Verificado:** `seth_gateway.py --selftest` OK, `verificar_cabecalho.py --selftest` 16/16, `perimetro.sh` 0 FALHA na worktree com o `.diff`, `git apply --check` OK. Segunda opinião dispensada: não toca REGRAS.
+
+**Depois de aplicar:** a mesma pergunta à Seth pelo `:20126`. Se voltar com o cabeçalho aprovado e sem as faltas falsas, vem o passo seguinte que o Humano pediu ("se isso resolver automatize tudo que for possível na Seth e Goose"): auditoria automática do turno anterior no gateway, em proposta própria.
+
+**Assinar:** `bash scripts/aprovar.sh seth-memoria-2026-10-13`
+
+**sync:** PASS — sobre `c61fc5c` (aplicação de (659)); `main` = `2a338fe` == `origin/main`; topo de MEMÓRIAS = (659).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: cada afirmação conferida no disco (PROJETO, PROTOCOLOS, REGRAS, índices, P-10, `estado_para_eco.sh`, `canon-mcp.mjs`), linter rodado no cabeçalho real · Autorização: Humano — "siga o mesmo procedimento" + decisão sobre o `CHAVES.md`.
 
 (659) DIÁRIO — 13/10/2026 · **`sombra-e-conselho-2026-10-13` aplicada (assinatura do Humano verificada, PR #161 juntado): o roteador-sombra deixou de registrar divergência falsa — provado com 1 mensagem real — e o Conselho Remoto passa a aceitar parecer sem a palavra "Emenda" e a não repetir família no mesmo pedido. As três decisões que dependem do Humano (Curador, Capivara, Fase 5) ficaram guardadas no `ONDE_ESTAMOS.md`, a pedido dele.**
 

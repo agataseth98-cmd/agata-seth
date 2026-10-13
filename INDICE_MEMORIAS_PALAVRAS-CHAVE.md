@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(660) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta da Seth (ministral-14b, 11:42) sobre o sistema de acesso a memórias: a descrição geral está certa, mas as 3 "faltas" que ela aponta já existem, o "ponto fraco" é uma recusa registrada, e a maior parte dos erros vem da doutrina que o sistema injeta nela — ponteiros velhos, nenhuma menção ao índice, e um linter que reprovava cabeçalho correto. Proposta `seth-memoria-2026-10-13` (4 arquivos), aguardando assinatura.**
+  palavras-chave: auditoria, resposta, seth, ministral, sistema, acesso, memórias, descrição, geral, certa, faltas, ela, aponta, existem, ponto, fraco, recusa, registrada, maior, parte, erros, vem, doutrina, injeta, nela, ponteiros, velhos, menção, índice, linter, reprovava, cabeçalho, correto, proposta, memoria, arquivos, aguardando, assinatura
 (659) DIÁRIO — 13/10/2026 · **`sombra-e-conselho-2026-10-13` aplicada (assinatura do Humano verificada, PR #161 juntado): o roteador-sombra deixou de registrar divergência falsa — provado com 1 mensagem real — e o Conselho Remoto passa a aceitar parecer sem a palavra "Emenda" e a não repetir família no mesmo pedido. As três decisões que dependem do Humano (Curador, Capivara, Fase 5) ficaram guardadas no `ONDE_ESTAMOS.md`, a pedido dele.**
   palavras-chave: sombra, aplicada, assinatura, humano, verificada, juntado, roteador, deixou, registrar, divergência, falsa, provado, mensagem, real, remoto, passa, aceitar, parecer, palavra, emenda, repetir, família, mesmo, pedido, três, decisões, dependem, curador, capivara, fase, ficaram, guardadas, estamos, dele
 (658) DIÁRIO — 13/10/2026 · **Proposta `sombra-e-conselho-2026-10-13` (3 arquivos, aguardando assinatura): conserta o bug do roteador-sombra achado em (657), e fecha as duas pendências do Conselho Remoto que o Humano mandou resolver — o checador que rejeitava parecer certo por falta da palavra "Emenda", e o rodízio que mandava o mesmo modelo várias vezes para o mesmo pedido.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: resolvido, método, seguro, chamadas, reais, strace, cascata, omniroute, invisível, fora, tira, filtro, sse, lista, suspeitos, item, lab, rota, tamanho, bloqueado, combos, seth, compartilham, mesmo, modelo, posição, trocar, combo, resolve, devolvido, pra, desenhar
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo não foi um subprocesso — foi `_token_interno()`, chamado a cada requisição dentro do próprio `seth_gateway`/`proxy.py`, abrindo `~/.config/agata/.env` inteiro pra ler 1 linha. Parte da responsabilidade é do pedido do lab, registrada como tal. Desenho (não aplicado) de isolar o token num arquivo próprio.**
   palavras-chave: corrige, causa, vazamento, segredo, subprocesso, token, interno, chamado, requisição, dentro, próprio, seth, gateway, proxy, abrindo, config, agata, env, inteiro, pra, ler, linha, parte, responsabilidade, pedido, lab, registrada, tal, desenho, aplicado, isolar, arquivo
-(630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte B (desenho da telemetria por turno, sem aplicar) do pacote do lab "Ensaio", continuação de (629).**
-  palavras-chave: janela, limite, real, modelo, medido, parte, desenho, telemetria, turno, aplicar, pacote, lab, ensaio, continuação
+(630) DIÁRIO — 02/10/2026 · **A2 (janela/limite real por modelo, medido) e Parte …
+  palavras-chave: janela, limite, real, modelo, medido, parte
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro " …
   palavras-chave: medição, parte, pacote, lab, ensaio, erro
 (628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogov …
