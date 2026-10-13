@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedido do Humano ("audite a última resposta da Seth e aplique o que for coerente"). Achado principal, erro meu: o `vault_buscar` NUNCA chegou à Seth — o Agent do LibreChat só carrega as ferramentas listadas em `agents.tools`, e eu não a listei; (671) e (677) afirmaram que estava "no ar para a Seth", e não estava. Proposta `seth-auditoria-1830-2026-10-13` pronta, aguardando assinatura.**
+  palavras-chave: auditoria, seth, turnos, pedido, humano, audite, última, resposta, aplique, for, coerente, achado, principal, erro, meu, vault, buscar, nunca, chegou, agent, librechat, carrega, ferramentas, listadas, agents, tools, listei, afirmaram, estava, proposta, pronta, aguardando, assinatura
 (677) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-vault-rotulos-2026-10-13` (assinada pelo Humano): catálogo da auditoria e regra "testar `vault_buscar` antes de avaliar a memória" no ar; grafo 3D com o nome da nota ao passar o mouse, de qualquer distância.**
   palavras-chave: execução, aplicada, seth, vault, rotulos, assinada, humano, catálogo, auditoria, regra, testar, buscar, avaliar, memória, grafo, nome, nota, passar, mouse, distância
 (676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pos, groq, assinada, aplicada, rota, cota, sai, código, reversão, exata, conserto, fica, sozinho, teste, próprio, llamacpp, service, trava, restart, install, novo, avisa, ollama, cpu, conferências, pós, aplicação, acharam, resíduos, llama, cpp, combos, pacote, previa, limpos
 (649) CORREÇÃO — 03/10/2026 · **Frente `rota-cota` desligada de vez (combos `-sg` apagados do OmniRoute) e os 4 `llama-cpp/*` removidos de todo caminho automático, inclusive do roster do Conselho Remoto — assinado, com segunda opinião favorável (irônica: o próprio Conselho rodou com os 4 ainda no roster e um deles falhou ao vivo durante o pedido).**
   palavras-chave: frente, rota, cota, desligada, combos, apagados, omniroute, llama, cpp, removidos, caminho, automático, inclusive, roster, remoto, assinado, segunda, opinião, favorável, irônica, próprio, rodou, deles, falhou, vivo, durante, pedido
-(648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 combos principais da Seth (não é mais desvio condicional, é remoção real). Isso expôs 2 problemas reais pré-existentes, achados e corrigidos na hora: modelos `llama-cpp` locais que não cabem juntos na GPU e travam a cascata quando offline; e o Ollama preso rodando em CPU por falta de VRAM, achado só depois de 2 reinícios.**
-  palavras-chave: decisão, humano, groq, removido, combos, principais, seth, desvio, condicional, remoção, real, expôs, problemas, reais, pré, existentes, achados, corrigidos, hora, modelos, llama, cpp, locais, cabem, juntos, gpu, travam, cascata, offline, ollama, preso, rodando, cpu, falta, vram, achado, reinícios
+(648) DIÁRIO — 03/10/2026 · **Decisão do Humano: Groq removido de vez dos 3 comb …
+  palavras-chave: decisão, humano, groq, removido, comb
 (647) CORREÇÃO — 03/10/2026 · **`estimador-taxa-tools-2026-10-03` assinada e apl …
   palavras-chave: estimador, taxa, tools, assinada, apl
 (646) DIÁRIO — 03/10/2026 · **Pergunta do lab em (643)/(644) respondida: o Libre …

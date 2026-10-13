@@ -1,0 +1,308 @@
+diff --git a/redesign/librechat/agente-seth.json b/redesign/librechat/agente-seth.json
+index d457eb6..8d973d8 100644
+--- a/redesign/librechat/agente-seth.json
++++ b/redesign/librechat/agente-seth.json
+@@ -3,6 +3,14 @@
+   "agent_id": "agent_4KlxSMeX5Y8cWQVODkJfH",
+   "teto_economia": 100000,
+   "_janela": "maxContextTokens NÃO é fixo: aplicar_agente_seth.sh calcula com scripts/capivara_perfis.py --janela-agente = min(teto_economia, menor janela dos modelos das filas -longo) − reserva da hidratação. Pedido maior do que cabe no menor modelo de uma fila vai pra <fila>-longo (seth_gateway). O teto é economia de tokens: o LibreChat reenvia o histórico até a janela a cada mensagem. MEMÓRIAS (666)/(667).",
++  "ferramentas_sempre": [
++    "maquina_verificar_mcp_canon",
++    "query_canon_mcp_canon",
++    "vault_consultar_mcp_canon",
++    "vault_buscar_mcp_canon",
++    "diario_anotar_mcp_canon"
++  ],
++  "_por_que_sempre": "As ferramentas do canon ficam SEMPRE carregadas (sem defer_loading): são usadas em quase toda resposta, e o vault é a prioridade 1 das buscas (670). O Agent só carrega ferramenta que está em agents.tools -- servidor MCP oferecer não basta; vault_buscar ficou de fora de (671) a (678) por isso.",
+   "plugins_sob_demanda": [
+     "ler_mensagens_mcp_discord",
+     "enviar_mensagem_mcp_discord",
+diff --git a/redesign/librechat/aplicar_agente_seth.sh b/redesign/librechat/aplicar_agente_seth.sh
+index 0c12dd0..26bd8dd 100755
+--- a/redesign/librechat/aplicar_agente_seth.sh
++++ b/redesign/librechat/aplicar_agente_seth.sh
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env bash
+ # Aplica no Agent "Seth" do LibreChat (Mongo) os parâmetros versionados em
+-# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)/(667)). A janela de contexto
++# agente-seth.json, ou só confere se batem (MEMÓRIAS (666)/(667)/(678)): janela,
++# plugins sob demanda e as ferramentas do canon que ficam sempre (ferramentas_sempre). A janela de contexto
+ # vem dos perfis da Capivara (capivara_perfis.py --janela-agente), não de número fixo.
+ #   aplicar_agente_seth.sh            backup do documento + aplica + confere
+ #   aplicar_agente_seth.sh --conferir só confere; saída 1 se divergir
+@@ -20,6 +21,8 @@ conferir() {
+     const mp = a.model_parameters || {};
+     for (const [k, v] of Object.entries(c.model_parameters))
+       if (mp[k] !== v) erros.push('model_parameters.' + k + ' = ' + mp[k] + ', esperado ' + v);
++    for (const t of (c.ferramentas_sempre || []))
++      if (!(a.tools || []).includes(t)) erros.push('ferramenta ' + t + ' não está no Agent (ferramentas_sempre)');
+     const to = a.tool_options || {};
+     for (const t of c.plugins_sob_demanda) {
+       if (!(a.tools || []).includes(t)) erros.push('ferramenta ' + t + ' não está no Agent');
+@@ -40,6 +43,7 @@ echo "backup: $BK"
+   const set = {};
+   for (const [k, v] of Object.entries(c.model_parameters)) set['model_parameters.' + k] = v;
+   for (const t of c.plugins_sob_demanda) set['tool_options.' + t + '.defer_loading'] = true;
+-  const r = db.agents.updateOne({id: c.agent_id}, {\$set: set});
++  const r = db.agents.updateOne({id: c.agent_id},
++    {\$set: set, \$addToSet: {tools: {\$each: (c.ferramentas_sempre || []).concat(c.plugins_sob_demanda)}}});
+   print('alterados: ' + r.modifiedCount);"
+ conferir
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 8059d88..f7e2b7b 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -61,6 +61,11 @@ function pathOk(p) {
+   if (!p || p.includes("..") || p.startsWith("/") || DENY.test(p)) return false;
+   if (p.startsWith("memoria/obsidian/")) return true;
+   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
++  // (678) extras/ -- arquivo histórico versionado (público no GitHub), pedido do
++  // Humano ("leve extras em consideração"). EXCETO extras/arquivo-redesign/: é
++  // para onde foi o dossiê de auditoria sobre a própria Seth (AUDITORIA-01,
++  // CONSELHO-*) que a decisão de 04/09 (comentário acima) tirou do alcance dela.
++  if (p.startsWith("extras/") && !p.startsWith("extras/arquivo-redesign")) return true;
+   return Object.values(CANON).includes(p);
+ }
+ 
+@@ -179,7 +184,7 @@ async function vaultConsultar(a) {
+   if (mScript) {
+     p = "memoria/obsidian/scripts/" + scriptSlug(mScript[1]) + ".md";
+   }
+-  const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") ||
++  const jaResolvido = p.startsWith("memoria/") || p.startsWith("redesign/") || p.startsWith("extras/") ||
+                       p === "SETH-DIARIO.md" || Object.values(CANON).includes(p);
+   if (p && !jaResolvido) p = "memoria/obsidian/" + p;
+   if (!p) p = "memoria/obsidian/";
+@@ -348,11 +353,12 @@ const TOOLS = [
+       "backlinks de uma regra, o que faz um script. Passe caminho vazio p/ listar a raiz; um .md p/ ler. " +
+       "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
+       "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
+-      "Para BUSCAR, use vault_buscar primeiro.",
++      "Para BUSCAR, use vault_buscar primeiro. Também lê o arquivo histórico em extras/ (liste \"extras/\"; " +
++      "extras/arquivo-redesign/ fica fora, por decisão de 04/09).",
+     inputSchema: {
+       type: "object",
+       properties: {
+-        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); "SETH-DIARIO.md" p/ o teu diário; vazio = listar a raiz' },
++        caminho: { type: "string", description: 'relativo a memoria/obsidian/ (ex: "INICIO.md", "entradas/", "moc-regras.md"); "SETH-DIARIO.md" p/ o teu diário; "extras/" (e subpastas) p/ o arquivo histórico; vazio = listar a raiz' },
+       },
+     },
+   },
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+index 9c1cf96..1b7c95b 100644
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -23,8 +23,8 @@
+     {
+       "id": "busca-semantica",
+       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
+-      "correcao": "existe e está ao seu alcance: vault_buscar (modo sentido, embedding local sobre entradas e parágrafos) -- (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
+-      "origem": "(660)/(670)"
++      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo -- não só o vault): vault_buscar modo sentido (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
++      "origem": "(660)/(670)/(678)"
+     },
+     {
+       "id": "indices-manuais",
+@@ -43,21 +43,21 @@
+     {
+       "id": "sync-pass-aceito",
+       "tema": "sync:?\\s*PASS",
+-      "sinal": "aceit|passa",
++      "sinal": "aceit|passa sem|passa s[oó] com|basta",
+       "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
+       "origem": "(661)"
+     },
+     {
+       "id": "vault-sem-entrada-nova",
+       "tema": "vault|obsidian|entradas/",
+-      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá",
++      "sinal": "ainda não (tem|contém|inclui|traz)|não tem a entrada|sem a entrada|defasad|desatualizad|atrasad|velh|precisa (ser )?regenera|não está no vault|nao esta no vault|ciclo noturno|regenerad\\w* (à|a) noite|até lá|em lote|batch|\\blag\\b",
+       "correcao": "o vault é regenerado no post-commit de CADA commit (não há ciclo noturno) e a listagem vem do disco desde (670) -- a entrada nova está lá; abra o arquivo",
+       "origem": "(666)/(670)/(676)"
+     },
+     {
+       "id": "leitura-parcial",
+       "tema": "leitura parcial|truncad|trunca\\b|cortad|456 chars|fading",
+-      "sinal": "persist|estrutura|limita|ainda|continua",
++      "sinal": "persist|estrutura|limita|ainda|continua|silencios",
+       "correcao": "corrigido em (668): janela do Agent calculada (96 mil) e saída de ferramenta inteira -- a própria ferramenta diz '[N linha(s), completo]'",
+       "origem": "(668)/(670)"
+     },
+@@ -67,6 +67,20 @@
+       "sinal": "transit|não publicad|nao publicad|só local|so local",
+       "correcao": "PR juntado no GitHub JÁ está publicado (origin/main); o main local só fica atrás até o git pull -- meça com git_sync",
+       "origem": "(676)"
++    },
++    {
++      "id": "tres-perguntas",
++      "tema": "tr[eê]s perguntas|3 perguntas",
++      "sinal": "o que muda|por que muda|como testar|por qu[eê]\\?|como (se )?testa",
++      "correcao": "as três perguntas do portão (REGRAS, 'Portão das três perguntas') são: 1. desfaço sozinho? (reversibilidade) 2. o que mais isto toca? (alcance) 3. eu saberia se quebrasse? (silêncio)",
++      "origem": "(678)"
++    },
++    {
++      "id": "assinatura-no-chat",
++      "tema": "assinatura|aprova[çc][ãa]o do humano|humano (disse|diz) sim",
++      "sinal": "no chat|na conversa|disse sim|diz sim|sem criptograf|confian[çc]a",
++      "correcao": "a aprovação é ASSINATURA SSH do Humano (scripts/aprovar.sh, chave com passphrase; P-8 confere contra propostas/.allowed_signers do HEAD) -- não um 'sim' no chat",
++      "origem": "(366)/(678)"
+     }
+   ]
+ }
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 70807c3..600efb1 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -151,6 +151,43 @@ def _modelo_do_cabecalho(linha: str) -> str:
+     return m.group(1).strip() if m else ""
+ 
+ 
++def _instante(h: str):
++    """'2026-10-13 18:27' ou '13/10/2026 18:27' -> tupla comparável; None se não casar."""
++    m = re.match(r"(\d{4})-(\d{2})-(\d{2}) (\d{1,2}):(\d{2})$", h) or None
++    if m:
++        return tuple(int(x) for x in m.groups())
++    m = re.match(r"(\d{2})/(\d{2})/(\d{4}) (\d{1,2}):(\d{2})$", h)
++    if m:
++        d, mo, a, hh, mi = (int(x) for x in m.groups())
++        return (a, mo, d, hh, mi)
++    return None
++
++
++_N_CONTROLES = re.compile(r"\b(\d{1,2})\s+contro(?:les|is)\b", re.IGNORECASE)
++
++
++def _controles_reais() -> int | None:
++    """Quantos controles o perímetro declara (`cabecalho "P-N"` em scripts/perimetro.sh) -- a fonte."""
++    try:
++        t = (RAIZ / "scripts" / "perimetro.sh").read_text(encoding="utf-8")
++    except OSError:
++        return None
++    n = len(set(re.findall(r'^\s*cabecalho\s+"(P-\d+)"', t, re.MULTILINE)))
++    return n or None
++
++
++def _contagem_controles(texto: str) -> list[str]:
++    """(678) "17 controles" quando o perímetro tem 23: número dito de memória."""
++    real = _controles_reais()
++    if real is None:
++        return []
++    errados = sorted({int(m.group(1)) for m in _N_CONTROLES.finditer(texto)} - {real})
++    if not errados:
++        return []
++    return [f"contagem de controles: a resposta fala em {', '.join(map(str, errados))} controles; o perímetro "
++            f"tem {real} (scripts/perimetro.sh) -- meça com maquina_verificar perimetro, não lembre"]
++
++
+ def _catalogo():
+     try:
+         dados = json.loads(CATALOGO.read_text(encoding="utf-8"))
+@@ -213,11 +250,18 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
+                       for h in [_HORA.search(c[0])] if h}
+         if m_h.group(1) in anteriores:
+             achados.append(f"cabeçalho: hora {m_h.group(1)} igual à de um cabeçalho anterior — hora se mede de novo, nunca se copia")
++        # (678) hora que volta no tempo: a Seth escreveu 18:27 depois de 18:30
++        atual, antes = _instante(m_h.group(1)), [_instante(h) for h in anteriores]
++        antes = [x for x in antes if x is not None]
++        if atual is not None and antes and atual < max(antes):
++            achados.append(f"cabeçalho: hora {m_h.group(1)} ANTERIOR à de um cabeçalho anterior desta conversa — "
++                           "a hora vem do relógio da Máquina (HORA-MAQUINA), nunca estimada")
+     modelo = _modelo_do_cabecalho(cabs[0][0])
+     if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
+         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
+                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
+     achados += _desmentidas(texto)
++    achados += _contagem_controles(texto)
+     if modo(msgs) == "conciso":
+         narradas = _narracao(texto)
+         if narradas:
+@@ -324,6 +368,14 @@ def _selftest() -> int:
+             [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n- Vault precisa regenerar para ter (673); será regenerado no ciclo noturno"), u()])),
+         ("merge 'no main local, não publicado' -> acusa (676)", "JÁ está publicado" in linha_estado(
+             [u(), a(pront), u(), a(linha(2, "16:47") + "\n\n2. Merge da proposta no main local — estado transitório, não publicado"), u()])),
++        ("hora que volta no tempo -> acusa (678)", "ANTERIOR" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "18:30")), u(), a(linha(3, "18:27")), u()])),
++        ("'17 controles' com outro número real -> acusa (678)", "contagem de controles" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n### 7. Controles de Perímetro (17 controles)"), u()])),
++        ("três perguntas com conteúdo errado -> acusa (678)", "reversibilidade" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Portão**: 3 perguntas — O que muda? Por que muda? Como testar?"), u()])),
++        ("assinatura 'no chat' -> acusa (678)", "ASSINATURA SSH" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n| Assinatura = \"Humano disse sim no chat\" |"), u()])),
+         ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
+             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
+              "- O bloco de estado deve ser copiado manualmente de ONDE_ESTAMOS.md."), u()]).count("já desmentida") == 2),
+@@ -348,7 +400,7 @@ def _selftest() -> int:
+     ]
+     linhas = LOG.read_text(encoding="utf-8").splitlines()
+     casos.append(("log: só quem foi auditado, sem o texto",
+-                  len(linhas) == 21 and all("análise" not in l and "corpo" not in l for l in linhas)))
++                  len(linhas) == 25 and all("análise" not in l and "corpo" not in l for l in linhas)))
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index fb848d5..21b7444 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -216,7 +216,14 @@ _DOUTRINA_FIXA = (
+     "chamada de `vault_buscar` sobre o tema avaliado — e relate o que ela "
+     "devolveu; sem esse teste, não afirme nada sobre vault ou busca ((676)). O "
+     "vault é regenerado a cada commit (não há ciclo noturno); PR juntado no "
+-    "GitHub já está publicado.\n\n"
++    "GitHub já está publicado. "
++    "**Sobre o próprio sistema, nunca de memória ((678)):** arquitetura, "
++    "controles, regras, fluxo — consulte no MESMO turno (`query_canon`, "
++    "`vault_buscar`, `maquina_verificar perimetro`); controle P-N só com a "
++    "descrição lida (são 23, e o número muda). **Estado da arte / sistemas "
++    "iguais:** use o navegador (`tool_search` \"navegador\") e cite a fonte de "
++    "cada item; sem fonte, escreva `não verificado`. `extras/` (arquivo "
++    "histórico) se lê com `vault_consultar extras/`.\n\n"
+     "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
+     "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
+     "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 19d644e..df05c2b 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -126,10 +126,11 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
+     ),
+     "busca_texto": (
+-        ["grep", "-rnIiF", "--include=*.md", "-m", "3"], 30,
++        ["grep", "-rnIiF", "--include=*.md", "--exclude-dir=arquivo-redesign", "-m", "3"], 30,
+         "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
+-        "derivado memoria/obsidian/, lendo o DISCO (sempre em dia; o índice do "
+-        "Obsidian não entra). Use o parâmetro `consulta` (até 200 caracteres). "
++        "derivado memoria/obsidian/ e no arquivo histórico extras/ (menos "
++        "extras/arquivo-redesign/), lendo o DISCO (sempre em dia). Use o "
++        "parâmetro `consulta` (até 200 caracteres). "
+         "Devolve caminho:linha:trecho, até 3 por nota.",
+     ),
+ }
+@@ -161,7 +162,7 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
+         if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
+                 or any(c in consulta for c in "\r\n\x00"):
+             raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
+-        return base + ["--", consulta.strip(), "memoria/obsidian"]
++        return base + ["--", consulta.strip(), "memoria/obsidian", "extras"]
+     if nome == "busca_semantica":
+         if prop_nome is not None:
+             raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
+@@ -259,7 +260,7 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+     if nome == "busca_texto":
+         if codigo == 1:
+             return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
+-        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith("memoria/")}
++        notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith(("memoria/", "extras/"))}
+         return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
+     if nome == "servicos":
+         m = re.search(r"(\d+) loaded units? listed", texto)
+@@ -451,7 +452,7 @@ def _selftest() -> int:
+         except ValueError:
+             casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
+     avt = _argv("busca_texto", None, None, "-e x")
+-    casos.append(("busca_texto: consulta é dado", avt[-3:] == ["--", "-e x", "memoria/obsidian"]))
++    casos.append(("busca_texto: consulta é dado", avt[-4:] == ["--", "-e x", "memoria/obsidian", "extras"]))
+     try:
+         _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
+     except ValueError:
