@@ -5,7 +5,15 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (654)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (656)).
+
+**13/10: todas as falhas da lista do sistema resolvidas numa proposta só — esperando a sua assinatura.** Para assinar: `bash scripts/aprovar.sh fechamento-e-decisor-2026-10-13`. Depois que você assinar e juntar o PR, eu aplico, instalo e meço de novo. O que ela faz, em uma linha cada:
+- o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
+- a pesquisa semanal e a consolidação noturna esperam o roteador de modelos subir (hoje cedo elas rodaram 1 segundo antes dele e gravaram só erro);
+- um alarme novo (P-22) avisa se aqueles arquivos de memória voltarem a ficar velhos sozinhos;
+- o GLM sai da fila rápida e o Groq sai da fila do Goose (suas decisões);
+- as notas que você puser em `memoria/obsidian-inbox/` viram entrada de MEMÓRIAS sozinhas, depois de 10 minutos paradas (sem commit: você revisa antes);
+- o **decisor local** (o Ollaya do artigo): roda no processador, decide em 4 lugares e, se falhar, tudo volta à regra de antes. Os pareceres foram contra ou com condições; você assumiu o risco. **Você vai receber um aviso na área de trabalho no 3º dia, no 7º e depois toda semana, dizendo se está valendo a pena.** Para encerrar, é só pedir "aprovar o decisor" ou "remover o decisor".
 
 **"Economia de tokens" é o padrão PERMANENTE do sistema a partir de agora — você confirmou que não é só até quarta.** Antes de qualquer bancada de medição nova, a regra passa a ser: perguntar se o dado já existe antes de medir de novo. O mecanismo já existia (Regra 7, `PROTOCOLOS.md`); fica elevado a prioridade agora. Formalizar no texto normativo (`PROTOCOLOS.md`/`REGRAS.md`) exige sua assinatura (P-8) — fica pendente pra quando quiser. Detalhe: `MEMÓRIAS.md` (654).
 
@@ -17,7 +25,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (654)).
 
 **2 decisões ainda pendentes:**
 1. O verificador do Conselho Remoto tem rejeitado respostas certas por exigir uma palavra exata — achei um jeito de contornar pedindo diferente, mas o conserto formal ainda é com você: quer que o lab desenhe?
-2. Se o Groq sai também do `seth-codigo` (o combo do Goose) — ainda sua decisão.
+2. ~~Se o Groq sai também do `seth-codigo`~~ — decidido em 13/10: sai.
 
 **Capítulo "pós-Groq" fechado por completo.** O código da rota-cota saiu de vez (era reversão limpa de 2 propostas), o reinício automático dos 4 modelos locais problemáticos foi desligado (eles só sobem à mão agora), e um alarme novo avisa (sem nunca travar nada) se o modelo principal da IA local cair pra rodar no processador. Na conferência final achei mais 5 lugares (3 filas da Seth/Goose + 2 filas antigas esquecidas) que ainda tinham os modelos problemáticos — todos limpos. LibreChat tinha caído sozinho no meio do trabalho — religado, testado com ferramenta real, funcionando. Detalhe: `MEMÓRIAS.md` (650).
 

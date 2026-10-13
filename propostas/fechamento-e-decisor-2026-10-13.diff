@@ -1,0 +1,1656 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 6c9b909..dfecea2 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -63,13 +63,14 @@ Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/
+ - **Limite de classe:** modelo local neste hardware tem teto de ~14b/9GB — `PROJETO_REFERENCIA.md`, "VM do Marcos".
+ 
+ ## Serviços (boot)
+-Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind real — fonte da verdade, não esta seção. `:20131`/`:20132` pertencem ao próprio `omniroute` (426 e 404): `lacuna`, função não determinada (420).
++Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind real — fonte da verdade, não esta seção. `:20131`/`:20132` são do próprio `omniroute`, só loopback: `embedWsProxy` (proxy WebSocket das UIs embutidas) e `liveServer` (WebSocket do painel, `/live-ws`) — lido no código do OmniRoute 3.8.50 em 13/10/2026, deixou de ser `lacuna` (420).
+ 
+ **`agata.target`** (`systemd --user`, habilitado no boot) puxa:
+ - `omniroute` (`:20128`) e `omniroute-sanitizer` (`:20127` — os callers usam este; `sanitizar_payload()` em `redesign/router/sanitizar.py`, `--autoteste`, sanitiza segredo antes do egresso e bloqueia payload profundo ou largo demais (328)). `requestQueue.maxWaitMs = 45000` no banco do OmniRoute (362)/(363); clone novo herda o valor pelo drop-in `redesign/systemd/dropin-omniroute-resilience.conf` (`RATE_LIMIT_MAX_WAIT_MS`) (588).
+ - `openvino-whisper` (`:20130`, STT na iGPU) e `openvino-embeddings` (`:20134`, embeddings na iGPU); venv `igpu/.venv` com `torch==2.14.0+cpu`, sem libs CUDA.
+ - `obsidian-ro-proxy` (`:27125`, só leitura, `ro_proxy.py`) e `obsidian-app.service` (Flatpak `md.obsidian.Obsidian`, `After=graphical-session.target`) — o app é o **backend real** do proxy: com ele fechado, o proxy devolve **403** ("upstream inacessível"), que parece permissão negada e não é.
+ - `agata-drain` (oneshot: drena o WAL do grafo no stop, nunca corta um commit).
++- `ollaya` (`:11435`, contêiner CPU pinado por digest) — decisor local; ver "Decisor local".
+ 
+ **Sob demanda pelo atalho `seth` / `Parar Seth`:**
+ - `seth-gateway` (`:20126`) — reidrata a Seth; ver "Interface".
+@@ -78,13 +79,13 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ - Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
+ - `piper-tts` (`:8890`, voz pt-BR local) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
+ 
+-**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-consolidacao.timer`.
++**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-consolidacao.timer` · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele (13/10/2026).
+ 
+ **Manuais:** `agata-warmup.service` pré-aquece o modelo local pesado (cold-start do Ollama). `agata-jogo` (`~/.local/bin/`) lança jogo com o Agata fora da RTX 4060, via `game-performance` da distro — **não** Feral GameMode, que briga com o `ananicy-cpp`.
+ 
+-**`agata-consolidacao.timer`** (220)/(311): 23:00 diário, `ExecStart` = `redesign/grafo/flows/consolidacao.py`. Saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon. Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` + `~/.cache/agata/` — contenção de kernel, não de prompt. **`lacuna` carregada:** o resumo de 1 linha do log já alegou sucesso sem o arquivo existir — confira `propostas/`, nunca só o log.
++**`agata-consolidacao.timer`** (220)/(311): 23:00 diário, `ExecStart` = `redesign/grafo/flows/consolidacao.py`. Saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon. Sob `ProtectSystem=strict` + `ProtectHome=read-only` + `ReadWritePaths` = `propostas/` + `~/.cache/agata/` — contenção de kernel, não de prompt. Três travas antes de escrever: as duas mecânicas (371)/(549) e a nota de utilidade do decisor local, que só reprova. "novo" no log só depois de conferir o arquivo no disco (tamanho > 0), não pela intenção de escrever.
+ 
+-**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar. Avisa também quando o Ollama tem modelo carregado só em parte na GPU (`/api/ps`, `size_vram < size`) e diz quem ocupa a VRAM (648)/(649) — todas as unidades estavam `active` enquanto a Seth rodava a 6,3 tok/s.
++**P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se estiverem `failed`, `disabled`/`masked` ou, no caso de container, fora do ar: `ollama.service`, `agata-consolidacao.timer`, `agata-pesquisa-modelos.timer`, os 5 membros do `agata.target` (`omniroute`, `omniroute-sanitizer`, `openvino-whisper`, `openvino-embeddings`, `obsidian-ro-proxy`), `seth-gateway.service`, `seth-escriba.service`, `piper-tts.service`, `ollaya.service`, `agata-vault-inbox.timer`, `agata-avaliacao-decisor.timer` e os containers `librechat`, `librechat-mongodb`, `librechat-meilisearch`. Motivo: foi a falta desse aviso que deixou a consolidação morta sem ninguém notar. Avisa também quando o Ollama tem modelo carregado só em parte na GPU (`/api/ps`, `size_vram < size`) e diz quem ocupa a VRAM (648)/(649) — todas as unidades estavam `active` enquanto a Seth rodava a 6,3 tok/s.
+ 
+ **Não recriar:** `agata.service`, `agatha.service`, `agata-rest.service` (ausentes, (107)/(539)), `hermes-gateway.service` (Hermes removido, (312)), `kokoro-tts` (removido, (593)/(594)).
+ 
+@@ -153,15 +154,20 @@ Adotada pelo Humano, 17/08/2026 (201). Ferramenta de decisão situacional do Hum
+ O formato de "pedido de decisão" (itens numerados, marcador de aguardando, ordem de execução) não é canonizado: canoniza-se a versão que sobreviver ao uso.
+ 
+ ## Estado dos bugs e dos testes
+-Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIAS e, até 02/10/2026, verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`.
+-- **OmniRoute lento sob provedor travado:** a conexão pooled para o provedor trava ~30s, fora do nosso controle. `maxWaitMs = 45000` só dá folga para a auto-recuperação terminar em vez de estourar `504`. Efeito residual: chamada isolada lenta (~45s), não falha; combos com fallback sofrem menos (362)/(363).
+-- **Cold-start do Ollama:** a 1ª chamada a modelo não carregado (~30s de load) pode estourar a fila; a 2ª responde em ~0,5s. Mitigação: `systemctl --user start agata-warmup.service` antes de usar o modelo local pesado.
+-- **Filtro de título do `seth_gateway`** (433): o sinal forte é o *schema* que o `@librechat/agents` exige (`response_format`/`tools` com propriedade `"title"`). Sem esse sinal, vale só o fallback: `messages[-1]`, `role in ("user","system")` e `len(messages) <= 2`. **Risco residual:** a string-gatilho como primeira mensagem de uma conversa nova ainda casa a condição de fallback — mesma classe de qualquer detector por conteúdo.
+-- **Hidratação suspeita na Seth** (sem bug confirmado com esse nome): `curl` no `:20126` forçando o caminho suspeito, capturar o payload que sai (o `--selftest` do gateway mostra o que `_injeta` monta) e testar em ordem: (a) não injetada, (b) injetada mas truncada, (c) recebida e ignorada (420).
+-- **Manifesto do HD:** a fórmula original de `ir_sha256_xmlbin` não reproduz. `redesign/fase7-hd/hash_ir.sh` fixa uma fórmula reproduzível daqui para frente; a garantia real é o teste de restore do restic (`diff -rq` restaurado vs. vivo).
+-- **Drift dos derivados de hidratação** (333): três arquivos derivados já voltaram a um estado velho; causa raiz não confirmada (hipótese: "Recuperação de arquivo"/"Sync" do Obsidian) — `lacuna` até o Humano checar dentro do app.
++Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIAS e, até 02/10/2026, verbatim em `extras/arquivo/PROJETO-ate-2026-10-02.md`. Fechados em 13/10/2026 (MEMÓRIAS (655)): cold-start do Ollama, filtro de título, hidratação suspeita, manifesto do HD, drift dos derivados (agora P-22), portas `:20131`/`:20132`, log da consolidação.
++- **Risco de fundo, não bug — provedor travado no OmniRoute:** a conexão pooled espera até `OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS` (padrão 30000) antes de tentar de novo num socket novo. Disparou 323 vezes de 02/09 a 10/10/2026 — 155 `api.z.ai`, 90 Gemini, **55 o próprio Ollama local** (todos até 23/09, quando o `llama.cpp` empurrava o Ollama para a CPU (648); nenhum depois). Por isso o valor **não** baixa: um fundo local lento seria cortado. Cold-start medido em 13/10/2026: 9,1 s, resposta com tool-call (modelo fora da GPU, ainda no cache de disco; logo após reboot pode demorar mais — coberto pelo retry em socket novo dentro dos 45 s). Mitigação: `maxWaitMs = 45000` (362)/(363) e os provedores instáveis no fim das filas ou fora delas (653)/(654)/(655). Desde 04/10, 1 disparo. Medir: `grep -c "response-start timeout" ~/.omniroute/logs/application/app.log`.
++- **Como testar uma fila sem se enganar** (655): `scripts/queda_por_elo.py`, nunca `curl` com `max_tokens` minúsculo — modelo com raciocínio interno devolve vazio e o OmniRoute cai pro próximo elo — e nunca dois pedidos Mistral no mesmo segundo (limite 1 req/s → 429). Pelo `:20126`, mensagem curta vira `seth-rapido` antes de chegar ao OmniRoute.
+ - Os protocolos TES-001/TES-002 foram aposentados em 09/09/2026 — (417); o que cobriam está em `PROTOCOLOS.md`, "Cadeia de auditoria em camadas", no P-7 e em `FALHAS.md`.
+ 
++## Decisor local
++Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
++- **Padrão "decide e confere".** A regra determinística continua e sempre vence. O modelo decide **dentro** do que ela permite, ou só **restringe** (barra, avisa) — nunca libera o que ela barrou, nunca reprova commit (hook só aceita checagem determinística). Confiança baixa, timeout ou serviço fora → vale a regra de antes; nada quebra se o `ollaya` cair. Cada decisão: `~/.cache/agata/decisor/<uso>.jsonl` (respostas, latência, metadados; nunca o texto avaliado). Única exceção, só enquanto durar a avaliação: 200 caracteres de cada divergência do roteador, em arquivo modo 600, para o Humano julgar.
++- **Onde decide hoje:** roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
++- **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
++- **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
++- **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo. Inbox se mede sozinho (nota barrada que depois foi editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); roteador que concorda com a regra em 95% ou mais "não vale" (só gasta CPU). Avisa na área de trabalho (notificação e `avaliacao-decisor.md`) no 3º e no 7º dia, depois a cada 7, e na hora se o serviço reiniciar 3+ vezes ou mais da metade das decisões de 24 h falhar. Termina quando o Humano mandar aprovar ou remover: `--encerrar aprovado|removido` apaga os trechos guardados; "removido" já para o `ollaya` (todos os usos caem na regra) e o código sai por proposta P-8.
++- **Risco declarado:** projeto independente com semanas de vida (versão nova a cada poucos dias — atualizar é decisão explícita, nunca `latest`); pesos baixados uma vez do Hugging Face dos autores; ~4 s de CPU por decisão, por isso nenhum uso fica no caminho quente da resposta.
++
+ ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
+ - **Fase 0 — Saneamento:** publicar no remoto as entradas acumuladas.
+ - **Fase 1:** blocos Conselho/MOD em MEMÓRIAS · REGRAS/PROJETO atualizados com segunda opinião ou risco assumido · rascunhos históricos → `docs/`.
+@@ -172,7 +178,7 @@ Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIA
+ 
+ **Bússola de longo prazo** (542): `extras/bussola/auditoria-e-bussola.md` — 12 princípios (B1–B12) e 5 aprendidos por incidente (T1–T5). Orienta, não gera tarefa (REGRAS, "Contenção de escopo"); em conflito, REGRAS vence.
+ 
+-**Replicabilidade** (25/09/2026): `propostas/plano-replicabilidade-2026-09-25.md` separa framework (vai para o clone) de instância (nunca vai). A gênese existe e foi testada de ponta a ponta: `scripts/genese.sh` (584)/(586). `scripts/vault_importar_inbox.py` (nota de `memoria/obsidian-inbox/` → entrada em MEMÓRIAS pelo `POST /memoria` do `seth_escriba`) está pronto e não ligado a fluxo automático nesta instância. O resto do plano é bússola.
++**Replicabilidade** (25/09/2026): `propostas/plano-replicabilidade-2026-09-25.md` separa framework (vai para o clone) de instância (nunca vai). A gênese existe e foi testada de ponta a ponta: `scripts/genese.sh` (584)/(586). `scripts/vault_importar_inbox.py` (nota de `memoria/obsidian-inbox/` → entrada em MEMÓRIAS pelo `POST /memoria` do `seth_escriba`) roda sozinho desde 13/10/2026 pelo `agata-vault-inbox.timer` (decisão do Humano, (655)); ver "Serviços (boot)". O resto do plano é bússola.
+ 
+ **Curador da sucessão:** `lacuna` — enquanto vago, o Humano operador local. Regras de curador nas REGRAS.
+ 
+diff --git a/config/agata-avaliacao-decisor.service b/config/agata-avaliacao-decisor.service
+new file mode 100644
+index 0000000..4039eb3
+--- /dev/null
++++ b/config/agata-avaliacao-decisor.service
+@@ -0,0 +1,13 @@
++[Unit]
++Description=Ágata — avaliação diária do decisor local (vale a pena? avisa o Humano)
++# scripts/avaliar_decisor.py: veredito por uso, relatório na área de trabalho,
++# notificação no 3º e no 7º dia, depois semanal, e na hora se houver alarme.
++# Para sozinho depois de `--encerrar aprovado|removido`.
++
++[Service]
++Type=oneshot
++WorkingDirectory=%h/agata
++ExecStart=/usr/bin/python3 %h/agata/scripts/avaliar_decisor.py
++ProtectSystem=strict
++ProtectHome=read-only
++ReadWritePaths=%h/.cache/agata "-%h/Área de trabalho"
+diff --git a/config/agata-avaliacao-decisor.timer b/config/agata-avaliacao-decisor.timer
+new file mode 100644
+index 0000000..485180f
+--- /dev/null
++++ b/config/agata-avaliacao-decisor.timer
+@@ -0,0 +1,9 @@
++[Unit]
++Description=Ágata — avaliação diária do decisor local, 20:00 (com recuperação se a máquina estava desligada)
++
++[Timer]
++OnCalendar=*-*-* 20:00:00
++Persistent=true
++
++[Install]
++WantedBy=timers.target
+diff --git a/config/agata-consolidacao.service b/config/agata-consolidacao.service
+index e16e6ca..3f21528 100644
+--- a/config/agata-consolidacao.service
++++ b/config/agata-consolidacao.service
+@@ -6,6 +6,8 @@ Type=oneshot
+ WorkingDirectory=%h/agata
+ # C2 (redesenho, Fase 8): era `hermes chat` -- agora o flow do grafo (P6-03).
+ # Saida so em propostas/consolidacao-<data>.md; nunca toca canon.
++# no boot a recuperacao do timer chegava antes do OmniRoute (13/10/2026)
++ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/
+ ExecStart=%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
+ ProtectSystem=strict
+ ProtectHome=read-only
+diff --git a/config/agata-pesquisa-modelos.service b/config/agata-pesquisa-modelos.service
+index 5e38dd2..4199235 100644
+--- a/config/agata-pesquisa-modelos.service
++++ b/config/agata-pesquisa-modelos.service
+@@ -5,6 +5,8 @@ Description=Ágata — pesquisa/saúde semanal do pool de modelos gratuitos (MEM
+ [Service]
+ Type=oneshot
+ WorkingDirectory=%h/agata
++# sem OmniRoute de pé a sonda só grava "connection refused" (13/10/2026)
++ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/
+ ExecStart=/usr/bin/python3 %h/agata/scripts/pesquisar_modelos_gratuitos.py --repo %h/agata
+ ProtectSystem=strict
+ ProtectHome=read-only
+diff --git a/config/agata-vault-inbox.service b/config/agata-vault-inbox.service
+new file mode 100644
+index 0000000..5d2acf5
+--- /dev/null
++++ b/config/agata-vault-inbox.service
+@@ -0,0 +1,18 @@
++[Unit]
++Description=Ágata — importa notas prontas do inbox do Obsidian para MEMÓRIAS (via seth_escriba)
++# Nota pronta = parada há 10 min + decisor local não acha que é rascunho
++# (scripts/vault_importar_inbox.py). O escriba grava no working tree e NÃO
++# comita: o Humano revisa `git diff MEMÓRIAS.md` antes de qualquer commit.
++Wants=seth-escriba.service
++After=seth-escriba.service
++
++[Service]
++Type=oneshot
++WorkingDirectory=%h/agata
++ExecCondition=/usr/bin/bash -c 'compgen -G "%h/agata/memoria/obsidian-inbox/*.md" >/dev/null'
++ExecCondition=/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20140/ 30
++ExecStart=/usr/bin/python3 %h/agata/scripts/vault_importar_inbox.py
++ProtectSystem=strict
++ProtectHome=read-only
++# apaga só a nota importada; o log do decisor vai para ~/.cache/agata/decisor
++ReadWritePaths=-%h/agata/memoria/obsidian-inbox %h/.cache/agata
+diff --git a/config/agata-vault-inbox.timer b/config/agata-vault-inbox.timer
+new file mode 100644
+index 0000000..739fe4e
+--- /dev/null
++++ b/config/agata-vault-inbox.timer
+@@ -0,0 +1,9 @@
++[Unit]
++Description=Ágata — confere o inbox do Obsidian a cada 15 min (só age se houver nota)
++
++[Timer]
++OnBootSec=5min
++OnUnitActiveSec=15min
++
++[Install]
++WantedBy=timers.target
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 2400585..58edf4b 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -145,6 +145,10 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+   - **`seth-rapido`** (trivial: <400 chars, sem `tools`, ≤2 msgs user)
+   - **`seth-livre`** (normal — tudo que não é trivial nem pesado)
+   - **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs)
++  - **Desde 13/10/2026, roteador-sombra** (PROJETO.md, "Decisor local"): o decisor
++    local (`winnow:e4b`, CPU) escolhe também entre rapido/livre/pesado/**codigo** pelo
++    significado e só registra em `~/.cache/agata/decisor/roteador.jsonl`; a rota de
++    verdade segue a heurística acima até o Humano aprovar o relatório de divergência.
+ - **Goose** (`~/.config/goose/config.yaml`, `model: seth-codigo`, 20/09/2026 —
+   **antes** apontava pra `auto/coding`, um alias que o próprio PROJETO.md já
+   documentava como apodrecido desde (390); nunca tinha sido atualizado pro sistema de
+@@ -157,42 +161,44 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+ 
+ **Fila de 03/10/2026 (MEMÓRIAS (648)/(649)), por decisão do Humano:** o Groq saiu das 3 filas do LibreChat ("privadas devem querer uma oportunidade no nosso sistema, não o contrário") e os 4 `llama-cpp/*` saíram de todo caminho automático (não cabem na GPU de 8 GB junto com o modelo que o Ollama mantém carregado). O `seth-pesado` perdeu também o `gemini-3-flash-preview` (travou 3 vezes seguidas, isolado). As linhas abaixo mantêm o "por quê" medido em 24/09.
+ 
++**Fila de 13/10/2026, por decisão do Humano:** o Groq saiu também do `seth-codigo` (Goose), e o `zai/glm-4.7-flash` saiu do `seth-rapido` (155 dos 323 travamentos de 30 s do `app.log` do OmniRoute eram dele; 529 de novo em 13/10). As tabelas do `seth-livre` e do `seth-pesado` foram alinhadas à ordem viva de (653)/(654), que esta página não registrava.
++
+ ### `seth-rapido` (LibreChat, trivial)
+ | ordem | modelo | por quê |
+ |---|---|---|
+ | 0 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
+-| 1 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 2 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
+-| 3 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
+-| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++| 1 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
++| 2 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
++| 3 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-livre` (LibreChat, rota normal — favorece conversação)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+-| 2 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+-| 3 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
+-| 4 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
+-| 5 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
++| 1 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 2 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
++| 3 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 4 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |
++| 5 | `gemini/gemini-3-flash-preview` | desceu em (653); mantido no fim por decisão do Humano (13/10/2026), sem travar desde então. *Preview* |
+ | 6 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+-| 1 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
++| 0 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | subiu em (654), quando o `gemini-2.5-flash` esgotou a cota diária no topo |
++| 1 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+ | 2 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
+ 
+ ### `seth-codigo` (Goose)
+ | ordem | modelo | por quê |
+ |---|---|---|
+ | 0 | `mistral/codestral-latest` | **novo 24/09 (546)** — especialista em código, 0,44 s, tool-call OK |
+-| 1 | `groq/openai/gpt-oss-120b` | **decisão pendente do Humano (03/10/2026):** a saída do Groq em (648) cobriu só as 3 filas do LibreChat; se valer também para o Goose, esta linha sai pela API e daqui. 0,4 s, tool-call OK; free 8.000 TPM. |
+-| 2 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
+-| 3 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
+-| 4 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
+-| 5 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++| 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
++| 2 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
++| 3 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
++| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível |
++
++O `groq/openai/gpt-oss-120b` saiu também desta fila em 13/10/2026 — decisão do Humano: a regra de (648) vale para o Goose.
+ 
+ **Recriar / reverter** (se o `storage.sqlite` for perdido):
+ `PUT http://127.0.0.1:20128/api/combos/<id>` (existente) ou `POST /api/combos` (novo),
+diff --git a/config/ollaya.service b/config/ollaya.service
+new file mode 100644
+index 0000000..10faef1
+--- /dev/null
++++ b/config/ollaya.service
+@@ -0,0 +1,27 @@
++[Unit]
++Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROJETO.md "Decisor local")
++# Só loopback. Quem usa (seth_gateway em sombra, inbox do vault, P-20,
++# consolidação) segue pela regra determinística se isto estiver fora do ar.
++After=docker.service
++PartOf=agata.target
++
++[Service]
++Type=simple
++# Imagem CPU pinada por digest (0.13.0, 13/10/2026): projeto novo, versões
++# saindo a cada poucos dias -- atualizar é decisão explícita, nunca `latest`.
++# Teto de memória porque a Máquina está sem swap, e oom-score-adj=1000: se a
++# RAM acabar, o kernel mata ESTE contêiner antes de qualquer outro processo
++# (guarda pedida nos pareceres de 13/10/2026). CPU limitada para não disputar
++# com o resto (winnow:e4b leva ~4 s por decisão com folga).
++ExecStartPre=-/usr/bin/docker rm -f ollaya
++ExecStart=/usr/bin/docker run --rm --name ollaya \
++  -p 127.0.0.1:11435:11435 \
++  -v %h/.cache/agata/ollaya:/home/ollaya/.ollaya \
++  --memory=8g --cpus=8 --oom-score-adj=1000 \
++  ghcr.io/ollaya-dev/ollaya@sha256:31f749def61165d7bbb15def4e3d799a403461e0b8b777f359a924bb9b845ce6
++ExecStop=/usr/bin/docker stop ollaya
++Restart=on-failure
++RestartSec=15
++
++[Install]
++WantedBy=agata.target
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index d105074..3590884 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -20,9 +20,14 @@
+ #
+ # Fora deste manifesto de propósito: contêineres Docker (LibreChat/Mongo/
+ # Meilisearch) -- o bind deles é outra camada (docker network), P-9 já
+-# confere se estão de pé via `docker ps`; portas :20131/:20132 (função não
+-# determinada, PROJETO.md "Serviços (boot)") -- não dá pra declarar
+-# `bind_esperado` pra algo que não se sabe o que é.
++# confere se estão de pé via `docker ps`. Exceção: o Ollaya (decisor local,
++# PROJETO.md "Decisor local") é contêiner mas entra aqui, porque o bind
++# 127.0.0.1 é invariante de segurança dele (docker-proxy, `-p 127.0.0.1:...`).
++# :20131/:20132 deixaram de ser lacuna em 13/10/2026 (lido no código do
++# OmniRoute 3.8.50): :20131 = `embedWsProxy` (proxy WebSocket das UIs
++# embutidas, src/lib/services/embedWsProxy.ts); :20132 = `liveServer`
++# (WebSocket do painel em tempo real, /live-ws, src/server/ws/liveServer.ts).
++# Os dois sobem com o próprio `omniroute`, só em loopback.
+ #
+ # Achado do laboratório "Ensaio" (DADO, fora do canon, "carta-2-para-seth-
+ # 2026-09-29.md" e "analise-resposta-seth-2026-09-29.md" — não é entrada de
+@@ -48,3 +53,6 @@
+ 20143|llamacpp-qwen3coder|127.0.0.1
+ 20144|llamacpp-gptoss20b|127.0.0.1
+ 20145|llamacpp-phi4mini|127.0.0.1
++20131|omniroute-embed-ws|127.0.0.1
++20132|omniroute-live-ws|127.0.0.1
++11435|ollaya|127.0.0.1
+diff --git a/redesign/grafo/flows/consolidacao.py b/redesign/grafo/flows/consolidacao.py
+index c94ff5b..24154db 100644
+--- a/redesign/grafo/flows/consolidacao.py
++++ b/redesign/grafo/flows/consolidacao.py
+@@ -44,9 +44,32 @@ from pathlib import Path
+ HERE = Path(__file__).resolve().parent
+ sys.path.insert(0, str(HERE.parent))            # redesign/grafo
+ sys.path.insert(0, str(HERE.parent.parent / "obsidian"))
++sys.path.insert(0, str(HERE.parent.parent / "router"))
+ from estado import Estado                        # noqa: E402
+ from durabilidade import WAL, idem_key           # noqa: E402
+ import consulta as C                             # noqa: E402
++import decisor                                   # noqa: E402  (redesign/router/decisor.py)
++
++# Terceira trava, DEPOIS das duas mecânicas (371)/(549): o decisor local dá
++# nota de utilidade e só pode REPROVAR -- nunca aprova o que elas barraram.
++# Fora do ar -> valem só as mecânicas (PROJETO.md, "Decisor local").
++LIMIAR_UTIL = 1.5
++_PERGUNTA_UTIL = {"util": {
++    "type": "score",
++    "instructions": "How much does this proposal consolidate useful, verifiable "
++                    "knowledge from the cited entries?",
++    "criteria": ["nothing: restates titles or is vague",
++                 "little: mostly repetition with a minor point",
++                 "useful: a real synthesis a reader would want",
++                 "clear, useful and checkable against the cited entries"]}}
++
++
++def _portao_decisor(corpo: str, tema: str) -> tuple[bool, str]:
++    n = decisor.nota(decisor.decidir("consolidacao", corpo[:4000], _PERGUNTA_UTIL,
++                                     meta={"tema": tema, "chars": len(corpo)}), "util")
++    if n is not None and n < LIMIAR_UTIL:
++        return False, f"decisor: utilidade {n:.2f} < {LIMIAR_UTIL}"
++    return True, ""
+ 
+ DIR_ESTADO = Path(os.path.expanduser("~/.cache/agata/consolidacao"))
+ DB = DIR_ESTADO / "checkpoints.sqlite"
+@@ -357,6 +380,8 @@ def consolidar(s: Estado) -> dict:
+         ok, motivo = _portao(corpo, a["refs"])
+         if ok:  # MEMORIAS (549): o que se diz de cada (NNN) tem de bater com o titulo
+             ok, motivo = _portao_conteudo(corpo, _indice(repo))
++        if ok:
++            ok, motivo = _portao_decisor(corpo, tema)
+         if not ok:
+             _log_reprovado(tema, hoje, motivo, corpo)
+             escritos.append((f"consolidacao-{slug}-{hoje}", f"reprovado: {motivo}"))
+@@ -374,7 +399,9 @@ def consolidar(s: Estado) -> dict:
+             f.flush()
+             os.fsync(f.fileno())
+         wal.done("consolidacao", "consolidar", slug, chave)
+-        escritos.append((str(alvo.relative_to(repo)), "novo"))
++        no_disco = alvo.is_file() and alvo.stat().st_size > 0
++        escritos.append((str(alvo.relative_to(repo)),
++                         "novo" if no_disco else "falhou: arquivo ausente ou vazio após escrita"))
+     return {"commit_sha": "",  # NADA commitado -- so arquivo em propostas/
+             "eventos": [f"consolidar:{escritos}"],
+             "decisao_log": [f"propostas escritas: {escritos}"]}
+@@ -434,8 +461,26 @@ def run(repo, temas=None):
+         cm.__exit__(None, None, None)
+ 
+ 
++def _selftest() -> int:
++    original, casos = decisor.decidir, []
++    for nome, resp, quer in [
++        ("decisor fora do ar -> passa (valem as mecânicas)", None, True),
++        ("nota 0.4 -> reprova", {"util": {"type": "score", "score": 0.4}}, False),
++        ("nota 2.6 -> passa", {"util": {"type": "score", "score": 2.6}}, True)]:
++        decisor.decidir = lambda *a, _r=resp, **k: _r
++        casos.append((nome, _portao_decisor("texto", "tema")[0] is quer))
++    decisor.decidir = original
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
+ if __name__ == "__main__":
+     a = sys.argv[1:]
++    if a == ["--selftest"]:
++        sys.exit(_selftest())
+     g = lambda f, d=None: a[a.index(f) + 1] if f in a else d
+     repo = g("--repo", os.path.expanduser("~/agata"))
+     temas = g("--temas")
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 9e99a37..ccdb5fa 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -199,6 +199,10 @@ endpoints:
+       # fica pequena e rápida, sem carregar REGRAS+PROJETO+estado.
+       titleConvo: true
+       titleModel: "seth-livre"
++      # structured: a chamada de título leva schema com "title" e o seth_gateway
++      # a reconhece pelo canal, nunca por texto (o padrão "completion" obrigava
++      # a detecção por substring, que o usuário consegue colar).
++      titleMethod: "structured"
+       modelDisplayLabel: "Seth"
+       forcePrompt: false
+ 
+diff --git a/redesign/router/decisor.py b/redesign/router/decisor.py
+new file mode 100644
+index 0000000..888b932
+--- /dev/null
++++ b/redesign/router/decisor.py
+@@ -0,0 +1,186 @@
++#!/usr/bin/env python3
++"""Decisor local -- cliente do Ollaya (`POST :11435/v1/systemone`), modelos de
++decisão no estilo Jev rodando na CPU. Padrão "decide e confere" (PROJETO.md,
++"Decisor local"): quem chama mantém a regra determinística e usa a resposta
++daqui só para decidir DENTRO do que a regra permite, ou para RESTRINGIR
++(barrar, avisar). Nunca libera o que a regra barrou; nunca reprova commit.
++
++Contrato: `decidir` NUNCA levanta exceção. Serviço fora do ar, timeout,
++modelo ausente, JSON inesperado -> `None`, e o chamador segue pela regra.
++
++Cada chamada vira uma linha em `~/.cache/agata/decisor/<uso>.jsonl` (respostas,
++latência, erro e os metadados que o chamador passar) -- é o dado para calibrar.
++O TEXTO avaliado nunca vai para o log: só tamanhos e respostas.
++
++Medição de 13/10/2026 (20 pedidos pt-BR rotulados, CPU i7-13650HX):
++`winnow:e4b` 20/20 em ~4,3 s; `laya`/`laya:multilingual`/`gliclass` 10/20 ou
++menos em ~50-200 ms; heurística por tamanho 5/20. Por isso o padrão é
++`winnow:e4b` e nenhum uso fica no caminho quente da resposta.
++
++Uso: python3 redesign/router/decisor.py --selftest
++Env: AGATA_DECISOR_URL (default http://127.0.0.1:11435),
++     AGATA_DECISOR_MODELO (default winnow:e4b),
++     AGATA_DECISOR_LOG (default ~/.cache/agata/decisor)
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import time
++import urllib.request
++from pathlib import Path
++
++URL = os.environ.get("AGATA_DECISOR_URL", "http://127.0.0.1:11435").rstrip("/")
++MODELO = os.environ.get("AGATA_DECISOR_MODELO", "winnow:e4b")
++LOG_DIR = Path(os.environ.get("AGATA_DECISOR_LOG", "~/.cache/agata/decisor")).expanduser()
++TIMEOUT_PADRAO = 15.0
++# loopback: nunca passar por proxy de ambiente
++_ABRIR = urllib.request.build_opener(urllib.request.ProxyHandler({})).open
++
++
++def decidir(uso: str, state, perguntas: dict, timeout: float = TIMEOUT_PADRAO,
++            meta: dict | None = None) -> dict | None:
++    """`answers` do Ollaya (dict por id de pergunta) ou None em qualquer falha."""
++    t0 = time.monotonic()
++    respostas, erro = None, None
++    try:
++        corpo = json.dumps({"model": MODELO, "state": state, "questions": perguntas}).encode()
++        req = urllib.request.Request(URL + "/v1/systemone", corpo,
++                                     {"Content-Type": "application/json"})
++        with _ABRIR(req, timeout=timeout) as r:
++            respostas = json.load(r)["answers"]
++        if not isinstance(respostas, dict) or set(respostas) != set(perguntas):
++            respostas, erro = None, "resposta sem as perguntas pedidas"
++    except Exception as e:  # fronteira com serviço externo: tudo vira None
++        respostas, erro = None, f"{type(e).__name__}: {e}"[:200]
++    _registrar(uso, respostas, erro, (time.monotonic() - t0) * 1000, meta)
++    return respostas
++
++
++def escolha(respostas: dict | None, pergunta: str, limiar: float) -> str | None:
++    """Rótulo de uma pergunta `choice` se `confidence >= limiar`, senão None."""
++    try:
++        a = respostas[pergunta]
++        return a["choice"] if a["confidence"] >= limiar else None
++    except (TypeError, KeyError):
++        return None
++
++
++def probabilidade(respostas: dict | None, pergunta: str) -> float | None:
++    """Probabilidade de uma pergunta `noul`, ou None."""
++    try:
++        return float(respostas[pergunta]["noul"])
++    except (TypeError, KeyError, ValueError):
++        return None
++
++
++def nota(respostas: dict | None, pergunta: str) -> float | None:
++    """Nível esperado de uma pergunta `score`, ou None."""
++    try:
++        return float(respostas[pergunta]["score"])
++    except (TypeError, KeyError, ValueError):
++        return None
++
++
++def registrar_avaliacao(uso: str, dados: dict) -> None:
++    """Eventos da avaliação em produção (PROJETO.md, "Decisor local"): o que
++    aconteceu depois da decisão, para medir se ela acertou. Única exceção à
++    regra "texto fora do log": o roteador guarda 200 caracteres das
++    divergências, para o Humano julgar. Arquivo separado, modo 600, apagado
++    inteiro por `scripts/avaliar_decisor.py --encerrar`."""
++    caminho = LOG_DIR / f"{uso}-avaliacao.jsonl"
++    try:
++        LOG_DIR.mkdir(parents=True, exist_ok=True)
++        fd = os.open(caminho, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
++        with os.fdopen(fd, "a", encoding="utf-8") as f:
++            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), **dados},
++                               ensure_ascii=False) + "\n")
++    except OSError:
++        pass
++
++
++def _registrar(uso, respostas, erro, ms, meta):
++    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "uso": uso, "modelo": MODELO,
++             "ms": round(ms), "respostas": respostas, "erro": erro, **(meta or {})}
++    try:
++        LOG_DIR.mkdir(parents=True, exist_ok=True)
++        with open(LOG_DIR / f"{uso}.jsonl", "a", encoding="utf-8") as f:
++            f.write(json.dumps(linha, ensure_ascii=False) + "\n")
++    except OSError:
++        pass  # log é para calibrar; sem ele a decisão continua valendo
++
++
++def _selftest() -> int:
++    import tempfile
++    import threading
++    from http.server import BaseHTTPRequestHandler, HTTPServer
++
++    global URL, LOG_DIR
++    modo = {"v": "ok"}
++
++    class _Falso(BaseHTTPRequestHandler):
++        def log_message(self, *a):
++            pass
++
++        def do_POST(self):
++            pedido = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
++            if modo["v"] == "404":
++                self.send_response(404)
++                self.end_headers()
++                return
++            if modo["v"] == "lento":
++                time.sleep(1.5)
++            ans = {k: ({"type": "choice", "choice": "b", "confidence": 0.9,
++                        "probabilities": {"a": 0.05, "b": 0.95}} if v["type"] == "choice"
++                       else {"type": "noul", "noul": 0.2}) for k, v in pedido["questions"].items()}
++            if modo["v"] == "incompleto":
++                ans = {}
++            corpo = json.dumps({"model": pedido["model"], "answers": ans}).encode()
++            self.send_response(200)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(corpo)))
++            self.end_headers()
++            try:
++                self.wfile.write(corpo)
++            except BrokenPipeError:
++                pass  # caso "lento": o cliente já desistiu por timeout
++
++    srv = HTTPServer(("127.0.0.1", 0), _Falso)
++    threading.Thread(target=srv.serve_forever, daemon=True).start()
++    URL = f"http://127.0.0.1:{srv.server_port}"
++    LOG_DIR = Path(tempfile.mkdtemp()) / "decisor"
++    q = {"r": {"type": "choice", "criteria": ["a", "b"]}, "s": {"type": "noul"}}
++    casos = []
++
++    r = decidir("teste", "x", q)
++    casos.append(("resposta normal -> escolha e probabilidade",
++                  escolha(r, "r", 0.6) == "b" and probabilidade(r, "s") == 0.2))
++    casos.append(("confiança abaixo do limiar -> None", escolha(r, "r", 0.95) is None))
++    modo["v"] = "404"
++    casos.append(("HTTP 404 -> None", decidir("teste", "x", q) is None))
++    modo["v"] = "incompleto"
++    casos.append(("resposta sem as perguntas -> None", decidir("teste", "x", q) is None))
++    modo["v"] = "lento"
++    casos.append(("timeout -> None", decidir("teste", "x", q, timeout=0.3) is None))
++    srv.shutdown()
++    srv.server_close()
++    casos.append(("serviço fora do ar -> None", decidir("teste", "x", q, timeout=1) is None))
++    casos.append(("helpers com None -> None", escolha(None, "r", 0) is None
++                  and probabilidade(None, "s") is None and nota(None, "s") is None))
++    linhas = (LOG_DIR / "teste.jsonl").read_text().splitlines()
++    casos.append(("1 linha de log por chamada, texto avaliado fora do log",
++                  len(linhas) == 5 and all('"x"' not in l for l in linhas)))
++
++    falhas = 0
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++        falhas += not ok
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    if sys.argv[1:] == ["--selftest"]:
++        sys.exit(_selftest())
++    print(__doc__)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index e797a46..7735662 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -339,18 +339,12 @@ def _linha_modelo_real_anterior() -> str:
+ # o timeout de 45s do `title.js`, cujo `AbortController` compartilhado fazia a
+ # resposta PRINCIPAL ser gravada vazia (MEMÓRIAS (411)).
+ #
+-# Detector: strings LITERAIS que o `@librechat/agents` põe no prompt de título
+-# ou no schema de saída estruturada (`dist/*/utils/title.*`). São texto GERADO
+-# pelo frontend, nunca conteúdo de usuário -- casar por elas não tem falso
+-# positivo prático. Se um usuário colar exatamente uma dessas frases, o pior
+-# caso é aquele turno sair sem hidratação (`Última entrada: lacuna`),
+-# recuperável. Fonte conferida no container em 09/09/2026.
+-_SINAIS_TITULO = (
+-    "A concise title in the detected language",
+-    "A concise title for the conversation in 5 words or less",
+-    "Provide a concise, 5-word-or-less title for the conversation",
+-    "Analyze this conversation and provide",
+-)
++# LibreChat: detectado só pelo schema (`_schema_pede_titulo`), nunca por texto.
++# `librechat.yaml` fixa `titleMethod: "structured"` no endpoint Seth; sem isso o
++# `generateTitle` do @librechat/agents usa "completion" por padrão (run.cjs,
++# conferido no container em 13/10/2026) e o título só seria reconhecível por
++# substring -- que um usuário consegue colar. Se o título algum dia chegar sem
++# schema, ele é HIDRATADO: degrada (chamada maior), nunca rouba hidratação de turno real.
+ 
+ # Sinal separado pro Goose (achado 21/09/2026, MEMÓRIAS (495)): ele também faz
+ # uma chamada de "nomear a sessão" pro MESMO endpoint (:20126), sistema PRÓPRIO
+@@ -364,13 +358,8 @@ _SINAIS_TITULO = (
+ #     {"role":"user","content":"---BEGIN USER MESSAGES---\n...\n---END USER
+ #       MESSAGES---\n\nGenerate a short title for the above messages."}],
+ #    "stream":true,"stream_options":{"include_usage":true}}
+-# Diferença estrutural do padrão LibreChat: o texto-gatilho está na PRIMEIRA
+-# mensagem (system), não na última -- por isso checado à parte de
+-# `_SINAIS_TITULO` (que só olha `msgs[-1]`), em QUALQUER posição/papel.
+-# Mesma classe de risco residual já declarada acima para `_SINAIS_TITULO`:
+-# string literal do PRÓPRIO cliente, não conteúdo de usuário -- colar esse
+-# texto exato como mensagem própria no pior caso perde só a hidratação
+-# daquele turno.
++# O texto-gatilho vem numa mensagem `system` montada pelo próprio Goose. Só
++# `role == "system"` conta: conteúdo de usuário (inclusive colado) nunca dispara.
+ _SINAIS_TITULO_GOOSE = (
+     "Generate a short title (four words or less) that describes the topic "
+     "of the user's messages",
+@@ -378,16 +367,14 @@ _SINAIS_TITULO_GOOSE = (
+ 
+ 
+ def _e_chamada_titulo_goose(payload: dict) -> bool:
+-    """Sinal 3 de `_e_chamada_utilitaria`: chamada de nomear-sessão do Goose,
+-    que carrega o texto-gatilho na PRIMEIRA mensagem (system), não na
+-    última. Varre todas as mensagens (posição não importa aqui), mas só
+-    quando `len(messages) <= 2` -- mesmo limite dos outros sinais, é sempre
+-    one-shot."""
++    """Sinal 2 de `_e_chamada_utilitaria`: chamada de nomear-sessão do Goose.
++    Só mensagens `system` (montadas pelo cliente) e só com `len(messages) <= 2`
++    -- é sempre one-shot."""
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
+         return False
+     for m in msgs:
+-        if not isinstance(m, dict):
++        if not isinstance(m, dict) or m.get("role") != "system":
+             continue
+         conteudo = m.get("content")
+         if isinstance(conteudo, list):
+@@ -430,54 +417,16 @@ def _schema_pede_titulo(payload: dict) -> bool:
+ 
+ def _e_chamada_utilitaria(payload: dict) -> bool:
+     """True se o corpo é uma chamada de título/utilidade do frontend, nunca
+-    um turno de chat real da Seth. Três sinais, checados nesta ordem
+-    (achado 21/09/2026, MEMÓRIAS (495): 3º sinal cobre o Goose, não só o
+-    LibreChat):
+-
+-    1. `_schema_pede_titulo` -- sinal de CANAL, não de conteúdo. Se bater,
+-       basta: nenhuma posição de mensagem importa, porque dado externo não
+-       consegue forjar `response_format`/`tools`.
+-    2. Sem (1): o `@librechat/agents` também tem um caminho SEM structured
+-       output (`createCompletionTitleRunnable`, mesmo arquivo, usado quando
+-       o provedor não suporta) -- prompt de completion puro, sem
+-       `response_format`. Aí vale a correção de (419)/MEMÓRIAS (431): a
+-       string-gatilho só conta se estiver na ÚLTIMA mensagem, com
+-       `role` user/system, E `len(messages) <= 2` -- a chamada de título é
+-       sempre one-shot (um H, no máximo um turno de usuário antes).
+-       `content` normalizado antes do teste de substring: lista de partes
+-       vira texto concatenado, `None`/outro tipo vira string vazia -- nunca
+-       `TypeError`, nunca falso negativo silencioso por testar `in` numa
+-       lista (achado de auditoria, 16/09/2026).
+-    3. `_e_chamada_titulo_goose` -- mesma ideia do (2), mas pro Goose: o
+-       texto-gatilho vem na PRIMEIRA mensagem (system), não na última, então
+-       tem checagem própria (varre todas as mensagens do payload).
+-
+-    Residual CONHECIDO, não fechado por este desenho: colar um texto com a
+-    string-gatilho como a PRIMEIRA mensagem de uma conversa nova ainda bate
+-    a condição 2 (role user, len<=2) sem ser uma chamada de título de
+-    verdade -- mesma classe de risco que qualquer detector por conteúdo,
+-    registrado em vez de escondido (Doutrina de defesa proporcional,
+-    PROJETO.md: risco residual declarado é mais seguro que estado seguro
+-    não declarado)."""
+-    if _schema_pede_titulo(payload):
+-        return True
+-    if _e_chamada_titulo_goose(payload):
+-        return True
++    um turno de chat real da Seth. Dois sinais, nenhum lê conteúdo de usuário:
+ 
+-    msgs = payload.get("messages")
+-    if not isinstance(msgs, list) or not msgs or len(msgs) > 2:
+-        return False
+-    ultima = msgs[-1]
+-    if not isinstance(ultima, dict) or ultima.get("role") not in ("user", "system"):
+-        return False
+-    conteudo = ultima.get("content")
+-    if isinstance(conteudo, list):
+-        texto = " ".join(p.get("text", "") for p in conteudo if isinstance(p, dict))
+-    elif isinstance(conteudo, str):
+-        texto = conteudo
+-    else:
+-        texto = ""
+-    return any(s in texto for s in _SINAIS_TITULO)
++    1. `_schema_pede_titulo` -- LibreChat (`titleMethod: "structured"`): sinal
++       de CANAL; dado externo não forja `response_format`/`tools`.
++    2. `_e_chamada_titulo_goose` -- Goose: texto-gatilho só em `role: system`.
++
++    Fecha o residual de (419)/(431)/(433): o antigo sinal por substring na
++    última mensagem de usuário saiu em 13/10/2026 -- colar a frase-gatilho
++    não tira mais a hidratação de um turno real."""
++    return _schema_pede_titulo(payload) or _e_chamada_titulo_goose(payload)
+ 
+ 
+ # --- Roteador por complexidade (MEMÓRIAS (416); reabre a (383) com premissa nova) --
+@@ -530,6 +479,79 @@ def _classificar_rota(payload: dict) -> str:
+     return _ROTA_BASE
+ 
+ 
++# --- Roteador-sombra: decisor local (PROJETO.md, "Decisor local") -----------
++# O modelo de decisão escolhe a rota pelo SIGNIFICADO do pedido; as travas
++# exatas abaixo continuam valendo por cima dele. Hoje só em SOMBRA: decide numa
++# thread fora do caminho da resposta (winnow:e4b leva ~4 s na CPU) e registra em
++# ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
++import decisor  # noqa: E402  (mesmo diretório)
++
++_PERGUNTA_ROTA = {"rota": {
++    "type": "choice",
++    "instructions": "What kind of AI model does this user request need?",
++    "criteria": {
++        "rapido": "a greeting, thanks, confirmation or trivial one-line question",
++        "livre": "normal conversation, everyday explanation or writing help, no hard reasoning",
++        "pesado": "hard reasoning, proof, deep technical analysis or complex planning",
++        "codigo": "writing, fixing or explaining programming code, SQL or a script"}}}
++_LIMIAR_ROTA = 0.6
++_SOMBRA_LIVRE = threading.Semaphore(1)
++
++
++def _rota_com_travas(escolhida: str | None, payload: dict) -> str:
++    """Rota final a partir da escolha do modelo, com as travas exatas por cima.
++    Sem escolha (confiança baixa, decisor fora) -> heurística de sempre."""
++    if escolhida is None:
++        return _classificar_rota(payload)
++    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    total, _, _ = _texto_e_sinais(msgs)
++    if total > _LIMIAR_PESADO_CHARS or len(msgs) > _LIMIAR_PESADO_MSGS:
++        return "seth-pesado"
++    if escolhida == "rapido" and payload.get("tools"):
++        return "seth-livre"
++    return f"seth-{escolhida}"
++
++
++def _ultimo_texto_usuario(msgs: list) -> str:
++    for m in reversed(msgs):
++        if isinstance(m, dict) and m.get("role") == "user":
++            c = m.get("content")
++            if isinstance(c, list):
++                return " ".join(p.get("text", "") for p in c if isinstance(p, dict))
++            return c if isinstance(c, str) else ""
++    return ""
++
++
++def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
++    """Dispara a decisão-sombra sem esperar. Uma por vez: se o decisor ainda
++    está ocupado, este pedido fica sem sombra (nunca empilha CPU)."""
++    if not _SOMBRA_LIVRE.acquire(blocking=False):
++        return
++    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    texto = _ultimo_texto_usuario(msgs)[-4000:]
++    total, n_user, cerca = _texto_e_sinais(msgs)
++    meta = {"heuristica": rota_heuristica, "chars": total, "n_msgs": len(msgs),
++            "n_user": n_user, "cerca_codigo": cerca, "tools": bool(payload.get("tools"))}
++
++    def _rodar():
++        try:
++            if not texto:
++                return
++            r = decisor.decidir("roteador", texto, _PERGUNTA_ROTA, meta=meta)
++            escolhida = decisor.escolha(r, "rota", _LIMIAR_ROTA)
++            final = _rota_com_travas(escolhida, payload)
++            if escolhida is not None and final != rota_heuristica:
++                # avaliação em produção: o Humano julga as divergências
++                decisor.registrar_avaliacao("roteador", {
++                    "heuristica": rota_heuristica, "modelo": final,
++                    "confianca": r["rota"]["confidence"], "chars": total,
++                    "trecho": texto[:200]})
++        finally:
++            _SOMBRA_LIVRE.release()
++
++    threading.Thread(target=_rodar, daemon=True).start()
++
++
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -587,6 +609,8 @@ class _Handler(BaseHTTPRequestHandler):
+                 # roteador por complexidade: só o alvo "seth-livre" do Agent
+                 if payload.get("model") == _ROTA_BASE:
+                     self._rota = _classificar_rota(payload)
++                    if not _e_chamada_utilitaria(payload):
++                        _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
+                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
+         self._passar(corpo, "POST")
+@@ -848,11 +872,13 @@ def _selftest() -> int:
+           f"(est={len(est_b)})")
+     falhas += 0 if ok2b else 1
+ 
+-    # 3. chamada de TÍTULO do LibreChat -> repassada crua, SEM system hidratado
++    # 3. chamada de TÍTULO do LibreChat (titleMethod structured: schema com "title")
++    #    -> repassada crua, SEM system hidratado
+     body3 = json.dumps({"model": "seth", "messages": [
+-        {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
+-         "detected language\n2. A concise title in the detected language (5 words "
+-         "or less, no punctuation or quotation)\n\nUser: oi\nAssistant: ok"}]}).encode()
++        {"role": "user", "content": "User: oi\nAssistant: ok"}],
++        "response_format": {"type": "json_schema", "json_schema": {"name": "title", "schema": {
++            "type": "object", "properties": {"title": {"type": "string"}},
++            "required": ["title"]}}}}).encode()
+     urllib.request.urlopen(urllib.request.Request(
+         base, data=body3, headers={"Content-Type": "application/json"}), timeout=10).read()
+     m3 = json.loads(_Dummy.ultimo_corpo)["messages"]
+@@ -861,6 +887,31 @@ def _selftest() -> int:
+           f"(messages={len(m3)}, role0={m3[0]['role']})")
+     falhas += 0 if ok3 else 1
+ 
++    # 3c. usuário COLA a frase-gatilho antiga do título (sem schema) -> hidrata
++    #     (residual de (419)/(431)/(433) fechado)
++    body3c = json.dumps({"model": "seth", "messages": [
++        {"role": "user", "content": "Analyze this conversation and provide:\n1. The "
++         "detected language\n2. A concise title in the detected language"}]}).encode()
++    urllib.request.urlopen(urllib.request.Request(
++        base, data=body3c, headers={"Content-Type": "application/json"}), timeout=10).read()
++    m3c = json.loads(_Dummy.ultimo_corpo)["messages"]
++    ok3c = len(m3c) == 2 and m3c[0]["role"] == "system" and MARCADOR in m3c[0]["content"]
++    print(f"{'PASS' if ok3c else 'FALHA'}  frase de título colada pelo usuário -> hidratou "
++          f"(messages={len(m3c)})")
++    falhas += 0 if ok3c else 1
++
++    # 3d. gatilho do Goose vindo em mensagem de USUÁRIO -> hidrata
++    body3d = json.dumps({"model": "seth", "messages": [
++        {"role": "user", "content": "Generate a short title (four words or less) that "
++         "describes the topic of the user's messages"}]}).encode()
++    urllib.request.urlopen(urllib.request.Request(
++        base, data=body3d, headers={"Content-Type": "application/json"}), timeout=10).read()
++    m3d = json.loads(_Dummy.ultimo_corpo)["messages"]
++    ok3d = len(m3d) == 2 and m3d[0]["role"] == "system" and MARCADOR in m3d[0]["content"]
++    print(f"{'PASS' if ok3d else 'FALHA'}  gatilho do Goose como mensagem de usuário -> "
++          f"hidratou (messages={len(m3d)})")
++    falhas += 0 if ok3d else 1
++
+     # 3b. chamada de TÍTULO do Goose (payload real capturado com proxy, MEMÓRIAS (495)) ->
+     # repassada crua, SEM system hidratado. Gatilho na PRIMEIRA mensagem (system), não na
+     # última -- é exatamente o caso que o sinal 2 (só olha msgs[-1]) não cobre.
+@@ -928,6 +979,38 @@ def _selftest() -> int:
+         print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
+         falhas += 0 if ok else 1
+ 
++    # 9b. travas exatas sobre a escolha do decisor (pura, sem rede)
++    curto = {"messages": [{"role": "user", "content": "prove que há infinitos primos"}]}
++    travas = [
++        ("sem escolha -> heurística", _rota_com_travas(None, curto), "seth-rapido"),
++        ("codigo -> seth-codigo", _rota_com_travas("codigo", curto), "seth-codigo"),
++        ("pesado curto -> seth-pesado", _rota_com_travas("pesado", curto), "seth-pesado"),
++        (">6000 chars vence o modelo", _rota_com_travas(
++            "rapido", {"messages": [{"role": "user", "content": "z" * 7000}]}), "seth-pesado"),
++        ("rapido com tools -> seth-livre", _rota_com_travas(
++            "rapido", {"tools": [{"x": 1}], **curto}), "seth-livre"),
++    ]
++    for desc, deu, quer in travas:
++        ok = deu == quer
++        print(f"{'PASS' if ok else 'FALHA'}  trava: {desc} (deu {deu})")
++        falhas += 0 if ok else 1
++
++    # 9c. sombra com decisor fora do ar: o pedido passa pela heurística, sem esperar
++    import time as _t
++    _url_antes, decisor.URL = decisor.URL, "http://127.0.0.1:9"
++    _log_antes, decisor.LOG_DIR = decisor.LOG_DIR, Path(tempfile.mkdtemp())
++    t0 = _t.monotonic()
++    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
++        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
++        headers={"Content-Type": "application/json"}), timeout=10).read()
++    dt = _t.monotonic() - t0
++    rota_sombra = json.loads(_Dummy.ultimo_corpo)["model"]
++    decisor.URL, decisor.LOG_DIR = _url_antes, _log_antes
++    ok9c = rota_sombra == "seth-rapido" and dt < 2
++    print(f"{'PASS' if ok9c else 'FALHA'}  sombra com decisor fora -> heurística, "
++          f"sem bloquear (rota {rota_sombra}, {dt * 1000:.0f} ms)")
++    falhas += 0 if ok9c else 1
++
+     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
+     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
+     # o PRÓXIMO turno já hidratado reinjeta MODELO-REAL-TURNO-ANTERIOR.
+diff --git a/scripts/avaliar_decisor.py b/scripts/avaliar_decisor.py
+new file mode 100644
+index 0000000..33b3457
+--- /dev/null
++++ b/scripts/avaliar_decisor.py
+@@ -0,0 +1,334 @@
++#!/usr/bin/env python3
++"""Avaliação em produção do decisor local (PROJETO.md, "Decisor local").
++
++Decisão do Humano, 13/10/2026 (MEMÓRIAS (655)): os 4 usos entram com o risco
++assumido por escrito, e o sistema avisa se valeu a pena até ele mandar aprovar
++ou remover de vez. Roda todo dia pelo `agata-avaliacao-decisor.timer`.
++
++Por uso, um veredito -- VALE / NÃO VALE / INCONCLUSIVO -- com o motivo e os
++números, pelos critérios abaixo (constantes, revisáveis):
++- roteador: falha demais -> não vale; concorda com a regra em >=95% -> não vale
++  (só gasta CPU); senão decide o rótulo do Humano nas divergências.
++- inbox: nota barrada como rascunho que depois foi EDITADA = acerto; importada
++  intocada pela regra das 24 h = erro. Medido sozinho, sem rótulo.
++- p20 e consolidação: rótulo do Humano (acertou/errou) nos avisos e reprovações.
++Alarme imediato: o serviço reiniciou 3+ vezes, ou mais da metade das decisões
++das últimas 24 h falhou.
++
++Avisa por notificação na área de trabalho e reescreve o relatório em
++`~/Área de trabalho/avaliacao-decisor.md`: no 3º dia, no 7º, depois a cada 7,
++e na hora em caso de alarme. Para de avisar depois de `--encerrar`.
++
++Uso:
++  avaliar_decisor.py              relatório + aviso, se for dia de avisar
++  avaliar_decisor.py --rotular    o Humano julga os casos pendentes (terminal)
++  avaliar_decisor.py --encerrar aprovado|removido
++  avaliar_decisor.py --selftest
++"""
++from __future__ import annotations
++
++import datetime as dt
++import json
++import os
++import subprocess
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "redesign" / "router"))
++import decisor  # noqa: E402
++
++LOG = decisor.LOG_DIR
++ESTADO = LOG / "avaliacao.json"
++ROTULOS = LOG / "rotulos.jsonl"
++_DESKTOP = Path.home() / "Área de trabalho"
++RELATORIO = (_DESKTOP if _DESKTOP.is_dir() else LOG) / "avaliacao-decisor.md"
++
++ROT_N_MIN, ROT_ERRO_MAX, ROT_CONCORDA_MAX = 30, 0.20, 0.95
++ROTULOS_MIN = {"roteador": 10, "p20": 3, "consolidacao": 3}
++INBOX_BLOQ_MIN = 3
++ACERTO_MIN = 0.60
++LIMIAR_P20, LIMIAR_UTIL, LIMIAR_INBOX = 0.7, 1.5, 0.7
++AVISAR_DIAS = (3, 7)
++
++
++def _ler(nome: str) -> list[dict]:
++    try:
++        return [json.loads(l) for l in (LOG / nome).read_text(encoding="utf-8").splitlines() if l.strip()]
++    except (OSError, ValueError):
++        return []
++
++
++def _estado() -> dict:
++    try:
++        return json.loads(ESTADO.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        e = {"inicio": dt.date.today().isoformat(), "encerrado": None, "avisos": []}
++        _gravar_estado(e)
++        return e
++
++
++def _gravar_estado(e: dict) -> None:
++    LOG.mkdir(parents=True, exist_ok=True)
++    ESTADO.write_text(json.dumps(e, ensure_ascii=False, indent=1), encoding="utf-8")
++
++
++def _rotulos() -> dict[tuple[str, str], str]:
++    return {(r["uso"], r["ts"]): r["veredito"] for r in _ler("rotulos.jsonl")}
++
++
++def _pendentes() -> list[dict]:
++    """Casos que só o Humano julga: divergência do roteador, aviso do P-20,
++    reprovação da consolidação."""
++    casos = [{"uso": "roteador", **c} for c in _ler("roteador-avaliacao.jsonl")]
++    for d in _ler("p20.jsonl"):
++        p = decisor.probabilidade(d.get("respostas"), "pessoal")
++        if p is not None and p >= LIMIAR_P20:
++            casos.append({"uso": "p20", "ts": d["ts"], "arquivo": d.get("arquivo"), "p": p})
++    for d in _ler("consolidacao.jsonl"):
++        n = decisor.nota(d.get("respostas"), "util")
++        if n is not None and n < LIMIAR_UTIL:
++            casos.append({"uso": "consolidacao", "ts": d["ts"], "tema": d.get("tema"), "nota": n})
++    feitos = _rotulos()
++    return [c for c in casos if (c["uso"], c["ts"]) not in feitos]
++
++
++def _por_rotulo(uso: str) -> tuple[str, str]:
++    vs = [v for (u, _), v in _rotulos().items() if u == uso and v in ("modelo", "regra")]
++    certos = vs.count("modelo")
++    if len(vs) < ROTULOS_MIN[uso]:
++        return "INCONCLUSIVO", (f"{len(vs)} de {ROTULOS_MIN[uso]} casos julgados -- rode "
++                                f"`python3 ~/agata/scripts/avaliar_decisor.py --rotular`")
++    taxa = certos / len(vs)
++    return ("VALE" if taxa >= ACERTO_MIN else "NÃO VALE",
++            f"o modelo acertou {certos} de {len(vs)} casos julgados ({taxa:.0%}; mínimo {ACERTO_MIN:.0%})")
++
++
++def veredito_roteador() -> tuple[str, str, dict]:
++    ds = _ler("roteador.jsonl")
++    n = len(ds)
++    falhas = sum(1 for d in ds if d.get("respostas") is None)
++    ok = n - falhas
++    div = len(_ler("roteador-avaliacao.jsonl"))
++    ms = sorted(d["ms"] for d in ds if d.get("respostas") is not None)
++    num = {"decisões": n, "falhas": falhas, "divergências": div,
++           "latência p95 (ms)": ms[int(0.95 * (len(ms) - 1))] if ms else None}
++    if n < ROT_N_MIN:
++        return "INCONCLUSIVO", f"só {n} decisões (mínimo {ROT_N_MIN})", num
++    if falhas / n > ROT_ERRO_MAX:
++        return "NÃO VALE", f"falhou em {falhas / n:.0%} das decisões", num
++    if ok and 1 - div / ok >= ROT_CONCORDA_MAX:
++        return "NÃO VALE", f"concorda com a regra em {1 - div / ok:.0%} -- só gasta CPU", num
++    v, m = _por_rotulo("roteador")
++    return v, m, num
++
++
++def veredito_inbox() -> tuple[str, str, dict]:
++    bloqueios = {}
++    for d in _ler("inbox.jsonl"):
++        p = decisor.probabilidade(d.get("respostas"), "concluida")
++        if p is not None and p < LIMIAR_INBOX and d.get("nota"):
++            bloqueios.setdefault(d["nota"], d.get("chars"))
++    certos = errados = 0
++    for e in _ler("inbox-avaliacao.jsonl"):
++        chars_no_bloqueio = bloqueios.get(e.get("nota"))
++        if chars_no_bloqueio is None:
++            continue
++        if e.get("chars") != chars_no_bloqueio:
++            certos += 1          # editada depois do bloqueio: era rascunho mesmo
++        elif e.get("via") == "24h":
++            errados += 1         # saiu intocada pela regra das 24 h: bloqueio à toa
++    num = {"notas barradas": len(bloqueios), "barradas e depois editadas": certos,
++           "barradas e importadas intocadas": errados}
++    julgados = certos + errados
++    if julgados < INBOX_BLOQ_MIN:
++        return "INCONCLUSIVO", f"{julgados} bloqueio(s) com desfecho (mínimo {INBOX_BLOQ_MIN})", num
++    taxa = certos / julgados
++    return ("VALE" if taxa >= ACERTO_MIN else "NÃO VALE",
++            f"{certos} de {julgados} notas barradas eram mesmo rascunho ({taxa:.0%})", num)
++
++
++def veredito_rotulado(uso: str, log: str) -> tuple[str, str, dict]:
++    num = {"avaliações": len(_ler(log)),
++           "casos para julgar": sum(1 for c in _pendentes() if c["uso"] == uso)}
++    v, m = _por_rotulo(uso)
++    return v, m, num
++
++
++def _servico() -> dict:
++    try:
++        out = subprocess.run(["systemctl", "--user", "show", "ollaya.service",
++                              "-p", "ActiveState", "-p", "NRestarts"],
++                             capture_output=True, text=True, timeout=10).stdout
++        return dict(l.split("=", 1) for l in out.splitlines() if "=" in l)
++    except (OSError, subprocess.SubprocessError):
++        return {}
++
++
++def alarmes() -> list[str]:
++    a = []
++    srv = _servico()
++    if int(srv.get("NRestarts", "0") or 0) >= 3:
++        a.append(f"o ollaya reiniciou {srv['NRestarts']} vezes (possível falta de memória)")
++    limite = (dt.datetime.now().astimezone() - dt.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S%z")
++    recentes = [d for u in ("roteador", "inbox", "p20", "consolidacao")
++                for d in _ler(f"{u}.jsonl") if d.get("ts", "") >= limite]
++    falhas = sum(1 for d in recentes if d.get("respostas") is None)
++    if len(recentes) >= 5 and falhas / len(recentes) > 0.5:
++        a.append(f"{falhas} de {len(recentes)} decisões das últimas 24 h falharam")
++    return a
++
++
++def relatorio() -> tuple[str, str]:
++    e = _estado()
++    dia = (dt.date.today() - dt.date.fromisoformat(e["inicio"])).days + 1
++    usos = {"Roteador da Seth (sombra)": veredito_roteador(),
++            "Inbox do Obsidian": veredito_inbox(),
++            "Aviso de dado pessoal (P-20)": veredito_rotulado("p20", "p20.jsonl"),
++            "Consolidação noturna": veredito_rotulado("consolidacao", "consolidacao.jsonl")}
++    al = alarmes()
++    cont = {v: sum(1 for x in usos.values() if x[0] == v) for v in ("VALE", "NÃO VALE", "INCONCLUSIVO")}
++    resumo = (f"Decisor local, dia {dia}: {cont['VALE']} vale, {cont['NÃO VALE']} não vale, "
++              f"{cont['INCONCLUSIVO']} inconclusivo" + (f" -- ALARME: {'; '.join(al)}" if al else ""))
++    linhas = [f"# Avaliação do decisor local — dia {dia} (desde {e['inicio']})", "",
++              f"**{resumo}**", ""]
++    if al:
++        linhas += ["## Alarme", *[f"- {x}" for x in al], ""]
++    for nome, (v, motivo, num) in usos.items():
++        linhas += [f"## {nome}: {v}", f"{motivo}.", "",
++                   *[f"- {k}: {val}" for k, val in num.items()], ""]
++    pend = len(_pendentes())
++    linhas += ["## O que fazer",
++               f"- Casos esperando seu julgamento: {pend}. Para julgar: "
++               "`python3 ~/agata/scripts/avaliar_decisor.py --rotular`" if pend else
++               "- Nenhum caso esperando julgamento.",
++               "- Para encerrar: diga a um executor \"aprovar o decisor\" ou \"remover o decisor\" "
++               "(ele roda `--encerrar` e prepara a proposta P-8 correspondente).", ""]
++    return resumo, "\n".join(linhas)
++
++
++def _notificar(resumo: str) -> None:
++    try:
++        subprocess.run(["notify-send", "-a", "Agata", "Avaliação do decisor local",
++                        resumo + f"\nRelatório: {RELATORIO}"], timeout=10)
++    except (OSError, subprocess.SubprocessError):
++        pass
++
++
++def rodar() -> int:
++    e = _estado()
++    if e.get("encerrado"):
++        print(f"avaliação encerrada ({e['encerrado']}) -- nada a fazer")
++        return 0
++    resumo, md = relatorio()
++    RELATORIO.write_text(md, encoding="utf-8")
++    print(md)
++    dia = (dt.date.today() - dt.date.fromisoformat(e["inicio"])).days + 1
++    marco = dia in AVISAR_DIAS or (dia > AVISAR_DIAS[-1] and (dia - AVISAR_DIAS[-1]) % 7 == 0)
++    chave = f"dia-{dia}" if marco else (f"alarme-{dt.date.today()}" if "ALARME" in resumo else None)
++    if chave and chave not in e["avisos"]:
++        _notificar(resumo)
++        e["avisos"].append(chave)
++        _gravar_estado(e)
++    return 0
++
++
++def rotular() -> int:
++    casos = _pendentes()
++    if not casos:
++        print("nenhum caso esperando julgamento")
++        return 0
++    print(f"{len(casos)} caso(s). Para cada um: m = o modelo acertou, r = a regra acertou, "
++          "i = tanto faz, Enter = pular, q = sair.\n")
++    for c in casos:
++        if c["uso"] == "roteador":
++            print(f"[roteador] {c['ts']}  regra: {c['heuristica']}  modelo: {c['modelo']} "
++                  f"(confiança {c['confianca']:.2f})\n  mensagem: {c['trecho']!r}")
++        elif c["uso"] == "p20":
++            print(f"[P-20] {c['ts']}  avisou dado pessoal em {c['arquivo']} (p={c['p']:.2f}). "
++                  "Lembre do commit dessa hora: tinha mesmo dado pessoal?")
++        else:
++            print(f"[consolidação] {c['ts']}  reprovou o tema {c['tema']!r} (nota {c['nota']:.2f}). "
++                  "Texto em ~/.cache/agata/consolidacao/reprovados.log: a reprovação foi justa?")
++        r = input("  > ").strip().lower()
++        if r == "q":
++            break
++        v = {"m": "modelo", "r": "regra", "i": "tanto-faz"}.get(r)
++        if v:
++            with open(ROTULOS, "a", encoding="utf-8") as f:
++                f.write(json.dumps({"uso": c["uso"], "ts": c["ts"], "veredito": v}) + "\n")
++    return 0
++
++
++def encerrar(como: str) -> int:
++    if como not in ("aprovado", "removido"):
++        print("uso: --encerrar aprovado|removido")
++        return 2
++    e = _estado()
++    e["encerrado"], e["encerrado_em"] = como, dt.date.today().isoformat()
++    _gravar_estado(e)
++    for f in LOG.glob("*-avaliacao.jsonl"):
++        f.unlink()
++    print(f"avaliação encerrada: {como}. Trechos de mensagem apagados.")
++    if como == "removido":
++        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.service"])
++        print("ollaya parado e desabilitado: todos os usos já caem na regra determinística. "
++              "Falta a proposta P-8 que tira o código (o executor prepara).")
++    else:
++        print("Falta a proposta P-8 que tira o roteador da sombra, se for o caso (o executor prepara).")
++    return 0
++
++
++def _selftest() -> int:
++    import tempfile
++    global LOG, ESTADO, ROTULOS, RELATORIO
++    LOG = Path(tempfile.mkdtemp())
++    ESTADO, ROTULOS, RELATORIO = LOG / "avaliacao.json", LOG / "rotulos.jsonl", LOG / "r.md"
++    hoje = dt.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
++
++    def grava(nome, linhas):
++        (LOG / nome).write_text("".join(json.dumps(l) + "\n" for l in linhas), encoding="utf-8")
++
++    casos = []
++    casos.append(("sem dado nenhum -> tudo inconclusivo",
++                  all(v[0] == "INCONCLUSIVO" for v in (veredito_roteador(), veredito_inbox()))))
++    ok = {"rota": {"choice": "livre", "confidence": 0.9}}
++    grava("roteador.jsonl", [{"ts": f"{hoje}{i}", "ms": 4000, "respostas": ok} for i in range(40)])
++    casos.append(("roteador concordando sempre -> não vale", veredito_roteador()[0] == "NÃO VALE"))
++    grava("roteador-avaliacao.jsonl", [{"ts": f"d{i}", "heuristica": "seth-rapido", "modelo": "seth-pesado",
++                                        "confianca": 0.8, "trecho": "x"} for i in range(12)])
++    casos.append(("roteador divergindo sem rótulo -> inconclusivo", veredito_roteador()[0] == "INCONCLUSIVO"))
++    grava("rotulos.jsonl", [{"uso": "roteador", "ts": f"d{i}", "veredito": "modelo" if i < 9 else "regra"}
++                            for i in range(12)])
++    casos.append(("9 de 12 divergências com o modelo certo -> vale", veredito_roteador()[0] == "VALE"))
++    grava("roteador.jsonl", [{"ts": f"{hoje}{i}", "ms": 0, "respostas": None} for i in range(40)])
++    casos.append(("roteador falhando -> não vale", veredito_roteador()[0] == "NÃO VALE"))
++    casos.append(("falhas recentes -> alarme", any("falharam" in a for a in alarmes())))
++    rasc = {"concluida": {"noul": 0.3}}
++    grava("inbox.jsonl", [{"nota": n, "chars": 50, "respostas": rasc} for n in "abcd"])
++    grava("inbox-avaliacao.jsonl", [{"evento": "importada", "nota": "a", "chars": 90, "via": "decisor"},
++                                    {"evento": "importada", "nota": "b", "chars": 120, "via": "decisor"},
++                                    {"evento": "importada", "nota": "c", "chars": 80, "via": "24h"},
++                                    {"evento": "importada", "nota": "d", "chars": 50, "via": "24h"}])
++    v, m, _ = veredito_inbox()
++    casos.append(("inbox: 3 de 4 barradas editadas depois -> vale", v == "VALE" and "3 de 4" in m))
++    encerrar("aprovado")
++    casos.append(("encerrar apaga os trechos e para de avisar",
++                  not list(LOG.glob("*-avaliacao.jsonl")) and _estado()["encerrado"] == "aprovado"))
++    for nome, ok_ in casos:
++        print(f"{'PASS' if ok_ else 'FALHA'}  {nome}")
++    falhas = sum(not ok_ for _, ok_ in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    a = sys.argv[1:]
++    if a == ["--selftest"]:
++        sys.exit(_selftest())
++    if a == ["--rotular"]:
++        sys.exit(rotular())
++    if len(a) == 2 and a[0] == "--encerrar":
++        sys.exit(encerrar(a[1]))
++    if not a:
++        sys.exit(rodar())
++    sys.exit(__doc__)
+diff --git a/scripts/esperar_servico.sh b/scripts/esperar_servico.sh
+new file mode 100755
+index 0000000..fd3e434
+--- /dev/null
++++ b/scripts/esperar_servico.sh
+@@ -0,0 +1,17 @@
++#!/usr/bin/env bash
++# Espera um serviço HTTP local responder (qualquer código HTTP conta como "de pé").
++# Feito para `ExecCondition=` de unit oneshot: no boot, timer com Persistent=true
++# dispara a recuperação antes de o serviço do qual depende subir (13/10/2026:
++# pesquisa e consolidação terminaram 1 s antes do OmniRoute começar a subir).
++# Saída 0 = pode rodar; 1 = o systemd PULA a unit (não é falha, nada é escrito).
++#
++# Uso: esperar_servico.sh <url> [segundos, padrão 120]
++url="${1:?uso: esperar_servico.sh <url> [segundos]}"
++limite="${2:-120}"
++inicio=$SECONDS
++while (( SECONDS - inicio < limite )); do
++  curl -s -o /dev/null -m 2 "$url" && exit 0
++  sleep 2
++done
++echo "esperar_servico: $url não respondeu em ${limite}s -- execução pulada, nada escrito"
++exit 1
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 48947b8..5691f7f 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -58,6 +58,7 @@ source "$_PERIMETRO_DIR/perimetro/p18_ancora_falha.sh"
+ source "$_PERIMETRO_DIR/perimetro/p19_citacao_arquivo.sh"
+ source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
+ source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
++source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -172,7 +173,7 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service")
++P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer" "agata-avaliacao-decisor.timer")
+ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
+ 
+ 
+@@ -338,12 +339,18 @@ main() {
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
+-  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework" "MEMÓRIAS (560); plano de replicabilidade, Fase 5"
++  cabecalho "P-20" "Dado pessoal não vaza por caminho de framework nem por texto livre do canon público" "MEMÓRIAS (560)/(430); camada do decisor local"
+   p20_dado_pessoal
+   echo "veredito: AVISO SÓ (nunca falha)"
+   CONT_OK=$((CONT_OK + 1))
+   echo
+ 
++  cabecalho "P-22" "Derivados de hidratação não divergem do HEAD sem a fonte mudar" "MEMÓRIAS (333)/(349)"
++  p22_derivados_drift
++  echo "veredito: AVISO SÓ (nunca falha)"
++  CONT_OK=$((CONT_OK + 1))
++  echo
++
+   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
+   PERIMETRO_ESTADO=""
+   p12_backup_verificavel; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p20_dado_pessoal.sh b/scripts/perimetro/p20_dado_pessoal.sh
+index 01ed1ff..9ba5f94 100644
+--- a/scripts/perimetro/p20_dado_pessoal.sh
++++ b/scripts/perimetro/p20_dado_pessoal.sh
+@@ -78,7 +78,22 @@ _p20_permissao_ok() {
+   fi
+ }
+ 
++# Camada do decisor local (scripts/perimetro/p20_decisor.py): texto pessoal
++# escrito à mão no canon PÚBLICO, que a régua de identificadores não enxerga.
++# Independe da lista; só AVISO; decisor fora do ar -> silêncio.
++P20_CANON_PUBLICO=("MEMÓRIAS.md" "PROJETO.md" "ONDE_ESTAMOS.md")
++
++_p20_decisor_canon() {
++  local arquivo diff_arquivo
++  for arquivo in "${P20_CANON_PUBLICO[@]}"; do
++    diff_arquivo="$(git diff --cached -U0 -- "$arquivo" 2>/dev/null)"
++    [ -z "$diff_arquivo" ] && continue
++    printf '%s\n' "$diff_arquivo" | python3 "$_PERIMETRO_DIR/perimetro/p20_decisor.py" "$arquivo" 2>/dev/null || true
++  done
++}
++
+ p20_dado_pessoal() {
++  _p20_decisor_canon
+   if ! _p20_carregar; then
+     echo "AVISO (P-20): lista de identificadores ausente ($(_p20_lista)) -- o P-20 não tem o que procurar e não protege nada. O que fazer: criar o arquivo com modo 600, uma linha por identificador, no formato rotulo|regex|prova."
+     return 0
+diff --git a/scripts/perimetro/p20_decisor.py b/scripts/perimetro/p20_decisor.py
+new file mode 100644
+index 0000000..31435d8
+--- /dev/null
++++ b/scripts/perimetro/p20_decisor.py
+@@ -0,0 +1,85 @@
++#!/usr/bin/env python3
++"""P-20, camada do decisor local -- dado pessoal em texto livre do canon PÚBLICO.
++
++A régua de identificadores do P-20 só acha o que está numa lista, e só em
++caminho de framework. Texto pessoal escrito à mão em MEMÓRIAS/PROJETO/ONDE_ESTAMOS
++(saúde, família, finanças, endereço, rotina) entra no repositório público sem
++que nada veja (MEMÓRIAS (430): MOD pessoal fica fora do canon). Aqui o decisor
++local lê as linhas ADICIONADAS e avisa. Padrão "decide e confere" (PROJETO.md,
++"Decisor local"): só AVISO, nunca FALHA; decisor fora do ar -> silêncio; o
++texto nunca sai da máquina e nunca é reimpresso (só arquivo e trecho).
++
++Uso: git diff --cached -U0 -- <arquivo> | p20_decisor.py <arquivo>
++     p20_decisor.py --selftest
++"""
++from __future__ import annotations
++
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "redesign" / "router"))
++import decisor  # noqa: E402
++
++LIMIAR = 0.7
++TRECHO = 4000
++MAX_TRECHOS = 3
++_PERGUNTA = {"pessoal": {
++    "type": "noul",
++    "instructions": "This text reveals private personal information about a real person: "
++                    "health, family, finances, home address, phone number, daily routine "
++                    "or relationships."}}
++
++
++def linhas_adicionadas(diff: str) -> str:
++    return "\n".join(l[1:] for l in diff.splitlines()
++                     if l.startswith("+") and not l.startswith("+++"))
++
++
++def avisos(arquivo: str, texto: str) -> list[str]:
++    saida = []
++    trechos = [texto[i:i + TRECHO] for i in range(0, len(texto), TRECHO)][:MAX_TRECHOS]
++    for n, trecho in enumerate(trechos, 1):
++        if not trecho.strip():
++            continue
++        p = decisor.probabilidade(
++            decisor.decidir("p20", trecho, _PERGUNTA, meta={"arquivo": arquivo, "trecho": n}),
++            "pessoal")
++        if p is not None and p >= LIMIAR:
++            saida.append(
++                f"AVISO (P-20, decisor): {arquivo}, trecho {n} das linhas novas, parece ter dado "
++                f"pessoal (p={p:.2f}). Por que importa: o repositório é público e o que entra "
++                f"não sai mais (MEMÓRIAS (430)). O que fazer: reler o trecho; se for pessoal, "
++                f"tirar antes do commit. É um aviso de modelo -- pode ser falso positivo.")
++    return saida
++
++
++def _selftest() -> int:
++    original, casos = decisor.decidir, []
++    diff = "+++ b/MEMÓRIAS.md\n@@ -1,0 +1,2 @@\n+linha um\n+linha dois\n-removida\n"
++    casos.append(("só linhas adicionadas, sem cabeçalho",
++                  linhas_adicionadas(diff) == "linha um\nlinha dois"))
++    for nome, p, quer in [("decisor fora do ar -> silêncio", None, 0),
++                          ("p=0.9 -> 1 aviso", 0.9, 1), ("p=0.2 -> silêncio", 0.2, 0)]:
++        decisor.decidir = lambda *a, _p=p, **k: None if _p is None else {
++            "pessoal": {"type": "noul", "noul": _p}}
++        casos.append((nome, len(avisos("MEMÓRIAS.md", "texto")) == quer))
++    decisor.decidir = lambda *a, **k: {"pessoal": {"type": "noul", "noul": 0.99}}
++    msg = avisos("MEMÓRIAS.md", "segredo-que-nao-pode-vazar")
++    casos.append(("aviso nunca reimprime o texto", msg and "segredo" not in msg[0]))
++    casos.append((f"texto longo -> no máximo {MAX_TRECHOS} trechos",
++                  len(avisos("X", "a" * (TRECHO * 10))) == MAX_TRECHOS))
++    decisor.decidir = original
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    if sys.argv[1:] == ["--selftest"]:
++        sys.exit(_selftest())
++    if len(sys.argv) != 2:
++        sys.exit(__doc__)
++    for linha in avisos(sys.argv[1], linhas_adicionadas(sys.stdin.read())):
++        print(linha)
+diff --git a/scripts/perimetro/p22_derivados_drift.sh b/scripts/perimetro/p22_derivados_drift.sh
+new file mode 100644
+index 0000000..0a4c35f
+--- /dev/null
++++ b/scripts/perimetro/p22_derivados_drift.sh
+@@ -0,0 +1,28 @@
++#!/usr/bin/env bash
++# P-22 -- derivados de hidratação rastreados não podem divergir do HEAD sem a
++# fonte ter mudado. MEMÓRIAS (333): `.hidrata.md` e os dois índices voltaram a
++# um conteúdo velho na árvore de trabalho, com MEMÓRIAS.md intacto; causa raiz
++# segue `lacuna` (349). Fecha a classe, não o caso: qualquer repetição aparece
++# na próxima corrida do perímetro, em vez de ser achada por acaso.
++# AVISA, nunca falha -- o remédio é regenerar, e o pre-commit já regenera.
++#
++# Fonte mexida (index ou árvore) = regeneração legítima em andamento: silêncio.
++
++P22_DERIVADOS=(".hidrata.md" "INDICE_MEMORIAS.md" "INDICE_MEMORIAS_PALAVRAS-CHAVE.md")
++P22_FONTES=("MEMÓRIAS.md" "MEMORIAS-MORNO.md" "memoria/frio" "PROJETO.md" "REGRAS.md"
++            "PROTOCOLOS.md" "FALHAS.md" "PROMPT_CARREGAMENTO.md" ".githooks/gerar-hidratacao.sh")
++
++p22_derivados_drift() {
++  if ! git diff --quiet HEAD -- "${P22_FONTES[@]}" 2>/dev/null; then
++    echo "P-22: fonte do canon modificada -- derivados podem divergir legitimamente, nada a checar."
++    return 0
++  fi
++  local d sujos=()
++  for d in "${P22_DERIVADOS[@]}"; do
++    git ls-files --error-unmatch -- "$d" >/dev/null 2>&1 || continue
++    git diff --quiet HEAD -- "$d" 2>/dev/null || sujos+=("$d")
++  done
++  [ "${#sujos[@]}" -eq 0 ] && return 0
++  echo "AVISO (P-22): derivado(s) diferente(s) do HEAD sem nenhuma fonte ter mudado: ${sujos[*]}. Por que importa: foi o drift de (333) -- quem lê o derivado lê história velha ou truncada. O que fazer: \`bash .githooks/gerar-hidratacao.sh\` e conferir que \`git status\` volta limpo; se repetir, anotar hora e o que estava aberto (causa raiz ainda é lacuna, (349))."
++  return 0
++}
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 1c5f038..7733c14 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -38,6 +38,11 @@ set -uo pipefail
+ RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ FILTRO="${1:-}"
+ export AGATA_TESTE_PERIMETRO=1   # impede o P-16 de recursar dentro do clone
++# Decisor local sempre "fora do ar" na suíte: veredito determinístico, sem
++# depender do Ollaya. A direção PEGA da camada do decisor é provada pelo
++# --selftest de scripts/perimetro/p20_decisor.py.
++export AGATA_DECISOR_URL="http://127.0.0.1:9"
++export AGATA_DECISOR_LOG="$(mktemp -d -t decisor-teste.XXXXXX)"
+ 
+ OK=0; FALHOU=0; PULADO=0
+ falhas_detalhe=()
+@@ -214,7 +219,7 @@ declare -A SEM_TESTE=(
+ # unico. Nao e' L0..L5, e' "meta", e o motivo ja estava em SEM_TESTE.
+ declare -A NIVEL=(
+   [P-1]=L1 [P-5]=L1 [P-7]=L1 [P-8]=L1 [P-11]=L1 [P-14]=L1
+-  [P-21]=L1 [P-20]=L1
++  [P-21]=L1 [P-20]=L1 [P-22]=L1
+   [P-2]=L3
+   [P-3]=L4 [P-13]=L4 [P-15]=L4
+   [P-4]=L2 [P-9]=L2 [P-10]=L2
+@@ -541,6 +546,27 @@ _caso P-20 PASSA "nada staged" <<'EOF'
+ true
+ EOF
+ 
++_caso P-20 PASSA "camada do decisor com decisor fora do ar: texto pessoal em MEMÓRIAS.md não vira aviso nem falha" <<'EOF'
++printf '\nconsulta médica marcada, endereço de casa e telefone da família\n' >> "MEMÓRIAS.md" && git add "MEMÓRIAS.md"
++EOF
++
++# --- P-22: derivados de hidratação divergindo do HEAD sem a fonte mudar ----
++_caso P-22 PEGA "drift de (333): .hidrata.md diferente do HEAD, fontes intactas" <<'EOF'
++printf 'conteudo velho\n' > .hidrata.md
++EOF
++
++_caso P-22 PEGA "drift num índice, mesmo sem nada staged" <<'EOF'
++printf 'indice truncado\n' > INDICE_MEMORIAS.md
++EOF
++
++_caso P-22 PASSA "fonte mudou junto (regeneração legítima)" <<'EOF'
++printf '\nlinha nova\n' >> "MEMÓRIAS.md" && printf 'regenerado\n' >> .hidrata.md
++EOF
++
++_caso P-22 PASSA "nada mudou" <<'EOF'
++true
++EOF
++
+ # --------------------------------------------------------------- veredito --
+ echo
+ if [ "$FALHOU" -eq 0 ]; then
+diff --git a/scripts/vault_importar_inbox.py b/scripts/vault_importar_inbox.py
+index 94eceaf..3e18cd5 100644
+--- a/scripts/vault_importar_inbox.py
++++ b/scripts/vault_importar_inbox.py
+@@ -41,10 +41,12 @@ Env: AGATA_REPO (default ~/agata), SETH_ESCRIBA_URL (default http://127.0.0.1:20
+ """
+ from __future__ import annotations
+ 
++import hashlib
+ import json
+ import os
+ import re
+ import sys
++import time
+ import urllib.error
+ import urllib.request
+ from pathlib import Path
+@@ -54,6 +56,24 @@ REPO = Path(os.environ.get("AGATA_REPO", os.path.expanduser("~/agata")))
+ INBOX = REPO / "memoria" / "obsidian-inbox"
+ ESCRIBA_URL = os.environ.get("SETH_ESCRIBA_URL", "http://127.0.0.1:20140")
+ 
++# Nota pronta = "decide e confere" (PROJETO.md, "Decisor local"). O Obsidian
++# salva sozinho a cada poucos segundos enquanto se digita, e MEMÓRIAS é
++# append-only: importar no meio da digitação gravaria entrada parcial para
++# sempre. Trava exata: a nota está parada há QUIETO_MIN minutos. Por cima, o
++# decisor local só pode BARRAR (parece rascunho pela metade); fora do ar ->
++# vale só a trava. Nota parada há LIBERA_MIN não consulta o decisor: um dia
++# intocada = pronta, e nada fica preso no inbox para sempre por um falso
++# "rascunho" (13/10/2026: nota completa deu 0,82, rascunho cortado 0,60).
++QUIETO_MIN = int(os.environ.get("AGATA_INBOX_QUIETO_MIN", "10"))
++LIBERA_MIN = 24 * 60
++LIMIAR_CONCLUIDA = 0.7
++_PERGUNTA_CONCLUIDA = {"concluida": {
++    "type": "noul",
++    "instructions": "This note is a finished thought, not a half-written draft "
++                    "that stops mid-sentence or mid-idea."}}
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "redesign" / "router"))
++import decisor  # noqa: E402  (redesign/router/decisor.py)
++
+ 
+ def _parse_nota(texto: str) -> tuple[str, str] | None:
+     """(titulo, corpo), ou None se a nota nao tem os dois."""
+@@ -86,6 +106,34 @@ def _parse_nota(texto: str) -> tuple[str, str] | None:
+     return titulo, corpo
+ 
+ 
++def _id_nota(caminho: Path) -> str:
++    """Identifica a nota nos logs sem gravar o nome (pode ser pessoal)."""
++    return hashlib.sha256(caminho.name.encode()).hexdigest()[:12]
++
++
++def _pronta(caminho: Path, agora: float) -> tuple[bool, str, str]:
++    """(pode importar?, motivo, via). Trava exata primeiro; o decisor só barra.
++    `via` diz por qual caminho a nota passou -- é o que a avaliação mede."""
++    parada_min = (agora - caminho.stat().st_mtime) / 60
++    if parada_min < QUIETO_MIN:
++        return False, f"salva há {parada_min:.0f} min (< {QUIETO_MIN}) -- pode estar em edição", ""
++    parsed = _parse_nota(caminho.read_text(encoding="utf-8"))
++    if parsed is None:
++        return True, "", "sem-titulo-corpo"  # _importar_um dá o motivo exato
++    if parada_min >= LIBERA_MIN:
++        return True, "", "24h"
++    titulo, corpo = parsed
++    r = decisor.decidir("inbox", f"{titulo}\n\n{corpo}"[:4000], _PERGUNTA_CONCLUIDA,
++                        meta={"nota": _id_nota(caminho), "chars": len(corpo),
++                              "parada_min": round(parada_min)})
++    p = decisor.probabilidade(r, "concluida")
++    if p is None:
++        return True, "", "sem-decisor"
++    if p < LIMIAR_CONCLUIDA:
++        return False, f"decisor: parece rascunho pela metade (p={p:.2f}) -- complete e espere", ""
++    return True, "", "decisor"
++
++
+ def _importar_um(caminho: Path) -> tuple[bool, str]:
+     parsed = _parse_nota(caminho.read_text(encoding="utf-8"))
+     if parsed is None:
+@@ -116,16 +164,28 @@ def main() -> int:
+     if not notas:
+         print("inbox vazio -- nada a importar")
+         return 0
+-    falhas = 0
++    falhas = aguardando = 0
++    agora = time.time()
+     for nota in notas:
++        pronta, motivo, via = _pronta(nota, agora)
++        if not pronta:
++            aguardando += 1
++            print(f"AGUARDA {nota.name}: {motivo}")
++            continue
++        parsed = _parse_nota(nota.read_text(encoding="utf-8"))
++        chars = len(parsed[1]) if parsed else 0
+         ok, msg = _importar_um(nota)
+         if ok:
+             print(f"OK     {nota.name}: {msg}")
++            decisor.registrar_avaliacao("inbox", {"evento": "importada", "nota": _id_nota(nota),
++                                                  "chars": chars, "via": via})
+             nota.unlink()
+         else:
+             falhas += 1
+             print(f"PULADA {nota.name}: {msg}")
+-    print(f"\n{len(notas) - falhas} importada(s), {falhas} pulada(s), {len(notas)} no total")
++    importadas = len(notas) - falhas - aguardando
++    print(f"\n{importadas} importada(s), {aguardando} aguardando, {falhas} pulada(s), "
++          f"{len(notas)} no total")
+     return 1 if falhas else 0
+ 
+ 
+@@ -161,6 +221,27 @@ def _selftest() -> int:
+         casos.append(("seth_escriba inacessível -> falha limpa, nao crash", ok_imp is False and "inacessível" in msg))
+         casos.append(("nota nao apagada quando falha", p.exists()))
+         ESCRIBA_URL = _url_original
++        # 8-10. nota pronta: trava exata (tempo parado) + decisor que só barra
++        agora = time.time()
++        os.utime(p, (agora, agora))
++        casos.append(("nota recém-salva -> aguarda (trava exata)", _pronta(p, agora)[0] is False))
++        velha = agora - (QUIETO_MIN + 1) * 60
++        os.utime(p, (velha, velha))
++        _decidir_original = decisor.decidir
++        decisor.decidir = lambda *a, **k: None
++        casos.append(("nota parada + decisor fora do ar -> importa (só a trava)",
++                      _pronta(p, agora)[0] is True))
++        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.3}}
++        barrada, motivo, _ = _pronta(p, agora)
++        casos.append(("nota parada + decisor diz rascunho -> barrada", barrada is False and "rascunho" in motivo))
++        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.95}}
++        casos.append(("nota parada + decisor diz concluída -> importa", _pronta(p, agora)[0] is True))
++        dia = agora - (LIBERA_MIN + 1) * 60
++        os.utime(p, (dia, dia))
++        decisor.decidir = lambda *a, **k: {"concluida": {"type": "noul", "noul": 0.1}}
++        casos.append(("nota parada há 1 dia -> importa sem perguntar ao decisor",
++                      _pronta(p, agora)[0] is True))
++        decisor.decidir = _decidir_original
+     for nome, passou in casos:
+         print(("PASS  " if passou else "FALHA ") + nome)
+         ok += 1 if passou else 0
