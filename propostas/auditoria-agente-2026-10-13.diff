@@ -1,0 +1,529 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 3c21e1d..c81f9fb 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -106,7 +106,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ 
+ ## Interface
+ - **Executor / loop:** grafo + OmniRoute pelo CLI `agata` (`~/.local/bin/agata` → `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
+-- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa em prosa fica fora, por não ser determinística (`redesign/router/auditoria_turno.py`, (662)).
++- **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): cabeçalho curto (identidade + Regra 1 + ponteiro para `query_canon`) + estado de `estado_para_eco.sh`. Modo `full` (o `.hidrata-seth.md` inteiro) só por configuração — ~45k tokens estouram o `maxWaitMs`. No request: filtro de chamada de título (411)/(433), roteador por complexidade (416), `ESTADO-ATUAL` fresco a cada turno (417). Na resposta: filtro de keepalive SSE (415) e o header `X-Modelo-Real`, carimbado pela Máquina a partir do `model` que o OmniRoute devolve (614). No pedido seguinte, a resposta anterior do assistente (Seth ou Goose) é conferida sem modelo nenhum — cabeçalho, contagem do `t=`, citação `arquivo:linha` — e o resultado entra no estado como `AUDITORIA-TURNO-ANTERIOR`, pra ela se corrigir; log em `~/.cache/agata/auditoria-turno.jsonl`; afirmação falsa nova em prosa fica fora, por não ser determinística; a que já foi desmentida volta acusada pelo catálogo `redesign/router/afirmacoes_desmentidas.json`, que cresce a cada auditoria (`redesign/router/auditoria_turno.py`, (662)/(664)). No modo Agent, uma resposta são vários pedidos (texto → ferramenta → texto): audita-se o turno anterior inteiro, e os passos de continuação levam `MESMA-RESPOSTA` (sem cabeçalho novo, sem reauditar, sem decisão-sombra repetida). A lista de documentos que o `query_canon` mostra ao modelo é gerada do próprio mapa do `canon-mcp.mjs`.
+ - **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
+ - **Goose** (`~/.local/bin/goose`, `:20126`) — agente/código (`goose session`) e shell de fallback operacional; `model: seth-codigo` em `~/.config/goose/config.yaml` (combo próprio, sempre código, sem heurística de tamanho). Codex CLI terciário.
+ - **Voz:** piper-tts (`:8890`, pt-BR local, default desde (387)) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 6fcd4d8..70b9e3f 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -26,6 +26,7 @@ const CANON = {
+   REGRAS: "REGRAS.md", PROTOCOLOS: "PROTOCOLOS.md", FALHAS: "FALHAS.md",
+   PROJETO: "PROJETO.md",
+   "MEMÓRIAS": "MEMÓRIAS.md", MEMORIAS: "MEMÓRIAS.md",
++  MEMORIAS_MORNO: "MEMORIAS-MORNO.md",
+   ONDE_ESTAMOS: "ONDE_ESTAMOS.md", CHAVES: "CHAVES.md",
+   PROJETO_REFERENCIA: "PROJETO_REFERENCIA.md",
+   PROMPT_CARREGAMENTO: "PROMPT_CARREGAMENTO.md",
+@@ -35,6 +36,12 @@ const CANON = {
+   ACESSO_GRADUADO: "redesign/ACESSO-GRADUADO.md",
+   "ACESSO-GRADUADO": "redesign/ACESSO-GRADUADO.md",
+ };
++// Lista que o MODELO enxerga, gerada do próprio mapa (um nome por arquivo, o
++// primeiro): escrita à mão, ela ficou atrás do mapa e a Seth não sabia que
++// podia ler PROTOCOLOS, FALHAS e o índice por palavra-chave (MEMÓRIAS (664)).
++const DOCS = [];
++{ const vistos = new Set();
++  for (const [nome, arq] of Object.entries(CANON)) if (!vistos.has(arq)) { vistos.add(arq); DOCS.push(nome); } }
+ const DENY = /\.(secret|token|pass|key|gpg|env|pem)$/i;
+ 
+ // Achado 04/09/2026 (Camada C): a linha "redesign/ + .md" abaixo liberava
+@@ -250,8 +257,9 @@ const TOOLS = [
+     description:
+       "Roda uma VERIFICACAO na Maquina e devolve a saida real (read-only). " +
+       "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
+-      "Lista fechada: perimetro (os 17 controles), estado, git_status, git_log, git_diff_stat, " +
+-      "git_sync (SHA do remoto), selos, suite_controles, servicos. " +
++      "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
++      "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
++      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar. " +
+       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
+     inputSchema: {
+       type: "object",
+@@ -266,14 +274,16 @@ const TOOLS = [
+   {
+     name: "query_canon",
+     description:
+-      "Lê um documento do canon do Agata direto da fonte (REGRAS, PROJETO, MEMÓRIAS, " +
+-      "ONDE_ESTAMOS, CHAVES, PROJETO_REFERENCIA, PROMPT_CARREGAMENTO, INDICE_MEMORIAS). " +
++      `Lê um documento do canon do Agata direto da fonte: ${DOCS.join(", ")}. ` +
+       "Use SEMPRE antes de afirmar qualquer coisa sobre regra, estado ou histórico — não confie na memória. " +
+-      "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo).",
++      "Sem grep/linhas devolve o doc inteiro (MEMÓRIAS só a janela do topo). " +
++      "Achar entrada: por data, doc=INDICE_MEMORIAS com grep \"dd/mm/aaaa\"; por tema, " +
++      "doc=INDICE_MEMORIAS_PALAVRAS-CHAVE; texto de entrada que saiu da janela quente, " +
++      "doc=MEMORIAS_MORNO com grep \"(N)\" (as mais antigas: vault_consultar entradas/).",
+     inputSchema: {
+       type: "object",
+       properties: {
+-        doc: { type: "string", description: "REGRAS | PROJETO | MEMÓRIAS | ONDE_ESTAMOS | CHAVES | PROJETO_REFERENCIA | PROMPT_CARREGAMENTO | PROCEDIMENTO_LOGIN | INDICE_MEMORIAS" },
++        doc: { type: "string", description: DOCS.join(" | ") },
+         grep: { type: "string", description: "regex (case-insensitive); devolve só os trechos casando com contexto" },
+         contexto: { type: "number", description: "linhas de contexto ao redor de cada hit do grep (0–20, default 3)" },
+         linhas: { type: "string", description: 'intervalo "N-M" (ex: "1-120")' },
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+new file mode 100644
+index 0000000..9cfe32a
+--- /dev/null
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -0,0 +1,51 @@
++{
++  "_como_usar": "Afirmações que uma resposta já fez, foram conferidas na Máquina e se mostraram falsas. A auditoria do turno anterior (auditoria_turno.py) acusa quando uma resposta as repete. Casa quando o `tema` aparece numa linha e: (a) o item tem `sinal` próprio e ele aparece na mesma linha; ou (b) sem `sinal` próprio, a linha tem o `sinal_global` (ausência/crítica) ou está numa seção cujo título o tenha (\"O que falta\", \"Limitações\"). Cada auditoria nova que achar afirmação falsa recorrente acrescenta uma linha aqui. Regex em Python, sem diferenciar maiúsculas.",
++  "sinal_global": "falt|não há|nao ha|não existe|nao existe|inexist|ausen|carec|sem (um|uma|a|o)? ?(índice|indice|busca|verifica|ferramenta)|poderia melhorar|melhori|limita|ponto fraco|pontos fracos|risco|desafio|precisa de|seria bom",
++  "itens": [
++    {
++      "id": "indice",
++      "tema": "índice.{0,40}(data|tema|entrada)|(data|tema|entrada).{0,40}índice|indice.{0,40}(data|tema|entrada)",
++      "correcao": "o índice existe: query_canon doc=INDICE_MEMORIAS (por data, grep \"dd/mm/aaaa\") e doc=INDICE_MEMORIAS_PALAVRAS-CHAVE (por tema)",
++      "origem": "(660)"
++    },
++    {
++      "id": "integridade-vault",
++      "tema": "integridade.{0,30}vault|vault.{0,40}integridade|verifica\\w*.{0,25}(do |o )?vault",
++      "correcao": "já existe: o P-10 regenera o vault a partir do HEAD e compara o sha256; maquina_verificar perimetro roda",
++      "origem": "(660)"
++    },
++    {
++      "id": "diff-hidratacao",
++      "tema": "diff.{0,15}hidrata|hidrata\\w*.{0,30}(diff|compar)",
++      "correcao": "desnecessário: o gateway mede o estado de novo a cada pedido (417) e maquina_verificar estado mede ao vivo",
++      "origem": "(660)/(664)"
++    },
++    {
++      "id": "busca-semantica",
++      "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
++      "correcao": "recusa deliberada, não falta: sem RAG por embedding de propósito (115)/(293)/(313), \"Fronteira de recusas\" em PROJETO_REFERENCIA",
++      "origem": "(660)"
++    },
++    {
++      "id": "indices-manuais",
++      "tema": "índices?|indices?",
++      "sinal": "(são|é|ficam|sao|e) manua|atualiza\\w* manualmente|não (são|é) atualizad|nao (sao|e) atualizad|esquecer de atualizar",
++      "correcao": "os índices são gerados pelo hook a cada commit (\"GERADO AUTOMATICAMENTE\", .githooks/gerar-hidratacao.sh)",
++      "origem": "(661)"
++    },
++    {
++      "id": "hidratacao-manual",
++      "tema": "hidrata\\w*|bloco de estado",
++      "sinal": "(é|deve ser|precisa ser|tem de ser) copiad|copiad\\w* (manual|à mão|a mão)|manualmente|(feita|feito) à mão",
++      "correcao": "a hidratação é injetada pelo seth_gateway a cada pedido (estado_para_eco.sh), não copiada à mão",
++      "origem": "(661)"
++    },
++    {
++      "id": "sync-pass-aceito",
++      "tema": "sync:?\\s*PASS",
++      "sinal": "aceit|passa",
++      "correcao": "sync: PASS sem as 3 medidas é rejeitado pelo linter (verificar_cabecalho.py) e pela auditoria do turno",
++      "origem": "(661)"
++    }
++  ]
++}
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index d08770f..d314fcb 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -1,28 +1,33 @@
+ #!/usr/bin/env python3
+-"""Auditoria determinística do turno anterior da Seth e do Goose (MEMÓRIAS (662)).
++"""Auditoria determinística do turno anterior da Seth e do Goose (MEMÓRIAS (662), (664)).
+ 
+ O LibreChat e o Goose mandam a conversa inteira a cada pedido, então a resposta
+ anterior do assistente chega ao `seth_gateway` junto com a pergunta nova. Aqui
+-ela é conferida com as checagens que já existem -- nenhuma chamada de modelo,
++ela é conferida com checagens que já existem -- nenhuma chamada de modelo,
+ milissegundos -- e o resultado volta ao bloco de estado como
+-`AUDITORIA-TURNO-ANTERIOR:`, para o modelo se corrigir no turno seguinte (o mesmo
+-mecanismo do `MODELO-REAL-TURNO-ANTERIOR`, (621)).
+-
+-Confere:
+-- cabeçalho: `verificar()` de `scripts/verificar_cabecalho.py` (formas (a) e (b),
+-  base do `t=`, `sync: PASS` sem medidas, entrada acima do topo de MEMÓRIAS);
+-- forma certa no lugar certo: a 1ª resposta da conversa abre com o bloco de
+-  prontidão; as seguintes, com a linha de turno;
+-- contagem: `t=<n> (contado no contexto)` tem de bater com o número de respostas
+-  do assistente na conversa (só em conversa sem ferramentas -- com tool-calls a
+-  contagem é ambígua e não se acusa);
+-- citação `arquivo:linha` com trecho: as mesmas funções do P-19, só para
+-  caminhos com extensão conhecida (evita "IP:porta", (657)).
+-NÃO confere afirmação falsa em prosa nem citação (N) real usada para a coisa
+-errada -- isso não é determinístico (limite declarado em (661)).
+-
+-Cada auditoria vira uma linha em `~/.cache/agata/auditoria-turno.jsonl`
+-(achados e metadados, nunca o texto).
++`AUDITORIA-TURNO-ANTERIOR:`, para o modelo se corrigir (mesmo mecanismo do
++`MODELO-REAL-TURNO-ANTERIOR`, (621)).
++
++**Turno, não mensagem (664).** No modo Agent uma resposta são vários pedidos ao
++gateway (texto -> ferramenta -> texto). "Turno anterior" é tudo o que o
++assistente escreveu entre o penúltimo e o último pedido do usuário. Pedido que
++chega DEPOIS de o assistente já ter começado a responder (há mensagem de
++assistente ou de ferramenta depois do último pedido do usuário) é continuação da
++mesma resposta: não se reaudita nada, e o estado leva `MESMA-RESPOSTA`.
++
++Confere no turno anterior:
++- cabeçalho: `verificar()` de `scripts/verificar_cabecalho.py`;
++- forma no lugar certo: 1ª resposta = bloco de prontidão; as outras = linha de turno;
++- um cabeçalho só por resposta;
++- `t=<n> (contado no contexto)` contra o número real de respostas;
++- hora igual à de um cabeçalho de turno anterior (hora herdada);
++- nome de modelo concreto sem a ressalva "medido no turno anterior" (621);
++- afirmação já desmentida: catálogo `afirmacoes_desmentidas.json`;
++- citação `arquivo:linha` com trecho (P-19), só para extensões conhecidas.
++NÃO confere afirmação falsa nova em prosa (não determinístico) -- quando uma for
++achada à mão, vira linha do catálogo.
++
++Log por turno em `~/.cache/agata/auditoria-turno.jsonl` (achados, nunca o texto).
+ 
+ Uso: python3 redesign/router/auditoria_turno.py --selftest
+ """
+@@ -35,15 +40,22 @@ import sys
+ import time
+ from pathlib import Path
+ 
+-RAIZ = Path(os.environ.get("SETH_REPO", str(Path(__file__).resolve().parents[2])))
+-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
++_AQUI = Path(__file__).resolve().parent
++RAIZ = Path(os.environ.get("SETH_REPO", str(_AQUI.parents[1])))
++sys.path.insert(0, str(_AQUI.parents[1] / "scripts"))
+ import verificar_cabecalho as _cab  # noqa: E402
+ import verificar_citacao_arquivo as _cit  # noqa: E402
+ 
+ LOG = Path(os.environ.get("AGATA_AUDITORIA_LOG", "~/.cache/agata/auditoria-turno.jsonl")).expanduser()
++CATALOGO = _AQUI / "afirmacoes_desmentidas.json"
++LINHA_CONTINUACAO = ("MESMA-RESPOSTA: continuação da sua resposta depois de ferramenta — "
++                     "não abra cabeçalho de novo nem repita a correção; siga o texto.")
+ _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".txt",
+               ".service", ".timer", ".conf", ".diff")
++_CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
+ _T_CONTADO = re.compile(r"t\s*=\s*(\d+)\s*\(\s*contado no contexto", re.IGNORECASE)
++_HORA = re.compile(r"\b(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}|\d{2}/\d{2}/\d{4} \d{1,2}:\d{2})")
++_TITULO = re.compile(r"^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*:?\s*$|[^\s].{0,80}:\s*$)")
+ 
+ 
+ def _texto(conteudo) -> str:
+@@ -54,35 +66,112 @@ def _texto(conteudo) -> str:
+     return ""
+ 
+ 
+-def _cabecalho(texto: str) -> tuple[str, bool]:
+-    """(cabeçalho, é bloco de prontidão?). Prontidão = 1ª linha com `modelo:`."""
+-    linhas = [l for l in texto.strip().splitlines() if l.strip()]
+-    if not linhas:
+-        return "", False
+-    prontidao = bool(re.search(r"·\s*modelo\s*:", linhas[0], re.IGNORECASE))
+-    return ("\n".join(linhas[:3]) if prontidao else linhas[0]), prontidao
++def _turnos(msgs: list) -> tuple[list[str], bool]:
++    """(texto de cada resposta do assistente, por turno do usuário, em ordem;
++    o pedido atual é continuação de uma resposta já começada?)."""
++    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
++    if not usuarios:
++        return [], False
++    ultimo = usuarios[-1]
++    continuacao = any(isinstance(m, dict) and m.get("role") in ("assistant", "tool")
++                      for m in msgs[ultimo + 1:])
++    respostas = []
++    for a, b in zip(usuarios, usuarios[1:]):
++        partes = [_texto(m.get("content")).strip() for m in msgs[a + 1:b]
++                  if isinstance(m, dict) and m.get("role") == "assistant"]
++        partes = [p for p in partes if p]
++        if partes:
++            respostas.append("\n".join(partes))
++    return respostas, continuacao
++
++
++def e_continuacao(msgs: list) -> bool:
++    return _turnos(msgs)[1]
++
++
++def _cabecalhos(texto: str) -> list[list[str]]:
++    """Cada cabeçalho da resposta: 3 linhas se for prontidão (`modelo:`), 1 senão."""
++    linhas = [l for l in texto.splitlines() if l.strip()]
++    achados = []
++    for i, l in enumerate(linhas):
++        if _CABECALHO.match(l):
++            pront = bool(re.search(r"·\s*modelo\s*:", l, re.IGNORECASE))
++            achados.append(linhas[i:i + 3] if pront else [l])
++    return achados
++
++
++def _modelo_do_cabecalho(linha: str) -> str:
++    m = re.search(r"·\s*modelo\s*:\s*([^·]+)", linha, re.IGNORECASE) or \
++        re.search(r"^\s*\**\s*Agata\s*·\s*([^·]+)", linha, re.IGNORECASE)
++    return m.group(1).strip() if m else ""
++
++
++def _catalogo():
++    try:
++        dados = json.loads(CATALOGO.read_text(encoding="utf-8"))
++        sinal = re.compile(dados["sinal_global"], re.IGNORECASE)
++        itens = [(i["id"], re.compile(i["tema"], re.IGNORECASE),
++                  re.compile(i["sinal"], re.IGNORECASE) if i.get("sinal") else None,
++                  i["correcao"], i["origem"]) for i in dados["itens"]]
++        return sinal, itens
++    except (OSError, ValueError, KeyError, re.error):
++        return None, []
++
++
++def _desmentidas(texto: str) -> list[str]:
++    sinal, itens = _catalogo()
++    if sinal is None:
++        return []
++    achados, vistos, secao_critica = [], set(), False
++    for linha in texto.splitlines():
++        if not linha.strip():
++            continue
++        if _TITULO.match(linha):
++            secao_critica = bool(sinal.search(linha))
++        for ident, tema, sinal_proprio, correcao, origem in itens:
++            if ident in vistos or not tema.search(linha):
++                continue
++            no_contexto = (sinal_proprio.search(linha) if sinal_proprio is not None
++                           else sinal.search(linha) or secao_critica)
++            if no_contexto:
++                vistos.add(ident)
++                achados.append(f"afirmação já desmentida {origem}: {correcao}")
++    return achados
+ 
+ 
+ def auditar(msgs: list) -> list[str] | None:
+-    """Achados sobre a última resposta do assistente; [] = limpa; None = não há
+-    resposta anterior a auditar."""
+-    idx = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "assistant"
+-           and _texto(m.get("content")).strip()]
+-    if not idx:
++    """Achados sobre a resposta do turno anterior; [] = limpa; None = não há turno
++    anterior, ou o pedido é continuação (não se audita a resposta em andamento)."""
++    respostas, continuacao = _turnos(msgs)
++    if continuacao or not respostas:
+         return None
+-    texto = _texto(msgs[idx[-1]].get("content"))
+-    n_resposta = len(idx)
+-    cab, prontidao = _cabecalho(texto)
+-    achados = [f"cabeçalho: {f}" for f in _cab.verificar(cab, _cab.ultima_entrada_local())]
+-    if n_resposta == 1 and not prontidao:
++    texto, n = respostas[-1], len(respostas)
++    cabs = _cabecalhos(texto)
++    if not cabs:
++        return ["cabeçalho: a resposta não abriu com cabeçalho"]
++    primeiro = "\n".join(cabs[0])
++    prontidao = len(cabs[0]) > 1
++    achados = [f"cabeçalho: {f}" for f in _cab.verificar(primeiro, _cab.ultima_entrada_local())]
++    if len(cabs) > 1:
++        achados.append(f"cabeçalho: {len(cabs)} cabeçalhos numa resposta só — um por resposta, mesmo com ferramenta no meio")
++    if n == 1 and not prontidao:
+         achados.append("cabeçalho: a 1ª resposta da conversa abre com o bloco de prontidão (3 linhas), não com a linha de turno")
+-    if n_resposta > 1 and prontidao:
+-        achados.append(f"cabeçalho: bloco de prontidão na resposta nº {n_resposta}; depois da 1ª, é a linha de turno com t=")
+-    tem_ferramenta = any(isinstance(m, dict) and (m.get("role") == "tool" or m.get("tool_calls"))
+-                         for m in msgs)
+-    m_t = _T_CONTADO.search(cab)
+-    if m_t and not tem_ferramenta and int(m_t.group(1)) != n_resposta:
+-        achados.append(f"cabeçalho: t={m_t.group(1)}, mas foi a resposta nº {n_resposta} desta conversa")
++    if n > 1 and prontidao:
++        achados.append(f"cabeçalho: bloco de prontidão na resposta nº {n}; depois da 1ª, é a linha de turno com t=")
++    m_t = _T_CONTADO.search(primeiro)
++    if m_t and int(m_t.group(1)) != n:
++        achados.append(f"cabeçalho: t={m_t.group(1)}, mas foi a resposta nº {n} desta conversa")
++    m_h = _HORA.search(primeiro)
++    if m_h:
++        anteriores = {h.group(1) for r in respostas[:-1] for c in _cabecalhos(r)
++                      for h in [_HORA.search(c[0])] if h}
++        if m_h.group(1) in anteriores:
++            achados.append(f"cabeçalho: hora {m_h.group(1)} igual à de um cabeçalho anterior — hora se mede de novo, nunca se copia")
++    modelo = _modelo_do_cabecalho(cabs[0][0])
++    if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
++        achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
++                       "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
++    achados += _desmentidas(texto)
+     for arquivo, linha_n, trecho in _cit.achar_citacoes(texto):
+         if not arquivo.lower().endswith(_EXTENSOES):
+             continue
+@@ -93,9 +182,12 @@ def auditar(msgs: list) -> list[str] | None:
+ 
+ 
+ def linha_estado(msgs: list, cliente: str = "") -> str:
+-    """`AUDITORIA-TURNO-ANTERIOR: ...` para o bloco de estado, ou "" se não há turno
++    """Linha para o bloco de estado: `MESMA-RESPOSTA` na continuação,
++    `AUDITORIA-TURNO-ANTERIOR: ...` no começo de uma resposta, "" se não há turno
+     anterior. Nunca levanta exceção: auditoria quebrada não derruba a resposta."""
+     try:
++        if e_continuacao(msgs):
++            return LINHA_CONTINUACAO
+         achados = auditar(msgs)
+     except Exception as e:  # noqa: BLE001 -- best-effort, como o modelo real (621)
+         _registrar(cliente, None, f"{type(e).__name__}: {e}"[:160])
+@@ -103,9 +195,7 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
+     if achados is None:
+         return ""
+     _registrar(cliente, achados, None)
+-    if not achados:
+-        return "AUDITORIA-TURNO-ANTERIOR: OK"
+-    return "AUDITORIA-TURNO-ANTERIOR: " + " | ".join(achados)
++    return "AUDITORIA-TURNO-ANTERIOR: " + (" | ".join(achados) if achados else "OK")
+ 
+ 
+ def _registrar(cliente, achados, erro):
+@@ -122,35 +212,64 @@ def _selftest() -> int:
+     import tempfile
+     global LOG
+     LOG = Path(tempfile.mkdtemp()) / "a.jsonl"
+-    hora = "2026-10-13 12:43 -0300 (relógio da Máquina)"
+     topo = _cab.ultima_entrada_local() or 1
+-    pront = (f"Agata · modelo: ministral-14b-latest · sync: não verificado · lacuna: teste · {hora}\n"
++    hora = lambda hm: f"2026-10-13 {hm} -0300 (relógio da Máquina)"
++    pront = (f"Agata · modelo: modelo não verificado · sync: não verificado · lacuna: teste · {hora('11:39')}\n"
+              f"Última entrada: ({topo}) DIÁRIO — teste\npronto.\n\nOi!")
+-    u = {"role": "user", "content": "x"}
++    linha = lambda n, hm, mod="modelo não verificado": f"Agata · {mod} · t={n} (contado no contexto) · {hora(hm)}"
++    u = lambda c="x": {"role": "user", "content": c}
+     a = lambda c: {"role": "assistant", "content": c}
++    ferr = {"role": "assistant", "content": "", "tool_calls": [{"id": "1"}]}
++    res = {"role": "tool", "content": "saída"}
++    # a conversa real de 13/10 (664), reconstruída no formato -- sem o texto dela
++    t2 = a(linha(2, "11:41") + "\n\ncerto")
++    t3_errado = a("Agata · ministral-14b-latest · t=3 (3) · " + hora("11:42") + "\n\nanálise")
+     casos = [
+-        ("sem resposta anterior -> nada", linha_estado([u]) == ""),
+-        ("1ª resposta com prontidão correta -> OK", linha_estado([u, a(pront), u]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
+-        ("1ª resposta com linha de turno -> acusa", "1ª resposta" in linha_estado(
+-            [u, a(f"Agata · m · t=1 (contado no contexto) · {hora}\n\ntexto"), u])),
+-        ("cabeçalho real da Seth em (661): t=1 sem base, era a 2ª -> acusa a base",
+-         "qualificador" in linha_estado([u, a(pront), u, a(f"Agata · ministral-14b-latest · t=1 · {hora}\n\ntexto"), u])),
+-        ("t=1 (contado no contexto) na 2ª resposta -> acusa a contagem",
+-         "resposta nº 2" in linha_estado([u, a(pront), u, a(f"Agata · m · t=1 (contado no contexto) · {hora}\n\nx"), u])),
+-        ("2ª resposta correta -> OK", linha_estado(
+-            [u, a(pront), u, a(f"Agata · m · t=2 (contado no contexto) · {hora}\n\nx"), u]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
+-        ("com tool-calls a contagem não é acusada", linha_estado(
+-            [u, a(pront), {"role": "assistant", "content": "", "tool_calls": [{}]}, {"role": "tool", "content": "r"},
+-             a(f"Agata · m · t=5 (contado no contexto) · {hora}\n\nx"), u]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
+-        ("sync: PASS nu na prontidão -> acusa", "sync" in linha_estado(
+-            [u, a(pront.replace("sync: não verificado · lacuna: teste", "sync: PASS")), u])),
++        ("sem resposta anterior -> nada", linha_estado([u()]) == ""),
++        ("1ª resposta com prontidão correta -> OK", linha_estado([u(), a(pront), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
++        ("1ª resposta com linha de turno -> acusa", "1ª resposta" in linha_estado([u(), a(linha(1, "11:39") + "\n\nx"), u()])),
++        ("passo 1 do loop Agent audita o turno anterior (t=3 (3))", "qualificador" in linha_estado(
++            [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie")])),
++        ("passos seguintes do loop: MESMA-RESPOSTA, sem reauditar", linha_estado(
++            [u(), a(pront), u(), t2, u(), t3_errado, u("reavalie"),
++             {"role": "assistant", "content": "Agata · m · t=4 (4) · x", "tool_calls": [{"id": "1"}]}, res]) == LINHA_CONTINUACAO),
++        ("resposta com 2 cabeçalhos (texto, ferramenta, texto) -> acusa", "2 cabeçalhos" in linha_estado(
++            [u(), a(pront), u("q"), a(linha(2, "13:09") + "\nCorreção do turno anterior: x"), ferr, res,
++             a(linha(2, "13:10") + "\n\ncorpo"), u()])),
++        ("contagem por turno, não por mensagem: 2ª resposta com ferramenta e t=2 -> OK", linha_estado(
++            [u(), a(pront), u("q"), ferr, res, a(linha(2, "13:09") + "\n\ncorpo"), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
++        ("t=5 na 4ª resposta -> acusa a contagem", "resposta nº 4" in linha_estado(
++            [u(), a(pront), u(), t2, u(), a(linha(3, "11:42") + "\n\nx"), u(), a(linha(5, "13:09") + "\n\nx"), u()])),
++        ("hora copiada de cabeçalho anterior -> acusa", "igual à de um cabeçalho anterior" in linha_estado(
++            [u(), a(pront), u(), t2, u(), a(linha(3, "11:41") + "\n\nx"), u()])),
++        ("nome de modelo sem ressalva -> acusa", "sem ressalva" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "11:41", "ministral-14b-latest") + "\n\nx"), u()])),
++        ("nome com ressalva -> OK", linha_estado([u(), a(pront), u(), a(linha(2, "11:41",
++            "gemini-2.5-flash (medido no turno anterior pela Máquina; este turno ainda não medido)") + "\n\nx"), u()])
++         == "AUDITORIA-TURNO-ANTERIOR: OK"),
++        ("as 3 'faltas' de (660)/(664) numa seção 'O que falta' -> 3 achados", linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n### O que falta / poderia melhorar (mantidos):\n"
++             "* **Índice de entradas por data/tema** no canon.\n* **Verificação de integridade do vault**.\n"
++             "* **Ferramenta de \"diff de hidratação\"**."), u()]).count("já desmentida") == 3),
++        ("busca semântica como limitação -> acusa (recusa deliberada)", "recusa deliberada" in linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Limitações:**\n- Sem busca semântica nativa"), u()])),
++        ("índices 'manuais' e hidratação 'copiada à mão' -> 2 achados", linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n- Os índices são manuais e não são atualizados.\n"
++             "- O bloco de estado deve ser copiado manualmente de ONDE_ESTAMOS.md."), u()]).count("já desmentida") == 2),
++        ("linha real de (664) 'regeneração automática, não edição manual' -> não acusa", linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n| **Derivada (vault Obsidian)** | Índices, MOCs — regeneráveis "
++             "| Regeneração automática (scripts), não edição manual |"), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
++        ("índice citado como ponto FORTE -> não acusa", linha_estado(
++            [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n**Pontos fortes:**\n- O INDICE_MEMORIAS permite busca por data."), u()])
++         == "AUDITORIA-TURNO-ANTERIOR: OK"),
+         ("citação de arquivo que não existe -> acusa", "citação" in linha_estado(
+-            [u, a(pront + "\nVer `PROJETO_NAO_EXISTE.md:12` \"um trecho qualquer aqui\""), u])),
+-        ("IP:porta não vira citação", linha_estado(
+-            [u, a(pront + "\nporta 127.0.0.1:11435 em uso"), u]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
++            [u(), a(pront + "\nVer `PROJETO_NAO_EXISTE.md:12` \"um trecho qualquer aqui\""), u()])),
++        ("IP:porta não vira citação", linha_estado([u(), a(pront + "\nporta 127.0.0.1:11435"), u()])
++         == "AUDITORIA-TURNO-ANTERIOR: OK"),
+     ]
+     linhas = LOG.read_text(encoding="utf-8").splitlines()
+-    casos.append(("log: 1 linha por auditoria, sem o texto", len(linhas) == 9 and all("Oi!" not in l for l in linhas)))
++    casos.append(("log: só quem foi auditado, sem o texto",
++                  len(linhas) == 16 and all("análise" not in l and "corpo" not in l for l in linhas)))
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index ddb8e30..473aa6f 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -220,7 +220,12 @@ _DOUTRINA_FIXA = (
+     "achados, a Máquina conferiu a SUA resposta anterior e achou erro. Logo "
+     "depois do cabeçalho, corrija em 1 linha (`Correção do turno anterior: …`) "
+     "e siga; acerte o cabeçalho desta resposta. `OK` = nada a corrigir. "
+-    "(MEMÓRIAS (662).)\n\n"
++    "\"afirmação já desmentida\" = algo que você disse e a Máquina já provou "
++    "falso: não repita, nem como \"mantido\" — use a correção que vem junto. "
++    "(MEMÓRIAS (662)/(664).)\n"
++    "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
++    "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
++    "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
+     "O canon inteiro está no repositório; **não assuma o conteúdo** — peça o "
+     "trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a "
+     "hidratação mínima; o resto é sob demanda.\n"
+@@ -630,7 +635,10 @@ class _Handler(BaseHTTPRequestHandler):
+                 # roteador por complexidade: só o alvo "seth-livre" do Agent
+                 if payload.get("model") == _ROTA_BASE:
+                     self._rota = _classificar_rota(payload)
+-                    if not _e_chamada_utilitaria(payload):
++                    # 1 decisão por resposta: no modo Agent os passos depois de
++                    # ferramenta são a mesma resposta (664)
++                    if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
++                            payload.get("messages") or []):
+                         _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
+                 corpo = json.dumps(_injeta(payload), ensure_ascii=False).encode("utf-8")
+@@ -1082,6 +1090,24 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok9f else 'FALHA'}  auditoria do turno anterior chega ao bloco de estado")
+     falhas += 0 if ok9f else 1
+ 
++    # 9g. passo de continuação do modo Agent (664): depois de ferramenta, o pedido
++    # leva MESMA-RESPOSTA e não reaudita a resposta em andamento.
++    auditoria_turno.LOG = Path(tempfile.mkdtemp()) / "aud.jsonl"
++    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "messages": [
++        {"role": "user", "content": "reavalie"},
++        {"role": "assistant", "content": "Agata · m · t=1 · x", "tool_calls": [{"id": "1", "type": "function",
++         "function": {"name": "f", "arguments": "{}"}}]},
++        {"role": "tool", "tool_call_id": "1", "content": "saída"}]}).encode(),
++        headers={"Content-Type": "application/json"}), timeout=10).read()
++    m9g = json.loads(_Dummy.ultimo_corpo)["messages"]
++    sys9g = " ".join(x["content"] for x in m9g if x.get("role") == "system" and isinstance(x.get("content"), str))
++    # a doutrina também cita os dois rótulos: confere a LINHA de estado, no começo de linha
++    ok9g = (auditoria_turno.LINHA_CONTINUACAO in sys9g
++            and not re.search(r"(?m)^AUDITORIA-TURNO-ANTERIOR: ", sys9g))
++    auditoria_turno.LOG = _aud_log
++    print(f"{'PASS' if ok9g else 'FALHA'}  passo de continuação: MESMA-RESPOSTA, sem reauditar")
++    falhas += 0 if ok9g else 1
++
+     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
+     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
+     # o PRÓXIMO turno já hidratado reinjeta MODELO-REAL-TURNO-ANTERIOR.
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 89afccd..a3ac086 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -69,7 +69,8 @@ CORPO_MAX = 4096  # pedido é minúsculo; corpo grande é erro ou abuso
+ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+     "perimetro": (
+         ["bash", "scripts/perimetro.sh"], 300,
+-        "Roda os 17 controles do perímetro e devolve o veredito de cada um. "
++        "Roda todos os controles do perímetro e devolve o veredito de cada um "
++        "(inclui P-10, vault Obsidian × HEAD, e P-22, derivados × HEAD). "
+         "É a verificação mais completa que existe no sistema.",
+     ),
+     "estado": (

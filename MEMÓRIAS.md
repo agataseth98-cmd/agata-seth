@@ -26,20 +26,48 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 81902f2dca356b3dc469e1ee4439adc8dd563dde
-  Escrito em: 13/10/2026 13:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1
+  Escrito em: 13/10/2026 13:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc4521c0601c2adfb1e1e1b75c9c560ac7208a1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(664) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta real da Seth no LibreChat (13:10): os dois cabeçalhos, a hora de 2,5 h antes e o nome "ministral-14b" vêm do modo Agent e de um defeito da auditoria de (662/663) — e não de modelo fraco: quem respondeu foram nemotron-3-ultra e gemini-2.5-flash. As 3 "faltas" falsas voltaram ("mantidas") por âncora na resposta errada da mesma conversa. Dos 3 pedidos dela, 2 tinham núcleo verdadeiro e entram. Proposta `auditoria-agente-2026-10-13` (6 arquivos), aguardando assinatura.**
+
+**Pedido do Humano:** resolver a resposta pelo mesmo método e, "caso sejam autênticos e viáveis", aplicar os pedidos dela.
+
+**Conferido, só leitura** (conversa no Mongo, `call_logs` do OmniRoute, logs da auditoria e do roteador-sombra, `git`):
+- **Uma resposta = 5 pedidos ao gateway** em 50 s (texto → 4 ferramentas → texto). Cada pedido recebe a doutrina ("abra TODA resposta com o cabeçalho") — daí 2 cabeçalhos. E a auditoria de (662) conferia "a última mensagem do assistente": no 1º passo, a resposta anterior (certo: achou o `t=3 (3)`); nos 4 seguintes, **o pedaço da própria resposta em andamento**, reinjetando a correção. A contagem também contava mensagens, não respostas: `t=5` na 4ª.
+- **Hora 11:42** no 1º cabeçalho: copiada do cabeçalho anterior.
+- **"ministral-14b-latest"**: errado. O OmniRoute registra `nemotron-3-ultra` e `gemini-2.5-flash` nesses passos. O nome veio do `MODELO-REAL-TURNO-ANTERIOR`, arquivo global entre conversas, que guardava o modelo de um teste meu noutra conversa; e ela tirou a ressalva "medido no turno anterior" de (621).
+- **As 3 "faltas" e "sem busca semântica" de novo**, por modelos fortes: âncora na resposta errada das 11:42, que estava na mesma conversa. A linha de doutrina de (660) não bastou.
+- **Certo:** `sync: PASS · REGRAS=15e8de63 · MEMÓRIAS=70ba842d · HEAD=bfc4521` (hashes de `bfc4521` conferidos) e o `git_status`. Commits quase todos certos; 2 merges atribuídos à proposta errada.
+
+**Os pedidos dela, avaliados contra o que o modelo enxerga** (a descrição das ferramentas):
+- **"Índice por data/tema" → núcleo verdadeiro.** O índice existe, mas a descrição do `query_canon` listava à mão 8 documentos: PROTOCOLOS, FALHAS, `INDICE_MEMORIAS_PALAVRAS-CHAVE` e ACESSO_GRADUADO eram legíveis e invisíveis — por isso ela cita "REGRAS" para o que mora no PROTOCOLOS. Agora a lista é **gerada do próprio mapa** (14 documentos), entra a camada morna (`MEMORIAS_MORNO`) e uma frase de como achar entrada por data e por tema. Testado pelo servidor MCP: o índice com "13/10/2026" devolve as 9 entradas do dia; a (356) é lida na camada morna.
+- **"Verificação de integridade do vault" → núcleo verdadeiro.** Existe (P-10), mas a descrição do `maquina_verificar` dizia "os 17 controles" (são 22) e não falava do vault. Agora diz que o `perimetro` inclui P-10 e P-22; o número velho saiu também do `seth_verificador.py`.
+- **"Diff de hidratação" → não.** O gateway mede o estado de novo a cada pedido (417) e o `estado` mede ao vivo. Virou item do catálogo de desmentidas.
+
+**A proposta:** `auditoria_turno.py` audita o **turno anterior inteiro** (tudo entre os dois últimos pedidos do usuário); passo de continuação recebe `MESMA-RESPOSTA` e não é reauditado; contagem por turno; checagens novas — 2 cabeçalhos numa resposta, hora igual à de cabeçalho anterior, nome de modelo sem ressalva, e **afirmação já desmentida** por um catálogo novo (`afirmacoes_desmentidas.json`, 7 itens de (660)/(661), cresce a cada auditoria). O gateway não roda mais a decisão-sombra nos passos de continuação (eram 5 por resposta). Doutrina: +345 caracteres (8.813).
+
+**Verificado:** sobre a conversa real reconstruída, a auditoria acha 6 problemas na resposta das 11:42 e 8 na das 13:10 — os 2 cabeçalhos, a hora copiada, o nome sem ressalva e as 4 desmentidas; os passos do meio recebem `MESMA-RESPOSTA`. Um falso positivo achado nessa rodada ("regeneração automática, **não** edição manual" casava "índices manuais") foi corrigido e virou caso de teste. `auditoria_turno.py --selftest` 19/19, `seth_gateway.py --selftest` (passo de continuação pelo caminho completo), `seth_verificador.py --selftest` 36/36, `node --check`, `perimetro.sh` 0 FALHA na worktree. No caminho, um teste meu passava à toa — a doutrina cita os mesmos rótulos que ele procurava; agora confere a linha de estado.
+
+**Fora, declarado:** o arquivo global do modelo real (precisaria de um identificador de conversa que o gateway não recebe hoje; a checagem da ressalva mitiga); a trava ">6000 caracteres → pesado" conta o histórico, então conversa longa vira sempre `seth-pesado` — dado para o relatório do roteador-sombra.
+
+**Assinar:** `bash scripts/aprovar.sh auditoria-agente-2026-10-13`
+
+**sync:** PASS — `main` = `bfc4521` (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (663).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: conversa lida no Mongo, `call_logs` e logs locais, hashes no `git`, servidor MCP chamado por stdio, auditoria rodada nos textos reais · Autorização: Humano — "resolva isso para ela" + "caso sejam autênticos e viáveis aplique".
 
 (663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura verificada, PR #164 juntado) e provada com 2 mensagens reais em streaming: a 1ª resposta da Seth saiu com o cabeçalho errado, a auditoria registrou 4 achados, e a 2ª resposta abriu com "Correção do turno anterior: …" reconhecendo o erro — e veio com cabeçalho aprovado pelo linter.**
 
