@@ -1,0 +1,251 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 0c27ce7..78af0e7 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -123,7 +123,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ 
+ ## Conselho Remoto — Fase 1 (transporte, não decisão)
+ Escopo pequeno de propósito: **UM modelo, UMA tarefa** — enviar um pedido de parecer já escrito pelo Humano e recolher a resposta. A fase testa o transporte, não a qualidade do parecer (206).
+-- **Mecanismo — `scripts/conselho_remoto.py`** (207): recebe o pedido em arquivo → **uma** POST em `http://127.0.0.1:20127/v1/chat/completions` (sanitizador → OmniRoute; o script não lê chave nenhuma) → guarda a resposta **crua** em `memoria/missoes/conselho-remoto/` (data, modelo, `provider`, tokens, custo) → confere as 4 partes do parecer (Origem/Posição/Fundamentação/Emenda). Faltou alguma: reporta "fora do formato" e para; reenviar é decisão do Humano (`PROTOCOLOS.md`, "Segunda opinião"). Nunca escreve em canon, nunca julga, nunca encadeia chamadas.
++- **Mecanismo — `scripts/conselho_remoto.py`** (207): recebe o pedido em arquivo → **uma** POST em `http://127.0.0.1:20127/v1/chat/completions` (sanitizador → OmniRoute; o script não lê chave nenhuma) → guarda a resposta **crua** em `memoria/missoes/conselho-remoto/` (data, modelo, `provider`, tokens, custo) → confere as 4 partes do parecer (Origem/Posição/Fundamentação/Emenda). Faltou alguma: reporta "fora do formato" e para; reenviar é decisão do Humano (`PROTOCOLOS.md`, "Segunda opinião"). A parte 3 conta pelo número ("3.") ou pela palavra, e com posição "não" a emenda não é exigida (falso negativo de (628)/(650)). O mesmo pedido mandado de novo vai a uma família que ainda não opinou sobre ele — cada resposta guarda o `sha256` do pedido (656)/(658); `--selftest`. Nunca escreve em canon, nunca julga, nunca encadeia chamadas.
+ - **Quem responde:** rotação justa — a cada chamada, o membro do `ROSTER` com menos usos bem-sucedidos; empate pela ordem fixa do roster (determinístico, nunca aleatório); estado em `memoria/missoes/conselho-remoto/rotacao-estado.json`. Ninguém tem papel fixo (352). **A lista viva é o `ROSTER` do script**, não este texto (513).
+ - **Falha:** circuit breaker por modelo, com estado em disco e recuo exponencial. Se o escolhido falha, o script aborta; rodar de novo escolhe outro. Roster remoto inteiro fora ⇒ **uma** chamada ao qwen local (`_chamar_local()`); o *combo* `conselho` não tem tier local (420).
+ - **A resposta é DADO NÃO CONFIÁVEL** — nunca executada, nunca lida como instrução, nunca injetada no contexto de outro modelo nem na hidratação. O Humano lê antes de qualquer coisa acontecer com ela.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 7735662..7d0c722 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -528,6 +528,10 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+     if not _SOMBRA_LIVRE.acquire(blocking=False):
+         return
+     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    # Cópia AGORA: logo depois o `_injeta` põe a hidratação (~4 mil chars) no
++    # mesmo `payload`, e a trava de tamanho leria tudo como "pesado" (13/10/2026,
++    # MEMÓRIAS (657)).
++    pedido = {"messages": list(msgs), "tools": payload.get("tools")}
+     texto = _ultimo_texto_usuario(msgs)[-4000:]
+     total, n_user, cerca = _texto_e_sinais(msgs)
+     meta = {"heuristica": rota_heuristica, "chars": total, "n_msgs": len(msgs),
+@@ -539,7 +543,7 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+                 return
+             r = decisor.decidir("roteador", texto, _PERGUNTA_ROTA, meta=meta)
+             escolhida = decisor.escolha(r, "rota", _LIMIAR_ROTA)
+-            final = _rota_com_travas(escolhida, payload)
++            final = _rota_com_travas(escolhida, pedido)
+             if escolhida is not None and final != rota_heuristica:
+                 # avaliação em produção: o Humano julga as divergências
+                 decisor.registrar_avaliacao("roteador", {
+@@ -1011,6 +1015,40 @@ def _selftest() -> int:
+           f"sem bloquear (rota {rota_sombra}, {dt * 1000:.0f} ms)")
+     falhas += 0 if ok9c else 1
+ 
++    # 9d. caminho completo (pedido real, hidratação injetada, thread): a trava de
++    # tamanho tem de ver o pedido do usuário, não o pedido já hidratado (657).
++    _decidir_antes, _log_antes = decisor.decidir, decisor.LOG_DIR
++    _hid_antes = globals()["_hidratacao"]
++    globals()["_hidratacao"] = lambda: MARCADOR + "\n" + "h" * 9000  # a real tem ~8,8 mil
++    decisor.LOG_DIR = Path(tempfile.mkdtemp())
++    divs = decisor.LOG_DIR / "roteador-avaliacao.jsonl"
++
++    def _sombra_com(escolha_falsa):
++        def _falso(*a, **k):
++            _t.sleep(0.3)  # o real leva ~4 s: o `_injeta` já mexeu no pedido quando ele volta
++            return {"rota": {"type": "choice", "choice": escolha_falsa, "confidence": 0.95}}
++        decisor.decidir = _falso
++        urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
++            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
++            headers={"Content-Type": "application/json"}), timeout=10).read()
++        for _ in range(50):  # espera a thread de sombra soltar o semáforo
++            if _SOMBRA_LIVRE.acquire(blocking=False):
++                _SOMBRA_LIVRE.release()
++                break
++            _t.sleep(0.05)
++        return divs.read_text().splitlines() if divs.exists() else []
++
++    ok9d = _sombra_com("rapido") == []
++    linhas = _sombra_com("pesado")
++    ok9e = len(linhas) == 1 and json.loads(linhas[0])["modelo"] == "seth-pesado"
++    decisor.decidir, decisor.LOG_DIR = _decidir_antes, _log_antes
++    globals()["_hidratacao"] = _hid_antes
++    print(f"{'PASS' if ok9d else 'FALHA'}  sombra pelo caminho completo: 'oi' = rapido "
++          f"não vira divergência (hidratação não conta na trava)")
++    print(f"{'PASS' if ok9e else 'FALHA'}  sombra pelo caminho completo: modelo diz pesado "
++          f"-> 1 divergência registrada")
++    falhas += (0 if ok9d else 1) + (0 if ok9e else 1)
++
+     # 10. identificação de modelo na fala (MEMÓRIAS (621)): resposta com "model"
+     # real -> grava no sidecar (isolado em tmp, nunca o arquivo de produção);
+     # o PRÓXIMO turno já hidratado reinjeta MODELO-REAL-TURNO-ANTERIOR.
+diff --git a/scripts/conselho_remoto.py b/scripts/conselho_remoto.py
+index 2ba8ee9..f7ce4d0 100755
+--- a/scripts/conselho_remoto.py
++++ b/scripts/conselho_remoto.py
+@@ -67,6 +67,8 @@ Merge para `main`: so na Fase 8 (Cadeia de auditoria). Ate la vive no branch.
+ 
+ Uso: python3 scripts/conselho_remoto.py <arquivo-com-o-pedido.txt>
+ """
++import glob
++import hashlib
+ import json
+ import os
+ import re
+@@ -245,17 +247,37 @@ def _disponiveis():
+     return [m for m in ROSTER if float(b.get(m, {}).get("cooldown_ate", 0)) <= agora]
+ 
+ 
+-def escolher_modelo():
++def familias_ja_consultadas(pedido_sha):
++    """Famílias que já deram parecer (remoto, não fallback local) a ESTE texto
++    de pedido -- lido das respostas guardadas, sem estado novo. Resposta antiga,
++    de antes deste campo existir, não conta (não há como casar)."""
++    vistas = set()
++    for caminho in glob.glob(os.path.join(DESTINO_DIR, "*.json")):
++        try:
++            with open(caminho, encoding="utf-8") as f:
++                reg = json.load(f)
++        except (OSError, ValueError):
++            continue
++        if reg.get("pedido_sha256") == pedido_sha and not reg.get("fallback_local"):
++            vistas.add(reg.get("familia"))
++    return vistas
++
++
++def escolher_modelo(excluir_familias=frozenset()):
+     """Família MENOS usada primeiro, ENTRE os modelos disponíveis (fora de
+     cooldown). Dentro da família, e no empate entre famílias, a ordem do
+     ROSTER decide. None = roster inteiro em cooldown. (MEMÓRIAS (381): a
+     granularidade passou de modelo pra família; o breaker segue por modelo,
+-    então um modelo problemático não resfria a família toda.)"""
++    então um modelo problemático não resfria a família toda.)
++    `excluir_familias`: as que já opinaram sobre o MESMO pedido -- pedir de
++    novo é pedir OUTRA opinião (MEMÓRIAS (656): o contador mandou o mesmo
++    modelo 5 vezes seguidas). Se todas já opinaram, vale a regra de sempre."""
+     disp = _disponiveis()
+     if not disp:
+         return None
++    novas = [m for m in disp if _familia(m) not in excluir_familias]
+     cont = _carregar_rotacao()
+-    return min(disp, key=lambda m: (cont.get(_familia(m), 0), ROSTER.index(m)))
++    return min(novas or disp, key=lambda m: (cont.get(_familia(m), 0), ROSTER.index(m)))
+ 
+ 
+ def _registrar_sucesso(modelo_escolhido):
+@@ -315,15 +337,24 @@ def checar_conteudo_privado(texto):
+     return None
+ 
+ 
++_PARTE_3 = re.compile(r"(?m)^[\s*#>_]*3\s*[.):\-–—]")
++_POSICAO_NAO = re.compile(r"posi[çc][ãa]o\W{0,12}n[ãa]o\b", re.IGNORECASE)
++
++
+ def checar_formato_parecer(texto):
+-    """Confere se as 4 partes do parecer (REGRAS, 'Segunda opiniao') aparecem,
+-    generoso o bastante pra aceitar variacao de acento/caixa. Nao julga o
+-    CONTEUDO -- so a presenca estrutural das 4 partes."""
++    """Confere se as 4 partes do parecer (PROTOCOLOS, 'Segunda opinião')
++    aparecem, generoso o bastante pra aceitar variacao de acento/caixa. Nao
++    julga o CONTEUDO -- so a presenca estrutural das 4 partes.
++    A parte 3 conta pelo NÚMERO ("3." / "3)") ou pela palavra "emenda": o
++    protocolo numera as partes, e a resposta certa de quem diz "sim" sem emenda
++    ("3. —", "não se aplica") não traz a palavra -- falso negativo registrado
++    em MEMÓRIAS (628) e (650). Com posição "não", a emenda não é exigida."""
+     baixo = texto.lower()
+     tem_origem = "origem" in baixo
+     tem_posicao = "posição" in baixo or "posicao" in baixo
+     tem_fundamentacao = "fundamentação" in baixo or "fundamentacao" in baixo
+-    tem_emenda = "emenda" in baixo
++    tem_emenda = ("emenda" in baixo or bool(_PARTE_3.search(texto))
++                  or bool(_POSICAO_NAO.search(texto)))
+     faltando = []
+     if not tem_origem:
+         faltando.append("Origem")
+@@ -475,7 +506,51 @@ def _salvar(caminho_pedido, modelo_escolhido, resposta, conteudo, duracao_s, ext
+     return destino, registro
+ 
+ 
++def _selftest():
++    import tempfile
++    global DESTINO_DIR, _disponiveis, _carregar_rotacao
++    casos = []
++    base = "0. Origem — li o pedido.\n1. Posição — {p}\n2. Fundamentação — porque sim.\n"
++    casos.append(("formato completo com a palavra Emenda",
++                  checar_formato_parecer(base.format(p="sim") + "3. Redação exata da emenda — x") == []))
++    casos.append(("posição sim, parte '3. —' sem a palavra -> aceita (falso negativo de (628)/(650))",
++                  checar_formato_parecer(base.format(p="sim") + "3. —") == []))
++    casos.append(("posição não, sem parte 3 -> aceita",
++                  checar_formato_parecer(base.format(p="não.")) == []))
++    casos.append(("posição condicional sem parte 3 -> falta Emenda",
++                  checar_formato_parecer(base.format(p="condicional")) == ["Emenda"]))
++    casos.append(("sem Origem -> falta Origem",
++                  checar_formato_parecer("1. Posição — sim\n2. Fundamentação — x\n3. —") == ["Origem"]))
++    disp_orig, rot_orig, dest_orig = _disponiveis, _carregar_rotacao, DESTINO_DIR
++    _disponiveis = lambda: list(ROSTER)
++    contagem = {_familia(m): 9 for m in ROSTER}
++    contagem[_familia(ROSTER[2])] = 4
++    _carregar_rotacao = lambda: dict(contagem)
++    casos.append(("sem exclusão -> a família menos usada", escolher_modelo() == ROSTER[2]))
++    outra = escolher_modelo({_familia(ROSTER[2])})
++    casos.append(("já opinou neste pedido -> outra família",
++                  outra is not None and _familia(outra) != _familia(ROSTER[2])))
++    casos.append(("todas já opinaram -> regra de sempre",
++                  escolher_modelo(_familias_do_roster()) == ROSTER[2]))
++    DESTINO_DIR = tempfile.mkdtemp()
++    for nome, reg in [("a.json", {"pedido_sha256": "abc", "familia": "zhipu"}),
++                      ("b.json", {"pedido_sha256": "abc", "familia": "local", "fallback_local": True}),
++                      ("c.json", {"pedido_sha256": "outro", "familia": "google"})]:
++        with open(os.path.join(DESTINO_DIR, nome), "w", encoding="utf-8") as f:
++            json.dump(reg, f)
++    casos.append(("famílias já consultadas: só o mesmo pedido, sem fallback local",
++                  familias_ja_consultadas("abc") == {"zhipu"}))
++    _disponiveis, _carregar_rotacao, DESTINO_DIR = disp_orig, rot_orig, dest_orig
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
+ def main():
++    if sys.argv[1:] == ["--selftest"]:
++        return _selftest()
+     if len(sys.argv) != 2:
+         print(f"uso: {sys.argv[0]} <arquivo-com-o-pedido.txt>", file=sys.stderr)
+         return 2
+@@ -492,10 +567,17 @@ def main():
+         print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
+         return 1
+ 
++    pedido_sha = hashlib.sha256(pedido_texto.encode("utf-8")).hexdigest()
++    ja = familias_ja_consultadas(pedido_sha)
++    if ja:
++        print(f"Este pedido já tem parecer de: {', '.join(sorted(ja))}.")
++        if _familias_do_roster() <= ja:
++            print("Todas as famílias do roster já opinaram -- esta será uma repetição.")
++
+     # --- rotação com circuit breaker + portão de resposta (MEMÓRIAS (374)) ---
+     tentados = []
+     for _ in range(len(ROSTER)):
+-        modelo = escolher_modelo()
++        modelo = escolher_modelo(ja)
+         if modelo is None or modelo in tentados:
+             break
+         tentados.append(modelo)
+@@ -528,7 +610,8 @@ def main():
+             continue
+ 
+         _registrar_sucesso(modelo)
+-        destino, reg = _salvar(caminho_pedido, modelo, resposta, conteudo, duracao_s)
++        destino, reg = _salvar(caminho_pedido, modelo, resposta, conteudo, duracao_s,
++                               extra={"pedido_sha256": pedido_sha})
+         print(f"Guardado: {destino}")
+         print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")
+         if reg["identidade"]["suspeita"]:
+@@ -557,7 +640,7 @@ def main():
+     conteudo, te, ts, tt = _normalizar(resposta)
+     ok, motivo = _portao_resposta(resposta, conteudo)
+     destino, _ = _salvar(caminho_pedido, FALLBACK_MODELO, resposta, conteudo, duracao_s,
+-                         extra={"fallback_local": True, "portao_ok": ok,
++                         extra={"pedido_sha256": pedido_sha, "fallback_local": True, "portao_ok": ok,
+                                 "portao_motivo": motivo, "tentados_remoto": tentados})
+     print(f"Guardado (FALLBACK LOCAL): {destino}")
+     print(f"Tokens: {te}+{ts}={tt}. Duração {duracao_s}s.")

@@ -26,20 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a
-  Escrito em: 13/10/2026 11:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 227179a97a9ac8519bad4d1d18b4827f86a09d8a
+  Escrito em: 13/10/2026 11:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5433f9540774f6b8ed2b9a5e34d4b59ae7763b5a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/227179a97a9ac8519bad4d1d18b4827f86a09d8a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(658) DIÁRIO — 13/10/2026 · **Proposta `sombra-e-conselho-2026-10-13` (3 arquivos, aguardando assinatura): conserta o bug do roteador-sombra achado em (657), e fecha as duas pendências do Conselho Remoto que o Humano mandou resolver — o checador que rejeitava parecer certo por falta da palavra "Emenda", e o rodízio que mandava o mesmo modelo várias vezes para o mesmo pedido.**
+
+**Pedido do Humano:** "1- faça, 2- resolva" — os dois itens do Conselho deixados em aberto no fim de (656) e no `ONDE_ESTAMOS.md`.
+
+**1. Roteador-sombra** (`redesign/router/seth_gateway.py`). A thread passa a usar uma cópia do pedido tirada antes da hidratação. A causa medida: o pedido "oi" com a hidratação real tem 8.777 caracteres, acima da trava de 6.000. Teste novo pelo caminho completo (pedido real, hidratação, thread); a primeira versão do teste passava mesmo com o bug — o decisor falso respondia na hora, antes de o `_injeta` mexer no pedido — e só pegou o bug depois de o falso demorar como o real. Prova por mutação: com a linha antiga de volta, o teste falha (2 FALHA); com a correção, passa. Até esta proposta ser aplicada, as divergências que o roteador registra estão erradas e serão apagadas na aplicação.
+
+**2. Checador de formato** (`scripts/conselho_remoto.py`). A parte 3 do parecer passa a contar pelo número ("3.") ou pela palavra, e com posição "não" a emenda não é exigida — o protocolo numera as partes e só pede emenda quando a posição é sim ou condicional. Era o falso negativo registrado em (628) e (650). Repassadas as respostas guardadas do Conselho pelo checador antigo e pelo novo: 5 que tinham sido rejeitadas só pela palavra passam; 3 seguem rejeitadas pelas outras partes (não eram parecer); nenhuma passou a ser rejeitada.
+
+**3. Rodízio por pedido** (mesmo script). Cada resposta guarda o `sha256` do pedido; mandar o mesmo texto de novo pula as famílias que já opinaram sobre ele, e avisa quando todas já opinaram. Era o que fez o nemotron responder 5 vezes em (656). Sem arquivo de estado novo: lê as próprias respostas guardadas.
+
+**Verificado:** `seth_gateway.py --selftest` e `conselho_remoto.py --selftest` (novo, 9 casos, sem rede) OK; `perimetro.sh` 0 FALHA na worktree com o `.diff` aplicado; `git apply --check` OK; árvore devolvida ao HEAD.
+
+**Assinar:** `bash scripts/aprovar.sh sombra-e-conselho-2026-10-13`
+
+**sync:** PASS — branch a partir de `main` = `5433f95` (== `origin/main`), sobre o commit de aplicação `227179a`; topo de MEMÓRIAS = (657).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: tamanho da hidratação medido no próprio gateway; teste de mutação rodado; respostas guardadas do Conselho repassadas pelos dois checadores · Autorização: Humano — "1- faça, 2- resolva".
 
 (657) DIÁRIO — 13/10/2026 · **`fechamento-e-decisor-2026-10-13` aplicada (assinatura do Humano verificada, PR #160 juntado) e provada pelo caminho real. Achado na prova: bug no roteador-sombra — a thread lê o pedido depois de o gateway injetar a hidratação, e a trava ">6000 caracteres" dispara sempre; toda divergência sairia "pesado". Correção vai em proposta própria, (658). Decisor ligado não deixou a Seth mais lenta.**
 

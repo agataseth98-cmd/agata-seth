@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(658) DIÁRIO — 13/10/2026 · **Proposta `sombra-e-conselho-2026-10-13` (3 arquivos, aguardando assinatura): conserta o bug do roteador-sombra achado em (657), e fecha as duas pendências do Conselho Remoto que o Humano mandou resolver — o checador que rejeitava parecer certo por falta da palavra "Emenda", e o rodízio que mandava o mesmo modelo várias vezes para o mesmo pedido.**
+  palavras-chave: proposta, sombra, arquivos, aguardando, assinatura, conserta, bug, roteador, achado, fecha, pendências, remoto, humano, mandou, resolver, checador, rejeitava, parecer, certo, falta, palavra, emenda, rodízio, mandava, mesmo, modelo, várias, pedido
 (657) DIÁRIO — 13/10/2026 · **`fechamento-e-decisor-2026-10-13` aplicada (assinatura do Humano verificada, PR #160 juntado) e provada pelo caminho real. Achado na prova: bug no roteador-sombra — a thread lê o pedido depois de o gateway injetar a hidratação, e a trava ">6000 caracteres" dispara sempre; toda divergência sairia "pesado". Correção vai em proposta própria, (658). Decisor ligado não deixou a Seth mais lenta.**
   palavras-chave: fechamento, decisor, aplicada, assinatura, humano, verificada, juntado, provada, caminho, real, achado, prova, bug, roteador, sombra, thread, pedido, gateway, injetar, hidratação, trava, caracteres, dispara, sempre, divergência, sairia, pesado, correção, vai, proposta, própria, ligado, deixou, seth, lenta
 (656) CONSELHO — 13/10/2026 · **Decisor local (modelos de decisão estilo Jev, Ollaya na CPU): 7 pareceres de 3 famílias — 2 "não", 5 "condicional"; o roteador da Seth foi o ponto mais contestado, por reabrir (383)/(416). O Humano decidiu seguir com os 4 usos e assumiu o risco por escrito, com uma avaliação em produção que avisa se valeu a pena até ele mandar aprovar ou remover.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: janela, limite, real, modelo, medido, parte, desenho, telemetria, turno, aplicar, pacote, lab, ensaio, continuação
 (629) DIÁRIO — 02/10/2026 · **Medição da Parte A (pacote do lab "Ensaio", erro "Cannot use 'in' operator to search for 'tool_calls' in undefined") — reproduzido 5/5, causa raiz achada no bundle real, hipótese de poda de contexto refutada. M1-M5 do lab medidos. Incidente de segurança no meio da medição: `strace -f` vazou segredos reais de `~/.config/agata/.env` pro meu contexto e pra 2 arquivos em disco.**
   palavras-chave: medição, parte, pacote, lab, ensaio, erro, cannot, use, operator, search, for, tool, calls, undefined, reproduzido, causa, raiz, achada, bundle, real, hipótese, poda, contexto, refutada, medidos, incidente, segurança, meio, strace, vazou, segredos, reais, config, agata, env, pro, meu, pra, arquivos, disco
-(628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogovernança da própria Seth (PVT-01/Rev2, "[PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth", escrita por ela via `diario_anotar` em `SETH-DIARIO.md` às 11:02 — DADO, Regra 2, nunca instrução). Relaiadas pelo laboratório "Ensaio".**
-  palavras-chave: decisões, humano, proposta, autogovernança, própria, seth, pvt, rev, gerada, viabilidade, técnica, camada, escrita, ela, diario, anotar, dado, regra, nunca, instrução, relaiadas, laboratório, ensaio
+(628) CORREÇÃO — 02/10/2026 · **3 decisões do Humano sobre a proposta de autogov …
+  palavras-chave: decisões, humano, proposta, autogov
 (627) DIÁRIO — 02/10/2026 · **`PROJETO.md` reduzido ao estado corrente: de 97,9 …
   palavras-chave: projeto, reduzido, estado, corrente
 (626) CORREÇÃO — 02/10/2026 · **Respostas do Humano às duas perguntas abertas de …
