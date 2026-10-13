@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c61fc5c716ee3a38ed279288d862a0e04e597998
-  Escrito em: 13/10/2026 12:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): eb06e348d99d97f33018cb828603bcdcafe14cb2
+  Escrito em: 13/10/2026 12:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c61fc5c716ee3a38ed279288d862a0e04e597998/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -115,7 +115,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 - **Ponte Discord e controle de navegador** (339): `redesign/mcp/discord/` (poll, não push; egresso sanitizado por `PADROES_SEGREDO`) e `redesign/mcp/navegador/` (Playwright contra Brave real — não `browser-use`, cuja API sumiu na versão avaliada —, perfil isolado, escrita travada por allowlist de domínio em `~/.config/agata/navegador-dominios-permitidos.txt`). Sobem e descem com `seth`/`seth-parar` (`discord-mcp.service`/`navegador-mcp.service`, `redesign/systemd/`, sem `[Install]`). Transporte HTTP; o LibreChat os alcança por `172.29.7.1` (relé, (538)); `librechat.yaml`: `mcpSettings.allowedDomains: ["127.0.0.1", "172.29.7.1"]` — sem isso o LibreChat bloqueia MCP remoto (guarda contra SSRF).
 
 ## Segurança
-- **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md` (só o Humano abre). O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
+- **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
 - **Nada deste sistema escuta em interface pública** — contenção de kernel, não de firewall, conferida por `ss -tlnp`. Os binds são `127.0.0.1` e, para os serviços que o LibreChat alcança, o relé `172.29.7.1` da bridge local do Docker (538); a lista com os binds de cada porta é `config/portas-agata.txt`, conferida pelo P-4. Fora do manifesto, também em loopback: `3080` LibreChat, `27017` Mongo, `7700` Meili e `27124` obsidian-rest. Fora disso só `tailscaled` — o acesso remoto legítimo.
 - **Ollama (`11434`)** restrito a `127.0.0.1` (126)/(127). `override.conf` com as 5 variáveis: `OLLAMA_NUM_GPU=999`, `OLLAMA_KV_CACHE_TYPE=q4_0`, `CUDA_VISIBLE_DEVICES=0`, `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_HOST=127.0.0.1:11434` (130).
 - **Rotação de chave:** atualize **todos** os consumidores no mesmo passo. Rotação parcial dá 401 silencioso.

@@ -51,7 +51,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # esse valor é legítimo nas DUAS formas (Regra 1). Tratar a presença
     # desse valor, sozinha, como prova de bloco de prontidão gerava falso
     # positivo real: uma linha de turno válida -- "Agata · modelo não
-    # verificado · t=6 (contagem do resumo) · <hora>" -- reprovava por
+    # verificado · t=6 (prefixo compactado) · <hora>" -- reprovava por
     # "mistura as duas formas", quando não mistura nada: é só a forma (b)
     # com um valor de <modelo> incerto. Achado rodando este linter contra
     # produção de verdade (LibreChat/Mongo), não só contra o selftest --
@@ -98,7 +98,7 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
                 falhas.append(
                     "sync: PASS sem as medidas que o PASS exige (falta "
                     + ", ".join(faltando)
-                    + ") — REGRAS.md, \"'sync' tem preço\": PASS pede "
+                    + ") — PROTOCOLOS.md, \"'sync' tem preço\": PASS pede "
                     "`REGRAS=<hash8> · MEMÓRIAS=<hash8> · HEAD=<commit7>` medidos ao vivo. "
                     "Sem eles é `sync: não verificado`, não PASS."
                 )
@@ -112,10 +112,10 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
             depois = (m.group(1).strip() if m else "")
             parece_data = bool(re.match(r"^(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4}|\d{1,2}:\d{2})", depois))
             if not depois or parece_data:
-                falhas.append("sync: FALHA sem dizer o que diverge em 1 linha (REGRAS, 'Carregar e formatos') — o que vem depois do `·` é a data, não o motivo")
+                falhas.append("sync: FALHA sem dizer o que diverge em 1 linha (PROTOCOLOS, 'Carregar e formatos') — o que vem depois do `·` é a data, não o motivo")
         elif "não verificado" in forma or "nao verificado" in forma:
             if not re.search(r"lacuna\s*:", texto, re.IGNORECASE):
-                falhas.append("sync: não verificado sem `lacuna: <motivo>` (REGRAS, 'Carregar e formatos')")
+                falhas.append("sync: não verificado sem `lacuna: <motivo>` (PROTOCOLOS, 'Carregar e formatos')")
     else:
         if not tem_t:
             falhas.append("falta t=<n> (ou t≥<n>) no cabeçalho")
@@ -128,8 +128,13 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
         r"última entrada[^(]{0,20}\((\d+)\)|MEMÓRIAS\s*\((\d+)\)|\((\d+)\)\s*DIÁRIO",
         texto, re.IGNORECASE,
     )
+    # "Última entrada" é da forma (a). A forma (b) -- uma linha, com t= -- não a
+    # leva: PROTOCOLOS, "Carregar e formatos", e a correção de MEMÓRIAS (422).
+    # Exigir aqui reprovava toda linha de turno correta (achado em (660)). Se a
+    # forma (b) citar uma entrada mesmo assim, a plausibilidade continua valendo.
     if not m_entrada:
-        falhas.append("não cita a última entrada de MEMÓRIAS (número + referência)")
+        if tem_prontidao:
+            falhas.append("não cita a última entrada de MEMÓRIAS (número + referência)")
     elif max_entrada_conhecida is not None:
         n = int(next(g for g in m_entrada.groups() if g))
         if n > max_entrada_conhecida:
@@ -180,6 +185,13 @@ _CASOS = [
      "Agata · X · t=7 · 2026-01-01 10:00 -03 · MEMÓRIAS (423)\n", False),
     ("entrada implausível (maior que a real)",
      "Agata · X · t=7 (contado no contexto) · MEMÓRIAS (99999)\n", False),
+    # (660): cabeçalho REAL da Seth (ministral-14b, 13/10/2026) -- erro só no "(3)".
+    ("REGRESSAO (660): t=3 (3) -- número no lugar da base",
+     "Agata · ministral-14b-latest · t=3 (3) · 2026-10-13 11:42 -0300 (relógio da Máquina)", False),
+    ("REGRESSAO (660): forma (b) correta, sem Última entrada, passa",
+     "Agata · ministral-14b-latest · t=3 (contado no contexto) · 2026-10-13 11:42 -0300 (relógio da Máquina)", True),
+    ("forma (b) citando entrada implausível ainda reprova",
+     "Agata · modelo não verificado · t=2 (contado no contexto) · 2026-10-13 11:42 -0300 (relógio da Máquina) · MEMÓRIAS (999)", False),
 ]
 
 
