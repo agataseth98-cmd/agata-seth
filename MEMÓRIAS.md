@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): eb06e348d99d97f33018cb828603bcdcafe14cb2
-  Escrito em: 13/10/2026 12:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 216eaa6acc7b230b6a3142d43a5bb249bc75865c
+  Escrito em: 13/10/2026 12:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb06e348d99d97f33018cb828603bcdcafe14cb2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(662) DIÁRIO — 13/10/2026 · **Proposta `auditoria-turno-2026-10-13` (3 arquivos, aguardando assinatura): a conferência que fiz à mão nas respostas da Seth vira automática para a Seth e o Goose — a cada pedido, o gateway confere a resposta anterior do assistente sem chamar modelo nenhum, em ~4,5 ms, e devolve o resultado no bloco de estado como `AUDITORIA-TURNO-ANTERIOR`.**
+
+**Pedido do Humano:** "se isso resolver automatize tudo que for possível na Seth e Goose". (661) resolveu só pela metade; o Humano escolheu automatizar mesmo assim ("Automatizar agora").
+
+**Desenho:** o LibreChat e o Goose mandam a conversa inteira a cada pedido, então a resposta anterior já chega ao gateway — sem capturar stream, sem estado novo. `redesign/router/auditoria_turno.py` reaproveita o que existe: `verificar()` do linter de cabeçalho (corrigido em (660)) e `achar_citacoes()`/`checar()` do verificador do P-19. Confere: cabeçalho (forma, base do `t=`, `sync: PASS` sem medidas, entrada acima do topo); forma certa no lugar certo (1ª resposta = bloco de prontidão; depois, linha de turno); `t=<n> (contado no contexto)` contra o número real de respostas (só em conversa sem ferramentas); citação `` `arquivo:linha` `` com trecho, só para extensões conhecidas. O resultado entra nos dois caminhos de hidratação do gateway, e também quando o estado falha. A doutrina ganha uma linha: com achado, corrigir em 1 linha logo depois do cabeçalho. Log por turno em `~/.cache/agata/auditoria-turno.jsonl`, sem o texto.
+
+**Limite declarado:** não pega afirmação falsa em prosa nem uma (N) real citada para a coisa errada — as invenções de (661) passariam. Isso não é determinístico.
+
+**Verificado:** `auditoria_turno.py --selftest` 11/11 (inclui o cabeçalho real da Seth em (661), "IP:porta" sem falso positivo e o formato do Goose com tool-calls); `seth_gateway.py --selftest` com teste novo pelo caminho completo; na resposta real de 6 mil caracteres de (661), a auditoria acha o erro do cabeçalho em 4,5 ms; `perimetro.sh` 0 FALHA na worktree com o `.diff`; doutrina em 8.468 caracteres (+305). No caminho, um teste meu de (659) que substituía `_hidratacao` sem argumento quebrou com a mudança de assinatura — corrigido no mesmo diff.
+
+**Assinar:** `bash scripts/aprovar.sh auditoria-turno-2026-10-13`
+
+**sync:** PASS — sobre `216eaa6` (aplicação de (661), PR #163); topo de MEMÓRIAS = (661).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 2 `--selftest`, tempo medido na resposta real da Seth, perímetro na worktree · Autorização: Humano — "Automatizar agora".
 
 (661) DIÁRIO — 13/10/2026 · **`seth-memoria-2026-10-13` aplicada (assinatura verificada, PR #162 juntado). Teste com a mesma pergunta à Seth: resolveu pela metade — as 3 "faltas" falsas sumiram (ela agora cita o índice, o `HASH-ESTADO` e a "Fronteira de recusas"), mas o cabeçalho segue reprovado (`t=1` sem base, e o turno era o 2º) e ela inventou afirmações novas. A condição do Humano para automatizar ("se isso resolver") não foi cumprida por inteiro: decisão volta para ele.**
 
