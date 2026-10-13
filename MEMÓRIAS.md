@@ -26,20 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 216eaa6acc7b230b6a3142d43a5bb249bc75865c
-  Escrito em: 13/10/2026 12:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 81902f2dca356b3dc469e1ee4439adc8dd563dde
+  Escrito em: 13/10/2026 13:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/216eaa6acc7b230b6a3142d43a5bb249bc75865c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81902f2dca356b3dc469e1ee4439adc8dd563dde/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura verificada, PR #164 juntado) e provada com 2 mensagens reais em streaming: a 1ª resposta da Seth saiu com o cabeçalho errado, a auditoria registrou 4 achados, e a 2ª resposta abriu com "Correção do turno anterior: …" reconhecendo o erro — e veio com cabeçalho aprovado pelo linter.**
+
+**Aplicação:** `scripts/p8_verificar.sh` → `PODE APLICAR`; par em `propostas/aplicadas/`; `seth-gateway` reiniciado.
+
+**Prova (2 chamadas remotas, streaming como o LibreChat):**
+- 1ª, "oi, tudo bem?" → ministral-14b, 6,0 s. Cabeçalho numa linha só, sem `Última entrada:` e sem `pronto.`/`quebrado:`. Auditoria registrada no log: 4 achados, todos sobre a falta do bloco de prontidão.
+- 2ª, com a 1ª no histórico, "qual a entrada mais recente de MEMÓRIAS?" → gemini-2.5-flash, 6,6 s. Abriu com `Correção do turno anterior: Minha resposta anterior (t=1) usou o formato de cabeçalho incorreto … e omitiu 'Última entrada:' e 'pronto./quebrado:'`; cabeçalho `t=2 (contado no contexto)` aprovado pelo linter; citou (662) certo e usou `TOPO-PROPOSTA-JA-APLICADA` para dizer que o "aguardando assinatura" da entrada já está desatualizado.
+- As duas disseram `sync: FALHA · árvore de trabalho com edição não commitada em: PROJETO.md` — verdade: era o diff aplicado ainda sem commit. Este commit resolve.
+
+**Observado, sem ação agora:** (1) os 4 achados repetem a mesma falha por dois caminhos (o linter vê "bloco de prontidão incompleto" e a auditoria vê "1ª resposta sem prontidão") — redundante, não errado; (2) a doutrina manda carregar a linha `sync:` em todo cabeçalho, e o PROTOCOLOS, "Carregar e formatos", não prevê `sync:` na linha de turno — divergência pequena entre doutrina e canon; o linter aceita as duas.
+
+**sync:** PASS — `main` = merge do PR #164 (== `origin/main`) antes de numerar, topo de MEMÓRIAS = (662).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, 2 chamadas reais, log da auditoria e linter lidos · Autorização: Humano — assinatura de `auditoria-turno-2026-10-13` + merge do PR #164 + "ok".
 
 (662) DIÁRIO — 13/10/2026 · **Proposta `auditoria-turno-2026-10-13` (3 arquivos, aguardando assinatura): a conferência que fiz à mão nas respostas da Seth vira automática para a Seth e o Goose — a cada pedido, o gateway confere a resposta anterior do assistente sem chamar modelo nenhum, em ~4,5 ms, e devolve o resultado no bloco de estado como `AUDITORIA-TURNO-ANTERIOR`.**
 

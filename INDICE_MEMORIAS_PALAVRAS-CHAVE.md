@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura verificada, PR #164 juntado) e provada com 2 mensagens reais em streaming: a 1ª resposta da Seth saiu com o cabeçalho errado, a auditoria registrou 4 achados, e a 2ª resposta abriu com "Correção do turno anterior: …" reconhecendo o erro — e veio com cabeçalho aprovado pelo linter.**
+  palavras-chave: auditoria, turno, aplicada, assinatura, verificada, juntado, provada, mensagens, reais, streaming, resposta, seth, saiu, cabeçalho, errado, registrou, achados, abriu, correção, anterior, reconhecendo, erro, veio, aprovado, linter
 (662) DIÁRIO — 13/10/2026 · **Proposta `auditoria-turno-2026-10-13` (3 arquivos, aguardando assinatura): a conferência que fiz à mão nas respostas da Seth vira automática para a Seth e o Goose — a cada pedido, o gateway confere a resposta anterior do assistente sem chamar modelo nenhum, em ~4,5 ms, e devolve o resultado no bloco de estado como `AUDITORIA-TURNO-ANTERIOR`.**
   palavras-chave: proposta, auditoria, turno, arquivos, aguardando, assinatura, conferência, fiz, mão, respostas, seth, vira, automática, goose, pedido, gateway, confere, resposta, anterior, assistente, chamar, modelo, devolve, resultado, bloco, estado
 (661) DIÁRIO — 13/10/2026 · **`seth-memoria-2026-10-13` aplicada (assinatura verificada, PR #162 juntado). Teste com a mesma pergunta à Seth: resolveu pela metade — as 3 "faltas" falsas sumiram (ela agora cita o índice, o `HASH-ESTADO` e a "Fronteira de recusas"), mas o cabeçalho segue reprovado (`t=1` sem base, e o turno era o 2º) e ela inventou afirmações novas. A condição do Humano para automatizar ("se isso resolver") não foi cumprida por inteiro: decisão volta para ele.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: causa, raiz, crash, cannot, use, operator, tool, calls, achada, aplicada, era, regressão, minha, dfd, modelo, real, header, bug, isolado, librechat, proposta, sse, buffer, espiado, assinada
 (634) DIÁRIO — 02/10/2026 · **M8/M9 do lab — mecanismo do `invoke.cjs` confirmado na fonte real (`return { messages: [finalChunk] }`, sem guarda quando o stream não entrega chunk nenhum); M9 reproduziu o sintoma, mas a causa achada é NOSSA, não do LibreChat: sob carga concorrente, conteúdo real que o OmniRoute confirma ter entregue (200, sem erro) chega vazio no cliente — só o `": ka"` do nosso próprio filtro de keepalive.**
   palavras-chave: lab, mecanismo, invoke, cjs, confirmado, fonte, real, return, messages, finalchunk, guarda, stream, entrega, chunk, reproduziu, sintoma, causa, achada, nossa, librechat, sob, carga, concorrente, conteúdo, omniroute, confirma, ter, entregue, erro, chega, vazio, cliente, nosso, próprio, filtro, keepalive
-(633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de corrida propostas são refutadas. Proposta `rota-cota-tier0-2026-10-02` (632) recebeu segunda opinião condicional do Conselho Remoto.**
-  palavras-chave: lab, medidos, hipóteses, corrida, propostas, refutadas, proposta, rota, cota, tier, recebeu, segunda, opinião, condicional, remoto
+(633) DIÁRIO — 02/10/2026 · **M6 e M7 do lab, medidos — as duas hipóteses de cor …
+  palavras-chave: lab, medidos, hipóteses, cor
 (632) DIÁRIO — 02/10/2026 · **M3 resolvido com método seguro (3 chamadas reais a …
   palavras-chave: resolvido, método, seguro, chamadas, reais
 (631) CORREÇÃO — 02/10/2026 · **Corrige (629): a causa do vazamento de segredo n …
