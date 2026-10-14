@@ -23,6 +23,7 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
 
 ## Mecanismo
 
+0. **Fluxo padrão** (MEMÓRIAS (692), decisão do Humano em 14/10/2026): o PR que só abre a proposta (`.diff` + registro em MEMÓRIAS/ONDE_ESTAMOS) vai direto contra o `main` — nunca empilhado em outra branch — e **quem propõe** junta o PR e roda `git pull` assim que o CI passa. O Humano só assina. Motivo: três vezes em 14/10 (e duas em 02/10) o Humano tentou assinar e o `.diff` não estava no `main` local. O PR que **aplica** o código assinado segue com o Humano.
 1. A mudança proposta vira `propostas/<nome>.diff` (formato `git diff`, com cabeçalhos `--- a/<caminho>` / `+++ b/<caminho>`) e fica aqui, versionado.
 2. O Humano aprova, de um destes dois jeitos:
    - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota) — vale só na janela sem `propostas/.allowed_signers`; depois, P-8 recusa marcador sem assinatura;
