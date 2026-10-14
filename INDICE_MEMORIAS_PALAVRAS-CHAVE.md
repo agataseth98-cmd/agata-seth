@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
+  palavras-chave: reteste, pedida, avaliação, últimas, mudanças, ela, juízo, técnico, marcado, tal, chama, ferramenta, query, canon, vault, buscar, cabeçalho, segue, sendo, ponto, fraco, acusado, auditoria, turno
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assinada pelo Humano), em worktree. Reteste da avaliação na entrada seguinte.**
   palavras-chave: execução, aplicada, seth, opiniao, tecnica, assinada, humano, worktree, reteste, avaliação, entrada, seguinte
 (702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, seth, vault, rotulos, pedido, humano, pode, preparar, gráfico, consigo, saber, bolinha, auditoria, vira, regra, catálogo, grafo, passa, mostrar, nome, nota, passar, mouse, distância, aguardando, assinatura
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
   palavras-chave: execução, aplicada, cerebro, navegavel, assinada, humano, brain, atlas, parado, new, graph, instalado, cores, regiões, obsidian, reiniciado, falta, abrir, navegar
-(674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
-  palavras-chave: proposta, cerebro, navegavel, pedido, humano, parar, ele, girar, usá, uso, gráfico, podendo, direções, zoom, insatisfatório, ler, notas, brain, atlas, fica, parado, panorama, entra, new, graph, explorar, navegação, livre, cores, regiões, agata, aguardando, assinatura
+(674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedid …
+  palavras-chave: proposta, cerebro, navegavel, pedid
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assin …
   palavras-chave: execução, aplicada, cerebro, tudo, ligado, assin
 (672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a ped …
