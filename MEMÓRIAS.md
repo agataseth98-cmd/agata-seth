@@ -26,20 +26,48 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7557c0699b936a155507e163322b3b6b7244e1a2
-  Escrito em: 14/10/2026 11:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d78d59c5a2e654784caeeed7bb020aabe28a3358
+  Escrito em: 14/10/2026 12:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(686) CONSELHO — 14/10/2026 · **Segunda opinião sobre a personalidade da Seth: 3 famílias, 1 "sim" e 2 "condicional". As emendas em que convergem entram numa proposta nova, `voz-comum-2026-10-14`, junto da voz comum para todos os modelos (AGENTS.md, Conselho). `seth-personalidade-2026-10-14` (685) está assinada (12:02) e intacta; aplicar só depois da pergunta 3 do portão. Plano da conversa por voz escrito.**
+
+**Pedidos do Humano:** "Todas as LLMs que fazem parte do conselho locais ou em nuvem assumem a mesma persona, verifique o estado da arte ... e aplique em nosso sistema, e já se prepare para criarmos nosso próprio sistema de conversa natural como a do GPT ... usar a placa dedicada e disponibilizar a voz somente quando o cérebro é um modelo na nuvem, quando trocar para o local ela avisa que a voz está desabilitada temporariamente." Depois: "é a persona que todos compartilham"; segunda opinião escolhida; e o princípio — "a ideia é que eu sinta que estou falando com a Seth, não importa o cérebro debaixo do capô, mas o que está debaixo do capô divergir é o ponto forte do sistema, esse atrito, mas o humano busca familiaridade, consistência e previsibilidade."
+
+**Sequência que precisa ficar clara:** ampliei a proposta de (685) na própria branch (commit `7286a82`: AGENTS.md + Conselho), mas o Humano juntou o PR #187 às 11:53, **antes** desse push (11:55), e assinou às 12:02 a versão de 3 arquivos (sha `976cacb9…`; `p8_verificar` 4/4). `7286a82` nunca entrou no `main` e fica abandonado; a ampliação vem agora como proposta própria, que aplica **por cima** da (685) (conferido: `git apply --check` depois da (685) aplicada).
+
+**Estado da arte (out/2026):** persona única em debate multiagente reduz a diversidade de raciocínio e leva à convergência prematura (survey de 151 abordagens, arXiv 2607.26212; arXiv 2607.20429; 2604.24698; 2606.03032); em roteamento entre provedores, o risco é a troca de tom no fallback, e o lugar do estilo é o gateway. Daí a regra: **forma comum, juízo próprio** — que é o princípio do Humano dito pela literatura.
+
+**Pareceres** (pedido com o `.diff` ampliado, só material público; `scripts/conselho_remoto.py`, rotação por família; respostas em `memoria/missoes/conselho-remoto/20261014-12*`): Mistral (`ministral-8b`) **condicional**; Zhipu (`glm-4.7-flash`) **sim**; NVIDIA via OpenRouter (`nemotron-3-ultra`) **condicional**. Hugging Face sem credencial (401) e Gemini em 504 ficaram de fora pela própria rotação. Convergências e o que fiz com elas:
+- **Falso positivo em citação** (Mistral e Nemotron): a checagem acusaria "né" ou "Bom dia" citados. **Aceito:** trecho entre aspas (" ", “ ”, « ») e linha de citação `>` não contam; 3 casos novos no selftest (citado não conta; `>` não conta; muleta fora da citação ainda conta). O código sugerido pela Mistral não foi usado (verificava o texto inteiro, não o trecho).
+- **Critério de utilidade** (Nemotron): **aceito, enxuto** — padrão seguro só se reversível (senão pergunta); evidência direta > indireta > relato; próximo passo executável ou "aguardo sua decisão: <qual>".
+- **Urgência em incidente** (Mistral: liberar exclamação): **aceito pela metade** — impacto primeiro, urgência pelo conteúdo, nunca pelo tom; a calma em incidente é parte da persona.
+- **Declarar o modelo na Origem** (Mistral): aceito no `VOZ_COMUM`.
+- **Métrica de divergência do Conselho** (Nemotron, entropia de opiniões): **não entra aqui** — é território do P-13 e precisa de desenho próprio; fica anotada como próximo passo.
+- Ressalva de leitura: a Mistral citou "AGENTS.md linha 685" (não existe) e a Nemotron uma chamada `conselho.perguntar()` (não existe) — dados não confiáveis, como manda o PROJETO; nada disso foi usado.
+
+**Proposta `voz-comum-2026-10-14`** (4 arquivos, +33/−4, sobre a (685)): `AGENTS.md` (item "Voz comum", com o princípio do Humano: a divergência entre cérebros é a força do sistema); `scripts/conselho_remoto.py` (`VOZ_COMUM` como mensagem de sistema, nuvem e fallback local; o `sha256` do pedido não muda; selftest +1); PROJETO (critério de utilidade; "Todos os modelos"; citação não conta); `auditoria_turno.py` (citação fora da checagem; +3 casos).
+
+**Plano da voz:** `propostas/plano-voz-conversa-2026-10-14.md` (plano, não muda comportamento): cascata (VAD Silero + Smart Turn v3, STT, fila nova `seth-voz` só de nuvem, Qwen3-TTS com a voz aprovada na 4060, piper na CPU de reserva, tratamento "sistema", barge-in) e o **árbitro da placa** pedido pelo Humano — nuvem: placa com a voz; cérebro local: placa com o Ollama e voz desligada com aviso pré-gravado ("Voz desabilitada temporariamente. O cérebro passou para o modelo local; sigo por texto."); motivo medido: Ollama empurrado para a CPU derrubou a Seth a 6,3 tok/s (648). Próximo: protótipo fora do canon, medido pelos 10 casos de aceite do PR #184.
+
+**Verificado:** `auditoria_turno.py`, `conselho_remoto.py` e `seth_gateway.py` `--selftest` OK com as duas propostas aplicadas na worktree; `git apply --check` da nova por cima da (685).
+
+**Pendente:** pergunta 3 do portão (silêncio) para a (685); assinatura da `voz-comum-2026-10-14` (`bash scripts/aprovar.sh voz-comum-2026-10-14`).
+
+**sync:** PASS — branch a partir de `origin/main` em `d78d59c` (PR #187 juntado); topo de MEMÓRIAS = (685).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `scripts/conselho_remoto.py` (3 chamadas), `scripts/p8_verificar.sh`, `git log`/`ls-remote`, selftests, WebSearch · Autorização: Humano, nesta sessão (falas citadas acima).
 
 (685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pedido do Humano ("vamos apenas canonizar essa personalidade de maneira persistente na Seth a partir de hoje ... dentro das diretrizes do sistema agata"; "é para virar canônico"; "capriche, tem que ser útil também"). Proposta `seth-personalidade-2026-10-14`, aguardando o portão das 3 perguntas e a assinatura. Junto, a voz própria da Agata: treino agendado para a madrugada de 15/10, fora do repo.**
 
