@@ -73,6 +73,64 @@ _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
 _CITADO = re.compile(r'"[^"\n]{0,300}"|“[^”\n]{0,300}”|«[^»\n]{0,300}»')
 
 
+# (690) Ferramenta citada como FONTE sem ter sido chamada na conversa -- o que a regra de
+# texto de (688) não segurou no reteste de (689): "verificado em `vault_buscar`" sem chamada
+# nenhuma. Sugestão ("posso medir com `maquina_verificar`") é o que a doutrina pede: não conta.
+def _nomes_ferramentas() -> set[str]:
+    try:
+        mjs = (RAIZ / "redesign" / "librechat" / "canon-mcp.mjs").read_text(encoding="utf-8")
+        nomes = set(re.findall(r'name:\s*"([a-z][a-z0-9_]+)"', mjs)) - {"canon"}
+        if nomes:
+            return nomes
+    except OSError:
+        pass
+    return {"query_canon", "vault_buscar", "vault_consultar", "maquina_verificar",
+            "memoria_acrescentar", "diario_anotar"}
+
+
+_ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
+_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
+                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b", re.IGNORECASE)
+
+
+def _chamadas(msgs: list) -> set[str]:
+    """Nomes de ferramenta chamados na conversa até o fim do turno auditado (antes do
+    último pedido do usuário). LibreChat prefixa/sufixa o nome do MCP: casa por trecho."""
+    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
+    fim = usuarios[-1] if usuarios else len(msgs)
+    nomes = set()
+    for m in msgs[:fim]:
+        if not isinstance(m, dict):
+            continue
+        for tc in m.get("tool_calls") or []:
+            nomes.add(str((tc.get("function") or {}).get("name") or tc.get("name") or ""))
+        if m.get("role") == "tool" and m.get("name"):
+            nomes.add(str(m["name"]))
+    return {n for n in nomes if n}
+
+
+def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+    chamadas = _chamadas(msgs)
+    corpo, em_codigo = [], False
+    for l in texto.splitlines():
+        if l.strip().startswith("```"):
+            em_codigo = not em_codigo
+            continue
+        if not em_codigo and not _CABECALHO.match(l):
+            corpo.append(l)
+    inventadas = set()
+    for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
+        for nome in _nomes_ferramentas():
+            if nome in frase and _ALEGA.search(frase) and not _SUGERE.search(frase) \
+                    and not any(nome in c for c in chamadas):
+                inventadas.add(nome)
+    if not inventadas:
+        return []
+    return [f"evidência: cita {', '.join(sorted(inventadas))} como fonte, mas nenhuma chamada a "
+            f"{'ela' if len(inventadas) == 1 else 'elas'} nesta conversa — escreva \"não medido\" ou chame a "
+            "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
+
+
 def _estilo(texto: str) -> list[str]:
     """Tiques da personalidade (685) na resposta: saudação na 1ª linha depois do
     cabeçalho, oferta/encerramento, muleta/interjeição, emoji, exclamação em série."""
@@ -313,6 +371,7 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
     achados += _desmentidas(texto)
     achados += _contagem_controles(texto)
     achados += _estilo(texto)
+    achados += _ferramenta_sem_chamada(texto, msgs)
     if modo(msgs) == "conciso":
         narradas = _narracao(texto)
         if narradas:
@@ -472,6 +531,17 @@ def _selftest() -> int:
             'Ele disse "ok". Tá certo, né.'))),
         ("citação '`arquivo`, linha N' inventada é acusada (688)", any(x.startswith("citação AGENTS.md:3") for x in est(
             'Evidência: `AGENTS.md`, linha 3: "treinos noturnos agendados via cron toda noite".'))),
+        ("evidência: ferramenta citada como fonte sem chamada é acusada (690)", any(
+            x.startswith("evidência:") and "vault_buscar" in x for x in est(
+                'Sem histórico de falha (verificado em `vault_buscar "treino noturno"`).'))),
+        ("evidência: sugerir a ferramenta não é acusado (690)", not any(x.startswith("evidência:") for x in est(
+            "Não medido. Posso medir com `maquina_verificar`, se quiser."))),
+        ("evidência: ferramenta chamada no turno (nome com sufixo do MCP) não é acusada (690)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
                                                          ([u()], [u("modo explicativo")]))),
     ]

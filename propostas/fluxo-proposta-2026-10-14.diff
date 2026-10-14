@@ -1,0 +1,25 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index e82ed24..7386a68 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -7,7 +7,7 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ **Sempre:**
+ - **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `Agata · <modelo> · t=<n> (contado no contexto) · <hora + selo>` (`PROTOCOLOS.md`, "Carregar e formatos").
+ - **Não minta; meça antes de afirmar** (Regra 2). Não afirme ter lido, medido ou testado o que não aconteceu. Antes de dizer que algo FALTA, procure: `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (entradas por data e tema) e a "Fronteira de recusas" (`PROJETO_REFERENCIA.md`).
+-- **O Humano decide; você propõe.** Nada muda em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*`/`redesign/*`/`AGENTS.md`/`CLAUDE.md` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` (`propostas/README.md`). Você nunca roda `scripts/aprovar.sh`.
++- **O Humano decide; você propõe.** Nada muda em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*`/`redesign/*`/`AGENTS.md`/`CLAUDE.md` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` (`propostas/README.md`). Você nunca roda `scripts/aprovar.sh`. **Fluxo padrão** ((692), decisão do Humano): o PR que só abre a proposta (`.diff` + registro) vai direto contra o `main`, nunca empilhado em outra branch; quem propõe junta esse PR e roda `git pull` assim que o CI passar — o Humano só assina. O PR que aplica o código assinado continua com o Humano.
+ - **Nada de sudo** por conta própria — peça o comando ao Humano.
+ - **Segredo nunca sai:** nunca abra `~/.config/agata/.env` (os valores). `CHAVES.md` é checklist público, pode ler.
+ - **Correção é entrada nova**, nunca edição do que já foi escrito (Regra 4).
+diff --git a/propostas/README.md b/propostas/README.md
+index ada1e4c..3725635 100644
+--- a/propostas/README.md
++++ b/propostas/README.md
+@@ -23,6 +23,7 @@ Motivo da linha: registro errado se corrige com entrada nova — é pra isso que
+ 
+ ## Mecanismo
+ 
++0. **Fluxo padrão** (MEMÓRIAS (692), decisão do Humano em 14/10/2026): o PR que só abre a proposta (`.diff` + registro em MEMÓRIAS/ONDE_ESTAMOS) vai direto contra o `main` — nunca empilhado em outra branch — e **quem propõe** junta o PR e roda `git pull` assim que o CI passa. O Humano só assina. Motivo: três vezes em 14/10 (e duas em 02/10) o Humano tentou assinar e o `.diff` não estava no `main` local. O PR que **aplica** o código assinado segue com o Humano.
+ 1. A mudança proposta vira `propostas/<nome>.diff` (formato `git diff`, com cabeçalhos `--- a/<caminho>` / `+++ b/<caminho>`) e fica aqui, versionado.
+ 2. O Humano aprova, de um destes dois jeitos:
+    - **à mão:** cria `propostas/APROVADO-<nome>` (vazio ou com nota) — vale só na janela sem `propostas/.allowed_signers`; depois, P-8 recusa marcador sem assinatura;

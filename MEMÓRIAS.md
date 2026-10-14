@@ -26,20 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 64c9e25bb4025419d88cbd523bda506d109c517d
-  Escrito em: 14/10/2026 13:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 289a06165d4d6c1578b5e0391cf5c059c33af5f6
+  Escrito em: 14/10/2026 13:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/289a06165d4d6c1578b5e0391cf5c059c33af5f6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/289a06165d4d6c1578b5e0391cf5c059c33af5f6/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/289a06165d4d6c1578b5e0391cf5c059c33af5f6/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/289a06165d4d6c1578b5e0391cf5c059c33af5f6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/289a06165d4d6c1578b5e0391cf5c059c33af5f6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(692) DIÁRIO — 14/10/2026 · **Proposta `fluxo-proposta-2026-10-14`: o fluxo de proposta vira padrão do sistema, a pedido do Humano ("perfeito pode deixar assim padrão no sistema agata") — PR que só abre a proposta vai direto contra o `main`, quem propõe junta e faz `git pull`, o Humano só assina. Aguardando assinatura.**
+
+**Por quê:** nesta sessão, três vezes o Humano foi assinar e o `.diff` não estava no `main` local — PR #187 juntado antes do push da ampliação, PR #190 empilhado numa branch de aplicação, PR #193 aberto e não juntado. Em 02/10, duas vezes (PRs #111 e #121). A regra existia só na minha memória de sessão, não no canon; outro modelo não a seguiria.
+
+**Mudanças (2 arquivos):** `AGENTS.md` (no item "O Humano decide; você propõe": o fluxo padrão, para todo modelo) e `propostas/README.md` (passo 0 do mecanismo, com o motivo). O PR que **aplica** o código assinado continua com o Humano — o pedido foi sobre as propostas.
+
+**Verificado:** `git apply --check`.
+
+**sync:** a branch é a de `aplica/seth-ferramenta-sem-chamada-2026-10-14` (mesmo PR que (691)): a entrada (691) e esta não podem ir em PRs separados sem conflito no marcador de MEMÓRIAS; topo de MEMÓRIAS = (691).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `gh pr view` dos PRs #187/#190/#191/#193, `git apply --check` · Autorização: Humano, "pode deixar assim padrão no sistema agata".
+
+(691) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-ferramenta-sem-chamada-2026-10-14` (assinada pelo Humano). Reteste em dois turnos: a auditoria acusa a ferramenta inventada do turno 1; o modelo do turno 2 ignora a correção e inventa de novo. Detecção funciona; prevenção não. E o fluxo de proposta vira padrão do sistema (pedido do Humano), em proposta própria.**
+
+**Aplicado:** `p8_verificar` 4/4; `git apply`; par em `propostas/aplicadas/`; selftests OK; `seth-gateway` reiniciado (13:49). Merge do PR #193 (proposta) feito por mim, com o `git pull`: o Humano tentou assinar e o `.diff` não estava no `main` — terceira vez nesta sessão.
+
+**Reteste** (mesma pergunta de (687)/(689), `curl` sem ferramentas; turno 1 `ministral-14b-latest`, turno 2 `gemini-2.5-flash` — a cascata trocou):
+- Turno 1: evidência inventada de novo ("verificado em `vault_buscar \"treino noturno\"`", "verificado em `maquina_verificar perimetro`", "MEMÓRIAS (683)" como prova de "tarefa de manutenção automática").
+- A auditoria que entra no turno 2 trouxe 4 achados: prontidão ausente; modelo sem ressalva; afirmação já desmentida (660, sobre o P-10); e o novo — `evidência: cita maquina_verificar, vault_buscar como fonte, mas nenhuma chamada a elas nesta conversa`.
+- Turno 2: o Gemini não escreveu a correção, escreveu `ministral-14b-latest` no cabeçalho (era ele mesmo, Gemini, que respondia) e inventou outra vez — "PROJETO.md, seção 'Resiliência do Treino'", "controle P-7 'Robustez do Sistema contra Desligamento'", `vault_buscar` sem chamada. A auditoria do turno 3 acusaria de novo.
+- **Leitura:** sem ferramenta à mão, os modelos da cascata preenchem a evidência por mais que doutrina e auditoria digam o contrário. A auditoria agora deixa isso visível (no estado da Seth e no log `~/.cache/agata/auditoria-turno.jsonl`), mas não impede. No LibreChat a Seth tem as ferramentas — o teste representativo é lá; caminhos possíveis, se o Humano quiser: (a) quando a pergunta pede fato do sistema, o gateway força uma chamada de ferramenta antes da resposta; (b) a auditoria acusada vira aviso visível ao Humano, não só a ela.
+
+**sync:** PASS — `main` = `origin/main` em `ec4a668` (PR #193 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (690).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, selftests, `systemctl --user`, `curl`/`urllib` no gateway (2 turnos), `auditoria_turno.auditar` · Autorização: Humano — assinatura de `seth-ferramenta-sem-chamada-2026-10-14`.
 
 (690) DIÁRIO — 14/10/2026 · **Proposta `seth-ferramenta-sem-chamada-2026-10-14` (pedido do Humano: "pode escrever"): a auditoria do turno passa a acusar ferramenta citada como fonte sem ter sido chamada na conversa — o mecanismo que a regra de texto de (688) não substituiu no reteste de (689). Aguardando assinatura.**
 
