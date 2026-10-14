@@ -61,6 +61,46 @@ _LIGA_CONCISO = re.compile(r"modo conciso", re.IGNORECASE)
 _NARRACAO = re.compile(r"^\s*(?:[-*>]\s*)?(?:\*\*)?(vou |agora vou|deixe-me|deixa eu|primeiro,? vou|em seguida,? vou|"
                        r"vamos (?:verificar|ver|checar|conferir|olhar)|estou (?:verificando|checando|lendo|rodando|analisando))",
                        re.IGNORECASE)
+# (685) Estilo da personalidade (PROJETO, "Personalidade da Seth"): só padrão de texto,
+# sem modelo julgando. Fora de bloco de código e da linha de cabeçalho.
+_SAUDACAO = re.compile(r"^\W*(ol[áa]|oi|e a[íi]|bom dia|boa tarde|boa noite|bem[- ]vind[oa]s?)\b", re.IGNORECASE)
+_OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [àa] disposi[çc][ãa]o|"
+                     r"qualquer (?:coisa|d[úu]vida),? (?:[ée] s[óo] |me )?(?:chamar|avisar|falar)", re.IGNORECASE)
+_MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
+                     r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
+_EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
+
+
+def _estilo(texto: str) -> list[str]:
+    """Tiques da personalidade (685) na resposta: saudação na 1ª linha depois do
+    cabeçalho, oferta/encerramento, muleta/interjeição, emoji, exclamação em série."""
+    corpo, em_codigo = [], False
+    for l in texto.splitlines():
+        if l.strip().startswith("```"):
+            em_codigo = not em_codigo
+            continue
+        if not em_codigo and not _CABECALHO.match(l) and not l.lstrip().startswith(
+                ("Última entrada:", "quebrado:", "pronto.")):
+            corpo.append(l)
+    prosa = "\n".join(re.sub(r"`[^`]*`", "", l) for l in corpo)
+    achados = []
+    primeira = next((l for l in corpo if l.strip()), "")
+    if _SAUDACAO.match(primeira):
+        achados.append(f"saudação ('{primeira.strip()[:30]}')")
+    if _OFERTA.search(prosa):
+        achados.append(f"oferta/encerramento ('{_OFERTA.search(prosa).group(0)}')")
+    muletas = sorted({m.group(0).strip().lower() for m in _MULETA.finditer(prosa)})
+    if muletas:
+        achados.append("muleta/interjeição (" + ", ".join(f"'{m}'" for m in muletas) + ")")
+    if _EMOJI.search(prosa):
+        achados.append("emoji")
+    if prosa.count("!") > 2:
+        achados.append(f"{prosa.count('!')} exclamações")
+    if not achados:
+        return []
+    return ["estilo: " + "; ".join(achados) + " — PROJETO, \"Personalidade da Seth\" (685)"]
+
+
 _TITULO = re.compile(r"^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*:?\s*$|[^\s].{0,80}:\s*$)")
 
 
@@ -112,11 +152,18 @@ def modo(msgs: list) -> str:
     return atual
 
 
+# (685) Reforço da personalidade a cada turno: a instrução inicial perde peso conforme a
+# conversa cresce (deriva de persona); uma linha curta junto da MODO custa pouco.
+LINHA_PERSONA = ("PERSONA: operadora técnica do sistema — resultado, evidência, próximo passo; "
+                 "frases curtas; sem muleta, emoji ou saudação (PROJETO, \"Personalidade da Seth\").")
+
+
 def linha_modo(msgs: list) -> str:
     if modo(msgs) == "explicativo":
-        return "MODO: explicativo (pedido do Humano nesta conversa) — pode explicar o processo."
+        return ("MODO: explicativo (pedido do Humano nesta conversa) — pode explicar o processo.\n"
+                + LINHA_PERSONA)
     return ("MODO: conciso (padrão) — traga o resultado, sem narrar o processo; fale do processo "
-            "só para constatar erro, em 1 linha.")
+            "só para constatar erro, em 1 linha.\n" + LINHA_PERSONA)
 
 
 def _narracao(texto: str) -> list[str]:
@@ -262,6 +309,7 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
     achados += _desmentidas(texto)
     achados += _contagem_controles(texto)
+    achados += _estilo(texto)
     if modo(msgs) == "conciso":
         narradas = _narracao(texto)
         if narradas:
@@ -321,7 +369,7 @@ def _selftest() -> int:
     topo = _cab.ultima_entrada_local() or 1
     hora = lambda hm: f"2026-10-13 {hm} -0300 (relógio da Máquina)"
     pront = (f"Agata · modelo: modelo não verificado · sync: não verificado · lacuna: teste · {hora('11:39')}\n"
-             f"Última entrada: ({topo}) DIÁRIO — teste\npronto.\n\nOi!")
+             f"Última entrada: ({topo}) DIÁRIO — teste\npronto.\n\nSistemas operacionais.")  # (685): era "Oi!" -- agora é saudação
     linha = lambda n, hm, mod="modelo não verificado": f"Agata · {mod} · t={n} (contado no contexto) · {hora(hm)}"
     u = lambda c="x": {"role": "user", "content": c}
     a = lambda c: {"role": "assistant", "content": c}
@@ -397,6 +445,24 @@ def _selftest() -> int:
             [u(), a(pront), u(), a(linha(2, "13:09") + "\n\n```\nvou fazer x\n```\nfeito"), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
         ("IP:porta não vira citação", linha_estado([u(), a(pront + "\nporta 127.0.0.1:11435"), u()])
          == "AUDITORIA-TURNO-ANTERIOR: OK"),
+    ]
+    # (685) estilo da personalidade -- direto em auditar(), sem passar pelo log
+    est = lambda corpo: auditar([u(), a(pront), u(), a(linha(2, "14:01") + "\n\n" + corpo), u()])
+    casos += [
+        ("estilo: resposta limpa -> sem achado", not any(x.startswith("estilo:") for x in est(
+            "Sistemas operacionais. Três provedores ativos.\nEvidência: `estado_para_eco.sh`.\nPróximo passo: nenhum."))),
+        ("estilo: saudação na 1ª linha", any("saudação" in x for x in est("Olá! Tudo certo por aqui."))),
+        ("estilo: 'Bem-vindo de volta' é saudação", any("saudação" in x for x in est("Bem-vindo de volta. Sistemas ok."))),
+        ("estilo: oferta/encerramento", any("oferta" in x for x in est("Feito.\nEspero ter ajudado."))),
+        ("estilo: muletas 'né' e 'tá?'", any("'né'" in x and "'tá?'" in x for x in est("Rodei os testes, né. Tá tudo certo, tá?"))),
+        ("estilo: emoji", any("emoji" in x for x in est("Feito \U0001F680"))),
+        ("estilo: 3 exclamações", any("exclamações" in x for x in est("Feito! Passou! Tudo verde!"))),
+        ("estilo: muleta em código não conta", not any(x.startswith("estilo:") for x in est(
+            "Saída:\n```\nné tá? olá!!!\n```\nFeito. `grep né` também não conta."))),
+        ("estilo: 'tipo de arquivo' e 'nenhum' não são muleta", not any(x.startswith("estilo:") for x in est(
+            "O tipo de arquivo é texto. Nenhum erro, nem aviso."))),
+        ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
+                                                         ([u()], [u("modo explicativo")]))),
     ]
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
