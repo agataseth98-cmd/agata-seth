@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(693) EXECUÇÃO — 14/10/2026 · **Aplicada `fluxo-proposta-2026-10-14` (assinada pelo Humano): o fluxo de proposta é padrão do sistema — PR de proposta direto contra o `main`, quem propõe junta e faz `git pull`, o Humano só assina. E, nesta conversa, o Humano autorizou que eu junte também os PRs de aplicação: "faça sempre o merge e o pull nesta conversa".**
+  palavras-chave: execução, aplicada, fluxo, proposta, assinada, humano, padrão, sistema, direto, contra, main, quem, propõe, junta, faz, git, pull, assina, conversa, autorizou, junte, prs, aplicação, faça, sempre, merge
 (692) DIÁRIO — 14/10/2026 · **Proposta `fluxo-proposta-2026-10-14`: o fluxo de proposta vira padrão do sistema, a pedido do Humano ("perfeito pode deixar assim padrão no sistema agata") — PR que só abre a proposta vai direto contra o `main`, quem propõe junta e faz `git pull`, o Humano só assina. Aguardando assinatura.**
   palavras-chave: proposta, fluxo, vira, padrão, sistema, pedido, humano, perfeito, pode, deixar, assim, agata, abre, vai, direto, contra, main, quem, propõe, junta, faz, git, pull, assina, aguardando, assinatura
 (691) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-ferramenta-sem-chamada-2026-10-14` (assinada pelo Humano). Reteste em dois turnos: a auditoria acusa a ferramenta inventada do turno 1; o modelo do turno 2 ignora a correção e inventa de novo. Detecção funciona; prevenção não. E o fluxo de proposta vira padrão do sistema (pedido do Humano), em proposta própria.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, agente, aplicada, assinatura, verificada, juntado, canon, mcp, mjs, novo, copiado, librechat, gateway, verificador, reiniciados, caminho, real, conversa, verdadeira, reavalie, fim, levou, achados, resposta, teste, conteúdo, fica, ferramentas, api, direta, serve
 (664) DIÁRIO — 13/10/2026 · **Auditoria de uma resposta real da Seth no LibreChat (13:10): os dois cabeçalhos, a hora de 2,5 h antes e o nome "ministral-14b" vêm do modo Agent e de um defeito da auditoria de (662/663) — e não de modelo fraco: quem respondeu foram nemotron-3-ultra e gemini-2.5-flash. As 3 "faltas" falsas voltaram ("mantidas") por âncora na resposta errada da mesma conversa. Dos 3 pedidos dela, 2 tinham núcleo verdadeiro e entram. Proposta `auditoria-agente-2026-10-13` (6 arquivos), aguardando assinatura.**
   palavras-chave: auditoria, resposta, real, seth, librechat, cabeçalhos, hora, nome, ministral, vêm, modo, agent, defeito, modelo, fraco, quem, respondeu, foram, nemotron, ultra, gemini, flash, faltas, falsas, voltaram, mantidas, âncora, errada, mesma, conversa, pedidos, dela, tinham, núcleo, verdadeiro, entram, proposta, agente, arquivos, aguardando, assinatura
-(663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura verificada, PR #164 juntado) e provada com 2 mensagens reais em streaming: a 1ª resposta da Seth saiu com o cabeçalho errado, a auditoria registrou 4 achados, e a 2ª resposta abriu com "Correção do turno anterior: …" reconhecendo o erro — e veio com cabeçalho aprovado pelo linter.**
-  palavras-chave: auditoria, turno, aplicada, assinatura, verificada, juntado, provada, mensagens, reais, streaming, resposta, seth, saiu, cabeçalho, errado, registrou, achados, abriu, correção, anterior, reconhecendo, erro, veio, aprovado, linter
+(663) DIÁRIO — 13/10/2026 · **`auditoria-turno-2026-10-13` aplicada (assinatura …
+  palavras-chave: auditoria, turno, aplicada, assinatura
 (662) DIÁRIO — 13/10/2026 · **Proposta `auditoria-turno-2026-10-13` (3 arquivos, …
   palavras-chave: proposta, auditoria, turno, arquivos
 (661) DIÁRIO — 13/10/2026 · **`seth-memoria-2026-10-13` aplicada (assinatura ver …
