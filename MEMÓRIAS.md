@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 20cf8ff922ca2249ae2a4672a32ee6ca0944977b
-  Escrito em: 14/10/2026 00:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 715e8507eb3296c9626e8af9a7328f5659a3c48b
+  Escrito em: 14/10/2026 00:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/715e8507eb3296c9626e8af9a7328f5659a3c48b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/715e8507eb3296c9626e8af9a7328f5659a3c48b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/715e8507eb3296c9626e8af9a7328f5659a3c48b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/715e8507eb3296c9626e8af9a7328f5659a3c48b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/715e8507eb3296c9626e8af9a7328f5659a3c48b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinada pelo Humano), com (682) e (683). Reteste no LibreChat: a pergunta que travou às 23:44 ("explique o portão de três perguntas") agora sai inteira, com as três perguntas certas, em ~16 s, numa fila só.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. `canon-mcp.mjs` no runtime do LibreChat; `dropin-omniroute-prazos.conf` instalado em `~/.config/systemd/user/omniroute.service.d/prazos.conf` (lido de volta: `STREAM_IDLE_TIMEOUT_MS=60000` no ambiente do serviço); `omniroute`, `seth-verificador`, `seth-gateway` e `librechat` reiniciados, todos ativos; MCP `canon` com as 6 ferramentas. O índice por sentido com os parágrafos de `extras/` já estava construído (5.348 textos).
+
+**Reteste (conversa de teste, pelo Chrome, aba arrastada pelo Humano):**
+- ✓ Resposta inteira (`unfinished: false`). 3 chamadas de `query_canon` (REGRAS, PROTOCOLOS, PROJETO) e as três perguntas certas (reversibilidade, alcance, silêncio), com a fonte (REGRAS 169–172). Um cabeçalho só.
+- ✓ **Fila estável:** os 4 passos foram para `seth-pesado` (Nemotron-Ultra, 2–10 s cada). A conversa já passava de 10 mensagens, então a resposta inteira é "pesada" — mas não troca mais no meio.
+- ✓ **Ministral volta a responder:** às 00:09:40 ele aceitou e começou a responder um pedido (antes, 422 imediato); o stream foi cortado pelo meu reinício do LibreChat, e o **log novo do gateway registrou o corte** ("cliente desconectou no meio do stream (modelo ministral-14b-latest) · rota=seth-livre · 3.5s").
+- ✗ **Hora:** a Seth escreveu "21:55" às 00:16. O gateway manda a hora certa; o modelo copia a de cabeçalhos anteriores da conversa. A auditoria pega hora repetida ou que volta, **não** hora velha que anda pra frente. Em observação; um conserto possível é o gateway lembrar a `HORA-MAQUINA` que injetou e a auditoria comparar.
+- ✗ **Citação fora de contexto:** "o portão é de verificação, não linha vermelha (REGRAS, linha 144)". A frase existe na linha 144, mas fala da regra das três passadas independentes, não do portão das três perguntas. Uma checagem de arquivo:linha não pega isso.
+- Gemini 2.5 Flash continua sem cota (429). O prazo de 60 s não foi exercitado: hoje o Gemini respondeu 429 rápido, sem ficar pendurado.
+
+**sync:** PASS — `main` = `origin/main` (PRs #182 e #183 juntados) antes do branch `aplica/`; topo de MEMÓRIAS = (683).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, systemctl (ambiente do omniroute), log do LibreChat (ferramentas do MCP), Chrome (reteste), Mongo, call logs do OmniRoute, journal do gateway, REGRAS:138–144 · Autorização: Humano — assinatura de `seth-rota-e-busca-2026-10-13`.
 
 (683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:44 de 13/10): uma resposta dela ficou pendurada e morreu. Três causas medidas no OmniRoute; duas entram na proposta `seth-rota-e-busca-2026-10-13`, ainda sem assinatura — o `.diff` foi refeito, (682) não se edita.**
 

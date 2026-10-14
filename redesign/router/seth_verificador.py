@@ -118,7 +118,8 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
     ),
     "busca_semantica": (
         ["python3", "scripts/busca_semantica.py", "-n"], 90,
-        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS e nos seus parágrafos "
+        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS, nos seus parágrafos e "
+        "nos parágrafos dos documentos de extras/ (resultado 'extras/…md ^bK') "
         "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
         "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
         "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
@@ -126,12 +127,13 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
     ),
     "busca_texto": (
-        ["grep", "-rnIiF", "--include=*.md", "--exclude-dir=arquivo-redesign", "-m", "3"], 30,
-        "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
-        "derivado memoria/obsidian/ e no arquivo histórico extras/ (menos "
-        "extras/arquivo-redesign/), lendo o DISCO (sempre em dia). Use o "
-        "parâmetro `consulta` (até 200 caracteres). "
-        "Devolve caminho:linha:trecho, até 3 por nota.",
+        ["python3", "scripts/busca_texto.py"], 30,
+        "Busca por TEXTO no vault derivado memoria/obsidian/ e no arquivo histórico "
+        "extras/ inteiro, lendo o DISCO (sempre em dia). "
+        "Sem acento e sem maiúscula, por PALAVRAS: casa a linha com todas as "
+        "palavras da consulta (ou, se nenhuma tiver, as que têm mais -- e diz). "
+        "O nome do arquivo também conta. Use o parâmetro `consulta` (até 200 "
+        "caracteres). Devolve caminho:linha:trecho, até 3 por nota.",
     ),
 }
 
@@ -162,7 +164,7 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
         if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
                 or any(c in consulta for c in "\r\n\x00"):
             raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
-        return base + ["--", consulta.strip(), "memoria/obsidian", "extras"]
+        return base + ["--", consulta.strip()]
     if nome == "busca_semantica":
         if prop_nome is not None:
             raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
@@ -259,7 +261,7 @@ def _redigir(texto: str) -> tuple[str, int]:
 def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) -> str | None:
     if nome == "busca_texto":
         if codigo == 1:
-            return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
+            return "nenhuma ocorrência (sem acento, por palavras) no vault nem em extras/ -- tente busca_semantica (por sentido)."
         notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith(("memoria/", "extras/"))}
         return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
     if nome == "servicos":
@@ -452,7 +454,7 @@ def _selftest() -> int:
         except ValueError:
             casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
     avt = _argv("busca_texto", None, None, "-e x")
-    casos.append(("busca_texto: consulta é dado", avt[-4:] == ["--", "-e x", "memoria/obsidian", "extras"]))
+    casos.append(("busca_texto: consulta é dado", avt[-2:] == ["--", "-e x"]))
     try:
         _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
     except ValueError:

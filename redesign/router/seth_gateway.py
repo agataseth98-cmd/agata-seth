@@ -43,6 +43,7 @@ import re
 import socket
 import sys
 import threading
+import time
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -223,7 +224,7 @@ _DOUTRINA_FIXA = (
     "descrição lida (são 23, e o número muda). **Estado da arte / sistemas "
     "iguais:** use o navegador (`tool_search` \"navegador\") e cite a fonte de "
     "cada item; sem fonte, escreva `não verificado`. `extras/` (arquivo "
-    "histórico) se lê com `vault_consultar extras/`.\n\n"
+    "histórico, inteiro) se lê com `vault_consultar extras/`.\n\n"
     "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
     "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
     "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "
@@ -239,7 +240,10 @@ _DOUTRINA_FIXA = (
     "(MEMÓRIAS (662)/(664).)\n"
     "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
     "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
-    "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
+    "repetir a correção. Uma resposta tem um cabeçalho só. **Se a resposta vai "
+    "usar ferramenta, chame a ferramenta ANTES de escrever qualquer texto** — o "
+    "cabeçalho e o texto vêm uma vez só, depois das ferramentas ((682): o "
+    "cabeçalho escrito antes da ferramenta saía repetido depois dela).\n\n"
     "**MODO (linha do estado):** `conciso` é o padrão — a resposta traz o resultado e "
     "não narra o processo (\"vou verificar…\", \"agora vou…\"); fale do processo só "
     "para constatar erro, em 1 linha. `explicativo` só quando o Humano pedir na "
@@ -513,6 +517,14 @@ def _classificar_rota(payload: dict) -> str:
     if not isinstance(msgs, list):
         return _ROTA_BASE
     tem_tools = bool(payload.get("tools"))
+    # (682) passo depois de ferramenta é a MESMA resposta: classifica só até o
+    # último pedido do usuário. Antes, o resultado da ferramenta e as mensagens a
+    # mais viravam "pesado" e a resposta trocava de fila no meio (seth-livre no
+    # passo 1, seth-pesado no passo 2 -- medido no teste de 13/10, 21:59).
+    if auditoria_turno.e_continuacao(msgs):
+        ult = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"),
+                  default=len(msgs) - 1)
+        msgs = msgs[:ult + 1]
     total, n_user, codigo = _texto_e_sinais(msgs)
     if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
         return "seth-pesado"
@@ -694,6 +706,11 @@ class _Handler(BaseHTTPRequestHandler):
                         _sombra_rota(payload, self._rota)
                     payload["model"] = self._rota
                 payload = _injeta(payload)
+                # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
+                # recusa campo a mais com 422 "Extra inputs are not permitted" --
+                # Ministral e Codestral caíam sempre e a fila pulava para o próximo.
+                # Campo opcional do OpenAI, nada no caminho o usa: sai aqui.
+                payload.pop("user", None)
                 longa = _fila_pela_janela(payload)
                 if longa:
                     print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
@@ -727,7 +744,14 @@ class _Handler(BaseHTTPRequestHandler):
                 return nome
         return None
 
+    def _log(self, msg: str, t0: float):
+        """(682) Erro e desconexão vão para o journal (antes nada era registrado:
+        uma resposta que morreu no meio não deixava rastro aqui)."""
+        print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path}",
+              file=sys.stderr, flush=True)
+
     def _passar(self, corpo: bytes, metodo: str):
+        t0 = time.monotonic()
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in _HOP_BY_HOP}
@@ -737,7 +761,9 @@ class _Handler(BaseHTTPRequestHandler):
             up = urllib.request.urlopen(req, timeout=180)
         except urllib.error.HTTPError as e:
             up = e
+            self._log(f"upstream HTTP {e.code}", t0)
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            self._log(f"upstream inacessível ({e})", t0)
             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
@@ -760,9 +786,14 @@ class _Handler(BaseHTTPRequestHandler):
                 buf_pre = up.read()
                 modelo_real = self._modelo_de_bytes(buf_pre)
         except (BrokenPipeError, ConnectionResetError):
+            self._log("cliente desconectou antes da 1ª resposta do modelo", t0)
             self.close_connection = True
             up.close()
             return
+        except (TimeoutError, OSError) as e:
+            self._log(f"upstream parou de responder ({e})", t0)
+            up.close()
+            return self._erro(504, f"upstream parou de responder: {e}")
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
@@ -790,6 +821,7 @@ class _Handler(BaseHTTPRequestHandler):
             # sem isto a exceção subia e o servidor inteiro emperrava (a Seth
             # "travou" no teste 3, MEMÓRIAS (393)). close_connection pra o
             # keep-alive não reusar o socket morto.
+            self._log(f"cliente desconectou no meio do stream (modelo {modelo_real or '?'})", t0)
             self.close_connection = True
         finally:
             up.close()
@@ -930,6 +962,15 @@ def _selftest() -> int:
           f"({len(m[0]['content'])} chars)")
     falhas += 0 if ok else 1
 
+    # 1b. (683) campo `user` do LibreChat não chega ao OmniRoute (Mistral: 422)
+    body_u = json.dumps({"model": "seth", "user": "6a99c85", "messages": [
+        {"role": "user", "content": "oi"}]}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        base, data=body_u, headers={"Content-Type": "application/json"}), timeout=10).read()
+    ok1b = "user" not in json.loads(_Dummy.ultimo_corpo)
+    print(f"{'PASS' if ok1b else 'FALHA'}  campo `user` retirado antes do OmniRoute")
+    falhas += 0 if ok1b else 1
+
     # 2. pedido JÁ hidratado -> NÃO repete a doutrina, MAS reinjeta ESTADO-ATUAL
     body2 = json.dumps({"model": "seth", "messages": [
         {"role": "system", "content": f"{MARCADOR}\nx"},
@@ -1065,6 +1106,17 @@ def _selftest() -> int:
                         (9, ok9, f"curto+tools -> seth-livre (deu {r_triv_tools})")]:
         print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
         falhas += 0 if ok else 1
+
+    # 9j. (682) passo depois de ferramenta fica na fila do passo 1 (mesma resposta)
+    hist = [{"role": "user", "content": "x" * 1200}]
+    passo1 = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}], "messages": hist})
+    passo2 = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}], "messages": hist + [
+        {"role": "assistant", "content": "", "tool_calls": [{"id": "t1", "type": "function",
+                                                              "function": {"name": "vault_buscar", "arguments": "{}"}}]},
+        {"role": "tool", "tool_call_id": "t1", "content": "z" * 9000}]})
+    ok9j = passo1 == passo2 == "seth-livre"
+    print(f"{'PASS' if ok9j else 'FALHA'}  rota estável depois de ferramenta ({passo1} -> {passo2})")
+    falhas += 0 if ok9j else 1
 
     # 9b. travas exatas sobre a escolha do decisor (pura, sem rede)
     curto = {"messages": [{"role": "user", "content": "prove que há infinitos primos"}]}
