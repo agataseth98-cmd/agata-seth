@@ -26,20 +26,76 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e2ac22af9f0624cb31f0128adccd269d337361e3
-  Escrito em: 13/10/2026 20:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 20cf8ff922ca2249ae2a4672a32ee6ca0944977b
+  Escrito em: 14/10/2026 00:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/20cf8ff922ca2249ae2a4672a32ee6ca0944977b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:44 de 13/10): uma resposta dela ficou pendurada e morreu. Três causas medidas no OmniRoute; duas entram na proposta `seth-rota-e-busca-2026-10-13`, ainda sem assinatura — o `.diff` foi refeito, (682) não se edita.**
+
+**O que aconteceu (Mongo + call logs do OmniRoute, conversa `80f0cb8e`, pergunta "explique o portão de três perguntas"):** a Seth chamou `query_canon`, `vault_buscar` e `query_canon` (todas responderam) e a resposta ficou `unfinished`; LibreChat: `EventStreamCallbackHandler … No LLM run to end`. Na fila `seth-livre`:
+1. **Gemini 2.5 Flash estourou a cota gratuita do dia** — 429 às 02:44:51Z — e, nos pedidos seguintes, **ficou 310 s com o stream aberto sem responder** (02:50:04Z e 02:55:06Z, "Request aborted", 499: o cliente desistiu antes).
+2. **Ministral recusa todo pedido vindo do LibreChat** — 422 `extra_forbidden … "user"`: o LibreChat manda o campo `user` (id do usuário) e a API da Mistral não aceita campo a mais. Hoje: 0 sucessos, 5 recusas. O Ministral é o 2º da `seth-livre` e o **1º da `seth-rapido`**; o Codestral (`seth-codigo`) é da mesma API.
+3. O Nemotron-Super, 3º da fila, respondia em ~2 s — tarde demais, depois da espera do Gemini.
+
+**Na proposta, além de (682):**
+- **Gateway tira o campo `user`** antes do OmniRoute (selftest 1b: o campo não chega ao upstream de teste). Campo opcional da API OpenAI, nada no caminho o usa.
+- **`redesign/systemd/dropin-omniroute-prazos.conf`** (novo): `STREAM_IDLE_TIMEOUT_MS=60000`. Lido no código do pacote: esse é o prazo para o primeiro evento útil antes de o stream ser aceito ("zombie streams fail fast and trigger fallback") e também o de silêncio no meio dele; o padrão é 600 s — mais do que o LibreChat espera. Com 60 s, modelo que não começa em 1 minuto cai e a fila segue. **Não medido ainda:** se isto pega exatamente o caso do Gemini — o efeito só se vê com cota estourada de novo.
+- **Fora da proposta, decisão sua quando quiser:** a ordem da `seth-livre` começa pelo Gemini, que tem cota diária gratuita; quando ela acaba, cada resposta paga primeiro a tentativa dele. O conserto acima reduz o custo; trocar a ordem é escolha de fila.
+
+**Também visto:** a 1ª resposta dessa conversa abriu com cabeçalho "modelo: … · sync: PASS · REGRAS=…" numa linha só, em vez do bloco de 3 linhas; a auditoria do turno seguinte acusa.
+
+**Verificado:** `seth_gateway.py --selftest` OK (com 1b e 9j); `perimetro.sh` 0 FALHA com as mudanças na árvore; `git apply --check` do `.diff` refeito.
+
+**Assinar** (depois de juntar o PR #183 e `git pull --ff-only`): `bash scripts/aprovar.sh seth-rota-e-busca-2026-10-13`
+
+**sync:** PASS — branch `proposta/seth-rota-e-busca-2026-10-13` sobre (682); `main` remoto com a (681) ainda no PR #182.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: Mongo do LibreChat, log do LibreChat, call logs do OmniRoute (status, modelo, duração, erro de cada passo), código-fonte do OmniRoute (`runtimeTimeouts.ts`, `constants.ts`), selftest, perímetro · Autorização: Humano — "verifica a seth acho que bugou"; "vamos fazer agora tudo que pudermos".
+
+(682) CONSELHO — 13/10/2026 · **Teste real da Seth no LibreChat (conversa "Teste de busca no vault") e proposta `seth-rota-e-busca-2026-10-13`, a pedido do Humano ("vamos fazer agora tudo que pudermos"; "tudo até o dossiê"): a resposta não troca mais de fila no meio, o gateway passa a registrar erro, a busca de texto ignora acento e casa por palavras, a busca por sentido cobre `extras/` — e `extras/` inteiro, dossiê incluído, fica legível pela Seth. Aguardando assinatura.**
+
+**Como foi o teste:** o Humano arrastou a aba já logada do LibreChat para o meu grupo do Chrome; abri uma conversa nova e mandei 3 pedidos. ✓ `vault_consultar extras/` listou os 9 itens; ✓ `vault_buscar` (modo ambos) respondeu inteira (2.419 caracteres) e a Seth resumiu certo; ✓ a auditoria do turno acusou "2 cabeçalhos numa resposta" e "1ª resposta sem o bloco de prontidão". ✗ uma resposta parou em "Ag…" ("The model provider could not complete this request").
+
+**Causa medida da resposta que morreu:** nos call logs do OmniRoute, o passo da ferramenta foi para `seth-livre` (Gemini 2.5 Flash, 200) e o passo seguinte, o do texto, foi classificado como **`seth-pesado`** — a heurística conta o resultado da ferramenta e as mensagens a mais (12 > 10) e troca de fila no meio da MESMA resposta. No pedido repetido, o passo 2 foi mesmo para `seth-pesado` (Nemotron-Ultra). Na falha, nenhuma chamada do passo 2 chegou a ser registrada e o LibreChat desistiu 30 s depois (`Upstream model error`, 01:00:08Z). O gateway não registrava nada — por isso a causa exata do corte (fila lenta × outra) não está provada.
+
+**Hora:** a Seth escreveu 21:54 às 22:01, mas o gateway mandou `HORA-MAQUINA: 22:01` (lido no corpo do pedido, no call log). Foi o modelo que não copiou. A auditoria já acusa hora repetida ou que volta.
+
+**Mudanças:**
+1. **Rota estável na resposta** (`seth_gateway.py`): no passo de continuação, a heurística classifica só até o último pedido do usuário. Selftest 9j: o passo depois de ferramenta com resultado de 9 mil caracteres fica em `seth-livre` (sem o conserto, ia para `seth-pesado`).
+2. **Log do gateway no journal:** HTTP de erro do OmniRoute, OmniRoute fora do ar, upstream que para de responder (vira 504) e cliente que desconecta, antes ou no meio do stream — com rota e tempo.
+3. **`scripts/busca_texto.py`** (novo) substitui o `grep -F` da `busca_texto`: sem acento, sem maiúscula, por palavras, com o nome do arquivo contando. "o despertar da Agata" agora acha `extras/O_Despertar_de_Agata.md` ("O Despertar de Ágata"); antes, nada.
+4. **Busca por sentido cobre `extras/`:** os parágrafos dos documentos de `extras/` entram no índice incremental, e o resultado sai como `extras/…md ^bK`. O vault não usa esses vetores.
+5. **`extras/` inteiro, inclusive `arquivo-redesign/`:** **decisão do Humano, que reverte a de 04/09** (Camada C: o dossiê de auditoria sobre a Seth fora do alcance dela). Em (678) eu tinha mantido o dossiê fechado; o Humano respondeu "tudo até o dossiê". Leitura (`vault_consultar`), busca de texto e busca por sentido abertas.
+6. **Doutrina:** "se a resposta vai usar ferramenta, chame a ferramenta ANTES de escrever qualquer texto" — o cabeçalho escrito antes da ferramenta saía repetido depois dela. Catálogo: a correção da busca semântica cita `extras/`. PROJETO atualizado (busca, roteador).
+
+**De passagem, não mexido:** `SETH-DIARIO.md` tem uma entrada nova da Seth (21:34, uma crônica pedida pelo Humano), ainda não comitada. Ficou fora do `.diff`; é dela. Em observação: a hora não copiada (fica com o modelo).
+
+**Verificado:** `busca_texto.py --selftest`; `seth_verificador.py` 43/43; `seth_gateway.py` (com 9j); `auditoria_turno.py`; `node --check`; `perimetro.sh` 0 FALHA na worktree com o `.diff`. Índice por sentido com os parágrafos de `extras/` construído na Máquina (cache fora do repo).
+
+**Assinar** (depois de juntar o PR e `git pull --ff-only`): `bash scripts/aprovar.sh seth-rota-e-busca-2026-10-13`
+
+**sync:** PASS — `main` = `origin/main` (PR #181 juntado; o PR #182, com a (681), ainda aberto — esta branch parte dele) antes do branch; topo de MEMÓRIAS = (681).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: Chrome (conversa de teste no LibreChat), Mongo, call logs do OmniRoute (rota, modelo e `HORA-MAQUINA` de cada passo), log do LibreChat, selftests, perímetro · Autorização: Humano — "vamos fazer agora tudo que pudermos"; "tudo até o dossiê".
+
+(681) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-tema-sync-2026-10-13` (assinada pelo Humano): o atalho `seth` passa a copiar o tema da Agata para o LibreChat.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. Cópia anterior do atalho guardada na área temporária da sessão; `redesign/systemd/seth` instalado em `~/.local/bin/seth` (idêntico, `bash -n` OK). O tema em `~/librechat/` já bate com o versionado — nada a reiniciar agora. Fica para amanhã o teste real da Seth (login no LibreChat).
+
+**sync:** PASS — `main` = `origin/main` (PR #181 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (680).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, `diff`/`cmp` do atalho e do tema, `bash -n` · Autorização: Humano — assinatura de `seth-tema-sync-2026-10-13`.
 
 (680) DIÁRIO — 13/10/2026 · **Proposta `seth-tema-sync-2026-10-13`, a pedido do Humano ("se puder automatizar e eu assinar … faça"): o atalho `seth` passa a copiar o tema da Agata para o LibreChat junto com o resto da configuração. Teste real da Seth adiado para amanhã — o Humano não lembra a senha do LibreChat. Aguardando assinatura.**
 
