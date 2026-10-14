@@ -50,8 +50,9 @@ import verificar_citacao_arquivo as _cit  # noqa: E402
 
 LOG = Path(os.environ.get("AGATA_AUDITORIA_LOG", "~/.cache/agata/auditoria-turno.jsonl")).expanduser()
 CATALOGO = _AQUI / "afirmacoes_desmentidas.json"
-LINHA_CONTINUACAO = ("MESMA-RESPOSTA: continuação da sua resposta depois de ferramenta — "
-                     "não abra cabeçalho de novo nem repita a correção; siga o texto.")
+LINHA_CONTINUACAO = ("MESMA-RESPOSTA: continuação da sua resposta depois de ferramenta — o Humano JÁ VÊ "
+                     "o que você escreveu antes da ferramenta: continue dali, sem cabeçalho, sem repetir "
+                     "parágrafo nem correção (700).")
 _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".txt",
               ".service", ".timer", ".conf", ".diff")
 _CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
@@ -318,7 +319,8 @@ def _instante(h: str):
     return None
 
 
-_N_CONTROLES = re.compile(r"\b(\d{1,2})\s+contro(?:les|is)\b", re.IGNORECASE)
+# (700) "20 controles OK" é parcial do resultado, não o total: só conta número sem veredito logo depois.
+_N_CONTROLES = re.compile(r"\b(\d{1,2})\s+contro(?:les|is)\b(?!\s*(?:OK|SKIP|PARCIA|FALH|AVISO|em\s))", re.IGNORECASE)
 
 
 def _controles_reais() -> int | None:
@@ -398,6 +400,8 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
         achados.append("cabeçalho: a 1ª resposta da conversa abre com o bloco de prontidão (3 linhas), não com a linha de turno")
     if n > 1 and prontidao:
         achados.append(f"cabeçalho: bloco de prontidão na resposta nº {n}; depois da 1ª, é a linha de turno com t=")
+    if not prontidao and re.search(r"\bsync\s*:", primeiro):
+        achados.append("cabeçalho: `sync:` na linha de turno — sync só no bloco de prontidão; uma forma só (700)")
     m_t = _T_CONTADO.search(primeiro)
     if m_t and int(m_t.group(1)) != n:
         achados.append(f"cabeçalho: t={m_t.group(1)}, mas foi a resposta nº {n} desta conversa")
@@ -418,6 +422,12 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
     achados += _conteudo(texto, msgs, modo(msgs))
+    # (700) o Humano cumprimentou e ela comentou a regra em vez de responder
+    usuarios = [m for m in msgs if isinstance(m, dict) and m.get("role") == "user"]
+    pedido = _texto(usuarios[-2].get("content")) if len(usuarios) >= 2 else ""
+    if _SAUDACAO.match(pedido.strip()) and re.search(r"sauda[çc][ãaõo]\w* (?:n[ãa]o s[ãa]o permitid|s[ãa]o proibid|[ée] proibid)",
+                                                     texto, re.IGNORECASE):
+        achados.append("estilo: comentou o cumprimento do Humano — a Regra 5 vale para a sua fala; responda com o estado (700)")
     return achados
 
 
@@ -615,6 +625,12 @@ def _selftest() -> int:
                 a("A `voz-comum-2026-10-14` está pendente de assinatura."), u()]) or [])),
         ("evidência: descrever a invenção não é acusado (695)", not any(x.startswith("evidência:") for x in est(
             "Em (687) a resposta trouxe JSON de `maquina_verificar` sem chamada, verificado no log."))),
+        ("cabeçalho: `sync:` na linha de turno é acusado (700)", any("`sync:` na linha de turno" in x for x in (auditar(
+            [u(), a(pront), u(), a(linha(2, "15:54").replace(" · 2026", " · sync: FALHA · 2026") + "\n\nok"), u()]) or []))),
+        ("controles: '20 controles OK' não é contagem errada (700)", not any(x.startswith("contagem") for x in est(
+            "O perímetro está com 20 controles OK, 1 SKIP e 2 PARCIAIS."))),
+        ("estilo: sermão sobre o cumprimento do Humano é acusado (700)", any("cumprimento" in x for x in (auditar(
+            [u("Olá"), a(pront + "\nSaudações não são permitidas. Regra 5."), u("x")]) or []))),
         ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
             "Tenho anos de experiência com esse tipo de servidor."))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
