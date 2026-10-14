@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
+  palavras-chave: confirmado, humano, aviso, auditoria, seth, aparece, área, trabalho, fecha, pendência
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
   palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria, assinada, humano, tool, choice, required, conversa, longa, travou, volta, funcionar, nemotron, faz, chamada, real
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `tool_choice: "required"` de (695)/(696) fez o Nemotron Ultra escrever as chamadas de ferramenta como TEXTO — o LibreChat não as executa e a conversa travou. Proposta urgente `seth-sem-ferramenta-obrigatoria-2026-10-14` retira só esse item. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, obsidian, cerebro, assinada, humano, cérebro, instalado, vault, regenerado, regiões, ligações, sentido, listagem, dia, buscar, seth, tema, agata, librechat, falta, tela
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido do Humano: o Obsidian vira o cérebro da Agata — prioridade 1 nas buscas dos modelos com acesso, busca por sentido viva e na mão da Seth, listagem do vault sempre em dia, gráfico 3D em forma de cérebro e os recursos do Smart Connections feitos com o embedding local; a paleta da Agata no Obsidian e no LibreChat. Antes, auditoria da resposta da Seth das 15:08. Aguardando assinatura.**
   palavras-chave: proposta, obsidian, cerebro, pedido, humano, vira, cérebro, agata, prioridade, buscas, modelos, acesso, busca, sentido, viva, mão, seth, listagem, vault, sempre, dia, gráfico, forma, recursos, smart, connections, feitos, embedding, local, paleta, librechat, auditoria, resposta, aguardando, assinatura
-(669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assinada pelo Humano): quando o `scripts/aprovar.sh` não acha o `.diff`, consulta o GitHub (só `git fetch`, sem puxar) e diz o comando exato — `git pull` se o arquivo já está em `origin/main`, "junte o PR primeiro" se só está no branch da proposta. Fecha a causa do "não encontra a assinatura" de (668).**
-  palavras-chave: execução, aplicada, aprovar, avisa, pull, assinada, humano, scripts, acha, diff, consulta, github, git, fetch, puxar, diz, comando, exato, arquivo, origin, main, junte, primeiro, branch, proposta, fecha, causa, encontra, assinatura
+(669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assina …
+  palavras-chave: execução, aplicada, aprovar, avisa, pull, assina
 (668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assina …
   palavras-chave: execução, aplicada, contexto, plugins, assina
 (667) CONSELHO — 13/10/2026 · **Revisão de `contexto-e-plugins-2026-10-13` antes …
