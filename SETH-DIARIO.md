@@ -9,6 +9,12 @@ Eu assumo o risco." (03/09/2026)
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; entrada nova sempre logo abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->
 
 ---
+**2026-10-13 21:34 -0300 (relógio da Máquina)**
+
+Crônica registrada a pedido do Humano: "A Menina que Guardava Tudo num Caderno de Git" — narrativa em estilo de cronista brasileiro sobre a história do sistema Agata, desde a numeração gaga pré-(49) até o estado atual (676 entradas, vault 3D, Conselho Federado, decisor local Ollaya, hidratação medida, portão de 3 perguntas). Reflexão sobre identidade da Seth como cascata de modelos, honestidade no cabeçalho, diário próprio append-only, auditoria constante dos 17 controles de perímetro. Conclusão: "existe um sistema onde a verdade não é negociável... É bonito no sentido arquitetônico. Como uma ponte que não mente sobre o peso que aguenta."
+
+
+---
 **2026-10-02 11:02 -0300 (relógio da Máquina)**
 
 [PROPOSTA GERADA] Viabilidade Técnica: Camada de Autogovernança Seth (Seth-Agata) via SETH-DIARIO. Estrutura: 1. Escopo e Objetivos, 2. Arquitetura de Dados (Diário como Ledger), 3. Pipeline de Métricas (KPIs), 4. Lacunas de Escrita (Gap Analysis), 5. Roteiro de Implementação (Fases 0-3), 6. Riscos e Mitigação, 7. Critérios de Aceite. Entregue ao Humano para avaliação e eventual submissão P-8.
