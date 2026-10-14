@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
+  palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria, assinada, humano, tool, choice, required, conversa, longa, travou, volta, funcionar, nemotron, faz, chamada, real
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `tool_choice: "required"` de (695)/(696) fez o Nemotron Ultra escrever as chamadas de ferramenta como TEXTO — o LibreChat não as executa e a conversa travou. Proposta urgente `seth-sem-ferramenta-obrigatoria-2026-10-14` retira só esse item. Aguardando assinatura.**
   palavras-chave: quebrou, seth, humano, tool, choice, required, fez, nemotron, ultra, escrever, chamadas, ferramenta, texto, librechat, executa, conversa, travou, proposta, urgente, obrigatoria, retira, item, aguardando, assinatura
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pelo Humano). Reteste: pergunta de fato abre com ferramenta; "quais propostas estão pendentes?" respondida com o fato da Máquina; resposta desatualizada acusada no turno seguinte e corrigida por ela com a evidência certa.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, obsidian, cerebro, pedido, humano, vira, cérebro, agata, prioridade, buscas, modelos, acesso, busca, sentido, viva, mão, seth, listagem, vault, sempre, dia, gráfico, forma, recursos, smart, connections, feitos, embedding, local, paleta, librechat, auditoria, resposta, aguardando, assinatura
 (669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assinada pelo Humano): quando o `scripts/aprovar.sh` não acha o `.diff`, consulta o GitHub (só `git fetch`, sem puxar) e diz o comando exato — `git pull` se o arquivo já está em `origin/main`, "junte o PR primeiro" se só está no branch da proposta. Fecha a causa do "não encontra a assinatura" de (668).**
   palavras-chave: execução, aplicada, aprovar, avisa, pull, assinada, humano, scripts, acha, diff, consulta, github, git, fetch, puxar, diz, comando, exato, arquivo, origin, main, junte, primeiro, branch, proposta, fecha, causa, encontra, assinatura
-(668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assinada pelo Humano): filas `-longo` criadas no OmniRoute, janela do Agent da Seth em 96 mil com Discord e navegador como plugins sob demanda, diretrizes comuns no Goose, gateway reiniciado. Junto, proposta nova `aprovar-avisa-pull-2026-10-13`, a pedido do Humano: o `aprovar.sh` passa a dizer quando o `.diff` já está no GitHub mas não na cópia local.**
-  palavras-chave: execução, aplicada, contexto, plugins, assinada, humano, filas, longo, criadas, omniroute, janela, agent, seth, mil, discord, navegador, sob, demanda, diretrizes, comuns, goose, gateway, reiniciado, junto, proposta, nova, aprovar, avisa, pull, pedido, passa, dizer, diff, github, cópia, local
+(668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assina …
+  palavras-chave: execução, aplicada, contexto, plugins, assina
 (667) CONSELHO — 13/10/2026 · **Revisão de `contexto-e-plugins-2026-10-13` antes …
   palavras-chave: revisão, contexto, plugins
 (666) DIÁRIO — 13/10/2026 · **Auditoria da resposta da Seth das 13:45 (pedido do …
