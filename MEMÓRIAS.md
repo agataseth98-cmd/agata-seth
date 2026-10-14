@@ -26,20 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 440e6d644e799908fabd5f1645513c2138038b80
-  Escrito em: 14/10/2026 19:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 02b3acc80be25535b0cd9c6bec93cf579de2cb5d
+  Escrito em: 14/10/2026 19:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02b3acc80be25535b0cd9c6bec93cf579de2cb5d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02b3acc80be25535b0cd9c6bec93cf579de2cb5d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02b3acc80be25535b0cd9c6bec93cf579de2cb5d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02b3acc80be25535b0cd9c6bec93cf579de2cb5d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02b3acc80be25535b0cd9c6bec93cf579de2cb5d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina funciona em stream — um por resposta, modelo real certo, `t` certo, e a Seth não escreve o dela; a conversa longa que ia para o Nemotron fica na `seth-livre`; a segunda opinião do Jev responde pelo caminho da Seth em 6 s. E a proposta `suite-fora-da-worktree-2026-10-14` conserta a causa do incidente de (706). Aguardando assinatura.**
+
+**Reteste** (19:30, `:20126`, `stream: true`, como o LibreChat recebe):
+- "Olá" → `Agata · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · sync: PASS · REGRAS=bd4e37e2 · MEMÓRIAS=77fdc241 · HEAD=02b3acc · 2026-10-14 19:30 -0300 (relógio da Máquina)` / `Última entrada: (706) …` / `pronto.`; o `X-Modelo-Real` confirmou `gemini-2.5-flash`.
+- 2º turno → `Agata · gemini-2.5-flash (…; medido pela Máquina neste turno) · t=2 (contador mecânico) · …`, e o texto dela começa direto pelo resultado. Um cabeçalho só nas duas.
+- Rota da conversa `cb358a0d` (a que travou em (697)): `seth-livre` (antes, `seth-pesado`).
+- `opiniao_jev` pelo `seth_verificador` (`:20141`): "reiniciar o servidor do LibreChat agora, no meio de uma conversa" → `recomendação=nao_fazer (0,78) · reversível p=0,13 · risco p=0,86`, 5,7 s.
+- Resta conferir no LibreChat de verdade, com a interface — o formato do stream é o mesmo.
+
+**Proposta `suite-fora-da-worktree-2026-10-14`** (`scripts/testar_perimetro.sh`, +5 linhas): a suíte apaga do próprio ambiente `GIT_DIR`, `GIT_INDEX_FILE`, `GIT_WORK_TREE`, `GIT_PREFIX`, `GIT_COMMON_DIR`, `GIT_OBJECT_DIRECTORY`, `GIT_ALTERNATE_OBJECT_DIRECTORIES` e `GIT_NAMESPACE` logo depois de calcular a raiz — ela só trabalha no clone temporário. **Medido:** na worktree, com `GIT_DIR`/`GIT_INDEX_FILE` absolutos (o ambiente que o hook cria), a suíte passou 55/55 e o HEAD da worktree não mudou.
+
+**sync:** PASS — worktree a partir de `origin/main` em `02b3acc` (PR #209 juntado); topo de MEMÓRIAS = (706).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 2 pedidos em stream ao `:20126`, `X-Modelo-Real`, `_classificar_rota` sobre a conversa real, `curl` no `:20141`, `testar_perimetro.sh` com ambiente de hook · Autorização: Humano — assinatura de (705); conserto da suíte pela Regra 2 sobre o incidente de (706).
 
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (assinada pelo Humano) — em dois tempos, por um incidente meu: a 1ª tentativa, numa worktree, levou ao `main` (PR #208) só o `p20_decisor.py`; o resto entra agora. Causa achada: a suíte do perímetro, rodando dentro do `pre-commit` de uma worktree, comita na branch da worktree. Conserto da suíte em proposta própria.**
 
