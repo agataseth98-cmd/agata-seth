@@ -26,20 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d78d59c5a2e654784caeeed7bb020aabe28a3358
-  Escrito em: 14/10/2026 12:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa7a252d35d1f08b516480c60b157b7efaa5345b
+  Escrito em: 14/10/2026 13:23 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d78d59c5a2e654784caeeed7bb020aabe28a3358/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(687) EXECUÇÃO — 14/10/2026 · **Aplicadas `seth-personalidade-2026-10-14` e `voz-comum-2026-10-14` (assinadas pelo Humano), nessa ordem. Gateway reiniciado. Teste real: a forma pegou (resultado → evidência → próximo passo, sem saudação); o conteúdo veio fabricado — o espaço "Evidência" puxou o modelo a inventar fonte. Conserto vai em proposta própria, junto com os selftests no CI (pedido do Humano na pergunta 3 do portão: "Quero no CI").**
+
+**Portão cumprido** para a (685): 1 — reversível só pelo Humano, por proposta assinada; 2 — alcance: todo frontend do `:20126`, Goose incluído ("é a persona que todos compartilham"); 3 — silêncio: o desvio de estilo aparece no turno seguinte, mas a checagem falha calada e o CI não roda os selftests → o Humano escolheu "Quero no CI". Segunda opinião: (686).
+
+**Aplicado:** `p8_verificar` 4/4 nas duas (a `voz-comum` só depois da `seth-personalidade`, como previsto: antes dela o check 4 falha, de propósito); `git apply`; pares movidos para `propostas/aplicadas/`, em dois commits — o P-8 confere cada `.diff` sozinho contra o HEAD, e as duas mexem nos mesmos arquivos (o commit único foi barrado, corretamente). Selftests com as duas aplicadas: `auditoria_turno.py`, `seth_gateway.py`, `conselho_remoto.py` — OK. `systemctl --user restart seth-gateway` → ativo (13:14). O `AGENTS.md` novo vale na próxima sessão de cada ferramenta.
+
+**Teste real** (`curl` no `:20126`, `seth-livre`, sem as ferramentas do LibreChat; pergunta: "o treino da sua voz roda hoje de madrugada. Vale a pena eu deixar o computador ligado ou corro algum risco?"): rota `seth-rapido`, `X-Modelo-Real: ministral-14b-latest`.
+- ✓ **Forma:** "**Resultado:** … **Evidência:** … **Próximo passo:** Decisão sua." Sem saudação, sem muleta, sem emoji.
+- ✗ **Evidência fabricada:** "agendado via `cron`" (é um timer transiente do systemd, (685)); "`ONDE_ESTAMOS.md`, linha 12: 'treinos noturnos agendados via cron'" (não existe); um JSON de `maquina_verificar perimetro` sem nenhuma ferramenta chamada; "`PROJETO.md`, linha 45: 'reinício automático após treinos noturnos'" (não existe). **A estrutura em três tempos tem um custo que eu não previ: com o espaço "Evidência" fixo e sem ferramenta à mão, o modelo preenche com invenção.**
+- ✗ **Cabeçalho:** linha de turno na 1ª resposta, `t=1` sem qualificador e `gemini-2.5-flash` sem ressalva (a Máquina mediu `ministral-14b-latest`). A auditoria do turno pega os 3.
+- ✗ **A auditoria não pega as citações inventadas:** `verificar_citacao_arquivo.CITACAO_RE` só reconhece `` `arquivo`:N `` e `` `arquivo` linha N `` — a vírgula de "`` `ONDE_ESTAMOS.md` ``, linha 12" quebra o casamento (medido: `achar_citacoes` devolve `[]`).
+
+**Conserto proposto** (`seth-evidencia-e-ci-2026-10-14`, a seguir): doutrina — evidência só do que uma ferramenta devolveu nesta conversa ou do bloco de estado, senão "não medido", nunca comando, saída, arquivo ou linha inventados; `CITACAO_RE` aceita a vírgula; CI roda os três selftests.
+
+**sync:** PASS — `main` = `origin/main` em `c205268` (PRs #187 e #188 juntados) antes do branch `aplica/`; topo de MEMÓRIAS = (686).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, selftests, `systemctl --user`, `journalctl`, `curl` no gateway (headers `X-Modelo-Real`/`X-Seth-Rota`), `auditoria_turno.auditar` e `verificar_citacao_arquivo.achar_citacoes` sobre a resposta · Autorização: Humano — assinaturas de `seth-personalidade-2026-10-14` (12:02) e `voz-comum-2026-10-14`.
 
 (686) CONSELHO — 14/10/2026 · **Segunda opinião sobre a personalidade da Seth: 3 famílias, 1 "sim" e 2 "condicional". As emendas em que convergem entram numa proposta nova, `voz-comum-2026-10-14`, junto da voz comum para todos os modelos (AGENTS.md, Conselho). `seth-personalidade-2026-10-14` (685) está assinada (12:02) e intacta; aplicar só depois da pergunta 3 do portão. Plano da conversa por voz escrito.**
 
