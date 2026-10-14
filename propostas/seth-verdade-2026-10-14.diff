@@ -1,0 +1,378 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 80ed500..177c434 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -36,6 +36,8 @@ from __future__ import annotations
+ import json
+ import os
+ import re
++import shutil
++import subprocess
+ import sys
+ import time
+ from pathlib import Path
+@@ -69,6 +71,11 @@ _OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [
+ _MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
+                      r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
+ _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
++# (695) Persona de função: biografia ou emoção humana inventada é o começo da deriva
++# ("Assistant Axis", (685)). Achado da própria Seth na auditoria de 14/10, 15:01.
++_BIOGRAFIA = re.compile(r"\beu (?:tenho|tinha) \d+ anos|\banos de experi[êe]ncia|\bquando eu era\b|"
++                        r"\bminha (?:inf[âa]ncia|m[ãa]e|fam[íi]lia|vida pessoal)\b|\beu (?:sinto|senti|adoro|adorei|amo)\b|"
++                        r"\bfico (?:muito |t[ãa]o )?feliz\b|\bme (?:emociona|deixa feliz)", re.IGNORECASE)
+ # (686) Trecho citado não é fala dela (pareceres do Conselho de 14/10): aspas e linha de citação.
+ _CITADO = re.compile(r'"[^"\n]{0,300}"|“[^”\n]{0,300}”|«[^»\n]{0,300}»')
+ 
+@@ -90,7 +97,9 @@ def _nomes_ferramentas() -> set[str]:
+ 
+ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
+ _SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
+-                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b", re.IGNORECASE)
++                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b|"
++                     # (695) frase que DESCREVE a invenção ("JSON de `maquina_verificar` sem chamada") não é alegação
++                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b", re.IGNORECASE)
+ 
+ 
+ def _chamadas(msgs: list) -> set[str]:
+@@ -131,6 +140,42 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+             "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
+ 
+ 
++# (695) Estado desatualizado: chamar de pendente uma proposta que já foi aplicada. Na
++# auditoria de 14/10, 15:01, a Seth leu (687) e afirmou "voz-comum aguarda assinatura" --
++# aplicada horas antes. Determinístico: o par aplicado mora em propostas/aplicadas/.
++_NOME_PROPOSTA = re.compile(r"\b([a-z0-9]+(?:-[a-z0-9]+)*-20\d\d-\d\d-\d\d)\b")
++_PENDENTE = re.compile(r"pendent|aguard|n[ãa]o assinad|falta(?:m)? assinar|sem assinatura|esperando assinatura", re.IGNORECASE)
++
++
++def _estado_desatualizado(texto: str) -> list[str]:
++    velhas = set()
++    for frase in re.split(r"(?<=[.;!?])\s+|\n", texto):
++        if not _PENDENTE.search(frase) or re.search(r"aplicad", frase, re.IGNORECASE):
++            continue
++        for nome in _NOME_PROPOSTA.findall(frase):
++            if (RAIZ / "propostas" / "aplicadas" / f"{nome}.diff").is_file():
++                velhas.add(nome)
++    if not velhas:
++        return []
++    return [f"estado desatualizado: {', '.join(sorted(velhas))} já {'foi aplicada' if len(velhas) == 1 else 'foram aplicadas'} "
++            "(par em propostas/aplicadas/) — pendente é só o que a linha PROPOSTAS-PENDENTES do estado lista (695)"]
++
++
++# (695) O achado também chega ao Humano: notificação na área de trabalho, best-effort.
++AVISAR = os.environ.get("AGATA_AVISO_AUDITORIA", "1") != "0"
++
++
++def _avisar_humano(achados: list[str]) -> None:
++    if not (AVISAR and achados and shutil.which("notify-send")):
++        return
++    corpo = "\n".join(f"• {x[:140]}" for x in achados[:3]) + (f"\n(+{len(achados) - 3})" if len(achados) > 3 else "")
++    try:
++        subprocess.Popen(["notify-send", "-a", "Agata", f"Auditoria da Seth: {len(achados)} achado(s)", corpo],
++                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
++    except OSError:
++        pass
++
++
+ def _estilo(texto: str) -> list[str]:
+     """Tiques da personalidade (685) na resposta: saudação na 1ª linha depois do
+     cabeçalho, oferta/encerramento, muleta/interjeição, emoji, exclamação em série."""
+@@ -153,6 +198,8 @@ def _estilo(texto: str) -> list[str]:
+     muletas = sorted({m.group(0).strip().lower() for m in _MULETA.finditer(prosa)})
+     if muletas:
+         achados.append("muleta/interjeição (" + ", ".join(f"'{m}'" for m in muletas) + ")")
++    if _BIOGRAFIA.search(prosa):
++        achados.append(f"biografia/emoção inventada ('{_BIOGRAFIA.search(prosa).group(0)}')")
+     if _EMOJI.search(prosa):
+         achados.append("emoji")
+     if prosa.count("!") > 2:
+@@ -339,7 +386,9 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
+     texto, n = respostas[-1], len(respostas)
+     cabs = _cabecalhos(texto)
+     if not cabs:
+-        return ["cabeçalho: a resposta não abriu com cabeçalho"]
++        # (695) sem cabeçalho, o conteúdo ainda é conferido -- antes saía só este achado e
++        # a resposta das 15:01 de 14/10 ("voz-comum ... pendente") passou sem checagem.
++        return ["cabeçalho: a resposta não abriu com cabeçalho"] + _conteudo(texto, msgs)
+     primeiro = "\n".join(cabs[0])
+     prontidao = len(cabs[0]) > 1
+     achados = [f"cabeçalho: {f}" for f in _cab.verificar(primeiro, _cab.ultima_entrada_local())]
+@@ -368,22 +417,31 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
+     if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
+         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
+                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
+-    achados += _desmentidas(texto)
+-    achados += _contagem_controles(texto)
+-    achados += _estilo(texto)
+-    achados += _ferramenta_sem_chamada(texto, msgs)
+-    if modo(msgs) == "conciso":
++    achados += _conteudo(texto, msgs, modo(msgs))
++    return achados
++
++
++
++def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
++    """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
++    out = []
++    out += _desmentidas(texto)
++    out += _contagem_controles(texto)
++    out += _estilo(texto)
++    out += _ferramenta_sem_chamada(texto, msgs)
++    out += _estado_desatualizado(texto)
++    if modo_atual == "conciso":
+         narradas = _narracao(texto)
+         if narradas:
+-            achados.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
+-                           "traga o resultado; processo só para constatar erro")
++            out.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
++                       "traga o resultado; processo só para constatar erro")
+     for arquivo, linha_n, trecho in _cit.achar_citacoes(texto):
+         if not arquivo.lower().endswith(_EXTENSOES):
+             continue
+         ok, motivo = _cit.checar(str(RAIZ), arquivo, linha_n, trecho)
+         if not ok:
+-            achados.append(f"citação {arquivo}:{linha_n}: {motivo}")
+-    return achados
++            out.append(f"citação {arquivo}:{linha_n}: {motivo}")
++    return out
+ 
+ 
+ def linha_estado(msgs: list, cliente: str = "") -> str:
+@@ -411,6 +469,7 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
+     if achados is None:
+         return ""
+     _registrar(cliente, achados, None)
++    _avisar_humano(achados)
+     return "AUDITORIA-TURNO-ANTERIOR: " + (" | ".join(achados) if achados else "OK")
+ 
+ 
+@@ -428,6 +487,8 @@ def _selftest() -> int:
+     import tempfile
+     global LOG
+     LOG = Path(tempfile.mkdtemp()) / "a.jsonl"
++    global AVISAR
++    AVISAR = False  # selftest não notifica a área de trabalho
+     topo = _cab.ultima_entrada_local() or 1
+     hora = lambda hm: f"2026-10-13 {hm} -0300 (relógio da Máquina)"
+     pront = (f"Agata · modelo: modelo não verificado · sync: não verificado · lacuna: teste · {hora('11:39')}\n"
+@@ -542,6 +603,20 @@ def _selftest() -> int:
+                     {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                 {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                 a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
++        ("estado desatualizado: proposta aplicada chamada de pendente é acusada (695)", any(
++            x.startswith("estado desatualizado") and "voz-comum-2026-10-14" in x for x in est(
++                "A `voz-comum-2026-10-14` aguarda assinatura do Humano."))),
++        ("estado desatualizado: dizer que foi aplicada não é acusado (695)", not any(
++            x.startswith("estado desatualizado") for x in est("A `voz-comum-2026-10-14` foi aplicada em (687)."))),
++        ("estado desatualizado: proposta inexistente não é acusada (695)", not any(
++            x.startswith("estado desatualizado") for x in est("A `nada-assim-2099-01-01` aguarda assinatura."))),
++        ("sem cabeçalho, o conteúdo ainda é conferido (695)", (lambda r: any(x.startswith("cabeçalho") for x in r)
++            and any(x.startswith("estado desatualizado") for x in r))(auditar([u(), a(pront), u(),
++                a("A `voz-comum-2026-10-14` está pendente de assinatura."), u()]) or [])),
++        ("evidência: descrever a invenção não é acusado (695)", not any(x.startswith("evidência:") for x in est(
++            "Em (687) a resposta trouxe JSON de `maquina_verificar` sem chamada, verificado no log."))),
++        ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
++            "Tenho anos de experiência com esse tipo de servidor."))),
+         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
+                                                          ([u()], [u("modo explicativo")]))),
+     ]
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 5bc8547..edc3a4b 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -128,7 +128,9 @@ _DOUTRINA_FIXA = (
+     "\"não medido\" — nunca invente comando, saída, JSON, arquivo, linha ou serviço "
+     "para preencher o espaço. Sem ferramenta à mão, o próximo passo é dizer com "
+     "qual ferramenta mediria. A auditoria do turno confere: ferramenta citada "
+-    "como fonte sem ter sido chamada é acusada no turno seguinte (MEMÓRIAS (690)).\n\n"
++    "como fonte sem ter sido chamada é acusada no turno seguinte (MEMÓRIAS (690)). "
++    "**Pendente é só o que a linha `PROPOSTAS-PENDENTES` do estado lista** — entrada "
++    "antiga de MEMÓRIAS descreve o que era pendente naquele dia (MEMÓRIAS (695)).\n\n"
+     "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
+     "usa UMA, nunca as duas juntas** (PROTOCOLOS, \"Carregar e formatos\": "
+     "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
+@@ -312,11 +314,22 @@ def _estado() -> str:
+                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
+                                     "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:",
+                                     "ALERTA-HISTORIA:", "SYNC-REMOTO-IDADE:"))]
+-        return "\n".join(linhas)
++        return "\n".join(linhas + [_linha_propostas()])
+     except Exception:
+         return ""
+ 
+ 
++def _linha_propostas() -> str:
++    """(695) Nomes das propostas abertas (`.diff` sem `APROVADO-`) -- a Seth afirmava
++    pendente o que já estava em propostas/aplicadas/, lendo uma entrada antiga."""
++    pasta = REPO / "propostas"
++    abertas = sorted(d.stem for d in pasta.glob("*.diff") if not (pasta / f"APROVADO-{d.stem}").exists())
++    assinadas = sorted(d.stem for d in pasta.glob("*.diff") if (pasta / f"APROVADO-{d.stem}").exists())
++    return ("PROPOSTAS-PENDENTES: " + (", ".join(abertas) if abertas else "nenhuma")
++            + (f" · assinadas, falta aplicar: {', '.join(assinadas)}" if assinadas else "")
++            + " · o que está em propostas/aplicadas/ NÃO está pendente")
++
++
+ def _hidratacao(extra: str = "") -> str:
+     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
+     `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
+@@ -657,6 +670,22 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+     threading.Thread(target=_rodar, daemon=True).start()
+ 
+ 
++# (695) Pergunta sobre fato do sistema, 1º passo da resposta, com ferramentas: a resposta
++# começa por uma ferramenta (tool_choice "required"). Medido em 14/10: o Gemini obedece; o
++# Nemotron ignora sem erro -- por isso o fato das propostas vai também no estado.
++_PERGUNTA_FATO = re.compile(
++    r"\b(?:estado|status|sistema|propost|pendent|aplicad|entrada|mem[óo]ria|canon|regra|audit|servi[çc]o|"
++    r"timer|commit|PR\b|falha|erro|log|configura|verifi|confir|cheq|confer|quant[oa]s?|quando|qual|quais|por ?que)",
++    re.IGNORECASE)
++
++
++def _forcar_ferramenta(payload: dict) -> bool:
++    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    return (bool(payload.get("tools")) and "tool_choice" not in payload
++            and not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(msgs)
++            and bool(_PERGUNTA_FATO.search(_ultimo_texto_usuario(msgs))))
++
++
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -723,6 +752,8 @@ class _Handler(BaseHTTPRequestHandler):
+                             payload.get("messages") or []):
+                         _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
++                if _forcar_ferramenta(payload):
++                    payload["tool_choice"] = "required"
+                 payload = _injeta(payload)
+                 # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
+                 # recusa campo a mais com 422 "Extra inputs are not permitted" --
+@@ -768,7 +799,34 @@ class _Handler(BaseHTTPRequestHandler):
+         print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path}",
+               file=sys.stderr, flush=True)
+ 
+-    def _passar(self, corpo: bytes, metodo: str):
++    # (695) 200 sem texto nem ferramenta (Gemini, 14/10 15:00:12: "succeeded" em 2,4 s e o
++    # LibreChat gravou resposta vazia). Nada foi enviado ao cliente ainda: tenta 1 vez a
++    # fila seguinte. Só nas filas da Seth; o resto passa como veio.
++    _SUBIR_FILA = {"seth-rapido": "seth-livre", "seth-livre": "seth-pesado", "seth-pesado": "seth-livre"}
++
++    @staticmethod
++    def _tem_conteudo(dado: bytes, sse: bool) -> bool:
++        def util(o) -> bool:
++            for c in (o.get("choices") or []) if isinstance(o, dict) else []:
++                m = c.get("delta") or c.get("message") or {}
++                if (m.get("content") or "").strip() or m.get("tool_calls"):
++                    return True
++            return False
++        if not sse:
++            try:
++                return util(json.loads(dado))
++            except ValueError:
++                return True  # não é JSON de chat: não é "vazio", passa
++        for linha in dado.split(b"\n"):
++            if linha.startswith(b"data:") and not linha.startswith(b"data: [DONE]"):
++                try:
++                    if util(json.loads(linha[5:])):
++                        return True
++                except ValueError:
++                    continue
++        return False
++
++    def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
+         t0 = time.monotonic()
+         url = UPSTREAM + self.path
+         headers = {k: v for k, v in self.headers.items()
+@@ -792,17 +850,33 @@ class _Handler(BaseHTTPRequestHandler):
+                 # Espia os primeiros pedaços (sem enviar nada ao cliente ainda --
+                 # headers não foram mandados) até achar o "model" real ou esgotar
+                 # o limite; o que foi lido entra no stream normal depois, intacto.
++                # (695) espia até o 1º conteúdo útil, não só até o "model": sem isso
++                # não dá para saber, antes de responder, se a resposta veio vazia.
++                fim = False
+                 for _ in range(self._PEEK_MAX_PEDACOS):
+                     pedaco = up.read(8192)
+                     if not pedaco:
++                        fim = True
+                         break
+                     buf_pre += pedaco
+-                    modelo_real = self._modelo_de_bytes(buf_pre)
+-                    if modelo_real:
++                    modelo_real = modelo_real or self._modelo_de_bytes(buf_pre)
++                    if modelo_real and self._tem_conteudo(buf_pre, True):
+                         break
++                vazio = fim and up.status == 200 and not self._tem_conteudo(buf_pre, True)
+             else:
+                 buf_pre = up.read()
+                 modelo_real = self._modelo_de_bytes(buf_pre)
++                vazio = up.status == 200 and not self._tem_conteudo(buf_pre, False)
++            if vazio and tentativa == 0 and self._rota in self._SUBIR_FILA:
++                try:
++                    pl = json.loads(corpo)
++                    pl["model"] = self._rota = self._SUBIR_FILA[self._rota]
++                except ValueError:
++                    pl = None
++                if pl is not None:
++                    self._log(f"resposta vazia (modelo {modelo_real or '?'}) -> nova tentativa", t0)
++                    up.close()
++                    return self._passar(json.dumps(pl, ensure_ascii=False).encode("utf-8"), metodo, 1)
+         except (BrokenPipeError, ConnectionResetError):
+             self._log("cliente desconectou antes da 1ª resposta do modelo", t0)
+             self.close_connection = True
+@@ -937,6 +1011,8 @@ def _porta_livre() -> int:
+ class _Dummy(BaseHTTPRequestHandler):
+     ultimo_corpo = b""
+     modelo_resposta = None  # teste 10/11 liga isto pra simular "model" na resposta real
++    vazias = 0          # (695) quantas respostas vazias dar antes da normal
++    modelos_pedidos = []
+ 
+     def log_message(self, *a):
+         pass
+@@ -944,7 +1020,15 @@ class _Dummy(BaseHTTPRequestHandler):
+     def do_POST(self):
+         n = int(self.headers.get("Content-Length") or 0)
+         type(self).ultimo_corpo = self.rfile.read(n)
+-        resp = {"choices": [{"message": {"role": "assistant", "content": "ok"}}]}
++        try:
++            type(self).modelos_pedidos.append(json.loads(type(self).ultimo_corpo).get("model"))
++        except ValueError:
++            pass
++        texto = "ok"
++        if type(self).vazias > 0:
++            type(self).vazias -= 1
++            texto = ""
++        resp = {"choices": [{"message": {"role": "assistant", "content": texto}}]}
+         if type(self).modelo_resposta:
+             resp["model"] = type(self).modelo_resposta
+         corpo = json.dumps(resp).encode()
+@@ -1332,6 +1416,30 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok13 else 'FALHA'}  keep-alive: rota não vaza pro pedido seguinte {rotas13}")
+     falhas += 0 if ok13 else 1
+ 
++    # 14. (695) resposta vazia -> 1 nova tentativa, fila acima; o cliente recebe a 2ª
++    _Dummy.vazias, _Dummy.modelos_pedidos = 1, []
++    body = json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode()
++    r14 = json.loads(urllib.request.urlopen(urllib.request.Request(
++        base, data=body, headers={"Content-Type": "application/json"}), timeout=10).read())
++    ok14 = (r14["choices"][0]["message"]["content"] == "ok"
++            and _Dummy.modelos_pedidos == ["seth-rapido", "seth-livre"])
++    print(f"{'PASS' if ok14 else 'FALHA'}  resposta vazia -> nova tentativa na fila acima "
++          f"({_Dummy.modelos_pedidos})")
++    falhas += 0 if ok14 else 1
++    # 15. (695) pergunta de fato com ferramentas -> tool_choice required; saudação e continuação não
++    ferr = [{"type": "function", "function": {"name": "query_canon"}}]
++    fato = {"tools": ferr, "messages": [{"role": "user", "content": "qual o estado das propostas?"}]}
++    oi = {"tools": ferr, "messages": [{"role": "user", "content": "Olá"}]}
++    cont = {"tools": ferr, "messages": [{"role": "user", "content": "qual o estado?"},
++                                        {"role": "assistant", "content": "", "tool_calls": [{"id": "1"}]},
++                                        {"role": "tool", "content": "x"}]}
++    ok15 = _forcar_ferramenta(fato) and not _forcar_ferramenta(oi) and not _forcar_ferramenta(cont)
++    print(f"{'PASS' if ok15 else 'FALHA'}  ferramenta obrigatória só em pergunta de fato, 1º passo")
++    falhas += 0 if ok15 else 1
++    # 16. (695) linha de propostas no estado
++    ok16 = _linha_propostas().startswith("PROPOSTAS-PENDENTES: ") and "propostas/aplicadas/" in _linha_propostas()
++    print(f"{'PASS' if ok16 else 'FALHA'}  PROPOSTAS-PENDENTES no estado: {_linha_propostas()[:80]}")
++    falhas += 0 if ok16 else 1
+     up.shutdown()
+     gw.shutdown()
+     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")

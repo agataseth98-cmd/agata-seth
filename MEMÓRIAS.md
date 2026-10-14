@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d428c757de29a9a4df9cb57b7f16634745320c4
-  Escrito em: 14/10/2026 14:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 67ba5664f1bc642a570521cafb1e9c095706935e
+  Escrito em: 14/10/2026 15:13 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma vez a Seth afirmar o que não mediu — junta (a)+(b) de (694) com os achados da auditoria da conversa de 15:00 ("ConversaIniciadaEmPortuguês"). Pedido do Humano: "junta tudo e faça de forma a resolver esse problema de uma vez, seja elegante econômico e preciso". Aguardando assinatura.**
+
+**Auditoria da conversa** (Mongo `cb358a0d`, log da auditoria, log do OmniRoute): prontidão certa no 1º turno; resposta **vazia** no 2º (Gemini "succeeded" em 2,4 s, 200, sem texto); no 3º ela **chamou ferramentas de verdade** (`query_canon` 2×, `vault_buscar`) e a resposta parou no meio; no 4º, sem cabeçalho; no 5º, três tempos limpos. Duas das cinco "falhas" que ela listou já estavam resolvidas — "`voz-comum` aguarda assinatura" (aplicada em (687)) e "`CITACAO_RE` falha com vírgula" (corrigido em (689)) — com o topo (694) no próprio bloco de estado. Achado válido dela: biografia inventada não era checada.
+
+**Medido antes de desenhar:** `tool_choice: "required"` pelo `:20126` — o Gemini (`seth-livre`) chamou `query_canon`; o Nemotron (`seth-pesado`) ignorou sem erro. Forçar ferramenta sozinho não garante nada; o fato tem de vir da Máquina.
+
+**O que a proposta faz (2 arquivos):**
+1. **O fato vem pronto** (`seth_gateway.py`): o bloco de estado de todo turno ganha `PROPOSTAS-PENDENTES: <nomes> · assinadas, falta aplicar: <nomes> · o que está em propostas/aplicadas/ NÃO está pendente` (lido do disco, sem modelo). Doutrina, uma frase: pendente é só o que essa linha lista.
+2. **(a) Ferramenta obrigatória** em pergunta de fato: 1º passo da resposta, com ferramentas, texto do Humano casando um padrão de fato (estado, proposta, entrada, serviço, falha, qual, quando, por que…) → `tool_choice: "required"`. "Olá", "continue", "refaça" e passos depois de ferramenta: livres.
+3. **(b) O achado chega ao Humano:** toda auditoria com achado vira notificação na área de trabalho (`notify-send`, "Auditoria da Seth: N achado(s)", até 3 linhas); `AGATA_AVISO_AUDITORIA=0` desliga.
+4. **Estado desatualizado** (`auditoria_turno.py`): frase que chama de pendente/aguardando assinatura uma proposta cujo `.diff` está em `propostas/aplicadas/` é acusada — cobre toda proposta, não só as duas de hoje.
+5. **Sem cabeçalho, o conteúdo ainda é conferido:** antes, resposta sem cabeçalho devolvia só esse achado — foi assim que a das 15:01 passou. As checagens de conteúdo viraram `_conteudo()`, chamada nos dois caminhos.
+6. **Resposta vazia:** o gateway espia o stream até o 1º conteúdo útil (texto ou ferramenta); se o upstream fecha com 200 e nada, tenta 1 vez a fila seguinte (`rapido→livre→pesado→livre`) antes de mandar qualquer byte ao LibreChat.
+7. **Biografia/emoção inventada** ("anos de experiência", "quando eu era", "fico feliz"…) entra na checagem de estilo.
+8. **Precisão:** frase que descreve uma invenção ("JSON de `maquina_verificar` sem chamada") não é mais acusada como alegação.
+
+**Medido nas respostas reais de 15:01 e 15:02:** as duas acusadas por estado desatualizado (`voz-comum-2026-10-14`); a de 15:01 também por falta de cabeçalho. **Limite:** quando ela discute a própria auditoria citando o exemplo de citação inventada, a checagem de citação acusa (caso raro, aceito).
+
+**Verificado:** selftests — `auditoria_turno.py` (+7 casos), `seth_gateway.py` (+3: vazia → nova tentativa na fila acima, de ponta a ponta com o upstream de teste; ferramenta obrigatória só em pergunta de fato no 1º passo; linha de propostas), `conselho_remoto.py` — OK; `git apply --check` contra o `main`.
+
+**sync:** PASS — branch a partir de `origin/main` em `67ba566`; topo de MEMÓRIAS = (694).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `mongosh` no `LibreChat` (conversa `cb358a0d`), `~/.cache/agata/auditoria-turno.jsonl`, log do OmniRoute, `curl` com `tool_choice` no `:20126` (2 filas), `auditoria_turno.auditar` sobre as respostas reais, selftests · Autorização: Humano, nesta sessão (fala citada acima).
 
 (694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (691) contra a evidência inventada — (a) o gateway força uma chamada de ferramenta quando a pergunta é sobre fato do sistema; (b) o achado da auditoria aparece para o Humano, não só para a Seth. Ainda sem proposta; fica para a próxima rodada.**
 
