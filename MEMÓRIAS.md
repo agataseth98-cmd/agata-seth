@@ -26,20 +26,51 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda
-  Escrito em: 14/10/2026 19:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e289cb142b8de073951f15e2125b1f77e6ffe746
+  Escrito em: 14/10/2026 20:48 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a17c83de2dc37a3dac4854c39dde9d9bc0d7eeda/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e289cb142b8de073951f15e2125b1f77e6ffe746/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e289cb142b8de073951f15e2125b1f77e6ffe746/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e289cb142b8de073951f15e2125b1f77e6ffe746/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e289cb142b8de073951f15e2125b1f77e6ffe746/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e289cb142b8de073951f15e2125b1f77e6ffe746/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) travou no 1º "Olá": o Gemini 2.5 Flash, sem cota, ficou 310 s sem responder e a fila não andou. Proposta `seth-prazo-primeiro-conteudo-2026-10-14` corta a espera de 310 s para ~47 s (medido). Erros e vitórias da rodada registrados, a pedido do Humano ("registre erros e vitórias"). Aguardando assinatura.**
+
+**Causa, medida:** às 20:15 o Gemini deu 429 (cota) e a conta entrou em espera; às 20:23 a fila `seth-livre` (Gemini 1º) mandou o "Olá" para ele assim mesmo. O OmniRoute tem um prazo por modelo de **310 s** ("Model gemini/gemini-2.5-flash exceeded 310000ms timeout — falling back", 23:29:01Z) — o `STREAM_IDLE_TIMEOUT_MS=60000` de (683) não corta esse caso. Enquanto espera, ele manda só keepalive. Segunda causa, achada medindo: o sanitizador (`proxy.py`) repassava com `read(8192)` — o keepalive, pequeno, ficava ~90 s preso até juntar 8 KB, e a desistência do cliente só era notada quando o bloco enchia.
+
+**Experimentos** ("total liberdade para experimentar, nenhuma para decidir"; cópias do gateway e do sanitizador nas portas 20198/20199, produção intocada; mesmo "Olá"):
+| iteração | mudança | tempo até a resposta |
+|---|---|---|
+| produção | — | 310 s |
+| 1 | prazo de 40 s para o 1º conteúdo → nova tentativa em `seth-pesado` | 139 s (o Nemotron levou mais 97 s) |
+| 2 | nova tentativa na fila mais RÁPIDA (`seth-rapido`) | 137 s (a desistência só chegou ao OmniRoute em 93 s) |
+| 3 | sanitizador com `read1` + gateway desiste com `shutdown` no socket | **47 s** (o OmniRoute viu a desistência na hora; Ministral respondeu em 3,7 s) |
+| 4 | despachante próprio (corrida paralela, disjuntor, cada família elege um modelo — autorizado pelo Humano) | teste real não concluído; **cortado**: ~230 linhas e threads sem utilidade provada, contra a regra do Humano ("sistema complexo deve ser combatido") |
+
+**Proposta (2 arquivos, +118/−12, ~40 de teste):**
+1. `seth_gateway.py`: leitor do upstream numa thread (`_Leitor`) — prazo de relógio sem estragar o socket (depois de um timeout de socket o Python recusa novas leituras); 40 s sem texto nem ferramenta → desiste derrubando o socket (`_derrubar`) e tenta a fila mais rápida (`_FILA_RAPIDA`: livre/pesado → rapido; rapido → livre); resposta vazia continua indo para `_SUBIR_FILA`. Selftest: upstream que só manda keepalive vira nova tentativa em 1,0 s (prazo de teste 1 s).
+2. `proxy.py`: `read1` no repasse; cliente que desiste vira 1 linha no log em vez de traceback (3 tracebacks no journal às 20:32, 20:37 e 20:40 — eram meus testes e o "parar" no LibreChat).
+
+**O que resolve a origem sem código (decisão do Humano, (683)):** descer o Gemini 2.5 Flash na `seth-livre` — com cota diária, é o 1º da fila e o que pendura.
+
+**Vitórias de hoje (14/10):** personalidade canônica e voz comum para todos os modelos (685)–(687); evidência sem invenção e selftests no CI (688)/(689); ferramenta citada sem chamada acusada (690)/(691); fluxo de proposta padrão (692)/(693); fato das propostas no estado, resposta vazia refeita, aviso ao Humano (695)/(696); conversa longa de volta (697)/(698); falso alarme de história e sermão do "Olá" eliminados (700)/(701); opinião técnica (702)–(704); **cabeçalho escrito pela Máquina** com o modelo real medido, rota pelo pedido atual, Jev como segunda opinião, P-20 de volta (32/32 OK desde 19:19) (705)–(707); suíte imune a worktree (707)/(708); apps do Claude e do ChatGPT e o Codex CLI instalados; treino da voz agendado (00:30, sobrevive a reinício).
+
+**Erros meus de hoje:** PR empilhado que tirou o `.diff` do `main` (689); hora escrita sem medir (689); `tool_choice: "required"` medido no caso fácil, quebrou conversa longa (697); script do ONDE_ESTAMOS que falhou depois de gravar MEMÓRIAS (704); commit dentro de worktree que disparou a suíte e levou meio commit ao `main` (706); `pkill` com padrão que matou o próprio comando (duas vezes); fechei a última guia do grupo do Chrome e a guia do Humano saiu dele; escrevi o despachante antes de esgotar o conserto simples; respostas longas apesar do NPR. Contramedidas guardadas na minha memória de sessão (worktree só para proposta/registro; menor mecanismo primeiro; conferir se um comando pode atingir a mim ou ao Humano).
+
+**Fora do sistema Agata:** `apply-nvidia-oc@autostart` falhou às 14:55 (o script do Humano usa `sudo -n`; primeiro boot depois do driver 615.78) — não mexi.
+
+**Verificado:** selftests `seth_gateway.py` e `proxy.py` OK; `git apply --check` contra o `main`.
+
+**sync:** PASS — worktree a partir de `origin/main` em `e289cb1`; topo de MEMÓRIAS = (708).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: Claude in Chrome (LibreChat, conversa `aab2c6b3`), log do OmniRoute, código do OmniRoute (prazo por modelo), cópias de teste nas portas 20198/20199, `journalctl`, `avaliacao-decisor.md`, `p20.jsonl` · Autorização: Humano, nesta sessão (falas citadas acima).
 
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (assinada pelo Humano): a suíte do perímetro não herda mais o ambiente git do hook. Aplicada no `~/agata`, não em worktree, como (706) ensinou.**
 
