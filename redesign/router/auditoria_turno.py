@@ -72,6 +72,9 @@ _OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [�
 _MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
                      r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
+# (702) Leu "sem emoção simulada" como "sem opinião" e recusou avaliar (14/10, 16:12).
+_RECUSA_JUIZO = re.compile(r"n[ãa]o (?:inclui|fa[zç]o|posso fazer|cabe(?: a mim)?) (?:uma )?avalia[çc][õo]es? subjetiva|"
+                           r"n[ãa]o (?:tenho|posso (?:dar|ter|emitir)) (?:uma )?opini[ãa]o|n[ãa]o emito opini", re.IGNORECASE)
 # (695) Persona de função: biografia ou emoção humana inventada é o começo da deriva
 # ("Assistant Axis", (685)). Achado da própria Seth na auditoria de 14/10, 15:01.
 _BIOGRAFIA = re.compile(r"\beu (?:tenho|tinha) \d+ anos|\banos de experi[êe]ncia|\bquando eu era\b|"
@@ -199,6 +202,8 @@ def _estilo(texto: str) -> list[str]:
     muletas = sorted({m.group(0).strip().lower() for m in _MULETA.finditer(prosa)})
     if muletas:
         achados.append("muleta/interjeição (" + ", ".join(f"'{m}'" for m in muletas) + ")")
+    if _RECUSA_JUIZO.search(prosa):
+        achados.append(f"recusou avaliar ('{_RECUSA_JUIZO.search(prosa).group(0)}') — avaliar é parte da função (702)")
     if _BIOGRAFIA.search(prosa):
         achados.append(f"biografia/emoção inventada ('{_BIOGRAFIA.search(prosa).group(0)}')")
     if _EMOJI.search(prosa):
@@ -631,6 +636,8 @@ def _selftest() -> int:
             "O perímetro está com 20 controles OK, 1 SKIP e 2 PARCIAIS."))),
         ("estilo: sermão sobre o cumprimento do Humano é acusado (700)", any("cumprimento" in x for x in (auditar(
             [u("Olá"), a(pront + "\nSaudações não são permitidas. Regra 5."), u("x")]) or []))),
+        ("estilo: recusar avaliação é acusado (702)", any("recusou avaliar" in x for x in est(
+            "Minha função não inclui avaliações subjetivas."))),
         ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
             "Tenho anos de experiência com esse tipo de servidor."))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
