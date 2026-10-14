@@ -1,0 +1,17 @@
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index c309bd1..b6ae266 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -36,6 +36,12 @@
+ set -uo pipefail
+ 
+ RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++# (707) Dentro de um hook o git exporta GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE. Numa
++# worktree eles apontam para a branch DELA, e o `git commit` da suíte (no clone, abaixo)
++# caía na branch de trabalho: em 14/10/2026 o commit "base da suite" foi parar no PR #208.
++# A suíte só trabalha no clone temporário -- herda nada do repositório que a chamou.
++unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_PREFIX GIT_COMMON_DIR GIT_OBJECT_DIRECTORY \
++      GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_NAMESPACE
+ FILTRO="${1:-}"
+ export AGATA_TESTE_PERIMETRO=1   # impede o P-16 de recursar dentro do clone
+ # Decisor local sempre "fora do ar" na suíte: veredito determinístico, sem
