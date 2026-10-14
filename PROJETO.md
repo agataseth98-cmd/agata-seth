@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 64c9e25bb4025419d88cbd523bda506d109c517d
-  Escrito em: 14/10/2026 13:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ec4a668247efc29a93293e9806721f4eced139d8
+  Escrito em: 14/10/2026 13:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec4a668247efc29a93293e9806721f4eced139d8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec4a668247efc29a93293e9806721f4eced139d8/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec4a668247efc29a93293e9806721f4eced139d8/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec4a668247efc29a93293e9806721f4eced139d8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec4a668247efc29a93293e9806721f4eced139d8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -125,7 +125,7 @@ Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, R
 - **Não:** Regra 5 inteira (abrir com status — "Sistemas operacionais." — não é saudação; "Bem-vindo de volta" é); muletas ("né", "tá?", "viu?", "tipo,", "olha,"), interjeições, emoji, exclamação em série; emoção simulada; bajulação.
 - **Voz:** timbre aprovado `agata-sistema-tratado` — a voz treinada da Agata (`~/.local/share/agata-voz/`) com tratamento "de sistema" na saída (ffmpeg: `rubberband=tempo=0.95,highpass=f=90,equalizer=f=2800:t=q:w=1.0:g=2.5,highshelf=g=-2:f=9000,aecho=0.85:0.4:18|31:0.10|0.06,acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80`). Entra no `piper-tts` por proposta própria, depois de o Humano ouvir o modelo treinado.
 - **Todos os modelos** (686): a mesma voz para Goose, Conselho (mensagem de sistema `VOZ_COMUM` em `scripts/conselho_remoto.py`, nuvem e fallback local) e toda ferramenta que lê `AGENTS.md` — o Humano busca familiaridade, consistência e previsibilidade. **Forma comum, juízo próprio:** a divergência entre cérebros é a força do sistema; persona única num conselho de modelos tende à convergência prematura (pesquisa de 2026, (686)), por isso cada membro declara o próprio modelo e opina sozinho.
-- **Persistência:** bloco "Personalidade" na doutrina do `seth_gateway`; linha `PERSONA:` a cada turno (reforço — a instrução inicial perde peso na conversa longa); `auditoria_turno.py` acusa saudação, oferta/encerramento, muleta, emoji e exclamação em série no turno anterior (padrão de texto, sem modelo julgando; trecho citado — entre aspas ou em linha `>` — não conta); deriva ao longo da conversa: `grep -c "estilo:" ~/.cache/agata/auditoria-turno.jsonl`.
+- **Persistência:** bloco "Personalidade" na doutrina do `seth_gateway`; linha `PERSONA:` a cada turno (reforço — a instrução inicial perde peso na conversa longa); `auditoria_turno.py` acusa saudação, oferta/encerramento, muleta, emoji e exclamação em série no turno anterior — e ferramenta citada como fonte sem ter sido chamada na conversa (690) — (padrão de texto, sem modelo julgando; trecho citado — entre aspas ou em linha `>` — não conta); deriva ao longo da conversa: `grep -c "estilo:" ~/.cache/agata/auditoria-turno.jsonl`.
 
 ## Segurança
 - **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
