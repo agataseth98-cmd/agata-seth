@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e2ac22af9f0624cb31f0128adccd269d337361e3
-  Escrito em: 13/10/2026 20:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b37ff4a7e32b5ad88a467303aa09aebb987e09d4
+  Escrito em: 13/10/2026 21:00 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2ac22af9f0624cb31f0128adccd269d337361e3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b37ff4a7e32b5ad88a467303aa09aebb987e09d4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b37ff4a7e32b5ad88a467303aa09aebb987e09d4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b37ff4a7e32b5ad88a467303aa09aebb987e09d4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b37ff4a7e32b5ad88a467303aa09aebb987e09d4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b37ff4a7e32b5ad88a467303aa09aebb987e09d4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(681) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-tema-sync-2026-10-13` (assinada pelo Humano): o atalho `seth` passa a copiar o tema da Agata para o LibreChat.**
+
+**Aplicado:** `p8_verificar` → PODE APLICAR; `git apply`; par movido para `propostas/aplicadas/`. Cópia anterior do atalho guardada na área temporária da sessão; `redesign/systemd/seth` instalado em `~/.local/bin/seth` (idêntico, `bash -n` OK). O tema em `~/librechat/` já bate com o versionado — nada a reiniciar agora. Fica para amanhã o teste real da Seth (login no LibreChat).
+
+**sync:** PASS — `main` = `origin/main` (PR #181 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (680).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, `diff`/`cmp` do atalho e do tema, `bash -n` · Autorização: Humano — assinatura de `seth-tema-sync-2026-10-13`.
 
 (680) DIÁRIO — 13/10/2026 · **Proposta `seth-tema-sync-2026-10-13`, a pedido do Humano ("se puder automatizar e eu assinar … faça"): o atalho `seth` passa a copiar o tema da Agata para o LibreChat junto com o resto da configuração. Teste real da Seth adiado para amanhã — o Humano não lembra a senha do LibreChat. Aguardando assinatura.**
 
