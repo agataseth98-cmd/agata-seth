@@ -26,20 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e93abf161c6f55caa53c3c8ce792cdea3704621a
-  Escrito em: 14/10/2026 13:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 64c9e25bb4025419d88cbd523bda506d109c517d
+  Escrito em: 14/10/2026 13:44 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/64c9e25bb4025419d88cbd523bda506d109c517d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(690) DIÁRIO — 14/10/2026 · **Proposta `seth-ferramenta-sem-chamada-2026-10-14` (pedido do Humano: "pode escrever"): a auditoria do turno passa a acusar ferramenta citada como fonte sem ter sido chamada na conversa — o mecanismo que a regra de texto de (688) não substituiu no reteste de (689). Aguardando assinatura.**
+
+**Como funciona** (`auditoria_turno.py`, `_ferramenta_sem_chamada`; só padrão de texto, sem modelo):
+- Nomes de ferramenta lidos do próprio `canon-mcp.mjs` (`query_canon`, `vault_buscar`, `vault_consultar`, `maquina_verificar`, `memoria_acrescentar`, `diario_anotar`), com lista fixa de reserva.
+- Chamadas da conversa até o turno auditado: `tool_calls[].function.name` e mensagens `tool` com `name`; casa por trecho, porque o LibreChat põe sufixo do MCP no nome.
+- Acusa a frase que cita a ferramenta **como fonte** ("verific…", "confirm…", "consult…", "devolv…", "→", "resultado"…) e não é sugestão ("posso", "vou", "sugiro", "para medir", "usar"…) — "Não medido. Posso medir com `maquina_verificar`" é o que a doutrina pede e não conta.
+- Achado: `evidência: cita <ferramenta> como fonte, mas nenhuma chamada … escreva "não medido" ou chame a ferramenta`.
+
+**Medido nas duas respostas reais inventadas de (689):** as duas acusadas (1ª: `vault_buscar`, `vault_consultar`; 2ª: `vault_buscar`). **Limite declarado:** seção inventada de documento ("REGRAS, 'Manutenção noturna'") e serviço inventado ("cron job") não são pegos — exigiriam conferir títulos de seção, outra checagem.
+
+**Mudanças:** `auditoria_turno.py` (+ checagem, +3 casos no selftest: inventada acusada; sugestão não; chamada real com sufixo do MCP não); doutrina do gateway (uma frase avisando que a auditoria confere); PROJETO, "Persistência" (a checagem nova na lista).
+
+**Verificado:** selftests de `auditoria_turno.py` e `seth_gateway.py` OK; `git apply --check` contra o `main`.
+
+**sync:** PASS — branch a partir de `origin/main` em `64c9e25` (PR #192 juntado); topo de MEMÓRIAS = (689). Proposta direto contra o `main`, como prometido em (689).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `auditoria_turno.auditar` sobre as respostas reais de (689), selftests · Autorização: Humano, "pode escrever".
 
 (689) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-evidencia-e-ci-2026-10-14` (assinada pelo Humano). Selftests da Seth agora no CI. Reteste: a regra de texto NÃO bastou — o mesmo modelo segue inventando a evidência. A citação "`arquivo`, linha N" passa a ser acusada; a invenção de ferramenta ainda não. Duas correções minhas registradas aqui.**
 

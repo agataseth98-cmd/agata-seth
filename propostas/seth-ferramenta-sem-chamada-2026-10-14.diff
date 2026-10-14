@@ -1,0 +1,122 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index ea9bf5d..c160e96 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -125,7 +125,7 @@ Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, R
+ - **Não:** Regra 5 inteira (abrir com status — "Sistemas operacionais." — não é saudação; "Bem-vindo de volta" é); muletas ("né", "tá?", "viu?", "tipo,", "olha,"), interjeições, emoji, exclamação em série; emoção simulada; bajulação.
+ - **Voz:** timbre aprovado `agata-sistema-tratado` — a voz treinada da Agata (`~/.local/share/agata-voz/`) com tratamento "de sistema" na saída (ffmpeg: `rubberband=tempo=0.95,highpass=f=90,equalizer=f=2800:t=q:w=1.0:g=2.5,highshelf=g=-2:f=9000,aecho=0.85:0.4:18|31:0.10|0.06,acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80`). Entra no `piper-tts` por proposta própria, depois de o Humano ouvir o modelo treinado.
+ - **Todos os modelos** (686): a mesma voz para Goose, Conselho (mensagem de sistema `VOZ_COMUM` em `scripts/conselho_remoto.py`, nuvem e fallback local) e toda ferramenta que lê `AGENTS.md` — o Humano busca familiaridade, consistência e previsibilidade. **Forma comum, juízo próprio:** a divergência entre cérebros é a força do sistema; persona única num conselho de modelos tende à convergência prematura (pesquisa de 2026, (686)), por isso cada membro declara o próprio modelo e opina sozinho.
+-- **Persistência:** bloco "Personalidade" na doutrina do `seth_gateway`; linha `PERSONA:` a cada turno (reforço — a instrução inicial perde peso na conversa longa); `auditoria_turno.py` acusa saudação, oferta/encerramento, muleta, emoji e exclamação em série no turno anterior (padrão de texto, sem modelo julgando; trecho citado — entre aspas ou em linha `>` — não conta); deriva ao longo da conversa: `grep -c "estilo:" ~/.cache/agata/auditoria-turno.jsonl`.
++- **Persistência:** bloco "Personalidade" na doutrina do `seth_gateway`; linha `PERSONA:` a cada turno (reforço — a instrução inicial perde peso na conversa longa); `auditoria_turno.py` acusa saudação, oferta/encerramento, muleta, emoji e exclamação em série no turno anterior — e ferramenta citada como fonte sem ter sido chamada na conversa (690) — (padrão de texto, sem modelo julgando; trecho citado — entre aspas ou em linha `>` — não conta); deriva ao longo da conversa: `grep -c "estilo:" ~/.cache/agata/auditoria-turno.jsonl`.
+ 
+ ## Segurança
+ - **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 26b4647..80ed500 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -73,6 +73,64 @@ _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
+ _CITADO = re.compile(r'"[^"\n]{0,300}"|“[^”\n]{0,300}”|«[^»\n]{0,300}»')
+ 
+ 
++# (690) Ferramenta citada como FONTE sem ter sido chamada na conversa -- o que a regra de
++# texto de (688) não segurou no reteste de (689): "verificado em `vault_buscar`" sem chamada
++# nenhuma. Sugestão ("posso medir com `maquina_verificar`") é o que a doutrina pede: não conta.
++def _nomes_ferramentas() -> set[str]:
++    try:
++        mjs = (RAIZ / "redesign" / "librechat" / "canon-mcp.mjs").read_text(encoding="utf-8")
++        nomes = set(re.findall(r'name:\s*"([a-z][a-z0-9_]+)"', mjs)) - {"canon"}
++        if nomes:
++            return nomes
++    except OSError:
++        pass
++    return {"query_canon", "vault_buscar", "vault_consultar", "maquina_verificar",
++            "memoria_acrescentar", "diario_anotar"}
++
++
++_ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
++_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
++                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b", re.IGNORECASE)
++
++
++def _chamadas(msgs: list) -> set[str]:
++    """Nomes de ferramenta chamados na conversa até o fim do turno auditado (antes do
++    último pedido do usuário). LibreChat prefixa/sufixa o nome do MCP: casa por trecho."""
++    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
++    fim = usuarios[-1] if usuarios else len(msgs)
++    nomes = set()
++    for m in msgs[:fim]:
++        if not isinstance(m, dict):
++            continue
++        for tc in m.get("tool_calls") or []:
++            nomes.add(str((tc.get("function") or {}).get("name") or tc.get("name") or ""))
++        if m.get("role") == "tool" and m.get("name"):
++            nomes.add(str(m["name"]))
++    return {n for n in nomes if n}
++
++
++def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
++    chamadas = _chamadas(msgs)
++    corpo, em_codigo = [], False
++    for l in texto.splitlines():
++        if l.strip().startswith("```"):
++            em_codigo = not em_codigo
++            continue
++        if not em_codigo and not _CABECALHO.match(l):
++            corpo.append(l)
++    inventadas = set()
++    for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
++        for nome in _nomes_ferramentas():
++            if nome in frase and _ALEGA.search(frase) and not _SUGERE.search(frase) \
++                    and not any(nome in c for c in chamadas):
++                inventadas.add(nome)
++    if not inventadas:
++        return []
++    return [f"evidência: cita {', '.join(sorted(inventadas))} como fonte, mas nenhuma chamada a "
++            f"{'ela' if len(inventadas) == 1 else 'elas'} nesta conversa — escreva \"não medido\" ou chame a "
++            "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
++
++
+ def _estilo(texto: str) -> list[str]:
+     """Tiques da personalidade (685) na resposta: saudação na 1ª linha depois do
+     cabeçalho, oferta/encerramento, muleta/interjeição, emoji, exclamação em série."""
+@@ -313,6 +371,7 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
+     achados += _desmentidas(texto)
+     achados += _contagem_controles(texto)
+     achados += _estilo(texto)
++    achados += _ferramenta_sem_chamada(texto, msgs)
+     if modo(msgs) == "conciso":
+         narradas = _narracao(texto)
+         if narradas:
+@@ -472,6 +531,17 @@ def _selftest() -> int:
+             'Ele disse "ok". Tá certo, né.'))),
+         ("citação '`arquivo`, linha N' inventada é acusada (688)", any(x.startswith("citação AGENTS.md:3") for x in est(
+             'Evidência: `AGENTS.md`, linha 3: "treinos noturnos agendados via cron toda noite".'))),
++        ("evidência: ferramenta citada como fonte sem chamada é acusada (690)", any(
++            x.startswith("evidência:") and "vault_buscar" in x for x in est(
++                'Sem histórico de falha (verificado em `vault_buscar "treino noturno"`).'))),
++        ("evidência: sugerir a ferramenta não é acusado (690)", not any(x.startswith("evidência:") for x in est(
++            "Não medido. Posso medir com `maquina_verificar`, se quiser."))),
++        ("evidência: ferramenta chamada no turno (nome com sufixo do MCP) não é acusada (690)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
+         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
+                                                          ([u()], [u("modo explicativo")]))),
+     ]
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 6f7bd4d..5bc8547 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -127,7 +127,8 @@ _DOUTRINA_FIXA = (
+     "devolveu NESTA conversa, ou o bloco de estado abaixo. Sem isso, escreva "
+     "\"não medido\" — nunca invente comando, saída, JSON, arquivo, linha ou serviço "
+     "para preencher o espaço. Sem ferramenta à mão, o próximo passo é dizer com "
+-    "qual ferramenta mediria.\n\n"
++    "qual ferramenta mediria. A auditoria do turno confere: ferramenta citada "
++    "como fonte sem ter sido chamada é acusada no turno seguinte (MEMÓRIAS (690)).\n\n"
+     "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
+     "usa UMA, nunca as duas juntas** (PROTOCOLOS, \"Carregar e formatos\": "
+     "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
