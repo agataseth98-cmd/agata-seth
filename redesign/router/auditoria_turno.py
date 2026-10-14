@@ -400,7 +400,8 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
     prontidao = len(cabs[0]) > 1
     achados = [f"cabeçalho: {f}" for f in _cab.verificar(primeiro, _cab.ultima_entrada_local())]
     if len(cabs) > 1:
-        achados.append(f"cabeçalho: {len(cabs)} cabeçalhos numa resposta só — um por resposta, mesmo com ferramenta no meio")
+        achados.append(f"cabeçalho: {len(cabs)} cabeçalhos numa resposta só — a Máquina já escreve o cabeçalho; "
+                       "não escreva o seu (705)")
     if n == 1 and not prontidao:
         achados.append("cabeçalho: a 1ª resposta da conversa abre com o bloco de prontidão (3 linhas), não com a linha de turno")
     if n > 1 and prontidao:
@@ -423,7 +424,8 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
             achados.append(f"cabeçalho: hora {m_h.group(1)} ANTERIOR à de um cabeçalho anterior desta conversa — "
                            "a hora vem do relógio da Máquina (HORA-MAQUINA), nunca estimada")
     modelo = _modelo_do_cabecalho(cabs[0][0])
-    if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
+    if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia|medido pela M[áa]quina neste turno",
+                                modelo, re.IGNORECASE):
         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
     achados += _conteudo(texto, msgs, modo(msgs))
@@ -638,6 +640,9 @@ def _selftest() -> int:
             [u("Olá"), a(pront + "\nSaudações não são permitidas. Regra 5."), u("x")]) or []))),
         ("estilo: recusar avaliação é acusado (702)", any("recusou avaliar" in x for x in est(
             "Minha função não inclui avaliações subjetivas."))),
+        ("cabeçalho da Máquina passa limpo pela auditoria (705)", not any(x.startswith("cabeçalho") for x in (auditar(
+            [u(), a(pront), u(), a("Agata · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 "
+                                   "(contador mecânico) · 2026-10-14 16:40 -0300 (relógio da Máquina)\n\nResultado: ok."), u()]) or []))),
         ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
             "Tenho anos de experiência com esse tipo de servidor."))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in

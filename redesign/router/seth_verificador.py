@@ -135,6 +135,14 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "O nome do arquivo também conta. Use o parâmetro `consulta` (até 200 "
         "caracteres). Devolve caminho:linha:trecho, até 3 por nota.",
     ),
+    "opiniao_jev": (
+        ["python3", "redesign/router/decisor.py", "--opinar"], 45,
+        "Segunda opinião do decisor local (modelo Jev, na CPU, sem custo de token): "
+        "recomendação (fazer / não fazer / depende), reversibilidade e risco, em "
+        "probabilidade. Use em pedido de opinião, decisão ou risco, com o parâmetro "
+        "`consulta` (a ação ou a pergunta, até 200 caracteres). Leva ~10-30 s. É "
+        "opinião de um modelo, não fato: cite como opinião dele (MEMÓRIAS (705)).",
+    ),
 }
 
 # `consulta` da busca por sentido (670): o texto da Seth vira DADO de um comando
@@ -156,11 +164,11 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
     tipado e validado antes de virar elemento de argv -- nunca interpolado
     como texto."""
     base = list(COMANDOS[nome][0])
-    if consulta is not None and nome not in ("busca_semantica", "busca_texto"):
+    if consulta is not None and nome not in ("busca_semantica", "busca_texto", "opiniao_jev"):
         raise ValueError(f"'{nome}' não aceita o parâmetro consulta")
-    if nome == "busca_texto":
+    if nome in ("busca_texto", "opiniao_jev"):
         if n is not None or prop_nome is not None:
-            raise ValueError("'busca_texto' só aceita o parâmetro consulta")
+            raise ValueError(f"'{nome}' só aceita o parâmetro consulta")
         if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
                 or any(c in consulta for c in "\r\n\x00"):
             raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
@@ -453,6 +461,14 @@ def _selftest() -> int:
             _argv("busca_semantica", None, None, mau); casos.append((f"consulta {str(mau)[:8]!r} recusada", False))
         except ValueError:
             casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
+    # (705) opiniao_jev: consulta vira DADO depois de "--", n recusado
+    aoj = _argv("opiniao_jev", None, None, "apagar os checkpoints antigos")
+    casos.append(("opiniao_jev: consulta depois de '--'", aoj[-2:] == ["--", "apagar os checkpoints antigos"]
+                  and aoj[:3] == ["python3", "redesign/router/decisor.py", "--opinar"]))
+    try:
+        _argv("opiniao_jev", 3, None, "x"); casos.append(("opiniao_jev recusa n", False))
+    except ValueError:
+        casos.append(("opiniao_jev recusa n", True))
     avt = _argv("busca_texto", None, None, "-e x")
     casos.append(("busca_texto: consulta é dado", avt[-2:] == ["--", "-e x"]))
     try:

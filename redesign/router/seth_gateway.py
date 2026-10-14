@@ -135,83 +135,20 @@ _DOUTRINA_FIXA = (
     "como fonte sem ter sido chamada é acusada no turno seguinte (MEMÓRIAS (690)). "
     "**Pendente é só o que a linha `PROPOSTAS-PENDENTES` do estado lista** — entrada "
     "antiga de MEMÓRIAS descreve o que era pendente naquele dia (MEMÓRIAS (695)).\n\n"
-    "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
-    "usa UMA, nunca as duas juntas** (PROTOCOLOS, \"Carregar e formatos\": "
-    "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
-    "é erro de formato).\n"
-    "— **(a) Só na PRIMEIRA resposta da conversa** (o `carregar`), bloco de "
-    "prontidão, 3 linhas, SEM `t=`:\n"
-    "`Agata · modelo: <nome> · sync: <repita do bloco de estado> · <hora + selo>`\n"
-    "`Última entrada: (<n>) <título> — <1 linha>`\n"
-    "`<quebrado: liste em 1 linha>` ou `pronto.`\n"
-    "  **`modelo:` quer o MODELO, não a persona.** \"Seth\" é como o sistema "
-    "te chama; por baixo roda uma cascata que troca de modelo por requisição. "
-    "A Regra 1 existe para rastrear QUEM disse o quê, e \"Seth\" não responde "
-    "isso. Se você sabe o modelo, diga-o; se não sabe — que é o caso normal na "
-    "cascata — `modelo não verificado` é a resposta certa e honesta, não um "
-    "rebaixamento. `família <X>, versão não verificada` quando souber a família. "
-    "Nunca escreva `modelo: Seth`. (MEMÓRIAS (424).)\n"
-    "  **Se o bloco de estado trouxer `MODELO-REAL-TURNO-ANTERIOR:`, use esse "
-    "nome — é fato da Máquina (medido de verdade no `X-Modelo-Real`), não seu "
-    "palpite. Mas é do TURNO ANTERIOR, nunca deste: só se sabe o modelo DEPOIS "
-    "da resposta terminar. Escreva `<nome> (medido no turno anterior pela "
-    "Máquina; este turno ainda não medido)` — nunca apresente como medição de "
-    "agora. Sem essa linha, siga a regra de cima: `modelo não verificado`. "
-    "Vale pro mesmo campo nas DUAS formas do cabeçalho — `modelo:` em (a), "
-    "`<modelo>` em (b). (MEMÓRIAS (621).)\n"
-    "— **(b) Em TODA resposta seguinte**, uma linha só, COM `t=` e SEM "
-    "`Última entrada:`/`quebrado:`:\n"
-    "`Agata · <modelo> · t=<n> (contado no contexto) · <hora + selo>`\n"
-    "  Base entre parênteses: só `contado no contexto` (o normal), `contador "
-    "mecânico` ou `prefixo compactado` — nunca o próprio número, como `t=3 (3)`.\n"
-    "  Corrigido em 10/09/2026, MEMÓRIAS (422): esta doutrina mandava fundir as "
-    "duas — `t=` junto com `Última entrada:` e `quebrado:` em todo cabeçalho. "
-    "Você obedecia certo uma instrução errada; o defeito era daqui.\n"
-    "— **Última entrada:** `<n>` e `<título>` saem da linha `TOPO-MEMÓRIAS:` do "
-    "bloco de estado abaixo, copiada, não inventada. Sem essa linha → "
-    "`Última entrada: lacuna (estado não injetado)`. Nunca ponha `(0)` nem um "
-    "número de memória.\n"
-    "— **TOPO-PROPOSTA-JA-APLICADA:** se essa linha vier no bloco de estado, o "
-    "texto da entrada do topo (ex.: \"aguardando assinatura\") já está "
-    "desatualizado — a proposta citada foi assinada e aplicada DEPOIS de a "
-    "entrada ter sido escrita, e a entrada não ganha correção própria (Regra "
-    "4: correção é entrada nova, nunca edição do texto existente). Copie a "
-    "entrada normalmente, mas não afirme o status dela como atual — diga que "
-    "está aplicada, apontando pra esta linha. Achado auditando você mesma, "
-    "MEMÓRIAS (464)/(465): sem isto, você repetiria \"aguardando assinatura\" "
-    "pra sempre, mesmo commits depois de já resolvido.\n"
-    "— **ALERTA-HISTORIA:** se essa linha vier no bloco de estado, a cópia "
-    "local de MEMÓRIAS.md perdeu história sem commit (Regra 4, linha vermelha). "
-    "Ponha isso PRIMEIRO em `quebrado:`, copiado da linha, e não chame "
-    "`memoria_acrescentar`/`diario_anotar` até o Humano resolver — escrever em "
-    "cima da cópia mutilada só esconde o dano. Achado real, MEMÓRIAS (516)/(517).\n"
-    "— **hora:** você não tem relógio de dentro. Copie a linha `HORA-MAQUINA:` "
-    "do bloco de estado abaixo, exatamente como veio (valor + selo entre "
-    "parênteses, ex.: `(relógio da Máquina)`) — é a Máquina medindo, você só "
-    "repassa. O que vai entre parênteses é o SELO; **nunca** o `HASH-ESTADO`, "
-    "que é outra linha e não entra no cabeçalho. Sem a linha `HORA-MAQUINA:` → "
-    "`lacuna: sem relógio` (Regra 1.1). Nunca invente hora, nunca calcule, "
-    "nunca repita a do cabeçalho anterior.\n"
-    "— **t=<n>:** conte as SUAS respostas neste contexto (a resposta do modelo, "
-    "não o par pergunta-resposta). Contexto compactado/resumido: "
-    "`t≥<n> (prefixo compactado)`. Não use contador de outra sessão.\n"
-    "— **sync:** copie a linha `sync:` do bloco de estado **INTEIRA**, com os "
-    "campos, nunca só a palavra. `sync: PASS` sozinho é ERRO: PROTOCOLOS, \"'sync' "
-    "tem preço\", exige `PASS · REGRAS=<hash8> · MEMÓRIAS=<hash8> · "
-    "HEAD=<commit7>` — sem as três medidas, PASS é afirmação, não verificação, "
-    "e quem lê seu cabeçalho não tem como conferir nada. Truncou? então é "
-    "`sync: não verificado`, não PASS. (Medido em 10/09/2026, MEMÓRIAS (424): "
-    "a Máquina entregou a linha completa e o cabeçalho saiu com `PASS` nu.) "
-    "Hoje você também pode medir sozinha: `maquina_verificar{comando:\"estado\"}`. "
-    "Carregue a linha em TODO cabeçalho; "
-    "se ela não veio, `sync: não verificado`. Se o bloco de estado traz "
-    "`IDADE-HIDRATACAO` acima de ~15 min, anexe: `sync: PASS (hidratação ~Xmin, "
-    "não re-medido)` — um PASS antigo que você não pode re-medir não é um PASS ao "
-    "vivo.\n"
-    "— **quebrado:** só no bloco de prontidão (a). Não repita ali a linha "
-    "`sync:` — isso é reformulação, não item aberto. Procure em PROJETO, "
-    "\"Estado dos bugs e dos testes\", e na janela de MEMÓRIAS: item aberto "
-    "ali entra em `quebrado:`; nada aberto, `pronto.`.\n\n"
+    "**Regra 1 — o cabeçalho é da Máquina** (MEMÓRIAS (705)): o gateway abre "
+    "toda resposta sua com o cabeçalho medido — o modelo real DESTE turno, `t=`, a "
+    "hora do relógio e, na 1ª resposta, o bloco de prontidão. **Não escreva "
+    "cabeçalho nenhum** (nem `Agata ·`, nem `Última entrada:`, nem `pronto.`): "
+    "comece pelo resultado. Do bloco de estado, use no CONTEÚDO: "
+    "`TOPO-PROPOSTA-JA-APLICADA` = a proposta citada no topo já foi aplicada, não "
+    "a chame de pendente; `ALERTA-HISTORIA` = a cópia local de MEMÓRIAS perdeu "
+    "história — diga isso primeiro e não chame `memoria_acrescentar`/`diario_anotar` "
+    "até o Humano resolver (MEMÓRIAS (516)/(517)).\n"
+    "**Opinião com um segundo cérebro:** pedido de opinião, decisão ou risco → "
+    "consulte também o decisor local (modelo Jev, na CPU, sem custo de token): "
+    "`maquina_verificar{comando:\"opiniao_jev\", consulta:\"<a ação ou pergunta>\"}` "
+    "devolve recomendação, reversibilidade e risco em probabilidade. Cite como "
+    "opinião dele, ao lado da sua (MEMÓRIAS (705)).\n\n"
     "**Você PODE medir a Máquina — use antes de afirmar.** A tool "
     "`maquina_verificar` roda uma verificação real no host e devolve a saída: "
     "`perimetro` (os controles do perímetro), `estado`, `git_status`, `git_log`, "
@@ -256,18 +193,17 @@ _DOUTRINA_FIXA = (
     "recusas\" (`PROJETO_REFERENCIA`). Falta que já existe ou foi recusada é "
     "afirmação errada, não sugestão (MEMÓRIAS (660)).\n\n"
     "**AUDITORIA-TURNO-ANTERIOR:** se o bloco de estado trouxer essa linha com "
-    "achados, a Máquina conferiu a SUA resposta anterior e achou erro. Logo "
-    "depois do cabeçalho, corrija em 1 linha (`Correção do turno anterior: …`) "
-    "e siga; acerte o cabeçalho desta resposta. `OK` = nada a corrigir. "
+    "achados, a Máquina conferiu a SUA resposta anterior e achou erro. Comece "
+    "corrigindo em 1 linha (`Correção do turno anterior: …`) e siga; achado de "
+    "cabeçalho é com a Máquina, não com você. `OK` = nada a corrigir. "
     "\"afirmação já desmentida\" = algo que você disse e a Máquina já provou "
     "falso: não repita, nem como \"mantido\" — use a correção que vem junto. "
     "(MEMÓRIAS (662)/(664).)\n"
     "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
-    "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
-    "repetir a correção. Uma resposta tem um cabeçalho só. **Se a resposta vai "
-    "usar ferramenta, chame a ferramenta ANTES de escrever qualquer texto** — o "
-    "cabeçalho e o texto vêm uma vez só, depois das ferramentas ((682): o "
-    "cabeçalho escrito antes da ferramenta saía repetido depois dela).\n\n"
+    "depois de usar ferramenta: continue o texto sem repetir parágrafo nem "
+    "correção. **Se a resposta vai usar ferramenta, chame a ferramenta ANTES de "
+    "escrever qualquer texto** — o texto vem uma vez só, depois das ferramentas "
+    "((682)).\n\n"
     "**MODO (linha do estado):** `conciso` é o padrão — a resposta traz o resultado e "
     "não narra o processo (\"vou verificar…\", \"agora vou…\"); fale do processo só "
     "para constatar erro, em 1 linha. `explicativo` só quando o Humano pedir na "
@@ -303,9 +239,21 @@ _HOP_BY_HOP = {
 _CACHE: dict = {"mtime": None, "texto": ""}
 
 
+_ESTADO_MEMO: dict = {"t": 0.0, "texto": ""}
+
+
 def _estado() -> str:
     """Saída curta de scripts/estado_para_eco.sh (HEAD, topo de MEMÓRIAS, sync).
-    Best-effort — se falhar, devolve string vazia."""
+    Best-effort — se falhar, devolve string vazia. (705) Memória de 10 s: a hidratação
+    e o cabeçalho da Máquina, no mesmo pedido, usam a mesma medição."""
+    if time.monotonic() - _ESTADO_MEMO["t"] < 10 and _ESTADO_MEMO["texto"]:
+        return _ESTADO_MEMO["texto"]
+    texto = _estado_medir()
+    _ESTADO_MEMO.update(t=time.monotonic(), texto=texto)
+    return texto
+
+
+def _estado_medir() -> str:
     import subprocess
     try:
         # 25s (era 15): estado_para_eco.sh faz `git ls-remote` -- local e' instantâneo,
@@ -343,8 +291,7 @@ def _hidratacao(extra: str = "") -> str:
         # medição falha -- antes, `est` vazio só omitia o bloco inteiro sem
         # dizer que algo quebrou (achado 04/09/2026, Camada C).
         if est:
-            linha_modelo = _linha_modelo_real_anterior()
-            corpo = est + (f"\n{linha_modelo}" if linha_modelo else "") + (f"\n{extra}" if extra else "")
+            corpo = est + (f"\n{extra}" if extra else "")  # (705) modelo: cabeçalho da Máquina
             bloco_estado = f"**Estado agora (fatos da Máquina):**\n{corpo}\n"
         else:
             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
@@ -368,11 +315,10 @@ def _bloco_estado_atual(extra: str = "") -> str:
     est = _estado()
     if not est:
         return ""
-    linha_modelo = _linha_modelo_real_anterior()
-    corpo = est + (f"\n{linha_modelo}" if linha_modelo else "") + (f"\n{extra}" if extra else "")
+    corpo = est + (f"\n{extra}" if extra else "")  # (705) modelo: cabeçalho da Máquina
     return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
             f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
-            f"use ESTA hora e ESTE `sync:`):**\n{corpo}\n")
+            f"o cabeçalho é escrito pela Máquina):**\n{corpo}\n")
 
 
 def _lembrar_modelo_real(nome: str) -> None:
@@ -524,7 +470,6 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
 _ROTA_BASE = "seth-livre"
 _LIMIAR_TRIVIAL_CHARS = 400
 _LIMIAR_PESADO_CHARS = 6000
-_LIMIAR_PESADO_MSGS = 10
 
 
 def _texto_e_sinais(msgs: list) -> tuple[int, int, bool]:
@@ -560,8 +505,13 @@ def _classificar_rota(payload: dict) -> str:
         ult = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"),
                   default=len(msgs) - 1)
         msgs = msgs[:ult + 1]
-    total, n_user, codigo = _texto_e_sinais(msgs)
-    if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
+    total, n_user, _ = _texto_e_sinais(msgs)
+    # (705) "pesado" pelo PEDIDO ATUAL, não pelo histórico: a soma da conversa inteira
+    # (saída de ferramenta incluída) mandava toda conversa com ferramenta para o Nemotron
+    # Ultra -- 32 de 77 pedidos medidos em 14/10, e o decisor local diria "livre" em 31.
+    # Contexto longo já tem fila própria (_fila_pela_janela, filas -longo).
+    ult = _ultimo_texto_usuario(msgs)
+    if len(ult) > _LIMIAR_PESADO_CHARS or "```" in ult:
         return "seth-pesado"
     if total < _LIMIAR_TRIVIAL_CHARS and not tem_tools and n_user <= 2:
         return "seth-rapido"
@@ -622,8 +572,7 @@ def _rota_com_travas(escolhida: str | None, payload: dict) -> str:
     if escolhida is None:
         return _classificar_rota(payload)
     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-    total, _, _ = _texto_e_sinais(msgs)
-    if total > _LIMIAR_PESADO_CHARS or len(msgs) > _LIMIAR_PESADO_MSGS:
+    if len(_ultimo_texto_usuario(msgs)) > _LIMIAR_PESADO_CHARS:  # (705) pedido atual, não histórico
         return "seth-pesado"
     if escolhida == "rapido" and payload.get("tools"):
         return "seth-livre"
@@ -674,6 +623,58 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
     threading.Thread(target=_rodar, daemon=True).start()
 
 
+# (705) O cabeçalho é da Máquina: o modelo real DESTE turno (medido na espiada do stream,
+# antes de qualquer byte ao cliente), t pelo contador mecânico, hora do relógio e, na 1ª
+# resposta, o bloco de prontidão. A Seth errava o cabeçalho em quase todo turno.
+_FAMILIAS = (("gemini", "Google"), ("gemma", "Google"), ("ministral", "Mistral"), ("mistral", "Mistral"),
+             ("codestral", "Mistral"), ("nemotron", "NVIDIA"), ("glm", "Zhipu"), ("qwen", "Alibaba"),
+             ("llama", "Meta"), ("gpt-oss", "OpenAI"), ("deepseek", "DeepSeek"))
+
+
+def _descrever_modelo(nome: str | None) -> str:
+    if not nome:
+        return "modelo não verificado"
+    chave = next((k for k in (_perfis().get("modelos") or {}) if k == nome or k.endswith("/" + nome)), "")
+    onde = "local, na Máquina" if "ollama" in (chave or nome).lower() else "nuvem"
+    familia = next((f for t, f in _FAMILIAS if t in nome.lower()), None)
+    return f"{nome} ({familia + ', ' if familia else ''}{onde}; medido pela Máquina neste turno)"
+
+
+def _cabecalho_maquina(msgs: list, modelo: str | None) -> str:
+    n = len(auditoria_turno._turnos(msgs)[0]) + 1
+    hora = time.strftime("%Y-%m-%d %H:%M %z") + " (relógio da Máquina)"
+    if n > 1:
+        return f"Agata · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
+    est = {l.split(":", 1)[0]: l for l in _estado().splitlines() if ":" in l}
+    sync = est.get("sync") or "sync: não verificado · lacuna: estado não medido"
+    topo = est.get("TOPO-MEMÓRIAS", "").split(":", 1)[-1].strip()
+    topo = (topo[:300] + "…") if len(topo) > 300 else (topo or "lacuna (estado não injetado)")
+    quebrado = [est[k] for k in ("ALERTA-HISTORIA",) if k in est] + ([] if sync.startswith("sync: PASS") else [sync])
+    fim = "pronto." if not quebrado else "quebrado: " + "; ".join(q[:200] for q in quebrado)
+    return f"Agata · modelo: {_descrever_modelo(modelo)} · {sync} · {hora}\nÚltima entrada: {topo}\n{fim}"
+
+
+def _injetar_sse(buf: bytes, texto: str) -> bytes | None:
+    """Insere um chunk `delta.content = texto` antes do 1º chunk com TEXTO. None se não há."""
+    linhas = buf.split(b"\n")
+    for i, l in enumerate(linhas):
+        if not l.startswith(b"data:") or l.startswith(b"data: [DONE]"):
+            continue
+        try:
+            o = json.loads(l[5:])
+        except ValueError:
+            continue
+        ch = (o.get("choices") or [{}])[0] if isinstance(o, dict) else {}
+        if ((ch.get("delta") or {}).get("content") or "").strip():
+            novo = {"id": o.get("id"), "object": o.get("object", "chat.completion.chunk"),
+                    "created": o.get("created"), "model": o.get("model"),
+                    "choices": [{"index": ch.get("index", 0), "delta": {"content": texto},
+                                 "finish_reason": None}]}
+            linhas[i:i] = [b"data: " + json.dumps(novo, ensure_ascii=False).encode("utf-8"), b""]
+            return b"\n".join(linhas)
+    return None
+
+
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
@@ -707,6 +708,7 @@ def _injeta(payload: dict) -> dict:
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
+    _cab_ctx = None  # (705) mensagens do pedido, se esta resposta leva o cabeçalho da Máquina
 
     def log_message(self, fmt, *args):
         pass
@@ -721,6 +723,7 @@ class _Handler(BaseHTTPRequestHandler):
         # estado por REQUISIÇÃO: com keep-alive o mesmo handler atende vários
         # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
         self._rota = ""
+        self._cab_ctx = None
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -742,6 +745,10 @@ class _Handler(BaseHTTPRequestHandler):
                     payload["model"] = self._rota
                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
+                msgs0 = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+                if (str(payload.get("model", "")).startswith("seth-") and not _e_chamada_utilitaria(payload)
+                        and not auditoria_turno._em_andamento(msgs0).strip()):
+                    self._cab_ctx = list(msgs0)
                 payload = _injeta(payload)
                 # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
                 # recusa campo a mais com 422 "Extra inputs are not permitted" --
@@ -874,6 +881,21 @@ class _Handler(BaseHTTPRequestHandler):
             self._log(f"upstream parou de responder ({e})", t0)
             up.close()
             return self._erro(504, f"upstream parou de responder: {e}")
+        if self._cab_ctx is not None and up.status == 200:
+            cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
+            if sse:
+                novo = _injetar_sse(buf_pre, cab)
+                if novo is not None:
+                    buf_pre = novo
+            else:
+                try:
+                    o = json.loads(buf_pre)
+                    m = o["choices"][0]["message"]
+                    if (m.get("content") or "").strip():
+                        m["content"] = cab + m["content"]
+                        buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
+                except (ValueError, KeyError, IndexError, TypeError):
+                    pass
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
@@ -1356,9 +1378,9 @@ def _selftest() -> int:
     m10 = json.loads(_Dummy.ultimo_corpo)["messages"]
     est10 = next((x["content"] for x in m10 if isinstance(x.get("content"), str)
                   and MARCADOR_ESTADO in x["content"]), "")
-    ok10c = "MODELO-REAL-TURNO-ANTERIOR: teste/modelo-selftest" in est10
-    print(f"{'PASS' if ok10c else 'FALHA'}  modelo real: turno seguinte cita o nome, rotulado "
-          f"como turno anterior ({'achou' if ok10c else 'não achou'} a linha)")
+    ok10c = "MODELO-REAL-TURNO-ANTERIOR" not in est10 and MARCADOR_ESTADO in est10
+    print(f"{'PASS' if ok10c else 'FALHA'}  (705) estado sem MODELO-REAL-TURNO-ANTERIOR: "
+          f"o modelo vai no cabeçalho da Máquina")
     falhas += 0 if ok10c else 1
     _Dummy.modelo_resposta = None
 
@@ -1404,12 +1426,52 @@ def _selftest() -> int:
     print(f"{'PASS' if ok13 else 'FALHA'}  keep-alive: rota não vaza pro pedido seguinte {rotas13}")
     falhas += 0 if ok13 else 1
 
+    # 17. (705) cabeçalho da Máquina: 1ª resposta = prontidão; 2ª = linha de turno; só ferramenta = nada
+    _Dummy.modelo_resposta = "gemini-2.5-flash"
+    r17a = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+    r17b = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
+                                             {"role": "user", "content": "e agora?"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+    l17 = r17a.splitlines()
+    ok17a = (l17[0].startswith("Agata · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)")
+             and l17[1].startswith("Última entrada:") and (l17[2] == "pronto." or l17[2].startswith("quebrado:")))
+    ok17b = r17b.startswith("Agata · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 (contador mecânico) · ")
+    ok17c = r17a.endswith("ok") and r17b.endswith("ok")
+    print(f"{'PASS' if ok17a else 'FALHA'}  cabeçalho da Máquina, 1ª resposta: prontidão de 3 linhas")
+    print(f"{'PASS' if ok17b else 'FALHA'}  cabeçalho da Máquina, 2ª resposta: t=2 (contador mecânico)")
+    print(f"{'PASS' if ok17c else 'FALHA'}  cabeçalho não come o conteúdo do modelo")
+    falhas += sum(0 if x else 1 for x in (ok17a, ok17b, ok17c))
+    sse = (b'data: {"id":"c1","model":"m","choices":[{"delta":{"role":"assistant"}}]}\n\n'
+           b'data: {"id":"c1","model":"m","choices":[{"delta":{"content":"oi"}}]}\n\n')
+    inj = _injetar_sse(sse, "CAB\n\n") or b""
+    ok17d = inj.index(b'"CAB') < inj.index(b'"oi"') and inj.count(b"data:") == 3
+    so_ferr = b'data: {"id":"c1","choices":[{"delta":{"tool_calls":[{"index":0}]}}]}\n\n'
+    ok17e = _injetar_sse(so_ferr, "CAB") is None
+    print(f"{'PASS' if ok17d else 'FALHA'}  SSE: cabeçalho entra antes do 1º texto")
+    print(f"{'PASS' if ok17e else 'FALHA'}  SSE: resposta só de ferramenta não recebe cabeçalho")
+    falhas += (0 if ok17d else 1) + (0 if ok17e else 1)
+    ok17f = "local, na Máquina" in _descrever_modelo("qwen3.5-9b-64k:latest") or "Alibaba" in _descrever_modelo("qwen3.5-9b-64k:latest")
+    ok17g = _descrever_modelo(None) == "modelo não verificado"
+    print(f"{'PASS' if ok17f and ok17g else 'FALHA'}  descrição do modelo: {_descrever_modelo('qwen3.5-9b-64k:latest')}")
+    falhas += 0 if ok17f and ok17g else 1
+    # 18. (705) rota pelo pedido atual: histórico longo com saída de ferramenta + pergunta simples = livre
+    hist18 = [{"role": "user", "content": "x" * 300}, {"role": "assistant", "content": "", "tool_calls": [{"id": "t"}]},
+              {"role": "tool", "content": "z" * 20000}, {"role": "assistant", "content": "y" * 3000}] * 4 + [
+             {"role": "user", "content": "e o que você acha disso?"}]
+    r18 = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}], "messages": hist18})
+    print(f"{'PASS' if r18 == 'seth-livre' else 'FALHA'}  rota pelo pedido atual, não pelo histórico (deu {r18})")
+    falhas += 0 if r18 == "seth-livre" else 1
+    _Dummy.modelo_resposta = None
+
     # 14. (695) resposta vazia -> 1 nova tentativa, fila acima; o cliente recebe a 2ª
     _Dummy.vazias, _Dummy.modelos_pedidos = 1, []
     body = json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode()
     r14 = json.loads(urllib.request.urlopen(urllib.request.Request(
         base, data=body, headers={"Content-Type": "application/json"}), timeout=10).read())
-    ok14 = (r14["choices"][0]["message"]["content"] == "ok"
+    ok14 = (r14["choices"][0]["message"]["content"].endswith("ok")  # (705) agora com o cabeçalho da Máquina na frente
             and _Dummy.modelos_pedidos == ["seth-rapido", "seth-livre"])
     print(f"{'PASS' if ok14 else 'FALHA'}  resposta vazia -> nova tentativa na fila acima "
           f"({_Dummy.modelos_pedidos})")
