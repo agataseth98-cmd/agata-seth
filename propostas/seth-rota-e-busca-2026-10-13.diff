@@ -1,5 +1,5 @@
 diff --git a/PROJETO.md b/PROJETO.md
-index 1eda47b..b212735 100644
+index dbd8b36..cacba4f 100644
 --- a/PROJETO.md
 +++ b/PROJETO.md
 @@ -96,7 +96,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
@@ -64,7 +64,7 @@ index 1b7c95b..f464cb1 100644
      {
        "id": "indices-manuais",
 diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
-index 21b7444..9bd6e30 100644
+index 21b7444..da86f8a 100644
 --- a/redesign/router/seth_gateway.py
 +++ b/redesign/router/seth_gateway.py
 @@ -43,6 +43,7 @@ import re
@@ -111,7 +111,19 @@ index 21b7444..9bd6e30 100644
      total, n_user, codigo = _texto_e_sinais(msgs)
      if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
          return "seth-pesado"
-@@ -727,7 +739,14 @@ class _Handler(BaseHTTPRequestHandler):
+@@ -694,6 +706,11 @@ class _Handler(BaseHTTPRequestHandler):
+                         _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
+                 payload = _injeta(payload)
++                # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
++                # recusa campo a mais com 422 "Extra inputs are not permitted" --
++                # Ministral e Codestral caíam sempre e a fila pulava para o próximo.
++                # Campo opcional do OpenAI, nada no caminho o usa: sai aqui.
++                payload.pop("user", None)
+                 longa = _fila_pela_janela(payload)
+                 if longa:
+                     print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
+@@ -727,7 +744,14 @@ class _Handler(BaseHTTPRequestHandler):
                  return nome
          return None
  
@@ -126,7 +138,7 @@ index 21b7444..9bd6e30 100644
          url = UPSTREAM + self.path
          headers = {k: v for k, v in self.headers.items()
                     if k.lower() not in _HOP_BY_HOP}
-@@ -737,7 +756,9 @@ class _Handler(BaseHTTPRequestHandler):
+@@ -737,7 +761,9 @@ class _Handler(BaseHTTPRequestHandler):
              up = urllib.request.urlopen(req, timeout=180)
          except urllib.error.HTTPError as e:
              up = e
@@ -136,7 +148,7 @@ index 21b7444..9bd6e30 100644
              return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
                                     "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
          sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
-@@ -760,9 +781,14 @@ class _Handler(BaseHTTPRequestHandler):
+@@ -760,9 +786,14 @@ class _Handler(BaseHTTPRequestHandler):
                  buf_pre = up.read()
                  modelo_real = self._modelo_de_bytes(buf_pre)
          except (BrokenPipeError, ConnectionResetError):
@@ -151,7 +163,7 @@ index 21b7444..9bd6e30 100644
          self.send_response(up.status)
          for k, v in up.headers.items():
              if k.lower() not in _HOP_BY_HOP:
-@@ -790,6 +816,7 @@ class _Handler(BaseHTTPRequestHandler):
+@@ -790,6 +821,7 @@ class _Handler(BaseHTTPRequestHandler):
              # sem isto a exceção subia e o servidor inteiro emperrava (a Seth
              # "travou" no teste 3, MEMÓRIAS (393)). close_connection pra o
              # keep-alive não reusar o socket morto.
@@ -159,7 +171,23 @@ index 21b7444..9bd6e30 100644
              self.close_connection = True
          finally:
              up.close()
-@@ -1066,6 +1093,17 @@ def _selftest() -> int:
+@@ -930,6 +962,15 @@ def _selftest() -> int:
+           f"({len(m[0]['content'])} chars)")
+     falhas += 0 if ok else 1
+ 
++    # 1b. (683) campo `user` do LibreChat não chega ao OmniRoute (Mistral: 422)
++    body_u = json.dumps({"model": "seth", "user": "6a99c85", "messages": [
++        {"role": "user", "content": "oi"}]}).encode()
++    urllib.request.urlopen(urllib.request.Request(
++        base, data=body_u, headers={"Content-Type": "application/json"}), timeout=10).read()
++    ok1b = "user" not in json.loads(_Dummy.ultimo_corpo)
++    print(f"{'PASS' if ok1b else 'FALHA'}  campo `user` retirado antes do OmniRoute")
++    falhas += 0 if ok1b else 1
++
+     # 2. pedido JÁ hidratado -> NÃO repete a doutrina, MAS reinjeta ESTADO-ATUAL
+     body2 = json.dumps({"model": "seth", "messages": [
+         {"role": "system", "content": f"{MARCADOR}\nx"},
+@@ -1066,6 +1107,17 @@ def _selftest() -> int:
          print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
          falhas += 0 if ok else 1
  
@@ -238,6 +266,32 @@ index df05c2b..7cce088 100644
      try:
          _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
      except ValueError:
+diff --git a/redesign/systemd/dropin-omniroute-prazos.conf b/redesign/systemd/dropin-omniroute-prazos.conf
+new file mode 100644
+index 0000000..6aab543
+--- /dev/null
++++ b/redesign/systemd/dropin-omniroute-prazos.conf
+@@ -0,0 +1,20 @@
++# Agata -- OmniRoute: prazo para um modelo começar a responder (MEMÓRIAS (683)).
++#
++# Medido em 14/10/2026 (call logs do OmniRoute): o Gemini 2.5 Flash, com a cota
++# gratuita do dia estourada, ficou 310 s com o stream aberto sem mandar nada; o
++# LibreChat desistiu antes ("Request aborted", 499) e a resposta da Seth morreu,
++# com o Nemotron-Super logo atrás pronto para responder em ~2 s.
++#
++# Lido no código do pacote (src/shared/utils/runtimeTimeouts.ts e
++# open-sse/config/constants.ts): STREAM_IDLE_TIMEOUT_MS é o prazo, ANTES de o
++# stream ser aceito, para o primeiro evento útil ("zombie streams fail fast and
++# trigger fallback") e, depois, o de silêncio no meio do stream. Padrão: 600000
++# (10 min) -- mais que o LibreChat espera. 60 s: o modelo que não começa em 1
++# minuto cai e a fila passa ao próximo; um modelo lento de verdade raramente fica
++# 1 minuto calado no meio da resposta.
++#
++# Instala com: cp dropin-omniroute-prazos.conf
++# ~/.config/systemd/user/omniroute.service.d/prazos.conf + systemctl --user
++# daemon-reload + restart do omniroute. Desfaz: apagar o arquivo e reiniciar.
++[Service]
++Environment=STREAM_IDLE_TIMEOUT_MS=60000
 diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
 index a37d2d6..84eaaa8 100644
 --- a/scripts/busca_semantica.py

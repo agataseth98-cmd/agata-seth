@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:44 de 13/10): uma resposta dela ficou pendurada e morreu. Três causas medidas no OmniRoute; duas entram na proposta `seth-rota-e-busca-2026-10-13`, ainda sem assinatura — o `.diff` foi refeito, (682) não se edita.**
+  palavras-chave: verifica, seth, acho, bugou, humano, resposta, dela, ficou, pendurada, morreu, três, causas, medidas, omniroute, entram, proposta, rota, busca, assinatura, diff, refeito, edita
 (682) CONSELHO — 13/10/2026 · **Teste real da Seth no LibreChat (conversa "Teste de busca no vault") e proposta `seth-rota-e-busca-2026-10-13`, a pedido do Humano ("vamos fazer agora tudo que pudermos"; "tudo até o dossiê"): a resposta não troca mais de fila no meio, o gateway passa a registrar erro, a busca de texto ignora acento e casa por palavras, a busca por sentido cobre `extras/` — e `extras/` inteiro, dossiê incluído, fica legível pela Seth. Aguardando assinatura.**
   palavras-chave: teste, real, seth, librechat, conversa, busca, vault, proposta, rota, pedido, humano, vamos, fazer, agora, tudo, pudermos, dossiê, resposta, troca, fila, meio, gateway, passa, registrar, erro, texto, ignora, acento, casa, palavras, sentido, cobre, extras, inteiro, incluído, fica, legível, aguardando, assinatura
 (681) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-tema-sync-2026-10-13` (assinada pelo Humano): o atalho `seth` passa a copiar o tema da Agata para o LibreChat.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pendências, projeto, estado, bugs, testes, fechadas, proposta, fechamento, decisor, arquivos, aguardando, assinatura, correção, medição, vira, risco, fundo, declarado, números, achado, novo, corrida, boot, fazia, pesquisa, semanal, consolidação, rodarem, omniroute, minha, diagnóstico, seth, livre, instável, dei, cedo, sessão, estava, errado
 (654) DIÁRIO — 03/10/2026 · **Teste de ponta a ponta pedido pelo Humano achou `seth-pesado` lento/travado no elo 0 (`gemini-2.5-flash`, provável cota diária esgotada) — reordenado igual ao `seth-livre`: `gemini-2.5-flash` desceu, `openrouter/nemotron-3-ultra` assumiu o elo 0. Testado ao vivo, 200. E: o Humano fixou "economia de tokens" como padrão PERMANENTE do sistema, não medida temporária até quarta.**
   palavras-chave: teste, ponta, pedido, humano, achou, seth, pesado, lento, travado, elo, gemini, flash, provável, cota, diária, esgotada, reordenado, igual, livre, desceu, openrouter, nemotron, ultra, assumiu, testado, vivo, fixou, economia, tokens, padrão, permanente, sistema, medida, temporária, quarta
-(653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até 07/10 (crédito de R$40, sem sessão até lá, pedido do Humano de economia máxima de tokens): os 2 elos mais instáveis (`zai/glm-4.7-flash`, `gemini/gemini-3-flash-preview` — a dupla que explica a fila inteira ter falhado em (652)) desceram pro fim, antes só do `ollama-local`. Testado ao vivo, 200.**
-  palavras-chave: seth, livre, reordenado, pra, regime, fallback, crédito, sessão, pedido, humano, economia, máxima, tokens, elos, instáveis, zai, glm, flash, gemini, preview, dupla, explica, fila, inteira, ter, falhado, desceram, pro, fim, ollama, local, testado, vivo
+(653) DIÁRIO — 03/10/2026 · **`seth-livre` reordenado pra regime de fallback até …
+  palavras-chave: seth, livre, reordenado, pra, regime, fallback
 (652) DIÁRIO — 03/10/2026 · **`llamacpp-agata` já estava `disabled`/`inactive` ( …
   palavras-chave: llamacpp, agata, estava, disabled, inactive
 (651) CORREÇÃO — 03/10/2026 · **`queda-por-elo-2026-10-03` assinada, aplicada, s …
