@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
+  palavras-chave: proposta, seth, cabecalho, maquina, cabeçalho, passa, escrito, máquina, modelo, real, medido, próprio, turno, rota, segue, pedido, atual, histórico, jev, vira, segunda, opinião, sob, volta, funcionar, pedidos, humano, faça, escrever, dai, aprimore, sistema, reconhecimento, baixo, facilite, acesso, modelos, assunto, for, verifique, aplicações, perdermos, features, diminuirmos, consumo, tokens, corrija, mecanicamente, erros, encontrados, aguardando, assinatura
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
   palavras-chave: reteste, pedida, avaliação, últimas, mudanças, ela, juízo, técnico, marcado, tal, chama, ferramenta, query, canon, vault, buscar, cabeçalho, segue, sendo, ponto, fraco, acusado, auditoria, turno
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assinada pelo Humano), em worktree. Reteste da avaliação na entrada seguinte.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, vault, rotulos, assinada, humano, catálogo, auditoria, regra, testar, buscar, avaliar, memória, grafo, nome, nota, passar, mouse, distância
 (676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedido do Humano ("pode preparar"; e "no gráfico 3D … não consigo saber o que cada bolinha é"): auditoria da Seth da 16:47 vira regra e catálogo; e o grafo 3D passa a mostrar o nome da nota ao passar o mouse, de qualquer distância. Aguardando assinatura.**
   palavras-chave: proposta, seth, vault, rotulos, pedido, humano, pode, preparar, gráfico, consigo, saber, bolinha, auditoria, vira, regra, catálogo, grafo, passa, mostrar, nome, nota, passar, mouse, distância, aguardando, assinatura
-(675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
-  palavras-chave: execução, aplicada, cerebro, navegavel, assinada, humano, brain, atlas, parado, new, graph, instalado, cores, regiões, obsidian, reiniciado, falta, abrir, navegar
+(675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinad …
+  palavras-chave: execução, aplicada, cerebro, navegavel, assinad
 (674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedid …
   palavras-chave: proposta, cerebro, navegavel, pedid
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assin …

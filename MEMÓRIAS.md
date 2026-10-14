@@ -26,20 +26,46 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9e8e7e618d1ff004206ae24606b30600d4d9caff
-  Escrito em: 14/10/2026 16:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 437c7308cec7dd7666742d6af61af66a9ed31be5
+  Escrito em: 14/10/2026 16:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e8e7e618d1ff004206ae24606b30600d4d9caff/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e8e7e618d1ff004206ae24606b30600d4d9caff/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e8e7e618d1ff004206ae24606b30600d4d9caff/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e8e7e618d1ff004206ae24606b30600d4d9caff/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e8e7e618d1ff004206ae24606b30600d4d9caff/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
+
+**Auditoria dos usos do Jev** (decisor local `winnow:e4b`, Ollaya `:11435`, CPU, zero token; medido em 14/10, logs de `~/.cache/agata/decisor/`):
+- **Roteador em sombra** (`seth_gateway._sombra_rota`): 77 decisões, 5 erros, ~4 s cada; confiança ≥0,6 em 43; concordou com a heurística em 15. Nos 32 pedidos que a heurística mandou para `seth-pesado`, o Jev diria `livre` em 31. **Causa medida:** a heurística somava a conversa INTEIRA (saída de ferramenta incluída) — passou de 6.000 caracteres, ia para o Nemotron Ultra, mesmo com a pergunta da vez sendo simples. Foi lá que a Seth quebrou em (697).
+- **P-20, dado pessoal** (`scripts/perimetro/p20_decisor.py`): 336 chamadas, **297 timeouts** (88%). Latência medida agora: 800 caracteres 13 s, 1.500 13,7 s, 2.500 20,7 s, 4.000 31,5 s; o trecho era 4.000 e o prazo padrão 15 s — na prática desligado, e cada commit esperava até 45 s à toa.
+- **Inbox do Obsidian** e **consolidação noturna**: ociosos (nenhuma nota no inbox; a consolidação de 13/10 foi reprovada pela trava mecânica antes do Jev). **Avaliação diária** (20:00): ativa. Nenhum desses muda — `decidir/escolha/probabilidade/nota` ficam iguais.
+
+**Mudanças (6 arquivos):**
+1. **Cabeçalho da Máquina** (`seth_gateway.py`): o gateway já espiava o stream até o 1º conteúdo (695), então sabe o modelo real DESTE turno antes de mandar qualquer byte. Ele monta e injeta o cabeçalho antes do 1º texto (chunk SSE próprio; no JSON, prefixo): na 1ª resposta, o bloco de prontidão (sync e topo do estado, `pronto.`/`quebrado:` pelo sync e pelo `ALERTA-HISTORIA`); depois, `Agata · <modelo> · t=<n> (contador mecânico) · <hora> (relógio da Máquina)`. Passo só de ferramenta não leva cabeçalho; o passo seguinte, com texto, leva. Estado com memória de 10 s (hidratação e cabeçalho usam a mesma medição).
+2. **Reconhecimento do modelo:** `gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)`, `qwen3.5-9b-64k:latest (Alibaba, local, na Máquina; …)` — família por trecho do nome, local/nuvem pelos perfis da Capivara. A linha `MODELO-REAL-TURNO-ANTERIOR` sai do estado.
+3. **Doutrina:** o manual de montar cabeçalho (~5,6 mil caracteres) vira um parágrafo de 1,1 mil — "o cabeçalho é da Máquina; não escreva cabeçalho nenhum". Doutrina: 13,6 → 8,2 mil caracteres (~1.350 tokens a menos por conversa), e acabam os turnos gastos em "Correção do turno anterior: cabeçalho…".
+4. **Rota pelo pedido atual:** `seth-pesado` só se a mensagem atual do Humano passa de 6.000 caracteres ou traz código; o histórico não conta mais (contexto longo já tem as filas `-longo`, pela janela). Sai o limite de 10 mensagens. É o que o Jev sugeria, sem os 4–13 s de CPU no caminho da resposta.
+5. **Jev para opinião:** `decisor.py --opinar -- "<texto>"` (recomendação fazer/não fazer/depende, reversível, risco) e o comando `opiniao_jev` na lista fechada do `seth_verificador` (consulta como dado depois de `--`, `n` recusado). A Seth já tem `maquina_verificar{comando, consulta}` — sem mudar MCP nem container. Medido: "apagar os checkpoints antigos do treino da voz para liberar disco" → `recomendação=fazer (0,59) · reversível p=0,41 · risco p=0,30` em 6 s.
+6. **P-20:** trecho 1.200 caracteres, até 2 por arquivo, prazo 30 s.
+Auditoria: aceita "medido pela Máquina neste turno"; cabeçalho escrito também pela Seth cai em "2 cabeçalhos — a Máquina já escreve o cabeçalho".
+
+**Promover o Jev a roteador real** (pergunta do Humano): trocaria a fila pelo sentido do pedido a cada turno, entrando e saindo de modelo conforme a tarefa — mas hoje custa 4–13 s de CPU antes de cada resposta e só decide com confiança em 56% dos pedidos. A rota pelo pedido atual (item 4) captura o ganho principal — conversa longa e simples sai do Nemotron — de graça. O Jev segue em sombra, medindo a regra nova; o caminho para promover é o relatório de (655) (`scripts/avaliar_decisor.py --rotular`).
+
+**Verificado:** selftests `seth_gateway.py` (+8 casos: prontidão, linha de turno, conteúdo intacto, SSE antes do 1º texto, só-ferramenta sem cabeçalho, descrição do modelo, rota pelo pedido atual, estado sem a linha antiga), `auditoria_turno.py` (+1), `seth_verificador.py` 45/45, `decisor.py`, `p20_decisor.py`; `verificar_cabecalho` aceita a prontidão da Máquina; `git apply --check` contra o `main`.
+
+**Riscos:** o LibreChat precisa aceitar um chunk de texto antes do primeiro do modelo (formato OpenAI padrão; conferir no LibreChat de verdade depois de aplicar); se o modelo escrever cabeçalho mesmo assim, saem dois e a auditoria acusa; o `quebrado:` mecânico só olha sync e alarme de história, não a lista de bugs do PROJETO.
+
+**sync:** PASS — worktree a partir de `origin/main` em `437c730`; topo de MEMÓRIAS = (704).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: logs do decisor (`roteador.jsonl`, `p20.jsonl`, `avaliacao.json`), latência medida no Ollaya por tamanho, `decisor.py --opinar` ao vivo, selftests · Autorização: Humano, nesta sessão (falas citadas acima; plano aprovado).
 
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
 
