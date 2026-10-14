@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
+  palavras-chave: execução, aplicada, seth, zerar, assinada, humano, primeira, worktree, agata, recebe, pull, merge, gateway, reiniciado, então, reteste, vai, entrada, seguinte
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
   palavras-chave: proposta, seth, zerar, pedido, humano, vamos, deixe, tudo, perfeito, fecha, auditoria, resposta, achou, falso, perdeu, história, sermão, cumprimento, duplicada, sync, linha, turno, positivo, própria, aguardando, assinatura
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, cerebro, tudo, ligado, assinada, humano, regiões, contadas, brain, atlas, limite, mil, ligações, entram
 (672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
   palavras-chave: proposta, cerebro, tudo, ligado, pedido, humano, ligue, vendo, parietal, occipital, tronco, tabela, passa, contar, cérebro, inteiro, limite, ligações, brain, atlas, sobe, mil, terço, sinapses, estava, fora, aguardando, assinatura
-(671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada pelo Humano): cérebro 3D instalado, vault regenerado com regiões e ligações por sentido, listagem do vault em dia, `vault_buscar` no ar para a Seth, tema da Agata no LibreChat. Falta o Humano ver na tela.**
-  palavras-chave: execução, aplicada, obsidian, cerebro, assinada, humano, cérebro, instalado, vault, regenerado, regiões, ligações, sentido, listagem, dia, buscar, seth, tema, agata, librechat, falta, tela
+(671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada …
+  palavras-chave: execução, aplicada, obsidian, cerebro, assinada
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido …
   palavras-chave: proposta, obsidian, cerebro, pedido
 (669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assina …

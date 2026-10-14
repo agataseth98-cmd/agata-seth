@@ -79,7 +79,15 @@ sujos=$(git -c core.quotepath=false diff --name-only HEAD -- "${CANONICOS[@]}" 2
 # reescreveu o arquivo inteiro (2457 -> 14 linhas) e ficou assim a manhã toda
 # com `sync: FALHA` genérico, sem ninguém reagir. Linha própria, com número,
 # pra ninguém confundir com "tem entrada pendente".
-removidas=$(git diff --numstat HEAD -- MEMÓRIAS.md 2>/dev/null | awk '{print $2}' | head -1 || true)
+# (700) Só o CORPO conta (abaixo do marcador ENTRADAS-NOVAS). O pre-commit reescreve a
+# âncora de SHA do preâmbulo e roda o perímetro (30-60 s) antes de o commit fechar: nessa
+# janela a âncora trocada contava como "linha removida" e a Seth via falso "perdeu história"
+# (14/10/2026, 15:54). História apagada é linha removida do corpo -- a âncora não é história.
+marcador_head=$(git show HEAD:MEMÓRIAS.md 2>/dev/null | grep -n -m1 'ENTRADAS-NOVAS:AQUI' | cut -d: -f1 || true)
+removidas=$(git diff -U0 HEAD -- MEMÓRIAS.md 2>/dev/null | awk -v m="${marcador_head:-0}" '
+  /^@@/ { split($2, a, ","); ini = substr(a[1], 2) + 0; n = (a[2] == "" ? 1 : a[2] + 0)
+          for (i = 0; i < n; i++) if (ini + i > m) c++ }
+  END { print c + 0 }' || true)
 alerta_historia=""
 if [ -n "$removidas" ] && [ "$removidas" != "-" ] && [ "$removidas" -gt 0 ] 2>/dev/null; then
   alerta_historia="ALERTA-HISTORIA: MEMÓRIAS.md perdeu $removidas linha(s) em relação ao HEAD, sem commit -- história apagada na cópia local (Regra 4). Não escreva em MEMÓRIAS nem commite; avise o Humano. O canon no GitHub não é afetado."
