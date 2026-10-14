@@ -180,7 +180,36 @@ def _selftest() -> int:
     return 1 if falhas else 0
 
 
+# (705) Segunda opinião local para a Seth: pedido de opinião, decisão ou risco. Mesmo
+# formato de pergunta tipada do roteador (seth_gateway._PERGUNTA_ROTA). É opinião de um
+# modelo de decisão na CPU -- nunca fato, nunca decide pelo Humano.
+PERGUNTAS_OPINIAO = {
+    "recomendacao": {"type": "choice",
+                     "instructions": "Given this proposed action or question, what is the sensible recommendation?",
+                     "criteria": {"fazer": "do it: the benefit clearly outweighs the risk",
+                                  "nao_fazer": "don't: the risk or cost outweighs the benefit",
+                                  "depende": "it depends on missing information: measure or ask first"}},
+    "reversivel": {"type": "noul", "instructions": "The action can be undone easily, without outside help."},
+    "risco": {"type": "noul", "instructions": "The action could cause data loss, a service outage or a leak of secrets."},
+}
+
+
+def opinar(texto: str, timeout: float = 40.0) -> str:
+    r = decidir("opiniao", texto, PERGUNTAS_OPINIAO, timeout=timeout)
+    if r is None:
+        return "decisor local indisponível (Ollaya fora do ar ou estourou o prazo) — sem segunda opinião desta vez."
+    rec = r.get("recomendacao") or {}
+    p_rev, p_risco = probabilidade(r, "reversivel"), probabilidade(r, "risco")
+    fmt = lambda p: "?" if p is None else f"{p:.2f}"
+    return (f"opinião do decisor local ({MODELO}, CPU; é opinião de um modelo de decisão, não fato): "
+            f"recomendação={rec.get('choice', '?')} (confiança {fmt(rec.get('confidence'))}) · "
+            f"reversível p={fmt(p_rev)} · risco p={fmt(p_risco)}")
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["--selftest"]:
         sys.exit(_selftest())
+    if len(sys.argv) == 4 and sys.argv[1:3] == ["--opinar", "--"]:
+        print(opinar(sys.argv[3]))
+        sys.exit(0)
     print(__doc__)

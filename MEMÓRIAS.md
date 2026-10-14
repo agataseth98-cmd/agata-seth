@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 437c7308cec7dd7666742d6af61af66a9ed31be5
-  Escrito em: 14/10/2026 16:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 440e6d644e799908fabd5f1645513c2138038b80
+  Escrito em: 14/10/2026 19:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/437c7308cec7dd7666742d6af61af66a9ed31be5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/440e6d644e799908fabd5f1645513c2138038b80/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (assinada pelo Humano) — em dois tempos, por um incidente meu: a 1ª tentativa, numa worktree, levou ao `main` (PR #208) só o `p20_decisor.py`; o resto entra agora. Causa achada: a suíte do perímetro, rodando dentro do `pre-commit` de uma worktree, comita na branch da worktree. Conserto da suíte em proposta própria.**
+
+**O que aconteceu** (19:19–19:23): na worktree `../agata-wt-ap3`, o `pre-commit` rodou o perímetro, que roda a suíte adversarial (`scripts/testar_perimetro.sh`). A suíte clona o repo num diretório temporário e faz `git add -A && git commit … "base da suite: arvore de trabalho"` dentro do clone — mas o git exporta `GIT_DIR`/`GIT_INDEX_FILE` para o hook, e numa worktree eles apontam para a branch dela: o commit da suíte caiu na MINHA branch (`73f32bf`, só `scripts/perimetro/p20_decisor.py`) e mexeu no índice. O pre-commit do meu commit falhou ("PROJETO.md staged ganhou conteúdo fora da âncora…"), o commit da suíte subiu no push e o PR #208 juntou só ele. No `~/agata` isso não acontece (o `GIT_DIR` do hook é relativo e resolve no clone) — por isso as outras aplicações de hoje não tiveram o problema: nenhuma mexia em `scripts/perimetro/`, que é o que faz a suíte rodar.
+
+**Efeito:** o `main` ficou com o P-20 da proposta assinada (conteúdo autorizado, igual ao `.diff` — conferido com `git apply --check -R`), sem o resto e sem o par em `aplicadas/`. O gateway em produção não mudou (código anterior), nada quebrou para o Humano.
+
+**Completado agora, no `~/agata`:** assinatura conferida contra o `.diff` (sha256 da cópia de segurança); `git apply --exclude=scripts/perimetro/p20_decisor.py`; par em `propostas/aplicadas/`; selftests `auditoria_turno.py`, `seth_gateway.py`, `seth_verificador.py` 45/45, `decisor.py` OK. Gateway e verificador reiniciados depois do merge; reteste ao vivo na entrada seguinte.
+
+**Lição para mim:** worktree serve para proposta e registro; aplicação que mexe em `scripts/perimetro/` (ou qualquer coisa que dispare a suíte) vai no `~/agata` até o conserto da suíte entrar.
+
+**sync:** PASS — `main` = `origin/main` em `440e6d6` (PR #208, parcial) antes do branch; topo de MEMÓRIAS = (705).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `git show 440e6d6^2`, `scripts/testar_perimetro.sh` (linhas 56–101), `git apply --check -R`, selftests · Autorização: Humano — assinatura de `seth-cabecalho-maquina-2026-10-14`; merge autorizado nesta conversa (693).
 
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
 
