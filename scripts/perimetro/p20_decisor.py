@@ -21,8 +21,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "redesign" / "route
 import decisor  # noqa: E402
 
 LIMIAR = 0.7
-TRECHO = 4000
-MAX_TRECHOS = 3
+# (705) 4000 caracteres levavam 31,5 s no winnow:e4b (CPU) e estouravam os 15 s padrão:
+# 297 de 336 chamadas deram timeout em 13-14/10. 1200 cabem (~13 s medidos).
+TRECHO = 1200
+MAX_TRECHOS = 2
+PRAZO = 30.0
 _PERGUNTA = {"pessoal": {
     "type": "noul",
     "instructions": "This text reveals private personal information about a real person: "
@@ -42,7 +45,7 @@ def avisos(arquivo: str, texto: str) -> list[str]:
         if not trecho.strip():
             continue
         p = decisor.probabilidade(
-            decisor.decidir("p20", trecho, _PERGUNTA, meta={"arquivo": arquivo, "trecho": n}),
+            decisor.decidir("p20", trecho, _PERGUNTA, timeout=PRAZO, meta={"arquivo": arquivo, "trecho": n}),
             "pessoal")
         if p is not None and p >= LIMIAR:
             saida.append(
