@@ -36,6 +36,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -69,6 +71,11 @@ _OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [�
 _MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
                      r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
+# (695) Persona de função: biografia ou emoção humana inventada é o começo da deriva
+# ("Assistant Axis", (685)). Achado da própria Seth na auditoria de 14/10, 15:01.
+_BIOGRAFIA = re.compile(r"\beu (?:tenho|tinha) \d+ anos|\banos de experi[êe]ncia|\bquando eu era\b|"
+                        r"\bminha (?:inf[âa]ncia|m[ãa]e|fam[íi]lia|vida pessoal)\b|\beu (?:sinto|senti|adoro|adorei|amo)\b|"
+                        r"\bfico (?:muito |t[ãa]o )?feliz\b|\bme (?:emociona|deixa feliz)", re.IGNORECASE)
 # (686) Trecho citado não é fala dela (pareceres do Conselho de 14/10): aspas e linha de citação.
 _CITADO = re.compile(r'"[^"\n]{0,300}"|“[^”\n]{0,300}”|«[^»\n]{0,300}»')
 
@@ -90,7 +97,9 @@ def _nomes_ferramentas() -> set[str]:
 
 _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
 _SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
-                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b", re.IGNORECASE)
+                     r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b|"
+                     # (695) frase que DESCREVE a invenção ("JSON de `maquina_verificar` sem chamada") não é alegação
+                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b", re.IGNORECASE)
 
 
 def _chamadas(msgs: list) -> set[str]:
@@ -131,6 +140,42 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
             "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
 
 
+# (695) Estado desatualizado: chamar de pendente uma proposta que já foi aplicada. Na
+# auditoria de 14/10, 15:01, a Seth leu (687) e afirmou "voz-comum aguarda assinatura" --
+# aplicada horas antes. Determinístico: o par aplicado mora em propostas/aplicadas/.
+_NOME_PROPOSTA = re.compile(r"\b([a-z0-9]+(?:-[a-z0-9]+)*-20\d\d-\d\d-\d\d)\b")
+_PENDENTE = re.compile(r"pendent|aguard|n[ãa]o assinad|falta(?:m)? assinar|sem assinatura|esperando assinatura", re.IGNORECASE)
+
+
+def _estado_desatualizado(texto: str) -> list[str]:
+    velhas = set()
+    for frase in re.split(r"(?<=[.;!?])\s+|\n", texto):
+        if not _PENDENTE.search(frase) or re.search(r"aplicad", frase, re.IGNORECASE):
+            continue
+        for nome in _NOME_PROPOSTA.findall(frase):
+            if (RAIZ / "propostas" / "aplicadas" / f"{nome}.diff").is_file():
+                velhas.add(nome)
+    if not velhas:
+        return []
+    return [f"estado desatualizado: {', '.join(sorted(velhas))} já {'foi aplicada' if len(velhas) == 1 else 'foram aplicadas'} "
+            "(par em propostas/aplicadas/) — pendente é só o que a linha PROPOSTAS-PENDENTES do estado lista (695)"]
+
+
+# (695) O achado também chega ao Humano: notificação na área de trabalho, best-effort.
+AVISAR = os.environ.get("AGATA_AVISO_AUDITORIA", "1") != "0"
+
+
+def _avisar_humano(achados: list[str]) -> None:
+    if not (AVISAR and achados and shutil.which("notify-send")):
+        return
+    corpo = "\n".join(f"• {x[:140]}" for x in achados[:3]) + (f"\n(+{len(achados) - 3})" if len(achados) > 3 else "")
+    try:
+        subprocess.Popen(["notify-send", "-a", "Agata", f"Auditoria da Seth: {len(achados)} achado(s)", corpo],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except OSError:
+        pass
+
+
 def _estilo(texto: str) -> list[str]:
     """Tiques da personalidade (685) na resposta: saudação na 1ª linha depois do
     cabeçalho, oferta/encerramento, muleta/interjeição, emoji, exclamação em série."""
@@ -153,6 +198,8 @@ def _estilo(texto: str) -> list[str]:
     muletas = sorted({m.group(0).strip().lower() for m in _MULETA.finditer(prosa)})
     if muletas:
         achados.append("muleta/interjeição (" + ", ".join(f"'{m}'" for m in muletas) + ")")
+    if _BIOGRAFIA.search(prosa):
+        achados.append(f"biografia/emoção inventada ('{_BIOGRAFIA.search(prosa).group(0)}')")
     if _EMOJI.search(prosa):
         achados.append("emoji")
     if prosa.count("!") > 2:
@@ -339,7 +386,9 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
     texto, n = respostas[-1], len(respostas)
     cabs = _cabecalhos(texto)
     if not cabs:
-        return ["cabeçalho: a resposta não abriu com cabeçalho"]
+        # (695) sem cabeçalho, o conteúdo ainda é conferido -- antes saía só este achado e
+        # a resposta das 15:01 de 14/10 ("voz-comum ... pendente") passou sem checagem.
+        return ["cabeçalho: a resposta não abriu com cabeçalho"] + _conteudo(texto, msgs)
     primeiro = "\n".join(cabs[0])
     prontidao = len(cabs[0]) > 1
     achados = [f"cabeçalho: {f}" for f in _cab.verificar(primeiro, _cab.ultima_entrada_local())]
@@ -368,22 +417,31 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
     if modelo and not re.search(r"n[ãa]o verificad|medido no turno anterior|fam[íi]lia", modelo, re.IGNORECASE):
         achados.append(f"cabeçalho: modelo '{modelo}' sem ressalva — o modelo DESTE turno não é medido; "
                        "use '(medido no turno anterior pela Máquina; este turno ainda não medido)' ou 'modelo não verificado' (621)")
-    achados += _desmentidas(texto)
-    achados += _contagem_controles(texto)
-    achados += _estilo(texto)
-    achados += _ferramenta_sem_chamada(texto, msgs)
-    if modo(msgs) == "conciso":
+    achados += _conteudo(texto, msgs, modo(msgs))
+    return achados
+
+
+
+def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+    """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
+    out = []
+    out += _desmentidas(texto)
+    out += _contagem_controles(texto)
+    out += _estilo(texto)
+    out += _ferramenta_sem_chamada(texto, msgs)
+    out += _estado_desatualizado(texto)
+    if modo_atual == "conciso":
         narradas = _narracao(texto)
         if narradas:
-            achados.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
-                           "traga o resultado; processo só para constatar erro")
+            out.append(f"narração de processo em modo conciso ({len(narradas)} linha(s), ex.: '{narradas[0][:50]}') — "
+                       "traga o resultado; processo só para constatar erro")
     for arquivo, linha_n, trecho in _cit.achar_citacoes(texto):
         if not arquivo.lower().endswith(_EXTENSOES):
             continue
         ok, motivo = _cit.checar(str(RAIZ), arquivo, linha_n, trecho)
         if not ok:
-            achados.append(f"citação {arquivo}:{linha_n}: {motivo}")
-    return achados
+            out.append(f"citação {arquivo}:{linha_n}: {motivo}")
+    return out
 
 
 def linha_estado(msgs: list, cliente: str = "") -> str:
@@ -411,6 +469,7 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
     if achados is None:
         return ""
     _registrar(cliente, achados, None)
+    _avisar_humano(achados)
     return "AUDITORIA-TURNO-ANTERIOR: " + (" | ".join(achados) if achados else "OK")
 
 
@@ -428,6 +487,8 @@ def _selftest() -> int:
     import tempfile
     global LOG
     LOG = Path(tempfile.mkdtemp()) / "a.jsonl"
+    global AVISAR
+    AVISAR = False  # selftest não notifica a área de trabalho
     topo = _cab.ultima_entrada_local() or 1
     hora = lambda hm: f"2026-10-13 {hm} -0300 (relógio da Máquina)"
     pront = (f"Agata · modelo: modelo não verificado · sync: não verificado · lacuna: teste · {hora('11:39')}\n"
@@ -542,6 +603,20 @@ def _selftest() -> int:
                     {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                 {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                 a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
+        ("estado desatualizado: proposta aplicada chamada de pendente é acusada (695)", any(
+            x.startswith("estado desatualizado") and "voz-comum-2026-10-14" in x for x in est(
+                "A `voz-comum-2026-10-14` aguarda assinatura do Humano."))),
+        ("estado desatualizado: dizer que foi aplicada não é acusado (695)", not any(
+            x.startswith("estado desatualizado") for x in est("A `voz-comum-2026-10-14` foi aplicada em (687)."))),
+        ("estado desatualizado: proposta inexistente não é acusada (695)", not any(
+            x.startswith("estado desatualizado") for x in est("A `nada-assim-2099-01-01` aguarda assinatura."))),
+        ("sem cabeçalho, o conteúdo ainda é conferido (695)", (lambda r: any(x.startswith("cabeçalho") for x in r)
+            and any(x.startswith("estado desatualizado") for x in r))(auditar([u(), a(pront), u(),
+                a("A `voz-comum-2026-10-14` está pendente de assinatura."), u()]) or [])),
+        ("evidência: descrever a invenção não é acusado (695)", not any(x.startswith("evidência:") for x in est(
+            "Em (687) a resposta trouxe JSON de `maquina_verificar` sem chamada, verificado no log."))),
+        ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
+            "Tenho anos de experiência com esse tipo de servidor."))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
                                                          ([u()], [u("modo explicativo")]))),
     ]
