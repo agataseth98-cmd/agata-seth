@@ -26,20 +26,37 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa7a252d35d1f08b516480c60b157b7efaa5345b
-  Escrito em: 14/10/2026 13:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf2be18737bb1f6759391f9b40e2657ebd279ef7
+  Escrito em: 14/10/2026 13:27 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa7a252d35d1f08b516480c60b157b7efaa5345b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: conserta o que o teste real de (687) achou — a Seth inventando a "evidência" — e põe os selftests da Seth no CI, como o Humano pediu ("Quero no CI"). Aguardando assinatura.**
+
+**Mudanças (5 arquivos):**
+1. **Doutrina** (`seth_gateway.py`): "Evidência só do que existe" — o que uma ferramenta devolveu NESTA conversa, ou o bloco de estado; sem isso, "não medido"; nunca inventar comando, saída, JSON, arquivo, linha ou serviço para preencher o espaço; sem ferramenta à mão, o próximo passo é dizer com qual ferramenta mediria.
+2. **PROJETO**, "Resposta útil": a mesma regra, curta.
+3. **`scripts/verificar_citacao_arquivo.py`**: `CITACAO_RE` aceita a vírgula — "`` `ONDE_ESTAMOS.md` ``, linha 12" escapava. Medido sobre as duas citações inventadas do teste de (687): antes, nenhuma reconhecida; agora as duas acusadas ("trecho não bate", com a linha real).
+4. **`auditoria_turno.py`**: caso novo no selftest (citação "`arquivo`, linha N" inventada é acusada).
+5. **CI** (`.github/workflows/perimetro.yml`): passo novo, depois da suíte adversarial, que roda os selftests de `auditoria_turno.py`, `seth_gateway.py` e `conselho_remoto.py` com `SETH_REPO` no checkout. Conferido num clone limpo, com HOME vazio e sem rede: os três OK (o gateway precisa do `SETH_REPO` — sem ele procura `~/agata/scripts` e não acha `http_seguro`).
+
+**Por que a forma em três tempos não sai:** o defeito não é ter um espaço para a evidência, é preenchê-lo sem fonte; a regra nova manda escrever "não medido" — o que a própria (685) já previa, mas sem dizer que inventar é proibido.
+
+**Verificado:** os três selftests OK na worktree com a proposta aplicada; `git apply --check` sobre a aplicação de (687); YAML do workflow válido.
+
+**sync:** a branch parte de `aplica/persona-voz-comum-2026-10-14` (PR #189, ainda aberto) — esta proposta só aplica depois dele; topo de MEMÓRIAS = (687).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `verificar_citacao_arquivo.achar_citacoes`/`checar` sobre a resposta real, selftests em clone limpo (`env -i`), `yaml.safe_load` · Autorização: Humano, "Quero no CI" (pergunta 3 do portão).
 
 (687) EXECUÇÃO — 14/10/2026 · **Aplicadas `seth-personalidade-2026-10-14` e `voz-comum-2026-10-14` (assinadas pelo Humano), nessa ordem. Gateway reiniciado. Teste real: a forma pegou (resultado → evidência → próximo passo, sem saudação); o conteúdo veio fabricado — o espaço "Evidência" puxou o modelo a inventar fonte. Conserto vai em proposta própria, junto com os selftests no CI (pedido do Humano na pergunta 3 do portão: "Quero no CI").**
 
