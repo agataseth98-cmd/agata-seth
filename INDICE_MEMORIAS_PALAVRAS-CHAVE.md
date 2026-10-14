@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (assinada pelo Humano): a suíte do perímetro não herda mais o ambiente git do hook. Aplicada no `~/agata`, não em worktree, como (706) ensinou.**
+  palavras-chave: execução, aplicada, suite, fora, worktree, assinada, humano, suíte, perímetro, herda, ambiente, git, hook, agata, ensinou
 (707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina funciona em stream — um por resposta, modelo real certo, `t` certo, e a Seth não escreve o dela; a conversa longa que ia para o Nemotron fica na `seth-livre`; a segunda opinião do Jev responde pelo caminho da Seth em 6 s. E a proposta `suite-fora-da-worktree-2026-10-14` conserta a causa do incidente de (706). Aguardando assinatura.**
   palavras-chave: reteste, cabeçalho, escrito, máquina, funciona, stream, resposta, modelo, real, certo, seth, escreve, dela, conversa, longa, nemotron, fica, livre, segunda, opinião, jev, responde, caminho, proposta, suite, fora, worktree, conserta, causa, incidente, aguardando, assinatura
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (assinada pelo Humano) — em dois tempos, por um incidente meu: a 1ª tentativa, numa worktree, levou ao `main` (PR #208) só o `p20_decisor.py`; o resto entra agora. Causa achada: a suíte do perímetro, rodando dentro do `pre-commit` de uma worktree, comita na branch da worktree. Conserto da suíte em proposta própria.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, seth, tema, sync, pedido, humano, puder, automatizar, assinar, faça, atalho, passa, copiar, agata, librechat, junto, resto, configuração, teste, real, adiado, amanhã, lembra, senha, aguardando, assinatura
 (679) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-auditoria-1830-2026-10-13` (assinada pelo Humano): `vault_buscar` agora está de verdade no Agent da Seth, `extras/` legível (menos o dossiê de `arquivo-redesign/`), catálogo e checagens novas da auditoria e a doutrina "sistema nunca de memória" no ar. E um erro meu de cabeçalho, registrado.**
   palavras-chave: execução, aplicada, seth, auditoria, assinada, humano, vault, buscar, agora, verdade, agent, extras, legível, dossiê, arquivo, redesign, catálogo, checagens, novas, doutrina, sistema, nunca, memória, erro, meu, cabeçalho, registrado
-(678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedido do Humano ("audite a última resposta da Seth e aplique o que for coerente"). Achado principal, erro meu: o `vault_buscar` NUNCA chegou à Seth — o Agent do LibreChat só carrega as ferramentas listadas em `agents.tools`, e eu não a listei; (671) e (677) afirmaram que estava "no ar para a Seth", e não estava. Proposta `seth-auditoria-1830-2026-10-13` pronta, aguardando assinatura.**
-  palavras-chave: auditoria, seth, turnos, pedido, humano, audite, última, resposta, aplique, for, coerente, achado, principal, erro, meu, vault, buscar, nunca, chegou, agent, librechat, carrega, ferramentas, listadas, agents, tools, listei, afirmaram, estava, proposta, pronta, aguardando, assinatura
+(678) CORREÇÃO — 13/10/2026 · **Auditoria da Seth (18:06–18:30, 6 turnos) a pedi …
+  palavras-chave: auditoria, seth, turnos, pedi
 (677) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-vault-rotulos-2026-10-13` (assina …
   palavras-chave: execução, aplicada, seth, vault, rotulos, assina
 (676) CONSELHO — 13/10/2026 · **Proposta `seth-vault-rotulos-2026-10-13`, a pedi …
