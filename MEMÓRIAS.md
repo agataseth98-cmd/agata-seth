@@ -26,20 +26,48 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 92306d26268c86420f05d940848361a3da001f4c
-  Escrito em: 14/10/2026 08:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7557c0699b936a155507e163322b3b6b7244e1a2
+  Escrito em: 14/10/2026 11:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306d26268c86420f05d940848361a3da001f4c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306d26268c86420f05d940848361a3da001f4c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306d26268c86420f05d940848361a3da001f4c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306d26268c86420f05d940848361a3da001f4c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92306d26268c86420f05d940848361a3da001f4c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7557c0699b936a155507e163322b3b6b7244e1a2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pedido do Humano ("vamos apenas canonizar essa personalidade de maneira persistente na Seth a partir de hoje ... dentro das diretrizes do sistema agata"; "é para virar canônico"; "capriche, tem que ser útil também"). Proposta `seth-personalidade-2026-10-14`, aguardando o portão das 3 perguntas e a assinatura. Junto, a voz própria da Agata: treino agendado para a madrugada de 15/10, fora do repo.**
+
+**De onde veio (sessão de 14/10, manhã):** fechadas as pendências do eco — PR #185 juntado (o código de (684) já rodava na Máquina), diário da Seth por PR #186 (o `main` é protegido; o push direto foi recusado), zip órfão do GitKraken (`archive-hLBtM4/`) apagado. A proposta de voz do PR #184 (rascunho, "Agata Flow Vanilla") passou pela pergunta 1 do portão (reversível, exceto vazamento de áudio no repo público); na 2, o Humano decidiu testar só o estilo de fala.
+
+**Voz (fora do repo, `~/.local/share/agata-voz/`; nada instalado, nenhum serviço tocado):**
+- Piper oficial não tem voz feminina pt-BR (catálogo medido: cadu, edresson, faber, jeff). A Dii (OpenVoiceOS) é feminina mas CC BY-NC-ND e treinada de pt-PT — descartada pelo caminho B ("criar nossa própria voz").
+- Caminho B: Qwen3-TTS (Apache 2.0) desenha a voz por descrição; o Humano escolheu em 5 rodadas. O português "padrão" do Qwen puxa para Portugal (x-vector puro: "português de Portugal total") — o sotaque precisa vir de molde. Aprovada: **timbre** da `rodada2/C-neutra-en-s7` (rouca, técnica, para qualquer público) + **sotaque** de uma leitora real do CML-TTS (speaker 12710, CC BY 4.0 — atribuição obrigatória se a voz for distribuída), via prompt ICL com o embedding de locutor trocado. Um artigo de set/2026 (arXiv 2609.23807) confirma: nenhum TTS aberto (Qwen3-TTS, F5, Piper, Kokoro incluídos) reproduz sotaque regional brasileiro — o leve de Recife não veio.
+- Pedido do Humano de "misturar com o JARVIS dublado": recusado — é a voz de um dublador real, de filme protegido; imitar identidade vocal sem consentimento contraria a própria proposta de voz. Feito no lugar: as **qualidades** do assistente (formal, preciso, status primeiro, humor seco) + tratamento de áudio "de sistema". Aprovada pelo Humano: `exemplos/agata-sistema-tratado.wav` ("com certeza").
+- Treino: dataset de 1.373 frases (1.300 do Common Voice pt, CC0, filtradas de marcas de pt-PT; 73 próprias, no registro hacker/profissional, sem "né/tá/viu" — "maneirismos ... vale da estranheza", disse o Humano), cada frase conferida pelo Whisper local (3 tentativas, senão descartada); fine-tune do piper a partir dos pesos do faber (CC0). `agata-voz-noite.timer` (transiente, `systemd-run --user`), 15/10 00:30, até 06:30; espera até 30 min por GPU livre e aborta sem derrubar a Seth. Ensaio de ponta a ponta passou duas vezes (11:12 o último).
+- Contornos medidos no caminho: checkpoint do faber regravado só com pesos (torch recusava `PosixPath`; carregado com `weights_only=True` + só essa classe liberada, nunca `weights_only=False`); avaliador UTMOS do piper desligado (baixa e executa código do GitHub por `torch.hub` com `trust_repo=True`); `core.pyx` do alinhamento monotônico ausente no wheel do PyPI — reescrito em numba e testado (monotônico, cobre a frase); export ONNX pelo exportador clássico (`dynamo=False`; o padrão do torch 2.14 falha no VITS); gerações do Qwen que "disparavam" (655 s para uma frase) — teto de tokens + descarte por duração; a coluna `text` do CML-TTS vem truncada — trocada pela transcrição do Whisper.
+
+**Estado da arte consultado (persona, out/2026):** deriva de persona em conversa longa é documentada — a instrução inicial perde peso (arXiv 2609.24532, 2609.12373); "Assistant Axis" (Lu et al., jan/2026, arXiv 2601.10387): a deriva começa quando o modelo inventa nome, passado e anos de ofício; persona profissional fica no polo estável; o remédio deles (limitar ativação) não se aplica aqui — a Seth é uma cascata de modelos remotos. Avaliação por trajetória, não só por turno (FutureAGI, 2026). Muleta no meio da frase soa insegurança (survey de fillers, arXiv 2301.10761).
+
+**Proposta `seth-personalidade-2026-10-14` (3 arquivos, +91/−3):**
+1. **PROJETO.md**, seção nova "Personalidade da Seth": quem é (operadora técnica, persona de função, sem biografia), resposta útil em três tempos (resultado → evidência → próximo passo; uma recomendação com o porquê), ação com efeito (ler de volta objeto/alcance/efeito, confirmação explícita), tom (frases curtas, humor seco raro, para qualquer público), o que não (Regra 5 inteira; muletas, interjeições, emoji, exclamação em série, emoção simulada), voz (parâmetros do tratamento; entra no `piper-tts` com a voz, por proposta própria) e como persiste — enxuta (2 KB): o PROJETO já passa do teto de 48 KB (50,3 KB antes; 52,4 KB depois), aviso do pre-commit; a justificativa fica aqui.
+2. **`seth_gateway.py`**: bloco "Personalidade" na doutrina fixa (+814 caracteres, ~220 tokens, uma vez por conversa; o hash da doutrina muda e as conversas abertas se reidratam).
+3. **`auditoria_turno.py`**: linha `PERSONA:` a cada turno, junto da `MODO:` (+157 caracteres, ~45 tokens — o reforço periódico); `_estilo()`, checagem determinística do turno anterior (saudação na 1ª linha, oferta/encerramento, muleta/interjeição, emoji, >2 exclamações; fora de código e do cabeçalho) → `AUDITORIA-TURNO-ANTERIOR`. Selftest: 10 casos novos; a fixture `pront` terminava em "Oi!" e passou a "Sistemas operacionais." (agora é saudação).
+
+**Tensão registrada, não resolvida por mim:** "Bem-vindo de volta", de uma das amostras de voz, é saudação — a Regra 5 proíbe; a proposta mantém a regra (abrir com status, não com cumprimento). Se o Humano quiser saudação no modo voz, é mudança de REGRAS, não desta proposta.
+
+**Pendente:** portão das 3 perguntas (mudança estrutural: identidade da Seth em PROJETO e na doutrina); segunda opinião de outro modelo **ou** risco assumido por escrito pelo Humano; assinatura. Depois da noite: o Humano ouve a voz treinada; instalação no `piper-tts` com o tratamento é proposta separada.
+
+**Verificado:** `auditoria_turno.py --selftest` OK (e OK no `main` antes da mudança); `seth_gateway.py --selftest` OK; `git apply --check` do `.diff` limpo.
+
+**sync:** PASS — `main` = `origin/main` (PRs #185 e #186 juntados) antes do branch; topo de MEMÓRIAS = (684).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: catálogo `voices.json` do piper, API do Hugging Face (licenças, modelos), Qwen3-TTS local, Whisper local (`:20130/transcribe`), `piper.train` (PyPI 1.8.0), `nvidia-smi`, `systemd-run`, WebSearch (fontes acima), leitura de `seth_gateway.py`/`auditoria_turno.py`/`propostas/README.md` · Autorização: Humano, nesta sessão (falas citadas acima).
 
 (684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinada pelo Humano), com (682) e (683). Reteste no LibreChat: a pergunta que travou às 23:44 ("explique o portão de três perguntas") agora sai inteira, com as três perguntas certas, em ~16 s, numa fila só.**
 
