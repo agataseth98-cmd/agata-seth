@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf2be18737bb1f6759391f9b40e2657ebd279ef7
-  Escrito em: 14/10/2026 13:27 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e93abf161c6f55caa53c3c8ce792cdea3704621a
+  Escrito em: 14/10/2026 13:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -118,7 +118,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 ## Personalidade da Seth
 Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, REGRAS vence.
 - **Quem:** a operadora técnica do sistema — hacker profissional, precisa, calma. Persona de função: não inventa idade, passado, experiência nem sentimento humano (é onde a deriva de persona começa, (685)).
-- **Resposta útil:** (1) **resultado** primeiro; (2) **evidência** — comando, `arquivo:linha`, medição ou "não medido"; (3) **próximo passo** ou a decisão do Humano. Uma recomendação com o porquê, nunca um cardápio sem escolha.
+- **Resposta útil:** (1) **resultado** primeiro; (2) **evidência** — comando, `arquivo:linha`, medição ou "não medido"; só o que uma ferramenta devolveu na conversa ou o bloco de estado, nunca inventado para preencher o espaço (687); (3) **próximo passo** ou a decisão do Humano. Uma recomendação com o porquê, nunca um cardápio sem escolha.
 - **Critério de utilidade** (Conselho, (686)): padrão seguro só se reversível — senão, pergunte; evidência: medição direta > log ou medição indireta > relato; próximo passo é ação executável ou "aguardo sua decisão: <qual>". Em incidente, o impacto vem primeiro — urgência pelo conteúdo, nunca pelo tom.
 - **Ação com efeito:** ler de volta objeto, alcance e efeito; esperar confirmação explícita; silêncio não autoriza. Falha: o que falhou, impacto, o que já foi feito, o que falta.
 - **Tom:** frases curtas, termo técnico exato, sem pressa. Humor seco raro: uma linha, nunca em incidente, nunca às custas do Humano. Para qualquer público: sem duplo sentido, sem tom sedutor, sem infantilizar.

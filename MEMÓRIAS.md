@@ -26,20 +26,38 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf2be18737bb1f6759391f9b40e2657ebd279ef7
-  Escrito em: 14/10/2026 13:27 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e93abf161c6f55caa53c3c8ce792cdea3704621a
+  Escrito em: 14/10/2026 13:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf2be18737bb1f6759391f9b40e2657ebd279ef7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e93abf161c6f55caa53c3c8ce792cdea3704621a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(689) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-evidencia-e-ci-2026-10-14` (assinada pelo Humano). Selftests da Seth agora no CI. Reteste: a regra de texto NÃO bastou — o mesmo modelo segue inventando a evidência. A citação "`arquivo`, linha N" passa a ser acusada; a invenção de ferramenta ainda não. Duas correções minhas registradas aqui.**
+
+**Aplicado:** `p8_verificar` 4/4; `git apply`; par movido para `propostas/aplicadas/`; selftests OK (`auditoria_turno.py`, `seth_gateway.py`, `conselho_remoto.py`); `systemctl --user restart seth-gateway` → ativo (13:35). Vault regenerado com a árvore limpa antes do commit (o P-10 compara com o que o gerador produz de HEAD; gerado com a árvore suja, ele barra).
+
+**Reteste** (mesma pergunta de (687), 2 vezes, `curl` no `:20126` sem as ferramentas do LibreChat; `X-Modelo-Real: ministral-14b-latest` nas duas):
+- ✓ forma em três tempos; sem saudação; na 1ª, `t=1 (contado no contexto)` com o qualificador certo.
+- ✗ evidência ainda inventada: "agendado via cron job (`cron_job_agendar`)", "`vault_buscar` 'treino noturno' → `vault_consultar` (673)", "REGRAS, 'Manutenção noturna'" (não existe), "MEMÓRIAS (667), 'MODO: conciso'" usado como prova de "baixa prioridade". Nenhuma ferramenta foi chamada — nem havia ferramenta no pedido.
+- ✗ cabeçalho: linha de turno na 1ª resposta (as duas vezes); `t=1` sem qualificador na 2ª.
+- **Leitura:** um modelo pequeno, sem ferramenta à mão, preenche o espaço da evidência mesmo com a proibição escrita. Instrução de texto não segura isso; precisa de mecanismo. Candidato determinístico: a auditoria acusar ferramenta citada como fonte ("verificado em `vault_buscar`", `maquina_verificar`, `query_canon`) num turno em que nenhuma ferramenta foi chamada — o gateway vê as mensagens de ferramenta da conversa. Fica como próxima proposta, se o Humano quiser. O teste representativo é no LibreChat, com as ferramentas; o `curl` sem ferramenta é o pior caso.
+
+**Correções minhas (Regra 4):**
+1. **PR empilhado:** abri o #190 com base na branch da aplicação (#189) para ele mostrar só a proposta; o Humano juntou os dois e o `.diff` foi para aquela branch, não para o `main` — o `aprovar.sh` não achou nada. Reaberto como #191 contra o `main` (mesmo commit `3967647`). Daqui em diante, proposta sempre contra o `main`, sem empilhar.
+2. **Hora não medida:** no cabeçalho da resposta em que expliquei por que a assinatura não era encontrada, escrevi "13:41" sem rodar o relógio; a medição seguinte deu 13:35. Hora inventada — a mesma falha que eu cobro da Seth (SIN-3). A hora de cada cabeçalho meu, daqui em diante, sai de `date` rodado naquela resposta.
+
+**sync:** PASS — `main` = `origin/main` em `e93abf1` (PR #191 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (688).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, selftests, `systemctl --user`, `curl` no gateway (2×), `gh pr view`, `date` · Autorização: Humano — assinatura de `seth-evidencia-e-ci-2026-10-14`.
 
 (688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: conserta o que o teste real de (687) achou — a Seth inventando a "evidência" — e põe os selftests da Seth no CI, como o Humano pediu ("Quero no CI"). Aguardando assinatura.**
 

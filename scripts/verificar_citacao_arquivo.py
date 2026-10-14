@@ -61,7 +61,8 @@ def normaliza(s: str) -> str:
 # regex exigia extensao e nunca casava com nada em .githooks/).
 CITACAO_RE = re.compile(
     r"`(?P<arq>[^`\s:]*(?:/[^`\s:]+|\.[a-zA-Z0-9]+))(?::(?P<n1>\d+))?`"
-    r"(?:\s*(?:linhas?\s+(?P<n2>\d+)|:\s*(?P<n3>\d+)))?",
+    # (688) vírgula opcional: "`ONDE_ESTAMOS.md`, linha 12" escapava (teste real de (687))
+    r"(?:\s*,?\s*(?:linhas?\s+(?P<n2>\d+)|:\s*(?P<n3>\d+)))?",
     re.IGNORECASE,
 )
 
