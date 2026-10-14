@@ -191,13 +191,21 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             while True:
-                pedaco = up.read(8192)
+                # (709) read1: repassa o que chegou, sem esperar juntar 8 KB. Com read(8192) o
+                # keepalive do OmniRoute (pequeno) ficava ~90 s preso aqui, e a desistência do
+                # cliente só era notada quando o bloco enchia (medido em 14/10, 20:36-20:38).
+                pedaco = up.read1(8192) if hasattr(up, "read1") else up.read(8192)
                 if not pedaco:
                     break
                 self.wfile.write(f"{len(pedaco):X}\r\n".encode())
                 self.wfile.write(pedaco)
                 self.wfile.write(b"\r\n")
             self.wfile.write(b"0\r\n\r\n")
+        except (BrokenPipeError, ConnectionResetError):
+            # (709) o cliente desistiu no meio (gateway trocou de modelo, "parar" no LibreChat):
+            # 1 linha no log, sem traceback -- antes, 3 tracebacks no journal em 14/10 20:32-20:40.
+            print(f"proxy: cliente desconectou no meio do stream ({self.path})", file=sys.stderr, flush=True)
+            self.close_connection = True
         finally:
             up.close()
 
