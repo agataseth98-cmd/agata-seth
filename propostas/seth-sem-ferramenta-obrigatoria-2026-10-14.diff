@@ -1,0 +1,55 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index edc3a4b..73581bc 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -670,22 +670,6 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+     threading.Thread(target=_rodar, daemon=True).start()
+ 
+ 
+-# (695) Pergunta sobre fato do sistema, 1º passo da resposta, com ferramentas: a resposta
+-# começa por uma ferramenta (tool_choice "required"). Medido em 14/10: o Gemini obedece; o
+-# Nemotron ignora sem erro -- por isso o fato das propostas vai também no estado.
+-_PERGUNTA_FATO = re.compile(
+-    r"\b(?:estado|status|sistema|propost|pendent|aplicad|entrada|mem[óo]ria|canon|regra|audit|servi[çc]o|"
+-    r"timer|commit|PR\b|falha|erro|log|configura|verifi|confir|cheq|confer|quant[oa]s?|quando|qual|quais|por ?que)",
+-    re.IGNORECASE)
+-
+-
+-def _forcar_ferramenta(payload: dict) -> bool:
+-    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+-    return (bool(payload.get("tools")) and "tool_choice" not in payload
+-            and not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(msgs)
+-            and bool(_PERGUNTA_FATO.search(_ultimo_texto_usuario(msgs))))
+-
+-
+ def _injeta(payload: dict) -> dict:
+     msgs = payload.get("messages")
+     if not isinstance(msgs, list):
+@@ -752,8 +736,8 @@ class _Handler(BaseHTTPRequestHandler):
+                             payload.get("messages") or []):
+                         _sombra_rota(payload, self._rota)
+                     payload["model"] = self._rota
+-                if _forcar_ferramenta(payload):
+-                    payload["tool_choice"] = "required"
++                # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
++                # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
+                 payload = _injeta(payload)
+                 # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
+                 # recusa campo a mais com 422 "Extra inputs are not permitted" --
+@@ -1426,16 +1410,6 @@ def _selftest() -> int:
+     print(f"{'PASS' if ok14 else 'FALHA'}  resposta vazia -> nova tentativa na fila acima "
+           f"({_Dummy.modelos_pedidos})")
+     falhas += 0 if ok14 else 1
+-    # 15. (695) pergunta de fato com ferramentas -> tool_choice required; saudação e continuação não
+-    ferr = [{"type": "function", "function": {"name": "query_canon"}}]
+-    fato = {"tools": ferr, "messages": [{"role": "user", "content": "qual o estado das propostas?"}]}
+-    oi = {"tools": ferr, "messages": [{"role": "user", "content": "Olá"}]}
+-    cont = {"tools": ferr, "messages": [{"role": "user", "content": "qual o estado?"},
+-                                        {"role": "assistant", "content": "", "tool_calls": [{"id": "1"}]},
+-                                        {"role": "tool", "content": "x"}]}
+-    ok15 = _forcar_ferramenta(fato) and not _forcar_ferramenta(oi) and not _forcar_ferramenta(cont)
+-    print(f"{'PASS' if ok15 else 'FALHA'}  ferramenta obrigatória só em pergunta de fato, 1º passo")
+-    falhas += 0 if ok15 else 1
+     # 16. (695) linha de propostas no estado
+     ok16 = _linha_propostas().startswith("PROPOSTAS-PENDENTES: ") and "propostas/aplicadas/" in _linha_propostas()
+     print(f"{'PASS' if ok16 else 'FALHA'}  PROPOSTAS-PENDENTES no estado: {_linha_propostas()[:80]}")

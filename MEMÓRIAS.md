@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfa343972e520760395ba38cb9e52e1f76551c81
-  Escrito em: 14/10/2026 15:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 49305c8835665839e865e194f5fd6f2b9168c962
+  Escrito em: 14/10/2026 15:31 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49305c8835665839e865e194f5fd6f2b9168c962/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49305c8835665839e865e194f5fd6f2b9168c962/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49305c8835665839e865e194f5fd6f2b9168c962/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49305c8835665839e865e194f5fd6f2b9168c962/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/49305c8835665839e865e194f5fd6f2b9168c962/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `tool_choice: "required"` de (695)/(696) fez o Nemotron Ultra escrever as chamadas de ferramenta como TEXTO — o LibreChat não as executa e a conversa travou. Proposta urgente `seth-sem-ferramenta-obrigatoria-2026-10-14` retira só esse item. Aguardando assinatura.**
+
+**Medido** (Mongo, conversa `cb358a0d`; log do OmniRoute): às 15:26 ("como são escolhidos os modelos no sistema") e 15:28 ("estado de prontidão agata") a resposta foi `[[{"name": "query_canon_mcp_canon", "parameters": {...}}, …]]` em texto, sem `tool_calls`; às 15:27 ("olá", sem ferramenta obrigatória) ela respondeu "Aguardando retorno das ferramentas…". As três vieram de `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`, 1º da `seth-pesado` — a conversa passou de 10 mensagens e a rota foi para lá.
+
+**Erro meu:** em (695) medi o `tool_choice` com uma pergunta curta por fila e li "Nemotron ignora sem erro" como inofensivo. Numa conversa real, longa, com 7 ferramentas MCP declaradas, o mesmo modelo responde com a chamada em texto. Medi o caso fácil e generalizei.
+
+**Conserto:** sai o `tool_choice: "required"` (`_forcar_ferramenta`, o padrão de pergunta de fato e o selftest 15). Fica todo o resto de (695), que não depende do modelo obedecer: `PROPOSTAS-PENDENTES` no estado, auditoria do estado desatualizado, conteúdo conferido sem cabeçalho, resposta vazia refeita, biografia, aviso ao Humano. O caminho (a) de (694) fica sem mecanismo próprio; o fato no estado cobre o caso que o motivou.
+
+**Enquanto não for aplicado:** conversa nova no LibreChat (curta → `seth-livre`, Gemini, que obedece) contorna; conversa longa cai no Nemotron e trava em pergunta de fato.
+
+**Verificado:** `seth_gateway.py --selftest` OK sem o item; `git apply --check` contra o `main`.
+
+**sync:** PASS — branch a partir de `origin/main` em `49305c8`; topo de MEMÓRIAS = (696).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `mongosh` no `LibreChat`, log do OmniRoute (`2026-10-14T18:26`–`18:28`), selftest · Autorização: pedido do Humano ("quebrou de vez a Seth audita minha conversa atual").
 
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pelo Humano). Reteste: pergunta de fato abre com ferramenta; "quais propostas estão pendentes?" respondida com o fato da Máquina; resposta desatualizada acusada no turno seguinte e corrigida por ela com a evidência certa.**
 
