@@ -470,6 +470,8 @@ def _selftest() -> int:
             "> Bom dia, Seth! Tudo certo, né?\nResposta: sistema estável."))),
         ("estilo: muleta fora da citação ainda conta (686)", any("'né'" in x for x in est(
             'Ele disse "ok". Tá certo, né.'))),
+        ("citação '`arquivo`, linha N' inventada é acusada (688)", any(x.startswith("citação AGENTS.md:3") for x in est(
+            'Evidência: `AGENTS.md`, linha 3: "treinos noturnos agendados via cron toda noite".'))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
                                                          ([u()], [u("modo explicativo")]))),
     ]

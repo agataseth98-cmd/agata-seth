@@ -35,3 +35,14 @@ jobs:
 
       - name: Suíte adversarial dos controles (nível L1 -- clone/offline)
         run: bash scripts/testar_perimetro.sh
+
+      # (688) Pedido do Humano na pergunta 3 do portão de (685): a checagem de
+      # estilo e a voz comum falhavam caladas -- os selftests só rodavam à mão.
+      # Sem rede e sem segredo: os três usam só o checkout (SETH_REPO).
+      - name: Selftests da Seth (auditoria do turno, gateway, Conselho)
+        env:
+          SETH_REPO: ${{ github.workspace }}
+        run: |
+          python3 redesign/router/auditoria_turno.py --selftest
+          python3 redesign/router/seth_gateway.py --selftest
+          python3 scripts/conselho_remoto.py --selftest
