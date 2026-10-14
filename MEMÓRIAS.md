@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6f0cff3d89d0643f36b86a6bb90e28abf459f46a
-  Escrito em: 14/10/2026 14:00 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d428c757de29a9a4df9cb57b7f16634745320c4
+  Escrito em: 14/10/2026 14:06 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f0cff3d89d0643f36b86a6bb90e28abf459f46a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f0cff3d89d0643f36b86a6bb90e28abf459f46a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f0cff3d89d0643f36b86a6bb90e28abf459f46a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f0cff3d89d0643f36b86a6bb90e28abf459f46a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f0cff3d89d0643f36b86a6bb90e28abf459f46a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d428c757de29a9a4df9cb57b7f16634745320c4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (691) contra a evidência inventada — (a) o gateway força uma chamada de ferramenta quando a pergunta é sobre fato do sistema; (b) o achado da auditoria aparece para o Humano, não só para a Seth. Ainda sem proposta; fica para a próxima rodada.**
+
+Pedido: "anote que quero a e b aplicados, e encerramos essa até mais tarde". Próximo passo: proposta P-8 com (a) e (b), pelo fluxo de (692)/(693), com portão.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · Autorização: Humano, nesta sessão.
 
 (693) EXECUÇÃO — 14/10/2026 · **Aplicada `fluxo-proposta-2026-10-14` (assinada pelo Humano): o fluxo de proposta é padrão do sistema — PR de proposta direto contra o `main`, quem propõe junta e faz `git pull`, o Humano só assina. E, nesta conversa, o Humano autorizou que eu junte também os PRs de aplicação: "faça sempre o merge e o pull nesta conversa".**
 
