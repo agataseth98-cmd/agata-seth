@@ -247,15 +247,49 @@ def vetor(vetores, texto):
     return np.frombuffer(base64.b64decode(v), dtype="<f4")
 
 
-def _itens(entradas):
-    """[(sha, texto)] de todas as entradas e blocos, sem repetição."""
+# (682) documentos do arquivo histórico extras/ entram na busca por sentido,
+# por parágrafo -- extras/ inteiro, inclusive extras/arquivo-redesign/ (o
+# Humano abriu o dossiê: "tudo até o dossiê"). Só .md, sem pastas ocultas. O vault (gerar_obsidian.py)
+# não usa estes vetores: só a busca.
+EXTRAS = os.path.join(REPO, "extras")
+EXTRAS_FORA = set()
+
+
+def docs_extras():
+    """[(caminho_relativo, linhas)] dos .md de extras/."""
+    out = []
+    for d, dirs, arqs in os.walk(EXTRAS):
+        dirs[:] = sorted(x for x in dirs if not x.startswith(".") and x not in EXTRAS_FORA)
+        for a in sorted(arqs):
+            if a.endswith(".md") and not a.startswith("."):
+                c = os.path.join(d, a)
+                try:
+                    with open(c, encoding="utf-8", errors="replace") as f:
+                        out.append((os.path.relpath(c, REPO), f.read().splitlines()))
+                except OSError:
+                    pass
+    return out
+
+
+def textos_doc(rel, linhas):
+    """[(n, texto)] -- parágrafos do documento, com o nome do arquivo de contexto."""
+    nome = os.path.basename(rel)
+    return [(n, f"{nome}\n\n{t[:1500]}") for n, _i, _f, t in agata_blocos.blocos(linhas)]
+
+
+def _itens(entradas, docs=()):
+    """[(sha, texto)] de todas as entradas, blocos e parágrafos de extras/, sem repetição."""
     vistos, out = set(), []
+    textos = []
     for e in entradas:
-        for t in [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]:
-            h = _h(t)
-            if h not in vistos:
-                vistos.add(h)
-                out.append((h, t))
+        textos += [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]
+    for rel, linhas in docs:
+        textos += [t for _n, t in textos_doc(rel, linhas)]
+    for t in textos:
+        h = _h(t)
+        if h not in vistos:
+            vistos.add(h)
+            out.append((h, t))
     return out
 
 
@@ -272,7 +306,7 @@ def atualizar(podar=False, silencioso=False):
     não poda, pra nunca tirar o vetor de uma entrada do HEAD que o vault usa)."""
     entradas, _ = _todas_entradas_todas_camadas()
     vetores = carregar_indice()
-    itens = _itens(entradas)
+    itens = _itens(entradas, docs_extras())
     faltam = [(h, t) for h, t in itens if h not in vetores]
     ok = True
     LOTE = 32
@@ -300,7 +334,7 @@ def atualizar(podar=False, silencioso=False):
         os.replace(tmp, INDICE_V2)
     if not silencioso:
         print(f"índice: {novos} texto(s) novo(s) embedado(s); {len(itens)} no total "
-              f"({len(entradas)} entradas + blocos)", file=sys.stderr)
+              f"({len(entradas)} entradas + blocos + parágrafos de extras/)", file=sys.stderr)
     return novos, len(itens), ok
 
 
@@ -325,6 +359,13 @@ def buscar_dados(query, n=10, blocos=True):
                     res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
                                 "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
                                 "trecho": t[:280]})
+    for rel, linhas in docs_extras():
+        for bn, t in textos_doc(rel, linhas):
+            v = vetor(vetores, t)
+            if v is not None:
+                res.append({"tipo": "documento", "num": rel, "bloco": bn,
+                             "score": float(v @ q), "titulo": os.path.basename(rel), "data": "",
+                             "trecho": t.split("\n\n", 1)[-1][:280]})
     res.sort(key=lambda r: r["score"], reverse=True)
     # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
     out, vistos = [], set()
@@ -347,6 +388,8 @@ def buscar(query, n, como_json=False):
     for r in rs:
         if r["tipo"] == "entrada":
             print(f"{r['score']:.3f}  ({r['num']}) — {r['titulo'][:140]}")
+        elif r["tipo"] == "documento":
+            print(f"{r['score']:.3f}  {r['num']} ^b{r['bloco']} — {r['trecho'][:140]}")
         else:
             print(f"{r['score']:.3f}  ({r['num']}) ^b{r['bloco']} — {r['trecho'][:140]}")
 
@@ -358,7 +401,7 @@ def contexto(query, n, destino):
     entradas = {e["num"]: e for e in _todas_entradas_todas_camadas()[0]}
     nums = []
     for r in rs:
-        if r["num"] not in nums:
+        if r["tipo"] != "documento" and r["num"] not in nums:
             nums.append(r["num"])
     linhas = [f"# Contexto Agata — \"{query}\"", "",
               "Entradas de MEMÓRIAS escolhidas por sentido (busca local, embedding na iGPU). "

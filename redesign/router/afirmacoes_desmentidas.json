@@ -23,8 +23,8 @@
     {
       "id": "busca-semantica",
       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
-      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo -- não só o vault): vault_buscar modo sentido (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
-      "origem": "(660)/(670)/(678)"
+      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo) e os documentos de extras/ -- não só o vault: vault_buscar modo sentido (327)/(670)/(682); a recusa de (115) é só de vetor como camada PRIMÁRIA",
+      "origem": "(660)/(670)/(678)/(682)"
     },
     {
       "id": "indices-manuais",

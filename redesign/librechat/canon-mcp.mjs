@@ -62,10 +62,10 @@ function pathOk(p) {
   if (p.startsWith("memoria/obsidian/")) return true;
   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
   // (678) extras/ -- arquivo histórico versionado (público no GitHub), pedido do
-  // Humano ("leve extras em consideração"). EXCETO extras/arquivo-redesign/: é
-  // para onde foi o dossiê de auditoria sobre a própria Seth (AUDITORIA-01,
-  // CONSELHO-*) que a decisão de 04/09 (comentário acima) tirou do alcance dela.
-  if (p.startsWith("extras/") && !p.startsWith("extras/arquivo-redesign")) return true;
+  // Humano ("leve extras em consideração"). (682) INTEIRO, inclusive
+  // extras/arquivo-redesign/ (o dossiê sobre a Seth): o Humano reverteu a
+  // decisão de 04/09 (comentário acima) por escrito -- "tudo até o dossiê".
+  if (p.startsWith("extras/")) return true;
   return Object.values(CANON).includes(p);
 }
 
@@ -354,7 +354,7 @@ const TOOLS = [
       "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
       "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
       "Para BUSCAR, use vault_buscar primeiro. Também lê o arquivo histórico em extras/ (liste \"extras/\"; " +
-      "extras/arquivo-redesign/ fica fora, por decisão de 04/09).",
+      "inteiro, inclusive extras/arquivo-redesign/, decisão do Humano em (682)).",
     inputSchema: {
       type: "object",
       properties: {
