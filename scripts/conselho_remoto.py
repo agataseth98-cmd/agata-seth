@@ -367,13 +367,27 @@ def checar_formato_parecer(texto):
     return faltando
 
 
+# (686) Voz comum do sistema (AGENTS.md; PROJETO, "Personalidade da Seth"): a FORMA é a mesma
+# para todo modelo; o JUÍZO é de cada membro. Persona única num conselho de modelos tende à
+# convergência prematura (pesquisa de 2026) -- e o Conselho existe para discordar (P-13).
+# Vai como mensagem de sistema; o pedido do Humano segue intacto (o sha256 do pedido não muda).
+VOZ_COMUM = (
+    "Você é membro do Conselho do sistema Agata. Voz comum do sistema: resultado primeiro, depois a "
+    "evidência (ou \"não medido\"), depois o próximo passo; frases curtas; sem saudação, oferta de ajuda, "
+    "muleta, emoji ou exclamação em série; sem emoção simulada nem biografia inventada. O juízo é seu: "
+    "declare o seu modelo na Origem, discorde quando os fatos mandarem, não tente adivinhar nem acompanhar "
+    "a opinião de outros membros nem a do Humano. Responda no formato pedido."
+)
+
+
 def enviar_omniroute(pedido_texto, modelo):
     """UMA chamada. POST no proxy de sanitizacao, que scrub-a o pedido e repassa
     ao OmniRoute pro `modelo` raw escolhido pela rotação (não mais uma combo
     de prioridade fixa). Devolve o JSON cru (shape OpenAI-compat)."""
     payload = {
         "model": modelo,
-        "messages": [{"role": "user", "content": pedido_texto}],
+        "messages": [{"role": "system", "content": VOZ_COMUM},
+                     {"role": "user", "content": pedido_texto}],
         "max_tokens": MAX_TOKENS_POR_MODELO.get(modelo, TETO_TOKENS_SAIDA),
     }
     if DESABILITAR_THINKING and modelo.startswith(THINKING_DISABLED_PREFIXOS):
@@ -457,7 +471,7 @@ def _chamar_local(pedido_texto):
     inteiro está fora. Devolve um dict no shape OpenAI-compat (parcial) + a
     marca `_fallback_local` pra ninguém confundir com opinião de família
     independente na nuvem."""
-    body = json.dumps({"model": FALLBACK_MODELO, "prompt": pedido_texto,
+    body = json.dumps({"model": FALLBACK_MODELO, "system": VOZ_COMUM, "prompt": pedido_texto,
                        "stream": False, "options": {"temperature": 0.2}}).encode("utf-8")
     req = urllib.request.Request(FALLBACK_OLLAMA, data=body, method="POST",
                                  headers={"Content-Type": "application/json"})
@@ -541,6 +555,9 @@ def _selftest():
     casos.append(("famílias já consultadas: só o mesmo pedido, sem fallback local",
                   familias_ja_consultadas("abc") == {"zhipu"}))
     _disponiveis, _carregar_rotacao, DESTINO_DIR = disp_orig, rot_orig, dest_orig
+    # (686) voz comum: forma igual para todos, juízo próprio declarado
+    casos.append(("VOZ_COMUM pede juízo próprio e proíbe acompanhar outros",
+                  "juízo é seu" in VOZ_COMUM and "acompanhar" in VOZ_COMUM and "declare o seu modelo" in VOZ_COMUM))
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)

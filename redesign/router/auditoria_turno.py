@@ -69,6 +69,8 @@ _OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [�
 _MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
                      r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
+# (686) Trecho citado não é fala dela (pareceres do Conselho de 14/10): aspas e linha de citação.
+_CITADO = re.compile(r'"[^"\n]{0,300}"|“[^”\n]{0,300}”|«[^»\n]{0,300}»')
 
 
 def _estilo(texto: str) -> list[str]:
@@ -80,8 +82,9 @@ def _estilo(texto: str) -> list[str]:
             em_codigo = not em_codigo
             continue
         if not em_codigo and not _CABECALHO.match(l) and not l.lstrip().startswith(
-                ("Última entrada:", "quebrado:", "pronto.")):
+                ("Última entrada:", "quebrado:", "pronto.", ">")):
             corpo.append(l)
+    corpo = [_CITADO.sub('""', l) for l in corpo]
     prosa = "\n".join(re.sub(r"`[^`]*`", "", l) for l in corpo)
     achados = []
     primeira = next((l for l in corpo if l.strip()), "")
@@ -461,6 +464,12 @@ def _selftest() -> int:
             "Saída:\n```\nné tá? olá!!!\n```\nFeito. `grep né` também não conta."))),
         ("estilo: 'tipo de arquivo' e 'nenhum' não são muleta", not any(x.startswith("estilo:") for x in est(
             "O tipo de arquivo é texto. Nenhum erro, nem aviso."))),
+        ("estilo: muleta citada entre aspas não conta (686)", not any(x.startswith("estilo:") for x in est(
+            'O Humano escreveu "né, tá?" no pedido. Registrado.'))),
+        ("estilo: linha de citação '>' não conta (686)", not any(x.startswith("estilo:") for x in est(
+            "> Bom dia, Seth! Tudo certo, né?\nResposta: sistema estável."))),
+        ("estilo: muleta fora da citação ainda conta (686)", any("'né'" in x for x in est(
+            'Ele disse "ok". Tá certo, né.'))),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
                                                          ([u()], [u("modo explicativo")]))),
     ]
