@@ -26,20 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 67ba5664f1bc642a570521cafb1e9c095706935e
-  Escrito em: 14/10/2026 15:13 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfa343972e520760395ba38cb9e52e1f76551c81
+  Escrito em: 14/10/2026 15:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67ba5664f1bc642a570521cafb1e9c095706935e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfa343972e520760395ba38cb9e52e1f76551c81/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pelo Humano). Reteste: pergunta de fato abre com ferramenta; "quais propostas estão pendentes?" respondida com o fato da Máquina; resposta desatualizada acusada no turno seguinte e corrigida por ela com a evidência certa.**
+
+**Aplicado:** `p8_verificar` 4/4; `git apply`; par em `propostas/aplicadas/`; selftests OK (`auditoria_turno.py`, `seth_gateway.py`, `conselho_remoto.py`); `seth-gateway` reiniciado (15:18).
+
+**Reteste** (`:20126`, 15:19):
+1. "audite seu sistema de personalidade em busca de oportunidades e falhas" (a pergunta das 15:00), com ferramenta declarada: o Gemini abriu com 3 chamadas de `query_canon` — PROJETO "Personalidade da Seth", REGRAS "Regra 5" e MEMÓRIAS (685)…(690)+ — em vez de responder de memória.
+2. "Quais propostas estão pendentes agora?", sem ferramenta: "**Resultado:** Nenhuma proposta está pendente. **Evidência:** `PROPOSTAS-PENDENTES: nenhuma` (bloco de estado acima)." — evidência real, a que a Máquina pôs no estado.
+3. Turno anterior simulado com "A `voz-comum-2026-10-14` aguarda assinatura.": a auditoria acusou `estado desatualizado: voz-comum-2026-10-14 já foi aplicada` (log, 15:19:21) e ela abriu o turno corrigindo — "está em `propostas/aplicadas/` … o status real é **aplicada**", citando `PROPOSTAS-PENDENTES: nenhuma`.
+- ✗ Continua: linha de turno na 1ª resposta e nome de modelo trocado no cabeçalho (o turno 2 saiu do `ministral-14b-latest` com "gemini-2.5-flash" escrito) — a auditoria acusa, como antes.
+- Notificação na área de trabalho: disparada pelo gateway; a exibição não foi conferida daqui — fica para o Humano confirmar.
+
+**sync:** PASS — `main` = `origin/main` em `bfa3439` (PR #197 juntado) antes do branch `aplica/`; topo de MEMÓRIAS = (695).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, selftests, `systemctl --user`, 3 pedidos ao `:20126`, `~/.cache/agata/auditoria-turno.jsonl` · Autorização: Humano — assinatura de `seth-verdade-2026-10-14`; merge desta aplicação autorizado nesta conversa (693).
 
 (695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma vez a Seth afirmar o que não mediu — junta (a)+(b) de (694) com os achados da auditoria da conversa de 15:00 ("ConversaIniciadaEmPortuguês"). Pedido do Humano: "junta tudo e faça de forma a resolver esse problema de uma vez, seja elegante econômico e preciso". Aguardando assinatura.**
 
