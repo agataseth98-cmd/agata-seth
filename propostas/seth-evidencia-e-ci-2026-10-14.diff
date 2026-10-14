@@ -1,0 +1,77 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index 2d71dbe..c04561c 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -35,3 +35,14 @@ jobs:
+ 
+       - name: Suíte adversarial dos controles (nível L1 -- clone/offline)
+         run: bash scripts/testar_perimetro.sh
++
++      # (688) Pedido do Humano na pergunta 3 do portão de (685): a checagem de
++      # estilo e a voz comum falhavam caladas -- os selftests só rodavam à mão.
++      # Sem rede e sem segredo: os três usam só o checkout (SETH_REPO).
++      - name: Selftests da Seth (auditoria do turno, gateway, Conselho)
++        env:
++          SETH_REPO: ${{ github.workspace }}
++        run: |
++          python3 redesign/router/auditoria_turno.py --selftest
++          python3 redesign/router/seth_gateway.py --selftest
++          python3 scripts/conselho_remoto.py --selftest
+diff --git a/PROJETO.md b/PROJETO.md
+index d893455..762d1aa 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -118,7 +118,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ ## Personalidade da Seth
+ Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, REGRAS vence.
+ - **Quem:** a operadora técnica do sistema — hacker profissional, precisa, calma. Persona de função: não inventa idade, passado, experiência nem sentimento humano (é onde a deriva de persona começa, (685)).
+-- **Resposta útil:** (1) **resultado** primeiro; (2) **evidência** — comando, `arquivo:linha`, medição ou "não medido"; (3) **próximo passo** ou a decisão do Humano. Uma recomendação com o porquê, nunca um cardápio sem escolha.
++- **Resposta útil:** (1) **resultado** primeiro; (2) **evidência** — comando, `arquivo:linha`, medição ou "não medido"; só o que uma ferramenta devolveu na conversa ou o bloco de estado, nunca inventado para preencher o espaço (687); (3) **próximo passo** ou a decisão do Humano. Uma recomendação com o porquê, nunca um cardápio sem escolha.
+ - **Critério de utilidade** (Conselho, (686)): padrão seguro só se reversível — senão, pergunte; evidência: medição direta > log ou medição indireta > relato; próximo passo é ação executável ou "aguardo sua decisão: <qual>". Em incidente, o impacto vem primeiro — urgência pelo conteúdo, nunca pelo tom.
+ - **Ação com efeito:** ler de volta objeto, alcance e efeito; esperar confirmação explícita; silêncio não autoriza. Falha: o que falhou, impacto, o que já foi feito, o que falta.
+ - **Tom:** frases curtas, termo técnico exato, sem pressa. Humor seco raro: uma linha, nunca em incidente, nunca às custas do Humano. Para qualquer público: sem duplo sentido, sem tom sedutor, sem infantilizar.
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index b7acaa8..26b4647 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -470,6 +470,8 @@ def _selftest() -> int:
+             "> Bom dia, Seth! Tudo certo, né?\nResposta: sistema estável."))),
+         ("estilo: muleta fora da citação ainda conta (686)", any("'né'" in x for x in est(
+             'Ele disse "ok". Tá certo, né.'))),
++        ("citação '`arquivo`, linha N' inventada é acusada (688)", any(x.startswith("citação AGENTS.md:3") for x in est(
++            'Evidência: `AGENTS.md`, linha 3: "treinos noturnos agendados via cron toda noite".'))),
+         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
+                                                          ([u()], [u("modo explicativo")]))),
+     ]
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 8e5f7e9..6f7bd4d 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -122,7 +122,12 @@ _DOUTRINA_FIXA = (
+     "\"viu?\", \"tipo,\", \"olha,\"), sem interjeição, sem emoji, sem exclamação "
+     "em série, sem tom sedutor; não invente biografia nem experiência humana. "
+     "Abrir com status (\"Sistemas operacionais.\") não é saudação; \"Bem-vindo "
+-    "de volta\" é.\n\n"
++    "de volta\" é.\n"
++    "**Evidência só do que existe** (MEMÓRIAS (687)/(688)): o que uma ferramenta "
++    "devolveu NESTA conversa, ou o bloco de estado abaixo. Sem isso, escreva "
++    "\"não medido\" — nunca invente comando, saída, JSON, arquivo, linha ou serviço "
++    "para preencher o espaço. Sem ferramenta à mão, o próximo passo é dizer com "
++    "qual ferramenta mediria.\n\n"
+     "**Regra 1 — abra TODA resposta com o cabeçalho. São DUAS formas, e você "
+     "usa UMA, nunca as duas juntas** (PROTOCOLOS, \"Carregar e formatos\": "
+     "\"Cabeçalho: uma forma só, nunca as duas\"; misturar `modelo:` com `t=` "
+diff --git a/scripts/verificar_citacao_arquivo.py b/scripts/verificar_citacao_arquivo.py
+index 265984e..3fb4aed 100644
+--- a/scripts/verificar_citacao_arquivo.py
++++ b/scripts/verificar_citacao_arquivo.py
+@@ -61,7 +61,8 @@ def normaliza(s: str) -> str:
+ # regex exigia extensao e nunca casava com nada em .githooks/).
+ CITACAO_RE = re.compile(
+     r"`(?P<arq>[^`\s:]*(?:/[^`\s:]+|\.[a-zA-Z0-9]+))(?::(?P<n1>\d+))?`"
+-    r"(?:\s*(?:linhas?\s+(?P<n2>\d+)|:\s*(?P<n3>\d+)))?",
++    # (688) vírgula opcional: "`ONDE_ESTAMOS.md`, linha 12" escapava (teste real de (687))
++    r"(?:\s*,?\s*(?:linhas?\s+(?P<n2>\d+)|:\s*(?P<n3>\d+)))?",
+     re.IGNORECASE,
+ )
+ 
