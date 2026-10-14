@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
+  palavras-chave: reteste, olá, sai, certo, prontidão, sync, pass, sermão, falso, alarme, sumiu, avaliação, pedida, saiu, recusada, minha, função, inclui, avaliações, subjetivas, proposta, seth, opiniao, tecnica, corrige, aguardando, assinatura
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
   palavras-chave: execução, aplicada, seth, zerar, assinada, humano, primeira, worktree, agata, recebe, pull, merge, gateway, reiniciado, então, reteste, vai, entrada, seguinte
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, cerebro, navegavel, pedido, humano, parar, ele, girar, usá, uso, gráfico, podendo, direções, zoom, insatisfatório, ler, notas, brain, atlas, fica, parado, panorama, entra, new, graph, explorar, navegação, livre, cores, regiões, agata, aguardando, assinatura
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assinada pelo Humano): `cerebro.md` com as 6 regiões contadas e o Brain Atlas com limite de 30 mil ligações — todas as 18.331 entram no 3D.**
   palavras-chave: execução, aplicada, cerebro, tudo, ligado, assinada, humano, regiões, contadas, brain, atlas, limite, mil, ligações, entram
-(672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
-  palavras-chave: proposta, cerebro, tudo, ligado, pedido, humano, ligue, vendo, parietal, occipital, tronco, tabela, passa, contar, cérebro, inteiro, limite, ligações, brain, atlas, sobe, mil, terço, sinapses, estava, fora, aguardando, assinatura
+(672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a ped …
+  palavras-chave: proposta, cerebro, tudo, ligado, ped
 (671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada …
   palavras-chave: execução, aplicada, obsidian, cerebro, assinada
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido …

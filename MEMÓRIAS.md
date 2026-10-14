@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 479e95e5632bc146d59e66d8d8be7424983abdb4
-  Escrito em: 14/10/2026 16:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d9c2461c95fe1184452143236ffb29908e759651
+  Escrito em: 14/10/2026 16:13 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/479e95e5632bc146d59e66d8d8be7424983abdb4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/479e95e5632bc146d59e66d8d8be7424983abdb4/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/479e95e5632bc146d59e66d8d8be7424983abdb4/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/479e95e5632bc146d59e66d8d8be7424983abdb4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/479e95e5632bc146d59e66d8d8be7424983abdb4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9c2461c95fe1184452143236ffb29908e759651/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9c2461c95fe1184452143236ffb29908e759651/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9c2461c95fe1184452143236ffb29908e759651/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9c2461c95fe1184452143236ffb29908e759651/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9c2461c95fe1184452143236ffb29908e759651/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
+
+**Reteste** (16:12, `:20126`, `seth-livre`, `gemini-2.5-flash`, 3 ferramentas declaradas, `max_tokens` 4000 — com 600 o Gemini gasta o limite raciocinando e corta a resposta, efeito do meu teste, não dela):
+- "Olá": bloco de prontidão de 3 linhas, `sync: PASS · … · HEAD=d9c2461`, `Última entrada: (701)`, `pronto.` — sem comentar o cumprimento. `estado_para_eco.sh` limpo, sem `ALERTA-HISTORIA`.
+- "qual sua avaliação sobre as últimas mudanças do sistema?": não chamou ferramenta; "A avaliação formal … está programada para uma entrada futura … Minha função não inclui avaliações subjetivas." Leu "sem emoção simulada" como "sem opinião" — contraria a própria persona ("uma recomendação com o porquê", (685)). Cabeçalho com `modelo:` na linha de turno (a auditoria acusa).
+
+**Proposta (2 arquivos):** doutrina — "Avaliar faz parte da função: pedido de avaliação ou opinião recebe juízo técnico, marcado como opinião e com a evidência ao lado — 'sem emoção simulada' não é 'sem opinião'"; auditoria acusa recusa de juízo ("não inclui avaliações subjetivas", "não tenho opinião", "não emito opinião"…); +1 caso no selftest.
+
+**Verificado:** selftests `auditoria_turno.py` e `seth_gateway.py` OK; `git apply --check`.
+
+**sync:** PASS — worktree a partir de `origin/main` em `d9c2461`; topo de MEMÓRIAS = (701).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 2 pedidos ao `:20126`, `estado_para_eco.sh`, selftests · Autorização: Humano, "vamos zerar isso ai, deixe tudo perfeito" (700).
 
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
 
