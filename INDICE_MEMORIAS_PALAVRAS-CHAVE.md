@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
+  palavras-chave: proposta, seth, zerar, pedido, humano, vamos, deixe, tudo, perfeito, fecha, auditoria, resposta, achou, falso, perdeu, história, sermão, cumprimento, duplicada, sync, linha, turno, positivo, própria, aguardando, assinatura
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
   palavras-chave: confirmado, humano, aviso, auditoria, seth, aparece, área, trabalho, fecha, pendência
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, cerebro, tudo, ligado, pedido, humano, ligue, vendo, parietal, occipital, tronco, tabela, passa, contar, cérebro, inteiro, limite, ligações, brain, atlas, sobe, mil, terço, sinapses, estava, fora, aguardando, assinatura
 (671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada pelo Humano): cérebro 3D instalado, vault regenerado com regiões e ligações por sentido, listagem do vault em dia, `vault_buscar` no ar para a Seth, tema da Agata no LibreChat. Falta o Humano ver na tela.**
   palavras-chave: execução, aplicada, obsidian, cerebro, assinada, humano, cérebro, instalado, vault, regenerado, regiões, ligações, sentido, listagem, dia, buscar, seth, tema, agata, librechat, falta, tela
-(670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido do Humano: o Obsidian vira o cérebro da Agata — prioridade 1 nas buscas dos modelos com acesso, busca por sentido viva e na mão da Seth, listagem do vault sempre em dia, gráfico 3D em forma de cérebro e os recursos do Smart Connections feitos com o embedding local; a paleta da Agata no Obsidian e no LibreChat. Antes, auditoria da resposta da Seth das 15:08. Aguardando assinatura.**
-  palavras-chave: proposta, obsidian, cerebro, pedido, humano, vira, cérebro, agata, prioridade, buscas, modelos, acesso, busca, sentido, viva, mão, seth, listagem, vault, sempre, dia, gráfico, forma, recursos, smart, connections, feitos, embedding, local, paleta, librechat, auditoria, resposta, aguardando, assinatura
+(670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido …
+  palavras-chave: proposta, obsidian, cerebro, pedido
 (669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assina …
   palavras-chave: execução, aplicada, aprovar, avisa, pull, assina
 (668) EXECUÇÃO — 13/10/2026 · **Aplicada `contexto-e-plugins-2026-10-13` (assina …

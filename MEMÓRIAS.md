@@ -26,20 +26,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ae8cc232a61a972af6fe5409c87e45d181744fe9
-  Escrito em: 14/10/2026 15:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ebbfa70f6c296c87042bfaa69945aa266e3febb9
+  Escrito em: 14/10/2026 16:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae8cc232a61a972af6fe5409c87e45d181744fe9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae8cc232a61a972af6fe5409c87e45d181744fe9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae8cc232a61a972af6fe5409c87e45d181744fe9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae8cc232a61a972af6fe5409c87e45d181744fe9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae8cc232a61a972af6fe5409c87e45d181744fe9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbfa70f6c296c87042bfaa69945aa266e3febb9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbfa70f6c296c87042bfaa69945aa266e3febb9/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbfa70f6c296c87042bfaa69945aa266e3febb9/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbfa70f6c296c87042bfaa69945aa266e3febb9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebbfa70f6c296c87042bfaa69945aa266e3febb9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
+
+**A resposta das 15:54** (conversa `7507efec`, "qual sua avaliação sobre as últimas mudanças do sistema?"): evidência real (`maquina_verificar git_log` e `perimetro`, números conferidos); recusou avaliar por "sync: FALHA … perda de histórico em MEMÓRIAS.md" — **verdadeiro naquele minuto e causado por mim**: eu comitava a (699) direto no `~/agata`, que o gateway lê ao vivo. No "Olá" anterior, ela passou sermão ("Saudações não são permitidas. Regra 5") — a Regra 5 é sobre a fala dela. A resposta saiu com dois cabeçalhos e o parágrafo repetido (texto antes da ferramenta + texto depois), e com `sync: FALHA` dentro da linha de turno.
+
+**Causa do falso "perdeu história", medida:** o `pre-commit` reescreve a âncora de SHA do preâmbulo de MEMÓRIAS/PROJETO/REGRAS e roda o perímetro (30–60 s) antes de o commit fechar; nessa janela, `git diff --numstat` conta a linha da âncora trocada como "removida" e o `ALERTA-HISTORIA` dispara. Vale para qualquer commit no `~/agata`, de qualquer modelo ou do Humano.
+
+**Mudanças (3 arquivos):**
+1. `scripts/estado_para_eco.sh`: `ALERTA-HISTORIA` conta só linha removida do **corpo** (abaixo do marcador `ENTRADAS-NOVAS`, linha lida do HEAD). Medido na worktree: âncora trocada → nenhum alerta (só o `sync: FALHA`, legítimo: a árvore está suja); uma linha do corpo apagada → alerta, como antes.
+2. Doutrina do gateway: "A Regra 5 vale para a SUA fala: se o Humano cumprimentar, responda com o estado, sem comentar o cumprimento."
+3. `auditoria_turno.py`: `MESMA-RESPOSTA` diz que o Humano já vê o texto de antes da ferramenta — continuar dali, sem cabeçalho nem parágrafo repetido; acusa `sync:` na linha de turno; acusa sermão sobre o cumprimento do Humano; "20 controles OK" deixa de ser lido como contagem errada (era falso positivo — o perímetro tem 23, e ela disse 20 OK, certo). +3 casos no selftest.
+
+**Do meu lado:** commit agora só em worktree; o `~/agata` recebe `git pull` do `main` (memória de sessão atualizada). Branches remotas sobrando, minhas: `aplica/persona-voz-comum-2026-10-14` (juntada) e `proposta/seth-personalidade-2026-10-14` (ampliação abandonada em (686)) — apagadas nesta rodada. `proposta/voz-flow-validacao-20261013` (PR #184, rascunho de outro modelo) fica: é decisão do Humano.
+
+**Limite:** a resposta duplicada não tem trava mecânica — o texto já saiu antes da ferramenta; o que muda é a instrução e a acusação no turno seguinte.
+
+**Verificado:** selftests `auditoria_turno.py` e `seth_gateway.py` OK; alarme testado nos dois sentidos; `git apply --check` contra o `main`.
+
+**sync:** PASS — branch a partir de `origin/main` em `ebbfa70`; topo de MEMÓRIAS = (699).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `mongosh` (conversa `7507efec`), `auditoria_turno.auditar` sobre a resposta real, `estado_para_eco.sh` na worktree com âncora trocada e com linha do corpo apagada, `.githooks/pre-commit` · Autorização: Humano, "vamos zerar isso ai, deixe tudo perfeito".
 
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
 
