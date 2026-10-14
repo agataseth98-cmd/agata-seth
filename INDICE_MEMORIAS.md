@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (675) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-navegavel-2026-10-13` (assinada pelo Humano): Brain Atlas parado; New 3D Graph 2.8.1 instalado com as cores das regiões; Obsidian reiniciado. Falta o Humano abrir e navegar.**
 (674) CONSELHO — 13/10/2026 · **Proposta `cerebro-navegavel-2026-10-13`, a pedido do Humano ("dá para parar ele de girar e usá-lo como uso o gráfico, podendo ir em todas as direções, e o zoom é insatisfatório para eu ler as notas"): o Brain Atlas fica parado, como panorama, e entra o New 3D Graph para explorar com navegação livre, nas cores das regiões da Agata. Aguardando assinatura.**
 (673) EXECUÇÃO — 13/10/2026 · **Aplicada `cerebro-tudo-ligado-2026-10-13` (assinada pelo Humano): `cerebro.md` com as 6 regiões contadas e o Brain Atlas com limite de 30 mil ligações — todas as 18.331 entram no 3D.**
-(672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a pedido do Humano ("ligue tudo", vendo parietal, occipital e tronco com "—" em `cerebro.md`): a tabela passa a contar o cérebro inteiro, e o limite de ligações do Brain Atlas sobe de 12 mil para 30 mil — um terço das sinapses estava de fora. Aguardando assinatura.**
+(672) CONSELHO — 13/10/2026 · **Proposta `cerebro-tudo-ligado-2026-10-13`, a ped …
 (671) EXECUÇÃO — 13/10/2026 · **Aplicada `obsidian-cerebro-2026-10-13` (assinada …
 (670) CONSELHO — 13/10/2026 · **Proposta `obsidian-cerebro-2026-10-13`, a pedido …
 (669) EXECUÇÃO — 13/10/2026 · **Aplicada `aprovar-avisa-pull-2026-10-13` (assina …
