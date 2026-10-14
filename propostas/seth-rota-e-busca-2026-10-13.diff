@@ -1,0 +1,479 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 1eda47b..b212735 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -96,7 +96,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ - **Janela de MEMÓRIAS na hidratação:** entradas inteiras, nunca cortadas, até `JANELA_ORCAMENTO_CHARS=25000`, de cima para baixo a partir do marcador; se a primeira sozinha estourar, entra inteira mesmo assim. Depois dela, um resumo de 1 linha das mais antigas (`JANELA_RESUMO_ANTIGAS_CHARS=8000`, de `INDICE_MEMORIAS.md`) (215)/(338).
+ - **Silos por modelo:** construídos. O hook gera `.hidrata-<modelo>.md` por modelo-alvo (hoje só `seth`, usado pelo `seth_gateway` no modo `full`), cada um com só o MOD do seu modelo; arquivo único foi rejeitado porque vaza MOD entre modelos. O P-11 impede silo de entrar no canon, por nome, por conteúdo e contra renomeação (419). MOD em MEMÓRIAS: REGRAS, "O Conselho", item 3 (430).
+ - **Vault Obsidian derivado** (290): `memoria/obsidian/`, regerado por `scripts/gerar_obsidian.py` a cada commit (`post-commit`, gitignorado) — uma nota por entrada, regra, seção, script, controle P-N e proposta aplicada, mais MOCs e painel. Camada de leitura; a fonte é o canon. Não editar. Também: `obsidian-skills` oficial e `memoria/obsidian/memorias.base` (Obsidian Bases) (324); a Nota Diária do Obsidian (`AAAA-MM-DD.md`) é gitignorada para nunca publicar rascunho pessoal (329). Uso pela Seth (292): consulta dirigida a partir de `memoria/obsidian/INICIO.md` ou dos `moc-*`, nunca varredura. Desde (670) o gerador escreve no lugar (só o que mudou) e a listagem de diretório do `:27125` vem do disco (`ro_proxy.py`), não do índice do Obsidian, que ficava atrás (391)/(400). **Cérebro** (670): cada nota leva `brain_region`/`kind` (`config/agata-identidade.json`) para o gráfico 3D do Brain Atlas (`redesign/obsidian/instalar_cerebro.sh`, versão fixa e conferida); cada entrada leva `parecidas` (5 mais próximas por sentido), `afinidade` e trechos parecidos com link de parágrafo (`#^bN`, segmentação em `scripts/agata_blocos.py`); `cerebro.md`, `mapa-do-sistema.canvas` e mais visões na Base. **Ordem de busca dos modelos com acesso:** o vault é a prioridade 1 — `vault_buscar` (sentido e texto), navegar pela nota, `query_canon` para confirmar antes de citar.
+-- **Busca:** sem RAG por embedding, de propósito — `rag_api`/`pgvector` não sobem (115)/(293)/(313). `scripts/busca_semantica.py` é ferramenta secundária, sob demanda, nunca injetada: boa para tema concreto, fraca para pergunta abstrata sobre o próprio sistema (327). Desde (670): índice incremental por entrada e por parágrafo (só o texto novo vai ao embedding; o `post-commit` atualiza antes do vault), ao alcance da Seth e do Goose pela lista fechada do `seth_verificador` (`busca_semantica`, `busca_texto`) e do Humano por `scripts/agata_busca.sh` (`--abrir`, `--contexto`). A recusa de (115) segue: vetor nunca como camada primária nem injetado na hidratação.
++- **Busca:** sem RAG por embedding, de propósito — `rag_api`/`pgvector` não sobem (115)/(293)/(313). `scripts/busca_semantica.py` é ferramenta secundária, sob demanda, nunca injetada: boa para tema concreto, fraca para pergunta abstrata sobre o próprio sistema (327). Desde (670): índice incremental por entrada e por parágrafo (só o texto novo vai ao embedding; o `post-commit` atualiza antes do vault), ao alcance da Seth e do Goose pela lista fechada do `seth_verificador` (`busca_semantica`, `busca_texto`) e do Humano por `scripts/agata_busca.sh` (`--abrir`, `--contexto`). A recusa de (115) segue: vetor nunca como camada primária nem injetado na hidratação. Desde (682): a busca por sentido cobre também os parágrafos dos documentos de `extras/` (inteiro, inclusive `arquivo-redesign/` — o Humano abriu o dossiê sobre a Seth, revertendo a decisão de 04/09), e a busca de texto (`scripts/busca_texto.py`) ignora acento e maiúscula e casa por palavras.
+ - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento, nunca por offset ou número de linha (96)/(97). Script: `scripts/achar_ancora_1_62.py`.
+ - **`memoria/missoes/`** — quarto pilar, local por desenho: um arquivo por missão + `INDICE.md`, repositório git próprio sem remote, gitignorado do repo principal (`*.bundle` coberto em toda a árvore (97)/(98)), nunca público, nunca na hidratação; pesquisado sob demanda por quem tem acesso à Máquina. Achável pelo vault via `memoria/obsidian/moc-missoes.md` (325), exceto `segunda-camada/` (esfera pessoal, mais estrita). Relação com o bg-review desligado: `INDICE.md` local e (91)-(95).
+ - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`). Sincronize contra ele no início de **toda** sessão; em sessões autônomas a sincronização falha em silêncio com frequência — verifique, não presuma.
+@@ -163,7 +163,7 @@ Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIA
+ ## Decisor local
+ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
+ - **Padrão "decide e confere".** A regra determinística continua e sempre vence. O modelo decide **dentro** do que ela permite, ou só **restringe** (barra, avisa) — nunca libera o que ela barrou, nunca reprova commit (hook só aceita checagem determinística). Confiança baixa, timeout ou serviço fora → vale a regra de antes; nada quebra se o `ollaya` cair. Cada decisão: `~/.cache/agata/decisor/<uso>.jsonl` (respostas, latência, metadados; nunca o texto avaliado). Única exceção, só enquanto durar a avaliação: 200 caracteres de cada divergência do roteador, em arquivo modo 600, para o Humano julgar.
+-- **Onde decide hoje:** roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
++- **Onde decide hoje:** roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência; desde (682) a heurística decide uma vez por resposta — o passo depois de ferramenta fica na mesma fila — e o gateway registra no journal erro do OmniRoute e cliente que desconecta) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
+ - **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
+ - **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
+ - **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo. Inbox se mede sozinho (nota barrada que depois foi editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); roteador que concorda com a regra em 95% ou mais "não vale" (só gasta CPU). Avisa na área de trabalho (notificação e `avaliacao-decisor.md`) no 3º e no 7º dia, depois a cada 7, e na hora se o serviço reiniciar 3+ vezes ou mais da metade das decisões de 24 h falhar. Termina quando o Humano mandar aprovar ou remover: `--encerrar aprovado|removido` apaga os trechos guardados; "removido" já para o `ollaya` (todos os usos caem na regra) e o código sai por proposta P-8.
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index f7e2b7b..260a0fc 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -62,10 +62,10 @@ function pathOk(p) {
+   if (p.startsWith("memoria/obsidian/")) return true;
+   if (p === "SETH-DIARIO.md") return true;               // a Seth lê o próprio diário
+   // (678) extras/ -- arquivo histórico versionado (público no GitHub), pedido do
+-  // Humano ("leve extras em consideração"). EXCETO extras/arquivo-redesign/: é
+-  // para onde foi o dossiê de auditoria sobre a própria Seth (AUDITORIA-01,
+-  // CONSELHO-*) que a decisão de 04/09 (comentário acima) tirou do alcance dela.
+-  if (p.startsWith("extras/") && !p.startsWith("extras/arquivo-redesign")) return true;
++  // Humano ("leve extras em consideração"). (682) INTEIRO, inclusive
++  // extras/arquivo-redesign/ (o dossiê sobre a Seth): o Humano reverteu a
++  // decisão de 04/09 (comentário acima) por escrito -- "tudo até o dossiê".
++  if (p.startsWith("extras/")) return true;
+   return Object.values(CANON).includes(p);
+ }
+ 
+@@ -354,7 +354,7 @@ const TOOLS = [
+       "Desde (670) a listagem de diretório vem do DISCO (sempre em dia) e cada entrada traz `parecidas` " +
+       "(as 5 mais próximas por sentido) e trechos parecidos com link de parágrafo (#^bN). " +
+       "Para BUSCAR, use vault_buscar primeiro. Também lê o arquivo histórico em extras/ (liste \"extras/\"; " +
+-      "extras/arquivo-redesign/ fica fora, por decisão de 04/09).",
++      "inteiro, inclusive extras/arquivo-redesign/, decisão do Humano em (682)).",
+     inputSchema: {
+       type: "object",
+       properties: {
+diff --git a/redesign/router/afirmacoes_desmentidas.json b/redesign/router/afirmacoes_desmentidas.json
+index 1b7c95b..f464cb1 100644
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -23,8 +23,8 @@
+     {
+       "id": "busca-semantica",
+       "tema": "busca sem[aâ]ntica|embedding|vetorial|vector store|\\bRAG\\b",
+-      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo -- não só o vault): vault_buscar modo sentido (327)/(670); a recusa de (115) é só de vetor como camada PRIMÁRIA",
+-      "origem": "(660)/(670)/(678)"
++      "correcao": "existe e lê o CANON direto (MEMÓRIAS, morno e frio, por entrada e por parágrafo) e os documentos de extras/ -- não só o vault: vault_buscar modo sentido (327)/(670)/(682); a recusa de (115) é só de vetor como camada PRIMÁRIA",
++      "origem": "(660)/(670)/(678)/(682)"
+     },
+     {
+       "id": "indices-manuais",
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 21b7444..9bd6e30 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -43,6 +43,7 @@ import re
+ import socket
+ import sys
+ import threading
++import time
+ import urllib.error
+ import urllib.request
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -223,7 +224,7 @@ _DOUTRINA_FIXA = (
+     "descrição lida (são 23, e o número muda). **Estado da arte / sistemas "
+     "iguais:** use o navegador (`tool_search` \"navegador\") e cite a fonte de "
+     "cada item; sem fonte, escreva `não verificado`. `extras/` (arquivo "
+-    "histórico) se lê com `vault_consultar extras/`.\n\n"
++    "histórico, inteiro) se lê com `vault_consultar extras/`.\n\n"
+     "**Antes de dizer que algo FALTA no sistema, procure:** entradas por data ou "
+     "tema estão no `INDICE_MEMORIAS` e no `INDICE_MEMORIAS_PALAVRAS-CHAVE` "
+     "(`query_canon`); o vault já é conferido contra o HEAD (P-10) e a hidratação "
+@@ -239,7 +240,10 @@ _DOUTRINA_FIXA = (
+     "(MEMÓRIAS (662)/(664).)\n"
+     "**MESMA-RESPOSTA:** se vier essa linha, você está no meio da sua resposta, "
+     "depois de usar ferramenta: continue o texto, SEM cabeçalho novo e sem "
+-    "repetir a correção. Uma resposta tem um cabeçalho só.\n\n"
++    "repetir a correção. Uma resposta tem um cabeçalho só. **Se a resposta vai "
++    "usar ferramenta, chame a ferramenta ANTES de escrever qualquer texto** — o "
++    "cabeçalho e o texto vêm uma vez só, depois das ferramentas ((682): o "
++    "cabeçalho escrito antes da ferramenta saía repetido depois dela).\n\n"
+     "**MODO (linha do estado):** `conciso` é o padrão — a resposta traz o resultado e "
+     "não narra o processo (\"vou verificar…\", \"agora vou…\"); fale do processo só "
+     "para constatar erro, em 1 linha. `explicativo` só quando o Humano pedir na "
+@@ -513,6 +517,14 @@ def _classificar_rota(payload: dict) -> str:
+     if not isinstance(msgs, list):
+         return _ROTA_BASE
+     tem_tools = bool(payload.get("tools"))
++    # (682) passo depois de ferramenta é a MESMA resposta: classifica só até o
++    # último pedido do usuário. Antes, o resultado da ferramenta e as mensagens a
++    # mais viravam "pesado" e a resposta trocava de fila no meio (seth-livre no
++    # passo 1, seth-pesado no passo 2 -- medido no teste de 13/10, 21:59).
++    if auditoria_turno.e_continuacao(msgs):
++        ult = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"),
++                  default=len(msgs) - 1)
++        msgs = msgs[:ult + 1]
+     total, n_user, codigo = _texto_e_sinais(msgs)
+     if total > _LIMIAR_PESADO_CHARS or codigo or len(msgs) > _LIMIAR_PESADO_MSGS:
+         return "seth-pesado"
+@@ -727,7 +739,14 @@ class _Handler(BaseHTTPRequestHandler):
+                 return nome
+         return None
+ 
++    def _log(self, msg: str, t0: float):
++        """(682) Erro e desconexão vão para o journal (antes nada era registrado:
++        uma resposta que morreu no meio não deixava rastro aqui)."""
++        print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path}",
++              file=sys.stderr, flush=True)
++
+     def _passar(self, corpo: bytes, metodo: str):
++        t0 = time.monotonic()
+         url = UPSTREAM + self.path
+         headers = {k: v for k, v in self.headers.items()
+                    if k.lower() not in _HOP_BY_HOP}
+@@ -737,7 +756,9 @@ class _Handler(BaseHTTPRequestHandler):
+             up = urllib.request.urlopen(req, timeout=180)
+         except urllib.error.HTTPError as e:
+             up = e
++            self._log(f"upstream HTTP {e.code}", t0)
+         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
++            self._log(f"upstream inacessível ({e})", t0)
+             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
+                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
+         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
+@@ -760,9 +781,14 @@ class _Handler(BaseHTTPRequestHandler):
+                 buf_pre = up.read()
+                 modelo_real = self._modelo_de_bytes(buf_pre)
+         except (BrokenPipeError, ConnectionResetError):
++            self._log("cliente desconectou antes da 1ª resposta do modelo", t0)
+             self.close_connection = True
+             up.close()
+             return
++        except (TimeoutError, OSError) as e:
++            self._log(f"upstream parou de responder ({e})", t0)
++            up.close()
++            return self._erro(504, f"upstream parou de responder: {e}")
+         self.send_response(up.status)
+         for k, v in up.headers.items():
+             if k.lower() not in _HOP_BY_HOP:
+@@ -790,6 +816,7 @@ class _Handler(BaseHTTPRequestHandler):
+             # sem isto a exceção subia e o servidor inteiro emperrava (a Seth
+             # "travou" no teste 3, MEMÓRIAS (393)). close_connection pra o
+             # keep-alive não reusar o socket morto.
++            self._log(f"cliente desconectou no meio do stream (modelo {modelo_real or '?'})", t0)
+             self.close_connection = True
+         finally:
+             up.close()
+@@ -1066,6 +1093,17 @@ def _selftest() -> int:
+         print(f"{'PASS' if ok else 'FALHA'}  rota {n}: {desc}")
+         falhas += 0 if ok else 1
+ 
++    # 9j. (682) passo depois de ferramenta fica na fila do passo 1 (mesma resposta)
++    hist = [{"role": "user", "content": "x" * 1200}]
++    passo1 = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}], "messages": hist})
++    passo2 = _classificar_rota({"model": "seth-livre", "tools": [{"x": 1}], "messages": hist + [
++        {"role": "assistant", "content": "", "tool_calls": [{"id": "t1", "type": "function",
++                                                              "function": {"name": "vault_buscar", "arguments": "{}"}}]},
++        {"role": "tool", "tool_call_id": "t1", "content": "z" * 9000}]})
++    ok9j = passo1 == passo2 == "seth-livre"
++    print(f"{'PASS' if ok9j else 'FALHA'}  rota estável depois de ferramenta ({passo1} -> {passo2})")
++    falhas += 0 if ok9j else 1
++
+     # 9b. travas exatas sobre a escolha do decisor (pura, sem rede)
+     curto = {"messages": [{"role": "user", "content": "prove que há infinitos primos"}]}
+     travas = [
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index df05c2b..7cce088 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -118,7 +118,8 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+     ),
+     "busca_semantica": (
+         ["python3", "scripts/busca_semantica.py", "-n"], 90,
+-        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS e nos seus parágrafos "
++        "Busca POR SENTIDO em todas as entradas de MEMÓRIAS, nos seus parágrafos e "
++        "nos parágrafos dos documentos de extras/ (resultado 'extras/…md ^bK') "
+         "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
+         "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
+         "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
+@@ -126,12 +127,13 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         "antes de citar. Complementar ao grep, não substituto (MEMÓRIAS (327)/(670)).",
+     ),
+     "busca_texto": (
+-        ["grep", "-rnIiF", "--include=*.md", "--exclude-dir=arquivo-redesign", "-m", "3"], 30,
+-        "Busca por TEXTO literal (sem regex, sem diferenciar maiúsculas) no vault "
+-        "derivado memoria/obsidian/ e no arquivo histórico extras/ (menos "
+-        "extras/arquivo-redesign/), lendo o DISCO (sempre em dia). Use o "
+-        "parâmetro `consulta` (até 200 caracteres). "
+-        "Devolve caminho:linha:trecho, até 3 por nota.",
++        ["python3", "scripts/busca_texto.py"], 30,
++        "Busca por TEXTO no vault derivado memoria/obsidian/ e no arquivo histórico "
++        "extras/ inteiro, lendo o DISCO (sempre em dia). "
++        "Sem acento e sem maiúscula, por PALAVRAS: casa a linha com todas as "
++        "palavras da consulta (ou, se nenhuma tiver, as que têm mais -- e diz). "
++        "O nome do arquivo também conta. Use o parâmetro `consulta` (até 200 "
++        "caracteres). Devolve caminho:linha:trecho, até 3 por nota.",
+     ),
+ }
+ 
+@@ -162,7 +164,7 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
+         if not isinstance(consulta, str) or not consulta.strip() or len(consulta) > _CONSULTA_MAX \
+                 or any(c in consulta for c in "\r\n\x00"):
+             raise ValueError(f"'consulta' inválida ou ausente -- até {_CONSULTA_MAX} caracteres, uma linha só")
+-        return base + ["--", consulta.strip(), "memoria/obsidian", "extras"]
++        return base + ["--", consulta.strip()]
+     if nome == "busca_semantica":
+         if prop_nome is not None:
+             raise ValueError("'busca_semantica' não aceita o parâmetro nome -- use 'consulta'")
+@@ -259,7 +261,7 @@ def _redigir(texto: str) -> tuple[str, int]:
+ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) -> str | None:
+     if nome == "busca_texto":
+         if codigo == 1:
+-            return "nenhuma ocorrência literal no vault -- tente busca_semantica (por sentido)."
++            return "nenhuma ocorrência (sem acento, por palavras) no vault nem em extras/ -- tente busca_semantica (por sentido)."
+         notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith(("memoria/", "extras/"))}
+         return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
+     if nome == "servicos":
+@@ -452,7 +454,7 @@ def _selftest() -> int:
+         except ValueError:
+             casos.append((f"consulta {str(mau)[:8]!r} recusada", True))
+     avt = _argv("busca_texto", None, None, "-e x")
+-    casos.append(("busca_texto: consulta é dado", avt[-4:] == ["--", "-e x", "memoria/obsidian", "extras"]))
++    casos.append(("busca_texto: consulta é dado", avt[-2:] == ["--", "-e x"]))
+     try:
+         _argv("git_status", None, None, "x"); casos.append(("git_status recusa consulta", False))
+     except ValueError:
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index a37d2d6..84eaaa8 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -247,15 +247,49 @@ def vetor(vetores, texto):
+     return np.frombuffer(base64.b64decode(v), dtype="<f4")
+ 
+ 
+-def _itens(entradas):
+-    """[(sha, texto)] de todas as entradas e blocos, sem repetição."""
++# (682) documentos do arquivo histórico extras/ entram na busca por sentido,
++# por parágrafo -- extras/ inteiro, inclusive extras/arquivo-redesign/ (o
++# Humano abriu o dossiê: "tudo até o dossiê"). Só .md, sem pastas ocultas. O vault (gerar_obsidian.py)
++# não usa estes vetores: só a busca.
++EXTRAS = os.path.join(REPO, "extras")
++EXTRAS_FORA = set()
++
++
++def docs_extras():
++    """[(caminho_relativo, linhas)] dos .md de extras/."""
++    out = []
++    for d, dirs, arqs in os.walk(EXTRAS):
++        dirs[:] = sorted(x for x in dirs if not x.startswith(".") and x not in EXTRAS_FORA)
++        for a in sorted(arqs):
++            if a.endswith(".md") and not a.startswith("."):
++                c = os.path.join(d, a)
++                try:
++                    with open(c, encoding="utf-8", errors="replace") as f:
++                        out.append((os.path.relpath(c, REPO), f.read().splitlines()))
++                except OSError:
++                    pass
++    return out
++
++
++def textos_doc(rel, linhas):
++    """[(n, texto)] -- parágrafos do documento, com o nome do arquivo de contexto."""
++    nome = os.path.basename(rel)
++    return [(n, f"{nome}\n\n{t[:1500]}") for n, _i, _f, t in agata_blocos.blocos(linhas)]
++
++
++def _itens(entradas, docs=()):
++    """[(sha, texto)] de todas as entradas, blocos e parágrafos de extras/, sem repetição."""
+     vistos, out = set(), []
++    textos = []
+     for e in entradas:
+-        for t in [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]:
+-            h = _h(t)
+-            if h not in vistos:
+-                vistos.add(h)
+-                out.append((h, t))
++        textos += [texto_entrada(e)] + [t for _n, t in textos_blocos(e)]
++    for rel, linhas in docs:
++        textos += [t for _n, t in textos_doc(rel, linhas)]
++    for t in textos:
++        h = _h(t)
++        if h not in vistos:
++            vistos.add(h)
++            out.append((h, t))
+     return out
+ 
+ 
+@@ -272,7 +306,7 @@ def atualizar(podar=False, silencioso=False):
+     não poda, pra nunca tirar o vetor de uma entrada do HEAD que o vault usa)."""
+     entradas, _ = _todas_entradas_todas_camadas()
+     vetores = carregar_indice()
+-    itens = _itens(entradas)
++    itens = _itens(entradas, docs_extras())
+     faltam = [(h, t) for h, t in itens if h not in vetores]
+     ok = True
+     LOTE = 32
+@@ -300,7 +334,7 @@ def atualizar(podar=False, silencioso=False):
+         os.replace(tmp, INDICE_V2)
+     if not silencioso:
+         print(f"índice: {novos} texto(s) novo(s) embedado(s); {len(itens)} no total "
+-              f"({len(entradas)} entradas + blocos)", file=sys.stderr)
++              f"({len(entradas)} entradas + blocos + parágrafos de extras/)", file=sys.stderr)
+     return novos, len(itens), ok
+ 
+ 
+@@ -325,6 +359,13 @@ def buscar_dados(query, n=10, blocos=True):
+                     res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
+                                 "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
+                                 "trecho": t[:280]})
++    for rel, linhas in docs_extras():
++        for bn, t in textos_doc(rel, linhas):
++            v = vetor(vetores, t)
++            if v is not None:
++                res.append({"tipo": "documento", "num": rel, "bloco": bn,
++                             "score": float(v @ q), "titulo": os.path.basename(rel), "data": "",
++                             "trecho": t.split("\n\n", 1)[-1][:280]})
+     res.sort(key=lambda r: r["score"], reverse=True)
+     # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
+     out, vistos = [], set()
+@@ -347,6 +388,8 @@ def buscar(query, n, como_json=False):
+     for r in rs:
+         if r["tipo"] == "entrada":
+             print(f"{r['score']:.3f}  ({r['num']}) — {r['titulo'][:140]}")
++        elif r["tipo"] == "documento":
++            print(f"{r['score']:.3f}  {r['num']} ^b{r['bloco']} — {r['trecho'][:140]}")
+         else:
+             print(f"{r['score']:.3f}  ({r['num']}) ^b{r['bloco']} — {r['trecho'][:140]}")
+ 
+@@ -358,7 +401,7 @@ def contexto(query, n, destino):
+     entradas = {e["num"]: e for e in _todas_entradas_todas_camadas()[0]}
+     nums = []
+     for r in rs:
+-        if r["num"] not in nums:
++        if r["tipo"] != "documento" and r["num"] not in nums:
+             nums.append(r["num"])
+     linhas = [f"# Contexto Agata — \"{query}\"", "",
+               "Entradas de MEMÓRIAS escolhidas por sentido (busca local, embedding na iGPU). "
+diff --git a/scripts/busca_texto.py b/scripts/busca_texto.py
+new file mode 100644
+index 0000000..25ca34d
+--- /dev/null
++++ b/scripts/busca_texto.py
+@@ -0,0 +1,122 @@
++#!/usr/bin/env python3
++"""Busca por TEXTO no vault derivado e no arquivo histórico -- sem acento, sem
++maiúscula, por palavras (MEMÓRIAS (682)).
++
++O `grep -F` de (670) só achava a frase exata: "o despertar da Agata" não achava
++"O Despertar de Ágata" (acento e uma palavra no meio). Aqui: a consulta vira
++palavras (3+ letras, sem acento); uma linha casa se tiver TODAS as palavras;
++sem nenhuma linha assim, casa a que tiver mais delas (e o resultado diz isso).
++
++Onde procura (fixo, nunca vem da consulta): memoria/obsidian/ e extras/ inteiro
++(inclusive extras/arquivo-redesign/, decisão do Humano em (682)). Só .md.
++
++Uso: python3 scripts/busca_texto.py -- "frase"     |     --selftest
++"""
++import os
++import sys
++import unicodedata
++
++REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++ONDE = ["memoria/obsidian", "extras"]
++FORA = set()  # (682) o Humano abriu o dossiê: "tudo até o dossiê"
++POR_NOTA = 3
++MAX_LINHAS = 40
++
++
++def _norm(t):
++    t = unicodedata.normalize("NFKD", t)
++    return "".join(c for c in t if not unicodedata.combining(c)).lower()
++
++
++def palavras(consulta):
++    ps = []
++    for p in _norm(consulta).replace("-", " ").replace("_", " ").split():
++        p = "".join(c for c in p if c.isalnum())
++        if len(p) >= 3 and p not in ps:
++            ps.append(p)
++    return ps
++
++
++def _arquivos(raiz):
++    for base in ONDE:
++        topo = os.path.join(raiz, base)
++        for d, dirs, arqs in os.walk(topo):
++            dirs[:] = sorted(x for x in dirs if not x.startswith(".") and x not in FORA)
++            for a in sorted(arqs):
++                if a.endswith(".md") and not a.startswith("."):
++                    yield os.path.join(d, a)
++
++
++def buscar(consulta, raiz=REPO):
++    ps = palavras(consulta)
++    if not ps:
++        return [], 0, ps
++    achados = []  # (n_palavras, caminho_rel, nº linha, trecho)
++    for caminho in _arquivos(raiz):
++        rel = os.path.relpath(caminho, raiz)
++        nome = _norm(rel)
++        try:
++            with open(caminho, encoding="utf-8", errors="replace") as f:
++                linhas = f.read().splitlines()
++        except OSError:
++            continue
++        locais = []
++        for i, ln in enumerate(linhas, 1):
++            n = sum(p in _norm(ln) for p in ps)
++            if n:
++                locais.append((n, rel, i, ln.strip()[:200]))
++        # o nome do arquivo também conta (ex.: O_Despertar_de_Agata.md)
++        n_nome = sum(p in nome for p in ps)
++        if n_nome and not any(n == len(ps) for n, *_ in locais):
++            locais.append((n_nome, rel, 0, "(nome do arquivo)"))
++        locais.sort(key=lambda x: (-x[0], x[2]))
++        achados += locais[:POR_NOTA]
++    if not achados:
++        return [], 0, ps
++    melhor = max(n for n, *_ in achados)
++    achados = [a for a in achados if a[0] == melhor]
++    achados.sort(key=lambda x: (x[1], x[2]))
++    return achados[:MAX_LINHAS], melhor, ps
++
++
++def main(argv):
++    if argv[:1] == ["--selftest"]:
++        return _selftest()
++    if "--" in argv:
++        argv = argv[argv.index("--") + 1:]
++    if len(argv) != 1:
++        print("uso: busca_texto.py -- \"frase\"", file=sys.stderr)
++        return 2
++    achados, melhor, ps = buscar(argv[0])
++    if not achados:
++        print(f"nenhuma ocorrência de {ps} (sem acento, sem maiúscula)")
++        return 1
++    if melhor < len(ps):
++        print(f"[nenhuma linha tem as {len(ps)} palavras; mostrando as que têm {melhor}: {ps}]")
++    for _n, rel, i, trecho in achados:
++        print(f"{rel}:{i}: {trecho}")
++    return 0
++
++
++def _selftest():
++    import tempfile
++    with tempfile.TemporaryDirectory() as t:
++        os.makedirs(os.path.join(t, "extras", "arquivo-redesign"))
++        os.makedirs(os.path.join(t, "memoria", "obsidian"))
++        open(os.path.join(t, "extras", "O_Despertar_de_Agata.md"), "w").write("# O Despertar de Ágata\n\nNasci de muitos nomes\n")
++        open(os.path.join(t, "extras", "arquivo-redesign", "AUDITORIA-01.md"), "w").write("despertar agata\n")
++        open(os.path.join(t, "memoria", "obsidian", "n.md"), "w").write("nada aqui\n")
++        a, m, ps = buscar("o despertar da Agata", t)
++        ok = (ps == ["despertar", "agata"] and m == 2 and a
++              and any(x[1].endswith("O_Despertar_de_Agata.md") for x in a)
++              and any("arquivo-redesign" in x[1] for x in a))
++        b, _, _ = buscar("NASCI de muitos", t)
++        ok = ok and b and b[0][2] == 3
++        c, _, _ = buscar("xy", t)
++        ok = ok and c == []
++    print("SELFTEST", "OK" if ok else f"FALHA {a} {b}")
++    return 0 if ok else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
