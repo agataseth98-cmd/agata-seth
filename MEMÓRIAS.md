@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 42fcd271041f3c04b11fd64db6b4a68f98acb0b8
-  Escrito em: 15/10/2026 12:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2cc2f8f31f7b6343e70fc573fac9621c0793d87f
+  Escrito em: 15/10/2026 13:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(724) DIÁRIO — 15/10/2026 · **O Laya escolhe a fila da Seth desde as 15:2x de 15/10: `laya-roteador` no ar (CPU, 1,9 GB, 0 reinícios), gateway reiniciado, 2 mensagens reais roteadas por ele em ~100 ms. E um efeito colateral meu: a geração de dados sintéticos de (718)/(719) gastou a cota diária gratuita do OpenRouter, e o Nemotron, 1º da `seth-pesado`, está em 429 até a cota virar (00:00 UTC, 21:00 -03).**
+
+**Medido** (`roteador-laya.jsonl`, cabeçalho `X-Seth-Rota`, call logs do OmniRoute):
+- "valeu, Seth" → Laya `rapido` (0,90, 93 ms) → `seth-rapido` (Ministral, 811 ms).
+- "compare as arquiteturas de tolerância a falha do gateway com trade-offs…" → Laya `pesado` (0,90, 105 ms; a regra por tamanho teria mandado para `seth-rapido`) → `seth-pesado`: Nemotron 429 "free-models-per-day"; `gemini-2.5-flash` 200 e `qwen3.5-9b` local 200, os dois com resposta vazia — o meu teste pediu `max_tokens: 20`, e modelo que pensa antes de responder gasta isso no raciocínio —; o gateway refez na `seth-livre` (Ministral, 990 ms). A rota do Laya estava certa; a resposta vazia é artefato do teste.
+
+**Lição:** gerar dados em volume pela mesma cota gratuita que serve a Seth tira um modelo de produção do ar. Próxima geração: fora do horário de uso, com teto de chamadas, e nunca no 1º modelo de uma fila de produção.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `/health` do `laya-roteador`, `systemctl --user show`, 2 pedidos ao gateway `:20126`, log do decisor, call logs · Autorização: Humano, merge do PR #227 ("aut").
 
 (723) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-aspas-2026-10-15` (assinada pelo Humano), em worktree: a linha do `LAYA_EXTRA_MODELS` entre aspas simples. Depois do merge, o `laya-roteador` sobe e o Laya passa a escolher a fila da Seth.**
 
