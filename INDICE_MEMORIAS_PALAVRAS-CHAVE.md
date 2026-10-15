@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(724) DIÁRIO — 15/10/2026 · **O Laya escolhe a fila da Seth desde as 15:2x de 15/10: `laya-roteador` no ar (CPU, 1,9 GB, 0 reinícios), gateway reiniciado, 2 mensagens reais roteadas por ele em ~100 ms. E um efeito colateral meu: a geração de dados sintéticos de (718)/(719) gastou a cota diária gratuita do OpenRouter, e o Nemotron, 1º da `seth-pesado`, está em 429 até a cota virar (00:00 UTC, 21:00 -03).**
+  palavras-chave: laya, escolhe, fila, seth, desde, roteador, cpu, reinícios, gateway, reiniciado, mensagens, reais, roteadas, ele, efeito, colateral, meu, geração, dados, sintéticos, gastou, cota, diária, gratuita, openrouter, nemotron, pesado, virar, utc
 (723) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-aspas-2026-10-15` (assinada pelo Humano), em worktree: a linha do `LAYA_EXTRA_MODELS` entre aspas simples. Depois do merge, o `laya-roteador` sobe e o Laya passa a escolher a fila da Seth.**
   palavras-chave: execução, aplicada, laya, aspas, assinada, humano, worktree, linha, extra, models, simples, merge, roteador, sobe, passa, escolher, fila, seth
 (722) CORREÇÃO — 15/10/2026 · **Depois do merge de (721), o `laya-roteador` caiu em loop na 1ª subida: o systemd comeu as aspas duplas do JSON em `Environment=LAYA_EXTRA_MODELS=...` e o `laya-serve` recusou ("invalid LAYA_EXTRA_MODELS: not a JSON object"). Parado; a Seth segue pela regra por tamanho (o gateway cai nela com o Laya fora). Conserto de 1 linha em proposta: `laya-aspas-2026-10-15`. E um segundo erro meu, de (717): o gateway estava de pé desde as 09:01 e eu não o reiniciei.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, verdade, assinada, humano, reteste, pergunta, fato, abre, ferramenta, quais, propostas, estão, pendentes, respondida, máquina, resposta, desatualizada, acusada, turno, seguinte, corrigida, ela, evidência, certa
 (695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma vez a Seth afirmar o que não mediu — junta (a)+(b) de (694) com os achados da auditoria da conversa de 15:00 ("ConversaIniciadaEmPortuguês"). Pedido do Humano: "junta tudo e faça de forma a resolver esse problema de uma vez, seja elegante econômico e preciso". Aguardando assinatura.**
   palavras-chave: proposta, seth, verdade, resolve, afirmar, mediu, junta, achados, auditoria, conversa, conversainiciadaemportuguês, pedido, humano, tudo, faça, forma, resolver, problema, seja, elegante, econômico, preciso, aguardando, assinatura
-(694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (691) contra a evidência inventada — (a) o gateway força uma chamada de ferramenta quando a pergunta é sobre fato do sistema; (b) o achado da auditoria aparece para o Humano, não só para a Seth. Ainda sem proposta; fica para a próxima rodada.**
-  palavras-chave: decisão, humano, aplicar, caminhos, contra, evidência, inventada, gateway, força, chamada, ferramenta, pergunta, fato, sistema, achado, auditoria, aparece, seth, proposta, fica, próxima, rodada
+(694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (69 …
+  palavras-chave: decisão, humano, aplicar, caminhos
 (693) EXECUÇÃO — 14/10/2026 · **Aplicada `fluxo-proposta-2026-10-14` (assinada p …
   palavras-chave: execução, aplicada, fluxo, proposta, assinada
 (692) DIÁRIO — 14/10/2026 · **Proposta `fluxo-proposta-2026-10-14`: o fluxo de p …
