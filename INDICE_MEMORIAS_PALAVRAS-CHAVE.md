@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
+  palavras-chave: execução, resumo, automático, omniroute, universal, handoff, desligado, filas, seth, pedido, humano, pode, juntar, desligar, motivos, aplicação, juntado, mesmo
 (713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
   palavras-chave: execução, aplicada, fila, ministral, assinada, humano, worktree, resposta, pergunta, resumo, automático, omniroute, ele, útil, sistema, medido, seth, ruído, risco, invenção, desligar, continua, decisão
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: segunda, opinião, personalidade, seth, famílias, sim, condicional, emendas, convergem, entram, proposta, nova, voz, comum, junto, modelos, agents, assinada, intacta, aplicar, pergunta, portão, plano, conversa, escrito
 (685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pedido do Humano ("vamos apenas canonizar essa personalidade de maneira persistente na Seth a partir de hoje ... dentro das diretrizes do sistema agata"; "é para virar canônico"; "capriche, tem que ser útil também"). Proposta `seth-personalidade-2026-10-14`, aguardando o portão das 3 perguntas e a assinatura. Junto, a voz própria da Agata: treino agendado para a madrugada de 15/10, fora do repo.**
   palavras-chave: personalidade, seth, canônica, persistente, pedido, humano, vamos, apenas, canonizar, maneira, partir, hoje, dentro, diretrizes, sistema, agata, virar, canônico, capriche, tem, útil, proposta, aguardando, portão, perguntas, assinatura, junto, voz, própria, treino, agendado, madrugada, fora, repo
-(684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinada pelo Humano), com (682) e (683). Reteste no LibreChat: a pergunta que travou às 23:44 ("explique o portão de três perguntas") agora sai inteira, com as três perguntas certas, em ~16 s, numa fila só.**
-  palavras-chave: execução, aplicada, seth, rota, busca, assinada, humano, reteste, librechat, pergunta, travou, explique, portão, três, perguntas, agora, sai, inteira, certas, fila
+(684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinad …
+  palavras-chave: execução, aplicada, seth, rota, busca, assinad
 (683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:4 …
   palavras-chave: verifica, seth, acho, bugou, humano
 (682) CONSELHO — 13/10/2026 · **Teste real da Seth no LibreChat (conversa "Teste …
