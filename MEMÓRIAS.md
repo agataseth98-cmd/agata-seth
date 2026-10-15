@@ -26,20 +26,30 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d7ba9a28ef0b5d8cf573647adca928dda4c3c690
-  Escrito em: 15/10/2026 08:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9
+  Escrito em: 15/10/2026 09:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7ba9a28ef0b5d8cf573647adca928dda4c3c690/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7ba9a28ef0b5d8cf573647adca928dda4c3c690/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7ba9a28ef0b5d8cf573647adca928dda4c3c690/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7ba9a28ef0b5d8cf573647adca928dda4c3c690/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7ba9a28ef0b5d8cf573647adca928dda4c3c690/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
+
+**Medido:** `noite-20261015.log` para em "1/3 dataset" (início 00:30:46); 32 de 1373 frases no `dataset/metadata.csv` (2 rejeitadas), último wav às 00:34:50; `relatorio.md` só com o cabeçalho, `resultado/` vazio. Journal do boot anterior: às 00:34:34 "suspend requested from client PID 3746 ('org_kde_powerde')" → "PM: suspend entry (deep)"; nada depois. Boot seguinte às 08:13, sem registro de desligamento (`last -x`): a Máquina não voltou da suspensão.
+
+**Conserto (fora do repo, sem quarentena):** `~/.config/systemd/user/agata-voz-noite.service` passa a rodar o `noite.sh` dentro de `systemd-inhibit --what=sleep:idle --mode=block`; o timer vai para `OnCalendar=2026-10-16 00:30:00` (ainda uma vez só, sem `Persistent`). Testado antes: um inibidor criado por serviço `--user` aparece em `systemd-inhibit --list` com `sleep:idle block`. `systemctl --user list-timers` → próximo disparo sex 16/10 00:30. Cópia das units velhas no scratchpad da sessão. O dataset é retomável (`gerar_dataset.py` pula o que já está em `metadata.csv`): começa das 32 prontas. No ritmo medido (~6,5 s por frase), o dataset termina perto das 03:00 e o treino tem ~3 h até o prazo de 06:30.
+
+**Não medido:** se o KDE respeita o inibidor na suspensão por inatividade (o logind recusa a suspensão de quem não tem privilégio para ignorar inibidor; não testei suspender de verdade). Condições para dar certo: Máquina ligada na tomada (agora: na tomada, 80%) e GPU com menos de 1,5 GB em uso às 00:30 (senão o script espera até 30 min e aborta).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `journalctl -b -1`, `last -x`, `~/.local/share/agata-voz/` (log, dataset, `noite.sh`, `gerar_dataset.py`), `systemd-run --user` + `systemd-inhibit --list` · Autorização: Humano, nesta sessão ("pode reagendar para hoje às 00:30").
 
 (714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
 
