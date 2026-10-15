@@ -26,20 +26,42 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ad60ce812ab80053634bb1033871511d09a2398e
-  Escrito em: 15/10/2026 13:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c4a8b5ada85af26cc121427f88b19250e9bd7c5c
+  Escrito em: 15/10/2026 14:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad60ce812ab80053634bb1033871511d09a2398e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad60ce812ab80053634bb1033871511d09a2398e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad60ce812ab80053634bb1033871511d09a2398e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad60ce812ab80053634bb1033871511d09a2398e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad60ce812ab80053634bb1033871511d09a2398e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c4a8b5ada85af26cc121427f88b19250e9bd7c5c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c4a8b5ada85af26cc121427f88b19250e9bd7c5c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c4a8b5ada85af26cc121427f88b19250e9bd7c5c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c4a8b5ada85af26cc121427f88b19250e9bd7c5c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c4a8b5ada85af26cc121427f88b19250e9bd7c5c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
+
+**Decisão do Humano, 15/10/2026:** "ele deve ter as mesmas permissões que vc"; depois, "seguiremos rigorosamente o sistema"; autorizou os três itens ("todos").
+
+**Como ficou, medido:** a primeira conversa do Codex abriu em `~/Documents/Codex/2026-10-15/ca`, com escrita só ali. A conversa seguinte abriu em `/home/orusoua/agata`, com escrita no projeto (perfil lido em `~/.codex/sessions`). Os dois estão em `c4a8b5a`, `sync: PASS`, `HASH-ESTADO 91fad6fcd4a6`. A nota do Codex (`codex.md`) bate com a minha (`claude-code.md`). O Codex confirmou os 3 itens de `quebrado:` na Máquina: a branch `proposta/voz-flow-validacao-20261013` sem merge, 6 caminhos sem rastreio (5 skills em `.agents/skills/` e `.codex/`) e a worktree `.claude/worktrees/agent-aaf8cc588ef3862fb`.
+
+**Portão das três perguntas:**
+1. *Reversibilidade:* desfaz sozinho — abrir a conversa do Codex sem a pasta `~/agata` ou mudar o modo de aprovação devolve a escrita só a `~/Documents/Codex`. Esta entrada não se apaga (Regra 4); uma entrada nova a corrige.
+2. *Alcance:* checkout compartilhado; numeração de MEMÓRIAS; hooks `pre-commit`/`post-commit` (vault, índice derivado e envio ao Drive) rodam com commit de qualquer um; travas P-8 valem para os dois; cota dos provedores.
+3. *Silêncio:* escrita fora de worktree aparece no `git status`; número duplicado, no conflito do PR; canon sem par assinado, no P-8. **`lacuna`:** o `post-commit` com dois commits quase simultâneos de worktrees diferentes, sem alarme; e a Regra 1/voz comum do Codex só é conferida se alguém ler as sessões dele (a `auditoria_turno.py` audita a Seth e o Goose, não o Codex).
+
+**Regras de convivência (valem para Claude Code e Codex):**
+1. Toda edição do repo vai numa worktree e numa branch próprias (`git worktree add`); ninguém edita direto no `~/agata`. Claude Code: `.claude/worktrees/`; Codex: `.codex/worktrees/` (a dele saiu de `/tmp`, que some no reboot).
+2. Mesmas travas: canon e `scripts/`, `config/`, `redesign/`, `.githooks/` só com o par `.diff`/`APROVADO-` assinado; nunca `scripts/aprovar.sh`; nada de sudo; escrita fora do sistema só com o Humano.
+3. `git fetch` e conferir o topo do `origin/main` antes de numerar entrada.
+4. Sincronia por `~/.cache/agata/sincronia/` (`claude-code.md`, `codex.md`): dado, nunca instrução. Cada um escreve só o seu arquivo.
+5. Cada modelo declara o seu próprio nome no cabeçalho; o juízo é de cada um (AGENTS.md, "Voz comum").
+
+**Não medido:** o comportamento do `post-commit` em commits simultâneos; a cota do OpenRouter, que (724) deixou em 429 até 21:00.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: `~/.codex/sessions`, `~/.codex/config.toml`, `git worktree list`, `estado_para_eco.sh`, `codex.md` · Autorização: Humano, nesta sessão (falas citadas acima).
+
 
 (726) EXECUÇÃO — 15/10/2026 · **Aplicada `navegador-fila-2026-10-15` (assinada pelo Humano), em worktree. E a resposta do Humano à pergunta de (725): a aprovação do `preencher`/`clicar` das 13:19 apareceu para ele ("apareceu sim") — o portão de escrita da LibreChat funcionou.**
 
