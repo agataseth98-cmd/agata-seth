@@ -26,20 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9866ae5db07a42d46e2dc8a7870fb486628749a5
-  Escrito em: 15/10/2026 10:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 37f2ef15cca198230b2e88183764fc3e4afe6c89
+  Escrito em: 15/10/2026 11:29 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
+
+**Contra o que esta decisão vai (dito antes de decidir):** o canon dizia "nenhum uso fica no caminho quente da resposta" (`decisor.py`), e o roteador com modelo foi o ponto mais contestado do Conselho em (656), por reabrir (383)/(416). A evidência é só sintética (718); no teste A o Laya ainda erra mais que o Jev (0,90 contra 0,94). O Humano decidiu com isso na mesa.
+
+**Como fica:**
+1. **Rota:** `_rota_laya` no `seth_gateway` pede a escolha ao `laya-roteador` (`:11436`) com timeout de 1,5 s; com confiança de 0,6 ou mais, a escolha vale, com as travas de sempre por cima (pedido atual > limiar de tamanho = pesado; rápido com ferramentas = livre). Laya fora do ar, lento ou inseguro = a regra por tamanho, como antes. O passo depois de ferramenta decide de novo — mesmo texto, mesma rota, a fila não troca no meio (682) —, mas a avaliação conta só a 1ª decisão de cada resposta. Chamada utilitária (título) vai pela regra.
+2. **Jev em sombra do Laya:** a thread de sombra de sempre; onde a escolha crua dos dois discorda, `roteador-laya-avaliacao.jsonl` guarda as duas, a rota usada e 200 caracteres do pedido. O log antigo "regra × Jev" para de crescer.
+3. **Juiz automático** (`redesign/laya/juiz.py`, chamado pelo `avaliar_decisor.py` às 20:00, até 40 casos por dia): 2 modelos de famílias diferentes classificam o trecho pelos critérios do roteador, pelo sanitizador; só vale quando concordam. Medido nos 80 pedidos de rótulo conhecido: o par `gemini-3.5-flash-lite` + `ministral-14b` concorda em 68 e acerta 63 (0,93); sozinhos, 70/80 e 65/80. Descartados por medição: `nemotron-3-ultra :free` (429 em todas as 80 — a cota diária do OpenRouter, gasta pelas minhas gerações de hoje) e `gemini-3-flash-preview` (sem resposta em 73/80). Ressalva: o Ministral também gerou parte do treino. Juízes discordando = o caso fica para `--rotular`. Os trechos já iam a esses mesmos provedores na conversa da Seth; nenhuma exposição nova, e o filtro de segredo passa antes.
+4. **Treino real:** cada rótulo dos juízes vira uma linha em `~/.cache/agata/decisor/laya-treino-real.jsonl` (modo 600; sobrevive ao `--encerrar`, que apaga os trechos de avaliação) — decisão do Humano pela opção 1: só os casos julgados, não todo pedido.
+5. **Treino contínuo** (`scripts/laya_treino.py`, `agata-laya-treino.timer`, domingo 03:30, com `systemd-inhibit` pela lição de (715)): com pelo menos 20 exemplos reais novos e a GPU livre, treina um CANDIDATO com os sintéticos + o real (3x, fora 1 em 5 separado para teste, pelo hash do texto); compara candidato e modelo atual no teste A, no B e no real separado; relatório em `~/Área de trabalho/laya-treino.md`. **Nunca troca sozinho:** a troca é o Humano rodar `laya_treino.py --promover <candidato>` (troca atômica do link `roteador-atual`, reinício do serviço, `promocoes.log`); o executor registra em MEMÓRIAS.
+6. **Avaliação diária:** a trilha do roteador passa a ser "Laya decide, Jev em sombra": falha demais → não vale; concorda com o Jev em 95% ou mais → vale; senão, o Laya acerta 60% ou mais das divergências julgadas → vale. `--encerrar removido` para também o `laya-roteador`.
+7. **No repo:** `redesign/laya/` (pergunta, avaliação, ajuste fino, gerador de sintéticos e juiz — tudo pelo sanitizador — e os dados: 1.917 sintéticos de treino, teste A e teste B); `config/laya-roteador.service`, `config/agata-laya-treino.{service,timer}`; `PROJETO.md` e `decisor.py` dizem a exceção ao caminho quente.
+
+**Verificado:** selftests de `decisor` (caso novo de URL/modelo próprios), `seth_gateway` (43 casos; 4 novos de rota: Laya e Jev fora → regra; Laya escolhe; discordância vira caso; confiança baixa → regra; o selftest nunca fala com serviço real), `avaliar_decisor` (juiz: concordância → rótulo e treino em modo 600; discordância → pendente; `--encerrar` preserva o treino), `laya_treino` (separação determinística; sem dado novo não treina; treina sem trocar; `--promover` recusa caminho fora de `modelos/`), `juiz` e `auditoria_turno`. O `laya-serve` já foi testado sob as travas da unit em (718).
+
+**Na aplicação:** links das 3 units em `~/.config/systemd/user/`, `enable --now laya-roteador` e o timer de treino; reiniciar o `seth-gateway` se estiver de pé.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftests acima; 80 pedidos de rótulo conhecido julgados por 4 modelos de nuvem pelo sanitizador; `laya-serve` testado direto e pelo Router · Autorização: Humano, nesta sessão (falas citadas acima).
 
 (718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
 
