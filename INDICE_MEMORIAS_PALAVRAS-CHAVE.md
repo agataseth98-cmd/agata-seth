@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(725) CORREÇÃO — 15/10/2026 · **Auditoria da conversa da Seth de 13:19–13:21 (pedido do Humano) e duas correções minhas. A Seth disse que o Laya "não está integrado" enquanto ele escolhia a fila da própria conversa; o navegador falhou por corrida entre chamadas paralelas. E os horários dos meus cabeçalhos e de (722)/(724) estavam errados: estimei a hora em vez de medir, com o selo "(relógio da Máquina)". Proposta `navegador-fila-2026-10-15`. Aguardando assinatura.**
+  palavras-chave: auditoria, conversa, seth, pedido, humano, correções, minhas, disse, laya, integrado, enquanto, ele, escolhia, fila, própria, navegador, falhou, corrida, chamadas, paralelas, horários, meus, cabeçalhos, estavam, errados, estimei, hora, medir, selo, relógio, máquina, proposta, aguardando, assinatura
 (724) DIÁRIO — 15/10/2026 · **O Laya escolhe a fila da Seth desde as 15:2x de 15/10: `laya-roteador` no ar (CPU, 1,9 GB, 0 reinícios), gateway reiniciado, 2 mensagens reais roteadas por ele em ~100 ms. E um efeito colateral meu: a geração de dados sintéticos de (718)/(719) gastou a cota diária gratuita do OpenRouter, e o Nemotron, 1º da `seth-pesado`, está em 429 até a cota virar (00:00 UTC, 21:00 -03).**
   palavras-chave: laya, escolhe, fila, seth, desde, roteador, cpu, reinícios, gateway, reiniciado, mensagens, reais, roteadas, ele, efeito, colateral, meu, geração, dados, sintéticos, gastou, cota, diária, gratuita, openrouter, nemotron, pesado, virar, utc
 (723) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-aspas-2026-10-15` (assinada pelo Humano), em worktree: a linha do `LAYA_EXTRA_MODELS` entre aspas simples. Depois do merge, o `laya-roteador` sobe e o Laya passa a escolher a fila da Seth.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: quebrou, seth, humano, tool, choice, required, fez, nemotron, ultra, escrever, chamadas, ferramenta, texto, librechat, executa, conversa, travou, proposta, urgente, obrigatoria, retira, item, aguardando, assinatura
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pelo Humano). Reteste: pergunta de fato abre com ferramenta; "quais propostas estão pendentes?" respondida com o fato da Máquina; resposta desatualizada acusada no turno seguinte e corrigida por ela com a evidência certa.**
   palavras-chave: execução, aplicada, seth, verdade, assinada, humano, reteste, pergunta, fato, abre, ferramenta, quais, propostas, estão, pendentes, respondida, máquina, resposta, desatualizada, acusada, turno, seguinte, corrigida, ela, evidência, certa
-(695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma vez a Seth afirmar o que não mediu — junta (a)+(b) de (694) com os achados da auditoria da conversa de 15:00 ("ConversaIniciadaEmPortuguês"). Pedido do Humano: "junta tudo e faça de forma a resolver esse problema de uma vez, seja elegante econômico e preciso". Aguardando assinatura.**
-  palavras-chave: proposta, seth, verdade, resolve, afirmar, mediu, junta, achados, auditoria, conversa, conversainiciadaemportuguês, pedido, humano, tudo, faça, forma, resolver, problema, seja, elegante, econômico, preciso, aguardando, assinatura
+(695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma …
+  palavras-chave: proposta, seth, verdade, resolve
 (694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (69 …
   palavras-chave: decisão, humano, aplicar, caminhos
 (693) EXECUÇÃO — 14/10/2026 · **Aplicada `fluxo-proposta-2026-10-14` (assinada p …
