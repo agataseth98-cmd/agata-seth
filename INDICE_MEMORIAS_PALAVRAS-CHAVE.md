@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
+  palavras-chave: treino, voz, agata, madrugada, agendado, aconteceu, máquina, suspendeu, inatividade, min, início, voltou, erro, meu, agendei, trabalho, segurar, suspensão, reagendado, pedido, humano, agora, systemd, inhibit
 (714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
   palavras-chave: execução, resumo, automático, omniroute, universal, handoff, desligado, filas, seth, pedido, humano, pode, juntar, desligar, motivos, aplicação, juntado, mesmo
 (713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicadas, seth, personalidade, voz, comum, assinadas, humano, ordem, gateway, reiniciado, teste, real, forma, pegou, resultado, evidência, próximo, passo, saudação, conteúdo, veio, fabricado, espaço, puxou, modelo, inventar, fonte, conserto, vai, proposta, própria, junto, selftests, pedido, pergunta, portão, quero
 (686) CONSELHO — 14/10/2026 · **Segunda opinião sobre a personalidade da Seth: 3 famílias, 1 "sim" e 2 "condicional". As emendas em que convergem entram numa proposta nova, `voz-comum-2026-10-14`, junto da voz comum para todos os modelos (AGENTS.md, Conselho). `seth-personalidade-2026-10-14` (685) está assinada (12:02) e intacta; aplicar só depois da pergunta 3 do portão. Plano da conversa por voz escrito.**
   palavras-chave: segunda, opinião, personalidade, seth, famílias, sim, condicional, emendas, convergem, entram, proposta, nova, voz, comum, junto, modelos, agents, assinada, intacta, aplicar, pergunta, portão, plano, conversa, escrito
-(685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pedido do Humano ("vamos apenas canonizar essa personalidade de maneira persistente na Seth a partir de hoje ... dentro das diretrizes do sistema agata"; "é para virar canônico"; "capriche, tem que ser útil também"). Proposta `seth-personalidade-2026-10-14`, aguardando o portão das 3 perguntas e a assinatura. Junto, a voz própria da Agata: treino agendado para a madrugada de 15/10, fora do repo.**
-  palavras-chave: personalidade, seth, canônica, persistente, pedido, humano, vamos, apenas, canonizar, maneira, partir, hoje, dentro, diretrizes, sistema, agata, virar, canônico, capriche, tem, útil, proposta, aguardando, portão, perguntas, assinatura, junto, voz, própria, treino, agendado, madrugada, fora, repo
+(685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pe …
+  palavras-chave: personalidade, seth, canônica, persistente
 (684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinad …
   palavras-chave: execução, aplicada, seth, rota, busca, assinad
 (683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:4 …
