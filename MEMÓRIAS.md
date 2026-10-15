@@ -26,20 +26,55 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49
-  Escrito em: 15/10/2026 09:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9866ae5db07a42d46e2dc8a7870fb486628749a5
+  Escrito em: 15/10/2026 10:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9866ae5db07a42d46e2dc8a7870fb486628749a5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
+
+**Origem:** leitura dos artigos do Laya em (717) — o único uso concreto para o Agata era o ajuste fino para o roteador; sem ajuste, o Laya acerta perto do acaso (o autor: 0,36 contra 0,32 do aleatório; aqui, 10/20 em (656)).
+
+**Ambiente (fora do repo):** `~/.local/share/agata-laya/` — venv Python 3.12 com torch 2.14.1 (CUDA) e `laya` 0.4.8 do PyPI (conferido antes de instalar: Convai Innovations, Apache-2.0, aponta para o Hugging Face do projeto); modelo base `convaiinnovations/laya` "multilingual" (647 MB). 7,3 GB no total.
+
+**Dados (todos sintéticos):**
+- Treino v1: 941 pedidos pt-BR gerados por `ministral-14b` (363) e `nemotron-3-super` (588) pelo OmniRoute local, por classe e estilo; tirados os 10 que se repetiam nos testes.
+- Treino v2: +1.000 pedidos focados no erro da v1 (pergunta curta do dia a dia; só cumprimento; pedido curto mas pesado), mesmas 2 famílias — 1.917 no total.
+- Teste A: 80 pedidos escritos à mão por mim (Claude), 20 por classe, no contexto do Agata. Teste B: 125 gerados pelo `gemini-3.5-flash-lite`. Famílias diferentes das do treino.
+- **Não usados: os pedidos reais do Humano.** Tentei exportar os do LibreChat para servirem de teste; o classificador de segurança do Claude Code negou ("PII Data Handling") — não contornei. A regra dos logs do decisor (texto fora do log) fica como está.
+
+**Resultado** (mesma pergunta tipada do roteador, `_PERGUNTA_ROTA`):
+| | teste A (80) | teste B (125) | A+B | decide com limiar 0,6 / acerta | tempo |
+|---|---|---|---|---|---|
+| Laya base | 0,46 | 0,56 | 0,52 | 6/80 no A | 8 ms GPU |
+| Laya v1 | 0,81 | 0,89 | 0,86 | 70/80, 84% no A | 68 ms CPU |
+| **Laya v2** | **0,90** | **0,91** | **0,91** | **79/80, 91% no A** | ~70 ms CPU |
+| Jev (`winnow:e4b`) | **0,94** | 0,86 | 0,89 | 56/80, 98% no A | 3.788 ms CPU |
+
+- A v1 aprendeu um atalho: "pedido curto = rápido" ("audite o desenho da cadeia de assinatura" → `rapido`, 0,96); os dados da v2 foram desenhados para quebrá-lo. Erros da v2 no teste A: pesado→livre 4, livre→rapido 3, livre→codigo 1. O Jev ainda ganha no teste A, o mais próximo do uso real.
+- Leitura honesta: o teste B nasceu do mesmo roteiro de geração do treino e favorece o Laya; o teste A foi escrito por quem desenhou o experimento. Nenhum dos dois é tráfego real — daí a sombra.
+- Calibração: na v1 a temperatura bateu no teto (5,0); na v2, ECE 0,007 na fatia de calibração (do próprio treino, não independente).
+
+**Proposta (5 arquivos):**
+1. `config/laya-roteador.service` (nova): `laya-serve` em `127.0.0.1:11436`, CPU, 4 threads, offline (`HF_HUB_OFFLINE=1`), `MemoryMax=3G`, `Nice=10`, `ProtectSystem=strict`, `ProtectHome=read-only`. Testada como unit temporária com as mesmas travas: sobe, carrega, responde; 1,9 GB residente. Aponta para `modelos/roteador-atual` (link, hoje na v2).
+2. `redesign/router/decisor.py`: `decidir(..., url, modelo)` — o mesmo cliente fala com o Laya (mesmo protocolo `/v1/systemone`); o log registra o modelo pedido. Selftest com caso novo.
+3. `redesign/router/seth_gateway.py`: na thread de sombra, depois do Jev, o Laya decide o mesmo texto (timeout 5 s); onde as escolhas cruas discordam, `roteador-laya-avaliacao.jsonl` guarda os dois e 200 caracteres do pedido (a mesma exceção que o roteador já tem, apagada pelo `--encerrar`). Rota intocada. 2 casos novos no selftest.
+4. `scripts/avaliar_decisor.py`: trilha "Laya × Jev" no relatório diário — falha demais → não vale; concorda com o Jev em 95% ou mais → vale (mesma decisão, bem mais rápido); senão, o rótulo do Humano nas divergências (`--rotular`: m = Laya, r = Jev; o Laya acerta 60% ou mais → vale). 3 casos novos no selftest.
+5. `PROJETO.md`, "Decisor local": a linha da sombra.
+
+**Na aplicação:** `ln -s` da unit para `~/.config/systemd/user/`, `systemctl --user enable --now laya-roteador`, reiniciar o `seth-gateway` se estiver de pé.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: OmniRoute local (geração), RTX 4060 (treino), `avaliar.py` próprio nos dois testes, Ollaya `:11435` (Jev), `laya-serve` em unit temporária, selftests de `decisor`, `seth_gateway`, `avaliar_decisor` · Autorização: Humano, nesta sessão (falas citadas acima).
 
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
 

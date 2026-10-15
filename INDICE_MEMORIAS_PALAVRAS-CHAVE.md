@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
+  palavras-chave: experimento, pedido, humano, pode, juntar, fazer, dados, sintéticos, retreinar, propor, modo, sombra, laya, multilingual, ajustado, chega, acerto, roteador, seth, contra, jev, cpu, proposta, roda, lado, influência, rota, tráfego, real, decide, aguardando, assinatura
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
   palavras-chave: execução, aplicada, pesquisa, livre, assinada, humano, worktree, mesma, fala, shell, goose, passa, pedir, aprovação, deve, padir
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, seth, ferramenta, chamada, pedido, humano, pode, escrever, auditoria, turno, passa, acusar, citada, fonte, ter, sido, conversa, mecanismo, regra, texto, substituiu, reteste, aguardando, assinatura
 (689) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-evidencia-e-ci-2026-10-14` (assinada pelo Humano). Selftests da Seth agora no CI. Reteste: a regra de texto NÃO bastou — o mesmo modelo segue inventando a evidência. A citação "`arquivo`, linha N" passa a ser acusada; a invenção de ferramenta ainda não. Duas correções minhas registradas aqui.**
   palavras-chave: execução, aplicada, seth, evidencia, assinada, humano, selftests, agora, reteste, regra, texto, bastou, mesmo, modelo, segue, inventando, evidência, citação, arquivo, linha, passa, acusada, invenção, ferramenta, correções, minhas, registradas, aqui
-(688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: conserta o que o teste real de (687) achou — a Seth inventando a "evidência" — e põe os selftests da Seth no CI, como o Humano pediu ("Quero no CI"). Aguardando assinatura.**
-  palavras-chave: proposta, seth, evidencia, conserta, teste, real, achou, inventando, evidência, põe, selftests, humano, pediu, quero, aguardando, assinatura
+(688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: consert …
+  palavras-chave: proposta, seth, evidencia, consert
 (687) EXECUÇÃO — 14/10/2026 · **Aplicadas `seth-personalidade-2026-10-14` e `voz …
   palavras-chave: execução, aplicadas, seth, personalidade, voz
 (686) CONSELHO — 14/10/2026 · **Segunda opinião sobre a personalidade da Seth: 3 …

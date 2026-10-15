@@ -1,0 +1,305 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 2017ba1..87cfb5c 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -180,6 +180,7 @@ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev ro
+ - **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
+ - **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
+ - **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo. Inbox se mede sozinho (nota barrada que depois foi editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); roteador que concorda com a regra em 95% ou mais "não vale" (só gasta CPU). Avisa na área de trabalho (notificação e `avaliacao-decisor.md`) no 3º e no 7º dia, depois a cada 7, e na hora se o serviço reiniciar 3+ vezes ou mais da metade das decisões de 24 h falhar. Termina quando o Humano mandar aprovar ou remover: `--encerrar aprovado|removido` apaga os trechos guardados; "removido" já para o `ollaya` (todos os usos caem na regra) e o código sai por proposta P-8.
++- **Laya × Jev no roteador (718):** o `laya-multilingual` ajustado com dados sintéticos roda em sombra ao lado do Jev (`laya-roteador.service`, `:11436`, CPU, ~70 ms por decisão contra ~3,8 s do Jev); o gateway registra as duas escolhas, a avaliação diária dá o veredito e o Humano julga as divergências. Nenhuma influência na rota. Ambiente e checkpoint fora do repo (`~/.local/share/agata-laya/`).
+ - **Risco declarado:** projeto independente com semanas de vida (versão nova a cada poucos dias — atualizar é decisão explícita, nunca `latest`); pesos baixados uma vez do Hugging Face dos autores; ~4 s de CPU por decisão, por isso nenhum uso fica no caminho quente da resposta.
+ 
+ ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)
+diff --git a/config/laya-roteador.service b/config/laya-roteador.service
+new file mode 100644
+index 0000000..2489fa4
+--- /dev/null
++++ b/config/laya-roteador.service
+@@ -0,0 +1,40 @@
++[Unit]
++Description=Ágata — Laya ajustado para o roteador da Seth, em sombra ao lado do Jev (MEMÓRIAS (718))
++# Só loopback (:11436), CPU. Mesmo protocolo do Ollaya (`POST /v1/systemone`).
++# Nenhuma influência na rota: o seth_gateway só registra a escolha dele ao lado
++# da do Jev, e o Humano julga as divergências (`avaliar_decisor.py --rotular`).
++# Fora do ar = o gateway segue igual (decisor.decidir devolve None).
++# Ambiente e checkpoint FORA do repo: ~/.local/share/agata-laya/ (venv com
++# laya 0.4.8 do PyPI, Apache-2.0; modelo base convaiinnovations/laya
++# "multilingual" ajustado com dados sintéticos -- ver (718)). `roteador-atual`
++# é um link para o checkpoint em uso; trocar o link é registrado em MEMÓRIAS.
++PartOf=agata.target
++
++[Service]
++Type=simple
++Environment=HF_HOME=%h/.local/share/agata-laya/hf
++Environment=HF_HUB_OFFLINE=1
++Environment=LAYA_HOST=127.0.0.1
++Environment=LAYA_PORT=11436
++Environment=LAYA_DEVICE=cpu
++Environment=LAYA_THREADS=4
++Environment=LAYA_MAX_LOADED=1
++Environment=LAYA_PRELOAD=1
++Environment=LAYA_MODELS=roteador
++Environment=LAYA_DEFAULT_MODEL=roteador
++Environment=LAYA_LOG_LEVEL=warning
++Environment=LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}
++ExecStart=%h/.local/share/agata-laya/.venv/bin/laya-serve
++Restart=on-failure
++RestartSec=15
++# Medido em 15/10/2026: ~1,9 GB residente com o checkpoint carregado. Sem swap
++# na Máquina: teto de 3 GB e prioridade baixa para não disputar com a Seth.
++MemoryMax=3G
++Nice=10
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectHome=read-only
++
++[Install]
++WantedBy=agata.target
+diff --git a/redesign/router/decisor.py b/redesign/router/decisor.py
+index 9cf07a7..4a17918 100644
+--- a/redesign/router/decisor.py
++++ b/redesign/router/decisor.py
+@@ -17,9 +17,15 @@ Medição de 13/10/2026 (20 pedidos pt-BR rotulados, CPU i7-13650HX):
+ menos em ~50-200 ms; heurística por tamanho 5/20. Por isso o padrão é
+ `winnow:e4b` e nenhum uso fica no caminho quente da resposta.
+ 
++(718) Laya ajustado para o roteador, em sombra AO LADO do Jev: `laya-serve`
++(`config/laya-roteador.service`, `:11436`, mesmo protocolo `/v1/systemone`),
++checkpoint treinado com dados sintéticos fora do repo. `decidir(..., url=URL_LAYA,
++modelo=MODELO_LAYA)` -- o mesmo contrato: nunca levanta, falha vira `None`.
++
+ Uso: python3 redesign/router/decisor.py --selftest
+ Env: AGATA_DECISOR_URL (default http://127.0.0.1:11435),
+      AGATA_DECISOR_MODELO (default winnow:e4b),
++     AGATA_LAYA_URL (default http://127.0.0.1:11436), AGATA_LAYA_MODELO (default roteador),
+      AGATA_DECISOR_LOG (default ~/.cache/agata/decisor)
+ """
+ from __future__ import annotations
+@@ -34,19 +40,24 @@ from pathlib import Path
+ URL = os.environ.get("AGATA_DECISOR_URL", "http://127.0.0.1:11435").rstrip("/")
+ MODELO = os.environ.get("AGATA_DECISOR_MODELO", "winnow:e4b")
+ LOG_DIR = Path(os.environ.get("AGATA_DECISOR_LOG", "~/.cache/agata/decisor")).expanduser()
++URL_LAYA = os.environ.get("AGATA_LAYA_URL", "http://127.0.0.1:11436").rstrip("/")
++MODELO_LAYA = os.environ.get("AGATA_LAYA_MODELO", "roteador")
+ TIMEOUT_PADRAO = 15.0
+ # loopback: nunca passar por proxy de ambiente
+ _ABRIR = urllib.request.build_opener(urllib.request.ProxyHandler({})).open
+ 
+ 
+ def decidir(uso: str, state, perguntas: dict, timeout: float = TIMEOUT_PADRAO,
+-            meta: dict | None = None) -> dict | None:
+-    """`answers` do Ollaya (dict por id de pergunta) ou None em qualquer falha."""
++            meta: dict | None = None, url: str | None = None,
++            modelo: str | None = None) -> dict | None:
++    """`answers` do Ollaya (ou de outro servidor `/v1/systemone`, com `url`/`modelo`)
++    -- dict por id de pergunta -- ou None em qualquer falha."""
+     t0 = time.monotonic()
+     respostas, erro = None, None
++    url, modelo = (url or URL), (modelo or MODELO)
+     try:
+-        corpo = json.dumps({"model": MODELO, "state": state, "questions": perguntas}).encode()
+-        req = urllib.request.Request(URL + "/v1/systemone", corpo,
++        corpo = json.dumps({"model": modelo, "state": state, "questions": perguntas}).encode()
++        req = urllib.request.Request(url + "/v1/systemone", corpo,
+                                      {"Content-Type": "application/json"})
+         with _ABRIR(req, timeout=timeout) as r:
+             respostas = json.load(r)["answers"]
+@@ -54,7 +65,7 @@ def decidir(uso: str, state, perguntas: dict, timeout: float = TIMEOUT_PADRAO,
+             respostas, erro = None, "resposta sem as perguntas pedidas"
+     except Exception as e:  # fronteira com serviço externo: tudo vira None
+         respostas, erro = None, f"{type(e).__name__}: {e}"[:200]
+-    _registrar(uso, respostas, erro, (time.monotonic() - t0) * 1000, meta)
++    _registrar(uso, respostas, erro, (time.monotonic() - t0) * 1000, meta, modelo)
+     return respostas
+ 
+ 
+@@ -87,7 +98,8 @@ def registrar_avaliacao(uso: str, dados: dict) -> None:
+     """Eventos da avaliação em produção (PROJETO.md, "Decisor local"): o que
+     aconteceu depois da decisão, para medir se ela acertou. Única exceção à
+     regra "texto fora do log": o roteador guarda 200 caracteres das
+-    divergências, para o Humano julgar. Arquivo separado, modo 600, apagado
++    divergências, para o Humano julgar -- as da heurística contra o Jev
++    (`roteador`) e, desde (718), as do Laya contra o Jev (`roteador-laya`). Arquivo separado, modo 600, apagado
+     inteiro por `scripts/avaliar_decisor.py --encerrar`."""
+     caminho = LOG_DIR / f"{uso}-avaliacao.jsonl"
+     try:
+@@ -100,8 +112,8 @@ def registrar_avaliacao(uso: str, dados: dict) -> None:
+         pass
+ 
+ 
+-def _registrar(uso, respostas, erro, ms, meta):
+-    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "uso": uso, "modelo": MODELO,
++def _registrar(uso, respostas, erro, ms, meta, modelo=None):
++    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "uso": uso, "modelo": modelo or MODELO,
+              "ms": round(ms), "respostas": respostas, "erro": erro, **(meta or {})}
+     try:
+         LOG_DIR.mkdir(parents=True, exist_ok=True)
+@@ -163,6 +175,11 @@ def _selftest() -> int:
+     casos.append(("resposta sem as perguntas -> None", decidir("teste", "x", q) is None))
+     modo["v"] = "lento"
+     casos.append(("timeout -> None", decidir("teste", "x", q, timeout=0.3) is None))
++    modo["v"] = "ok"
++    r2 = decidir("teste-laya", "x", q, url=URL, modelo="roteador")
++    l2 = (LOG_DIR / "teste-laya.jsonl").read_text().splitlines()
++    casos.append(("(718) url/modelo próprios: mesma resposta, log com o modelo pedido",
++                  escolha(r2, "r", 0.6) == "b" and json.loads(l2[0])["modelo"] == "roteador"))
+     srv.shutdown()
+     srv.server_close()
+     casos.append(("serviço fora do ar -> None", decidir("teste", "x", q, timeout=1) is None))
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 952c7b5..79b979c 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -635,6 +635,17 @@ def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
+                     "heuristica": rota_heuristica, "modelo": final,
+                     "confianca": r["rota"]["confidence"], "chars": total,
+                     "trecho": texto[:200]})
++            # (718) Laya ajustado em sombra AO LADO do Jev: mesma pergunta, mesmo texto,
++            # nenhuma influência na rota. Escolha crua de cada um (sem limiar): onde
++            # discordam, o Humano julga quem acertou (`avaliar_decisor.py --rotular`).
++            rl = decisor.decidir("roteador-laya", texto, _PERGUNTA_ROTA, timeout=5, meta=meta,
++                                 url=decisor.URL_LAYA, modelo=decisor.MODELO_LAYA)
++            jev, laya = ((x or {}).get("rota") or {} for x in (r, rl))
++            if jev.get("choice") and laya.get("choice") and jev["choice"] != laya["choice"]:
++                decisor.registrar_avaliacao("roteador-laya", {
++                    "jev": jev["choice"], "laya": laya["choice"],
++                    "conf_jev": jev.get("confidence"), "conf_laya": laya.get("confidence"),
++                    "chars": total, "trecho": texto[:200]})
+         finally:
+             _SOMBRA_LIVRE.release()
+ 
+@@ -1385,6 +1396,28 @@ def _selftest() -> int:
+     ok9d = _sombra_com("rapido") == []
+     linhas = _sombra_com("pesado")
+     ok9e = len(linhas) == 1 and json.loads(linhas[0])["modelo"] == "seth-pesado"
++    # (718) Laya ao lado do Jev: concordando, nada; discordando, 1 linha com os dois
++    divs_laya = decisor.LOG_DIR / "roteador-laya-avaliacao.jsonl"
++    ok9l1 = not divs_laya.exists()
++
++    def _falso_dois(*a, **k):
++        _t.sleep(0.1)
++        c = "codigo" if k.get("modelo") == decisor.MODELO_LAYA else "livre"
++        return {"rota": {"type": "choice", "choice": c, "confidence": 0.9}}
++    decisor.decidir = _falso_dois
++    urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
++        {"model": "seth-livre", "messages": [{"role": "user", "content": "me explica latência"}]}).encode(),
++        headers={"Content-Type": "application/json"}), timeout=10).read()
++    for _ in range(50):
++        if _SOMBRA_LIVRE.acquire(blocking=False):
++            _SOMBRA_LIVRE.release()
++            break
++        _t.sleep(0.05)
++    ll = divs_laya.read_text().splitlines() if divs_laya.exists() else []
++    ok9l2 = len(ll) == 1 and json.loads(ll[0])["jev"] == "livre" and json.loads(ll[0])["laya"] == "codigo"
++    print(f"{'PASS' if ok9l1 else 'FALHA'}  (718) Laya concordando com o Jev não vira divergência")
++    print(f"{'PASS' if ok9l2 else 'FALHA'}  (718) Laya discordando do Jev -> 1 divergência com os dois")
++    falhas += (0 if ok9l1 else 1) + (0 if ok9l2 else 1)
+     decisor.decidir, decisor.LOG_DIR = _decidir_antes, _log_antes
+     globals()["_hidratacao"] = _hid_antes
+     print(f"{'PASS' if ok9d else 'FALHA'}  sombra pelo caminho completo: 'oi' = rapido "
+diff --git a/scripts/avaliar_decisor.py b/scripts/avaliar_decisor.py
+index 33b3457..dad5795 100644
+--- a/scripts/avaliar_decisor.py
++++ b/scripts/avaliar_decisor.py
+@@ -12,6 +12,9 @@ números, pelos critérios abaixo (constantes, revisáveis):
+ - inbox: nota barrada como rascunho que depois foi EDITADA = acerto; importada
+   intocada pela regra das 24 h = erro. Medido sozinho, sem rótulo.
+ - p20 e consolidação: rótulo do Humano (acertou/errou) nos avisos e reprovações.
++- roteador-laya (718): o Laya ajustado em sombra ao lado do Jev. Falha demais -> não
++  vale; concorda com o Jev em >=95% -> vale (mesma decisão, ~55x mais rápido na CPU);
++  senão decide o rótulo do Humano nas divergências (o Laya acerta >=60% -> vale).
+ Alarme imediato: o serviço reiniciou 3+ vezes, ou mais da metade das decisões
+ das últimas 24 h falhou.
+ 
+@@ -44,7 +47,7 @@ _DESKTOP = Path.home() / "Área de trabalho"
+ RELATORIO = (_DESKTOP if _DESKTOP.is_dir() else LOG) / "avaliacao-decisor.md"
+ 
+ ROT_N_MIN, ROT_ERRO_MAX, ROT_CONCORDA_MAX = 30, 0.20, 0.95
+-ROTULOS_MIN = {"roteador": 10, "p20": 3, "consolidacao": 3}
++ROTULOS_MIN = {"roteador": 10, "roteador-laya": 10, "p20": 3, "consolidacao": 3}
+ INBOX_BLOQ_MIN = 3
+ ACERTO_MIN = 0.60
+ LIMIAR_P20, LIMIAR_UTIL, LIMIAR_INBOX = 0.7, 1.5, 0.7
+@@ -80,6 +83,7 @@ def _pendentes() -> list[dict]:
+     """Casos que só o Humano julga: divergência do roteador, aviso do P-20,
+     reprovação da consolidação."""
+     casos = [{"uso": "roteador", **c} for c in _ler("roteador-avaliacao.jsonl")]
++    casos += [{"uso": "roteador-laya", **c} for c in _ler("roteador-laya-avaliacao.jsonl")]
+     for d in _ler("p20.jsonl"):
+         p = decisor.probabilidade(d.get("respostas"), "pessoal")
+         if p is not None and p >= LIMIAR_P20:
+@@ -147,6 +151,26 @@ def veredito_inbox() -> tuple[str, str, dict]:
+             f"{certos} de {julgados} notas barradas eram mesmo rascunho ({taxa:.0%})", num)
+ 
+ 
++def veredito_laya() -> tuple[str, str, dict]:
++    """(718) Laya × Jev, mesmo texto. 'modelo' no rótulo = o Laya acertou; 'regra' = o Jev."""
++    ds = _ler("roteador-laya.jsonl")
++    n = len(ds)
++    falhas = sum(1 for d in ds if d.get("respostas") is None)
++    ok = n - falhas
++    div = len(_ler("roteador-laya-avaliacao.jsonl"))
++    ms = sorted(d["ms"] for d in ds if d.get("respostas") is not None)
++    num = {"decisões": n, "falhas": falhas, "divergências com o Jev": div,
++           "latência p95 (ms)": ms[int(0.95 * (len(ms) - 1))] if ms else None}
++    if n < ROT_N_MIN:
++        return "INCONCLUSIVO", f"só {n} decisões (mínimo {ROT_N_MIN})", num
++    if falhas / n > ROT_ERRO_MAX:
++        return "NÃO VALE", f"falhou em {falhas / n:.0%} das decisões", num
++    if ok and 1 - div / ok >= ROT_CONCORDA_MAX:
++        return "VALE", f"concorda com o Jev em {1 - div / ok:.0%} -- mesma decisão, bem mais rápido", num
++    v, m = _por_rotulo("roteador-laya")
++    return v, m.replace("o modelo acertou", "o Laya acertou"), num
++
++
+ def veredito_rotulado(uso: str, log: str) -> tuple[str, str, dict]:
+     num = {"avaliações": len(_ler(log)),
+            "casos para julgar": sum(1 for c in _pendentes() if c["uso"] == uso)}
+@@ -170,7 +194,7 @@ def alarmes() -> list[str]:
+     if int(srv.get("NRestarts", "0") or 0) >= 3:
+         a.append(f"o ollaya reiniciou {srv['NRestarts']} vezes (possível falta de memória)")
+     limite = (dt.datetime.now().astimezone() - dt.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S%z")
+-    recentes = [d for u in ("roteador", "inbox", "p20", "consolidacao")
++    recentes = [d for u in ("roteador", "roteador-laya", "inbox", "p20", "consolidacao")
+                 for d in _ler(f"{u}.jsonl") if d.get("ts", "") >= limite]
+     falhas = sum(1 for d in recentes if d.get("respostas") is None)
+     if len(recentes) >= 5 and falhas / len(recentes) > 0.5:
+@@ -182,6 +206,7 @@ def relatorio() -> tuple[str, str]:
+     e = _estado()
+     dia = (dt.date.today() - dt.date.fromisoformat(e["inicio"])).days + 1
+     usos = {"Roteador da Seth (sombra)": veredito_roteador(),
++            "Laya × Jev no roteador (sombra, (718))": veredito_laya(),
+             "Inbox do Obsidian": veredito_inbox(),
+             "Aviso de dado pessoal (P-20)": veredito_rotulado("p20", "p20.jsonl"),
+             "Consolidação noturna": veredito_rotulado("consolidacao", "consolidacao.jsonl")}
+@@ -243,6 +268,9 @@ def rotular() -> int:
+         if c["uso"] == "roteador":
+             print(f"[roteador] {c['ts']}  regra: {c['heuristica']}  modelo: {c['modelo']} "
+                   f"(confiança {c['confianca']:.2f})\n  mensagem: {c['trecho']!r}")
++        elif c["uso"] == "roteador-laya":
++            print(f"[roteador: Laya × Jev] {c['ts']}  Laya: {c['laya']}  Jev: {c['jev']}  "
++                  f"(m = o Laya acertou, r = o Jev acertou)\n  mensagem: {c['trecho']!r}")
+         elif c["uso"] == "p20":
+             print(f"[P-20] {c['ts']}  avisou dado pessoal em {c['arquivo']} (p={c['p']:.2f}). "
+                   "Lembre do commit dessa hora: tinha mesmo dado pessoal?")
+@@ -311,6 +339,19 @@ def _selftest() -> int:
+                                     {"evento": "importada", "nota": "d", "chars": 50, "via": "24h"}])
+     v, m, _ = veredito_inbox()
+     casos.append(("inbox: 3 de 4 barradas editadas depois -> vale", v == "VALE" and "3 de 4" in m))
++    # (718) Laya × Jev
++    grava("roteador-laya.jsonl", [{"ts": f"{hoje}{i}", "ms": 70, "respostas": ok} for i in range(40)])
++    casos.append(("Laya concordando com o Jev em 100% -> vale", veredito_laya()[0] == "VALE"))
++    grava("roteador-laya-avaliacao.jsonl", [{"ts": f"l{i}", "jev": "livre", "laya": "rapido",
++                                             "trecho": "x"} for i in range(12)])
++    casos.append(("Laya divergindo sem rótulo -> inconclusivo, e o caso aparece para julgar",
++                  veredito_laya()[0] == "INCONCLUSIVO" and any(c["uso"] == "roteador-laya" for c in _pendentes())))
++    with open(ROTULOS, "a", encoding="utf-8") as f:
++        f.write("".join(json.dumps({"uso": "roteador-laya", "ts": f"l{i}", "veredito": "regra" if i < 9 else "modelo"})
++                        + "\n" for i in range(12)))
++    v_l, m_l, _ = veredito_laya()
++    casos.append(("Laya acerta 3 de 12 divergências -> não vale, e o motivo nomeia o Laya",
++                  v_l == "NÃO VALE" and "o Laya acertou 3 de 12" in m_l))
+     encerrar("aprovado")
+     casos.append(("encerrar apaga os trechos e para de avisar",
+                   not list(LOG.glob("*-avaliacao.jsonl")) and _estado()["encerrado"] == "aprovado"))
