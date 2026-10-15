@@ -26,20 +26,41 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a333fac83355000cd5fde3e734a268fd48b80acb
-  Escrito em: 14/10/2026 20:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 400c5a796244e2249bc4c1600a672189d87b2339
+  Escrito em: 15/10/2026 08:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a333fac83355000cd5fde3e734a268fd48b80acb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a333fac83355000cd5fde3e734a268fd48b80acb/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a333fac83355000cd5fde3e734a268fd48b80acb/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a333fac83355000cd5fde3e734a268fd48b80acb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a333fac83355000cd5fde3e734a268fd48b80acb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o Gemini sem cota pendurou a `seth-livre` 7 vezes e nas 7 o gateway desistiu em 42 s e a `seth-rapido` (Ministral) respondeu. Resposta em 43–56 s, contra os 310 s de (709). A origem continua: o Gemini segue 1º da fila e sem cota — descer ele na fila segue decisão do Humano.**
+
+**Medido** (journal do `seth-gateway`, 21:03–22:36 de 14/10; `~/.omniroute/call_logs/2026-10-15/`, 00:12–00:54Z):
+| hora (-03) | Gemini (`seth-livre`) | nova tentativa (`seth-rapido`, Ministral) | total |
+|---|---|---|---|
+| 21:12 | 499 em 42,0 s | 200 em 0,9 s | ~43 s |
+| 21:15 | 499 em 42,0 s | 200 em 13,5 s (1111 tokens) | ~56 s |
+| 21:19 | 499 em 42,0 s | 200 em 1,2 s | ~43 s |
+| 21:20 | 499 em 42,0 s | 200 em 9,8 s | ~52 s |
+| 21:28 | 499 em 42,0 s | 200 em 0,9 s | ~43 s |
+| 21:33 | 499 em 42,0 s | 200 em 1,9 s | ~44 s |
+| 21:54 | 499 em 42,0 s | 200 em 11,7 s | ~54 s |
+
+O 499 ("Request aborted") no OmniRoute no mesmo segundo da desistência confirma que o `shutdown` do socket e o `read1` do sanitizador chegam ao OmniRoute na hora — em (709) a desistência levava ~90 s para ser vista. Nenhuma resposta se perdeu; nenhum traceback no sanitizador (1 linha "cliente desconectou no meio do stream", como previsto).
+
+**Achados laterais, não consertados:** (1) às 21:28:05 uma chamada interna do OmniRoute (`_omnirouteInternalRequest: "universal-handoff"`) foi à Mistral com campos extras e levou 422 `extra_forbidden` — é defeito do OmniRoute, não do gateway; não afetou a resposta da Seth. (2) 6 `connection-test` com 401 "fetch failed" às 21:20 e 21:40 — teste de conexão no painel do OmniRoute; não investigado. (3) Os 42 s são o piso enquanto o Gemini for 1º da fila sem cota: cada "Olá" ainda paga o prazo inteiro.
+
+**Estado em 15/10, 08:16:** `seth-gateway` parado (sobe sob demanda pelo atalho `seth`, unit sem `[Install]` — não é falha); `omniroute-sanitizer` ativo desde o boot (08:13).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `journalctl --user -u seth-gateway`/`omniroute-sanitizer`, call logs do OmniRoute (só o resumo: status, fila, modelo, duração), `scripts/estado_para_eco.sh` (HASH-ESTADO `4d81da421814`) · Autorização: Humano, nesta sessão ("prossiga", depois do eco que propôs o reteste de (710)).
 
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-14` (assinada pelo Humano), em worktree. Reteste na entrada seguinte.**
 
