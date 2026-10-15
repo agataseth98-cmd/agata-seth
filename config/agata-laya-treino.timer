@@ -1,0 +1,11 @@
+[Unit]
+Description=Ágata — dispara o treino semanal do Laya (domingo 03:30)
+
+[Timer]
+OnCalendar=Sun *-*-* 03:30:00
+# Sem Persistent: Máquina desligada no domingo de madrugada = pula a semana, nunca treina de dia.
+Persistent=false
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

@@ -15,11 +15,19 @@ O TEXTO avaliado nunca vai para o log: só tamanhos e respostas.
 Medição de 13/10/2026 (20 pedidos pt-BR rotulados, CPU i7-13650HX):
 `winnow:e4b` 20/20 em ~4,3 s; `laya`/`laya:multilingual`/`gliclass` 10/20 ou
 menos em ~50-200 ms; heurística por tamanho 5/20. Por isso o padrão é
-`winnow:e4b` e nenhum uso fica no caminho quente da resposta.
+`winnow:e4b` e nenhum uso do Jev fica no caminho quente da resposta. Exceção desde
+(719), decisão do Humano: o Laya ajustado (~70 ms) escolhe a fila da Seth, com a regra
+por tamanho de reserva; o Jev fica como sombra dele.
+
+(718)/(719) Laya ajustado que escolhe a fila da Seth (o Jev em sombra): `laya-serve`
+(`config/laya-roteador.service`, `:11436`, mesmo protocolo `/v1/systemone`),
+checkpoint treinado com dados sintéticos fora do repo. `decidir(..., url=URL_LAYA,
+modelo=MODELO_LAYA)` -- o mesmo contrato: nunca levanta, falha vira `None`.
 
 Uso: python3 redesign/router/decisor.py --selftest
 Env: AGATA_DECISOR_URL (default http://127.0.0.1:11435),
      AGATA_DECISOR_MODELO (default winnow:e4b),
+     AGATA_LAYA_URL (default http://127.0.0.1:11436), AGATA_LAYA_MODELO (default roteador),
      AGATA_DECISOR_LOG (default ~/.cache/agata/decisor)
 """
 from __future__ import annotations
@@ -34,19 +42,24 @@ from pathlib import Path
 URL = os.environ.get("AGATA_DECISOR_URL", "http://127.0.0.1:11435").rstrip("/")
 MODELO = os.environ.get("AGATA_DECISOR_MODELO", "winnow:e4b")
 LOG_DIR = Path(os.environ.get("AGATA_DECISOR_LOG", "~/.cache/agata/decisor")).expanduser()
+URL_LAYA = os.environ.get("AGATA_LAYA_URL", "http://127.0.0.1:11436").rstrip("/")
+MODELO_LAYA = os.environ.get("AGATA_LAYA_MODELO", "roteador")
 TIMEOUT_PADRAO = 15.0
 # loopback: nunca passar por proxy de ambiente
 _ABRIR = urllib.request.build_opener(urllib.request.ProxyHandler({})).open
 
 
 def decidir(uso: str, state, perguntas: dict, timeout: float = TIMEOUT_PADRAO,
-            meta: dict | None = None) -> dict | None:
-    """`answers` do Ollaya (dict por id de pergunta) ou None em qualquer falha."""
+            meta: dict | None = None, url: str | None = None,
+            modelo: str | None = None) -> dict | None:
+    """`answers` do Ollaya (ou de outro servidor `/v1/systemone`, com `url`/`modelo`)
+    -- dict por id de pergunta -- ou None em qualquer falha."""
     t0 = time.monotonic()
     respostas, erro = None, None
+    url, modelo = (url or URL), (modelo or MODELO)
     try:
-        corpo = json.dumps({"model": MODELO, "state": state, "questions": perguntas}).encode()
-        req = urllib.request.Request(URL + "/v1/systemone", corpo,
+        corpo = json.dumps({"model": modelo, "state": state, "questions": perguntas}).encode()
+        req = urllib.request.Request(url + "/v1/systemone", corpo,
                                      {"Content-Type": "application/json"})
         with _ABRIR(req, timeout=timeout) as r:
             respostas = json.load(r)["answers"]
@@ -54,7 +67,7 @@ def decidir(uso: str, state, perguntas: dict, timeout: float = TIMEOUT_PADRAO,
             respostas, erro = None, "resposta sem as perguntas pedidas"
     except Exception as e:  # fronteira com serviço externo: tudo vira None
         respostas, erro = None, f"{type(e).__name__}: {e}"[:200]
-    _registrar(uso, respostas, erro, (time.monotonic() - t0) * 1000, meta)
+    _registrar(uso, respostas, erro, (time.monotonic() - t0) * 1000, meta, modelo)
     return respostas
 
 
@@ -87,7 +100,8 @@ def registrar_avaliacao(uso: str, dados: dict) -> None:
     """Eventos da avaliação em produção (PROJETO.md, "Decisor local"): o que
     aconteceu depois da decisão, para medir se ela acertou. Única exceção à
     regra "texto fora do log": o roteador guarda 200 caracteres das
-    divergências, para o Humano julgar. Arquivo separado, modo 600, apagado
+    divergências, para o Humano julgar -- as da heurística contra o Jev
+    (`roteador`) e, desde (718), as do Laya contra o Jev (`roteador-laya`). Arquivo separado, modo 600, apagado
     inteiro por `scripts/avaliar_decisor.py --encerrar`."""
     caminho = LOG_DIR / f"{uso}-avaliacao.jsonl"
     try:
@@ -100,8 +114,8 @@ def registrar_avaliacao(uso: str, dados: dict) -> None:
         pass
 
 
-def _registrar(uso, respostas, erro, ms, meta):
-    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "uso": uso, "modelo": MODELO,
+def _registrar(uso, respostas, erro, ms, meta, modelo=None):
+    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "uso": uso, "modelo": modelo or MODELO,
              "ms": round(ms), "respostas": respostas, "erro": erro, **(meta or {})}
     try:
         LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -163,6 +177,11 @@ def _selftest() -> int:
     casos.append(("resposta sem as perguntas -> None", decidir("teste", "x", q) is None))
     modo["v"] = "lento"
     casos.append(("timeout -> None", decidir("teste", "x", q, timeout=0.3) is None))
+    modo["v"] = "ok"
+    r2 = decidir("teste-laya", "x", q, url=URL, modelo="roteador")
+    l2 = (LOG_DIR / "teste-laya.jsonl").read_text().splitlines()
+    casos.append(("(718) url/modelo próprios: mesma resposta, log com o modelo pedido",
+                  escolha(r2, "r", 0.6) == "b" and json.loads(l2[0])["modelo"] == "roteador"))
     srv.shutdown()
     srv.server_close()
     casos.append(("serviço fora do ar -> None", decidir("teste", "x", q, timeout=1) is None))

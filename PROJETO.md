@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5f068a65521005d59ce159dda6480b847ea10d8e
-  Escrito em: 15/10/2026 11:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930
+  Escrito em: 15/10/2026 11:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6e6bfd13a5667074c3a4ba2a4ba00e1423b930/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -180,6 +180,7 @@ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev ro
 - **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
 - **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
 - **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo. Inbox se mede sozinho (nota barrada que depois foi editada = acerto; importada intocada pelas 24 h = erro); roteador, P-20 e consolidação pelo julgamento do Humano (`--rotular`); roteador que concorda com a regra em 95% ou mais "não vale" (só gasta CPU). Avisa na área de trabalho (notificação e `avaliacao-decisor.md`) no 3º e no 7º dia, depois a cada 7, e na hora se o serviço reiniciar 3+ vezes ou mais da metade das decisões de 24 h falhar. Termina quando o Humano mandar aprovar ou remover: `--encerrar aprovado|removido` apaga os trechos guardados; "removido" já para o `ollaya` (todos os usos caem na regra) e o código sai por proposta P-8.
+- **Laya escolhe a fila da Seth (718)/(719):** decisão do Humano, 15/10/2026. O `laya-multilingual` ajustado (`laya-roteador.service`, `:11436`, CPU, ~70 ms) decide a rota no caminho da resposta, com as travas de sempre; fora do ar, lento (> 1,5 s) ou inseguro, vale a regra por tamanho. O Jev vira a sombra dele; as divergências vão a 2 juízes de nuvem pelo sanitizador (`redesign/laya/juiz.py`) e, quando concordam, viram rótulo e treino real. Treino semanal de um candidato (`scripts/laya_treino.py`, domingo 03:30); a troca de modelo é sempre do Humano (`--promover`). Ambiente e checkpoints fora do repo (`~/.local/share/agata-laya/`).
 - **Risco declarado:** projeto independente com semanas de vida (versão nova a cada poucos dias — atualizar é decisão explícita, nunca `latest`); pesos baixados uma vez do Hugging Face dos autores; ~4 s de CPU por decisão, por isso nenhum uso fica no caminho quente da resposta.
 
 ## Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)

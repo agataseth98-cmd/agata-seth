@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(721) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-roteador-2026-10-15` (assinada pelo Humano depois da explicação de "caminho quente"), em worktree. O Laya passa a escolher a fila da Seth quando o PR entrar e os serviços subirem.**
+  palavras-chave: execução, aplicada, laya, roteador, assinada, humano, explicação, caminho, quente, worktree, passa, escolher, fila, seth, entrar, serviços, subirem
 (720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
   palavras-chave: corrige, proposta, laya, sombra, estava, assinada, humano, superada, aplicar, roteador, aprovado, propostas, rejeitadas, junto, diff
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, fluxo, proposta, assinada, humano, padrão, sistema, direto, contra, main, quem, propõe, junta, faz, git, pull, assina, conversa, autorizou, junte, prs, aplicação, faça, sempre, merge
 (692) DIÁRIO — 14/10/2026 · **Proposta `fluxo-proposta-2026-10-14`: o fluxo de proposta vira padrão do sistema, a pedido do Humano ("perfeito pode deixar assim padrão no sistema agata") — PR que só abre a proposta vai direto contra o `main`, quem propõe junta e faz `git pull`, o Humano só assina. Aguardando assinatura.**
   palavras-chave: proposta, fluxo, vira, padrão, sistema, pedido, humano, perfeito, pode, deixar, assim, agata, abre, vai, direto, contra, main, quem, propõe, junta, faz, git, pull, assina, aguardando, assinatura
-(691) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-ferramenta-sem-chamada-2026-10-14` (assinada pelo Humano). Reteste em dois turnos: a auditoria acusa a ferramenta inventada do turno 1; o modelo do turno 2 ignora a correção e inventa de novo. Detecção funciona; prevenção não. E o fluxo de proposta vira padrão do sistema (pedido do Humano), em proposta própria.**
-  palavras-chave: execução, aplicada, seth, ferramenta, chamada, assinada, humano, reteste, turnos, auditoria, acusa, inventada, turno, modelo, ignora, correção, inventa, novo, detecção, funciona, prevenção, fluxo, proposta, vira, padrão, sistema, pedido, própria
+(691) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-ferramenta-sem-chamada-2026-10-14 …
+  palavras-chave: execução, aplicada, seth, ferramenta, chamada
 (690) DIÁRIO — 14/10/2026 · **Proposta `seth-ferramenta-sem-chamada-2026-10-14` …
   palavras-chave: proposta, seth, ferramenta, chamada
 (689) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-evidencia-e-ci-2026-10-14` (assin …

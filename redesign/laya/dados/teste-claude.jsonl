@@ -1,0 +1,80 @@
+{"state": "Olá.", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "oi seth", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "bom dia", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "valeu!", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "obrigado, era isso", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "ok, pode seguir", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "beleza", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "assinado", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "pode juntar o PR", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "que horas são?", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "tudo certo?", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "entendi", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "perfeito, obrigado", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "sim", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "não, deixa assim", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "boa noite, seth", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "show", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "pode continuar", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "certo, aguardo", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "e aí, tudo em cima?", "gold": "rapido", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me explica o que é um container docker em poucas palavras", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "resume pra mim o que aconteceu ontem no sistema", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "revisa esse e-mail pro meu chefe: 'Oi, vou atrasar a entrega pra sexta, tudo bem?'", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "qual a diferença entre RAM e armazenamento?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me dá umas ideias de nome pra um gato preto", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que é um modelo de linguagem?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como está a questão da voz de ontem?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "traduz 'decide e confere' pro inglês", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que você acha do Obsidian pra tomar notas?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me lembra o que é o Conselho Remoto", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "escreve uma mensagem de aniversário pra minha mãe", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que significa a sigla PR no github?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "por que o céu é azul?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me explica o que é latência", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "qual a capital da Austrália?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "faz um resumo curto da Regra 2", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me sugere um filme de ficção científica", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como funciona a busca por sentido, explicado simples?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que é cota de API?", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "reescreve essa frase mais formal: 'a parada travou de novo'", "gold": "livre", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "compare três arquiteturas para tolerância a falha do gateway da Seth, com trade-offs de latência, custo e complexidade, e recomende uma", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "audite o desenho da cadeia de proposta e assinatura: onde um executor mal-intencionado ainda conseguiria mudar o canon sem o Humano ver?", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "monte um plano de migração em etapas do OmniRoute para outro roteador sem derrubar a Seth, com critérios de volta atrás", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "prove que, se MEMÓRIAS só cresce entre commits, uma linha removida no diff indica história apagada", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "analise se o decisor local deveria substituir a heurística do roteador, considerando calibração, latência e risco de regressão", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "quais são os modos de falha de um sistema multiagente com memória compartilhada append-only? classifique por gravidade", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "estime o custo em tokens por mês da hidratação da Seth e proponha uma estratégia para cortar pela metade sem perder segurança", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "avalie criticamente os resultados do artigo de roteamento por confiança: o desenho experimental sustenta as conclusões?", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "desenhe uma política de retenção para os logs do decisor que equilibre privacidade e capacidade de auditar decisões", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "qual a melhor forma de detectar alucinação na Seth sem chamar outro modelo? compare abordagens", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "planeje a sucessão do sistema caso eu não possa mais cuidar dele: papéis, permissões e salvaguardas", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "analise a ameaça de injeção de prompt via páginas lidas pelo navegador e proponha defesas em camadas", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "se a fila livre perde o Gemini por cota, como redistribuir a carga entre os modelos restantes mantendo qualidade? raciocine com os números", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "compare fine-tuning, RAG e prompt longo para ensinar o canon à Seth, com prós e contras de cada um", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "demonstre por que um limiar fixo de confiança pode piorar o roteamento quando o modelo é mal calibrado", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "faça uma análise de risco completa de liberar ferramentas de pesquisa sem aprovação", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como garantir consistência entre o vault derivado e o canon se o hook de post-commit falhar no meio? pense nos casos", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "proponha um experimento estatisticamente válido para medir se o Jev melhora o roteamento em produção", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que aconteceria com a integridade do sistema se a chave de assinatura vazasse? descreva o plano de resposta", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "avalie se vale a pena treinar uma voz própria ou usar uma voz pronta, considerando qualidade, custo de GPU e manutenção", "gold": "pesado", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "esse sed não funciona: sed -i 's/foo/bar' arquivo.txt", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "escreve uma função python que lê um jsonl e conta as linhas por campo 'gold'", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "por que esse SELECT demora? SELECT * FROM logs WHERE ts > now() - interval '1 day'", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como faço um loop em fish shell sobre os arquivos .md de uma pasta?", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "corrige esse erro: TypeError: 'NoneType' object is not subscriptable na linha 42", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "me explica o que esse regex faz: ^(?:[a-z0-9]+-)+20\\d\\d$", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "escreve um systemd timer que roda um script todo dia às 3h", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como uso o jq pra extrair o campo name de cada item de uma lista?", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "tem um jeito melhor de escrever esse for em python: for i in range(len(xs)): print(xs[i])", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "escreve um script bash que faz backup do sqlite com a API de backup", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "o que esse comando faz: git log --oneline --graph --all", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "converte essa função de javascript pra python: const soma = (a,b) => a+b", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "meu docker compose não sobe, dá 'port is already allocated', como resolvo no yaml?", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "escreve um teste pytest pra uma função que valida e-mail", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como faço um PUT com curl mandando json?", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "explica a diferença entre async e threads em python com um exemplo de código", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "esse SQL dá erro de sintaxe: INSERT INTO t (a,b) VALUES (1,2),(3,4", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "cria uma expressão regular que case data no formato dd/mm/aaaa", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "como leio uma variável de ambiente em node sem quebrar se ela não existir?", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
+{"state": "refatora esse trecho pra não repetir código: if x==1: f(1) elif x==2: f(2) elif x==3: f(3)", "gold": "codigo", "gerador": "claude-opus-5-5 (à mão)"}
