@@ -53,11 +53,13 @@ Uso:
 from __future__ import annotations
 
 import base64
+import functools
 import json
 import os
 import sys
 import time
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 
 from fastmcp import FastMCP
 from playwright.sync_api import sync_playwright
@@ -83,6 +85,20 @@ _BUSCA_JS = """() => Array.from(document.querySelectorAll('li.b_algo')).map(li =
 })"""
 
 mcp = FastMCP("agata-navegador")
+
+# (725) Uma thread só para o navegador. A Seth chama ferramentas em PARALELO, e o FastMCP
+# roda cada ferramenta síncrona numa thread de trabalho: duas chamadas subiam o Brave ao
+# mesmo tempo no mesmo perfil ("Failed to create a ProcessSingleton", conversa de 15/10,
+# 13:19; reproduzido: 2 de 3 chamadas paralelas falhavam). E o Playwright síncrono só pode
+# ser usado pela thread que o criou. Toda ferramenta roda nesta fila, uma por vez.
+_FILA_NAVEGADOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="navegador")
+
+
+def _na_fila(fn):
+    @functools.wraps(fn)
+    def embrulho(*a, **k):
+        return _FILA_NAVEGADOR.submit(fn, *a, **k).result()
+    return embrulho
 
 _estado: dict = {"pw": None, "ctx": None, "page": None}
 
@@ -163,6 +179,7 @@ def _handler_rota(route, request) -> None:
 
 
 @mcp.tool
+@_na_fila
 def navegar(url: str) -> dict:
     """Abre uma URL no navegador isolado (perfil dedicado, nunca o do Humano).
     Livre de allowlist de domínio (allowlist só trava clicar/preencher) --
@@ -220,6 +237,7 @@ def _termos(consulta: str) -> list[str]:
 
 
 @mcp.tool
+@_na_fila
 def buscar_web(consulta: str, n: int = 8) -> dict:
     """Busca na internet (Bing) e devolve os resultados: título, endereço e trecho.
     READ-ONLY -- é uma leitura de página de resultados por URL, nenhum clique nem
@@ -287,6 +305,7 @@ def buscar_web(consulta: str, n: int = 8) -> dict:
 
 
 @mcp.tool
+@_na_fila
 def ler_pagina(max_chars: int = _MAX_CHARS_PADRAO, inicio: int = 0) -> dict:
     """Lê o texto visível da página atual. READ-ONLY.
 
@@ -325,6 +344,7 @@ def ler_pagina(max_chars: int = _MAX_CHARS_PADRAO, inicio: int = 0) -> dict:
 
 
 @mcp.tool
+@_na_fila
 def clicar(descricao: str) -> dict:
     """Clica no primeiro elemento cujo texto visível bate com `descricao`
     (busca simples, não-exata, primeira ocorrência). ESCRITA -- travado por
@@ -348,6 +368,7 @@ def clicar(descricao: str) -> dict:
 
 
 @mcp.tool
+@_na_fila
 def preencher(campo: str, valor: str) -> dict:
     """Preenche um campo de formulário (achado por label/placeholder/name que
     contenha `campo`) com `valor`. ESCRITA -- mesma allowlist de `clicar`.
@@ -369,6 +390,7 @@ def preencher(campo: str, valor: str) -> dict:
 
 
 @mcp.tool
+@_na_fila
 def screenshot() -> dict:
     """Salva uma captura da página atual em disco (nunca envia binário pelo
     MCP -- retorna só o caminho). READ-ONLY.
@@ -387,6 +409,7 @@ def screenshot() -> dict:
 
 
 @mcp.tool
+@_na_fila
 def fechar_navegador() -> dict:
     """Encerra a sessão do navegador (libera o processo). Chamar ao fim do uso
     -- não é obrigatório, mas evita um processo Brave pendurado."""
