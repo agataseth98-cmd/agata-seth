@@ -1,0 +1,15 @@
+diff --git a/config/laya-roteador.service b/config/laya-roteador.service
+index 17e7943..e1b1b81 100644
+--- a/config/laya-roteador.service
++++ b/config/laya-roteador.service
+@@ -22,7 +22,9 @@ Environment=LAYA_PRELOAD=1
+ Environment=LAYA_MODELS=roteador
+ Environment=LAYA_DEFAULT_MODEL=roteador
+ Environment=LAYA_LOG_LEVEL=warning
+-Environment=LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}
++# (722) A atribuição inteira entre aspas simples: sem elas o systemd come as aspas duplas
++# do JSON e o laya-serve recusa ("invalid LAYA_EXTRA_MODELS") -- caiu em loop na 1ª subida.
++Environment='LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}'
+ ExecStart=%h/.local/share/agata-laya/.venv/bin/laya-serve
+ Restart=on-failure
+ RestartSec=15
