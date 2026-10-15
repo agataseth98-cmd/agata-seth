@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(726) EXECUÇÃO — 15/10/2026 · **Aplicada `navegador-fila-2026-10-15` (assinada pelo Humano), em worktree. E a resposta do Humano à pergunta de (725): a aprovação do `preencher`/`clicar` das 13:19 apareceu para ele ("apareceu sim") — o portão de escrita da LibreChat funcionou.**
 (725) CORREÇÃO — 15/10/2026 · **Auditoria da conversa da Seth de 13:19–13:21 (pedido do Humano) e duas correções minhas. A Seth disse que o Laya "não está integrado" enquanto ele escolhia a fila da própria conversa; o navegador falhou por corrida entre chamadas paralelas. E os horários dos meus cabeçalhos e de (722)/(724) estavam errados: estimei a hora em vez de medir, com o selo "(relógio da Máquina)". Proposta `navegador-fila-2026-10-15`. Aguardando assinatura.**
 (724) DIÁRIO — 15/10/2026 · **O Laya escolhe a fila da Seth desde as 15:2x de 15/10: `laya-roteador` no ar (CPU, 1,9 GB, 0 reinícios), gateway reiniciado, 2 mensagens reais roteadas por ele em ~100 ms. E um efeito colateral meu: a geração de dados sintéticos de (718)/(719) gastou a cota diária gratuita do OpenRouter, e o Nemotron, 1º da `seth-pesado`, está em 429 até a cota virar (00:00 UTC, 21:00 -03).**
 (723) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-aspas-2026-10-15` (assinada pelo Humano), em worktree: a linha do `LAYA_EXTRA_MODELS` entre aspas simples. Depois do merge, o `laya-roteador` sobe e o Laya passa a escolher a fila da Seth.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `tool_choice: "required"` de (695)/(696) fez o Nemotron Ultra escrever as chamadas de ferramenta como TEXTO — o LibreChat não as executa e a conversa travou. Proposta urgente `seth-sem-ferramenta-obrigatoria-2026-10-14` retira só esse item. Aguardando assinatura.**
-(696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pelo Humano). Reteste: pergunta de fato abre com ferramenta; "quais propostas estão pendentes?" respondida com o fato da Máquina; resposta desatualizada acusada no turno seguinte e corrigida por ela com a evidência certa.**
+(696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pel …
 (695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma …
 (694) DIÁRIO — 14/10/2026 · **Decisão do Humano: aplicar os dois caminhos de (69 …
 (693) EXECUÇÃO — 14/10/2026 · **Aplicada `fluxo-proposta-2026-10-14` (assinada p …
