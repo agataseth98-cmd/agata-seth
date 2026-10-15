@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
+  palavras-chave: humano, deu, codex, app, gpt, designação, trabalho, mesmas, permissões, claude, code, agata, portão, três, perguntas, modelos, sincronizam, cache, sincronia, regras, convivência, abaixo, lacuna, declarada, post, commit, commits, simultâneos
 (726) EXECUÇÃO — 15/10/2026 · **Aplicada `navegador-fila-2026-10-15` (assinada pelo Humano), em worktree. E a resposta do Humano à pergunta de (725): a aprovação do `preencher`/`clicar` das 13:19 apareceu para ele ("apareceu sim") — o portão de escrita da LibreChat funcionou.**
   palavras-chave: execução, aplicada, navegador, fila, assinada, humano, worktree, resposta, pergunta, aprovação, preencher, clicar, apareceu, ele, sim, portão, escrita, librechat, funcionou
 (725) CORREÇÃO — 15/10/2026 · **Auditoria da conversa da Seth de 13:19–13:21 (pedido do Humano) e duas correções minhas. A Seth disse que o Laya "não está integrado" enquanto ele escolhia a fila da própria conversa; o navegador falhou por corrida entre chamadas paralelas. E os horários dos meus cabeçalhos e de (722)/(724) estavam errados: estimei a hora em vez de medir, com o selo "(relógio da Máquina)". Proposta `navegador-fila-2026-10-15`. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: confirmado, humano, aviso, auditoria, seth, aparece, área, trabalho, fecha, pendência
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
   palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria, assinada, humano, tool, choice, required, conversa, longa, travou, volta, funcionar, nemotron, faz, chamada, real
-(697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `tool_choice: "required"` de (695)/(696) fez o Nemotron Ultra escrever as chamadas de ferramenta como TEXTO — o LibreChat não as executa e a conversa travou. Proposta urgente `seth-sem-ferramenta-obrigatoria-2026-10-14` retira só esse item. Aguardando assinatura.**
-  palavras-chave: quebrou, seth, humano, tool, choice, required, fez, nemotron, ultra, escrever, chamadas, ferramenta, texto, librechat, executa, conversa, travou, proposta, urgente, obrigatoria, retira, item, aguardando, assinatura
+(697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `too …
+  palavras-chave: quebrou, seth, humano, too
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pel …
   palavras-chave: execução, aplicada, seth, verdade, assinada, pel
 (695) DIÁRIO — 14/10/2026 · **Proposta `seth-verdade-2026-10-14`: resolve de uma …
