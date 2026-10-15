@@ -26,20 +26,45 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9
-  Escrito em: 15/10/2026 09:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a1d4d21321d78fe0369f7204802a58464d06d2e
+  Escrito em: 15/10/2026 09:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce42d37ac19ee9ba7bc5cbe7c1d46448c6b456d9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
+
+**A conversa** (LibreChat `8c72ef25`, lida no MongoDB em leitura; 4 pedidos; todas as respostas pelo `ministral-14b`, cabeçalho da Máquina certo):
+1. "verifique a presença do termo Laya no sistema" — chamou `vault_buscar` sem o sufixo do servidor (o nome na LibreChat é `vault_buscar_mcp_canon`) e levou "Tool vault_buscar not found"; caiu para `maquina_verificar busca_texto`. **A saída trouxe, na linha 37 de 38, `projeto/proj-decisor-local.md:16`: "`laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms"** — a medição de 13/10 de (655)/(656). Ela respondeu: o termo **"Laya"** "não aparece em nenhum trecho relevante" e citou "Ollaya" como ocorrência "indireta". Falso, com a prova na mão. O Ollaya é o runtime do decisor local que roda na Máquina (`:11435`), e o Laya é um dos modelos dele, medido aqui.
+2. "É um modelo de decisão, pode verificar nos contextos externos" — usou `tool_search`, que procura FERRAMENTAS, 3 vezes, e afirmou: "Também não há menção a ele em documentos públicos ou repositórios acessíveis". Nenhuma busca externa feita: evidência inventada.
+3. "pesquise laya research e seus papers na internet" — mais 6 `tool_search`, escreveu "não há resultados … em buscas externas (GitHub, arXiv)" ANTES de abrir qualquer página e depois abriu o navegador: `clicar "Google"` barrado (nenhuma página aberta; clique é escrita, allowlist), `navegar` e `ler_pagina` em arxiv.org e github.com, busca por URL nos dois. Conclusão final: "não retornou nenhum artigo … nem repositórios". A busca do GitHub veio com 276 caracteres e os resultados escondidos ("(...) results"; a página monta os resultados por JavaScript) — ela concluiu sobre o que a página não mostrou. Na Máquina, o mesmo assunto no Bing, primeira busca: `github.com/NandhaKishorM/laya`, `laya.convaiinnovations.com` ("From our March 2025 arXiv paper…"), `horadecodar.com.br/laya`.
+4. Acertos: o cabeçalho, o 1º passo pelo vault, e ela não tentou contornar o bloqueio do clique.
+
+**Causas, medidas:** (a) nenhuma ferramenta de busca na web — o navegador só abre URL; (b) a `vault_buscar_mcp_canon` nunca entrou no `toolApproval.allow` da LibreChat (nasceu em (670), a lista é de (622)), então pede aprovação a cada uso — e a doutrina a nomeia sem o sufixo; (c) a busca de texto casa pedaço de palavra ("himalaya", "relaya") e põe isso antes da palavra inteira, o que levou a linha certa para o fim da lista; (d) nada mecânico confere uma negação contra a saída da ferramenta; (e) `ler_pagina` corta em 5000 caracteres, sem como ler o resto.
+
+**Proposta (7 arquivos, +220/−18):**
+1. `redesign/mcp/navegador/servidor.py`: ferramenta nova `buscar_web(consulta, n)` — leitura por URL da página de resultados do Bing (nenhum clique nem formulário), com o endereço real de cada resultado (o Bing embrulha em `ck/a?u=a1<base64>`) e a marca `relacionado`; se nenhum resultado tiver os termos da consulta, vem `aviso` ("a busca não prova nada"). Medido no Brave headless: Bing 10 resultados; `html.duckduckgo.com` 202 sem resultado; `search.brave.com` captcha; e o Bing devolve lixo para termo raro ("ollaya", 3 consultas) — daí o `aviso`. `ler_pagina` ganha `inicio` (lê página longa por partes) e `total_chars`. Testado com perfil temporário: busca, leitura em 2 partes, loopback barrado pela política de egress; `--selftest offline` OK.
+2. `redesign/librechat/librechat.yaml`: `vault_buscar_mcp_canon` e `buscar_web_mcp_navegador` no `allow` (sem aprovação). Escrita (`memoria_acrescentar`, `enviar_mensagem`, `clicar`, `preencher`) segue fora, pedindo aprovação.
+3. `redesign/router/seth_gateway.py` (doutrina): "Pesquisa é livre; escrita passa pelo Humano"; nomes com sufixo; `tool_search` não é a internet; "não encontrado nesta busca", nunca "não existe"; `truncado` se lê por partes; antes de negar um termo, reler o que a busca devolveu. Selftest OK.
+4. `redesign/router/auditoria_turno.py`: conferência nova — frase com negação + termo destacado + o termo como palavra inteira na saída de ferramenta do mesmo turno → achado na `AUDITORIA-TURNO-ANTERIOR`. 3 casos novos no selftest (acusa o caso desta conversa; não acusa pedaço de palavra; não acusa sem ferramenta). Selftest OK.
+5. `scripts/busca_texto.py`: palavra inteira antes de pedaço. Contra o vault real, "Laya" passa a trazer as 2 linhas do canon primeiro. Selftest com o caso novo OK.
+6. `AGENTS.md`: a regra para todo modelo federado — leitura livre; escrita continua pelos portões de hoje (aprovação da ferramenta e, no canon, o par assinado). Primeira redação minha exigia aprovação para gravar qualquer arquivo, mais do que o Humano pediu; corrigida antes de propor.
+7. `redesign/mcp/navegador/README.md`: tabela de ferramentas.
+
+**Na aplicação (fora do `.diff`):** copiar o `librechat.yaml` para `~/librechat/`, pôr `buscar_web_mcp_navegador` na lista de ferramentas do Agent da Seth (MongoDB, sem `defer_loading`), reiniciar `navegador-mcp`, o contêiner `librechat` e o `seth-gateway`.
+
+**Já feito, fora do repo (autorizado pela mesma fala):** `~/.config/goose/permission.yaml` — `canon__vault_buscar` em `always_allow` (backup `.bak-2026-10-15-pesquisa`). **Achado para o Humano decidir:** no Goose, `shell` está em `always_allow` desde antes de (518), que o declarou risco residual ("o Goose ainda pode estragar arquivo por `sed -i`/`>`"). Shell escreve; pela regra de hoje, devia pedir aprovação. Não mexi: tirar muda o fluxo do Goose.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: MongoDB da LibreChat em leitura (`messages`, `agents`), `librechat.yaml`, `~/.config/goose/permission.yaml`, Playwright + Brave headless com perfil temporário no scratchpad, WebSearch (para conferir a verdade sobre o Laya), selftests de `seth_gateway`, `auditoria_turno`, `busca_texto`, navegador · Autorização: Humano, nesta sessão (fala citada acima).
 
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
 
