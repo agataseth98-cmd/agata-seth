@@ -1,6 +1,6 @@
 {
   "_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas ou os modelos mudarem. MEMÓRIAS (667).",
-  "medido_em": "2026-10-13",
+  "medido_em": "2026-10-15",
   "filas": {
     "seth-rapido": [
       "mistral/ministral-14b-latest",
@@ -9,8 +9,8 @@
       "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-livre": [
-      "gemini/gemini-2.5-flash",
       "mistral/ministral-14b-latest",
+      "gemini/gemini-2.5-flash",
       "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "zai/glm-4.7-flash",
