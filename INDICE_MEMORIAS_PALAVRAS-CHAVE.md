@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
+  palavras-chave: corrige, proposta, laya, sombra, estava, assinada, humano, superada, aplicar, roteador, aprovado, propostas, rejeitadas, junto, diff
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
   palavras-chave: laya, passa, escolher, fila, seth, jev, sombra, juiz, automático, divergências, treino, contínuo, troca, aprovada, humano, decisões, sessão, prefiro, agora, ele, pode, permanecer, treinamento, continuo, dados, vamos, fazer, parte, rotular, tem, automática, você, aprova, proposta, roteador, substitui, assinada, propostas, rejeitadas, aguardando, assinatura
 (718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, fluxo, vira, padrão, sistema, pedido, humano, perfeito, pode, deixar, assim, agata, abre, vai, direto, contra, main, quem, propõe, junta, faz, git, pull, assina, aguardando, assinatura
 (691) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-ferramenta-sem-chamada-2026-10-14` (assinada pelo Humano). Reteste em dois turnos: a auditoria acusa a ferramenta inventada do turno 1; o modelo do turno 2 ignora a correção e inventa de novo. Detecção funciona; prevenção não. E o fluxo de proposta vira padrão do sistema (pedido do Humano), em proposta própria.**
   palavras-chave: execução, aplicada, seth, ferramenta, chamada, assinada, humano, reteste, turnos, auditoria, acusa, inventada, turno, modelo, ignora, correção, inventa, novo, detecção, funciona, prevenção, fluxo, proposta, vira, padrão, sistema, pedido, própria
-(690) DIÁRIO — 14/10/2026 · **Proposta `seth-ferramenta-sem-chamada-2026-10-14` (pedido do Humano: "pode escrever"): a auditoria do turno passa a acusar ferramenta citada como fonte sem ter sido chamada na conversa — o mecanismo que a regra de texto de (688) não substituiu no reteste de (689). Aguardando assinatura.**
-  palavras-chave: proposta, seth, ferramenta, chamada, pedido, humano, pode, escrever, auditoria, turno, passa, acusar, citada, fonte, ter, sido, conversa, mecanismo, regra, texto, substituiu, reteste, aguardando, assinatura
+(690) DIÁRIO — 14/10/2026 · **Proposta `seth-ferramenta-sem-chamada-2026-10-14` …
+  palavras-chave: proposta, seth, ferramenta, chamada
 (689) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-evidencia-e-ci-2026-10-14` (assin …
   palavras-chave: execução, aplicada, seth, evidencia, assin
 (688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: consert …
