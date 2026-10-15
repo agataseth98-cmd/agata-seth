@@ -1,0 +1,46 @@
+diff --git a/config/capivara/perfis-modelos.json b/config/capivara/perfis-modelos.json
+index 557acfc..d8ebec7 100644
+--- a/config/capivara/perfis-modelos.json
++++ b/config/capivara/perfis-modelos.json
+@@ -1,6 +1,6 @@
+ {
+   "_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas ou os modelos mudarem. MEMÓRIAS (667).",
+-  "medido_em": "2026-10-13",
++  "medido_em": "2026-10-15",
+   "filas": {
+     "seth-rapido": [
+       "mistral/ministral-14b-latest",
+@@ -9,8 +9,8 @@
+       "ollama-local/qwen3.5-9b-64k:latest"
+     ],
+     "seth-livre": [
+-      "gemini/gemini-2.5-flash",
+       "mistral/ministral-14b-latest",
++      "gemini/gemini-2.5-flash",
+       "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
+       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+       "zai/glm-4.7-flash",
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index 58edf4b..ca646b7 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -163,6 +163,8 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+ 
+ **Fila de 13/10/2026, por decisão do Humano:** o Groq saiu também do `seth-codigo` (Goose), e o `zai/glm-4.7-flash` saiu do `seth-rapido` (155 dos 323 travamentos de 30 s do `app.log` do OmniRoute eram dele; 529 de novo em 13/10). As tabelas do `seth-livre` e do `seth-pesado` foram alinhadas à ordem viva de (653)/(654), que esta página não registrava.
+ 
++**Fila de 14/10/2026 (MEMÓRIAS (711)/(712)):** no `seth-livre` e no `seth-livre-longo`, o `ministral-14b` passou à frente do `gemini-2.5-flash` — o Gemini sem cota pendurava cada "Olá" (310 s em (709); 42 s com o prazo de (710)). Decisão pendente desde (683), pedida pelo Humano em 15/10 ("pode fazer todos esses reparos"). O `seth-livre` já estava mudado no OmniRoute desde as 22:00 de 14/10 (autor não registrado: o `config_audit_log` está vazio); o `seth-livre-longo` foi mudado pela API em 15/10.
++
+ ### `seth-rapido` (LibreChat, trivial)
+ | ordem | modelo | por quê |
+ |---|---|---|
+@@ -174,8 +176,8 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+ ### `seth-livre` (LibreChat, rota normal — favorece conversação)
+ | ordem | modelo | por quê |
+ |---|---|---|
+-| 0 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
+-| 1 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
++| 0 | `mistral/ministral-14b-latest` | **subiu em 14/10 (711)/(712)** — 0,6–0,9 s, tool-call OK; respondeu as 7 novas tentativas de (711) em 0,9–13,5 s |
++| 1 | `gemini/gemini-2.5-flash` | **desceu em 14/10 (711)/(712)**: teto ~20 req/dia; sem cota, pendura a fila até o prazo de 40 s do gateway (710) |
+ | 2 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
+ | 3 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+ | 4 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |

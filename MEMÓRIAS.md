@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 400c5a796244e2249bc4c1600a672189d87b2339
-  Escrito em: 15/10/2026 08:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5ebc501067b0c48d583669e6e2e04178b785437b
+  Escrito em: 15/10/2026 08:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/400c5a796244e2249bc4c1600a672189d87b2339/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
+
+**1. Gemini fora do topo (feito ao vivo, fora do repo).** O `seth-livre` já estava com o `ministral-14b` em 1º desde as 22:00 de 14/10 (`updated_at` 01:00:59Z; o `config_audit_log` do OmniRoute está vazio, autor não registrado) — depois do último travamento de (711), às 21:54. Faltava o `seth-livre-longo`, que ainda punha o Gemini em 1º: `PUT /api/combos/afb2cd7a…` 200, ordem conferida por `GET` (Ministral, Gemini 2.5, Nemotron super, Nemotron ultra, Gemini 3 preview). Backup antes: `~/.omniroute/storage.sqlite.bak-antes-livre-longo-ministral-2026-10-15` (pela API de backup do sqlite, não `cp`: o banco está em WAL). Resposta pela fila não testada: o sanitizador recusa chamada sem `X-Agata-Token` (só o gateway), e não contornei.
+
+**Proposta** (`config/*`, só registro da fila viva, 2 arquivos): `perfis-modelos.json` regenerado por `capivara_perfis.py` (`--conferir` acusava "MUDOU: filas"; só a ordem do `seth-livre` e a data mudam) e a tabela do `seth-livre` em `modelos-gratuitos.md`. Sem ela, o `--sincronizar-filas` continua comparando com a ordem velha.
+
+**2. Testes de conexão com 401 — não é defeito.** É o próprio OmniRoute testando as conexões a cada 10 min (`/api/providers/test`). Os 4 `llama-cpp` falham porque os servidores sobem só sob demanda e estão fora de todo caminho automático desde (648). O Z.AI falhou em 14/10 às 21:20 e às 21:40 ("fetch failed") e hoje está `test_status: active`, último teste às 08:24 sem erro.
+
+**3. 422 do `universal-handoff` — defeito do OmniRoute, não consertado.** Quando uma fila troca de modelo, o OmniRoute pede a um modelo um resumo da conversa para passar adiante e manda junto 2 campos internos (`_omnirouteSkipContextRelay`, `_omnirouteInternalRequest`); a Mistral rejeita campo desconhecido (422 `extra_forbidden`). Efeito: o resumo sai "unavailable", a resposta da Seth não é afetada. 1 ocorrência nos call logs guardados (14/10, 21:28). Mas, com outros modelos, o resumo funcionou 25 vezes desde 02/09 (`context_handoffs`: `seth-codigo` 16, `seth-livre` 2, `seth-pesado` 2, `seth-rapido` 1, outros 4) — e esse resumo, escrito por um modelo barato, entra na conversa da Seth por cima da hidratação do gateway. Saída possível: `universalHandoff: {enabled: false}` nas filas `seth-*` (o código lê `combo.universalHandoff`; padrão `enabled: true`, `trigger: on-switch`). Não apliquei: muda o que a Seth recebe, não é reparo — decisão do Humano.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `GET/PUT :20128/api/combos`, `storage.sqlite` em leitura (`combos`, `provider_connections`, `context_handoffs`, `jobs`), call logs do OmniRoute, código instalado do OmniRoute (`phaseComboSetup`, `resolveUniversalHandoffConfig`), `capivara_perfis.py --conferir` · Autorização: Humano, nesta sessão ("pode fazer todos esses reparos que vc citou").
 
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o Gemini sem cota pendurou a `seth-livre` 7 vezes e nas 7 o gateway desistiu em 42 s e a `seth-rapido` (Ministral) respondeu. Resposta em 43–56 s, contra os 310 s de (709). A origem continua: o Gemini segue 1º da fila e sem cota — descer ele na fila segue decisão do Humano.**
 
