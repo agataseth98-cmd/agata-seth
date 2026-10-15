@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
+  palavras-chave: execução, aplicada, fila, ministral, assinada, humano, worktree, resposta, pergunta, resumo, automático, omniroute, ele, útil, sistema, medido, seth, ruído, risco, invenção, desligar, continua, decisão
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
   palavras-chave: reparos, pedidos, humano, pode, fazer, esses, gemini, flash, sai, lugar, filas, seth, livre, vivo, testes, conexão, eram, defeito, universal, handoff, omniroute, tem, saída, decide, proposta, fila, ministral, alinha, config, viva, aguardando, assinatura
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o Gemini sem cota pendurou a `seth-livre` 7 vezes e nas 7 o gateway desistiu em 42 s e a `seth-rapido` (Ministral) respondeu. Resposta em 43–56 s, contra os 310 s de (709). A origem continua: o Gemini segue 1º da fila e sem cota — descer ele na fila segue decisão do Humano.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: personalidade, seth, canônica, persistente, pedido, humano, vamos, apenas, canonizar, maneira, partir, hoje, dentro, diretrizes, sistema, agata, virar, canônico, capriche, tem, útil, proposta, aguardando, portão, perguntas, assinatura, junto, voz, própria, treino, agendado, madrugada, fora, repo
 (684) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-rota-e-busca-2026-10-13` (assinada pelo Humano), com (682) e (683). Reteste no LibreChat: a pergunta que travou às 23:44 ("explique o portão de três perguntas") agora sai inteira, com as três perguntas certas, em ~16 s, numa fila só.**
   palavras-chave: execução, aplicada, seth, rota, busca, assinada, humano, reteste, librechat, pergunta, travou, explique, portão, três, perguntas, agora, sai, inteira, certas, fila
-(683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:44 de 13/10): uma resposta dela ficou pendurada e morreu. Três causas medidas no OmniRoute; duas entram na proposta `seth-rota-e-busca-2026-10-13`, ainda sem assinatura — o `.diff` foi refeito, (682) não se edita.**
-  palavras-chave: verifica, seth, acho, bugou, humano, resposta, dela, ficou, pendurada, morreu, três, causas, medidas, omniroute, entram, proposta, rota, busca, assinatura, diff, refeito, edita
+(683) CORREÇÃO — 14/10/2026 · **"Verifica a Seth, acho que bugou" (Humano, ~23:4 …
+  palavras-chave: verifica, seth, acho, bugou, humano
 (682) CONSELHO — 13/10/2026 · **Teste real da Seth no LibreChat (conversa "Teste …
   palavras-chave: teste, real, seth, librechat, conversa
 (681) EXECUÇÃO — 13/10/2026 · **Aplicada `seth-tema-sync-2026-10-13` (assinada p …

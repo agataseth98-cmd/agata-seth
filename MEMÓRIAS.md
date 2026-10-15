@@ -26,20 +26,35 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5ebc501067b0c48d583669e6e2e04178b785437b
-  Escrito em: 15/10/2026 08:30 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4366dd426d64e9a4f94628175778ce9faf678d90
+  Escrito em: 15/10/2026 08:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5ebc501067b0c48d583669e6e2e04178b785437b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4366dd426d64e9a4f94628175778ce9faf678d90/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4366dd426d64e9a4f94628175778ce9faf678d90/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4366dd426d64e9a4f94628175778ce9faf678d90/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4366dd426d64e9a4f94628175778ce9faf678d90/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4366dd426d64e9a4f94628175778ce9faf678d90/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
+
+**Aplicado:** `p8_verificar` 4/4 (assinatura ED25519 válida, sha256 `4d951090d96b`); `git apply`; par em `propostas/aplicadas/`. Conferido depois: `capivara_perfis.py --conferir` → "perfil em dia"; `--sincronizar-filas` → as 3 filas `-longo` "já em dia". Nada a reiniciar: a fila viva já era essa desde (712).
+
+**O resumo (`universal-handoff`) — o que ele faz, lido no código instalado:** quando a mesma sessão troca de modelo dentro de uma fila, o OmniRoute põe um bloco `<context_handoff>` no topo das instruções, antes do resto. Com resumo guardado, o bloco traz um resumo escrito por um modelo barato, com a frase "Continue seamlessly from where the session left off". Sem resumo, ele entra assim mesmo, com uma nota em espanhol dizendo que "a seguir se resume toda a conversa" — e não vem resumo nenhum.
+
+**Medido:**
+- Os 5 resumos guardados das filas de conversa da Seth (09/09–02/10) estão em inglês, têm 106–491 caracteres e são genéricos ("The AI has not yet responded to the user's greeting"); um afirma "the system is currently in a test assistant mode", que ninguém mediu.
+- Nos call logs guardados (09/10–15/10), o bloco entrou 3 vezes, todas sem resumo (só a nota em espanhol), em pedidos de título do LibreChat — 10/10 22:34 e 22:35 — e na falha de 14/10 21:28.
+- A Seth não precisa dele: o LibreChat manda a conversa inteira a cada turno, o gateway re-hidrata o canon, e as filas `-longo` garantem que a conversa cabe na janela.
+
+**Juízo (Claude Opus 5.5):** o resumo serve para cliente que manda só a última mensagem; aqui não acrescenta nada e põe, acima da hidratação, texto de outro modelo que não passou pela conferência — o vetor de prova inventada que (690)–(696) fecharam. Proposta, se o Humano quiser: `universalHandoff: {enabled: false}` nas filas `seth-*`, ao vivo pela API, com backup do banco antes (mesmo caminho de (712)).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, `capivara_perfis.py`, código instalado do OmniRoute (`injectUniversalHandoffBody`, `maybeGenerateUniversalHandoff`), `context_handoffs` em leitura, call logs 09–15/10 · Autorização: Humano — assinatura de `fila-ministral-1o-2026-10-15`; pergunta nesta sessão.
 
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
 
