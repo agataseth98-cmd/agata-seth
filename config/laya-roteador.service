@@ -1,0 +1,39 @@
+[Unit]
+Description=Ágata — Laya ajustado que escolhe a fila da Seth; o Jev fica em sombra (MEMÓRIAS (718)/(719))
+# Só loopback (:11436), CPU, ~70 ms por decisão. Mesmo protocolo do Ollaya
+# (`POST /v1/systemone`). O seth_gateway pede a rota aqui com timeout de 1,5 s;
+# fora do ar, lento ou com confiança baixa = a regra por tamanho, como antes.
+# Ambiente e checkpoint FORA do repo: ~/.local/share/agata-laya/ (venv com
+# laya 0.4.8 do PyPI, Apache-2.0; modelo base convaiinnovations/laya
+# "multilingual" ajustado -- ver (718)). `roteador-atual` é um link para o
+# checkpoint em uso; só `scripts/laya_treino.py --promover` (o Humano) o troca.
+PartOf=agata.target
+
+[Service]
+Type=simple
+Environment=HF_HOME=%h/.local/share/agata-laya/hf
+Environment=HF_HUB_OFFLINE=1
+Environment=LAYA_HOST=127.0.0.1
+Environment=LAYA_PORT=11436
+Environment=LAYA_DEVICE=cpu
+Environment=LAYA_THREADS=4
+Environment=LAYA_MAX_LOADED=1
+Environment=LAYA_PRELOAD=1
+Environment=LAYA_MODELS=roteador
+Environment=LAYA_DEFAULT_MODEL=roteador
+Environment=LAYA_LOG_LEVEL=warning
+Environment=LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}
+ExecStart=%h/.local/share/agata-laya/.venv/bin/laya-serve
+Restart=on-failure
+RestartSec=15
+# Medido em 15/10/2026: ~1,9 GB residente com o checkpoint carregado. Sem swap
+# na Máquina: teto de 3 GB e prioridade baixa para não disputar com a Seth.
+MemoryMax=3G
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=agata.target

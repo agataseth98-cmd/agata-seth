@@ -581,6 +581,8 @@ _PERGUNTA_ROTA = {"rota": {
         "pesado": "hard reasoning, proof, deep technical analysis or complex planning",
         "codigo": "writing, fixing or explaining programming code, SQL or a script"}}}
 _LIMIAR_ROTA = 0.6
+# (719) o Laya decide a rota no caminho da resposta (~70 ms na CPU); passou disso, regra.
+_TIMEOUT_LAYA = 1.5
 _SOMBRA_LIVRE = threading.Semaphore(1)
 
 
@@ -607,34 +609,56 @@ def _ultimo_texto_usuario(msgs: list) -> str:
     return ""
 
 
-def _sombra_rota(payload: dict, rota_heuristica: str) -> None:
-    """Dispara a decisão-sombra sem esperar. Uma por vez: se o decisor ainda
-    está ocupado, este pedido fica sem sombra (nunca empilha CPU)."""
+def _rota_laya(payload: dict) -> tuple[str, dict]:
+    """(719) Rota ativa: o Laya ajustado escolhe (decisão do Humano, 15/10/2026: "prefiro
+    já agora o Laya"), com as travas exatas de sempre por cima. Laya fora do ar, lento
+    (> _TIMEOUT_LAYA) ou com confiança abaixo do limiar -> a regra por tamanho, como antes.
+    Devolve (rota, resposta crua do Laya -- {} se não houve) para a sombra do Jev comparar."""
+    if _e_chamada_utilitaria(payload):
+        return _classificar_rota(payload), {}
+    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    texto = _ultimo_texto_usuario(msgs)[-4000:]
+    if not texto:
+        return _classificar_rota(payload), {}
+    total, n_user, cerca = _texto_e_sinais(msgs)
+    # continuação (passo depois de ferramenta) decide de novo -- mesmo texto, mesma rota, a
+    # fila não troca no meio (682) -- mas a avaliação conta só a 1ª decisão de cada resposta
+    meta = {"heuristica": _classificar_rota(payload), "chars": total, "n_msgs": len(msgs),
+            "n_user": n_user, "cerca_codigo": cerca, "tools": bool(payload.get("tools")),
+            "continuacao": auditoria_turno.e_continuacao(msgs)}
+    r = decisor.decidir("roteador-laya", texto, _PERGUNTA_ROTA, timeout=_TIMEOUT_LAYA, meta=meta,
+                        url=decisor.URL_LAYA, modelo=decisor.MODELO_LAYA)
+    return _rota_com_travas(decisor.escolha(r, "rota", _LIMIAR_ROTA), payload), (r or {}).get("rota") or {}
+
+
+def _sombra_rota(payload: dict, rota_ativa: str, laya: dict | None = None) -> None:
+    """Dispara a decisão-sombra do Jev sem esperar. Uma por vez: se o decisor ainda
+    está ocupado, este pedido fica sem sombra (nunca empilha CPU). (719) Desde que o
+    Laya decide a rota, o Jev é a sombra dele: onde as escolhas cruas discordam, o
+    caso vai para o juiz automático (`avaliar_decisor.py`)."""
     if not _SOMBRA_LIVRE.acquire(blocking=False):
         return
     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-    # Cópia AGORA: logo depois o `_injeta` põe a hidratação (~4 mil chars) no
-    # mesmo `payload`, e a trava de tamanho leria tudo como "pesado" (13/10/2026,
-    # MEMÓRIAS (657)).
-    pedido = {"messages": list(msgs), "tools": payload.get("tools")}
+    # Texto AGORA: logo depois o `_injeta` põe a hidratação (~4 mil chars) no
+    # mesmo `payload` (13/10/2026, MEMÓRIAS (657)).
     texto = _ultimo_texto_usuario(msgs)[-4000:]
     total, n_user, cerca = _texto_e_sinais(msgs)
-    meta = {"heuristica": rota_heuristica, "chars": total, "n_msgs": len(msgs),
+    meta = {"rota_ativa": rota_ativa, "chars": total, "n_msgs": len(msgs),
             "n_user": n_user, "cerca_codigo": cerca, "tools": bool(payload.get("tools"))}
+    laya = laya or {}
 
     def _rodar():
         try:
             if not texto:
                 return
             r = decisor.decidir("roteador", texto, _PERGUNTA_ROTA, meta=meta)
-            escolhida = decisor.escolha(r, "rota", _LIMIAR_ROTA)
-            final = _rota_com_travas(escolhida, pedido)
-            if escolhida is not None and final != rota_heuristica:
-                # avaliação em produção: o Humano julga as divergências
-                decisor.registrar_avaliacao("roteador", {
-                    "heuristica": rota_heuristica, "modelo": final,
-                    "confianca": r["rota"]["confidence"], "chars": total,
-                    "trecho": texto[:200]})
+            jev = (r or {}).get("rota") or {}
+            # escolha crua de cada um (sem limiar): é o que se compara e o que o juiz julga
+            if jev.get("choice") and laya.get("choice") and jev["choice"] != laya["choice"]:
+                decisor.registrar_avaliacao("roteador-laya", {
+                    "jev": jev["choice"], "laya": laya["choice"],
+                    "conf_jev": jev.get("confidence"), "conf_laya": laya.get("confidence"),
+                    "rota_ativa": rota_ativa, "chars": total, "trecho": texto[:200]})
         finally:
             _SOMBRA_LIVRE.release()
 
@@ -804,12 +828,12 @@ class _Handler(BaseHTTPRequestHandler):
             if isinstance(payload, dict):
                 # roteador por complexidade: só o alvo "seth-livre" do Agent
                 if payload.get("model") == _ROTA_BASE:
-                    self._rota = _classificar_rota(payload)
+                    self._rota, laya = _rota_laya(payload)
                     # 1 decisão por resposta: no modo Agent os passos depois de
                     # ferramenta são a mesma resposta (664)
                     if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
                             payload.get("messages") or []):
-                        _sombra_rota(payload, self._rota)
+                        _sombra_rota(payload, self._rota, laya)
                     payload["model"] = self._rota
                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
@@ -1152,6 +1176,10 @@ def _selftest() -> int:
     UPSTREAM = f"http://127.0.0.1:{up_port}"
     import tempfile
     MODELO_REAL_PATH = Path(tempfile.mkdtemp()) / "modelo-real.txt"  # isolado do arquivo real
+    # (719) o selftest nunca fala com o Laya nem com o Jev de verdade: rota e sombra
+    # determinísticas mesmo com os serviços no ar (os casos que precisam deles os simulam)
+    decisor.URL = decisor.URL_LAYA = "http://127.0.0.1:9"
+    decisor.LOG_DIR = Path(tempfile.mkdtemp())
     up = ThreadingHTTPServer(("127.0.0.1", up_port), _Dummy)
     gw = ThreadingHTTPServer(("127.0.0.1", gw_port), _Handler)
     threading.Thread(target=up.serve_forever, daemon=True).start()
@@ -1343,9 +1371,10 @@ def _selftest() -> int:
         print(f"{'PASS' if ok else 'FALHA'}  trava: {desc} (deu {deu})")
         falhas += 0 if ok else 1
 
-    # 9c. sombra com decisor fora do ar: o pedido passa pela heurística, sem esperar
+    # 9c. (719) Laya e Jev fora do ar: o pedido passa pela regra por tamanho, sem esperar
     import time as _t
-    _url_antes, decisor.URL = decisor.URL, "http://127.0.0.1:9"
+    _urls_antes = (decisor.URL, decisor.URL_LAYA)
+    decisor.URL = decisor.URL_LAYA = "http://127.0.0.1:9"
     _log_antes, decisor.LOG_DIR = decisor.LOG_DIR, Path(tempfile.mkdtemp())
     t0 = _t.monotonic()
     urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
@@ -1353,45 +1382,56 @@ def _selftest() -> int:
         headers={"Content-Type": "application/json"}), timeout=10).read()
     dt = _t.monotonic() - t0
     rota_sombra = json.loads(_Dummy.ultimo_corpo)["model"]
-    decisor.URL, decisor.LOG_DIR = _url_antes, _log_antes
+    decisor.URL, decisor.URL_LAYA = _urls_antes
+    decisor.LOG_DIR = _log_antes
     ok9c = rota_sombra == "seth-rapido" and dt < 2
-    print(f"{'PASS' if ok9c else 'FALHA'}  sombra com decisor fora -> heurística, "
-          f"sem bloquear (rota {rota_sombra}, {dt * 1000:.0f} ms)")
+    print(f"{'PASS' if ok9c else 'FALHA'}  (719) Laya e Jev fora -> regra, sem bloquear "
+          f"(rota {rota_sombra}, {dt * 1000:.0f} ms)")
     falhas += 0 if ok9c else 1
 
-    # 9d. caminho completo (pedido real, hidratação injetada, thread): a trava de
-    # tamanho tem de ver o pedido do usuário, não o pedido já hidratado (657).
+    # 9d. (719) caminho completo (pedido real, hidratação injetada, thread do Jev): o Laya
+    # escolhe a rota com as travas; o Jev é a sombra; discordância vira caso para o juiz.
     _decidir_antes, _log_antes = decisor.decidir, decisor.LOG_DIR
     _hid_antes = globals()["_hidratacao"]
     globals()["_hidratacao"] = lambda extra="": MARCADOR + "\n" + "h" * 9000  # a real tem ~8,8 mil
     decisor.LOG_DIR = Path(tempfile.mkdtemp())
-    divs = decisor.LOG_DIR / "roteador-avaliacao.jsonl"
+    divs = decisor.LOG_DIR / "roteador-laya-avaliacao.jsonl"
 
-    def _sombra_com(escolha_falsa):
-        def _falso(*a, **k):
-            _t.sleep(0.3)  # o real leva ~4 s: o `_injeta` já mexeu no pedido quando ele volta
-            return {"rota": {"type": "choice", "choice": escolha_falsa, "confidence": 0.95}}
+    def _rota_com(laya_diz, jev_diz, conf_laya=0.95, texto="oi"):
+        def _falso(uso, *a, **k):
+            if k.get("modelo") == decisor.MODELO_LAYA:
+                return {"rota": {"type": "choice", "choice": laya_diz, "confidence": conf_laya}}
+            _t.sleep(0.3)  # o Jev real leva ~4 s, numa thread: o `_injeta` já mexeu no pedido
+            return {"rota": {"type": "choice", "choice": jev_diz, "confidence": 0.9}}
         decisor.decidir = _falso
         urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
-            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
+            {"model": "seth-livre", "messages": [{"role": "user", "content": texto}]}).encode(),
             headers={"Content-Type": "application/json"}), timeout=10).read()
         for _ in range(50):  # espera a thread de sombra soltar o semáforo
             if _SOMBRA_LIVRE.acquire(blocking=False):
                 _SOMBRA_LIVRE.release()
                 break
             _t.sleep(0.05)
-        return divs.read_text().splitlines() if divs.exists() else []
+        return (json.loads(_Dummy.ultimo_corpo)["model"],
+                divs.read_text().splitlines() if divs.exists() else [])
 
-    ok9d = _sombra_com("rapido") == []
-    linhas = _sombra_com("pesado")
-    ok9e = len(linhas) == 1 and json.loads(linhas[0])["modelo"] == "seth-pesado"
+    r1, d1 = _rota_com("rapido", "rapido")
+    r2, d2 = _rota_com("codigo", "livre", texto="me explica latência")
+    r3, _ = _rota_com("pesado", "pesado", conf_laya=0.3)
     decisor.decidir, decisor.LOG_DIR = _decidir_antes, _log_antes
     globals()["_hidratacao"] = _hid_antes
-    print(f"{'PASS' if ok9d else 'FALHA'}  sombra pelo caminho completo: 'oi' = rapido "
-          f"não vira divergência (hidratação não conta na trava)")
-    print(f"{'PASS' if ok9e else 'FALHA'}  sombra pelo caminho completo: modelo diz pesado "
-          f"-> 1 divergência registrada")
-    falhas += (0 if ok9d else 1) + (0 if ok9e else 1)
+    casos9 = [
+        ("(719) Laya diz rapido -> seth-rapido; concordando com o Jev, nenhum caso "
+         "(hidratação não conta na trava)", r1 == "seth-rapido" and d1 == []),
+        ("(719) Laya decide a rota (codigo) e a discordância do Jev (livre) vira 1 caso com os dois",
+         r2 == "seth-codigo" and len(d2) == 1 and json.loads(d2[0])["jev"] == "livre"
+         and json.loads(d2[0])["laya"] == "codigo" and json.loads(d2[0])["rota_ativa"] == "seth-codigo"),
+        ("(719) Laya com confiança abaixo do limiar -> regra por tamanho", r3 == "seth-rapido"),
+    ]
+    for desc, ok in casos9:
+        print(f"{'PASS' if ok else 'FALHA'}  {desc}")
+        falhas += 0 if ok else 1
+
 
     # 9f. auditoria do turno anterior pelo caminho completo (662): resposta anterior
     # com cabeçalho errado -> o pedido seguinte leva AUDITORIA-TURNO-ANTERIOR.

@@ -7,11 +7,18 @@ ou remover de vez. Roda todo dia pelo `agata-avaliacao-decisor.timer`.
 
 Por uso, um veredito -- VALE / NÃO VALE / INCONCLUSIVO -- com o motivo e os
 números, pelos critérios abaixo (constantes, revisáveis):
-- roteador: falha demais -> não vale; concorda com a regra em >=95% -> não vale
-  (só gasta CPU); senão decide o rótulo do Humano nas divergências.
+- roteador (até 15/10/2026): o Jev em sombra contra a regra por tamanho. Desde (719)
+  o Laya decide a rota e o Jev é a sombra dele: o relatório mostra a trilha abaixo.
 - inbox: nota barrada como rascunho que depois foi EDITADA = acerto; importada
   intocada pela regra das 24 h = erro. Medido sozinho, sem rótulo.
 - p20 e consolidação: rótulo do Humano (acertou/errou) nos avisos e reprovações.
+- roteador-laya (718)/(719): o Laya decide a rota, o Jev em sombra. Falha demais -> não
+  vale; concorda com o Jev em >=95% -> vale (mesma decisão, ~55x mais rápido na CPU);
+  senão decide o rótulo nas divergências (o Laya acerta >=60% -> vale). **O rótulo é
+  automático** (decisão do Humano, 15/10/2026): 2 juízes de nuvem pelo sanitizador
+  (`redesign/laya/juiz.py`), só vale quando concordam; o que eles julgam vira dado de
+  treino real do Laya (`laya-treino-real.jsonl`, modo 600, sobrevive ao `--encerrar`).
+  Discordância dos juízes fica para `--rotular`.
 Alarme imediato: o serviço reiniciou 3+ vezes, ou mais da metade das decisões
 das últimas 24 h falhou.
 
@@ -44,7 +51,7 @@ _DESKTOP = Path.home() / "Área de trabalho"
 RELATORIO = (_DESKTOP if _DESKTOP.is_dir() else LOG) / "avaliacao-decisor.md"
 
 ROT_N_MIN, ROT_ERRO_MAX, ROT_CONCORDA_MAX = 30, 0.20, 0.95
-ROTULOS_MIN = {"roteador": 10, "p20": 3, "consolidacao": 3}
+ROTULOS_MIN = {"roteador": 10, "roteador-laya": 10, "p20": 3, "consolidacao": 3}
 INBOX_BLOQ_MIN = 3
 ACERTO_MIN = 0.60
 LIMIAR_P20, LIMIAR_UTIL, LIMIAR_INBOX = 0.7, 1.5, 0.7
@@ -80,6 +87,7 @@ def _pendentes() -> list[dict]:
     """Casos que só o Humano julga: divergência do roteador, aviso do P-20,
     reprovação da consolidação."""
     casos = [{"uso": "roteador", **c} for c in _ler("roteador-avaliacao.jsonl")]
+    casos += [{"uso": "roteador-laya", **c} for c in _ler("roteador-laya-avaliacao.jsonl")]
     for d in _ler("p20.jsonl"):
         p = decisor.probabilidade(d.get("respostas"), "pessoal")
         if p is not None and p >= LIMIAR_P20:
@@ -147,6 +155,61 @@ def veredito_inbox() -> tuple[str, str, dict]:
             f"{certos} de {julgados} notas barradas eram mesmo rascunho ({taxa:.0%})", num)
 
 
+def veredito_laya() -> tuple[str, str, dict]:
+    """(718)/(719) Laya × Jev, mesmo texto. 'modelo' no rótulo = o Laya acertou; 'regra' = o Jev.
+    Conta só a 1ª decisão de cada resposta (o passo depois de ferramenta decide de novo)."""
+    ds = [d for d in _ler("roteador-laya.jsonl") if not d.get("continuacao")]
+    n = len(ds)
+    falhas = sum(1 for d in ds if d.get("respostas") is None)
+    ok = n - falhas
+    div = len(_ler("roteador-laya-avaliacao.jsonl"))
+    ms = sorted(d["ms"] for d in ds if d.get("respostas") is not None)
+    num = {"decisões": n, "falhas": falhas, "divergências com o Jev": div,
+           "latência p95 (ms)": ms[int(0.95 * (len(ms) - 1))] if ms else None}
+    if n < ROT_N_MIN:
+        return "INCONCLUSIVO", f"só {n} decisões (mínimo {ROT_N_MIN})", num
+    if falhas / n > ROT_ERRO_MAX:
+        return "NÃO VALE", f"falhou em {falhas / n:.0%} das decisões", num
+    if ok and 1 - div / ok >= ROT_CONCORDA_MAX:
+        return "VALE", f"concorda com o Jev em {1 - div / ok:.0%} -- mesma decisão, bem mais rápido", num
+    v, m = _por_rotulo("roteador-laya")
+    return v, m.replace("o modelo acertou", "o Laya acertou"), num
+
+
+JUIZ_MAX_POR_DIA = 40  # teto de pedidos à nuvem por rodada (2 juízes por caso)
+
+
+def rotular_auto() -> int:
+    """(719) Julga sozinho as divergências Laya × Jev ainda sem rótulo: 2 juízes de nuvem
+    (`redesign/laya/juiz.py`, pelo sanitizador); só vale quando concordam. Cada rótulo vira
+    também uma linha de treino real do Laya. Devolve quantos casos foram ao juiz."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "redesign" / "laya"))
+        import juiz
+    except ImportError:
+        return 0
+    feitos, n = _rotulos(), 0
+    for c in _ler("roteador-laya-avaliacao.jsonl"):
+        if ("roteador-laya", c.get("ts")) in feitos or not c.get("trecho"):
+            continue
+        if n >= JUIZ_MAX_POR_DIA:
+            break
+        n += 1
+        classe, votos = juiz.julgar(c["trecho"])
+        if classe is None:
+            continue  # juízes discordam ou fora do ar: fica para --rotular
+        v = "modelo" if classe == c.get("laya") else "regra" if classe == c.get("jev") else "tanto-faz"
+        LOG.mkdir(parents=True, exist_ok=True)
+        with open(ROTULOS, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"uso": "roteador-laya", "ts": c["ts"], "veredito": v,
+                                "juiz": votos}, ensure_ascii=False) + "\n")
+        fd = os.open(LOG / "laya-treino-real.jsonl", os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        with os.fdopen(fd, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": c["ts"], "state": c["trecho"], "gold": classe,
+                                "fonte": "juizes:" + ",".join(juiz.JUIZES)}, ensure_ascii=False) + "\n")
+    return n
+
+
 def veredito_rotulado(uso: str, log: str) -> tuple[str, str, dict]:
     num = {"avaliações": len(_ler(log)),
            "casos para julgar": sum(1 for c in _pendentes() if c["uso"] == uso)}
@@ -170,7 +233,7 @@ def alarmes() -> list[str]:
     if int(srv.get("NRestarts", "0") or 0) >= 3:
         a.append(f"o ollaya reiniciou {srv['NRestarts']} vezes (possível falta de memória)")
     limite = (dt.datetime.now().astimezone() - dt.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S%z")
-    recentes = [d for u in ("roteador", "inbox", "p20", "consolidacao")
+    recentes = [d for u in ("roteador", "roteador-laya", "inbox", "p20", "consolidacao")
                 for d in _ler(f"{u}.jsonl") if d.get("ts", "") >= limite]
     falhas = sum(1 for d in recentes if d.get("respostas") is None)
     if len(recentes) >= 5 and falhas / len(recentes) > 0.5:
@@ -181,7 +244,7 @@ def alarmes() -> list[str]:
 def relatorio() -> tuple[str, str]:
     e = _estado()
     dia = (dt.date.today() - dt.date.fromisoformat(e["inicio"])).days + 1
-    usos = {"Roteador da Seth (sombra)": veredito_roteador(),
+    usos = {"Roteador da Seth: Laya decide, Jev em sombra (719)": veredito_laya(),
             "Inbox do Obsidian": veredito_inbox(),
             "Aviso de dado pessoal (P-20)": veredito_rotulado("p20", "p20.jsonl"),
             "Consolidação noturna": veredito_rotulado("consolidacao", "consolidacao.jsonl")}
@@ -219,6 +282,8 @@ def rodar() -> int:
     if e.get("encerrado"):
         print(f"avaliação encerrada ({e['encerrado']}) -- nada a fazer")
         return 0
+    if not os.environ.get("AGATA_SEM_JUIZ"):
+        print(f"juiz automático: {rotular_auto()} caso(s) julgado(s)")
     resumo, md = relatorio()
     RELATORIO.write_text(md, encoding="utf-8")
     print(md)
@@ -243,6 +308,9 @@ def rotular() -> int:
         if c["uso"] == "roteador":
             print(f"[roteador] {c['ts']}  regra: {c['heuristica']}  modelo: {c['modelo']} "
                   f"(confiança {c['confianca']:.2f})\n  mensagem: {c['trecho']!r}")
+        elif c["uso"] == "roteador-laya":
+            print(f"[roteador: Laya × Jev] {c['ts']}  Laya: {c['laya']}  Jev: {c['jev']}  "
+                  f"(m = o Laya acertou, r = o Jev acertou)\n  mensagem: {c['trecho']!r}")
         elif c["uso"] == "p20":
             print(f"[P-20] {c['ts']}  avisou dado pessoal em {c['arquivo']} (p={c['p']:.2f}). "
                   "Lembre do commit dessa hora: tinha mesmo dado pessoal?")
@@ -270,8 +338,8 @@ def encerrar(como: str) -> int:
         f.unlink()
     print(f"avaliação encerrada: {como}. Trechos de mensagem apagados.")
     if como == "removido":
-        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.service"])
-        print("ollaya parado e desabilitado: todos os usos já caem na regra determinística. "
+        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.service", "laya-roteador.service"])
+        print("ollaya e laya-roteador parados e desabilitados: todos os usos já caem na regra determinística. "
               "Falta a proposta P-8 que tira o código (o executor prepara).")
     else:
         print("Falta a proposta P-8 que tira o roteador da sombra, se for o caso (o executor prepara).")
@@ -311,9 +379,42 @@ def _selftest() -> int:
                                     {"evento": "importada", "nota": "d", "chars": 50, "via": "24h"}])
     v, m, _ = veredito_inbox()
     casos.append(("inbox: 3 de 4 barradas editadas depois -> vale", v == "VALE" and "3 de 4" in m))
+    # (718) Laya × Jev
+    grava("roteador-laya.jsonl", [{"ts": f"{hoje}{i}", "ms": 70, "respostas": ok} for i in range(40)])
+    casos.append(("Laya concordando com o Jev em 100% -> vale", veredito_laya()[0] == "VALE"))
+    grava("roteador-laya-avaliacao.jsonl", [{"ts": f"l{i}", "jev": "livre", "laya": "rapido",
+                                             "trecho": "x"} for i in range(12)])
+    casos.append(("Laya divergindo sem rótulo -> inconclusivo, e o caso aparece para julgar",
+                  veredito_laya()[0] == "INCONCLUSIVO" and any(c["uso"] == "roteador-laya" for c in _pendentes())))
+    with open(ROTULOS, "a", encoding="utf-8") as f:
+        f.write("".join(json.dumps({"uso": "roteador-laya", "ts": f"l{i}", "veredito": "regra" if i < 9 else "modelo"})
+                        + "\n" for i in range(12)))
+    v_l, m_l, _ = veredito_laya()
+    casos.append(("Laya acerta 3 de 12 divergências -> não vale, e o motivo nomeia o Laya",
+                  v_l == "NÃO VALE" and "o Laya acertou 3 de 12" in m_l))
+    # (719) juiz automático: concordância vira rótulo + treino; discordância fica pendente
+    import types
+    falso = types.ModuleType("juiz")
+    falso.JUIZES = ("a", "b")
+    respostas = iter([("livre", ["livre", "livre"]), (None, ["livre", "pesado"])])
+    falso.julgar = lambda t: next(respostas)
+    sys.modules["juiz"] = falso
+    open(ROTULOS, "w").close()
+    grava("roteador-laya-avaliacao.jsonl", [{"ts": "j1", "jev": "livre", "laya": "rapido", "trecho": "me explica x"},
+                                            {"ts": "j2", "jev": "livre", "laya": "pesado", "trecho": "audite y"}])
+    n_auto = rotular_auto()
+    treino = _ler("laya-treino-real.jsonl")
+    casos.append(("juiz automático: concordando -> rótulo 'regra' (o Jev acertou) e 1 linha de treino; "
+                  "discordando -> fica para --rotular",
+                  n_auto == 2 and _rotulos().get(("roteador-laya", "j1")) == "regra"
+                  and ("roteador-laya", "j2") not in _rotulos()
+                  and len(treino) == 1 and treino[0]["gold"] == "livre"
+                  and oct((LOG / "laya-treino-real.jsonl").stat().st_mode & 0o777) == "0o600"))
+    del sys.modules["juiz"]
     encerrar("aprovado")
-    casos.append(("encerrar apaga os trechos e para de avisar",
-                  not list(LOG.glob("*-avaliacao.jsonl")) and _estado()["encerrado"] == "aprovado"))
+    casos.append(("encerrar apaga os trechos e para de avisar; o treino real do Laya fica",
+                  not list(LOG.glob("*-avaliacao.jsonl")) and _estado()["encerrado"] == "aprovado"
+                  and (LOG / "laya-treino-real.jsonl").exists()))
     for nome, ok_ in casos:
         print(f"{'PASS' if ok_ else 'FALHA'}  {nome}")
     falhas = sum(not ok_ for _, ok_ in casos)

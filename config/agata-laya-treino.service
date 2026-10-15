@@ -1,0 +1,18 @@
+[Unit]
+Description=Ágata — treino semanal do Laya que escolhe a fila da Seth; troca só com o Humano (MEMÓRIAS (719))
+# scripts/laya_treino.py: treina um CANDIDATO com os sintéticos + as divergências Laya × Jev
+# julgadas pelos 2 juízes; compara com o modelo atual; relatório na área de trabalho.
+# Nunca troca o modelo: a troca é o Humano rodar `--promover`.
+# systemd-inhibit: a Máquina não dorme no meio do treino (lição de (715)).
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+Environment=HF_HOME=%h/.local/share/agata-laya/hf
+Environment=HF_HUB_OFFLINE=1
+ExecStart=/usr/bin/systemd-inhibit --what=sleep:idle --who=agata-laya-treino --why="treino semanal do Laya" --mode=block %h/.local/share/agata-laya/.venv/bin/python %h/agata/scripts/laya_treino.py
+TimeoutStartSec=4h
+Nice=10
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/agata-laya %h/.cache/agata "-%h/Área de trabalho"
