@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a1d4d21321d78fe0369f7204802a58464d06d2e
-  Escrito em: 15/10/2026 09:25 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49
+  Escrito em: 15/10/2026 09:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a1d4d21321d78fe0369f7204802a58464d06d2e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d851b5fe3b5ed1e8c8d2e81f56b993e67d7eb49/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
+
+**Aplicado:** `p8_verificar` 4/4 (sha256 `a81d6a27648d`); `git apply`; par em `propostas/aplicadas/`; selftests `seth_gateway.py`, `auditoria_turno.py`, `busca_texto.py` e navegador (`offline`) OK. Depois do merge: `pull` no `~/agata`; copiar `redesign/librechat/librechat.yaml` para `~/librechat/`; `buscar_web_mcp_navegador` na lista de ferramentas do Agent da Seth (MongoDB, sem `defer_loading`); reiniciar `navegador-mcp`, o contêiner `librechat` e o `seth-gateway` (se estiver de pé).
+
+**Goose (fora do repo):** `~/.config/goose/permission.yaml` — `shell` saiu de `always_allow` e foi para `ask_before`, junto de `edit` e `memoria_acrescentar`. Fecha o risco residual declarado em (518). Backup `.bak-2026-10-15-shell`. Conferido com `yaml.safe_load`: `shell` só em `ask_before`.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh`, selftests · Autorização: Humano — assinatura de `pesquisa-livre-2026-10-15`; fala desta sessão sobre o `shell`.
 
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
 

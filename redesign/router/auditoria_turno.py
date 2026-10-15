@@ -23,7 +23,9 @@ Confere no turno anterior:
 - hora igual à de um cabeçalho de turno anterior (hora herdada);
 - nome de modelo concreto sem a ressalva "medido no turno anterior" (621);
 - afirmação já desmentida: catálogo `afirmacoes_desmentidas.json`;
-- citação `arquivo:linha` com trecho (P-19), só para extensões conhecidas.
+- citação `arquivo:linha` com trecho (P-19), só para extensões conhecidas;
+- termo negado ("não aparece", "nenhuma menção") que a ferramenta do mesmo turno
+  devolveu como palavra inteira (716).
 NÃO confere afirmação falsa nova em prosa (não determinístico) -- quando uma for
 achada à mão, vira linha do catálogo.
 
@@ -40,6 +42,7 @@ import shutil
 import subprocess
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 _AQUI = Path(__file__).resolve().parent
@@ -439,6 +442,47 @@ def auditar(msgs: list, na_continuacao: bool = False) -> list[str] | None:
 
 
 
+# (716) Negar o que a ferramenta devolveu. 15/10, 09:04: a busca de texto trouxe a linha
+# do canon com `laya` e `laya:multilingual`; a Seth respondeu que **"Laya"** "não aparece
+# em nenhum trecho". Determinístico: frase com negação + termo destacado ("X", **X**, `X`)
+# + o termo como palavra inteira na saída de ferramenta do mesmo turno.
+_NEGA = re.compile(r"n[ãa]o (?:aparece|consta|existe|foi encontrad|h[áa] (?:men[çc]|registro|refer[êe]nc|resultado|ocorr[êe]nc))"
+                   r"|nenhuma? (?:men[çc]|registro|refer[êe]nc|resultado|ocorr[êe]nc)|sem (?:men[çc]|registro|ocorr[êe]nc)",
+                   re.IGNORECASE)
+_DESTAQUE = re.compile(r"\*\*[\"“]?([^*\"”\n]{3,40})[\"”]?\*\*|[\"“]([^\"”\n]{3,40})[\"”]|`([^`\n]{3,40})`")
+
+
+def _sem_acento(t: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", t) if not unicodedata.combining(c)).lower()
+
+
+def _saidas_turno_anterior(msgs: list) -> str:
+    """Saída das ferramentas entre o penúltimo e o último pedido do usuário."""
+    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
+    if len(usuarios) < 2:
+        return ""
+    return "\n".join(_texto(m.get("content")) for m in msgs[usuarios[-2] + 1:usuarios[-1]]
+                     if isinstance(m, dict) and m.get("role") == "tool")
+
+
+def _negacao_contradita(texto: str, msgs: list) -> list[str]:
+    saidas = _sem_acento(_saidas_turno_anterior(msgs))
+    if not saidas:
+        return []
+    negados = []
+    for frase in re.split(r"(?<=[.;!?])\s+|\n", texto):
+        if not _NEGA.search(frase):
+            continue
+        for m in _DESTAQUE.finditer(frase):
+            termo = next(g for g in m.groups() if g).strip()
+            alvo = _sem_acento(termo)
+            if len(alvo) >= 3 and termo not in negados and \
+                    re.search(r"(?<![a-z0-9])" + re.escape(alvo) + r"(?![a-z0-9])", saidas):
+                negados.append(termo)
+    return [f"negou '{t}', mas a ferramenta deste turno devolveu '{t}' como palavra inteira — releia o "
+            "resultado e cite a linha; busca que acha o termo prova que ele aparece (716)" for t in negados]
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
@@ -446,6 +490,7 @@ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     out += _contagem_controles(texto)
     out += _estilo(texto)
     out += _ferramenta_sem_chamada(texto, msgs)
+    out += _negacao_contradita(texto, msgs)
     out += _estado_desatualizado(texto)
     if modo_atual == "conciso":
         narradas = _narracao(texto)
@@ -645,6 +690,14 @@ def _selftest() -> int:
                                    "(contador mecânico) · 2026-10-14 16:40 -0300 (relógio da Máquina)\n\nResultado: ok."), u()]) or []))),
         ("estilo: biografia inventada é acusada (695)", any("biografia" in x for x in est(
             "Tenho anos de experiência com esse tipo de servidor."))),
+        ("negar termo que a ferramenta devolveu é acusado (716)", any("negou 'Laya'" in x for x in _negacao_contradita(
+            'O termo **"Laya"** não aparece em nenhum trecho relevante.',
+            [u("busque Laya"), {"role": "tool", "content": "proj.md:16: `laya`, `laya:multilingual` 10/20; email/himalaya"},
+             a("x"), u()]))),
+        ("termo só como pedaço de palavra não acusa (716)", not _negacao_contradita(
+            'Não há menção a **"Laya"**.', [u(), {"role": "tool", "content": "email/himalaya; relaya"}, a("x"), u()])),
+        ("termo negado sem ferramenta no turno não acusa (716)", not _negacao_contradita(
+            'Não há menção a **"Laya"**.', [u(), a("x"), u()])),
         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
                                                          ([u()], [u("modo explicativo")]))),
     ]

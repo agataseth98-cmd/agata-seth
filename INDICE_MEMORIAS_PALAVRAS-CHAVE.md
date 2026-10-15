@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
+  palavras-chave: execução, aplicada, pesquisa, livre, assinada, humano, worktree, mesma, fala, shell, goose, passa, pedir, aprovação, deve, padir
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
   palavras-chave: auditoria, conversa, seth, pedido, humano, ela, negou, laya, segurando, linha, canon, citava, concluiu, internet, ter, buscado, nela, chamou, resultados, páginas, leu, inteiras, decisão, risco, assumido, ele, pode, liberar, ferramentas, pesquisa, disponiveis, pedir, minha, autorização, assumo, escrita, devem, continuar, passando, sempre, serve, modelos, federados, proposta, livre, aguardando, assinatura
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, evidencia, assinada, humano, selftests, agora, reteste, regra, texto, bastou, mesmo, modelo, segue, inventando, evidência, citação, arquivo, linha, passa, acusada, invenção, ferramenta, correções, minhas, registradas, aqui
 (688) DIÁRIO — 14/10/2026 · **Proposta `seth-evidencia-e-ci-2026-10-14`: conserta o que o teste real de (687) achou — a Seth inventando a "evidência" — e põe os selftests da Seth no CI, como o Humano pediu ("Quero no CI"). Aguardando assinatura.**
   palavras-chave: proposta, seth, evidencia, conserta, teste, real, achou, inventando, evidência, põe, selftests, humano, pediu, quero, aguardando, assinatura
-(687) EXECUÇÃO — 14/10/2026 · **Aplicadas `seth-personalidade-2026-10-14` e `voz-comum-2026-10-14` (assinadas pelo Humano), nessa ordem. Gateway reiniciado. Teste real: a forma pegou (resultado → evidência → próximo passo, sem saudação); o conteúdo veio fabricado — o espaço "Evidência" puxou o modelo a inventar fonte. Conserto vai em proposta própria, junto com os selftests no CI (pedido do Humano na pergunta 3 do portão: "Quero no CI").**
-  palavras-chave: execução, aplicadas, seth, personalidade, voz, comum, assinadas, humano, ordem, gateway, reiniciado, teste, real, forma, pegou, resultado, evidência, próximo, passo, saudação, conteúdo, veio, fabricado, espaço, puxou, modelo, inventar, fonte, conserto, vai, proposta, própria, junto, selftests, pedido, pergunta, portão, quero
+(687) EXECUÇÃO — 14/10/2026 · **Aplicadas `seth-personalidade-2026-10-14` e `voz …
+  palavras-chave: execução, aplicadas, seth, personalidade, voz
 (686) CONSELHO — 14/10/2026 · **Segunda opinião sobre a personalidade da Seth: 3 …
   palavras-chave: segunda, opinião, personalidade, seth
 (685) DIÁRIO — 14/10/2026 · **Personalidade da Seth canônica e persistente, a pe …
