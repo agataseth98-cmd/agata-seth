@@ -26,20 +26,39 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2cc2f8f31f7b6343e70fc573fac9621c0793d87f
-  Escrito em: 15/10/2026 13:12 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f340ad1debe66dea3f78587b9f70ad3fa7220de7
+  Escrito em: 15/10/2026 13:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2cc2f8f31f7b6343e70fc573fac9621c0793d87f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f340ad1debe66dea3f78587b9f70ad3fa7220de7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f340ad1debe66dea3f78587b9f70ad3fa7220de7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f340ad1debe66dea3f78587b9f70ad3fa7220de7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f340ad1debe66dea3f78587b9f70ad3fa7220de7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f340ad1debe66dea3f78587b9f70ad3fa7220de7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(725) CORREÇÃO — 15/10/2026 · **Auditoria da conversa da Seth de 13:19–13:21 (pedido do Humano) e duas correções minhas. A Seth disse que o Laya "não está integrado" enquanto ele escolhia a fila da própria conversa; o navegador falhou por corrida entre chamadas paralelas. E os horários dos meus cabeçalhos e de (722)/(724) estavam errados: estimei a hora em vez de medir, com o selo "(relógio da Máquina)". Proposta `navegador-fila-2026-10-15`. Aguardando assinatura.**
+
+**Correção 1 — hora (Regra 1.1).** Desde a manhã escrevi a hora dos meus cabeçalhos sem rodar o relógio, e marquei "(relógio da Máquina)". Medido às 13:22: os cabeçalhos corriam ~3 h na frente (escrevi "16:24" perto de 13:15). Nas entradas: em (722), o gateway foi reiniciado às **12:03** (`ActiveEnterTimestamp`), não "15:0x"; em (724), o `laya-roteador` subiu às **13:10:27**, não "15:2x"; o `navegador-mcp` foi reiniciado às 09:43 em (717). O "até as 21h" de (724) está certo (00:00 UTC). `ONDE_ESTAMOS` corrigido.
+
+**A conversa** (`8c72ef25`, lida no MongoDB em leitura):
+1. **13:19, "tente novamente"** (refazer a busca do Laya na internet). O Laya mandou para `rapido` — ele decide só pela última mensagem, e "tente novamente" sozinha parece trivial; a regra por tamanho fazia o mesmo. A Seth chamou 5 ferramentas do navegador **em paralelo**: `navegar`, `ler_pagina` e `clicar` falharam com "Failed to create a ProcessSingleton for your profile directory"; `preencher` e `clicar` são escrita (allowlist bloqueou). Depois, `buscar_web` funcionou e trouxe o GitHub e o site do Laya. A auditoria do turno acusou 2 cabeçalhos e "negou 'Laya Research', mas a ferramenta deste turno devolveu 'Laya Research'" — a conferência nova de (716) pegou na primeira vez.
+2. **13:20, "verifique se ele está integrado no nosso sistema".** O Laya mandou para `pesado` (0,79) — certo. A Seth respondeu: "O modelo Laya não está diretamente integrado ou operando como um serviço medido". **Falso:** o `laya-roteador` estava no ar desde 13:10 e tinha acabado de rotear essa mensagem; o canon documenta (PROJETO, "Decisor local"; (718)–(724)). A prova dela foi `maquina_verificar servicos`, que lista **só as unidades em FALHA** — ela leu "não está na lista de falhas" como "não existe". Não consultou o canon nem o vault, contra (678) ("sobre o próprio sistema, nunca de memória"). E ofereceu "propor a criação de uma unidade de serviço" para o que já existe.
+3. **Cabeçalhos:** nas duas respostas o modelo escreveu cabeçalhos próprios além do da Máquina, com horas velhas (09:12, 09:15, 09:16) — a auditoria acusou 2 e 3 cabeçalhos.
+
+**Causa do navegador, reproduzida:** o FastMCP roda cada ferramenta síncrona numa thread de trabalho; chamadas paralelas subiam o Brave ao mesmo tempo no mesmo perfil. Com 3 chamadas paralelas num perfil temporário, 2 falharam.
+
+**Proposta `navegador-fila-2026-10-15` (2 arquivos):**
+1. `redesign/mcp/navegador/servidor.py`: todas as ferramentas rodam numa fila de uma thread só (`ThreadPoolExecutor(max_workers=1)`), uma por vez — o que também respeita o Playwright síncrono, que só aceita a thread que o criou. Testado: as mesmas 3 chamadas paralelas, 3 de 3 certas; as 7 ferramentas e seus parâmetros continuam visíveis ao cliente MCP; `--selftest offline` OK.
+2. `redesign/router/seth_gateway.py` (doutrina): "Lista de falhas não prova ausência" — para saber se algo está integrado, o canon. Selftest OK.
+
+**Não medido:** se o Humano aprovou o `preencher` e o `clicar` das 13:19 (são escrita e deviam pedir aprovação na LibreChat); a pausa de aprovação não fica guardada depois de resolvida.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: MongoDB da LibreChat em leitura, `auditoria-turno.jsonl`, `roteador-laya.jsonl`, `journalctl`, `systemctl --user show`, reprodução da corrida com perfil temporário, cliente MCP em memória · Autorização: Humano, nesta sessão ("audite a conversa atual com Seth").
 
 (724) DIÁRIO — 15/10/2026 · **O Laya escolhe a fila da Seth desde as 15:2x de 15/10: `laya-roteador` no ar (CPU, 1,9 GB, 0 reinícios), gateway reiniciado, 2 mensagens reais roteadas por ele em ~100 ms. E um efeito colateral meu: a geração de dados sintéticos de (718)/(719) gastou a cota diária gratuita do OpenRouter, e o Nemotron, 1º da `seth-pesado`, está em 429 até a cota virar (00:00 UTC, 21:00 -03).**
 
