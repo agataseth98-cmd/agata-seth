@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b
-  Escrito em: 15/10/2026 12:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 42fcd271041f3c04b11fd64db6b4a68f98acb0b8
+  Escrito em: 15/10/2026 12:14 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc03ab425f352edb2e6d0b3d5a7b573cab0a1f5b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/42fcd271041f3c04b11fd64db6b4a68f98acb0b8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(723) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-aspas-2026-10-15` (assinada pelo Humano), em worktree: a linha do `LAYA_EXTRA_MODELS` entre aspas simples. Depois do merge, o `laya-roteador` sobe e o Laya passa a escolher a fila da Seth.**
+
+**Aplicado:** `p8_verificar` 4/4; `git apply`; par em `propostas/aplicadas/`. A mesma linha já foi provada numa unit temporária em (722). Depois do merge: `pull`, `daemon-reload`, `start laya-roteador`, conferir `/health` e uma decisão real no log `roteador-laya.jsonl`.
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh` · Autorização: Humano — assinatura de `laya-aspas-2026-10-15`.
 
 (722) CORREÇÃO — 15/10/2026 · **Depois do merge de (721), o `laya-roteador` caiu em loop na 1ª subida: o systemd comeu as aspas duplas do JSON em `Environment=LAYA_EXTRA_MODELS=...` e o `laya-serve` recusou ("invalid LAYA_EXTRA_MODELS: not a JSON object"). Parado; a Seth segue pela regra por tamanho (o gateway cai nela com o Laya fora). Conserto de 1 linha em proposta: `laya-aspas-2026-10-15`. E um segundo erro meu, de (717): o gateway estava de pé desde as 09:01 e eu não o reiniciei.**
 
