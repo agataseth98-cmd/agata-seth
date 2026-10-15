@@ -37,8 +37,9 @@ redesign/mcp/navegador/.venv/bin/python redesign/mcp/navegador/servidor.py --sel
 
 | Tool | Tipo | Trava |
 |---|---|---|
+| `buscar_web(consulta, n=8)` | leitura (página de resultados do Bing, por URL) | nenhuma — pesquisa é livre (MEMÓRIAS (716)) |
 | `navegar(url)` | leitura | nenhuma |
-| `ler_pagina(max_chars=5000)` | leitura | nenhuma |
+| `ler_pagina(max_chars=5000, inicio=0)` | leitura (página longa: por partes, com `inicio`) | nenhuma |
 | `screenshot()` | leitura | nenhuma |
 | `clicar(descricao)` | escrita | allowlist de domínio |
 | `preencher(campo, valor)` | escrita | allowlist de domínio |

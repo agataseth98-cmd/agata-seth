@@ -145,6 +145,14 @@ endpoints:
   #     ser tecnicamente destrutivo) · enviar_mensagem (discord, visível a
   #     terceiros) · clicar/preencher (navegador, trava dupla com a
   #     allowlist de domínio -- ver redesign/mcp/navegador/README.md).
+  # (716), 15/10/2026, decisão do Humano, risco assumido por ele: "pode liberar
+  # para ela todas as ferramentas de pesquisa disponiveis sem pedir minha
+  # autorização ... ferramentas de escrita devem continuar passando pelo humano
+  # sempre, isso serve para todos os modelos federados". Entram no automático:
+  # vault_buscar (busca no vault por sentido e por texto, read-only -- estava
+  # fora desta lista desde que nasceu em (670), pedindo aprovação a cada busca)
+  # e buscar_web (navegador, página de resultados por URL, nenhum clique).
+  # Escrita continua aqui fora, pedindo aprovação.
   agents:
     toolApproval:
       enabled: true
@@ -152,10 +160,12 @@ endpoints:
       allow:
         - query_canon_mcp_canon
         - vault_consultar_mcp_canon
+        - vault_buscar_mcp_canon
         - maquina_verificar_mcp_canon
         - diario_anotar_mcp_canon
         - ler_mensagens_mcp_discord
         - navegar_mcp_navegador
+        - buscar_web_mcp_navegador
         - ler_pagina_mcp_navegador
         - screenshot_mcp_navegador
         - fechar_navegador_mcp_navegador

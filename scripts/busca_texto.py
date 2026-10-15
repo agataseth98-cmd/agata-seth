@@ -6,6 +6,9 @@ O `grep -F` de (670) só achava a frase exata: "o despertar da Agata" não achav
 "O Despertar de Ágata" (acento e uma palavra no meio). Aqui: a consulta vira
 palavras (3+ letras, sem acento); uma linha casa se tiver TODAS as palavras;
 sem nenhuma linha assim, casa a que tiver mais delas (e o resultado diz isso).
+Entre as que casam, palavra INTEIRA vem antes de pedaço de palavra (MEMÓRIAS
+(716)): "laya" achava "himalaya" e "relaya" primeiro, e a linha do canon com
+`laya` saiu em 37º de 38 -- a Seth leu as de cima e negou o termo.
 
 Onde procura (fixo, nunca vem da consulta): memoria/obsidian/ e extras/ inteiro
 (inclusive extras/arquivo-redesign/, decisão do Humano em (682)). Só .md.
@@ -13,6 +16,7 @@ Onde procura (fixo, nunca vem da consulta): memoria/obsidian/ e extras/ inteiro
 Uso: python3 scripts/busca_texto.py -- "frase"     |     --selftest
 """
 import os
+import re
 import sys
 import unicodedata
 
@@ -51,7 +55,8 @@ def buscar(consulta, raiz=REPO):
     ps = palavras(consulta)
     if not ps:
         return [], 0, ps
-    achados = []  # (n_palavras, caminho_rel, nº linha, trecho)
+    inteiras = [re.compile(r"(?<![a-z0-9])" + re.escape(p) + r"(?![a-z0-9])") for p in ps]
+    achados = []  # (n_palavras, n_inteiras, caminho_rel, nº linha, trecho)
     for caminho in _arquivos(raiz):
         rel = os.path.relpath(caminho, raiz)
         nome = _norm(rel)
@@ -62,21 +67,23 @@ def buscar(consulta, raiz=REPO):
             continue
         locais = []
         for i, ln in enumerate(linhas, 1):
-            n = sum(p in _norm(ln) for p in ps)
+            norm = _norm(ln)
+            n = sum(p in norm for p in ps)
             if n:
-                locais.append((n, rel, i, ln.strip()[:200]))
+                w = sum(bool(r.search(norm)) for r in inteiras)
+                locais.append((n, w, rel, i, ln.strip()[:200]))
         # o nome do arquivo também conta (ex.: O_Despertar_de_Agata.md)
         n_nome = sum(p in nome for p in ps)
         if n_nome and not any(n == len(ps) for n, *_ in locais):
-            locais.append((n_nome, rel, 0, "(nome do arquivo)"))
-        locais.sort(key=lambda x: (-x[0], x[2]))
+            locais.append((n_nome, 0, rel, 0, "(nome do arquivo)"))
+        locais.sort(key=lambda x: (-x[0], -x[1], x[3]))
         achados += locais[:POR_NOTA]
     if not achados:
         return [], 0, ps
     melhor = max(n for n, *_ in achados)
     achados = [a for a in achados if a[0] == melhor]
-    achados.sort(key=lambda x: (x[1], x[2]))
-    return achados[:MAX_LINHAS], melhor, ps
+    achados.sort(key=lambda x: (-x[1], x[2], x[3]))
+    return [(n, rel, i, t) for n, _w, rel, i, t in achados[:MAX_LINHAS]], melhor, ps
 
 
 def main(argv):
@@ -114,6 +121,11 @@ def _selftest():
         ok = ok and b and b[0][2] == 3
         c, _, _ = buscar("xy", t)
         ok = ok and c == []
+        # (716) palavra inteira antes de pedaço: "laya" acha a linha com `laya` antes de "himalaya"
+        open(os.path.join(t, "extras", "a.md"), "w").write("email/himalaya\n")
+        open(os.path.join(t, "memoria", "obsidian", "z.md"), "w").write("medido: `laya` 10/20\n")
+        d, _, _ = buscar("Laya", t)
+        ok = ok and d and d[0][1].endswith("z.md") and any(x[1].endswith("a.md") for x in d)
     print("SELFTEST", "OK" if ok else f"FALHA {a} {b}")
     return 0 if ok else 1
 
