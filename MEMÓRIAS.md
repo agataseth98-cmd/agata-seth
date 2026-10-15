@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 37f2ef15cca198230b2e88183764fc3e4afe6c89
-  Escrito em: 15/10/2026 11:29 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5f068a65521005d59ce159dda6480b847ea10d8e
+  Escrito em: 15/10/2026 11:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/37f2ef15cca198230b2e88183764fc3e4afe6c89/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5f068a65521005d59ce159dda6480b847ea10d8e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
+
+Como errei: escrevi (719) sem olhar `propostas/` por um `APROVADO-` novo — o arquivo estava lá, fora do git, desde as 10:51; só vi no `git status` depois do merge do PR #223. Nada foi aplicado com ele. A NOTA em `propostas/rejeitadas/laya-sombra-2026-10-15.NOTA` ganhou a linha de correção (a frase original fica).
+
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `git status`, o `APROVADO-laya-sombra-2026-10-15` (cabeçalho lido) · Autorização: correção de registro (Regra 4), sem quarentena.
 
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
 

@@ -5,7 +5,7 @@ Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
-O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (719)).
+O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (720)).
 
 **13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** O defeito achado no teste (o decisor anotava errado quando discordava da regra) e os 2 consertos do Conselho Remoto também já estão valendo — assinados e aplicados (entrada (659)). O que já está valendo:
 - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
