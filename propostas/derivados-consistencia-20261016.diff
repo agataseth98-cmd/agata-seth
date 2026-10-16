@@ -1,0 +1,83 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index 44aec8a..18434e7 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -78,6 +78,14 @@ fi
+ cd "$RAIZ_HOOK" || exit 0
+ unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+ 
++# Consistência dos derivados (achado do Codex, 16/10/2026): vault, índice e envio leem o checkout VIVO, e um `git pull`,
++# checkout ou edição feita enquanto eles rodam mistura duas versões sob o mesmo rótulo de SHA. Aqui só se DETECTA (o
++# lock não impede quem não passa por ele): mede o HEAD e o estado dos arquivos rastreados antes e depois da geração;
++# se mudou, avisa e deixa um marcador para o próximo `--atualizar`/commit refazer. Fail-soft: nunca bloqueia o commit.
++estado_checkout() { printf '%s\n' "$(git rev-parse HEAD 2>/dev/null)"; git status --porcelain --untracked-files=no 2>/dev/null; }
++ESTADO_INICIO="$(estado_checkout | sha256sum | cut -d' ' -f1)"
++SHA_INICIO="$(git rev-parse HEAD 2>/dev/null)"
++
+ # 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
+ # ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra
+ # no commit. Fail-soft: nunca atrapalha o commit (MEMÓRIAS (290)).
+@@ -147,4 +155,13 @@ if [ -f scripts/gerar_indice_derivado.py ]; then
+   fi
+ fi
+ 
++# Fim da geração: o checkout mudou enquanto os derivados eram gerados?
++if [ "$(estado_checkout | sha256sum | cut -d' ' -f1)" != "$ESTADO_INICIO" ]; then
++  mkdir -p "$HOME/.cache/agata"
++  printf '%s %s\n' "$(date -Iseconds)" "$SHA_INICIO" > "$HOME/.cache/agata/derivados-possivelmente-misturados"
++  echo "post-commit: AVISO — o checkout mudou durante a geração dos derivados (pull, checkout ou edição); vault e índice rotulados $SHA_INICIO podem misturar duas versões. Refaça: python3 scripts/busca_semantica.py --atualizar e um novo commit/pull (marcador em ~/.cache/agata/derivados-possivelmente-misturados)." >&2
++else
++  rm -f "$HOME/.cache/agata/derivados-possivelmente-misturados"
++fi
++
+ exit 0
+diff --git a/scripts/testar_post_commit.py b/scripts/testar_post_commit.py
+index aaa3ddb..39fb9eb 100755
+--- a/scripts/testar_post_commit.py
++++ b/scripts/testar_post_commit.py
+@@ -45,6 +45,9 @@ STUB_BUSCA = r'''
+ import os
+ with open(os.environ["P8_LOG"], "a") as f:
+     f.write("busca atualizar\n")
++if os.environ.get("P8_MUTAR"):  # simula pull/edição concorrente durante a geração
++    with open("a.txt", "a") as f:
++        f.write("mudou durante a geracao\n")
+ '''
+ 
+ 
+@@ -98,7 +101,8 @@ def bundle_ok(r, env):
+ 
+ def main():
+     antigo = tempfile.NamedTemporaryFile("w", delete=False, suffix=".sh")
+-    antigo.write(sh(RAIZ, "git", "show", "HEAD:.githooks/post-commit"))
++    # hook ANTES da correção, fixado no commit 9cc0a6c (o HEAD já tem o hook novo)
++    antigo.write(sh(RAIZ, "git", "show", "9cc0a6c:.githooks/post-commit"))
+     antigo.close()
+     res = {}
+ 
+@@ -121,6 +125,25 @@ def main():
+     finally:
+         shutil.rmtree(td, ignore_errors=True)
+ 
++    # E checkout que muda durante a geração é detectado; sem mudança, sem aviso
++    td, r, wt, env = montar(NOVO)
++    try:
++        marc = os.path.join(env["HOME"], ".cache", "agata", "derivados-possivelmente-misturados")
++        p0 = commitar(r, env, "e0.txt")
++        res["E1 sem mudança durante a geração: sem marcador"] = not os.path.exists(marc)
++        env2 = dict(env, P8_MUTAR="1")
++        sh(r, "git", "checkout", "-q", "--", "a.txt", env=env)
++        with open(os.path.join(r, "e1.txt"), "w") as f:
++            f.write("e1\n")
++        sh(r, "git", "add", "e1.txt", env=env2)
++        c = subprocess.run(["git", "commit", "-qm", "e1"], cwd=r, env=env2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++        res["E2 checkout mudou durante a geração: marcador e AVISO"] = os.path.exists(marc) and "mudou durante a geração" in c.stderr
++        sh(r, "git", "checkout", "-q", "--", "a.txt", env=env)
++        commitar(r, env, "e2.txt")
++        res["E3 geração seguinte limpa: marcador some"] = not os.path.exists(marc)
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++
+     # C com o hook antigo (reproduz o defeito)
+     td, r, wt, env = montar(antigo.name)
+     try:
