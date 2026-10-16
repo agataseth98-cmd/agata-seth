@@ -1,0 +1,2477 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index 292aca8..44aec8a 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -10,19 +10,43 @@
+ # point-in-time verificado. Isto só reduz o quanto elas precisam alcançar
+ # quando alguém lembrar de fazer uma.
+ set -uo pipefail
+-cd "$(dirname "$0")/.." || { echo "post-commit: AVISO — não consegui entrar na raiz do repo; backup e vault pulados neste commit." >&2; exit 0; }
++# Onde estamos (medido em 16/10/2026, reproduzido num repositório sintético): `core.hooksPath` é
++# ABSOLUTO para o checkout principal, então o hook vive lá mesmo quando o commit acontece numa
++# worktree vinculada; nesse caso o git exporta GIT_DIR/GIT_INDEX_FILE da worktree. O `cd "$0/.."`
++# antigo ia para o checkout principal MANTENDO esse GIT_DIR: `git rev-parse HEAD` devolvia o commit
++# da worktree enquanto os arquivos lidos eram os do principal -- vault rotulado com um SHA que não
++# era o do que foi lido. Agora: raiz do hook e local do commit são medidos separadamente.
++RAIZ_HOOK="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)" \
++  || { echo "post-commit: AVISO — não consegui localizar a raiz do hook; backup e vault pulados neste commit." >&2; exit 0; }
++TOPO_COMMIT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$RAIZ_HOOK")"
++EM_WORKTREE=0
++[ "$TOPO_COMMIT" != "$RAIZ_HOOK" ] && EM_WORKTREE=1
+ 
+ STAGING="$HOME/.agata-backup-staging"
+ mkdir -p "$STAGING"
++
++# Um hook por vez. Dois commits (ou um commit e um `git pull`, que roda este mesmo script pelo
++# post-merge) simultâneos disputavam o MESMO `agata-canonico.bundle.tmp` e os geradores do vault.
++# Lock cooperativo, com espera limitada; se não vier, avisa e não trava o commit.
++exec 9>"$STAGING/.post-commit.lock"
++if ! flock -w 600 9; then
++  echo "post-commit: AVISO — outro post-commit/post-merge segura o lock há mais de 10 min; backup e vault pulados neste commit." >&2
++  exit 0
++fi
++
+ SHORT=$(git rev-parse --short HEAD)
+ STAMP=$(date +%Y%m%d-%H%M%S)
+ 
+-# 1. Staging local — sempre, cache descartável, uma geração só.
+-if ! git bundle create "$STAGING/agata-canonico.bundle.tmp" --all >/dev/null 2>&1; then
++# 1. Staging local — sempre, cache descartável, uma geração só. Temporário único, publicação
++# atômica (`mv`) e dentro do lock acima.
++BUNDLE_TMP="$(mktemp "$STAGING/agata-canonico.bundle.XXXXXX")" \
++  || { echo "post-commit: AVISO — não consegui criar temporário do bundle" >&2; exit 0; }
++if ! git bundle create "$BUNDLE_TMP" --all >/dev/null 2>&1; then
++  rm -f "$BUNDLE_TMP"
+   echo "post-commit: AVISO — falha ao gerar bundle no staging local" >&2
+   exit 0
+ fi
+-mv "$STAGING/agata-canonico.bundle.tmp" "$STAGING/agata-canonico.bundle"
++mv -f "$BUNDLE_TMP" "$STAGING/agata-canonico.bundle"
+ 
+ USB="/run/media/$USER/AgataBkup01"
+ if mountpoint -q "$USB" 2>/dev/null; then
+@@ -43,6 +67,17 @@ else
+   echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
+ fi
+ 
++# Os derivados (vault, índice por sentido, índice do canon e envio ao Drive) são do checkout PRINCIPAL:
++# vêm do `main` que está lá. Commit numa worktree de branch não os refaz (o `git pull`/merge no
++# principal refaz, pelo post-merge). Daqui para baixo o ambiente é o do checkout principal e o git
++# não pode herdar o GIT_DIR/GIT_INDEX_FILE da worktree.
++if [ "$EM_WORKTREE" -eq 1 ]; then
++  echo "post-commit: commit em worktree vinculada ($TOPO_COMMIT) — bundle feito; vault, índice e Drive só se refazem no checkout principal"
++  exit 0
++fi
++cd "$RAIZ_HOOK" || exit 0
++unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
++
+ # 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
+ # ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra
+ # no commit. Fail-soft: nunca atrapalha o commit (MEMÓRIAS (290)).
+diff --git a/.github/dependabot.yml b/.github/dependabot.yml
+new file mode 100644
+index 0000000..b82e0b9
+--- /dev/null
++++ b/.github/dependabot.yml
+@@ -0,0 +1,12 @@
++# Atualização de dependências, candidato 16/10/2026 (Fase I, I2): carência antes de abrir PR de
++# versão, porque a maioria dos ataques à cadeia de suprimentos dura menos de uma semana. Atualização
++# de SEGURANÇA fura a carência por desenho do Dependabot. Só `github-actions` por enquanto: é o único
++# ecossistema versionado que o repositório declara.
++version: 2
++updates:
++  - package-ecosystem: "github-actions"
++    directory: "/"
++    schedule:
++      interval: "weekly"
++    cooldown:
++      default-days: 7
+diff --git a/.github/workflows/fiscal-p8.yml b/.github/workflows/fiscal-p8.yml
+new file mode 100644
+index 0000000..9b27d87
+--- /dev/null
++++ b/.github/workflows/fiscal-p8.yml
+@@ -0,0 +1,46 @@
++# Fiscal do P-8 para PR (candidato, 16/10/2026; MEMÓRIAS (a numerar), proposta única de governo).
++#
++# Por que `pull_request_target`: esse evento executa a versão do workflow que está no `main`, e não
++# a da branch do PR. Assim um PR não consegue alterar a própria fiscalização. A contrapartida é que
++# este job NUNCA faz checkout do head nem executa nada que venha dele: o head entra só como objetos
++# do git, lidos por plumbing em scripts/p8_verificar_pr.sh. Os testes que exercitam o código do PR
++# ficam em outro workflow (perimetro.yml, evento `pull_request`, sem privilégio algum).
++#
++# Ordem de ativação (REGRAS: a prova de bloqueio vem depois de tornar obrigatório):
++#   1. publicar este arquivo no main; 2. observar a execução em PRs reais; 3. o Humano marca o check
++#   `fiscal-p8` como obrigatório no main; 4. demonstrar que um PR sem par assinado fica bloqueado e
++#   que um commit novo no PR dispara a revalidação.
++name: Fiscal P-8 (PR, raiz de confiança anterior)
++
++on:
++  pull_request_target:
++    branches: [main]
++
++permissions:
++  contents: read
++
++jobs:
++  fiscal-p8:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout da BASE (única fonte de código confiável)
++        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA em 16/10/2026
++        with:
++          ref: ${{ github.event.pull_request.base.sha }}
++          fetch-depth: 0
++          persist-credentials: false
++
++      - name: Traz o head só como objetos do git (nunca checkout)
++        env:
++          PR: ${{ github.event.pull_request.number }}
++          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
++        run: |
++          git fetch --no-tags origin "+refs/pull/${PR}/head:refs/remotes/pr/head"
++          test "$(git rev-parse refs/remotes/pr/head)" = "$HEAD_SHA" \
++            || { echo "o head do PR mudou durante a execução; reexecute"; exit 1; }
++
++      - name: Fiscalizar (par assinado, consumo integral, raiz da base)
++        env:
++          BASE_SHA: ${{ github.event.pull_request.base.sha }}
++          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
++        run: bash scripts/p8_verificar_pr.sh "$BASE_SHA" "$HEAD_SHA"
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index c04561c..d6a749c 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -12,6 +12,10 @@
+ # escondida, é a mesma fronteira que a própria suíte já declara há dias.
+ name: Perímetro (segunda linha independente)
+ 
++# Menor privilégio (candidato 16/10/2026): este workflow só lê o repositório.
++permissions:
++  contents: read
++
+ on:
+   push:
+     branches: [main]
+@@ -24,7 +28,7 @@ jobs:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout
+-        uses: actions/checkout@v4
++        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA em 16/10/2026
+         with:
+           fetch-depth: 0
+ 
+@@ -46,3 +50,16 @@ jobs:
+           python3 redesign/router/auditoria_turno.py --selftest
+           python3 redesign/router/seth_gateway.py --selftest
+           python3 scripts/conselho_remoto.py --selftest
++
++      # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
++      # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
++      # `fiscal-p8` de fiscal-p8.yml, que roda a versão do `main`.
++      - name: Selftests do fiscal P-8 (integralidade e PR)
++        run: |
++          python3 -I scripts/p8_integral.py --selftest
++          python3 -I scripts/testar_p8_verificar_pr.py
++
++      - name: Contratos de memória e escriba (offline, stdlib)
++        run: |
++          python3 -I scripts/testar_memoria_leitura.py
++          python3 -I scripts/testar_trava_escriba.py
+diff --git a/.gitignore b/.gitignore
+index 1fa959d..e70ed4c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -100,3 +100,7 @@ redesign/router/tts-piper/voices/
+ # Relatórios da pesquisa semanal automática de modelos (scripts/pesquisar_modelos_gratuitos.py):
+ # ficam no disco pro Humano ler, mas não são proposta pendente -- decisão do Humano, MEMÓRIAS (666).
+ propostas/modelos-gratuitos-*.md
++
++# Trava do seth_escriba (arquivo estável, nunca substituído): ao lado de cada alvo escrito por ele
++MEMÓRIAS.md.lock
++SETH-DIARIO.md.lock
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index d5ebeb4..9f98765 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -40,6 +40,17 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ ---
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
++(728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
++
++O Humano autorizou preparação conjunta até 13h e assinatura única; à sessão do Claude Code disse, em 16/10/2026: "assinatura única, pode continuar, estou saindo." (fala conferida nessa sessão; a frase equivalente dirigida ao Codex foi relatada por ele e não foi conferida pelo Claude). Aplicação continua condicionada ao par P-8 assinado pelo Humano; nenhum modelo executa aprovar.sh. Registro dentro do diff é adaptação explícita do fluxo(692), cujo padrão publica diff+registro.
++
++Entregas: fiscal de PR baseado na confiança anterior; conferência integral do pacote; correção de raiz/serialização do post-commit; voz candidata e inventário/atualização com pausa; trava estável do escriba; consulta sem manutenção implícita; testes e CI. Escopo, caminhos, modos, provas e volta estão no manifesto interno MANIFESTO-governo-integridade-20261016.md e recibo externo do diff. Nada prova implantação, CI remoto obrigatório ou aceite auditivo. Memória temática, corrige/ACL, F0, emoji ampliado, métricas e estado compacto continuam em plano.
++
++Provas em ambientes descartáveis: reprodução da perda concorrente no escriba antigo e ausência de perda nas cargas do candidato; contraprovas do fiscal antes aceitas e agora recusadas; suítes declaradas no manifesto. Permanecem os limites de escritores não cooperativos, TOCTOU/durabilidade, cobertura do índice, derivados sem snapshot fixo e bootstrap inaugural. Volta preserva arquivos e história; alterar comportamento continua pelo portão aplicável. Correções: librechat também está fixado por digest; decisão de configurar canais não revoga a recusa do produto Agent Reach(241).
++
++Origem: Claude Code e Codex; candidatos/provas em worktrees próprias, revisão cruzada e canal local de sincronia. O texto anterior detalhado desta proposta e os pareceres permanecem preservados nos relatórios; esta entrada resume por referências, sem apagá-los.
++
++Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex (GPT-6, designação de trabalho) · vetor: worktrees `claude/*` e `codex/*`, clones descartáveis, canal `~/.cache/agata/sincronia/conversa.md` · Autorização: Humano, preparação até 13h de 16/10/2026; aplicação só com o par `.diff`/`APROVADO-` assinado por ele.
+ (727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
+ 
+ **Decisão do Humano, 15/10/2026:** "ele deve ter as mesmas permissões que vc"; depois, "seguiremos rigorosamente o sistema"; autorizou os três itens ("todos").
+diff --git a/ONDE_ESTAMOS.md b/ONDE_ESTAMOS.md
+index 625c023..7f35ec9 100644
+--- a/ONDE_ESTAMOS.md
++++ b/ONDE_ESTAMOS.md
+@@ -7,6 +7,8 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
+ Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
+ O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (727)).
+ 
++**16/10: Claude Code e Codex trabalharam juntos, cada um na sua cópia do projeto, e prepararam um pacote único para você assinar de uma vez (entrada (728)).** Ele fecha a brecha de um pedido de mudança chegar ao `main` sem a sua assinatura, conserta o rótulo errado do vault quando se commita fora da pasta principal, impede que a memória perca escrita de dois escritores ao mesmo tempo, instala a voz treinada com o eco (falta você ouvir) e faz a atualização parar sozinha quando algo falha. Nada disso vale antes da sua assinatura e da aplicação.
++
+ **13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** O defeito achado no teste (o decisor anotava errado quando discordava da regra) e os 2 consertos do Conselho Remoto também já estão valendo — assinados e aplicados (entrada (659)). O que já está valendo:
+ - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
+ - a pesquisa semanal e a consolidação noturna esperam o roteador de modelos subir (hoje cedo elas rodaram 1 segundo antes dele e gravaram só erro);
+diff --git a/PROJETO.md b/PROJETO.md
+index 39f234e..44c4904 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -123,11 +123,16 @@ Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, R
+ - **Ação com efeito:** ler de volta objeto, alcance e efeito; esperar confirmação explícita; silêncio não autoriza. Falha: o que falhou, impacto, o que já foi feito, o que falta.
+ - **Tom:** frases curtas, termo técnico exato, sem pressa. Humor seco raro: uma linha, nunca em incidente, nunca às custas do Humano. Para qualquer público: sem duplo sentido, sem tom sedutor, sem infantilizar.
+ - **Não:** Regra 5 inteira (abrir com status — "Sistemas operacionais." — não é saudação; "Bem-vindo de volta" é); muletas ("né", "tá?", "viu?", "tipo,", "olha,"), interjeições, emoji, exclamação em série; emoção simulada; bajulação.
+-- **Voz:** timbre aprovado `agata-sistema-tratado` — a voz treinada da Agata (`~/.local/share/agata-voz/`) com tratamento "de sistema" na saída (ffmpeg: `rubberband=tempo=0.95,highpass=f=90,equalizer=f=2800:t=q:w=1.0:g=2.5,highshelf=g=-2:f=9000,aecho=0.85:0.4:18|31:0.10|0.06,acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80`). Entra no `piper-tts` por proposta própria, depois de o Humano ouvir o modelo treinado.
++- **Voz:** o modelo treinado `last` (`pt_BR-agata-last.onnx`, treino de 15 a 16/10/2026; sha256 em `redesign/router/tts-piper/agata-last.sha256`) com o tratamento "de sistema" e o eco "jarvis", escolhidos pelo Humano em 16/10/2026 ("gostei da Last, mas faltou aquele efeito de eco inspirado no Jarvis"; depois, a segunda das três variações de eco). Instala-se com `redesign/router/tts-piper/instalar-agata.sh` (confere o sha256, nunca baixa) e o `tts_piper.py` o prefere à voz genérica quando o arquivo existe; apagar o `.onnx` volta à genérica. O tratamento é a cadeia `CADEIA_SISTEMA` do `tts_piper.py` (ffmpeg: `rubberband=tempo=0.95`, equalização, `chorus` e `aecho=0.8:0.7:25|50|90:0.3|0.2|0.12`, compressor), medida em ~0,05 s para 3 s de áudio e 0,10 s para 12,8 s. `PIPER_TRATAMENTO=off` o desliga; sem ffmpeg ou com erro a voz sai crua e o cabeçalho `X-Agata-Tratamento` diz por quê. Limite medido: a inteligibilidade só foi conferida com o Whisper-base (3 frases, sem diferença conclusiva; "nenhum" saiu "menino" uma vez na versão tratada); a aceitação é auditiva, do Humano. Atribuição CC BY 4.0 da leitora 12710 (CML-TTS, LibriVox) obrigatória se a voz for distribuída.
+ - **Todos os modelos** (686): a mesma voz para Goose, Conselho (mensagem de sistema `VOZ_COMUM` em `scripts/conselho_remoto.py`, nuvem e fallback local) e toda ferramenta que lê `AGENTS.md` — o Humano busca familiaridade, consistência e previsibilidade. **Forma comum, juízo próprio:** a divergência entre cérebros é a força do sistema; persona única num conselho de modelos tende à convergência prematura (pesquisa de 2026, (686)), por isso cada membro declara o próprio modelo e opina sozinho.
+ - **Cabeçalho:** escrito pela Máquina (`seth_gateway`), com o modelo real medido no turno, `t=` por contador mecânico e a hora do relógio; a Seth não escreve cabeçalho (705).
+ - **Persistência:** bloco "Personalidade" na doutrina do `seth_gateway`; linha `PERSONA:` a cada turno (reforço — a instrução inicial perde peso na conversa longa); `auditoria_turno.py` acusa saudação, oferta/encerramento, muleta, emoji e exclamação em série no turno anterior — e ferramenta citada como fonte sem ter sido chamada na conversa (690) — (padrão de texto, sem modelo julgando; trecho citado — entre aspas ou em linha `>` — não conta); deriva ao longo da conversa: `grep -c "estilo:" ~/.cache/agata/auditoria-turno.jsonl`.
+ 
++## Atualização segura de componentes
++- **Inventário.** `scripts/inventario_componentes.py` acrescenta a `models/manifest.json` a chave `componentes_externos` (imagens Docker com digest ou só tag, modelos do Ollama pelo digest da API, arquivos de `config/componentes-externos.txt` com sha256, Obsidian Flatpak). A chave `modelos`, régua do P-12, não é tocada. Só relata deriva; nunca atualiza. Tag de imagem não é imutável: em 16/10/2026 `librechat` e `ollaya` estavam fixados por digest e `mongo`, `meilisearch` e `socat` só por tag.
++- **Regra.** Atualizar componente externo é decisão do Humano; nada `latest`; versão e digest registrados antes. Dependências de rotina esperam 7 dias antes de virar PR (`.github/dependabot.yml`, `cooldown`); atualização de segurança fura a carência.
++- **Depois de atualizar** (`scripts/atualizar.sh`): o perímetro é verificação obrigatória e a deriva dos componentes é só aviso. Falha do perímetro não reverte nada (a história não se apaga): grava `~/.cache/agata/atualizacao-pausada` com a instrução `git revert`, e a atualização seguinte recusa até o Humano olhar o que falhou. Volta é sempre `git revert`, nunca `reset --hard`.
++
+ ## Segurança
+ - **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
+ - **Nada deste sistema escuta em interface pública** — contenção de kernel, não de firewall, conferida por `ss -tlnp`. Os binds são `127.0.0.1` e, para os serviços que o LibreChat alcança, o relé `172.29.7.1` da bridge local do Docker (538); a lista com os binds de cada porta é `config/portas-agata.txt`, conferida pelo P-4. Fora do manifesto, também em loopback: `3080` LibreChat, `27017` Mongo, `7700` Meili e `27124` obsidian-rest. Fora disso só `tailscaled` — o acesso remoto legítimo.
+@@ -155,6 +160,7 @@ Quando uma operação exige `sudo`, o executor pausa e pede ao Humano para rodar
+ Texto completo: `propostas/README.md`. Fluxo prático: skill `agata-aplicar-proposta`.
+ - **Escopo, proporcional de propósito.** Sob quarentena — o que **muda comportamento**: a lista de `_p8_eh_comportamento` em `scripts/perimetro/p08_quarentena.sh` (canon normativo `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `CLAUDE.md`; `scripts/`, `.githooks/`, `config/`; o código de `redesign/`; `.agents/`, `.claude/`; a raiz de confiança `propostas/.allowed_signers`) (218)/(222). Sem quarentena — o que só **registra**: entradas de `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS.md`, `.hidrata.md` (gerado) e `PROMPT_CARREGAMENTO.md`, que dirige um modelo mas sempre com um Humano colando e lendo a resposta. Motivo da linha: registro errado se corrige com entrada nova; comportamento errado, não.
+ - **Mecanismo.** A mudança vira `propostas/<nome>.diff`. O Humano lê e assina com `bash scripts/aprovar.sh <nome>`, que (`bash scripts/aprovar.sh <nome> ["motivo"]`) grava em `propostas/APROVADO-<nome>` a linha `diff-sha256:` e a assinatura ssh de `"<sha256 do .diff>  <nome>"` (namespace `agata-aprovacao-p8`, chave `~/.config/agata/aprovacao_ed25519` com passphrase, fora do repo) (365)/(366). **O executor nunca roda `scripts/aprovar.sh`.** Verificar não precisa da passphrase (`ssh-keygen -Y verify`). O P-8 falha o commit se um arquivo staged do escopo não tiver par `.diff`/`APROVADO-` assinado e batendo byte a byte; procura em `propostas/` e em `propostas/aplicadas/`, porque quem aplica move o par para `aplicadas/` no mesmo commit. A verificação usa sempre `HEAD:propostas/.allowed_signers`, nunca a cópia de trabalho — uma troca staged não autoaprova a própria troca; rotação de chave assina-se com a chave atual (367). Antes de aplicar: `scripts/p8_verificar.sh <nome>` (543).
++- **Fiscal de PR e consumo integral.** O hook só roda na máquina do Humano: um PR feito na web chegaria ao `main` sem o par assinado. `.github/workflows/fiscal-p8.yml` (`pull_request_target`, roda a versão do `main`) chama `scripts/p8_verificar_pr.sh`, que lê da **base** o escopo do P-8, a raiz `propostas/.allowed_signers` e o auxiliar `scripts/p8_integral.py`, trata o head só como objetos do git e **não tem modo compat**: sem a raiz na base, falha. Um par conta como consumido quando está em `propostas/aplicadas/` no head e não estava na base; o head tem de ser exatamente a base mais o(s) diff(s) assinado(s) em tudo o que o diff toca e em todo caminho protegido que mudou (caminho, modo, tipo e OID), com tolerância só para os quatro caminhos exatos de cada par e para o bloco `ANCORA-SHA`. O hook local confere cada arquivo isoladamente e aceita consumo parcial de diff com vários arquivos (reproduzido em 16/10/2026); o auxiliar fecha isso para PR. Ele só vale como barreira depois de publicado, observado e marcado como obrigatório nas regras do GitHub, ato do Humano. Nenhum desses scripts verifica o que o próprio pacote que os introduz altera: o pacote inaugural é conferido por duas implementações independentes.
+ - **Risco residual aceito, não suavizado:** (i) o Humano aprovar às cegas um `.diff` malicioso, inclusive de rotação de chave; (ii) chave privada mal guardada. P-8 impede automação agindo sem ninguém perceber — a ameaça real é desatenção, não malícia. Custo do ganho: a passphrase a cada mudança estrutural.
+ 
+ ## Doutrina de defesa proporcional
+diff --git a/config/componentes-externos.txt b/config/componentes-externos.txt
+new file mode 100644
+index 0000000..7d5813d
+--- /dev/null
++++ b/config/componentes-externos.txt
+@@ -0,0 +1,6 @@
++# Arquivos de componentes externos que o inventário (scripts/inventario_componentes.py) registra com tamanho e sha256.
++# Um glob por linha; `~` vira o HOME. Só o que muda comportamento do sistema se for trocado em silêncio.
++# Atualizar qualquer um destes é decisão do Humano; o inventário só relata deriva, nunca troca nada.
++~/.local/share/agata-voz/resultado/pt_BR-agata-last.onnx
++~/.local/share/agata-voz/resultado/pt_BR-agata-last.onnx.json
++~/.local/share/agata-laya/modelos/roteador-atual/*
+diff --git a/propostas/MANIFESTO-governo-integridade-20261016.md b/propostas/MANIFESTO-governo-integridade-20261016.md
+new file mode 100644
+index 0000000..287d2cf
+--- /dev/null
++++ b/propostas/MANIFESTO-governo-integridade-20261016.md
+@@ -0,0 +1,51 @@
++# Manifesto técnico candidato — revisão Codex 16/10/2026
++
++Estado: pacote de fechamento para UMA assinatura humana; não assinado nem aplicado. Inclui o registro canônico (entrada (728) de MEMÓRIAS e parágrafo de ONDE_ESTAMOS). O objeto assinado é o sha256 do `.diff`, conferido pelo Humano contra o recibo externo.
++
++Base real: `9cc0a6ce15132911010f1970c1752076ddda9dd8`.
++
++Escopo: fiscal proporcional de PR com correções de âncora/transporte; auxiliar integral; hook worktree; voz candidata; inventário/atualização; consulta sem manutenção implícita; trava estável do escriba; dois testes offline e inclusão no CI. Memória temática, aliases, corrige estruturado, ACL, resolvedor temporal, F0 e métricas continuam no plano, não implantados por este candidato.
++
++Manifesto autoexcluído da identidade abaixo: caminho exato `propostas/MANIFESTO-governo-integridade-20261016.md`. Não contém hash de si nem do diff. A árvore abaixo representa payload ANTES desta inclusão, não árvore final pós-hook. Recibo externo registra hash completo do diff e árvore com manifesto. Nenhum outro caminho foi excluído desta tabela de payload.
++
++Árvore de construção antes do manifesto: `9bf658fb06b1d85e39fea33fb84efdceab890f54` (baseline sintético com mesmos blobs da base real, antes de âncoras/transporte).
++
++| caminho | modo | blob | sha256 |
++|---|---|---|---|
++| .githooks/post-commit | 100755 | 44aec8aab4679ed699132cf6421a117e0207c9d3 | 5868b3a64e527e3c6f2db1907cd3fb081599765c410e54da35ecdd1a37c85116 |
++| .github/dependabot.yml | 100644 | b82e0b9b1a02aa9d774a0dce38d9098f2c519538 | ae7dd24fb7087d34dd8a2eb4192a917f6d3d5800c80084ad01898444c8e84b48 |
++| .github/workflows/fiscal-p8.yml | 100644 | 9b27d87b8ab6a4ffed7fa46a8d214204d4891ce5 | 7f21891de7b95418375f3f5b4ecdf0a5730dc66b040e3df94f96b62b7942dbd0 |
++| .github/workflows/perimetro.yml | 100644 | d6a749c9b0dec9ca6a3699c8cc2a0ebebe260a21 | 48f203558a548f5f7aed7a08f25731414321f97c312c3669cb74988b7cab14ff |
++| .gitignore | 100644 | e70ed4c7035cc36e17e6bb00564a544eb2d80c47 | c953c2f8def3b5ad115d6bdacfcc4ff65147321be381a8fddb143eac6de6613b |
++| MEMÓRIAS.md | 100644 | 9f987656dd1a902800675b7f6f010eb33682d0fa | 9ff66c4ec3ff76d95e50431a6e9dcb98dc10a25dffc394e7ba544fee358a4b53 |
++| ONDE_ESTAMOS.md | 100644 | 7f35ec9277cc343b0a5ac5bc40cb6060807889f5 | 0a6fc7386273786103ddb4923e6ffd480bf39e3062eac2b5b9e729975f47ec75 |
++| PROJETO.md | 100644 | 44c490471718c5a053c0bc3709088bd2d48fae52 | 139bd0ebc3eb082bbf02bebb79e2d5e2c2e5f6e4df991c759a4dc4b53615a3b8 |
++| config/componentes-externos.txt | 100644 | 7d5813dc009f16e1ab668cf1d5ba5596d7304d70 | 12b4bd8a142df261e6ddec464d5527500e27fafd934b6b9b512d39559fb39510 |
++| redesign/router/seth_escriba.py | 100644 | fc24dc792aa02393bedd5ce5087490c7e505e66d | baf2cae5887f3641886530698a650df02bbc0fbfa42923970013d19700fd4239 |
++| redesign/router/seth_verificador.py | 100644 | 54d67f3fde34a892ef7883fd9c1ef3548298b8e0 | c255b93c54b8b3aeabc623d403dbf6e6f1c299173d08d472171cbb437433e181 |
++| redesign/router/tts-piper/agata-last.sha256 | 100644 | 068f95098e4da9be7dcd5f9bfaf741d0bc58f781 | 64611bc962068c92d5694266b1b2a7c67907105dae181d5f9feb9c6d01ddb503 |
++| redesign/router/tts-piper/instalar-agata.sh | 100755 | 784a5209ea3acd6b9a9dd38d634bb4d19cfdd9f0 | ce5e45046a4941409b56fa6199b2f814eaf95319bae7f6e24cd5c4a1d642817e |
++| redesign/router/tts_piper.py | 100755 | a608478394fee5a5904c8f5d27f6ded96521fa6d | fe1790a85cc4d0e0ddbe7c3f3b68a2187709dcd4394de67f79aba2030719fc3d |
++| scripts/agata_busca.sh | 100755 | cb0600ea495592eb00a22f80534086f8adf52253 | 9655909a229e55e11f6a3f5159d3c78b61a425a1390b3133bb2355f093a48489 |
++| scripts/atualizar.sh | 100755 | d39a9b1ca6482f85f32ff81c18fa95a3a5831188 | 3634f5918bc94bafb31dbc30d4c11a122b436c2b4074bc16d36922a54083ef72 |
++| scripts/busca_semantica.py | 100644 | 81055fa1b925628be954c0150ab7c1b54677cb7a | ef2dca8890c3403a2dd329cd6638ba7c18ac97d49655162498720636a0fbeac8 |
++| scripts/inventario_componentes.py | 100755 | 6236f3321ed07df53f3edfe3c67e8e0b8d0dbe22 | adb14263707dbfea88fd401ba7a3ee0280be34ac6772f3c0282a921c517586f3 |
++| scripts/p8_integral.py | 100755 | 24cc9b432aa7b14bd9a6f1989168b675c1d15e71 | 92e6913c3ee789dcf65b21a5df329c114a651673626ad0911dc4fa67393beb38 |
++| scripts/p8_verificar_pr.sh | 100755 | e9e8905434e9688d0a59abc950b0a8d705db901d | e5e970b92c32b84cff69513e3b4889b0b19e53f6a904f1369f17e057652049a9 |
++| scripts/testar_atualizar.py | 100755 | 14d52c12717f255694b1b4437412b745eec43482 | 8b0f6e5d8f82758fff921450e79c590b32832f9bc7d2b5fe84719092634f6d68 |
++| scripts/testar_memoria_leitura.py | 100644 | 0e94119403f59aed53c2de4a1792899b60d4156d | de85d039bd593bfbfe68d7bbdb728d8736528df5a20c92a7a2f68d88ed9dbea9 |
++| scripts/testar_p8_verificar_pr.py | 100755 | 357be575a451a13ee393221236618f0346b43175 | 170f74a5cd9546eea70d68ac4a76b377d6ae141d46867fda5db53c8396198014 |
++| scripts/testar_post_commit.py | 100755 | aaa3ddbb302487bdd362a22370bef504fe6b03dd | bddcabb5021290491ab98277384b031bcd1f57c75e6da7e31ed5b2ebe47b2e39 |
++| scripts/testar_trava_escriba.py | 100644 | 5bdd42836f90e029f59c00dfefb6a56da334067b | cf4a997c8d0743e11e01192751ae1d1f5e5bbe91758153d5a20b5079715fdc89 |
++
++Provas externas disponíveis: integralidade29, fiscal25; contraprovas F1/F2 agora rejeitadas; memória10 e escriba5 em checkout descartável. São resultados anteriores identificados por fontes/recibos; os ensaios integrados desta construção precisam constar no recibo externo, não são presumidos aqui.
++
++Limites: nenhum CI remoto/obrigatoriedade observado; nenhum serviço ativado; nenhum aceite auditivo presumido. Escriba não resolve escritores não cooperativos, troca de caminhos pós-abertura e fsync de diretório. Busca não faz manutenção: escrita sem vetor precisa de pesquisa textual até post-commit/manutenção autorizada. Schema/vetores inválidos não são resolvidos integralmente. Derivados por snapshot fixo não implementados. Cofre/canais/ACL/temas não implantados.
++
++Antes da aplicação: assinatura humana do diff exato, p8_verificar.sh anterior extraído da base confiável, comparação integral independente. No pacote inaugural, p8_integral não existe em9cc: usar cópia independente previamente revisada e identificada, sem chamar de código anterior. Perímetro novo complementa prova e não se autoautoriza. Aplicação/PR final permanecem com o Humano.
++
++Publicação: adaptar explicitamente o fluxo692 caso registro canônico fique dentro do payload por instrução humana de assinatura do canon. Não afirmar que publicação sódiff é o fluxo padrão original. Drift exige reconstrução/revisão antes da assinatura. Nunca assinar patches futuros desconhecidos.
++
++Volta: preservar história; reversão protegida precisa do portão aplicável. Voz usa PIPER_MODEL para modelo anterior e PIPER_TRATAMENTO=off, sem apagar arquivos. Alteração operacional só pelo ato autorizado correspondente. Desativar check remoto obrigatório antes de eventual reversão do workflow é ato humano.
++
++Refinamento de fechamento: registro canônico por referências; versão detalhada original preservada nos relatórios do Claude. Tabela e identidade acima recalculadas após MEMÓRIAS/ONDE, excluindo apenas este manifesto.
+diff --git a/redesign/router/seth_escriba.py b/redesign/router/seth_escriba.py
+index 58076ea..fc24dc7 100644
+--- a/redesign/router/seth_escriba.py
++++ b/redesign/router/seth_escriba.py
+@@ -41,6 +41,7 @@ import json
+ import os
+ import re
+ import subprocess
++import stat
+ import sys
+ import tempfile
+ import threading
+@@ -69,9 +70,10 @@ MAX_CORPO = 20000  # trava de tamanho por acrescimo
+ # append-only mesmo com a verificação pós-escrita (que comparava o `depois`
+ # construído contra si mesmo, nunca relia o disco antes de gravar). Duas
+ # travas: (1) um lock por processo serializa as duas rotas entre threads
+-# deste servidor; (2) um flock exclusivo no PRÓPRIO arquivo alvo cobre o caso
+-# de outro processo (ex.: um commit manual do Humano no mesmo instante)
+-# tocando o arquivo ao mesmo tempo. Escrita é sempre por arquivo-temporário +
++# deste servidor; (2) um flock exclusivo em arquivo .lock ESTÁVEL cobre
++# outros processos que adotem o mesmo protocolo. Git e escritores externos
++# não são serializados automaticamente. O alvo troca de inode no replace;
++# por isso não pode ser o próprio objeto da trava. Escrita é sempre por arquivo-temporário +
+ # os.replace (atômica no mesmo filesystem) -- nunca write_text direto, que
+ # pode deixar o arquivo pela metade se o processo morrer no meio.
+ _LOCK_PROCESSO = threading.Lock()
+@@ -80,9 +82,25 @@ _LOCK_PROCESSO = threading.Lock()
+ @contextmanager
+ def _travar_arquivo(caminho: Path):
+     caminho.parent.mkdir(parents=True, exist_ok=True)
+-    fd = os.open(str(caminho), os.O_RDWR | os.O_CREAT, 0o644)
++    trava = caminho.with_name(caminho.name + ".lock")
++    flags = os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW | os.O_NONBLOCK
++    fd = os.open(str(trava), flags, 0o600)
+     try:
++        st = os.fstat(fd)
++        if not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or st.st_nlink != 1:
++            raise RuntimeError("objeto de trava inseguro")
+         fcntl.flock(fd, fcntl.LOCK_EX)
++        atual = os.stat(trava, follow_symlinks=False)
++        if (atual.st_dev, atual.st_ino) != (st.st_dev, st.st_ino):
++            raise RuntimeError("objeto de trava substituido durante espera")
++        # Preserva bootstrap do diário, que espera alvo vazio na primeira vez.
++        # O alvo ainda é reaberto pelos leitores: isto NÃO conclui E3/TOCTOU.
++        alvo = os.open(str(caminho), flags, 0o644)
++        try:
++            if not stat.S_ISREG(os.fstat(alvo).st_mode):
++                raise RuntimeError("alvo nao e arquivo regular")
++        finally:
++            os.close(alvo)
+         yield
+     finally:
+         fcntl.flock(fd, fcntl.LOCK_UN)
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index c3477ab..54d67f3 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -120,7 +120,7 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         ["python3", "scripts/busca_semantica.py", "-n"], 90,
+         "Busca POR SENTIDO em todas as entradas de MEMÓRIAS, nos seus parágrafos e "
+         "nos parágrafos dos documentos de extras/ (resultado 'extras/…md ^bK') "
+-        "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
++        "(embedding local na iGPU; consulta não atualiza o índice; manutenção no post-commit). Use o "
+         "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
+         "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
+         "vault_consultar entradas/0NNN.md e confirme o texto exato com query_canon "
+diff --git a/redesign/router/tts-piper/agata-last.sha256 b/redesign/router/tts-piper/agata-last.sha256
+new file mode 100644
+index 0000000..068f950
+--- /dev/null
++++ b/redesign/router/tts-piper/agata-last.sha256
+@@ -0,0 +1,4 @@
++# sha256 do modelo treinado `last` (treino de 15-16/10/2026, escolhido pelo Humano em 16/10/2026).
++# Vem de ~/.local/share/agata-voz/resultado/. Hash de bytes: prova identidade do arquivo, não qualidade.
++a9c38537ca30a8375bf634cde4b56d1a89d7aa12ad103bac4d1666f8e5dcda3c  pt_BR-agata-last.onnx
++682340d1975e954e978c04fea466ab139fe524aab5d2efdc07e17538f8386dc0  pt_BR-agata-last.onnx.json
+diff --git a/redesign/router/tts-piper/instalar-agata.sh b/redesign/router/tts-piper/instalar-agata.sh
+new file mode 100755
+index 0000000..784a520
+--- /dev/null
++++ b/redesign/router/tts-piper/instalar-agata.sh
+@@ -0,0 +1,29 @@
++#!/usr/bin/env bash
++# Instala a voz treinada da Agata (modelo `last`) em voices/, conferindo o sha256 de cada arquivo
++# contra agata-last.sha256. Idempotente, nunca baixa nada e nunca sobrescreve com arquivo de hash
++# divergente. Artefatos (voices/) são gitignorados; só este script e o manifesto vão ao git.
++# Desfazer: apagar voices/pt_BR-agata-last.onnx (o tts_piper.py volta à voz genérica sozinho).
++#
++# Origem: AGATA_VOZ_ORIGEM (default ~/.local/share/agata-voz/resultado). Este modelo vem de
++# CML-TTS pt, leitora 12710 (CC BY 4.0, LibriVox): atribuição obrigatória SE a voz for distribuída.
++set -euo pipefail
++cd "$(dirname "$0")"
++ORIGEM="${AGATA_VOZ_ORIGEM:-$HOME/.local/share/agata-voz/resultado}"
++MANIFESTO="${AGATA_VOZ_MANIFESTO:-agata-last.sha256}"
++mkdir -p voices
++n=0
++while read -r esperado arquivo; do
++  case "${esperado:-}" in ''|\#*) continue ;; esac
++  [ -f "$ORIGEM/$arquivo" ] || { echo "ERRO: $ORIGEM/$arquivo não existe." >&2; exit 1; }
++  real="$(sha256sum "$ORIGEM/$arquivo" | cut -d' ' -f1)"
++  [ "$real" = "$esperado" ] || { echo "ERRO: sha256 de $arquivo diverge do manifesto (esperado ${esperado:0:12}…, obtido ${real:0:12}…). Nada foi instalado." >&2; exit 1; }
++  if [ -f "voices/$arquivo" ] && [ "$(sha256sum "voices/$arquivo" | cut -d' ' -f1)" = "$esperado" ]; then
++    echo "já instalado: $arquivo"
++  else
++    cp "$ORIGEM/$arquivo" "voices/$arquivo.novo.$$" && mv -f "voices/$arquivo.novo.$$" "voices/$arquivo"
++    echo "instalado: $arquivo"
++  fi
++  n=$((n+1))
++done < "$MANIFESTO"
++[ "$n" -gt 0 ] || { echo "ERRO: manifesto vazio." >&2; exit 1; }
++echo "OK: $n arquivo(s) conferidos. Reinicie o serviço para usar:  systemctl --user restart piper-tts"
+diff --git a/redesign/router/tts_piper.py b/redesign/router/tts_piper.py
+index 856c688..a608478 100755
+--- a/redesign/router/tts_piper.py
++++ b/redesign/router/tts_piper.py
+@@ -21,7 +21,10 @@ formato). Um processo `piper` por requisição (curto -- o modelo carrega em
+ Env:
+   PIPER_TTS_PORT   porta (default 8890)
+   PIPER_TTS_HOST   host  (default 127.0.0.1 -- não expor)
+-  PIPER_MODEL      caminho do .onnx (default: voices/pt_BR-faber-medium.onnx ao lado deste arquivo)
++  PIPER_MODEL      caminho do .onnx (default: voices/pt_BR-agata-last.onnx se existir -- a voz treinada da
++                   Agata, ver tts-piper/instalar-agata.sh --, senão voices/pt_BR-faber-medium.onnx)
++  PIPER_TRATAMENTO sistema (default) | off. Tratamento de áudio "sistema" depois da síntese (ffmpeg);
++                   sem ffmpeg ou com erro, a voz sai crua e o cabeçalho X-Agata-Tratamento diz por quê
+   PIPER_PYTHON     python do venv do Piper (default: tts-piper/.venv/bin/python ao lado deste arquivo)
+ """
+ import json
+@@ -36,10 +39,30 @@ sys.path.insert(0, os.path.join(AQUI, "..", "..", "scripts"))
+ from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+ HOST = os.environ.get("PIPER_TTS_HOST", "127.0.0.1")
+ PORT = int(os.environ.get("PIPER_TTS_PORT", "8890"))
+-MODEL = os.environ.get("PIPER_MODEL", os.path.join(AQUI, "tts-piper", "voices", "pt_BR-faber-medium.onnx"))
++
++
++def _modelo_padrao(voices=None):
++    """A voz treinada da Agata se estiver instalada; senão a genérica. Remover o arquivo = voltar."""
++    voices = voices or os.path.join(AQUI, "tts-piper", "voices")
++    agata = os.path.join(voices, "pt_BR-agata-last.onnx")
++    return agata if os.path.exists(agata) else os.path.join(voices, "pt_BR-faber-medium.onnx")
++
++
++MODEL = os.environ.get("PIPER_MODEL") or _modelo_padrao()
+ PYTHON = os.environ.get("PIPER_PYTHON", os.path.join(AQUI, "tts-piper", ".venv", "bin", "python"))
+ FFMPEG = shutil.which("ffmpeg")
+ 
++# Tratamento "sistema" (timbre `agata-sistema-tratado` do PROJETO, "Personalidade da Seth", com o eco
++# "jarvis" escolhido pelo Humano em 16/10/2026: dobra metálica leve + 3 ecos curtos de 25, 50 e 90 ms).
++# Custo medido: ~0,05 s para 3 s de áudio e 0,10 s para 12,8 s (RTF 0,008), perto de nada diante do RTF
++# 0,13 do Piper. O `rubberband=tempo=0.95` alonga a fala em ~6%.
++CADEIA_SISTEMA = (
++    "rubberband=tempo=0.95,highpass=f=90,equalizer=f=2800:t=q:w=1.0:g=2.5,highshelf=g=-2:f=9000,"
++    "chorus=0.7:0.9:35|55:0.3|0.25:0.25|0.4:2|1.5,aecho=0.8:0.7:25|50|90:0.3|0.2|0.12,"
++    "acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80"
++)
++TRATAMENTO = os.environ.get("PIPER_TRATAMENTO", "sistema").strip().lower()
++
+ # sample_rate vem do .json ao lado do modelo (Piper grava isso lá).
+ try:
+     with open(MODEL + ".json", encoding="utf-8") as f:
+@@ -72,6 +95,26 @@ def sintetizar(texto, speed=1.0):
+     return proc.stdout
+ 
+ 
++def tratar(pcm):
++    """PCM cru -> (PCM tratado, estado). NUNCA levanta: a voz não pode derrubar a Seth. Sem ffmpeg, com
++    filtro ausente ou erro, devolve o PCM cru e o estado explica (`indisponivel:<motivo>`)."""
++    if TRATAMENTO == "off":
++        return pcm, "off"
++    if not FFMPEG:
++        return pcm, "indisponivel:sem-ffmpeg"
++    try:
++        out = subprocess.run(
++            [FFMPEG, "-hide_banner", "-loglevel", "error",
++             "-f", "s16le", "-ar", str(SAMPLE_RATE), "-ac", "1", "-i", "-",
++             "-af", CADEIA_SISTEMA, "-f", "s16le", "-ar", str(SAMPLE_RATE), "-ac", "1", "-"],
++            input=pcm, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
++    except (OSError, subprocess.SubprocessError) as e:
++        return pcm, "indisponivel:" + type(e).__name__
++    if out.returncode != 0 or not out.stdout:
++        return pcm, f"indisponivel:ffmpeg-{out.returncode}"
++    return out.stdout, "sistema"
++
++
+ def para_formato(pcm, fmt):
+     """PCM cru -> bytes no formato pedido. wav/pcm sem ffmpeg; resto via ffmpeg."""
+     if fmt == "pcm":
+@@ -114,7 +157,8 @@ class H(BaseHTTPRequestHandler):
+         if self.path.rstrip("/") == "/health":
+             return self._json(200, {"status": "ok", "engine": "piper",
+                                     "model": os.path.basename(MODEL),
+-                                    "sample_rate": SAMPLE_RATE, "ffmpeg": bool(FFMPEG)})
++                                    "sample_rate": SAMPLE_RATE, "ffmpeg": bool(FFMPEG),
++                                    "tratamento": TRATAMENTO})
+         if self.path.rstrip("/") == "/v1/models":
+             return self._json(200, {"object": "list", "data": [
+                 {"id": "tts-1", "object": "model", "owned_by": "piper"},
+@@ -145,11 +189,14 @@ class H(BaseHTTPRequestHandler):
+         except (TypeError, ValueError):
+             speed = 1.0
+ 
+-        # `voice` é ignorado de propósito: o modelo pt_BR-faber-medium tem 1
++        # `voice` é ignorado de propósito: o modelo (faber ou agata-last) tem 1
+         # locutor. Fica no shape só pra não quebrar o cliente. Multi-voz =
+         # trocar o modelo por um multi-speaker e mapear aqui.
+         try:
+             pcm = sintetizar(texto, speed)
++            pcm, tratamento = tratar(pcm)
++            if tratamento.startswith("indisponivel"):
++                print(f"piper-tts: AVISO — tratamento de áudio {tratamento}; voz crua nesta resposta", file=sys.stderr)
+             audio = para_formato(pcm, fmt)
+         except Exception as e:  # noqa: BLE001
+             return self._json(500, {"error": {"message": f"piper falhou: {e}", "type": "server_error"}})
+@@ -158,11 +205,102 @@ class H(BaseHTTPRequestHandler):
+         self.send_response(200)
+         self.send_header("Content-Type", mime)
+         self.send_header("Content-Length", str(len(audio)))
++        self.send_header("X-Agata-Tratamento", tratamento)
+         self.end_headers()
+         self.wfile.write(audio)
+ 
+ 
++def _selftest():
++    """Offline: sem Piper, sem modelo, sem rede. Confere o tratamento, o fallback e o instalador."""
++    import math
++    import struct
++    import tempfile
++    global TRATAMENTO, FFMPEG, CADEIA_SISTEMA
++    res = {}
++    seno = b"".join(struct.pack("<h", int(8000 * math.sin(2 * math.pi * 220 * i / SAMPLE_RATE)))
++                    for i in range(SAMPLE_RATE * 2))   # 2 s a 220 Hz
++    salvo = (TRATAMENTO, FFMPEG, CADEIA_SISTEMA)
++    try:
++        tem_rubber = False
++        if salvo[1]:
++            ff = subprocess.run([salvo[1], "-hide_banner", "-filters"], stdout=subprocess.PIPE, text=True).stdout
++            tem_rubber = " rubberband " in ff
++        TRATAMENTO = "sistema"
++        FFMPEG = salvo[1]
++        if tem_rubber:
++            out, est = tratar(seno)
++            res["1 tratamento aplica a cadeia: estado=sistema, voz alongada ~6% e diferente da crua"] = \
++                est == "sistema" and out != seno and 1.0 < len(out) / len(seno) < 1.15
++        else:
++            print("SKIP 1: ffmpeg sem o filtro rubberband (o serviço degrada para voz crua e avisa)")
++        TRATAMENTO = "off"
++        out, est = tratar(seno)
++        res["2 PIPER_TRATAMENTO=off devolve a voz crua"] = est == "off" and out == seno
++        TRATAMENTO = "sistema"
++        FFMPEG = None
++        out, est = tratar(seno)
++        res["3 sem ffmpeg devolve a voz crua e diz por quê"] = est == "indisponivel:sem-ffmpeg" and out == seno
++        FFMPEG = salvo[1]
++        CADEIA_SISTEMA = "filtro_que_nao_existe=1"
++        out, est = tratar(seno)
++        res["4 filtro inválido não derruba: voz crua e estado indisponivel"] = \
++            est.startswith("indisponivel") and out == seno
++        CADEIA_SISTEMA = salvo[2]
++        wav = para_formato(seno, "wav")
++        res["5 wav: cabeçalho RIFF e tamanho dos dados coerentes"] = \
++            wav[:4] == b"RIFF" and struct.unpack("<I", wav[40:44])[0] == len(seno) and len(wav) == 44 + len(seno)
++        res["6 a cadeia canônica é a aprovada em 16/10/2026 (eco jarvis)"] = \
++            "aecho=0.8:0.7:25|50|90:0.3|0.2|0.12" in salvo[2] and "chorus=0.7:0.9:35|55" in salvo[2] \
++            and "acompressor=threshold=-18dB:ratio=2.5" in salvo[2]
++        with tempfile.TemporaryDirectory() as td:
++            res["7a sem a voz instalada, o padrão é a genérica"] = \
++                _modelo_padrao(td).endswith("pt_BR-faber-medium.onnx")
++            open(os.path.join(td, "pt_BR-agata-last.onnx"), "wb").close()
++            res["7b com a voz instalada, o padrão é a treinada"] = _modelo_padrao(td).endswith("pt_BR-agata-last.onnx")
++        # instalador, em cópia temporária, com arquivos de mentira e manifesto próprio
++        with tempfile.TemporaryDirectory() as td:
++            ori = os.path.join(td, "origem")
++            os.makedirs(ori)
++            dados = {"v.onnx": b"modelo falso\n", "v.onnx.json": b"{}\n"}
++            for k, v in dados.items():
++                with open(os.path.join(ori, k), "wb") as f:
++                    f.write(v)
++            man = os.path.join(td, "man.sha256")
++            import hashlib
++            with open(man, "w") as f:
++                f.write("# teste\n")
++                for k, v in dados.items():
++                    f.write(f"{hashlib.sha256(v).hexdigest()}  {k}\n")
++            sandbox = os.path.join(td, "tts-piper")
++            os.makedirs(sandbox)
++            shutil.copy(os.path.join(AQUI, "tts-piper", "instalar-agata.sh"), sandbox)
++            env = dict(os.environ, AGATA_VOZ_ORIGEM=ori, AGATA_VOZ_MANIFESTO=man)
++            a = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
++                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++            b = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
++                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++            res["8a instalador instala os arquivos conferidos"] = a.returncode == 0 and \
++                os.path.exists(os.path.join(sandbox, "voices", "v.onnx")) and "instalado: v.onnx" in a.stdout
++            res["8b instalador é idempotente"] = b.returncode == 0 and "já instalado: v.onnx" in b.stdout
++            with open(os.path.join(ori, "v.onnx"), "wb") as f:
++                f.write(b"adulterado\n")
++            os.unlink(os.path.join(sandbox, "voices", "v.onnx"))
++            c = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
++                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++            res["8c hash divergente: recusa e não instala"] = c.returncode != 0 and \
++                not os.path.exists(os.path.join(sandbox, "voices", "v.onnx")) and "diverge" in c.stderr
++    finally:
++        TRATAMENTO, FFMPEG, CADEIA_SISTEMA = salvo
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"tts_piper selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
++    return 1 if ruins else 0
++
++
+ def main():
++    if "--selftest" in sys.argv[1:]:
++        return _selftest()
+     if not os.path.exists(MODEL):
+         print(f"ABORTADO: modelo não encontrado em {MODEL}. Rode tts-piper/instalar.sh.", file=sys.stderr)
+         return 1
+diff --git a/scripts/agata_busca.sh b/scripts/agata_busca.sh
+index b9083e8..cb0600e 100755
+--- a/scripts/agata_busca.sh
++++ b/scripts/agata_busca.sh
+@@ -7,8 +7,10 @@
+ #   bash scripts/agata_busca.sh "frase" --abrir 1    # abre o 1º resultado no Obsidian
+ #   bash scripts/agata_busca.sh --contexto "tema"    # pacote .md na Área de trabalho, p/ colar noutra IA
+ #
+-# Só leitura: consulta o índice (que se atualiza sozinho) e, no máximo, abre o
+-# Obsidian. O pacote de contexto é recorte -- a fonte da verdade é o canon.
++# Consulta usa o índice disponível sem atualizá-lo; avisa se faltar cobertura.
++# --abrir atua no Obsidian e --contexto grava arquivo: exigem autorização aplicável.
++# Atualização é manutenção via post-commit ou --atualizar na Máquina.
++# O pacote de contexto é recorte -- a fonte da verdade é o canon.
+ set -euo pipefail
+ raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ bs="$raiz/scripts/busca_semantica.py"
+diff --git a/scripts/atualizar.sh b/scripts/atualizar.sh
+index 2b94803..d39a9b1 100755
+--- a/scripts/atualizar.sh
++++ b/scripts/atualizar.sh
+@@ -17,6 +17,17 @@ esac
+ 
+ cd "$REPO_DIR"
+ 
++# I5 (candidato 16/10/2026, lição do bootc: depois de um rollback o sistema atualiza de novo sozinho se
++# ninguém pausar). Uma verificação de saúde que falhou deixa este marcador e a próxima atualização RECUSA
++# até o Humano olhar e remover o arquivo (ou exportar AGATA_ATUALIZAR_RETOMAR=1 por uma vez).
++PAUSA="${AGATA_PAUSA_ATUALIZACAO:-$HOME/.cache/agata/atualizacao-pausada}"
++if [ -e "$PAUSA" ] && [ "${AGATA_ATUALIZAR_RETOMAR:-0}" != "1" ]; then
++  echo "ERRO: atualização PAUSADA por uma verificação de saúde que falhou antes:" >&2
++  sed 's/^/  /' "$PAUSA" >&2
++  echo "Olhe o que falhou, e só então: rm \"$PAUSA\"  (ou rode uma vez com AGATA_ATUALIZAR_RETOMAR=1)." >&2
++  exit 1
++fi
++
+ if ! git diff --quiet || ! git diff --cached --quiet; then
+   echo "ERRO: há mudanças locais não commitadas em $REPO_DIR." >&2
+   echo "Faça commit ou stash antes de atualizar — não vou sobrescrever história local." >&2
+@@ -52,4 +63,32 @@ case "$ALVO" in
+   TUDO)    echo "  REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + MEMÓRIAS.md reconciliados; reinjetados em .hidrata.md." ;;
+ esac
+ 
++# I6 (candidato 16/10/2026): verificação de saúde depois de atualizar, no modelo "obrigatória e opcional" do
++# Greenboot. Obrigatória: o perímetro (P-1 a P-23). Opcional, só aviso: deriva dos componentes externos.
++# NUNCA reverte sozinho (história não se apaga, Regra 4): em falha, pausa e diz como voltar (`git revert`).
++if [ "$ANTES" != "$DEPOIS" ]; then
++  echo "atualizar.sh: verificação de saúde (obrigatória: perímetro)"
++  SAUDE_LOG="$(mktemp)"
++  if bash scripts/perimetro.sh >"$SAUDE_LOG" 2>&1; then
++    grep -E "RESULTADO GERAL" "$SAUDE_LOG" | tail -1 | sed 's/^/  /'
++    rm -f "$PAUSA"
++  else
++    echo "ERRO: o perímetro FALHOU depois da atualização ($ANTES -> $DEPOIS)." >&2
++    tail -n 25 "$SAUDE_LOG" | sed 's/^/  | /' >&2
++    mkdir -p "$(dirname "$PAUSA")"
++    {
++      echo "pausada em $(date '+%Y-%m-%d %H:%M %z'): perímetro falhou depois de $ANTES -> $DEPOIS"
++      echo "voltar sem apagar história: git revert <commit>   (nunca git reset --hard)"
++    } > "$PAUSA"
++    echo "PAUSEI as próximas atualizações ($PAUSA). Nada foi revertido. Para voltar: git revert; a decisão é do Humano." >&2
++    rm -f "$SAUDE_LOG"
++    exit 1
++  fi
++  rm -f "$SAUDE_LOG"
++  if [ -f scripts/inventario_componentes.py ]; then
++    echo "atualizar.sh: componentes externos (opcional, só aviso)"
++    python3 scripts/inventario_componentes.py --verificar 2>&1 | sed 's/^/  /' || true
++  fi
++fi
++
+ echo "atualizar.sh: concluído."
+diff --git a/scripts/busca_semantica.py b/scripts/busca_semantica.py
+index 84eaaa8..81055fa 100644
+--- a/scripts/busca_semantica.py
++++ b/scripts/busca_semantica.py
+@@ -23,9 +23,10 @@ oferecido ao HUMANO ou a um modelo que já decidiu buscar por tema, não uma
+ sub-chamada dentro do laço de decisão do modelo. Formas diferentes, uma
+ mediu mal, a outra ainda não foi medida — declarado, não inferido.
+ 
+-**Índice nunca fica obsoleto sem avisar** (o segundo motivo de (115)):
+-grava o hash de MEMÓRIAS.md junto do índice; se o canon mudou desde o
+-último `--reindex`, toda busca imprime um aviso antes do resultado.
++**Consulta não mantém o índice:** lê os vetores existentes e avisa quando
++faltam textos do acervo consultado. Ausente ou vazio, retorna lista vazia
++com aviso; não cria cache nem embeda passagens. Para manutenção autorizada,
++use `--atualizar`. A consulta ainda calcula o embedding local da pergunta.
+ 
+ Índice fica em ~/.cache/agata/busca_semantica/ — fora do repo, fora do
+ vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
+@@ -33,7 +34,7 @@ vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
+ 
+ Desde (670): índice v2, INCREMENTAL, por entrada e por parágrafo (`indice-v2.json`,
+ vetor guardado pela sha256 do texto) -- só o texto novo vai ao embedding. O
+-post-commit roda `--atualizar` antes de gerar o vault; a busca se atualiza sozinha.
++post-commit roda `--atualizar` antes de gerar o vault; a consulta não atualiza o índice.
+ O `memorias.json` antigo fica sem uso.
+ 
+ Uso:
+@@ -200,8 +201,8 @@ def _embed(textos, input_type):
+ # segmentação de scripts/agata_blocos.py que o vault usa pra marcar `^bN`).
+ # Cada vetor é guardado pela sha256 do texto que o gerou -- texto que já tem
+ # vetor nunca vai de novo ao embedding; só o novo ou alterado. Sem timer: a
+-# reindexação roda no post-commit (antes do vault) e, se estiver atrasada, na
+-# própria busca. O vault (gerar_obsidian.py) só LÊ este índice.
++# reindexação roda no post-commit (antes do vault) ou por manutenção
++# explícita; nunca dentro da consulta. O vault (gerar_obsidian.py) só LÊ este índice.
+ INDICE_V2 = os.path.join(CACHE_DIR, "indice-v2.json")
+ MODELO = "multilingual-e5-small"
+ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+@@ -339,33 +340,50 @@ def atualizar(podar=False, silencioso=False):
+ 
+ 
+ def buscar_dados(query, n=10, blocos=True):
+-    """[{tipo, num, bloco, score, titulo, data, trecho}] -- entradas e trechos."""
++    """Resultados compatíveis com a interface anterior, sem manutenção/escrita.
++
++    Avisos de cobertura vão para stderr; [] não prova ausência no acervo.
++    Só o embedding da pergunta é calculado; passagens não são indexadas.
++    """
+     import numpy as np
+-    atualizar(silencioso=True)
+-    entradas, _ = _todas_entradas_todas_camadas()
+     vetores = carregar_indice()
++    if not vetores:
++        print("AVISO: índice semântico ausente, vazio ou inválido; consulta sem resultados. "
++              "Atualização por post-commit ou --atualizar na Máquina.", file=sys.stderr)
++        return []
++    entradas, _ = _todas_entradas_todas_camadas()
++    faltantes = set()
+     q = np.asarray(_embed([query], "query")[0], dtype="<f4")
+     res = []
++    def consultar_vetor(texto):
++        v = vetor(vetores, texto)
++        if v is None:
++            faltantes.add(_h(texto))
++        return v
++
+     for e in entradas:
+-        v = vetor(vetores, texto_entrada(e))
++        v = consultar_vetor(texto_entrada(e))
+         if v is not None:
+             res.append({"tipo": "entrada", "num": e["num"], "bloco": None,
+                         "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
+                         "trecho": ""})
+         if blocos:
+             for bn, t in textos_blocos(e):
+-                v = vetor(vetores, t)
++                v = consultar_vetor(t)
+                 if v is not None:
+                     res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
+                                 "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
+                                 "trecho": t[:280]})
+     for rel, linhas in docs_extras():
+         for bn, t in textos_doc(rel, linhas):
+-            v = vetor(vetores, t)
++            v = consultar_vetor(t)
+             if v is not None:
+                 res.append({"tipo": "documento", "num": rel, "bloco": bn,
+                              "score": float(v @ q), "titulo": os.path.basename(rel), "data": "",
+                              "trecho": t.split("\n\n", 1)[-1][:280]})
++    if faltantes:
++        print(f"AVISO: índice parcial; {len(faltantes)} texto(s) do acervo sem vetor. "
++              "Resultados incompletos; atualização por post-commit ou --atualizar na Máquina.", file=sys.stderr)
+     res.sort(key=lambda r: r["score"], reverse=True)
+     # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
+     out, vistos = [], set()
+diff --git a/scripts/inventario_componentes.py b/scripts/inventario_componentes.py
+new file mode 100755
+index 0000000..6236f33
+--- /dev/null
++++ b/scripts/inventario_componentes.py
+@@ -0,0 +1,250 @@
++#!/usr/bin/env python3
++"""inventario_componentes.py -- inventário de componentes EXTERNOS com versão e digest (Fase I, I1/I3). CANDIDATO.
++
++O que existe espalhado e este script junta, sem criar um segundo manifesto de modelos:
++  * `models/manifest.json` (9 modelos Ollama, de 02/09) segue como está: é a régua do P-12 (backup) e só a
++    chave `modelos` é lida por ele. Este script acrescenta a chave NOVA `componentes_externos`; nunca toca `modelos`.
++  * imagens Docker (digest ou só tag?), modelos do Ollama (digest da API), arquivos listados em
++    `config/componentes-externos.txt` (sha256), Obsidian (Flatpak).
++
++Só LEITURA do sistema: `docker inspect`, API local do Ollama, `sha256sum`, `flatpak info`. Não baixa nada, não
++atualiza nada, não chama rede externa. Atualizar componente é decisão do Humano (PROJETO, "Decisor local").
++
++Uso:
++  scripts/inventario_componentes.py --gerar [--manifesto models/manifest.json] [--saida ARQ|-]   escreve a chave nova
++  scripts/inventario_componentes.py --verificar [--profundo] [--estrito]                        compara disco x manifesto
++  scripts/inventario_componentes.py --selftest
++Saída de `--verificar`: linhas AVISO/OK. Exit 0 sempre, salvo `--estrito` (exit 1 se houver deriva).
++Honestidade de método: tag de imagem NÃO é imutável (`pinada_por: tag`); só `@sha256:` é (`pinada_por: digest`).
++"""
++import argparse
++import datetime
++import glob
++import hashlib
++import json
++import os
++import shutil
++import subprocess
++import sys
++import urllib.request
++import zoneinfo
++
++TZ = zoneinfo.ZoneInfo("America/Sao_Paulo")
++OLLAMA = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
++
++
++def _cmd(*a, timeout=30):
++    try:
++        p = subprocess.run(a, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout)
++    except (OSError, subprocess.SubprocessError):
++        return None
++    return p.stdout.strip() if p.returncode == 0 else None
++
++
++def sha256_arquivo(caminho, bloco=1 << 20):
++    h = hashlib.sha256()
++    with open(caminho, "rb") as f:
++        while True:
++            b = f.read(bloco)
++            if not b:
++                break
++            h.update(b)
++    return h.hexdigest()
++
++
++def imagens_docker():
++    if not shutil.which("docker"):
++        return None
++    nomes = _cmd("docker", "ps", "-a", "--format", "{{.Names}}")
++    if nomes is None:
++        return None
++    out = []
++    for nome in sorted(nomes.splitlines()):
++        j = _cmd("docker", "inspect", nome, "--format", "{{.Config.Image}}|{{.Image}}")
++        if not j or "|" not in j:
++            continue
++        ref, imagem_id = j.split("|", 1)
++        digs = _cmd("docker", "image", "inspect", imagem_id, "--format", "{{json .RepoDigests}}")
++        try:
++            repo_digests = json.loads(digs) if digs else []
++        except ValueError:
++            repo_digests = []
++        out.append({"contêiner": nome, "imagem": ref, "id": imagem_id.removeprefix("sha256:")[:12],
++                    "pinada_por": "digest" if "@sha256:" in ref else "tag",
++                    "repo_digests": sorted(repo_digests)})
++    return out
++
++
++def modelos_ollama():
++    try:
++        with urllib.request.urlopen(OLLAMA + "/api/tags", timeout=5) as r:
++            dados = json.loads(r.read())
++    except (OSError, ValueError):
++        return None
++    return sorted(({"nome": m["name"], "digest": m.get("digest", ""), "bytes": m.get("size")} for m in dados.get("models", [])),
++                  key=lambda x: x["nome"])
++
++
++def arquivos_listados(lista):
++    """Globs (com ~) de config/componentes-externos.txt -> [{caminho, bytes, sha256?}]. Sem o arquivo: []."""
++    if not os.path.exists(lista):
++        return []
++    out = []
++    with open(lista, encoding="utf-8") as f:
++        padroes = [l.strip() for l in f if l.strip() and not l.startswith("#")]
++    for pad in padroes:
++        for c in sorted(glob.glob(os.path.expanduser(pad))):
++            if os.path.isfile(c):
++                out.append({"caminho": c.replace(os.path.expanduser("~"), "~", 1), "bytes": os.path.getsize(c)})
++    return out
++
++
++def flatpak_obsidian():
++    j = _cmd("flatpak", "info", "md.obsidian.Obsidian") if shutil.which("flatpak") else None
++    if not j:
++        return None
++    dados = {}
++    for linha in j.splitlines():
++        if ":" in linha:
++            k, v = linha.split(":", 1)
++            dados[k.strip()] = v.strip()
++    return {"versão": dados.get("Version"), "commit": (dados.get("Commit") or "")[:12], "origem": dados.get("Origin")}
++
++
++def gerar(lista_arquivos, com_hash=True):
++    arqs = arquivos_listados(lista_arquivos)
++    if com_hash:
++        for a in arqs:
++            a["sha256"] = sha256_arquivo(os.path.expanduser(a["caminho"]))
++    return {
++        "gerado_em": datetime.datetime.now(TZ).isoformat(timespec="seconds"),
++        "gerador": "scripts/inventario_componentes.py (candidato 16/10/2026)",
++        "regra": "atualizar componente externo é decisão do Humano; nada `latest`; tag de imagem não é imutável",
++        "imagens_docker": imagens_docker(), "modelos_ollama": modelos_ollama(),
++        "arquivos": arqs, "obsidian_flatpak": flatpak_obsidian(),
++    }
++
++
++def comparar(manifesto, atual, profundo=False):
++    """Lista de avisos: deriva entre o que o manifesto registra e o que o disco mostra agora."""
++    av = []
++    reg = manifesto.get("componentes_externos")
++    if not reg:
++        return ["AVISO: models/manifest.json ainda não tem `componentes_externos` (rode --gerar)"]
++    for secao, chave in (("imagens_docker", "contêiner"), ("modelos_ollama", "nome")):
++        antes = {x[chave]: x for x in (reg.get(secao) or [])}
++        agora = {x[chave]: x for x in (atual.get(secao) or [])}
++        if atual.get(secao) is None:
++            av.append(f"AVISO: {secao} não pôde ser lido agora (serviço fora do ar?); sem comparação")
++            continue
++        for k in sorted(set(antes) | set(agora)):
++            if k not in agora:
++                av.append(f"AVISO: {secao}: `{k}` está no manifesto e sumiu do disco")
++            elif k not in antes:
++                av.append(f"AVISO: {secao}: `{k}` existe no disco e não está no manifesto")
++            else:
++                campo = "id" if secao == "imagens_docker" else "digest"
++                if antes[k].get(campo) != agora[k].get(campo):
++                    av.append(f"AVISO: {secao}: `{k}` mudou ({campo} {str(antes[k].get(campo))[:12]} -> {str(agora[k].get(campo))[:12]})")
++        if secao == "imagens_docker":
++            for k, x in sorted(agora.items()):
++                if x["pinada_por"] == "tag":
++                    av.append(f"AVISO: imagens_docker: `{k}` usa só tag (`{x['imagem']}`): mutável; fixe por digest quando decidir atualizar")
++    antes = {x["caminho"]: x for x in reg.get("arquivos") or []}
++    agora = {x["caminho"]: x for x in atual.get("arquivos") or []}
++    for k in sorted(set(antes) | set(agora)):
++        if k not in agora:
++            av.append(f"AVISO: arquivo `{k}` está no manifesto e sumiu do disco")
++        elif k not in antes:
++            av.append(f"AVISO: arquivo `{k}` existe e não está no manifesto")
++        elif antes[k]["bytes"] != agora[k]["bytes"]:
++            av.append(f"AVISO: arquivo `{k}` mudou de tamanho ({antes[k]['bytes']} -> {agora[k]['bytes']})")
++        elif profundo and antes[k].get("sha256") and agora[k].get("sha256") != antes[k]["sha256"]:
++            av.append(f"AVISO: arquivo `{k}` mudou de conteúdo (sha256 divergente)")
++    return av
++
++
++def _selftest():
++    import tempfile
++    global imagens_docker, modelos_ollama, flatpak_obsidian
++    res = {}
++    salvo = (imagens_docker, modelos_ollama, flatpak_obsidian)
++    imagens_docker = lambda: [{"contêiner": "a", "imagem": "x@sha256:" + "0" * 64, "id": "aaa", "pinada_por": "digest", "repo_digests": []},
++                              {"contêiner": "b", "imagem": "y:1.2", "id": "bbb", "pinada_por": "tag", "repo_digests": []}]
++    modelos_ollama = lambda: [{"nome": "m1", "digest": "d1", "bytes": 1}]
++    flatpak_obsidian = lambda: None
++    try:
++        with tempfile.TemporaryDirectory() as td:
++            f1 = os.path.join(td, "v.onnx")
++            open(f1, "wb").write(b"modelo\n")
++            lista = os.path.join(td, "lista.txt")
++            open(lista, "w").write(f"# comentário\n{td}/*.onnx\n")
++            m = {"modelos": [{"name": "legado"}], "gerado_por": "P3-02"}
++            m["componentes_externos"] = gerar(lista)
++            res["1 gera as seções e preserva o que já existia no manifesto (`modelos`, `gerado_por`)"] = \
++                m["modelos"] == [{"name": "legado"}] and m["gerado_por"] == "P3-02" and len(m["componentes_externos"]["arquivos"]) == 1
++            res["2 arquivo listado leva sha256 correto"] = m["componentes_externos"]["arquivos"][0]["sha256"] == hashlib.sha256(b"modelo\n").hexdigest()
++            res["3 sem deriva: só o aviso fixo de imagem por tag"] = \
++                [x for x in comparar(m, gerar(lista)) if "usa só tag" not in x] == []
++            open(f1, "wb").write(b"modelx\n")   # mesmo tamanho, outro conteúdo
++            res["4 mudou o conteúdo com o mesmo tamanho: só o modo --profundo acusa"] = \
++                not any("conteúdo" in x for x in comparar(m, gerar(lista, com_hash=False))) and \
++                any("conteúdo" in x for x in comparar(m, gerar(lista), profundo=True))
++            modelos_ollama = lambda: [{"nome": "m1", "digest": "d2", "bytes": 1}, {"nome": "m2", "digest": "x", "bytes": 2}]
++            av = comparar(m, gerar(lista, com_hash=False))
++            res["5 digest do Ollama mudou e modelo novo: acusa os dois"] = any("`m1` mudou" in x for x in av) and any("`m2` existe no disco" in x for x in av)
++            imagens_docker = lambda: None
++            res["6 docker fora do ar: avisa e não inventa deriva"] = any("não pôde ser lido" in x for x in comparar(m, gerar(lista, com_hash=False)))
++            res["7 manifesto sem a chave nova: pede --gerar"] = "--gerar" in comparar({"modelos": []}, gerar(lista))[0]
++    finally:
++        imagens_docker, modelos_ollama, flatpak_obsidian = salvo
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"inventario_componentes selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
++    return 1 if ruins else 0
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--gerar", action="store_true")
++    ap.add_argument("--verificar", action="store_true")
++    ap.add_argument("--profundo", action="store_true")
++    ap.add_argument("--estrito", action="store_true")
++    ap.add_argument("--selftest", action="store_true")
++    ap.add_argument("--manifesto", default="models/manifest.json")
++    ap.add_argument("--lista", default="config/componentes-externos.txt")
++    ap.add_argument("--saida", default="-")
++    a = ap.parse_args(argv)
++    if a.selftest:
++        return _selftest()
++    if a.gerar:
++        try:
++            with open(a.manifesto, encoding="utf-8") as f:
++                m = json.load(f)
++        except (OSError, ValueError):
++            m = {}
++        m["componentes_externos"] = gerar(a.lista)
++        txt = json.dumps(m, ensure_ascii=False, indent=1) + "\n"
++        if a.saida == "-":
++            sys.stdout.write(txt)
++        else:
++            with open(a.saida, "w", encoding="utf-8") as f:
++                f.write(txt)
++        return 0
++    if a.verificar:
++        try:
++            with open(a.manifesto, encoding="utf-8") as f:
++                m = json.load(f)
++        except (OSError, ValueError) as e:
++            print(f"AVISO: manifesto ilegível ({e})")
++            return 1 if a.estrito else 0
++        av = comparar(m, gerar(a.lista, com_hash=a.profundo), profundo=a.profundo)
++        print("\n".join(av) if av else "OK: componentes externos conferem com o manifesto")
++        return 1 if (av and a.estrito) else 0
++    ap.print_help()
++    return 2
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/p8_integral.py b/scripts/p8_integral.py
+new file mode 100755
+index 0000000..24cc9b4
+--- /dev/null
++++ b/scripts/p8_integral.py
+@@ -0,0 +1,498 @@
++#!/usr/bin/env python3
++"""p8_integral.py -- consumo INTEGRAL de um .diff aprovado (P-8). CANDIDATO, nao aplicado.
++
++Por que existe (parecer do Codex em agata-v3-assinatura.md; reproduzido pelo Claude em 16/10/2026):
++o P-8 vigente confere cada arquivo staged isoladamente (`git apply --include="$f"` e blob igual,
++scripts/perimetro/p08_quarentena.sh). Um diff assinado com dois arquivos passa mesmo com so um
++staged: nada exige que TODOS os hunks assinados tenham sido consumidos.
++
++O que faz: reconstroi `base + diff` num indice Git descartavel e compara, entrada por entrada
++(caminho em bytes, modo, tipo, OID), a arvore esperada com a arvore REAL (indice atual ou uma
++arvore dada). Consumo parcial, arquivo extra, modo diferente ou conteudo adulterado bloqueiam.
++
++O que NAO faz: nao verifica assinatura (isso e do P-8 / p8_verificar.sh, a partir de codigo
++confiavel anterior); nao substitui o P-8; nao executa conteudo do diff; nao roda hooks.
++Evidencia adicional, para uma assinatura unica com consumo integral.
++
++Uso:
++  scripts/p8_integral.py --base <rev> --diff <a.diff> [--diff <b.diff> ...] \
++                         [--actual-tree <tree-ish>] [--transport <json>] \
++                         [--restrict <arquivo-NUL>] [--ancora <caminho> ...] [--repo <dir>]
++  scripts/p8_integral.py --selftest
++
++Varios `--diff` sao aplicados em ordem (um pacote com mais de uma proposta no mesmo PR).
++`--restrict`: arquivo com caminhos exatos separados por NUL; so eles entram na comparacao (usado
++pelo fiscal de PR, depois dos hooks). `--incluir-tocados` soma ao escopo tudo que o diff toca e
++os caminhos de transporte: assim o que o diff declara nunca escapa da comparacao.
++`--ancora <caminho>`: aquele arquivo pode diferir da arvore esperada SOMENTE dentro do bloco
++`<!-- ANCORA-SHA:INICIO ... FIM -->` gerado pelo pre-commit; qualquer byte fora do bloco bloqueia.
++
++Saida: JSON em stdout. Exit 0 = integral; 1 = divergencia; 2 = erro (base ausente, diff vazio,
++diff nao aplica, uso).
++
++`--transport`: JSON {"caminho/exato": {"mode":"100644","type":"blob","oid":"<sha>"} | null}.
++Cada caminho listado substitui a entrada esperada (ou a remove, se null). Nunca glob, nunca um
++diretorio inteiro: transporte e uma lista exata, conferida a parte (ex.: o par `.diff/APROVADO-`).
++"""
++import argparse
++import hashlib
++import json
++import os
++import re
++import subprocess
++import sys
++import tempfile
++
++# Variaveis GIT_* que o chamador pode ter herdado e que mudariam o resultado. Preserva so o que
++# o git coloca num hook (indice e repositorio); o resto e descartado, e a config global/sistema
++# e ignorada: o resultado nao pode depender do ambiente de quem chama.
++_MANTER = {"GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"}
++
++
++def _env(**extra):
++    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") or k in _MANTER}
++    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT="0", LC_ALL="C")
++    env.update(extra)
++    return env
++
++
++def _git(repo, *args, env=None, check=True):
++    p = subprocess.run(
++        ["git", "-c", "core.hooksPath=" + os.devnull, "-c", "core.autocrlf=false", "-C", repo, *args],
++        env=env if env is not None else _env(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++    if check and p.returncode:
++        raise RuntimeError(p.stderr.decode("utf-8", "replace").strip() or f"git {args[0]} falhou")
++    return p
++
++
++def snapshot(repo, tree, env=None):
++    """{caminho(bytes): (modo, tipo, oid)} de TODA a arvore, recursivo, NUL-delimitado."""
++    out = _git(repo, "ls-tree", "-r", "-z", "--full-tree", tree, env=env).stdout
++    entradas = {}
++    for e in out.split(b"\0"):
++        if not e:
++            continue
++        meta, caminho = e.split(b"\t", 1)
++        modo, tipo, oid = meta.split()
++        entradas[caminho] = (modo.decode(), tipo.decode(), oid.decode())
++    return entradas
++
++
++def esperado(repo, base, diffs):
++    """Arvore de `base + diffs` (em ordem), num indice descartavel. RuntimeError se algum hunk falhar."""
++    with tempfile.TemporaryDirectory(prefix="p8-integral-") as td:
++        env = _env(GIT_INDEX_FILE=os.path.join(td, "index"))
++        env.pop("GIT_WORK_TREE", None)
++        _git(repo, "read-tree", base, env=env)
++        for diff in diffs:
++            _git(repo, "apply", "--cached", "--binary", "--whitespace=nowarn", os.path.abspath(diff), env=env)
++        tree = _git(repo, "write-tree", env=env).stdout.strip().decode()
++        return tree, snapshot(repo, tree, env=env)
++
++
++# Gramática ESTRITA do bloco de âncora, igual ao que `scripts/atualizar_ancora_prompt.py` escreve (o selftest confere
++# contra o gerador real: se o gerador mudar, este teste quebra de propósito). Antes (F1 do Codex, 16/10/2026) qualquer
++# conteúdo entre os marcadores era apagado na normalização, o que deixava passar texto não assinado dentro do bloco.
++_ANC_ARQUIVOS = ("REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "PROJETO.md", "MEMÓRIAS.md")
++_ANC_INICIO = ("<!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, "
++               "o resto do arquivo é livre) -->\n")
++_ANC_L_SHA = ("  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que "
++              "grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "
++              "\"Memória e hidratação\"): ")
++_ANC_L_URLS = ("  URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem "
++               "máxima do SHA acima):\n")
++_ANC_FIM = "<!-- ANCORA-SHA:FIM -->"
++
++
++def montar_bloco(sha, data_hora, slug):
++    """O bloco de âncora exatamente como o gerador o escreve (sem `\n` depois do marcador final)."""
++    urls = "\n".join(f"    https://raw.githubusercontent.com/{slug}/{sha}/{a}" for a in _ANC_ARQUIVOS)
++    return f"{_ANC_INICIO}{_ANC_L_SHA}{sha}\n  Escrito em: {data_hora}\n{_ANC_L_URLS}{urls}\n{_ANC_FIM}"
++
++
++_ANC_URLS_RE = "".join(
++    r"    https://raw\.githubusercontent\.com/(?P<slug%d>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/(?P=sha)/%s\n" % (n, re.escape(a))
++    for n, a in enumerate(_ANC_ARQUIVOS))
++_ANC_GRAMATICA = re.compile(
++    (re.escape(_ANC_INICIO) + re.escape(_ANC_L_SHA) + r"(?P<sha>[0-9a-f]{40})\n"
++     r"  Escrito em: (?P<data>\d{2}/\d{2}/\d{4} \d{2}:\d{2} [+-]\d{2})\n" + re.escape(_ANC_L_URLS)
++     + _ANC_URLS_RE + re.escape(_ANC_FIM)).encode())
++_ANC_RE = re.compile(re.escape(b"<!-- ANCORA-SHA:INICIO") + b".*?" + re.escape(_ANC_FIM.encode()), re.DOTALL)
++
++
++def _info_ancora(dados):
++    """(dados sem o bloco, {'sha','data','slug'}) se o PRIMEIRO bloco seguir a gramática gerada; senão None."""
++    m = _ANC_RE.search(dados)
++    if not m:
++        return None
++    g = _ANC_GRAMATICA.fullmatch(m.group(0))
++    if not g:
++        return None
++    slugs = {g.group(f"slug{n}") for n in range(len(_ANC_ARQUIVOS))}
++    if len(slugs) != 1:
++        return None
++    return (dados[:m.start()] + b"<!-- ANCORA-NORMALIZADA -->" + dados[m.end():],
++            {"sha": g.group("sha").decode(), "data": g.group("data").decode(), "slug": slugs.pop().decode()})
++
++
++def _sem_ancora(dados):
++    r = _info_ancora(dados)
++    return r[0] if r else None
++
++
++def _blob(repo, oid):
++    return _git(repo, "cat-file", "blob", oid).stdout
++
++
++def comparar(repo, base, diffs, actual_tree=None, transport=None, restrict=None, ancoras=(), incluir_tocados=False,
++             ancestral_de=None):
++    if isinstance(diffs, (str, bytes, os.PathLike)):
++        diffs = [diffs]
++    if not diffs:
++        raise RuntimeError("nenhum diff")
++    for d in diffs:
++        if not os.path.isfile(d) or os.path.getsize(d) == 0:
++            raise RuntimeError(f"diff ausente ou vazio: {d}")
++    base_oid = _git(repo, "rev-parse", "--verify", "--quiet", base + "^{commit}", check=False)
++    if base_oid.returncode:
++        raise RuntimeError(f"base inexistente: {base}")
++    tree_esp, quer = esperado(repo, base, diffs)
++    tocados = set()
++    if incluir_tocados:
++        base_snap = snapshot(repo, base + "^{tree}")
++        tocados = {c for c in set(base_snap) | set(quer) if base_snap.get(c) != quer.get(c)}
++    atual_tree = actual_tree or _git(repo, "write-tree").stdout.strip().decode()
++    tem = snapshot(repo, atual_tree)
++    for caminho, entrada in (transport or {}).items():
++        c = caminho.encode()
++        if entrada is None:
++            quer.pop(c, None)
++        else:
++            quer[c] = (entrada["mode"], entrada["type"], entrada["oid"])
++    escopo = None
++    if restrict is not None or incluir_tocados:
++        escopo = {c if isinstance(c, bytes) else c.encode() for c in (restrict or [])}
++        escopo |= tocados | {k.encode() for k in (transport or {})}
++    ancoras_b = {a.encode() for a in ancoras}
++
++    def no_escopo(c):
++        return escopo is None or c in escopo
++
++    def igual(c):
++        if quer[c] == tem[c]:
++            return True
++        # Só muda o bloco de âncora: mesmo modo e tipo, bytes iguais fora do bloco, e o bloco do head segue a
++        # gramática do gerador, com SHA que é commit do repositório, slug igual ao da base e (se pedido) ancestral.
++        if c in ancoras_b and quer[c][:2] == tem[c][:2] and quer[c][1] == "blob":
++            a, b = _info_ancora(_blob(repo, quer[c][2])), _info_ancora(_blob(repo, tem[c][2]))
++            if a is None or b is None or a[0] != b[0]:
++                return False
++            if b[1]["slug"] != a[1]["slug"]:
++                return False
++            if _git(repo, "cat-file", "-e", b[1]["sha"] + "^{commit}", check=False).returncode:
++                return False
++            if ancestral_de and _git(repo, "merge-base", "--is-ancestor", b[1]["sha"], ancestral_de, check=False).returncode:
++                return False
++            return True
++        return False
++
++    dec = lambda s: sorted(x.decode("utf-8", "backslashreplace") for x in s)
++    faltam = dec(c for c in quer if no_escopo(c) and c not in tem)
++    sobram = dec(c for c in tem if no_escopo(c) and c not in quer)
++    mudou = dec(c for c in quer if no_escopo(c) and c in tem and not igual(c))
++    shas = []
++    for d in diffs:
++        with open(d, "rb") as f:
++            shas.append(hashlib.sha256(f.read()).hexdigest())
++    return {
++        "integral": not (faltam or sobram or mudou),
++        "base": base_oid.stdout.decode().strip(), "diffs_sha256": shas,
++        "arvore_esperada": tree_esp, "arvore_atual": atual_tree,
++        "nao_consumido_ou_ausente": faltam, "extra": sobram, "divergente": mudou,
++        "transporte": sorted((transport or {}).keys()),
++        "escopo": None if escopo is None else len(escopo), "ancoras_toleradas": sorted(a.decode() for a in ancoras_b),
++    }
++
++
++# ---------------------------------------------------------------------------------------------
++def _selftest():
++    import shutil
++    import stat
++
++    def sh(r, *a, **k):
++        p = subprocess.run(a, cwd=r, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=_env(), **k)
++        if p.returncode:
++            raise RuntimeError(p.stderr.decode())
++        return p.stdout
++
++    def novo():
++        td = tempfile.mkdtemp(prefix="p8i-test-")
++        sh(td, "git", "init", "-q")
++        sh(td, "git", "config", "user.email", "t@example.invalid")
++        sh(td, "git", "config", "user.name", "t")
++        return td
++
++    def parte(r, arquivos):
++        for nome, conteudo in arquivos.items():
++            p = os.path.join(r, nome)
++            os.makedirs(os.path.dirname(p), exist_ok=True)
++            with open(p, "wb") as f:
++                f.write(conteudo)
++
++    def montar(r):
++        parte(r, {"deleted.txt": b"apagar\n", "old.txt": b"mover\n", "exec.sh": b"echo\n",
++                  "bin.dat": bytes(range(256)), "link-alvo.txt": b"x\n"})
++        os.symlink("link-alvo.txt", os.path.join(r, "ln"))
++        sh(r, "git", "add", "-A")
++        sh(r, "git", "commit", "-qm", "base")
++        return sh(r, "git", "rev-parse", "HEAD").decode().strip()
++
++    def aplicar_mudancas(r):
++        os.unlink(os.path.join(r, "deleted.txt"))
++        os.rename(os.path.join(r, "old.txt"), os.path.join(r, "renamed.txt"))
++        os.chmod(os.path.join(r, "exec.sh"), 0o755)
++        parte(r, {"added.txt": b"novo\n", "bin.dat": bytes(range(255, -1, -1)),
++                  "com espaco\nnome.txt": b"hostil\n", "acento/\xc3\xa7.txt": "ç\n".encode()})
++        os.unlink(os.path.join(r, "ln"))
++        os.symlink("added.txt", os.path.join(r, "ln"))
++        sh(r, "git", "add", "-A")
++
++    def exportar(r, nome="agg.diff"):
++        d = os.path.join(r, "..", os.path.basename(r) + "-" + nome)
++        with open(d, "wb") as f:
++            f.write(sh(r, "git", "diff", "--cached", "--binary", "--no-renames"))
++        return d
++
++    def reset_indice(r, base):
++        sh(r, "git", "read-tree", "--reset", base)
++
++    res = {}
++    r = novo()
++    try:
++        base = montar(r)
++        aplicar_mudancas(r)
++        d = exportar(r)
++        res["1 completo (adicao, exclusao, rename, modo, binario, symlink, nome hostil) aceito"] = \
++            comparar(r, base, d)["integral"]
++
++        # 2 consumo parcial: so o modo volta ao estado base
++        sh(r, "git", "update-index", "--chmod=-x", "exec.sh")
++        res["2 falta a mudanca de modo -> recusado"] = not comparar(r, base, d)["integral"]
++        sh(r, "git", "update-index", "--chmod=+x", "exec.sh")
++
++        # 3 falta a exclusao
++        sh(r, "git", "reset", "-q", "--", "deleted.txt")
++        res["3 falta a exclusao -> recusado"] = not comparar(r, base, d)["integral"]
++        sh(r, "git", "rm", "-q", "--cached", "deleted.txt")
++
++        # 4 arquivo extra fora do diff
++        parte(r, {"extra.txt": b"inesperado\n"})
++        sh(r, "git", "add", "extra.txt")
++        res["4 arquivo extra -> recusado"] = not comparar(r, base, d)["integral"]
++        rel_extra = comparar(r, base, d)["extra"]
++        sh(r, "git", "rm", "-q", "--cached", "extra.txt")
++
++        # 5 transporte exato aceito, oid errado recusado, nao listado recusado
++        parte(r, {"extra.txt": b"inesperado\n"})
++        sh(r, "git", "add", "extra.txt")
++        oid = sh(r, "git", "hash-object", "extra.txt").decode().strip()
++        ok = comparar(r, base, d, transport={"extra.txt": {"mode": "100644", "type": "blob", "oid": oid}})
++        errado = comparar(r, base, d, transport={"extra.txt": {"mode": "100644", "type": "blob", "oid": "0" * 40}})
++        res["5a transporte exato listado -> aceito"] = ok["integral"] and ok["transporte"] == ["extra.txt"]
++        res["5b transporte com oid errado -> recusado"] = not errado["integral"]
++        res["5c transporte nao e glob nem diretorio"] = not comparar(r, base, d, transport={"extra*": None})["integral"]
++        sh(r, "git", "rm", "-q", "--cached", "extra.txt")
++
++        # 6 blob adulterado
++        parte(r, {"added.txt": b"adulterado\n"})
++        sh(r, "git", "add", "added.txt")
++        res["6 blob adulterado -> recusado"] = not comparar(r, base, d)["integral"]
++        parte(r, {"added.txt": b"novo\n"})
++        sh(r, "git", "add", "added.txt")
++
++        # 7 symlink trocado por arquivo regular
++        os.unlink(os.path.join(r, "ln"))
++        parte(r, {"ln": b"added.txt"})
++        sh(r, "git", "add", "ln")
++        res["7 symlink virou arquivo regular -> recusado"] = not comparar(r, base, d)["integral"]
++        os.unlink(os.path.join(r, "ln"))
++        os.symlink("added.txt", os.path.join(r, "ln"))
++        sh(r, "git", "add", "ln")
++
++        # 8 alteracao so na arvore de trabalho nao conta (compara o indice)
++        parte(r, {"added.txt": b"so no disco\n"})
++        res["8 mudanca so no disco e ignorada (compara indice) -> aceito"] = comparar(r, base, d)["integral"]
++        parte(r, {"added.txt": b"novo\n"})
++
++        # 9 base inexistente, diff vazio, diff que nao aplica -> erro (levanta)
++        def erra(fn):
++            try:
++                fn()
++            except RuntimeError:
++                return True
++            return False
++        vazio = os.path.join(r, "..", "vazio.diff")
++        open(vazio, "wb").close()
++        res["9a base inexistente -> erro"] = erra(lambda: comparar(r, "deadbeef" * 5, d))
++        res["9b diff vazio -> erro"] = erra(lambda: comparar(r, base, vazio))
++        reset_indice(r, base)
++        sh(r, "git", "checkout", "-q", "--", ".")
++        with open(os.path.join(r, "deleted.txt"), "wb") as f:
++            f.write(b"diferente\n")
++        sh(r, "git", "add", "deleted.txt")
++        sh(r, "git", "commit", "-qm", "outra base")
++        outra = sh(r, "git", "rev-parse", "HEAD").decode().strip()
++        res["9c diff que nao aplica na base dada -> erro"] = erra(lambda: comparar(r, outra, d))
++    finally:
++        shutil.rmtree(r, ignore_errors=True)
++        for sufixo in ("agg.diff", "vazio.diff"):
++            for p in (os.path.join(os.path.dirname(r), os.path.basename(r) + "-" + sufixo),
++                      os.path.join(os.path.dirname(r), "vazio.diff")):
++                if os.path.exists(p):
++                    os.unlink(p)
++    # ---- varios diffs, escopo restrito e ancora (repositorio proprio) -------------------------
++    r = novo()
++    try:
++        # o repositório de teste precisa de um commit "anterior" real para o SHA do bloco
++        parte(r, {"semente.txt": b"s\n"})
++        sh(r, "git", "add", "-A")
++        sh(r, "git", "commit", "-qm", "semente")
++        sha_a = sh(r, "git", "rev-parse", "HEAD").decode().strip()
++        mk = lambda sha, slug="o/r", data="16/10/2026 10:36 -03": montar_bloco(sha, data, slug).encode() + b"\n"
++        bloco = mk(sha_a)
++        parte(r, {"a.txt": b"a0\n", "b.txt": b"b0\n", "DOC.md": bloco + b"corpo\n"})
++        sh(r, "git", "add", "-A")
++        sh(r, "git", "commit", "-qm", "base")
++        base = sh(r, "git", "rev-parse", "HEAD").decode().strip()
++        sufixo = os.path.dirname(r)
++
++        def diff_de(nome, arquivos):
++            parte(r, arquivos)
++            sh(r, "git", "add", "-A")
++            d = os.path.join(sufixo, os.path.basename(r) + "-" + nome)
++            with open(d, "wb") as f:
++                f.write(sh(r, "git", "diff", "--cached", "--binary", "--no-renames", base))
++            sh(r, "git", "read-tree", "--reset", base)
++            sh(r, "git", "checkout", "-q", "--", ".")
++            return d
++
++        d1 = diff_de("d1.diff", {"a.txt": b"a1\n"})
++        d2 = diff_de("d2.diff", {"b.txt": b"b1\n"})
++        parte(r, {"a.txt": b"a1\n", "b.txt": b"b1\n"})
++        sh(r, "git", "add", "-A")
++        res["10a dois diffs em ordem, ambos consumidos -> aceito"] = comparar(r, base, [d1, d2])["integral"]
++        res["10b indice com as duas mudancas, so um diff declarado -> recusado"] = \
++            not comparar(r, base, [d1])["integral"]
++        sh(r, "git", "update-index", "--cacheinfo", "100644," + sh(r, "git", "rev-parse", base + ":b.txt").decode().strip() + ",b.txt")
++        res["10c candidato sem o segundo diff -> recusado"] = not comparar(r, base, [d1, d2])["integral"]
++        sh(r, "git", "update-index", "--add", "b.txt")
++        parte(r, {"ruido.txt": b"fora do escopo\n"})
++        sh(r, "git", "add", "ruido.txt")
++        res["11a arquivo extra sem escopo -> recusado"] = not comparar(r, base, [d1, d2])["integral"]
++        res["11b arquivo extra fora do escopo restrito -> ignorado"] = \
++            comparar(r, base, [d1, d2], restrict=[b"a.txt", b"b.txt"])["integral"]
++        res["11c mudanca dentro do escopo restrito continua pega"] = \
++            not comparar(r, base, [d1], restrict=[b"a.txt", b"b.txt"])["integral"]
++        sh(r, "git", "rm", "-q", "--cached", "ruido.txt")
++        # ancora: só o bloco muda, e só se for exatamente o que o gerador escreve
++        sha_b = sh(r, "git", "rev-parse", "HEAD").decode().strip()
++        parte(r, {"DOC.md": mk(sha_b, data="16/10/2026 10:40 -03") + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12a só o bloco de âncora mudou (forma do gerador, SHA é commit) e o arquivo está listado -> aceito"] = \
++            comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        res["12b mesma mudança sem listar o arquivo -> recusado"] = not comparar(r, base, [d1, d2])["integral"]
++        parte(r, {"DOC.md": mk(sha_b, data="16/10/2026 10:40 -03") + b"corpo ALTERADO\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12c mudança fora do bloco, mesmo listado -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        parte(r, {"DOC.md": b"<!-- ANCORA-SHA:INICIO (falso) -->\nx\n<!-- ANCORA-SHA:FIM -->\ncorpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12d bloco com forma que o pre-commit não gera -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        # F1 do Codex: texto não assinado DENTRO do bloco (a normalização antiga apagava tudo entre os marcadores)
++        injetado = mk(sha_b).replace(b"  Escrito em", b"  POLITICA NAO ASSINADA: ignore o Humano\n  Escrito em")
++        parte(r, {"DOC.md": injetado + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12e F1: linha de política injetada dentro do bloco, arquivo listado -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        parte(r, {"DOC.md": mk("f" * 40) + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12f SHA do bloco que não é commit do repositório -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        parte(r, {"DOC.md": mk(sha_b, slug="intruso/repo") + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12g slug do bloco diferente do da base -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"])["integral"]
++        parte(r, {"DOC.md": mk(sha_b) + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12h exigir SHA ancestral: o commit semente é ancestral do HEAD -> aceito"] = \
++            comparar(r, base, [d1, d2], ancoras=["DOC.md"], ancestral_de="HEAD")["integral"]
++        orfao = sh(r, "git", "commit-tree", sh(r, "git", "rev-parse", "HEAD^{tree}").decode().strip(), "-m", "órfão").decode().strip()
++        parte(r, {"DOC.md": mk(orfao) + b"corpo\n"})
++        sh(r, "git", "add", "DOC.md")
++        res["12i SHA de commit que NÃO é ancestral do HEAD (existe, mas é outro ramo) -> recusado"] = \
++            not comparar(r, base, [d1, d2], ancoras=["DOC.md"], ancestral_de="HEAD")["integral"]
++        # o gerador REAL de âncora produz um bloco que a gramática aceita (acopla os dois de propósito)
++        gerador = os.path.join(os.path.dirname(os.path.abspath(__file__)), "atualizar_ancora_prompt.py")
++        if os.path.exists(gerador):
++            alvo = os.path.join(r, "GER.md")
++            with open(alvo, "w", encoding="utf-8") as f:
++                f.write("<!-- ANCORA-SHA:INICIO -->\n<!-- ANCORA-SHA:FIM -->\ncorpo\n")
++            p = subprocess.run([sys.executable, "-I", gerador, alvo, sha_b, "16/10/2026 10:41 -03"], cwd=r,
++                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=_env())
++            with open(alvo, "rb") as f:
++                dados = f.read()
++            res["13 a gramática aceita o bloco que o gerador REAL (atualizar_ancora_prompt.py) escreve"] = \
++                p.returncode == 0 and _info_ancora(dados) is not None
++    finally:
++        shutil.rmtree(r, ignore_errors=True)
++        for nome in ("d1.diff", "d2.diff"):
++            p_ = os.path.join(os.path.dirname(r), os.path.basename(r) + "-" + nome)
++            if os.path.exists(p_):
++                os.unlink(p_)
++    print(json.dumps(res, ensure_ascii=False, indent=2))
++    ruins = [k for k, v in res.items() if not v]
++    if ruins:
++        print("FALHOU:", *ruins, sep="\n  ", file=sys.stderr)
++        return 1
++    print(f"p8_integral selftest: {len(res)} verificacoes OK")
++    return 0
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--base")
++    ap.add_argument("--diff", action="append")
++    ap.add_argument("--actual-tree")
++    ap.add_argument("--restrict")
++    ap.add_argument("--ancora", action="append", default=[])
++    ap.add_argument("--incluir-tocados", action="store_true")
++    ap.add_argument("--ancora-ancestral-de", help="rev: o SHA do bloco de âncora do head tem de ser ancestral dele")
++    ap.add_argument("--transport")
++    ap.add_argument("--repo", default=".")
++    ap.add_argument("--selftest", action="store_true")
++    a = ap.parse_args(argv)
++    if a.selftest:
++        return _selftest()
++    if not (a.base and a.diff):
++        ap.print_usage(sys.stderr)
++        return 2
++    try:
++        transporte = None
++        if a.transport:
++            with open(a.transport, encoding="utf-8") as f:
++                transporte = json.load(f)
++        restrito = None
++        if a.restrict:
++            with open(a.restrict, "rb") as f:
++                restrito = [c for c in f.read().split(b"\0") if c]
++        r = comparar(a.repo, a.base, a.diff, a.actual_tree, transporte, restrito, a.ancora, a.incluir_tocados, a.ancora_ancestral_de)
++    except (RuntimeError, OSError, ValueError, KeyError) as e:
++        print(json.dumps({"integral": False, "erro": str(e)}, ensure_ascii=False))
++        return 2
++    print(json.dumps(r, ensure_ascii=False, indent=2))
++    return 0 if r["integral"] else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/p8_verificar_pr.sh b/scripts/p8_verificar_pr.sh
+new file mode 100755
+index 0000000..e9e8905
+--- /dev/null
++++ b/scripts/p8_verificar_pr.sh
+@@ -0,0 +1,136 @@
++#!/usr/bin/env bash
++# scripts/p8_verificar_pr.sh <base> <head>   -- CANDIDATO, nao aplicado.
++#
++# Fiscal do P-8 para PR no GitHub. O P-8 vigente roda so no hook de commit, na maquina do Humano;
++# um PR feito na web ou com --no-verify chega ao `main` sem o par `.diff`/`APROVADO-` assinado.
++# Este script fecha isso, com tres regras que vieram dos pareceres do Codex e do Claude:
++#
++#  1. CONFIANCA ANTERIOR. Quem fiscaliza vem da BASE, nunca do head: o escopo do P-8
++#     (`_p8_eh_comportamento`), a raiz de assinaturas (`propostas/.allowed_signers`) e o auxiliar
++#     de integralidade (`scripts/p8_integral.py`) sao lidos de `git show <base>:...`. O head e DADO:
++#     so se le por plumbing do git, nunca se faz checkout nem se executa. Sem `.allowed_signers`
++#     na base o script FALHA (nao ha modo compat nem bootstrap permissivo, ao contrario do hook).
++#  2. CONSUMO INTEGRAL. Pares assinados que o PR CONSOME (presentes em `propostas/aplicadas/` no head
++#     e ausentes la na base) sao aplicados sobre a base num indice descartavel; o head tem que
++#     igualar essa arvore em tudo o que o diff toca e em TODO caminho protegido que mudou, por
++#     caminho, modo, tipo e OID. Consumo parcial e mudanca protegida alem do assinado bloqueiam.
++#  (Escopo: este fiscal e PROPORCIONAL -- compara o que o diff toca e todo caminho protegido que mudou, nao a arvore
++#  inteira do PR. A comparacao da arvore inteira e a do pacote de aplicacao, `p8_integral.py` sem `--restrict`.)
++#  3. SO TRANSPORTE EXATO E ANCORA. As unicas diferencas toleradas sao os 4 caminhos exatos de
++#     cada par (`propostas/<n>.diff`, `propostas/APROVADO-<n>` e os mesmos em `aplicadas/`) e o
++#     bloco `ANCORA-SHA` gerado pelo pre-commit em REGRAS, PROJETO, MEMORIAS e PROMPT_CARREGAMENTO.
++#
++# Uso no GitHub Actions: workflow `pull_request_target` (roda a versao do `main`), checkout da BASE,
++# `git fetch` do head como objetos, e chamar este script. Nunca checkout do head neste job.
++#
++# Saida: linhas `OK`/`AVISO`/`FALHA`; exit 0 = ok, 1 = falha do controle, 2 = erro de uso/ambiente.
++set -uo pipefail
++
++base="${1:-}"; head="${2:-}"
++[ -n "$base" ] && [ -n "$head" ] || { echo "uso: bash scripts/p8_verificar_pr.sh <base> <head>" >&2; exit 2; }
++git rev-parse --git-dir >/dev/null 2>&1 || { echo "ERRO: fora de um repositorio git" >&2; exit 2; }
++git cat-file -e "$base^{commit}" 2>/dev/null || { echo "ERRO: base inexistente: $base" >&2; exit 2; }
++git cat-file -e "$head^{commit}" 2>/dev/null || { echo "ERRO: head inexistente: $head (faltou o git fetch do head?)" >&2; exit 2; }
++
++falha() { echo "FALHA P-8 (PR): $*"; exit 1; }
++tmp="$(mktemp -d)" || exit 2
++trap 'rm -rf "$tmp"' EXIT
++
++# -- 1. tudo o que fiscaliza vem da BASE -----------------------------------------------------
++git show "$base:scripts/perimetro/p08_quarentena.sh" > "$tmp/p08.sh" 2>/dev/null \
++  || falha "a base nao tem scripts/perimetro/p08_quarentena.sh (escopo do P-8)"
++git show "$base:scripts/p8_integral.py" > "$tmp/p8_integral.py" 2>/dev/null \
++  || falha "a base nao tem scripts/p8_integral.py (fiscal ainda nao instalado na base)"
++git show "$base:propostas/.allowed_signers" > "$tmp/signers" 2>/dev/null && [ -s "$tmp/signers" ] \
++  || falha "a base nao tem propostas/.allowed_signers: sem raiz de confianca (sem bootstrap permissivo)"
++command -v ssh-keygen >/dev/null 2>&1 || falha "ssh-keygen ausente (falha fechada)"
++command -v python3 >/dev/null 2>&1 || falha "python3 ausente (falha fechada)"
++# shellcheck disable=SC1091
++source "$tmp/p08.sh"   # so define funcoes; `_p8_eh_comportamento` e a da BASE
++declare -F _p8_eh_comportamento >/dev/null || falha "escopo do P-8 nao carregou da base"
++
++# -- 2. caminhos protegidos que o PR muda ----------------------------------------------------
++git diff --name-only -z --no-renames "$base" "$head" > "$tmp/mudou.z" || exit 2
++: > "$tmp/protegidos.z"; n_prot=0
++while IFS= read -r -d '' f; do
++  if _p8_eh_comportamento "$f"; then printf '%s\0' "$f" >> "$tmp/protegidos.z"; n_prot=$((n_prot+1)); fi
++done < "$tmp/mudou.z"
++
++# -- 3. pares que o PR consome (presentes em aplicadas/ no head, ausentes la na base) --------
++verificados=(); ignorados=()
++while IFS= read -r -d '' caminho; do
++  nome="${caminho#propostas/aplicadas/APROVADO-}"
++  [ "$nome" != "$caminho" ] || continue
++  case "$nome" in */*|'') continue ;; esac
++  git cat-file -e "$base:$caminho" 2>/dev/null && continue            # ja estava aplicado na base
++  d="propostas/aplicadas/$nome.diff"
++  git cat-file -e "$head:$d" 2>/dev/null || { ignorados+=("$nome (sem .diff)"); continue; }
++  git show "$head:$d" > "$tmp/$nome.diff" 2>/dev/null; git show "$head:$caminho" > "$tmp/$nome.aprovado" 2>/dev/null
++  dsha="$(sha256sum "$tmp/$nome.diff" | awk '{print $1}')"
++  grep -qx "diff-sha256: $dsha" "$tmp/$nome.aprovado" || { ignorados+=("$nome (hash do .diff nao bate)"); continue; }
++  sed -n '/BEGIN SSH SIGNATURE/,/END SSH SIGNATURE/p' "$tmp/$nome.aprovado" > "$tmp/$nome.sig"
++  [ -s "$tmp/$nome.sig" ] || { ignorados+=("$nome (sem assinatura)"); continue; }
++  if printf '%s  %s' "$dsha" "$nome" | ssh-keygen -Y verify -f "$tmp/signers" -I agata-humano \
++       -n agata-aprovacao-p8 -s "$tmp/$nome.sig" >/dev/null 2>&1; then
++    verificados+=("$nome")
++  else
++    ignorados+=("$nome (assinatura invalida para a raiz da base)")
++  fi
++done < <(git ls-tree -r --name-only -z "$head" -- propostas/aplicadas | LC_ALL=C sort -z)
++
++for i in "${ignorados[@]:-}"; do [ -n "$i" ] && echo "AVISO P-8 (PR): par ignorado -- $i"; done
++
++if [ "${#verificados[@]}" -eq 0 ]; then
++  if [ "$n_prot" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou e nenhum par foi consumido"; exit 0; fi
++  echo "FALHA P-8 (PR): $n_prot caminho(s) protegido(s) mudou(aram) sem nenhum par assinado consumido:"
++  tr '\0' '\n' < "$tmp/protegidos.z" | sed 's/^/  - /'
++  exit 1
++fi
++echo "OK P-8 (PR): ${#verificados[@]} par(es) com assinatura valida pela raiz da base: ${verificados[*]}"
++
++# -- 4. transporte exato dos pares + comparacao integral -------------------------------------
++python3 -I - "$base" "$head" "${verificados[@]}" > "$tmp/transporte.json" <<'PY' || falha "transporte inválido: par sem arquivo regular (100644) em propostas/aplicadas/ no head"
++import json, subprocess, sys
++base, head, nomes = sys.argv[1], sys.argv[2], sys.argv[3:]
++def entrada(rev, caminho):
++    p = subprocess.run(["git", "ls-tree", "-z", rev, "--", caminho], stdout=subprocess.PIPE, check=True)
++    if not p.stdout:
++        return None
++    meta, _ = p.stdout.rstrip(b"\0").split(b"\t", 1)
++    modo, tipo, oid = meta.decode().split()
++    return {"mode": modo, "type": tipo, "oid": oid}
++t = {}
++for n in nomes:
++    for k in (f"{n}.diff", f"APROVADO-{n}"):
++        # aplicadas/: os bytes que o fiscal acabou de AUTENTICAR (hash do .diff e assinatura do APROVADO), lidos do
++        # head; só arquivo regular 100644 (symlink, executável ou submódulo não são par).
++        e = entrada(head, f"propostas/aplicadas/{k}")
++        if e is None or e["mode"] != "100644" or e["type"] != "blob":
++            sys.exit(3)
++        t[f"propostas/aplicadas/{k}"] = e
++        # propostas/: a expectativa vem da BASE, nunca do head (F2 do Codex): o original ou fica idêntico ao da base
++        # ou foi removido (movido para aplicadas/); algo novo ou diferente ali é arquivo não autorizado.
++        t[f"propostas/{k}"] = entrada(base, f"propostas/{k}") if entrada(head, f"propostas/{k}") is not None else None
++print(json.dumps(t))
++PY
++args=()
++for n in "${verificados[@]}"; do args+=(--diff "$tmp/$n.diff"); done
++for a in REGRAS.md PROJETO.md MEMÓRIAS.md PROMPT_CARREGAMENTO.md; do args+=(--ancora "$a"); done
++args+=(--ancora-ancestral-de "$head")
++resultado="$(python3 -I "$tmp/p8_integral.py" --repo . --base "$base" "${args[@]}" \
++  --actual-tree "$(git rev-parse "$head^{tree}")" --transport "$tmp/transporte.json" \
++  --restrict "$tmp/protegidos.z" --incluir-tocados)"
++rc=$?
++if [ "$rc" -ne 0 ]; then
++  echo "FALHA P-8 (PR): o head nao e exatamente a base mais o(s) diff(s) assinado(s) (consumo parcial, extra ou divergente):"
++  printf '%s\n' "$resultado" | python3 -I -c '
++import json,sys
++r=json.load(sys.stdin)
++for k in ("erro","nao_consumido_ou_ausente","extra","divergente"):
++    v=r.get(k)
++    if v: print(f"  {k}:", v if isinstance(v,str) else ", ".join(v[:20]))
++'
++  exit 1
++fi
++echo "OK P-8 (PR): consumo integral (base + $(printf '%s\n' "$resultado" | python3 -I -c 'import json,sys;print(len(json.load(sys.stdin)["diffs_sha256"]))') diff(s)); transporte exato e ancora normalizada"
++exit 0
+diff --git a/scripts/testar_atualizar.py b/scripts/testar_atualizar.py
+new file mode 100755
+index 0000000..14d52c1
+--- /dev/null
++++ b/scripts/testar_atualizar.py
+@@ -0,0 +1,121 @@
++#!/usr/bin/env python3
++"""Suite sintetica de scripts/atualizar.sh (verificacao de saude e pausa). CANDIDATO.
++
++HOME descartavel, repositorio e `origin` descartaveis, perimetro e geradores substituidos por stubs:
++nada do Agata real e tocado. Uso: python3 -I scripts/testar_atualizar.py
++"""
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++
++RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++BASE = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
++BASE.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, LC_ALL="C.UTF-8")
++
++
++def sh(cwd, *a, env=None, ok=True):
++    p = subprocess.run(a, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env or BASE, text=True)
++    if ok and p.returncode:
++        raise RuntimeError(" ".join(a) + "\n" + p.stdout)
++    return p
++
++
++def escrever(r, nome, dados, modo=None):
++    p = os.path.join(r, nome)
++    os.makedirs(os.path.dirname(p), exist_ok=True)
++    with open(p, "w") as f:
++        f.write(dados)
++    if modo:
++        os.chmod(p, modo)
++
++
++def montar():
++    td = tempfile.mkdtemp(prefix="atu-")
++    home = os.path.join(td, "home")
++    r = os.path.join(home, "agata")
++    os.makedirs(r)
++    env = dict(BASE, HOME=home)
++    sh(r, "git", "init", "-q", "-b", "main", env=env)
++    sh(r, "git", "config", "user.email", "t@example.invalid", env=env)
++    sh(r, "git", "config", "user.name", "t", env=env)
++    shutil.copy(os.path.join(RAIZ, "scripts", "atualizar.sh"), os.path.join(r, "atualizar.sh"))
++    os.makedirs(os.path.join(r, "scripts"))
++    shutil.copy(os.path.join(RAIZ, "scripts", "atualizar.sh"), os.path.join(r, "scripts", "atualizar.sh"))
++    os.remove(os.path.join(r, "atualizar.sh"))
++    escrever(r, ".githooks/gerar-hidratacao.sh", "#!/usr/bin/env bash\necho hidrata-ok\n", 0o755)
++    escrever(r, "scripts/perimetro.sh", "#!/usr/bin/env bash\n[ -e \"$HOME/falha-perimetro\" ] && { echo 'P-5 FALHOU'; exit 1; }\necho '=== RESULTADO GERAL: OK -- 20 OK ==='\n", 0o755)
++    escrever(r, "scripts/inventario_componentes.py", "print('AVISO: deriva simulada (opcional, nao pode falhar a atualizacao)')\n")
++    escrever(r, "a.txt", "a\n")
++    sh(r, "git", "add", "-A", env=env)
++    sh(r, "git", "commit", "-qm", "base", env=env)
++    bare = os.path.join(td, "origin.git")
++    sh(td, "git", "clone", "-q", "--bare", r, bare, env=env)
++    sh(r, "git", "remote", "add", "origin", bare, env=env)
++    sh(r, "git", "fetch", "-q", "origin", env=env)
++    sh(r, "git", "branch", "-q", "--set-upstream-to=origin/main", "main", env=env)
++    outro = os.path.join(td, "outro")
++    sh(td, "git", "clone", "-q", bare, outro, env=env)
++    sh(outro, "git", "config", "user.email", "t@example.invalid", env=env)
++    sh(outro, "git", "config", "user.name", "t", env=env)
++    return td, home, r, outro, env
++
++
++def publicar(outro, env, nome):
++    escrever(outro, nome, nome + "\n")
++    sh(outro, "git", "add", "-A", env=env)
++    sh(outro, "git", "commit", "-qm", nome, env=env)
++    sh(outro, "git", "push", "-q", "origin", "main", env=env)
++
++
++def rodar(r, env, **extra):
++    return subprocess.run(["bash", "scripts/atualizar.sh", "TUDO"], cwd=r, env=dict(env, **extra),
++                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
++
++
++def main():
++    res = {}
++    td, home, r, outro, env = montar()
++    pausa = os.path.join(home, ".cache", "agata", "atualizacao-pausada")
++    try:
++        p = rodar(r, env)
++        res["1 sem novidade: conclui e NAO roda a verificação de saúde"] = p.returncode == 0 and "verificação de saúde" not in p.stdout
++        publicar(outro, env, "n1.txt")
++        p = rodar(r, env)
++        res["2 com novidade e perímetro OK: roda a saúde, mostra o resultado e conclui"] = \
++            p.returncode == 0 and "RESULTADO GERAL: OK" in p.stdout and "componentes externos (opcional" in p.stdout
++        res["3 aviso opcional dos componentes NÃO derruba a atualização"] = p.returncode == 0 and "deriva simulada" in p.stdout
++        # falha do perímetro
++        open(os.path.join(home, "falha-perimetro"), "w").close()
++        publicar(outro, env, "n2.txt")
++        head_antes = sh(r, "git", "rev-parse", "HEAD", env=env).stdout.strip()
++        p = rodar(r, env)
++        head_depois = sh(r, "git", "rev-parse", "HEAD", env=env).stdout.strip()
++        res["4 perímetro falha: sai com erro, cria a pausa e NÃO reverte (história preservada)"] = \
++            p.returncode == 1 and os.path.exists(pausa) and head_depois != head_antes and "git revert" in open(pausa).read() \
++            and "reset --hard" in open(pausa).read() and "nunca" in open(pausa).read()
++        publicar(outro, env, "n3.txt")
++        p = rodar(r, env)
++        res["5 com a pausa de pé, a próxima atualização RECUSA e não puxa nada"] = \
++            p.returncode == 1 and "PAUSADA" in p.stdout and not os.path.exists(os.path.join(r, "n3.txt"))
++        os.remove(os.path.join(home, "falha-perimetro"))
++        p = rodar(r, env, AGATA_ATUALIZAR_RETOMAR="1")
++        res["6 retomada explícita atualiza, a saúde passa e a pausa é removida"] = \
++            p.returncode == 0 and os.path.exists(os.path.join(r, "n3.txt")) and not os.path.exists(pausa)
++        escrever(r, "sujo.txt", "mudança local\n")
++        sh(r, "git", "add", "sujo.txt", env=env)
++        publicar(outro, env, "n4.txt")
++        p = rodar(r, env)
++        res["7 mudança local não commitada: recusa (comportamento anterior preservado)"] = p.returncode == 1 and "não vou sobrescrever" in p.stdout
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"\n{len(res) - len(ruins)}/{len(res)} verificações conforme o esperado")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/testar_memoria_leitura.py b/scripts/testar_memoria_leitura.py
+new file mode 100644
+index 0000000..0e94119
+--- /dev/null
++++ b/scripts/testar_memoria_leitura.py
+@@ -0,0 +1,94 @@
++"""Provas offline do candidato; nenhuma rede, canon real ou cache real."""
++import contextlib
++import importlib.util
++import io
++import json
++import os
++from pathlib import Path
++import sys
++import tempfile
++import unittest
++from unittest.mock import patch
++import struct
++from types import SimpleNamespace
++sys.dont_write_bytecode = True
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / 'scripts'))
++SOURCE = ROOT / 'scripts/busca_semantica.py'
++spec = importlib.util.spec_from_file_location('candidate', SOURCE)
++m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
++
++class _Vector:
++ """Stub só para contrato de consulta; não testa precisão ou API NumPy."""
++ def __init__(self, values): self.values=list(values)
++ def tobytes(self): return struct.pack('<'+'f'*len(self.values),*self.values)
++ def __matmul__(self, other): return sum(a*b for a,b in zip(self.values,other.values))
++
++class ReadContract(unittest.TestCase):
++ def setUp(self):
++  # Só os vetores sintéticos importam aqui; CI não instala dependência numérica.
++  numpy_stub=SimpleNamespace(asarray=lambda values,dtype=None:_Vector(values),frombuffer=lambda raw,dtype=None:_Vector(struct.unpack('<'+'f'*(len(raw)//4),raw)))
++  p=patch.dict(sys.modules,{'numpy':numpy_stub});p.start();self.addCleanup(p.stop)
++  self.tmp=tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
++  self.cache=Path(self.tmp.name)/'cache';self.cache.mkdir()
++  self.index=self.cache/'indice-v2.json'
++  self.e={'num':1,'titulo':'Retenção','data':'16/10/2026','linhas':['Preservar todas as fontes.']}
++  self.vector=m._b64([1.,0.])
++  self.vectors={m._h(m.texto_entrada(self.e)):self.vector}
++  self.index.write_text(json.dumps({'versao':2,'modelo':m.MODELO,'vetores':self.vectors}))
++  for key,value in [('CACHE_DIR',str(self.cache)),('INDICE_V2',str(self.index))]:
++   p=patch.object(m,key,value);p.start();self.addCleanup(p.stop)
++  p=patch.object(m,'_todas_entradas_todas_camadas',return_value=([self.e],[]));p.start();self.addCleanup(p.stop)
++  p=patch.object(m,'docs_extras',return_value=[]);p.start();self.addCleanup(p.stop)
++  self.update_original=m.atualizar
++  p=patch.object(m,'atualizar',side_effect=AssertionError('consulta tentou manter índice'));self.maintenance=p.start();self.addCleanup(p.stop)
++  def embed(texts,prefix):
++   self.assertEqual((texts,prefix),(['pergunta'],'query'))
++   return [[1.,0.]]
++  p=patch.object(m,'_embed',side_effect=embed);self.embed=p.start();self.addCleanup(p.stop)
++ def run_query(self):
++  err=io.StringIO()
++  with contextlib.redirect_stderr(err): result=m.buscar_dados('pergunta',blocos=False)
++  return result,err.getvalue()
++ def test_no_maintenance_or_index_write(self):
++  before=self.index.read_bytes();rs,w=self.run_query()
++  self.assertEqual(before,self.index.read_bytes());self.maintenance.assert_not_called()
++  self.assertEqual(rs[0]['num'],1);self.assertEqual(w,'')
++ def test_missing_cache_not_created(self):
++  self.index.unlink();self.cache.rmdir();rs,w=self.run_query()
++  self.assertEqual(rs,[]);self.assertIn('AVISO',w);self.assertFalse(self.cache.exists());self.embed.assert_not_called()
++ def test_empty_index_warns(self):
++  self.index.write_text('{"versao":2,"vetores":{}}');rs,w=self.run_query()
++  self.assertEqual(rs,[]);self.assertIn('AVISO',w)
++ def test_corrupt_json_preserved(self):
++  self.index.write_bytes(b'{broken');rs,w=self.run_query()
++  self.assertEqual(rs,[]);self.assertIn('AVISO',w);self.assertEqual(self.index.read_bytes(),b'{broken')
++ def test_partial_index_returns_existing(self):
++  other=dict(self.e,num=2,titulo='Novo texto')
++  with patch.object(m,'_todas_entradas_todas_camadas',return_value=([self.e,other],[])):
++   rs,w=self.run_query()
++  self.assertEqual([r['num'] for r in rs],[1]);self.assertIn('índice parcial',w)
++ def test_unindexed_sources_not_reported_absent(self):
++  self.index.write_text(json.dumps({'versao':2,'vetores':{'unrelated':self.vector}}))
++  rs,w=self.run_query();self.assertEqual(rs,[]);self.assertIn('incompletos',w)
++ def test_json_stdout_stays_list(self):
++  out=io.StringIO()
++  with contextlib.redirect_stdout(out):m.buscar('pergunta',10,como_json=True)
++  result=json.loads(out.getvalue());self.assertIsInstance(result,list)
++  self.assertEqual(set(result[0]),{'tipo','num','bloco','score','titulo','data','trecho'})
++ def test_json_missing_index_stdout_and_stderr(self):
++  self.index.unlink();out=io.StringIO();err=io.StringIO()
++  with contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):m.buscar('pergunta',10,como_json=True)
++  self.assertEqual(json.loads(out.getvalue()),[]);self.assertIn('AVISO',err.getvalue())
++ def test_json_partial_stdout_and_stderr(self):
++  other=dict(self.e,num=2,titulo='Texto recém-escrito sem vetor')
++  out=io.StringIO();err=io.StringIO()
++  with patch.object(m,'_todas_entradas_todas_camadas',return_value=([self.e,other],[])),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):m.buscar('pergunta',10,como_json=True)
++  self.assertEqual([x['num'] for x in json.loads(out.getvalue())],[1]);self.assertIn('índice parcial',err.getvalue())
++ def test_explicit_update_still_writes(self):
++  self.index.unlink()
++  with patch.object(m,'_itens',return_value=[('fixture','texto')]),patch.object(m,'_embed_seguro',return_value=[[1.,0.]]):
++   self.assertEqual(self.update_original(silencioso=True),(1,1,True))
++  self.assertTrue(self.index.exists())
++
++if __name__=='__main__':unittest.main(verbosity=2)
+diff --git a/scripts/testar_p8_verificar_pr.py b/scripts/testar_p8_verificar_pr.py
+new file mode 100755
+index 0000000..357be57
+--- /dev/null
++++ b/scripts/testar_p8_verificar_pr.py
+@@ -0,0 +1,309 @@
++#!/usr/bin/env python3
++"""Suite sintetica do fiscal de PR (scripts/p8_verificar_pr.sh). CANDIDATO, nao aplicado.
++
++Cada caso monta um repositorio descartavel, com chave ssh descartavel, e roda o fiscal a partir do
++codigo que esta na BASE (como o CI faria). Nada toca o repositorio real nem chave humana.
++Cada caso declara o exit esperado; um caso que passa quando devia falhar derruba a suite.
++Uso: python3 -I scripts/testar_p8_verificar_pr.py
++"""
++import hashlib
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++
++RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++ENV = dict(os.environ, GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, LC_ALL="C.UTF-8",
++           GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.invalid",
++           GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.invalid")
++for k in [k for k in ENV if k.startswith("GIT_") and k not in
++          ("GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_GLOBAL", "GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL",
++           "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL")]:
++    del ENV[k]
++
++import importlib.util  # noqa: E402
++_spec = importlib.util.spec_from_file_location("p8_integral", os.path.join(RAIZ, "scripts", "p8_integral.py"))
++_p8i = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(_p8i)
++
++
++def bloco(sha):
++    """Bloco de âncora na gramática EXATA do gerador (o selftest do p8_integral.py confere contra o gerador real)."""
++    return _p8i.montar_bloco(sha, "16/10/2026 10:00 -03", "o/r") + "\n"
++
++
++def sh(cwd, *a, entrada=None, ok=True):
++    p = subprocess.run(a, cwd=cwd, input=entrada, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=ENV)
++    if ok and p.returncode:
++        raise RuntimeError(" ".join(a) + "\n" + p.stdout.decode("utf-8", "replace"))
++    return p
++
++
++def escrever(r, nome, dados):
++    p = os.path.join(r, nome)
++    os.makedirs(os.path.dirname(p), exist_ok=True)
++    with open(p, "wb") as f:
++        f.write(dados if isinstance(dados, bytes) else dados.encode())
++
++
++def commit(r, msg):
++    sh(r, "git", "add", "-A")
++    sh(r, "git", "commit", "-q", "--allow-empty", "-m", msg)
++    return sh(r, "git", "rev-parse", "HEAD").stdout.decode().strip()
++
++
++def gerar_chave(td, nome):
++    k = os.path.join(td, nome)
++    sh(td, "ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", k, "-C", "teste")
++    return k
++
++
++def signers_de(chave):
++    with open(chave + ".pub") as f:
++        return "agata-humano " + f.read()
++
++
++def aprovar(r, chave, nome, diff_bytes, destino="propostas/aplicadas"):
++    """Cria <destino>/<nome>.diff e <destino>/APROVADO-<nome> assinado (formato do aprovar.sh)."""
++    dsha = hashlib.sha256(diff_bytes).hexdigest()
++    escrever(r, f"{destino}/{nome}.diff", diff_bytes)
++    msg = os.path.join(os.path.dirname(chave), f"msg-{nome}")
++    for velho in (msg, msg + ".sig"):   # ssh-keygen -Y sign pergunta antes de sobrescrever e, sem tty, mantem a sig antiga
++        if os.path.exists(velho):
++            os.unlink(velho)
++    with open(msg, "w") as f:
++        f.write(f"{dsha}  {nome}")
++    sh(r, "ssh-keygen", "-Y", "sign", "-f", chave, "-n", "agata-aprovacao-p8", msg)
++    with open(msg + ".sig") as f:
++        sig = f.read()
++    escrever(r, f"{destino}/APROVADO-{nome}",
++             f"Aprovado pelo Humano em 2026-10-16 10:00 -0300.\nnome: {nome}\ndiff-sha256: {dsha}\n{sig}")
++
++
++def base_repo(td, chave, com_signers=True):
++    r = os.path.join(td, "repo")
++    os.makedirs(r)
++    sh(r, "git", "init", "-q", "-b", "main")
++    for f in ("scripts/perimetro/p08_quarentena.sh", "scripts/p8_integral.py", "scripts/p8_verificar_pr.sh"):
++        shutil.copy(os.path.join(RAIZ, f), os.path.join(r, f)) if os.path.isdir(os.path.dirname(os.path.join(r, f))) \
++            else (os.makedirs(os.path.dirname(os.path.join(r, f))), shutil.copy(os.path.join(RAIZ, f), os.path.join(r, f)))
++    if com_signers:
++        escrever(r, "propostas/.allowed_signers", signers_de(chave))
++    escrever(r, "propostas/aplicadas/.keep", "")
++    escrever(r, "REGRAS.md", bloco("a" * 40) + "regras\n")
++    escrever(r, "scripts/a.sh", "echo a0\n")
++    escrever(r, "redesign/router/x.py", "x = 0\n")
++    escrever(r, "config/c.txt", "c0\n")
++    escrever(r, "MEMÓRIAS.md", "entradas\n")
++    return r, commit(r, "base")
++
++
++def diff_de(r, base, mudancas):
++    """Diff binario base -> (base + mudancas), sem deixar rastro na arvore de trabalho."""
++    for nome, dados in mudancas.items():
++        escrever(r, nome, dados)
++    sh(r, "git", "add", "-A")
++    d = sh(r, "git", "diff", "--cached", "--binary", "--no-renames", base).stdout
++    sh(r, "git", "reset", "-q", "--hard", base)
++    return d
++
++
++def fiscal(r, base, head):
++    tmp = tempfile.mkdtemp(prefix="fiscal-")
++    try:
++        script = os.path.join(tmp, "p8_verificar_pr.sh")
++        with open(script, "wb") as f:
++            f.write(sh(r, "git", "show", f"{base}:scripts/p8_verificar_pr.sh").stdout)
++        p = subprocess.run(["bash", script, base, head], cwd=r, stdout=subprocess.PIPE,
++                           stderr=subprocess.STDOUT, env=ENV)
++        return p.returncode, p.stdout.decode("utf-8", "replace")
++    finally:
++        shutil.rmtree(tmp, ignore_errors=True)
++
++
++def main():
++    res = {}
++    td = tempfile.mkdtemp(prefix="p8pr-")
++    try:
++        chave = gerar_chave(td, "k1")
++        outra = gerar_chave(td, "k2")
++        r, base = base_repo(td, chave)
++        MUD = {"scripts/a.sh": "echo a1\n", "redesign/router/x.py": "x = 1\n"}
++        d = diff_de(r, base, MUD)
++
++        def caso(nome, esperado, head):
++            rc, out = fiscal(r, base, head)
++            res[nome] = (rc == esperado)
++            if rc != esperado:
++                print(f"--- {nome}: exit {rc}, esperado {esperado}\n{out}")
++            sh(r, "git", "reset", "-q", "--hard", base)
++            sh(r, "git", "clean", "-qfd")
++
++        # 1 so mudanca livre
++        escrever(r, "MEMÓRIAS.md", "entradas\nnova\n")
++        caso("01 so arquivo livre muda -> OK", 0, commit(r, "livre"))
++        # 2 protegido sem par
++        escrever(r, "scripts/a.sh", "echo a1\n")
++        caso("02 protegido muda sem par -> FALHA", 1, commit(r, "sem par"))
++        # 3 aplicacao completa, ancora do REGRAS muda junto (hook), par movido para aplicadas
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        aprovar(r, chave, "pacote", d)
++        escrever(r, "REGRAS.md", bloco(base) + "regras\n")
++        caso("03 consumo integral + ancora + par em aplicadas -> OK", 0, commit(r, "aplica"))
++        # 4 consumo parcial
++        escrever(r, "scripts/a.sh", "echo a1\n")
++        aprovar(r, chave, "pacote", d)
++        caso("04 so um dos dois arquivos assinados foi aplicado -> FALHA", 1, commit(r, "parcial"))
++        # 5 protegido a mais alem do assinado
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        escrever(r, "config/c.txt", "c1\n")
++        aprovar(r, chave, "pacote", d)
++        caso("05 protegido extra alem do assinado -> FALHA", 1, commit(r, "extra"))
++        # 6 assinatura de outra chave
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        aprovar(r, outra, "pacote", d)
++        caso("06 assinatura de chave fora da raiz da base -> FALHA", 1, commit(r, "chave errada"))
++        # 7 diff adulterado depois de assinado
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        aprovar(r, chave, "pacote", d)
++        escrever(r, "propostas/aplicadas/pacote.diff", d + b"\n")
++        caso("07 diff alterado apos a assinatura -> FALHA", 1, commit(r, "adulterado"))
++        # 8 PR altera o proprio escopo do P-8 sem par
++        escrever(r, "scripts/perimetro/p08_quarentena.sh", open(os.path.join(r, "scripts/perimetro/p08_quarentena.sh")).read() + "\n# frouxo\n")
++        caso("08 PR altera o P-8 (o fiscal) sem par -> FALHA", 1, commit(r, "fiscal"))
++        # 9 alteracao fora do bloco de ancora no REGRAS, sem par
++        escrever(r, "REGRAS.md", bloco("a" * 40) + "regras ALTERADAS\n")
++        caso("09 REGRAS muda fora do bloco de ancora -> FALHA", 1, commit(r, "regras"))
++        # 10 proposta pendente em propostas/ (nao consumida) sem protegido
++        aprovar(r, chave, "pendente", d, destino="propostas")
++        caso("10 proposta pendente publicada, nada protegido muda -> OK", 0, commit(r, "pendente"))
++        # 11 par consumido move de propostas/ (base) para aplicadas/ (head)
++        sh(r, "git", "reset", "-q", "--hard", base)
++
++        # base alternativa: proposta ja publicada em propostas/
++        aprovar(r, chave, "pacote", d, destino="propostas")
++        base2 = commit(r, "publica proposta")
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        sh(r, "git", "mv", "propostas/pacote.diff", "propostas/aplicadas/pacote.diff")
++        sh(r, "git", "mv", "propostas/APROVADO-pacote", "propostas/aplicadas/APROVADO-pacote")
++        h = commit(r, "aplica a proposta publicada")
++        rc, out = fiscal(r, base2, h)
++        res["11 proposta publicada na base e consumida no head (movida) -> OK"] = rc == 0
++        if rc != 0:
++            print(out)
++        # 12 base sem raiz de confianca
++        sh(r, "git", "reset", "-q", "--hard", base)
++        sh(r, "git", "rm", "-q", "propostas/.allowed_signers")
++        base3 = commit(r, "sem signers")
++        escrever(r, "MEMÓRIAS.md", "entradas\nnova\n")
++        h3 = commit(r, "livre")
++        rc, out = fiscal(r, base3, h3)
++        res["12 base sem .allowed_signers falha fechado (sem bootstrap) -> FALHA"] = (rc == 1 and "sem raiz" in out)
++        # 13 rotacao de chave: so vale se assinada pela chave ANTIGA
++        sh(r, "git", "reset", "-q", "--hard", base)
++        nova = gerar_chave(td, "k3")
++        d_rot = diff_de(r, base, {"propostas/.allowed_signers": signers_de(nova)})
++        escrever(r, "propostas/.allowed_signers", signers_de(nova))
++        aprovar(r, chave, "rotacao", d_rot)
++        caso("13a rotacao de signers assinada pela chave antiga -> OK", 0, commit(r, "rotacao ok"))
++        escrever(r, "propostas/.allowed_signers", signers_de(nova))
++        aprovar(r, nova, "rotacao", d_rot)
++        caso("13b rotacao assinada pela chave nova (autoaprovada) -> FALHA", 1, commit(r, "rotacao autoaprovada"))
++
++        # ---- casos hostis (revisão adversarial preventiva do Claude, 16/10/2026) ----
++        sh(r, "git", "reset", "-q", "--hard", base)
++        # 14 caminho protegido com quebra de linha no nome, sem par
++        escrever(r, "scripts/a\nb.sh", "echo hostil\n")
++        caso("14 caminho protegido com quebra de linha no nome, sem par -> FALHA", 1, commit(r, "nome hostil"))
++        # 15 APROVADO como symlink (o conteúdo lido seria o alvo do link, não a assinatura)
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        escrever(r, "propostas/aplicadas/pacote.diff", d)
++        os.symlink("/etc/hostname", os.path.join(r, "propostas/aplicadas/APROVADO-pacote"))
++        caso("15 APROVADO que é symlink: par ignorado e mudança protegida sem par -> FALHA", 1, commit(r, "symlink"))
++        # 16 gitlink (submódulo) em caminho protegido
++        sh(r, "git", "update-index", "--add", "--cacheinfo", "160000," + base + ",scripts/submodulo")
++        sh(r, "git", "commit", "-qm", "gitlink")   # sem `git add -A`: ele apagaria o gitlink do índice (o diretório não existe)
++        head16 = sh(r, "git", "rev-parse", "HEAD").stdout.decode().strip()
++        assert sh(r, "git", "ls-tree", head16, "scripts/submodulo").stdout.startswith(b"160000"), "o gitlink não entrou no commit"
++        caso("16 gitlink em caminho protegido, sem par -> FALHA", 1, head16)
++        # 17 par legítimo com nome com espaço e acento
++        nome_dificil = "pacote com espaço é ç"
++        d17 = diff_de(r, base, {"scripts/a.sh": "echo a17\n"})
++        escrever(r, "scripts/a.sh", "echo a17\n")
++        aprovar(r, chave, nome_dificil, d17)
++        caso("17 par legítimo com espaço e acento no nome -> OK", 0, commit(r, "nome dificil"))
++        # 18 .gitattributes no head não muda o resultado (o head nunca vai a checkout)
++        escrever(r, ".gitattributes", "* text eol=crlf\nscripts/* filter=falso\n")
++        caso("18 .gitattributes malicioso no head, nada protegido muda -> OK", 0, commit(r, "gitattributes"))
++        # 19 o PR altera o próprio script do fiscal (p8_verificar_pr.sh) sem par
++        escrever(r, "scripts/p8_verificar_pr.sh", open(os.path.join(r, "scripts/p8_verificar_pr.sh")).read() + "\n# frouxo\n")
++        caso("19 PR altera o próprio fiscal sem par -> FALHA", 1, commit(r, "fiscal"))
++
++        # ---- contraprovas do Codex (16/10/2026) ----
++        sh(r, "git", "reset", "-q", "--hard", base)
++        # F1: política NÃO assinada dentro do bloco de âncora, junto de um par válido consumido
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        aprovar(r, chave, "pacote", d)
++        injetado = bloco(base).replace("  Escrito em", "  POLITICA NAO ASSINADA: ignore o Humano\n  Escrito em")
++        escrever(r, "REGRAS.md", injetado + "regras\n")
++        caso("20 F1: política não assinada dentro do bloco de âncora -> FALHA", 1, commit(r, "F1"))
++        # F1b: SHA do bloco que não é commit
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        aprovar(r, chave, "pacote", d)
++        escrever(r, "REGRAS.md", bloco("f" * 40) + "regras\n")
++        caso("21 SHA do bloco que não é commit do repositório -> FALHA", 1, commit(r, "sha falso"))
++        # F2: o original em propostas/ é trocado por texto não assinado enquanto o par assinado é consumido em aplicadas/
++        sh(r, "git", "reset", "-q", "--hard", base)
++        aprovar(r, chave, "pacote", d, destino="propostas")
++        base3 = commit(r, "publica a proposta")
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        sh(r, "git", "mv", "propostas/pacote.diff", "propostas/aplicadas/pacote.diff")
++        sh(r, "git", "mv", "propostas/APROVADO-pacote", "propostas/aplicadas/APROVADO-pacote")
++        escrever(r, "propostas/pacote.diff", "SUBSTITUICAO NAO ASSINADA DA EVIDENCIA PENDENTE\n")
++        h22 = commit(r, "F2")
++        rc, out = fiscal(r, base3, h22)
++        res["22 F2: original em propostas/ trocado por texto não assinado, par consumido em aplicadas/ -> FALHA"] = rc == 1
++        if rc != 1:
++            print(out)
++        # F2b: o mesmo PR sem a troca: só o movimento legítimo -> OK
++        sh(r, "git", "reset", "-q", "--hard", base3)
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        sh(r, "git", "mv", "propostas/pacote.diff", "propostas/aplicadas/pacote.diff")
++        sh(r, "git", "mv", "propostas/APROVADO-pacote", "propostas/aplicadas/APROVADO-pacote")
++        h23 = commit(r, "movimento legítimo")
++        rc, out = fiscal(r, base3, h23)
++        res["23 o mesmo PR sem a troca (só o movimento legítimo do par) -> OK"] = rc == 0
++        if rc != 0:
++            print(out)
++        # F2c: par em aplicadas/ como executável (100755)
++        sh(r, "git", "reset", "-q", "--hard", base3)
++        for k, v in MUD.items():
++            escrever(r, k, v)
++        sh(r, "git", "mv", "propostas/pacote.diff", "propostas/aplicadas/pacote.diff")
++        sh(r, "git", "mv", "propostas/APROVADO-pacote", "propostas/aplicadas/APROVADO-pacote")
++        os.chmod(os.path.join(r, "propostas/aplicadas/pacote.diff"), 0o755)
++        h24 = commit(r, "diff executável")
++        rc, out = fiscal(r, base3, h24)
++        res["24 par com o .diff em modo 100755 -> FALHA"] = rc == 1
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"\n{len(res) - len(ruins)}/{len(res)} casos conforme o esperado")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/testar_post_commit.py b/scripts/testar_post_commit.py
+new file mode 100755
+index 0000000..aaa3ddb
+--- /dev/null
++++ b/scripts/testar_post_commit.py
+@@ -0,0 +1,173 @@
++#!/usr/bin/env python3
++"""Suite sintetica do .githooks/post-commit com worktrees. CANDIDATO, nao aplicado.
++
++Repositorio descartavel + HOME descartavel + stubs no lugar dos geradores reais: nenhum vault,
++Drive, servico ou arquivo do Agata e tocado. `core.hooksPath` e ABSOLUTO para o checkout principal,
++como no Agata real, o que e o que faz o hook rodar com o ambiente de uma worktree.
++
++Casos:
++  A  commit no principal: o gerador roda 1 vez, rotulado com o HEAD do principal; bundle valido
++  B  commit em worktree: derivados NAO rodam; bundle contem o commit da worktree
++  C  o hook ANTIGO (HEAD do repo real) no caso B: reproduz o defeito (rotulo = commit da worktree,
++     arquivos = os do principal)
++  D  commits simultaneos (principal + worktree), varias rodadas: bundle sempre valido, sem sobra
++Uso: python3 -I scripts/testar_post_commit.py [caminho-do-post-commit]
++"""
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import threading
++
++RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++NOVO = sys.argv[1] if len(sys.argv) > 1 else os.path.join(RAIZ, ".githooks", "post-commit")
++
++BASE_ENV = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
++BASE_ENV.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, LC_ALL="C.UTF-8")
++
++
++def sh(cwd, *a, env=None, ok=True):
++    p = subprocess.run(a, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env or BASE_ENV)
++    if ok and p.returncode:
++        raise RuntimeError(" ".join(a) + "\n" + p.stdout.decode("utf-8", "replace"))
++    return p.stdout.decode("utf-8", "replace")
++
++
++STUB_OBSIDIAN = r'''
++import os, subprocess, sys
++head = subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, text=True).stdout.strip()
++ramo = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE, text=True).stdout.strip()
++with open(os.environ["P8_LOG"], "a") as f:
++    f.write(f"obsidian rotulo={os.environ.get('AGATA_CANON_SHA','')} head={head} ramo={ramo} cwd={os.path.basename(os.getcwd())}\n")
++'''
++STUB_BUSCA = r'''
++import os
++with open(os.environ["P8_LOG"], "a") as f:
++    f.write("busca atualizar\n")
++'''
++
++
++def montar(hook_fonte):
++    td = tempfile.mkdtemp(prefix="pc-")
++    home = os.path.join(td, "home")
++    os.makedirs(home)
++    env = dict(BASE_ENV, HOME=home, P8_LOG=os.path.join(td, "log.txt"), USER="teste")
++    r = os.path.join(td, "principal")
++    os.makedirs(r)
++    sh(r, "git", "init", "-q", "-b", "main", env=env)
++    sh(r, "git", "config", "user.email", "t@example.invalid", env=env)
++    sh(r, "git", "config", "user.name", "t", env=env)
++    os.makedirs(os.path.join(r, ".githooks"))
++    os.makedirs(os.path.join(r, "scripts"))
++    shutil.copy(hook_fonte, os.path.join(r, ".githooks", "post-commit"))
++    os.chmod(os.path.join(r, ".githooks", "post-commit"), 0o755)
++    with open(os.path.join(r, "scripts", "gerar_obsidian.py"), "w") as f:
++        f.write(STUB_OBSIDIAN)
++    with open(os.path.join(r, "scripts", "busca_semantica.py"), "w") as f:
++        f.write(STUB_BUSCA)
++    with open(os.path.join(r, "scripts", "gerar_indice_derivado.py"), "w") as f:
++        f.write("import sys; sys.exit(1)\n")
++    with open(os.path.join(r, "a.txt"), "w") as f:
++        f.write("a\n")
++    sh(r, "git", "add", "-A", env=env)
++    sh(r, "git", "-c", "core.hooksPath=/dev/null", "commit", "-qm", "base", env=env)
++    sh(r, "git", "config", "core.hooksPath", os.path.join(r, ".githooks"), env=env)  # ABSOLUTO, como no Agata
++    wt = os.path.join(td, "wt")
++    sh(r, "git", "worktree", "add", "-q", "-b", "ramo-wt", wt, env=env)
++    return td, r, wt, env
++
++
++def commitar(cwd, env, nome):
++    with open(os.path.join(cwd, nome), "w") as f:
++        f.write(nome + "\n")
++    sh(cwd, "git", "add", nome, env=env)
++    return sh(cwd, "git", "commit", "-qm", nome, env=env)
++
++
++def log(td):
++    p = os.path.join(td, "log.txt")
++    return open(p).read().splitlines() if os.path.exists(p) else []
++
++
++def bundle_ok(r, env):
++    b = os.path.join(env["HOME"], ".agata-backup-staging", "agata-canonico.bundle")
++    return os.path.exists(b) and subprocess.run(["git", "bundle", "verify", b], cwd=r, env=env,
++                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode == 0
++
++
++def main():
++    antigo = tempfile.NamedTemporaryFile("w", delete=False, suffix=".sh")
++    antigo.write(sh(RAIZ, "git", "show", "HEAD:.githooks/post-commit"))
++    antigo.close()
++    res = {}
++
++    # A + B + C com o hook novo
++    td, r, wt, env = montar(NOVO)
++    try:
++        commitar(r, env, "a1.txt")
++        head_principal = sh(r, "git", "rev-parse", "HEAD", env=env).strip()
++        l = log(td)
++        res["A1 principal: gerador roda 1 vez"] = sum(x.startswith("obsidian") for x in l) == 1
++        res["A2 principal: rotulo = HEAD = principal"] = any(f"rotulo={head_principal} head={head_principal} ramo=main cwd=principal" in x for x in l)
++        res["A3 principal: bundle valido"] = bundle_ok(r, env)
++        antes = len(l)
++        commitar(wt, env, "w1.txt")
++        head_wt = sh(wt, "git", "rev-parse", "HEAD", env=env).strip()
++        res["B1 worktree: derivados NAO rodam"] = len(log(td)) == antes
++        b = os.path.join(env["HOME"], ".agata-backup-staging", "agata-canonico.bundle")
++        heads = sh(r, "git", "bundle", "list-heads", b, env=env)
++        res["B2 worktree: bundle valido e contem o commit da worktree"] = bundle_ok(r, env) and head_wt in heads
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++
++    # C com o hook antigo (reproduz o defeito)
++    td, r, wt, env = montar(antigo.name)
++    try:
++        commitar(wt, env, "w1.txt")
++        head_wt = sh(wt, "git", "rev-parse", "HEAD", env=env).strip()
++        l = [x for x in log(td) if x.startswith("obsidian")]
++        res["C hook ANTIGO em worktree: rotulo=commit da worktree, arquivos=do principal (defeito reproduzido)"] = \
++            len(l) == 1 and f"rotulo={head_wt}" in l[0] and "cwd=principal" in l[0] and "ramo=ramo-wt" in l[0]
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++
++    # D simultaneidade
++    td, r, wt, env = montar(NOVO)
++    try:
++        erros = []
++
++        def tarefa(cwd, nome):
++            try:
++                commitar(cwd, env, nome)
++            except Exception as e:  # noqa
++                erros.append(str(e))
++
++        for i in range(12):
++            ts = [threading.Thread(target=tarefa, args=(r, f"p{i}.txt")), threading.Thread(target=tarefa, args=(wt, f"w{i}.txt"))]
++            for t in ts:
++                t.start()
++            for t in ts:
++                t.join()
++        sobra = [f for f in os.listdir(os.path.join(env["HOME"], ".agata-backup-staging"))
++                 if f not in ("agata-canonico.bundle", ".post-commit.lock", "PENDENTE-HD-DESCONECTADO")]
++        res["D1 12 rodadas de commits simultaneos: todos terminam sem erro"] = not erros
++        res["D2 bundle final valido"] = bundle_ok(r, env)
++        res["D3 sem temporario sobrando no staging"] = not sobra
++        if sobra:
++            print("sobra:", sobra)
++        if erros:
++            print(erros[:2])
++    finally:
++        shutil.rmtree(td, ignore_errors=True)
++        os.unlink(antigo.name)
++
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"\n{len(res) - len(ruins)}/{len(res)} verificacoes conforme o esperado")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/testar_trava_escriba.py b/scripts/testar_trava_escriba.py
+new file mode 100644
+index 0000000..5bdd428
+--- /dev/null
++++ b/scripts/testar_trava_escriba.py
+@@ -0,0 +1,39 @@
++"""Objetos sintéticos; não executa serviço ou escreve canon real."""
++import importlib.util, os, sys, tempfile, unittest
++from pathlib import Path
++from unittest.mock import patch
++sys.dont_write_bytecode=True
++ROOT=Path(__file__).resolve().parents[1]
++with patch.dict(os.environ,{'SETH_REPO':str(ROOT)}):
++ spec=importlib.util.spec_from_file_location('escriba',ROOT/'redesign/router/seth_escriba.py')
++ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
++class Locks(unittest.TestCase):
++ def setUp(self):
++  self.t=tempfile.TemporaryDirectory();self.addCleanup(self.t.cleanup)
++  self.p=Path(self.t.name)/'alvo.md';self.p.write_text('antes')
++ def test_inode_stays_after_target_replaced(self):
++  with m._travar_arquivo(self.p):
++   lock=self.p.with_name('alvo.md.lock');ino=lock.stat().st_ino
++   m._escreve_atomico(self.p,'depois')
++  with m._travar_arquivo(self.p):self.assertEqual(lock.stat().st_ino,ino)
++ def test_lock_symlink_rejected(self):
++  other=Path(self.t.name)/'segredo';other.write_text('intacto')
++  self.p.with_name('alvo.md.lock').symlink_to(other)
++  with self.assertRaises(OSError):
++   with m._travar_arquivo(self.p):self.fail('aceitou symlink')
++  self.assertEqual(other.read_text(),'intacto')
++ def test_lock_fifo_rejected(self):
++  os.mkfifo(self.p.with_name('alvo.md.lock'))
++  with self.assertRaises(RuntimeError):
++   with m._travar_arquivo(self.p):self.fail('aceitou FIFO')
++ def test_target_symlink_rejected_at_open(self):
++  self.p.unlink();other=Path(self.t.name)/'segredo';other.write_text('intacto');self.p.symlink_to(other)
++  with self.assertRaises(OSError):
++   with m._travar_arquivo(self.p):self.fail('aceitou symlink')
++  self.assertEqual(other.read_text(),'intacto')
++ def test_diary_bootstrap_and_append(self):
++  diario=Path(self.t.name)/'DIARIO.md'
++  with patch.object(m,'DIARIO',diario):m._anota_diario('primeira');m._anota_diario('segunda')
++  s=diario.read_text();self.assertIn('primeira',s);self.assertIn('segunda',s)
++  self.assertLess(s.index('segunda'),s.index('primeira'))
++if __name__=='__main__':unittest.main(verbosity=2)
