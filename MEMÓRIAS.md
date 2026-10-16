@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 69fe379f139d3634726268ee34c5bc16aa2b6e72
-  Escrito em: 16/10/2026 13:59 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a82b8d983dcbd71d9d71465952e86f9d7c792689
+  Escrito em: 16/10/2026 14:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/69fe379f139d3634726268ee34c5bc16aa2b6e72/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/69fe379f139d3634726268ee34c5bc16aa2b6e72/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/69fe379f139d3634726268ee34c5bc16aa2b6e72/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/69fe379f139d3634726268ee34c5bc16aa2b6e72/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/69fe379f139d3634726268ee34c5bc16aa2b6e72/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
+
+Aplicada a proposta assinada, do Codex, revisada por mim sem emenda. A regex de `auditoria_turno.py` passa a cobrir os blocos de símbolos e emoji pela propriedade Emoji da tabela oficial Unicode 17.0 (relógio, ampulheta, setas, keycap, quadrados e outros), sem acusar símbolos tipográficos (✓ ★ ♪ ☐ → © ® ™). Continua só aviso: não remove texto. O catálogo de afirmações desmentidas ganha o `qwen3.5:9b`. Medido antes: 12% dos 134 turnos auditados tinham emoji; a meta é derrubar esse número, e a decisão de remover o emoji da prosa (E-2) continua do Humano.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex · vetor: selftest de `auditoria_turno.py`, casos cegos e livres escolhidos pelo revisor · Autorização: Humano — assinatura de `emoji-e1-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Detector de derivados misturados aplicado (`derivados-consistencia-v2-20261016`): o `post-commit` passa a avisar quando o checkout muda enquanto vault e índice são gerados.**
 
 Aplicada a proposta assinada. O hook mede HEAD e o conteúdo dos arquivos rastreados (`git diff HEAD --binary`) antes e depois da geração; se mudou, avisa e grava marcador por checkout em `~/.cache/agata/`. É detecção PARCIAL, não snapshot por SHA: mudança que volta ao estado inicial (ABA), arquivo não rastreado e o envio ao Drive antes do aviso ficam fora da garantia. Origem: achado do Codex (revisão de 4abe4ec4) sobre a v1, que comparava só HEAD e status. Testes do post-commit 13/13 (revisão independente do Codex: 13/13).
