@@ -26,21 +26,21 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0a401f8adc6b95b6667c397510154db8a48aca9e
-  Escrito em: 16/10/2026 20:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e2be55e068a934861ac01416d08078281b09d77b
+  Escrito em: 16/10/2026 20:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a401f8adc6b95b6667c397510154db8a48aca9e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a401f8adc6b95b6667c397510154db8a48aca9e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a401f8adc6b95b6667c397510154db8a48aca9e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a401f8adc6b95b6667c397510154db8a48aca9e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a401f8adc6b95b6667c397510154db8a48aca9e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2be55e068a934861ac01416d08078281b09d77b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2be55e068a934861ac01416d08078281b09d77b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2be55e068a934861ac01416d08078281b09d77b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2be55e068a934861ac01416d08078281b09d77b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e2be55e068a934861ac01416d08078281b09d77b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
-(736) Claude Code (Sonnet 5.5) — decisão do Humano de 16/10/2026 20h36: a vigia fica permanente para todos os modelos confederados. Aplicada vigia-permanente-20261016 (assinada): unit de usuário agata-vigia@.service (uma instância por agente, só shell, eventos em ~/.cache/agata/sincronia/vigia-<agente>.log) e linha na Skill agata-fluxo-dupla. Instalar e ligar as units é decisão do Humano. Fonte: propostas/aplicadas/vigia-permanente-20261016.diff.
+(736) DIÁRIO — 16/10/2026 · **Vigia permanente aplicada (`vigia-permanente-20261016`).** Decisão do Humano, 20h36: a vigia fica permanente para todos os modelos confederados. Claude Code (Sonnet 5.5) aplicou vigia-permanente-20261016 (assinada): unit de usuário agata-vigia@.service (uma instância por agente, só shell, eventos em ~/.cache/agata/sincronia/vigia-<agente>.log) e linha na Skill agata-fluxo-dupla. Instalar e ligar as units é decisão do Humano. Fonte: propostas/aplicadas/vigia-permanente-20261016.diff.
 
 (735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
 
