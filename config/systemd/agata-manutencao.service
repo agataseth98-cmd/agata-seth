@@ -1,0 +1,11 @@
+[Unit]
+Description=Ágata — janela de manutenção diária 12h15-13h15 (avaliação do decisor, consolidação, treino do Laya)
+# Roda scripts/janela_manutencao.py (config/janela-tarefas.txt). Quem decide se está na janela e se a tarefa é devida é o script
+# (hora de Brasília, tentativas por dia, recibos em ~/.cache/agata/janela/); o timer só o chama.
+[Service]
+Type=oneshot
+WorkingDirectory=%h/agata
+# systemd-inhibit: a máquina não dorme no meio da janela (lição de (715): o KDE suspendeu um treino às 00:34).
+ExecStart=/usr/bin/systemd-inhibit --what=sleep:idle --who=agata-manutencao --why="janela de manutenção diária" --mode=block /usr/bin/python3 %h/agata/scripts/janela_manutencao.py
+TimeoutStartSec=65min
+Nice=10
