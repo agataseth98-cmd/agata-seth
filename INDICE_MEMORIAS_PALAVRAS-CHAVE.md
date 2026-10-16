@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Dependabot passa a ignorar versões maiores de github-actions (`dependabot-major-20261016`).**
+  palavras-chave: dependabot, passa, ignorar, versões, maiores, github, actions, major
 (729) DIÁRIO — 16/10/2026 · **README do roteador corrigido (`readme-router-20261016`): o sanitizador de segredo já está ligado ao caminho de saída.**
   palavras-chave: readme, roteador, corrigido, router, sanitizador, segredo, ligado, caminho, saída
 (729) DIÁRIO — 16/10/2026 · **Painel de estado só de leitura aplicado (`painel-estado-v3-20261016`): `python3 scripts/painel_estado.py` mostra numa tela o que está no ar e o que espera a assinatura do Humano, com o comando Fish que confere os hashes antes de assinar.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, seth, navegador, pedido, humano, travou, olá, gemini, flash, cota, ficou, responder, fila, andou, proposta, prazo, primeiro, conteudo, corta, espera, medido, erros, vitórias, rodada, registrados, registre, aguardando, assinatura
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (assinada pelo Humano): a suíte do perímetro não herda mais o ambiente git do hook. Aplicada no `~/agata`, não em worktree, como (706) ensinou.**
   palavras-chave: execução, aplicada, suite, fora, worktree, assinada, humano, suíte, perímetro, herda, ambiente, git, hook, agata, ensinou
-(707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina funciona em stream — um por resposta, modelo real certo, `t` certo, e a Seth não escreve o dela; a conversa longa que ia para o Nemotron fica na `seth-livre`; a segunda opinião do Jev responde pelo caminho da Seth em 6 s. E a proposta `suite-fora-da-worktree-2026-10-14` conserta a causa do incidente de (706). Aguardando assinatura.**
-  palavras-chave: reteste, cabeçalho, escrito, máquina, funciona, stream, resposta, modelo, real, certo, seth, escreve, dela, conversa, longa, nemotron, fica, livre, segunda, opinião, jev, responde, caminho, proposta, suite, fora, worktree, conserta, causa, incidente, aguardando, assinatura
+(707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina …
+  palavras-chave: reteste, cabeçalho, escrito, máquina
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (as …
   palavras-chave: execução, aplicada, seth, cabecalho, maquina
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o ca …

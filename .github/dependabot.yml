@@ -10,3 +10,9 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+    # Versão MAIOR de uma action muda comportamento do CI e mexe em workflow protegido: entra só por proposta
+    # assinada, não por PR automático (o fiscal-p8 barraria o PR de qualquer forma; ver PR 234, fechado em 16/10/2026).
+    # Não afeta atualizações de SEGURANÇA, que seguem abrindo PR.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

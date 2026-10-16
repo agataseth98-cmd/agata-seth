@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Dependabot passa a ignorar versões maiores de github-actions (`dependabot-major-20261016`).**
 (729) DIÁRIO — 16/10/2026 · **README do roteador corrigido (`readme-router-20261016`): o sanitizador de segredo já está ligado ao caminho de saída.**
 (729) DIÁRIO — 16/10/2026 · **Painel de estado só de leitura aplicado (`painel-estado-v3-20261016`): `python3 scripts/painel_estado.py` mostra numa tela o que está no ar e o que espera a assinatura do Humano, com o comando Fish que confere os hashes antes de assinar.**
 (729) DIÁRIO — 16/10/2026 · **`PROJETO.md` voltou ao teto (`projeto-mapa-v2-20261016`): de 57.618 B para 47.965 B, com o detalhe movido sem alteração para `extras/projeto-detalhe/`.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-14` (assinada pelo Humano), em worktree. Reteste na entrada seguinte.**
 (709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) travou no 1º "Olá": o Gemini 2.5 Flash, sem cota, ficou 310 s sem responder e a fila não andou. Proposta `seth-prazo-primeiro-conteudo-2026-10-14` corta a espera de 310 s para ~47 s (medido). Erros e vitórias da rodada registrados, a pedido do Humano ("registre erros e vitórias"). Aguardando assinatura.**
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (assinada pelo Humano): a suíte do perímetro não herda mais o ambiente git do hook. Aplicada no `~/agata`, não em worktree, como (706) ensinou.**
-(707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina funciona em stream — um por resposta, modelo real certo, `t` certo, e a Seth não escreve o dela; a conversa longa que ia para o Nemotron fica na `seth-livre`; a segunda opinião do Jev responde pelo caminho da Seth em 6 s. E a proposta `suite-fora-da-worktree-2026-10-14` conserta a causa do incidente de (706). Aguardando assinatura.**
+(707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina …
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (as …
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o ca …
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas m …
