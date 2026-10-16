@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
+  palavras-chave: primeira, skill, sistema, agata, aplicada, fluxo, dupla, ferramentas, agora, vivem, repositório
 (734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado (`janela-manutencao-20261016`): avaliação do decisor, consolidação e treino do Laya DIÁRIO entre 12h15 e 13h15; nada foi ativado ainda.**
   palavras-chave: orquestrador, janela, manutenção, aplicado, manutencao, avaliação, decisor, consolidação, treino, laya, nada, ativado
 (733) DIÁRIO — 16/10/2026 · **Marcador da consolidação corrigido (`consolidacao-marcador-20261016`): o marcador só avança até a entrada realmente considerada, não até o estado do canon no fim da execução.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: corrige, proposta, laya, sombra, estava, assinada, humano, superada, aplicar, roteador, aprovado, propostas, rejeitadas, junto, diff
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
   palavras-chave: laya, passa, escolher, fila, seth, jev, sombra, juiz, automático, divergências, treino, contínuo, troca, aprovada, humano, decisões, sessão, prefiro, agora, ele, pode, permanecer, treinamento, continuo, dados, vamos, fazer, parte, rotular, tem, automática, você, aprova, proposta, roteador, substitui, assinada, propostas, rejeitadas, aguardando, assinatura
-(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
-  palavras-chave: experimento, pedido, humano, pode, juntar, fazer, dados, sintéticos, retreinar, propor, modo, sombra, laya, multilingual, ajustado, chega, acerto, roteador, seth, contra, jev, cpu, proposta, roda, lado, influência, rota, tráfego, real, decide, aguardando, assinatura
+(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o P …
+  palavras-chave: experimento, pedido, humano, pode, juntar
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada p …
   palavras-chave: execução, aplicada, pesquisa, livre, assinada
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pe …

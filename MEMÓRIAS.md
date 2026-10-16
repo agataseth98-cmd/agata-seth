@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 33cdbcf87184d86d930d3f06c17c1ec91e31c8b3
-  Escrito em: 16/10/2026 19:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0fe2a4831ca6c490fa75d4c459af4d67f9b314b0
+  Escrito em: 16/10/2026 20:08 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33cdbcf87184d86d930d3f06c17c1ec91e31c8b3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33cdbcf87184d86d930d3f06c17c1ec91e31c8b3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33cdbcf87184d86d930d3f06c17c1ec91e31c8b3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33cdbcf87184d86d930d3f06c17c1ec91e31c8b3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/33cdbcf87184d86d930d3f06c17c1ec91e31c8b3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fe2a4831ca6c490fa75d4c459af4d67f9b314b0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fe2a4831ca6c490fa75d4c459af4d67f9b314b0/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fe2a4831ca6c490fa75d4c459af4d67f9b314b0/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fe2a4831ca6c490fa75d4c459af4d67f9b314b0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fe2a4831ca6c490fa75d4c459af4d67f9b314b0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
+
+Aplicada a proposta assinada. Pedido do Humano (16/10/2026): ao final, transformar o fluxo de trabalho em Skill. `.agents/skills/agata-fluxo-dupla/SKILL.md` (50 linhas) cobre partida e retomada da dupla, vigia sem timer (segundo plano e modo bloqueante `--uma`), o ciclo de uma mudança protegida (worktree própria, `.diff` só dos protegidos, teste em cópia descartável, PR de abertura, revisão cruzada com autor diferente do revisor, comando de assinatura em Fish, `aplicar.py`, merge pinado), fallback mútuo, economia de cota e as armadilhas já pagas (MEMÓRIAS (732)). `scripts/dupla/` versiona `dupla.py`, `aplicar.py`, `vigia.sh`, `vigia_par.py` e `contar_turnos.py`, antes soltos em `~/.local/share/agata-dupla/`. A pedido do Codex, `aplicar.py` ganhou `--agente` e `--sem-pull` (worktree própria, sem pull no checkout compartilhado); o cálculo do próximo número de MEMÓRIAS virou `proximo_numero()` com teste de título acentuado (o bug do (729)). Testes: selftest do `dupla.py` 28/28 e auxiliares 12/12, ambos em ambiente limpo, com passos no CI. LIMITE: não rodou no runner do GitHub antes do merge; se falhar lá, reverter.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautoria das ferramentas: Codex (pistas e pareceres) · vetor: selftests e ambiente limpo (`env -i`) · Autorização: Humano, pedido da Skill e assinatura de `skill-fluxo-dupla-20261016`, 16/10/2026.
+
 (734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado (`janela-manutencao-20261016`): avaliação do decisor, consolidação e treino do Laya DIÁRIO entre 12h15 e 13h15; nada foi ativado ainda.**
 
 Aplicada a proposta assinada. Decisão do Humano (16/10/2026): unificar os scripts automáticos numa janela de almoço e treinar o Laya todos os dias nos horários disponíveis (a máquina nem sempre está ligada no domingo de madrugada; o timer semanal do Laya nunca havia disparado). Núcleo: Codex (`janela-nucleo-offline-v1.py`); revisão e correção: Claude (cinco falhas: sem teto de tentativas por dia, adiamento silencioso, `state.json` corrompido derrubava o ciclo, orçamento inválido só validado no meio, recibo final que desfazia o carimbo); publicação pelo Claude por ausência do Codex (cota). `scripts/janela_manutencao.py` roda as tarefas de `config/janela-tarefas.txt` em ordem e uma por vez, com um lock, no máximo 2 tentativas por tarefa por dia, `skipped` esgotando o dia, recibo `started` antes de rodar, estado atômico antes do recibo final, término do processo por SIGTERM e depois SIGKILL ao estourar o prazo, e nenhuma tarefa nova depois de 13h15. As units e o timer (12h15, 12h30, 12h45, 13h00 e 3 min depois de ligar) ficam em `config/systemd/` como referência; `systemd-analyze verify` limpo. Selftest 18/18. LIMITES: a pesquisa de modelos (domingo 22h) fica fora até o Codex separar descoberta pública de ensaio autorizado; o treino diário reverte o "nunca treina de dia" da unit antiga; os timers antigos só devem ser desativados depois de o novo ser ativado e visto rodar; ativar é comando do Humano.

@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
 (734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado (`janela-manutencao-20261016`): avaliação do decisor, consolidação e treino do Laya DIÁRIO entre 12h15 e 13h15; nada foi ativado ainda.**
 (733) DIÁRIO — 16/10/2026 · **Marcador da consolidação corrigido (`consolidacao-marcador-20261016`): o marcador só avança até a entrada realmente considerada, não até o estado do canon no fim da execução.**
 (732) CORREÇÃO — 16/10/2026 · **Lições do dia de trabalho em dupla (Claude Code e Codex), gravadas a pedido do Humano depois de o Codex ficar sem cota pela 2ª vez: o que gastou, o que errei e a regra que sai de cada erro.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (721) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-roteador-2026-10-15` (assinada pelo Humano depois da explicação de "caminho quente"), em worktree. O Laya passa a escolher a fila da Seth quando o PR entrar e os serviços subirem.**
 (720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
-(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o PR e fazer o experimento com dados sintéticos"; depois "pode retreinar com mais dados e propor o modo sombra"): o `laya-multilingual` ajustado só com dados sintéticos chega a 0,91 de acerto no roteador da Seth, contra 0,89 do Jev, em ~70 ms na CPU contra ~3,8 s. Proposta `laya-sombra-2026-10-15`: o Laya roda em sombra ao lado do Jev, sem influência na rota, e o tráfego real decide. Aguardando assinatura.**
+(718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o P …
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada p …
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pe …
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 ( …
