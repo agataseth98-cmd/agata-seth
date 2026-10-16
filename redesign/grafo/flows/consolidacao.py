@@ -190,10 +190,10 @@ def _cita(tema, ent):
     return False
 
 
-def _temas_do_que_mudou(repo, desde_num):
+def _temas_do_que_mudou(repo, desde_num, indice=None):
     """Do pool curado, so os temas que >= MIN_NOVAS entradas com num > desde_num
     citam. Selecao dirigida pela mudanca; pool e' dado. Devolve (temas, novos)."""
-    idx = _indice(repo)
+    idx = _indice(repo) if indice is None else indice
     if not idx:
         return list(TEMAS_PADRAO), []
     novas = sorted(n for n in idx if n > desde_num)
@@ -308,7 +308,10 @@ def orientar(s: Estado) -> dict:
     if manual:
         temas, novas = manual, []
     else:
-        temas, novas = _temas_do_que_mudou(repo, _ler_marcador().get("ultimo_num", 0))
+        snapshot = s.get("hidratacao", {}).get("consolidacao_snapshot")
+        if snapshot is None:
+            raise RuntimeError("consolidacao automatica sem snapshot inicial")
+        temas, novas = _temas_do_que_mudou(repo, snapshot["desde_num"], snapshot["indice"])
     achados = {}
     for t in temas:
         r = C.consultar(t.split(), via="ambos")
@@ -441,11 +444,20 @@ def run(repo, temas=None):
     global _TEMAS_MANUAL
     _TEMAS_MANUAL = list(temas) if temas else None
     DIR_ESTADO.mkdir(parents=True, exist_ok=True)
+    # O limite de progresso pertence à seleção inicial, não ao índice relido no fim.
+    # Reprovação de qualidade mantém a semântica anterior: entrada considerada,
+    # não tentativa pendente. Uma proposta aprovada não é condição deste marcador.
+    snapshot = None
+    if not temas:
+        indice = _indice(repo)
+        snapshot = {"indice": indice, "limite": max(indice) if indice else 0,
+                    "sha": _canon_sha(repo),
+                    "desde_num": _ler_marcador().get("ultimo_num", 0)}
     graph, cm = build()
     try:
         st0 = {"thread_id": f"consolid-{int(time.time())}", "repo": os.path.abspath(repo),
                "entrada": "consolidacao noturna", "tipo": "trabalho", "com_envelope": False,
-               "hidratacao": {}, "rota": "", "trabalho": "", "trabalho_erro": "",
+               "hidratacao": {"consolidacao_snapshot": snapshot}, "rota": "", "trabalho": "", "trabalho_erro": "",
                "verificacao": {}, "diff_proposto": "", "portao": {}, "commit_sha": "",
                "ultimo_efeito_confirmado": "", "eventos": [], "decisao_log": [],
                "_temas": temas}
@@ -455,8 +467,7 @@ def run(repo, temas=None):
                           "poda": out["portao"].get("poda_proposta", "")[:400]},
                          ensure_ascii=False, indent=2))
         if not temas:  # modo automatico: avanca o marcador pro estado atual do canon
-            idx = _indice(repo)
-            _gravar_marcador(max(idx) if idx else 0, _canon_sha(repo))
+            _gravar_marcador(snapshot["limite"], snapshot["sha"])
     finally:
         cm.__exit__(None, None, None)
 

@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c2803b75f0220b47700550bf41b834128abbec6d
-  Escrito em: 16/10/2026 19:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 780483908e62d9f11f5070dec1c990e730624182
+  Escrito em: 16/10/2026 19:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2803b75f0220b47700550bf41b834128abbec6d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2803b75f0220b47700550bf41b834128abbec6d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2803b75f0220b47700550bf41b834128abbec6d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2803b75f0220b47700550bf41b834128abbec6d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2803b75f0220b47700550bf41b834128abbec6d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780483908e62d9f11f5070dec1c990e730624182/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780483908e62d9f11f5070dec1c990e730624182/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780483908e62d9f11f5070dec1c990e730624182/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780483908e62d9f11f5070dec1c990e730624182/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/780483908e62d9f11f5070dec1c990e730624182/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(733) DIÁRIO — 16/10/2026 · **Marcador da consolidação corrigido (`consolidacao-marcador-20261016`): o marcador só avança até a entrada realmente considerada, não até o estado do canon no fim da execução.**
+
+Aplicada a proposta assinada. Autor: Codex (`consolidacao-marcador-v1.diff`); revisão: Claude (parecer favorável, com verificação própria: o grafo da consolidação não passa pelo nó `hidratar`, `hidratacao` é chave declarada do `Estado`, e o snapshot com chaves inteiras e conjuntos sobrevive à serialização do checkpoint); publicação do `.diff` pelo Claude por ausência do Codex (cota). A correção captura no início o índice, o limite e o sha do canon e usa esse mesmo snapshot para selecionar os temas e gravar o marcador. Prova do Codex: cinco cenários isolados e uma execução real com LangGraph e SqliteSaver (entrada 3 chegou durante a inferência; o marcador permaneceu em 2). Semântica mantida e agora escrita no código: reprovação de qualidade conta como "considerada", não como tentativa pendente (o marcador é global; reintentar um tema reprovado exigiria arquivo de pendentes por tema, decisão do Humano). Limites: a consulta da prova é sintética, não prova qualidade nem snapshot imutável dos corpos.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · autor da correção e coautor: Codex · vetor: `consolidacao.py` com `py_compile`, execução do Codex com LangGraph real, teste de serialização no ambiente real · Autorização: Humano, assinatura de `consolidacao-marcador-20261016`, 16/10/2026.
+
 (732) CORREÇÃO — 16/10/2026 · **Lições do dia de trabalho em dupla (Claude Code e Codex), gravadas a pedido do Humano depois de o Codex ficar sem cota pela 2ª vez: o que gastou, o que errei e a regra que sai de cada erro.**
 
 Pedido do Humano: "Codex acabou novamente, complicado, grave o que aprendemos para correção e toque o trabalho". Registro de fatos medidos neste dia; nada aqui é decisão nova.

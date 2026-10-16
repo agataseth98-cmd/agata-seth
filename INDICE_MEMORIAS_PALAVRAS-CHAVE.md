@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(733) DIÁRIO — 16/10/2026 · **Marcador da consolidação corrigido (`consolidacao-marcador-20261016`): o marcador só avança até a entrada realmente considerada, não até o estado do canon no fim da execução.**
+  palavras-chave: marcador, consolidação, corrigido, consolidacao, avança, entrada, realmente, considerada, estado, canon, fim, execução
 (732) CORREÇÃO — 16/10/2026 · **Lições do dia de trabalho em dupla (Claude Code e Codex), gravadas a pedido do Humano depois de o Codex ficar sem cota pela 2ª vez: o que gastou, o que errei e a regra que sai de cada erro.**
   palavras-chave: lições, dia, trabalho, dupla, claude, code, codex, gravadas, pedido, humano, ficar, cota, gastou, errei, regra, sai, erro
 (731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: experimento, pedido, humano, pode, juntar, fazer, dados, sintéticos, retreinar, propor, modo, sombra, laya, multilingual, ajustado, chega, acerto, roteador, seth, contra, jev, cpu, proposta, roda, lado, influência, rota, tráfego, real, decide, aguardando, assinatura
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
   palavras-chave: execução, aplicada, pesquisa, livre, assinada, humano, worktree, mesma, fala, shell, goose, passa, pedir, aprovação, deve, padir
-(716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
-  palavras-chave: auditoria, conversa, seth, pedido, humano, ela, negou, laya, segurando, linha, canon, citava, concluiu, internet, ter, buscado, nela, chamou, resultados, páginas, leu, inteiras, decisão, risco, assumido, ele, pode, liberar, ferramentas, pesquisa, disponiveis, pedir, minha, autorização, assumo, escrita, devem, continuar, passando, sempre, serve, modelos, federados, proposta, livre, aguardando, assinatura
+(716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pe …
+  palavras-chave: auditoria, conversa, seth
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 ( …
   palavras-chave: treino, voz, agata, madrugada
 (714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-han …
