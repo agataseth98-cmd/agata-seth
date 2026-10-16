@@ -39,14 +39,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): abb31a05d4f1a74b63a2964dd38f3734f0482827
-  Escrito em: 16/10/2026 15:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): db0111aeb17d033fd87a769fb3381ce77d818cff
+  Escrito em: 16/10/2026 15:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abb31a05d4f1a74b63a2964dd38f3734f0482827/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abb31a05d4f1a74b63a2964dd38f3734f0482827/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abb31a05d4f1a74b63a2964dd38f3734f0482827/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abb31a05d4f1a74b63a2964dd38f3734f0482827/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/abb31a05d4f1a74b63a2964dd38f3734f0482827/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0111aeb17d033fd87a769fb3381ce77d818cff/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0111aeb17d033fd87a769fb3381ce77d818cff/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0111aeb17d033fd87a769fb3381ce77d818cff/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0111aeb17d033fd87a769fb3381ce77d818cff/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0111aeb17d033fd87a769fb3381ce77d818cff/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
