@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 528c0db23f0c6c82cb41d092ca0b6a057d39dd8a
-  Escrito em: 16/10/2026 14:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b
+  Escrito em: 16/10/2026 14:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/528c0db23f0c6c82cb41d092ca0b6a057d39dd8a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/528c0db23f0c6c82cb41d092ca0b6a057d39dd8a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/528c0db23f0c6c82cb41d092ca0b6a057d39dd8a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/528c0db23f0c6c82cb41d092ca0b6a057d39dd8a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/528c0db23f0c6c82cb41d092ca0b6a057d39dd8a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa01fdd3a46080ba9dcbd6fbcf9bd2ca737e4b4b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **`PROJETO.md` voltou ao teto (`projeto-mapa-v2-20261016`): de 57.618 B para 47.965 B, com o detalhe movido sem alteração para `extras/projeto-detalhe/`.**
+
+Aplicada a proposta assinada. Quatro arquivos de detalhe (memória e hidratação, memória em duas camadas, serviços e interface, decisor e Conselho Remoto) recebem o texto integral retirado do `PROJETO.md`; no PROJETO ficam resumos com ponteiro. Prova: nenhuma linha do `PROJETO.md` anterior deixou de existir no novo `PROJETO.md` ou no detalhe (conferido por mim e, de forma independente, pelo Codex). Revisão do Codex mudou o desenho: os arquivos movidos estão fora do escopo do P-8, então são CONSULTA, não norma; toda obrigação permanente ficou nos resumos do PROJETO, em REGRAS ou em PROTOCOLOS, e em divergência estes vencem. A v1, não assinada, foi substituída pela v2.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex · vetor: comparação linha a linha, perímetro e suíte dos controles em worktree descartável · Autorização: Humano — assinatura de `projeto-mapa-v2-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Regra de fontes (F0) aplicada (`fontes-f0-20261016`): todo modelo cita a fonte do que afirma, e a auditoria de turno avisa quando há afirmação de medição sem origem.**
 
 Aplicada a proposta assinada, do Codex, revisada por mim em três versões (a v3 sem emenda). `AGENTS.md` ganha a regra de origem dos fatos (fonte lida, distinção entre evidência, inferência e não medido; referência não prova suporte). `auditoria_turno.py` ganha um aviso lexical e DELIBERADAMENTE parcial: acusa verbo de medição na prosa (primeira pessoa, passiva de medição, "teste/suíte/build passou") sem fonte, ressalva ou "não medido" no mesmo texto. Ignora código e citação; não acusa os substantivos e adjetivos que a v2 acusava ("medidas de segurança", "modelo testado"). Limites: é só aviso; qualquer nome de arquivo, "(1)" ou "Fonte: x" satisfaz a marcação, e não cobre afirmação factual sem esses verbos. Não certifica verdade nem leitura.
