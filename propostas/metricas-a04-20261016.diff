@@ -1,0 +1,79 @@
+--- a/scripts/avaliar_decisor.py
++++ b/scripts/avaliar_decisor.py
+@@ -217,6 +217,36 @@
+     return v, m, num
+ 
+ 
++def metricas_por_rota(registros: list[dict]) -> dict:
++    """Agrega só metadados existentes. Rota ativa não é escolha crua nem desfecho.
++
++    Latência mede a chamada ao decisor, inclusive falhas, não a resposta da Seth.
++    Não inventa tokens, custo, acerto, intervenção humana ou rota ausentes.
++    """
++    import math
++    grupos = {}
++    for d in registros:
++        if not isinstance(d, dict) or d.get("continuacao"):
++            continue
++        rota = d.get("rota_ativa")
++        # Classes fechadas: não expõe texto arbitrário eventualmente presente no log.
++        chave = rota if rota in ("seth-rapido", "seth-livre", "seth-pesado", "seth-codigo") else "não registrada"
++        g = grupos.setdefault(chave, {"decisões": 0, "falhas": 0, "amostras_ms": []})
++        g["decisões"] += 1
++        g["falhas"] += d.get("respostas") is None
++        ms = d.get("ms")
++        if isinstance(ms, (int, float)) and not isinstance(ms, bool) and math.isfinite(ms) and ms >= 0:
++            g["amostras_ms"].append(ms)
++    for g in grupos.values():
++        ms = sorted(g.pop("amostras_ms"))
++        g["latências válidas"] = len(ms)
++        g["taxa de falha"] = g["falhas"] / g["decisões"]
++        # Percentil por posto mais próximo; nenhuma interpolação em amostra curta.
++        for p in (50, 95):
++            g[f"latência p{p} do decisor (ms)"] = ms[math.ceil(p / 100 * len(ms)) - 1] if ms else None
++    return dict(sorted(grupos.items()))
++
++
+ def _servico() -> dict:
+     try:
+         out = subprocess.run(["systemctl", "--user", "show", "ollaya.service",
+@@ -259,6 +289,12 @@
+     for nome, (v, motivo, num) in usos.items():
+         linhas += [f"## {nome}: {v}", f"{motivo}.", "",
+                    *[f"- {k}: {val}" for k, val in num.items()], ""]
++    linhas += ["## Telemetria por rota ativa registrada", "",
++               "Latências do decisor em sombra, inclusive falhas; não medem tempo de resposta nem qualidade.",
++               "Amostra limitada às chamadas em sombra registradas; continuação sem marcador pode estar incluída.",
++               "Rota ausente não é inferida da escolha crua. Tokens, custo e desfecho: não medidos.", ""]
++    for rota, numeros in metricas_por_rota(_ler("roteador.jsonl")).items():
++        linhas += [f"### Rota {rota}", *[f"- {k}: {v}" for k, v in numeros.items()], ""]
+     pend = len(_pendentes())
+     linhas += ["## O que fazer",
+                f"- Casos esperando seu julgamento: {pend}. Para julgar: "
+@@ -415,6 +451,26 @@
+     casos.append(("encerrar apaga os trechos e para de avisar; o treino real do Laya fica",
+                   not list(LOG.glob("*-avaliacao.jsonl")) and _estado()["encerrado"] == "aprovado"
+                   and (LOG / "laya-treino-real.jsonl").exists()))
++    # A04: denominadores por rota, falhas com latência e ausência explícita.
++    mr = metricas_por_rota([
++        {"rota_ativa": "seth-rapido", "respostas": {}, "ms": 10},
++        {"rota_ativa": "seth-rapido", "respostas": None, "ms": 90},
++        {"rota_ativa": "seth-rapido", "respostas": {}, "ms": True},
++        {"rota_ativa": "seth-rapido", "respostas": {}, "ms": float("nan")},
++        {"rota_ativa": "seth-rapido", "respostas": {}, "ms": 999, "continuacao": True},
++        {"respostas": {}, "ms": None}])
++    rg = mr["seth-rapido"]
++    casos += [
++        ("A04 vazio", metricas_por_rota([]) == {}),
++        ("A04 denominador e falhas", rg["decisões"] == 4 and rg["taxa de falha"] == .25),
++        ("A04 percentis com falha", rg["latência p50 do decisor (ms)"] == 10 and
++             rg["latência p95 do decisor (ms)"] == 90),
++        ("A04 ignora bool/NaN", rg["latências válidas"] == 2),
++        ("A04 rota ausente", mr["não registrada"]["latência p95 do decisor (ms)"] is None),
++        ("A04 não expõe rota arbitrária", "segredo" not in str(metricas_por_rota([
++             {"rota_ativa": "segredo", "respostas": {}}]))),
++    ]
++
+     for nome, ok_ in casos:
+         print(f"{'PASS' if ok_ else 'FALHA'}  {nome}")
+     falhas = sum(not ok_ for _, ok_ in casos)
