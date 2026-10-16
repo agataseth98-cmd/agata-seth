@@ -26,20 +26,52 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7b242a7720a864d8557367ba5e3ef7db62edce30
-  Escrito em: 16/10/2026 18:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229
+  Escrito em: 16/10/2026 18:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
+
+A regra é a de `PROJETO.md` (memória em duas camadas, Fronteira): "Segredo, chave e credencial nunca sobem para esfera externa nenhuma". Ao escolher onde guardar uma segunda cópia da chave de recuperação, o Claude Code listou as opções (segundo pendrive, e-mail, nuvem) sem lembrar essa regra, e só a apontou depois da escolha do Humano ("email da agata"). Com a regra à vista, o Humano decidiu manter a escolha e escreveu: "risco aceito registre para lembrança posterior caso solicitado".
+
+**Escopo (só isto):** um único arquivo, `agata-recuperacao.key.age`, que contém a chave privada `age` já cifrada com senha (scrypt) pelo `age -p`; quem o guarda sem a senha não decifra nada. O envio é feito pelo Humano; modelo nenhum envia, lê ou abre o arquivo. **Não cobre:** a cópia dos segredos (`segredos-*.tar.age`), o `.env`, nenhuma chave de provedor, nem a chave de assinatura `aprovacao_ed25519`; esses continuam sem sair da Máquina e do pendrive.
+
+**Risco aceito, nomeado:** quem obtiver o arquivo (o provedor de e-mail, ou alguém com acesso à conta) pode tentar adivinhar a senha à vontade, offline; a segurança passa a depender só da força da senha. Mitigações: senha longa e única, nunca guardada junto do arquivo; a cópia dos segredos não vai ao e-mail, então o arquivo isolado não abre nada sem ela. **Como desfazer:** gerar nova chave `age-keygen`, refazer a cópia (`scripts/cifrar_recuperacao.py` com a nova chave pública em `config/segredos-destinatario.txt`, por proposta P-8), apagar o e-mail antigo e a chave antiga.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: conferência da regra em `PROJETO.md` e da escolha do Humano na sessão · Autorização: Humano, "risco aceito registre para lembrança posterior caso solicitado" (16/10/2026).
+
+(730) CORREÇÃO — 16/10/2026 · **O número (729) foi atribuído a 14 entradas diferentes de 16/10/2026 por defeito do meu aplicador; esta entrada fixa a leitura: (729a) a (729n), na ordem em que foram escritas.**
+
+Achado quando a 15ª entrada do dia ia receber o mesmo número. O `aplicar.py` (ferramenta local do Claude Code, fora do repositório) calculava "último número + 1" com um padrão que não reconhecia a letra acentuada de "DIÁRIO" e, por isso, via só a entrada (728); cada aplicação do dia recebeu (729). Nada foi reescrito (Regra 4, história só se acrescenta): as 14 entradas mantêm o texto e o número original, e esta correção dá a cada uma um sufixo para citação, do mais antigo (a) ao mais novo (n):
+- (729a) Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por
+- (729b) Detector de derivados misturados aplicado (derivados-consistencia-v2-20261016): o post-c
+- (729c) Aviso de emoji ampliado aplicado (emoji-e1-20261016): a auditoria de turno passa a acusa
+- (729d) Métricas por rota do decisor aplicadas (metricas-a04-20261016): o relatório passa a most
+- (729e) Regra de fontes (F0) aplicada (fontes-f0-20261016): todo modelo cita a fonte do que afir
+- (729f) PROJETO.md voltou ao teto (projeto-mapa-v2-20261016): de 57.618 B para 47.965 B, com o d
+- (729g) Painel de estado só de leitura aplicado (painel-estado-v3-20261016): python3 scripts/pai
+- (729h) README do roteador corrigido (readme-router-20261016): o sanitizador de segredo já está 
+- (729i) Dependabot passa a ignorar versões maiores de github-actions (dependabot-major-20261016)
+- (729j) Teste por mutações do fiscal de PR aplicado (fiscal-mutacao-20261016): a suíte do fiscal
+- (729k) Remoção de emoji da prosa da Seth aplicada (emoji-remover-20261016, E-2): o seth_gateway
+- (729l) Inventário de componentes externos gravado (inventario-gerado-20261016, Fase I, I1): mod
+- (729m) Cofre de chaves, etapa F1 aplicada (cofre-f1-20261016): manifesto de segredos e verifica
+- (729n) Cofre de chaves, etapa F2 aplicada (cofre-f2-20261016): cópia de recuperação dos segredo
+
+Daqui em diante vale a leitura com sufixo ao citar qualquer uma delas, e o `aplicar.py` foi corrigido (padrão `\S+`, aceita qualquer palavra após o número). Efeito sobre o resto: o texto de `ONDE_ESTAMOS.md` que cita "(729)" para a correção do fiscal refere-se a (729a).
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: `grep` das 14 entradas em `MEMÓRIAS.md`, conferência do padrão em `aplicar.py` · Autorização: dever de correção da Regra 4; sem decisão nova do Humano.
+
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
 
 Aplicada a proposta assinada. `scripts/cifrar_recuperacao.py` empacota todos os caminhos de `config/segredos-manifesto.txt` (inclusive a chave de assinatura do Humano, classe H: perdê-la impediria assinar qualquer proposta e a rotação do `.allowed_signers` exige assinatura da chave antiga) e cifra com `age` para `config/segredos-destinatario.txt` (chave PÚBLICA gerada pelo Humano em 16/10/2026; a privada fica cifrada com senha no pendrive e nunca entra na máquina). Sem texto puro no disco (tar para pipe para age). A máquina NÃO consegue decifrar o que cria; a prova de restauração é do Humano, com o pendrive (procedimento no cabeçalho do script). `scripts/verificar_cofre.py` passa a comparar a cópia age com o segredo mais novo do manifesto. Testes: `cifrar_recuperacao` 9/9 com ida e volta por chave de teste (a cópia não contém o segredo em texto puro, o restaurado é idêntico); `verificar_cofre` 10/10. Estado do desenho G-C: F1 e F2 aplicadas; F3 (`systemd-creds` por serviço) pendente.
