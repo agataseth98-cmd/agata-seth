@@ -24,4 +24,4 @@ Mudança que altera comportamento (regras, `scripts/`, `config/`, `.githooks/`, 
 
 `bash scripts/perimetro.sh` roda os controles (P-1 a P-23). `bash scripts/testar_perimetro.sh` roda a suíte adversarial dos próprios controles, a mesma do CI.
 
-Segurança: ver `SECURITY.md`. Licença: ainda não definida pelo autor.
+Segurança: ver `SECURITY.md`. Licença: Apache-2.0 (`LICENSE`), escolha do autor em 16/10/2026.
