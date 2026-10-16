@@ -1,0 +1,128 @@
+diff --git a/scripts/p8_integral.py b/scripts/p8_integral.py
+index 24cc9b4..d7c0d5a 100755
+--- a/scripts/p8_integral.py
++++ b/scripts/p8_integral.py
+@@ -144,6 +144,31 @@ def _blob(repo, oid):
+     return _git(repo, "cat-file", "blob", oid).stdout
+ 
+ 
++def so_ancora(repo, base, head_tree, caminho, ancestral_de=None):
++    """True se `caminho` difere entre base e head SOMENTE no bloco de âncora gerado pelo pre-commit: mesmo modo,
++    tipo blob, bytes iguais fora do bloco, bloco do head na gramática do gerador, SHA que é commit do repositório,
++    slug igual ao da base e (se pedido) ancestral. Usado pelo fiscal de PR para não barrar o PR livre cujo hook
++    só regravou o bloco em arquivo protegido."""
++    def entrada(tree):
++        r = _git(repo, "ls-tree", "-z", tree, "--", caminho, check=False).stdout
++        if not r:
++            return None
++        meta, _ = r.rstrip(b"\0").split(b"\t", 1)
++        modo, tipo, oid = meta.decode().split()
++        return modo, tipo, oid
++    a, b = entrada(base + "^{tree}"), entrada(head_tree)
++    if a is None or b is None or a[:2] != b[:2] or a[1] != "blob":
++        return False
++    ia, ib = _info_ancora(_blob(repo, a[2])), _info_ancora(_blob(repo, b[2]))
++    if ia is None or ib is None or ia[0] != ib[0] or ia[1]["slug"] != ib[1]["slug"]:
++        return False
++    if _git(repo, "cat-file", "-e", ib[1]["sha"] + "^{commit}", check=False).returncode:
++        return False
++    if ancestral_de and _git(repo, "merge-base", "--is-ancestor", ib[1]["sha"], ancestral_de, check=False).returncode:
++        return False
++    return True
++
++
+ def comparar(repo, base, diffs, actual_tree=None, transport=None, restrict=None, ancoras=(), incluir_tocados=False,
+              ancestral_de=None):
+     if isinstance(diffs, (str, bytes, os.PathLike)):
+@@ -469,11 +494,21 @@ def main(argv=None):
+     ap.add_argument("--incluir-tocados", action="store_true")
+     ap.add_argument("--ancora-ancestral-de", help="rev: o SHA do bloco de âncora do head tem de ser ancestral dele")
+     ap.add_argument("--transport")
++    ap.add_argument("--so-ancora", help="caminho: exit 0 se base e --actual-tree diferem nele só no bloco de âncora")
+     ap.add_argument("--repo", default=".")
+     ap.add_argument("--selftest", action="store_true")
+     a = ap.parse_args(argv)
+     if a.selftest:
+         return _selftest()
++    if a.so_ancora:
++        if not (a.base and a.actual_tree):
++            ap.print_usage(sys.stderr)
++            return 2
++        try:
++            return 0 if so_ancora(a.repo, a.base, a.actual_tree, a.so_ancora, a.ancora_ancestral_de) else 1
++        except (RuntimeError, OSError, ValueError) as e:
++            print(json.dumps({"erro": str(e)}, ensure_ascii=False))
++            return 2
+     if not (a.base and a.diff):
+         ap.print_usage(sys.stderr)
+         return 2
+diff --git a/scripts/p8_verificar_pr.sh b/scripts/p8_verificar_pr.sh
+index e9e8905..b3c82c3 100755
+--- a/scripts/p8_verificar_pr.sh
++++ b/scripts/p8_verificar_pr.sh
+@@ -51,9 +51,20 @@ declare -F _p8_eh_comportamento >/dev/null || falha "escopo do P-8 nao carregou
+ 
+ # -- 2. caminhos protegidos que o PR muda ----------------------------------------------------
+ git diff --name-only -z --no-renames "$base" "$head" > "$tmp/mudou.z" || exit 2
+-: > "$tmp/protegidos.z"; n_prot=0
++# `protegidos.z`: tudo o que e protegido e mudou (entra na comparacao integral). `sem_par.z`: os que, SEM par consumido,
++# seriam barrados -- exclui o arquivo cuja unica mudanca e o bloco ANCORA-SHA que o pre-commit regrava em todo commit
++# (REGRAS, PROJETO, MEMORIAS, PROMPT_CARREGAMENTO); sem esta excecao nenhum PR livre passaria (visto no PR 235).
++: > "$tmp/protegidos.z"; : > "$tmp/sem_par.z"; n_prot=0; n_sem_par=0
+ while IFS= read -r -d '' f; do
+-  if _p8_eh_comportamento "$f"; then printf '%s\0' "$f" >> "$tmp/protegidos.z"; n_prot=$((n_prot+1)); fi
++  if _p8_eh_comportamento "$f"; then
++    printf '%s\0' "$f" >> "$tmp/protegidos.z"; n_prot=$((n_prot+1))
++    case "$f" in
++      REGRAS.md|PROJETO.md|MEMÓRIAS.md|PROMPT_CARREGAMENTO.md)
++        if python3 -I "$tmp/p8_integral.py" --repo . --base "$base" --actual-tree "$(git rev-parse "$head^{tree}")" \
++             --so-ancora "$f" --ancora-ancestral-de "$head" >/dev/null 2>&1; then continue; fi ;;
++    esac
++    printf '%s\0' "$f" >> "$tmp/sem_par.z"; n_sem_par=$((n_sem_par+1))
++  fi
+ done < "$tmp/mudou.z"
+ 
+ # -- 3. pares que o PR consome (presentes em aplicadas/ no head, ausentes la na base) --------
+@@ -81,9 +92,9 @@ done < <(git ls-tree -r --name-only -z "$head" -- propostas/aplicadas | LC_ALL=C
+ for i in "${ignorados[@]:-}"; do [ -n "$i" ] && echo "AVISO P-8 (PR): par ignorado -- $i"; done
+ 
+ if [ "${#verificados[@]}" -eq 0 ]; then
+-  if [ "$n_prot" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou e nenhum par foi consumido"; exit 0; fi
+-  echo "FALHA P-8 (PR): $n_prot caminho(s) protegido(s) mudou(aram) sem nenhum par assinado consumido:"
+-  tr '\0' '\n' < "$tmp/protegidos.z" | sed 's/^/  - /'
++  if [ "$n_sem_par" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou alem do bloco de ancora e nenhum par foi consumido"; exit 0; fi
++  echo "FALHA P-8 (PR): $n_sem_par caminho(s) protegido(s) mudou(aram) sem nenhum par assinado consumido:"
++  tr '\0' '\n' < "$tmp/sem_par.z" | sed 's/^/  - /'
+   exit 1
+ fi
+ echo "OK P-8 (PR): ${#verificados[@]} par(es) com assinatura valida pela raiz da base: ${verificados[*]}"
+diff --git a/scripts/testar_p8_verificar_pr.py b/scripts/testar_p8_verificar_pr.py
+index 357be57..5c4d6f5 100755
+--- a/scripts/testar_p8_verificar_pr.py
++++ b/scripts/testar_p8_verificar_pr.py
+@@ -296,6 +296,25 @@ def main():
+         h24 = commit(r, "diff executável")
+         rc, out = fiscal(r, base3, h24)
+         res["24 par com o .diff em modo 100755 -> FALHA"] = rc == 1
++        # ---- PR livre cujo pre-commit só regravou o bloco de âncora em arquivo protegido (achado no PR 235) ----
++        def sem_par(nome, esperado, mudancas):
++            sh(r, "git", "reset", "-q", "--hard", base)
++            sh(r, "git", "clean", "-qfd")
++            for k, v in mudancas.items():
++                escrever(r, k, v)
++            h = commit(r, nome)
++            rc2, out2 = fiscal(r, base, h)
++            res[nome] = rc2 == esperado
++            if rc2 != esperado:
++                print(f"--- {nome}: exit {rc2}, esperado {esperado}\n{out2}")
++        sem_par("25 sem par: só o bloco de âncora de REGRAS.md muda (hook) -> OK", 0,
++                {"REGRAS.md": bloco(base) + "regras\n", "MEMÓRIAS.md": "entradas\nnova\n"})
++        sem_par("26 sem par: bloco de âncora + outro protegido -> FALHA", 1,
++                {"REGRAS.md": bloco(base) + "regras\n", "scripts/a.sh": "echo a1\n"})
++        sem_par("27 sem par: bloco de âncora com SHA que não é commit -> FALHA", 1, {"REGRAS.md": bloco("f" * 40) + "regras\n"})
++        sem_par("28 sem par: política injetada dentro do bloco de âncora -> FALHA", 1,
++                {"REGRAS.md": bloco(base).replace("  Escrito em", "  POLITICA NAO ASSINADA\n  Escrito em") + "regras\n"})
++        sem_par("29 sem par: texto novo fora do bloco de âncora em REGRAS.md -> FALHA", 1, {"REGRAS.md": bloco(base) + "regras\nNOVA REGRA\n"})
+     finally:
+         shutil.rmtree(td, ignore_errors=True)
+     for k, v in res.items():
