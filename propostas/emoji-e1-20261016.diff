@@ -1,0 +1,52 @@
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -74,7 +74,9 @@
+                      r"qualquer (?:coisa|d[úu]vida),? (?:[ée] s[óo] |me )?(?:chamar|avisar|falar)", re.IGNORECASE)
+ _MULETA = re.compile(r"(?<![\w-])(n[ée]\b(?![-\w])|t[áa]\?|viu\?|(?:^|(?<=[.!?,]\s))(?:tipo|olha),|"
+                      r"nossa\b|uau\b|eita\b|hmm+\b)", re.IGNORECASE | re.MULTILINE)
+-_EMOJI = re.compile("[\U0001F300-\U0001FAFF]")
++# Unicode Emoji 17.0: BMP com propriedade Emoji; símbolos tipográficos comuns livres.
++# Fonte: https://www.unicode.org/Public/17.0.0/ucd/emoji/emoji-data.txt
++_EMOJI = re.compile(r"[\u203C\u2049\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23EC\u23ED-\u23EE\u23EF\u23F0\u23F1-\u23F2\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2601\u2602-\u2603\u2604\u260E\u2611\u2614-\u2615\u2618\u261D\u2620\u2622-\u2623\u2626\u262A\u262E\u262F\u2638-\u2639\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665-\u2666\u2668\u267B\u267E\u267F\u2692\u2693\u2694\u2695\u2696-\u2697\u2699\u269B-\u269C\u26A0-\u26A1\u26A7\u26AA-\u26AB\u26B0-\u26B1\u26BD-\u26BE\u26C4-\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F1\u26F2-\u26F3\u26F4\u26F5\u26F7-\u26F9\u26FA\u26FD\u2702\u2705\u2708-\u270C\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733-\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u20E3\uFE0F\U0001F000-\U0001FAFF]")
+ # (702) Leu "sem emoção simulada" como "sem opinião" e recusou avaliar (14/10, 16:12).
+ _RECUSA_JUIZO = re.compile(r"n[ãa]o (?:inclui|fa[zç]o|posso fazer|cabe(?: a mim)?) (?:uma )?avalia[çc][õo]es? subjetiva|"
+                            r"n[ãa]o (?:tenho|posso (?:dar|ter|emitir)) (?:uma )?opini[ãa]o|n[ãa]o emito opini", re.IGNORECASE)
+@@ -701,6 +703,22 @@
+         ("PERSONA vai junto da MODO, nos dois modos", all(LINHA_PERSONA in linha_modo(m) for m in
+                                                          ([u()], [u("modo explicativo")]))),
+     ]
++    # E-1: famílias antes fora da regex; exercita a mesma prosa da auditoria.
++    for nome, simbolo in [("dingbat", "\u2705"), ("estrela", "\u2B50"),
++                          ("seletor de variação", "\uFE0F"), ("mahjong", "\U0001F004"),
++                          ("rosto", "\U0001F600")]:
++        casos.append((f"estilo E-1: {nome}", any("emoji" in x for x in est("Feito " + simbolo))))
++    casos += [
++        ("estilo E-1: emoji em código não conta", not _estilo("```\n✅\n```")),
++        ("estilo E-1: emoji citado não conta", not _estilo('Ele disse "✅".')),
++        ("estilo E-1: bloco de citação não conta", not _estilo("> ✅")),
++    ]
++    # Casos adversariais independentes de Claude Code, 16/10/2026.
++    for simbolo in "⏰⏳⏩▶⬛⭕‼⁉\u20e3〰㊗↔↩⤴":
++        casos.append((f"E-1 adversarial U+{ord(simbolo):04X}", "emoji" in ";".join(_estilo("Resultado " + simbolo))))
++    for simbolo in "✓★☆♪☐→©®•—≥≤":
++        casos.append((f"E-1 tipografia U+{ord(simbolo):04X}", not _estilo("Resultado " + simbolo)))
++
+     linhas = LOG.read_text(encoding="utf-8").splitlines()
+     casos.append(("log: só quem foi auditado, sem o texto",
+                   len(linhas) == 25 and all("análise" not in l and "corpo" not in l for l in linhas)))
+--- a/redesign/router/afirmacoes_desmentidas.json
++++ b/redesign/router/afirmacoes_desmentidas.json
+@@ -81,6 +81,13 @@
+       "sinal": "no chat|na conversa|disse sim|diz sim|sem criptograf|confian[çc]a",
+       "correcao": "a aprovação é ASSINATURA SSH do Humano (scripts/aprovar.sh, chave com passphrase; P-8 confere contra propostas/.allowed_signers do HEAD) -- não um 'sim' no chat",
+       "origem": "(366)/(678)"
++    },
++    {
++      "id": "qwen-tag-oficial",
++      "tema": "\\bqwen3\\.5:9b\\b",
++      "sinal": "principal|recomendad|usar em produ[çc][ãa]o|tag correta",
++      "correcao": "a tag local principal documentada é qwen3.5-9b-64k; a tag oficial qwen3.5:9b reproduz o problema de num_ctx no caminho descrito. Consulte PROJETO, Cérebro, e (121)/(133)-(135); não generalize a qualquer chamada com num_ctx explícito.",
++      "origem": "PROJETO, Cérebro; (121)/(133)-(135)"
+     }
+   ]
+ }
