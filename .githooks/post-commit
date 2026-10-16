@@ -78,6 +78,19 @@ fi
 cd "$RAIZ_HOOK" || exit 0
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 
+# Consistência dos derivados (achado do Codex, 16/10/2026): vault, índice e envio leem o checkout VIVO, e um `git pull`,
+# checkout ou edição feita enquanto eles rodam mistura duas versões sob o mesmo rótulo de SHA. Aqui só se DETECTA (o
+# lock não impede quem não passa por ele): mede o HEAD e o CONTEÚDO dos arquivos rastreados (`git diff HEAD --binary`,
+# que muda mesmo quando um arquivo já modificado continua modificado) antes e depois da geração; se mudou, avisa e deixa
+# um marcador POR CHECKOUT para o próximo `--atualizar`/commit refazer. Fail-soft: nunca bloqueia o commit.
+# LIMITES (parcial, não é snapshot por SHA): uma mudança que volta ao estado inicial antes do fim (ABA) não é vista;
+# arquivo não rastreado não entra; o aviso não impede o envio do derivado ao Drive. Consistência prometida exigiria
+# gerar de uma árvore exportada do SHA (item adiado).
+estado_checkout() { git rev-parse HEAD 2>/dev/null; git diff HEAD --binary 2>/dev/null; }
+MARCADOR_MISTURA="$HOME/.cache/agata/derivados-possivelmente-misturados-$(printf '%s' "$RAIZ_HOOK" | sha256sum | cut -c1-12)"
+ESTADO_INICIO="$(estado_checkout | sha256sum | cut -d' ' -f1)"
+SHA_INICIO="$(git rev-parse HEAD 2>/dev/null)"
+
 # 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
 # ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra
 # no commit. Fail-soft: nunca atrapalha o commit (MEMÓRIAS (290)).
@@ -145,6 +158,15 @@ if [ -f scripts/gerar_indice_derivado.py ]; then
   else
     echo "post-commit: AVISO — gerar_indice_derivado.py falhou; índice pode estar desatualizado" >&2
   fi
+fi
+
+# Fim da geração: o checkout mudou enquanto os derivados eram gerados?
+if [ "$(estado_checkout | sha256sum | cut -d' ' -f1)" != "$ESTADO_INICIO" ]; then
+  mkdir -p "$HOME/.cache/agata"
+  printf '%s %s\n' "$(date -Iseconds)" "$SHA_INICIO" > "$MARCADOR_MISTURA"
+  echo "post-commit: AVISO — o checkout mudou durante a geração dos derivados (pull, checkout ou edição); vault e índice rotulados $SHA_INICIO podem misturar duas versões. Refaça: python3 scripts/busca_semantica.py --atualizar e um novo commit/pull (marcador $MARCADOR_MISTURA)." >&2
+else
+  rm -f "$MARCADOR_MISTURA"
 fi
 
 exit 0
