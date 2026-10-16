@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 54a647907d8c963fee92275f92111e3c2ed04f6e
-  Escrito em: 16/10/2026 16:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d80c3556989345186554d3a6ebafb2554158b57f
+  Escrito em: 16/10/2026 16:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/54a647907d8c963fee92275f92111e3c2ed04f6e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/54a647907d8c963fee92275f92111e3c2ed04f6e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/54a647907d8c963fee92275f92111e3c2ed04f6e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/54a647907d8c963fee92275f92111e3c2ed04f6e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/54a647907d8c963fee92275f92111e3c2ed04f6e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d80c3556989345186554d3a6ebafb2554158b57f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d80c3556989345186554d3a6ebafb2554158b57f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d80c3556989345186554d3a6ebafb2554158b57f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d80c3556989345186554d3a6ebafb2554158b57f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d80c3556989345186554d3a6ebafb2554158b57f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
+
+Aplicada a proposta assinada. O inventário (imagens Docker com digest ou só tag, modelos do Ollama pelo digest da API, arquivos com sha256, Obsidian Flatpak) foi gerado por `scripts/inventario_componentes.py --gerar`; a chave `modelos`, régua do P-12, ficou idêntica (conferido), mas o arquivo foi reformatado. A partir daqui o `--verificar` funciona e avisa três imagens do LibreChat fixadas só por tag mutável (`mongo:8.0.20`, `getmeili/meilisearch:v1.35.1`, `alpine/socat:1.8.0.1`); fixá-las por digest é ação do Humano no compose, fora do repositório. O P-12 segue PARCIAL (HD de backup ausente).
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: `inventario_componentes.py --gerar/--verificar`, perímetro em worktree descartável · Autorização: Humano — assinatura de `inventario-gerado-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
 
 Aplicada a proposta assinada (decisão do Humano em 16/10/2026: "remover"). O módulo novo `redesign/router/limpa_emoji.py` usa a mesma regex do aviso do E-1 e preserva emoji em bloco de código, código em linha, citação entre aspas e linha de citação (`>`); o estado atravessa os fragmentos de streaming (SSE e resposta não streaming). Chave para desligar: `SETH_EMOJI_REMOVER=0`. Log do que o modelo produziu em `~/.cache/agata/emoji-removido.jsonl`, só com códigos Unicode e contagem, nunca o texto. Limites: é heurística de estilo, não filtro de segurança; o texto original NÃO é guardado, porque o LibreChat grava o que o gateway devolve, e por isso o aviso da auditoria do turno seguinte deixa de ver o emoji do modelo (o log é a medida). Só vale no gateway depois que o Humano reiniciar `seth-gateway.service`. Testes: `limpa_emoji` 17/17, selftest completo do gateway OK (4 casos novos), perímetro 0 FALHA.
