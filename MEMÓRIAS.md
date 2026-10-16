@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229
-  Escrito em: 16/10/2026 18:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1
+  Escrito em: 16/10/2026 19:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6402f4f4a0af36a6116bb8ccb7ec2ad8f07c229/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc9ee2aee1b83cfc966d7c083b22e958ddbb42f1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(732) CORREÇÃO — 16/10/2026 · **Lições do dia de trabalho em dupla (Claude Code e Codex), gravadas a pedido do Humano depois de o Codex ficar sem cota pela 2ª vez: o que gastou, o que errei e a regra que sai de cada erro.**
+
+Pedido do Humano: "Codex acabou novamente, complicado, grave o que aprendemos para correção e toque o trabalho". Registro de fatos medidos neste dia; nada aqui é decisão nova.
+
+**1. Onde a cota foi embora (medido ou relatado).** (a) O Codex acordava por timer a cada 2 min e relia o contexto mesmo sem nada novo; o Humano viu ciclos de "trabalha na média 32 s e para". (b) Na última hora medida (19:2x) o canal teve 14 mensagens do Codex e 11 minhas (cerca de 32 KB), boa parte resposta só de estado ("recebido", "base atualizada"). (c) O vigia em segundo plano não acorda o modelo do Codex (limite dele, confirmado por ele). **Correção adotada:** `vigia.sh` em modo bloqueante (`--uma`), sem timer (ordem do Humano, 19:36); uma mensagem por entrega ou bloqueio, agrupada; despertar começa por checagem em shell; fila longa de itens de 10 min ou mais. O gasto de token em si só o painel de uso do Codex mostra; eu não o medi.
+
+**2. Erros meus, com a regra que sai de cada um.** (a) Numeração: o aplicador usou um padrão que não reconhecia a acentuada de "DIÁRIO" e deu (729) a 14 entradas (corrigido em (730)); regra: o padrão aceita qualquer palavra, e todo gerador de número é testado com título acentuado. (b) Crases dentro de texto entre aspas duplas foram EXECUTADAS pelo shell (lançaram um vigia extra e um `touch` no arquivo de parada); regra: texto longo vai por arquivo e `--texto "$(cat arq)"`, nunca crase no argumento. (c) Dei ao Humano o comando de assinatura antes de a proposta estar no `main` (2 vezes); regra: conferir `ls propostas/` no `main` antes de entregar o comando. (d) Vigia com prazo de 30 min expirou sem eu notar e deixei 5 mensagens do Codex sem resposta; regra: rearmar o monitor a cada notificação de expiração. (e) Abandonei o cabeçalho da Regra 1 no modo conciso; regra: o cabeçalho abre TODA resposta, com `t` pelo contador mecânico. (f) Afirmei que a consolidação resumia "o dia" e usava modelo remoto, por inferência da unit; o Codex mostrou que é incremental por marcador e local; regra: não afirmar comportamento de código a partir de descrição de unit. (g) Tornei o `fiscal-p8` obrigatório sem testar com o hook ligado: ele barrava todo PR comum (corrigido); regra: testar o caminho real antes de torná-lo obrigatório. (h) `pkill -f` com o padrão no próprio comando matou meu shell (2 vezes); regra: matar por PID. (i) Dois PRs de aplicação simultâneos conflitaram nas âncoras; regra: um PR de aplicação por vez, ou em lote único.
+
+**3. O que a revisão cruzada achou e valeu.** O Codex achou o defeito do comando de assinatura em Fish (um `false` dentro do `for` era sobrescrito, o comando assinava mesmo com hash divergente) e o caso do arquivo ausente; eu achei lacunas de fail-closed na política do pool e cinco falhas no núcleo da janela; o teste por mutações levou o fiscal de 5 para 12 mutantes mortos de 15. Autor diferente do revisor pegou erros que cada um teria deixado passar.
+
+**4. Regras operacionais que ficam.** Fallback mútuo (`dupla.py ausente/presente`; ausência só com confirmação, nunca por silêncio); recibo por entrega até o parecer; mensagens agrupadas; a próxima sessão retoma por `~/.cache/agata/sincronia/RETOMADA-claude.md`.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: contagem de mensagens do canal, `grep` do histórico de erros desta sessão, medições citadas · Autorização: Humano, "grave o que aprendemos para correção" (16/10/2026).
+
 (731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
 
 A regra é a de `PROJETO.md` (memória em duas camadas, Fronteira): "Segredo, chave e credencial nunca sobem para esfera externa nenhuma". Ao escolher onde guardar uma segunda cópia da chave de recuperação, o Claude Code listou as opções (segundo pendrive, e-mail, nuvem) sem lembrar essa regra, e só a apontou depois da escolha do Humano ("email da agata"). Com a regra à vista, o Humano decidiu manter a escolha e escreveu: "risco aceito registre para lembrança posterior caso solicitado".

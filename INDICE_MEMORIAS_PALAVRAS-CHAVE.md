@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(732) CORREÇÃO — 16/10/2026 · **Lições do dia de trabalho em dupla (Claude Code e Codex), gravadas a pedido do Humano depois de o Codex ficar sem cota pela 2ª vez: o que gastou, o que errei e a regra que sai de cada erro.**
+  palavras-chave: lições, dia, trabalho, dupla, claude, code, codex, gravadas, pedido, humano, ficar, cota, gastou, errei, regra, sai, erro
 (731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
   palavras-chave: exceção, assumida, humano, regra, chave, nunca, sobe, esfera, externa, arquivo, agata, recuperacao, key, age, privada, recuperação, cofre, cifrada, senha, pode, guardado, mail, conta, projeto
 (730) CORREÇÃO — 16/10/2026 · **O número (729) foi atribuído a 14 entradas diferentes de 16/10/2026 por defeito do meu aplicador; esta entrada fixa a leitura: (729a) a (729n), na ordem em que foram escritas.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, pesquisa, livre, assinada, humano, worktree, mesma, fala, shell, goose, passa, pedir, aprovação, deve, padir
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
   palavras-chave: auditoria, conversa, seth, pedido, humano, ela, negou, laya, segurando, linha, canon, citava, concluiu, internet, ter, buscado, nela, chamou, resultados, páginas, leu, inteiras, decisão, risco, assumido, ele, pode, liberar, ferramentas, pesquisa, disponiveis, pedir, minha, autorização, assumo, escrita, devem, continuar, passando, sempre, serve, modelos, federados, proposta, livre, aguardando, assinatura
-(715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
-  palavras-chave: treino, voz, agata, madrugada, agendado, aconteceu, máquina, suspendeu, inatividade, min, início, voltou, erro, meu, agendei, trabalho, segurar, suspensão, reagendado, pedido, humano, agora, systemd, inhibit
+(715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 ( …
+  palavras-chave: treino, voz, agata, madrugada
 (714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-han …
   palavras-chave: execução, resumo, automático, omniroute, universal, han
 (713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinad …
