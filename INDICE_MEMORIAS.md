@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
 (729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
 (729) DIÁRIO — 16/10/2026 · **Detector de derivados misturados aplicado (`derivados-consistencia-v2-20261016`): o `post-commit` passa a avisar quando o checkout muda enquanto vault e índice são gerados.**
 (729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assinada pelo Humano), em worktree. Reteste da avaliação na entrada seguinte.**
-(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
+(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, ` …
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo …
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano …
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth …

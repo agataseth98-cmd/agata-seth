@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a82b8d983dcbd71d9d71465952e86f9d7c792689
-  Escrito em: 16/10/2026 14:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 744c062e9e7f43476f12270f37407a23d3ca956e
+  Escrito em: 16/10/2026 14:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a82b8d983dcbd71d9d71465952e86f9d7c792689/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/744c062e9e7f43476f12270f37407a23d3ca956e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/744c062e9e7f43476f12270f37407a23d3ca956e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/744c062e9e7f43476f12270f37407a23d3ca956e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/744c062e9e7f43476f12270f37407a23d3ca956e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/744c062e9e7f43476f12270f37407a23d3ca956e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
+
+Aplicada a proposta assinada, do Codex, revisada por mim sem emenda: conferi que `rota_ativa`, `ms` e `respostas` existem de fato no log (gravados por `seth_gateway.py` e `decisor.py`) e rodei a função sobre o `roteador.jsonl` real (163 registros). Limites declarados no próprio relatório: a latência é a do decisor em sombra, inclusive falhas, não o tempo de resposta da Seth nem qualidade; rota ausente não é inferida; tokens, custo e desfecho não são medidos; amostras pequenas (por exemplo `seth-rapido`, n=1) aparecem com o número de decisões ao lado.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex · vetor: `scripts/avaliar_decisor.py --selftest`, função aplicada ao log real · Autorização: Humano — assinatura de `metricas-a04-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
 
 Aplicada a proposta assinada, do Codex, revisada por mim sem emenda. A regex de `auditoria_turno.py` passa a cobrir os blocos de símbolos e emoji pela propriedade Emoji da tabela oficial Unicode 17.0 (relógio, ampulheta, setas, keycap, quadrados e outros), sem acusar símbolos tipográficos (✓ ★ ♪ ☐ → © ® ™). Continua só aviso: não remove texto. O catálogo de afirmações desmentidas ganha o `qwen3.5:9b`. Medido antes: 12% dos 134 turnos auditados tinham emoji; a meta é derrubar esse número, e a decisão de remover o emoji da prosa (E-2) continua do Humano.

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
+  palavras-chave: métricas, rota, decisor, aplicadas, metricas, relatório, passa, mostrar, ativa, registrada, número, decisões, taxa, falha, latências
 (729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
   palavras-chave: aviso, emoji, ampliado, aplicado, auditoria, turno, passa, acusar, símbolos, passavam, silêncio
 (729) DIÁRIO — 16/10/2026 · **Detector de derivados misturados aplicado (`derivados-consistencia-v2-20261016`): o `post-commit` passa a avisar quando o checkout muda enquanto vault e índice são gerados.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reteste, pedida, avaliação, últimas, mudanças, ela, juízo, técnico, marcado, tal, chama, ferramenta, query, canon, vault, buscar, cabeçalho, segue, sendo, ponto, fraco, acusado, auditoria, turno
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assinada pelo Humano), em worktree. Reteste da avaliação na entrada seguinte.**
   palavras-chave: execução, aplicada, seth, opiniao, tecnica, assinada, humano, worktree, reteste, avaliação, entrada, seguinte
-(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
-  palavras-chave: reteste, olá, sai, certo, prontidão, sync, pass, sermão, falso, alarme, sumiu, avaliação, pedida, saiu, recusada, minha, função, inclui, avaliações, subjetivas, proposta, seth, opiniao, tecnica, corrige, aguardando, assinatura
+(702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, ` …
+  palavras-chave: reteste, olá, sai, certo, prontidão
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo …
   palavras-chave: execução, aplicada, seth, zerar, assinada
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano …
