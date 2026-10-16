@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 922555dc2418fbefa458e89a2e8f247b8d0dfbfe
-  Escrito em: 16/10/2026 19:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 92c3de2242ee33c91e1b8797b4cc904c3769234b
+  Escrito em: 16/10/2026 19:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/922555dc2418fbefa458e89a2e8f247b8d0dfbfe/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/922555dc2418fbefa458e89a2e8f247b8d0dfbfe/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/922555dc2418fbefa458e89a2e8f247b8d0dfbfe/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/922555dc2418fbefa458e89a2e8f247b8d0dfbfe/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/922555dc2418fbefa458e89a2e8f247b8d0dfbfe/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92c3de2242ee33c91e1b8797b4cc904c3769234b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92c3de2242ee33c91e1b8797b4cc904c3769234b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92c3de2242ee33c91e1b8797b4cc904c3769234b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92c3de2242ee33c91e1b8797b4cc904c3769234b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/92c3de2242ee33c91e1b8797b4cc904c3769234b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado (`janela-manutencao-20261016`): avaliação do decisor, consolidação e treino do Laya DIÁRIO entre 12h15 e 13h15; nada foi ativado ainda.**
+
+Aplicada a proposta assinada. Decisão do Humano (16/10/2026): unificar os scripts automáticos numa janela de almoço e treinar o Laya todos os dias nos horários disponíveis (a máquina nem sempre está ligada no domingo de madrugada; o timer semanal do Laya nunca havia disparado). Núcleo: Codex (`janela-nucleo-offline-v1.py`); revisão e correção: Claude (cinco falhas: sem teto de tentativas por dia, adiamento silencioso, `state.json` corrompido derrubava o ciclo, orçamento inválido só validado no meio, recibo final que desfazia o carimbo); publicação pelo Claude por ausência do Codex (cota). `scripts/janela_manutencao.py` roda as tarefas de `config/janela-tarefas.txt` em ordem e uma por vez, com um lock, no máximo 2 tentativas por tarefa por dia, `skipped` esgotando o dia, recibo `started` antes de rodar, estado atômico antes do recibo final, término do processo por SIGTERM e depois SIGKILL ao estourar o prazo, e nenhuma tarefa nova depois de 13h15. As units e o timer (12h15, 12h30, 12h45, 13h00 e 3 min depois de ligar) ficam em `config/systemd/` como referência; `systemd-analyze verify` limpo. Selftest 18/18. LIMITES: a pesquisa de modelos (domingo 22h) fica fora até o Codex separar descoberta pública de ensaio autorizado; o treino diário reverte o "nunca treina de dia" da unit antiga; os timers antigos só devem ser desativados depois de o novo ser ativado e visto rodar; ativar é comando do Humano.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · autor do núcleo: Codex · vetor: selftest, `systemd-analyze verify`, dry-run com relógio simulado · Autorização: Humano, decisão do treino diário (16/10/2026) e assinatura de `janela-manutencao-20261016`.
+
 (733) DIÁRIO — 16/10/2026 · **Marcador da consolidação corrigido (`consolidacao-marcador-20261016`): o marcador só avança até a entrada realmente considerada, não até o estado do canon no fim da execução.**
 
 Aplicada a proposta assinada. Autor: Codex (`consolidacao-marcador-v1.diff`); revisão: Claude (parecer favorável, com verificação própria: o grafo da consolidação não passa pelo nó `hidratar`, `hidratacao` é chave declarada do `Estado`, e o snapshot com chaves inteiras e conjuntos sobrevive à serialização do checkpoint); publicação do `.diff` pelo Claude por ausência do Codex (cota). A correção captura no início o índice, o limite e o sha do canon e usa esse mesmo snapshot para selecionar os temas e gravar o marcador. Prova do Codex: cinco cenários isolados e uma execução real com LangGraph e SqliteSaver (entrada 3 chegou durante a inferência; o marcador permaneceu em 2). Semântica mantida e agora escrita no código: reprovação de qualidade conta como "considerada", não como tentativa pendente (o marcador é global; reintentar um tema reprovado exigiria arquivo de pendentes por tema, decisão do Humano). Limites: a consulta da prova é sintética, não prova qualidade nem snapshot imutável dos corpos.

@@ -1,0 +1,17 @@
+[Unit]
+Description=Ágata — chama a janela de manutenção (12h15, a cada 15 min até 13h, e 3 min depois de ligar a máquina)
+
+[Timer]
+# O script ignora disparo fora da janela e tarefa já feita no dia; chamar várias vezes só custa um processo curto, sem modelo.
+OnCalendar=*-*-* 12:15:00
+OnCalendar=*-*-* 12:30:00
+OnCalendar=*-*-* 12:45:00
+OnCalendar=*-*-* 13:00:00
+# Máquina ligada às 12h30 (ou acordada do sono): dispara 3 min depois do boot; fora da janela o script não faz nada.
+OnBootSec=3min
+# Sem Persistent: nunca recupera disparo perdido para a tarde.
+Persistent=false
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

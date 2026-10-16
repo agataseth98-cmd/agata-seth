@@ -62,6 +62,7 @@ jobs:
           python3 -I redesign/router/limpa_emoji.py --selftest
           python3 -I scripts/verificar_cofre.py --selftest
           python3 -I scripts/cifrar_recuperacao.py --selftest
+          python3 -I scripts/janela_manutencao.py --selftest
 
       - name: Contratos de memória e escriba (offline, stdlib)
         run: |
