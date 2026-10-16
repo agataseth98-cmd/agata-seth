@@ -4,8 +4,10 @@
 
 ## `sanitizar.py` — scrub de segredo antes do egresso (P1-02)
 
-Feito 2026-09-01 ("continuar sem o HD"), **testado offline**, ainda **não ligado** ao
-caminho de saída (isso é o passo 3 da P1-02, quando o OmniRoute estiver de pé).
+Feito 2026-09-01 ("continuar sem o HD") e **testado offline**. **Ligado ao caminho de saída**
+(medido em 16/10/2026): `proxy.py` (unit `omniroute-sanitizer`, `:20127`, ativa) chama
+`sanitizar_payload()` antes do egresso ao OmniRoute; o texto antigo "ainda não ligado" era de
+antes do OmniRoute subir.
 
 ### Régua única
 
