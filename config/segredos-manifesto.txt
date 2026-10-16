@@ -1,0 +1,16 @@
+# Manifesto de segredos da Agata (cofre G-C, etapa F1). SÓ NOMES E METADADOS -- nunca valores.
+# Lido por scripts/verificar_cofre.py, que só faz stat() e nunca abre o arquivo.
+# Formato (separador |):  caminho | classe | validade_dias | ultima_rotacao | modo_esperado | uso
+# classe: A = chave de provedor de modelo; B = token de canal/serviço; C = interna/criptográfica; H = chave de assinatura do Humano; P = dado pessoal sensível
+# ultima_rotacao: AAAA-MM-DD. Aproximada pela data de modificação do arquivo em 16/10/2026 (o Humano corrige quando souber a data real).
+# validade_dias: A=180, B=90, C=0 (sem prazo; só por evento), H=0, P=0. 0 = não vence por tempo.
+# Rotacionar é ato do Humano (CHAVES.md); a máquina só avisa.
+~/.config/agata/.env|A|180|2026-09-22|600|chaves de API dos provedores de modelo e token do Discord
+~/.config/agata/restic.pass|C|0|2026-09-02|600|senha do repositório restic no HD de backup
+~/.config/agata/obsidian.token|B|90|2026-09-02|600|bearer do plugin obsidian-local-rest-api
+~/.config/agata/google-project|B|90|2026-09-04|700|credencial OAuth da conta do projeto (Drive)
+~/.config/agata/token-interno|C|0|2026-10-03|600|token interno entre serviços da Agata
+~/.config/agata/identificadores-pessoais.txt|P|0|2026-09-30|600|identificadores pessoais (P-20)
+~/.config/agata/aprovacao_ed25519|H|0|2026-09-08|600|chave PRIVADA de assinatura do Humano (aprovar.sh); nunca copiar
+~/.omniroute/.env|C|0|2026-09-02|600|STORAGE_ENCRYPTION_KEY do OmniRoute (cifra o storage.sqlite)
+~/librechat/.env|C|0|2026-09-21|600|CREDS_KEY, CREDS_IV, JWT_SECRET, MEILI_MASTER_KEY do LibreChat
