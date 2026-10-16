@@ -548,6 +548,7 @@ def _classificar_rota(payload: dict) -> str:
 # ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
 import decisor  # noqa: E402  (mesmo diretório)
 import auditoria_turno  # noqa: E402  (mesmo diretório)
+import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -1005,6 +1006,11 @@ class _Handler(BaseHTTPRequestHandler):
                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
                 except (ValueError, KeyError, IndexError, TypeError):
                     pass
+        self._emoji_estados = {}
+        self._modelo_para_log = modelo_real
+        if up.status == 200 and not sse and _emoji_ligado():
+            buf_pre, _rem = limpa_emoji.limpar_json(buf_pre)
+            _registrar_emoji(self._rota, modelo_real, _rem)
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
@@ -1075,6 +1081,7 @@ class _Handler(BaseHTTPRequestHandler):
         # pelo keepalive do OmniRoute, virava um único ": ka" e o conteúdo real
         # sumia -> stream sem nenhum chunk -> crash "'tool_calls' in undefined"
         # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
+        self._emoji_estados = {}
         buf = self._escrever_linhas_completas(buf)
         while True:
             try:
@@ -1086,9 +1093,14 @@ class _Handler(BaseHTTPRequestHandler):
             buf = self._escrever_linhas_completas(buf + pedaco)
         if buf:
             saida = self._filtrar_linha_sse(buf)
+            if _emoji_ligado():
+                saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
+        if _emoji_ligado():
+            _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
+                             [c for est in self._emoji_estados.values() for c in est.removidos])
 
     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
@@ -1096,6 +1108,8 @@ class _Handler(BaseHTTPRequestHandler):
         while b"\n" in buf:
             linha, buf = buf.split(b"\n", 1)
             saida = self._filtrar_linha_sse(linha + b"\n")
+            if _emoji_ligado():
+                saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
@@ -1122,6 +1136,27 @@ def servir(host: str = BIND_HOST, port: int = BIND_PORT):
 
 
 # --------------------------------------------------------------------------- #
+def _emoji_ligado() -> bool:
+    """E-2 (decisão do Humano, 16/10/2026): remove emoji da prosa. Chave para desligar sem mexer em código:
+    SETH_EMOJI_REMOVER=0 (lida a cada resposta). Padrão: ligado."""
+    return os.environ.get("SETH_EMOJI_REMOVER", "1") != "0"
+
+
+def _registrar_emoji(rota, modelo, removidos) -> None:
+    """Log do que o MODELO produziu (só códigos Unicode e contagem, nunca o texto): o cliente guarda a resposta já limpa,
+    então a auditoria do turno seguinte não vê mais o emoji; esta é a medida. Fail-soft."""
+    if not removidos:
+        return
+    try:
+        arq = Path(os.environ.get("AGATA_EMOJI_LOG") or Path.home() / ".cache" / "agata" / "emoji-removido.jsonl")
+        arq.parent.mkdir(parents=True, exist_ok=True)
+        with open(arq, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
+                                "n": len(removidos), "codigos": sorted(set(removidos))}, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
 def _porta_livre() -> int:
     s = socket.socket()
     s.bind(("127.0.0.1", 0))
@@ -1136,6 +1171,8 @@ class _Dummy(BaseHTTPRequestHandler):
     vazias = 0          # (695) quantas respostas vazias dar antes da normal
     penduradas = 0      # (709) quantas respostas só-keepalive (SSE, sem conteúdo) antes da normal
     modelos_pedidos = []
+    texto_fixo = None   # E-2: resposta não streaming com este texto (ex.: com emoji)
+    sse_emoji = False   # E-2: próxima resposta é SSE com emoji partido em fragmentos
 
     def log_message(self, *a):
         pass
@@ -1143,6 +1180,16 @@ class _Dummy(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
         type(self).ultimo_corpo = self.rfile.read(n)
+        if type(self).sse_emoji:
+            type(self).sse_emoji = False
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            for frag in ("Feito ", "\u2705", " ok `\u2705` \"\u274c\" ", "fim \U0001F600\n"):
+                ch = {"model": "m-real", "choices": [{"index": 0, "delta": {"content": frag}}]}
+                self.wfile.write(b"data: " + json.dumps(ch).encode() + b"\n\n")
+            self.wfile.write(b"data: [DONE]\n\n")
+            return
         try:
             type(self).modelos_pedidos.append(json.loads(type(self).ultimo_corpo).get("model"))
         except ValueError:
@@ -1160,7 +1207,7 @@ class _Dummy(BaseHTTPRequestHandler):
             except (BrokenPipeError, ConnectionResetError):
                 pass
             return
-        texto = "ok"
+        texto = type(self).texto_fixo or "ok"
         if type(self).vazias > 0:
             type(self).vazias -= 1
             texto = ""
@@ -1640,6 +1687,39 @@ def _selftest() -> int:
     ok16 = _linha_propostas().startswith("PROPOSTAS-PENDENTES: ") and "propostas/aplicadas/" in _linha_propostas()
     print(f"{'PASS' if ok16 else 'FALHA'}  PROPOSTAS-PENDENTES no estado: {_linha_propostas()[:80]}")
     falhas += 0 if ok16 else 1
+    # 17. (E-2, 16/10/2026) remoção de emoji da prosa: não streaming e SSE, log só com códigos, chave para desligar
+    import tempfile as _tf
+    log_emoji = Path(_tf.mkdtemp()) / "emoji.jsonl"
+    os.environ["AGATA_EMOJI_LOG"] = str(log_emoji)
+    corpo_e = json.dumps({"model": "seth", "messages": [{"role": "user", "content": "oi"}]}).encode()
+    hdr = {"Content-Type": "application/json"}
+    _Dummy.texto_fixo = "Pronto \u2705 e `\u2705` fim \U0001F600"
+    r17 = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())
+    t17 = r17["choices"][0]["message"]["content"]
+    ok17a = "\U0001F600" not in t17 and t17.count("\u2705") == 1 and "`\u2705`" in t17
+    print(f"{'PASS' if ok17a else 'FALHA'}  E-2 não streaming: emoji da prosa sai, o do código fica ({t17!r})")
+    falhas += 0 if ok17a else 1
+    _Dummy.texto_fixo = None
+    _Dummy.sse_emoji = True
+    sse17 = urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "stream": True,
+        "messages": [{"role": "user", "content": "oi"}]}).encode(), headers=hdr), timeout=15).read().decode("utf-8")
+    txt17 = "".join(json.loads(l[6:])["choices"][0]["delta"].get("content") or ""
+                    for l in sse17.splitlines() if l.startswith("data: {") and "choices" in l and "keepalive" not in l)
+    ok17b = ("\u2705" not in txt17.replace("`\u2705`", "")) and "`\u2705`" in txt17 and '"\u274c"' in txt17 and "\U0001F600" not in txt17 and "[DONE]" in sse17
+    print(f"{'PASS' if ok17b else 'FALHA'}  E-2 SSE: fragmentos limpos, código e aspas preservados, [DONE] intacto ({txt17!r})")
+    falhas += 0 if ok17b else 1
+    log17 = [json.loads(l) for l in log_emoji.read_text(encoding="utf-8").splitlines()] if log_emoji.exists() else []
+    ok17c = len(log17) == 2 and all("texto" not in e and "codigos" in e for e in log17) and log17[0]["n"] >= 1
+    print(f"{'PASS' if ok17c else 'FALHA'}  E-2 log: {len(log17)} registros, só códigos Unicode e contagem")
+    falhas += 0 if ok17c else 1
+    os.environ["SETH_EMOJI_REMOVER"] = "0"
+    _Dummy.texto_fixo = "Pronto \u2705"
+    t17d = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())["choices"][0]["message"]["content"]
+    del os.environ["SETH_EMOJI_REMOVER"]
+    _Dummy.texto_fixo = None
+    ok17d = "\u2705" in t17d
+    print(f"{'PASS' if ok17d else 'FALHA'}  E-2 chave SETH_EMOJI_REMOVER=0 devolve o texto original")
+    falhas += 0 if ok17d else 1
     up.shutdown()
     gw.shutdown()
     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")

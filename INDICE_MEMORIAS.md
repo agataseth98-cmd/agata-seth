@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
 (729) DIÁRIO — 16/10/2026 · **Teste por mutações do fiscal de PR aplicado (`fiscal-mutacao-20261016`): a suíte do `fiscal-p8` passou de 5 para 12 mutantes mortos em 15.**
 (729) DIÁRIO — 16/10/2026 · **Dependabot passa a ignorar versões maiores de github-actions (`dependabot-major-20261016`).**
 (729) DIÁRIO — 16/10/2026 · **README do roteador corrigido (`readme-router-20261016`): o sanitizador de segredo já está ligado ao caminho de saída.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o Gemini sem cota pendurou a `seth-livre` 7 vezes e nas 7 o gateway desistiu em 42 s e a `seth-rapido` (Ministral) respondeu. Resposta em 43–56 s, contra os 310 s de (709). A origem continua: o Gemini segue 1º da fila e sem cota — descer ele na fila segue decisão do Humano.**
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-14` (assinada pelo Humano), em worktree. Reteste na entrada seguinte.**
-(709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) travou no 1º "Olá": o Gemini 2.5 Flash, sem cota, ficou 310 s sem responder e a fila não andou. Proposta `seth-prazo-primeiro-conteudo-2026-10-14` corta a espera de 310 s para ~47 s (medido). Erros e vitórias da rodada registrados, a pedido do Humano ("registre erros e vitórias"). Aguardando assinatura.**
+(709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) …
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (as …
 (707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina …
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (as …

@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 81d478f7988637b02ade064ac94c6426e6826f40
-  Escrito em: 16/10/2026 16:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1d39929f51b70824d119d4453c8bf9dd0cd3212
+  Escrito em: 16/10/2026 16:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81d478f7988637b02ade064ac94c6426e6826f40/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81d478f7988637b02ade064ac94c6426e6826f40/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81d478f7988637b02ade064ac94c6426e6826f40/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81d478f7988637b02ade064ac94c6426e6826f40/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/81d478f7988637b02ade064ac94c6426e6826f40/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d39929f51b70824d119d4453c8bf9dd0cd3212/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d39929f51b70824d119d4453c8bf9dd0cd3212/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d39929f51b70824d119d4453c8bf9dd0cd3212/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d39929f51b70824d119d4453c8bf9dd0cd3212/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1d39929f51b70824d119d4453c8bf9dd0cd3212/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
+
+Aplicada a proposta assinada (decisão do Humano em 16/10/2026: "remover"). O módulo novo `redesign/router/limpa_emoji.py` usa a mesma regex do aviso do E-1 e preserva emoji em bloco de código, código em linha, citação entre aspas e linha de citação (`>`); o estado atravessa os fragmentos de streaming (SSE e resposta não streaming). Chave para desligar: `SETH_EMOJI_REMOVER=0`. Log do que o modelo produziu em `~/.cache/agata/emoji-removido.jsonl`, só com códigos Unicode e contagem, nunca o texto. Limites: é heurística de estilo, não filtro de segurança; o texto original NÃO é guardado, porque o LibreChat grava o que o gateway devolve, e por isso o aviso da auditoria do turno seguinte deixa de ver o emoji do modelo (o log é a medida). Só vale no gateway depois que o Humano reiniciar `seth-gateway.service`. Testes: `limpa_emoji` 17/17, selftest completo do gateway OK (4 casos novos), perímetro 0 FALHA.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina; item C9 assumido porque o Codex só volta às 18:35) · coautor/revisor: Codex (revisa ao voltar) · vetor: selftests acima · Autorização: Humano — decisão "remover" e assinatura de `emoji-remover-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Teste por mutações do fiscal de PR aplicado (`fiscal-mutacao-20261016`): a suíte do `fiscal-p8` passou de 5 para 12 mutantes mortos em 15.**
 
 Aplicada a proposta assinada (item K1, R2 do plano). A ferramenta `scripts/mutar_fiscal.py` aplica uma quebra por vez numa cópia de `scripts/` e roda `testar_p8_verificar_pr.py`. A suíte antiga matava 5 de 15 mutantes; seis casos novos (30 a 35) fecham lacunas reais: REGRAS alterada fora do bloco de âncora com par consumido, slug diferente, SHA de commit real fora da história do head, mudança de modo com e sem par, e base que já tem par aplicado. Suíte 36/36. Restam 3 sobreviventes argumentados como equivalentes, sem prova formal: M02 e M03 (a assinatura SSH cobre o hash real do diff) e M11 (encoberto pela checagem de ancestralidade enquanto o fiscal passar `--ancora-ancestral-de`). Um caso nasceu errado (o 32 passava pelo motivo errado, pois o commit lateral absorvia o pacote) e só foi percebido porque o mutante da ancestralidade seguia vivo.
