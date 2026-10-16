@@ -30,6 +30,7 @@ Regra do Humano (15 e 16/10/2026): **guardar sempre os achados; resolver quando 
 | AC-23 | Gateway e Skill: a Skill `agata-fluxo-dupla` precisa ser atualizada sempre que o fluxo mudar; ferramentas agora em `scripts/dupla/` | `.agents/skills/agata-fluxo-dupla/SKILL.md` | aberto | revisar a Skill a cada mudança do fluxo |
 | AC-24 | Tags assinadas dos selos, `CODEOWNERS` e requisitos da voz do PR 184 (fechado) não feitos | itens C7, C8 da fila | aberto | quando o Codex voltar |
 | AC-25 | Teste de estado da arte Seth: voz somente leitura funciona; STT (microfone) segue pendente e não está configurado | `librechat.yaml` (nota do STT); teste de 20h30 | bússola | só com decisão sobre entrada por voz |
+| AC-26 | Vigia deve ser permanente para todos os modelos confederados (decisão do Humano, 16/10 20h36); hoje depende de rearmar o Monitor a cada 30 min e não existe para o Codex fora da sessão | fala do Humano; `scripts/dupla/vigia.sh` | decisão do Humano / em proposta | proposta P-8: unit systemd de usuário por agente (sem modelo) + nota na Skill; até lá, rearmar sempre |
 
 ## Como evoluir
 Escolha por valor e risco: primeiro o que fecha buracos de integridade ou reduz gasto (AC-03, AC-04, AC-05, AC-09), depois o que melhora a qualidade da Seth (AC-01, AC-02, AC-20), por último o que amplia superfície (AC-15). Cada item vira proposta própria, uma por vez; o Codex revisa o que o Claude escreve e o contrário.
