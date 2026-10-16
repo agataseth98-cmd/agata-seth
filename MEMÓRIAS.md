@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b61552f83a26d46c15bd7fced08d9489ecba501e
-  Escrito em: 16/10/2026 16:29 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 008cafbed7c2750e24b128388eeb6a20a167d09d
+  Escrito em: 16/10/2026 16:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b61552f83a26d46c15bd7fced08d9489ecba501e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b61552f83a26d46c15bd7fced08d9489ecba501e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b61552f83a26d46c15bd7fced08d9489ecba501e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b61552f83a26d46c15bd7fced08d9489ecba501e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b61552f83a26d46c15bd7fced08d9489ecba501e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008cafbed7c2750e24b128388eeb6a20a167d09d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008cafbed7c2750e24b128388eeb6a20a167d09d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008cafbed7c2750e24b128388eeb6a20a167d09d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008cafbed7c2750e24b128388eeb6a20a167d09d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/008cafbed7c2750e24b128388eeb6a20a167d09d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
+
+Aplicada a proposta assinada (desenho G-C aprovado pelo Humano em 16/10/2026: etapas F1 a F3; chave privada de recuperação em pendrive, gerada depois; `age` e `sops` a instalar com `sudo` do Humano). `config/segredos-manifesto.txt` lista só nomes e metadados (caminho, classe, validade, última rotação aproximada, modo esperado, uso), nunca valores. `scripts/verificar_cofre.py` compara o manifesto com o disco usando apenas `stat()`; o selftest prova que `open()` nunca é chamado (8/8). No estado real, a primeira rodada achou: `~/.omniroute/.env` com permissão 644 (guarda a chave que decifra o storage do OmniRoute; esperada 600), a cópia GPG do `.env` de 03/09 mais velha que o `.env` de 22/09 (19 dias sem cobertura) e `~/librechat/PRIMEIRO-ACESSO.txt` ainda existente. As correções são ações do Humano (chmod, `scripts/cifrar_env.sh`, apagar o arquivo). Próximas etapas: F2 (cópia de recuperação com `age` e a chave pública do Humano, teste de restauração) e F3 (`systemd-creds` por serviço).
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: `verificar_cofre.py` no estado real e selftest · Autorização: Humano — aprovação do desenho e assinatura de `cofre-f1-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
 
 Aplicada a proposta assinada. O inventário (imagens Docker com digest ou só tag, modelos do Ollama pelo digest da API, arquivos com sha256, Obsidian Flatpak) foi gerado por `scripts/inventario_componentes.py --gerar`; a chave `modelos`, régua do P-12, ficou idêntica (conferido), mas o arquivo foi reformatado. A partir daqui o `--verificar` funciona e avisa três imagens do LibreChat fixadas só por tag mutável (`mongo:8.0.20`, `getmeili/meilisearch:v1.35.1`, `alpine/socat:1.8.0.1`); fixá-las por digest é ação do Humano no compose, fora do repositório. O P-12 segue PARCIAL (HD de backup ausente).
