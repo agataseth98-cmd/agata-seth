@@ -1,0 +1,353 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index 0a97c40..cd8b583 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -59,6 +59,7 @@ jobs:
+           python3 -I scripts/p8_integral.py --selftest
+           python3 -I scripts/testar_p8_verificar_pr.py
+           python3 -I scripts/painel_estado.py --selftest
++          python3 -I redesign/router/limpa_emoji.py --selftest
+ 
+       - name: Contratos de memória e escriba (offline, stdlib)
+         run: |
+diff --git a/redesign/router/limpa_emoji.py b/redesign/router/limpa_emoji.py
+new file mode 100644
+index 0000000..06a6365
+--- /dev/null
++++ b/redesign/router/limpa_emoji.py
+@@ -0,0 +1,176 @@
++#!/usr/bin/env python3
++"""limpa_emoji.py -- remove emoji da PROSA da resposta da Seth (E-2, decisão do Humano de 16/10/2026: "remover").
++
++Puro e sem rede. A regex é a MESMA do aviso da auditoria (`auditoria_turno._EMOJI`, E-1): uma só régua. Não remove em:
++bloco de código (``` ao início da linha), código em linha (`...`), citação entre aspas ("..." “...” «...») nem linha de citação (`>`).
++Funciona em STREAMING: o estado (bloco de código, aspas, crase, início de linha) atravessa os fragmentos de `delta.content`.
++Um emoji de várias partes (ZWJ, seletor, tom de pele) que atravesse dois fragmentos é removido peça a peça: o seletor U+FE0F
++e o tom de pele estão na regex, e o ZWJ (U+200D) só é removido logo depois de um emoji removido.
++
++LIMITES (declarados): detecta bloco de código só pela cerca ``` no início da linha; não entende HTML/Markdown aninhado; aspas
++não fechadas valem até o fim da linha; é heurística de estilo, não filtro de segurança. A contagem de removidos vai para um log
++(só códigos Unicode e contagem, nunca o texto) -- o aviso da auditoria deixa de ver o emoji no turno seguinte porque o cliente
++guarda a resposta já limpa; o log é a medida do que o MODELO produziu.
++
++Uso como módulo: `LimpaEmoji().passar(texto) -> texto`; `limpar_sse_linha(linha_bytes, estados)`; `limpar_json(corpo_bytes)`.
++`--selftest` roda os casos.
++"""
++import json
++import re
++import sys
++import os
++
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++from auditoria_turno import _EMOJI  # noqa: E402  (mesma régua do aviso)
++
++_ABRE = {'"': '"', "“": "”", "«": "»"}
++
++
++class LimpaEmoji:
++    def __init__(self):
++        self.em_bloco = False      # dentro de ``` ... ```
++        self.em_inline = False     # dentro de `...` (reinicia na quebra de linha)
++        self.fecha_aspas = None    # caractere que fecha a citação aberta (reinicia na quebra de linha)
++        self.inicio = True         # só espaços desde o início da linha
++        self.linha_cit = False     # linha começa com '>'
++        self.prefixo = ""          # primeiros caracteres não-espaço da linha (detectar ```)
++        self.removeu_antes = False
++        self.removidos = []        # pontos de código removidos (só para o log)
++
++    def _fim_de_linha(self):
++        self.em_inline = False
++        self.fecha_aspas = None
++        self.inicio = True
++        self.linha_cit = False
++        self.prefixo = ""
++        self.removeu_antes = False
++
++    def passar(self, texto):
++        saida = []
++        for ch in texto:
++            if ch == "\n":
++                saida.append(ch)
++                self._fim_de_linha()
++                continue
++            # detecção da cerca ``` no início da linha (atravessa fragmentos)
++            if self.inicio and not ch.isspace():
++                self.prefixo += ch
++                if self.prefixo.startswith(">"):
++                    self.linha_cit = True
++                if len(self.prefixo) == 3 or (not set(self.prefixo) <= {"`"}):
++                    if self.prefixo == "```":
++                        self.em_bloco = not self.em_bloco
++                    self.inicio = False
++            protegido = self.em_bloco or self.em_inline or self.fecha_aspas or self.linha_cit or self.prefixo.startswith("`")
++            if not self.em_bloco and ch == "`" and not self.prefixo.startswith("```"):
++                self.em_inline = not self.em_inline
++            elif not self.em_bloco and not self.em_inline and not self.linha_cit:
++                if self.fecha_aspas:
++                    if ch == self.fecha_aspas:
++                        self.fecha_aspas = None
++                elif ch in _ABRE:
++                    self.fecha_aspas = _ABRE[ch]
++            if not protegido and _EMOJI.fullmatch(ch):
++                self.removidos.append(f"U+{ord(ch):04X}")
++                self.removeu_antes = True
++                continue
++            if not protegido and ch == "‍" and self.removeu_antes:   # ZWJ solto depois de emoji removido
++                continue
++            self.removeu_antes = False
++            saida.append(ch)
++        return "".join(saida)
++
++
++def limpar_sse_linha(linha, estados):
++    """`linha`: uma linha `data: {...}` (bytes, com ou sem \\n). `estados`: dict índice-da-escolha -> LimpaEmoji (mutado).
++    Só mexe em `choices[].delta.content` (texto). tool_calls, role e o resto passam intactos. Qualquer coisa que não seja JSON
++    de chat passa intacta."""
++    if not linha.startswith(b"data:") or b'"content"' not in linha:
++        return linha
++    corpo = linha[5:].strip()
++    if corpo == b"[DONE]":
++        return linha
++    try:
++        o = json.loads(corpo)
++        mudou = False
++        for ch in o.get("choices") or []:
++            d = ch.get("delta") or {}
++            c = d.get("content")
++            if isinstance(c, str) and c:
++                est = estados.setdefault(ch.get("index", 0), LimpaEmoji())
++                novo = est.passar(c)
++                if novo != c:
++                    d["content"] = novo
++                    mudou = True
++        if not mudou:
++            return linha
++        fim = b"\n" if linha.endswith(b"\n") else b""
++        return b"data: " + json.dumps(o, ensure_ascii=False).encode("utf-8") + fim
++    except (ValueError, AttributeError, TypeError):
++        return linha
++
++
++def limpar_json(corpo):
++    """Resposta NÃO streaming: `choices[].message.content`. Devolve (bytes, [pontos de código removidos])."""
++    try:
++        o = json.loads(corpo)
++        removidos = []
++        for ch in o.get("choices") or []:
++            m = ch.get("message") or {}
++            c = m.get("content")
++            if isinstance(c, str) and c:
++                est = LimpaEmoji()
++                novo = est.passar(c)
++                if novo != c:
++                    m["content"] = novo
++                    removidos += est.removidos
++        if not removidos:
++            return corpo, []
++        return json.dumps(o, ensure_ascii=False).encode("utf-8"), removidos
++    except (ValueError, AttributeError, TypeError):
++        return corpo, []
++
++
++def _selftest():
++    E1, E2, E3, E4 = "✅", "\U0001F600", "❌", "⚠️"
++    casos = []
++    L = lambda t: LimpaEmoji().passar(t)
++    casos.append(("remove da prosa", L(f"Feito {E1} e ok {E2}.") == "Feito  e ok ."))
++    casos.append(("preserva acento e símbolos tipográficos", L("ação → © ✓ ★ ™") == "ação → © ✓ ★ ™"))
++    casos.append(("preserva em bloco de código", L(f"a\n```\nx = '{E1}'\n```\nb {E2}") == f"a\n```\nx = '{E1}'\n```\nb "))
++    casos.append(("preserva em código em linha", L(f"use `{E3}` aqui {E3}") == f"use `{E3}` aqui "))
++    casos.append(("preserva em citação entre aspas", L(f'ele disse "ok {E1}" e {E1}') == f'ele disse "ok {E1}" e '))
++    casos.append(("preserva em linha de citação >", L(f"> {E1} citado\ntexto {E1}") == f"> {E1} citado\ntexto "))
++    casos.append(("remove emoji de duas peças (VS16)", L(f"x {E4} y") == "x  y"))
++    casos.append(("ZWJ solto após emoji removido sai; ZWJ legítimo fica", L("a\U0001F468‍\U0001F469b") == "ab" and L("a‍b") == "a‍b"))
++    # streaming: fragmentos que cortam cerca, aspas e emoji
++    est = LimpaEmoji()
++    frag = ["Veja\n", "``", "`\nx=", E1, "\n``", "`\nfim ", E2, " \"cit", E1, "ado\" ", E3]
++    sai = "".join(est.passar(f) for f in frag)
++    casos.append(("streaming: cerca ``` partida em 2 fragmentos", sai == f"Veja\n```\nx={E1}\n```\nfim  \"cit{E1}ado\" "))
++    est = LimpaEmoji()
++    casos.append(("streaming: contagem de removidos", (est.passar(f"a{E1}"), est.passar(f"b{E2}"), est.removidos) == ("a", "b", ["U+2705", "U+1F600"])))
++    # SSE: só o texto muda; tool_calls e [DONE] intactos
++    st = {}
++    l1 = b'data: {"choices":[{"index":0,"delta":{"content":"ok \\u2705 fim"}}]}\n'
++    l2 = b'data: {"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"a\\":\\"\\u2705\\"}"}}]}}]}\n'
++    r1 = limpar_sse_linha(l1, st)
++    casos.append(("SSE: content limpo", b"\xe2\x9c\x85" not in r1 and b"ok  fim" in r1 and r1.endswith(b"\n")))
++    casos.append(("SSE: tool_calls intactos", limpar_sse_linha(l2, st) == l2))
++    casos.append(("SSE: [DONE] e comentário intactos", limpar_sse_linha(b"data: [DONE]\n", st) == b"data: [DONE]\n" and limpar_sse_linha(b": ka\n", st) == b": ka\n"))
++    casos.append(("SSE: lixo não derruba", limpar_sse_linha(b'data: {"content": quebrado\n', st) == b'data: {"content": quebrado\n'))
++    corpo = json.dumps({"choices": [{"message": {"content": f"Pronto {E1}"}}]}).encode()
++    novo, rem = limpar_json(corpo)
++    casos.append(("JSON não streaming: limpa e devolve removidos", json.loads(novo)["choices"][0]["message"]["content"] == "Pronto " and rem == ["U+2705"]))
++    casos.append(("JSON sem emoji: bytes idênticos", limpar_json(b'{"choices":[{"message":{"content":"oi"}}]}') == (b'{"choices":[{"message":{"content":"oi"}}]}', [])))
++    casos.append(("JSON inválido passa", limpar_json(b"nao json") == (b"nao json", [])))
++    ruins = 0
++    for nome, ok in casos:
++        print(("PASS  " if ok else "FALHA ") + nome)
++        ruins += not ok
++    print(f"limpa_emoji selftest: {len(casos) - ruins}/{len(casos)}")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(_selftest() if len(sys.argv) > 1 and sys.argv[1] == "--selftest" else 0)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index c519dfe..1891bfa 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -548,6 +548,7 @@ def _classificar_rota(payload: dict) -> str:
+ # ~/.cache/agata/decisor/roteador.jsonl. A resposta segue pela heurística.
+ import decisor  # noqa: E402  (mesmo diretório)
+ import auditoria_turno  # noqa: E402  (mesmo diretório)
++import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
+ import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+ 
+ _PERFIS = {"mtime": None, "dados": {}}
+@@ -1005,6 +1006,11 @@ class _Handler(BaseHTTPRequestHandler):
+                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
+                 except (ValueError, KeyError, IndexError, TypeError):
+                     pass
++        self._emoji_estados = {}
++        self._modelo_para_log = modelo_real
++        if up.status == 200 and not sse and _emoji_ligado():
++            buf_pre, _rem = limpa_emoji.limpar_json(buf_pre)
++            _registrar_emoji(self._rota, modelo_real, _rem)
+         self.send_response(up.status)
+         for k, v in up.headers.items():
+             if k.lower() not in _HOP_BY_HOP:
+@@ -1075,6 +1081,7 @@ class _Handler(BaseHTTPRequestHandler):
+         # pelo keepalive do OmniRoute, virava um único ": ka" e o conteúdo real
+         # sumia -> stream sem nenhum chunk -> crash "'tool_calls' in undefined"
+         # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
++        self._emoji_estados = {}
+         buf = self._escrever_linhas_completas(buf)
+         while True:
+             try:
+@@ -1086,9 +1093,14 @@ class _Handler(BaseHTTPRequestHandler):
+             buf = self._escrever_linhas_completas(buf + pedaco)
+         if buf:
+             saida = self._filtrar_linha_sse(buf)
++            if _emoji_ligado():
++                saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
+             self.wfile.write(f"{len(saida):X}\r\n".encode())
+             self.wfile.write(saida)
+             self.wfile.write(b"\r\n")
++        if _emoji_ligado():
++            _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
++                             [c for est in self._emoji_estados.values() for c in est.removidos])
+ 
+     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
+         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
+@@ -1096,6 +1108,8 @@ class _Handler(BaseHTTPRequestHandler):
+         while b"\n" in buf:
+             linha, buf = buf.split(b"\n", 1)
+             saida = self._filtrar_linha_sse(linha + b"\n")
++            if _emoji_ligado():
++                saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
+             self.wfile.write(f"{len(saida):X}\r\n".encode())
+             self.wfile.write(saida)
+             self.wfile.write(b"\r\n")
+@@ -1122,6 +1136,27 @@ def servir(host: str = BIND_HOST, port: int = BIND_PORT):
+ 
+ 
+ # --------------------------------------------------------------------------- #
++def _emoji_ligado() -> bool:
++    """E-2 (decisão do Humano, 16/10/2026): remove emoji da prosa. Chave para desligar sem mexer em código:
++    SETH_EMOJI_REMOVER=0 (lida a cada resposta). Padrão: ligado."""
++    return os.environ.get("SETH_EMOJI_REMOVER", "1") != "0"
++
++
++def _registrar_emoji(rota, modelo, removidos) -> None:
++    """Log do que o MODELO produziu (só códigos Unicode e contagem, nunca o texto): o cliente guarda a resposta já limpa,
++    então a auditoria do turno seguinte não vê mais o emoji; esta é a medida. Fail-soft."""
++    if not removidos:
++        return
++    try:
++        arq = Path(os.environ.get("AGATA_EMOJI_LOG") or Path.home() / ".cache" / "agata" / "emoji-removido.jsonl")
++        arq.parent.mkdir(parents=True, exist_ok=True)
++        with open(arq, "a", encoding="utf-8") as f:
++            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
++                                "n": len(removidos), "codigos": sorted(set(removidos))}, ensure_ascii=False) + "\n")
++    except OSError:
++        pass
++
++
+ def _porta_livre() -> int:
+     s = socket.socket()
+     s.bind(("127.0.0.1", 0))
+@@ -1136,6 +1171,8 @@ class _Dummy(BaseHTTPRequestHandler):
+     vazias = 0          # (695) quantas respostas vazias dar antes da normal
+     penduradas = 0      # (709) quantas respostas só-keepalive (SSE, sem conteúdo) antes da normal
+     modelos_pedidos = []
++    texto_fixo = None   # E-2: resposta não streaming com este texto (ex.: com emoji)
++    sse_emoji = False   # E-2: próxima resposta é SSE com emoji partido em fragmentos
+ 
+     def log_message(self, *a):
+         pass
+@@ -1143,6 +1180,16 @@ class _Dummy(BaseHTTPRequestHandler):
+     def do_POST(self):
+         n = int(self.headers.get("Content-Length") or 0)
+         type(self).ultimo_corpo = self.rfile.read(n)
++        if type(self).sse_emoji:
++            type(self).sse_emoji = False
++            self.send_response(200)
++            self.send_header("Content-Type", "text/event-stream")
++            self.end_headers()
++            for frag in ("Feito ", "\u2705", " ok `\u2705` \"\u274c\" ", "fim \U0001F600\n"):
++                ch = {"model": "m-real", "choices": [{"index": 0, "delta": {"content": frag}}]}
++                self.wfile.write(b"data: " + json.dumps(ch).encode() + b"\n\n")
++            self.wfile.write(b"data: [DONE]\n\n")
++            return
+         try:
+             type(self).modelos_pedidos.append(json.loads(type(self).ultimo_corpo).get("model"))
+         except ValueError:
+@@ -1160,7 +1207,7 @@ class _Dummy(BaseHTTPRequestHandler):
+             except (BrokenPipeError, ConnectionResetError):
+                 pass
+             return
+-        texto = "ok"
++        texto = type(self).texto_fixo or "ok"
+         if type(self).vazias > 0:
+             type(self).vazias -= 1
+             texto = ""
+@@ -1640,6 +1687,39 @@ def _selftest() -> int:
+     ok16 = _linha_propostas().startswith("PROPOSTAS-PENDENTES: ") and "propostas/aplicadas/" in _linha_propostas()
+     print(f"{'PASS' if ok16 else 'FALHA'}  PROPOSTAS-PENDENTES no estado: {_linha_propostas()[:80]}")
+     falhas += 0 if ok16 else 1
++    # 17. (E-2, 16/10/2026) remoção de emoji da prosa: não streaming e SSE, log só com códigos, chave para desligar
++    import tempfile as _tf
++    log_emoji = Path(_tf.mkdtemp()) / "emoji.jsonl"
++    os.environ["AGATA_EMOJI_LOG"] = str(log_emoji)
++    corpo_e = json.dumps({"model": "seth", "messages": [{"role": "user", "content": "oi"}]}).encode()
++    hdr = {"Content-Type": "application/json"}
++    _Dummy.texto_fixo = "Pronto \u2705 e `\u2705` fim \U0001F600"
++    r17 = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())
++    t17 = r17["choices"][0]["message"]["content"]
++    ok17a = "\U0001F600" not in t17 and t17.count("\u2705") == 1 and "`\u2705`" in t17
++    print(f"{'PASS' if ok17a else 'FALHA'}  E-2 não streaming: emoji da prosa sai, o do código fica ({t17!r})")
++    falhas += 0 if ok17a else 1
++    _Dummy.texto_fixo = None
++    _Dummy.sse_emoji = True
++    sse17 = urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "stream": True,
++        "messages": [{"role": "user", "content": "oi"}]}).encode(), headers=hdr), timeout=15).read().decode("utf-8")
++    txt17 = "".join(json.loads(l[6:])["choices"][0]["delta"].get("content") or ""
++                    for l in sse17.splitlines() if l.startswith("data: {") and "choices" in l and "keepalive" not in l)
++    ok17b = ("\u2705" not in txt17.replace("`\u2705`", "")) and "`\u2705`" in txt17 and '"\u274c"' in txt17 and "\U0001F600" not in txt17 and "[DONE]" in sse17
++    print(f"{'PASS' if ok17b else 'FALHA'}  E-2 SSE: fragmentos limpos, código e aspas preservados, [DONE] intacto ({txt17!r})")
++    falhas += 0 if ok17b else 1
++    log17 = [json.loads(l) for l in log_emoji.read_text(encoding="utf-8").splitlines()] if log_emoji.exists() else []
++    ok17c = len(log17) == 2 and all("texto" not in e and "codigos" in e for e in log17) and log17[0]["n"] >= 1
++    print(f"{'PASS' if ok17c else 'FALHA'}  E-2 log: {len(log17)} registros, só códigos Unicode e contagem")
++    falhas += 0 if ok17c else 1
++    os.environ["SETH_EMOJI_REMOVER"] = "0"
++    _Dummy.texto_fixo = "Pronto \u2705"
++    t17d = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())["choices"][0]["message"]["content"]
++    del os.environ["SETH_EMOJI_REMOVER"]
++    _Dummy.texto_fixo = None
++    ok17d = "\u2705" in t17d
++    print(f"{'PASS' if ok17d else 'FALHA'}  E-2 chave SETH_EMOJI_REMOVER=0 devolve o texto original")
++    falhas += 0 if ok17d else 1
+     up.shutdown()
+     gw.shutdown()
+     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
