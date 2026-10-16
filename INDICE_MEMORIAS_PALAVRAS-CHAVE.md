@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
+  palavras-chave: cofre, chaves, etapa, aplicada, cópia, recuperação, segredos, cifrada, age, chave, pública, humano
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
   palavras-chave: cofre, chaves, etapa, aplicada, manifesto, segredos, verificador, leitura
 (729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, resumo, automático, omniroute, universal, handoff, desligado, filas, seth, pedido, humano, pode, juntar, desligar, motivos, aplicação, juntado, mesmo
 (713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
   palavras-chave: execução, aplicada, fila, ministral, assinada, humano, worktree, resposta, pergunta, resumo, automático, omniroute, ele, útil, sistema, medido, seth, ruído, risco, invenção, desligar, continua, decisão
-(712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
-  palavras-chave: reparos, pedidos, humano, pode, fazer, esses, gemini, flash, sai, lugar, filas, seth, livre, vivo, testes, conexão, eram, defeito, universal, handoff, omniroute, tem, saída, decide, proposta, fila, ministral, alinha, config, viva, aguardando, assinatura
+(712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode …
+  palavras-chave: reparos, pedidos, humano, pode
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o …
   palavras-chave: reteste, uso, real, noite
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-1 …

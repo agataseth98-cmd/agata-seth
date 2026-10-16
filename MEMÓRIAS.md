@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8b2ab059ecf847777c456a31900939c73faf3d3e
-  Escrito em: 16/10/2026 16:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7b242a7720a864d8557367ba5e3ef7db62edce30
+  Escrito em: 16/10/2026 18:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b2ab059ecf847777c456a31900939c73faf3d3e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b2ab059ecf847777c456a31900939c73faf3d3e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b2ab059ecf847777c456a31900939c73faf3d3e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b2ab059ecf847777c456a31900939c73faf3d3e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8b2ab059ecf847777c456a31900939c73faf3d3e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7b242a7720a864d8557367ba5e3ef7db62edce30/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
+
+Aplicada a proposta assinada. `scripts/cifrar_recuperacao.py` empacota todos os caminhos de `config/segredos-manifesto.txt` (inclusive a chave de assinatura do Humano, classe H: perdê-la impediria assinar qualquer proposta e a rotação do `.allowed_signers` exige assinatura da chave antiga) e cifra com `age` para `config/segredos-destinatario.txt` (chave PÚBLICA gerada pelo Humano em 16/10/2026; a privada fica cifrada com senha no pendrive e nunca entra na máquina). Sem texto puro no disco (tar para pipe para age). A máquina NÃO consegue decifrar o que cria; a prova de restauração é do Humano, com o pendrive (procedimento no cabeçalho do script). `scripts/verificar_cofre.py` passa a comparar a cópia age com o segredo mais novo do manifesto. Testes: `cifrar_recuperacao` 9/9 com ida e volta por chave de teste (a cópia não contém o segredo em texto puro, o restaurado é idêntico); `verificar_cofre` 10/10. Estado do desenho G-C: F1 e F2 aplicadas; F3 (`systemd-creds` por serviço) pendente.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: selftests acima · Autorização: Humano — aprovação do desenho, pendrive e `age` (16/10/2026) e assinatura de `cofre-f2-20261016`.
+
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
 
 Aplicada a proposta assinada (desenho G-C aprovado pelo Humano em 16/10/2026: etapas F1 a F3; chave privada de recuperação em pendrive, gerada depois; `age` e `sops` a instalar com `sudo` do Humano). `config/segredos-manifesto.txt` lista só nomes e metadados (caminho, classe, validade, última rotação aproximada, modo esperado, uso), nunca valores. `scripts/verificar_cofre.py` compara o manifesto com o disco usando apenas `stat()`; o selftest prova que `open()` nunca é chamado (8/8). No estado real, a primeira rodada achou: `~/.omniroute/.env` com permissão 644 (guarda a chave que decifra o storage do OmniRoute; esperada 600), a cópia GPG do `.env` de 03/09 mais velha que o `.env` de 22/09 (19 dias sem cobertura) e `~/librechat/PRIMEIRO-ACESSO.txt` ainda existente. As correções são ações do Humano (chmod, `scripts/cifrar_env.sh`, apagar o arquivo). Próximas etapas: F2 (cópia de recuperação com `age` e a chave pública do Humano, teste de restauração) e F3 (`systemd-creds` por serviço).

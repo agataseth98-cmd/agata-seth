@@ -59,10 +59,25 @@ def verificar(manifesto, hoje, home=None, staging=None):
                 res.append(("AVISO", f"{e['rotulo']}: VENCIDO há {-dias} dias (rotação em {e['rotacao']}, validade {e['validade']} d)"))
             elif dias <= 14:
                 res.append(("AVISO", f"{e['rotulo']}: vence em {dias} dias"))
-    # cópia de recuperação do .env mais velha que o próprio .env
+    # F2: cópia de recuperação age (segredos-*.tar.age) contra o segredo MAIS NOVO do manifesto
+    copias_age = sorted(glob.glob(os.path.join(staging, "segredos-*.tar.age")), key=os.path.getmtime)
+    mtimes = []
+    for e in manifesto:
+        try:
+            mtimes.append(os.stat(e["caminho"]).st_mtime)
+        except OSError:
+            pass
+    if copias_age and mtimes:
+        d_cop = datetime.date.fromtimestamp(os.path.getmtime(copias_age[-1]))
+        d_seg = datetime.date.fromtimestamp(max(mtimes))
+        if d_cop < d_seg:
+            res.append(("AVISO", f"cópia de recuperação age ({os.path.basename(copias_age[-1])}, {d_cop}) é MAIS VELHA que o segredo mais novo ({d_seg}); rode scripts/cifrar_recuperacao.py"))
+        else:
+            res.append(("OK", f"cópia de recuperação age em dia ({d_cop})"))
+    # cópia de recuperação do .env mais velha que o próprio .env (legado, GPG); some do relatório quando a age está em dia
     env = os.path.join(home, ".config", "agata", ".env")
     copias = sorted(glob.glob(os.path.join(staging, "env-*.gpg")), key=os.path.getmtime)
-    if os.path.exists(env):
+    if os.path.exists(env) and not (copias_age and mtimes and datetime.date.fromtimestamp(os.path.getmtime(copias_age[-1])) >= datetime.date.fromtimestamp(max(mtimes))):
         if not copias:
             res.append(("AVISO", "cópia de recuperação do .env: NENHUMA em " + staging))
         else:
@@ -109,6 +124,14 @@ def _selftest():
         open(os.path.join(home, ".config", "agata", "x"), "w").write("y")
         casos.append(("manifesto com coluna a menos é rejeitado", _rejeita(td)))
         casos.append(("nunca abre o segredo", _nao_abre(m, hoje, home)))
+        st = os.path.join(home, ".agata-backup-staging")
+        age_c = os.path.join(st, "segredos-20260101-0000.tar.age")
+        open(age_c, "w").write("x")
+        os.utime(age_c, (0, 0))
+        casos.append(("cópia age velha: avisa", "age (segredos-20260101" in "\n".join(x[1] for x in verificar(m, hoje, home=home)) and "MAIS VELHA que o segredo mais novo" in "\n".join(x[1] for x in verificar(m, hoje, home=home))))
+        os.utime(age_c, None)
+        msgs2 = "\n".join(x[1] for x in verificar(m, hoje, home=home))
+        casos.append(("cópia age em dia: ok e some o aviso legado do GPG", "age em dia" in msgs2 and "env-" not in msgs2))
     finally:
         import shutil
         shutil.rmtree(td, ignore_errors=True)
