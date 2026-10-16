@@ -485,9 +485,41 @@ def _negacao_contradita(texto: str, msgs: list) -> list[str]:
             "resultado e cite a linha; busca que acha o termo prova que ele aparece (716)" for t in negados]
 
 
+# F0 é aviso lexical parcial: ausência de marcação, não julgamento de verdade.
+_AFIRMA_MEDICAO = re.compile(r"\b(?:medi|medimos|verifiquei|verificamos|confirmei|confirmamos|testei|testamos)\b|"
+    r"\b(?:foi|foram|est[áa]|est[ãa]o) (?:medid|verificad|confirmad|testad)[oa]s?\b|"
+    r"\b(?:teste|testes|suíte|build|CI|comando|selftest|verificador)\w* (?:passou|passaram|falhou|falharam)\b", re.IGNORECASE)
+_ORIGEM_DECLARADA = re.compile(r"(?:fonte|evid[êe]ncia|infer[êe]ncia|hip[óo]tese)\s*:\s*\S|"
+    r"n[ãa]o (?:(?:foi|foram) )?(?:medid[oa]s?|verificad[oa]s?|testad[oa]s?|conferid[oa]s?|medi|testei|verifiquei)|"
+    r"\[[^\]\n]+\]\(https?://[^)]+\)|\b[\w/-]+\.(?:md|py|sh|json|txt)\b|\(\d{1,4}\)", re.IGNORECASE)
+
+
+def _origem_ausente(texto: str) -> list[str]:
+    """Só sinaliza verbos de medição sem origem na prosa do turno.
+
+    Referência/declaração detectada não prova leitura, suporte ou atualidade.
+    Fatos sem esses verbos permanecem fora da cobertura determinística.
+    """
+    linhas, codigo = [], False
+    for linha in texto.splitlines():
+        if linha.strip().startswith("```"):
+            codigo = not codigo
+            continue
+        if not codigo and not _CABECALHO.match(linha) and not linha.lstrip().startswith(">"):
+            # Nome de arquivo em inline code é referência; outras instruções/código não são prosa.
+            linha = re.sub(r"`([^`\n]*)`", lambda m: m.group(1) if re.fullmatch(
+                r"[\w./-]+\.(?:md|py|sh|json|txt)(?::\d+)?", m.group(1)) else "", linha)
+            linhas.append(_CITADO.sub('""', linha))
+    prosa = "\n".join(linhas)
+    if _AFIRMA_MEDICAO.search(prosa) and not _ORIGEM_DECLARADA.search(prosa):
+        return ["origem (F0): há afirmação de medição sem referência ou ressalva explícita; indique a fonte lida, a inferência ou o que não foi medido. Aviso lexical, não prova de falsidade"]
+    return []
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
+    out += _origem_ausente(texto)
     out += _desmentidas(texto)
     out += _contagem_controles(texto)
     out += _estilo(texto)
@@ -718,6 +750,28 @@ def _selftest() -> int:
         casos.append((f"E-1 adversarial U+{ord(simbolo):04X}", "emoji" in ";".join(_estilo("Resultado " + simbolo))))
     for simbolo in "✓★☆♪☐→©®•—≥≤":
         casos.append((f"E-1 tipografia U+{ord(simbolo):04X}", not _estilo("Resultado " + simbolo)))
+
+    # F0: aviso de ausência, jamais certificado de verdade.
+    casos.append(('F0 medicao_sem_origem', bool(_origem_ausente('Medi e confirmei o resultado.')) == True))
+    casos.append(('F0 origem_lida', bool(_origem_ausente('Resultado confirmado. Evidência: REGRAS.md.')) == False))
+    casos.append(('F0 inferencia', bool(_origem_ausente('Resultado confirmado. Inferência: compatível com a amostra.')) == False))
+    casos.append(('F0 nao_medido', bool(_origem_ausente('Não foi testado.')) == False))
+    casos.append(('F0 codigo_nao_satisfaz', bool(_origem_ausente('Confirmei o resultado.\n```\nFonte: x.md\n```')) == True))
+    casos.append(('F0 citacao_nao_satisfaz', bool(_origem_ausente('Confirmei o resultado.\n> Fonte: x.md')) == True))
+    casos.append(('F0 confirmacao_curta', bool(_origem_ausente('Ok.')) == False))
+    casos.append(('F0 pergunta', bool(_origem_ausente('Qual resultado?')) == False))
+    casos.append(('F0 fonte_historica', bool(_origem_ausente('Resultado confirmado em PROJETO.md do commit antigo.')) == False))
+    casos.append(('F0 quoted_claim', bool(_origem_ausente('Ele escreveu "resultado confirmado".')) == False))
+    casos.append(('F0 inline_codigo_nao_satisfaz', bool(_origem_ausente('Confirmei o resultado. `Fonte: exemplo`')) == True))
+    casos.append(('F0 inline_claim_nao_e_prosa', bool(_origem_ausente('Código: `resultado confirmado`.')) == False))
+    casos.append(('F0 inline_arquivo_e_referencia', bool(_origem_ausente('Confirmei em `REGRAS.md`.')) == False))
+    casos.append(('F0 medidas_substantivo', bool(_origem_ausente('Adotamos medidas de segurança adicionais')) == False))
+    casos.append(('F0 medida_pergunta', bool(_origem_ausente('Qual a medida correta aqui?')) == False))
+    casos.append(('F0 prazo_nao_e_teste', bool(_origem_ausente('O prazo passou ontem')) == False))
+    casos.append(('F0 adjetivo_nao_e_medicao', bool(_origem_ausente('Um modelo testado em produção...')) == False))
+    casos.append(('F0 teste_passou', bool(_origem_ausente('O teste passou.')) == True))
+    casos.append(('F0 ci_falhou', bool(_origem_ausente('CI falhou.')) == True))
+    casos.append(('F0 passiva_medicao', bool(_origem_ausente('A latência foi medida.')) == True))
 
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
