@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
 (729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
 (729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
 (714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
 (713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
-(712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode fazer todos esses reparos"): o Gemini 2.5 Flash sai do 1º lugar das duas filas `seth-livre`, ao vivo; os testes de conexão com 401 não eram defeito; o 422 do `universal-handoff` é defeito do OmniRoute e tem uma saída que o Humano decide. Proposta `fila-ministral-1o-2026-10-15` alinha `config/` à fila viva. Aguardando assinatura.**
+(712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode …
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o …
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-1 …
 (709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) …

@@ -1,0 +1,4 @@
+# Chave PÚBLICA age do Humano para a cópia de recuperação dos segredos (cofre G-C, etapa F2). Pública: pode ficar no repositório.
+# A chave PRIVADA correspondente está cifrada com senha no pendrive do Humano (agata-recuperacao.key.age) e nunca passa pela máquina.
+# Gerada pelo Humano em 16/10/2026.
+age1et50cjxpdsz0u4j9qg8k399yaahhlg4xjunlf03g2pk3pvsalg3say6efr
