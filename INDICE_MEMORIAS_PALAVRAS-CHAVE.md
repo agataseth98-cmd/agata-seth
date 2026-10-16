@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **README do roteador corrigido (`readme-router-20261016`): o sanitizador de segredo já está ligado ao caminho de saída.**
+  palavras-chave: readme, roteador, corrigido, router, sanitizador, segredo, ligado, caminho, saída
 (729) DIÁRIO — 16/10/2026 · **Painel de estado só de leitura aplicado (`painel-estado-v3-20261016`): `python3 scripts/painel_estado.py` mostra numa tela o que está no ar e o que espera a assinatura do Humano, com o comando Fish que confere os hashes antes de assinar.**
   palavras-chave: painel, estado, leitura, aplicado, python, scripts, mostra, tela, espera, assinatura, humano, comando, fish, confere, hashes, assinar
 (729) DIÁRIO — 16/10/2026 · **`PROJETO.md` voltou ao teto (`projeto-mapa-v2-20261016`): de 57.618 B para 47.965 B, com o detalhe movido sem alteração para `extras/projeto-detalhe/`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, suite, fora, worktree, assinada, humano, suíte, perímetro, herda, ambiente, git, hook, agata, ensinou
 (707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina funciona em stream — um por resposta, modelo real certo, `t` certo, e a Seth não escreve o dela; a conversa longa que ia para o Nemotron fica na `seth-livre`; a segunda opinião do Jev responde pelo caminho da Seth em 6 s. E a proposta `suite-fora-da-worktree-2026-10-14` conserta a causa do incidente de (706). Aguardando assinatura.**
   palavras-chave: reteste, cabeçalho, escrito, máquina, funciona, stream, resposta, modelo, real, certo, seth, escreve, dela, conversa, longa, nemotron, fica, livre, segunda, opinião, jev, responde, caminho, proposta, suite, fora, worktree, conserta, causa, incidente, aguardando, assinatura
-(706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (assinada pelo Humano) — em dois tempos, por um incidente meu: a 1ª tentativa, numa worktree, levou ao `main` (PR #208) só o `p20_decisor.py`; o resto entra agora. Causa achada: a suíte do perímetro, rodando dentro do `pre-commit` de uma worktree, comita na branch da worktree. Conserto da suíte em proposta própria.**
-  palavras-chave: execução, aplicada, seth, cabecalho, maquina, assinada, humano, tempos, incidente, meu, tentativa, worktree, levou, main, decisor, resto, entra, agora, causa, achada, suíte, perímetro, rodando, dentro, pre, commit, comita, branch, conserto, proposta, própria
+(706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (as …
+  palavras-chave: execução, aplicada, seth, cabecalho, maquina
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o ca …
   palavras-chave: proposta, seth, cabecalho, maquina
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas m …
