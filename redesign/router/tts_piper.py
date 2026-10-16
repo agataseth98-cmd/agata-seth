@@ -21,7 +21,10 @@ formato). Um processo `piper` por requisição (curto -- o modelo carrega em
 Env:
   PIPER_TTS_PORT   porta (default 8890)
   PIPER_TTS_HOST   host  (default 127.0.0.1 -- não expor)
-  PIPER_MODEL      caminho do .onnx (default: voices/pt_BR-faber-medium.onnx ao lado deste arquivo)
+  PIPER_MODEL      caminho do .onnx (default: voices/pt_BR-agata-last.onnx se existir -- a voz treinada da
+                   Agata, ver tts-piper/instalar-agata.sh --, senão voices/pt_BR-faber-medium.onnx)
+  PIPER_TRATAMENTO sistema (default) | off. Tratamento de áudio "sistema" depois da síntese (ffmpeg);
+                   sem ffmpeg ou com erro, a voz sai crua e o cabeçalho X-Agata-Tratamento diz por quê
   PIPER_PYTHON     python do venv do Piper (default: tts-piper/.venv/bin/python ao lado deste arquivo)
 """
 import json
@@ -36,9 +39,29 @@ sys.path.insert(0, os.path.join(AQUI, "..", "..", "scripts"))
 from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
 HOST = os.environ.get("PIPER_TTS_HOST", "127.0.0.1")
 PORT = int(os.environ.get("PIPER_TTS_PORT", "8890"))
-MODEL = os.environ.get("PIPER_MODEL", os.path.join(AQUI, "tts-piper", "voices", "pt_BR-faber-medium.onnx"))
+
+
+def _modelo_padrao(voices=None):
+    """A voz treinada da Agata se estiver instalada; senão a genérica. Remover o arquivo = voltar."""
+    voices = voices or os.path.join(AQUI, "tts-piper", "voices")
+    agata = os.path.join(voices, "pt_BR-agata-last.onnx")
+    return agata if os.path.exists(agata) else os.path.join(voices, "pt_BR-faber-medium.onnx")
+
+
+MODEL = os.environ.get("PIPER_MODEL") or _modelo_padrao()
 PYTHON = os.environ.get("PIPER_PYTHON", os.path.join(AQUI, "tts-piper", ".venv", "bin", "python"))
 FFMPEG = shutil.which("ffmpeg")
+
+# Tratamento "sistema" (timbre `agata-sistema-tratado` do PROJETO, "Personalidade da Seth", com o eco
+# "jarvis" escolhido pelo Humano em 16/10/2026: dobra metálica leve + 3 ecos curtos de 25, 50 e 90 ms).
+# Custo medido: ~0,05 s para 3 s de áudio e 0,10 s para 12,8 s (RTF 0,008), perto de nada diante do RTF
+# 0,13 do Piper. O `rubberband=tempo=0.95` alonga a fala em ~6%.
+CADEIA_SISTEMA = (
+    "rubberband=tempo=0.95,highpass=f=90,equalizer=f=2800:t=q:w=1.0:g=2.5,highshelf=g=-2:f=9000,"
+    "chorus=0.7:0.9:35|55:0.3|0.25:0.25|0.4:2|1.5,aecho=0.8:0.7:25|50|90:0.3|0.2|0.12,"
+    "acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80"
+)
+TRATAMENTO = os.environ.get("PIPER_TRATAMENTO", "sistema").strip().lower()
 
 # sample_rate vem do .json ao lado do modelo (Piper grava isso lá).
 try:
@@ -70,6 +93,26 @@ def sintetizar(texto, speed=1.0):
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.decode("utf-8", "replace")[:500])
     return proc.stdout
+
+
+def tratar(pcm):
+    """PCM cru -> (PCM tratado, estado). NUNCA levanta: a voz não pode derrubar a Seth. Sem ffmpeg, com
+    filtro ausente ou erro, devolve o PCM cru e o estado explica (`indisponivel:<motivo>`)."""
+    if TRATAMENTO == "off":
+        return pcm, "off"
+    if not FFMPEG:
+        return pcm, "indisponivel:sem-ffmpeg"
+    try:
+        out = subprocess.run(
+            [FFMPEG, "-hide_banner", "-loglevel", "error",
+             "-f", "s16le", "-ar", str(SAMPLE_RATE), "-ac", "1", "-i", "-",
+             "-af", CADEIA_SISTEMA, "-f", "s16le", "-ar", str(SAMPLE_RATE), "-ac", "1", "-"],
+            input=pcm, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+    except (OSError, subprocess.SubprocessError) as e:
+        return pcm, "indisponivel:" + type(e).__name__
+    if out.returncode != 0 or not out.stdout:
+        return pcm, f"indisponivel:ffmpeg-{out.returncode}"
+    return out.stdout, "sistema"
 
 
 def para_formato(pcm, fmt):
@@ -114,7 +157,8 @@ class H(BaseHTTPRequestHandler):
         if self.path.rstrip("/") == "/health":
             return self._json(200, {"status": "ok", "engine": "piper",
                                     "model": os.path.basename(MODEL),
-                                    "sample_rate": SAMPLE_RATE, "ffmpeg": bool(FFMPEG)})
+                                    "sample_rate": SAMPLE_RATE, "ffmpeg": bool(FFMPEG),
+                                    "tratamento": TRATAMENTO})
         if self.path.rstrip("/") == "/v1/models":
             return self._json(200, {"object": "list", "data": [
                 {"id": "tts-1", "object": "model", "owned_by": "piper"},
@@ -145,11 +189,14 @@ class H(BaseHTTPRequestHandler):
         except (TypeError, ValueError):
             speed = 1.0
 
-        # `voice` é ignorado de propósito: o modelo pt_BR-faber-medium tem 1
+        # `voice` é ignorado de propósito: o modelo (faber ou agata-last) tem 1
         # locutor. Fica no shape só pra não quebrar o cliente. Multi-voz =
         # trocar o modelo por um multi-speaker e mapear aqui.
         try:
             pcm = sintetizar(texto, speed)
+            pcm, tratamento = tratar(pcm)
+            if tratamento.startswith("indisponivel"):
+                print(f"piper-tts: AVISO — tratamento de áudio {tratamento}; voz crua nesta resposta", file=sys.stderr)
             audio = para_formato(pcm, fmt)
         except Exception as e:  # noqa: BLE001
             return self._json(500, {"error": {"message": f"piper falhou: {e}", "type": "server_error"}})
@@ -158,11 +205,102 @@ class H(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(audio)))
+        self.send_header("X-Agata-Tratamento", tratamento)
         self.end_headers()
         self.wfile.write(audio)
 
 
+def _selftest():
+    """Offline: sem Piper, sem modelo, sem rede. Confere o tratamento, o fallback e o instalador."""
+    import math
+    import struct
+    import tempfile
+    global TRATAMENTO, FFMPEG, CADEIA_SISTEMA
+    res = {}
+    seno = b"".join(struct.pack("<h", int(8000 * math.sin(2 * math.pi * 220 * i / SAMPLE_RATE)))
+                    for i in range(SAMPLE_RATE * 2))   # 2 s a 220 Hz
+    salvo = (TRATAMENTO, FFMPEG, CADEIA_SISTEMA)
+    try:
+        tem_rubber = False
+        if salvo[1]:
+            ff = subprocess.run([salvo[1], "-hide_banner", "-filters"], stdout=subprocess.PIPE, text=True).stdout
+            tem_rubber = " rubberband " in ff
+        TRATAMENTO = "sistema"
+        FFMPEG = salvo[1]
+        if tem_rubber:
+            out, est = tratar(seno)
+            res["1 tratamento aplica a cadeia: estado=sistema, voz alongada ~6% e diferente da crua"] = \
+                est == "sistema" and out != seno and 1.0 < len(out) / len(seno) < 1.15
+        else:
+            print("SKIP 1: ffmpeg sem o filtro rubberband (o serviço degrada para voz crua e avisa)")
+        TRATAMENTO = "off"
+        out, est = tratar(seno)
+        res["2 PIPER_TRATAMENTO=off devolve a voz crua"] = est == "off" and out == seno
+        TRATAMENTO = "sistema"
+        FFMPEG = None
+        out, est = tratar(seno)
+        res["3 sem ffmpeg devolve a voz crua e diz por quê"] = est == "indisponivel:sem-ffmpeg" and out == seno
+        FFMPEG = salvo[1]
+        CADEIA_SISTEMA = "filtro_que_nao_existe=1"
+        out, est = tratar(seno)
+        res["4 filtro inválido não derruba: voz crua e estado indisponivel"] = \
+            est.startswith("indisponivel") and out == seno
+        CADEIA_SISTEMA = salvo[2]
+        wav = para_formato(seno, "wav")
+        res["5 wav: cabeçalho RIFF e tamanho dos dados coerentes"] = \
+            wav[:4] == b"RIFF" and struct.unpack("<I", wav[40:44])[0] == len(seno) and len(wav) == 44 + len(seno)
+        res["6 a cadeia canônica é a aprovada em 16/10/2026 (eco jarvis)"] = \
+            "aecho=0.8:0.7:25|50|90:0.3|0.2|0.12" in salvo[2] and "chorus=0.7:0.9:35|55" in salvo[2] \
+            and "acompressor=threshold=-18dB:ratio=2.5" in salvo[2]
+        with tempfile.TemporaryDirectory() as td:
+            res["7a sem a voz instalada, o padrão é a genérica"] = \
+                _modelo_padrao(td).endswith("pt_BR-faber-medium.onnx")
+            open(os.path.join(td, "pt_BR-agata-last.onnx"), "wb").close()
+            res["7b com a voz instalada, o padrão é a treinada"] = _modelo_padrao(td).endswith("pt_BR-agata-last.onnx")
+        # instalador, em cópia temporária, com arquivos de mentira e manifesto próprio
+        with tempfile.TemporaryDirectory() as td:
+            ori = os.path.join(td, "origem")
+            os.makedirs(ori)
+            dados = {"v.onnx": b"modelo falso\n", "v.onnx.json": b"{}\n"}
+            for k, v in dados.items():
+                with open(os.path.join(ori, k), "wb") as f:
+                    f.write(v)
+            man = os.path.join(td, "man.sha256")
+            import hashlib
+            with open(man, "w") as f:
+                f.write("# teste\n")
+                for k, v in dados.items():
+                    f.write(f"{hashlib.sha256(v).hexdigest()}  {k}\n")
+            sandbox = os.path.join(td, "tts-piper")
+            os.makedirs(sandbox)
+            shutil.copy(os.path.join(AQUI, "tts-piper", "instalar-agata.sh"), sandbox)
+            env = dict(os.environ, AGATA_VOZ_ORIGEM=ori, AGATA_VOZ_MANIFESTO=man)
+            a = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            b = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            res["8a instalador instala os arquivos conferidos"] = a.returncode == 0 and \
+                os.path.exists(os.path.join(sandbox, "voices", "v.onnx")) and "instalado: v.onnx" in a.stdout
+            res["8b instalador é idempotente"] = b.returncode == 0 and "já instalado: v.onnx" in b.stdout
+            with open(os.path.join(ori, "v.onnx"), "wb") as f:
+                f.write(b"adulterado\n")
+            os.unlink(os.path.join(sandbox, "voices", "v.onnx"))
+            c = subprocess.run(["bash", os.path.join(sandbox, "instalar-agata.sh")], env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            res["8c hash divergente: recusa e não instala"] = c.returncode != 0 and \
+                not os.path.exists(os.path.join(sandbox, "voices", "v.onnx")) and "diverge" in c.stderr
+    finally:
+        TRATAMENTO, FFMPEG, CADEIA_SISTEMA = salvo
+    for k, v in res.items():
+        print(("OK    " if v else "FALHOU"), k)
+    ruins = [k for k, v in res.items() if not v]
+    print(f"tts_piper selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
+    return 1 if ruins else 0
+
+
 def main():
+    if "--selftest" in sys.argv[1:]:
+        return _selftest()
     if not os.path.exists(MODEL):
         print(f"ABORTADO: modelo não encontrado em {MODEL}. Rode tts-piper/instalar.sh.", file=sys.stderr)
         return 1

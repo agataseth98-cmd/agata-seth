@@ -1,0 +1,6 @@
+# Arquivos de componentes externos que o inventário (scripts/inventario_componentes.py) registra com tamanho e sha256.
+# Um glob por linha; `~` vira o HOME. Só o que muda comportamento do sistema se for trocado em silêncio.
+# Atualizar qualquer um destes é decisão do Humano; o inventário só relata deriva, nunca troca nada.
+~/.local/share/agata-voz/resultado/pt_BR-agata-last.onnx
+~/.local/share/agata-voz/resultado/pt_BR-agata-last.onnx.json
+~/.local/share/agata-laya/modelos/roteador-atual/*

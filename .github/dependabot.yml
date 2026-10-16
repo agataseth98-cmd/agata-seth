@@ -1,0 +1,12 @@
+# Atualização de dependências, candidato 16/10/2026 (Fase I, I2): carência antes de abrir PR de
+# versão, porque a maioria dos ataques à cadeia de suprimentos dura menos de uma semana. Atualização
+# de SEGURANÇA fura a carência por desenho do Dependabot. Só `github-actions` por enquanto: é o único
+# ecossistema versionado que o repositório declara.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7

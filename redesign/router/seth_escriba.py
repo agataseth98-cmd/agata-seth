@@ -41,6 +41,7 @@ import json
 import os
 import re
 import subprocess
+import stat
 import sys
 import tempfile
 import threading
@@ -69,9 +70,10 @@ MAX_CORPO = 20000  # trava de tamanho por acrescimo
 # append-only mesmo com a verificação pós-escrita (que comparava o `depois`
 # construído contra si mesmo, nunca relia o disco antes de gravar). Duas
 # travas: (1) um lock por processo serializa as duas rotas entre threads
-# deste servidor; (2) um flock exclusivo no PRÓPRIO arquivo alvo cobre o caso
-# de outro processo (ex.: um commit manual do Humano no mesmo instante)
-# tocando o arquivo ao mesmo tempo. Escrita é sempre por arquivo-temporário +
+# deste servidor; (2) um flock exclusivo em arquivo .lock ESTÁVEL cobre
+# outros processos que adotem o mesmo protocolo. Git e escritores externos
+# não são serializados automaticamente. O alvo troca de inode no replace;
+# por isso não pode ser o próprio objeto da trava. Escrita é sempre por arquivo-temporário +
 # os.replace (atômica no mesmo filesystem) -- nunca write_text direto, que
 # pode deixar o arquivo pela metade se o processo morrer no meio.
 _LOCK_PROCESSO = threading.Lock()
@@ -80,9 +82,25 @@ _LOCK_PROCESSO = threading.Lock()
 @contextmanager
 def _travar_arquivo(caminho: Path):
     caminho.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(str(caminho), os.O_RDWR | os.O_CREAT, 0o644)
+    trava = caminho.with_name(caminho.name + ".lock")
+    flags = os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW | os.O_NONBLOCK
+    fd = os.open(str(trava), flags, 0o600)
     try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or st.st_nlink != 1:
+            raise RuntimeError("objeto de trava inseguro")
         fcntl.flock(fd, fcntl.LOCK_EX)
+        atual = os.stat(trava, follow_symlinks=False)
+        if (atual.st_dev, atual.st_ino) != (st.st_dev, st.st_ino):
+            raise RuntimeError("objeto de trava substituido durante espera")
+        # Preserva bootstrap do diário, que espera alvo vazio na primeira vez.
+        # O alvo ainda é reaberto pelos leitores: isto NÃO conclui E3/TOCTOU.
+        alvo = os.open(str(caminho), flags, 0o644)
+        try:
+            if not stat.S_ISREG(os.fstat(alvo).st_mode):
+                raise RuntimeError("alvo nao e arquivo regular")
+        finally:
+            os.close(alvo)
         yield
     finally:
         fcntl.flock(fd, fcntl.LOCK_UN)

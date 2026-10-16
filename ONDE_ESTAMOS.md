@@ -7,6 +7,8 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 27/09/2026: `extras/arquivo/onde-estamos-ate-2026-09-27.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md` (entrada (727)).
 
+**16/10: Claude Code e Codex trabalharam juntos, cada um na sua cópia do projeto, e prepararam um pacote único para você assinar de uma vez (entrada (728)).** Ele fecha a brecha de um pedido de mudança chegar ao `main` sem a sua assinatura, conserta o rótulo errado do vault quando se commita fora da pasta principal, impede que a memória perca escrita de dois escritores ao mesmo tempo, instala a voz treinada com o eco (falta você ouvir) e faz a atualização parar sozinha quando algo falha. Nada disso vale antes da sua assinatura e da aplicação.
+
 **13/10: todas as falhas da lista do sistema resolvidas — você assinou, eu apliquei e testei de verdade (entrada (657)).** O defeito achado no teste (o decisor anotava errado quando discordava da regra) e os 2 consertos do Conselho Remoto também já estão valendo — assinados e aplicados (entrada (659)). O que já está valendo:
 - o título das conversas do LibreChat passa a ser reconhecido sem olhar o texto (uma mensagem sua nunca mais perde a memória do sistema por engano);
 - a pesquisa semanal e a consolidação noturna esperam o roteador de modelos subir (hoje cedo elas rodaram 1 segundo antes dele e gravaram só erro);

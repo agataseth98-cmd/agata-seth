@@ -26,20 +26,31 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9cc0a6ce15132911010f1970c1752076ddda9dd8
-  Escrito em: 16/10/2026 12:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6e604b6924ddd90f4455b7df6dc2cfb229710271
+  Escrito em: 16/10/2026 13:12 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cc0a6ce15132911010f1970c1752076ddda9dd8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cc0a6ce15132911010f1970c1752076ddda9dd8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cc0a6ce15132911010f1970c1752076ddda9dd8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cc0a6ce15132911010f1970c1752076ddda9dd8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9cc0a6ce15132911010f1970c1752076ddda9dd8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6e604b6924ddd90f4455b7df6dc2cfb229710271/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6e604b6924ddd90f4455b7df6dc2cfb229710271/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6e604b6924ddd90f4455b7df6dc2cfb229710271/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6e604b6924ddd90f4455b7df6dc2cfb229710271/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6e604b6924ddd90f4455b7df6dc2cfb229710271/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
+
+O Humano autorizou preparação conjunta até 13h e assinatura única; à sessão do Claude Code disse, em 16/10/2026: "assinatura única, pode continuar, estou saindo." (fala conferida nessa sessão; a frase equivalente dirigida ao Codex foi relatada por ele e não foi conferida pelo Claude). Aplicação continua condicionada ao par P-8 assinado pelo Humano; nenhum modelo executa aprovar.sh. Registro dentro do diff é adaptação explícita do fluxo(692), cujo padrão publica diff+registro.
+
+Entregas: fiscal de PR baseado na confiança anterior; conferência integral do pacote; correção de raiz/serialização do post-commit; voz candidata e inventário/atualização com pausa; trava estável do escriba; consulta sem manutenção implícita; testes e CI. Escopo, caminhos, modos, provas e volta estão no manifesto interno MANIFESTO-governo-integridade-20261016.md e recibo externo do diff. Nada prova implantação, CI remoto obrigatório ou aceite auditivo. Memória temática, corrige/ACL, F0, emoji ampliado, métricas e estado compacto continuam em plano.
+
+Provas em ambientes descartáveis: reprodução da perda concorrente no escriba antigo e ausência de perda nas cargas do candidato; contraprovas do fiscal antes aceitas e agora recusadas; suítes declaradas no manifesto. Permanecem os limites de escritores não cooperativos, TOCTOU/durabilidade, cobertura do índice, derivados sem snapshot fixo e bootstrap inaugural. Volta preserva arquivos e história; alterar comportamento continua pelo portão aplicável. Correções: librechat também está fixado por digest; decisão de configurar canais não revoga a recusa do produto Agent Reach(241).
+
+Origem: Claude Code e Codex; candidatos/provas em worktrees próprias, revisão cruzada e canal local de sincronia. O texto anterior detalhado desta proposta e os pareceres permanecem preservados nos relatórios; esta entrada resume por referências, sem apagá-los.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex (GPT-6, designação de trabalho) · vetor: worktrees `claude/*` e `codex/*`, clones descartáveis, canal `~/.cache/agata/sincronia/conversa.md` · Autorização: Humano, preparação até 13h de 16/10/2026; aplicação só com o par `.diff`/`APROVADO-` assinado por ele.
 (727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
 
 **Decisão do Humano, 15/10/2026:** "ele deve ter as mesmas permissões que vc"; depois, "seguiremos rigorosamente o sistema"; autorizou os três itens ("todos").

@@ -23,9 +23,10 @@ oferecido ao HUMANO ou a um modelo que já decidiu buscar por tema, não uma
 sub-chamada dentro do laço de decisão do modelo. Formas diferentes, uma
 mediu mal, a outra ainda não foi medida — declarado, não inferido.
 
-**Índice nunca fica obsoleto sem avisar** (o segundo motivo de (115)):
-grava o hash de MEMÓRIAS.md junto do índice; se o canon mudou desde o
-último `--reindex`, toda busca imprime um aviso antes do resultado.
+**Consulta não mantém o índice:** lê os vetores existentes e avisa quando
+faltam textos do acervo consultado. Ausente ou vazio, retorna lista vazia
+com aviso; não cria cache nem embeda passagens. Para manutenção autorizada,
+use `--atualizar`. A consulta ainda calcula o embedding local da pergunta.
 
 Índice fica em ~/.cache/agata/busca_semantica/ — fora do repo, fora do
 vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
@@ -33,7 +34,7 @@ vault, nunca commitado, regenerado sob demanda (não a cada commit; indexar
 
 Desde (670): índice v2, INCREMENTAL, por entrada e por parágrafo (`indice-v2.json`,
 vetor guardado pela sha256 do texto) -- só o texto novo vai ao embedding. O
-post-commit roda `--atualizar` antes de gerar o vault; a busca se atualiza sozinha.
+post-commit roda `--atualizar` antes de gerar o vault; a consulta não atualiza o índice.
 O `memorias.json` antigo fica sem uso.
 
 Uso:
@@ -200,8 +201,8 @@ def _embed(textos, input_type):
 # segmentação de scripts/agata_blocos.py que o vault usa pra marcar `^bN`).
 # Cada vetor é guardado pela sha256 do texto que o gerou -- texto que já tem
 # vetor nunca vai de novo ao embedding; só o novo ou alterado. Sem timer: a
-# reindexação roda no post-commit (antes do vault) e, se estiver atrasada, na
-# própria busca. O vault (gerar_obsidian.py) só LÊ este índice.
+# reindexação roda no post-commit (antes do vault) ou por manutenção
+# explícita; nunca dentro da consulta. O vault (gerar_obsidian.py) só LÊ este índice.
 INDICE_V2 = os.path.join(CACHE_DIR, "indice-v2.json")
 MODELO = "multilingual-e5-small"
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -339,33 +340,50 @@ def atualizar(podar=False, silencioso=False):
 
 
 def buscar_dados(query, n=10, blocos=True):
-    """[{tipo, num, bloco, score, titulo, data, trecho}] -- entradas e trechos."""
+    """Resultados compatíveis com a interface anterior, sem manutenção/escrita.
+
+    Avisos de cobertura vão para stderr; [] não prova ausência no acervo.
+    Só o embedding da pergunta é calculado; passagens não são indexadas.
+    """
     import numpy as np
-    atualizar(silencioso=True)
-    entradas, _ = _todas_entradas_todas_camadas()
     vetores = carregar_indice()
+    if not vetores:
+        print("AVISO: índice semântico ausente, vazio ou inválido; consulta sem resultados. "
+              "Atualização por post-commit ou --atualizar na Máquina.", file=sys.stderr)
+        return []
+    entradas, _ = _todas_entradas_todas_camadas()
+    faltantes = set()
     q = np.asarray(_embed([query], "query")[0], dtype="<f4")
     res = []
+    def consultar_vetor(texto):
+        v = vetor(vetores, texto)
+        if v is None:
+            faltantes.add(_h(texto))
+        return v
+
     for e in entradas:
-        v = vetor(vetores, texto_entrada(e))
+        v = consultar_vetor(texto_entrada(e))
         if v is not None:
             res.append({"tipo": "entrada", "num": e["num"], "bloco": None,
                         "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
                         "trecho": ""})
         if blocos:
             for bn, t in textos_blocos(e):
-                v = vetor(vetores, t)
+                v = consultar_vetor(t)
                 if v is not None:
                     res.append({"tipo": "trecho", "num": e["num"], "bloco": bn,
                                 "score": float(v @ q), "titulo": e["titulo"], "data": e["data"],
                                 "trecho": t[:280]})
     for rel, linhas in docs_extras():
         for bn, t in textos_doc(rel, linhas):
-            v = vetor(vetores, t)
+            v = consultar_vetor(t)
             if v is not None:
                 res.append({"tipo": "documento", "num": rel, "bloco": bn,
                              "score": float(v @ q), "titulo": os.path.basename(rel), "data": "",
                              "trecho": t.split("\n\n", 1)[-1][:280]})
+    if faltantes:
+        print(f"AVISO: índice parcial; {len(faltantes)} texto(s) do acervo sem vetor. "
+              "Resultados incompletos; atualização por post-commit ou --atualizar na Máquina.", file=sys.stderr)
     res.sort(key=lambda r: r["score"], reverse=True)
     # no máximo um trecho por entrada, pra não encher o topo com a mesma entrada
     out, vistos = [], set()

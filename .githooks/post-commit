@@ -10,19 +10,43 @@
 # point-in-time verificado. Isto só reduz o quanto elas precisam alcançar
 # quando alguém lembrar de fazer uma.
 set -uo pipefail
-cd "$(dirname "$0")/.." || { echo "post-commit: AVISO — não consegui entrar na raiz do repo; backup e vault pulados neste commit." >&2; exit 0; }
+# Onde estamos (medido em 16/10/2026, reproduzido num repositório sintético): `core.hooksPath` é
+# ABSOLUTO para o checkout principal, então o hook vive lá mesmo quando o commit acontece numa
+# worktree vinculada; nesse caso o git exporta GIT_DIR/GIT_INDEX_FILE da worktree. O `cd "$0/.."`
+# antigo ia para o checkout principal MANTENDO esse GIT_DIR: `git rev-parse HEAD` devolvia o commit
+# da worktree enquanto os arquivos lidos eram os do principal -- vault rotulado com um SHA que não
+# era o do que foi lido. Agora: raiz do hook e local do commit são medidos separadamente.
+RAIZ_HOOK="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)" \
+  || { echo "post-commit: AVISO — não consegui localizar a raiz do hook; backup e vault pulados neste commit." >&2; exit 0; }
+TOPO_COMMIT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$RAIZ_HOOK")"
+EM_WORKTREE=0
+[ "$TOPO_COMMIT" != "$RAIZ_HOOK" ] && EM_WORKTREE=1
 
 STAGING="$HOME/.agata-backup-staging"
 mkdir -p "$STAGING"
+
+# Um hook por vez. Dois commits (ou um commit e um `git pull`, que roda este mesmo script pelo
+# post-merge) simultâneos disputavam o MESMO `agata-canonico.bundle.tmp` e os geradores do vault.
+# Lock cooperativo, com espera limitada; se não vier, avisa e não trava o commit.
+exec 9>"$STAGING/.post-commit.lock"
+if ! flock -w 600 9; then
+  echo "post-commit: AVISO — outro post-commit/post-merge segura o lock há mais de 10 min; backup e vault pulados neste commit." >&2
+  exit 0
+fi
+
 SHORT=$(git rev-parse --short HEAD)
 STAMP=$(date +%Y%m%d-%H%M%S)
 
-# 1. Staging local — sempre, cache descartável, uma geração só.
-if ! git bundle create "$STAGING/agata-canonico.bundle.tmp" --all >/dev/null 2>&1; then
+# 1. Staging local — sempre, cache descartável, uma geração só. Temporário único, publicação
+# atômica (`mv`) e dentro do lock acima.
+BUNDLE_TMP="$(mktemp "$STAGING/agata-canonico.bundle.XXXXXX")" \
+  || { echo "post-commit: AVISO — não consegui criar temporário do bundle" >&2; exit 0; }
+if ! git bundle create "$BUNDLE_TMP" --all >/dev/null 2>&1; then
+  rm -f "$BUNDLE_TMP"
   echo "post-commit: AVISO — falha ao gerar bundle no staging local" >&2
   exit 0
 fi
-mv "$STAGING/agata-canonico.bundle.tmp" "$STAGING/agata-canonico.bundle"
+mv -f "$BUNDLE_TMP" "$STAGING/agata-canonico.bundle"
 
 USB="/run/media/$USER/AgataBkup01"
 if mountpoint -q "$USB" 2>/dev/null; then
@@ -42,6 +66,17 @@ else
   } > "$STAGING/PENDENTE-HD-DESCONECTADO"
   echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
 fi
+
+# Os derivados (vault, índice por sentido, índice do canon e envio ao Drive) são do checkout PRINCIPAL:
+# vêm do `main` que está lá. Commit numa worktree de branch não os refaz (o `git pull`/merge no
+# principal refaz, pelo post-merge). Daqui para baixo o ambiente é o do checkout principal e o git
+# não pode herdar o GIT_DIR/GIT_INDEX_FILE da worktree.
+if [ "$EM_WORKTREE" -eq 1 ]; then
+  echo "post-commit: commit em worktree vinculada ($TOPO_COMMIT) — bundle feito; vault, índice e Drive só se refazem no checkout principal"
+  exit 0
+fi
+cd "$RAIZ_HOOK" || exit 0
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 
 # 2. Vault Obsidian derivado — refaz memoria/obsidian/ a cada commit para
 # ficar sempre em dia com MEMÓRIAS.md e o canon. É gitignorado, não entra

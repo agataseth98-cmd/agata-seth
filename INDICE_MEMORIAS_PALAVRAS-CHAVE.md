@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
+  palavras-chave: pacote, inicial, integridade, governança, preparado, claude, code, codex, assinatura, humana, aplicado
 (727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
   palavras-chave: humano, deu, codex, app, gpt, designação, trabalho, mesmas, permissões, claude, code, agata, portão, três, perguntas, modelos, sincronizam, cache, sincronia, regras, convivência, abaixo, lacuna, declarada, post, commit, commits, simultâneos
 (726) EXECUÇÃO — 15/10/2026 · **Aplicada `navegador-fila-2026-10-15` (assinada pelo Humano), em worktree. E a resposta do Humano à pergunta de (725): a aprovação do `preencher`/`clicar` das 13:19 apareceu para ele ("apareceu sim") — o portão de escrita da LibreChat funcionou.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, seth, zerar, pedido, humano, vamos, deixe, tudo, perfeito, fecha, auditoria, resposta, achou, falso, perdeu, história, sermão, cumprimento, duplicada, sync, linha, turno, positivo, própria, aguardando, assinatura
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
   palavras-chave: confirmado, humano, aviso, auditoria, seth, aparece, área, trabalho, fecha, pendência
-(698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-10-14` (assinada pelo Humano): sem o `tool_choice: "required"`, a conversa longa que travou volta a funcionar — o Nemotron faz chamada de ferramenta real.**
-  palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria, assinada, humano, tool, choice, required, conversa, longa, travou, volta, funcionar, nemotron, faz, chamada, real
+(698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-1 …
+  palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `too …
   palavras-chave: quebrou, seth, humano, too
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pel …
