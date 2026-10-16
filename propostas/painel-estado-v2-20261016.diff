@@ -12,10 +12,10 @@ index d6a749c..0a97c40 100644
          run: |
 diff --git a/scripts/painel_estado.py b/scripts/painel_estado.py
 new file mode 100755
-index 0000000..0ed66c6
+index 0000000..03d71c5
 --- /dev/null
 +++ b/scripts/painel_estado.py
-@@ -0,0 +1,165 @@
+@@ -0,0 +1,225 @@
 +#!/usr/bin/env python3
 +"""painel_estado.py -- painel de estado SÓ DE LEITURA (F2 do plano). Uma tela: o que está no ar, o que espera o Humano.
 +
@@ -47,31 +47,55 @@ index 0000000..0ed66c6
 +        return 127, str(e)
 +
 +
-+def pendentes(repo):
-+    """[(nome, sha256)] das propostas em propostas/*.diff sem propostas/APROVADO-<nome> (lidas do disco)."""
++_NOME_OK = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
++
++
++def _assinada_valida(repo, nome):
++    """True só se o verificador vigente (p8_verificar.sh) disser PODE APLICAR: par presente, hash, assinatura e git apply.
++    APROVADO- existir não basta (um arquivo vazio ou de outra chave não é assinatura)."""
++    if not os.path.exists(os.path.join(repo, "propostas", f"APROVADO-{nome}")):
++        return False
++    rc, out = _run(["bash", "scripts/p8_verificar.sh", nome], cwd=repo, timeout=60)
++    linhas = [l for l in out.splitlines() if l.strip()]
++    return rc == 0 and bool(linhas) and linhas[-1].strip() == f"PODE APLICAR: {nome}"
++
++
++def pendentes(repo, assinada=None):
++    """([(nome, sha256)], [avisos]): propostas em propostas/*.diff SEM assinatura válida. `assinada(repo, nome)` é injetável
++    (teste); o padrão chama o verificador. Nome fora de [A-Za-z0-9._-] não vira comando (aviso); diff ilegível vira aviso."""
++    assinada = assinada or _assinada_valida
 +    pasta = os.path.join(repo, "propostas")
-+    out = []
++    out, avisos = [], []
 +    try:
 +        nomes = sorted(f[:-5] for f in os.listdir(pasta) if f.endswith(".diff"))
 +    except OSError:
-+        return out
++        return out, ["propostas/ ilegível"]
 +    for n in nomes:
-+        if os.path.exists(os.path.join(pasta, f"APROVADO-{n}")):
++        if not _NOME_OK.fullmatch(n):
++            avisos.append(f"nome de proposta fora do padrão, não entra no comando: {n!r}")
 +            continue
-+        with open(os.path.join(pasta, n + ".diff"), "rb") as f:
-+            out.append((n, hashlib.sha256(f.read()).hexdigest()))
-+    return out
++        if assinada(repo, n):
++            continue
++        try:
++            with open(os.path.join(pasta, n + ".diff"), "rb") as f:
++                out.append((n, hashlib.sha256(f.read()).hexdigest()))
++        except OSError as e:
++            avisos.append(f"{n}.diff ilegível: {e.strerror}")
++    return out, avisos
 +
 +
 +def comando_fish(pend, repo="/home/orusoua/agata"):
-+    """Um comando Fish: pull, confere o hash de cada proposta e só então assina todas. Vazio se não há pendentes."""
++    """Um comando Fish de UMA linha: pull, confere o hash de TODAS as propostas e só então assina todas. Se qualquer hash
++    divergir (primeira, do meio ou última), mostra qual e NÃO assina nenhuma. (Um `false` dentro do `for` seria
++    sobrescrito pela iteração seguinte -- achado do Codex, 16/10/2026 --, por isso a bandeira `ok` explícita.)"""
 +    if not pend:
 +        return ""
++    import shlex
 +    pares = " ".join(f"{n}:{h}" for n, h in pend)
 +    nomes = " ".join(n for n, _ in pend)
-+    return (f"cd {repo}; and git pull --ff-only; and for p in {pares}; set n (string split : $p)[1]; set h (string split : $p)[2]; "
-+            f"test (sha256sum propostas/$n.diff | string split ' ')[1] = $h; or begin; echo \"HASH DIVERGE: $n\"; false; end; end; "
-+            f"and for n in {nomes}; bash scripts/aprovar.sh $n; end")
++    return (f"cd {shlex.quote(repo)}; and git pull --ff-only; and begin; set ok 1; for p in {pares}; set n (string split : $p)[1]; "
++            f"set h (string split : $p)[2]; if test (sha256sum propostas/$n.diff | string split -f1 ' ') != $h; "
++            f"echo \"HASH DIVERGE: $n\"; set ok 0; end; end; test $ok = 1; end; and for n in {nomes}; bash scripts/aprovar.sh $n; end")
 +
 +
 +def bloco_git(repo):
@@ -127,8 +151,9 @@ index 0000000..0ed66c6
 +def painel(repo, rede=True):
 +    L = ["== Agata · painel de estado (só leitura) =="]
 +    L += bloco_git(repo) + bloco_servicos(repo) + bloco_derivados()
-+    p = pendentes(repo)
++    p, avisos = pendentes(repo)
 +    L.append(f"propostas esperando a SUA assinatura: {len(p)}" + ("".join(f"\n  - {n} ({h[:12]}…)" for n, h in p)))
++    L += [f"  AVISO: {a}" for a in avisos]
 +    if rede:
 +        L += bloco_github(repo)
 +    cmd = comando_fish(p, repo)
@@ -137,26 +162,61 @@ index 0000000..0ed66c6
 +    return "\n".join(L)
 +
 +
++def _fish_real(td):
++    """Executa o comando num Fish REAL com aprovar.sh trocado por um eco (nada é assinado). Pula se não houver fish."""
++    import shutil as _sh
++    if not _sh.which("fish"):
++        return [("fish real: pulado (fish ausente)", True)]
++    os.makedirs(os.path.join(td, "scripts"), exist_ok=True)
++    open(os.path.join(td, "scripts", "aprovar.sh"), "w").write('echo "ASSINARIA $1"\n')
++    subprocess.run(["git", "init", "-q", td], capture_output=True)
++    ps, _ = pendentes(td, _FAKE)
++    def roda(pend):
++        cmd = comando_fish(pend, td).replace("git pull --ff-only", "true")
++        p = subprocess.run(["fish", "-c", cmd], capture_output=True, text=True)
++        return p.returncode, p.stdout
++    r = []
++    rc, out = roda(ps)
++    r.append(("fish real: todos certos -> assina todos", rc == 0 and out.count("ASSINARIA") == len(ps)))
++    for pos in range(len(ps)):
++        ruim = list(ps)
++        ruim[pos] = (ruim[pos][0], "0" * 64)
++        rc, out = roda(ruim)
++        r.append((f"fish real: hash errado na posição {pos} -> não assina nenhuma", rc != 0 and "ASSINARIA" not in out and "HASH DIVERGE" in out))
++    return r
++
++
++_FAKE = lambda repo, nome: os.path.exists(os.path.join(repo, "propostas", f"APROVADO-{nome}")) and \
++    open(os.path.join(repo, "propostas", f"APROVADO-{nome}")).read().startswith("ASSINADO")
++
++
 +def _selftest():
 +    casos = []
 +    td = tempfile.mkdtemp(prefix="painel-")
 +    try:
 +        os.makedirs(os.path.join(td, "propostas"))
-+        for n, c in (("a", b"A\n"), ("b", b"B\n"), ("c", b"C\n")):
++        for n, c in (("a", b"A\n"), ("b", b"B\n"), ("c", b"C\n"), ("d", b"D\n")):
 +            open(os.path.join(td, "propostas", n + ".diff"), "wb").write(c)
-+        open(os.path.join(td, "propostas", "APROVADO-b"), "w").write("x")
-+        p = pendentes(td)
-+        casos.append(("lista só as sem APROVADO-", [n for n, _ in p] == ["a", "c"]))
++        open(os.path.join(td, "propostas", "APROVADO-b"), "w").write("ASSINADO")
++        open(os.path.join(td, "propostas", "APROVADO-d"), "w").write("")  # existe mas NÃO é assinatura
++        p, av = pendentes(td, _FAKE)
++        casos.append(("lista as sem assinatura VÁLIDA (APROVADO vazio não conta)", [n for n, _ in p] == ["a", "c", "d"]))
 +        casos.append(("hash é o sha256 do arquivo", p[0][1] == hashlib.sha256(b"A\n").hexdigest()))
 +        cmd = comando_fish(p, "/x")
-+        casos.append(("comando traz nome:hash de cada pendente", f"a:{p[0][1]}" in cmd and f"c:{p[1][1]}" in cmd))
++        casos.append(("comando traz nome:hash de cada pendente", all(f"{n}:{h}" in cmd for n, h in p)))
 +        casos.append(("comando confere hash antes de assinar", cmd.index("HASH DIVERGE") < cmd.index("aprovar.sh")))
-+        casos.append(("não inclui a já assinada", " b:" not in cmd and "for n in a c;" in cmd))
++        casos += _fish_real(td)
++        casos.append(("não inclui a já assinada", " b:" not in cmd and "for n in a c d;" in cmd))
 +        casos.append(("sem pendentes: sem comando", comando_fish([], "/x") == ""))
-+        casos.append(("só lê: nada criado/alterado",
-+                      sorted(os.listdir(os.path.join(td, "propostas"))) == ["APROVADO-b", "a.diff", "b.diff", "c.diff"]))
++        # nome hostil e diff ilegível
++        open(os.path.join(td, "propostas", "x;touch y.diff"), "wb").write(b"X")
++        os.symlink("/nao/existe", os.path.join(td, "propostas", "quebrado.diff"))
++        p2, av2 = pendentes(td, _FAKE)
++        casos.append(("nome com ';' não entra no comando e gera aviso", all(";" not in n for n, _ in p2) and any("fora do padrão" in a for a in av2)))
++        casos.append(("diff ilegível vira aviso, não derruba", any("quebrado.diff ilegível" in a for a in av2)))
++        casos.append(("repo com espaço/aspas é citado no comando", "'/tmp/a b'" in comando_fish([("a", "0" * 64)], "/tmp/a b")))
 +        txt = painel(td, rede=False)
-+        casos.append(("painel sem rede roda e mostra a contagem", "esperando a SUA assinatura: 2" in txt))
++        casos.append(("painel sem rede roda e mostra a contagem", "esperando a SUA assinatura:" in txt))
 +    finally:
 +        import shutil
 +        shutil.rmtree(td, ignore_errors=True)
