@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
+  palavras-chave: exceção, assumida, humano, regra, chave, nunca, sobe, esfera, externa, arquivo, agata, recuperacao, key, age, privada, recuperação, cofre, cifrada, senha, pode, guardado, mail, conta, projeto
+(730) CORREÇÃO — 16/10/2026 · **O número (729) foi atribuído a 14 entradas diferentes de 16/10/2026 por defeito do meu aplicador; esta entrada fixa a leitura: (729a) a (729n), na ordem em que foram escritas.**
+  palavras-chave: número, atribuído, entradas, diferentes, defeito, meu, aplicador, entrada, fixa, leitura, ordem, foram, escritas
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
   palavras-chave: cofre, chaves, etapa, aplicada, cópia, recuperação, segredos, cifrada, age, chave, pública, humano
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, conversa, seth, pedido, humano, ela, negou, laya, segurando, linha, canon, citava, concluiu, internet, ter, buscado, nela, chamou, resultados, páginas, leu, inteiras, decisão, risco, assumido, ele, pode, liberar, ferramentas, pesquisa, disponiveis, pedir, minha, autorização, assumo, escrita, devem, continuar, passando, sempre, serve, modelos, federados, proposta, livre, aguardando, assinatura
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
   palavras-chave: treino, voz, agata, madrugada, agendado, aconteceu, máquina, suspendeu, inatividade, min, início, voltou, erro, meu, agendei, trabalho, segurar, suspensão, reagendado, pedido, humano, agora, systemd, inhibit
-(714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
-  palavras-chave: execução, resumo, automático, omniroute, universal, handoff, desligado, filas, seth, pedido, humano, pode, juntar, desligar, motivos, aplicação, juntado, mesmo
-(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
-  palavras-chave: execução, aplicada, fila, ministral, assinada, humano, worktree, resposta, pergunta, resumo, automático, omniroute, ele, útil, sistema, medido, seth, ruído, risco, invenção, desligar, continua, decisão
+(714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-han …
+  palavras-chave: execução, resumo, automático, omniroute, universal, han
+(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinad …
+  palavras-chave: execução, aplicada, fila, ministral, assinad
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode …
   palavras-chave: reparos, pedidos, humano, pode
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o …

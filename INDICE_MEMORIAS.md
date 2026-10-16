@@ -3,6 +3,8 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(731) DIÁRIO — 16/10/2026 · **Exceção assumida pelo Humano à regra "chave nunca sobe para esfera externa": o arquivo `agata-recuperacao.key.age` (chave privada de recuperação do cofre, CIFRADA com senha) pode ser guardado no e-mail da conta do projeto.**
+(730) CORREÇÃO — 16/10/2026 · **O número (729) foi atribuído a 14 entradas diferentes de 16/10/2026 por defeito do meu aplicador; esta entrada fixa a leitura: (729a) a (729n), na ordem em que foram escritas.**
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F2 aplicada (`cofre-f2-20261016`): cópia de recuperação dos segredos cifrada com `age` para a chave pública do Humano.**
 (729) DIÁRIO — 16/10/2026 · **Cofre de chaves, etapa F1 aplicada (`cofre-f1-20261016`): manifesto de segredos e verificador só de leitura.**
 (729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
@@ -31,8 +33,8 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada pelo Humano), em worktree. E, pela mesma fala, o `shell` do Goose passa a pedir aprovação ("o shell deve padir aprovação").**
 (716) CONSELHO — 15/10/2026 · **Auditoria da conversa da Seth de 09:02–09:10 (pedido do Humano): ela negou "Laya" segurando a linha do canon que o citava, concluiu sobre a internet sem ter buscado nela e chamou de "sem resultados" páginas que não leu inteiras. E a decisão do Humano, com o risco assumido por ele: "pode liberar para ela todas as ferramentas de pesquisa disponiveis sem pedir minha autorização, eu assumo o risco, ferramentas de escrita devem continuar passando pelo humano sempre, isso serve para todos os modelos federados". Proposta `pesquisa-livre-2026-10-15`. Aguardando assinatura.**
 (715) CORREÇÃO — 15/10/2026 · **O treino da voz da Agata da madrugada de 15/10 (agendado em (685)) não aconteceu: a Máquina suspendeu por inatividade às 00:34, 4 min depois do início, e não voltou. Erro meu: agendei trabalho de madrugada sem segurar a suspensão. Reagendado para 16/10 às 00:30, a pedido do Humano, agora com `systemd-inhibit`.**
-(714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-handoff`) foi desligado nas 7 filas `seth-*`, a pedido do Humano ("pode juntar o PR e desligar o resumo"), pelos motivos de (713). PR #217 (aplicação de (713)) juntado pelo mesmo pedido.**
-(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinada pelo Humano), em worktree. E a resposta à pergunta do Humano sobre o resumo automático do OmniRoute ("ele é útil para o sistema?"): não é, medido — para a Seth, é ruído e risco de invenção. Desligar continua decisão do Humano.**
+(714) EXECUÇÃO — 15/10/2026 · **O resumo automático do OmniRoute (`universal-han …
+(713) EXECUÇÃO — 15/10/2026 · **Aplicada `fila-ministral-1o-2026-10-15` (assinad …
 (712) DIÁRIO — 15/10/2026 · **Reparos pedidos pelo Humano depois de (711) ("pode …
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o …
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-1 …
