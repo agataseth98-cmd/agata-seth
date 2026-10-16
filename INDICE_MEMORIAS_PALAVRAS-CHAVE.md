@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Painel de estado só de leitura aplicado (`painel-estado-v3-20261016`): `python3 scripts/painel_estado.py` mostra numa tela o que está no ar e o que espera a assinatura do Humano, com o comando Fish que confere os hashes antes de assinar.**
+  palavras-chave: painel, estado, leitura, aplicado, python, scripts, mostra, tela, espera, assinatura, humano, comando, fish, confere, hashes, assinar
 (729) DIÁRIO — 16/10/2026 · **`PROJETO.md` voltou ao teto (`projeto-mapa-v2-20261016`): de 57.618 B para 47.965 B, com o detalhe movido sem alteração para `extras/projeto-detalhe/`.**
   palavras-chave: projeto, voltou, teto, mapa, detalhe, movido, alteração, extras
 (729) DIÁRIO — 16/10/2026 · **Regra de fontes (F0) aplicada (`fontes-f0-20261016`): todo modelo cita a fonte do que afirma, e a auditoria de turno avisa quando há afirmação de medição sem origem.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reteste, cabeçalho, escrito, máquina, funciona, stream, resposta, modelo, real, certo, seth, escreve, dela, conversa, longa, nemotron, fica, livre, segunda, opinião, jev, responde, caminho, proposta, suite, fora, worktree, conserta, causa, incidente, aguardando, assinatura
 (706) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-cabecalho-maquina-2026-10-14` (assinada pelo Humano) — em dois tempos, por um incidente meu: a 1ª tentativa, numa worktree, levou ao `main` (PR #208) só o `p20_decisor.py`; o resto entra agora. Causa achada: a suíte do perímetro, rodando dentro do `pre-commit` de uma worktree, comita na branch da worktree. Conserto da suíte em proposta própria.**
   palavras-chave: execução, aplicada, seth, cabecalho, maquina, assinada, humano, tempos, incidente, meu, tentativa, worktree, levou, main, decisor, resto, entra, agora, causa, achada, suíte, perímetro, rodando, dentro, pre, commit, comita, branch, conserto, proposta, própria
-(705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
-  palavras-chave: proposta, seth, cabecalho, maquina, cabeçalho, passa, escrito, máquina, modelo, real, medido, próprio, turno, rota, segue, pedido, atual, histórico, jev, vira, segunda, opinião, sob, volta, funcionar, pedidos, humano, faça, escrever, dai, aprimore, sistema, reconhecimento, baixo, facilite, acesso, modelos, assunto, for, verifique, aplicações, perdermos, features, diminuirmos, consumo, tokens, corrija, mecanicamente, erros, encontrados, aguardando, assinatura
+(705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o ca …
+  palavras-chave: proposta, seth, cabecalho, maquina
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas m …
   palavras-chave: reteste, pedida, avaliação, últimas
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assi …

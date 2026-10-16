@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""painel_estado.py -- painel de estado SÓ DE LEITURA (F2 do plano). Uma tela: o que está no ar, o que espera o Humano.
+
+Não escreve em arquivo do repositório, não assina, não aplica, não chama `aprovar.sh`. A única saída "acionável" é o
+COMANDO FISH que o Humano pode copiar para assinar as propostas pendentes: ele traz o hash de cada `.diff` lido AGORA e
+confere o hash de novo antes de assinar (se o arquivo mudar entre o painel e o comando, para sem assinar). Quem assina é
+sempre o Humano, no terminal dele.
+
+Cada bloco falha sozinho (`indisponível: <motivo>`): um serviço fora do ar nunca derruba o painel. `gh` (rede) é opcional.
+
+Uso: python3 scripts/painel_estado.py [--repo DIR] [--sem-rede] [--selftest]
+"""
+import argparse
+import hashlib
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _run(args, cwd=None, timeout=15):
+    try:
+        p = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        return p.returncode, p.stdout.strip()
+    except (OSError, subprocess.SubprocessError) as e:
+        return 127, str(e)
+
+
+_NOME_OK = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+def _assinada_valida(repo, nome):
+    """'ok' (verificador diz PODE APLICAR), 'drift' (assinatura boa, mas o diff não aplica mais limpo: NÃO é pedir nova
+    assinatura, é refazer a proposta) ou 'nao' (sem assinatura válida). APROVADO- existir não basta."""
+    if not os.path.exists(os.path.join(repo, "propostas", f"APROVADO-{nome}")):
+        return "nao"
+    rc, out = _run(["bash", "scripts/p8_verificar.sh", nome], cwd=repo, timeout=60)
+    linhas = [l for l in out.splitlines() if l.strip()]
+    if rc == 0 and linhas and linhas[-1].strip() == f"PODE APLICAR: {nome}":
+        return "ok"
+    if any(l.startswith("OK 3") and "Good" in l for l in linhas):
+        return "drift"
+    return "nao"
+
+
+def pendentes(repo, assinada=None):
+    """([(nome, sha256)], [avisos]): propostas em propostas/*.diff SEM assinatura válida. `assinada(repo, nome)` é injetável
+    (teste); o padrão chama o verificador. Nome fora de [A-Za-z0-9._-] não vira comando (aviso); diff ilegível vira aviso."""
+    assinada = assinada or _assinada_valida
+    pasta = os.path.join(repo, "propostas")
+    out, avisos = [], []
+    try:
+        nomes = sorted(f[:-5] for f in os.listdir(pasta) if f.endswith(".diff"))
+    except OSError:
+        return out, ["propostas/ ilegível"]
+    for n in nomes:
+        if not _NOME_OK.fullmatch(n):
+            avisos.append(f"nome de proposta fora do padrão, não entra no comando: {n!r}")
+            continue
+        st = assinada(repo, n)
+        st = "ok" if st is True else ("nao" if st is False else st)
+        if st == "ok":
+            continue
+        if st == "drift":
+            avisos.append(f"{n}: assinatura válida, mas o diff não aplica limpo (drift) -- refazer a proposta, não reassinar")
+            continue
+        try:
+            with open(os.path.join(pasta, n + ".diff"), "rb") as f:
+                out.append((n, hashlib.sha256(f.read()).hexdigest()))
+        except OSError as e:
+            avisos.append(f"{n}.diff ilegível: {e.strerror}")
+    return out, avisos
+
+
+def comando_fish(pend, repo="/home/orusoua/agata"):
+    """Um comando Fish de UMA linha: pull, confere o hash de TODAS as propostas e só então assina todas. Se qualquer hash
+    divergir (primeira, do meio ou última), mostra qual e NÃO assina nenhuma. (Um `false` dentro do `for` seria
+    sobrescrito pela iteração seguinte -- achado do Codex, 16/10/2026 --, por isso a bandeira `ok` explícita.)"""
+    if not pend:
+        return ""
+    import shlex
+    pares = " ".join(f"{n}:{h}" for n, h in pend)
+    nomes = " ".join(n for n, _ in pend)
+    return (f"cd {shlex.quote(repo)}; and git pull --ff-only; and begin; set ok 1; for p in {pares}; set n (string split : $p)[1]; "
+            f"set h (string split : $p)[2]; set got (sha256sum propostas/$n.diff 2>/dev/null | string split -f1 ' '); "
+            f"if not test \"$got\" = $h; echo \"HASH DIVERGE OU ARQUIVO AUSENTE: $n\"; set ok 0; end; end; test $ok = 1; end; and for n in {nomes}; bash scripts/aprovar.sh $n; end")
+
+
+def bloco_git(repo):
+    rc, head = _run(["git", "log", "-1", "--format=%h %s"], cwd=repo)
+    rc2, ahead = _run(["git", "rev-list", "--left-right", "--count", "HEAD...origin/main"], cwd=repo)
+    if rc or rc2:
+        return ["git: indisponível"]
+    a, b = (ahead.split() + ["?", "?"])[:2]
+    return [f"main local: {head[:90]}", f"à frente de origin/main: {a} · atrás: {b} (conferido contra o último fetch)"]
+
+
+def bloco_servicos(repo):
+    f = os.path.join(repo, "config", "portas-agata.txt")
+    try:
+        linhas = [l for l in open(f, encoding="utf-8") if l.strip() and not l.startswith("#")]
+    except OSError:
+        return ["serviços: manifesto de portas indisponível"]
+    nomes = sorted({l.split("|")[1].strip() for l in linhas if l.count("|") >= 2})
+    ruins = []
+    for n in nomes:
+        ativo = False
+        for escopo in (["--user"], []):  # unidade de usuário, depois de sistema (ex.: ollama.service)
+            rc, out = _run(["systemctl", *escopo, "is-active", n + ".service"], timeout=5)
+            if out in ("active", "activating"):
+                ativo = True
+                break
+        if not ativo:
+            rc2, out2 = _run(["docker", "ps", "--filter", f"name=^{n}$", "--format", "{{.Names}}"], timeout=5)
+            ativo = rc2 == 0 and bool(out2)
+        if not ativo:
+            ruins.append(n)
+    return [f"serviços do manifesto de portas: {len(nomes)} · inativos agora: {len(ruins)} (alguns sobem sob demanda; a lista de alerta é a do P-9)"] + \
+           ([("  " + ", ".join(ruins))[:150]] if ruins else [])
+
+
+def bloco_derivados():
+    d = os.path.expanduser("~/.cache/agata")
+    try:
+        ms = [f for f in os.listdir(d) if f.startswith("derivados-possivelmente-misturados")]
+    except OSError:
+        ms = []
+    return ["derivados (vault/índice): " + ("POSSIVELMENTE MISTURADOS em " + ", ".join(ms) if ms else "sem marcador de mistura")]
+
+
+def bloco_github(repo):
+    rc, prs = _run(["gh", "pr", "list", "--state", "open", "--json", "number,title", "--jq", ".[]|\"#\\(.number) \\(.title)\""], cwd=repo, timeout=20)
+    rc2, chk = _run(["gh", "api", "repos/{owner}/{repo}/branches/main/protection/required_status_checks", "--jq", ".contexts|join(\", \")"], cwd=repo, timeout=20)
+    out = [f"checagens exigidas no main: {chk if rc2 == 0 else 'indisponível'}"]
+    out.append("PRs abertos: " + (("\n  " + "\n  ".join(prs.splitlines()[:6])) if rc == 0 and prs else ("nenhum" if rc == 0 else "indisponível")))
+    return out
+
+
+def painel(repo, rede=True):
+    L = ["== Agata · painel de estado (só leitura) =="]
+    L += bloco_git(repo) + bloco_servicos(repo) + bloco_derivados()
+    p, avisos = pendentes(repo)
+    L.append(f"propostas esperando a SUA assinatura: {len(p)}" + ("".join(f"\n  - {n} ({h[:12]}…)" for n, h in p)))
+    L += [f"  AVISO: {a}" for a in avisos]
+    if rede:
+        L += bloco_github(repo)
+    cmd = comando_fish(p, repo)
+    if cmd:
+        L += ["", "Para assinar tudo que está acima (confere o hash antes):", cmd]
+    return "\n".join(L)
+
+
+def _fish_real(td):
+    """Executa o comando num Fish REAL com aprovar.sh trocado por um eco (nada é assinado). Pula se não houver fish."""
+    import shutil as _sh
+    if not _sh.which("fish"):
+        return [("fish real: pulado (fish ausente)", True)]
+    os.makedirs(os.path.join(td, "scripts"), exist_ok=True)
+    open(os.path.join(td, "scripts", "aprovar.sh"), "w").write('echo "ASSINARIA $1"\n')
+    subprocess.run(["git", "init", "-q", td], capture_output=True)
+    ps, _ = pendentes(td, _FAKE)
+    def roda(pend):
+        cmd = comando_fish(pend, td).replace("git pull --ff-only", "true")
+        p = subprocess.run(["fish", "-c", cmd], capture_output=True, text=True)
+        return p.returncode, p.stdout
+    r = []
+    rc, out = roda(ps)
+    r.append(("fish real: todos certos -> assina todos", rc == 0 and out.count("ASSINARIA") == len(ps)))
+    for pos in range(len(ps)):
+        ruim = list(ps)
+        ruim[pos] = (ruim[pos][0], "0" * 64)
+        rc, out = roda(ruim)
+        r.append((f"fish real: hash errado na posição {pos} -> não assina nenhuma", rc != 0 and "ASSINARIA" not in out and "HASH DIVERGE" in out))
+    # arquivo ausente / ilegível DEPOIS de o comando ser gerado: não pode assinar nada (achado do Codex, v2)
+    os.remove(os.path.join(td, "propostas", ps[0][0] + ".diff"))
+    rc, out = roda(ps)
+    r.append(("fish real: .diff ausente -> não assina nenhuma", rc != 0 and "ASSINARIA" not in out and "AUSENTE" in out))
+    open(os.path.join(td, "propostas", ps[0][0] + ".diff"), "w").write("restaurado")
+    return r
+
+
+_FAKE = lambda repo, nome: os.path.exists(os.path.join(repo, "propostas", f"APROVADO-{nome}")) and \
+    open(os.path.join(repo, "propostas", f"APROVADO-{nome}")).read().startswith("ASSINADO")
+
+
+def _selftest():
+    casos = []
+    td = tempfile.mkdtemp(prefix="painel-")
+    try:
+        os.makedirs(os.path.join(td, "propostas"))
+        for n, c in (("a", b"A\n"), ("b", b"B\n"), ("c", b"C\n"), ("d", b"D\n")):
+            open(os.path.join(td, "propostas", n + ".diff"), "wb").write(c)
+        open(os.path.join(td, "propostas", "APROVADO-b"), "w").write("ASSINADO")
+        open(os.path.join(td, "propostas", "APROVADO-d"), "w").write("")  # existe mas NÃO é assinatura
+        p, av = pendentes(td, _FAKE)
+        casos.append(("lista as sem assinatura VÁLIDA (APROVADO vazio não conta)", [n for n, _ in p] == ["a", "c", "d"]))
+        casos.append(("hash é o sha256 do arquivo", p[0][1] == hashlib.sha256(b"A\n").hexdigest()))
+        cmd = comando_fish(p, "/x")
+        casos.append(("comando traz nome:hash de cada pendente", all(f"{n}:{h}" in cmd for n, h in p)))
+        casos.append(("comando confere hash antes de assinar", cmd.index("HASH DIVERGE") < cmd.index("aprovar.sh")))
+        casos += _fish_real(td)
+        casos.append(("não inclui a já assinada", " b:" not in cmd and "for n in a c d;" in cmd))
+        casos.append(("sem pendentes: sem comando", comando_fish([], "/x") == ""))
+        # nome hostil e diff ilegível
+        open(os.path.join(td, "propostas", "x;touch y.diff"), "wb").write(b"X")
+        os.symlink("/nao/existe", os.path.join(td, "propostas", "quebrado.diff"))
+        p2, av2 = pendentes(td, _FAKE)
+        casos.append(("nome com ';' não entra no comando e gera aviso", all(";" not in n for n, _ in p2) and any("fora do padrão" in a for a in av2)))
+        casos.append(("diff ilegível vira aviso, não derruba", any("quebrado.diff ilegível" in a for a in av2)))
+        casos.append(("repo com espaço/aspas é citado no comando", "'/tmp/a b'" in comando_fish([("a", "0" * 64)], "/tmp/a b")))
+        pd, avd = pendentes(td, lambda r, n: "drift" if n == "a" else _FAKE(r, n))
+        casos.append(("assinatura boa com drift: não pede reassinar, avisa", "a" not in [n for n, _ in pd] and any("drift" in a for a in avd)))
+        txt = painel(td, rede=False)
+        casos.append(("painel sem rede roda e mostra a contagem", "esperando a SUA assinatura:" in txt))
+    finally:
+        import shutil
+        shutil.rmtree(td, ignore_errors=True)
+    for n, ok in casos:
+        print(("PASS  " if ok else "FALHA ") + n)
+    bad = [n for n, ok in casos if not ok]
+    print(f"painel_estado selftest: {len(casos) - len(bad)}/{len(casos)}")
+    return 1 if bad else 0
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--repo", default=RAIZ)
+    ap.add_argument("--sem-rede", action="store_true")
+    ap.add_argument("--selftest", action="store_true")
+    a = ap.parse_args(argv)
+    if a.selftest:
+        return _selftest()
+    print(painel(a.repo, rede=not a.sem_rede))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
