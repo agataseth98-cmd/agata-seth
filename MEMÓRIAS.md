@@ -40,6 +40,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
+
+Aplicada a proposta assinada, do Codex, revisada por mim sem emenda: conferi que `rota_ativa`, `ms` e `respostas` existem de fato no log (gravados por `seth_gateway.py` e `decisor.py`) e rodei a função sobre o `roteador.jsonl` real (163 registros). Limites declarados no próprio relatório: a latência é a do decisor em sombra, inclusive falhas, não o tempo de resposta da Seth nem qualidade; rota ausente não é inferida; tokens, custo e desfecho não são medidos; amostras pequenas (por exemplo `seth-rapido`, n=1) aparecem com o número de decisões ao lado.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex · vetor: `scripts/avaliar_decisor.py --selftest`, função aplicada ao log real · Autorização: Humano — assinatura de `metricas-a04-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
 
 Aplicada a proposta assinada, do Codex, revisada por mim sem emenda. A regex de `auditoria_turno.py` passa a cobrir os blocos de símbolos e emoji pela propriedade Emoji da tabela oficial Unicode 17.0 (relógio, ampulheta, setas, keycap, quadrados e outros), sem acusar símbolos tipográficos (✓ ★ ♪ ☐ → © ® ™). Continua só aviso: não remove texto. O catálogo de afirmações desmentidas ganha o `qwen3.5:9b`. Medido antes: 12% dos 134 turnos auditados tinham emoji; a meta é derrubar esse número, e a decisão de remover o emoji da prosa (E-2) continua do Humano.
