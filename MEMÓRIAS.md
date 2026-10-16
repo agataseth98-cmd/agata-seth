@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): da7a10ab61980be52c15278f1502e211669e9192
-  Escrito em: 16/10/2026 14:29 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 973c2d3da1c308b80c29758e2a84e6212e857068
+  Escrito em: 16/10/2026 14:31 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da7a10ab61980be52c15278f1502e211669e9192/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da7a10ab61980be52c15278f1502e211669e9192/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da7a10ab61980be52c15278f1502e211669e9192/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da7a10ab61980be52c15278f1502e211669e9192/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da7a10ab61980be52c15278f1502e211669e9192/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/973c2d3da1c308b80c29758e2a84e6212e857068/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/973c2d3da1c308b80c29758e2a84e6212e857068/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/973c2d3da1c308b80c29758e2a84e6212e857068/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/973c2d3da1c308b80c29758e2a84e6212e857068/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/973c2d3da1c308b80c29758e2a84e6212e857068/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Regra de fontes (F0) aplicada (`fontes-f0-20261016`): todo modelo cita a fonte do que afirma, e a auditoria de turno avisa quando há afirmação de medição sem origem.**
+
+Aplicada a proposta assinada, do Codex, revisada por mim em três versões (a v3 sem emenda). `AGENTS.md` ganha a regra de origem dos fatos (fonte lida, distinção entre evidência, inferência e não medido; referência não prova suporte). `auditoria_turno.py` ganha um aviso lexical e DELIBERADAMENTE parcial: acusa verbo de medição na prosa (primeira pessoa, passiva de medição, "teste/suíte/build passou") sem fonte, ressalva ou "não medido" no mesmo texto. Ignora código e citação; não acusa os substantivos e adjetivos que a v2 acusava ("medidas de segurança", "modelo testado"). Limites: é só aviso; qualquer nome de arquivo, "(1)" ou "Fonte: x" satisfaz a marcação, e não cobre afirmação factual sem esses verbos. Não certifica verdade nem leitura.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · coautor e revisor: Codex · vetor: selftest de `auditoria_turno.py`, frases de revisão adversarial · Autorização: Humano — decisão "o Agata deve sempre citar as fontes" (15/10/2026) e assinatura de `fontes-f0-20261016`, 16/10/2026.
+
 (729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
 
 Aplicada a proposta assinada, do Codex, revisada por mim sem emenda: conferi que `rota_ativa`, `ms` e `respostas` existem de fato no log (gravados por `seth_gateway.py` e `decisor.py`) e rodei a função sobre o `roteador.jsonl` real (163 registros). Limites declarados no próprio relatório: a latência é a do decisor em sombra, inclusive falhas, não o tempo de resposta da Seth nem qualidade; rota ausente não é inferida; tokens, custo e desfecho não são medidos; amostras pequenas (por exemplo `seth-rapido`, n=1) aparecem com o número de decisões ao lado.
