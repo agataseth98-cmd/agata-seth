@@ -1,0 +1,38 @@
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+index d5814a7..e840b91 100644
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ b/.agents/skills/agata-fluxo-dupla/SKILL.md
+@@ -21,6 +21,7 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
+ `dupla.py estado --agente <eu> --item <nome> --estado <em_andamento|em_revisao|pronto|bloqueado>` mantém o quadro (`quadro`). Dois itens ativos por agente.
+ 
+ ## 2. Esperar sem gastar: vigia sem timer
++- **Permanente (decisão do Humano, 16/10/2026):** a vigia roda sempre para todos os modelos, como unit `agata-vigia@<agente>` (`config/systemd/agata-vigia@.service`); eventos em `~/.cache/agata/sincronia/vigia-<agente>.log`. Quem tem Monitor só acompanha: `tail -n0 -F` nesse arquivo. Não precisa rearmar nem rodar `vigia.sh` à mão.
+ - Segundo plano (Claude, com Monitor): `bash scripts/dupla/vigia.sh <eu> 20`. Avisa mensagem do outro, `APROVADO-` novo, `main` andou e pedido parado ("DEVO RESPOSTA" ≥ 8 min; "PAR SEM RESPOSTA" ≥ 15 min).
+ - Bloqueante (Codex, e quem não acorda por stdout): `bash scripts/dupla/vigia.sh <eu> 20 --uma 600` — sai no primeiro evento ou imprime "SEM EVENTO em 600s". Chame de novo sem texto. Sem timer de 2 min.
+ - Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `dupla.py ler --agente <eu>` (mostra só o novo).
+diff --git a/config/systemd/agata-vigia@.service b/config/systemd/agata-vigia@.service
+new file mode 100644
+index 0000000..b37d786
+--- /dev/null
++++ b/config/systemd/agata-vigia@.service
+@@ -0,0 +1,20 @@
++[Unit]
++Description=Ágata — vigia permanente da dupla (%i), sem modelo
++# Decisão do Humano, 16/10/2026: a vigia é permanente para todos os modelos confederados (achados AC-26).
++# Instância por agente: agata-vigia@claude, agata-vigia@codex. Só shell: não gasta cota de modelo.
++# Os eventos vão para ~/.cache/agata/sincronia/vigia-%i.log; quem tem Monitor usa:  tail -n0 -F ~/.cache/agata/sincronia/vigia-%i.log
++# Parar de vez: systemctl --user disable --now agata-vigia@%i
++
++[Service]
++Type=simple
++WorkingDirectory=%h/agata
++Environment=DUPLA_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
++ExecStart=/bin/bash %h/agata/scripts/dupla/vigia.sh %i 20
++StandardOutput=append:%h/.cache/agata/sincronia/vigia-%i.log
++StandardError=append:%h/.cache/agata/sincronia/vigia-%i.log
++Restart=always
++RestartSec=30
++Nice=19
++
++[Install]
++WantedBy=default.target
