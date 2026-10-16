@@ -51,9 +51,20 @@ declare -F _p8_eh_comportamento >/dev/null || falha "escopo do P-8 nao carregou 
 
 # -- 2. caminhos protegidos que o PR muda ----------------------------------------------------
 git diff --name-only -z --no-renames "$base" "$head" > "$tmp/mudou.z" || exit 2
-: > "$tmp/protegidos.z"; n_prot=0
+# `protegidos.z`: tudo o que e protegido e mudou (entra na comparacao integral). `sem_par.z`: os que, SEM par consumido,
+# seriam barrados -- exclui o arquivo cuja unica mudanca e o bloco ANCORA-SHA que o pre-commit regrava em todo commit
+# (REGRAS, PROJETO, MEMORIAS, PROMPT_CARREGAMENTO); sem esta excecao nenhum PR livre passaria (visto no PR 235).
+: > "$tmp/protegidos.z"; : > "$tmp/sem_par.z"; n_prot=0; n_sem_par=0
 while IFS= read -r -d '' f; do
-  if _p8_eh_comportamento "$f"; then printf '%s\0' "$f" >> "$tmp/protegidos.z"; n_prot=$((n_prot+1)); fi
+  if _p8_eh_comportamento "$f"; then
+    printf '%s\0' "$f" >> "$tmp/protegidos.z"; n_prot=$((n_prot+1))
+    case "$f" in
+      REGRAS.md|PROJETO.md|MEMÓRIAS.md|PROMPT_CARREGAMENTO.md)
+        if python3 -I "$tmp/p8_integral.py" --repo . --base "$base" --actual-tree "$(git rev-parse "$head^{tree}")" \
+             --so-ancora "$f" --ancora-ancestral-de "$head" >/dev/null 2>&1; then continue; fi ;;
+    esac
+    printf '%s\0' "$f" >> "$tmp/sem_par.z"; n_sem_par=$((n_sem_par+1))
+  fi
 done < "$tmp/mudou.z"
 
 # -- 3. pares que o PR consome (presentes em aplicadas/ no head, ausentes la na base) --------
@@ -81,9 +92,9 @@ done < <(git ls-tree -r --name-only -z "$head" -- propostas/aplicadas | LC_ALL=C
 for i in "${ignorados[@]:-}"; do [ -n "$i" ] && echo "AVISO P-8 (PR): par ignorado -- $i"; done
 
 if [ "${#verificados[@]}" -eq 0 ]; then
-  if [ "$n_prot" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou e nenhum par foi consumido"; exit 0; fi
-  echo "FALHA P-8 (PR): $n_prot caminho(s) protegido(s) mudou(aram) sem nenhum par assinado consumido:"
-  tr '\0' '\n' < "$tmp/protegidos.z" | sed 's/^/  - /'
+  if [ "$n_sem_par" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou alem do bloco de ancora e nenhum par foi consumido"; exit 0; fi
+  echo "FALHA P-8 (PR): $n_sem_par caminho(s) protegido(s) mudou(aram) sem nenhum par assinado consumido:"
+  tr '\0' '\n' < "$tmp/sem_par.z" | sed 's/^/  - /'
   exit 1
 fi
 echo "OK P-8 (PR): ${#verificados[@]} par(es) com assinatura valida pela raiz da base: ${verificados[*]}"

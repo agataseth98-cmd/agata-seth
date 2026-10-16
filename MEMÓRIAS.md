@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2
-  Escrito em: 16/10/2026 13:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 01d0f3f7e914f59b011834db272c76e47b2b28cf
+  Escrito em: 16/10/2026 13:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc3acd5537bbe157cfa1f4dcd141aa0571ef63f2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/01d0f3f7e914f59b011834db272c76e47b2b28cf/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/01d0f3f7e914f59b011834db272c76e47b2b28cf/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/01d0f3f7e914f59b011834db272c76e47b2b28cf/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/01d0f3f7e914f59b011834db272c76e47b2b28cf/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/01d0f3f7e914f59b011834db272c76e47b2b28cf/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
+
+Ao tornar o `fiscal-p8` checagem obrigatória do `main` (pedido do Humano, 16/10/2026), o PR 235 (só README e SECURITY) falhou: o pre-commit regrava o bloco `ANCORA-SHA` em `REGRAS.md` e `PROJETO.md`, protegidos, e sem par isso contava como mudança protegida. O ensaio anterior não pegou porque rodou com hooks desligados. A exigência do `fiscal-p8` foi removida do `main` até a correção (checagem exigida: só `suite-adversarial`). A correção tolera o arquivo cuja única diferença é o bloco, com a gramática estrita já usada com par (SHA commit e ancestral, slug da base); testes 25 a 29 do fiscal (30/30) e selftest do integral 29/29. Reativar a exigência só depois de observar o fiscal aprovar um PR livre real.
+
+Modelo: Claude Sonnet 5.5 (Claude Code, na Máquina) · vetor: PR 235 e log do `fiscal-p8`, `scripts/testar_p8_verificar_pr.py`, `p8_integral.py --selftest` · Autorização: Humano — assinatura de `fiscal-ancora-20261016` e ordem de automatizar o fluxo, 16/10/2026.
+
 (728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
 
 O Humano autorizou preparação conjunta até 13h e assinatura única; à sessão do Claude Code disse, em 16/10/2026: "assinatura única, pode continuar, estou saindo." (fala conferida nessa sessão; a frase equivalente dirigida ao Codex foi relatada por ele e não foi conferida pelo Claude). Aplicação continua condicionada ao par P-8 assinado pelo Humano; nenhum modelo executa aprovar.sh. Registro dentro do diff é adaptação explícita do fluxo(692), cujo padrão publica diff+registro.

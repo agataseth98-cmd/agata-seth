@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
 (728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
 (727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
 (726) EXECUÇÃO — 15/10/2026 · **Aplicada `navegador-fila-2026-10-15` (assinada pelo Humano), em worktree. E a resposta do Humano à pergunta de (725): a aprovação do `preencher`/`clicar` das 13:19 apareceu para ele ("apareceu sim") — o portão de escrita da LibreChat funcionou.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
 (701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
-(699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
+(699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth …
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-1 …
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `too …
 (696) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-verdade-2026-10-14` (assinada pel …

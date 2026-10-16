@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
+  palavras-chave: correção, fiscal, aplicada, barrava, comum, corrigido, proposta, assinada, ancora
 (728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
   palavras-chave: pacote, inicial, integridade, governança, preparado, claude, code, codex, assinatura, humana, aplicado
 (727) CONSELHO — 15/10/2026 · **O Humano deu ao Codex (app, GPT-6, designação de trabalho) as mesmas permissões do Claude Code no `~/agata`, depois do portão das três perguntas. Os dois modelos se sincronizam por `~/.cache/agata/sincronia/`. Regras de convivência abaixo; uma `lacuna` declarada: o `post-commit` com dois commits simultâneos.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, zerar, assinada, humano, primeira, worktree, agata, recebe, pull, merge, gateway, reiniciado, então, reteste, vai, entrada, seguinte
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano ("vamos zerar isso ai, deixe tudo perfeito"): fecha o que a auditoria da resposta das 15:54 achou — falso "perdeu história", sermão sobre o cumprimento do Humano, resposta duplicada, `sync:` na linha de turno e um falso positivo da própria auditoria. Aguardando assinatura.**
   palavras-chave: proposta, seth, zerar, pedido, humano, vamos, deixe, tudo, perfeito, fecha, auditoria, resposta, achou, falso, perdeu, história, sermão, cumprimento, duplicada, sync, linha, turno, positivo, própria, aguardando, assinatura
-(699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth" aparece na área de trabalho ("aparece o aviso"). Fecha a pendência de (696).**
-  palavras-chave: confirmado, humano, aviso, auditoria, seth, aparece, área, trabalho, fecha, pendência
+(699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth …
+  palavras-chave: confirmado, humano, aviso, auditoria, seth
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-1 …
   palavras-chave: execução, aplicada, seth, ferramenta, obrigatoria
 (697) CORREÇÃO — 14/10/2026 · **"Quebrou de vez a Seth" (Humano, ~15:28): o `too …

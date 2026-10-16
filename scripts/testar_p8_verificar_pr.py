@@ -296,6 +296,25 @@ def main():
         h24 = commit(r, "diff executável")
         rc, out = fiscal(r, base3, h24)
         res["24 par com o .diff em modo 100755 -> FALHA"] = rc == 1
+        # ---- PR livre cujo pre-commit só regravou o bloco de âncora em arquivo protegido (achado no PR 235) ----
+        def sem_par(nome, esperado, mudancas):
+            sh(r, "git", "reset", "-q", "--hard", base)
+            sh(r, "git", "clean", "-qfd")
+            for k, v in mudancas.items():
+                escrever(r, k, v)
+            h = commit(r, nome)
+            rc2, out2 = fiscal(r, base, h)
+            res[nome] = rc2 == esperado
+            if rc2 != esperado:
+                print(f"--- {nome}: exit {rc2}, esperado {esperado}\n{out2}")
+        sem_par("25 sem par: só o bloco de âncora de REGRAS.md muda (hook) -> OK", 0,
+                {"REGRAS.md": bloco(base) + "regras\n", "MEMÓRIAS.md": "entradas\nnova\n"})
+        sem_par("26 sem par: bloco de âncora + outro protegido -> FALHA", 1,
+                {"REGRAS.md": bloco(base) + "regras\n", "scripts/a.sh": "echo a1\n"})
+        sem_par("27 sem par: bloco de âncora com SHA que não é commit -> FALHA", 1, {"REGRAS.md": bloco("f" * 40) + "regras\n"})
+        sem_par("28 sem par: política injetada dentro do bloco de âncora -> FALHA", 1,
+                {"REGRAS.md": bloco(base).replace("  Escrito em", "  POLITICA NAO ASSINADA\n  Escrito em") + "regras\n"})
+        sem_par("29 sem par: texto novo fora do bloco de âncora em REGRAS.md -> FALHA", 1, {"REGRAS.md": bloco(base) + "regras\nNOVA REGRA\n"})
     finally:
         shutil.rmtree(td, ignore_errors=True)
     for k, v in res.items():
