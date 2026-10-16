@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(736) DIÁRIO — 16/10/2026 · **Vigia permanente aplicada (`vigia-permanente-20261016`).** Decisão do Humano, 20h36: a vigia fica permanente para todos os modelos confederados. Claude Code (Sonnet 5.5) aplicou vigia-permanente-20261016 (assinada): unit de usuário agata-vigia@.service (uma instância por agente, só shell, eventos em ~/.cache/agata/sincronia/vigia-<agente>.log) e linha na Skill agata-fluxo-dupla. Instalar e ligar as units é decisão do Humano. Fonte: propostas/aplicadas/vigia-permanente-20261016.diff.
+  palavras-chave: vigia, permanente, aplicada, decisão, humano, fica, modelos, confederados, claude, code, sonnet, aplicou, assinada, unit, usuário, agata, service, instância, agente, shell, eventos, cache, sincronia, log, linha, skill, fluxo, dupla, instalar, ligar, units, fonte, propostas, aplicadas, diff
 (735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
   palavras-chave: primeira, skill, sistema, agata, aplicada, fluxo, dupla, ferramentas, agora, vivem, repositório
 (734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado (`janela-manutencao-20261016`): avaliação do decisor, consolidação e treino do Laya DIÁRIO entre 12h15 e 13h15; nada foi ativado ainda.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, laya, roteador, assinada, humano, explicação, caminho, quente, worktree, passa, escolher, fila, seth, entrar, serviços, subirem
 (720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
   palavras-chave: corrige, proposta, laya, sombra, estava, assinada, humano, superada, aplicar, roteador, aprovado, propostas, rejeitadas, junto, diff
-(719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Jev em sombra, juiz automático nas divergências e treino contínuo com troca aprovada pelo Humano. Decisões do Humano nesta sessão: "prefiro já agora o Laya, ele pode permanecer em treinamento continuo?"; dados = "Vamos fazer o 1 mas a parte do --rotular tem que ser automática"; troca = "Você aprova cada troca". Proposta `laya-roteador-2026-10-15`, que substitui `laya-sombra-2026-10-15` (não assinada, em `propostas/rejeitadas/`). Aguardando assinatura.**
-  palavras-chave: laya, passa, escolher, fila, seth, jev, sombra, juiz, automático, divergências, treino, contínuo, troca, aprovada, humano, decisões, sessão, prefiro, agora, ele, pode, permanecer, treinamento, continuo, dados, vamos, fazer, parte, rotular, tem, automática, você, aprova, proposta, roteador, substitui, assinada, propostas, rejeitadas, aguardando, assinatura
+(719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Je …
+  palavras-chave: laya, passa, escolher, fila, seth
 (718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o P …
   palavras-chave: experimento, pedido, humano, pode, juntar
 (717) EXECUÇÃO — 15/10/2026 · **Aplicada `pesquisa-livre-2026-10-15` (assinada p …

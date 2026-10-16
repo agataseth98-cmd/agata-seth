@@ -1,0 +1,20 @@
+[Unit]
+Description=Ágata — vigia permanente da dupla (%i), sem modelo
+# Decisão do Humano, 16/10/2026: a vigia é permanente para todos os modelos confederados (achados AC-26).
+# Instância por agente: agata-vigia@claude, agata-vigia@codex. Só shell: não gasta cota de modelo.
+# Os eventos vão para ~/.cache/agata/sincronia/vigia-%i.log; quem tem Monitor usa:  tail -n0 -F ~/.cache/agata/sincronia/vigia-%i.log
+# Parar de vez: systemctl --user disable --now agata-vigia@%i
+
+[Service]
+Type=simple
+WorkingDirectory=%h/agata
+Environment=DUPLA_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
+ExecStart=/bin/bash %h/agata/scripts/dupla/vigia.sh %i 20
+StandardOutput=append:%h/.cache/agata/sincronia/vigia-%i.log
+StandardError=append:%h/.cache/agata/sincronia/vigia-%i.log
+Restart=always
+RestartSec=30
+Nice=19
+
+[Install]
+WantedBy=default.target

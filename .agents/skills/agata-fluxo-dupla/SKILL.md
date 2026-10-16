@@ -21,6 +21,7 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
 `dupla.py estado --agente <eu> --item <nome> --estado <em_andamento|em_revisao|pronto|bloqueado>` mantém o quadro (`quadro`). Dois itens ativos por agente.
 
 ## 2. Esperar sem gastar: vigia sem timer
+- **Permanente (decisão do Humano, 16/10/2026):** a vigia roda sempre para todos os modelos, como unit `agata-vigia@<agente>` (`config/systemd/agata-vigia@.service`); eventos em `~/.cache/agata/sincronia/vigia-<agente>.log`. Quem tem Monitor só acompanha: `tail -n0 -F` nesse arquivo. Não precisa rearmar nem rodar `vigia.sh` à mão.
 - Segundo plano (Claude, com Monitor): `bash scripts/dupla/vigia.sh <eu> 20`. Avisa mensagem do outro, `APROVADO-` novo, `main` andou e pedido parado ("DEVO RESPOSTA" ≥ 8 min; "PAR SEM RESPOSTA" ≥ 15 min).
 - Bloqueante (Codex, e quem não acorda por stdout): `bash scripts/dupla/vigia.sh <eu> 20 --uma 600` — sai no primeiro evento ou imprime "SEM EVENTO em 600s". Chame de novo sem texto. Sem timer de 2 min.
 - Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `dupla.py ler --agente <eu>` (mostra só o novo).
