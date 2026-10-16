@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Inventário de componentes externos gravado (`inventario-gerado-20261016`, Fase I, I1): `models/manifest.json` ganha a chave `componentes_externos`.**
+  palavras-chave: inventário, componentes, externos, gravado, inventario, gerado, fase, models, manifest, json, ganha, chave
 (729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
   palavras-chave: remoção, emoji, prosa, seth, aplicada, remover, gateway, passa, tirar, entregar, resposta, cliente
 (729) DIÁRIO — 16/10/2026 · **Teste por mutações do fiscal de PR aplicado (`fiscal-mutacao-20261016`): a suíte do `fiscal-p8` passou de 5 para 12 mutantes mortos em 15.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reparos, pedidos, humano, pode, fazer, esses, gemini, flash, sai, lugar, filas, seth, livre, vivo, testes, conexão, eram, defeito, universal, handoff, omniroute, tem, saída, decide, proposta, fila, ministral, alinha, config, viva, aguardando, assinatura
 (711) DIÁRIO — 15/10/2026 · **Reteste de (710) com uso real da noite de 14/10: o Gemini sem cota pendurou a `seth-livre` 7 vezes e nas 7 o gateway desistiu em 42 s e a `seth-rapido` (Ministral) respondeu. Resposta em 43–56 s, contra os 310 s de (709). A origem continua: o Gemini segue 1º da fila e sem cota — descer ele na fila segue decisão do Humano.**
   palavras-chave: reteste, uso, real, noite, gemini, cota, pendurou, seth, livre, gateway, desistiu, rapido, ministral, respondeu, resposta, contra, origem, continua, segue, fila, descer, ele, decisão, humano
-(710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-14` (assinada pelo Humano), em worktree. Reteste na entrada seguinte.**
-  palavras-chave: execução, aplicada, seth, prazo, primeiro, conteudo, assinada, humano, worktree, reteste, entrada, seguinte
+(710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-1 …
+  palavras-chave: execução, aplicada, seth, prazo, primeiro, conteudo
 (709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) …
   palavras-chave: auditoria, seth, navegador, pedido, humano
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (as …
