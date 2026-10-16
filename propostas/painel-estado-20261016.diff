@@ -1,0 +1,183 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index d6a749c..0a97c40 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -58,6 +58,7 @@ jobs:
+         run: |
+           python3 -I scripts/p8_integral.py --selftest
+           python3 -I scripts/testar_p8_verificar_pr.py
++          python3 -I scripts/painel_estado.py --selftest
+ 
+       - name: Contratos de memória e escriba (offline, stdlib)
+         run: |
+diff --git a/scripts/painel_estado.py b/scripts/painel_estado.py
+new file mode 100755
+index 0000000..0ed66c6
+--- /dev/null
++++ b/scripts/painel_estado.py
+@@ -0,0 +1,165 @@
++#!/usr/bin/env python3
++"""painel_estado.py -- painel de estado SÓ DE LEITURA (F2 do plano). Uma tela: o que está no ar, o que espera o Humano.
++
++Não escreve em arquivo do repositório, não assina, não aplica, não chama `aprovar.sh`. A única saída "acionável" é o
++COMANDO FISH que o Humano pode copiar para assinar as propostas pendentes: ele traz o hash de cada `.diff` lido AGORA e
++confere o hash de novo antes de assinar (se o arquivo mudar entre o painel e o comando, para sem assinar). Quem assina é
++sempre o Humano, no terminal dele.
++
++Cada bloco falha sozinho (`indisponível: <motivo>`): um serviço fora do ar nunca derruba o painel. `gh` (rede) é opcional.
++
++Uso: python3 scripts/painel_estado.py [--repo DIR] [--sem-rede] [--selftest]
++"""
++import argparse
++import hashlib
++import os
++import re
++import subprocess
++import sys
++import tempfile
++
++RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++
++
++def _run(args, cwd=None, timeout=15):
++    try:
++        p = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=timeout)
++        return p.returncode, p.stdout.strip()
++    except (OSError, subprocess.SubprocessError) as e:
++        return 127, str(e)
++
++
++def pendentes(repo):
++    """[(nome, sha256)] das propostas em propostas/*.diff sem propostas/APROVADO-<nome> (lidas do disco)."""
++    pasta = os.path.join(repo, "propostas")
++    out = []
++    try:
++        nomes = sorted(f[:-5] for f in os.listdir(pasta) if f.endswith(".diff"))
++    except OSError:
++        return out
++    for n in nomes:
++        if os.path.exists(os.path.join(pasta, f"APROVADO-{n}")):
++            continue
++        with open(os.path.join(pasta, n + ".diff"), "rb") as f:
++            out.append((n, hashlib.sha256(f.read()).hexdigest()))
++    return out
++
++
++def comando_fish(pend, repo="/home/orusoua/agata"):
++    """Um comando Fish: pull, confere o hash de cada proposta e só então assina todas. Vazio se não há pendentes."""
++    if not pend:
++        return ""
++    pares = " ".join(f"{n}:{h}" for n, h in pend)
++    nomes = " ".join(n for n, _ in pend)
++    return (f"cd {repo}; and git pull --ff-only; and for p in {pares}; set n (string split : $p)[1]; set h (string split : $p)[2]; "
++            f"test (sha256sum propostas/$n.diff | string split ' ')[1] = $h; or begin; echo \"HASH DIVERGE: $n\"; false; end; end; "
++            f"and for n in {nomes}; bash scripts/aprovar.sh $n; end")
++
++
++def bloco_git(repo):
++    rc, head = _run(["git", "log", "-1", "--format=%h %s"], cwd=repo)
++    rc2, ahead = _run(["git", "rev-list", "--left-right", "--count", "HEAD...origin/main"], cwd=repo)
++    if rc or rc2:
++        return ["git: indisponível"]
++    a, b = (ahead.split() + ["?", "?"])[:2]
++    return [f"main local: {head[:90]}", f"à frente de origin/main: {a} · atrás: {b} (conferido contra o último fetch)"]
++
++
++def bloco_servicos(repo):
++    f = os.path.join(repo, "config", "portas-agata.txt")
++    try:
++        linhas = [l for l in open(f, encoding="utf-8") if l.strip() and not l.startswith("#")]
++    except OSError:
++        return ["serviços: manifesto de portas indisponível"]
++    nomes = sorted({l.split("|")[1].strip() for l in linhas if l.count("|") >= 2})
++    ruins = []
++    for n in nomes:
++        ativo = False
++        for escopo in (["--user"], []):  # unidade de usuário, depois de sistema (ex.: ollama.service)
++            rc, out = _run(["systemctl", *escopo, "is-active", n + ".service"], timeout=5)
++            if out in ("active", "activating"):
++                ativo = True
++                break
++        if not ativo:
++            rc2, out2 = _run(["docker", "ps", "--filter", f"name=^{n}$", "--format", "{{.Names}}"], timeout=5)
++            ativo = rc2 == 0 and bool(out2)
++        if not ativo:
++            ruins.append(n)
++    return [f"serviços do manifesto de portas: {len(nomes)} · inativos agora: {len(ruins)} (alguns sobem sob demanda; a lista de alerta é a do P-9)"] + \
++           ([("  " + ", ".join(ruins))[:150]] if ruins else [])
++
++
++def bloco_derivados():
++    d = os.path.expanduser("~/.cache/agata")
++    try:
++        ms = [f for f in os.listdir(d) if f.startswith("derivados-possivelmente-misturados")]
++    except OSError:
++        ms = []
++    return ["derivados (vault/índice): " + ("POSSIVELMENTE MISTURADOS em " + ", ".join(ms) if ms else "sem marcador de mistura")]
++
++
++def bloco_github(repo):
++    rc, prs = _run(["gh", "pr", "list", "--state", "open", "--json", "number,title", "--jq", ".[]|\"#\\(.number) \\(.title)\""], cwd=repo, timeout=20)
++    rc2, chk = _run(["gh", "api", "repos/{owner}/{repo}/branches/main/protection/required_status_checks", "--jq", ".contexts|join(\", \")"], cwd=repo, timeout=20)
++    out = [f"checagens exigidas no main: {chk if rc2 == 0 else 'indisponível'}"]
++    out.append("PRs abertos: " + (("\n  " + "\n  ".join(prs.splitlines()[:6])) if rc == 0 and prs else ("nenhum" if rc == 0 else "indisponível")))
++    return out
++
++
++def painel(repo, rede=True):
++    L = ["== Agata · painel de estado (só leitura) =="]
++    L += bloco_git(repo) + bloco_servicos(repo) + bloco_derivados()
++    p = pendentes(repo)
++    L.append(f"propostas esperando a SUA assinatura: {len(p)}" + ("".join(f"\n  - {n} ({h[:12]}…)" for n, h in p)))
++    if rede:
++        L += bloco_github(repo)
++    cmd = comando_fish(p, repo)
++    if cmd:
++        L += ["", "Para assinar tudo que está acima (confere o hash antes):", cmd]
++    return "\n".join(L)
++
++
++def _selftest():
++    casos = []
++    td = tempfile.mkdtemp(prefix="painel-")
++    try:
++        os.makedirs(os.path.join(td, "propostas"))
++        for n, c in (("a", b"A\n"), ("b", b"B\n"), ("c", b"C\n")):
++            open(os.path.join(td, "propostas", n + ".diff"), "wb").write(c)
++        open(os.path.join(td, "propostas", "APROVADO-b"), "w").write("x")
++        p = pendentes(td)
++        casos.append(("lista só as sem APROVADO-", [n for n, _ in p] == ["a", "c"]))
++        casos.append(("hash é o sha256 do arquivo", p[0][1] == hashlib.sha256(b"A\n").hexdigest()))
++        cmd = comando_fish(p, "/x")
++        casos.append(("comando traz nome:hash de cada pendente", f"a:{p[0][1]}" in cmd and f"c:{p[1][1]}" in cmd))
++        casos.append(("comando confere hash antes de assinar", cmd.index("HASH DIVERGE") < cmd.index("aprovar.sh")))
++        casos.append(("não inclui a já assinada", " b:" not in cmd and "for n in a c;" in cmd))
++        casos.append(("sem pendentes: sem comando", comando_fish([], "/x") == ""))
++        casos.append(("só lê: nada criado/alterado",
++                      sorted(os.listdir(os.path.join(td, "propostas"))) == ["APROVADO-b", "a.diff", "b.diff", "c.diff"]))
++        txt = painel(td, rede=False)
++        casos.append(("painel sem rede roda e mostra a contagem", "esperando a SUA assinatura: 2" in txt))
++    finally:
++        import shutil
++        shutil.rmtree(td, ignore_errors=True)
++    for n, ok in casos:
++        print(("PASS  " if ok else "FALHA ") + n)
++    bad = [n for n, ok in casos if not ok]
++    print(f"painel_estado selftest: {len(casos) - len(bad)}/{len(casos)}")
++    return 1 if bad else 0
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--repo", default=RAIZ)
++    ap.add_argument("--sem-rede", action="store_true")
++    ap.add_argument("--selftest", action="store_true")
++    a = ap.parse_args(argv)
++    if a.selftest:
++        return _selftest()
++    print(painel(a.repo, rede=not a.sem_rede))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
