@@ -296,6 +296,63 @@ def main():
         h24 = commit(r, "diff executável")
         rc, out = fiscal(r, base3, h24)
         res["24 par com o .diff em modo 100755 -> FALHA"] = rc == 1
+        # ---- casos de MUTAÇÃO (K1, 16/10/2026): cada um mata um mutante que a suíte antiga deixava sobreviver ----
+        def com_par(nome, esperado, mudancas, antes=None, preparar=None):
+            sh(r, "git", "reset", "-q", "--hard", base)
+            sh(r, "git", "clean", "-qfd")
+            if preparar:
+                mudancas = dict(mudancas, **preparar())
+            for k, v in MUD.items():
+                escrever(r, k, v)
+            aprovar(r, chave, "pacote", d)
+            for k, v in mudancas.items():
+                escrever(r, k, v)
+            if antes:
+                antes()
+            h = commit(r, nome)
+            rc3, out3 = fiscal(r, base, h)
+            res[nome] = rc3 == esperado
+            if rc3 != esperado:
+                print(f"--- {nome}: exit {rc3}, esperado {esperado}\n{out3}")
+        # M09: par consumido + REGRAS alterada FORA do bloco de âncora (bloco válido)
+        com_par("30 par consumido + REGRAS muda fora do bloco de ancora -> FALHA", 1, {"REGRAS.md": bloco(base) + "regras\nTEXTO NAO ASSINADO\n"})
+        # M10: par consumido + bloco com slug diferente do da base
+        com_par("31 par consumido + bloco de ancora com slug diferente -> FALHA", 1,
+                {"REGRAS.md": _p8i.montar_bloco(base, "16/10/2026 10:00 -03", "outro/repo") + "\nregras\n"})
+        # M04/M12: SHA do bloco é um commit REAL do repositório, mas fora da história do head
+        def commit_lateral():
+            """Cria um commit REAL fora da história do head (ramo lateral a partir da base) ANTES de escrever o pacote."""
+            sh(r, "git", "checkout", "-q", "-b", "lado", base)
+            escrever(r, "lado.txt", "x")
+            sha_lado = commit(r, "lado")
+            sh(r, "git", "checkout", "-q", "--detach", base)
+            sh(r, "git", "branch", "-q", "-D", "lado")  # o objeto continua no repositório
+            return {"REGRAS.md": bloco(sha_lado) + "regras\n"}
+        com_par("32 par consumido + SHA da ancora e commit real fora da historia do head -> FALHA", 1, {}, preparar=commit_lateral)
+        # M13: par consumido + REGRAS.md vira executável (100755) com o resto igual
+        def tornar_exec():
+            escrever(r, "REGRAS.md", bloco(base) + "regras\n")
+            os.chmod(os.path.join(r, "REGRAS.md"), 0o755)
+        com_par("33 par consumido + REGRAS.md muda de modo (100755) -> FALHA", 1, {}, antes=tornar_exec)
+        # M14: sem par, só bloco de âncora, mas com modo alterado
+        sh(r, "git", "reset", "-q", "--hard", base)
+        escrever(r, "REGRAS.md", bloco(base) + "regras\n")
+        os.chmod(os.path.join(r, "REGRAS.md"), 0o755)
+        h34 = commit(r, "ancora + modo")
+        rc4, out4 = fiscal(r, base, h34)
+        res["34 sem par: bloco de ancora + mudanca de modo -> FALHA"] = rc4 == 1
+        # M01: a base JÁ tem um par aplicado; um PR livre não pode ser tratado como se o consumisse
+        sh(r, "git", "reset", "-q", "--hard", base)
+        for k, v in MUD.items():
+            escrever(r, k, v)
+        aprovar(r, chave, "velho", d)
+        base_com_par = commit(r, "base com par ja aplicado")
+        escrever(r, "MEMÓRIAS.md", "entradas\numa linha livre\n")
+        h35 = commit(r, "pr livre sobre base com par aplicado")
+        rc5, out5 = fiscal(r, base_com_par, h35)
+        res["35 base com par ja aplicado + PR livre -> OK (nao reconsome o par velho)"] = rc5 == 0
+        if rc5 != 0:
+            print(out5)
         # ---- PR livre cujo pre-commit só regravou o bloco de âncora em arquivo protegido (achado no PR 235) ----
         def sem_par(nome, esperado, mudancas):
             sh(r, "git", "reset", "-q", "--hard", base)
