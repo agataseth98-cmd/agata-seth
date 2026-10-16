@@ -144,6 +144,31 @@ def _blob(repo, oid):
     return _git(repo, "cat-file", "blob", oid).stdout
 
 
+def so_ancora(repo, base, head_tree, caminho, ancestral_de=None):
+    """True se `caminho` difere entre base e head SOMENTE no bloco de âncora gerado pelo pre-commit: mesmo modo,
+    tipo blob, bytes iguais fora do bloco, bloco do head na gramática do gerador, SHA que é commit do repositório,
+    slug igual ao da base e (se pedido) ancestral. Usado pelo fiscal de PR para não barrar o PR livre cujo hook
+    só regravou o bloco em arquivo protegido."""
+    def entrada(tree):
+        r = _git(repo, "ls-tree", "-z", tree, "--", caminho, check=False).stdout
+        if not r:
+            return None
+        meta, _ = r.rstrip(b"\0").split(b"\t", 1)
+        modo, tipo, oid = meta.decode().split()
+        return modo, tipo, oid
+    a, b = entrada(base + "^{tree}"), entrada(head_tree)
+    if a is None or b is None or a[:2] != b[:2] or a[1] != "blob":
+        return False
+    ia, ib = _info_ancora(_blob(repo, a[2])), _info_ancora(_blob(repo, b[2]))
+    if ia is None or ib is None or ia[0] != ib[0] or ia[1]["slug"] != ib[1]["slug"]:
+        return False
+    if _git(repo, "cat-file", "-e", ib[1]["sha"] + "^{commit}", check=False).returncode:
+        return False
+    if ancestral_de and _git(repo, "merge-base", "--is-ancestor", ib[1]["sha"], ancestral_de, check=False).returncode:
+        return False
+    return True
+
+
 def comparar(repo, base, diffs, actual_tree=None, transport=None, restrict=None, ancoras=(), incluir_tocados=False,
              ancestral_de=None):
     if isinstance(diffs, (str, bytes, os.PathLike)):
@@ -469,11 +494,21 @@ def main(argv=None):
     ap.add_argument("--incluir-tocados", action="store_true")
     ap.add_argument("--ancora-ancestral-de", help="rev: o SHA do bloco de âncora do head tem de ser ancestral dele")
     ap.add_argument("--transport")
+    ap.add_argument("--so-ancora", help="caminho: exit 0 se base e --actual-tree diferem nele só no bloco de âncora")
     ap.add_argument("--repo", default=".")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
     if a.selftest:
         return _selftest()
+    if a.so_ancora:
+        if not (a.base and a.actual_tree):
+            ap.print_usage(sys.stderr)
+            return 2
+        try:
+            return 0 if so_ancora(a.repo, a.base, a.actual_tree, a.so_ancora, a.ancora_ancestral_de) else 1
+        except (RuntimeError, OSError, ValueError) as e:
+            print(json.dumps({"erro": str(e)}, ensure_ascii=False))
+            return 2
     if not (a.base and a.diff):
         ap.print_usage(sys.stderr)
         return 2
