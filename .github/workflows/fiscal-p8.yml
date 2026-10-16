@@ -1,0 +1,46 @@
+# Fiscal do P-8 para PR (candidato, 16/10/2026; MEMÓRIAS (a numerar), proposta única de governo).
+#
+# Por que `pull_request_target`: esse evento executa a versão do workflow que está no `main`, e não
+# a da branch do PR. Assim um PR não consegue alterar a própria fiscalização. A contrapartida é que
+# este job NUNCA faz checkout do head nem executa nada que venha dele: o head entra só como objetos
+# do git, lidos por plumbing em scripts/p8_verificar_pr.sh. Os testes que exercitam o código do PR
+# ficam em outro workflow (perimetro.yml, evento `pull_request`, sem privilégio algum).
+#
+# Ordem de ativação (REGRAS: a prova de bloqueio vem depois de tornar obrigatório):
+#   1. publicar este arquivo no main; 2. observar a execução em PRs reais; 3. o Humano marca o check
+#   `fiscal-p8` como obrigatório no main; 4. demonstrar que um PR sem par assinado fica bloqueado e
+#   que um commit novo no PR dispara a revalidação.
+name: Fiscal P-8 (PR, raiz de confiança anterior)
+
+on:
+  pull_request_target:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fiscal-p8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout da BASE (única fonte de código confiável)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA em 16/10/2026
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Traz o head só como objetos do git (nunca checkout)
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/${PR}/head:refs/remotes/pr/head"
+          test "$(git rev-parse refs/remotes/pr/head)" = "$HEAD_SHA" \
+            || { echo "o head do PR mudou durante a execução; reexecute"; exit 1; }
+
+      - name: Fiscalizar (par assinado, consumo integral, raiz da base)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash scripts/p8_verificar_pr.sh "$BASE_SHA" "$HEAD_SHA"

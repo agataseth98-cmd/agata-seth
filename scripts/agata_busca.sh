@@ -7,8 +7,10 @@
 #   bash scripts/agata_busca.sh "frase" --abrir 1    # abre o 1º resultado no Obsidian
 #   bash scripts/agata_busca.sh --contexto "tema"    # pacote .md na Área de trabalho, p/ colar noutra IA
 #
-# Só leitura: consulta o índice (que se atualiza sozinho) e, no máximo, abre o
-# Obsidian. O pacote de contexto é recorte -- a fonte da verdade é o canon.
+# Consulta usa o índice disponível sem atualizá-lo; avisa se faltar cobertura.
+# --abrir atua no Obsidian e --contexto grava arquivo: exigem autorização aplicável.
+# Atualização é manutenção via post-commit ou --atualizar na Máquina.
+# O pacote de contexto é recorte -- a fonte da verdade é o canon.
 set -euo pipefail
 raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 bs="$raiz/scripts/busca_semantica.py"

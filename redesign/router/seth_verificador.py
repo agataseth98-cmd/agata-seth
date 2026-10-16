@@ -120,7 +120,7 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         ["python3", "scripts/busca_semantica.py", "-n"], 90,
         "Busca POR SENTIDO em todas as entradas de MEMÓRIAS, nos seus parágrafos e "
         "nos parágrafos dos documentos de extras/ (resultado 'extras/…md ^bK') "
-        "(embedding local na iGPU; índice incremental, se atualiza sozinho). Use o "
+        "(embedding local na iGPU; consulta não atualiza o índice; manutenção no post-commit). Use o "
         "parâmetro `consulta` (frase, até 200 caracteres) e `n` (1 a 20, padrão 8). "
         "Devolve '(N)' e '(N) ^bK' (parágrafo K da entrada N) com a nota; abra com "
         "vault_consultar entradas/0NNN.md e confirme o texto exato com query_canon "

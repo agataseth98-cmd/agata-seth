@@ -1,0 +1,4 @@
+# sha256 do modelo treinado `last` (treino de 15-16/10/2026, escolhido pelo Humano em 16/10/2026).
+# Vem de ~/.local/share/agata-voz/resultado/. Hash de bytes: prova identidade do arquivo, não qualidade.
+a9c38537ca30a8375bf634cde4b56d1a89d7aa12ad103bac4d1666f8e5dcda3c  pt_BR-agata-last.onnx
+682340d1975e954e978c04fea466ab139fe524aab5d2efdc07e17538f8386dc0  pt_BR-agata-last.onnx.json
