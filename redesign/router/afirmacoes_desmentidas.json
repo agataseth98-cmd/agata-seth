@@ -81,6 +81,13 @@
       "sinal": "no chat|na conversa|disse sim|diz sim|sem criptograf|confian[çc]a",
       "correcao": "a aprovação é ASSINATURA SSH do Humano (scripts/aprovar.sh, chave com passphrase; P-8 confere contra propostas/.allowed_signers do HEAD) -- não um 'sim' no chat",
       "origem": "(366)/(678)"
+    },
+    {
+      "id": "qwen-tag-oficial",
+      "tema": "\\bqwen3\\.5:9b\\b",
+      "sinal": "principal|recomendad|usar em produ[çc][ãa]o|tag correta",
+      "correcao": "a tag local principal documentada é qwen3.5-9b-64k; a tag oficial qwen3.5:9b reproduz o problema de num_ctx no caminho descrito. Consulte PROJETO, Cérebro, e (121)/(133)-(135); não generalize a qualquer chamada com num_ctx explícito.",
+      "origem": "PROJETO, Cérebro; (121)/(133)-(135)"
     }
   ]
 }

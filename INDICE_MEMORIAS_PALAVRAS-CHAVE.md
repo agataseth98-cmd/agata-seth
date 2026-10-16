@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
+  palavras-chave: aviso, emoji, ampliado, aplicado, auditoria, turno, passa, acusar, símbolos, passavam, silêncio
 (729) DIÁRIO — 16/10/2026 · **Detector de derivados misturados aplicado (`derivados-consistencia-v2-20261016`): o `post-commit` passa a avisar quando o checkout muda enquanto vault e índice são gerados.**
   palavras-chave: detector, derivados, misturados, aplicado, consistencia, post, commit, passa, avisar, checkout, muda, enquanto, vault, índice, gerados
 (729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, opiniao, tecnica, assinada, humano, worktree, reteste, avaliação, entrada, seguinte
 (702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
   palavras-chave: reteste, olá, sai, certo, prontidão, sync, pass, sermão, falso, alarme, sumiu, avaliação, pedida, saiu, recusada, minha, função, inclui, avaliações, subjetivas, proposta, seth, opiniao, tecnica, corrige, aguardando, assinatura
-(701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
-  palavras-chave: execução, aplicada, seth, zerar, assinada, humano, primeira, worktree, agata, recebe, pull, merge, gateway, reiniciado, então, reteste, vai, entrada, seguinte
+(701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo …
+  palavras-chave: execução, aplicada, seth, zerar, assinada
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano …
   palavras-chave: proposta, seth, zerar, pedido, humano
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth …

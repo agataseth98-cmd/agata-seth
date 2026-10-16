@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(729) DIÁRIO — 16/10/2026 · **Aviso de emoji ampliado aplicado (`emoji-e1-20261016`): a auditoria de turno passa a acusar os símbolos que antes passavam em silêncio.**
 (729) DIÁRIO — 16/10/2026 · **Detector de derivados misturados aplicado (`derivados-consistencia-v2-20261016`): o `post-commit` passa a avisar quando o checkout muda enquanto vault e índice são gerados.**
 (729) DIÁRIO — 16/10/2026 · **Correção do fiscal de PR aplicada: o fiscal-p8 barrava todo PR comum e foi corrigido por proposta assinada (`fiscal-ancora-20261016`).**
 (728) CONSELHO — 16/10/2026 · Pacote inicial de integridade e governança preparado por Claude Code e Codex para uma assinatura humana; não aplicado.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assinada pelo Humano), em worktree. Reteste da avaliação na entrada seguinte.**
 (702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, `sync: PASS`, sem sermão; o falso alarme sumiu. Mas a avaliação pedida saiu recusada: "Minha função não inclui avaliações subjetivas". Proposta `seth-opiniao-tecnica-2026-10-14` corrige. Aguardando assinatura.**
-(701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo Humano), pela primeira vez numa worktree: o `~/agata` só recebe o `pull` depois do merge, e o gateway é reiniciado então. O reteste com a Seth vai na entrada seguinte.**
+(701) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-zerar-2026-10-14` (assinada pelo …
 (700) DIÁRIO — 14/10/2026 · **Proposta `seth-zerar-2026-10-14`, pedido do Humano …
 (699) DIÁRIO — 14/10/2026 · **Confirmado pelo Humano: o aviso "Auditoria da Seth …
 (698) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-sem-ferramenta-obrigatoria-2026-1 …
