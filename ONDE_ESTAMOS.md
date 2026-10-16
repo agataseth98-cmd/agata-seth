@@ -7,15 +7,17 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 16/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-16.md` (e até 27/09: `extras/arquivo/onde-estamos-ate-2026-09-27.md`).
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Hoje, 16/10/2026
-**Já está valendo (você assinou, eu apliquei):**
-- O pacote de integridade: o GitHub agora confere, em todo pedido de mudança, se o que muda comportamento tem a sua assinatura (entrada (728)).
-- A correção desse conferente, que barrava até mudança comum (entrada (729)); ele voltou a ser exigido para juntar qualquer mudança.
-- A voz treinada `last`, com o eco, instalada e em uso.
-- O `post-commit` não confunde mais o commit de uma cópia de trabalho com o da principal; a trava do escriba perde menos escritas; a consulta de memória não se atualiza sozinha.
+## Hoje, 16/10/2026 (atualizado às 20h25)
+**Já está valendo (você assinou, eu apliquei, o GitHub conferiu):**
+- O GitHub exige a sua assinatura em toda mudança que altera comportamento. Testei o conferente com 15 quebras de propósito: ele pega 12 (os outros 3 não mudam nada na prática).
+- Avisos de emoji e de fonte, métricas por rota, e a Seth sem emoji na prosa (o gateway foi reiniciado às 20h20).
+- Painel de estado (`python3 scripts/painel_estado.py`), detector de derivados misturados, marcador da consolidação corrigido.
+- Cofre de chaves: lista de segredos, verificador e uma cópia de recuperação cifrada para o seu pendrive.
+- Janela de manutenção diária 12h15 a 13h15, com o treino do Laya todo dia: o timer está ativo, o primeiro ciclo é amanhã.
+- A primeira Skill do sistema (`agata-fluxo-dupla`), licença Apache-2.0 e PROJETO dentro do teto.
 
-**Esperando a sua assinatura:** detector de derivados misturados (`derivados-consistencia-v2-20261016`); aviso de emoji mais completo (PR 240); métricas por rota do decisor (PR 241, em revisão). Publicar não aplica: cada uma só vale depois que você assina.
+**Com você:** nenhuma assinatura pendente. Testar a restauração do cofre com o pendrive (monta só leitura, pede `sudo`); guardar uma segunda cópia da chave; recriar os contêineres do LibreChat para valer as imagens fixadas; desativar os três timers antigos só depois de ver a janela rodar bem.
 
-**Ainda falta:** memória por tema com rastreio, citar fontes sempre (F0), estado do PROJETO mais curto, medir missões completas, cofre de chaves e canais (sua decisão 1). Limites que continuam: a trava do escriba só protege quem passa por ela; as métricas do decisor não provam qualidade da resposta.
+**Com o Codex (sem cota desde 19h38):** pesquisa de modelos gratuitos, KV cache, licenças dos componentes, tags dos selos.
 
-**Como trabalhamos agora:** você só assina; Claude Code e Codex propõem, revisam um ao outro e juntam os pedidos no GitHub, e eu aplico depois da assinatura.
+**Ainda falta:** canais (todos desligados, só os gratuitos), cofre etapa 3, memória por tema, missões M01 a M10. Limites que continuam: a trava do escriba só protege quem passa por ela; as métricas do decisor não medem qualidade da resposta.
