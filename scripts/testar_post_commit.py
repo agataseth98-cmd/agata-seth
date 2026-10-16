@@ -45,6 +45,9 @@ STUB_BUSCA = r'''
 import os
 with open(os.environ["P8_LOG"], "a") as f:
     f.write("busca atualizar\n")
+if os.environ.get("P8_MUTAR"):  # simula pull/edição concorrente durante a geração
+    with open("a.txt", "a") as f:
+        f.write("mudou durante a geracao\n")
 '''
 
 
@@ -98,7 +101,8 @@ def bundle_ok(r, env):
 
 def main():
     antigo = tempfile.NamedTemporaryFile("w", delete=False, suffix=".sh")
-    antigo.write(sh(RAIZ, "git", "show", "HEAD:.githooks/post-commit"))
+    # hook ANTES da correção, fixado no commit 9cc0a6c (o HEAD já tem o hook novo)
+    antigo.write(sh(RAIZ, "git", "show", "9cc0a6c:.githooks/post-commit"))
     antigo.close()
     res = {}
 
@@ -118,6 +122,34 @@ def main():
         b = os.path.join(env["HOME"], ".agata-backup-staging", "agata-canonico.bundle")
         heads = sh(r, "git", "bundle", "list-heads", b, env=env)
         res["B2 worktree: bundle valido e contem o commit da worktree"] = bundle_ok(r, env) and head_wt in heads
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # E checkout que muda durante a geração é detectado; sem mudança, sem aviso
+    td, r, wt, env = montar(NOVO)
+    try:
+        cache = os.path.join(env["HOME"], ".cache", "agata")
+        marcs = lambda: [f for f in (os.listdir(cache) if os.path.isdir(cache) else []) if f.startswith("derivados-possivelmente-misturados")]
+        p0 = commitar(r, env, "e0.txt")
+        res["E1 sem mudança durante a geração: sem marcador"] = not marcs()
+        env2 = dict(env, P8_MUTAR="1")
+        sh(r, "git", "checkout", "-q", "--", "a.txt", env=env)
+        with open(os.path.join(r, "e1.txt"), "w") as f:
+            f.write("e1\n")
+        sh(r, "git", "add", "e1.txt", env=env2)
+        c = subprocess.run(["git", "commit", "-qm", "e1"], cwd=r, env=env2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        res["E2 checkout mudou durante a geração: marcador e AVISO"] = bool(marcs()) and "mudou durante a geração" in c.stderr
+        sh(r, "git", "checkout", "-q", "--", "a.txt", env=env)
+        commitar(r, env, "e2.txt")
+        res["E3 geração seguinte limpa: marcador some"] = not marcs()
+        # E4 arquivo JÁ modificado (dirty->dirty) que muda de conteúdo durante a geração: o status continuaria " M"
+        with open(os.path.join(r, "a.txt"), "a") as f:
+            f.write("sujo antes\n")
+        with open(os.path.join(r, "e4.txt"), "w") as f:
+            f.write("e4\n")
+        sh(r, "git", "add", "e4.txt", env=env2)
+        c4 = subprocess.run(["git", "commit", "-qm", "e4"], cwd=r, env=env2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        res["E4 arquivo já modificado muda de conteúdo durante a geração -> detectado"] = bool(marcs()) and "mudou durante a geração" in c4.stderr
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
