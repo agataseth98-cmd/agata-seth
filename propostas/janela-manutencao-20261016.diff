@@ -1,0 +1,388 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index f7f68a4..d8f971e 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -62,6 +62,7 @@ jobs:
+           python3 -I redesign/router/limpa_emoji.py --selftest
+           python3 -I scripts/verificar_cofre.py --selftest
+           python3 -I scripts/cifrar_recuperacao.py --selftest
++          python3 -I scripts/janela_manutencao.py --selftest
+ 
+       - name: Contratos de memória e escriba (offline, stdlib)
+         run: |
+diff --git a/config/janela-tarefas.txt b/config/janela-tarefas.txt
+new file mode 100644
+index 0000000..1af04c0
+--- /dev/null
++++ b/config/janela-tarefas.txt
+@@ -0,0 +1,7 @@
++# Tarefas da janela de manutenção (12h15-13h15), em ORDEM. Formato:  id | cadencia | orcamento_s | env | precondicao | comando
++# cadencia: daily (1x por data local) ou weekly (7 dias desde o ultimo sucesso). %h = HOME. env = K=V,K2=V2.
++# Soma dos orcamentos <= 3600 s. Comandos copiados das units atuais (agata-avaliacao-decisor, agata-consolidacao, agata-laya-treino).
++# pesquisa-modelos (dom 22h) fica FORA ate o Codex separar descoberta publica de ensaio autorizado.
++avaliar-decisor|daily|300|||/usr/bin/python3 %h/agata/scripts/avaliar_decisor.py
++consolidacao|daily|1200||/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/|%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
++laya-treino|daily|1800|HF_HOME=%h/.local/share/agata-laya/hf,HF_HUB_OFFLINE=1||%h/.local/share/agata-laya/.venv/bin/python %h/agata/scripts/laya_treino.py
+diff --git a/config/systemd/agata-manutencao.service b/config/systemd/agata-manutencao.service
+new file mode 100644
+index 0000000..c334f3a
+--- /dev/null
++++ b/config/systemd/agata-manutencao.service
+@@ -0,0 +1,11 @@
++[Unit]
++Description=Ágata — janela de manutenção diária 12h15-13h15 (avaliação do decisor, consolidação, treino do Laya)
++# Roda scripts/janela_manutencao.py (config/janela-tarefas.txt). Quem decide se está na janela e se a tarefa é devida é o script
++# (hora de Brasília, tentativas por dia, recibos em ~/.cache/agata/janela/); o timer só o chama.
++[Service]
++Type=oneshot
++WorkingDirectory=%h/agata
++# systemd-inhibit: a máquina não dorme no meio da janela (lição de (715): o KDE suspendeu um treino às 00:34).
++ExecStart=/usr/bin/systemd-inhibit --what=sleep:idle --who=agata-manutencao --why="janela de manutenção diária" --mode=block /usr/bin/python3 %h/agata/scripts/janela_manutencao.py
++TimeoutStartSec=65min
++Nice=10
+diff --git a/config/systemd/agata-manutencao.timer b/config/systemd/agata-manutencao.timer
+new file mode 100644
+index 0000000..27c1018
+--- /dev/null
++++ b/config/systemd/agata-manutencao.timer
+@@ -0,0 +1,17 @@
++[Unit]
++Description=Ágata — chama a janela de manutenção (12h15, a cada 15 min até 13h, e 3 min depois de ligar a máquina)
++
++[Timer]
++# O script ignora disparo fora da janela e tarefa já feita no dia; chamar várias vezes só custa um processo curto, sem modelo.
++OnCalendar=*-*-* 12:15:00
++OnCalendar=*-*-* 12:30:00
++OnCalendar=*-*-* 12:45:00
++OnCalendar=*-*-* 13:00:00
++# Máquina ligada às 12h30 (ou acordada do sono): dispara 3 min depois do boot; fora da janela o script não faz nada.
++OnBootSec=3min
++# Sem Persistent: nunca recupera disparo perdido para a tarde.
++Persistent=false
++AccuracySec=1min
++
++[Install]
++WantedBy=timers.target
+diff --git a/scripts/janela_manutencao.py b/scripts/janela_manutencao.py
+new file mode 100644
+index 0000000..906758f
+--- /dev/null
++++ b/scripts/janela_manutencao.py
+@@ -0,0 +1,317 @@
++#!/usr/bin/env python3
++"""janela_manutencao.py -- orquestrador da JANELA DE MANUTENÇÃO diária (12h15-13h15, hora de Brasília).
++
++Decisão do Humano (16/10/2026): unificar os scripts automáticos numa janela de almoço, porque a máquina nem sempre está ligada
++no domingo de madrugada; treino do Laya DIÁRIO nessa janela. Núcleo escrito pelo Codex (janela-nucleo-offline-v1.py) e revisado
++pelo Claude (cinco falhas, corrigidas aqui: tentativas por dia, adiamento visível, state.json corrompido, validação prévia das
++tarefas e recibo final que não pode desfazer o carimbo).
++
++Contrato:
++  * UM lock; tarefas em ORDEM, uma por vez (nunca duas disputando a GPU); nenhuma tarefa nova começa depois de 13h15.
++  * Cadência `daily` (uma vez por data local) ou `weekly` (7 dias desde o último SUCESSO). Só `success` carimba.
++  * No máximo `MAX_TENTATIVAS_DIA` (2) tentativas por tarefa por dia; `skipped` esgota o dia (nada a fazer hoje).
++  * Tarefa cujo orçamento não cabe no tempo restante é ADIADA com recibo (`adiada_sem_tempo`), não descartada em silêncio.
++  * Estourou o orçamento: SIGTERM no grupo de processos, 20 s de graça, depois SIGKILL; recibo `terminada_por_prazo`.
++    (O treino do Laya só treina um CANDIDATO; abortar não troca o modelo; a promoção é do Humano.)
++  * Recibo `started` ANTES de rodar (se não puder gravar, a tarefa não roda); o estado é gravado de forma atômica ANTES do recibo
++    final, e falha do recibo final não desfaz o carimbo.
++  * Não muda configuração do sistema nem liga serviço: roda os comandos do manifesto `config/janela-tarefas.txt`.
++Uso: python3 scripts/janela_manutencao.py [--dir DIR] [--tarefas ARQ] [--dry-run] [--agora ISO] | --selftest
++Ativação (comandos do Humano, depois de assinada a proposta): copiar config/systemd/agata-manutencao.{service,timer} para
++~/.config/systemd/user/, `systemctl --user daemon-reload`, `systemctl --user enable --now agata-manutencao.timer`, e só então
++desativar os timers antigos das tarefas incluídas (agata-avaliacao-decisor, agata-consolidacao, agata-laya-treino)."""
++import argparse
++import datetime as dt
++import fcntl
++import json
++import os
++import shlex
++import signal
++import subprocess
++import sys
++import tempfile
++import uuid
++from pathlib import Path
++from zoneinfo import ZoneInfo
++
++TZ = ZoneInfo("America/Sao_Paulo")
++MAX_TENTATIVAS_DIA = 2
++GRACA_S = 20
++RAIZ = Path(__file__).resolve().parent.parent
++PADRAO_DIR = Path.home() / ".cache" / "agata" / "janela"
++
++
++def janela(agora):
++    local = agora.astimezone(TZ)
++    fim = local.replace(hour=13, minute=15, second=0, microsecond=0)
++    ini = fim.replace(minute=15, hour=12)
++    return ini <= local < fim, fim
++
++
++def ler_tarefas(arquivo):
++    """Linhas `id|cadencia|orcamento_s|env|precondicao|comando`; `%h` = HOME. Valida TUDO antes de devolver."""
++    tarefas, ids = [], set()
++    for n, l in enumerate(Path(arquivo).read_text(encoding="utf-8").splitlines(), 1):
++        l = l.strip()
++        if not l or l.startswith("#"):
++            continue
++        c = [x.strip().replace("%h", str(Path.home())) for x in l.split("|")]
++        if len(c) != 6:
++            raise ValueError(f"linha {n}: esperadas 6 colunas, vieram {len(c)}")
++        tid, cad, orc, env, pre, cmd = c
++        if not tid or tid in ids:
++            raise ValueError(f"linha {n}: id vazio ou repetido")
++        if cad not in ("daily", "weekly"):
++            raise ValueError(f"linha {n}: cadência inválida {cad!r}")
++        if not orc.isdigit() or int(orc) <= 0:
++            raise ValueError(f"linha {n}: orçamento deve ser inteiro positivo")
++        if not cmd:
++            raise ValueError(f"linha {n}: comando vazio")
++        ids.add(tid)
++        tarefas.append({"id": tid, "cadence": cad, "budget_seconds": int(orc),
++                        "env": dict(kv.split("=", 1) for kv in env.split(",") if "=" in kv),
++                        "precond": shlex.split(pre) if pre else [], "cmd": shlex.split(cmd)})
++    if not tarefas:
++        raise ValueError("manifesto sem tarefas")
++    return tarefas
++
++
++def validar(tarefas):
++    for t in tarefas:
++        if t["cadence"] not in ("daily", "weekly") or not isinstance(t["budget_seconds"], int) or t["budget_seconds"] <= 0:
++            raise ValueError(f"tarefa {t.get('id')!r}: cadência ou orçamento inválido")
++
++
++def devida(tarefa, est, agora):
++    ultimo = est.get("last_success")
++    hoje = agora.astimezone(TZ).date().isoformat()
++    if est.get("tries", {}).get(hoje, 0) >= MAX_TENTATIVAS_DIA:
++        return False
++    if not ultimo:
++        return True
++    anterior = dt.datetime.fromisoformat(ultimo)
++    if tarefa["cadence"] == "daily":
++        return anterior.astimezone(TZ).date() < agora.astimezone(TZ).date()
++    return (agora - anterior).total_seconds() >= 7 * 86400
++
++
++def recibo_duravel(caminho, registro):
++    with caminho.open("a", encoding="utf-8") as f:
++        f.write(json.dumps(registro, ensure_ascii=False) + "\n")
++        f.flush()
++        os.fsync(f.fileno())
++
++
++def estado_atomico(caminho, estado):
++    tmp = caminho.with_name(caminho.name + ".tmp-" + uuid.uuid4().hex)
++    with tmp.open("x", encoding="utf-8") as f:
++        json.dump(estado, f)
++        f.flush()
++        os.fsync(f.fileno())
++    os.replace(tmp, caminho)
++    fd = os.open(caminho.parent, os.O_RDONLY | os.O_DIRECTORY)
++    try:
++        os.fsync(fd)
++    finally:
++        os.close(fd)
++
++
++def executar(tarefa, prazo_s):
++    """Roda precondição e comando; devolve (resultado, terminada_por_prazo)."""
++    env = dict(os.environ, **tarefa["env"])
++    if tarefa["precond"]:
++        try:
++            if subprocess.run(tarefa["precond"], env=env, timeout=min(60, prazo_s), capture_output=True).returncode != 0:
++                return "skipped", False
++        except (OSError, subprocess.TimeoutExpired):
++            return "skipped", False
++    try:
++        p = subprocess.Popen(tarefa["cmd"], env=env, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
++    except OSError:
++        return "failed", False
++    try:
++        rc = p.wait(timeout=prazo_s)
++        return ("success" if rc == 0 else "failed"), False
++    except subprocess.TimeoutExpired:
++        for sinal, espera in ((signal.SIGTERM, GRACA_S), (signal.SIGKILL, 5)):
++            try:
++                os.killpg(p.pid, sinal)
++                p.wait(timeout=espera)
++                break
++            except (ProcessLookupError, subprocess.TimeoutExpired):
++                continue
++        return "failed", True
++
++
++def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
++    """Retorna 'locked' | 'outside_window' | 'complete'. Valida todas as tarefas ANTES de qualquer execução."""
++    validar(tarefas)
++    diretorio = Path(diretorio)
++    diretorio.mkdir(parents=True, exist_ok=True)
++    rec = diretorio / "receipts.jsonl"
++    with (diretorio / "lock").open("a") as lock:
++        try:
++            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
++        except BlockingIOError:
++            return "locked"
++        caminho = diretorio / "state.json"
++        try:
++            estado = json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
++            if not isinstance(estado, dict):
++                raise ValueError("estado não é objeto")
++        except (ValueError, OSError):
++            copia = caminho.with_name("state.json.corrompido-" + uuid.uuid4().hex[:8])
++            try:
++                os.replace(caminho, copia)
++            except OSError:
++                pass
++            estado = {}
++            try:
++                recibo(rec, {"task": "-", "phase": "state_corrompido", "at": relogio().isoformat(), "copia": copia.name})
++            except OSError:
++                pass
++        for t in tarefas:
++            agora = relogio()
++            dentro, fim = janela(agora)
++            if not dentro:
++                return "outside_window"
++            est = estado.setdefault(t["id"], {})
++            if not devida(t, est, agora):
++                continue
++            restante = (fim - agora).total_seconds()
++            if restante < t["budget_seconds"]:
++                try:
++                    recibo(rec, {"task": t["id"], "phase": "adiada_sem_tempo", "at": agora.isoformat(), "restante_s": int(restante), "orcamento_s": t["budget_seconds"]})
++                except OSError:
++                    pass
++                continue
++            rid = uuid.uuid4().hex
++            hoje = agora.astimezone(TZ).date().isoformat()
++            recibo(rec, {"run": rid, "task": t["id"], "phase": "started", "at": agora.isoformat()})  # se falhar, a tarefa NÃO roda
++            prazo = min(t["budget_seconds"], restante)
++            try:
++                resultado, por_prazo = runner(t, prazo)
++                if resultado not in ("success", "skipped", "failed"):
++                    raise ValueError("status inválido do runner")
++                erro = None
++            except Exception as e:  # noqa: BLE001 -- só a classe vai ao recibo
++                resultado, por_prazo, erro = "failed", False, type(e).__name__
++            fim_run = relogio()
++            est.setdefault("tries", {})
++            est["tries"][hoje] = MAX_TENTATIVAS_DIA if resultado == "skipped" else est["tries"].get(hoje, 0) + 1
++            if resultado == "success":
++                est["last_success"] = fim_run.isoformat()
++            estado_atomico(caminho, estado)  # estado ANTES do recibo final
++            try:
++                recibo(rec, {"run": rid, "task": t["id"], "phase": "finished", "at": fim_run.isoformat(), "result": resultado,
++                             "terminada_por_prazo": por_prazo, "error_class": erro})
++            except OSError as e:
++                print(f"AVISO: recibo final não gravado ({type(e).__name__}); estado já carimbado", file=sys.stderr)
++        return "complete"
++
++
++def _selftest():
++    import time
++    casos = []
++    T = lambda i, c="daily", b=600: {"id": i, "cadence": c, "budget_seconds": b, "env": {}, "precond": [], "cmd": ["true"]}
++    at = lambda h, m, s=0, d=16: dt.datetime(2026, 10, d, h, m, s, tzinfo=TZ)
++    ok = lambda t, p: ("success", False)
++
++    def go(tasks, runner, quando, d, **kw):
++        chamadas = []
++
++        def r(t, p):
++            chamadas.append(t["id"])
++            return runner(t, p)
++        try:
++            res = ciclo(d, tasks, r, lambda: quando, **kw)
++        except Exception as e:  # noqa: BLE001
++            res = "EXC:" + type(e).__name__
++        return res, chamadas
++
++    def recs(d):
++        p = Path(d) / "receipts.jsonl"
++        return [json.loads(x) for x in p.read_text().splitlines()] if p.exists() else []
++    d = tempfile.mkdtemp()
++    r, c = go([T("a")], ok, at(12, 30), d); casos.append(("boot 12:30 executa e carimba", r == "complete" and c == ["a"]))
++    r, c = go([T("a")], ok, at(12, 40), d); casos.append(("sucesso não repete no dia", c == []))
++    r, c = go([T("a")], ok, at(12, 20, d=17), tempfile.mkdtemp()); casos.append(("outro dia executa", c == ["a"]))
++    d = tempfile.mkdtemp(); n = 0
++    for _ in range(4):
++        n += len(go([T("a")], lambda t, p: ("failed", False), at(12, 20), d)[1])
++    casos.append(("falha: no máximo 2 tentativas por dia", n == MAX_TENTATIVAS_DIA))
++    d = tempfile.mkdtemp(); n = 0
++    for _ in range(4):
++        n += len(go([T("a")], lambda t, p: ("skipped", False), at(12, 20), d)[1])
++    casos.append(("skipped esgota o dia (1 execução)", n == 1))
++    d = tempfile.mkdtemp(); go([T("w", "weekly")], ok, at(12, 20, d=9), d)
++    casos.append(("semanal: 6 dias não, 7 dias sim", not go([T("w", "weekly")], ok, at(12, 20, d=15), d)[1] and bool(go([T("w", "weekly")], ok, at(12, 21, d=16), d)[1])))
++    d = tempfile.mkdtemp(); r, c = go([T("a", b=1800)], ok, at(12, 50), d)
++    casos.append(("orçamento > restante: adiada COM recibo", c == [] and any(x["phase"] == "adiada_sem_tempo" for x in recs(d))))
++    d = tempfile.mkdtemp(); Path(d).mkdir(exist_ok=True); (Path(d) / "state.json").write_text("{quebrado")
++    r, c = go([T("a")], ok, at(12, 20), d)
++    casos.append(("state corrompido: guarda cópia, registra e segue", r == "complete" and c == ["a"] and any(x["phase"] == "state_corrompido" for x in recs(d)) and list(Path(d).glob("state.json.corrompido-*"))))
++    d = tempfile.mkdtemp(); r, c = go([T("a"), T("b", b=0)], ok, at(12, 20), d)
++    casos.append(("orçamento inválido: nada roda", r.startswith("EXC:ValueError") and c == []))
++
++    def falha_final(caminho, reg):
++        if reg["phase"] == "finished":
++            raise OSError("disco cheio")
++        recibo_duravel(caminho, reg)
++    d = tempfile.mkdtemp(); go([T("a")], ok, at(12, 20), d, recibo=falha_final)
++    casos.append(("recibo final falha: estado já carimbado, não repete", not go([T("a")], ok, at(12, 40), d)[1]))
++
++    def falha_inicio(caminho, reg):
++        raise OSError("sem espaço")
++    d = tempfile.mkdtemp(); r, c = go([T("a")], ok, at(12, 20), d, recibo=falha_inicio)
++    casos.append(("recibo 'started' falha: tarefa NÃO roda", c == [] or r.startswith("EXC")))
++    casos.append(("bordas da janela", go([T("a")], ok, at(12, 14, 59), tempfile.mkdtemp())[0] == "outside_window" and go([T("a")], ok, at(13, 15), tempfile.mkdtemp())[0] == "outside_window" and bool(go([T("a", b=1)], ok, at(13, 14, 59), tempfile.mkdtemp())[1])))
++    t0 = time.time(); res = executar({"env": {}, "precond": [], "cmd": ["sleep", "30"]}, 1)
++    casos.append(("executar: prazo estourado termina o processo", res == ("failed", True) and time.time() - t0 < 10))
++    casos.append(("executar: comando ok", executar({"env": {}, "precond": [], "cmd": ["true"]}, 5) == ("success", False)))
++    casos.append(("executar: precondição falha vira skipped", executar({"env": {}, "precond": ["false"], "cmd": ["true"]}, 5) == ("skipped", False)))
++    tf = Path(tempfile.mkdtemp()) / "t.txt"
++    tf.write_text("# c\nx|daily|60||| /bin/true\ny|weekly|90|A=1,B=2|/bin/true|/bin/echo oi\n")
++    ts = ler_tarefas(tf)
++    casos.append(("manifesto lido (env, precond, argv)", len(ts) == 2 and ts[1]["env"] == {"A": "1", "B": "2"} and ts[1]["cmd"] == ["/bin/echo", "oi"]))
++    tf.write_text("x|daily|0|||/bin/true\n")
++    try:
++        ler_tarefas(tf)
++        casos.append(("manifesto com orçamento 0 é rejeitado", False))
++    except ValueError:
++        casos.append(("manifesto com orçamento 0 é rejeitado", True))
++    real = ler_tarefas(RAIZ / "config" / "janela-tarefas.txt") if (RAIZ / "config" / "janela-tarefas.txt").exists() else []
++    casos.append(("manifesto real (config/janela-tarefas.txt) é válido", bool(real) and sum(t["budget_seconds"] for t in real) <= 3600))
++    for n, okk in casos:
++        print(("PASS  " if okk else "FALHA ") + n)
++    ruins = [n for n, okk in casos if not okk]
++    print(f"janela_manutencao selftest: {len(casos) - len(ruins)}/{len(casos)}")
++    return 1 if ruins else 0
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--dir", default=str(PADRAO_DIR))
++    ap.add_argument("--tarefas", default=str(RAIZ / "config" / "janela-tarefas.txt"))
++    ap.add_argument("--dry-run", action="store_true")
++    ap.add_argument("--agora")
++    ap.add_argument("--selftest", action="store_true")
++    a = ap.parse_args(argv)
++    if a.selftest:
++        return _selftest()
++    tarefas = ler_tarefas(a.tarefas)
++    agora = dt.datetime.fromisoformat(a.agora) if a.agora else dt.datetime.now(TZ)
++    if a.dry_run:
++        dentro, fim = janela(agora)
++        est = json.loads((Path(a.dir) / "state.json").read_text()) if (Path(a.dir) / "state.json").exists() else {}
++        print(f"agora {agora.astimezone(TZ):%Y-%m-%d %H:%M %z} · dentro da janela: {dentro} · fim {fim:%H:%M}")
++        for t in tarefas:
++            print(f"  {t['id']}: {'DEVIDA' if devida(t, est.get(t['id'], {}), agora) else 'em dia'} · {t['cadence']} · orçamento {t['budget_seconds']} s")
++        return 0
++    runner = executar
++    print(ciclo(a.dir, tarefas, runner, lambda: dt.datetime.now(TZ)))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
