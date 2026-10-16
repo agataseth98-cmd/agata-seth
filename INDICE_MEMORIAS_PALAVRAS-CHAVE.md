@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **`PROJETO.md` voltou ao teto (`projeto-mapa-v2-20261016`): de 57.618 B para 47.965 B, com o detalhe movido sem alteração para `extras/projeto-detalhe/`.**
+  palavras-chave: projeto, voltou, teto, mapa, detalhe, movido, alteração, extras
 (729) DIÁRIO — 16/10/2026 · **Regra de fontes (F0) aplicada (`fontes-f0-20261016`): todo modelo cita a fonte do que afirma, e a auditoria de turno avisa quando há afirmação de medição sem origem.**
   palavras-chave: regra, fontes, aplicada, modelo, cita, fonte, afirma, auditoria, turno, avisa, afirmação, medição, origem
 (729) DIÁRIO — 16/10/2026 · **Métricas por rota do decisor aplicadas (`metricas-a04-20261016`): o relatório passa a mostrar, por rota ativa registrada, número de decisões, taxa de falha e latências p50 e p95 do decisor.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: execução, aplicada, seth, cabecalho, maquina, assinada, humano, tempos, incidente, meu, tentativa, worktree, levou, main, decisor, resto, entra, agora, causa, achada, suíte, perímetro, rodando, dentro, pre, commit, comita, branch, conserto, proposta, própria
 (705) DIÁRIO — 14/10/2026 · **Proposta `seth-cabecalho-maquina-2026-10-14`: o cabeçalho passa a ser escrito pela Máquina, com o modelo real medido no próprio turno; a rota segue o pedido atual, não o histórico; o Jev vira segunda opinião sob pedido; o P-20 volta a funcionar. Pedidos do Humano: "faça [a Máquina escrever o cabeçalho], dai já aprimore o sistema de reconhecimento do modelo por baixo e facilite o acesso dos modelos aos modelos JEV quando o assunto for opinião", "verifique todas as aplicações dos modelos JEV para não perdermos features … e diminuirmos o consumo de tokens", "já corrija mecanicamente todos os erros encontrados". Aguardando assinatura.**
   palavras-chave: proposta, seth, cabecalho, maquina, cabeçalho, passa, escrito, máquina, modelo, real, medido, próprio, turno, rota, segue, pedido, atual, histórico, jev, vira, segunda, opinião, sob, volta, funcionar, pedidos, humano, faça, escrever, dai, aprimore, sistema, reconhecimento, baixo, facilite, acesso, modelos, assunto, for, verifique, aplicações, perdermos, features, diminuirmos, consumo, tokens, corrija, mecanicamente, erros, encontrados, aguardando, assinatura
-(704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas mudanças, ela dá juízo técnico marcado como tal e chama ferramenta (`query_canon`, `vault_buscar`). O cabeçalho segue sendo o ponto fraco — acusado pela auditoria a cada turno.**
-  palavras-chave: reteste, pedida, avaliação, últimas, mudanças, ela, juízo, técnico, marcado, tal, chama, ferramenta, query, canon, vault, buscar, cabeçalho, segue, sendo, ponto, fraco, acusado, auditoria, turno
+(704) DIÁRIO — 14/10/2026 · **Reteste de (703): pedida a avaliação das últimas m …
+  palavras-chave: reteste, pedida, avaliação, últimas
 (703) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-opiniao-tecnica-2026-10-14` (assi …
   palavras-chave: execução, aplicada, seth, opiniao, tecnica, assi
 (702) DIÁRIO — 14/10/2026 · **Reteste de (701): o "Olá" sai certo — prontidão, ` …
