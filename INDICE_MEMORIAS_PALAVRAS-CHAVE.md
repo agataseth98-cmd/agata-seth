@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(729) DIÁRIO — 16/10/2026 · **Remoção de emoji da prosa da Seth aplicada (`emoji-remover-20261016`, E-2): o `seth_gateway` passa a tirar emoji da prosa, antes de entregar a resposta ao cliente.**
+  palavras-chave: remoção, emoji, prosa, seth, aplicada, remover, gateway, passa, tirar, entregar, resposta, cliente
 (729) DIÁRIO — 16/10/2026 · **Teste por mutações do fiscal de PR aplicado (`fiscal-mutacao-20261016`): a suíte do `fiscal-p8` passou de 5 para 12 mutantes mortos em 15.**
   palavras-chave: teste, mutações, fiscal, aplicado, mutacao, suíte, passou, mutantes, mortos
 (729) DIÁRIO — 16/10/2026 · **Dependabot passa a ignorar versões maiores de github-actions (`dependabot-major-20261016`).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: reteste, uso, real, noite, gemini, cota, pendurou, seth, livre, gateway, desistiu, rapido, ministral, respondeu, resposta, contra, origem, continua, segue, fila, descer, ele, decisão, humano
 (710) EXECUÇÃO — 14/10/2026 · **Aplicada `seth-prazo-primeiro-conteudo-2026-10-14` (assinada pelo Humano), em worktree. Reteste na entrada seguinte.**
   palavras-chave: execução, aplicada, seth, prazo, primeiro, conteudo, assinada, humano, worktree, reteste, entrada, seguinte
-(709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) travou no 1º "Olá": o Gemini 2.5 Flash, sem cota, ficou 310 s sem responder e a fila não andou. Proposta `seth-prazo-primeiro-conteudo-2026-10-14` corta a espera de 310 s para ~47 s (medido). Erros e vitórias da rodada registrados, a pedido do Humano ("registre erros e vitórias"). Aguardando assinatura.**
-  palavras-chave: auditoria, seth, navegador, pedido, humano, travou, olá, gemini, flash, cota, ficou, responder, fila, andou, proposta, prazo, primeiro, conteudo, corta, espera, medido, erros, vitórias, rodada, registrados, registre, aguardando, assinatura
+(709) DIÁRIO — 14/10/2026 · **Auditoria da Seth no navegador (pedido do Humano) …
+  palavras-chave: auditoria, seth, navegador, pedido, humano
 (708) EXECUÇÃO — 14/10/2026 · **Aplicada `suite-fora-da-worktree-2026-10-14` (as …
   palavras-chave: execução, aplicada, suite, fora, worktree
 (707) DIÁRIO — 14/10/2026 · **Reteste de (706): o cabeçalho escrito pela Máquina …
