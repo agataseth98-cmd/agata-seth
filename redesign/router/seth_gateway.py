@@ -549,6 +549,7 @@ def _classificar_rota(payload: dict) -> str:
 import decisor  # noqa: E402  (mesmo diretório)
 import auditoria_turno  # noqa: E402  (mesmo diretório)
 import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
+import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -807,6 +808,8 @@ class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
     _cab_ctx = None  # (705) mensagens do pedido, se esta resposta leva o cabeçalho da Máquina
+    _cab_injetado = None  # texto do cabeçalho que a Máquina injetou nesta resposta (cabeçalho único)
+    _cab_estados = None
 
     def log_message(self, fmt, *args):
         pass
@@ -822,6 +825,7 @@ class _Handler(BaseHTTPRequestHandler):
         # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
         self._rota = ""
         self._cab_ctx = None
+        self._cab_injetado = None
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -993,6 +997,7 @@ class _Handler(BaseHTTPRequestHandler):
             return self._erro(504, f"upstream parou de responder: {e}")
         if self._cab_ctx is not None and up.status == 200:
             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
+            self._cab_injetado = cab
             if sse:
                 novo = _injetar_sse(buf_pre, cab)
                 if novo is not None:
@@ -1011,6 +1016,9 @@ class _Handler(BaseHTTPRequestHandler):
         if up.status == 200 and not sse and _emoji_ligado():
             buf_pre, _rem = limpa_emoji.limpar_json(buf_pre)
             _registrar_emoji(self._rota, modelo_real, _rem)
+        if up.status == 200 and not sse and self._cab_injetado and _cabecalho_unico_ligado():
+            buf_pre, _nc = limpa_cabecalho.limpar_json(buf_pre, self._cab_injetado)
+            _registrar_cabecalho(self._rota, modelo_real, _nc)
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
@@ -1082,6 +1090,7 @@ class _Handler(BaseHTTPRequestHandler):
         # sumia -> stream sem nenhum chunk -> crash "'tool_calls' in undefined"
         # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
         self._emoji_estados = {}
+        self._cab_estados = {}
         buf = self._escrever_linhas_completas(buf)
         while True:
             try:
@@ -1095,12 +1104,17 @@ class _Handler(BaseHTTPRequestHandler):
             saida = self._filtrar_linha_sse(buf)
             if _emoji_ligado():
                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
+            if self._cab_injetado and _cabecalho_unico_ligado():
+                saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
         if _emoji_ligado():
             _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
                              [c for est in self._emoji_estados.values() for c in est.removidos])
+        if self._cab_injetado and _cabecalho_unico_ligado():
+            _registrar_cabecalho(self._rota, getattr(self, "_modelo_para_log", ""),
+                                 sum(est.removidas for est in self._cab_estados.values()))
 
     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
@@ -1110,6 +1124,8 @@ class _Handler(BaseHTTPRequestHandler):
             saida = self._filtrar_linha_sse(linha + b"\n")
             if _emoji_ligado():
                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
+            if self._cab_injetado and _cabecalho_unico_ligado():
+                saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
@@ -1153,6 +1169,26 @@ def _registrar_emoji(rota, modelo, removidos) -> None:
         with open(arq, "a", encoding="utf-8") as f:
             f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
                                 "n": len(removidos), "codigos": sorted(set(removidos))}, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def _cabecalho_unico_ligado() -> bool:
+    """Cabeçalho único (17/10/2026): apaga o cabeçalho que o MODELO escreve no começo, depois do da Máquina.
+    Chave para desligar: SETH_CABECALHO_UNICO=0 (lida a cada resposta). Padrão: ligado."""
+    return os.environ.get("SETH_CABECALHO_UNICO", "1") != "0"
+
+
+def _registrar_cabecalho(rota, modelo, n) -> None:
+    """Log de quantas linhas de cabeçalho o modelo escreveu e foram removidas (só contagem, nunca o texto). Fail-soft."""
+    if not n:
+        return
+    try:
+        arq = Path(os.environ.get("AGATA_CABECALHO_LOG") or Path.home() / ".cache" / "agata" / "cabecalho-removido.jsonl")
+        arq.parent.mkdir(parents=True, exist_ok=True)
+        with open(arq, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
+                                "n": int(n)}, ensure_ascii=False) + "\n")
     except OSError:
         pass
 
@@ -1664,6 +1700,29 @@ def _selftest() -> int:
     ok17g = _descrever_modelo(None) == "modelo não verificado"
     print(f"{'PASS' if ok17f and ok17g else 'FALHA'}  descrição do modelo: {_descrever_modelo('qwen3.5-9b-64k:latest')}")
     falhas += 0 if ok17f and ok17g else 1
+    # 17h. Cabeçalho único (17/10/2026): o cabeçalho que o MODELO escreve depois do da Máquina é apagado
+    _Dummy.texto_fixo = ("Agata · modelo: x · sync: PASS · HEAD=4975b44 · 2026-10-17 11:56 -0300\n"
+                         "Última entrada: (741) DIÁRIO — x\npronto.\n\nSistemas operacionais.")
+    log_cab = Path(__import__("tempfile").mkdtemp()) / "cab.jsonl"
+    os.environ["AGATA_CABECALHO_LOG"] = str(log_cab)
+    r17h = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
+                                             {"role": "user", "content": "e agora?"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+    ok17h = r17h.count("Agata ·") == 1 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
+    ok17i = log_cab.exists() and json.loads(log_cab.read_text(encoding="utf-8").splitlines()[0])["n"] >= 1
+    os.environ["SETH_CABECALHO_UNICO"] = "0"
+    r17j = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
+                                             {"role": "user", "content": "e agora?"}]}).encode(),
+        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+    del os.environ["SETH_CABECALHO_UNICO"]
+    ok17j = r17j.count("Agata ·") == 2
+    _Dummy.texto_fixo = None
+    print(f"{'PASS' if ok17h else 'FALHA'}  cabeçalho único: o duplicado do modelo é apagado, fica o da Máquina")
+    print(f"{'PASS' if ok17i else 'FALHA'}  cabeçalho único: remoção registrada em log (só contagem)")
+    print(f"{'PASS' if ok17j else 'FALHA'}  cabeçalho único: SETH_CABECALHO_UNICO=0 desliga")
+    falhas += sum(0 if x else 1 for x in (ok17h, ok17i, ok17j))
     # 18. (705) rota pelo pedido atual: histórico longo com saída de ferramenta + pergunta simples = livre
     hist18 = [{"role": "user", "content": "x" * 300}, {"role": "assistant", "content": "", "tool_calls": [{"id": "t"}]},
               {"role": "tool", "content": "z" * 20000}, {"role": "assistant", "content": "y" * 3000}] * 4 + [
