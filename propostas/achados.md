@@ -34,3 +34,12 @@ Regra do Humano (15 e 16/10/2026): **guardar sempre os achados; resolver quando 
 
 ## Como evoluir
 Escolha por valor e risco: primeiro o que fecha buracos de integridade ou reduz gasto (AC-03, AC-04, AC-05, AC-09), depois o que melhora a qualidade da Seth (AC-01, AC-02, AC-20), por último o que amplia superfície (AC-15). Cada item vira proposta própria, uma por vez; o Codex revisa o que o Claude escreve e o contrário.
+
+## Atualizações de 17/10/2026 (linhas novas; as de cima não se editam)
+| ID | Atualização | Evidência (medida hoje, só leitura) | Estado |
+|---|---|---|---|
+| AC-01 | **Medido.** 144 de 151 chamadas ao Laya (95%) trazem ferramentas (`tools=true`); nesses casos a trava veta `rapido`, então `rapido` só é alcançável nas 7 chamadas sem ferramenta. Na avaliação (18 linhas) o Laya escolheu `rapido` 9 vezes e a rota ativa foi `livre` nas 9. Conclusão: pelo LibreChat a rota `rapido` está, na prática, desligada. Não medido: se o modelo `rapido` chama ferramenta bem (sem isso a trava é correta) | `~/.cache/agata/decisor/roteador-laya.jsonl` e `roteador-laya-avaliacao.jsonl` | aberto: medir tool-calling do `rapido` antes de qualquer proposta |
+| AC-09 | **Medido.** A consolidação rodou hoje (marcador: último número 737, sha `bbb0884`) mas não gerou nenhuma proposta. `reprovados.log` tem 40 linhas: o mesmo tema "aprovação assinada P-8" é reprovado a cada rodada desde 28/09 (12 vezes) pela conferência "descrição não bate com o título real" (o resumo do modelo atribui títulos errados às entradas citadas); o resto é infraestrutura (OmniRoute 504 em 3 dias, `num_ctx 16814` em 1). O tema que falha é retentado todo dia e falha igual | `~/.cache/agata/consolidacao/{marcador.json,reprovados.log}` | aberto: o juiz funciona (barra citação errada); falta decidir se o tema repetido deve ser pulado após N reprovações ou o prompt corrigido |
+| AC-19 | **Resolvido** fora do repositório: comentário e lista de vozes do `librechat.yaml` atualizados (voz `agata-last`, sem `dora`); backup `librechat.yaml.bak-voz-20261017`; LibreChat reiniciado, responde 200 | `~/librechat/librechat.yaml` | resolvido |
+| AC-26 | **Resolvido**: unit `agata-vigia@.service` aplicada (PR 285) e ligada para `claude` e `codex` | `systemctl --user is-active agata-vigia@claude agata-vigia@codex` | resolvido |
+| AC-27 | **Novo, resolvido:** a voz do LibreChat dava 500 por SSRF; corrigido com `speech.tts.allowedAddresses`. E o shim do Piper agora interpreta markdown e fala a 0,88 (MEMÓRIAS (737)) | logs do `librechat`; selftest 17/17 | resolvido |
