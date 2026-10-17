@@ -55,3 +55,8 @@ Escolha por valor e risco: primeiro o que fecha buracos de integridade ou reduz 
 | ID | Atualização | Evidência | Estado |
 |---|---|---|---|
 | AC-30 | **Novo.** A Seth afirmou "verificado agora com `git log` e `query_canon`" sem chamar nenhuma ferramenta (resposta de 12:50, uma só parte de texto) e negou (734) e (743), que existem. Não é hidratação atrasada, como eu disse antes; é a falha FAB-3 em uso real. A auditoria do turno (conferência (690), ferramenta citada sem ser chamada) não a acusou no mesmo turno; ver se acusa no turno seguinte | banco do LibreChat (`messages`); `auditoria-turno.jsonl`; MEMÓRIAS (747) | aberto: medir se a conferência (690) cobre "verificado agora" sem ferramenta |
+
+## Pendência de 17/10/2026 13h (linha nova)
+| ID | Atualização | Evidência | Estado |
+|---|---|---|---|
+| AC-31 | **Pendência do Humano:** a senha do LibreChat (conta do projeto) nunca foi trocada desde a criação (16/10), e o Humano não a tem à mão: o arquivo em claro foi apagado e só resta a cópia cifrada em `~/.agata-backup-staging/PRIMEIRO-ACESSO-20261016.txt.age` (chave privada age no pendrive "Manutenção Horusoua"). Trocar a senha é ato dele; o caminho mais curto é `docker exec -it librechat node config/reset-password.js <email>` (o script pede a senha nova; o LibreChat não tem envio de e-mail configurado para "esqueci a senha"). Depois de trocar: guardar a nova no gerenciador dele, nunca em arquivo do repositório ou em chat | `~/.agata-backup-staging/`; `/app/config/reset-password.js` no contêiner | aberto (Humano) |
