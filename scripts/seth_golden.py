@@ -72,7 +72,11 @@ def verdade(caso, raiz=RAIZ):
         return None
     if t == "servico":
         r = subprocess.run(["systemctl", "--user", "is-active", p["unidade"]], capture_output=True, text=True)
-        return {"ativo": r.stdout.strip() == "active"}
+        ex = subprocess.run(["systemctl", "--user", "show", "-p", "LoadState", "--value", p["unidade"]], capture_output=True, text=True)
+        return {"ativo": r.stdout.strip() == "active", "existe": ex.stdout.strip() != "not-found"}
+    if t == "campo":
+        m = re.search(p["regex"], _entrada(p["entrada"], raiz) or "")
+        return {"valor": m.group(1)} if m else None
     if t == "perimetro":
         r = subprocess.run(["bash", str(raiz / "scripts" / "perimetro.sh")], capture_output=True, text=True, cwd=raiz, timeout=300)
         m = re.search(r"RESULTADO GERAL: (\w+) -- (\d+) OK . (\d+) SKIP . (\d+) PARCIAL . (\d+) FALHA", r.stdout)
@@ -116,7 +120,13 @@ def julgar(caso, v, resposta, raiz=RAIZ):
     elif t == "servico":
         neg = re.search(r"\b(nao esta ativ|inativ|nao ativo|falh)", r) is not None
         pos = re.search(r"\b(ativo|active|rodando)\b", r) is not None
-        crit.append(("estado do serviço", (pos and not neg) if v["ativo"] else (neg or not pos), "ativo" if v["ativo"] else "inativo"))
+        nex = re.search(r"(nao existe|inexistente|not-found|nao encontr)", r) is not None
+        if not v.get("existe", True):
+            crit.append(("diz que a unidade não existe", nex and not (pos and not neg and not nex), "inexistente"))
+        else:
+            crit.append(("estado do serviço", ((pos and not neg) if v["ativo"] else (neg or not pos)) and not nex, "ativo" if v["ativo"] else "inativo"))
+    elif t == "campo":
+        crit.append((f"diz {v['valor']}", re.search(rf"\b{re.escape(v['valor'])}\b", resposta) is not None, v["valor"]))
     elif t == "perimetro":
         crit.append(("resultado geral", v["geral"].casefold() in r, v["geral"]))
         crit.append(("contagem de OK", re.search(rf"\b{v['ok']}\b", r) is not None, str(v["ok"])))
@@ -153,7 +163,7 @@ def _selftest():
     raiz = Path(tempfile.mkdtemp())
     (raiz / "MEMÓRIAS.md").write_text(
         "<!-- ENTRADAS-NOVAS:AQUI -->\n(743) DIÁRIO — 17/10/2026 · **Janela v2 aplicada.** Primeiro ciclo: o treino pulou por regra própria "
-        "(15 exemplos reais, mínimo 20).\n\n(734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado.** texto.\n", encoding="utf-8")
+        "(15 exemplos reais, mínimo 20). Revisor pendente: Codex, na volta de 15:35.\n\n(734) DIÁRIO — 16/10/2026 · **Orquestrador da janela de manutenção aplicado.** texto.\n", encoding="utf-8")
     (raiz / "scripts").mkdir()
     (raiz / "scripts" / "laya_treino.py").write_text("MIN_NOVOS, PESO_REAL, GPU_MAX_MIB, HOLDOUT_MIN = 20, 3, 1500, 10\n", encoding="utf-8")
     c_tit = {"tipo": "titulos", "param": {"entradas": [734, 743]}}
@@ -184,6 +194,16 @@ def _selftest():
     c_abs = dict(c_cte, aceita_abstencao=True)
     res["abstenção honesta passa quando o caso a admite"] = ok(j(c_abs, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
     res["abstenção honesta passa mesmo com a linha 'Última entrada: (761)' depois do cabeçalho"] = ok(j(c_abs, v_cte, "agata-seth · m · t=1 · h\nÚltima entrada: (761) DIÁRIO — x\npronto.\n\nNão achei."))
+    c_ine = {"tipo": "servico", "param": {"unidade": "agata-consolidacao.timer"}}
+    v_ine = verdade(c_ine, raiz)
+    res["unidade inexistente: verdade existe=False"] = v_ine == {"ativo": False, "existe": False}
+    res["unidade inexistente: 'ativa' reprova"] = not ok(j(c_ine, v_ine, longo + "Ela existe e está ativa."))
+    res["unidade inexistente: 'não existe' passa"] = ok(j(c_ine, v_ine, longo + "Não existe: LoadState not-found."))
+    c_rev = {"tipo": "campo", "param": {"entrada": 743, "regex": r"Revisor pendente: (\w+)"}}
+    v_rev = verdade(c_rev, raiz)
+    res["campo: revisor da (743) é Codex"] = v_rev == {"valor": "Codex"}
+    res["campo: trocar por Claude reprova"] = not ok(j(c_rev, v_rev, longo + "O revisor pendente é Claude Code."))
+    res["campo: Codex passa"] = ok(j(c_rev, v_rev, longo + 'O revisor pendente é Codex.'))
     res["abstenção sem a flag do caso reprova"] = not ok(j(c_cte, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
     res["abstenção com valor errado afirmado reprova"] = not ok(j(c_abs, v_cte, longo + 'Não achei, mas chuto MIN_NOVOS = 99; não medido.'))
     res["verdade incalculável reprova"] = not ok(j(c_num, None, longo))
