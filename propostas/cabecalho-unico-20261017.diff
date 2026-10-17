@@ -1,0 +1,377 @@
+diff --git a/redesign/router/limpa_cabecalho.py b/redesign/router/limpa_cabecalho.py
+new file mode 100644
+index 0000000..33197dc
+--- /dev/null
++++ b/redesign/router/limpa_cabecalho.py
+@@ -0,0 +1,232 @@
++#!/usr/bin/env python3
++"""limpa_cabecalho.py -- um cabeçalho só por resposta da Seth (anomalia do cabeçalho duplo, 17/10/2026).
++
++O cabeçalho da Regra 1 é da Máquina ((705)): o gateway o injeta medido no começo da resposta. O modelo, hidratado com o
++canon (que manda abrir com cabeçalho), às vezes escreve o dele logo depois -- no caso medido de 17/10 11:56, um bloco de
++prontidão com `sync:` e `HEAD=` copiados, não medidos. Este filtro apaga o cabeçalho que o MODELO escreve no INÍCIO do texto,
++imediatamente depois do injetado. Só age quando o injetado existe; só no começo (depois da primeira prosa, nada é tocado);
++só linhas no formato do cabeçalho (`Agata · ...`, seguidas de `Última entrada:` e `pronto.`/`quebrado:`).
++
++Funciona em STREAMING: segura no máximo o começo ainda ambíguo (um prefixo de "Agata ·", ou uma linha de cabeçalho sem a
++quebra de linha) e solta tudo ao ver que não é cabeçalho, ou ao fim da resposta (`fim`). A contagem de linhas removidas vai
++para um log (só a contagem e o rótulo, nunca o texto).
++
++LIMITES (declarados): heurística de formato, não prova de verdade; cabeçalho que o modelo escreva no MEIO da resposta (depois
++de ferramenta, por exemplo) não é tocado; o injetado precisa chegar como um fragmento só (é como `_injetar_sse` o escreve).
++`--selftest` roda os casos.
++"""
++import json
++import re
++import sys
++
++_ABRE = "agata ·"
++_RESTO = re.compile(r"^\s*(?:\*\*)?\s*(?:última entrada\s*:|pronto\.|quebrado\s*:)", re.I)
++
++
++class LimpaCabecalho:
++    def __init__(self, injetado):
++        self.injetado = (injetado or "").strip()
++        # 'espera' -> viu o injetado? ; 'inicio' -> começo do texto do modelo ; 'resto' -> linhas após o cabeçalho ; 'livre'
++        self.fase = "espera" if self.injetado else "livre"
++        self.pend = ""
++        self.removidas = 0
++
++    def _eh_prefixo_cab(self, s):
++        """True se `s` ainda pode virar "Agata ·" (vazio, ou um prefixo dele)."""
++        t = s.lstrip().lstrip("*").lstrip().lower()
++        return t == "" or (len(t) < len(_ABRE) and _ABRE.startswith(t))
++
++    def _comeca_cab(self, s):
++        return s.lstrip().lstrip("*").lstrip().lower().startswith(_ABRE)
++
++    def passar(self, texto):
++        if self.fase == "livre" or not texto:
++            return texto
++        if self.fase == "espera":
++            if texto.strip() == self.injetado:
++                self.fase = "inicio"
++                return texto
++            self.fase = "livre"           # o primeiro texto não é o injetado: nada a fazer
++            return texto
++        self.pend += texto
++        saida = []
++        while True:
++            if self.fase == "livre":
++                saida.append(self.pend)
++                self.pend = ""
++                break
++            if self.fase == "inicio":
++                if self._comeca_cab(self.pend):
++                    if "\n" not in self.pend:
++                        break             # linha de cabeçalho ainda sem fim: segura
++                    _, self.pend = self.pend.split("\n", 1)
++                    self.removidas += 1
++                    self.fase = "resto"
++                    continue
++                if self._eh_prefixo_cab(self.pend):
++                    break                 # pode virar "Agata ·": segura
++                self.fase = "livre"
++                continue
++            # fase 'resto': descarta linhas em branco e "Última entrada:" / "pronto." / "quebrado:"
++            if "\n" in self.pend:
++                linha, resto = self.pend.split("\n", 1)
++                if not linha.strip():
++                    self.pend = resto
++                    continue
++                if _RESTO.match(linha):
++                    self.pend = resto
++                    self.removidas += 1
++                    continue
++                self.fase = "livre"
++                continue
++            if not self.pend.strip():
++                break
++            if _RESTO.match(self.pend):
++                break                     # linha de rodapé do cabeçalho ainda sem fim: segura
++            if any(r.startswith(self.pend.strip().lstrip("*").strip().lower()) for r in ("última entrada:", "pronto.", "quebrado:")):
++                break                     # pode virar rodapé: segura
++            self.fase = "livre"
++        return "".join(saida)
++
++    def fim(self):
++        """Fim da resposta: solta o que estava segurando (menos uma linha de cabeçalho completa já descartável)."""
++        resto, self.pend = self.pend, ""
++        if self.fase == "inicio" and self._comeca_cab(resto):
++            self.removidas += 1
++            return ""
++        if self.fase == "resto" and (not resto.strip() or _RESTO.match(resto)):
++            return ""
++        return resto
++
++
++def _chunk(texto, base=None):
++    o = {"object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": texto}, "finish_reason": None}]}
++    if isinstance(base, dict):
++        for k in ("id", "created", "model"):
++            if base.get(k) is not None:
++                o[k] = base[k]
++    return b"data: " + json.dumps(o, ensure_ascii=False).encode("utf-8") + b"\n\n"
++
++
++def limpar_sse_linha(linha, estados, injetado):
++    """Uma linha `data: ...` (bytes). `estados`: dict índice -> LimpaCabecalho (mutado). Segura o começo ambíguo e o solta antes do
++    `finish_reason`/`[DONE]`. Tool_calls, role e o resto passam intactos."""
++    if not linha.startswith(b"data:"):
++        return linha
++    corpo = linha[5:].strip()
++    if corpo == b"[DONE]":
++        resto = "".join(e.fim() for e in estados.values())
++        return (_chunk(resto) if resto else b"") + linha
++    try:
++        o = json.loads(corpo)
++    except ValueError:
++        return linha
++    if not isinstance(o, dict):
++        return linha
++    mudou, extra = False, b""
++    for ch in o.get("choices") or []:
++        d = ch.get("delta") or {}
++        est = estados.setdefault(ch.get("index", 0), LimpaCabecalho(injetado))
++        c = d.get("content")
++        if isinstance(c, str) and c:
++            novo = est.passar(c)
++            if novo != c:
++                d["content"] = novo
++                mudou = True
++        if ch.get("finish_reason"):
++            resto = est.fim()
++            if resto:
++                extra += _chunk(resto, o)
++    fim = b"\n" if linha.endswith(b"\n") else b""
++    if not mudou and not extra:
++        return linha
++    corpo_novo = linha if not mudou else b"data: " + json.dumps(o, ensure_ascii=False).encode("utf-8") + fim
++    # chunk com content vazio não precisa sair; o resto solto vem ANTES da linha com finish_reason
++    return extra + corpo_novo
++
++
++def limpar_json(corpo, injetado):
++    """Resposta NÃO streaming. Devolve (bytes, nº de linhas removidas)."""
++    try:
++        o = json.loads(corpo)
++        total = 0
++        for ch in o.get("choices") or []:
++            m = ch.get("message") or {}
++            c = m.get("content")
++            if isinstance(c, str) and injetado and c.startswith(injetado):
++                resto = c[len(injetado):]
++                est = LimpaCabecalho(injetado)
++                est.fase = "inicio"
++                saida = est.passar(resto) + est.fim()
++                if saida != resto:
++                    m["content"] = injetado + saida
++                    total += est.removidas
++        if not total:
++            return corpo, 0
++        return json.dumps(o, ensure_ascii=False).encode("utf-8"), total
++    except (ValueError, AttributeError, TypeError):
++        return corpo, 0
++
++
++def _selftest():
++    CAB = "Agata · ministral-14b-latest (Mistral, nuvem; medido pela Máquina neste turno) · t=4 (contador mecânico) · 2026-10-17 11:56 -0300 (relógio da Máquina)\n\n"
++    DUP = ("Agata · modelo: ministral-14b-latest · sync: PASS · HEAD=4975b44 · 2026-10-17 11:56 -0300\n"
++           "Última entrada: (741) DIÁRIO — x\n\nSistemas operacionais.")
++
++    def rodar(frags, injetado=CAB):
++        est = LimpaCabecalho(injetado)
++        return "".join(est.passar(f) for f in frags) + est.fim()
++
++    def sse(frags, injetado=CAB, fim=True):
++        est, saida = {}, []
++        for f in frags:
++            linha = b"data: " + json.dumps({"id": "x", "choices": [{"index": 0, "delta": {"content": f}}]}, ensure_ascii=False).encode() + b"\n\n"
++            saida.append(limpar_sse_linha(linha, est, injetado))
++        if fim:
++            saida.append(limpar_sse_linha(b'data: {"id":"x","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n', est, injetado))
++            saida.append(limpar_sse_linha(b"data: [DONE]\n\n", est, injetado))
++        txt = ""
++        for l in b"".join(saida).split(b"\n"):
++            if l.startswith(b"data: {"):
++                for ch in json.loads(l[5:]).get("choices") or []:
++                    txt += (ch.get("delta") or {}).get("content") or ""
++        return txt, b"".join(saida)
++
++    casos = []
++    casos.append(("apaga o bloco de prontidão duplicado e deixa o injetado + corpo",
++                  rodar([CAB, DUP]) == CAB + "Sistemas operacionais."))
++    casos.append(("fragmentado em pedaços de 3 caracteres", rodar([CAB] + [DUP[i:i + 3] for i in range(0, len(DUP), 3)]) == CAB + "Sistemas operacionais."))
++    casos.append(("fragmentado em 1 caractere", rodar([CAB] + list(DUP)) == CAB + "Sistemas operacionais."))
++    casos.append(("linha de turno duplicada (t=...) também sai",
++                  rodar([CAB, "Agata · ministral · t=4 (contador mecânico) · 2026-10-17 11:56\nResposta."]) == CAB + "Resposta."))
++    casos.append(("cabeçalho em negrito do modelo sai", rodar([CAB, "**Agata · x · t=4 · hora**\nCorpo."]) == CAB + "Corpo."))
++    casos.append(("prosa normal passa intacta", rodar([CAB, "Sincronizado. Agata · não é cabeçalho aqui."]) == CAB + "Sincronizado. Agata · não é cabeçalho aqui."))
++    casos.append(("começa com 'Aga' mas não é cabeçalho: solta tudo", rodar([CAB, "Agarrei o ponto.", " Fim."]) == CAB + "Agarrei o ponto. Fim."))
++    casos.append(("só 'Agat' e acaba: não perde o texto", rodar([CAB, "Agat"]) == CAB + "Agat"))
++    casos.append(("sem injetado o filtro não age", rodar(["Agata · modelo: x · sync: PASS\nCorpo."], injetado=None) == "Agata · modelo: x · sync: PASS\nCorpo."))
++    casos.append(("1º texto que não é o injetado desliga o filtro", rodar(["Agata · x · t=4\nCorpo."]) == "Agata · x · t=4\nCorpo."))
++    casos.append(("cabeçalho no meio do texto não é tocado",
++                  rodar([CAB, "Resposta.\nAgata · x · t=4 · hora\nMais."]) == CAB + "Resposta.\nAgata · x · t=4 · hora\nMais."))
++    casos.append(("rodapé depois de prosa não é tocado", rodar([CAB, "Texto.\npronto.\nFim."]) == CAB + "Texto.\npronto.\nFim."))
++    casos.append(("cabeçalho só, sem corpo: não devolve lixo", rodar([CAB, "Agata · x · t=4 · hora"]) == CAB))
++    t1, raw = sse([CAB, DUP[:20], DUP[20:]])
++    casos.append(("SSE: injetado + corpo, duplicata sumiu", t1 == CAB + "Sistemas operacionais." and b"[DONE]" in raw))
++    t2, raw2 = sse([CAB, "Agat"])
++    casos.append(("SSE: texto retido sai ANTES do finish_reason", t2 == CAB + "Agat" and raw2.index(b"Agat") < raw2.index(b"finish_reason")))
++    casos.append(("SSE: tool_calls e role passam intactos",
++                  limpar_sse_linha(b'data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"id":"1"}]}}]}\n\n', {}, CAB)
++                  == b'data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"id":"1"}]}}]}\n\n'))
++    j = json.dumps({"choices": [{"message": {"content": CAB + DUP}}]}, ensure_ascii=False).encode()
++    novo, n = limpar_json(j, CAB)
++    casos.append(("JSON não streaming: remove e conta", json.loads(novo)["choices"][0]["message"]["content"] == CAB + "Sistemas operacionais." and n == 2))
++    novo2, n2 = limpar_json(json.dumps({"choices": [{"message": {"content": "sem injetado"}}]}).encode(), CAB)
++    casos.append(("JSON sem o injetado passa", n2 == 0))
++    ruins = [n for n, ok in casos if not ok]
++    for n, ok in casos:
++        print(("OK    " if ok else "FALHOU"), n)
++    print(f"limpa_cabecalho selftest: {len(casos) - len(ruins)}/{len(casos)}")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(_selftest() if "--selftest" in sys.argv else 0)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 1891bfa..5798e28 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -549,6 +549,7 @@ def _classificar_rota(payload: dict) -> str:
+ import decisor  # noqa: E402  (mesmo diretório)
+ import auditoria_turno  # noqa: E402  (mesmo diretório)
+ import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
++import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
+ import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+ 
+ _PERFIS = {"mtime": None, "dados": {}}
+@@ -807,6 +808,8 @@ class _Handler(BaseHTTPRequestHandler):
+     protocol_version = "HTTP/1.1"
+     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
+     _cab_ctx = None  # (705) mensagens do pedido, se esta resposta leva o cabeçalho da Máquina
++    _cab_injetado = None  # texto do cabeçalho que a Máquina injetou nesta resposta (cabeçalho único)
++    _cab_estados = None
+ 
+     def log_message(self, fmt, *args):
+         pass
+@@ -822,6 +825,7 @@ class _Handler(BaseHTTPRequestHandler):
+         # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
+         self._rota = ""
+         self._cab_ctx = None
++        self._cab_injetado = None
+         corpo = ler_corpo_limitado(self)
+         if corpo is None:
+             return
+@@ -993,6 +997,7 @@ class _Handler(BaseHTTPRequestHandler):
+             return self._erro(504, f"upstream parou de responder: {e}")
+         if self._cab_ctx is not None and up.status == 200:
+             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
++            self._cab_injetado = cab
+             if sse:
+                 novo = _injetar_sse(buf_pre, cab)
+                 if novo is not None:
+@@ -1011,6 +1016,9 @@ class _Handler(BaseHTTPRequestHandler):
+         if up.status == 200 and not sse and _emoji_ligado():
+             buf_pre, _rem = limpa_emoji.limpar_json(buf_pre)
+             _registrar_emoji(self._rota, modelo_real, _rem)
++        if up.status == 200 and not sse and self._cab_injetado and _cabecalho_unico_ligado():
++            buf_pre, _nc = limpa_cabecalho.limpar_json(buf_pre, self._cab_injetado)
++            _registrar_cabecalho(self._rota, modelo_real, _nc)
+         self.send_response(up.status)
+         for k, v in up.headers.items():
+             if k.lower() not in _HOP_BY_HOP:
+@@ -1082,6 +1090,7 @@ class _Handler(BaseHTTPRequestHandler):
+         # sumia -> stream sem nenhum chunk -> crash "'tool_calls' in undefined"
+         # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
+         self._emoji_estados = {}
++        self._cab_estados = {}
+         buf = self._escrever_linhas_completas(buf)
+         while True:
+             try:
+@@ -1095,12 +1104,17 @@ class _Handler(BaseHTTPRequestHandler):
+             saida = self._filtrar_linha_sse(buf)
+             if _emoji_ligado():
+                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
++            if self._cab_injetado and _cabecalho_unico_ligado():
++                saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
+             self.wfile.write(f"{len(saida):X}\r\n".encode())
+             self.wfile.write(saida)
+             self.wfile.write(b"\r\n")
+         if _emoji_ligado():
+             _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
+                              [c for est in self._emoji_estados.values() for c in est.removidos])
++        if self._cab_injetado and _cabecalho_unico_ligado():
++            _registrar_cabecalho(self._rota, getattr(self, "_modelo_para_log", ""),
++                                 sum(est.removidas for est in self._cab_estados.values()))
+ 
+     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
+         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
+@@ -1110,6 +1124,8 @@ class _Handler(BaseHTTPRequestHandler):
+             saida = self._filtrar_linha_sse(linha + b"\n")
+             if _emoji_ligado():
+                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
++            if self._cab_injetado and _cabecalho_unico_ligado():
++                saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
+             self.wfile.write(f"{len(saida):X}\r\n".encode())
+             self.wfile.write(saida)
+             self.wfile.write(b"\r\n")
+@@ -1157,6 +1173,26 @@ def _registrar_emoji(rota, modelo, removidos) -> None:
+         pass
+ 
+ 
++def _cabecalho_unico_ligado() -> bool:
++    """Cabeçalho único (17/10/2026): apaga o cabeçalho que o MODELO escreve no começo, depois do da Máquina.
++    Chave para desligar: SETH_CABECALHO_UNICO=0 (lida a cada resposta). Padrão: ligado."""
++    return os.environ.get("SETH_CABECALHO_UNICO", "1") != "0"
++
++
++def _registrar_cabecalho(rota, modelo, n) -> None:
++    """Log de quantas linhas de cabeçalho o modelo escreveu e foram removidas (só contagem, nunca o texto). Fail-soft."""
++    if not n:
++        return
++    try:
++        arq = Path(os.environ.get("AGATA_CABECALHO_LOG") or Path.home() / ".cache" / "agata" / "cabecalho-removido.jsonl")
++        arq.parent.mkdir(parents=True, exist_ok=True)
++        with open(arq, "a", encoding="utf-8") as f:
++            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
++                                "n": int(n)}, ensure_ascii=False) + "\n")
++    except OSError:
++        pass
++
++
+ def _porta_livre() -> int:
+     s = socket.socket()
+     s.bind(("127.0.0.1", 0))
+@@ -1664,6 +1700,29 @@ def _selftest() -> int:
+     ok17g = _descrever_modelo(None) == "modelo não verificado"
+     print(f"{'PASS' if ok17f and ok17g else 'FALHA'}  descrição do modelo: {_descrever_modelo('qwen3.5-9b-64k:latest')}")
+     falhas += 0 if ok17f and ok17g else 1
++    # 17h. Cabeçalho único (17/10/2026): o cabeçalho que o MODELO escreve depois do da Máquina é apagado
++    _Dummy.texto_fixo = ("Agata · modelo: x · sync: PASS · HEAD=4975b44 · 2026-10-17 11:56 -0300\n"
++                         "Última entrada: (741) DIÁRIO — x\npronto.\n\nSistemas operacionais.")
++    log_cab = Path(__import__("tempfile").mkdtemp()) / "cab.jsonl"
++    os.environ["AGATA_CABECALHO_LOG"] = str(log_cab)
++    r17h = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
++        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
++                                             {"role": "user", "content": "e agora?"}]}).encode(),
++        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
++    ok17h = r17h.count("Agata ·") == 1 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
++    ok17i = log_cab.exists() and json.loads(log_cab.read_text(encoding="utf-8").splitlines()[0])["n"] >= 1
++    os.environ["SETH_CABECALHO_UNICO"] = "0"
++    r17j = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
++        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
++                                             {"role": "user", "content": "e agora?"}]}).encode(),
++        headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
++    del os.environ["SETH_CABECALHO_UNICO"]
++    ok17j = r17j.count("Agata ·") == 2
++    _Dummy.texto_fixo = None
++    print(f"{'PASS' if ok17h else 'FALHA'}  cabeçalho único: o duplicado do modelo é apagado, fica o da Máquina")
++    print(f"{'PASS' if ok17i else 'FALHA'}  cabeçalho único: remoção registrada em log (só contagem)")
++    print(f"{'PASS' if ok17j else 'FALHA'}  cabeçalho único: SETH_CABECALHO_UNICO=0 desliga")
++    falhas += sum(0 if x else 1 for x in (ok17h, ok17i, ok17j))
+     # 18. (705) rota pelo pedido atual: histórico longo com saída de ferramenta + pergunta simples = livre
+     hist18 = [{"role": "user", "content": "x" * 300}, {"role": "assistant", "content": "", "tool_calls": [{"id": "t"}]},
+               {"role": "tool", "content": "z" * 20000}, {"role": "assistant", "content": "y" * 3000}] * 4 + [
