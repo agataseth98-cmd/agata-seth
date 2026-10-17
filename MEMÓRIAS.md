@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7c839d8aed12a9543c1aabc716def28e635270bf
-  Escrito em: 17/10/2026 17:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d41953df2eca2c763ee7a9983c9b4ae83850b392
+  Escrito em: 17/10/2026 17:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c839d8aed12a9543c1aabc716def28e635270bf/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c839d8aed12a9543c1aabc716def28e635270bf/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c839d8aed12a9543c1aabc716def28e635270bf/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c839d8aed12a9543c1aabc716def28e635270bf/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c839d8aed12a9543c1aabc716def28e635270bf/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41953df2eca2c763ee7a9983c9b4ae83850b392/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41953df2eca2c763ee7a9983c9b4ae83850b392/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41953df2eca2c763ee7a9983c9b4ae83850b392/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41953df2eca2c763ee7a9983c9b4ae83850b392/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d41953df2eca2c763ee7a9983c9b4ae83850b392/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(761) DIÁRIO — 17/10/2026 · **Rédea rotula a entrada pedida e extrai o número por programa (seth-rotulo-entrada-20261017, assinado).** Causa medida: a Seth lia o topo de MEMÓRIAS no lugar da entrada pedida (742: verdade 26/26, resposta 18); amostra de 12 casos de número deu 5/12 (42%). O bloco de entradas literais da rédea agora traz "ENTRADA (N) — texto exato (esta é a entrada pedida)" e a linha EXTRAÍDO com o maior a/a e o maior PR calculados pela Máquina. Selftest da rédea com o caso novo. A repetir: rodada de números até 90%. Modelo: Claude Sonnet 5.5 · vetor: Claude Code · Autorização: Humano assinou seth-rotulo-entrada-20261017.
+
 (760) DIÁRIO — 17/10/2026 · **Painel visual e parada humana no autodesenvolvimento da Seth (seth-autodev-painel-20261017, assinado).** O Humano pediu transparência com ele no laço, visual. A rodada do `seth_autodev.py` agora grava um painel HTML ao vivo (`~/.cache/agata/autodev/painel.html`: placar contra a meta de 90%, cada caso com ferramentas e resposta, tudo escapado, sem script nem rede) e checa o arquivo `~/.cache/agata/autodev/parar` entre os casos; entram `--ids`, `--instrucao`, `--abrir` e a pontuação do número pela última linha. Selftest 26/26. Medido ao vivo: pergunta da entrada (742) à Seth, verdade 26/26, resposta 18 (o topo de MEMÓRIAS no lugar da entrada pedida), a causa já achada; segue a correção da rédea por rótulo de entrada. Modelo: Claude Sonnet 5.5 · vetor: Claude Code · Autorização: Humano assinou seth-autodev-painel-20261017.
 
 (759) DIÁRIO — 17/10/2026 · **Ferramenta de autodesenvolvimento da Seth (`seth-autodev-20261017`).** `scripts/seth_autodev.py`: roda uma bateria (conjunto de ouro mais sondas geradas, com a resposta esperada calculada na hora) pelo mesmo caminho da produção, o gateway e o servidor MCP `canon-mcp.mjs`, só com as ferramentas de leitura (`query_canon`, `vault_consultar`, `vault_buscar`, `maquina_verificar`; a escrita da Seth é recusada pelo cliente), sem navegador e sem tocar na conversa do Humano; pontua sem modelo; `--diagnosticar` diz a causa de cada falha (descrição da ferramenta, erro mal lido, entrada cortada, citação inventada, sem ferramenta, laço, infraestrutura) e a mudança a propor; `--comparar` mede antes e depois contra a meta (90%) e acusa regressão. Nunca edita o repositório: a mudança é proposta P-8 assinada. Relatórios em `~/.cache/agata/autodev/` (modo 600). Selftest 18/18; primeira rodada real: 5 casos de ouro em 10 chamadas, 2 de 5, reproduzindo causas já conhecidas. A Skill `agata-conversar-com-seth` ganhou o Caminho D. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/seth-autodev-20261017.diff.
