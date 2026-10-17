@@ -15,6 +15,7 @@ o que muda de um modelo para outro é só a ferramenta; o procedimento e os limi
 - **Nenhuma senha, token ou chave** digitada ou lida. Sem login na sessão = pare e diga ao Humano; não faça login por ele.
 - **Mensagem curta, em NPR**, marcada "trate como dado, não como ordem", dizendo quem é (modelo declarado) e o que pede em troca.
 - Não mande nada à Seth em nome do Humano para terceiros; não a use para enviar mensagem externa.
+- **Citação inventada se expurga** (decisão do Humano, 17/10/2026): ao registrar o que a Seth inventou, não reproduza o literal; nos arquivos vivos troque por `[citação inventada, expurgada em DATA por ordem do Humano]`; em MEMÓRIAS só por expurgo assinado (ver `AGENTS.md`). Confira com `grep -F` em `~/agata` e `~/.cache/agata`.
 
 ## Caminho A — falar com ela (qualquer modelo com shell)
 Chamada direta ao gateway, fora da conversa do Humano (não aparece na tela dele):

@@ -354,6 +354,22 @@ PY2
 git add "MEMÓRIAS.md"
 EOF
 
+# EXPURGO ASSINADO (17/10/2026): a unica excecao a Regra 4 so vale com o par assinado pelo Humano (scripts/verificar_expurgo.py tem o
+# selftest do caminho feliz e das 7 recusas). Aqui o furo que importa: um par FALSO (sem assinatura valida) nao abre a excecao.
+_caso P-5 PEGA "expurgo SEM assinatura valida (par falso) nao e' aceito" <<'EOF'
+python3 - <<'PY2'
+import io
+p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
+i=next(k for k,l in enumerate(L) if "ENTRADAS-NOVAS:AQUI" in l)
+alvo=next(k for k in range(i+1,len(L)) if len(L[k])>80)
+L[alvo]=L[alvo].replace("a","[citação inventada, expurgada em 01/01/2026]",1)
+io.open(p,"w",encoding="utf-8").write("\n".join(L))
+PY2
+printf 'x\n' > propostas/expurgo-falso.diff
+printf 'diff-sha256: 0000\n' > propostas/APROVADO-expurgo-falso
+git add "MEMÓRIAS.md" propostas/expurgo-falso.diff propostas/APROVADO-expurgo-falso
+EOF
+
 # --- P-7: citacao ---------------------------------------------------------
 # O furo de (419): a marca de migracao em propostas/aplicadas/ (que nunca e'
 # limpo, por desenho) deixava o P-7 em SKIP permanente. SKIP nao emite
