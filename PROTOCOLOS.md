@@ -17,17 +17,19 @@ A janela mais recente de MEMÓRIAS já está no contexto (topo do corpo, logo ap
 
 Ao `carregar`, bloco de prontidão de 3 linhas:
 ```
-{{NOME_SISTEMA}} · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
+agata-seth · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
 Última entrada: (<n>) <título> — <1 linha>
 <quebrado: liste em 1 linha. senão: "pronto.">
 ```
 
 Em qualquer outra resposta, uma linha só:
 ```
-{{NOME_SISTEMA}} · <modelo> · t=<n> (<base: contado no contexto / contador mecânico / prefixo compactado>) · <data e hora local + selo de origem>
+agata-seth · <modelo> · t=<n> (<base: contado no contexto / contador mecânico / prefixo compactado>) · <data e hora local + selo de origem>
 ```
 
 Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
+
+**O nome no cabeçalho é `agata-seth`** (decisão do Humano, 17/10/2026): o cabeçalho é o único lugar em que o nome do sistema sai assim; no resto do canon vale o campo "Nome do sistema". Durante a transição, `Agata ·` continua aceito pelos verificadores.
 
 **Data e hora.**
 - `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada entre sessões paralelas.

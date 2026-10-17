@@ -57,9 +57,9 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
     # produção de verdade (LibreChat/Mongo), não só contra o selftest --
     # 16/09/2026.
     tem_rotulo_modelo = bool(re.search(
-        r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE | re.IGNORECASE))
+        r"^\s*(?:Agata|agata-seth)\s*·\s*modelo\s*:", texto, re.MULTILINE | re.IGNORECASE))
     tem_valor_incerto = bool(re.search(
-        r"^\s*Agata\s*·\s*(?:modelo\s+n[ãa]o\s+verificado"
+        r"^\s*(?:Agata|agata-seth)\s*·\s*(?:modelo\s+n[ãa]o\s+verificado"
         r"|fam[íi]lia\s+[^·]+?,\s*vers[ãa]o\s+n[ãa]o\s+verificada)",
         texto, re.MULTILINE | re.IGNORECASE))
     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)

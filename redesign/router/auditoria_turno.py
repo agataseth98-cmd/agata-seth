@@ -58,7 +58,7 @@ LINHA_CONTINUACAO = ("MESMA-RESPOSTA: continuação da sua resposta depois de fe
                      "parágrafo nem correção (700).")
 _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".txt",
               ".service", ".timer", ".conf", ".diff")
-_CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
+_CABECALHO = re.compile(r"^\s*\**\s*(?:Agata|agata-seth)\s*·", re.IGNORECASE)  # agata-seth: forma do cabeçalho desde 17/10/2026; Agata segue aceita
 _T_CONTADO = re.compile(r"t\s*=\s*(\d+)\s*\(\s*contado no contexto", re.IGNORECASE)
 _HORA = re.compile(r"\b(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}|\d{2}/\d{2}/\d{4} \d{1,2}:\d{2})")
 # Modo conciso (REGRAS, "NPR"; MEMÓRIAS (667)): padrão; o Humano liga o explicativo na conversa.
@@ -313,7 +313,7 @@ def _cabecalhos(texto: str) -> list[list[str]]:
 
 def _modelo_do_cabecalho(linha: str) -> str:
     m = re.search(r"·\s*modelo\s*:\s*([^·]+)", linha, re.IGNORECASE) or \
-        re.search(r"^\s*\**\s*Agata\s*·\s*([^·]+)", linha, re.IGNORECASE)
+        re.search(r"^\s*\**\s*(?:Agata|agata-seth)\s*·\s*([^·]+)", linha, re.IGNORECASE)
     return m.group(1).strip() if m else ""
 
 

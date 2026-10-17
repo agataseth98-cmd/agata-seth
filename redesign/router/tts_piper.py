@@ -99,7 +99,7 @@ _MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "
 def _cabecalho_natural(modelo, turno, resto):
     """'Agata · Claude Sonnet 5.5 · t=125 (...) · 17/10/2026 11:56 -03' -> frase falável."""
     import re
-    partes = ["Agata", modelo.strip(), f"turno {turno}"]
+    partes = ["Agata Seth", modelo.strip(), f"turno {turno}"]
     d = re.search(r"(\d{1,2})/(\d{1,2})(?:/(\d{4}))?", resto)
     h = re.search(r"(\d{1,2}):(\d{2})", resto)
     if d and 1 <= int(d.group(2)) <= 12:
@@ -132,7 +132,7 @@ def preparar_fala(texto):
     import re
     global _CAB_RE
     if _CAB_RE is None:
-        _CAB_RE = re.compile(r"^\s*(?:\*\*)?Agata\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
+        _CAB_RE = re.compile(r"^\s*(?:\*\*)?(?:Agata|agata-seth)\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
     m = _CAB_RE.match(texto)
     if not m:
         return texto
@@ -371,14 +371,16 @@ def _selftest():
             cab = "Agata · Claude Sonnet 5.5 · t=125 (contador mecânico) · 17/10/2026 11:56 -03 (relógio da Máquina)\nCorpo da resposta."
             r1 = preparar_fala(cab)
             res["10a primeiro cabeçalho é falado, em frase natural"] = r1.startswith(
-                "Agata, Claude Sonnet 5.5, turno 125, 17 de outubro, 11 e 56.\n") and r1.endswith("Corpo da resposta.")
+                "Agata Seth, Claude Sonnet 5.5, turno 125, 17 de outubro, 11 e 56.\n") and r1.endswith("Corpo da resposta.")
             res["10b turnos 126 a 134 não falam o cabeçalho, só o corpo"] = all(
                 preparar_fala(cab.replace("t=125", f"t={n}")) == "Corpo da resposta." for n in range(126, 135))
-            res["10c turno 135 fala de novo"] = preparar_fala(cab.replace("t=125", "t=135")).startswith("Agata, Claude Sonnet 5.5, turno 135")
-            res["10d contador que recua (sessão nova) fala de novo"] = preparar_fala(cab.replace("t=125", "t=3")).startswith("Agata, Claude Sonnet 5.5, turno 3")
+            res["10c turno 135 fala de novo"] = preparar_fala(cab.replace("t=125", "t=135")).startswith("Agata Seth, Claude Sonnet 5.5, turno 135")
+            res["10d contador que recua (sessão nova) fala de novo"] = preparar_fala(cab.replace("t=125", "t=3")).startswith("Agata Seth, Claude Sonnet 5.5, turno 3")
             res["10e só cabeçalho: ainda assim fala, não devolve vazio"] = preparar_fala(
-                "Agata · Seth · t=137 (x) · 17/10/2026 12:00 -03").startswith("Agata, Seth, turno 137")
+                "Agata · Seth · t=137 (x) · 17/10/2026 12:00 -03").startswith("Agata Seth, Seth, turno 137")
             res["10f texto sem cabeçalho passa intacto"] = preparar_fala("Olá. Tudo certo.") == "Olá. Tudo certo."
+            res["10g forma nova agata-seth · é reconhecida e falada como Agata Seth"] = preparar_fala(
+                cab.replace("Agata ·", "agata-seth ·").replace("t=125", "t=250")).startswith("Agata Seth, Claude Sonnet 5.5, turno 250")
         ESTADO_CABECALHO = _est
         res["11a separadores · e - viram pausa; guarda-chuva e 5.5 ficam"] = limpar_markdown(
             "um · dois - três — quatro • cinco guarda-chuva 5.5") == "um, dois, três, quatro, cinco guarda-chuva 5.5"
