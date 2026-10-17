@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58937543e2ecc1bd80f679729bffb72a59b80331
-  Escrito em: 17/10/2026 16:00 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b94e4cf2b880a1dd8b8afee36bc9d96e384711ba
+  Escrito em: 17/10/2026 16:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b94e4cf2b880a1dd8b8afee36bc9d96e384711ba/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b94e4cf2b880a1dd8b8afee36bc9d96e384711ba/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b94e4cf2b880a1dd8b8afee36bc9d96e384711ba/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b94e4cf2b880a1dd8b8afee36bc9d96e384711ba/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b94e4cf2b880a1dd8b8afee36bc9d96e384711ba/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -79,11 +79,11 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 - Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
 - `piper-tts` (`:8890`, voz pt-BR local) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
 
-**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-consolidacao.timer` · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele (13/10/2026).
+**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-manutencao.timer` (janela diária) · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele.
 
 **Manuais:** `agata-warmup.service` pré-aquece o modelo local pesado (cold-start do Ollama). `agata-jogo` (`~/.local/bin/`) lança jogo com o Agata fora da RTX 4060, via `game-performance` da distro — **não** Feral GameMode, que briga com o `ananicy-cpp`.
 
-**`agata-consolidacao.timer`** (220)/(311): 23:00 diário, saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon (contenção de kernel: `ProtectSystem=strict`); "novo" no log só depois de conferir o arquivo no disco. Ver `extras/projeto-detalhe/servicos-e-interface.md`.
+**Consolidação** (220)/(311): na janela diária 12h15–13h15 (timer das 23:00 desativado), saída só em `propostas/consolidacao-<data>.md` com entrada `(a numerar)`; nunca toca canon (contenção de kernel: `ProtectSystem=strict`); "novo" no log só depois de conferir o arquivo no disco. Ver `extras/projeto-detalhe/servicos-e-interface.md`.
 
 **P-9** (221): `scripts/perimetro.sh` avisa (nunca falha) se uma lista fechada de unidades e containers estiver fora do ar, e quando o Ollama carrega modelo só em parte na GPU (648)/(649). Lista e motivo: `extras/projeto-detalhe/servicos-e-interface.md`.
 
@@ -185,7 +185,7 @@ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev ro
 - **Onde decide hoje:** segunda opinião sob pedido da Seth (`maquina_verificar opiniao_jev`: recomendação, reversível, risco; ~6 s, (705)) · roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência; desde (682) a heurística decide uma vez por resposta — o passo depois de ferramenta fica na mesma fila — e o gateway registra no journal erro do OmniRoute e cliente que desconecta) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
 - **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
 - **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
-- **Avaliação em produção** (pedido do Humano): `scripts/avaliar_decisor.py`, todo dia às 20:00 (`agata-avaliacao-decisor.timer`), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo; avisa na área de trabalho em dias fixos; termina quando o Humano manda `--encerrar aprovado|removido`. Texto: `extras/projeto-detalhe/decisor-e-conselho.md`.
+- **Avaliação em produção**: `scripts/avaliar_decisor.py`, todo dia na janela diária (timer das 20:00 desativado), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo; avisa na área de trabalho em dias fixos; termina quando o Humano manda `--encerrar aprovado|removido`. Texto: `extras/projeto-detalhe/decisor-e-conselho.md`.
 - **Laya escolhe a fila da Seth (718)/(719):** decisão do Humano, 15/10/2026. O `laya-multilingual` ajustado (`laya-roteador.service`, `:11436`, CPU, ~70 ms) decide a rota no caminho da resposta, com as travas de sempre; fora do ar, lento (> 1,5 s) ou inseguro, vale a regra por tamanho. O Jev vira a sombra dele; as divergências vão a 2 juízes de nuvem pelo sanitizador (`redesign/laya/juiz.py`) e, quando concordam, viram rótulo e treino real. Treino semanal de um candidato (`scripts/laya_treino.py`, domingo 03:30); a troca de modelo é sempre do Humano (`--promover`). Ambiente e checkpoints fora do repo (`~/.local/share/agata-laya/`).
 - **Risco declarado:** projeto independente com semanas de vida (versão nova a cada poucos dias — atualizar é decisão explícita, nunca `latest`); pesos baixados uma vez do Hugging Face dos autores; ~4 s de CPU por decisão, por isso nenhum uso fica no caminho quente da resposta.
 
