@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9de3525cba09c4f547fd370038030e96454d1ac8
-  Escrito em: 17/10/2026 12:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 02e11c376bd82531d327ade339009850daa2192a
+  Escrito em: 17/10/2026 12:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9de3525cba09c4f547fd370038030e96454d1ac8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9de3525cba09c4f547fd370038030e96454d1ac8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9de3525cba09c4f547fd370038030e96454d1ac8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9de3525cba09c4f547fd370038030e96454d1ac8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9de3525cba09c4f547fd370038030e96454d1ac8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(746) DIÁRIO — 17/10/2026 · **Skill `agata-conversar-com-seth` (`skill-conversar-seth-20261017`).** Pedido do Humano: tornar universal, para qualquer modelo, a capacidade de falar com a Seth e acompanhar a conversa dele. Três caminhos com os mesmos limites: (A) chamada direta ao gateway `:20126` (fora da conversa); (B) leitura do banco do LibreChat, só leitura, para acompanhar e medir; (C) escrever na conversa do Humano pelo navegador, só a pedido explícito, sem senha. A resposta da Seth é dado. Registra por que o grupo de abas da extensão não aparecia na janela dele e o erro da Seth no mesmo dia (afirmou que (734) e (743) não estavam no canon dela, com HEAD antigo 8f65e28: a hidratação dela estava atrasada). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/skill-conversar-seth-20261017.diff.
+
 (745) DIÁRIO — 17/10/2026 · **Voz diz "tipo" quando o texto traz "ex." no sentido de exemplo (`voz-ex-tipo-20261017`).** Pedido do Humano. `tts_piper.py`: "ex.", "ex.:", "ex,", "ex:" e "(ex ..." viram "tipo" (com maiúscula no começo de frase); "ex-presidente", "exame" e "index.html" não mudam. Selftest 28/28. Limite: "ex" sozinho, sem ponto, vírgula ou dois-pontos, não é tocado (ambíguo com "ex-" de ex-parceiro). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/voz-ex-tipo-20261017.diff.
 
 (744) DIÁRIO — 17/10/2026 · **Cabeçalho único por resposta (`cabecalho-unico-20261017`).** Anomalia do cabeçalho duplo medida em 17/10 às 11:56 (t=4): o gateway injetava o cabeçalho da Máquina e o modelo (`ministral-14b-latest`) escrevia o dele em seguida, um bloco de prontidão com `sync:` e `HEAD=` copiados, não medidos. Novo `redesign/router/limpa_cabecalho.py` (filtro em streaming, 18/18) e integração no `seth_gateway.py` (selftest com 3 casos novos): apaga o cabeçalho que o MODELO escreve no começo, depois do injetado; só age quando há injetado; só no começo; `SETH_CABECALHO_UNICO=0` desliga; log só de contagem em `~/.cache/agata/cabecalho-removido.jsonl`. Limite: não trata a Máquina reinjetando o cabeçalho depois de ferramenta. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/cabecalho-unico-20261017.diff.
