@@ -788,6 +788,9 @@ def _injeta(payload: dict) -> dict:
     # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
     auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
     auditoria = auditoria_turno.linha_modo(msgs) + (f"\n{auditoria}" if auditoria else "")
+    literais = auditoria_turno.entradas_literais(msgs)  # rédea (17/10/2026): o texto exato das entradas que o Humano citou
+    if literais:
+        auditoria = (auditoria + "\n" if auditoria else "") + literais
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
@@ -1727,6 +1730,16 @@ def _selftest() -> int:
     print(f"{'PASS' if ok17i else 'FALHA'}  cabeçalho único: remoção registrada em log (só contagem)")
     print(f"{'PASS' if ok17j else 'FALHA'}  cabeçalho único: SETH_CABECALHO_UNICO=0 desliga")
     falhas += sum(0 if x else 1 for x in (ok17h, ok17i, ok17j))
+    # 17m. Rédea (17/10/2026): o pedido cita (N) -> o texto exato da entrada vai no estado do turno
+    _pr = _injeta({"model": "seth-livre", "messages": [{"role": "user", "content": "explique a (743) pra mim"}]})
+    _sys = " ".join(m["content"] for m in _pr["messages"] if isinstance(m, dict) and m.get("role") == "system")
+    ok17m = "ENTRADAS-LITERAIS" in _sys and "(743) " in _sys
+    _pr2 = _injeta({"model": "seth-livre", "messages": [{"role": "user", "content": "oi, tudo bem?"}]})
+    _sys2 = " ".join(m["content"] for m in _pr2["messages"] if isinstance(m, dict) and m.get("role") == "system")
+    ok17n = "ENTRADAS-LITERAIS" not in _sys2
+    print(f"{'PASS' if ok17m else 'FALHA'}  rédea: pedido com (743) leva a entrada exata no estado")
+    print(f"{'PASS' if ok17n else 'FALHA'}  rédea: pedido sem (N) não leva bloco")
+    falhas += sum(0 if x else 1 for x in (ok17m, ok17n))
     # 18. (705) rota pelo pedido atual: histórico longo com saída de ferramenta + pergunta simples = livre
     hist18 = [{"role": "user", "content": "x" * 300}, {"role": "assistant", "content": "", "tool_calls": [{"id": "t"}]},
               {"role": "tool", "content": "z" * 20000}, {"role": "assistant", "content": "y" * 3000}] * 4 + [
