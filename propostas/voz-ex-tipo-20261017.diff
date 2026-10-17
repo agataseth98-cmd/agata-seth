@@ -1,0 +1,26 @@
+diff --git a/redesign/router/tts_piper.py b/redesign/router/tts_piper.py
+index 274a902..79a8291 100755
+--- a/redesign/router/tts_piper.py
++++ b/redesign/router/tts_piper.py
+@@ -170,6 +170,9 @@ def limpar_markdown(texto):
+     t = re.sub(r"(?m)^\s*,\s*", "", t)                                   # sem vírgula abrindo a linha
+     t = re.sub(r"[ \t]+", " ", t)
+     t = re.sub(r"\s+([,.;:!?])", r"\1", t)
++    # "ex." / "ex," / "ex:" / "(ex ..." no sentido de exemplo: a voz diz "tipo" (decisão do Humano, 17/10/2026)
++    t = re.sub(r"(?<![\w/.\-])([Ee])x(?:\.:?|[,:])(?=\s|$)", lambda m: ("T" if m.group(1) == "E" else "t") + "ipo" + (":" if m.group(0)[-1] in ":" else ("," if m.group(0)[-1] == "," else "")), t)
++    t = re.sub(r"(?<=\()([Ee])x(?=[\s,:])", lambda m: "Tipo" if m.group(1) == "E" else "tipo", t)
+     t = re.sub(r"\s*[·•‧∙⋅]\s*", ", ", t)                                # separadores · • viram pausa
+     t = re.sub(r"\s+[—–-]+\s+|(?<=\w)[—–](?=\w)", ", ", t)                  # travessão ou hífen entre espaços vira pausa; guarda-chuva fica
+     t = re.sub(r",(\s*[,.;:!?])", r"\1", t)
+@@ -379,6 +382,11 @@ def _selftest():
+         ESTADO_CABECALHO = _est
+         res["11a separadores · e - viram pausa; guarda-chuva e 5.5 ficam"] = limpar_markdown(
+             "um · dois - três — quatro • cinco guarda-chuva 5.5") == "um, dois, três, quatro, cinco guarda-chuva 5.5"
++        res["12 'ex.' no sentido de exemplo vira 'tipo'"] = (
++            limpar_markdown("Use um comando, ex.: grep x. Ou ex, o log; (ex: isto) e Ex. aquilo.")
++            == "Use um comando, tipo: grep x. Ou tipo, o log; (tipo: isto) e Tipo aquilo.")
++        res["12b 'ex' dentro de palavra, sigla ou composto não muda"] = (
++            limpar_markdown("o ex-presidente, exame, index.html e a.ex.b") == "o ex-presidente, exame, index.html e a.ex.b")
+         res["9f velocidade base mais lenta que a natural (reunião esclarecedora)"] = 0.5 <= VELOCIDADE_BASE < 1.0
+         with tempfile.TemporaryDirectory() as td:
+             res["7a sem a voz instalada, o padrão é a genérica"] = \
