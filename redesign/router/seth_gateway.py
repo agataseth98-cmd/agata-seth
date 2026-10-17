@@ -693,18 +693,22 @@ def _descrever_modelo(nome: str | None) -> str:
     return f"{nome} ({familia + ', ' if familia else ''}{onde}; medido pela Máquina neste turno)"
 
 
+# O cabeçalho da Máquina abre com este nome (decisão do Humano, 17/10/2026): é o ÚNICO lugar em que o nome do sistema sai como "agata-seth".
+_NOME_CABECALHO = os.environ.get("SETH_NOME_CABECALHO", "agata-seth")
+
+
 def _cabecalho_maquina(msgs: list, modelo: str | None) -> str:
     n = len(auditoria_turno._turnos(msgs)[0]) + 1
     hora = time.strftime("%Y-%m-%d %H:%M %z") + " (relógio da Máquina)"
     if n > 1:
-        return f"Agata · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
+        return f"{_NOME_CABECALHO} · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
     est = {l.split(":", 1)[0]: l for l in _estado().splitlines() if ":" in l}
     sync = est.get("sync") or "sync: não verificado · lacuna: estado não medido"
     topo = est.get("TOPO-MEMÓRIAS", "").split(":", 1)[-1].strip()
     topo = (topo[:300] + "…") if len(topo) > 300 else (topo or "lacuna (estado não injetado)")
     quebrado = [est[k] for k in ("ALERTA-HISTORIA",) if k in est] + ([] if sync.startswith("sync: PASS") else [sync])
     fim = "pronto." if not quebrado else "quebrado: " + "; ".join(q[:200] for q in quebrado)
-    return f"Agata · modelo: {_descrever_modelo(modelo)} · {sync} · {hora}\nÚltima entrada: {topo}\n{fim}"
+    return f"{_NOME_CABECALHO} · modelo: {_descrever_modelo(modelo)} · {sync} · {hora}\nÚltima entrada: {topo}\n{fim}"
 
 
 def _injetar_sse(buf: bytes, texto: str) -> bytes | None:
@@ -1686,9 +1690,9 @@ def _selftest() -> int:
                                              {"role": "user", "content": "e agora?"}]}).encode(),
         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
     l17 = r17a.splitlines()
-    ok17a = (l17[0].startswith("Agata · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)")
+    ok17a = (l17[0].startswith("agata-seth · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)")
              and l17[1].startswith("Última entrada:") and (l17[2] == "pronto." or l17[2].startswith("quebrado:")))
-    ok17b = r17b.startswith("Agata · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 (contador mecânico) · ")
+    ok17b = r17b.startswith("agata-seth · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 (contador mecânico) · ")
     ok17c = r17a.endswith("ok") and r17b.endswith("ok")
     print(f"{'PASS' if ok17a else 'FALHA'}  cabeçalho da Máquina, 1ª resposta: prontidão de 3 linhas")
     print(f"{'PASS' if ok17b else 'FALHA'}  cabeçalho da Máquina, 2ª resposta: t=2 (contador mecânico)")
@@ -1716,7 +1720,7 @@ def _selftest() -> int:
         {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
                                              {"role": "user", "content": "e agora?"}]}).encode(),
         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
-    ok17h = r17h.count("Agata ·") == 1 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
+    ok17h = r17h.count("agata-seth ·") == 1 and r17h.count("Agata ·") == 0 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
     ok17i = log_cab.exists() and json.loads(log_cab.read_text(encoding="utf-8").splitlines()[0])["n"] >= 1
     os.environ["SETH_CABECALHO_UNICO"] = "0"
     r17j = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
@@ -1724,7 +1728,7 @@ def _selftest() -> int:
                                              {"role": "user", "content": "e agora?"}]}).encode(),
         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
     del os.environ["SETH_CABECALHO_UNICO"]
-    ok17j = r17j.count("Agata ·") == 2
+    ok17j = r17j.count("agata-seth ·") + r17j.count("Agata ·") == 2
     _Dummy.texto_fixo = None
     print(f"{'PASS' if ok17h else 'FALHA'}  cabeçalho único: o duplicado do modelo é apagado, fica o da Máquina")
     print(f"{'PASS' if ok17i else 'FALHA'}  cabeçalho único: remoção registrada em log (só contagem)")

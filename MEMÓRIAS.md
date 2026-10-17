@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5fa08f12704601a4124c218bf1f32e61d30cbfc7
-  Escrito em: 17/10/2026 15:39 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 34ba7cbf192531e93fdfe1548ca955f22c60d45e
+  Escrito em: 17/10/2026 15:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fa08f12704601a4124c218bf1f32e61d30cbfc7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fa08f12704601a4124c218bf1f32e61d30cbfc7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fa08f12704601a4124c218bf1f32e61d30cbfc7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fa08f12704601a4124c218bf1f32e61d30cbfc7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fa08f12704601a4124c218bf1f32e61d30cbfc7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34ba7cbf192531e93fdfe1548ca955f22c60d45e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34ba7cbf192531e93fdfe1548ca955f22c60d45e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34ba7cbf192531e93fdfe1548ca955f22c60d45e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34ba7cbf192531e93fdfe1548ca955f22c60d45e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/34ba7cbf192531e93fdfe1548ca955f22c60d45e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(755) DIÁRIO — 17/10/2026 · **O cabeçalho abre com `agata-seth` (`cabecalho-agata-seth-20261017`).** Ordem do Humano: o cabeçalho é o regime de verdade e o único lugar aprovado a vir com o nome composto, no lugar de "Agata". O gateway emite `agata-seth ·` (constante `SETH_NOME_CABECALHO`); a auditoria, o filtro de cabeçalho único, o `verificar_cabecalho.py` e a voz aceitam as duas formas na transição (a voz fala "Agata Seth"); `PROTOCOLOS.md` e `AGENTS.md` atualizados. Selftests: auditoria OK, filtro 20/20, voz 29/29, verificar_cabecalho 16/16, gateway OK. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/cabecalho-agata-seth-20261017.diff.
+
 (754) DIÁRIO — 17/10/2026 · **Rédea de entradas literais (`seth-redea-entradas-literais-20261017`).** Decisão do Humano: todo modelo se treina por rédea, pelo arnês, sem tocar nos pesos. Quando o último pedido do Humano cita uma entrada (N), o gateway põe o texto EXATO dessa entrada (até 3, 2500 caracteres cada) no estado do turno, marcado como dado e com a instrução de citar só dali; `entradas_literais` em `auditoria_turno.py`, ligada em `_injeta`; o verificador de citação confere o resultado. Selftests: 9 casos novos na auditoria e 2 de integração no gateway. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/seth-redea-entradas-literais-20261017.diff.
 
 (753) DIÁRIO — 17/10/2026 · **Ferramentas da Seth: fila longa só onde existe, consulta de unidade e golden com abstenção (`seth-ferramentas-fila-golden-20261017`).** Primeiro uso do protocolo aconselhar-esperar-prosseguir (caso 00001: aviso 15:09, prazo 3 min, sem objeção). Do teste em produção de 33 rodadas (linha de base antes da rédea). (1) O gateway só escala para `<fila>-longo` nas filas de conversa (`rapido`, `livre`, `pesado`); `seth-codigo-longo` não existe no OmniRoute e dava HTTP 400 (4 vezes no teste). (2) `maquina_verificar` ganhou o comando `unidade` (consulta = nome da unidade de USUÁRIO; nome validado por regex, sem espaço nem barra; só `systemctl --user show`): a Seth passa a poder dizer se um serviço está ativo, o que `servicos` (só lista falhas) não faz. (3) `seth_golden.py` e `casos.jsonl`: abstenção honesta ("não medido") como terceiro resultado onde a ferramenta não mede. Selftests: verificador 58/58, gateway OK, golden 19/19. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/seth-ferramentas-fila-golden-20261017.diff.

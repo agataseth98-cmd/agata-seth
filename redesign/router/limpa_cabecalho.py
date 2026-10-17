@@ -19,7 +19,7 @@ import json
 import re
 import sys
 
-_ABRE = "agata ·"
+_ABRES = ("agata ·", "agata-seth ·")  # as duas formas do cabeçalho (agata-seth desde 17/10/2026)
 _RESTO = re.compile(r"^\s*(?:\*\*)?\s*(?:última entrada\s*:|pronto\.|quebrado\s*:)", re.I)
 
 
@@ -34,10 +34,10 @@ class LimpaCabecalho:
     def _eh_prefixo_cab(self, s):
         """True se `s` ainda pode virar "Agata ·" (vazio, ou um prefixo dele)."""
         t = s.lstrip().lstrip("*").lstrip().lower()
-        return t == "" or (len(t) < len(_ABRE) and _ABRE.startswith(t))
+        return t == "" or any(len(t) < len(x) and x.startswith(t) for x in _ABRES)
 
     def _comeca_cab(self, s):
-        return s.lstrip().lstrip("*").lstrip().lower().startswith(_ABRE)
+        return s.lstrip().lstrip("*").lstrip().lower().startswith(_ABRES)
 
     def passar(self, texto):
         if self.fase == "livre" or not texto:
@@ -197,6 +197,8 @@ def _selftest():
                   rodar([CAB, DUP]) == CAB + "Sistemas operacionais."))
     casos.append(("fragmentado em pedaços de 3 caracteres", rodar([CAB] + [DUP[i:i + 3] for i in range(0, len(DUP), 3)]) == CAB + "Sistemas operacionais."))
     casos.append(("fragmentado em 1 caractere", rodar([CAB] + list(DUP)) == CAB + "Sistemas operacionais."))
+    casos.append(("duplicado na forma nova (agata-seth ·) também sai", rodar([CAB, "agata-seth · modelo: x · sync: PASS · HEAD=1\nÚltima entrada: (1) x\npronto.\nCorpo."]) == CAB + "Corpo."))
+    casos.append(("injetado na forma nova: o duplicado do modelo sai", rodar([CAB.replace("Agata ·", "agata-seth ·", 1), "agata-seth · x · t=4 · hora\nCorpo."], injetado=CAB.replace("Agata ·", "agata-seth ·", 1)) == CAB.replace("Agata ·", "agata-seth ·", 1) + "Corpo."))
     casos.append(("linha de turno duplicada (t=...) também sai",
                   rodar([CAB, "Agata · ministral · t=4 (contador mecânico) · 2026-10-17 11:56\nResposta."]) == CAB + "Resposta."))
     casos.append(("cabeçalho em negrito do modelo sai", rodar([CAB, "**Agata · x · t=4 · hora**\nCorpo."]) == CAB + "Corpo."))
