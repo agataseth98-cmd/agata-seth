@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 256718cfc054a51370bff5a7691898ec1f4a3d85
-  Escrito em: 17/10/2026 15:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58937543e2ecc1bd80f679729bffb72a59b80331
+  Escrito em: 17/10/2026 16:00 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/256718cfc054a51370bff5a7691898ec1f4a3d85/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/256718cfc054a51370bff5a7691898ec1f4a3d85/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/256718cfc054a51370bff5a7691898ec1f4a3d85/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/256718cfc054a51370bff5a7691898ec1f4a3d85/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/256718cfc054a51370bff5a7691898ec1f4a3d85/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58937543e2ecc1bd80f679729bffb72a59b80331/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(756) DIÁRIO — 17/10/2026 · **O recibo da janela de manutenção passa a guardar o motivo quando uma tarefa pula (`janela-saida-final-20261017`, AC-33).** Antes, uma tarefa que pulava por regra própria (o treino do Laya, com 15 de 20 exemplos reais) saía no recibo como "sucesso" e a saída era descartada, e ninguém via o porquê sem rodar o script à mão. Agora o recibo final traz `saida_final`: a última linha não vazia da saída do comando, até 200 caracteres, sem caracteres de controle e com sequências longas (tokens, chaves, hashes) redigidas. Só o comando da tarefa é capturado, não a precondição. Testes: janela 18/18 e recuperação 19/19, com 5 casos novos (motivo visível, redação de token, corte em 200, comando que falha, recibo com a linha). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/janela-saida-final-20261017.diff.
+
 (755) DIÁRIO — 17/10/2026 · **O cabeçalho abre com `agata-seth` (`cabecalho-agata-seth-20261017`).** Ordem do Humano: o cabeçalho é o regime de verdade e o único lugar aprovado a vir com o nome composto, no lugar de "Agata". O gateway emite `agata-seth ·` (constante `SETH_NOME_CABECALHO`); a auditoria, o filtro de cabeçalho único, o `verificar_cabecalho.py` e a voz aceitam as duas formas na transição (a voz fala "Agata Seth"); `PROTOCOLOS.md` e `AGENTS.md` atualizados. Selftests: auditoria OK, filtro 20/20, voz 29/29, verificar_cabecalho 16/16, gateway OK. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/cabecalho-agata-seth-20261017.diff.
 
 (754) DIÁRIO — 17/10/2026 · **Rédea de entradas literais (`seth-redea-entradas-literais-20261017`).** Decisão do Humano: todo modelo se treina por rédea, pelo arnês, sem tocar nos pesos. Quando o último pedido do Humano cita uma entrada (N), o gateway põe o texto EXATO dessa entrada (até 3, 2500 caracteres cada) no estado do turno, marcado como dado e com a instrução de citar só dali; `entradas_literais` em `auditoria_turno.py`, ligada em `_injeta`; o verificador de citação confere o resultado. Selftests: 9 casos novos na auditoria e 2 de integração no gateway. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/seth-redea-entradas-literais-20261017.diff.

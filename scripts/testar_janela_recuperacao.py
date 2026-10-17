@@ -85,9 +85,22 @@ def main():
         cycle();rs=[json.loads(x) for x in (d/'receipts.jsonl').read_text().splitlines()];r=next(x for x in rs if x['phase']=='finished');r['result']='failed';j.recibo_duravel(d/'receipts.jsonl',r)
         return cycle()=='blocked' and calls==['a']
     test('recibos contraditórios não permitem execução',contradiction)
+    got=j.executar(dict(TASK,cmd=[sys.executable,'-c','print("linha 1");print("2026-10-17 12:17: 15 exemplo(s) real(is) novo(s) (mínimo 20) -- sem treino esta semana")'],budget_seconds=5),5)
+    checks['saída final do comando vai ao resultado (motivo do pulo visível)']=got[0]=='success' and got[2]=='2026-10-17 12:17: 15 exemplo(s) real(is) novo(s) (mínimo 20) -- sem treino esta semana'
+    got=j.executar(dict(TASK,cmd=[sys.executable,'-c','print("token "+"A"*40+" fim")'],budget_seconds=5),5)
+    checks['sequência longa (token) é redigida na saída final']=got[2]=='token [redigido] fim'
+    got=j.executar(dict(TASK,cmd=[sys.executable,'-c','print("x"*500)'],budget_seconds=5),5)
+    checks['saída final é cortada em 200 caracteres']=len(got[2] or '')<=200
+    got=j.executar(dict(TASK,cmd=[sys.executable,'-c','import sys;print("falhou assim");sys.exit(3)'],budget_seconds=5),5)
+    checks['comando que falha: resultado failed e a última linha guardada']=got[0]=='failed' and got[2]=='falhou assim'
+    def com_saida(d,calls,cycle):
+        cycle(runner=lambda t,p:('success',False,'motivo X'))
+        rows=[json.loads(x) for x in (d/'receipts.jsonl').read_text().splitlines()]
+        return any(x.get('saida_final')=='motivo X' for x in rows if x.get('phase')=='finished')
+    test('recibo final traz saida_final quando o executor a devolve',com_saida)
     t0=time.monotonic()
     got=j.executar(dict(TASK,precond=[sys.executable,'-c','import time;time.sleep(.3)'],cmd=[sys.executable,'-c','import time;time.sleep(.3)']),.4)
-    checks['prazo único cobre precondição e comando']=got==('failed',True) and time.monotonic()-t0<1.3
+    checks['prazo único cobre precondição e comando']=got[:2]==('failed',True) and time.monotonic()-t0<1.3
     got=j.executar(dict(TASK,precond=[sys.executable,'-c','import time;time.sleep(5)']),.1)
     checks['precondição em timeout é skipped (não gasta tentativa de falha)']=got==('skipped',False)
     # Falha transitória de leitura não autoriza remover a evidência antiga.
