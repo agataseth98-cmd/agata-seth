@@ -1,0 +1,56 @@
+diff --git a/redesign/router/tts_piper.py b/redesign/router/tts_piper.py
+index a608478..6e669bb 100755
+--- a/redesign/router/tts_piper.py
++++ b/redesign/router/tts_piper.py
+@@ -81,6 +81,26 @@ FORMATOS = {
+ }
+ 
+ 
++def limpar_markdown(texto):
++    """Tira a marcação de markdown antes de falar: a voz lê o texto, não os símbolos (asteriscos, #, crases, pipes)."""
++    import re
++    t = re.sub(r"```.*?```", " ", texto, flags=re.S)            # bloco de código não se lê
++    t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)             # [texto](url) -> texto
++    t = re.sub(r"https?://\S+", " ", t)                           # URL solta não se lê
++    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", t)                   # títulos
++    t = re.sub(r"(?m)^\s*>+\s?", "", t)                           # citação
++    t = re.sub(r"(?m)^\s*([-*+]|\d+[.)])\s+", "", t)             # marcador de lista
++    t = re.sub(r"(?m)^\s*[-=_*]{3,}\s*$", " ", t)                 # régua horizontal
++    t = re.sub(r"(?m)^\s*\|?[\s:|-]+\|[\s:|-]*$", " ", t)       # linha separadora de tabela
++    t = t.replace("|", ", ")                                       # célula de tabela vira pausa
++    t = re.sub(r"(\*{1,3}|_{2,3})(?=\S)(.+?)(?<=\S)\1", r"\2", t, flags=re.S)  # negrito e itálico
++    t = re.sub(r"(?<!\w)_(?=\S)(.+?)(?<=\S)_(?!\w)", r"\1", t)  # _itálico_ (não mexe em snake_case)
++    t = t.replace("*", "").replace("`", "").replace("~~", "")      # sobras
++    t = re.sub(r"[ \t]+", " ", t)
++    t = re.sub(r"\n{3,}", "\n\n", t)
++    return t.strip()
++
++
+ def sintetizar(texto, speed=1.0):
+     """texto -> PCM s16le mono cru (bytes). speed 1.0 = natural; >1 acelera."""
+     length_scale = 1.0 / speed if speed and speed > 0 else 1.0
+@@ -178,7 +198,7 @@ class H(BaseHTTPRequestHandler):
+         except Exception:  # noqa: BLE001
+             return self._json(400, {"error": {"message": "corpo não é JSON", "type": "invalid_request_error"}})
+ 
+-        texto = (req.get("input") or "").strip()
++        texto = limpar_markdown((req.get("input") or "").strip())
+         if not texto:
+             return self._json(400, {"error": {"message": "campo 'input' vazio", "type": "invalid_request_error"}})
+         fmt = (req.get("response_format") or "mp3").lower()
+@@ -252,6 +272,15 @@ def _selftest():
+         res["6 a cadeia canônica é a aprovada em 16/10/2026 (eco jarvis)"] = \
+             "aecho=0.8:0.7:25|50|90:0.3|0.2|0.12" in salvo[2] and "chorus=0.7:0.9:35|55" in salvo[2] \
+             and "acompressor=threshold=-18dB:ratio=2.5" in salvo[2]
++        res["9a negrito e itálico: sem asteriscos, o texto fica"] = \
++            limpar_markdown("Isto é **muito importante** e *assim* também.") == "Isto é muito importante e assim também."
++        res["9b título, lista, link, crase e código"] = limpar_markdown(
++            "## Resultado\n- item **um**\n- veja [o canon](https://x.y/z) e `grep`\n```\nrm -rf\n```") == \
++            "Resultado\nitem um\nveja o canon e grep"
++        res["9c snake_case e texto simples não são mexidos"] = \
++            limpar_markdown("o arquivo seth_gateway ficou pronto") == "o arquivo seth_gateway ficou pronto"
++        res["9d tabela: sem barras nem traços"] = \
++            "|" not in limpar_markdown("| a | b |\n|---|---|\n| 1 | 2 |") and "-" not in limpar_markdown("| a | b |\n|---|---|\n| 1 | 2 |")
+         with tempfile.TemporaryDirectory() as td:
+             res["7a sem a voz instalada, o padrão é a genérica"] = \
+                 _modelo_padrao(td).endswith("pt_BR-faber-medium.onnx")
