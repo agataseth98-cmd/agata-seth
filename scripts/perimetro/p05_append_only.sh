@@ -226,6 +226,23 @@ p5_append_only() {
   if [ "$cod_quente" -eq 0 ] && [ "$cod_morno" -eq 0 ]; then
     return 0
   fi
+  # EXPURGO ASSINADO (decisão do Humano, 17/10/2026: citação inventada se expurga, inegociável): única exceção à Regra 4, estreita.
+  # Só vale se o staged de MEMÓRIAS.md for o HEAD com um `.diff` assinado (par propostas/expurgo-<nome>.diff + APROVADO-expurgo-<nome>)
+  # aplicado, mais entradas novas no topo; o .diff só troca linhas por linhas com o marcador "[citação inventada, expurgada em ".
+  if [ "$cod_quente" -ne 0 ] && [ "$cod_morno" -eq 0 ] && [ -f "$_PERIMETRO_DIR/verificar_expurgo.py" ]; then
+    local ant nov saida_exp
+    ant="$(mktemp)"; nov="$(mktemp)"
+    if git show "HEAD:MEMÓRIAS.md" > "$ant" 2>/dev/null; then
+      git show ":MEMÓRIAS.md" > "$nov" 2>/dev/null || cat MEMÓRIAS.md > "$nov" 2>/dev/null
+      if saida_exp="$(python3 "$_PERIMETRO_DIR/verificar_expurgo.py" "$ant" "$nov" "$(git rev-parse --show-toplevel)" 2>&1)"; then
+        rm -f "$ant" "$nov"
+        P5_RAMO="expurgo"
+        echo "$saida_exp"
+        return 0
+      fi
+    fi
+    rm -f "$ant" "$nov"
+  fi
   if [ -n "$marca_migracao" ]; then
     P5_RAMO="permutacao"
     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
