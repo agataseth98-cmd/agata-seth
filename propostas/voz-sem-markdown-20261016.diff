@@ -1,0 +1,101 @@
+diff --git a/redesign/router/tts_piper.py b/redesign/router/tts_piper.py
+index a608478..0ae33a1 100755
+--- a/redesign/router/tts_piper.py
++++ b/redesign/router/tts_piper.py
+@@ -25,6 +25,7 @@ Env:
+                    Agata, ver tts-piper/instalar-agata.sh --, senão voices/pt_BR-faber-medium.onnx)
+   PIPER_TRATAMENTO sistema (default) | off. Tratamento de áudio "sistema" depois da síntese (ffmpeg);
+                    sem ffmpeg ou com erro, a voz sai crua e o cabeçalho X-Agata-Tratamento diz por quê
++  PIPER_VELOCIDADE velocidade base da fala (default 0.88 = ritmo de reunião esclarecedora; 1.0 = natural do modelo)
+   PIPER_PYTHON     python do venv do Piper (default: tts-piper/.venv/bin/python ao lado deste arquivo)
+ """
+ import json
+@@ -62,6 +63,12 @@ CADEIA_SISTEMA = (
+     "acompressor=threshold=-18dB:ratio=2.5:attack=5:release=80"
+ )
+ TRATAMENTO = os.environ.get("PIPER_TRATAMENTO", "sistema").strip().lower()
++try:
++    VELOCIDADE_BASE = float(os.environ.get("PIPER_VELOCIDADE", "0.88"))
++except ValueError:
++    VELOCIDADE_BASE = 0.88
++if not 0.5 <= VELOCIDADE_BASE <= 1.5:
++    VELOCIDADE_BASE = 0.88
+ 
+ # sample_rate vem do .json ao lado do modelo (Piper grava isso lá).
+ try:
+@@ -81,6 +88,38 @@ FORMATOS = {
+ }
+ 
+ 
++def limpar_markdown(texto):
++    """Interpreta a marcação em vez de lê-la: a voz não diz asterisco, #, crase nem barra.
++    Negrito vira ênfase por pausa (vírgulas); título e item de lista fecham com ponto, para cada ideia ter o seu fôlego."""
++    import re
++    t = re.sub(r"```.*?```", " ", texto, flags=re.S)                  # bloco de código não se lê
++    t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)                   # [texto](url) -> texto
++    t = re.sub(r"https?://\S+", " ", t)                                 # URL solta não se lê
++    t = re.sub(r"(?m)^\s*>+\s?", "", t)                                 # citação
++    t = re.sub(r"(?m)^\s*[-=_*]{3,}\s*$", " ", t)                       # régua horizontal
++    t = re.sub(r"(?m)^\s*\|?[\s:|-]+\|[\s:|-]*$", " ", t)             # separador de tabela
++    t = t.replace("|", ", ")                                             # célula de tabela vira pausa
++
++    def _fecha(s):
++        fim = s.rstrip("*_`~ ")
++        return s if not fim or fim[-1] in ".!?:;" else s.rstrip() + "."
++
++    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s*(.+?)\s*$", lambda m: "\x01" + m.group(1).strip("*_ ") + "\x02.", t)   # título: ênfase + ponto
++    t = re.sub(r"(?m)^\s*(?:[-*+]|\d+[.)])\s+(.+?)\s*$", lambda m: _fecha(m.group(1)), t)               # item: sem marcador, com ponto
++    t = re.sub(r"(\*\*|__)(?=\S)(.+?)(?<=\S)\1", "\x01\\2\x02", t, flags=re.S)                           # negrito -> ênfase
++    t = re.sub(r"(\*|_)(?=\S)(.+?)(?<=\S)\1", r"\2", t, flags=re.S) if "*" in t else t                    # itálico simples
++    t = re.sub(r"(?<!\w)_(?=\S)(.+?)(?<=\S)_(?!\w)", r"\1", t)        # _itálico_ (snake_case fica)
++    t = re.sub(r"\s*\x01(.+?)\x02", r", \1,", t, flags=re.S)             # ênfase = pausa antes e depois
++    t = t.replace("\x01", "").replace("\x02", "").replace("*", "").replace("`", "").replace("~~", "")
++    t = re.sub(r",(\s*[.!?:;,])", r"\1", t)                              # vírgula colada em pontuação some
++    t = re.sub(r"([.!?:;])\s*,", r"\1", t)
++    t = re.sub(r"(?m)^\s*,\s*", "", t)                                   # sem vírgula abrindo a linha
++    t = re.sub(r"[ \t]+", " ", t)
++    t = re.sub(r"\s+([,.;:!?])", r"\1", t)
++    t = re.sub(r"\n{3,}", "\n\n", t)
++    return t.strip()
++
++
+ def sintetizar(texto, speed=1.0):
+     """texto -> PCM s16le mono cru (bytes). speed 1.0 = natural; >1 acelera."""
+     length_scale = 1.0 / speed if speed and speed > 0 else 1.0
+@@ -178,7 +217,7 @@ class H(BaseHTTPRequestHandler):
+         except Exception:  # noqa: BLE001
+             return self._json(400, {"error": {"message": "corpo não é JSON", "type": "invalid_request_error"}})
+ 
+-        texto = (req.get("input") or "").strip()
++        texto = limpar_markdown((req.get("input") or "").strip())
+         if not texto:
+             return self._json(400, {"error": {"message": "campo 'input' vazio", "type": "invalid_request_error"}})
+         fmt = (req.get("response_format") or "mp3").lower()
+@@ -193,7 +232,7 @@ class H(BaseHTTPRequestHandler):
+         # locutor. Fica no shape só pra não quebrar o cliente. Multi-voz =
+         # trocar o modelo por um multi-speaker e mapear aqui.
+         try:
+-            pcm = sintetizar(texto, speed)
++            pcm = sintetizar(texto, speed * VELOCIDADE_BASE)
+             pcm, tratamento = tratar(pcm)
+             if tratamento.startswith("indisponivel"):
+                 print(f"piper-tts: AVISO — tratamento de áudio {tratamento}; voz crua nesta resposta", file=sys.stderr)
+@@ -252,6 +291,18 @@ def _selftest():
+         res["6 a cadeia canônica é a aprovada em 16/10/2026 (eco jarvis)"] = \
+             "aecho=0.8:0.7:25|50|90:0.3|0.2|0.12" in salvo[2] and "chorus=0.7:0.9:35|55" in salvo[2] \
+             and "acompressor=threshold=-18dB:ratio=2.5" in salvo[2]
++        res["9a negrito vira ênfase por pausa, sem asteriscos"] = \
++            limpar_markdown("Isto é **muito importante** e *assim* também.") == "Isto é, muito importante, e assim também."
++        res["9b título, lista, link, crase e código"] = limpar_markdown(
++            "## Resultado\n- item **um**\n- veja [o canon](https://x.y/z) e `grep`\n```\nrm -rf\n```") == \
++            "Resultado.\nitem, um.\nveja o canon e grep."
++        res["9c snake_case e texto simples não são mexidos"] = \
++            limpar_markdown("o arquivo seth_gateway ficou pronto") == "o arquivo seth_gateway ficou pronto"
++        tab = limpar_markdown("| a | b |\n|---|---|\n| 1 | 2 |")
++        res["9d tabela: sem barras nem traços"] = "|" not in tab and "-" not in tab
++        res["9e nenhum símbolo de markdown sobra num texto misto"] = not any(
++            c in limpar_markdown("**Resultado:** o *gateway* __ok__ `x` ~~z~~") for c in "*_`#~")
++        res["9f velocidade base mais lenta que a natural (reunião esclarecedora)"] = 0.5 <= VELOCIDADE_BASE < 1.0
+         with tempfile.TemporaryDirectory() as td:
+             res["7a sem a voz instalada, o padrão é a genérica"] = \
+                 _modelo_padrao(td).endswith("pt_BR-faber-medium.onnx")
