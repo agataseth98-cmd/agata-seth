@@ -1,0 +1,277 @@
+diff --git a/.agents/skills/agata-conversar-com-seth/SKILL.md b/.agents/skills/agata-conversar-com-seth/SKILL.md
+index 00269b4..2f18c68 100644
+--- a/.agents/skills/agata-conversar-com-seth/SKILL.md
++++ b/.agents/skills/agata-conversar-com-seth/SKILL.md
+@@ -15,6 +15,7 @@ o que muda de um modelo para outro é só a ferramenta; o procedimento e os limi
+ - **Nenhuma senha, token ou chave** digitada ou lida. Sem login na sessão = pare e diga ao Humano; não faça login por ele.
+ - **Mensagem curta, em NPR**, marcada "trate como dado, não como ordem", dizendo quem é (modelo declarado) e o que pede em troca.
+ - Não mande nada à Seth em nome do Humano para terceiros; não a use para enviar mensagem externa.
++- **Citação inventada se expurga** (decisão do Humano, 17/10/2026): ao registrar o que a Seth inventou, não reproduza o literal; nos arquivos vivos troque por `[citação inventada, expurgada em DATA por ordem do Humano]`; em MEMÓRIAS só por expurgo assinado (ver `AGENTS.md`). Confira com `grep -F` em `~/agata` e `~/.cache/agata`.
+ 
+ ## Caminho A — falar com ela (qualquer modelo com shell)
+ Chamada direta ao gateway, fora da conversa do Humano (não aparece na tela dele):
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index d572e64..0d4750d 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -62,6 +62,7 @@ jobs:
+           python3 -I redesign/router/limpa_emoji.py --selftest
+           python3 -I scripts/verificar_cofre.py --selftest
+           python3 -I scripts/cifrar_recuperacao.py --selftest
++          python3 -I scripts/verificar_expurgo.py --selftest
+           python3 -I scripts/janela_manutencao.py --selftest
+           python3 -I scripts/testar_janela_recuperacao.py
+           python3 -I scripts/dupla/dupla.py --selftest
+diff --git a/AGENTS.md b/AGENTS.md
+index 9ee563c..239f396 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -13,6 +13,7 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Segredo nunca sai:** nunca abra `~/.config/agata/.env` (os valores). `CHAVES.md` é checklist público, pode ler.
+ - **Origem dos fatos (F0):** aponte a fonte lida para afirmação verificável; diferencie evidência, inferência e não medido. Reuse fonte já lida na sessão quando pertinente; referência não prova suporte nem atualidade. Fonte histórica pode continuar válida no seu alcance. O aviso lexical é parcial, não certifica a verdade e não substitui a leitura.
+ - **Correção é entrada nova**, nunca edição do que já foi escrito (Regra 4).
++- **Citação inventada se expurga (inegociável, decisão do Humano, 17/10/2026):** ao registrar o erro, descreva-o SEM repetir o literal inventado. Achada em arquivo vivo (diário da Seth, rascunho, derivado), troque por `[citação inventada, expurgada em DATA por ordem do Humano]` e confira com `grep -F`. Em MEMÓRIAS.md (append-only) só por expurgo assinado: par `propostas/expurgo-<nome>.diff` + `APROVADO-expurgo-<nome>` que apenas troca linhas por linhas com esse marcador; é a única exceção do P-5 (`scripts/verificar_expurgo.py`). O histórico do git não se reescreve. Mensagem de chat do Humano só ele apaga.
+ - **Modo conciso é o padrão** (`REGRAS.md`, seção "NPR"): traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. O cabeçalho da Regra 1 não é narração. Modo explicativo só quando o Humano pedir ("modo explicativo"; volta com "modo conciso").
+ - **Buscar: o vault Obsidian é a prioridade 1** ((670)): para achar algo na memória, `memoria/obsidian/` primeiro — por sentido (`python3 scripts/busca_semantica.py "frase"`, ou a tool `vault_buscar` onde houver) e por texto (`grep` no vault), navegando por `cita`/`citada_por`/`parecidas`; para citar, confirme o texto exato no canon (o vault é derivado).
+ - **Voz comum** ((685)/(686); PROJETO, "Personalidade da Seth"): todo modelo do sistema — Seth, Goose, Conselho, Claude Code, Codex, Gemini, local ou nuvem — fala com a mesma voz, para o Humano sentir que fala com a Seth seja qual for o cérebro: **resultado** primeiro, depois a **evidência** (ou "não medido"), depois o **próximo passo**; frases curtas; sem saudação, oferta de ajuda, muleta ("né", "tá?"), interjeição, emoji ou exclamação em série; sem emoção simulada nem biografia inventada. **A voz é comum; o juízo é de cada um:** em parecer ou revisão, declare o seu modelo (no Conselho, na Origem), discorde quando os fatos mandarem e não acompanhe a opinião de outro modelo nem a do Humano — a divergência entre cérebros é a força do sistema.
+diff --git a/scripts/perimetro/p05_append_only.sh b/scripts/perimetro/p05_append_only.sh
+index ddd0d42..a28516b 100644
+--- a/scripts/perimetro/p05_append_only.sh
++++ b/scripts/perimetro/p05_append_only.sh
+@@ -226,6 +226,23 @@ p5_append_only() {
+   if [ "$cod_quente" -eq 0 ] && [ "$cod_morno" -eq 0 ]; then
+     return 0
+   fi
++  # EXPURGO ASSINADO (decisão do Humano, 17/10/2026: citação inventada se expurga, inegociável): única exceção à Regra 4, estreita.
++  # Só vale se o staged de MEMÓRIAS.md for o HEAD com um `.diff` assinado (par propostas/expurgo-<nome>.diff + APROVADO-expurgo-<nome>)
++  # aplicado, mais entradas novas no topo; o .diff só troca linhas por linhas com o marcador "[citação inventada, expurgada em ".
++  if [ "$cod_quente" -ne 0 ] && [ "$cod_morno" -eq 0 ] && [ -f "$_PERIMETRO_DIR/verificar_expurgo.py" ]; then
++    local ant nov saida_exp
++    ant="$(mktemp)"; nov="$(mktemp)"
++    if git show "HEAD:MEMÓRIAS.md" > "$ant" 2>/dev/null; then
++      git show ":MEMÓRIAS.md" > "$nov" 2>/dev/null || cat MEMÓRIAS.md > "$nov" 2>/dev/null
++      if saida_exp="$(python3 "$_PERIMETRO_DIR/verificar_expurgo.py" "$ant" "$nov" "$(git rev-parse --show-toplevel)" 2>&1)"; then
++        rm -f "$ant" "$nov"
++        P5_RAMO="expurgo"
++        echo "$saida_exp"
++        return 0
++      fi
++    fi
++    rm -f "$ant" "$nov"
++  fi
+   if [ -n "$marca_migracao" ]; then
+     P5_RAMO="permutacao"
+     echo "P-5: crescimento ordinário falhou (quente/morno encolheram) e marca '$marca_migracao' está presente -- checagem de PERMUTAÇÃO entre camadas (verificar_migracao_periodo.py), quente+morno+frio. MEMÓRIAS por período (Fase 4)."
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index b6ae266..cc0c80f 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -354,6 +354,22 @@ PY2
+ git add "MEMÓRIAS.md"
+ EOF
+ 
++# EXPURGO ASSINADO (17/10/2026): a unica excecao a Regra 4 so vale com o par assinado pelo Humano (scripts/verificar_expurgo.py tem o
++# selftest do caminho feliz e das 7 recusas). Aqui o furo que importa: um par FALSO (sem assinatura valida) nao abre a excecao.
++_caso P-5 PEGA "expurgo SEM assinatura valida (par falso) nao e' aceito" <<'EOF'
++python3 - <<'PY2'
++import io
++p="MEMÓRIAS.md"; L=io.open(p,encoding="utf-8").read().split("\n")
++i=next(k for k,l in enumerate(L) if "ENTRADAS-NOVAS:AQUI" in l)
++alvo=next(k for k in range(i+1,len(L)) if len(L[k])>80)
++L[alvo]=L[alvo].replace("a","[citação inventada, expurgada em 01/01/2026]",1)
++io.open(p,"w",encoding="utf-8").write("\n".join(L))
++PY2
++printf 'x\n' > propostas/expurgo-falso.diff
++printf 'diff-sha256: 0000\n' > propostas/APROVADO-expurgo-falso
++git add "MEMÓRIAS.md" propostas/expurgo-falso.diff propostas/APROVADO-expurgo-falso
++EOF
++
+ # --- P-7: citacao ---------------------------------------------------------
+ # O furo de (419): a marca de migracao em propostas/aplicadas/ (que nunca e'
+ # limpo, por desenho) deixava o P-7 em SKIP permanente. SKIP nao emite
+diff --git a/scripts/verificar_expurgo.py b/scripts/verificar_expurgo.py
+new file mode 100644
+index 0000000..1836b54
+--- /dev/null
++++ b/scripts/verificar_expurgo.py
+@@ -0,0 +1,180 @@
++#!/usr/bin/env python3
++"""verificar_expurgo.py -- ramo "expurgo assinado" do P-5 (decisão do Humano, 17/10/2026: citação inventada se expurga, inegociável).
++
++O P-5 recusa alterar entrada já registrada (Regra 4). Esta é a ÚNICA exceção, e é estreita: o conteúdo NOVO de MEMÓRIAS.md tem de ser o
++ANTIGO (HEAD) com um expurgo ASSINADO aplicado, mais, no máximo, entradas novas no topo. O expurgo é um par `propostas/expurgo-<nome>.diff`
+++ `propostas/APROVADO-expurgo-<nome>` (em propostas/ ou propostas/aplicadas/) assinado pelo Humano, igual ao P-8 (sha256 do .diff + assinatura
++ssh, namespace agata-aprovacao-p8, contra a raiz de confiança de HEAD). E o .diff só pode SUBSTITUIR linhas por linhas que carregam o marcador
++"[citação inventada, expurgada em ": mesmo número de linhas tiradas e postas, só em MEMÓRIAS.md, nenhuma linha posta sem o marcador.
++O histórico do git não é reescrito; o que muda é o arquivo vivo, de onde os modelos leem (hidratação e derivados).
++
++Uso: verificar_expurgo.py ANTIGO NOVO [RAIZ]   exit 0 = o NOVO é o ANTIGO expurgado de forma assinada; 1 = não; 2 = uso.
++     verificar_expurgo.py --selftest
++"""
++import glob
++import hashlib
++import os
++import subprocess
++import sys
++import tempfile
++
++MARCADOR_EXPURGO = "[citação inventada, expurgada em "
++MARCADOR_P5 = "<!-- ENTRADAS-NOVAS:AQUI".encode("utf-8")
++
++
++def _corpo(b):
++    i = b.find(MARCADOR_P5)
++    if i == -1:
++        return None
++    return b[b.find(b"\n", i) + 1:]
++
++
++def _git(raiz, *args, entrada=None):
++    return subprocess.run(["git", "-C", raiz, *args], input=entrada, capture_output=True)
++
++
++def _assinatura_ok(raiz, nome, diff_path, apr_path):
++    dsha = hashlib.sha256(open(diff_path, "rb").read()).hexdigest()
++    linhas = open(apr_path, encoding="utf-8", errors="replace").read().splitlines()
++    if f"diff-sha256: {dsha}" not in linhas:
++        return False, "sha256 do .diff não bate com o APROVADO"
++    sig = []
++    dentro = False
++    for l in linhas:
++        if "BEGIN SSH SIGNATURE" in l:
++            dentro = True
++        if dentro:
++            sig.append(l)
++        if "END SSH SIGNATURE" in l:
++            break
++    if not sig:
++        return False, "APROVADO sem bloco de assinatura"
++    r = _git(raiz, "show", "HEAD:propostas/.allowed_signers")
++    if r.returncode != 0 or not r.stdout.strip():
++        return False, "sem propostas/.allowed_signers em HEAD"
++    with tempfile.TemporaryDirectory() as td:
++        open(f"{td}/signers", "wb").write(r.stdout)
++        open(f"{td}/sig", "w", encoding="utf-8").write("\n".join(sig) + "\n")
++        p = subprocess.run(["ssh-keygen", "-Y", "verify", "-f", f"{td}/signers", "-I", "agata-humano", "-n", "agata-aprovacao-p8",
++                            "-s", f"{td}/sig"], input=f"{dsha}  {nome}".encode(), capture_output=True)
++    return (p.returncode == 0), (p.stderr or p.stdout).decode(errors="replace").strip()
++
++
++def _diff_estreito(diff_path):
++    """True se o .diff só troca linhas de MEMÓRIAS.md por linhas com o marcador (mesmo número, sem acréscimo livre)."""
++    texto = open(diff_path, encoding="utf-8").read().splitlines()
++    arquivos = [l for l in texto if l.startswith(("--- ", "+++ "))]
++    if not arquivos or any(a.split("\t")[0] not in ("--- a/MEMÓRIAS.md", "+++ b/MEMÓRIAS.md") for a in arquivos):
++        return False
++    tiradas = [l for l in texto if l.startswith("-") and not l.startswith("---")]
++    postas = [l for l in texto if l.startswith("+") and not l.startswith("+++")]
++    if not tiradas or len(tiradas) != len(postas):
++        return False
++    return all(MARCADOR_EXPURGO in p for p in postas)
++
++
++def verificar(antigo, novo, raiz):
++    ca, cn = _corpo(antigo), _corpo(novo)
++    if ca is None or cn is None:
++        return False, "marcador ENTRADAS-NOVAS ausente"
++    candidatos = glob.glob(os.path.join(raiz, "propostas", "APROVADO-expurgo-*")) + \
++        glob.glob(os.path.join(raiz, "propostas", "aplicadas", "APROVADO-expurgo-*"))
++    motivos = []
++    for apr in sorted(candidatos):
++        nome = os.path.basename(apr)[len("APROVADO-"):]
++        diff = next((d for d in (os.path.join(raiz, "propostas", nome + ".diff"), os.path.join(raiz, "propostas", "aplicadas", nome + ".diff")) if os.path.isfile(d)), None)
++        if not diff:
++            motivos.append(f"{nome}: .diff ausente")
++            continue
++        ok, m = _assinatura_ok(raiz, nome, diff, apr)
++        if not ok:
++            motivos.append(f"{nome}: {m}")
++            continue
++        if not _diff_estreito(diff):
++            motivos.append(f"{nome}: .diff fora do formato permitido (só trocar linhas de MEMÓRIAS.md por linhas com o marcador)")
++            continue
++        with tempfile.TemporaryDirectory() as td:
++            open(os.path.join(td, "MEMÓRIAS.md"), "wb").write(antigo)
++            p = subprocess.run(["git", "apply", os.path.abspath(diff)], cwd=td, capture_output=True)
++            if p.returncode != 0:
++                motivos.append(f"{nome}: não aplica sobre o HEAD ({p.stderr.decode(errors='replace').strip()[:80]})")
++                continue
++            remendado = open(os.path.join(td, "MEMÓRIAS.md"), "rb").read()
++        cr = _corpo(remendado)
++        if cr is not None and len(cn) >= len(cr) and cn.endswith(cr):
++            return True, f"expurgo assinado '{nome}' aplicado; resto só cresceu pelo topo"
++        motivos.append(f"{nome}: o conteúdo novo não é o antigo + este expurgo + entradas no topo")
++    return False, "; ".join(motivos) or "nenhum par propostas/APROVADO-expurgo-* encontrado"
++
++
++def _selftest():
++    ok_geral = True
++    res = {}
++    with tempfile.TemporaryDirectory() as td:
++        raiz = os.path.join(td, "repo")
++        os.makedirs(os.path.join(raiz, "propostas"))
++        subprocess.run(["git", "init", "-q", raiz], check=True)
++        chave = os.path.join(td, "k")
++        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", chave], check=True)
++        pub = open(chave + ".pub").read().split()
++        open(os.path.join(raiz, "propostas", ".allowed_signers"), "w").write(f'agata-humano namespaces="agata-aprovacao-p8" {pub[0]} {pub[1]}\n')
++        cab = "# MEMÓRIAS\n<!-- ENTRADAS-NOVAS:AQUI -- teste -->\n"
++        antigo = cab + "(2) DIÁRIO — a · disse \"frase inventada X\" e mais.\n\n(1) DIÁRIO — b · texto b.\n"
++        open(os.path.join(raiz, "MEMÓRIAS.md"), "w").write(antigo)
++        _git(raiz, "-c", "user.email=t@t", "-c", "user.name=t", "add", "-A")
++        _git(raiz, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "base")
++        mod = antigo.replace('disse "frase inventada X" e mais', f'disse {MARCADOR_EXPURGO}17/10/2026] e mais')
++        novo_ok = cab + "(3) DIÁRIO — nova no topo.\n\n" + mod[len(cab):]
++        with tempfile.TemporaryDirectory() as t2:
++            open(os.path.join(t2, "a"), "w").write(antigo)
++            open(os.path.join(t2, "b"), "w").write(mod)
++            d = subprocess.run(["git", "diff", "--no-index", "-U1", "a", "b"], cwd=t2, capture_output=True, text=True).stdout
++        d = d.replace("a/a", "a/MEMÓRIAS.md").replace("b/b", "b/MEMÓRIAS.md")
++        nome = "expurgo-teste"
++        dpath = os.path.join(raiz, "propostas", nome + ".diff")
++        open(dpath, "w", encoding="utf-8").write(d)
++        dsha = hashlib.sha256(d.encode("utf-8")).hexdigest()
++        p = subprocess.run(["ssh-keygen", "-Y", "sign", "-f", chave, "-n", "agata-aprovacao-p8"], input=f"{dsha}  {nome}".encode(), capture_output=True)
++        assinatura = p.stdout.decode()
++        apr = os.path.join(raiz, "propostas", "APROVADO-" + nome)
++        open(apr, "w", encoding="utf-8").write(f"diff-sha256: {dsha}\n{assinatura}")
++        _git(raiz, "-c", "user.email=t@t", "-c", "user.name=t", "add", "-A")
++        _git(raiz, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "chave e par")
++        # o HEAD agora tem a raiz de confiança; antigo = HEAD:MEMÓRIAS.md
++        a = antigo.encode()
++        res["1 expurgo assinado + entrada nova no topo passa"] = verificar(a, novo_ok.encode(), raiz)[0]
++        res["2 expurgo assinado sozinho passa"] = verificar(a, mod.encode(), raiz)[0]
++        res["3 sem aplicar o expurgo (só entrada nova) não é este ramo"] = not verificar(a, (cab + "(3) x\n\n" + antigo[len(cab):]).encode(), raiz)[0]
++        res["4 edição qualquer fora do expurgo não passa"] = not verificar(a, novo_ok.replace("texto b.", "texto B alterado.").encode(), raiz)[0]
++        res["5 apagar a entrada inteira não passa"] = not verificar(a, (cab + "(1) DIÁRIO — b · texto b.\n").encode(), raiz)[0]
++        # assinatura adulterada: muda o .diff depois de assinado
++        open(dpath, "a").write("\n")
++        res["6 .diff alterado depois de assinado não passa"] = not verificar(a, mod.encode(), raiz)[0]
++        open(dpath, "w", encoding="utf-8").write(d)
++        # sem par
++        os.remove(apr)
++        res["7 sem o APROVADO não passa"] = not verificar(a, mod.encode(), raiz)[0]
++        # diff largo (põe linha sem marcador)
++        d2 = d.replace(MARCADOR_EXPURGO, "[outra coisa ")
++        open(dpath, "w", encoding="utf-8").write(d2)
++        dsha2 = hashlib.sha256(d2.encode("utf-8")).hexdigest()
++        p2 = subprocess.run(["ssh-keygen", "-Y", "sign", "-f", chave, "-n", "agata-aprovacao-p8"], input=f"{dsha2}  {nome}".encode(), capture_output=True)
++        open(apr, "w", encoding="utf-8").write(f"diff-sha256: {dsha2}\n{p2.stdout.decode()}")
++        res["8 .diff assinado mas sem o marcador de expurgo não passa"] = not verificar(a, mod.replace(MARCADOR_EXPURGO, "[outra coisa ").encode(), raiz)[0]
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++        ok_geral = ok_geral and v
++    print(f"verificar_expurgo selftest: {sum(res.values())}/{len(res)}")
++    return 0 if ok_geral else 1
++
++
++if __name__ == "__main__":
++    if "--selftest" in sys.argv:
++        sys.exit(_selftest())
++    if len(sys.argv) < 3:
++        print(__doc__)
++        sys.exit(2)
++    raiz = sys.argv[3] if len(sys.argv) > 3 else os.getcwd()
++    ok, msg = verificar(open(sys.argv[1], "rb").read(), open(sys.argv[2], "rb").read(), raiz)
++    print(("P-5 expurgo: " if ok else "P-5 expurgo NÃO vale: ") + msg)
++    sys.exit(0 if ok else 1)
