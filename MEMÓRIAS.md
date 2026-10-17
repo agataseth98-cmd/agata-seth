@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ae54b9e8506a1d31884f75f84de21bd6b56db2af
-  Escrito em: 17/10/2026 10:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cbaad06bdf54f6318f76f8b133548fa5aa5aa330
+  Escrito em: 17/10/2026 10:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae54b9e8506a1d31884f75f84de21bd6b56db2af/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae54b9e8506a1d31884f75f84de21bd6b56db2af/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae54b9e8506a1d31884f75f84de21bd6b56db2af/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae54b9e8506a1d31884f75f84de21bd6b56db2af/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ae54b9e8506a1d31884f75f84de21bd6b56db2af/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbaad06bdf54f6318f76f8b133548fa5aa5aa330/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbaad06bdf54f6318f76f8b133548fa5aa5aa330/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbaad06bdf54f6318f76f8b133548fa5aa5aa330/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbaad06bdf54f6318f76f8b133548fa5aa5aa330/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cbaad06bdf54f6318f76f8b133548fa5aa5aa330/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(738) DIÁRIO — 17/10/2026 · **Emoji inline corrigido (`emoji-inline-20261017`).** Autor Codex (GPT-6); revisor Claude Code (Sonnet 5.5). Em `limpa_emoji.py` o prefixo de crase só protege enquanto ainda está sendo reconhecido, sem engolir a prosa depois de um trecho inline no início. Selftest 19/19; meus casos de borda (inline no início, texto fragmentado, emoji dentro de bloco e de inline) passaram. Fonte: propostas/aplicadas/emoji-inline-20261017.diff.
+
 (737) DIÁRIO — 16/10/2026 · **Voz interpreta markdown e fala mais devagar (`voz-sem-markdown-20261016`).** Pedido do Humano: a voz dizia "asterisco" no negrito; a fala deve ter ritmo de reunião esclarecedora e a interpretação deve contribuir para a compreensão. `tts_piper.py` ganhou `limpar_markdown` (tira asteriscos, #, crases, barras de tabela, URLs e código; negrito vira ênfase por pausa; título e item de lista fecham com ponto) e `VELOCIDADE_BASE` 0,88 (`PIPER_VELOCIDADE`). Selftest 17/17. Claude Code (Sonnet 5.5) aplicou o par assinado. Fonte: propostas/aplicadas/voz-sem-markdown-20261016.diff.
 
 (736) DIÁRIO — 16/10/2026 · **Vigia permanente aplicada (`vigia-permanente-20261016`).** Decisão do Humano, 20h36: a vigia fica permanente para todos os modelos confederados. Claude Code (Sonnet 5.5) aplicou vigia-permanente-20261016 (assinada): unit de usuário agata-vigia@.service (uma instância por agente, só shell, eventos em ~/.cache/agata/sincronia/vigia-<agente>.log) e linha na Skill agata-fluxo-dupla. Instalar e ligar as units é decisão do Humano. Fonte: propostas/aplicadas/vigia-permanente-20261016.diff.
