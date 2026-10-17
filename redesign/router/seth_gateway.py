@@ -571,6 +571,10 @@ def _fila_pela_janela(payload: dict) -> str | None:
     base -- o LibreChat não sabe qual modelo da fila vai responder, o gateway sabe a fila
     (667). None = fica como está (pedido cabe, fila fora do perfil, sem fila longa)."""
     modelo = str(payload.get("model", ""))
+    # A fila -longo só existe para as filas de conversa (capivara_perfis.FILAS_CONVERSA); `seth-codigo` não tem. Escalar para uma fila que
+    # não existe dava HTTP 400 no OmniRoute (medido em 17/10/2026, 4 vezes no teste de produção).
+    if modelo not in capivara_perfis.FILAS_CONVERSA:
+        return None
     perfis = _perfis()
     limiar = capivara_perfis.limiar_tokens(perfis, modelo)
     if limiar is None or not capivara_perfis.fila_longa(perfis, modelo):
@@ -1558,11 +1562,11 @@ def _selftest() -> int:
     # 9h. fila pela janela (667): perfil de teste -- pedido curto fica, pedido grande
     # vai pro -longo; fila fora do perfil não muda.
     _perfis_antes = globals()["_perfis"]
-    globals()["_perfis"] = lambda: {"filas": {"seth-pesado": ["a/grande", "ollama-local/x"]},
+    globals()["_perfis"] = lambda: {"filas": {"seth-pesado": ["a/grande", "ollama-local/x"], "seth-codigo": ["a/grande", "ollama-local/x"]},
                                     "modelos": {"a/grande": {"janela": 1000000}, "ollama-local/x": {"janela": 65536}}}
     curto = {"model": "seth-pesado", "messages": [{"role": "user", "content": "oi"}]}
     grande = {"model": "seth-pesado", "messages": [{"role": "user", "content": "z" * 200000}]}
-    fora = {"model": "seth-codigo", "messages": [{"role": "user", "content": "z" * 200000}]}
+    fora = {"model": "seth-codigo", "messages": [{"role": "user", "content": "z" * 200000}]}  # no perfil, mas sem fila -longo no OmniRoute
     ok9h = (_fila_pela_janela(curto) is None and _fila_pela_janela(grande) == "seth-pesado-longo"
             and _fila_pela_janela(fora) is None)
     globals()["_perfis"] = _perfis_antes

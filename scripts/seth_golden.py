@@ -15,6 +15,7 @@ Uso:
   seth_golden.py --pontuar ID < resposta.txt        pontua um texto de resposta
   seth_golden.py --banco ID                         pontua a última resposta da Seth no LibreChat (só leitura)
   seth_golden.py --selftest
+Casos com `"aceita_abstencao": true` aceitam "não medido/não achei" sem valor afirmado (a ferramenta não mede aquilo).
 Saída: PASS/FALHA por critério e a verdade usada. Exit 0 = passou, 1 = falhou, 2 = uso.
 """
 import json
@@ -93,6 +94,12 @@ def julgar(caso, v, resposta, raiz=RAIZ):
         crit.append(("verdade calculável", False, "não consegui calcular a verdade"))
         return crit
     t = caso["tipo"]
+    # ABSTENÇÃO HONESTA: se o caso admite (a ferramenta não mede aquilo) e a resposta diz que não mediu/achou, SEM afirmar valor nenhum, passa.
+    corpo = "\n".join(resposta.splitlines()[1:]) if re.match(r"\s*(?:agata|agata-seth)\s*\u00b7", resposta, re.I) else resposta
+    if caso.get("aceita_abstencao") and re.search(r"\b(nao medido|nao achei|nao encontrei|nao consegui medir|nao lista)", _n(corpo)) \
+            and not re.search(r"\d", corpo):
+        crit.append(("abstenção honesta aceita (a ferramenta não mede isso)", True, "não medido"))
+        return crit
     if t == "titulos":
         for n, titulo in v.items():
             ok = bool(titulo) and _n(" ".join(titulo.split()[:4])) in r
@@ -172,6 +179,10 @@ def _selftest():
     v_per = {"geral": "OK", "ok": 20, "skip": 1, "parcial": 2, "falha": 0, "parciais": ["P-4", "P-12"]}
     res["perímetro certo passa"] = ok(j(c_per, v_per, longo + "Geral OK, 20 OK, 2 PARCIAL: P-4 e P-12."))
     res["perímetro sem o P-12 falha"] = not ok(j(c_per, v_per, longo + "Geral OK, 20 OK, 2 PARCIAL: P-4."))
+    c_abs = dict(c_cte, aceita_abstencao=True)
+    res["abstenção honesta passa quando o caso a admite"] = ok(j(c_abs, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
+    res["abstenção sem a flag do caso reprova"] = not ok(j(c_cte, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
+    res["abstenção com valor errado afirmado reprova"] = not ok(j(c_abs, v_cte, longo + 'Não achei, mas chuto MIN_NOVOS = 99; não medido.'))
     res["verdade incalculável reprova"] = not ok(j(c_num, None, longo))
     res["resposta vazia reprova"] = not ok(j(c_cte, v_cte, ""))
     for k, v in res.items():

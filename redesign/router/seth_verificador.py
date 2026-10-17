@@ -108,6 +108,11 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "Unidades de usuário em FALHA (`systemctl --user --failed`). "
         "'0 loaded units listed' = nenhuma falhando = saudável.",
     ),
+    "unidade": (
+        ["systemctl", "--user", "show", "--no-pager", "-p", "Id,LoadState,ActiveState,SubState,UnitFileState"], 15,
+        "Estado de UMA unidade de usuário (ex.: laya-roteador.service): ativa ou não, em que subestado. "
+        "Use o parâmetro `consulta` com o nome da unidade. `servicos` só lista as que estão em FALHA.",
+    ),
     "p8_verificar": (
         ["bash", "scripts/p8_verificar.sh"], 60,
         "Confere se uma proposta P-8 PENDENTE (propostas/<nome>.diff + "
@@ -156,6 +161,8 @@ _CONSULTA_MAX = 200
 # nome virar argv -- barra aqui, nunca deixa a validação inteira pro script
 # de baixo.
 _RX_NOME_PROPOSTA = re.compile(r"^[a-z0-9][a-z0-9._-]{0,80}$")
+# nome de unidade de USUÁRIO: minúsculas, dígitos, `_.@-`, e um sufixo de tipo; nada de caminho, espaço ou metacaractere
+_RX_UNIDADE = re.compile(r"^[a-z0-9][a-z0-9_.@-]{0,80}\.(?:service|timer|socket|target)$")
 
 
 def _argv(nome: str, n: int | None, prop_nome: str | None = None,
@@ -164,8 +171,14 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
     tipado e validado antes de virar elemento de argv -- nunca interpolado
     como texto."""
     base = list(COMANDOS[nome][0])
-    if consulta is not None and nome not in ("busca_semantica", "busca_texto", "opiniao_jev"):
+    if consulta is not None and nome not in ("busca_semantica", "busca_texto", "opiniao_jev", "unidade"):
         raise ValueError(f"'{nome}' não aceita o parâmetro consulta")
+    if nome == "unidade":
+        if n is not None or prop_nome is not None:
+            raise ValueError("'unidade' só aceita o parâmetro consulta (o nome da unidade)")
+        if not isinstance(consulta, str) or any(c in consulta for c in " \t\r\n\x00") or not _RX_UNIDADE.fullmatch(consulta):
+            raise ValueError("'consulta' inválida -- nome de unidade de usuário, ex.: laya-roteador.service")
+        return base + ["--", consulta]
     if nome in ("busca_texto", "opiniao_jev"):
         if n is not None or prop_nome is not None:
             raise ValueError(f"'{nome}' só aceita o parâmetro consulta")
@@ -272,6 +285,11 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
             return "nenhuma ocorrência (sem acento, por palavras) no vault nem em extras/ -- tente busca_semantica (por sentido)."
         notas = {ln.split(":", 1)[0] for ln in texto.splitlines() if ln.startswith(("memoria/", "extras/"))}
         return f"{len(notas)} nota(s) com a frase; abra com vault_consultar." if codigo == 0 else None
+    if nome == "unidade":
+        d = dict(l.split("=", 1) for l in texto.splitlines() if "=" in l)
+        if d.get("LoadState") == "not-found":
+            return f"unidade {d.get('Id', '?')}: NÃO existe (not-found)."
+        return f"{d.get('Id', '?')}: {d.get('ActiveState', '?')}/{d.get('SubState', '?')}, arquivo {d.get('UnitFileState', '?')}."
     if nome == "servicos":
         m = re.search(r"(\d+) loaded units? listed", texto)
         if m is None:
@@ -441,6 +459,19 @@ def _selftest() -> int:
             casos.append((f"n={mau!r} recusado", True))
     # 3. n válido entra como inteiro
     casos.append(("git_log n=5 -> argv", _argv("git_log", 5)[-1] == "5"))
+    casos.append(("unidade válida -> argv termina no nome, depois de --", _argv("unidade", None, consulta="laya-roteador.service")[-2:] == ["--", "laya-roteador.service"]))
+    for mau in ("../x.service", "a b.service", "UPPER.service", "x.service;rm", "x", "x.service\n", "/etc/passwd.service", "-x.service"):
+        try:
+            _argv("unidade", None, consulta=mau); casos.append((f"unidade {mau!r} recusada", False))
+        except ValueError:
+            casos.append((f"unidade {mau!r} recusada", True))
+    try:
+        _argv("servicos", None, consulta="x.service"); casos.append(("servicos continua sem consulta", False))
+    except ValueError:
+        casos.append(("servicos continua sem consulta", True))
+    casos.append(("unidade só --user, sem shell", _argv("unidade", None, consulta="a.timer")[:3] == ["systemctl", "--user", "show"]))
+    casos.append(("leitura: unidade ativa", "active/running" in (_leitura("unidade", "Id=a.service\nLoadState=loaded\nActiveState=active\nSubState=running\nUnitFileState=enabled\n", 0) or "")))
+    casos.append(("leitura: unidade inexistente", "NÃO existe" in (_leitura("unidade", "Id=b.service\nLoadState=not-found\nActiveState=inactive\n", 0) or "")))
     # 4. comando que não aceita n recusa n
     try:
         _argv("perimetro", 3); casos.append(("perimetro recusa n", False))
