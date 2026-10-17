@@ -43,3 +43,10 @@ Escolha por valor e risco: primeiro o que fecha buracos de integridade ou reduz 
 | AC-19 | **Resolvido** fora do repositório: comentário e lista de vozes do `librechat.yaml` atualizados (voz `agata-last`, sem `dora`); backup `librechat.yaml.bak-voz-20261017`; LibreChat reiniciado, responde 200 | `~/librechat/librechat.yaml` | resolvido |
 | AC-26 | **Resolvido**: unit `agata-vigia@.service` aplicada (PR 285) e ligada para `claude` e `codex` | `systemctl --user is-active agata-vigia@claude agata-vigia@codex` | resolvido |
 | AC-27 | **Novo, resolvido:** a voz do LibreChat dava 500 por SSRF; corrigido com `speech.tts.allowedAddresses`. E o shim do Piper agora interpreta markdown e fala a 0,88 (MEMÓRIAS (737)) | logs do `librechat`; selftest 17/17 | resolvido |
+
+## Correções de 17/10/2026 11h (linhas novas)
+| ID | Atualização | Evidência | Estado |
+|---|---|---|---|
+| AC-17 | **Refutado.** Os números 427, 514 e 599 não estão repetidos como entradas: o `grep` simples contava linhas de texto que começam com "(N)" no meio de outras entradas. Só cabeçalhos reais (`^\(N\) TIPO — `) contam, e entre eles o único número repetido é o (729), já corrigido pela entrada (730). Lição: a contagem de duplicatas usa o padrão do aplicador, não um `grep` solto | `grep -oE '^\([0-9]+\) [^ ]+ — ' MEMÓRIAS.md` + `uniq -c` (só 729 com 14) | resolvido (falso positivo) |
+| AC-28 | **Novo.** Janela de manutenção: o payload do Codex bloqueava a janela inteira após uma queda no meio da tarefa (medido por simulação). Emendado em `janela-recuperacao-v2-20261017` (queda conta 1 tentativa e a janela segue; precondição mantém teto de 60 s) | PR 294; testes 14/14 | em proposta (assinatura do Humano) |
+| AC-29 | **Novo.** O contador de respostas do Codex mudava o significado de `t=` (120 mensagens do Humano contra 233 respostas do modelo no mesmo transcrito). Emendado em `contador-t-modos-20261017`: padrão continua mensagens do Humano; modo respostas opcional | PR 295; testes auxiliares 16/16 | em proposta (assinatura do Humano) |
