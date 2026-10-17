@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(737) DIÁRIO — 16/10/2026 · **Voz interpreta markdown e fala mais devagar (`voz-sem-markdown-20261016`).** Pedido do Humano: a voz dizia "asterisco" no negrito; a fala deve ter ritmo de reunião esclarecedora e a interpretação deve contribuir para a compreensão. `tts_piper.py` ganhou `limpar_markdown` (tira asteriscos, #, crases, barras de tabela, URLs e código; negrito vira ênfase por pausa; título e item de lista fecham com ponto) e `VELOCIDADE_BASE` 0,88 (`PIPER_VELOCIDADE`). Selftest 17/17. Claude Code (Sonnet 5.5) aplicou o par assinado. Fonte: propostas/aplicadas/voz-sem-markdown-20261016.diff.
+  palavras-chave: voz, interpreta, markdown, fala, devagar, pedido, humano, dizia, asterisco, negrito, deve, ter, ritmo, reunião, esclarecedora, interpretação, contribuir, compreensão, tts, piper, ganhou, limpar, tira, asteriscos, crases, barras, tabela, urls, código, vira, ênfase, pausa, título, item, lista, fecham, ponto, velocidade, base, selftest, claude, code, sonnet, aplicou, par, assinado, fonte, propostas, aplicadas, diff
 (736) DIÁRIO — 16/10/2026 · **Vigia permanente aplicada (`vigia-permanente-20261016`).** Decisão do Humano, 20h36: a vigia fica permanente para todos os modelos confederados. Claude Code (Sonnet 5.5) aplicou vigia-permanente-20261016 (assinada): unit de usuário agata-vigia@.service (uma instância por agente, só shell, eventos em ~/.cache/agata/sincronia/vigia-<agente>.log) e linha na Skill agata-fluxo-dupla. Instalar e ligar as units é decisão do Humano. Fonte: propostas/aplicadas/vigia-permanente-20261016.diff.
   palavras-chave: vigia, permanente, aplicada, decisão, humano, fica, modelos, confederados, claude, code, sonnet, aplicou, assinada, unit, usuário, agata, service, instância, agente, shell, eventos, cache, sincronia, log, linha, skill, fluxo, dupla, instalar, ligar, units, fonte, propostas, aplicadas, diff
 (735) DIÁRIO — 16/10/2026 · **Primeira Skill do sistema Agata aplicada (`skill-fluxo-dupla-20261016`): `agata-fluxo-dupla` e as ferramentas da dupla agora vivem no repositório.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: merge, laya, roteador, caiu, loop, subida, systemd, comeu, aspas, duplas, json, environment, extra, models, serve, recusou, invalid, not, object, parado, seth, segue, regra, tamanho, gateway, cai, nela, fora, conserto, linha, proposta, segundo, erro, meu, estava, desde, reiniciei
 (721) EXECUÇÃO — 15/10/2026 · **Aplicada `laya-roteador-2026-10-15` (assinada pelo Humano depois da explicação de "caminho quente"), em worktree. O Laya passa a escolher a fila da Seth quando o PR entrar e os serviços subirem.**
   palavras-chave: execução, aplicada, laya, roteador, assinada, humano, explicação, caminho, quente, worktree, passa, escolher, fila, seth, entrar, serviços, subirem
-(720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-15` estava ASSINADA pelo Humano (10:51), não "não assinada". Superada antes de aplicar pela `laya-roteador-2026-10-15`; o `APROVADO-` foi para `propostas/rejeitadas/` junto do `.diff`, como em (415).**
-  palavras-chave: corrige, proposta, laya, sombra, estava, assinada, humano, superada, aplicar, roteador, aprovado, propostas, rejeitadas, junto, diff
+(720) CORREÇÃO — 15/10/2026 · **Corrige (719): a proposta `laya-sombra-2026-10-1 …
+  palavras-chave: corrige, proposta, laya, sombra
 (719) CONSELHO — 15/10/2026 · **O Laya passa a escolher a fila da Seth, com o Je …
   palavras-chave: laya, passa, escolher, fila, seth
 (718) CONSELHO — 15/10/2026 · **Experimento pedido pelo Humano ("pode juntar o P …
