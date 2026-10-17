@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 525a7a37a91afcc37457b760e9039dbf69914855
-  Escrito em: 17/10/2026 16:28 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7
+  Escrito em: 17/10/2026 16:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/525a7a37a91afcc37457b760e9039dbf69914855/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/525a7a37a91afcc37457b760e9039dbf69914855/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/525a7a37a91afcc37457b760e9039dbf69914855/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/525a7a37a91afcc37457b760e9039dbf69914855/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/525a7a37a91afcc37457b760e9039dbf69914855/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1f6c3dce3126d9191d9b5cd83f7b36ea5eff3fb7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(758) DIÁRIO — 17/10/2026 · **A ferramenta de verificação mostra o comando `unidade`, o erro aponta o caminho e a rédea cobre entradas longas (`seth-descricao-cap-20261017`).** Achados da validação de produção (as duas primeiras de 30 perguntas falharam, cada uma por causa concreta): (1) a descrição de `maquina_verificar` no cliente MCP (`canon-mcp.mjs`) não listava o comando `unidade` e dizia que `consulta` era só para busca; a Seth chamou `servicos` com consulta, recebeu erro e leu o erro como "não existe"; (2) o corte de 2500 caracteres da rédea escondeu um número que estava na posição 4819 de uma entrada de 5653 (24% das entradas passam de 2500). Agora: a descrição lista `unidade` e diz que `servicos` só lista falhas; o erro de `servicos` com consulta manda usar `unidade`; o teto da rédea sobe para 6000 por entrada e 12000 no total. Selftests: auditoria OK, verificador 59/59, gateway OK. Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/seth-descricao-cap-20261017.diff.
+
 (757) DIÁRIO — 17/10/2026 · **O PROJETO descreve a janela diária no lugar dos timers antigos (`projeto-janela-20261017`, AC-32).** Três trechos: a lista de unidades do boot cita `agata-manutencao.timer` (janela diária) no lugar do timer da consolidação; a Consolidação roda na janela de 12h15 às 13h15 (o timer das 23:00 foi desativado em 17/10/2026); a avaliação do decisor roda na janela (o timer das 20:00 foi desativado). O arquivo ficou com 47.986 bytes (teto 48.000). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/projeto-janela-20261017.diff.
 
 (756) DIÁRIO — 17/10/2026 · **O recibo da janela de manutenção passa a guardar o motivo quando uma tarefa pula (`janela-saida-final-20261017`, AC-33).** Antes, uma tarefa que pulava por regra própria (o treino do Laya, com 15 de 20 exemplos reais) saía no recibo como "sucesso" e a saída era descartada, e ninguém via o porquê sem rodar o script à mão. Agora o recibo final traz `saida_final`: a última linha não vazia da saída do comando, até 200 caracteres, sem caracteres de controle e com sequências longas (tokens, chaves, hashes) redigidas. Só o comando da tarefa é capturado, não a precondição. Testes: janela 18/18 e recuperação 19/19, com 5 casos novos (motivo visível, redação de token, corte em 200, comando que falha, recibo com a linha). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/janela-saida-final-20261017.diff.

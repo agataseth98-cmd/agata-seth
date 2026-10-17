@@ -292,7 +292,8 @@ const TOOLS = [
       "Use quando precisar AFIRMAR algo sobre o estado do sistema -- a Regra 2 manda medir, nao lembrar. " +
       "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
       "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
-      "git_sync (SHA do remoto), selos, suite_controles, servicos, p8_verificar, " +
+      "git_sync (SHA do remoto), selos, suite_controles, servicos (SÓ lista as unidades em FALHA), " +
+      "unidade (estado de UMA unidade de usuario: consulta = o nome, ex.: laya-roteador.service; use esta para \"esta ativa?\"), p8_verificar, " +
       "busca_semantica e busca_texto (prefira a tool vault_buscar). " +
       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
     inputSchema: {
@@ -300,7 +301,7 @@ const TOOLS = [
       properties: {
         comando: { type: "string", description: "nome da lista fechada (ex.: perimetro, git_status, git_sync)" },
         n: { type: "integer", description: "git_log: quantos commits (1 a 50, padrao 10); busca_semantica: quantos resultados (1 a 20)" },
-        consulta: { type: "string", description: "so para busca_semantica/busca_texto: a frase a buscar (ate 200 caracteres)" },
+        consulta: { type: "string", description: "busca_semantica/busca_texto: a frase a buscar (ate 200 caracteres); unidade: o nome da unidade (ex.: laya-roteador.service)" },
         listar: { type: "boolean", description: "true devolve a lista de comandos em vez de executar" },
       },
     },
