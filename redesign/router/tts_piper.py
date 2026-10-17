@@ -69,6 +69,10 @@ except ValueError:
     VELOCIDADE_BASE = 0.88
 if not 0.5 <= VELOCIDADE_BASE <= 1.5:
     VELOCIDADE_BASE = 0.88
+# O cabeçalho da Regra 1 aparece escrito em toda resposta, mas só é FALADO a cada INTERVALO_CABECALHO turnos
+# (decisão do Humano, 17/10/2026). O texto não muda; só a voz o pula. Estado: último t falado.
+INTERVALO_CABECALHO = 10
+ESTADO_CABECALHO = os.environ.get("AGATA_VOZ_ESTADO") or os.path.expanduser("~/.cache/agata/voz-cabecalho.json")
 
 # sample_rate vem do .json ao lado do modelo (Piper grava isso lá).
 try:
@@ -86,6 +90,56 @@ FORMATOS = {
     "wav": (None, "audio/wav"),
     "pcm": (None, "audio/L16"),
 }
+
+
+_CAB_RE = None
+_MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")
+
+
+def _cabecalho_natural(modelo, turno, resto):
+    """'Agata · Claude Sonnet 5.5 · t=125 (...) · 17/10/2026 11:56 -03' -> frase falável."""
+    import re
+    partes = ["Agata", modelo.strip(), f"turno {turno}"]
+    d = re.search(r"(\d{1,2})/(\d{1,2})(?:/(\d{4}))?", resto)
+    h = re.search(r"(\d{1,2}):(\d{2})", resto)
+    if d and 1 <= int(d.group(2)) <= 12:
+        partes.append(f"{int(d.group(1))} de {_MESES[int(d.group(2)) - 1]}")
+    if h:
+        partes.append(f"{int(h.group(1))} e {int(h.group(2)):02d}" if h.group(2) != "00" else f"{int(h.group(1))} horas")
+    return ", ".join(partes) + "."
+
+
+def _deve_falar_cabecalho(turno):
+    """True na primeira vez, a cada INTERVALO_CABECALHO turnos, ou se o contador recuou (sessão nova). Grava o estado."""
+    try:
+        with open(ESTADO_CABECALHO, encoding="utf-8") as f:
+            ultimo = int(json.load(f).get("ultimo"))
+    except (OSError, ValueError, TypeError, AttributeError):
+        ultimo = None
+    falar = ultimo is None or turno < ultimo or turno - ultimo >= INTERVALO_CABECALHO
+    if falar:
+        try:
+            os.makedirs(os.path.dirname(ESTADO_CABECALHO), exist_ok=True)
+            with open(ESTADO_CABECALHO, "w", encoding="utf-8") as f:
+                json.dump({"ultimo": turno}, f)
+        except OSError:
+            pass
+    return falar
+
+
+def preparar_fala(texto):
+    """Troca o cabeçalho da Regra 1 por uma frase natural, ou o tira da fala fora do intervalo. O resto segue igual."""
+    import re
+    global _CAB_RE
+    if _CAB_RE is None:
+        _CAB_RE = re.compile(r"^\s*(?:\*\*)?Agata\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
+    m = _CAB_RE.match(texto)
+    if not m:
+        return texto
+    corpo = texto[m.end():].lstrip("\n")
+    if _deve_falar_cabecalho(int(m.group("t"))) or not corpo.strip():
+        return _cabecalho_natural(m.group("modelo"), m.group("t"), m.group("resto")) + "\n" + corpo
+    return corpo
 
 
 def limpar_markdown(texto):
@@ -116,6 +170,9 @@ def limpar_markdown(texto):
     t = re.sub(r"(?m)^\s*,\s*", "", t)                                   # sem vírgula abrindo a linha
     t = re.sub(r"[ \t]+", " ", t)
     t = re.sub(r"\s+([,.;:!?])", r"\1", t)
+    t = re.sub(r"\s*[·•‧∙⋅]\s*", ", ", t)                                # separadores · • viram pausa
+    t = re.sub(r"\s+[—–-]+\s+|(?<=\w)[—–](?=\w)", ", ", t)                  # travessão ou hífen entre espaços vira pausa; guarda-chuva fica
+    t = re.sub(r",(\s*[,.;:!?])", r"\1", t)
     t = re.sub(r"\n{3,}", "\n\n", t)
     return t.strip()
 
@@ -217,7 +274,7 @@ class H(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001
             return self._json(400, {"error": {"message": "corpo não é JSON", "type": "invalid_request_error"}})
 
-        texto = limpar_markdown((req.get("input") or "").strip())
+        texto = limpar_markdown(preparar_fala((req.get("input") or "").strip()))
         if not texto:
             return self._json(400, {"error": {"message": "campo 'input' vazio", "type": "invalid_request_error"}})
         fmt = (req.get("response_format") or "mp3").lower()
@@ -304,6 +361,24 @@ def _selftest():
         res["9d tabela: sem barras nem traços"] = "|" not in tab and "-" not in tab
         res["9e nenhum símbolo de markdown sobra num texto misto"] = not any(
             c in limpar_markdown("**Resultado:** o *gateway* __ok__ `x` ~~z~~") for c in "*_`#~")
+        global ESTADO_CABECALHO
+        _est = ESTADO_CABECALHO
+        with tempfile.TemporaryDirectory() as _td:
+            ESTADO_CABECALHO = os.path.join(_td, "e.json")
+            cab = "Agata · Claude Sonnet 5.5 · t=125 (contador mecânico) · 17/10/2026 11:56 -03 (relógio da Máquina)\nCorpo da resposta."
+            r1 = preparar_fala(cab)
+            res["10a primeiro cabeçalho é falado, em frase natural"] = r1.startswith(
+                "Agata, Claude Sonnet 5.5, turno 125, 17 de outubro, 11 e 56.\n") and r1.endswith("Corpo da resposta.")
+            res["10b turnos 126 a 134 não falam o cabeçalho, só o corpo"] = all(
+                preparar_fala(cab.replace("t=125", f"t={n}")) == "Corpo da resposta." for n in range(126, 135))
+            res["10c turno 135 fala de novo"] = preparar_fala(cab.replace("t=125", "t=135")).startswith("Agata, Claude Sonnet 5.5, turno 135")
+            res["10d contador que recua (sessão nova) fala de novo"] = preparar_fala(cab.replace("t=125", "t=3")).startswith("Agata, Claude Sonnet 5.5, turno 3")
+            res["10e só cabeçalho: ainda assim fala, não devolve vazio"] = preparar_fala(
+                "Agata · Seth · t=137 (x) · 17/10/2026 12:00 -03").startswith("Agata, Seth, turno 137")
+            res["10f texto sem cabeçalho passa intacto"] = preparar_fala("Olá. Tudo certo.") == "Olá. Tudo certo."
+        ESTADO_CABECALHO = _est
+        res["11a separadores · e - viram pausa; guarda-chuva e 5.5 ficam"] = limpar_markdown(
+            "um · dois - três — quatro • cinco guarda-chuva 5.5") == "um, dois, três, quatro, cinco guarda-chuva 5.5"
         res["9f velocidade base mais lenta que a natural (reunião esclarecedora)"] = 0.5 <= VELOCIDADE_BASE < 1.0
         with tempfile.TemporaryDirectory() as td:
             res["7a sem a voz instalada, o padrão é a genérica"] = \
