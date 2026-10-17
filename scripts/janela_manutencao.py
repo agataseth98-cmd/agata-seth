@@ -27,6 +27,7 @@ import datetime as dt
 import fcntl
 import json
 import os
+import re
 import shlex
 import signal
 import subprocess
@@ -119,6 +120,27 @@ def estado_atomico(caminho, estado):
         os.close(fd)
 
 
+SAIDA_MAX = 200
+
+
+def _ultima_linha(arq):
+    """Última linha não vazia da saída do comando, no máximo SAIDA_MAX caracteres, sem controle e com sequências longas redigidas
+    (token, chave, hash). Serve só para o recibo dizer POR QUE uma tarefa pulou (ex.: "15 exemplos, mínimo 20")."""
+    try:
+        arq.flush()
+        n = arq.seek(0, os.SEEK_END)
+        arq.seek(max(0, n - 4096))
+        bruto = arq.read().decode("utf-8", "replace")
+    except (OSError, ValueError):
+        return None
+    linhas = [l.strip() for l in bruto.splitlines() if l.strip()]
+    if not linhas:
+        return None
+    s = "".join(c for c in linhas[-1] if c.isprintable())
+    s = re.sub(r"[A-Za-z0-9_\-]{32,}", "[redigido]", s)
+    return s[:SAIDA_MAX]
+
+
 def executar(tarefa, prazo_s):
     """Precondição e comando compartilham prazo monotônico e contenção por grupo."""
     limite = time.monotonic() + prazo_s
@@ -129,8 +151,10 @@ def executar(tarefa, prazo_s):
         if restante <= 0:
             return "failed", True
         try:
+            saida_tmp = None if precondicao else tempfile.TemporaryFile()
             p = subprocess.Popen(cmd, env=env, start_new_session=True,
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                 stdout=subprocess.DEVNULL if precondicao else saida_tmp,
+                                 stderr=subprocess.DEVNULL if precondicao else subprocess.STDOUT)
         except OSError:
             return ("skipped" if precondicao else "failed"), False
         teto = max(0, limite - time.monotonic())
@@ -151,10 +175,10 @@ def executar(tarefa, prazo_s):
                 except ProcessLookupError:
                     pass
                 p.wait(timeout=5)
-            return ("skipped", False) if precondicao else ("failed", True)
+            return ("skipped", False) if precondicao else ("failed", True, _ultima_linha(saida_tmp))
         if rc != 0:
-            return ("skipped" if precondicao else "failed"), False
-    return "success", False
+            return ("skipped", False) if precondicao else ("failed", False, _ultima_linha(saida_tmp))
+    return "success", False, _ultima_linha(saida_tmp)
 
 
 def recuperar_estado(caminho, rec, relogio, recibo):
@@ -274,12 +298,14 @@ def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
             recibo(rec, {"run": rid, "task": t["id"], "phase": "started", "at": agora.isoformat()})  # se falhar, a tarefa NÃO roda
             prazo = min(t["budget_seconds"], restante)
             try:
-                resultado, por_prazo = runner(t, prazo)
+                r = runner(t, prazo)
+                resultado, por_prazo = r[0], r[1]
+                saida_final = r[2] if len(r) > 2 else None
                 if resultado not in ("success", "skipped", "failed"):
                     raise ValueError("status inválido do runner")
                 erro = None
             except Exception as e:  # noqa: BLE001 -- só a classe vai ao recibo
-                resultado, por_prazo, erro = "failed", False, type(e).__name__
+                resultado, por_prazo, erro, saida_final = "failed", False, type(e).__name__, None
             fim_run = relogio()
             est.setdefault("tries", {})
             est["tries"][hoje] = MAX_TENTATIVAS_DIA if resultado == "skipped" else est["tries"].get(hoje, 0) + 1
@@ -289,7 +315,7 @@ def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
             estado_atomico(caminho, estado)  # estado ANTES do recibo final
             try:
                 recibo(rec, {"run": rid, "task": t["id"], "phase": "finished", "at": fim_run.isoformat(), "result": resultado,
-                             "terminada_por_prazo": por_prazo, "error_class": erro})
+                             "terminada_por_prazo": por_prazo, "error_class": erro, "saida_final": saida_final})
             except OSError as e:
                 print(f"AVISO: recibo final não gravado ({type(e).__name__}); estado já carimbado", file=sys.stderr)
         return "complete"
@@ -352,8 +378,8 @@ def _selftest():
     casos.append(("recibo 'started' falha: tarefa NÃO roda", c == [] or r.startswith("EXC")))
     casos.append(("bordas da janela", go([T("a")], ok, at(12, 14, 59), tempfile.mkdtemp())[0] == "outside_window" and go([T("a")], ok, at(13, 15), tempfile.mkdtemp())[0] == "outside_window" and bool(go([T("a", b=1)], ok, at(13, 14, 59), tempfile.mkdtemp())[1])))
     t0 = time.time(); res = executar({"env": {}, "precond": [], "cmd": ["sleep", "30"]}, 1)
-    casos.append(("executar: prazo estourado termina o processo", res == ("failed", True) and time.time() - t0 < 10))
-    casos.append(("executar: comando ok", executar({"env": {}, "precond": [], "cmd": ["true"]}, 5) == ("success", False)))
+    casos.append(("executar: prazo estourado termina o processo", tuple(res[:2]) == ("failed", True) and time.time() - t0 < 10))
+    casos.append(("executar: comando ok", executar({"env": {}, "precond": [], "cmd": ["true"]}, 5)[:2] == ("success", False)))
     casos.append(("executar: precondição falha vira skipped", executar({"env": {}, "precond": ["false"], "cmd": ["true"]}, 5) == ("skipped", False)))
     tf = Path(tempfile.mkdtemp()) / "t.txt"
     tf.write_text("# c\nx|daily|60||| /bin/true\ny|weekly|90|A=1,B=2|/bin/true|/bin/echo oi\n")
