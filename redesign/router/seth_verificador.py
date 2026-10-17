@@ -172,7 +172,8 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
     como texto."""
     base = list(COMANDOS[nome][0])
     if consulta is not None and nome not in ("busca_semantica", "busca_texto", "opiniao_jev", "unidade"):
-        raise ValueError(f"'{nome}' não aceita o parâmetro consulta")
+        raise ValueError(f"'{nome}' não aceita o parâmetro consulta"
+                         + (" -- para saber se UMA unidade está ativa use o comando 'unidade' com consulta=<nome da unidade>" if nome == "servicos" else ""))
     if nome == "unidade":
         if n is not None or prop_nome is not None:
             raise ValueError("'unidade' só aceita o parâmetro consulta (o nome da unidade)")
@@ -459,6 +460,10 @@ def _selftest() -> int:
             casos.append((f"n={mau!r} recusado", True))
     # 3. n válido entra como inteiro
     casos.append(("git_log n=5 -> argv", _argv("git_log", 5)[-1] == "5"))
+    try:
+        _argv("servicos", None, consulta="x.service"); casos.append(("servicos com consulta: o erro aponta o comando unidade", False))
+    except ValueError as e:
+        casos.append(("servicos com consulta: o erro aponta o comando unidade", "unidade" in str(e)))
     casos.append(("unidade válida -> argv termina no nome, depois de --", _argv("unidade", None, consulta="laya-roteador.service")[-2:] == ["--", "laya-roteador.service"]))
     for mau in ("../x.service", "a b.service", "UPPER.service", "x.service;rm", "x", "x.service\n", "/etc/passwd.service", "-x.service"):
         try:

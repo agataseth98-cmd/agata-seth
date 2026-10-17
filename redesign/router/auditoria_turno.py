@@ -596,7 +596,8 @@ def _citacao_inventada(texto: str, raiz: Path | None = None) -> list[str]:
 # Humano cita "(N)", o texto EXATO dessas entradas vai no estado do turno, e a doutrina manda citar só dali. Determinístico, sem modelo,
 # vale para qualquer modelo da cascata, e o verificador (_citacao_inventada) confere o resultado.
 _MAX_ENTRADAS_LITERAIS = 3
-_MAX_CHARS_ENTRADA = 2500
+_MAX_CHARS_ENTRADA = 6000   # p90 das entradas de 700 a 789 é 3911; 6000 cobre ~95%
+_MAX_CHARS_TOTAL = 12000
 
 
 def entradas_literais(msgs: list, raiz: Path | None = None) -> str:
@@ -617,13 +618,18 @@ def entradas_literais(msgs: list, raiz: Path | None = None) -> str:
             return ""
         idx = _entradas(raiz or RAIZ)
         partes = []
+        total = 0
         for n in vistos:
             e = idx.get(n)
             if not e:
                 continue
             e = e.strip()
-            if len(e) > _MAX_CHARS_ENTRADA:
-                e = e[:_MAX_CHARS_ENTRADA] + " […truncado: leia o resto com query_canon]"
+            folga = min(_MAX_CHARS_ENTRADA, _MAX_CHARS_TOTAL - total)
+            if folga < 400:
+                break
+            if len(e) > folga:
+                e = e[:folga] + " […truncado: leia o resto com query_canon]"
+            total += len(e)
             partes.append(e)
         if not partes:
             return ""
@@ -913,6 +919,9 @@ def _selftest() -> int:
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
                   len(linhas) == 25 and all("análise" not in l and "corpo" not in l for l in linhas)))
+    _raiz_longa = Path(_tfc.mkdtemp())
+    (_raiz_longa / "MEMÓRIAS.md").write_text(
+        "<!-- ENTRADAS-NOVAS:AQUI -->\n(745) DIÁRIO — x · " + ("longa demais " * 700) + "\n\n(744) DIÁRIO — x · " + ("texto " * 800) + "NUMERO-FINAL-4819\n", encoding="utf-8")
     _lit = lambda txt: entradas_literais([{"role": "user", "content": txt}], _raiz_c)
     casos_redea = [
         ("rédea: pedido cita (743) -> o texto exato da entrada vai no bloco", "o treino pulou por regra própria (15 exemplos reais, mínimo 20)" in _lit("explique a (743) pra mim")),
@@ -924,6 +933,9 @@ def _selftest() -> int:
         ("rédea: usa o ÚLTIMO pedido do Humano, não o primeiro", _lit("(742)") != "" and "15 exemplos" not in entradas_literais(
             [{"role": "user", "content": "(743)"}, {"role": "assistant", "content": "x"}, {"role": "user", "content": "(742)"}], _raiz_c)),
         ("rédea: nunca levanta com mensagem malformada", entradas_literais([None, 5, {"role": "user"}], _raiz_c) == ""),
+        ("rédea: entrada de 5000 caracteres vem inteira (o número do fim é visível)", "NUMERO-FINAL-4819" in entradas_literais(
+            [{"role": "user", "content": "e a (744)?"}], _raiz_longa)),
+        ("rédea: entrada acima do teto é cortada com aviso", "truncado" in entradas_literais([{"role": "user", "content": "e a (745)?"}], _raiz_longa)),
         ("rédea: o bloco passa pelo verificador de citação sem acusar", _ci('Em (743): "o treino pulou por regra própria (15 exemplos reais, mínimo 20)".') == []),
     ]
     casos = casos + casos_citacao + casos_redea
