@@ -15,6 +15,8 @@ Contrato:
     (O treino do Laya só treina um CANDIDATO; abortar não troca o modelo; a promoção é do Humano.)
   * Recibo `started` ANTES de rodar (se não puder gravar, a tarefa não roda); o estado é gravado de forma atômica ANTES do recibo
     final, e falha do recibo final não desfaz o carimbo.
+  * Antes de executar, reconcilia recibos: corrupção reconstrói sucessos/tentativas; intenção órfã ou recibo inválido bloqueia.
+  * Precondição e comando compartilham um prazo monotônico total (mais a graça de término).
   * Não muda configuração do sistema nem liga serviço: roda os comandos do manifesto `config/janela-tarefas.txt`.
 Uso: python3 scripts/janela_manutencao.py [--dir DIR] [--tarefas ARQ] [--dry-run] [--agora ISO] | --selftest
 Ativação (comandos do Humano, depois de assinada a proposta): copiar config/systemd/agata-manutencao.{service,timer} para
@@ -30,6 +32,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 import uuid
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -117,34 +120,122 @@ def estado_atomico(caminho, estado):
 
 
 def executar(tarefa, prazo_s):
-    """Roda precondição e comando; devolve (resultado, terminada_por_prazo)."""
+    """Precondição e comando compartilham prazo monotônico e contenção por grupo."""
+    limite = time.monotonic() + prazo_s
     env = dict(os.environ, **tarefa["env"])
-    if tarefa["precond"]:
+    comandos = ([(tarefa["precond"], True)] if tarefa["precond"] else []) + [(tarefa["cmd"], False)]
+    for cmd, precondicao in comandos:
+        restante = limite - time.monotonic()
+        if restante <= 0:
+            return "failed", True
         try:
-            if subprocess.run(tarefa["precond"], env=env, timeout=min(60, prazo_s), capture_output=True).returncode != 0:
-                return "skipped", False
-        except (OSError, subprocess.TimeoutExpired):
-            return "skipped", False
-    try:
-        p = subprocess.Popen(tarefa["cmd"], env=env, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except OSError:
-        return "failed", False
-    try:
-        rc = p.wait(timeout=prazo_s)
-        return ("success" if rc == 0 else "failed"), False
-    except subprocess.TimeoutExpired:
-        for sinal, espera in ((signal.SIGTERM, GRACA_S), (signal.SIGKILL, 5)):
+            p = subprocess.Popen(cmd, env=env, start_new_session=True,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            return ("skipped" if precondicao else "failed"), False
+        teto = max(0, limite - time.monotonic())
+        if precondicao:
+            teto = min(60, teto)
+        try:
+            rc = p.wait(timeout=teto)
+        except subprocess.TimeoutExpired:
             try:
-                os.killpg(p.pid, sinal)
-                p.wait(timeout=espera)
-                break
+                os.killpg(p.pid, signal.SIGTERM)
+                p.wait(timeout=GRACA_S)
             except (ProcessLookupError, subprocess.TimeoutExpired):
+                pass
+            finally:
+                # O líder pode terminar antes de um descendente que ignorou SIGTERM.
+                try:
+                    os.killpg(p.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                p.wait(timeout=5)
+            return ("skipped", False) if precondicao else ("failed", True)
+        if rc != 0:
+            return ("skipped" if precondicao else "failed"), False
+    return "success", False
+
+
+def recuperar_estado(caminho, rec, relogio, recibo):
+    """Reconcilia provas duráveis antes de executar. Intenção órfã bloqueia repetição."""
+    corrompido = False
+    try:
+        estado = json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
+        if not isinstance(estado, dict):
+            raise ValueError("estado não é objeto")
+        for est in estado.values():
+            if not isinstance(est, dict) or not isinstance(est.get("tries", {}), dict):
+                raise ValueError("estado de tarefa inválido")
+            if any(type(v) is not int or v < 0 for v in est.get("tries", {}).values()):
+                raise ValueError("tentativas inválidas")
+            if est.get("last_run") and (not isinstance(est.get("last_run"), str) or est.get("last_result") not in ("success", "skipped", "failed") or not isinstance(est.get("last_finished"), str) or dt.datetime.fromisoformat(est["last_finished"]).tzinfo is None):
+                raise ValueError("última execução inválida")
+            if est.get("last_success") and dt.datetime.fromisoformat(est["last_success"]).tzinfo is None:
+                raise ValueError("sucesso sem fuso")
+    except (ValueError, TypeError, OSError):
+        copia = caminho.with_name("state.json.corrompido-" + uuid.uuid4().hex[:8])
+        if caminho.exists():
+            os.replace(caminho, copia)
+        estado, corrompido = {}, True
+        recibo(rec, {"task": "-", "phase": "state_corrompido", "at": relogio().isoformat(), "copia": copia.name})
+    inicios, finais = {}, {}
+    try:
+        linhas = rec.read_text(encoding="utf-8").splitlines() if rec.exists() else []
+        for linha in linhas:
+            r = json.loads(linha)
+            if not isinstance(r, dict):
+                raise ValueError("recibo não é objeto")
+            if r.get("phase") not in ("started", "finished"):
                 continue
-        return "failed", True
+            rid, tarefa = r.get("run"), r.get("task")
+            quando = dt.datetime.fromisoformat(r["at"])
+            if not isinstance(rid, str) or not rid or not isinstance(tarefa, str) or not tarefa or quando.tzinfo is None:
+                raise ValueError("recibo inválido")
+            alvo = inicios if r["phase"] == "started" else finais
+            if rid in alvo and alvo[rid] != r:
+                raise ValueError("recibo contraditório")
+            alvo[rid] = r
+        for rid, r in finais.items():
+            if rid not in inicios or r["task"] != inicios[rid]["task"] or r.get("result") not in ("success", "skipped", "failed"):
+                raise ValueError("término sem início coerente")
+            if dt.datetime.fromisoformat(r["at"]) < dt.datetime.fromisoformat(inicios[rid]["at"]):
+                raise ValueError("término anterior ao início")
+    except (ValueError, KeyError, TypeError, OSError):
+        return None, "receipts_invalidos"
+    # Estado gravado antes de finished prova o resultado desta run, mesmo se o último append falhou.
+    for rid, inicio in inicios.items():
+        if rid not in finais:
+            est = estado.get(inicio["task"], {})
+            if est.get("last_run") != rid or est.get("last_result") not in ("success", "failed", "skipped"):
+                # Sob o flock nenhuma outra instância roda: started sem término e sem prova no estado é execução
+                # interrompida (queda, suspensão, SIGKILL). Conta 1 tentativa do dia e a janela segue; não bloqueia.
+                fim = {"run": rid, "task": inicio["task"], "phase": "finished", "at": inicio["at"],
+                       "result": "failed", "reconciled_interrupted": True}
+            else:
+                fim = {"run": rid, "task": inicio["task"], "phase": "finished", "at": est["last_finished"],
+                       "result": est["last_result"], "reconciled_from_state": True}
+            recibo(rec, fim)
+            finais[rid] = fim
+    if corrompido and not finais:
+        return None, "estado_sem_prova"
+    contagens = {}
+    for rid, r in finais.items():
+        est = estado.setdefault(r["task"], {})
+        dia = dt.datetime.fromisoformat(inicios[rid]["at"]).astimezone(TZ).date().isoformat()
+        k = (r["task"], dia)
+        contagens[k] = MAX_TENTATIVAS_DIA if r["result"] == "skipped" else contagens.get(k, 0) + 1
+        if r["result"] == "success" and (not est.get("last_success") or dt.datetime.fromisoformat(r["at"]) > dt.datetime.fromisoformat(est["last_success"])):
+            est["last_success"] = r["at"]
+        est["last_run"], est["last_result"], est["last_finished"] = rid, r["result"], r["at"]
+    for (tarefa, dia), tentativas in contagens.items():
+        tries = estado[tarefa].setdefault("tries", {})
+        tries[dia] = max(tries.get(dia, 0), tentativas)
+    return estado, None
 
 
 def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
-    """Retorna 'locked' | 'outside_window' | 'complete'. Valida todas as tarefas ANTES de qualquer execução."""
+    """Retorna 'locked' | 'outside_window' | 'complete' | 'blocked'. Valida todas as tarefas ANTES de qualquer execução."""
     validar(tarefas)
     diretorio = Path(diretorio)
     diretorio.mkdir(parents=True, exist_ok=True)
@@ -155,21 +246,14 @@ def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
         except BlockingIOError:
             return "locked"
         caminho = diretorio / "state.json"
-        try:
-            estado = json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
-            if not isinstance(estado, dict):
-                raise ValueError("estado não é objeto")
-        except (ValueError, OSError):
-            copia = caminho.with_name("state.json.corrompido-" + uuid.uuid4().hex[:8])
+        estado, bloqueio = recuperar_estado(caminho, rec, relogio, recibo)
+        if bloqueio:
+            print(f"BLOQUEADO: {bloqueio}; reconciliação explícita necessária", file=sys.stderr)
             try:
-                os.replace(caminho, copia)
+                recibo(rec, {"task": "-", "phase": "bloqueado", "at": relogio().isoformat(), "motivo": bloqueio})
             except OSError:
                 pass
-            estado = {}
-            try:
-                recibo(rec, {"task": "-", "phase": "state_corrompido", "at": relogio().isoformat(), "copia": copia.name})
-            except OSError:
-                pass
+            return "blocked"
         for t in tarefas:
             agora = relogio()
             dentro, fim = janela(agora)
@@ -201,6 +285,7 @@ def ciclo(diretorio, tarefas, runner, relogio, recibo=recibo_duravel):
             est["tries"][hoje] = MAX_TENTATIVAS_DIA if resultado == "skipped" else est["tries"].get(hoje, 0) + 1
             if resultado == "success":
                 est["last_success"] = fim_run.isoformat()
+            est["last_run"], est["last_result"], est["last_finished"] = rid, resultado, fim_run.isoformat()
             estado_atomico(caminho, estado)  # estado ANTES do recibo final
             try:
                 recibo(rec, {"run": rid, "task": t["id"], "phase": "finished", "at": fim_run.isoformat(), "result": resultado,
@@ -250,7 +335,7 @@ def _selftest():
     casos.append(("orçamento > restante: adiada COM recibo", c == [] and any(x["phase"] == "adiada_sem_tempo" for x in recs(d))))
     d = tempfile.mkdtemp(); Path(d).mkdir(exist_ok=True); (Path(d) / "state.json").write_text("{quebrado")
     r, c = go([T("a")], ok, at(12, 20), d)
-    casos.append(("state corrompido: guarda cópia, registra e segue", r == "complete" and c == ["a"] and any(x["phase"] == "state_corrompido" for x in recs(d)) and list(Path(d).glob("state.json.corrompido-*"))))
+    casos.append(("state corrompido sem prova: guarda cópia, registra e bloqueia", r == "blocked" and c == [] and any(x["phase"] == "state_corrompido" for x in recs(d)) and list(Path(d).glob("state.json.corrompido-*"))))
     d = tempfile.mkdtemp(); r, c = go([T("a"), T("b", b=0)], ok, at(12, 20), d)
     casos.append(("orçamento inválido: nada roda", r.startswith("EXC:ValueError") and c == []))
 
@@ -309,8 +394,9 @@ def main(argv=None):
             print(f"  {t['id']}: {'DEVIDA' if devida(t, est.get(t['id'], {}), agora) else 'em dia'} · {t['cadence']} · orçamento {t['budget_seconds']} s")
         return 0
     runner = executar
-    print(ciclo(a.dir, tarefas, runner, lambda: dt.datetime.now(TZ)))
-    return 0
+    resultado = ciclo(a.dir, tarefas, runner, lambda: dt.datetime.now(TZ))
+    print(resultado)
+    return 2 if resultado == "blocked" else 0
 
 
 if __name__ == "__main__":
