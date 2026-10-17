@@ -1,0 +1,163 @@
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+index e840b91..c535c0a 100644
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ b/.agents/skills/agata-fluxo-dupla/SKILL.md
+@@ -12,6 +12,7 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
+ ## 0. Antes de tudo
+ - Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: `Agata · <modelo> · t=<n> (contador mecânico) · <hora -03> (relógio da Máquina)`;
+   hora = `TZ=America/Sao_Paulo date`; t = `python3 scripts/dupla/contar_turnos.py`.
++  Padrão = mensagens do Humano (o t= que ele acompanha). `--modo respostas TRANSCRITO` conta respostas do modelo (exige transcrito explícito; o Codex usa o dele). Sem fonte: `t=<n> (contado no contexto)`.
+ - Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
+ - Texto longo para o canal vai por ARQUIVO: `dupla.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
+ 
+diff --git a/scripts/dupla/contar_turnos.py b/scripts/dupla/contar_turnos.py
+index 439d69b..56ac233 100755
+--- a/scripts/dupla/contar_turnos.py
++++ b/scripts/dupla/contar_turnos.py
+@@ -1,21 +1,98 @@
+ #!/usr/bin/env python3
+-"""Conta mecanicamente as mensagens do Humano no transcrito da sessão do Claude Code (base 'contador mecânico' do t= da Regra 1).
+-Heurística: registros `user` que não são tool_result nem avisos de sistema/tarefa. Uso: python3 contar_turnos.py [transcrito.jsonl]"""
+-import glob, json, os, sys
+-f = sys.argv[1] if len(sys.argv) > 1 else max(glob.glob(os.path.expanduser("~/.claude/projects/-home-orusoua-agata/*.jsonl")), key=os.path.getmtime)
+-n = 0
+-for l in open(f, encoding="utf-8"):
++"""Conta o t= da Regra 1 num transcrito, de forma mecânica. Dois modos:
++  --modo humano (PADRÃO): mensagens do Humano (registros `user` que não são tool_result nem aviso de sistema/tarefa).
++     É o t= que o Humano acompanha. Sem transcrito informado, usa o JSONL mais recente de ~/.claude/projects/-home-orusoua-agata
++     (limite conhecido: com duas sessões abertas pode pegar a outra; informe o transcrito para ser exato).
++  --modo respostas: respostas textuais do MODELO (Claude JSONL e Codex response_item), dedup por message.id; exige
++     transcrito explícito (argumento ou AGATA_TRANSCRITO); nunca escolhe sessão por mtime.
++Uso: contar_turnos.py [--modo humano|respostas] [--proximo] [TRANSCRITO]. --proximo soma 1 (a resposta que será escrita).
++"""
++import argparse
++import glob
++import json
++import os
++from pathlib import Path
++
++
++def contar_humano(linhas):
++    n = 0
++    for linha in linhas:
++        try:
++            d = json.loads(linha)
++        except ValueError:
++            continue
++        if not isinstance(d, dict) or d.get("type") != "user":
++            continue
++        c = (d.get("message") or {}).get("content")
++        if isinstance(c, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in c):
++            continue
++        txt = c if isinstance(c, str) else "".join(x.get("text", "") for x in c if isinstance(x, dict) and x.get("type") == "text") if isinstance(c, list) else ""
++        s = txt.strip()
++        if s and not s.startswith(("<system-reminder>", "<task-notification>")) and "[SYSTEM NOTIFICATION" not in s[:200]:
++            n += 1
++    return n
++
++
++def contar(linhas):
++    """Respostas textuais do modelo (modo respostas). JSON truncado é erro explícito."""
++    vistos = set()
++    total = 0
++    for n, linha in enumerate(linhas, 1):
++        if not linha.strip():
++            continue
++        try:
++            d = json.loads(linha)
++        except ValueError as e:
++            raise ValueError(f'linha {n}: JSON incompleto ou inválido') from e
++        if not isinstance(d, dict):
++            raise ValueError(f'linha {n}: registro não é objeto')
++        if d.get('type') == 'assistant':
++            m = d.get('message') or {}
++            if not isinstance(m, dict):
++                raise ValueError(f'linha {n}: mensagem inválida')
++        elif d.get('type') == 'response_item':
++            m = d.get('payload') or {}
++            if not isinstance(m, dict):
++                raise ValueError(f'linha {n}: payload inválido')
++            if m.get('type') != 'message' or m.get('role') != 'assistant':
++                continue
++        else:
++            continue
++        c = m.get('content')
++        texto = c if isinstance(c, str) else ''.join(x.get('text', '') for x in c
++                if isinstance(x, dict) and x.get('type') in ('text', 'output_text') and isinstance(x.get('text'), str)) if isinstance(c, list) else ''
++        if not texto.strip():
++            continue
++        # Fragmentos com o mesmo message.id não são respostas novas.
++        ident = m.get('id')
++        if isinstance(ident, str) and ident:
++            if ident in vistos:
++                continue
++            vistos.add(ident)
++        total += 1
++    return total
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument('transcrito', nargs='?', default=os.environ.get('AGATA_TRANSCRITO'))
++    ap.add_argument('--modo', choices=('humano', 'respostas'), default='humano')
++    ap.add_argument('--proximo', action='store_true')
++    a = ap.parse_args(argv)
++    fonte = a.transcrito
++    if not fonte and a.modo == 'humano':
++        achados = glob.glob(os.path.expanduser('~/.claude/projects/-home-orusoua-agata/*.jsonl'))
++        fonte = max(achados, key=os.path.getmtime) if achados else None
++    if not fonte:
++        ap.error('transcrito desta sessão não informado; use contagem no contexto')
+     try:
+-        d = json.loads(l)
+-    except ValueError:
+-        continue
+-    if d.get("type") != "user":
+-        continue
+-    c = d.get("message", {}).get("content")
+-    if isinstance(c, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in c):
+-        continue
+-    txt = c if isinstance(c, str) else "".join(x.get("text", "") for x in c if isinstance(x, dict) and x.get("type") == "text") if isinstance(c, list) else ""
+-    s = txt.strip()
+-    if s and not s.startswith(("<system-reminder>", "<task-notification>")) and "[SYSTEM NOTIFICATION" not in s[:200]:
+-        n += 1
+-print(n)
++        with Path(fonte).open(encoding='utf-8') as f:
++            n = contar_humano(f) if a.modo == 'humano' else contar(f)
++    except (OSError, ValueError) as e:
++        ap.exit(2, f'contador: {e}\n')
++    print(n + int(a.proximo))
++    return 0
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/scripts/dupla/testar_auxiliares.py b/scripts/dupla/testar_auxiliares.py
+index ab73da2..1d74303 100755
+--- a/scripts/dupla/testar_auxiliares.py
++++ b/scripts/dupla/testar_auxiliares.py
+@@ -61,6 +61,24 @@ def main():
+            {"type": "assistant", "message": {"content": "resposta"}}]
+     open(arq, "w", encoding="utf-8").write("\n".join(json.dumps(r) for r in reg))
+     casos.append(("t=: conta só as falas do Humano (2 de 6 registros)", subprocess.run([sys.executable, "-I", ct, arq], capture_output=True, text=True).stdout.strip() == "2"))
++    contador = carregar("contar_turnos")
++    misto = [
++        {"type":"assistant","message":{"id":"a","content":[{"type":"thinking","thinking":"x"}]}},
++        {"type":"assistant","message":{"id":"b","content":[{"type":"tool_use","name":"x"}]}},
++        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um"}]}},
++        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um completo"}]}},
++        {"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"dois"}]}},
++        {"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"humano"}]}},
++    ]
++    casos.append(("t=: modo respostas conta 2 (sem tool/thinking/repetição)", contador.contar(map(json.dumps,misto)) == 2))
++    try:
++        contador.contar(['{incompleto'])
++        casos.append(("t=: modo respostas, transcrito truncado falha",False))
++    except ValueError:
++        casos.append(("t=: modo respostas, transcrito truncado falha",True))
++    casos.append(("t=: --modo respostas --proximo soma 1", subprocess.run([sys.executable,"-I",ct,"--modo","respostas","--proximo",arq],capture_output=True,text=True).stdout.strip() == "2"))
++    env_ct = {k:v for k,v in os.environ.items() if k != "AGATA_TRANSCRITO"}
++    casos.append(("t=: modo respostas sem fonte não escolhe sessão alheia", subprocess.run([sys.executable,"-I",ct,"--modo","respostas"],capture_output=True,text=True,env=env_ct).returncode == 2))
+     vg = os.path.join(AQUI, "vigia.sh")
+     casos.append(("vigia.sh: sintaxe bash válida", subprocess.run(["bash", "-n", vg]).returncode == 0))
+     iso = tempfile.mkdtemp()
