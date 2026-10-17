@@ -29,8 +29,14 @@ Pelo banco do LibreChat, sem tocar na tela: `docker exec librechat-mongodb mongo
 Só com pedido explícito ("abra minha conversa e apresente-se"). Precisa de uma ferramenta de navegador do próprio modelo.
 - **Claude Code com a extensão Claude in Chrome:** `tabs_context_mcp` com `createIfEmpty:true` cria um grupo de abas próprio, em OUTRA janela do navegador que a extensão controla. A aba nasce com a sessão logada do perfil (o LibreChat abriu direto em `/c/new`, sem tela de login). Navegue para `http://127.0.0.1:3080/c/<conversationId>` (id vem do caminho B), ache a caixa com `find`, preencha com `form_input` e clique em enviar. O grupo pode não aparecer na janela que o Humano está olhando; isso é normal, e não adianta pedir que ele "arraste a aba".
 - **Outros modelos:** qualquer automação de navegador que reuse o perfil logado do Humano serve (MCP de navegador do Codex ou do Goose). Mesmos limites.
-- Depois de enviar, confira a resposta pelo caminho B (leitura), não por captura de tela.
+- **Fazer o Humano ver o que você faz (o ponto que mais custou tempo em 17/10):** a janela que a extensão controla é uma janela NOVA e pequena do navegador, quase sempre fora da vista dele, e o painel do navegador interno do aplicativo é isolado (sem a sessão logada, e a senha não é sua). Por isso, **mostre cada passo por captura de tela na própria conversa**: `computer screenshot` com `save_to_disk:true`, e envie com `SendUserFile` (1) com a pergunta digitada, antes de enviar, e (2) com a resposta. Legende cada captura ("Passo 1: ..."). Se ele fechar o grupo de abas, recrie com `tabs_context_mcp createIfEmpty:true`; se uma ação for recusada no lado dele, pare e espere, sem insistir.
+- Depois de enviar, confira a resposta pelo caminho B (leitura): chamadas de ferramenta, cabeçalhos contados, símbolos que sobraram.
 - Nunca clique em configuração, exclusão, compartilhamento ou exportação; nunca troque de conversa sem pedido.
+
+## Fatos do LibreChat da Agata que já custaram tempo (17/10/2026)
+- A "Seth" na tela é um **Agent** do LibreChat (`endpoint: agents`, `agent_id` fixo), com provedor "Seth" e modelo `seth-livre`; o gateway escolhe o modelo real (o cabeçalho da Máquina diz qual). **É o Agent que dá as ferramentas** (`query_canon`, `vault_buscar`, `maquina_verificar`...). No caminho A (chamada direta) ela NÃO tem ferramentas: o que ela disser sobre "consultei" ou "o resultado foi" é invenção (medido: números e citação de entrada inventados). Peça verificação só pelo Agent (caminhos B e C).
+- Senha: o LibreChat não tem e-mail configurado, então "esqueci a senha" não existe; a troca é `docker exec -it librechat node config/reset-password.js`, que **ignora argumento** e pergunta o e-mail por prompt, com comparação exata (digitar à mão; colar já falhou). A senha nunca passa por você.
+- O aviso "Index build failed ... partial index ... $not" no log do LibreChat (v0.8.8-rc3) é inofensivo e anterior às mudanças do dia.
 
 ## O que não está coberto (declarado)
 - O áudio da voz: nenhum dos caminhos o ouve; só o Humano mede se ficou natural.
