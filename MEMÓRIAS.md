@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c5e2050c5fb8f3d7afc1549362c6b2f36597b489
-  Escrito em: 17/10/2026 18:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bfc562104cda428009b55731f8b477cf89d571d1
+  Escrito em: 17/10/2026 20:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c5e2050c5fb8f3d7afc1549362c6b2f36597b489/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c5e2050c5fb8f3d7afc1549362c6b2f36597b489/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c5e2050c5fb8f3d7afc1549362c6b2f36597b489/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c5e2050c5fb8f3d7afc1549362c6b2f36597b489/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c5e2050c5fb8f3d7afc1549362c6b2f36597b489/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc562104cda428009b55731f8b477cf89d571d1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc562104cda428009b55731f8b477cf89d571d1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc562104cda428009b55731f8b477cf89d571d1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc562104cda428009b55731f8b477cf89d571d1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bfc562104cda428009b55731f8b477cf89d571d1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(763) DIÁRIO — 17/10/2026 · **Método do Claude Code destilado na Seth por rédea e medição (seth-destila-claude-20261017, assinado).** Não treina pesos (modelos de nuvem); entra na doutrina fixa do gateway: pergunta nova a cada turno (a resposta anterior não vale), estado de unidade só pela ferramenta (not-found = não existe), número só do bloco extraído da entrada pedida, nome de revisor copiado do texto. O juiz do golden passa a reconhecer unidade inexistente e ganha o tipo campo; casos novos g06 e g07; selftest 26/26. Medido antes: 30 sondas em conversa única 25/30 (83%), falhas em unidade (4/14) e uma contaminação por contexto (709). A repetir após aplicar, com a meta de 90%. Modelo: Claude Sonnet 5.5 · vetor: Claude Code · Autorização: Humano assinou seth-destila-claude-20261017.
+
 (762) DIÁRIO — 17/10/2026 · **Juiz do golden aceita abstenção honesta mesmo com a linha de última entrada (seth-golden-abstencao-20261017, assinado).** A bateria completa deu 43/44; o único caso reprovado (g03) era acerto da Seth, que respondeu "Não achei.", e o juiz contou os dígitos da linha "Última entrada" que a Máquina põe depois do cabeçalho. Essa linha sai da conta da abstenção; selftest 20/20 com o caso novo. Esperado: 44/44. Aberto: a Seth trocou o revisor (Claude por Codex) nas entradas 741–743; entra na próxima rodada de treino. Modelo: Claude Sonnet 5.5 · vetor: Claude Code · Autorização: Humano assinou seth-golden-abstencao-20261017.
 
 (761) DIÁRIO — 17/10/2026 · **Rédea rotula a entrada pedida e extrai o número por programa (seth-rotulo-entrada-20261017, assinado).** Causa medida: a Seth lia o topo de MEMÓRIAS no lugar da entrada pedida (742: verdade 26/26, resposta 18); amostra de 12 casos de número deu 5/12 (42%). O bloco de entradas literais da rédea agora traz "ENTRADA (N) — texto exato (esta é a entrada pedida)" e a linha EXTRAÍDO com o maior a/a e o maior PR calculados pela Máquina. Selftest da rédea com o caso novo. A repetir: rodada de números até 90%. Modelo: Claude Sonnet 5.5 · vetor: Claude Code · Autorização: Humano assinou seth-rotulo-entrada-20261017.
