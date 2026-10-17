@@ -1,0 +1,23 @@
+diff --git a/redesign/router/limpa_emoji.py b/redesign/router/limpa_emoji.py
+index 06a6365..610cad3 100644
+--- a/redesign/router/limpa_emoji.py
++++ b/redesign/router/limpa_emoji.py
+@@ -61,7 +61,7 @@ class LimpaEmoji:
+                     if self.prefixo == "```":
+                         self.em_bloco = not self.em_bloco
+                     self.inicio = False
+-            protegido = self.em_bloco or self.em_inline or self.fecha_aspas or self.linha_cit or self.prefixo.startswith("`")
++            protegido = self.em_bloco or self.em_inline or self.fecha_aspas or self.linha_cit or (self.inicio and self.prefixo.startswith("`"))
+             if not self.em_bloco and ch == "`" and not self.prefixo.startswith("```"):
+                 self.em_inline = not self.em_inline
+             elif not self.em_bloco and not self.em_inline and not self.linha_cit:
+@@ -135,6 +135,9 @@ def _selftest():
+     E1, E2, E3, E4 = "✅", "\U0001F600", "❌", "⚠️"
+     casos = []
+     L = lambda t: LimpaEmoji().passar(t)
++    casos.append(("inline no início não protege prosa seguinte", L("`ok` prosa ✅") == "`ok` prosa "))
++    est = LimpaEmoji()
++    casos.append(("inline inicial fragmentado encerra proteção", "".join(est.passar(x) for x in ["`", "ok", "` prosa ", "✅"]) == "`ok` prosa "))
+     casos.append(("remove da prosa", L(f"Feito {E1} e ok {E2}.") == "Feito  e ok ."))
+     casos.append(("preserva acento e símbolos tipográficos", L("ação → © ✓ ★ ™") == "ação → © ✓ ★ ™"))
+     casos.append(("preserva em bloco de código", L(f"a\n```\nx = '{E1}'\n```\nb {E2}") == f"a\n```\nx = '{E1}'\n```\nb "))
