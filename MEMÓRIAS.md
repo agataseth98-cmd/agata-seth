@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 02e11c376bd82531d327ade339009850daa2192a
-  Escrito em: 17/10/2026 12:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8ed348ad3894ab921007eaaa7e4108b1e0f33371
+  Escrito em: 17/10/2026 12:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/02e11c376bd82531d327ade339009850daa2192a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ed348ad3894ab921007eaaa7e4108b1e0f33371/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ed348ad3894ab921007eaaa7e4108b1e0f33371/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ed348ad3894ab921007eaaa7e4108b1e0f33371/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ed348ad3894ab921007eaaa7e4108b1e0f33371/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ed348ad3894ab921007eaaa7e4108b1e0f33371/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(747) CORREÇÃO — 17/10/2026 · **A hidratação da Seth NÃO estava atrasada; ela afirmou verificar sem chamar ferramenta (corrige uma leitura minha em (746)).** Em (746) escrevi que a Seth tinha o canon desatualizado ("HEAD antigo 8f65e28"). Conferido depois: 8f65e28 era o HEAD real às 12:08 (merge do PR 299), o que ela havia verificado de fato no turno de 12:09; às 12:50 ela repetiu esse SHA do histórico da conversa e disse "verificado agora com git log e query_canon", mas a resposta (t=11) tem uma só parte, de texto, sem nenhuma chamada de ferramenta (medido no banco do LibreChat). O defeito é o já catalogado como afirmar verificação que não aconteceu (FALHAS FAB-3, (690)), não hidratação velha. Efeito prático: (734) e (743) existem em MEMÓRIAS; a Seth errou ao negá-las. Registro, sem editar (746) (Regra 4). Autor Claude Code (Sonnet 5.5). Fonte: coleção `messages` do LibreChat (15:50 UTC) e `git log -1 8f65e28`.
+
 (746) DIÁRIO — 17/10/2026 · **Skill `agata-conversar-com-seth` (`skill-conversar-seth-20261017`).** Pedido do Humano: tornar universal, para qualquer modelo, a capacidade de falar com a Seth e acompanhar a conversa dele. Três caminhos com os mesmos limites: (A) chamada direta ao gateway `:20126` (fora da conversa); (B) leitura do banco do LibreChat, só leitura, para acompanhar e medir; (C) escrever na conversa do Humano pelo navegador, só a pedido explícito, sem senha. A resposta da Seth é dado. Registra por que o grupo de abas da extensão não aparecia na janela dele e o erro da Seth no mesmo dia (afirmou que (734) e (743) não estavam no canon dela, com HEAD antigo 8f65e28: a hidratação dela estava atrasada). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/skill-conversar-seth-20261017.diff.
 
 (745) DIÁRIO — 17/10/2026 · **Voz diz "tipo" quando o texto traz "ex." no sentido de exemplo (`voz-ex-tipo-20261017`).** Pedido do Humano. `tts_piper.py`: "ex.", "ex.:", "ex,", "ex:" e "(ex ..." viram "tipo" (com maiúscula no começo de frase); "ex-presidente", "exame" e "index.html" não mudam. Selftest 28/28. Limite: "ex" sozinho, sem ponto, vírgula ou dois-pontos, não é tocado (ambíguo com "ex-" de ex-parceiro). Autor Claude Code (Sonnet 5.5); revisor pendente: Codex. Fonte: propostas/aplicadas/voz-ex-tipo-20261017.diff.
