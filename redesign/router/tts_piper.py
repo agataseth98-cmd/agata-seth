@@ -92,7 +92,7 @@ def limpar_markdown(texto):
     """Interpreta a marcação em vez de lê-la: a voz não diz asterisco, #, crase nem barra.
     Negrito vira ênfase por pausa (vírgulas); título e item de lista fecham com ponto, para cada ideia ter o seu fôlego."""
     import re
-    t = re.sub(r"```.*?```", " ", texto, flags=re.S)                  # bloco de código não se lê
+    t = re.sub(r"(?m)^ {0,3}(`{3,}|~{3,})[^\n]*\n.*?^ {0,3}\1[ \t]*$", " ", texto, flags=re.S)                  # bloco de código não se lê
     t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)                   # [texto](url) -> texto
     t = re.sub(r"https?://\S+", " ", t)                                 # URL solta não se lê
     t = re.sub(r"(?m)^\s*>+\s?", "", t)                                 # citação
@@ -107,7 +107,7 @@ def limpar_markdown(texto):
     t = re.sub(r"(?m)^\s{0,3}#{1,6}\s*(.+?)\s*$", lambda m: "\x01" + m.group(1).strip("*_ ") + "\x02.", t)   # título: ênfase + ponto
     t = re.sub(r"(?m)^\s*(?:[-*+]|\d+[.)])\s+(.+?)\s*$", lambda m: _fecha(m.group(1)), t)               # item: sem marcador, com ponto
     t = re.sub(r"(\*\*|__)(?=\S)(.+?)(?<=\S)\1", "\x01\\2\x02", t, flags=re.S)                           # negrito -> ênfase
-    t = re.sub(r"(\*|_)(?=\S)(.+?)(?<=\S)\1", r"\2", t, flags=re.S) if "*" in t else t                    # itálico simples
+    t = re.sub(r"\*(?=\S)(.+?)(?<=\S)\*", r"\1", t, flags=re.S)                    # itálico simples
     t = re.sub(r"(?<!\w)_(?=\S)(.+?)(?<=\S)_(?!\w)", r"\1", t)        # _itálico_ (snake_case fica)
     t = re.sub(r"\s*\x01(.+?)\x02", r", \1,", t, flags=re.S)             # ênfase = pausa antes e depois
     t = t.replace("\x01", "").replace("\x02", "").replace("*", "").replace("`", "").replace("~~", "")
@@ -299,6 +299,8 @@ def _selftest():
         res["9c snake_case e texto simples não são mexidos"] = \
             limpar_markdown("o arquivo seth_gateway ficou pronto") == "o arquivo seth_gateway ficou pronto"
         tab = limpar_markdown("| a | b |\n|---|---|\n| 1 | 2 |")
+        res["9g itálico não altera identificadores"] = limpar_markdown("Custo *baixo* em seth_gateway e outro_nome.") == "Custo baixo em seth_gateway e outro_nome."
+        res["9h código com tils não é falado"] = limpar_markdown("Antes.\n~~~python\nprint('exemplo')\n~~~\nDepois.") == "Antes.\n \nDepois."
         res["9d tabela: sem barras nem traços"] = "|" not in tab and "-" not in tab
         res["9e nenhum símbolo de markdown sobra num texto misto"] = not any(
             c in limpar_markdown("**Resultado:** o *gateway* __ok__ `x` ~~z~~") for c in "*_`#~")
