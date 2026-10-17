@@ -1,0 +1,215 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 239f396..5c77631 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -5,7 +5,7 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ **Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
+ 
+ **Sempre:**
+-- **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `Agata · <modelo> · t=<n> (contado no contexto) · <hora + selo>` (`PROTOCOLOS.md`, "Carregar e formatos").
++- **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `agata-seth · <modelo> · t=<n> (contado no contexto) · <hora + selo>` (`PROTOCOLOS.md`, "Carregar e formatos").
+ - **Não minta; meça antes de afirmar** (Regra 2). Não afirme ter lido, medido ou testado o que não aconteceu. Antes de dizer que algo FALTA, procure: `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (entradas por data e tema) e a "Fronteira de recusas" (`PROJETO_REFERENCIA.md`).
+ - **O Humano decide; você propõe.** Nada muda em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*`/`redesign/*`/`AGENTS.md`/`CLAUDE.md` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` (`propostas/README.md`). Você nunca roda `scripts/aprovar.sh`. **Fluxo padrão** ((692), decisão do Humano): o PR que só abre a proposta (`.diff` + registro) vai direto contra o `main`, nunca empilhado em outra branch; quem propõe junta esse PR e roda `git pull` assim que o CI passar — o Humano só assina. O PR que aplica o código assinado continua com o Humano.
+ - **Nada de sudo** por conta própria — peça o comando ao Humano.
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 101fa55..7001850 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -17,18 +17,20 @@ A janela mais recente de MEMÓRIAS já está no contexto (topo do corpo, logo ap
+ 
+ Ao `carregar`, bloco de prontidão de 3 linhas:
+ ```
+-{{NOME_SISTEMA}} · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
++agata-seth · modelo: <nome> · sync: <forma, ver abaixo> · <data e hora local + selo de origem>
+ Última entrada: (<n>) <título> — <1 linha>
+ <quebrado: liste em 1 linha. senão: "pronto.">
+ ```
+ 
+ Em qualquer outra resposta, uma linha só:
+ ```
+-{{NOME_SISTEMA}} · <modelo> · t=<n> (<base: contado no contexto / contador mecânico / prefixo compactado>) · <data e hora local + selo de origem>
++agata-seth · <modelo> · t=<n> (<base: contado no contexto / contador mecânico / prefixo compactado>) · <data e hora local + selo de origem>
+ ```
+ 
+ Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
+ 
++**O nome no cabeçalho é `agata-seth`** (decisão do Humano, 17/10/2026): o cabeçalho é o único lugar em que o nome do sistema sai assim; no resto do canon vale o campo "Nome do sistema". Durante a transição, `Agata ·` continua aceito pelos verificadores.
++
+ **Data e hora.**
+ - `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada entre sessões paralelas.
+ - **Selo de origem, obrigatório:** `(relógio da Máquina)` quando medido · `(informado pela interface)` quando não verificável de dentro · `lacuna: sem relógio` quando não há nada a medir. Lista completa e precedência: "Regra 1.1 — Sincronização de horário", abaixo.
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index c120ceb..3422bc1 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -58,7 +58,7 @@ LINHA_CONTINUACAO = ("MESMA-RESPOSTA: continuação da sua resposta depois de fe
+                      "parágrafo nem correção (700).")
+ _EXTENSOES = (".md", ".py", ".sh", ".mjs", ".js", ".yaml", ".yml", ".json", ".txt",
+               ".service", ".timer", ".conf", ".diff")
+-_CABECALHO = re.compile(r"^\s*\**\s*Agata\s*·", re.IGNORECASE)
++_CABECALHO = re.compile(r"^\s*\**\s*(?:Agata|agata-seth)\s*·", re.IGNORECASE)  # agata-seth: forma do cabeçalho desde 17/10/2026; Agata segue aceita
+ _T_CONTADO = re.compile(r"t\s*=\s*(\d+)\s*\(\s*contado no contexto", re.IGNORECASE)
+ _HORA = re.compile(r"\b(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}|\d{2}/\d{2}/\d{4} \d{1,2}:\d{2})")
+ # Modo conciso (REGRAS, "NPR"; MEMÓRIAS (667)): padrão; o Humano liga o explicativo na conversa.
+@@ -313,7 +313,7 @@ def _cabecalhos(texto: str) -> list[list[str]]:
+ 
+ def _modelo_do_cabecalho(linha: str) -> str:
+     m = re.search(r"·\s*modelo\s*:\s*([^·]+)", linha, re.IGNORECASE) or \
+-        re.search(r"^\s*\**\s*Agata\s*·\s*([^·]+)", linha, re.IGNORECASE)
++        re.search(r"^\s*\**\s*(?:Agata|agata-seth)\s*·\s*([^·]+)", linha, re.IGNORECASE)
+     return m.group(1).strip() if m else ""
+ 
+ 
+diff --git a/redesign/router/limpa_cabecalho.py b/redesign/router/limpa_cabecalho.py
+index 33197dc..b7d083f 100644
+--- a/redesign/router/limpa_cabecalho.py
++++ b/redesign/router/limpa_cabecalho.py
+@@ -19,7 +19,7 @@ import json
+ import re
+ import sys
+ 
+-_ABRE = "agata ·"
++_ABRES = ("agata ·", "agata-seth ·")  # as duas formas do cabeçalho (agata-seth desde 17/10/2026)
+ _RESTO = re.compile(r"^\s*(?:\*\*)?\s*(?:última entrada\s*:|pronto\.|quebrado\s*:)", re.I)
+ 
+ 
+@@ -34,10 +34,10 @@ class LimpaCabecalho:
+     def _eh_prefixo_cab(self, s):
+         """True se `s` ainda pode virar "Agata ·" (vazio, ou um prefixo dele)."""
+         t = s.lstrip().lstrip("*").lstrip().lower()
+-        return t == "" or (len(t) < len(_ABRE) and _ABRE.startswith(t))
++        return t == "" or any(len(t) < len(x) and x.startswith(t) for x in _ABRES)
+ 
+     def _comeca_cab(self, s):
+-        return s.lstrip().lstrip("*").lstrip().lower().startswith(_ABRE)
++        return s.lstrip().lstrip("*").lstrip().lower().startswith(_ABRES)
+ 
+     def passar(self, texto):
+         if self.fase == "livre" or not texto:
+@@ -197,6 +197,8 @@ def _selftest():
+                   rodar([CAB, DUP]) == CAB + "Sistemas operacionais."))
+     casos.append(("fragmentado em pedaços de 3 caracteres", rodar([CAB] + [DUP[i:i + 3] for i in range(0, len(DUP), 3)]) == CAB + "Sistemas operacionais."))
+     casos.append(("fragmentado em 1 caractere", rodar([CAB] + list(DUP)) == CAB + "Sistemas operacionais."))
++    casos.append(("duplicado na forma nova (agata-seth ·) também sai", rodar([CAB, "agata-seth · modelo: x · sync: PASS · HEAD=1\nÚltima entrada: (1) x\npronto.\nCorpo."]) == CAB + "Corpo."))
++    casos.append(("injetado na forma nova: o duplicado do modelo sai", rodar([CAB.replace("Agata ·", "agata-seth ·", 1), "agata-seth · x · t=4 · hora\nCorpo."], injetado=CAB.replace("Agata ·", "agata-seth ·", 1)) == CAB.replace("Agata ·", "agata-seth ·", 1) + "Corpo."))
+     casos.append(("linha de turno duplicada (t=...) também sai",
+                   rodar([CAB, "Agata · ministral · t=4 (contador mecânico) · 2026-10-17 11:56\nResposta."]) == CAB + "Resposta."))
+     casos.append(("cabeçalho em negrito do modelo sai", rodar([CAB, "**Agata · x · t=4 · hora**\nCorpo."]) == CAB + "Corpo."))
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 5798e28..d8ed916 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -689,18 +689,22 @@ def _descrever_modelo(nome: str | None) -> str:
+     return f"{nome} ({familia + ', ' if familia else ''}{onde}; medido pela Máquina neste turno)"
+ 
+ 
++# O cabeçalho da Máquina abre com este nome (decisão do Humano, 17/10/2026): é o ÚNICO lugar em que o nome do sistema sai como "agata-seth".
++_NOME_CABECALHO = os.environ.get("SETH_NOME_CABECALHO", "agata-seth")
++
++
+ def _cabecalho_maquina(msgs: list, modelo: str | None) -> str:
+     n = len(auditoria_turno._turnos(msgs)[0]) + 1
+     hora = time.strftime("%Y-%m-%d %H:%M %z") + " (relógio da Máquina)"
+     if n > 1:
+-        return f"Agata · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
++        return f"{_NOME_CABECALHO} · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
+     est = {l.split(":", 1)[0]: l for l in _estado().splitlines() if ":" in l}
+     sync = est.get("sync") or "sync: não verificado · lacuna: estado não medido"
+     topo = est.get("TOPO-MEMÓRIAS", "").split(":", 1)[-1].strip()
+     topo = (topo[:300] + "…") if len(topo) > 300 else (topo or "lacuna (estado não injetado)")
+     quebrado = [est[k] for k in ("ALERTA-HISTORIA",) if k in est] + ([] if sync.startswith("sync: PASS") else [sync])
+     fim = "pronto." if not quebrado else "quebrado: " + "; ".join(q[:200] for q in quebrado)
+-    return f"Agata · modelo: {_descrever_modelo(modelo)} · {sync} · {hora}\nÚltima entrada: {topo}\n{fim}"
++    return f"{_NOME_CABECALHO} · modelo: {_descrever_modelo(modelo)} · {sync} · {hora}\nÚltima entrada: {topo}\n{fim}"
+ 
+ 
+ def _injetar_sse(buf: bytes, texto: str) -> bytes | None:
+@@ -1679,9 +1683,9 @@ def _selftest() -> int:
+                                              {"role": "user", "content": "e agora?"}]}).encode(),
+         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+     l17 = r17a.splitlines()
+-    ok17a = (l17[0].startswith("Agata · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)")
++    ok17a = (l17[0].startswith("agata-seth · modelo: gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno)")
+              and l17[1].startswith("Última entrada:") and (l17[2] == "pronto." or l17[2].startswith("quebrado:")))
+-    ok17b = r17b.startswith("Agata · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 (contador mecânico) · ")
++    ok17b = r17b.startswith("agata-seth · gemini-2.5-flash (Google, nuvem; medido pela Máquina neste turno) · t=2 (contador mecânico) · ")
+     ok17c = r17a.endswith("ok") and r17b.endswith("ok")
+     print(f"{'PASS' if ok17a else 'FALHA'}  cabeçalho da Máquina, 1ª resposta: prontidão de 3 linhas")
+     print(f"{'PASS' if ok17b else 'FALHA'}  cabeçalho da Máquina, 2ª resposta: t=2 (contador mecânico)")
+@@ -1709,7 +1713,7 @@ def _selftest() -> int:
+         {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
+                                              {"role": "user", "content": "e agora?"}]}).encode(),
+         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+-    ok17h = r17h.count("Agata ·") == 1 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
++    ok17h = r17h.count("agata-seth ·") == 1 and r17h.count("Agata ·") == 0 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
+     ok17i = log_cab.exists() and json.loads(log_cab.read_text(encoding="utf-8").splitlines()[0])["n"] >= 1
+     os.environ["SETH_CABECALHO_UNICO"] = "0"
+     r17j = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
+@@ -1717,7 +1721,7 @@ def _selftest() -> int:
+                                              {"role": "user", "content": "e agora?"}]}).encode(),
+         headers={"Content-Type": "application/json"}), timeout=10).read())["choices"][0]["message"]["content"]
+     del os.environ["SETH_CABECALHO_UNICO"]
+-    ok17j = r17j.count("Agata ·") == 2
++    ok17j = r17j.count("agata-seth ·") + r17j.count("Agata ·") == 2
+     _Dummy.texto_fixo = None
+     print(f"{'PASS' if ok17h else 'FALHA'}  cabeçalho único: o duplicado do modelo é apagado, fica o da Máquina")
+     print(f"{'PASS' if ok17i else 'FALHA'}  cabeçalho único: remoção registrada em log (só contagem)")
+diff --git a/redesign/router/tts_piper.py b/redesign/router/tts_piper.py
+index 79a8291..d4c7e3b 100755
+--- a/redesign/router/tts_piper.py
++++ b/redesign/router/tts_piper.py
+@@ -99,7 +99,7 @@ _MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "
+ def _cabecalho_natural(modelo, turno, resto):
+     """'Agata · Claude Sonnet 5.5 · t=125 (...) · 17/10/2026 11:56 -03' -> frase falável."""
+     import re
+-    partes = ["Agata", modelo.strip(), f"turno {turno}"]
++    partes = ["Agata Seth", modelo.strip(), f"turno {turno}"]
+     d = re.search(r"(\d{1,2})/(\d{1,2})(?:/(\d{4}))?", resto)
+     h = re.search(r"(\d{1,2}):(\d{2})", resto)
+     if d and 1 <= int(d.group(2)) <= 12:
+@@ -132,7 +132,7 @@ def preparar_fala(texto):
+     import re
+     global _CAB_RE
+     if _CAB_RE is None:
+-        _CAB_RE = re.compile(r"^\s*(?:\*\*)?Agata\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
++        _CAB_RE = re.compile(r"^\s*(?:\*\*)?(?:Agata|agata-seth)\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
+     m = _CAB_RE.match(texto)
+     if not m:
+         return texto
+@@ -371,14 +371,16 @@ def _selftest():
+             cab = "Agata · Claude Sonnet 5.5 · t=125 (contador mecânico) · 17/10/2026 11:56 -03 (relógio da Máquina)\nCorpo da resposta."
+             r1 = preparar_fala(cab)
+             res["10a primeiro cabeçalho é falado, em frase natural"] = r1.startswith(
+-                "Agata, Claude Sonnet 5.5, turno 125, 17 de outubro, 11 e 56.\n") and r1.endswith("Corpo da resposta.")
++                "Agata Seth, Claude Sonnet 5.5, turno 125, 17 de outubro, 11 e 56.\n") and r1.endswith("Corpo da resposta.")
+             res["10b turnos 126 a 134 não falam o cabeçalho, só o corpo"] = all(
+                 preparar_fala(cab.replace("t=125", f"t={n}")) == "Corpo da resposta." for n in range(126, 135))
+-            res["10c turno 135 fala de novo"] = preparar_fala(cab.replace("t=125", "t=135")).startswith("Agata, Claude Sonnet 5.5, turno 135")
+-            res["10d contador que recua (sessão nova) fala de novo"] = preparar_fala(cab.replace("t=125", "t=3")).startswith("Agata, Claude Sonnet 5.5, turno 3")
++            res["10c turno 135 fala de novo"] = preparar_fala(cab.replace("t=125", "t=135")).startswith("Agata Seth, Claude Sonnet 5.5, turno 135")
++            res["10d contador que recua (sessão nova) fala de novo"] = preparar_fala(cab.replace("t=125", "t=3")).startswith("Agata Seth, Claude Sonnet 5.5, turno 3")
+             res["10e só cabeçalho: ainda assim fala, não devolve vazio"] = preparar_fala(
+-                "Agata · Seth · t=137 (x) · 17/10/2026 12:00 -03").startswith("Agata, Seth, turno 137")
++                "Agata · Seth · t=137 (x) · 17/10/2026 12:00 -03").startswith("Agata Seth, Seth, turno 137")
+             res["10f texto sem cabeçalho passa intacto"] = preparar_fala("Olá. Tudo certo.") == "Olá. Tudo certo."
++            res["10g forma nova agata-seth · é reconhecida e falada como Agata Seth"] = preparar_fala(
++                cab.replace("Agata ·", "agata-seth ·").replace("t=125", "t=250")).startswith("Agata Seth, Claude Sonnet 5.5, turno 250")
+         ESTADO_CABECALHO = _est
+         res["11a separadores · e - viram pausa; guarda-chuva e 5.5 ficam"] = limpar_markdown(
+             "um · dois - três — quatro • cinco guarda-chuva 5.5") == "um, dois, três, quatro, cinco guarda-chuva 5.5"
+diff --git a/scripts/verificar_cabecalho.py b/scripts/verificar_cabecalho.py
+index 423c0c1..6263a9a 100755
+--- a/scripts/verificar_cabecalho.py
++++ b/scripts/verificar_cabecalho.py
+@@ -57,9 +57,9 @@ def verificar(texto: str, max_entrada_conhecida: int | None = None) -> list[str]
+     # produção de verdade (LibreChat/Mongo), não só contra o selftest --
+     # 16/09/2026.
+     tem_rotulo_modelo = bool(re.search(
+-        r"^\s*Agata\s*·\s*modelo\s*:", texto, re.MULTILINE | re.IGNORECASE))
++        r"^\s*(?:Agata|agata-seth)\s*·\s*modelo\s*:", texto, re.MULTILINE | re.IGNORECASE))
+     tem_valor_incerto = bool(re.search(
+-        r"^\s*Agata\s*·\s*(?:modelo\s+n[ãa]o\s+verificado"
++        r"^\s*(?:Agata|agata-seth)\s*·\s*(?:modelo\s+n[ãa]o\s+verificado"
+         r"|fam[íi]lia\s+[^·]+?,\s*vers[ãa]o\s+n[ãa]o\s+verificada)",
+         texto, re.MULTILINE | re.IGNORECASE))
+     tem_t = re.search(r"t\s*[=≥]\s*\d+", texto)
