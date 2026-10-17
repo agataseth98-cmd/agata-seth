@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8
-  Escrito em: 17/10/2026 10:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 490b0d11dcee39df4ecedaad628b3d15128183ae
+  Escrito em: 17/10/2026 10:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b93c07f77b747bd83c48c2d0bc2bfcaa13223e8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/490b0d11dcee39df4ecedaad628b3d15128183ae/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/490b0d11dcee39df4ecedaad628b3d15128183ae/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/490b0d11dcee39df4ecedaad628b3d15128183ae/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/490b0d11dcee39df4ecedaad628b3d15128183ae/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/490b0d11dcee39df4ecedaad628b3d15128183ae/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(740) DIÁRIO — 17/10/2026 · **Fiscal-mutador executável (`fiscal-mutador-executavel-20261017`).** Autor Codex (GPT-6); revisor Claude Code (Sonnet 5.5). `mutar_fiscal.py` ganhou imports, baseline verde antes de mutar e a regra de que "morto" exige falha de caso identificada; crash ou saída incompleta vira ERRO-INFRA. Não muda o fiscal que governa PR. A rodada real completa ainda não foi executada nesta versão. Fonte: propostas/aplicadas/fiscal-mutador-executavel-20261017.diff.
+
 (739) DIÁRIO — 17/10/2026 · **Voz: regressões de markdown corrigidas (`voz-markdown-regressao-20261017`).** Autor Codex (GPT-6); revisor Claude Code (Sonnet 5.5). Em `tts_piper.py` o itálico com asterisco não captura underscore de identificador e a cerca em til também é removida. Selftest 19/19. Limites: a limpeza segue heurística; código em cerca aberta sem fecho ainda é lido; "2 * 3" perde o asterisco; áudio não ouvido. Fonte: propostas/aplicadas/voz-markdown-regressao-20261017.diff.
 
 (738) DIÁRIO — 17/10/2026 · **Emoji inline corrigido (`emoji-inline-20261017`).** Autor Codex (GPT-6); revisor Claude Code (Sonnet 5.5). Em `limpa_emoji.py` o prefixo de crase só protege enquanto ainda está sendo reconhecido, sem engolir a prosa depois de um trecho inline no início. Selftest 19/19; meus casos de borda (inline no início, texto fragmentado, emoji dentro de bloco e de inline) passaram. Fonte: propostas/aplicadas/emoji-inline-20261017.diff.

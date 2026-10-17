@@ -3,6 +3,15 @@
 sobre a cópia. Mutante MORTO = a suíte falhou (bom). SOBREVIVENTE = a suíte passou mesmo com o fiscal quebrado (lacuna de teste
 OU mutante equivalente: M02/M03 são equivalentes porque a assinatura SSH cobre o hash real; M11 é encoberto pelo teste de
 ancestralidade enquanto o fiscal passar --ancora-ancestral-de). Só /tmp. Uso: python3 -I scripts/mutar_fiscal.py <repo> <saida.json>"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
 repo, saida = sys.argv[1], sys.argv[2]
 SH, PY = "scripts/p8_verificar_pr.sh", "scripts/p8_integral.py"
 M = [
@@ -22,6 +31,13 @@ M = [
  ("M14 so_ancora aceita modo diferente", PY, 'if a is None or b is None or a[:2] != b[:2] or a[1] != "blob":', 'if a is None or b is None:'),
  ("M15 sem raiz de confiança não falha", SH, 'git show "$base:propostas/.allowed_signers" > "$tmp/signers" 2>/dev/null && [ -s "$tmp/signers" ] \\\n  || falha', 'true || falha'),
 ]
+# Erro de infraestrutura ou baseline quebrada não prova que a suíte matou mutante.
+baseline = subprocess.run([sys.executable, "-I", os.path.join(repo, "scripts/testar_p8_verificar_pr.py")],
+                          capture_output=True, text=True, timeout=900)
+conclusao = re.search(r"(?m)^(\d+)/\1 casos conforme o esperado$", baseline.stdout)
+if baseline.returncode or not conclusao:
+    sys.exit("BASELINE INVALIDA: suite não concluiu verde; nenhuma mutação classificada")
+baseline_conclusao = conclusao.group(0)
 res = []
 for nome, arq, velho, novo in M:
     td = tempfile.mkdtemp(prefix="mut-")
@@ -35,8 +51,8 @@ for nome, arq, velho, novo in M:
         open(p, "w", encoding="utf-8").write(t.replace(velho, novo))
         t0 = time.time()
         r = subprocess.run(["python3", "-I", os.path.join(td, "scripts/testar_p8_verificar_pr.py")], capture_output=True, text=True, timeout=900)
-        falhou = [l for l in r.stdout.splitlines() if l.startswith("FALHOU")]
-        v = "MORTO" if r.returncode != 0 else "SOBREVIVEU"
+        falhou = [l for l in r.stdout.splitlines() if l.startswith("FALHOU") or l.startswith("FALHA")]
+        v = "MORTO" if r.returncode != 0 and falhou else ("SOBREVIVEU" if r.returncode == 0 and baseline_conclusao in r.stdout else "ERRO-INFRA")
         res.append({"mutante": nome, "resultado": v, "casos_que_pegaram": [l[7:70] for l in falhou][:3], "s": round(time.time() - t0)})
         print(nome, v, "|", (falhou[0][7:60] if falhou else ""), flush=True)
     finally:
@@ -44,3 +60,6 @@ for nome, arq, velho, novo in M:
 json.dump(res, open(saida, "w"), ensure_ascii=False, indent=1)
 mortos = sum(r["resultado"] == "MORTO" for r in res); aplic = sum(r["resultado"] != "NAO-APLICADO" for r in res)
 print(f"\nmutantes aplicados: {aplic} · mortos: {mortos} · sobreviventes: {aplic - mortos}")
+
+if any(r["resultado"] in ("ERRO-INFRA", "NAO-APLICADO") for r in res):
+    sys.exit(2)
