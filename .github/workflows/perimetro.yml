@@ -63,6 +63,7 @@ jobs:
           python3 -I scripts/verificar_cofre.py --selftest
           python3 -I scripts/cifrar_recuperacao.py --selftest
           python3 -I scripts/verificar_expurgo.py --selftest
+          python3 -I scripts/seth_golden.py --selftest
           python3 -I scripts/janela_manutencao.py --selftest
           python3 -I scripts/testar_janela_recuperacao.py
           python3 -I scripts/dupla/dupla.py --selftest

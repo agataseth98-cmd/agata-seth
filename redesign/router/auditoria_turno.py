@@ -516,6 +516,81 @@ def _origem_ausente(texto: str) -> list[str]:
     return []
 
 
+# Citação inventada (decisão do Humano, 17/10/2026: citação inventada se expurga, inegociável). Determinístico: trecho entre
+# aspas, de 5 palavras ou mais, atribuído a uma entrada "(N)" que NÃO está no texto dessa entrada. Só aviso, como as outras
+# conferências. O achado NUNCA reproduz o trecho (o achado vai ao prompt do turno seguinte e ao log: reproduzi-lo o espalharia).
+_REF_ENTRADA = re.compile(r"\((\d{2,4})\)")
+_CAB_ENTRADA = re.compile(r"^\((\d+)\) \S+ — ", re.M)
+_CACHE_ENTRADAS: dict = {}
+
+
+def _norm_citacao(s: str) -> str:
+    s = s.replace("*", "").replace("`", "").replace("\u201c", '"').replace("\u201d", '"').replace("\u2019", "'")
+    return " ".join(s.split()).casefold()
+
+
+def _entradas(raiz: Path) -> dict[int, str]:
+    """Número -> texto da entrada, de MEMÓRIAS.md, MEMORIAS-MORNO.md e dos MEMORIAS-FRIO-*.md. Cache por (caminho, mtime, tamanho)."""
+    idx: dict[int, str] = {}
+    for p in [raiz / "MEMÓRIAS.md", raiz / "MEMORIAS-MORNO.md", *sorted(raiz.glob("MEMORIAS-FRIO-*.md"))]:
+        try:
+            st = p.stat()
+            if st.st_size > 20_000_000:
+                continue
+            chave = (str(p), st.st_mtime_ns, st.st_size)
+            if chave not in _CACHE_ENTRADAS:
+                for k in [k for k in _CACHE_ENTRADAS if k[0] == str(p)]:
+                    del _CACHE_ENTRADAS[k]
+                texto = p.read_text(encoding="utf-8", errors="replace")
+                marcas = list(_CAB_ENTRADA.finditer(texto))
+                por_n: dict[int, str] = {}
+                for i, m in enumerate(marcas):
+                    fim = marcas[i + 1].start() if i + 1 < len(marcas) else len(texto)
+                    por_n[int(m.group(1))] = por_n.get(int(m.group(1)), "") + texto[m.start():fim]
+                _CACHE_ENTRADAS[chave] = por_n
+            for n, corpo in _CACHE_ENTRADAS[chave].items():
+                idx[n] = idx.get(n, "") + corpo
+        except OSError:
+            continue
+    return idx
+
+
+def _citacao_inventada(texto: str, raiz: Path | None = None) -> list[str]:
+    out: list[str] = []
+    idx = None
+    checados = 0
+    for m in _CITADO.finditer(texto):
+        citado = m.group(0)[1:-1].strip()
+        palavras = len(citado.split())
+        if palavras < 5:
+            continue
+        antes = texto[max(0, m.start() - 240):m.start()].rsplit("\n\n", 1)[-1]
+        refs = list(_REF_ENTRADA.finditer(antes))
+        ref = refs[-1].group(1) if refs else None
+        if ref is None:
+            r = _REF_ENTRADA.search(texto[m.end():m.end() + 80].split("\n\n")[0])
+            ref = r.group(1) if r else None
+        if ref is None:
+            continue
+        if idx is None:
+            idx = _entradas(raiz or RAIZ)
+        entrada = idx.get(int(ref))
+        if entrada is None:
+            continue  # entrada inexistente é assunto do P-7, não desta conferência
+        partes = [x.strip(" .,;:") for x in re.split(r"\u2026|\.\.\.", _norm_citacao(citado))]
+        partes = [x for x in partes if len(x) >= 12]
+        if not partes:
+            continue
+        ne = _norm_citacao(entrada)
+        if not all(x in ne for x in partes):
+            out.append(f"citação inventada: o trecho entre aspas ({palavras} palavras) atribuído a ({ref}) NÃO está nessa entrada — "
+                       'citação inventada se expurga: cite só o literal lido com query_canon ou escreva "não medido"')
+        checados += 1
+        if checados >= 8:
+            break
+    return out
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
@@ -526,6 +601,7 @@ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     out += _ferramenta_sem_chamada(texto, msgs)
     out += _negacao_contradita(texto, msgs)
     out += _estado_desatualizado(texto)
+    out += _citacao_inventada(texto)
     if modo_atual == "conciso":
         narradas = _narracao(texto)
         if narradas:
@@ -597,6 +673,24 @@ def _selftest() -> int:
     # a conversa real de 13/10 (664), reconstruída no formato -- sem o texto dela
     t2 = a(linha(2, "11:41") + "\n\ncerto")
     t3_errado = a("Agata · ministral-14b-latest · t=3 (3) · " + hora("11:42") + "\n\nanálise")
+    import tempfile as _tfc
+    _raiz_c = Path(_tfc.mkdtemp())
+    (_raiz_c / "MEMÓRIAS.md").write_text(
+        "<!-- ENTRADAS-NOVAS:AQUI -->\n(743) DIÁRIO — 17/10/2026 · **Janela v2.** Primeiro ciclo de 17/10 às 12:15, com o código anterior: "
+        "avaliar-decisor (20 s), laya-treino (0,2 s); o treino pulou por regra própria (15 exemplos reais, mínimo 20).\n\n"
+        "(742) DIÁRIO — x · texto de outra entrada que fala de outra coisa inteiramente.\n", encoding="utf-8")
+    _ci = lambda s: _citacao_inventada(s, _raiz_c)
+    casos_citacao = [
+        ("citação fiel à entrada citada -> nada", _ci('Em (743): "o treino pulou por regra própria (15 exemplos reais, mínimo 20)".') == []),
+        ("citação inventada atribuída a (743) -> acusa", len(_ci('Em (743) consta "consolidação demorou dez minutos e o treino foi esquecido hoje".')) == 1),
+        ("o achado NÃO reproduz o trecho inventado", "esquecido" not in "".join(_ci('Em (743) consta "consolidação demorou dez minutos e o treino foi esquecido hoje".'))),
+        ("elipse: fragmentos presentes -> nada", _ci('(743) diz "Primeiro ciclo de 17/10 às 12:15 … o treino pulou por regra própria".') == []),
+        ("citação de 4 palavras é ignorada", _ci('(743) diz "o treino pulou ontem".') == []),
+        ("entrada inexistente é assunto do P-7: nada aqui", _ci('(9999) diz "um trecho inventado bem comprido de propósito aqui".') == []),
+        ("aspas sem referência de entrada -> nada", _ci('Disse "um trecho comprido que ninguém atribuiu a entrada alguma".') == []),
+        ("citação atribuída a outra entrada que a contém -> nada", _ci('(742) e (743): (742) fala "texto de outra entrada que fala de outra coisa" mesmo.') == []),
+        ("marcação em negrito na entrada não atrapalha", _ci('(743) é "Janela v2. Primeiro ciclo de 17/10 às 12:15, com o código anterior".') == []),
+    ]
     casos = [
         ("sem resposta anterior -> nada", linha_estado([u()]) == ""),
         ("1ª resposta com prontidão correta -> OK", linha_estado([u(), a(pront), u()]) == "AUDITORIA-TURNO-ANTERIOR: OK"),
@@ -776,6 +870,7 @@ def _selftest() -> int:
     linhas = LOG.read_text(encoding="utf-8").splitlines()
     casos.append(("log: só quem foi auditado, sem o texto",
                   len(linhas) == 25 and all("análise" not in l and "corpo" not in l for l in linhas)))
+    casos = casos + casos_citacao
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)
