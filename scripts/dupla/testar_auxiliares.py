@@ -61,6 +61,24 @@ def main():
            {"type": "assistant", "message": {"content": "resposta"}}]
     open(arq, "w", encoding="utf-8").write("\n".join(json.dumps(r) for r in reg))
     casos.append(("t=: conta só as falas do Humano (2 de 6 registros)", subprocess.run([sys.executable, "-I", ct, arq], capture_output=True, text=True).stdout.strip() == "2"))
+    contador = carregar("contar_turnos")
+    misto = [
+        {"type":"assistant","message":{"id":"a","content":[{"type":"thinking","thinking":"x"}]}},
+        {"type":"assistant","message":{"id":"b","content":[{"type":"tool_use","name":"x"}]}},
+        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um"}]}},
+        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um completo"}]}},
+        {"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"dois"}]}},
+        {"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"humano"}]}},
+    ]
+    casos.append(("t=: modo respostas conta 2 (sem tool/thinking/repetição)", contador.contar(map(json.dumps,misto)) == 2))
+    try:
+        contador.contar(['{incompleto'])
+        casos.append(("t=: modo respostas, transcrito truncado falha",False))
+    except ValueError:
+        casos.append(("t=: modo respostas, transcrito truncado falha",True))
+    casos.append(("t=: --modo respostas --proximo soma 1", subprocess.run([sys.executable,"-I",ct,"--modo","respostas","--proximo",arq],capture_output=True,text=True).stdout.strip() == "2"))
+    env_ct = {k:v for k,v in os.environ.items() if k != "AGATA_TRANSCRITO"}
+    casos.append(("t=: modo respostas sem fonte não escolhe sessão alheia", subprocess.run([sys.executable,"-I",ct,"--modo","respostas"],capture_output=True,text=True,env=env_ct).returncode == 2))
     vg = os.path.join(AQUI, "vigia.sh")
     casos.append(("vigia.sh: sintaxe bash válida", subprocess.run(["bash", "-n", vg]).returncode == 0))
     iso = tempfile.mkdtemp()

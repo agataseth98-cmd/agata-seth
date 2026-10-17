@@ -12,6 +12,7 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
 ## 0. Antes de tudo
 - Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: `Agata · <modelo> · t=<n> (contador mecânico) · <hora -03> (relógio da Máquina)`;
   hora = `TZ=America/Sao_Paulo date`; t = `python3 scripts/dupla/contar_turnos.py`.
+  Padrão = mensagens do Humano (o t= que ele acompanha). `--modo respostas TRANSCRITO` conta respostas do modelo (exige transcrito explícito; o Codex usa o dele). Sem fonte: `t=<n> (contado no contexto)`.
 - Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
 - Texto longo para o canal vai por ARQUIVO: `dupla.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
 
