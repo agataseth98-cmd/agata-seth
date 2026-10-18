@@ -113,6 +113,12 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "Estado de UMA unidade de usuário (ex.: laya-roteador.service): ativa ou não, em que subestado. "
         "Use o parâmetro `consulta` com o nome da unidade. `servicos` só lista as que estão em FALHA.",
     ),
+    "laya_treino": (
+        ["python3", "scripts/laya_treino.py", "--estado"], 30,
+        "Estado MEDIDO do treino do Laya: exemplos reais, novos desde o último treino, o mínimo, quantos faltam, "
+        "o último candidato e o último recibo da janela de manutenção. Use para 'o treino rodou/pulou?' e "
+        "'quantos faltam?' -- entrada de MEMÓRIAS é história, não estado de hoje (AC-34).",
+    ),
     "p8_verificar": (
         ["bash", "scripts/p8_verificar.sh"], 60,
         "Confere se uma proposta P-8 PENDENTE (propostas/<nome>.diff + "
@@ -291,6 +297,15 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
         if d.get("LoadState") == "not-found":
             return f"unidade {d.get('Id', '?')}: NÃO existe (not-found)."
         return f"{d.get('Id', '?')}: {d.get('ActiveState', '?')}/{d.get('SubState', '?')}, arquivo {d.get('UnitFileState', '?')}."
+    if nome == "laya_treino":
+        d = dict(l.split("=", 1) for l in texto.splitlines() if "=" in l and not l.startswith("janela"))
+        if "faltam" not in d:
+            return None
+        f = d["faltam"]
+        if not f.isdigit():
+            return "não medido: a leitura dos exemplos foi inconclusiva -- não afirme quantos faltam."
+        return ("mínimo atingido: há exemplos novos suficientes para treinar." if f == "0"
+                else f"faltam {f} exemplo(s) real(is) novo(s) para o mínimo de {d.get('minimo_para_treinar', '?')}.")
     if nome == "servicos":
         m = re.search(r"(\d+) loaded units? listed", texto)
         if m is None:
@@ -475,6 +490,14 @@ def _selftest() -> int:
     except ValueError:
         casos.append(("servicos continua sem consulta", True))
     casos.append(("unidade só --user, sem shell", _argv("unidade", None, consulta="a.timer")[:3] == ["systemctl", "--user", "show"]))
+    casos.append(("leitura: laya_treino com faltam=5", "faltam 5" in (_leitura("laya_treino", "minimo_para_treinar=20\nfaltam=5\n", 0) or "")))
+    casos.append(("leitura: laya_treino com faltam=nao_medido", "não medido" in (_leitura("laya_treino", "faltam=nao_medido\n", 0) or "")))
+    casos.append(("leitura: laya_treino com faltam=0", "mínimo atingido" in (_leitura("laya_treino", "faltam=0\n", 0) or "")))
+    try:
+        _argv("laya_treino", None, consulta="x"); casos.append(("laya_treino não aceita consulta", False))
+    except ValueError:
+        casos.append(("laya_treino não aceita consulta", True))
+    casos.append(("laya_treino: argv fixo", _argv("laya_treino", None) == ["python3", "scripts/laya_treino.py", "--estado"]))
     casos.append(("leitura: unidade ativa", "active/running" in (_leitura("unidade", "Id=a.service\nLoadState=loaded\nActiveState=active\nSubState=running\nUnitFileState=enabled\n", 0) or "")))
     casos.append(("leitura: unidade inexistente", "NÃO existe" in (_leitura("unidade", "Id=b.service\nLoadState=not-found\nActiveState=inactive\n", 0) or "")))
     # 4. comando que não aceita n recusa n
