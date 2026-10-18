@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 51337cfcc90572d1d4c7e294cb2558c0fda61699
-  Escrito em: 18/10/2026 13:41 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2
+  Escrito em: 18/10/2026 14:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/51337cfcc90572d1d4c7e294cb2558c0fda61699/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/51337cfcc90572d1d4c7e294cb2558c0fda61699/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/51337cfcc90572d1d4c7e294cb2558c0fda61699/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/51337cfcc90572d1d4c7e294cb2558c0fda61699/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/51337cfcc90572d1d4c7e294cb2558c0fda61699/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eeda1fb3e22db9ca96a526a1580fbb2d0adb95d2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(771) DIÁRIO — 18/10/2026 · **Juiz do golden por formato fechado (golden-juiz-v2-20261018, assinado; AC-47).** O juiz aprovava unidade inexistente sempre que a resposta dizia "não existe", mesmo dizendo também "ativa" (parecer do Codex de 17/10). Duas versões que interpretavam texto livre por expressão regular foram quebradas pelo Codex com frases novas; o desenho mudou: as sondas já pedem resposta fechada, e o juiz exige esse formato na última linha, com rótulo e parênteses validados, não descartados. A verdade da unidade com medição vazia ou estado desconhecido passa a ser incalculável. Cinco revisões do Codex, todas as contraprovas viraram casos fixos (65/65); contra 31 respostas reais da Seth, 23 passam e 8 reprovam, e as 8 são erros já registrados. Frase certa fora do formato pedido agora reprova.
+
 (770) DIÁRIO — 18/10/2026 · **Teto de rodadas de ferramenta por resposta da Seth (teto-ferramentas-20261018, assinado; AC-37).** Em 17/10 a Seth fez 11 chamadas de ferramenta seguidas e parou sem texto, com a tela presa em "Pare de gerar". O gateway agora conta as rodadas de ferramenta da resposta em andamento e, depois de 6, manda `tool_choice: none` com uma linha de teto no estado: responder em texto com o que já mediu, e "não medido" no que faltou (`SETH_TETO_FERRAMENTAS`, 0 desliga). Medido antes de propor: 2 de 2 respostas em texto pelo gateway vivo com `tool_choice: none` e histórico de ferramenta. Revisão do Codex: sem defeito bloqueante; ressalvas: rejeição de `none` por algum provedor da cascata não tem tratamento próprio, e a suíte não rodou no sandbox dele (sem sockets).
 
 (769) DIÁRIO — 18/10/2026 · **Trava de laço de repetição no stream da Seth (trava-laco-20261018, assinado).** Fecha o laço da sonda 18 de 17/10 (764): lido no banco do LibreChat, depois da ferramenta o codestral-latest respondeu certo, repetiu o bloco de estado que o gateway injeta, resumiu a doutrina e repetiu uma frase até 117.771 caracteres; nas outras duas corridas da mesma sonda não houve laço. O gateway agora corta o repasse quando a mesma frase se repete em sequência e fecha o SSE de forma válida. Diagnóstico do Claude Code; proposta feita por sessão própria do Claude Code.
