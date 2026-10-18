@@ -1,5 +1,5 @@
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index 1f680c1..b3dc8db 100644
+index 1f680c1..a0ba79e 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
 @@ -127,8 +127,26 @@ def _chamadas(msgs: list) -> set[str]:
@@ -12,7 +12,7 @@ index 1f680c1..b3dc8db 100644
 +_VERBO_MED = r"(?:verific|confirm|consult|medi|conferi|cheq|chec)\w*"
 +_AGORA = re.compile(rf"\b{_VERBO_MED}\s+(?:\w+\s+)?(?:agora|neste turno|nesta resposta)\b|"
 +                    rf"\b(?:agora|acab(?:ei|o|amos) de|h[áa] pouco)\s+(?:\w+\s+){{0,2}}?{_VERBO_MED}", re.IGNORECASE)
-+_PASSADO = re.compile(r"turno anterior|resposta anterior|\bantes\b|anteriormente|mais cedo", re.IGNORECASE)
++_PASSADO = re.compile(r"turno anterior|resposta anterior|\bantes\b|anteriormente|mais cedo|\bontem\b", re.IGNORECASE)
 +
 +
 +def _chamadas_do_turno(msgs: list) -> set[str]:
@@ -29,18 +29,27 @@ index 1f680c1..b3dc8db 100644
      corpo, em_codigo = [], False
      for l in texto.splitlines():
          if l.strip().startswith("```"):
-@@ -136,16 +154,23 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+@@ -136,16 +154,31 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
              continue
          if not em_codigo and not _CABECALHO.match(l):
              corpo.append(l)
 -    inventadas = set()
 +    inventadas, so_no_turno = set(), set()
-+    # a alegação de "agora" vale para a resposta inteira (a quebra de linha não a separa da fonte); frase que
-+    # se refere ao passado ("no turno anterior") continua valendo contra a conversa toda
-+    agora = _AGORA.search("\n".join(corpo)) is not None
++    # Temporalidade POR FRASE (2ª revisão do Codex): frase com "agora" colado ao verbo exige a chamada no turno,
++    # mesmo dizendo "como antes"; frase no passado vale contra a conversa; "Verificado agora." solto (sem
++    # ferramenta) passa a exigência só para a frase seguinte.
++    pendente = False
++    nomes = _nomes_ferramentas()
      for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
-         for nome in _nomes_ferramentas():
-+            base = do_turno if agora and not _PASSADO.search(frase) else chamadas
+-        for nome in _nomes_ferramentas():
++        if not frase.strip():
++            continue
++        tem_agora = _AGORA.search(frase) is not None
++        cita = any(n in frase for n in nomes)
++        no_turno = tem_agora or (pendente and not _PASSADO.search(frase))
++        pendente = tem_agora and not cita
++        for nome in nomes:
++            base = do_turno if no_turno else chamadas
 +            if base is do_turno and any(nome in c for c in chamadas) and not any(nome in c for c in do_turno):
 +                so_no_turno.add(nome)
              if nome in frase and _ALEGA.search(frase) and not _SUGERE.search(frase) \
@@ -56,7 +65,7 @@ index 1f680c1..b3dc8db 100644
              "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
  
  
-@@ -902,6 +927,40 @@ def _selftest() -> int:
+@@ -902,6 +935,57 @@ def _selftest() -> int:
                      {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                  {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                  a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
@@ -88,6 +97,23 @@ index 1f680c1..b3dc8db 100644
 +                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
 +                a(linha(2, "14:02") + "\n\nLido."), u(),
 +                a(linha(3, "14:05") + "\n\nVerificado agora.\nA `query_canon` confirmou a regra."), u()]))),
++        ("evidência: 'Verificado agora com query_canon, como antes.' é acusada (2ª revisão do Codex)", any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\nVerificado agora com `query_canon`, como antes."), u()]))),
++        ("evidência: fonte de ontem não herda o 'agora' de outra ferramenta (2ª revisão do Codex)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "2", "function": {"name": "maquina_verificar_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "2", "content": "ActiveState=active"},
++                a(linha(3, "14:05") + "\n\nVerificado agora com `maquina_verificar`: o serviço está ativo.\nA `query_canon` confirmou a regra ontem."), u()]))),
 +        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
 +            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
 +                {"role": "assistant", "content": "", "tool_calls": [
