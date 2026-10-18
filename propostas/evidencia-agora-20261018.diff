@@ -1,9 +1,13 @@
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index 1f680c1..43ddd39 100644
+index 1f680c1..dfed190 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
-@@ -108,7 +108,10 @@ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mos
- _SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
+@@ -105,10 +105,13 @@ def _nomes_ferramentas() -> set[str]:
+ 
+ 
+ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
+-_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
++_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|sugerid\w*|recomend\w*|se quiser|para medir|mediria|"
                       r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b|"
                       # (695) frase que DESCREVE a invenção ("JSON de `maquina_verificar` sem chamada") não é alegação
 -                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b", re.IGNORECASE)
@@ -101,7 +105,7 @@ index 1f680c1..43ddd39 100644
              "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
  
  
-@@ -902,6 +960,91 @@ def _selftest() -> int:
+@@ -902,6 +960,93 @@ def _selftest() -> int:
                      {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                  {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                  a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
@@ -184,6 +188,8 @@ index 1f680c1..43ddd39 100644
 +            any(x.startswith("evidência:") for x in est('[[{"name": "maquina_verificar_mcp_canon", "parameters": {"comando": "estado"}}]]'))),
 +        ("evidência: 'Evidência: `maquina_verificar servicos`' sem chamada é acusada (resposta real fd9937a2)",
 +            any(x.startswith("evidência:") for x in est("- Evidência: `maquina_verificar servicos` sem falhas."))),
++        ("evidência: 'Fonte recomendada: query_canon.' não é acusada (6ª revisão do Codex)",
++            not any(x.startswith("evidência:") for x in est("Fonte recomendada: `query_canon`."))),
 +        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
 +            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
 +                {"role": "assistant", "content": "", "tool_calls": [
