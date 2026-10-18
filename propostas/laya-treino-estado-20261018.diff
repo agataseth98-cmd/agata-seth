@@ -61,7 +61,7 @@ index 4ddbb99..0f27d70 100644
      casos.append(("leitura: unidade inexistente", "NÃO existe" in (_leitura("unidade", "Id=b.service\nLoadState=not-found\nActiveState=inactive\n", 0) or "")))
      # 4. comando que não aceita n recusa n
 diff --git a/scripts/laya_treino.py b/scripts/laya_treino.py
-index b1e390e..8a29dec 100644
+index b1e390e..6db3efc 100644
 --- a/scripts/laya_treino.py
 +++ b/scripts/laya_treino.py
 @@ -41,6 +41,7 @@ TESTES = {"A (à mão)": RAIZ / "redesign/laya/dados/teste-claude.jsonl",
@@ -72,7 +72,7 @@ index b1e390e..8a29dec 100644
  MIN_NOVOS, PESO_REAL, GPU_MAX_MIB, HOLDOUT_MIN = 20, 3, 1500, 10
  
  
-@@ -92,6 +93,60 @@ def _relatar(linhas: list[str], resumo: str) -> None:
+@@ -92,6 +93,71 @@ def _relatar(linhas: list[str], resumo: str) -> None:
          pass
  
  
@@ -98,7 +98,18 @@ index b1e390e..8a29dec 100644
 +    """Só leitura (AC-34, 18/10/2026): o estado do treino MEDIDO, para a Seth não responder de entrada velha.
 +    Leitura inconclusiva (arquivo ausente, linha ilegível, contagem negativa) sai "nao_medido", nunca número."""
 +    linhas = ["ESTADO-TREINO-LAYA (medido agora; só leitura)"]
-+    lido, e = _ler_linhas(REAL), _estado()
++    lido = _ler_linhas(REAL)
++    # estado do treino: ausente = nunca treinou (0 usados); presente e ilegível = inconclusivo (2ª revisão do Codex)
++    estado_ok = True
++    try:
++        e = json.loads(ESTADO.read_text(encoding="utf-8"))
++        if not isinstance(e, dict) or not isinstance(e.get("ultimo_n_real", 0), int):
++            raise ValueError
++    except FileNotFoundError:
++        e = {"ultimo_n_real": 0, "candidatos": []}
++    except (OSError, ValueError):
++        e, estado_ok = {"ultimo_n_real": 0, "candidatos": []}, False
++        linhas.append(f"leitura=inconclusiva ({ESTADO.name} ilegível)")
 +    usados = e.get("ultimo_n_real", 0)
 +    if lido is None:
 +        linhas.append(f"exemplos_reais=nao_medido (arquivo ausente: {REAL.name})")
@@ -107,10 +118,10 @@ index b1e390e..8a29dec 100644
 +        real, ruins = lido
 +        novos = len(real) - usados
 +        linhas.append(f"exemplos_reais_total={len(real)}" + (f" (+{ruins} linha(s) ilegível(is))" if ruins else ""))
-+        if ruins or novos < 0:
++        if ruins or novos < 0 or not estado_ok:
 +            novos = None
 +            linhas.append("leitura=inconclusiva (linha ilegível ou contagem menor que a já usada)")
-+    linhas += [f"usados_ate_o_ultimo_treino={usados}",
++    linhas += [f"usados_ate_o_ultimo_treino={usados if estado_ok else 'nao_medido'}",
 +               f"novos_desde_o_ultimo_treino={novos if novos is not None else 'nao_medido'}",
 +               f"minimo_para_treinar={MIN_NOVOS}",
 +               f"faltam={max(0, MIN_NOVOS - novos) if novos is not None else 'nao_medido'}"]
@@ -133,7 +144,7 @@ index b1e390e..8a29dec 100644
  def rodar(treinar=None, avaliar=None) -> int:
      hoje = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
      real, e = _ler(REAL), _estado()
-@@ -190,6 +245,32 @@ def _selftest() -> int:
+@@ -190,6 +256,39 @@ def _selftest() -> int:
                    feitos and len(feitos[0]) == 1 + (40 - n_sep) * PESO_REAL and not ATUAL.exists()
                    and "sem piora" not in RELATORIO.read_text() and "não fica pior" in RELATORIO.read_text()))
      casos.append(("promover recusa caminho fora de modelos/", promover(str(t)) == 2))
@@ -159,6 +170,13 @@ index b1e390e..8a29dec 100644
 +                  "faltam=nao_medido" in s and "exemplos_reais_total=25 (+1" in s))
 +    REAL.write_text("".join('{"x": %d}\n' % i for i in range(5)), encoding="utf-8")
 +    casos.append(("--estado: contagem menor que a já usada vira nao_medido", "faltam=nao_medido" in estado()))
++    REAL.write_text("".join('{"x": %d}\n' % i for i in range(25)), encoding="utf-8")
++    ESTADO.write_text('{"ultimo_n_real": 1', encoding="utf-8")  # gravação interrompida
++    s = estado()
++    casos.append(("--estado: treino-continuo.json truncado vira nao_medido (2ª revisão do Codex)",
++                  "faltam=nao_medido" in s and "usados_ate_o_ultimo_treino=nao_medido" in s))
++    ESTADO.unlink()
++    casos.append(("--estado: sem treino-continuo.json = nunca treinou (0 usados)", "novos_desde_o_ultimo_treino=25" in estado()))
 +    REAL.unlink()
 +    casos.append(("--estado: arquivo de exemplos ausente vira nao_medido", "exemplos_reais=nao_medido" in estado()))
 +    RECIBOS.unlink()
@@ -166,7 +184,7 @@ index b1e390e..8a29dec 100644
      for nome, ok in casos:
          print(f"{'PASS' if ok else 'FALHA'}  {nome}")
      falhas = sum(not ok for _, ok in casos)
-@@ -201,6 +282,9 @@ if __name__ == "__main__":
+@@ -201,6 +300,9 @@ if __name__ == "__main__":
      a = sys.argv[1:]
      if a == ["--selftest"]:
          sys.exit(_selftest())
