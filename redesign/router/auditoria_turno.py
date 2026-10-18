@@ -105,10 +105,13 @@ def _nomes_ferramentas() -> set[str]:
 
 
 _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mostr|→|resultado|registr", re.IGNORECASE)
-_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
+_SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|sugerid\w*|recomend\w*|se quiser|para medir|mediria|"
                      r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b|"
                      # (695) frase que DESCREVE a invenção ("JSON de `maquina_verificar` sem chamada") não é alegação
-                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b", re.IGNORECASE)
+                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b|"
+                     # 3ª revisão do Codex (AC-30): negação e hipótese não alegam medição
+                     r"n[ãa]o (?:\w+ )?(?:consultei|verifiquei|medi|conferi|chamei|usei|rodei)\b|"
+                     r"\bse (?:eu )?(?:\w+ )?(?:consult|verific|med|confer|cham|us|rod)\w*", re.IGNORECASE)
 
 
 def _chamadas(msgs: list) -> set[str]:
@@ -127,8 +130,47 @@ def _chamadas(msgs: list) -> set[str]:
     return {n for n in nomes if n}
 
 
+# AC-30 (17/10/2026, 12:50): "verificado agora com `query_canon`" sem chamada NAQUELE turno passava, porque a
+# conversa já tinha 21 chamadas de turnos anteriores. Alegação de agora exige a chamada no próprio turno.
+# "agora" só conta colado ao verbo de verificar (revisão do Codex, 18/10/2026): "Agora, explico..." não é alegação.
+_VERBO_MED = r"(?:verific|confirm|consult|medi|conferi|cheq|chec)\w*"
+_AGORA = re.compile(rf"\b{_VERBO_MED}\s+(?:\w+\s+)?(?:agora|neste turno|nesta resposta)\b|"
+                    rf"\b(?:agora|acab(?:ei|o|amos) de|h[áa] pouco)\s+(?:\w+\s+){{0,2}}?{_VERBO_MED}", re.IGNORECASE)
+_PASSADO = re.compile(r"turno anterior|resposta anterior|\bantes\b|anteriormente|mais cedo|\bontem\b", re.IGNORECASE)
+
+
+def _isenta(frase: str, nome: str) -> bool:
+    """Sugestão, negação ou hipótese isentam a frase, MENOS quando a oração da própria ferramenta traz a sua
+    alegação (5ª revisão do Codex): "Não usei git log e confirmei agora com `query_canon`" alega `query_canon`;
+    "Use ferramentas quando autorizado (ex.: `vault_buscar`)" não alega nada."""
+    oracoes = [o for o in re.split(r"[,;:]|\s+e\s+|\s+mas\s+", frase) if nome in o]
+    if any(_SUGERE.search(o) for o in oracoes):
+        return True
+    return _SUGERE.search(frase) is not None and not any(_alega(o) for o in oracoes)
+
+
+def _alega(texto: str) -> bool:
+    """Verbo de alegação fora dos nomes de ferramenta: `maquina_verificar` não alega "verific" sozinho.
+    "Evidência:"/"fonte:" e o JSON de chamada escrito como texto (`"name": "..."`) alegam por si (antes só eram
+    pegos por acaso, pelo "verific" do nome)."""
+    if re.search(r'evid[êe]ncia|\bfonte\b|"name"\s*:', texto, re.IGNORECASE):
+        return True
+    for n in _nomes_ferramentas():
+        texto = texto.replace(n, " ")
+    return _ALEGA.search(texto) is not None
+
+
+def _chamadas_do_turno(msgs: list) -> set[str]:
+    """Nomes chamados no turno auditado: entre o penúltimo e o último pedido do usuário."""
+    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
+    if len(usuarios) < 2:
+        return _chamadas(msgs)
+    return _chamadas(msgs[usuarios[-2] + 1:usuarios[-1]] + [msgs[usuarios[-1]]])
+
+
 def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
     chamadas = _chamadas(msgs)
+    do_turno = _chamadas_do_turno(msgs)
     corpo, em_codigo = [], False
     for l in texto.splitlines():
         if l.strip().startswith("```"):
@@ -136,16 +178,32 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
             continue
         if not em_codigo and not _CABECALHO.match(l):
             corpo.append(l)
-    inventadas = set()
-    for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
-        for nome in _nomes_ferramentas():
-            if nome in frase and _ALEGA.search(frase) and not _SUGERE.search(frase) \
-                    and not any(nome in c for c in chamadas):
+    inventadas, so_no_turno = set(), set()
+    # Temporalidade POR FRASE (2ª revisão do Codex): frase com "agora" colado ao verbo exige a chamada no turno,
+    # mesmo dizendo "como antes"; frase no passado vale contra a conversa; "Verificado agora." solto (sem
+    # ferramenta) passa a exigência só para a frase seguinte.
+    pendente = False
+    nomes = _nomes_ferramentas()
+    # oração adversativa é alegação à parte: a negação de uma não isenta a outra (4ª revisão do Codex)
+    for frase in re.split(r"(?<=[.;!?])\s+|\n|,\s*(?=(?:mas|por[ée]m|contudo|entretanto)\b)", "\n".join(corpo)):
+        if not frase.strip():
+            continue
+        tem_agora = _AGORA.search(frase) is not None
+        cita = any(n in frase for n in nomes)
+        no_turno = tem_agora or (pendente and not _PASSADO.search(frase))
+        pendente = tem_agora and not cita
+        for nome in nomes:
+            base = do_turno if no_turno else chamadas
+            if base is do_turno and any(nome in c for c in chamadas) and not any(nome in c for c in do_turno):
+                so_no_turno.add(nome)
+            if nome in frase and _alega(frase) and not _isenta(frase, nome) \
+                    and not any(nome in c for c in base):
                 inventadas.add(nome)
     if not inventadas:
         return []
+    onde = "neste turno (só em turnos anteriores)" if inventadas <= so_no_turno else "nesta conversa"
     return [f"evidência: cita {', '.join(sorted(inventadas))} como fonte, mas nenhuma chamada a "
-            f"{'ela' if len(inventadas) == 1 else 'elas'} nesta conversa — escreva \"não medido\" ou chame a "
+            f"{'ela' if len(inventadas) == 1 else 'elas'} {onde} — escreva \"não medido\" ou chame a "
             "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
 
 
@@ -902,6 +960,93 @@ def _selftest() -> int:
                     {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                 {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                 a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
+        ("evidência: 'verificado agora' com chamada só em turno anterior é acusada (AC-30)", any(
+            x.startswith("evidência:") and "query_canon" in x for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\n(734) não aparece (verificado agora com `git log` e `query_canon`)."), u()]))),
+        ("evidência: alegação sem 'agora' com chamada em turno anterior não é acusada (690)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nComo a `query_canon` devolveu antes, a Regra 5 vale."), u()]))),
+        ("evidência: 'Agora, explico o que query_canon devolveu no turno anterior' não é acusada (revisão do Codex)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nAgora, explico o resultado que `query_canon` devolveu no turno anterior."), u()]))),
+        ("evidência: 'Verificado agora.' e a fonte na linha seguinte é acusada (revisão do Codex)", any(
+            x.startswith("evidência:") and "neste turno" in x for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nVerificado agora.\nA `query_canon` confirmou a regra."), u()]))),
+        ("evidência: 'Verificado agora com query_canon, como antes.' é acusada (2ª revisão do Codex)", any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nVerificado agora com `query_canon`, como antes."), u()]))),
+        ("evidência: fonte de ontem não herda o 'agora' de outra ferramenta (2ª revisão do Codex)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "2", "function": {"name": "maquina_verificar_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "2", "content": "ActiveState=active"},
+                a(linha(3, "14:05") + "\n\nVerificado agora com `maquina_verificar`: o serviço está ativo.\nA `query_canon` confirmou a regra ontem."), u()]))),
+        ("evidência: negação 'Não consultei agora a query_canon' não é acusada (3ª revisão do Codex)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nNão consultei agora a `query_canon`; estou usando o resultado anterior."), u()]))),
+        ("evidência: hipótese 'Se eu consultar agora a query_canon' não é acusada (3ª revisão do Codex)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nSe eu consultar agora a `query_canon`, obtenho o estado atualizado."), u()]))),
+        ("evidência: 'Não usei git log, mas confirmei agora com query_canon' é acusada (4ª revisão do Codex)", any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nNão usei git log, mas confirmei agora com `query_canon`."), u()]))),
+        ("evidência: 'Não usei git log e confirmei agora com query_canon' é acusada (5ª revisão do Codex)", any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nLido."), u(),
+                a(linha(3, "14:05") + "\n\nNão usei git log e confirmei agora com `query_canon`."), u()]))),
+        ("evidência: recomendação 'Use ferramentas quando autorizado (ex.: `vault_buscar`)' não é acusada (resposta real de 17/10)",
+            not any(x.startswith("evidência:") for x in est("- Use ferramentas apenas quando autorizado (ex.: `vault_buscar`, `maquina_verificar`).\n- Registre o resultado."))),
+        ("evidência: JSON de chamada escrito como texto, sem chamada, é acusado (resposta real cb358a0d)",
+            any(x.startswith("evidência:") for x in est('[[{"name": "maquina_verificar_mcp_canon", "parameters": {"comando": "estado"}}]]'))),
+        ("evidência: 'Evidência: `maquina_verificar servicos`' sem chamada é acusada (resposta real fd9937a2)",
+            any(x.startswith("evidência:") for x in est("- Evidência: `maquina_verificar servicos` sem falhas."))),
+        ("evidência: 'Fonte recomendada: query_canon.' não é acusada (6ª revisão do Codex)",
+            not any(x.startswith("evidência:") for x in est("Fonte recomendada: `query_canon`."))),
+        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
+            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
+                {"role": "assistant", "content": "", "tool_calls": [
+                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                a(linha(2, "14:02") + "\n\nRegra 5 confirmada agora em `query_canon`."), u()]))),
         ("estado desatualizado: proposta aplicada chamada de pendente é acusada (695)", any(
             x.startswith("estado desatualizado") and "voz-comum-2026-10-14" in x for x in est(
                 "A `voz-comum-2026-10-14` aguarda assinatura do Humano."))),
