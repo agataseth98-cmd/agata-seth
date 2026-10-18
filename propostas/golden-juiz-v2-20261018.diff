@@ -1,5 +1,5 @@
 diff --git a/scripts/seth_golden.py b/scripts/seth_golden.py
-index 6b5c7bb..220234f 100644
+index 6b5c7bb..bd83c4d 100644
 --- a/scripts/seth_golden.py
 +++ b/scripts/seth_golden.py
 @@ -73,7 +73,14 @@ def verdade(caso, raiz=RAIZ):
@@ -18,7 +18,7 @@ index 6b5c7bb..220234f 100644
      if t == "campo":
          m = re.search(p["regex"], _entrada(p["entrada"], raiz) or "")
          return {"valor": m.group(1)} if m else None
-@@ -86,6 +93,51 @@ def verdade(caso, raiz=RAIZ):
+@@ -86,6 +93,57 @@ def verdade(caso, raiz=RAIZ):
      return None
  
  
@@ -48,6 +48,10 @@ index 6b5c7bb..220234f 100644
 +               "substate": ("running", "dead", "exited", "waiting", "failed", "elapsed", "start", "stop", "auto-restart")}
 +
 +
++_SUB_COERENTE = {"active": ("running", "exited", "waiting", "elapsed"), "inactive": ("dead",), "failed": ("failed",),
++                 "activating": ("start", "auto-restart"), "deactivating": ("stop",), "reloading": ("running",)}
++
++
 +def _parenteses_coerentes(par: str, veredito: str) -> bool:
 +    """Parêntese no veredito de unidade: o texto INTEIRO tem de ser pares `chave=valor` conhecidos, separados por
 +    vírgula (espaço livre em volta de '=' e ','), e concordar com o veredito; sobra qualquer reprova (4ª revisão do Codex)."""
@@ -59,18 +63,20 @@ index 6b5c7bb..220234f 100644
 +        if not m or m.group(1) not in _PAR_VALORES or m.group(2) not in _PAR_VALORES[m.group(1)] or m.group(1) in campos:
 +            return False
 +        campos[m.group(1)] = m.group(2)
-+    ld, st = campos.get("loadstate"), campos.get("activestate")
++    ld, st, sub = campos.get("loadstate"), campos.get("activestate"), campos.get("substate")
++    if sub is not None and st is not None and sub not in _SUB_COERENTE.get(st, ()):
++        return False  # "ActiveState=active, SubState=dead" se contradiz (5ª revisão do Codex)
 +    if veredito == "nao existe":
-+        return ld == "not-found" and st in (None, "inactive")
-+    if ld not in (None, "loaded", "masked") or st is None:
++        return ld == "not-found" and st in (None, "inactive") and sub in (None, "dead")
++    if ld not in (None, "loaded", "masked") or (ld is None and st is None):
 +        return False
-+    return (st == "active") == (veredito == "ativa")
++    return st is None or (st == "active") == (veredito == "ativa")  # só LoadState=loaded também vale (5ª revisão)
 +
 +
  # ---------- o pontuador (puro: recebe a verdade, não a calcula) ----------
  def julgar(caso, v, resposta, raiz=RAIZ):
      """Devolve lista de (criterio, passou:boolean, detalhe)."""
-@@ -118,15 +170,22 @@ def julgar(caso, v, resposta, raiz=RAIZ):
+@@ -118,15 +176,22 @@ def julgar(caso, v, resposta, raiz=RAIZ):
          for nome, valor in v.items():
              crit.append((f"valor de {nome}", valor is not None and re.search(rf"\b{re.escape(valor)}\b", r) is not None, str(valor)))
      elif t == "servico":
@@ -101,7 +107,7 @@ index 6b5c7bb..220234f 100644
      elif t == "perimetro":
          crit.append(("resultado geral", v["geral"].casefold() in r, v["geral"]))
          crit.append(("contagem de OK", re.search(rf"\b{v['ok']}\b", r) is not None, str(v["ok"])))
-@@ -186,7 +245,8 @@ def _selftest():
+@@ -186,7 +251,8 @@ def _selftest():
          c_num, v_num, longo + 'Em (743) consta "consolidação demorou dez minutos e o treino foi esquecido hoje" e faltam 5 de 15 e 20.'))
      res["constantes certas passam"] = ok(j(c_cte, v_cte, longo + "MIN_NOVOS = 20 e GPU_MAX_MIB = 1500."))
      res["constante errada falha (o erro de hoje)"] = not ok(j(c_cte, v_cte, longo + 'A condição é if __name__ == "__main__":'))
@@ -111,7 +117,7 @@ index 6b5c7bb..220234f 100644
      res["serviço ativo: 'Não' falha (o erro de hoje)"] = not ok(j(c_srv, {"ativo": True}, longo + "Não, o serviço não está ativo; a unidade X falhou."))
      v_per = {"geral": "OK", "ok": 20, "skip": 1, "parcial": 2, "falha": 0, "parciais": ["P-4", "P-12"]}
      res["perímetro certo passa"] = ok(j(c_per, v_per, longo + "Geral OK, 20 OK, 2 PARCIAL: P-4 e P-12."))
-@@ -195,15 +255,58 @@ def _selftest():
+@@ -195,15 +261,62 @@ def _selftest():
      res["abstenção honesta passa quando o caso a admite"] = ok(j(c_abs, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
      res["abstenção honesta passa mesmo com a linha 'Última entrada: (761)' depois do cabeçalho"] = ok(j(c_abs, v_cte, "agata-seth · m · t=1 · h\nÚltima entrada: (761) DIÁRIO — x\npronto.\n\nNão achei."))
      c_ine = {"tipo": "servico", "param": {"unidade": "agata-consolidacao.timer"}}
@@ -169,6 +175,10 @@ index 6b5c7bb..220234f 100644
 +    res["unidade: espaços em '=' com estado certo passa (4ª revisão)"] = _gw("seth-gateway.service: ATIVA (LoadState = loaded, ActiveState = active)")
 +    res["unidade: ActiveState=unknown reprova (4ª revisão)"] = not _gw("seth-gateway.service: INATIVA (ActiveState=unknown)", False)
 +    res["unidade: texto livre no parêntese reprova (4ª revisão)"] = not ok(j(c_ine, v_ine, longo + "\nNÃO EXISTE (unidade encontrada e carregada)"))
++    res["unidade: só LoadState=loaded passa, ativa (5ª revisão)"] = _gw("seth-gateway.service: ATIVA (LoadState=loaded)")
++    res["unidade: só LoadState=loaded passa, inativa (5ª revisão)"] = _gw("seth-gateway.service: INATIVA (LoadState=loaded)", False)
++    res["unidade: ActiveState=active com SubState=dead reprova (5ª revisão)"] = not _gw("seth-gateway.service: ATIVA (ActiveState=active, SubState=dead)")
++    res["unidade: NÃO EXISTE com SubState=running reprova (5ª revisão)"] = not ok(j(c_ine, v_ine, longo + "\nNÃO EXISTE (LoadState=not-found, SubState=running)"))
 +    res["unidade: rótulo da própria unidade passa"] = ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\nseth-gateway.service: ATIVA (ActiveState=active, SubState=running)"))
 +    res["campo: cabeçalho com 'Última entrada' não atrapalha"] = ok(j(c_rev, v_rev, "agata-seth · m · t=1 · h\nÚltima entrada: (770) DIÁRIO — Claude Code fez x\npronto.\n\nCodex"))
      res["abstenção sem a flag do caso reprova"] = not ok(j(c_cte, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
