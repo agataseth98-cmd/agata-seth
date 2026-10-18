@@ -1,5 +1,5 @@
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index 1f680c1..d334c61 100644
+index 1f680c1..43ddd39 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
 @@ -108,7 +108,10 @@ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mos
@@ -183,7 +183,7 @@ index 1f680c1..d334c61 100644
 +        ("evidência: JSON de chamada escrito como texto, sem chamada, é acusado (resposta real cb358a0d)",
 +            any(x.startswith("evidência:") for x in est('[[{"name": "maquina_verificar_mcp_canon", "parameters": {"comando": "estado"}}]]'))),
 +        ("evidência: 'Evidência: `maquina_verificar servicos`' sem chamada é acusada (resposta real fd9937a2)",
-+            any(x.startswith("evidência:") for x in est("**Evidência:**\n- `maquina_verificar servicos` sem falhas."))),
++            any(x.startswith("evidência:") for x in est("- Evidência: `maquina_verificar servicos` sem falhas."))),
 +        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
 +            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
 +                {"role": "assistant", "content": "", "tool_calls": [
