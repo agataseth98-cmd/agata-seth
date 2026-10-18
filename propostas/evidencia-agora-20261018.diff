@@ -1,8 +1,20 @@
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index 1f680c1..a0ba79e 100644
+index 1f680c1..52472e7 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
-@@ -127,8 +127,26 @@ def _chamadas(msgs: list) -> set[str]:
+@@ -108,7 +108,10 @@ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mos
+ _SUGERE = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|recomendo|se quiser|para medir|mediria|"
+                      r"\busar\b|\buse\b|rode\b|rodar\b|chamar\b|"
+                      # (695) frase que DESCREVE a invenção ("JSON de `maquina_verificar` sem chamada") não é alegação
+-                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b", re.IGNORECASE)
++                     r"sem chamad|n[ãa]o chamad|inventad|fabricad|invent[ao]u?\b|"
++                     # 3ª revisão do Codex (AC-30): negação e hipótese não alegam medição
++                     r"n[ãa]o (?:\w+ )?(?:consultei|verifiquei|medi|conferi|chamei|usei|rodei)\b|"
++                     r"\bse (?:eu )?(?:\w+ )?(?:consult|verific|med|confer|cham|us|rod)\w*", re.IGNORECASE)
+ 
+ 
+ def _chamadas(msgs: list) -> set[str]:
+@@ -127,8 +130,26 @@ def _chamadas(msgs: list) -> set[str]:
      return {n for n in nomes if n}
  
  
@@ -29,7 +41,7 @@ index 1f680c1..a0ba79e 100644
      corpo, em_codigo = [], False
      for l in texto.splitlines():
          if l.strip().startswith("```"):
-@@ -136,16 +154,31 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+@@ -136,16 +157,31 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
              continue
          if not em_codigo and not _CABECALHO.match(l):
              corpo.append(l)
@@ -65,7 +77,7 @@ index 1f680c1..a0ba79e 100644
              "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
  
  
-@@ -902,6 +935,57 @@ def _selftest() -> int:
+@@ -902,6 +938,71 @@ def _selftest() -> int:
                      {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                  {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                  a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
@@ -114,6 +126,20 @@ index 1f680c1..a0ba79e 100644
 +                    {"id": "2", "function": {"name": "maquina_verificar_mcp_canon", "arguments": "{}"}}]},
 +                {"role": "tool", "tool_call_id": "2", "content": "ActiveState=active"},
 +                a(linha(3, "14:05") + "\n\nVerificado agora com `maquina_verificar`: o serviço está ativo.\nA `query_canon` confirmou a regra ontem."), u()]))),
++        ("evidência: negação 'Não consultei agora a query_canon' não é acusada (3ª revisão do Codex)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\nNão consultei agora a `query_canon`; estou usando o resultado anterior."), u()]))),
++        ("evidência: hipótese 'Se eu consultar agora a query_canon' não é acusada (3ª revisão do Codex)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\nSe eu consultar agora a `query_canon`, obtenho o estado atualizado."), u()]))),
 +        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
 +            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
 +                {"role": "assistant", "content": "", "tool_calls": [
