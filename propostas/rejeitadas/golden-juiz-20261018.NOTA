@@ -1,0 +1,1 @@
+Não assinada; SUPERADA pela v2 antes da assinatura: a revisão do Codex (18/10/2026 13:50) achou falsos positivos que a v1 deixava passar ("não existe e está ativa, sem falha"; "Não foi Codex."), um falso negativo ("Claude Code") e verdade parcial com is-active vazio ou LoadState=error. Substituída por golden-juiz-v2-20261018. Ver AC-47 em propostas/achados.md.
