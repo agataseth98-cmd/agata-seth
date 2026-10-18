@@ -1,0 +1,40 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 83a7a08..1f680c1 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -680,7 +680,11 @@ def unidades_medidas(msgs: list, medir=None) -> str:
+                 return dict(l.split("=", 1) for l in r.stdout.splitlines() if "=" in l)
+         linhas = []
+         for u in nomes:
+-            d = medir(u)
++            try:
++                d = medir(u)
++            except Exception as e:  # noqa: BLE001 -- uma unidade que falha não apaga as já medidas (revisão do Codex, 18/10/2026)
++                linhas.append(f"- {u}: NÃO MEDIDO (erro: {type(e).__name__})")
++                continue
+             carga = d.get("LoadState")
+             if carga == "not-found":
+                 linhas.append(f"- {u}: NÃO EXISTE (LoadState=not-found)")
+@@ -981,6 +985,11 @@ def _selftest() -> int:
+     _raiz_ext = Path(_tfc.mkdtemp())
+     (_raiz_ext / "MEMÓRIAS.md").write_text("<!-- ENTRADAS-NOVAS:AQUI -->\n(744) DIÁRIO — x · topo 18/18\n\n(743) DIÁRIO — x · passou 12/12 e 26/26 no PR 337\n", encoding="utf-8")
+     _lit = lambda txt: entradas_literais([{"role": "user", "content": txt}], _raiz_c)
++    def _medir_timeout(u):
++        if u.startswith("lenta"):
++            raise subprocess.TimeoutExpired(["systemctl"], 10)
++        return {"LoadState": "loaded", "ActiveState": "active", "SubState": "running"}
++
+     casos_redea = [
+         ("rédea: pedido cita (743) -> o texto exato da entrada vai no bloco", "o treino pulou por regra própria (15 exemplos reais, mínimo 20)" in _lit("explique a (743) pra mim")),
+         ("rédea: só as entradas citadas (742 não vem se não foi pedida)", "outra coisa inteiramente" not in _lit("explique a (743) pra mim")),
+@@ -999,7 +1008,9 @@ def _selftest() -> int:
+             unidades_medidas([{"role": "user", "content": "e agata-consolidacao.timer e seth-gateway.service?"}],
+                              medir=lambda u: {"LoadState": "not-found"} if "consolidacao" in u else {"LoadState": "loaded", "ActiveState": "active", "SubState": "running"}))),
+         ("unidades: pedido sem unidade -> vazio", unidades_medidas([{"role": "user", "content": "oi, tudo bem?"}]) == ""),
+-        ("unidades: medição que falha nunca levanta", unidades_medidas([{"role": "user", "content": "x.service?"}], medir=lambda u: 1 / 0) == ""),
++        ("unidades: medição que falha nunca levanta e sai NÃO MEDIDO", "xy.service: NÃO MEDIDO (erro: ZeroDivisionError)" in unidades_medidas([{"role": "user", "content": "xy.service?"}], medir=lambda u: 1 / 0)),
++        ("unidades: timeout numa unidade não apaga a outra", (lambda s: "lenta.service: NÃO MEDIDO (erro: TimeoutExpired)" in s and "seth-gateway.service: existe; ActiveState=active" in s)(
++            unidades_medidas([{"role": "user", "content": "e lenta.service e seth-gateway.service?"}], medir=_medir_timeout))),
+         ("unidades: medição vazia ou com erro sai NÃO MEDIDO, nunca existe", all(
+             "NÃO MEDIDO" in s and "existe;" not in s for s in (
+                 unidades_medidas([{"role": "user", "content": "e o seth-gateway.service?"}], medir=lambda u: {}),
