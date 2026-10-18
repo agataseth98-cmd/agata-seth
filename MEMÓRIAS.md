@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 617ffbbe4e5d8da79c33dd163460fb8c4c58da14
-  Escrito em: 18/10/2026 13:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 41ef6d03bfd65e437b763d867816152efbd19625
+  Escrito em: 18/10/2026 13:08 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/617ffbbe4e5d8da79c33dd163460fb8c4c58da14/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/617ffbbe4e5d8da79c33dd163460fb8c4c58da14/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/617ffbbe4e5d8da79c33dd163460fb8c4c58da14/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/617ffbbe4e5d8da79c33dd163460fb8c4c58da14/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/617ffbbe4e5d8da79c33dd163460fb8c4c58da14/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/41ef6d03bfd65e437b763d867816152efbd19625/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/41ef6d03bfd65e437b763d867816152efbd19625/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/41ef6d03bfd65e437b763d867816152efbd19625/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/41ef6d03bfd65e437b763d867816152efbd19625/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/41ef6d03bfd65e437b763d867816152efbd19625/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(768) DIÁRIO — 18/10/2026 · **Voz (piper-tts) sobe no boot com o agata.target (piper-boot-20261018, assinado).** Na queda de energia de 18/10 a voz, `static` e sem [Install], também não voltou; religada à mão pelo Claude Code. O Humano decidiu que ela sobe no boot. Aplicado o mesmo padrão do seth-gateway: `PartOf=agata.target` e `[Install] WantedBy=agata.target`, com a instalação sem sudo no README de redesign/systemd.
+
 (767) DIÁRIO — 18/10/2026 · **Medição de unidade que falha sai NÃO MEDIDO só para ela (seth-unidades-erro-por-unidade-20261018, assinado).** Fecha a ressalva do Codex à v2 (765): antes, timeout ou exceção ao medir uma unidade descartava o bloco UNIDADES-MEDIDAS inteiro, com as unidades já medidas junto; agora só aquela sai `NÃO MEDIDO (erro: <tipo>)` e as outras seguem. Selftest cobre exceção genérica e TimeoutExpired ao lado de unidade válida. Proposta feita por sessão própria do Claude Code.
 
 (766) DIÁRIO — 18/10/2026 · **Gateway da Seth e LibreChat voltam sozinhos no boot (boot-religa-gateway-librechat-20261018, assinado); sondas de unidade 6/6.** Na queda de energia de 18/10 o `seth-gateway.service` (static, sem [Install]) não subiu e os 4 contêineres do LibreChat (restart "no") saíram com 255; religados à mão pelo Claude Code. Aplicado: o gateway ganha `WantedBy=agata.target` e `PartOf=agata.target`; os 4 serviços do compose ganham `restart: unless-stopped` e as três imagens sem digest passam a fixá-lo, conferido contra as imagens em uso antes de aplicar (mongo, meilisearch, socat). Proposta feita por sessão própria do Claude Code e revisada pelo Codex, sem defeito bloqueante. Na mesma retomada, as 6 sondas de unidade da v2 (765), enviadas no Brave com o Humano acompanhando e lidas no banco do LibreChat: 6/6 certas, as 4 inexistentes inclusive. Pendentes: `piper-tts` também não volta no boot; e, pela revisão do Codex, timeout ou exceção na medição ainda descarta o bloco inteiro em vez de marcar NÃO MEDIDO.
