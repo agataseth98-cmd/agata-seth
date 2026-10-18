@@ -789,6 +789,43 @@ class _Leitor:
         return item
 
 
+def _rodadas_ferramenta(msgs: list) -> int:
+    """Rodadas de ferramenta da resposta EM ANDAMENTO: mensagens do assistente com
+    `tool_calls` depois da última mensagem do Humano."""
+    n = 0
+    for m in reversed(msgs):
+        if not isinstance(m, dict):
+            continue
+        if m.get("role") == "user":
+            break
+        if m.get("role") == "assistant" and m.get("tool_calls"):
+            n += 1
+    return n
+
+
+def _teto_ferramentas() -> int:
+    """AC-37 (17/10/2026): a Seth fez 11 chamadas seguidas e parou sem texto, com a
+    tela presa em "Pare de gerar". No teto, o pedido sai com `tool_choice: none`:
+    o modelo tem de responder em texto com o que já mediu. SETH_TETO_FERRAMENTAS=0 desliga."""
+    try:
+        return max(0, int(os.environ.get("SETH_TETO_FERRAMENTAS", "6")))
+    except ValueError:
+        return 6
+
+
+def _aplica_teto(payload: dict, msgs: list) -> str:
+    """Põe `tool_choice: none` quando a resposta já usou o teto de rodadas; devolve a
+    linha de estado que explica ao modelo, ou "" abaixo do teto."""
+    teto = _teto_ferramentas()
+    n = _rodadas_ferramenta(msgs)
+    if not teto or n < teto or not payload.get("tools"):
+        return ""
+    payload["tool_choice"] = "none"
+    return (f"TETO-FERRAMENTAS: esta resposta já fez {n} rodadas de ferramenta (teto {teto}). "
+            "Não chame mais ferramenta: responda agora, em texto, com o que já foi medido; "
+            "o que faltou medir, escreva \"não medido\".")
+
+
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
@@ -805,6 +842,9 @@ def _injeta(payload: dict) -> dict:
     unidades = auditoria_turno.unidades_medidas(msgs)  # 17/10/2026: estado da unidade medido pela Máquina, não de cabeça
     if unidades:
         auditoria = (auditoria + "\n" if auditoria else "") + unidades
+    teto = _aplica_teto(payload, msgs)
+    if teto:
+        auditoria = (auditoria + "\n" if auditoria else "") + teto
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
@@ -1912,6 +1952,29 @@ def _selftest() -> int:
     ok19d = sse19d.count("[DONE]") == 1 and "Corte da Máquina" not in sse19d and "fim" in sse19d
     print(f"{'PASS' if ok19d else 'FALHA'}  trava de laço: SETH_TRAVA_LACO=0 desliga (resposta comum intacta)")
     falhas += 0 if ok19d else 1
+    # 20. Teto de ferramentas (AC-37, 18/10/2026)
+    def _hist20(n):
+        h = [{"role": "user", "content": "e o laya-roteador?"}]
+        for i in range(n):
+            h += [{"role": "assistant", "content": "", "tool_calls": [{"id": f"t{i}", "type": "function",
+                   "function": {"name": "maquina_verificar_mcp_canon", "arguments": "{}"}}]},
+                  {"role": "tool", "tool_call_id": f"t{i}", "content": "ok"}]
+        return h
+    _ant20 = [{"role": "user", "content": "antes"}, {"role": "assistant", "content": "", "tool_calls": [{"id": "x"}]},
+              {"role": "tool", "tool_call_id": "x", "content": "ok"}, {"role": "assistant", "content": "feito"}]
+    _p20a = _injeta({"model": "seth-livre", "tools": [{"x": 1}], "messages": _hist20(5)})
+    _p20b = _injeta({"model": "seth-livre", "tools": [{"x": 1}], "messages": _hist20(6)})
+    _sys20b = " ".join(m["content"] for m in _p20b["messages"] if isinstance(m, dict) and m.get("role") == "system")
+    ok20a = "tool_choice" not in _p20a and _p20b.get("tool_choice") == "none" and "TETO-FERRAMENTAS: esta resposta já fez 6" in _sys20b
+    ok20b = _rodadas_ferramenta(_ant20 * 4 + _hist20(2)) == 2  # rodadas de respostas anteriores não contam
+    os.environ["SETH_TETO_FERRAMENTAS"] = "0"
+    _p20c = _injeta({"model": "seth-livre", "tools": [{"x": 1}], "messages": _hist20(9)})
+    del os.environ["SETH_TETO_FERRAMENTAS"]
+    ok20c = "tool_choice" not in _p20c and "TETO-FERRAMENTAS" not in json.dumps(_p20c, ensure_ascii=False)
+    print(f"{'PASS' if ok20a else 'FALHA'}  teto de ferramentas: 5 rodadas passam, na 6ª sai tool_choice none com aviso")
+    print(f"{'PASS' if ok20b else 'FALHA'}  teto de ferramentas: só conta a resposta em andamento")
+    print(f"{'PASS' if ok20c else 'FALHA'}  teto de ferramentas: SETH_TETO_FERRAMENTAS=0 desliga")
+    falhas += sum(0 if x else 1 for x in (ok20a, ok20b, ok20c))
     os.environ["SETH_EMOJI_REMOVER"] = "0"
     _Dummy.texto_fixo = "Pronto \u2705"
     t17d = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())["choices"][0]["message"]["content"]
