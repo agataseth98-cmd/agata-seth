@@ -18,14 +18,17 @@
 # app precise = entra aqui E no librechat.yaml, nos dois, no mesmo commit.
 # Mongo/Meili: a app fala com eles pelo NOME do servico, dentro da bridge.
 #
-# restart:"no" em tudo -- nada sobe no boot. Os atalhos `seth` / `Parar Seth` controlam.
+# restart: unless-stopped em tudo (18/10/2026): antes era "no" e, depois da queda de
+# energia desse dia, os 4 containers sairam com 255 e nao voltaram. Agora o dockerd os
+# religa no boot; `Parar Seth` (`compose stop`) continua valendo -- container parado
+# a mao fica parado, inclusive depois de reiniciar a Maquina.
 # Fonte versionada: ~/agata/redesign/librechat/docker-compose.yml
 
 services:
   librechat-mongodb:
     container_name: librechat-mongodb
-    image: mongo:8.0.20
-    restart: "no"
+    image: mongo:8.0.20@sha256:098862b1339f031900ca66cf8fef799e616d6324fa41b9a263f2ec899552c1ef
+    restart: unless-stopped
     networks: [librechat]
     ports:
       - "127.0.0.1:27017:27017"
@@ -34,8 +37,8 @@ services:
 
   librechat-meilisearch:
     container_name: librechat-meilisearch
-    image: getmeili/meilisearch:v1.35.1
-    restart: "no"
+    image: getmeili/meilisearch:v1.35.1@sha256:8b57fc3c7f46535ddef3828df1538465ac19d892eb57c9a10da6df0880bd5856
+    restart: unless-stopped
     networks: [librechat]
     ports:
       - "127.0.0.1:7700:7700"
@@ -47,8 +50,8 @@ services:
 
   librechat-ponte-host:
     container_name: librechat-ponte-host
-    image: alpine/socat:1.8.0.1
-    restart: "no"
+    image: alpine/socat:1.8.0.1@sha256:87d88ff79bf42ca723fb360e9585c40e2923a2f4df9b9d148b127568ef6b99e7
+    restart: unless-stopped
     network_mode: host
     depends_on:
       - librechat-mongodb
@@ -75,7 +78,7 @@ services:
     # trocar aqui: boot limpo com esta mesma config, aprovação/rejeição de
     # ferramenta confirmadas funcionando.
     image: ghcr.io/danny-avila/librechat@sha256:b07248d86e020c44101170bde2dbb4ab547df30dd223b4aacd6218cc90e8632b
-    restart: "no"
+    restart: unless-stopped
     networks: [librechat]
     ports:
       - "127.0.0.1:3080:3080"

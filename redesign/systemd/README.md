@@ -37,6 +37,7 @@ systemctl --user daemon-reload
 ```
 
 `agata-drain` foi `enable`d p/ `agata.target.wants/` (senão o target não puxa o dreno).
+`seth-gateway` entrou no `agata.target` em 18/10/2026 (queda de energia): `[Install] WantedBy=agata.target` + `PartOf=agata.target` na própria unit; instalar com `cp seth-gateway.service ~/.config/systemd/user/ && systemctl --user daemon-reload && systemctl --user enable seth-gateway` (sem sudo). `seth-escriba`/`seth-verificador` seguem `static`, sob demanda.
 `agata.target` foi `enable`d p/ `default.target.wants/` (boot) — "sim" do Humano
 2026-09-02 ~21:00. Rollback do boot: `systemctl --user disable agata.target`.
 
