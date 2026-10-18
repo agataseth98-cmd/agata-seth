@@ -1,0 +1,71 @@
+diff --git a/redesign/grafo/flows/consolidacao.py b/redesign/grafo/flows/consolidacao.py
+index 06b17ca..5e651ff 100644
+--- a/redesign/grafo/flows/consolidacao.py
++++ b/redesign/grafo/flows/consolidacao.py
+@@ -83,6 +83,10 @@ IDX_CHAVES = "INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
+ TEMAS_TXT = HERE / "temas-consolidacao.txt"
+ TEMAS_PADRAO = ["presence_penalty", "num_ctx 16814", "âncora sha"]
+ MIN_NOVAS = 2    # tema so consolida se >= 2 entradas novas (desde o marcador) o citam
++# AC-09 (18/10/2026, decisao B3 do Humano): tema reprovado REPROVADO_MAX vezes sai do modo
++# automatico (o mesmo tema voltava todo dia e era barrado de novo: 11 vezes "aprovacao
++# assinada P-8"). --temas manual ainda roda; apagar as linhas do log devolve o tema.
++REPROVADO_MAX = 3
+ 
+ OLLAMA = os.environ.get("AGATA_OLLAMA_URL", "http://localhost:11434/api/generate")
+ MODELO_LOCAL = os.environ.get("AGATA_CONSOLIDACAO_MODELO", "qwen3.5-9b-64k:latest")
+@@ -200,12 +204,29 @@ def _temas_do_que_mudou(repo, desde_num, indice=None):
+     if len(novas) < MIN_NOVAS:
+         return [], novas
+     temas = []
++    reprov = _reprovacoes()
+     for tema in _pool_temas():
++        if reprov.get(tema, 0) >= REPROVADO_MAX:
++            continue
+         if sum(1 for n in novas if _cita(tema, idx[n])) >= MIN_NOVAS:
+             temas.append(tema)
+     return temas, novas
+ 
+ 
++def _reprovacoes():
++    """Quantas vezes cada tema foi reprovado, contando as linhas `[data] tema :: motivo` do log."""
++    cont = {}
++    try:
++        linhas = REPROVADOS.read_text(encoding="utf-8").splitlines()
++    except OSError:
++        return cont
++    for ln in linhas:
++        m = re.match(r"^\[\d{4}-\d{2}-\d{2}\] (.+?) :: ", ln)
++        if m:
++            cont[m.group(1)] = cont.get(m.group(1), 0) + 1
++    return cont
++
++
+ # ------------------------------------------------------------------ portao
+ def _portao(corpo, refs_validas):
+     """(ok, motivo) -- checagem MECANICA antes de escrever qualquer arquivo."""
+@@ -481,6 +502,25 @@ def _selftest() -> int:
+         decisor.decidir = lambda *a, _r=resp, **k: _r
+         casos.append((nome, _portao_decisor("texto", "tema")[0] is quer))
+     decisor.decidir = original
++    # AC-09: tema com REPROVADO_MAX reprovacoes sai do automatico; os outros seguem
++    import tempfile
++    global REPROVADOS, TEMAS_TXT
++    rep_orig, temas_orig = REPROVADOS, TEMAS_TXT
++    d = Path(tempfile.mkdtemp())
++    REPROVADOS, TEMAS_TXT = d / "reprovados.log", d / "temas.txt"
++    TEMAS_TXT.write_text("aprovacao assinada\nnum_ctx\n", encoding="utf-8")
++    idx = {10: {"chaves": ["aprovacao", "num_ctx"], "titulo": "aprovacao assinada e num_ctx"},
++           11: {"chaves": ["aprovacao", "num_ctx"], "titulo": "aprovacao assinada e num_ctx"}}
++    try:
++        casos.append(("sem reprovacao, os dois temas entram", _temas_do_que_mudou(".", 0, idx)[0] == ["aprovacao assinada", "num_ctx"]))
++        for i in range(REPROVADO_MAX - 1):
++            _log_reprovado("aprovacao assinada", "2026-10-1%d" % i, "motivo", "x")
++        casos.append(("2 reprovacoes: o tema ainda entra", "aprovacao assinada" in _temas_do_que_mudou(".", 0, idx)[0]))
++        _log_reprovado("aprovacao assinada", "2026-10-18", "motivo", "x")
++        casos.append(("3 reprovacoes: o tema sai do automatico, o outro segue (AC-09)",
++                      _temas_do_que_mudou(".", 0, idx)[0] == ["num_ctx"]))
++    finally:
++        REPROVADOS, TEMAS_TXT = rep_orig, temas_orig
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
