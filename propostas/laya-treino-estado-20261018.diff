@@ -1,0 +1,129 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index d01caca..8a0d9fa 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -293,7 +293,8 @@ const TOOLS = [
+       "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
+       "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
+       "git_sync (SHA do remoto), selos, suite_controles, servicos (SÓ lista as unidades em FALHA), " +
+-      "unidade (estado de UMA unidade de usuario: consulta = o nome, ex.: laya-roteador.service; use esta para \"esta ativa?\"), p8_verificar, " +
++      "unidade (estado de UMA unidade de usuario: consulta = o nome, ex.: laya-roteador.service; use esta para \"esta ativa?\"), " +
++      "laya_treino (estado MEDIDO do treino do Laya: exemplos, quantos faltam, ultimo recibo da janela; entrada de MEMORIAS e historia, nao estado de hoje), p8_verificar, " +
+       "busca_semantica e busca_texto (prefira a tool vault_buscar). " +
+       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
+     inputSchema: {
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 4ddbb99..5bc3bbb 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -113,6 +113,12 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         "Estado de UMA unidade de usuário (ex.: laya-roteador.service): ativa ou não, em que subestado. "
+         "Use o parâmetro `consulta` com o nome da unidade. `servicos` só lista as que estão em FALHA.",
+     ),
++    "laya_treino": (
++        ["python3", "scripts/laya_treino.py", "--estado"], 30,
++        "Estado MEDIDO do treino do Laya: exemplos reais, novos desde o último treino, o mínimo, quantos faltam, "
++        "o último candidato e o último recibo da janela de manutenção. Use para 'o treino rodou/pulou?' e "
++        "'quantos faltam?' -- entrada de MEMÓRIAS é história, não estado de hoje (AC-34).",
++    ),
+     "p8_verificar": (
+         ["bash", "scripts/p8_verificar.sh"], 60,
+         "Confere se uma proposta P-8 PENDENTE (propostas/<nome>.diff + "
+@@ -291,6 +297,13 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+         if d.get("LoadState") == "not-found":
+             return f"unidade {d.get('Id', '?')}: NÃO existe (not-found)."
+         return f"{d.get('Id', '?')}: {d.get('ActiveState', '?')}/{d.get('SubState', '?')}, arquivo {d.get('UnitFileState', '?')}."
++    if nome == "laya_treino":
++        d = dict(l.split("=", 1) for l in texto.splitlines() if "=" in l and not l.startswith("janela"))
++        if "faltam" not in d:
++            return None
++        f = d["faltam"]
++        return ("mínimo atingido: há exemplos novos suficientes para treinar." if f == "0"
++                else f"faltam {f} exemplo(s) real(is) novo(s) para o mínimo de {d.get('minimo_para_treinar', '?')}.")
+     if nome == "servicos":
+         m = re.search(r"(\d+) loaded units? listed", texto)
+         if m is None:
+@@ -475,6 +488,13 @@ def _selftest() -> int:
+     except ValueError:
+         casos.append(("servicos continua sem consulta", True))
+     casos.append(("unidade só --user, sem shell", _argv("unidade", None, consulta="a.timer")[:3] == ["systemctl", "--user", "show"]))
++    casos.append(("leitura: laya_treino com faltam=5", "faltam 5" in (_leitura("laya_treino", "minimo_para_treinar=20\nfaltam=5\n", 0) or "")))
++    casos.append(("leitura: laya_treino com faltam=0", "mínimo atingido" in (_leitura("laya_treino", "faltam=0\n", 0) or "")))
++    try:
++        _argv("laya_treino", None, consulta="x"); casos.append(("laya_treino não aceita consulta", False))
++    except ValueError:
++        casos.append(("laya_treino não aceita consulta", True))
++    casos.append(("laya_treino: argv fixo", _argv("laya_treino", None) == ["python3", "scripts/laya_treino.py", "--estado"]))
+     casos.append(("leitura: unidade ativa", "active/running" in (_leitura("unidade", "Id=a.service\nLoadState=loaded\nActiveState=active\nSubState=running\nUnitFileState=enabled\n", 0) or "")))
+     casos.append(("leitura: unidade inexistente", "NÃO existe" in (_leitura("unidade", "Id=b.service\nLoadState=not-found\nActiveState=inactive\n", 0) or "")))
+     # 4. comando que não aceita n recusa n
+diff --git a/scripts/laya_treino.py b/scripts/laya_treino.py
+index b1e390e..87768ec 100644
+--- a/scripts/laya_treino.py
++++ b/scripts/laya_treino.py
+@@ -41,6 +41,7 @@ TESTES = {"A (à mão)": RAIZ / "redesign/laya/dados/teste-claude.jsonl",
+ ESTADO = LAYA / "treino-continuo.json"
+ _DESKTOP = Path.home() / "Área de trabalho"
+ RELATORIO = (_DESKTOP if _DESKTOP.is_dir() else LAYA) / "laya-treino.md"
++RECIBOS = Path(os.environ.get("AGATA_JANELA_DIR", Path.home() / ".cache" / "agata" / "janela")) / "receipts.jsonl"
+ MIN_NOVOS, PESO_REAL, GPU_MAX_MIB, HOLDOUT_MIN = 20, 3, 1500, 10
+ 
+ 
+@@ -92,6 +93,28 @@ def _relatar(linhas: list[str], resumo: str) -> None:
+         pass
+ 
+ 
++def estado() -> str:
++    """Só leitura (AC-34, 18/10/2026): o estado do treino MEDIDO, para a Seth não responder de entrada velha.
++    Exemplos reais, quantos são novos desde o último treino, o mínimo, quantos faltam e o último recibo da janela."""
++    real, e = _ler(REAL), _estado()
++    novos = len(real) - e.get("ultimo_n_real", 0)
++    linhas = ["ESTADO-TREINO-LAYA (medido agora; só leitura)",
++              f"exemplos_reais_total={len(real)}",
++              f"usados_ate_o_ultimo_treino={e.get('ultimo_n_real', 0)}",
++              f"novos_desde_o_ultimo_treino={novos}",
++              f"minimo_para_treinar={MIN_NOVOS}",
++              f"faltam={max(0, MIN_NOVOS - novos)}"]
++    cand = (e.get("candidatos") or [None])[-1]
++    linhas.append(f"ultimo_candidato={cand['nome']} em {cand['em']}" if cand else "ultimo_candidato=nenhum")
++    ult = None
++    for r in _ler(RECIBOS):
++        if r.get("task") == "laya-treino" and r.get("phase") == "finished":
++            ult = r
++    linhas.append(f"janela_ultimo_recibo={ult.get('at')} resultado={ult.get('result')} saida_final={ult.get('saida_final', '')!r}"
++                  if ult else "janela_ultimo_recibo=nenhum")
++    return "\n".join(linhas)
++
++
+ def rodar(treinar=None, avaliar=None) -> int:
+     hoje = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+     real, e = _ler(REAL), _estado()
+@@ -190,6 +213,18 @@ def _selftest() -> int:
+                   feitos and len(feitos[0]) == 1 + (40 - n_sep) * PESO_REAL and not ATUAL.exists()
+                   and "sem piora" not in RELATORIO.read_text() and "não fica pior" in RELATORIO.read_text()))
+     casos.append(("promover recusa caminho fora de modelos/", promover(str(t)) == 2))
++    global RECIBOS
++    RECIBOS = t / "receipts.jsonl"
++    REAL.write_text("".join('{"x": %d}\n' % i for i in range(25)), encoding="utf-8")
++    ESTADO.write_text('{"ultimo_n_real": 10, "candidatos": [{"nome": "candidato-x", "em": "2026-10-18 12:20"}]}', encoding="utf-8")
++    RECIBOS.write_text('{"task": "laya-treino", "phase": "finished", "at": "2026-10-18T12:21", "result": "success", "saida_final": "ok"}\n'
++                       '{"task": "consolidacao", "phase": "finished", "at": "2026-10-18T12:22", "result": "success"}\n', encoding="utf-8")
++    s = estado()
++    casos.append(("--estado: 25 reais, 15 novos, faltam 5 (AC-34)", "exemplos_reais_total=25" in s and "novos_desde_o_ultimo_treino=15" in s
++                  and "faltam=5" in s and "minimo_para_treinar=20" in s))
++    casos.append(("--estado: último recibo é o do laya-treino, não o de outra tarefa", "2026-10-18T12:21 resultado=success" in s))
++    RECIBOS.unlink()
++    casos.append(("--estado: sem recibo diz 'nenhum'", "janela_ultimo_recibo=nenhum" in estado()))
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+@@ -201,6 +236,9 @@ if __name__ == "__main__":
+     a = sys.argv[1:]
+     if a == ["--selftest"]:
+         sys.exit(_selftest())
++    if a == ["--estado"]:
++        print(estado())
++        sys.exit(0)
+     if len(a) == 2 and a[0] == "--promover":
+         sys.exit(promover(a[1]))
+     if not a:
