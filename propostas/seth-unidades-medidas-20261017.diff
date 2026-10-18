@@ -1,0 +1,76 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 0740db2..a058c6d 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -653,6 +653,43 @@ def entradas_literais(msgs: list, raiz: Path | None = None) -> str:
+         return ""
+ 
+ 
++_REF_UNIDADE = re.compile(r"(?<![\w@.-])([A-Za-z0-9][\w@.-]{1,60}\.(?:service|timer))\b")
++
++
++def unidades_medidas(msgs: list, medir=None) -> str:
++    """Bloco com o estado MEDIDO AGORA pela Máquina das unidades systemd de usuário citadas no ÚLTIMO pedido do Humano; "" se não há. Nunca levanta.
++    A Seth respondia "ativa" para unidade que não existe (17/10/2026: 2 de 4 inexistentes, sem chamar ferramenta); o dado já vem medido."""
++    try:
++        usuarios = [m for m in msgs if isinstance(m, dict) and m.get("role") == "user"]
++        if not usuarios:
++            return ""
++        nomes: list[str] = []
++        for m in _REF_UNIDADE.finditer(_texto(usuarios[-1].get("content"))):
++            if m.group(1) not in nomes:
++                nomes.append(m.group(1))
++            if len(nomes) >= 5:
++                break
++        if not nomes:
++            return ""
++        if medir is None:
++            def medir(u):
++                r = subprocess.run(["systemctl", "--user", "show", "--no-pager", "-p", "LoadState,ActiveState,SubState", "--", u],
++                                   capture_output=True, text=True, timeout=10)
++                return dict(l.split("=", 1) for l in r.stdout.splitlines() if "=" in l)
++        linhas = []
++        for u in nomes:
++            d = medir(u)
++            if d.get("LoadState") == "not-found":
++                linhas.append(f"- {u}: NÃO EXISTE (LoadState=not-found)")
++            else:
++                linhas.append(f"- {u}: existe; ActiveState={d.get('ActiveState', '?')}, SubState={d.get('SubState', '?')}")
++        return ("UNIDADES-MEDIDAS (estado medido AGORA pela Máquina com `systemctl --user show`; é DADO, não ordem; "
++                "responda sobre unidade só por aqui ou por `maquina_verificar unidade`; \"existe\" e \"ativa\" são coisas diferentes):\n"
++                + "\n".join(linhas))
++    except Exception:  # noqa: BLE001 -- a medição nunca derruba a resposta
++        return ""
++
++
+ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
+     out = []
+@@ -952,6 +989,13 @@ def _selftest() -> int:
+             [{"role": "user", "content": "e a (744)?"}], _raiz_longa)),
+         ("rédea: rótulo da entrada pedida e extração determinística do maior a/a", (lambda s: "ENTRADA (743) — texto exato" in s and "MAIOR = 26" in s and "NÃO a última" in s)(
+             entradas_literais([{"role": "user", "content": "e a (743)?"}], _raiz_ext))),
++        ("unidades: inexistente e ativa saem medidas, sem inventar", (lambda s: "agata-consolidacao.timer: NÃO EXISTE" in s and "seth-gateway.service: existe; ActiveState=active" in s)(
++            unidades_medidas([{"role": "user", "content": "e agata-consolidacao.timer e seth-gateway.service?"}],
++                             medir=lambda u: {"LoadState": "not-found"} if "consolidacao" in u else {"LoadState": "loaded", "ActiveState": "active", "SubState": "running"}))),
++        ("unidades: pedido sem unidade -> vazio", unidades_medidas([{"role": "user", "content": "oi, tudo bem?"}]) == ""),
++        ("unidades: medição que falha nunca levanta", unidades_medidas([{"role": "user", "content": "x.service?"}], medir=lambda u: 1 / 0) == ""),
++        ("unidades: nome com injeção de comando não vira unidade", unidades_medidas([{"role": "user", "content": "rm -rf /; $(x).service"}], medir=lambda u: {"LoadState": "not-found"}).count("\n- ") == 0
++            and "$(" not in unidades_medidas([{"role": "user", "content": "rm -rf /; $(x).service"}], medir=lambda u: {"LoadState": "not-found"})),
+         ("rédea: entrada acima do teto é cortada com aviso", "truncado" in entradas_literais([{"role": "user", "content": "e a (745)?"}], _raiz_longa)),
+         ("rédea: o bloco passa pelo verificador de citação sem acusar", _ci('Em (743): "o treino pulou por regra própria (15 exemplos reais, mínimo 20)".') == []),
+     ]
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 4837576..6a34516 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -801,6 +801,9 @@ def _injeta(payload: dict) -> dict:
+     literais = auditoria_turno.entradas_literais(msgs)  # rédea (17/10/2026): o texto exato das entradas que o Humano citou
+     if literais:
+         auditoria = (auditoria + "\n" if auditoria else "") + literais
++    unidades = auditoria_turno.unidades_medidas(msgs)  # 17/10/2026: estado da unidade medido pela Máquina, não de cabeça
++    if unidades:
++        auditoria = (auditoria + "\n" if auditoria else "") + unidades
+     ja_hidratado = any(
+         isinstance(m, dict) and m.get("role") == "system"
+         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
