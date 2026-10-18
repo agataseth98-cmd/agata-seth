@@ -556,6 +556,7 @@ import decisor  # noqa: E402  (mesmo diretório)
 import auditoria_turno  # noqa: E402  (mesmo diretório)
 import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
 import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
+import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -1111,8 +1112,10 @@ class _Handler(BaseHTTPRequestHandler):
         # no LibreChat. Reproduzido no lab: 5 bytes de saída para 471 de entrada.
         self._emoji_estados = {}
         self._cab_estados = {}
+        self._laco_estados = {}
+        self._laco_cortou = False
         buf = self._escrever_linhas_completas(buf)
-        while True:
+        while not self._laco_cortou:
             try:
                 pedaco = leitor.ler(180)  # (709) mesmo teto de antes (urlopen timeout=180)
             except queue.Empty:
@@ -1120,32 +1123,48 @@ class _Handler(BaseHTTPRequestHandler):
             if not pedaco:
                 break
             buf = self._escrever_linhas_completas(buf + pedaco)
-        if buf:
+        if self._laco_cortou:
+            # Trava de laço (18/10/2026): o SSE já foi fechado (nota + finish_reason + [DONE]);
+            # solta o upstream na hora para o provedor parar de gerar.
+            _derrubar(getattr(leitor, "_up", None))
+        elif buf:
             saida = self._filtrar_linha_sse(buf)
             if _emoji_ligado():
                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
             if self._cab_injetado and _cabecalho_unico_ligado():
                 saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
-            self.wfile.write(f"{len(saida):X}\r\n".encode())
-            self.wfile.write(saida)
-            self.wfile.write(b"\r\n")
+            if _trava_laco_ligada():
+                saida, self._laco_cortou = limpa_laco.limpar_sse(saida, self._laco_estados, _trava_laco_repeticoes())
+            if saida:
+                self.wfile.write(f"{len(saida):X}\r\n".encode())
+                self.wfile.write(saida)
+                self.wfile.write(b"\r\n")
         if _emoji_ligado():
             _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
                              [c for est in self._emoji_estados.values() for c in est.removidos])
         if self._cab_injetado and _cabecalho_unico_ligado():
             _registrar_cabecalho(self._rota, getattr(self, "_modelo_para_log", ""),
                                  sum(est.removidas for est in self._cab_estados.values()))
+        if _trava_laco_ligada():
+            _registrar_laco(self._rota, getattr(self, "_modelo_para_log", ""), self._laco_estados)
 
     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
-        devolve o resto -- no máximo uma linha parcial, sem '\\n'."""
+        devolve o resto -- no máximo uma linha parcial, sem '\\n'. Depois de um corte
+        da trava de laço, não escreve mais nada e devolve b""."""
         while b"\n" in buf:
+            if getattr(self, "_laco_cortou", False):
+                return b""
             linha, buf = buf.split(b"\n", 1)
             saida = self._filtrar_linha_sse(linha + b"\n")
             if _emoji_ligado():
                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
             if self._cab_injetado and _cabecalho_unico_ligado():
                 saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
+            if _trava_laco_ligada():
+                saida, self._laco_cortou = limpa_laco.limpar_sse(saida, self._laco_estados, _trava_laco_repeticoes())
+            if not saida:
+                continue  # chunk HTTP de tamanho 0 encerraria a resposta
             self.wfile.write(f"{len(saida):X}\r\n".encode())
             self.wfile.write(saida)
             self.wfile.write(b"\r\n")
@@ -1213,6 +1232,41 @@ def _registrar_cabecalho(rota, modelo, n) -> None:
         pass
 
 
+def _trava_laco_ligada() -> bool:
+    """Trava de laço de repetição (18/10/2026, sonda 18 da rodada de 17/10): corta a resposta que degenera repetindo o mesmo
+    trecho. Chave para desligar: SETH_TRAVA_LACO=0 (lida a cada resposta). Padrão: ligada."""
+    return os.environ.get("SETH_TRAVA_LACO", "1") != "0"
+
+
+def _trava_laco_repeticoes() -> int:
+    """Mínimo de voltas seguidas do mesmo trecho para cortar (SETH_LACO_REPETICOES; padrão do limpa_laco)."""
+    try:
+        return int(os.environ.get("SETH_LACO_REPETICOES", limpa_laco.REPETICOES))
+    except ValueError:
+        return limpa_laco.REPETICOES
+
+
+def _registrar_laco(rota, modelo, estados) -> None:
+    """Log da trava de laço: só quando cortou ou quando o modelo ecoou o bloco de estado. Só contagens e o período, nunca o
+    texto. Fail-soft."""
+    ests = list((estados or {}).values())
+    cortou = any(e.cortado for e in ests)
+    eco = any(e.eco for e in ests)
+    if not (cortou or eco):
+        return
+    try:
+        arq = Path(os.environ.get("AGATA_LACO_LOG") or Path.home() / ".cache" / "agata" / "laco-cortado.jsonl")
+        arq.parent.mkdir(parents=True, exist_ok=True)
+        with open(arq, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota or "", "modelo": modelo or "",
+                                "cortou": cortou, "eco_estado": eco,
+                                "periodo": max((e.periodo for e in ests), default=0),
+                                "voltas": max((e.voltas for e in ests), default=0),
+                                "chars": sum(len(e.texto) for e in ests)}, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
 def _porta_livre() -> int:
     s = socket.socket()
     s.bind(("127.0.0.1", 0))
@@ -1229,6 +1283,8 @@ class _Dummy(BaseHTTPRequestHandler):
     modelos_pedidos = []
     texto_fixo = None   # E-2: resposta não streaming com este texto (ex.: com emoji)
     sse_emoji = False   # E-2: próxima resposta é SSE com emoji partido em fragmentos
+    sse_laco = False    # trava de laço: próxima resposta é SSE que repete a mesma frase sem parar
+    laco_escritos = 0   # quantos fragmentos do laço o upstream conseguiu escrever antes de ser solto
 
     def log_message(self, *a):
         pass
@@ -1236,6 +1292,25 @@ class _Dummy(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
         type(self).ultimo_corpo = self.rfile.read(n)
+        if type(self).sse_laco:  # o caso medido da sonda 18 (17/10/2026), em ~2 MB se ninguém cortar
+            type(self).sse_laco = False
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            frags = ["ativa\n\nAUDITORIA-TURNO-ANTERIOR: OK\nMESMA-RESPOSTA: continuação da sua resposta.\n\n"]
+            frags += ["Não cite o arquivo histórico ", "sem `vault_consultar extras/`. "] * 20000
+            try:
+                for i, frag in enumerate(frags):
+                    ch = {"id": "c-laco", "model": "m-real", "choices": [{"index": 0, "delta": {"content": frag}}]}
+                    self.wfile.write(b"data: " + json.dumps(ch, ensure_ascii=False).encode() + b"\n\n")
+                    type(self).laco_escritos = i + 1
+                    if i % 50 == 0:
+                        self.wfile.flush()
+                        time.sleep(0.005)
+                self.wfile.write(b"data: [DONE]\n\n")
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            return
         if type(self).sse_emoji:
             type(self).sse_emoji = False
             self.send_response(200)
@@ -1801,6 +1876,42 @@ def _selftest() -> int:
     ok17c = len(log17) == 2 and all("texto" not in e and "codigos" in e for e in log17) and log17[0]["n"] >= 1
     print(f"{'PASS' if ok17c else 'FALHA'}  E-2 log: {len(log17)} registros, só códigos Unicode e contagem")
     falhas += 0 if ok17c else 1
+    # 19. Trava de laço (18/10/2026): o caso medido da sonda 18, pelo mesmo caminho da produção (SSE pelo gateway)
+    log_laco = Path(_tf.mkdtemp()) / "laco.jsonl"
+    os.environ["AGATA_LACO_LOG"] = str(log_laco)
+    _Dummy.sse_laco = True
+    t19 = time.monotonic()
+    sse19 = urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "stream": True,
+        "messages": [{"role": "user", "content": "oi"}]}).encode(), headers=hdr), timeout=30).read().decode("utf-8")
+    dt19 = time.monotonic() - t19
+    txt19 = "".join(json.loads(l[6:])["choices"][0]["delta"].get("content") or ""
+                    for l in sse19.splitlines() if l.startswith("data: {") and "choices" in l and "keepalive" not in l)
+    ok19a = (len(txt19) < 3000 and txt19.endswith(limpa_laco.NOTA) and sse19.count("[DONE]") == 1
+             and sse19.count('"finish_reason": "stop"') == 1)
+    print(f"{'PASS' if ok19a else 'FALHA'}  trava de laço: {len(txt19)} caracteres chegam (sem a trava, ~1,2 milhão), "
+          f"nota + finish_reason + [DONE] uma vez")
+    falhas += 0 if ok19a else 1
+    for _ in range(50):  # o upstream é solto: o Dummy para de escrever bem antes do fim
+        if _Dummy.laco_escritos and not _Dummy.sse_laco:
+            time.sleep(0.1)
+            break
+    ok19b = 0 < _Dummy.laco_escritos < 40000 and dt19 < 15
+    print(f"{'PASS' if ok19b else 'FALHA'}  trava de laço: upstream solto ({_Dummy.laco_escritos} de 40001 fragmentos, "
+          f"{dt19:.1f} s)")
+    falhas += 0 if ok19b else 1
+    log19 = [json.loads(l) for l in log_laco.read_text(encoding="utf-8").splitlines()] if log_laco.exists() else []
+    ok19c = (len(log19) == 1 and log19[0]["cortou"] and log19[0]["eco_estado"] and log19[0]["periodo"] == len("Não cite o arquivo histórico sem `vault_consultar extras/`. ")
+             and "texto" not in log19[0])
+    print(f"{'PASS' if ok19c else 'FALHA'}  trava de laço: log com corte, eco do estado e período, sem texto ({log19})")
+    falhas += 0 if ok19c else 1
+    os.environ["SETH_TRAVA_LACO"] = "0"
+    _Dummy.sse_emoji = True  # SSE comum, sem laço
+    sse19d = urllib.request.urlopen(urllib.request.Request(base, data=json.dumps({"model": "seth", "stream": True,
+        "messages": [{"role": "user", "content": "oi"}]}).encode(), headers=hdr), timeout=15).read().decode("utf-8")
+    del os.environ["SETH_TRAVA_LACO"]
+    ok19d = sse19d.count("[DONE]") == 1 and "Corte da Máquina" not in sse19d and "fim" in sse19d
+    print(f"{'PASS' if ok19d else 'FALHA'}  trava de laço: SETH_TRAVA_LACO=0 desliga (resposta comum intacta)")
+    falhas += 0 if ok19d else 1
     os.environ["SETH_EMOJI_REMOVER"] = "0"
     _Dummy.texto_fixo = "Pronto \u2705"
     t17d = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=corpo_e, headers=hdr), timeout=10).read())["choices"][0]["message"]["content"]
