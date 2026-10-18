@@ -34,6 +34,7 @@ Ordem: primeiro o que protege dado e acesso, depois as decisões rápidas, por f
 ## B. Decisões rápidas (sim ou não)
 
 ### B1. Liberar a fila `rapido` com ferramenta (AC-01) — **recomendo: sim**
+- **Estado (18/10, 15:45):** feito. Você disse sim; aplicado em MEMÓRIAS (774), gateway reiniciado, pedido simples com ferramenta já vai para `seth-rapido`.
 - **Fato medido hoje:** 8 pedidos reais com ferramenta em cada fila, pelo gateway. `seth-rapido`: 7 chamadas corretas, 1 resposta em texto, 0 malformadas. `seth-livre`: o mesmo, 7/1/0. Latência mediana: rapido 0,85 s, livre 1,1 s. Ressalva: a `rapido` respondeu com `ministral-14b-latest` e a `livre` com `ministral-14b-latest` e `codestral-latest`; amostra pequena (8 + 8).
 - **Hoje:** a trava manda para `livre` toda escolha `rapido` com ferramenta (95% das chamadas). Na prática a `rapido` está desligada.
 - **Se sim:** eu preparo a proposta que tira a trava, com teste.
