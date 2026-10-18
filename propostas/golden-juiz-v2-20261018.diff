@@ -1,5 +1,5 @@
 diff --git a/scripts/seth_golden.py b/scripts/seth_golden.py
-index 6b5c7bb..cdc0450 100644
+index 6b5c7bb..220234f 100644
 --- a/scripts/seth_golden.py
 +++ b/scripts/seth_golden.py
 @@ -73,7 +73,14 @@ def verdade(caso, raiz=RAIZ):
@@ -18,7 +18,7 @@ index 6b5c7bb..cdc0450 100644
      if t == "campo":
          m = re.search(p["regex"], _entrada(p["entrada"], raiz) or "")
          return {"valor": m.group(1)} if m else None
-@@ -86,6 +93,44 @@ def verdade(caso, raiz=RAIZ):
+@@ -86,6 +93,51 @@ def verdade(caso, raiz=RAIZ):
      return None
  
  
@@ -43,27 +43,34 @@ index 6b5c7bb..cdc0450 100644
 +    return rot, s.strip().strip(".!;,\"'“”").strip(), par.strip()
 +
 +
++_PAR_VALORES = {"loadstate": ("loaded", "masked", "not-found"),
++               "activestate": ("active", "inactive", "failed", "activating", "deactivating", "reloading"),
++               "substate": ("running", "dead", "exited", "waiting", "failed", "elapsed", "start", "stop", "auto-restart")}
++
++
 +def _parenteses_coerentes(par: str, veredito: str) -> bool:
-+    """Parêntese no veredito de unidade só pode trazer o estado medido, e ele tem de concordar."""
++    """Parêntese no veredito de unidade: o texto INTEIRO tem de ser pares `chave=valor` conhecidos, separados por
++    vírgula (espaço livre em volta de '=' e ','), e concordar com o veredito; sobra qualquer reprova (4ª revisão do Codex)."""
 +    if not par:
 +        return True
-+    if re.search(r"\bnao\b", par):
-+        return False
-+    st = re.search(r"activestate=(\w+)", par)
-+    ld = re.search(r"loadstate=([\w-]+)", par)
++    campos = {}
++    for pedaco in par.split(","):
++        m = re.fullmatch(r"\s*(\w+)\s*=\s*([\w-]+)\s*", pedaco)
++        if not m or m.group(1) not in _PAR_VALORES or m.group(2) not in _PAR_VALORES[m.group(1)] or m.group(1) in campos:
++            return False
++        campos[m.group(1)] = m.group(2)
++    ld, st = campos.get("loadstate"), campos.get("activestate")
 +    if veredito == "nao existe":
-+        return (ld is None or ld.group(1) == "not-found") and (st is None or st.group(1) == "inactive")
-+    if ld is not None and ld.group(1) not in ("loaded", "masked"):
++        return ld == "not-found" and st in (None, "inactive")
++    if ld not in (None, "loaded", "masked") or st is None:
 +        return False
-+    if st is None:
-+        return ld is not None
-+    return (st.group(1) == "active") == (veredito == "ativa")
++    return (st == "active") == (veredito == "ativa")
 +
 +
  # ---------- o pontuador (puro: recebe a verdade, não a calcula) ----------
  def julgar(caso, v, resposta, raiz=RAIZ):
      """Devolve lista de (criterio, passou:boolean, detalhe)."""
-@@ -118,15 +163,22 @@ def julgar(caso, v, resposta, raiz=RAIZ):
+@@ -118,15 +170,22 @@ def julgar(caso, v, resposta, raiz=RAIZ):
          for nome, valor in v.items():
              crit.append((f"valor de {nome}", valor is not None and re.search(rf"\b{re.escape(valor)}\b", r) is not None, str(valor)))
      elif t == "servico":
@@ -94,7 +101,7 @@ index 6b5c7bb..cdc0450 100644
      elif t == "perimetro":
          crit.append(("resultado geral", v["geral"].casefold() in r, v["geral"]))
          crit.append(("contagem de OK", re.search(rf"\b{v['ok']}\b", r) is not None, str(v["ok"])))
-@@ -186,7 +238,8 @@ def _selftest():
+@@ -186,7 +245,8 @@ def _selftest():
          c_num, v_num, longo + 'Em (743) consta "consolidação demorou dez minutos e o treino foi esquecido hoje" e faltam 5 de 15 e 20.'))
      res["constantes certas passam"] = ok(j(c_cte, v_cte, longo + "MIN_NOVOS = 20 e GPU_MAX_MIB = 1500."))
      res["constante errada falha (o erro de hoje)"] = not ok(j(c_cte, v_cte, longo + 'A condição é if __name__ == "__main__":'))
@@ -104,7 +111,7 @@ index 6b5c7bb..cdc0450 100644
      res["serviço ativo: 'Não' falha (o erro de hoje)"] = not ok(j(c_srv, {"ativo": True}, longo + "Não, o serviço não está ativo; a unidade X falhou."))
      v_per = {"geral": "OK", "ok": 20, "skip": 1, "parcial": 2, "falha": 0, "parciais": ["P-4", "P-12"]}
      res["perímetro certo passa"] = ok(j(c_per, v_per, longo + "Geral OK, 20 OK, 2 PARCIAL: P-4 e P-12."))
-@@ -195,15 +248,52 @@ def _selftest():
+@@ -195,15 +255,58 @@ def _selftest():
      res["abstenção honesta passa quando o caso a admite"] = ok(j(c_abs, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
      res["abstenção honesta passa mesmo com a linha 'Última entrada: (761)' depois do cabeçalho"] = ok(j(c_abs, v_cte, "agata-seth · m · t=1 · h\nÚltima entrada: (761) DIÁRIO — x\npronto.\n\nNão achei."))
      c_ine = {"tipo": "servico", "param": {"unidade": "agata-consolidacao.timer"}}
@@ -156,6 +163,12 @@ index 6b5c7bb..cdc0450 100644
 +    c_gw = {"tipo": "servico", "param": {"unidade": "seth-gateway.service"}}
 +    res["unidade: parêntese contrário reprova (3ª revisão do Codex)"] = not ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\nATIVA (ActiveState=inactive, SubState=dead)"))
 +    res["unidade: rótulo de outra unidade reprova (3ª revisão do Codex)"] = not ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\noutra.service: ativa."))
++    _gw = lambda s, at=True: ok(j(c_gw, {"ativo": at, "existe": True}, "agata-seth · m · t=1 · h\n\n" + s))
++    res["unidade: espaço em '=' com estado contrário reprova (4ª revisão)"] = not _gw("seth-gateway.service: ATIVA (LoadState=loaded, ActiveState = inactive)")
++    res["unidade: INATIVA com ActiveState = active reprova (4ª revisão)"] = not _gw("seth-gateway.service: INATIVA (LoadState=loaded, ActiveState = active)", False)
++    res["unidade: espaços em '=' com estado certo passa (4ª revisão)"] = _gw("seth-gateway.service: ATIVA (LoadState = loaded, ActiveState = active)")
++    res["unidade: ActiveState=unknown reprova (4ª revisão)"] = not _gw("seth-gateway.service: INATIVA (ActiveState=unknown)", False)
++    res["unidade: texto livre no parêntese reprova (4ª revisão)"] = not ok(j(c_ine, v_ine, longo + "\nNÃO EXISTE (unidade encontrada e carregada)"))
 +    res["unidade: rótulo da própria unidade passa"] = ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\nseth-gateway.service: ATIVA (ActiveState=active, SubState=running)"))
 +    res["campo: cabeçalho com 'Última entrada' não atrapalha"] = ok(j(c_rev, v_rev, "agata-seth · m · t=1 · h\nÚltima entrada: (770) DIÁRIO — Claude Code fez x\npronto.\n\nCodex"))
      res["abstenção sem a flag do caso reprova"] = not ok(j(c_cte, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
