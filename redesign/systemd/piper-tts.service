@@ -1,6 +1,9 @@
 [Unit]
 Description=Agata -- Piper TTS (voz pt-BR local, shim OpenAI-compat, :8890) -- MEMÓRIAS (387)
 Documentation=file:///home/orusoua/agata/redesign/router/tts_piper.py
+# Membro do agata.target desde 18/10/2026: depois da queda de energia desse dia a voz
+# nao voltou sozinha; o Humano decidiu que ela sobe no boot.
+PartOf=agata.target
 
 [Service]
 Type=simple
@@ -21,6 +24,8 @@ ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 ReadOnlyPaths=%h/agata
 
-# Sem [Install] -- sobe sob demanda, igual seth-gateway. O atalho da Seth
-# (redesign/systemd/seth) faz `systemctl --user start piper-tts` quando ligar
-# a voz. CPU only: RTF ~0,13, zero VRAM, nao briga com o cerebro local da Seth.
+# Sobe com o agata.target no boot (18/10/2026, decisão do Humano). O atalho da Seth
+# (redesign/systemd/seth) continua dando `start` (inofensivo se já estiver de pé).
+# CPU only: RTF ~0,13, zero VRAM, nao briga com o cerebro local da Seth.
+[Install]
+WantedBy=agata.target
