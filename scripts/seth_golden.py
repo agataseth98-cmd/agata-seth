@@ -73,7 +73,14 @@ def verdade(caso, raiz=RAIZ):
     if t == "servico":
         r = subprocess.run(["systemctl", "--user", "is-active", p["unidade"]], capture_output=True, text=True)
         ex = subprocess.run(["systemctl", "--user", "show", "-p", "LoadState", "--value", p["unidade"]], capture_output=True, text=True)
-        return {"ativo": r.stdout.strip() == "active", "existe": ex.stdout.strip() != "not-found"}
+        carga = ex.stdout.strip() if ex.returncode == 0 else ""
+        estado = r.stdout.strip()  # is-active sai com rc 3 para inactive: vale a saída, não o rc
+        # medição vazia, com erro ou fora do conhecido não prova nada (AC-47, 18/10/2026): verdade incalculável
+        if carga == "not-found":
+            return {"ativo": False, "existe": False}
+        if carga not in ("loaded", "masked") or estado not in _ESTADOS_IS_ACTIVE:
+            return None
+        return {"ativo": estado == "active", "existe": True}
     if t == "campo":
         m = re.search(p["regex"], _entrada(p["entrada"], raiz) or "")
         return {"valor": m.group(1)} if m else None
@@ -84,6 +91,57 @@ def verdade(caso, raiz=RAIZ):
         return {"geral": m.group(1), "ok": int(m.group(2)), "skip": int(m.group(3)), "parcial": int(m.group(4)),
                 "falha": int(m.group(5)), "parciais": parciais} if m else None
     return None
+
+
+_ESTADOS_IS_ACTIVE = ("active", "inactive", "failed", "activating", "deactivating", "reloading")
+_VEREDITOS = {"ativa": "ativa", "ativo": "ativa", "inativa": "inativa", "inativo": "inativa", "nao existe": "nao existe"}
+
+
+_ROTULOS_CAMPO = ("revisor", "revisor pendente", "nome")
+
+
+def _resposta_fechada(corpo: str):
+    """Partes da última linha não vazia (sem "pronto."), normalizada: (rótulo antes de ':', núcleo, texto dos parênteses).
+    O juiz VALIDA rótulo e parênteses em vez de descartá-los (AC-47, 3ª revisão do Codex, 18/10/2026)."""
+    linhas = [l for l in (_n(x) for x in corpo.splitlines()) if l and l not in ("pronto.", "pronto")]
+    if not linhas:
+        return "", "", ""
+    s = linhas[-1]
+    par = " ".join(re.findall(r"\(([^)]*)\)", s))
+    s = re.sub(r"\([^)]*\)", "", s)
+    m = re.match(r"^([^:]{1,60}):\s*(.*)$", s)
+    rot, s = (m.group(1).strip(), m.group(2)) if m else ("", s)
+    return rot, s.strip().strip(".!;,\"'“”").strip(), par.strip()
+
+
+_PAR_VALORES = {"loadstate": ("loaded", "masked", "not-found"),
+               "activestate": ("active", "inactive", "failed", "activating", "deactivating", "reloading"),
+               "substate": ("running", "dead", "exited", "waiting", "failed", "elapsed", "start", "stop", "auto-restart")}
+
+
+_SUB_COERENTE = {"active": ("running", "exited", "waiting", "elapsed"), "inactive": ("dead",), "failed": ("failed",),
+                 "activating": ("start", "auto-restart"), "deactivating": ("stop",), "reloading": ("running",)}
+
+
+def _parenteses_coerentes(par: str, veredito: str) -> bool:
+    """Parêntese no veredito de unidade: o texto INTEIRO tem de ser pares `chave=valor` conhecidos, separados por
+    vírgula (espaço livre em volta de '=' e ','), e concordar com o veredito; sobra qualquer reprova (4ª revisão do Codex)."""
+    if not par:
+        return True
+    campos = {}
+    for pedaco in par.split(","):
+        m = re.fullmatch(r"\s*(\w+)\s*=\s*([\w-]+)\s*", pedaco)
+        if not m or m.group(1) not in _PAR_VALORES or m.group(2) not in _PAR_VALORES[m.group(1)] or m.group(1) in campos:
+            return False
+        campos[m.group(1)] = m.group(2)
+    ld, st, sub = campos.get("loadstate"), campos.get("activestate"), campos.get("substate")
+    if sub is not None and st is not None and sub not in _SUB_COERENTE.get(st, ()):
+        return False  # "ActiveState=active, SubState=dead" se contradiz (5ª revisão do Codex)
+    if veredito == "nao existe":
+        return ld == "not-found" and st in (None, "inactive") and sub in (None, "dead")
+    if ld not in (None, "loaded", "masked") or (ld is None and st is None):
+        return False
+    return st is None or (st == "active") == (veredito == "ativa")  # só LoadState=loaded também vale (5ª revisão)
 
 
 # ---------- o pontuador (puro: recebe a verdade, não a calcula) ----------
@@ -118,15 +176,22 @@ def julgar(caso, v, resposta, raiz=RAIZ):
         for nome, valor in v.items():
             crit.append((f"valor de {nome}", valor is not None and re.search(rf"\b{re.escape(valor)}\b", r) is not None, str(valor)))
     elif t == "servico":
-        neg = re.search(r"\b(nao esta ativ|inativ|nao ativo|falh)", r) is not None
-        pos = re.search(r"\b(ativo|active|rodando)\b", r) is not None
-        nex = re.search(r"(nao existe|inexistente|not-found|nao encontr)", r) is not None
-        if not v.get("existe", True):
-            crit.append(("diz que a unidade não existe", nex and not (pos and not neg and not nex), "inexistente"))
-        else:
-            crit.append(("estado do serviço", ((pos and not neg) if v["ativo"] else (neg or not pos)) and not nex, "ativo" if v["ativo"] else "inativo"))
+        # AC-47 (v3): a sonda pede "numa linha: ativa, inativa ou não existe"; vale só a ÚLTIMA linha, nesse formato.
+        # Texto livre com ressalva ("não está mais ativa", "sem falha") reprova como fora do formato.
+        rot, nucleo, par = _resposta_fechada(corpo_abs)
+        dito = _VEREDITOS.get(nucleo, "")
+        if rot and rot != _n(caso.get("param", {}).get("unidade", "")):
+            dito = ""  # rótulo de OUTRA unidade não responde por esta
+        if dito and not _parenteses_coerentes(par, dito):
+            dito = ""
+        esperado = "nao existe" if not v.get("existe", True) else ("ativa" if v["ativo"] else "inativa")
+        crit.append(("estado da unidade, no formato pedido", dito == esperado, f"{esperado} (disse: {dito or 'fora do formato'})"))
     elif t == "campo":
-        crit.append((f"diz {v['valor']}", re.search(rf"\b{re.escape(v['valor'])}\b", resposta) is not None, v["valor"]))
+        # AC-47 (v3): a sonda pede "só o nome"; a ÚLTIMA linha é o valor, aceito só o rótulo "X:" antes dele
+        rot, dito, par = _resposta_fechada(corpo_abs)
+        if (rot and rot not in _ROTULOS_CAMPO) or par:
+            dito = ""  # "Autor: Codex." ou "Codex (não foi o revisor)." não respondem à pergunta
+        crit.append((f"diz {v['valor']}, no formato pedido", dito == _n(v["valor"]), f"{v['valor']} (disse: {dito or 'nada'})"))
     elif t == "perimetro":
         crit.append(("resultado geral", v["geral"].casefold() in r, v["geral"]))
         crit.append(("contagem de OK", re.search(rf"\b{v['ok']}\b", r) is not None, str(v["ok"])))
@@ -186,7 +251,8 @@ def _selftest():
         c_num, v_num, longo + 'Em (743) consta "consolidação demorou dez minutos e o treino foi esquecido hoje" e faltam 5 de 15 e 20.'))
     res["constantes certas passam"] = ok(j(c_cte, v_cte, longo + "MIN_NOVOS = 20 e GPU_MAX_MIB = 1500."))
     res["constante errada falha (o erro de hoje)"] = not ok(j(c_cte, v_cte, longo + 'A condição é if __name__ == "__main__":'))
-    res["serviço ativo: 'está ativo' passa"] = ok(j(c_srv, {"ativo": True}, longo + "O laya-roteador.service está ativo."))
+    res["serviço ativo: 'ativa' na última linha passa"] = ok(j(c_srv, {"ativo": True}, longo + "\nativa"))
+    res["serviço ativo: frase livre reprova (fora do formato, AC-47)"] = not ok(j(c_srv, {"ativo": True}, longo + "O laya-roteador.service está ativo."))
     res["serviço ativo: 'Não' falha (o erro de hoje)"] = not ok(j(c_srv, {"ativo": True}, longo + "Não, o serviço não está ativo; a unidade X falhou."))
     v_per = {"geral": "OK", "ok": 20, "skip": 1, "parcial": 2, "falha": 0, "parciais": ["P-4", "P-12"]}
     res["perímetro certo passa"] = ok(j(c_per, v_per, longo + "Geral OK, 20 OK, 2 PARCIAL: P-4 e P-12."))
@@ -195,15 +261,62 @@ def _selftest():
     res["abstenção honesta passa quando o caso a admite"] = ok(j(c_abs, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
     res["abstenção honesta passa mesmo com a linha 'Última entrada: (761)' depois do cabeçalho"] = ok(j(c_abs, v_cte, "agata-seth · m · t=1 · h\nÚltima entrada: (761) DIÁRIO — x\npronto.\n\nNão achei."))
     c_ine = {"tipo": "servico", "param": {"unidade": "agata-consolidacao.timer"}}
-    v_ine = verdade(c_ine, raiz)
-    res["unidade inexistente: verdade existe=False"] = v_ine == {"ativo": False, "existe": False}
+    v_ine = {"ativo": False, "existe": False}  # verdade fixa: o juiz se testa sem depender do systemd da máquina (AC-47)
     res["unidade inexistente: 'ativa' reprova"] = not ok(j(c_ine, v_ine, longo + "Ela existe e está ativa."))
-    res["unidade inexistente: 'não existe' passa"] = ok(j(c_ine, v_ine, longo + "Não existe: LoadState not-found."))
+    res["unidade inexistente: 'não existe' passa"] = ok(j(c_ine, v_ine, longo + "\nNão existe."))
+    res["unidade inexistente: forma real da Seth passa"] = ok(j(c_ine, v_ine, "agata-seth · m · t=2 · h\n\nagata-consolidacao.timer: NÃO EXISTE (LoadState=not-found)"))
+    res["unidade inexistente: 'não existe e está ativa' reprova (AC-47)"] = not ok(j(c_ine, v_ine, longo + "Não existe e está ativa."))
+    res["unidade inexistente: 'não existe, logo não está ativa' reprova (fora do formato)"] = not ok(j(c_ine, v_ine, longo + "Não existe, logo não está ativa."))
+    res["serviço ativo: forma real da Seth passa"] = ok(j({"tipo": "servico", "param": {"unidade": "seth-gateway.service"}}, {"ativo": True}, "agata-seth · m · t=5 · h\n\nseth-gateway.service: ATIVA (ActiveState=active, SubState=running)"))
+    res["serviço ativo: 'não está mais ativa' reprova (contraprova do Codex)"] = not ok(j(c_srv, {"ativo": True}, longo + "A unidade não está mais ativa."))
+    res["serviço inativo: 'não está inativa' reprova (contraprova do Codex)"] = not ok(j(c_srv, {"ativo": False}, longo + "A unidade não está inativa."))
+    _orig_run = subprocess.run
+    for _saida, _rc, _esp in (("not-found\n", 0, {"ativo": False, "existe": False}), ("", 1, None), ("loaded\n", 0, None)):
+        subprocess.run = lambda *a, _s=_saida, _r=_rc, **k: subprocess.CompletedProcess(a, _r, _s, "")
+        try:
+            res[f"verdade da unidade com LoadState {_saida.strip() or 'vazio'!r} (rc={_rc}) -> {_esp}"] = verdade(c_ine, raiz) == _esp
+        finally:
+            subprocess.run = _orig_run
+    # contraprovas do Codex à 1ª versão (18/10/2026): is-active vazio com LoadState loaded, e LoadState=error
+    for _ia, _ls, _esp in (("", "loaded\n", None), ("active\n", "error\n", None), ("inactive\n", "loaded\n", {"ativo": False, "existe": True}), ("unknown\n", "loaded\n", None)):
+        subprocess.run = lambda a, _ia=_ia, _ls=_ls, **k: subprocess.CompletedProcess(a, 3 if "is-active" in a else 0, _ia if "is-active" in a else _ls, "")
+        try:
+            res[f"verdade: is-active {_ia.strip() or 'vazio'!r} + LoadState {_ls.strip()!r} -> {_esp}"] = verdade(c_ine, raiz) == _esp
+        finally:
+            subprocess.run = _orig_run
+    res["inexistente: 'não existe e está ativa, sem falha' reprova"] = not ok(j(c_ine, v_ine, longo + "Não existe e está ativa, sem falha."))
+    res["inexistente: 'outro inativo; esta ativa' reprova"] = not ok(j(c_ine, v_ine, longo + "Não existe. Outro serviço está inativo; esta unidade está ativa."))
+    res["serviço ativo: 'está ativo, sem falha' reprova (fora do formato)"] = not ok(j(c_srv, {"ativo": True}, longo + "Está ativo, sem falha."))
     c_rev = {"tipo": "campo", "param": {"entrada": 743, "regex": r"Revisor pendente: (\w+)"}}
     v_rev = verdade(c_rev, raiz)
     res["campo: revisor da (743) é Codex"] = v_rev == {"valor": "Codex"}
     res["campo: trocar por Claude reprova"] = not ok(j(c_rev, v_rev, longo + "O revisor pendente é Claude Code."))
-    res["campo: Codex passa"] = ok(j(c_rev, v_rev, longo + 'O revisor pendente é Codex.'))
+    res["campo: Codex passa"] = ok(j(c_rev, v_rev, longo + "\nCodex."))
+    res["campo: 'Revisor: Codex.' passa"] = ok(j(c_rev, v_rev, longo + "\nRevisor: Codex."))
+    res["campo: frase livre reprova (fora do formato)"] = not ok(j(c_rev, v_rev, longo + "\nO revisor pendente é Codex."))
+    res["campo: 'O revisor é Claude. Codex.' reprova (contraprova do Codex)"] = not ok(j(c_rev, v_rev, longo + "\nO revisor é Claude. Codex."))
+    res["campo: 'O autor é Codex.' reprova (contraprova do Codex)"] = not ok(j(c_rev, v_rev, longo + "\nO autor é Codex."))
+    res["campo: 'Claude; Codex é outro modelo' reprova (AC-47)"] = not ok(j(c_rev, v_rev, longo + "O revisor pendente é Claude; Codex é um modelo diferente."))
+    res["campo: 'Não foi Codex.' reprova"] = not ok(j(c_rev, v_rev, longo + "Não foi Codex."))
+    res["campo: 'ChatGPT; Codex é outro modelo' reprova"] = not ok(j(c_rev, v_rev, "O revisor é ChatGPT; Codex é outro modelo."))
+    res["campo: valor de duas palavras ('Claude Code') passa"] = ok(j(c_rev, {"valor": "Claude Code"}, "agata-seth · m · t=1 · h\n\nClaude Code"))
+    res["campo: 'Autor: Codex.' reprova (3ª revisão do Codex)"] = not ok(j(c_rev, v_rev, longo + "\nAutor: Codex."))
+    res["campo: 'Codex (não foi o revisor).' reprova (3ª revisão do Codex)"] = not ok(j(c_rev, v_rev, longo + "\nCodex (não foi o revisor)."))
+    c_gw = {"tipo": "servico", "param": {"unidade": "seth-gateway.service"}}
+    res["unidade: parêntese contrário reprova (3ª revisão do Codex)"] = not ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\nATIVA (ActiveState=inactive, SubState=dead)"))
+    res["unidade: rótulo de outra unidade reprova (3ª revisão do Codex)"] = not ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\noutra.service: ativa."))
+    _gw = lambda s, at=True: ok(j(c_gw, {"ativo": at, "existe": True}, "agata-seth · m · t=1 · h\n\n" + s))
+    res["unidade: espaço em '=' com estado contrário reprova (4ª revisão)"] = not _gw("seth-gateway.service: ATIVA (LoadState=loaded, ActiveState = inactive)")
+    res["unidade: INATIVA com ActiveState = active reprova (4ª revisão)"] = not _gw("seth-gateway.service: INATIVA (LoadState=loaded, ActiveState = active)", False)
+    res["unidade: espaços em '=' com estado certo passa (4ª revisão)"] = _gw("seth-gateway.service: ATIVA (LoadState = loaded, ActiveState = active)")
+    res["unidade: ActiveState=unknown reprova (4ª revisão)"] = not _gw("seth-gateway.service: INATIVA (ActiveState=unknown)", False)
+    res["unidade: texto livre no parêntese reprova (4ª revisão)"] = not ok(j(c_ine, v_ine, longo + "\nNÃO EXISTE (unidade encontrada e carregada)"))
+    res["unidade: só LoadState=loaded passa, ativa (5ª revisão)"] = _gw("seth-gateway.service: ATIVA (LoadState=loaded)")
+    res["unidade: só LoadState=loaded passa, inativa (5ª revisão)"] = _gw("seth-gateway.service: INATIVA (LoadState=loaded)", False)
+    res["unidade: ActiveState=active com SubState=dead reprova (5ª revisão)"] = not _gw("seth-gateway.service: ATIVA (ActiveState=active, SubState=dead)")
+    res["unidade: NÃO EXISTE com SubState=running reprova (5ª revisão)"] = not ok(j(c_ine, v_ine, longo + "\nNÃO EXISTE (LoadState=not-found, SubState=running)"))
+    res["unidade: rótulo da própria unidade passa"] = ok(j(c_gw, {"ativo": True, "existe": True}, longo + "\nseth-gateway.service: ATIVA (ActiveState=active, SubState=running)"))
+    res["campo: cabeçalho com 'Última entrada' não atrapalha"] = ok(j(c_rev, v_rev, "agata-seth · m · t=1 · h\nÚltima entrada: (770) DIÁRIO — Claude Code fez x\npronto.\n\nCodex"))
     res["abstenção sem a flag do caso reprova"] = not ok(j(c_cte, v_cte, longo + 'Não achei a linha das constantes na busca; não medido.'))
     res["abstenção com valor errado afirmado reprova"] = not ok(j(c_abs, v_cte, longo + 'Não achei, mas chuto MIN_NOVOS = 99; não medido.'))
     res["verdade incalculável reprova"] = not ok(j(c_num, None, longo))
