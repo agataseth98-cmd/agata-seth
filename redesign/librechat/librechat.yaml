@@ -169,6 +169,18 @@ endpoints:
         - ler_pagina_mcp_navegador
         - screenshot_mcp_navegador
         - fechar_navegador_mcp_navegador
+        # AC-54 (18/10/2026): o modelo às vezes chama pelo nome CURTO, sem o sufixo do MCP. O nome curto
+        # não existe como ferramenta (volta "not found" e ela repete com o nome certo), mas, fora desta
+        # lista, a resposta parava pedindo aprovação humana para nada -- 6 vezes desde 01/10. Só leitura.
+        - query_canon
+        - vault_consultar
+        - vault_buscar
+        - maquina_verificar
+        - ler_mensagens
+        - navegar
+        - buscar_web
+        - ler_pagina
+        - screenshot
     checkpointer:
       type: mongo
   custom:

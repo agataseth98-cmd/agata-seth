@@ -293,7 +293,8 @@ const TOOLS = [
       "Lista fechada: perimetro (todos os controles do perímetro — inclui P-10, vault Obsidian × HEAD, " +
       "e P-22, derivados de hidratação × HEAD), estado, git_status, git_log, git_diff_stat, " +
       "git_sync (SHA do remoto), selos, suite_controles, servicos (SÓ lista as unidades em FALHA), " +
-      "unidade (estado de UMA unidade de usuario: consulta = o nome, ex.: laya-roteador.service; use esta para \"esta ativa?\"), p8_verificar, " +
+      "unidade (estado de UMA unidade de usuario: consulta = o nome, ex.: laya-roteador.service; use esta para \"esta ativa?\"), " +
+      "laya_treino (estado MEDIDO do treino do Laya: exemplos, quantos faltam, ultimo recibo da janela; entrada de MEMORIAS e historia, nao estado de hoje), p8_verificar, " +
       "busca_semantica e busca_texto (prefira a tool vault_buscar). " +
       "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
     inputSchema: {
