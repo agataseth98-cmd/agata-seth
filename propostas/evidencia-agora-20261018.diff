@@ -1,5 +1,5 @@
 diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
-index 1f680c1..52472e7 100644
+index 1f680c1..1869a11 100644
 --- a/redesign/router/auditoria_turno.py
 +++ b/redesign/router/auditoria_turno.py
 @@ -108,7 +108,10 @@ _ALEGA = re.compile(r"verific|confirm|consult|devolv|retorn|segundo|conforme|mos
@@ -41,19 +41,21 @@ index 1f680c1..52472e7 100644
      corpo, em_codigo = [], False
      for l in texto.splitlines():
          if l.strip().startswith("```"):
-@@ -136,16 +157,31 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+@@ -136,16 +157,32 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
              continue
          if not em_codigo and not _CABECALHO.match(l):
              corpo.append(l)
 -    inventadas = set()
+-    for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
+-        for nome in _nomes_ferramentas():
 +    inventadas, so_no_turno = set(), set()
 +    # Temporalidade POR FRASE (2ª revisão do Codex): frase com "agora" colado ao verbo exige a chamada no turno,
 +    # mesmo dizendo "como antes"; frase no passado vale contra a conversa; "Verificado agora." solto (sem
 +    # ferramenta) passa a exigência só para a frase seguinte.
 +    pendente = False
 +    nomes = _nomes_ferramentas()
-     for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
--        for nome in _nomes_ferramentas():
++    # oração adversativa é alegação à parte: a negação de uma não isenta a outra (4ª revisão do Codex)
++    for frase in re.split(r"(?<=[.;!?])\s+|\n|,\s*(?=(?:mas|por[ée]m|contudo|entretanto)\b)", "\n".join(corpo)):
 +        if not frase.strip():
 +            continue
 +        tem_agora = _AGORA.search(frase) is not None
@@ -77,7 +79,7 @@ index 1f680c1..52472e7 100644
              "ferramenta (doutrina, \"Evidência só do que existe\"; (690))"]
  
  
-@@ -902,6 +938,71 @@ def _selftest() -> int:
+@@ -902,6 +939,78 @@ def _selftest() -> int:
                      {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
                  {"role": "tool", "tool_call_id": "1", "content": "trecho"},
                  a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
@@ -140,6 +142,13 @@ index 1f680c1..52472e7 100644
 +                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
 +                a(linha(2, "14:02") + "\n\nLido."), u(),
 +                a(linha(3, "14:05") + "\n\nSe eu consultar agora a `query_canon`, obtenho o estado atualizado."), u()]))),
++        ("evidência: 'Não usei git log, mas confirmei agora com query_canon' é acusada (4ª revisão do Codex)", any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\nNão usei git log, mas confirmei agora com `query_canon`."), u()]))),
 +        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
 +            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
 +                {"role": "assistant", "content": "", "tool_calls": [
