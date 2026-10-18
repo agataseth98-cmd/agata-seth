@@ -2,6 +2,9 @@
 Description=Agata -- seth_gateway: reidrata a Seth antes do OmniRoute (:20126)
 After=omniroute-sanitizer.service
 Requires=omniroute-sanitizer.service
+# Membro do agata.target desde 18/10/2026: a queda de energia desse dia mostrou que,
+# sem [Install], o gateway nao voltava no boot e a Seth ficava fora ate religar a mao.
+PartOf=agata.target
 
 [Service]
 Type=simple
@@ -23,5 +26,7 @@ ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 ReadOnlyPaths=%h/agata
 
-# Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user start
-# seth-gateway`), nao no boot. Mesma logica do llamacpp-agata / agata-warmup.
+# Sobe com o agata.target no boot (18/10/2026, queda de energia). O atalho `seth`
+# continua dando `start` (inofensivo se ja estiver de pe); `seth-parar` ainda para.
+[Install]
+WantedBy=agata.target
