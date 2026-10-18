@@ -1,0 +1,65 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 1f680c1..63cb231 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -127,8 +127,22 @@ def _chamadas(msgs: list) -> set[str]:
+     return {n for n in nomes if n}
+ 
+ 
++# AC-30 (17/10/2026, 12:50): "verificado agora com `query_canon`" sem chamada NAQUELE turno passava, porque a
++# conversa já tinha 21 chamadas de turnos anteriores. Alegação de agora exige a chamada no próprio turno.
++_AGORA = re.compile(r"\bagora\b|neste turno|nesta resposta|acab(?:ei|o|amos) de|\bh[áa] pouco\b", re.IGNORECASE)
++
++
++def _chamadas_do_turno(msgs: list) -> set[str]:
++    """Nomes chamados no turno auditado: entre o penúltimo e o último pedido do usuário."""
++    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
++    if len(usuarios) < 2:
++        return _chamadas(msgs)
++    return _chamadas(msgs[usuarios[-2] + 1:usuarios[-1]] + [msgs[usuarios[-1]]])
++
++
+ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+     chamadas = _chamadas(msgs)
++    do_turno = _chamadas_do_turno(msgs)
+     corpo, em_codigo = [], False
+     for l in texto.splitlines():
+         if l.strip().startswith("```"):
+@@ -139,8 +153,9 @@ def _ferramenta_sem_chamada(texto: str, msgs: list) -> list[str]:
+     inventadas = set()
+     for frase in re.split(r"(?<=[.;!?])\s+|\n", "\n".join(corpo)):
+         for nome in _nomes_ferramentas():
++            base = do_turno if _AGORA.search(frase) else chamadas
+             if nome in frase and _ALEGA.search(frase) and not _SUGERE.search(frase) \
+-                    and not any(nome in c for c in chamadas):
++                    and not any(nome in c for c in base):
+                 inventadas.add(nome)
+     if not inventadas:
+         return []
+@@ -902,6 +917,26 @@ def _selftest() -> int:
+                     {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
+                 {"role": "tool", "tool_call_id": "1", "content": "trecho"},
+                 a(linha(2, "14:02") + "\n\nRegra 5 confirmada em `query_canon`."), u()]))),
++        ("evidência: 'verificado agora' com chamada só em turno anterior é acusada (AC-30)", any(
++            x.startswith("evidência:") and "query_canon" in x for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\n(734) não aparece (verificado agora com `git log` e `query_canon`)."), u()]))),
++        ("evidência: alegação sem 'agora' com chamada em turno anterior não é acusada (690)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nLido."), u(),
++                a(linha(3, "14:05") + "\n\nComo a `query_canon` devolveu antes, a Regra 5 vale."), u()]))),
++        ("evidência: 'verificado agora' com chamada no próprio turno não é acusada (AC-30)", not any(
++            x.startswith("evidência:") for x in auditar([u(), a(pront), u(),
++                {"role": "assistant", "content": "", "tool_calls": [
++                    {"id": "1", "function": {"name": "query_canon_mcp_canon", "arguments": "{}"}}]},
++                {"role": "tool", "tool_call_id": "1", "content": "trecho"},
++                a(linha(2, "14:02") + "\n\nRegra 5 confirmada agora em `query_canon`."), u()]))),
+         ("estado desatualizado: proposta aplicada chamada de pendente é acusada (695)", any(
+             x.startswith("estado desatualizado") and "voz-comum-2026-10-14" in x for x in est(
+                 "A `voz-comum-2026-10-14` aguarda assinatura do Humano."))),
