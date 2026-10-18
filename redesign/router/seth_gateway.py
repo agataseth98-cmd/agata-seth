@@ -612,8 +612,8 @@ def _rota_com_travas(escolhida: str | None, payload: dict) -> str:
     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
     if len(_ultimo_texto_usuario(msgs)) > _LIMIAR_PESADO_CHARS:  # (705) pedido atual, não histórico
         return "seth-pesado"
-    if escolhida == "rapido" and payload.get("tools"):
-        return "seth-livre"
+    # AC-01 (18/10/2026, decisão do Humano): a trava "ferramenta veta rapido" saiu. Medido pelo gateway,
+    # 8 pedidos reais com ferramenta: seth-rapido 7 chamadas corretas, 0 malformadas, como a seth-livre.
     return f"seth-{escolhida}"
 
 
@@ -1586,8 +1586,8 @@ def _selftest() -> int:
         ("pesado curto -> seth-pesado", _rota_com_travas("pesado", curto), "seth-pesado"),
         (">6000 chars vence o modelo", _rota_com_travas(
             "rapido", {"messages": [{"role": "user", "content": "z" * 7000}]}), "seth-pesado"),
-        ("rapido com tools -> seth-livre", _rota_com_travas(
-            "rapido", {"tools": [{"x": 1}], **curto}), "seth-livre"),
+        ("rapido com tools fica seth-rapido (AC-01)", _rota_com_travas(
+            "rapido", {"tools": [{"x": 1}], **curto}), "seth-rapido"),
     ]
     for desc, deu, quer in travas:
         ok = deu == quer
