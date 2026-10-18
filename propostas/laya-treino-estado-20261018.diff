@@ -13,7 +13,7 @@ index d01caca..8a0d9fa 100644
        "Nao executa comando livre e nao escreve nada. `listar: true` mostra a lista comentada.",
      inputSchema: {
 diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
-index 4ddbb99..5bc3bbb 100644
+index 4ddbb99..0f27d70 100644
 --- a/redesign/router/seth_verificador.py
 +++ b/redesign/router/seth_verificador.py
 @@ -113,6 +113,12 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
@@ -29,7 +29,7 @@ index 4ddbb99..5bc3bbb 100644
      "p8_verificar": (
          ["bash", "scripts/p8_verificar.sh"], 60,
          "Confere se uma proposta P-8 PENDENTE (propostas/<nome>.diff + "
-@@ -291,6 +297,13 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+@@ -291,6 +297,15 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
          if d.get("LoadState") == "not-found":
              return f"unidade {d.get('Id', '?')}: NÃO existe (not-found)."
          return f"{d.get('Id', '?')}: {d.get('ActiveState', '?')}/{d.get('SubState', '?')}, arquivo {d.get('UnitFileState', '?')}."
@@ -38,16 +38,19 @@ index 4ddbb99..5bc3bbb 100644
 +        if "faltam" not in d:
 +            return None
 +        f = d["faltam"]
++        if not f.isdigit():
++            return "não medido: a leitura dos exemplos foi inconclusiva -- não afirme quantos faltam."
 +        return ("mínimo atingido: há exemplos novos suficientes para treinar." if f == "0"
 +                else f"faltam {f} exemplo(s) real(is) novo(s) para o mínimo de {d.get('minimo_para_treinar', '?')}.")
      if nome == "servicos":
          m = re.search(r"(\d+) loaded units? listed", texto)
          if m is None:
-@@ -475,6 +488,13 @@ def _selftest() -> int:
+@@ -475,6 +490,14 @@ def _selftest() -> int:
      except ValueError:
          casos.append(("servicos continua sem consulta", True))
      casos.append(("unidade só --user, sem shell", _argv("unidade", None, consulta="a.timer")[:3] == ["systemctl", "--user", "show"]))
 +    casos.append(("leitura: laya_treino com faltam=5", "faltam 5" in (_leitura("laya_treino", "minimo_para_treinar=20\nfaltam=5\n", 0) or "")))
++    casos.append(("leitura: laya_treino com faltam=nao_medido", "não medido" in (_leitura("laya_treino", "faltam=nao_medido\n", 0) or "")))
 +    casos.append(("leitura: laya_treino com faltam=0", "mínimo atingido" in (_leitura("laya_treino", "faltam=0\n", 0) or "")))
 +    try:
 +        _argv("laya_treino", None, consulta="x"); casos.append(("laya_treino não aceita consulta", False))
@@ -58,7 +61,7 @@ index 4ddbb99..5bc3bbb 100644
      casos.append(("leitura: unidade inexistente", "NÃO existe" in (_leitura("unidade", "Id=b.service\nLoadState=not-found\nActiveState=inactive\n", 0) or "")))
      # 4. comando que não aceita n recusa n
 diff --git a/scripts/laya_treino.py b/scripts/laya_treino.py
-index b1e390e..87768ec 100644
+index b1e390e..8a29dec 100644
 --- a/scripts/laya_treino.py
 +++ b/scripts/laya_treino.py
 @@ -41,6 +41,7 @@ TESTES = {"A (à mão)": RAIZ / "redesign/laya/dados/teste-claude.jsonl",
@@ -69,36 +72,68 @@ index b1e390e..87768ec 100644
  MIN_NOVOS, PESO_REAL, GPU_MAX_MIB, HOLDOUT_MIN = 20, 3, 1500, 10
  
  
-@@ -92,6 +93,28 @@ def _relatar(linhas: list[str], resumo: str) -> None:
+@@ -92,6 +93,60 @@ def _relatar(linhas: list[str], resumo: str) -> None:
          pass
  
  
++def _ler_linhas(p: Path):
++    """Leitura tolerante para o --estado: (registros válidos, linhas ilegíveis) ou None se o arquivo não existe.
++    Uma linha ruim (append no meio, interrupção) não zera o resto (revisão do Codex, 18/10/2026)."""
++    try:
++        bruto = p.read_text(encoding="utf-8").splitlines()
++    except OSError:
++        return None
++    bons, ruins = [], 0
++    for l in bruto:
++        if not l.strip():
++            continue
++        try:
++            bons.append(json.loads(l))
++        except ValueError:
++            ruins += 1
++    return bons, ruins
++
++
 +def estado() -> str:
 +    """Só leitura (AC-34, 18/10/2026): o estado do treino MEDIDO, para a Seth não responder de entrada velha.
-+    Exemplos reais, quantos são novos desde o último treino, o mínimo, quantos faltam e o último recibo da janela."""
-+    real, e = _ler(REAL), _estado()
-+    novos = len(real) - e.get("ultimo_n_real", 0)
-+    linhas = ["ESTADO-TREINO-LAYA (medido agora; só leitura)",
-+              f"exemplos_reais_total={len(real)}",
-+              f"usados_ate_o_ultimo_treino={e.get('ultimo_n_real', 0)}",
-+              f"novos_desde_o_ultimo_treino={novos}",
-+              f"minimo_para_treinar={MIN_NOVOS}",
-+              f"faltam={max(0, MIN_NOVOS - novos)}"]
++    Leitura inconclusiva (arquivo ausente, linha ilegível, contagem negativa) sai "nao_medido", nunca número."""
++    linhas = ["ESTADO-TREINO-LAYA (medido agora; só leitura)"]
++    lido, e = _ler_linhas(REAL), _estado()
++    usados = e.get("ultimo_n_real", 0)
++    if lido is None:
++        linhas.append(f"exemplos_reais=nao_medido (arquivo ausente: {REAL.name})")
++        novos = None
++    else:
++        real, ruins = lido
++        novos = len(real) - usados
++        linhas.append(f"exemplos_reais_total={len(real)}" + (f" (+{ruins} linha(s) ilegível(is))" if ruins else ""))
++        if ruins or novos < 0:
++            novos = None
++            linhas.append("leitura=inconclusiva (linha ilegível ou contagem menor que a já usada)")
++    linhas += [f"usados_ate_o_ultimo_treino={usados}",
++               f"novos_desde_o_ultimo_treino={novos if novos is not None else 'nao_medido'}",
++               f"minimo_para_treinar={MIN_NOVOS}",
++               f"faltam={max(0, MIN_NOVOS - novos) if novos is not None else 'nao_medido'}"]
 +    cand = (e.get("candidatos") or [None])[-1]
 +    linhas.append(f"ultimo_candidato={cand['nome']} em {cand['em']}" if cand else "ultimo_candidato=nenhum")
++    rec = _ler_linhas(RECIBOS)
 +    ult = None
-+    for r in _ler(RECIBOS):
-+        if r.get("task") == "laya-treino" and r.get("phase") == "finished":
++    for r in (rec[0] if rec else []):
++        if isinstance(r, dict) and r.get("task") == "laya-treino" and r.get("phase") == "finished":
 +            ult = r
-+    linhas.append(f"janela_ultimo_recibo={ult.get('at')} resultado={ult.get('result')} saida_final={ult.get('saida_final', '')!r}"
-+                  if ult else "janela_ultimo_recibo=nenhum")
++    if ult:
++        linhas.append(f"janela_ultimo_recibo={ult.get('at')} resultado={ult.get('result')} saida_final={ult.get('saida_final', '')!r}")
++    else:
++        linhas.append("janela_ultimo_recibo=" + ("nao_medido (arquivo ausente)" if rec is None else "nenhum"))
++    if rec and rec[1]:
++        linhas.append(f"recibos_ilegiveis={rec[1]}")
 +    return "\n".join(linhas)
 +
 +
  def rodar(treinar=None, avaliar=None) -> int:
      hoje = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
      real, e = _ler(REAL), _estado()
-@@ -190,6 +213,18 @@ def _selftest() -> int:
+@@ -190,6 +245,32 @@ def _selftest() -> int:
                    feitos and len(feitos[0]) == 1 + (40 - n_sep) * PESO_REAL and not ATUAL.exists()
                    and "sem piora" not in RELATORIO.read_text() and "não fica pior" in RELATORIO.read_text()))
      casos.append(("promover recusa caminho fora de modelos/", promover(str(t)) == 2))
@@ -112,12 +147,26 @@ index b1e390e..87768ec 100644
 +    casos.append(("--estado: 25 reais, 15 novos, faltam 5 (AC-34)", "exemplos_reais_total=25" in s and "novos_desde_o_ultimo_treino=15" in s
 +                  and "faltam=5" in s and "minimo_para_treinar=20" in s))
 +    casos.append(("--estado: último recibo é o do laya-treino, não o de outra tarefa", "2026-10-18T12:21 resultado=success" in s))
++    with open(RECIBOS, "a", encoding="utf-8") as f:
++        f.write('{"task": "laya-tre')  # append interrompido
++    s = estado()
++    casos.append(("--estado: recibo bom seguido de linha incompleta mantém o recibo (revisão do Codex)",
++                  "2026-10-18T12:21 resultado=success" in s and "recibos_ilegiveis=1" in s))
++    with open(REAL, "a", encoding="utf-8") as f:
++        f.write('{"x": 9')
++    s = estado()
++    casos.append(("--estado: linha incompleta nos exemplos vira nao_medido, nunca número (revisão do Codex)",
++                  "faltam=nao_medido" in s and "exemplos_reais_total=25 (+1" in s))
++    REAL.write_text("".join('{"x": %d}\n' % i for i in range(5)), encoding="utf-8")
++    casos.append(("--estado: contagem menor que a já usada vira nao_medido", "faltam=nao_medido" in estado()))
++    REAL.unlink()
++    casos.append(("--estado: arquivo de exemplos ausente vira nao_medido", "exemplos_reais=nao_medido" in estado()))
 +    RECIBOS.unlink()
-+    casos.append(("--estado: sem recibo diz 'nenhum'", "janela_ultimo_recibo=nenhum" in estado()))
++    casos.append(("--estado: sem arquivo de recibos diz nao_medido", "janela_ultimo_recibo=nao_medido" in estado()))
      for nome, ok in casos:
          print(f"{'PASS' if ok else 'FALHA'}  {nome}")
      falhas = sum(not ok for _, ok in casos)
-@@ -201,6 +236,9 @@ if __name__ == "__main__":
+@@ -201,6 +282,9 @@ if __name__ == "__main__":
      a = sys.argv[1:]
      if a == ["--selftest"]:
          sys.exit(_selftest())
