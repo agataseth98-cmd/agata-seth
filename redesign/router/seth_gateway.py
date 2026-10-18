@@ -801,6 +801,9 @@ def _injeta(payload: dict) -> dict:
     literais = auditoria_turno.entradas_literais(msgs)  # rédea (17/10/2026): o texto exato das entradas que o Humano citou
     if literais:
         auditoria = (auditoria + "\n" if auditoria else "") + literais
+    unidades = auditoria_turno.unidades_medidas(msgs)  # 17/10/2026: estado da unidade medido pela Máquina, não de cabeça
+    if unidades:
+        auditoria = (auditoria + "\n" if auditoria else "") + unidades
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
