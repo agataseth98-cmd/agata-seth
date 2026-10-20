@@ -65,7 +65,11 @@ from fastmcp import FastMCP
 from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from politica_egress import destino_permitido  # noqa: E402 -- import após ajuste de sys.path
+from redesign.mcp.capability import verificar_capability  # noqa: E402
+from egress_proxy import EgressProxy  # noqa: E402 -- conexão efetiva pinada ao IP validado
+import egress_proxy  # noqa: E402
 
 PERFIL_DIR = os.path.expanduser("~/.cache/agata/navegador-perfil")
 ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/navegador-dominios-permitidos.txt")
@@ -100,7 +104,7 @@ def _na_fila(fn):
         return _FILA_NAVEGADOR.submit(fn, *a, **k).result()
     return embrulho
 
-_estado: dict = {"pw": None, "ctx": None, "page": None}
+_estado: dict = {"pw": None, "ctx": None, "page": None, "egress": None}
 
 
 def _log(acao: str, **campos) -> None:
@@ -144,15 +148,25 @@ def _pagina():
         return _estado["page"]
     os.makedirs(PERFIL_DIR, exist_ok=True)
     pw = sync_playwright().start()
-    ctx = pw.chromium.launch_persistent_context(
-        PERFIL_DIR,
-        executable_path=BRAVE_BIN,
-        headless=True,
-        args=["--disable-blink-features=AutomationControlled"],
-    )
+    egress = EgressProxy().start()
+    try:
+        ctx = pw.chromium.launch_persistent_context(
+            PERFIL_DIR,
+            executable_path=BRAVE_BIN,
+            headless=True,
+            proxy={"server": egress.url},
+            args=["--disable-blink-features=AutomationControlled",
+                  "--proxy-bypass-list=<-loopback>",
+                  "--disable-quic",
+                  "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"],
+        )
+    except BaseException:
+        egress.close()
+        pw.stop()
+        raise
     ctx.route("**/*", _handler_rota)
     page = ctx.new_page()
-    _estado.update(pw=pw, ctx=ctx, page=page)
+    _estado.update(pw=pw, ctx=ctx, page=page, egress=egress)
     return page
 
 
@@ -168,7 +182,9 @@ def _handler_rota(route, request) -> None:
     loopback/link-local/RFC1918 sem passar por checagem nenhuma. Registrado
     via `ctx.route("**/*", ...)` -- nível de CONTEXTO, cobre toda página
     (inclusive as criadas depois) e todo tipo de requisição, não só a
-    navegação principal."""
+    navegação principal. A conexão efetiva também passa pelo SOCKS local
+    `egress_proxy`, que resolve, valida e conecta ao IP pinado; o interceptor
+    é a primeira barreira, o proxy fecha a janela DNS TOCTOU."""
     permitido, motivo = destino_permitido(request.url)
     if not permitido:
         _log("requisicao_bloqueada", url=request.url, motivo=motivo,
@@ -345,7 +361,7 @@ def ler_pagina(max_chars: int = _MAX_CHARS_PADRAO, inicio: int = 0) -> dict:
 
 @mcp.tool
 @_na_fila
-def clicar(descricao: str) -> dict:
+def clicar(descricao: str, target_url: str, agata_capability: str | None = None) -> dict:
     """Clica no primeiro elemento cujo texto visível bate com `descricao`
     (busca simples, não-exata, primeira ocorrência). ESCRITA -- travado por
     allowlist de domínio (~/.config/agata/navegador-dominios-permitidos.txt);
@@ -354,7 +370,16 @@ def clicar(descricao: str) -> dict:
     Retorna: {clicado: bool, dominio_bloqueado: str|None, erro}.
     """
     try:
+        verificar_capability(agata_capability, audience="navegador", tool="clicar",
+                             arguments={"descricao": descricao, "target_url": target_url})
+    except PermissionError:
+        return {"clicado": False, "dominio_bloqueado": None,
+                "erro": "capability de aprovação ausente, inválida ou já consumida"}
+    try:
         page = _pagina()
+        if page.url != target_url:
+            return {"clicado": False, "dominio_bloqueado": None,
+                    "erro": "a página mudou desde a aprovação; solicite nova aprovação"}
         if not _dominio_permitido(page.url):
             dom = _dominio(page.url)
             _log("clicar_bloqueado", url=page.url, dominio=dom, descricao=descricao)
@@ -369,14 +394,25 @@ def clicar(descricao: str) -> dict:
 
 @mcp.tool
 @_na_fila
-def preencher(campo: str, valor: str) -> dict:
+def preencher(campo: str, valor: str, target_url: str,
+              agata_capability: str | None = None) -> dict:
     """Preenche um campo de formulário (achado por label/placeholder/name que
     contenha `campo`) com `valor`. ESCRITA -- mesma allowlist de `clicar`.
 
     Retorna: {preenchido: bool, dominio_bloqueado: str|None, erro}.
     """
     try:
+        verificar_capability(agata_capability, audience="navegador", tool="preencher",
+                             arguments={"campo": campo, "valor": valor,
+                                        "target_url": target_url})
+    except PermissionError:
+        return {"preenchido": False, "dominio_bloqueado": None,
+                "erro": "capability de aprovação ausente, inválida ou já consumida"}
+    try:
         page = _pagina()
+        if page.url != target_url:
+            return {"preenchido": False, "dominio_bloqueado": None,
+                    "erro": "a página mudou desde a aprovação; solicite nova aprovação"}
         if not _dominio_permitido(page.url):
             dom = _dominio(page.url)
             _log("preencher_bloqueado", url=page.url, dominio=dom, campo=campo)
@@ -418,7 +454,9 @@ def fechar_navegador() -> dict:
             _estado["ctx"].close()
         if _estado["pw"] is not None:
             _estado["pw"].stop()
-        _estado.update(pw=None, ctx=None, page=None)
+        if _estado["egress"] is not None:
+            _estado["egress"].close()
+        _estado.update(pw=None, ctx=None, page=None, egress=None)
         _log("fechar_navegador")
         return {"fechado": True, "erro": None}
     except Exception as e:  # noqa: BLE001
@@ -470,14 +508,24 @@ def _selftest_interceptor() -> int:
     import http.server
     import threading
     import politica_egress
+    import egress_proxy as egress_proxy_mod
 
     _original = politica_egress.destino_permitido
+    _original_enderecos = egress_proxy_mod._enderecos_publicos
 
     def _permitir_loopback_para_teste(url: str):
         permitido, motivo = _original(url)
         if not permitido and "loopback" in motivo:
             return True, ""
         return permitido, motivo
+
+    def _permitir_loopback_no_proxy(host: str, port: int):
+        try:
+            return _original_enderecos(host, port)
+        except PermissionError as e:
+            if "loopback" in str(e):
+                return ["127.0.0.1"]
+            raise
 
     class _Pagina(http.server.BaseHTTPRequestHandler):
         def log_message(self, *a):
@@ -502,6 +550,7 @@ def _selftest_interceptor() -> int:
     ok = True
     try:
         politica_egress.destino_permitido = _permitir_loopback_para_teste
+        egress_proxy_mod._enderecos_publicos = _permitir_loopback_no_proxy
         globals()["destino_permitido"] = _permitir_loopback_para_teste
 
         if os.path.exists(LOG_PATH):
@@ -528,6 +577,7 @@ def _selftest_interceptor() -> int:
         ok = ok and bloqueado
     finally:
         politica_egress.destino_permitido = _original
+        egress_proxy_mod._enderecos_publicos = _original_enderecos
         globals()["destino_permitido"] = _original
         fechar_navegador()
         srv.shutdown()

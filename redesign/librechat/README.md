@@ -4,19 +4,34 @@ Substituiu o Open WebUI em 03/09/2026 (MEMORIAS (313)). Frontend de conversa
 informal, "estilo ChatGPT/Claude", apontado no `seth_gateway` (`:20126`).
 Para agente/codigo continua o Goose (`seth-agente`).
 
+## Fork Agata
+
+O container da Agata é uma derivação versionada da imagem v0.8.8-rc3, fixada
+por digest no `Dockerfile`. O patch em `fork/agata-capabilities.patch` se aplica
+ao commit upstream `1df448481075d37484f11c4751dc3f60314ee651`; o build falha se o
+patch não casar com a imagem-base. Ele instala o emissor no caminho real de
+aprovação/resume e injeta a capability somente na chamada MCP executada. O teste
+Node cobre emissão, rejeição, edição de argumentos e colisão de IDs por conversa.
+O build ainda não foi aplicado à instância em execução.
+
 ## Forma (espelhos do sistema)
 
-- **Enxuto**: so 3 contêineres -- `librechat`, `librechat-mongodb`, `librechat-meilisearch`.
+- **Enxuto**: três serviços da aplicação/dados (`librechat`, Mongo, Meili) e um relay `socat` mínimo em host networking.
 - **SEM RAG por embedding**: `rag_api` e `pgvector` nao sao implantados. Respeita
   MEMORIAS (115)/(293) (busca semantica recusada; canon e grep + link por numero).
 - **Memoria desligada** (`memory.disabled: true`): a hidratacao da Seth vem do
   `seth_gateway`, que injeta canon-em-git verificavel. Nada de auto-captura por LLM
   (MEMORIAS (312)).
-- **Sob demanda**: `restart: "no"` em tudo. Sobe/para pelos atalhos `seth` / `Parar Seth`.
+- **Recuperação**: `restart: unless-stopped` nos contêineres; o atalho `Parar Seth` para manualmente e deixa-os parados.
 - **Loopback**: a app faz bind em `127.0.0.1:3080`. Acesso remoto e via Tailscale
   serve (nao expor porta).
 - **Um endpoint** ("Seth") -> `http://127.0.0.1:20126/v1` (seth_gateway ->
   sanitizador -> OmniRoute). `ENDPOINTS=custom` esconde os embutidos.
+- **Dados externos**: o proxy bloqueia qualquer POST sem classificação `public`, em
+  todos os caminhos e tipos de conteúdo. Na UI, `Seth pública · sem ferramentas` é
+  um endpoint custom dedicado com cabeçalho público fixo; as rotas cloud do Agent
+  comum continuam bloqueadas. O alias local `ollama-local/*` segue local.
+  Chamadores HTTP diretos podem declarar `X-Agata-Data-Classification: public`.
 
 ## Layout
 
@@ -39,7 +54,10 @@ seth_gateway · 8890 piper · 27125 canon · 20135 discord · 20136 navegador ·
 20140 escriba · 20141 verificador. O ufw da Maquina precisa liberar essas 7
 portas na `br-librechat` (regra instalada com sudo, uma vez). Porta nova =
 compose + `librechat.yaml` + regra do ufw, juntos. Mongo e Meili: pelo nome do
-servico, dentro da bridge.
+serviço, na rede interna `librechat-data` (172.29.8.0/24), sem rota para o
+relé. A aplicação entra nas duas redes: alcança as ferramentas pela bridge
+`librechat` e os bancos pela rede de dados. Os bancos não compartilham a bridge
+que alcança as portas de ferramentas.
 
 ## Operacao
 
@@ -117,6 +135,29 @@ que o container ja tem). Le o vault do Agata pelo proxy read-only `:27125`
 - Trava de leitura: whitelist (docs nomeados + `memoria/obsidian/**` + `SETH-DIARIO.md`)
   + denylist de sufixos de segredo (`.secret .token .pass .key .gpg .env .pem`) + sem `..`.
 - `SETH_ESCRIBA` (default `http://127.0.0.1:20140`) -- onde as tools de escrita batem.
+Cada escrita exige uma capability Ed25519 de uso único, emitida após aprovação
+humana no LibreChat e vinculada ao executor, à ferramenta e aos argumentos.
+A chave privada (`~/.config/agata/approval-capability-private.pem`) fica no host
+como `root:59999`, modo 0440, e é montada somente no container emissor, como
+`/run/secrets/agata-approval-private.pem`, em leitura. O container usa UID
+1000/GID 59999; o emissor também valida owner root, GID, modo, tipo e link único.
+Depois de criar o par, o Humano deve executar:
+
+```sh
+sudo chown root:59999 ~/.config/agata/approval-capability-private.pem
+sudo chmod 0440 ~/.config/agata/approval-capability-private.pem
+```
+
+Os executores locais recebem só a chave pública
+(`approval-capability-public.pem`) e consomem cada nonce no banco local
+`~/.cache/agata/approval-capabilities/used.sqlite3`; esse banco não é montado no
+container do LibreChat. O UID/GID numérico do container é 1000:59999 nesta
+Máquina. `python3
+scripts/criar_chave_capability.py` cria o par sem exibir conteúdo. Sem token
+válido, Escriba, Discord e ações de escrita do navegador recusam chamadas diretas.
+Esta barreira não protege contra processos com acesso ao daemon Docker (o usuário
+local pertence ao grupo `docker`); esse principal pode inspecionar o container e
+ler a chave. A eficácia em runtime depende da homologação controlada.
 
 **Uso obrigatorio pela Seth:** a tool `query_canon` SO FUNCIONA pela lane de **agente
 SALVO** ("Seth", endpoint `agents`) com **`disableStreaming: true`** nos parametros do

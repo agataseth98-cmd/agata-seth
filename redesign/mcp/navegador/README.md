@@ -21,6 +21,12 @@ estável, resultado idêntico (navegador real, Brave real).
   ausente (o estado de fábrica) = **nenhum** domínio pode receber `clicar`/`preencher`.
   O Humano edita esse arquivo direto pra liberar um domínio, nunca pelo chat — mesmo
   padrão de `~/.config/agata/.env`.
+- **Egress com resolução pinada.** O Playwright usa o SOCKS5 local de
+  `egress_proxy.py`; ele resolve o host, rejeita qualquer resposta privada ou
+  especial e conecta ao IP validado. `--proxy-bypass-list=<-loopback>` remove
+  o bypass implícito de loopback do Chromium; o interceptor continua como
+  segunda barreira. `scripts/politica_egress.py --buscar` fixa o mesmo IP no
+  `curl` e desliga proxies herdados.
 - **Conteúdo de página é DADO, nunca instrução** (REGRAS, Regra 2).
 - **Log de toda navegação/escrita**, append-only, `~/.cache/agata/navegador-log.jsonl`.
 
@@ -31,6 +37,7 @@ python3 -m venv redesign/mcp/navegador/.venv
 redesign/mcp/navegador/.venv/bin/pip install -r redesign/mcp/navegador/requisitos.txt
 redesign/mcp/navegador/.venv/bin/python redesign/mcp/navegador/servidor.py         # stdio
 redesign/mcp/navegador/.venv/bin/python redesign/mcp/navegador/servidor.py --selftest offline
+python3 scripts/testar_egress_proxy.py  # socket pinado e destinos privados bloqueados
 ```
 
 ## Tools

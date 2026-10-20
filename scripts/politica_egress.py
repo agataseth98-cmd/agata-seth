@@ -37,41 +37,55 @@ _MAX_REDIRECTS = 10
 def _ip_bloqueado(ip_str: str) -> str | None:
     """Motivo do bloqueio, ou None se o IP for público comum."""
     ip = ipaddress.ip_address(ip_str)
+    if ip.is_global:
+        return None
     if ip.is_loopback:
         return "loopback"
     if ip.is_link_local:
         return "link-local (inclui endereço de metadado de nuvem)"
     if ip.is_private:
-        return "RFC1918 (rede privada)"
-    if ip.is_multicast or ip.is_reserved or ip.is_unspecified:
-        return "endereço reservado/especial"
-    return None
+        return "RFC1918 (rede privada) ou faixa não global reservada"
+    return "endereço não global ou reservado/especial"
 
 
-def destino_permitido(url: str) -> tuple[bool, str]:
-    """(True, "") se a requisição pode sair; (False, motivo) senão.
-    Resolve DNS de verdade -- nunca confia só no hostname escrito na URL."""
+def _resolver_destino(url: str) -> tuple[str | None, int | None, list[str], str]:
+    """Resolve e valida o destino uma vez, retornando IPs que podem ser pinados.
+
+    O chamador que abre o socket deve usar um dos IPs retornados sem resolver o
+    hostname de novo. Validar DNS e depois deixar o cliente HTTP resolver por
+    conta própria mantém uma janela TOCTOU.
+    """
     try:
         partes = urllib.parse.urlsplit(url)
     except ValueError as e:
-        return False, f"URL malformada: {e}"
+        return None, None, [], f"URL malformada: {e}"
     if partes.scheme not in _ESQUEMAS_PERMITIDOS:
-        return False, f"esquema '{partes.scheme}' fora de {_ESQUEMAS_PERMITIDOS}"
+        return None, None, [], f"esquema '{partes.scheme}' fora de {_ESQUEMAS_PERMITIDOS}"
     host = partes.hostname
     if not host:
-        return False, "sem host na URL"
+        return None, None, [], "sem host na URL"
     try:
-        enderecos = socket.getaddrinfo(host, None)
+        port = partes.port or (443 if partes.scheme == "https" else 80)
+    except ValueError as e:
+        return None, None, [], f"porta inválida: {e}"
+    try:
+        enderecos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
     except socket.gaierror as e:
-        return False, f"DNS não resolveu '{host}': {e}"
-    ips = {info[4][0] for info in enderecos}
+        return None, None, [], f"DNS não resolveu '{host}': {e}"
+    ips = sorted({info[4][0].split("%", 1)[0] for info in enderecos})
     if not ips:
-        return False, f"DNS não devolveu endereço pra '{host}'"
+        return None, None, [], f"DNS não devolveu endereço pra '{host}'"
     for ip_str in ips:
         motivo = _ip_bloqueado(ip_str)
         if motivo:
-            return False, f"'{host}' resolve para {ip_str} ({motivo})"
-    return True, ""
+            return None, None, [], f"'{host}' resolve para {ip_str} ({motivo})"
+    return host, port, ips, ""
+
+
+def destino_permitido(url: str) -> tuple[bool, str]:
+    """(True, "") se a requisição pode sair; (False, motivo) senão."""
+    host, _port, ips, motivo = _resolver_destino(url)
+    return bool(host and ips), motivo
 
 
 def buscar_seguro(
@@ -96,12 +110,18 @@ def buscar_seguro(
     """
     atual = url
     for _ in range(_MAX_REDIRECTS + 1):
-        permitido, motivo = destino_permitido(atual)
-        if not permitido:
+        host, port, ips, motivo = _resolver_destino(atual)
+        if not host or not ips:
             return False, 0, atual, motivo
+        # Pinamos um endereço que acabou de ser validado; curl não faz outra
+        # resolução. O proxy do ambiente também é desativado, pois ele trocaria
+        # o peer da conexão e invalidaria esta verificação.
+        ip = ips[0]
+        ip_curl = f"[{ip}]" if ":" in ip else ip
         r = subprocess.run(
             [
                 "curl", "-sS", "-A", ua, "--max-time", str(timeout_s),
+                "--noproxy", "*", "--resolve", f"{host}:{port}:{ip_curl}",
                 "-D", "-", "-o", destino, "-w", "%{http_code}", atual,
             ],
             capture_output=True, text=True,
@@ -135,21 +155,21 @@ def _selftest_buscar_seguro() -> bool:
     bloqueia redirect pra destino da lista de bloqueio -- com servidores
     HTTP descartáveis reais, não mock de rede. Os servidores de teste
     nascem em loopback (única forma viável sem depender de internet); por
-    isso, só PRA ESTE TESTE, `destino_permitido` é trocado por uma versão
-    que trata loopback como permitido -- a lógica de bloqueio em si (usada
-    pro destino do REDIRECT, no 3º caso) continua sendo a função real,
-    sem substituição, porque é justamente o que este teste verifica."""
+    isso, só PRA ESTE TESTE, o resolver é trocado por uma versão que trata
+    loopback como permitido -- o destino link-local do redirect continua
+    sendo bloqueado pelo resolver real."""
     import http.server
     import threading
 
-    global destino_permitido
-    _original = destino_permitido
+    global _resolver_destino
+    _original = _resolver_destino
 
-    def _permitir_loopback_para_teste(url: str) -> tuple[bool, str]:
-        permitido, motivo = _original(url)
-        if not permitido and "loopback" in motivo:
-            return True, ""
-        return permitido, motivo
+    def _permitir_loopback_para_teste(url: str) -> tuple[str | None, int | None, list[str], str]:
+        host, port, ips, motivo = _original(url)
+        if not host and "loopback" in motivo:
+            partes = urllib.parse.urlsplit(url)
+            return partes.hostname, partes.port or 80, ["127.0.0.1"], ""
+        return host, port, ips, motivo
 
     class _OK(http.server.BaseHTTPRequestHandler):
         def log_message(self, *a):
@@ -201,7 +221,7 @@ def _selftest_buscar_seguro() -> bool:
 
     ok = True
     try:
-        destino_permitido = _permitir_loopback_para_teste
+        _resolver_destino = _permitir_loopback_para_teste
 
         dest1 = "/tmp/_selftest_egress_1.html"
         ok1, status1, url1, _ = buscar_seguro(f"http://127.0.0.1:{porta_ok}/", dest1)
@@ -223,7 +243,7 @@ def _selftest_buscar_seguro() -> bool:
               f"(ok={ok3}, url_final={url3}, motivo={motivo3!r})")
         ok = ok and cond3
     finally:
-        destino_permitido = _original
+        _resolver_destino = _original
         srv_ok.shutdown()
         srv_redir_ok.shutdown()
         srv_redir_ruim.shutdown()
@@ -257,6 +277,26 @@ def _selftest() -> int:
             ok = False
 
     ok = _selftest_buscar_seguro() and ok
+
+    # Prova a propriedade central do NET-01: curl recebe o IP já validado e
+    # não pode delegar DNS nem conexão a um proxy herdado do ambiente.
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    fake_addr = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 443))]
+    fake_http = SimpleNamespace(returncode=0, stdout="\n\n200", stderr="")
+    with patch("socket.getaddrinfo", return_value=fake_addr), patch(
+            "subprocess.run", return_value=fake_http) as curl:
+        ok_pin, status_pin, _url_pin, motivo_pin = buscar_seguro(
+            "https://example.com/", "/tmp/_selftest_egress_pin.html")
+        args = curl.call_args.args[0]
+        cond_pin = (ok_pin and status_pin == 200 and "--noproxy" in args
+                    and args[args.index("--noproxy") + 1] == "*"
+                    and "--resolve" in args
+                    and args[args.index("--resolve") + 1] == "example.com:443:1.1.1.1")
+    print(f"{'PASS' if cond_pin else 'FALHA'}  curl usa IP validado, sem proxy e sem nova resolução"
+          f" (motivo={motivo_pin!r})")
+    ok = ok and cond_pin
 
     print("\nSELFTEST OK" if ok else "\nSELFTEST FALHOU")
     return 0 if ok else 1

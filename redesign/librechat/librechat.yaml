@@ -74,6 +74,13 @@ modelSpecs:
       preset:
         endpoint: "agents"
         agent_id: "agent_4KlxSMeX5Y8cWQVODkJfH"
+    - name: "seth-public"
+      label: "Seth pública · sem ferramentas"
+      iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
+      description: "Rota explícita para contexto público. Envia ao gateway externo; não inclui as ferramentas do Agent Seth."
+      preset:
+        endpoint: "Seth Pública"
+        model: "seth-public"
     - name: "seth-zai"
       label: "Seth · zai/glm-4.7-flash"
       iconURL: "/images/6a99c8514070d04134d59265/agent-agent_4KlxSMeX5Y8cWQVODkJfH-avatar-1788979966338.png"
@@ -162,7 +169,6 @@ endpoints:
         - vault_consultar_mcp_canon
         - vault_buscar_mcp_canon
         - maquina_verificar_mcp_canon
-        - diario_anotar_mcp_canon
         - ler_mensagens_mcp_discord
         - navegar_mcp_navegador
         - buscar_web_mcp_navegador
@@ -184,6 +190,16 @@ endpoints:
     checkpointer:
       type: mongo
   custom:
+    - name: "Seth Pública"
+      apiKey: "loopback-sem-chave"
+      baseURL: "http://172.29.7.1:20126/v1"
+      headers:
+        X-Agata-Data-Classification: "public"
+      models:
+        default: ["seth-public"]
+        fetch: false
+      titleConvo: false
+      modelDisplayLabel: "Seth pública · sem ferramentas"
     - name: "Seth"
       apiKey: "loopback-sem-chave"
       baseURL: "http://172.29.7.1:20126/v1"

@@ -1,7 +1,7 @@
 # ~/librechat/docker-compose.yml
 # LibreChat ENXUTO para o sistema Agata -- 3 servicos, nada mais.
-#   librechat-mongodb      conversas / usuarios / presets
-#   librechat-meilisearch  busca de conversa
+#   librechat-mongodb      conversas / usuarios / presets (rede de dados isolada)
+#   librechat-meilisearch  busca de conversa (rede de dados isolada)
 #   librechat              a app (api + cliente)
 #
 # NAO tem rag_api nem pgvector de proposito (MEMORIAS (115)/(293): sem busca por embedding).
@@ -29,7 +29,7 @@ services:
     container_name: librechat-mongodb
     image: mongo:8.0.20@sha256:098862b1339f031900ca66cf8fef799e616d6324fa41b9a263f2ec899552c1ef
     restart: unless-stopped
-    networks: [librechat]
+    networks: [librechat-data]
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
@@ -39,7 +39,7 @@ services:
     container_name: librechat-meilisearch
     image: getmeili/meilisearch:v1.35.1@sha256:8b57fc3c7f46535ddef3828df1538465ac19d892eb57c9a10da6df0880bd5856
     restart: unless-stopped
-    networks: [librechat]
+    networks: [librechat-data]
     ports:
       - "127.0.0.1:7700:7700"
     environment:
@@ -65,21 +65,19 @@ services:
 
   librechat:
     container_name: librechat
-    # Pin por digest, não por tag (achado (328), sem pin/healthcheck; corrigido
-    # 05/09/2026, MEMÓRIAS (341)) -- digest da imagem real testada e em uso
-    # nesta Máquina no momento do pin (docker inspect librechat, 05/09/2026).
-    # Subir de propósito, não sem querer: `docker pull ...:latest` +
-    # `docker inspect --format='{{index .RepoDigests 0}}'` pra pegar o novo
-    # digest, testar, só então trocar aqui.
-    # Atualizado 21/09/2026 (MEMÓRIAS (487)) -- tag v0.8.8-rc3, pra ganhar o
-    # HITL tool approval (endpoints.agents.toolApproval acima). É release
-    # candidate, não versão estável -- não existe v0.8.8 oficial ainda
-    # (conferido na API do Docker Hub). Testado numa cópia isolada antes de
-    # trocar aqui: boot limpo com esta mesma config, aprovação/rejeição de
-    # ferramenta confirmadas funcionando.
-    image: ghcr.io/danny-avila/librechat@sha256:b07248d86e020c44101170bde2dbb4ab547df30dd223b4aacd6218cc90e8632b
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agata-librechat:capabilities-20261020
+    # GID exclusivo da montagem privada (host: root:59999, 0440); a aplicação
+    # continua UID 1000 para escrever nos volumes dela.
+    user: "${AGATA_LIBRECHAT_UID:-1000}:${AGATA_LIBRECHAT_GID:-59999}"
+    # A imagem derivada é montada de forma reprodutível no Dockerfile: imagem
+    # upstream pinada por digest + patch versionado do fork Agata em `fork/`.
+    # O patch altera o emissor de capabilities e a ligação com a aprovação real.
+    # Não usar `docker pull` para substituir a imagem derivada por upstream.
     restart: unless-stopped
-    networks: [librechat]
+    networks: [librechat, librechat-data]
     ports:
       - "127.0.0.1:3080:3080"
     depends_on:
@@ -102,6 +100,7 @@ services:
         exec npm run backend
     environment:
       - CONFIG_PATH=/app/librechat.yaml
+      - AGATA_APPROVAL_PRIVATE_PEM_PATH=/run/secrets/agata-approval-private.pem
       # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
       # escuta em todas as interfaces DO CONTAINER -- na Maquina so 127.0.0.1:3080
       # e publicado (acima) -- e acha Mongo/Meili pelo nome do servico.
@@ -114,6 +113,7 @@ services:
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
       - ./data:/app/data
+      - ${HOME}/.config/agata/approval-capability-private.pem:/run/secrets/agata-approval-private.pem:ro
       - ./agata-tema.css:/app/client/dist/assets/agata-tema.css:ro
     healthcheck:
       # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber
@@ -137,6 +137,14 @@ networks:
       config:
         - subnet: 172.29.7.0/24
           gateway: 172.29.7.1
+  librechat-data:
+    name: librechat-data
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.29.8.0/24
+          gateway: 172.29.8.1
 
 volumes:
   librechat-mongo-data:
