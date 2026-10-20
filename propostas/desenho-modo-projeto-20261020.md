@@ -96,3 +96,9 @@ Em aberto (para o desenho de código, não para esta decisão): como o escriba a
 3. **Interface:** por enquanto, LibreChat. Haverá uma interface própria para o sistema, a definir em outra proposta.
 
 Pendente, sem decisão ainda: confirmar `AGATA_PROJETO_RAIZ` como forma de a hidratação escolher o projeto (seção 4).
+
+## 11. Decisão do Humano (20/10/2026): escolha do projeto ativo
+
+**Aprovado:** a hidratação escolhe o projeto ativo por `AGATA_PROJETO_RAIZ` (pasta da instância), sem fallback. Se a variável faltar, a hidratação para e avisa; não tenta adivinhar nem usa outro projeto.
+
+Consequência: a retirada de seções do PROJETO (PR 394) passa a poder ser assinada depois que a hidratação souber ler `extras/projeto-detalhe/` da pasta indicada pela variável. Essa leitura ainda precisa ser implementada e testada antes da assinatura.
