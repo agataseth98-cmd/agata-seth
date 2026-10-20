@@ -1,0 +1,14 @@
+diff --git a/config/systemd/agata-manutencao.service b/config/systemd/agata-manutencao.service
+index c334f3a..3e990c0 100644
+--- a/config/systemd/agata-manutencao.service
++++ b/config/systemd/agata-manutencao.service
+@@ -4,6 +4,9 @@ Description=Ágata — janela de manutenção diária 12h15-13h15 (avaliação d
+ # (hora de Brasília, tentativas por dia, recibos em ~/.cache/agata/janela/); o timer só o chama.
+ [Service]
+ Type=oneshot
++# Só roda dentro da janela (12h15-13h15, hora de Brasília). Fora dela o systemd pula a unidade sem marcá-la como falha
++# (ExecCondition: código != 0 = pular). Antes, uma partida às 13h25 ficava 'failed' porque o systemd-inhibit recusava.
++ExecCondition=/bin/sh -c 'h=$$(TZ=America/Sao_Paulo date +%%H%%M); [ "$$h" -ge 1215 ] && [ "$$h" -lt 1315 ]'
+ WorkingDirectory=%h/agata
+ # systemd-inhibit: a máquina não dorme no meio da janela (lição de (715): o KDE suspendeu um treino às 00:34).
+ ExecStart=/usr/bin/systemd-inhibit --what=sleep:idle --who=agata-manutencao --why="janela de manutenção diária" --mode=block /usr/bin/python3 %h/agata/scripts/janela_manutencao.py
