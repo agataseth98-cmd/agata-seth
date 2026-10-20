@@ -60,3 +60,18 @@ Credenciais de remoto não entram aqui: ficam no cofre (F3, `systemd-creds`).
 
 - Medido: 21 scripts referenciam `origin` ou `git remote` (`grep`). `aplicar.py` e `aprovar.sh` dependem de `origin/main`. `atualizar_ancora_prompt.py` lê `origin` por `git remote get-url`.
 - Não medido: se um clone sem remoto passa pelo `pre-commit` inteiro sem erro. Isso precisa de teste em clone limpo antes do passo 1.
+
+## 8. Decisão do Humano (20/10/2026): memórias de projetos que não são o projeto mãe
+
+- O projeto **mãe** (esta instância, Agata) mantém `MEMÓRIAS.md` como fonte oficial. Nada muda para ele.
+- Todo projeto **não mãe** usa o **Obsidian como local oficial** das memórias: o vault dele é a fonte, e `MEMÓRIAS.md` vira um derivado gerado a partir do vault (o caminho inverso do atual).
+- Isso resolve a pergunta 1.1 da Fase 4 do plano de replicabilidade para os projetos não mãe. A Fase 4 deixa de ser "decisão pendente" para eles.
+
+Consequências que precisam de desenho antes do código:
+
+1. **Controle P-10** ("vault derivado confere com a fonte em HEAD") hoje assume que o canon é a fonte. Para projeto não mãe, a checagem passa a ser "derivado `MEMÓRIAS.md` confere com o vault".
+2. **Escrita:** o `seth_escriba` escreve em `MEMÓRIAS.md`. Em projeto não mãe, a escrita vai para o vault (Obsidian), com o mesmo controle append-only (P-5).
+3. **Modo git:** o vault fica versionado no mesmo repositório do projeto. No modo local, o vault vive só na pasta da instância, com backup restic.
+4. **Marcador `ENTRADAS-NOVAS:AQUI`:** em projeto não mãe, a numeração das entradas vem do vault, não do arquivo derivado.
+
+Perguntas que continuam abertas para o Humano: (a) o nome do vault é o nome do projeto ou um fixo? (b) o Obsidian precisa estar aberto para a escrita, ou o escriba escreve direto no arquivo do vault?
