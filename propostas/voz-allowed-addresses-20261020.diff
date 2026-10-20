@@ -1,0 +1,12 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 5e0b119..d13f143 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -244,6 +244,7 @@ endpoints:
+ # pf_dora em CPU.
+ speech:
+   tts:
++    allowedAddresses: ["172.29.7.1:8890"]
+     openai:
+       url: "http://172.29.7.1:8890/v1/audio/speech"
+       apiKey: "loopback-sem-chave"
