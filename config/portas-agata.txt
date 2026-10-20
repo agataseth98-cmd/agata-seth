@@ -56,3 +56,4 @@
 20131|omniroute-embed-ws|127.0.0.1
 20132|omniroute-live-ws|127.0.0.1
 11435|ollaya|127.0.0.1
+11436|laya-roteador|127.0.0.1
