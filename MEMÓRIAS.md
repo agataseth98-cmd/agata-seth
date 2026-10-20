@@ -48,6 +48,10 @@ Numeração futura medida: os PRs 409 e 411, ainda abertos nesta auditoria, traz
 
 Modelo: GPT-6 · vetor: `grep` literal e agrupamento independente dos cabeçalhos formais nas camadas de memória, mais conferência dos PRs 409 e 411 · autorização: pedido do Humano, 20/10/2026.
 
+(786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`manutencao-fora-da-janela-20261020`). Fonte versionada alterada e par assinado consumido no PR de aplicação; a unidade de runtime será verificada depois do merge.
+Modelo: GPT-6 (Codex) · vetor: P-8 `PODE APLICAR`; `suite-adversarial` após atualizar a branch · Autorização: Humano — tarefa assinada de 20/10/2026
+
+
 (785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução externa aplicados (`auditoria-seguranca-reducoes-verificaveis-20261020`).** O pacote endurece a capability por chamada, autentica os executores e restringe escrita do Escriba e dados externos/egress. Suíte offline: 58/58; perímetro: 19 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. A eficácia no runtime ainda depende de homologação controlada com privilégios; P-4 permanece parcial sem root.
 Modelo: GPT-6.1-sol (Codex, na Máquina) · vetor: suíte offline e perímetro em checkout descartável; `p8_verificar.sh` confirmou assinatura, hash e aplicabilidade · Autorização: Humano — "feito" (assinatura de auditoria-seguranca-reducoes-verificaveis-20261020)
 
