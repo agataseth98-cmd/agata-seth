@@ -7,6 +7,8 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 16/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-16.md` (e até 27/09: `extras/arquivo/onde-estamos-ate-2026-09-27.md`).
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+**20/10 — autostart NVIDIA corrigido.** A execução real passou com `DISPLAY` e `XAUTHORITY` da sessão; offsets conferidos em 250/1750. Cópia de reversão guardada junto ao arquivo de autostart.
+
 **20/10 — backup em disco novo.** O HD antigo de backup saiu. O backup agora fica numa pasta `AgataBkup01` dentro do disco TI, que tem outros usos e não foi formatado. O caminho fica em `~/.config/agata/hd-backup`. A cópia do backup antigo está em andamento.
 
 **20/10 — backup conferido no disco novo.** O backup antigo voltou inteiro para o disco TI e passou na verificação. Os modelos que precisam de cópia ganharam cópia nova hoje, e o controle de backup está limpo.
