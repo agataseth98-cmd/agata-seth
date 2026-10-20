@@ -48,6 +48,10 @@ Numeração futura medida: os PRs 409 e 411, ainda abertos nesta auditoria, traz
 
 Modelo: GPT-6 · vetor: `grep` literal e agrupamento independente dos cabeçalhos formais nas camadas de memória, mais conferência dos PRs 409 e 411 · autorização: pedido do Humano, 20/10/2026.
 
+786 DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restringe os destinos de TTS do LibreChat ao serviço Piper autorizado.** A aplicação move o par assinado para `propostas/aplicadas/` e registra a mudança neste commit.
+Modelo: GPT-6 (Codex, na Máquina) · vetor: P-8 confirmou assinatura e hash do diff; CI do PR de aplicação será verificado antes do merge · Autorização: Humano — assinatura P-8 e ordem para aplicar em 20/10/2026
+
+
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`manutencao-fora-da-janela-20261020`). Fonte versionada alterada e par assinado consumido no PR de aplicação; a unidade de runtime será verificada depois do merge.
 Modelo: GPT-6 (Codex) · vetor: P-8 `PODE APLICAR`; `suite-adversarial` após atualizar a branch · Autorização: Humano — tarefa assinada de 20/10/2026
 
