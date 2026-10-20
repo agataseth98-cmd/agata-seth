@@ -75,3 +75,16 @@ Consequências que precisam de desenho antes do código:
 4. **Marcador `ENTRADAS-NOVAS:AQUI`:** em projeto não mãe, a numeração das entradas vem do vault, não do arquivo derivado.
 
 Perguntas que continuam abertas para o Humano: (a) o nome do vault é o nome do projeto ou um fixo? (b) o Obsidian precisa estar aberto para a escrita, ou o escriba escreve direto no arquivo do vault?
+
+## 9. Decisões do Humano (20/10/2026): vault
+
+1. **Escriba grava direto na pasta do vault.** A API do Obsidian fica só para leitura. Não depende de o app estar aberto.
+2. **Repositório git do vault é obrigatório em todos os modos** (local, git e ambos). Cada gravação vira commit. O remoto segue opcional.
+3. **Nome do vault = nome do projeto** (ou dos projetos em questão). Sem nome fixo.
+
+Consequências para o desenho:
+- O controle P-10 (vault derivado confere com a fonte) vale para projetos não mãe, com a regra: `MEMÓRIAS.md` derivado bate com o vault em HEAD.
+- Cada projeto tem o seu vault, com nome derivado do projeto. Dois projetos nunca compartilham vault.
+- O modo local deixa de ser "sem git": passa a ser "git local sem remoto".
+
+Em aberto (para o desenho de código, não para esta decisão): como o escriba autentica a gravação e como a limpeza de segredo roda antes do commit.
