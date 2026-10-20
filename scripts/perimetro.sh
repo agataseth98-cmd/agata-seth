@@ -181,8 +181,8 @@ P9_UNIDADES_SISTEMA=("ollama.service")
 # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
 # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
 # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer" "agata-avaliacao-decisor.timer")
-P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
+P9_UNIDADES_USUARIO=("agata-manutencao.timer" "agata-manutencao.service" "laya-roteador.service" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer")
+P9_CONTAINERS_DOCKER=("librechat-ponte-host" "librechat" "librechat-mongodb" "librechat-meilisearch")
 
 
 
@@ -216,7 +216,7 @@ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
 # scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
 # mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
 # SKIP crônico; foi lido como "por desenho" em (527), e era isto).
-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
+P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
 
 
 # --- P-17 ----------------------------------------------------------------

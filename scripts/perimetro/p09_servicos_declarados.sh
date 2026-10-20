@@ -20,8 +20,8 @@ p9_servicos_declarados() {
   done
   for u in "${P9_UNIDADES_USUARIO[@]}"; do
     estado="$(systemctl --user is-active "$u" 2>/dev/null)"
-    if [ "$estado" = "failed" ]; then
-      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está 'failed' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+    if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; }; then
+      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
       avisos=1
     fi
     habilitada="$(systemctl --user is-enabled "$u" 2>/dev/null)"

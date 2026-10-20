@@ -192,9 +192,9 @@ _caso() {
 declare -A SEM_TESTE=(
   [P-2]="exige root para ler /etc/sudoers.d; a suite roda como usuario comum e nao vai pedir sudo pra testar"
   [P-3]="depende do estado do REMOTO (publicacao); um clone descartavel nao reproduz a condicao"
-  [P-4]="depende de portas e processos VIVOS da Maquina; dentro do clone nao ha o que bindar"
+  [P-4]="binds sintéticos cobertos por testar_cobertura_servicos.py no fim desta suíte; atribuição de processos vivos exige integração"
   [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
-  [P-9]="depende de unidades systemd vivas do usuario; o clone nao tem servicos. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
+  [P-9]="lista de unidades e ponte coberta offline por testar_cobertura_servicos.py no fim desta suíte; integração depende de unidades systemd vivas. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
   [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
@@ -607,6 +607,16 @@ EOF
 _caso P-23 PASSA "porta que importa o AGENTS.md" <<'EOF'
 printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf '# x\n@AGENTS.md\n' > porta-teste.md
 EOF
+
+# Contraprovas offline dos binds e da lista viva de serviços, sem tocar systemd.
+if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ]]; then
+  if python3 "$RAIZ/scripts/testar_cobertura_servicos.py"; then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("P-4/P-9: contraprovas offline de cobertura de serviços")
+  fi
+fi
 
 # --------------------------------------------------------------- veredito --
 echo

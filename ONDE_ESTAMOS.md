@@ -11,7 +11,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **20/10 — backup conferido no disco novo.** O backup antigo voltou inteiro para o disco TI e passou na verificação. Os modelos que precisam de cópia ganharam cópia nova hoje, e o controle de backup está limpo.
 
-**20/10 — correções da auditoria em proposta.** Preparadas e testadas as correções dos avisos de rede e manutenção, e do texto que descreve o funcionamento atual. Aguardam sua assinatura; ainda não foram aplicadas.
+**20/10 — correções da auditoria aplicadas.** P-4 inclui o roteador Laya; P-9 acompanha a manutenção, o Laya e a ponte do LibreChat. O texto do projeto foi atualizado. Suíte completa e revisão cruzada passaram.
 
 ## Hoje, 16/10/2026 (atualizado às 20h25)
 **Já está valendo (você assinou, eu apliquei, o GitHub conferiu):**

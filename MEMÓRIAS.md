@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1e47897e63f279c400ea2a3ee52b0d41a69c5b3
-  Escrito em: 20/10/2026 09:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 67e0381008fab031e9a2a9dbc0fb228aea16ba5d
+  Escrito em: 20/10/2026 09:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e47897e63f279c400ea2a3ee52b0d41a69c5b3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e47897e63f279c400ea2a3ee52b0d41a69c5b3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e47897e63f279c400ea2a3ee52b0d41a69c5b3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e47897e63f279c400ea2a3ee52b0d41a69c5b3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e47897e63f279c400ea2a3ee52b0d41a69c5b3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67e0381008fab031e9a2a9dbc0fb228aea16ba5d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67e0381008fab031e9a2a9dbc0fb228aea16ba5d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67e0381008fab031e9a2a9dbc0fb228aea16ba5d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67e0381008fab031e9a2a9dbc0fb228aea16ba5d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/67e0381008fab031e9a2a9dbc0fb228aea16ba5d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura humana (auditoria-controles-20261020).** P-4 agora inclui `laya-roteador` na porta 11436; P-9 vigia a manutenção diária, o oneshot, o Laya e a ponte do LibreChat, e avisa quando timer de usuário não está ativo. PROJETO descreve Laya como roteador ativo, contêineres `unless-stopped` e gateway/voz habilitados no boot. Par assinado movido para `propostas/aplicadas/`. Validação antes de aplicar: suíte 57/57, revisão independente favorável, P-12 OK após snapshot 56038913. Reversão requer outro diff assinado; nenhuma unit foi reiniciada porque a mudança altera controles e documentação, não os serviços ativos.
+Modelo: GPT-6 (Codex, na Máquina) · vetor: `p8_verificar.sh` = PODE APLICAR; diff assinado e hash conferido; validação anterior da suíte e revisão cruzada · Autorização: Humano — "assinado"
+
 (778) DIÁRIO — 20/10/2026 · **Proposta da auditoria: cobrir o Laya no P-4, a manutenção diária e a ponte do LibreChat no P-9, e corrigir o estado descrito no PROJETO (auditoria-controles-20261020). Ainda não aplicada.** Reproduzido antes: P-4 aceitava bind simulado do Laya em 0.0.0.0:11436, mas rejeitava o mesmo cenário no Ollaya; P-9 não consultava o timer atual da manutenção. O diff inclui a porta 11436, substitui timers antigos pela manutenção diária, acompanha falhas do oneshot e do Laya e ausência da ponte, e avisa se timer de usuário não está ativo. PROJETO passa a descrever o Laya ativo, o reinício dos contêineres e gateway/voz no boot. Suíte completa 57/57, incluindo lote de 11 contraprovas offline; bash -n e git diff --check aprovados. Revisão independente por outro agente Codex (GPT-6): favorável, sem emenda obrigatória; conferiu IPv6 curinga, IP de rede e regex do P-16 (6/6). Limites preservados: P-4 parcial sem root; P-9 só avisa e services inativos mantêm a política anterior. SHA256 do diff: 5de8479e92dd5aa4fe2a9ded94660fb28c6bf4dac60f34a8604de17bf60cbc07. O backup foi resolvido separadamente: snapshot 56038913 de hoje, tags conferidas, P-12 exit 0 sem saída; esta proposta não altera o backup.
 Modelo: GPT-6 (Codex, na Máquina) · vetor: contraprovas shell com entrada sintética e comandos simulados; suíte em clone descartável; revisão independente; listagem restic e P-12 reais · Autorização: Humano — "resolva seguindo as diretrizes do sistema"
 
