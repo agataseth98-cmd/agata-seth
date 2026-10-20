@@ -9,6 +9,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **20/10 — backup em disco novo.** O HD antigo de backup saiu. O backup agora fica numa pasta `AgataBkup01` dentro do disco TI, que tem outros usos e não foi formatado. O caminho fica em `~/.config/agata/hd-backup`. A cópia do backup antigo está em andamento.
 
+**20/10 — backup conferido no disco novo.** O backup antigo voltou inteiro para o disco TI e passou na verificação. Os modelos que precisam de cópia ganharam cópia nova hoje, e o controle de backup está limpo.
+
 ## Hoje, 16/10/2026 (atualizado às 20h25)
 **Já está valendo (você assinou, eu apliquei, o GitHub conferiu):**
 - O GitHub exige a sua assinatura em toda mudança que altera comportamento. Testei o conferente com 15 quebras de propósito: ele pega 12 (os outros 3 não mudam nada na prática).
