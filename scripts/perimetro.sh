@@ -135,7 +135,14 @@ P12_AVISO_SEM_BACKUP="whisper-base-int8-ov whisper-small-int8-ov"
 # "USER: unbound variable" ANTES de rodar qualquer controle -- o guardião de
 # commits falhando por detalhe de ambiente, não por violação real. `id -un`
 # é a mesma informação, sem depender de env var.
-P12_REPO="${AGATA_RESTIC_REPO:-/run/media/${USER:-$(id -un)}/AgataBkup01/restic-agata-local}"
+# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
+# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
+# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
+# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
+# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
+P12_HD="$(head -n1 "${HOME:-}/.config/agata/hd-backup" 2>/dev/null || true)"
+P12_HD="${P12_HD:-/run/media/${USER:-$(id -un)}/AgataBkup01}"
+P12_REPO="${AGATA_RESTIC_REPO:-$P12_HD/restic-agata-local}"
 P12_PASS="$HOME/.config/agata/restic.pass"
 P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
 

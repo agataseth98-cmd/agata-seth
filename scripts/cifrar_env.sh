@@ -33,8 +33,14 @@ echo
 echo "Pronto: $OUT"
 echo "sha256: $(sha256sum "$OUT" | cut -d' ' -f1)"
 
-USB="/run/media/$USER/AgataBkup01"
-if mountpoint -q "$USB" 2>/dev/null; then
+# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
+# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
+# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
+# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
+# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
+USB="$(head -n1 "$HOME/.config/agata/hd-backup" 2>/dev/null || true)"
+USB="${USB:-/run/media/$USER/AgataBkup01}"
+if [ -d "$USB" ]; then
   DEST="$USB/env-$(date +%Y%m%d).gpg"
   cp "$OUT" "$DEST"
   echo "Copiado pro HD: $DEST"

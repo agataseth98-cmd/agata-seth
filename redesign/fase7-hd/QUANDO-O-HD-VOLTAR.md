@@ -14,7 +14,8 @@ Ordem: **0 → 1 → 2 → 3 → 4**. Cada passo diz o que colar de volta.
 ## 0. Montar e conferir o repo
 
 ```fish
-set -x RESTIC_REPOSITORY /run/media/orusoua/AgataBkup01/restic-agata-local
+# raiz do HD: ~/.config/agata/hd-backup (desde 20/10/2026, pasta AgataBkup01/ no disco TI-CSR)
+set -x RESTIC_REPOSITORY (head -n1 ~/.config/agata/hd-backup; or echo /run/media/orusoua/AgataBkup01)/restic-agata-local
 set -x RESTIC_PASSWORD_FILE $HOME/.config/agata/restic.pass
 restic cat config | head -3          # tem que responder (repo alcancavel)
 restic snapshots --compact           # o que ja existe -- procure c19275ec (GGUF do rlm, P3-02)

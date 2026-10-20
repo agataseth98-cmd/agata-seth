@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A cada commit: regenera o bundle --all num staging local (sempre — não
-# depende do HD) E, se o HD externo AgataBkup01 estiver montado agora,
+# depende do HD) E, se o HD externo de backup estiver montado agora,
 # escreve uma cópia versionada lá também (últimas N gerações, nunca uma
 # só — commit ruim não deve levar junto a última cópia boa). Se o HD não
 # estiver montado, deixa um marcador de pendência visível.
@@ -48,8 +48,14 @@ if ! git bundle create "$BUNDLE_TMP" --all >/dev/null 2>&1; then
 fi
 mv -f "$BUNDLE_TMP" "$STAGING/agata-canonico.bundle"
 
-USB="/run/media/$USER/AgataBkup01"
-if mountpoint -q "$USB" 2>/dev/null; then
+# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
+# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
+# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
+# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
+# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
+USB="$(head -n1 "$HOME/.config/agata/hd-backup" 2>/dev/null)"
+USB="${USB:-/run/media/$USER/AgataBkup01}"
+if [ -d "$USB" ]; then
   AUTO="$USB/auto-backups"
   mkdir -p "$AUTO"
   DEST="$AUTO/agata-canonico-${STAMP}-${SHORT}.bundle"
@@ -60,9 +66,9 @@ if mountpoint -q "$USB" 2>/dev/null; then
   echo "post-commit: bundle em $STAGING E em $DEST (HD conectado)"
 else
   {
-    echo "HD AgataBkup01 não estava montado no commit $SHORT ($STAMP)."
+    echo "HD de backup ($USB) não estava montado no commit $SHORT ($STAMP)."
     echo "Staging local ($STAGING/agata-canonico.bundle) está atualizado até este commit."
-    echo "Plugue o HD e rode: cp \"$STAGING/agata-canonico.bundle\" \"/run/media/\$USER/AgataBkup01/auto-backups/agata-canonico-${STAMP}-${SHORT}.bundle\""
+    echo "Plugue o HD e rode: cp \"$STAGING/agata-canonico.bundle\" \"$USB/auto-backups/agata-canonico-${STAMP}-${SHORT}.bundle\""
   } > "$STAGING/PENDENTE-HD-DESCONECTADO"
   echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
 fi
