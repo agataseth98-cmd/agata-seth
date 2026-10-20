@@ -1,0 +1,27 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index fd25833..c02d7a4 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -40,6 +40,9 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ ---
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
++(784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHORITY` dinâmico da sessão.** A unidade agora preserva `DISPLAY` e `XAUTHORITY` em `sudo`; a execução real terminou com `Result=success`, e `nvidia-settings` confirmou offsets `250`/`1750`. Reversão local: restaurar `~/.config/autostart/apply-nvidia-oc.desktop.codex-bak-20261020` e zerar os offsets.
++Modelo: GPT-6 (Codex, na Máquina) · vetor: `systemctl --user restart` + journal da unidade + consulta de offsets · Autorização: Humano — "Audite e resolva", "Aceito esse alcance", "Aceito essa detecção e esses limites"; comando privilegiado executado pelo Humano.
++
+ (783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos dois itens são (780) = AC-09 (consolidação) e (781) = AC-18 (retirada no PROJETO). (777) é o P-4 com sudo; (778) e (779) são da auditoria do Codex.** Medido em `grep -nE '^\((77[5-9]|78[0-2])\) ' MEMÓRIAS.md`. Não edito (782) (append-only).
+ Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `grep` de MEMÓRIAS.md, linhas 43-64 · Autorização: Humano — "faça"
+ 
+diff --git a/ONDE_ESTAMOS.md b/ONDE_ESTAMOS.md
+index a4fff83..90016a6 100644
+--- a/ONDE_ESTAMOS.md
++++ b/ONDE_ESTAMOS.md
+@@ -7,6 +7,8 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
+ Histórico até 16/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-16.md` (e até 27/09: `extras/arquivo/onde-estamos-ate-2026-09-27.md`).
+ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+ 
++**20/10 — autostart NVIDIA corrigido.** A execução real passou com `DISPLAY` e `XAUTHORITY` da sessão; offsets conferidos em 250/1750. Cópia de reversão guardada junto ao arquivo de autostart.
++
+ **20/10 — backup em disco novo.** O HD antigo de backup saiu. O backup agora fica numa pasta `AgataBkup01` dentro do disco TI, que tem outros usos e não foi formatado. O caminho fica em `~/.config/agata/hd-backup`. A cópia do backup antigo está em andamento.
+ 
+ **20/10 — backup conferido no disco novo.** O backup antigo voltou inteiro para o disco TI e passou na verificação. Os modelos que precisam de cópia ganharam cópia nova hoje, e o controle de backup está limpo.
