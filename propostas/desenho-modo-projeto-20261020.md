@@ -88,3 +88,11 @@ Consequências para o desenho:
 - O modo local deixa de ser "sem git": passa a ser "git local sem remoto".
 
 Em aberto (para o desenho de código, não para esta decisão): como o escriba autentica a gravação e como a limpeza de segredo roda antes do commit.
+
+## 10. Decisões do Humano (20/10/2026): escrita e segredo
+
+1. **Autenticação da escrita:** token por projeto agora (opção B), guardado em `~/.config/agata/`, com o escriba recusando gravação sem o token certo. Uma porta por projeto. Migração para o cofre (opção C) quando o F3 estiver pronto.
+2. **Segredo na escrita:** opção C. O escriba recusa a gravação quando encontra segredo e avisa o Humano. O hook de pré-commit no vault fica como segunda barreira.
+3. **Interface:** por enquanto, LibreChat. Haverá uma interface própria para o sistema, a definir em outra proposta.
+
+Pendente, sem decisão ainda: confirmar `AGATA_PROJETO_RAIZ` como forma de a hidratação escolher o projeto (seção 4).
