@@ -1,0 +1,169 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 8501d88..b73a40b 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -54,7 +54,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
+ 
+ ## Cérebro
+ Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/modelos-gratuitos.md` — não este texto.
+-- **Seth (conversa e agente):** cascatas grátis do OmniRoute (`strategy: priority`). Remotos primeiro, Ollama no fundo (546)/(547); desde 03/10/2026 sem Groq nas 3 filas do LibreChat e sem `llama-cpp/*` em fila automática nenhuma (648)/(649). Ordem viva por rota: `config/modelos-gratuitos.md`. Classificador heurístico no `seth_gateway` (só regras, ~µs) reescreve `model` **só** quando o Agent pede `seth-livre`: `seth-rapido` (<400 chars, sem tools, ≤2 msgs do usuário) · `seth-livre` (normal) · `seth-pesado` (>6000 chars, código ou >10 msgs). Todas as rotas terminam nos mesmos modelos confiáveis — rotear errado degrada, nunca quebra (416). Goose usa o combo próprio `seth-codigo`.
++- **Seth (conversa e agente):** cascatas grátis do OmniRoute (`strategy: priority`). Remotos primeiro, Ollama no fundo (546)/(547); desde 03/10/2026 sem Groq nas 3 filas do LibreChat e sem `llama-cpp/*` em fila automática nenhuma (648)/(649). Ordem viva por rota: `config/modelos-gratuitos.md`. O Laya escolhe a fila no `seth_gateway`, com fallback pela regra de tamanho quando indisponível, lento ou inseguro; as travas determinísticas prevalecem. O Jev acompanha em sombra. Detalhes em "Decisor local". Goose usa o combo próprio `seth-codigo`.
+ - **Local principal: `qwen3.5-9b-64k`** (Ollama, `custom:qwen-local-ctx-override`) — nunca a tag oficial `qwen3.5:9b`, que reproduz o bug de `num_ctx` (121). Convenção: `PARAMETER num_ctx 65536` em Modelfile próprio, tag `-64k`, porque o endpoint OpenAI-compatível do Ollama ignora `num_ctx` por desenho ([`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814); (133)-(135)). VRAM de pico em uso real: 89-92% dos 8.188 MiB (log em `~/agata_vram_producao_*.log`). **Regime de auditoria** desde (140): cada resposta é auditada pelo Humano; sai do regime quando o Humano pedir, evento e não prazo (141).
+ - **Fundo local da cadeia da Seth:** `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) do OmniRoute; entra só se todos os remotos falharem (402)/(403).
+ - **Locais sob demanda (`llama.cpp`):** `llamacpp-agata` (MoE `Qwen3-30B-A3B-Instruct-2507`, `:20129`, `--n-cpu-moe 36`, ~31 tok/s, `PartOf` sem `WantedBy`) e 4 modelos de 20/09/2026 — `nemotron-3.5-lightning` (geral), `qwen3-coder-30b-a3b` (código), `phi-4-mini` (leve), `gpt-oss-20b` (agentic, quant `ggml-org` MXFP4; o `unsloth` Q4_K_M trava o sampler). Um serviço systemd cada; não cabem todos ao mesmo tempo; com o local principal na GPU, subir outro pode falhar por VRAM — limite de hardware, não bug (611). **Fora de todo caminho automático desde 03/10/2026** (combos e Conselho Remoto, (649)): um que voltou sozinho depois de OOM empurrou o Ollama para a CPU (648). `llamacpp@.service` não tem `Restart` nem `[Install]`: só sobe à mão, depois de conferir `nvidia-smi`. Portas e ressalvas: `config/modelos-gratuitos.md`, `config/portas-agata.txt`.
+@@ -72,12 +72,12 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ - `agata-drain` (oneshot: drena o WAL do grafo no stop, nunca corta um commit).
+ - `ollaya` (`:11435`, contêiner CPU pinado por digest) — decisor local; ver "Decisor local".
+ 
+-**Sob demanda pelo atalho `seth` / `Parar Seth`:**
+-- `seth-gateway` (`:20126`) — reidrata a Seth; ver "Interface".
++**Gateway e voz no boot; demais frentes pelo atalho `seth` / `Parar Seth`:**
++- `seth-gateway` (`:20126`, habilitado no `agata.target`) — reidrata a Seth; ver "Interface".
+ - `seth-verificador` (`:20141`) — **único caminho de execução da Seth, read-only.** `POST /verificar` roda um de 10 comandos fixos (`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`, `suite_controles`, `servicos`, `p8_verificar`), argv fixo, sem shell, saída redigida pela régua do P-1, teto com total declarado (423).
+ - `seth-escriba` (`:20140`) — **único caminho de escrita da Seth, append-only.** `POST /memoria` insere abaixo do marcador `ENTRADAS-NOVAS` (número e data vêm do relógio da Máquina); `POST /diario` anexa a `SETH-DIARIO.md`; aborta com 409 se a operação não for insert/append puro; sem `PUT`/`PATCH`/`DELETE`, sem `git`, sem segredo; `fcntl.flock` + `os.replace`; fonte `redesign/router/seth_escriba.py` (318).
+-- Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: "no"` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
+-- `piper-tts` (`:8890`, voz pt-BR local) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
++- Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: unless-stopped` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
++- `piper-tts` (`:8890`, voz pt-BR local, habilitada no `agata.target`) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
+ 
+ **Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-manutencao.timer` (janela diária) · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele.
+ 
+@@ -182,7 +182,7 @@ Só o que segue aberto, ou deixou mecanismo vivo. Os fechados estão em MEMÓRIA
+ ## Decisor local
+ Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
+ - **Padrão "decide e confere".** A regra determinística continua e sempre vence. O modelo decide **dentro** do que ela permite, ou só **restringe** (barra, avisa) — nunca libera o que ela barrou, nunca reprova commit (hook só aceita checagem determinística). Confiança baixa, timeout ou serviço fora → vale a regra de antes; nada quebra se o `ollaya` cair. Cada decisão: `~/.cache/agata/decisor/<uso>.jsonl` (respostas, latência, metadados; nunca o texto avaliado). Única exceção, só enquanto durar a avaliação: 200 caracteres de cada divergência do roteador, em arquivo modo 600, para o Humano julgar.
+-- **Onde decide hoje:** segunda opinião sob pedido da Seth (`maquina_verificar opiniao_jev`: recomendação, reversível, risco; ~6 s, (705)) · roteador da Seth em **sombra** (escolhe rapido/livre/pesado/codigo pelo significado, só registra; a rota real segue a heurística até o Humano aprovar o relatório de divergência; desde (682) a heurística decide uma vez por resposta — o passo depois de ferramenta fica na mesma fila — e o gateway registra no journal erro do OmniRoute e cliente que desconecta) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
++- **Onde decide hoje:** segunda opinião sob pedido da Seth (`maquina_verificar opiniao_jev`: recomendação, reversível, risco; ~6 s, (705)) · Jev em **sombra** do roteador Laya (compara escolhas e só registra; a rota ativa vem do Laya com as travas determinísticas e fallback por tamanho) · inbox do Obsidian (só barra rascunho) · P-20 (aviso de dado pessoal no texto livre do canon público) · consolidação noturna (só reprova proposta de pouca utilidade).
+ - **Onde não decide, de propósito:** qual provedor está vivo dentro de uma fila (isso é histórico de chamadas, não texto — fica com a prioridade e os disjuntores do OmniRoute) e toda checagem que precisa ser exata (filtro de título, drift, travas de tamanho, timeouts).
+ - **Medição de 13/10/2026** (20 pedidos pt-BR rotulados à mão, CPU i7-13650HX): `winnow:e4b` 20/20 em ~4,3 s; `laya`, `laya:multilingual` e `gliclass` 10/20 ou menos em 50–200 ms; heurística por tamanho 5/20. Amostra pequena e feita por quem desenhou o teste — o número que vale é o da sombra, em tráfego real.
+ - **Avaliação em produção**: `scripts/avaliar_decisor.py`, todo dia na janela diária (timer das 20:00 desativado), dá por uso VALE / NÃO VALE / INCONCLUSIVO com o motivo; avisa na área de trabalho em dias fixos; termina quando o Humano manda `--encerrar aprovado|removido`. Texto: `extras/projeto-detalhe/decisor-e-conselho.md`.
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 3590884..454c9bb 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -56,3 +56,4 @@
+ 20131|omniroute-embed-ws|127.0.0.1
+ 20132|omniroute-live-ws|127.0.0.1
+ 11435|ollaya|127.0.0.1
++11436|laya-roteador|127.0.0.1
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 013c717..3b15280 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -181,8 +181,8 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+-P9_UNIDADES_USUARIO=("agata-consolidacao.timer" "agata-pesquisa-modelos.timer" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer" "agata-avaliacao-decisor.timer")
+-P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
++P9_UNIDADES_USUARIO=("agata-manutencao.timer" "agata-manutencao.service" "laya-roteador.service" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer")
++P9_CONTAINERS_DOCKER=("librechat-ponte-host" "librechat" "librechat-mongodb" "librechat-meilisearch")
+ 
+ 
+ 
+@@ -216,7 +216,7 @@ P9_CONTAINERS_DOCKER=("librechat" "librechat-mongodb" "librechat-meilisearch")
+ # scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
+ # mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
+ # SKIP crônico; foi lido como "por desenho" em (527), e era isto).
+-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
++P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
+ 
+ 
+ # --- P-17 ----------------------------------------------------------------
+diff --git a/scripts/perimetro/p09_servicos_declarados.sh b/scripts/perimetro/p09_servicos_declarados.sh
+index 572bfff..7283cae 100644
+--- a/scripts/perimetro/p09_servicos_declarados.sh
++++ b/scripts/perimetro/p09_servicos_declarados.sh
+@@ -20,8 +20,8 @@ p9_servicos_declarados() {
+   done
+   for u in "${P9_UNIDADES_USUARIO[@]}"; do
+     estado="$(systemctl --user is-active "$u" 2>/dev/null)"
+-    if [ "$estado" = "failed" ]; then
+-      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está 'failed' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
++    if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; }; then
++      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+       avisos=1
+     fi
+     habilitada="$(systemctl --user is-enabled "$u" 2>/dev/null)"
+diff --git a/scripts/testar_cobertura_servicos.py b/scripts/testar_cobertura_servicos.py
+new file mode 100644
+index 0000000..93e8734
+--- /dev/null
++++ b/scripts/testar_cobertura_servicos.py
+@@ -0,0 +1,43 @@
++#!/usr/bin/env python3
++"""Contraprovas offline de P-4/P-9; nenhum serviço real é alterado."""
++from pathlib import Path
++import subprocess
++
++RAIZ = Path(__file__).resolve().parent.parent
++
++def shell(codigo):
++    return subprocess.run(['bash', '-c', codigo], cwd=RAIZ, capture_output=True, text=True, check=False)
++
++n = 0
++for porta in (11435, 11436):
++    for bind, esperado in [('127.0.0.1', 0), ('0.0.0.0', 1)]:
++        r = shell(f'source scripts/perimetro/p04_bind.sh; p4_bind "tcp LISTEN 0 128 {bind}:{porta} 0.0.0.0:*"')
++        assert r.returncode == esperado, (porta, bind, r.stdout, r.stderr)
++        n += 1
++
++base = '''source scripts/perimetro.sh
++systemctl() {
++  case "$*" in
++    *is-enabled*) echo enabled;;
++    *is-active*) case "${@: -1}" in
++      "$ALVO") echo "$ESTADO";;
++      *) echo active;;
++    esac;;
++  esac
++}
++docker() { printf '%s\\n' librechat librechat-mongodb librechat-meilisearch librechat-ponte-host; }
++_p9_ollama_na_gpu() { :; }
++'''
++for alvo, estado in [('agata-manutencao.timer', 'failed'), ('agata-manutencao.timer', 'inactive'), ('agata-manutencao.timer', 'unknown'), ('agata-manutencao.service', 'failed'), ('laya-roteador.service', 'failed')]:
++    r = shell(base + f'ALVO={alvo}; ESTADO={estado}; p9_servicos_declarados')
++    assert r.returncode == 0 and alvo in r.stdout and 'AVISO (P-9)' in r.stdout, (alvo, estado, r.stdout, r.stderr)
++    n += 1
++r = shell(base + 'ALVO=nenhum; ESTADO=failed; p9_servicos_declarados')
++assert r.returncode == 0 and not r.stdout, (r.stdout, r.stderr)
++n += 1
++r = shell(base + '''ALVO=nenhum; ESTADO=failed
++docker() { case "$*" in *librechat-ponte-host*) :;; *) printf '%s\\n' librechat librechat-mongodb librechat-meilisearch;; esac; }
++p9_servicos_declarados''')
++assert r.returncode == 0 and 'librechat-ponte-host' in r.stdout, (r.stdout, r.stderr)
++n += 1
++print(f'COBERTURA SERVICOS OK -- {n}/{n}')
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index cc0c80f..bbd7e1a 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -192,9 +192,9 @@ _caso() {
+ declare -A SEM_TESTE=(
+   [P-2]="exige root para ler /etc/sudoers.d; a suite roda como usuario comum e nao vai pedir sudo pra testar"
+   [P-3]="depende do estado do REMOTO (publicacao); um clone descartavel nao reproduz a condicao"
+-  [P-4]="depende de portas e processos VIVOS da Maquina; dentro do clone nao ha o que bindar"
++  [P-4]="binds sintéticos cobertos por testar_cobertura_servicos.py no fim desta suíte; atribuição de processos vivos exige integração"
+   [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
+-  [P-9]="depende de unidades systemd vivas do usuario; o clone nao tem servicos. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
++  [P-9]="lista de unidades e ponte coberta offline por testar_cobertura_servicos.py no fim desta suíte; integração depende de unidades systemd vivas. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
+   [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
+   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
+   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
+@@ -608,6 +608,16 @@ _caso P-23 PASSA "porta que importa o AGENTS.md" <<'EOF'
+ printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf '# x\n@AGENTS.md\n' > porta-teste.md
+ EOF
+ 
++# Contraprovas offline dos binds e da lista viva de serviços, sem tocar systemd.
++if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ]]; then
++  if python3 "$RAIZ/scripts/testar_cobertura_servicos.py"; then
++    OK=$((OK + 1))
++  else
++    FALHOU=$((FALHOU + 1))
++    falhas_detalhe+=("P-4/P-9: contraprovas offline de cobertura de serviços")
++  fi
++fi
++
+ # --------------------------------------------------------------- veredito --
+ echo
+ if [ "$FALHOU" -eq 0 ]; then
