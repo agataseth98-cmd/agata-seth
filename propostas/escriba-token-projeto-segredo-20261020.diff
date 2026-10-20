@@ -1,6 +1,8 @@
+diff --git a/redesign/router/seth_escriba.py b/redesign/router/seth_escriba.py
+index 651a5e2..875a786 100644
 --- a/redesign/router/seth_escriba.py
 +++ b/redesign/router/seth_escriba.py
-@@ -37,6 +37,8 @@
+@@ -37,6 +37,8 @@ Env: SETH_ESCRIBA_BIND (default 127.0.0.1:20140), SETH_REPO (default ~/agata),
  from __future__ import annotations
  
  import fcntl
@@ -9,12 +11,10 @@
  import json
  import os
  import re
-@@ -63,6 +65,59 @@
- DIARIO = REPO / "SETH-DIARIO.md"
- MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
+@@ -65,6 +67,71 @@ MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
  MAX_CORPO = 20000  # trava de tamanho por acrescimo
-+
-+
+ 
+ 
 +def _token_projeto_esperado() -> str:
 +    raiz = os.environ.get("AGATA_PROJETO_RAIZ")
 +    if not raiz:
@@ -22,13 +22,25 @@
 +    try:
 +        projeto = Path(raiz).resolve(strict=True)
 +        config = Path.home() / ".config" / "agata" / "projetos"
++        if config.resolve(strict=True) != config.absolute():
++            raise PermissionError("diretório de tokens indireto")
++        dfd = os.open(str(config), os.O_RDONLY | os.O_CLOEXEC | os.O_DIRECTORY | os.O_NOFOLLOW)
++        st_dir = os.fstat(dfd)
++        if (st_dir.st_uid != os.getuid() or st_dir.st_mode & 0o022):
++            os.close(dfd)
++            raise PermissionError("diretório de tokens inseguro")
 +        ident = hashlib.sha256(str(projeto).encode("utf-8")).hexdigest()
-+        arquivo = config / f"{ident}.token"
-+        st = arquivo.lstat()
-+        if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid()
-+                or st.st_mode & 0o077 or st.st_nlink != 1):
-+            raise PermissionError("token de projeto inseguro")
-+        valor = arquivo.read_text(encoding="utf-8").strip()
++        try:
++            fd = os.open(f"{ident}.token", os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=dfd)
++            st = os.fstat(fd)
++            if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid()
++                    or st.st_mode & 0o077 or st.st_nlink != 1):
++                os.close(fd)
++                raise PermissionError("token de projeto inseguro")
++            with os.fdopen(fd, "r", encoding="utf-8") as f:
++                valor = f.read().strip()
++        finally:
++            os.close(dfd)
 +    except (OSError, RuntimeError):
 +        raise PermissionError("token de projeto indisponível") from None
 +    if len(valor) < 32:
@@ -66,10 +78,12 @@
 +def _recusar_segredo(textos: list[str]) -> None:
 +    if _tem_segredo("\n".join(textos)):
 +        raise ValueError("gravação recusada: possível segredo; nada foi gravado")
- 
- 
++
++
  def _validar_capability(token: str, tool: str, arguments: dict) -> None:
-@@ -308,13 +363,19 @@
+     verificar_capability(
+         token,
+@@ -308,13 +375,19 @@ class _H(BaseHTTPRequestHandler):
              return self._j(400, {"error": "corpo nao e' JSON"})
          try:
              if self.path.rstrip("/") == "/memoria":
@@ -91,13 +105,14 @@
                  return self._j(200, _anota_diario(data.get("texto", "")))
              return self._j(404, {"error": f"rota {self.path} inexistente"})
          except PermissionError:
+diff --git a/scripts/testar_capability.py b/scripts/testar_capability.py
+index 73176e1..b30d3a0 100644
 --- a/scripts/testar_capability.py
 +++ b/scripts/testar_capability.py
-@@ -132,6 +132,32 @@
-         with self.assertRaises(PermissionError):
+@@ -133,6 +133,32 @@ class CapabilityTests(unittest.TestCase):
              self.verify(self.issue(self.args, nonce="bad-key"))
          self.assertEqual(stat.S_IMODE(self.public_key_file.stat().st_mode), 0o666)
-+
+ 
 +    def test_project_token_is_scoped_to_project_and_required(self):
 +        projeto = self.root / "projeto-a"
 +        projeto.mkdir()
@@ -123,6 +138,7 @@
 +            _recusar_segredo(["texto comum", segredo])
 +        self.assertNotIn(segredo, str(erro.exception))
 +        _recusar_segredo(["texto comum sem credenciais"])
- 
++
      def test_escriba_http_requires_and_consumes_capability(self):
          memories = self.root / "MEMÓRIAS.md"
+         diary = self.root / "SETH-DIARIO.md"
