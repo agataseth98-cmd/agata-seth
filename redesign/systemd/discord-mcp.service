@@ -18,6 +18,7 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 ReadOnlyPaths=%h/agata
+ReadWritePaths=%h/.cache/agata/approval-capabilities
 
 # Sem [Install] -- sobe sob demanda (o atalho da Seth faz `systemctl --user
 # start discord-mcp`), nao no boot. Mesma logica do seth-gateway.

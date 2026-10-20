@@ -216,7 +216,7 @@ P9_CONTAINERS_DOCKER=("librechat-ponte-host" "librechat" "librechat-mongodb" "li
 # scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
 # mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
 # SKIP crônico; foi lido como "por desenho" em (527), e era isto).
-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|verificar_cabecalho|verificar_migracao_[a-z]+)\.(sh|py)|\.githooks/.*)$'
+P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|testar_(capability|dados_externos|egress_proxy|net02_compose|fork_librechat)|verificar_cabecalho|verificar_migracao_[a-z]+|politica_egress|criar_chave_capability)\.(sh|py)|redesign/(mcp/capability\.py|mcp/(discord|navegador)/.*\.py|router/(proxy|seth_gateway|seth_escriba)\.py|librechat/(canon-mcp\.mjs|librechat\.yaml|docker-compose\.yml|Dockerfile|fork/agata-capabilities\.patch)|systemd/(discord-mcp|navegador-mcp|seth-escriba)\.service)|\.githooks/.*)$'
 
 
 # --- P-17 ----------------------------------------------------------------

@@ -69,6 +69,22 @@ _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
     "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
 }
+_CLASSIFICATION_HEADERS = {"x-agata-data-classification", "x-agata-token"}
+_LOCAL_MODEL_PREFIXES = ("ollama-local/", "llamacpp-local/", "local/")
+
+
+def validar_egresso_publico(payload: object, classification: str | None) -> None:
+    """Reject unclassified POST content at the last Agata-controlled hop.
+
+    This applies regardless of URL and Content-Type: only a parsed JSON object
+    can be forwarded, and external model calls need an explicit public label.
+    The local model routes remain usable without that label.
+    """
+    model = payload.get("model", "") if isinstance(payload, dict) else ""
+    if isinstance(model, str) and model.startswith(_LOCAL_MODEL_PREFIXES):
+        return
+    if classification != "public":
+        raise PermissionError("dados sem classificação pública bloqueados antes do OmniRoute")
 
 # User-Agent de saída (MEMÓRIAS (545)). O Cloudflare do Groq e do Cerebras bane o
 # prefixo `Python-urllib` (403 error 1010, "browser_signature_banned") ANTES da
@@ -140,6 +156,7 @@ class _Handler(BaseHTTPRequestHandler):
         # Camada C: a versão anterior deixava passar ileso qualquer corpo que
         # não fosse `application/json`, contradizendo a própria promessa de
         # "SÓ ENTÃO repassa" no topo do arquivo).
+        payload = {}
         if corpo:
             try:
                 payload = json.loads(corpo)
@@ -165,6 +182,12 @@ class _Handler(BaseHTTPRequestHandler):
                     "corpo JSON não é objeto -- este proxy só entende OpenAI-compat "
                     "(objeto no topo); nada foi repassado",
                 )
+        try:
+            validar_egresso_publico(
+                payload, self.headers.get("X-Agata-Data-Classification")
+            )
+        except PermissionError as e:
+            return self._erro(403, str(e))
         self._passar(corpo, "POST")
 
     # --------------------------------------------------------------------- #
@@ -172,7 +195,7 @@ class _Handler(BaseHTTPRequestHandler):
         url = UPSTREAM + self.path
         headers = _ua_de_saida({
             k: v for k, v in self.headers.items()
-            if k.lower() not in _HOP_BY_HOP
+            if k.lower() not in _HOP_BY_HOP | _CLASSIFICATION_HEADERS
         })
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
@@ -254,6 +277,7 @@ def _porta_livre() -> int:
 class _DummyUpstream(BaseHTTPRequestHandler):
     tocado = False
     ua_recebido = None
+    headers_internos_recebidos = None
 
     def log_message(self, *a):
         pass
@@ -261,6 +285,10 @@ class _DummyUpstream(BaseHTTPRequestHandler):
     def do_POST(self):
         type(self).tocado = True
         type(self).ua_recebido = self.headers.get("User-Agent")
+        type(self).headers_internos_recebidos = (
+            self.headers.get("X-Agata-Token"),
+            self.headers.get("X-Agata-Data-Classification"),
+        )
         n = int(self.headers.get("Content-Length") or 0)
         _ = self.rfile.read(n)
         corpo = json.dumps({"choices": [{"message": {"role": "assistant", "content": "ok-dummy"}}],
@@ -293,7 +321,8 @@ def _selftest() -> int:
 
     base = f"http://127.0.0.1:{px_port}/v1/chat/completions"
     falhas = 0
-    com_token = {"Content-Type": "application/json", "X-Agata-Token": token_teste}
+    com_token = {"Content-Type": "application/json", "X-Agata-Token": token_teste,
+                 "X-Agata-Data-Classification": "public"}
 
     # 0a. sem token nenhum -> 403, upstream NAO tocado (item 3 do plano de
     # mitigacao da auditoria do Marcos, MEMORIAS (437))
@@ -311,7 +340,8 @@ def _selftest() -> int:
     # 0b. token errado -> 403, upstream NAO tocado
     try:
         urllib.request.urlopen(urllib.request.Request(
-            base, data=limpo, headers={"Content-Type": "application/json", "X-Agata-Token": "errado"}), timeout=10)
+            base, data=limpo, headers={"Content-Type": "application/json", "X-Agata-Token": "errado",
+                                       "X-Agata-Data-Classification": "public"}), timeout=10)
         print("FALHA  pedido com token errado passou (esperava 403)")
         falhas += 1
     except urllib.error.HTTPError as e:
@@ -319,12 +349,30 @@ def _selftest() -> int:
         print(f"{'PASS' if ok else 'FALHA'}  token errado -> {e.code}, upstream {'NAO tocado' if not _DummyUpstream.tocado else 'TOCADO (falha!)'}")
         falhas += 0 if ok else 1
 
+    # 0c. classificação ausente bloqueia conteúdo em qualquer endpoint e tipo
+    # de mídia, inclusive JSON de chat disfarçado de text/plain.
+    _DummyUpstream.tocado = False
+    for path, content_type in (("/v1/chat/completions", "application/json"),
+                               ("/v1/chat/completions", "text/plain"),
+                               ("/api/other-inference", "application/json")):
+        try:
+            urllib.request.urlopen(urllib.request.Request(
+                f"http://127.0.0.1:{px_port}{path}", data=limpo,
+                headers={"Content-Type": content_type, "X-Agata-Token": token_teste}), timeout=10)
+            print(f"FALHA  POST sem classificação passou: {path} ({content_type})")
+            falhas += 1
+        except urllib.error.HTTPError as e:
+            ok = e.code == 403 and not _DummyUpstream.tocado
+            print(f"{'PASS' if ok else 'FALHA'}  POST sem classificação {path} ({content_type}) -> {e.code}")
+            falhas += 0 if ok else 1
+
     # 1. pedido limpo, token certo -> 200, passthrough do dummy
     try:
         r = urllib.request.urlopen(
             urllib.request.Request(base, data=limpo, headers=com_token), timeout=10)
         body = json.loads(r.read())
         ok = r.status == 200 and body.get("choices", [{}])[0].get("message", {}).get("content") == "ok-dummy"
+        ok = ok and _DummyUpstream.headers_internos_recebidos == (None, None)
         print(f"{'PASS' if ok else 'FALHA'}  pedido limpo, token certo -> {r.status}, upstream {'tocado' if _DummyUpstream.tocado else 'NAO tocado'}")
         falhas += 0 if ok else 1
     except Exception as e:  # noqa: BLE001

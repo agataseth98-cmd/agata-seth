@@ -66,11 +66,13 @@ def _token_interno():
     return token_interno.ler()
 
 
-def _http(url, metodo="GET", body=None, timeout=45):
+def _http(url, metodo="GET", body=None, timeout=45, classification=None):
     data = json.dumps(body).encode() if body is not None else None
+    headers = {"content-type": "application/json", "X-Agata-Token": _token_interno()}
+    if classification is not None:
+        headers["X-Agata-Data-Classification"] = classification
     req = urllib.request.Request(url, data=data, method=metodo,
-                                 headers={"content-type": "application/json",
-                                          "X-Agata-Token": _token_interno()})
+                                 headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
@@ -87,7 +89,8 @@ def _sondar(modelo):
     if _cr.DESABILITAR_THINKING and modelo.startswith(_cr.THINKING_DISABLED_PREFIXOS):
         payload["thinking"] = {"type": "disabled"}
     try:
-        d = _http(f"{PROXY}/v1/chat/completions", "POST", payload)
+        d = _http(f"{PROXY}/v1/chat/completions", "POST", payload,
+                  classification="public")
     except urllib.error.HTTPError as e:
         corpo = e.read().decode("utf-8", errors="replace")[:200]
         if e.code in (402,) or "payment" in corpo.lower() or "billing" in corpo.lower():
@@ -147,7 +150,8 @@ def _discovery(fazer):
     if not fazer:
         return {"pulado": True}
     try:
-        _http(f"{OMNIROUTE}/api/discovery/scan", "POST", {}, timeout=20)
+        _http(f"{OMNIROUTE}/api/discovery/scan", "POST", {}, timeout=20,
+              classification="public")
         time.sleep(30)
         return _http(f"{OMNIROUTE}/api/discovery/results", timeout=20)
     except Exception as e:  # noqa: BLE001

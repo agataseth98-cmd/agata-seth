@@ -15,6 +15,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **20/10 — correções da auditoria aplicadas.** P-4 inclui o roteador Laya; P-9 acompanha a manutenção, o Laya e a ponte do LibreChat. O texto do projeto foi atualizado. Suíte completa e revisão cruzada passaram.
 
+**20/10 — controles de autorização da Seth aplicados no código.** Suíte offline e perímetro passaram; a eficácia em runtime depende de homologação controlada. P-4 segue parcial sem root.
+
 ## Hoje, 16/10/2026 (atualizado às 20h25)
 **Já está valendo (você assinou, eu apliquei, o GitHub conferiu):**
 - O GitHub exige a sua assinatura em toda mudança que altera comportamento. Testei o conferente com 15 quebras de propósito: ele pega 12 (os outros 3 não mudam nada na prática).

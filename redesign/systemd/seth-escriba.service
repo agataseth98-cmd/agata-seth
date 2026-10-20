@@ -29,6 +29,7 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 ReadWritePaths=%h/agata
+ReadWritePaths=%h/.cache/agata/approval-capabilities
 # Dentro da raiz gravável, o que NÃO é do escriba fica só-leitura (laboratório "Ensaio",
 # 30/09/2026): ele escreve só MEMÓRIAS.md, SETH-DIARIO.md e os temporários do os.replace
 # na raiz. O caminho mais específico prevalece; REGRAS/PROJETO montados só-leitura também

@@ -40,10 +40,10 @@ import fcntl
 import json
 import os
 import re
+import secrets
 import subprocess
 import stat
 import sys
-import tempfile
 import threading
 from contextlib import contextmanager
 from datetime import datetime
@@ -52,15 +52,29 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 BIND = os.environ.get("SETH_ESCRIBA_BIND", "127.0.0.1:20140")
-REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+REPO = Path(os.environ.get("SETH_REPO", str(Path(__file__).resolve().parents[2])))
 sys.path.insert(0, str(REPO / "scripts"))
+sys.path.insert(0, str(REPO))
 from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+from redesign.mcp.capability import PUBLIC_KEY_FILE, NONCE_DB, verificar_capability  # noqa: E402
 TZ = ZoneInfo(os.environ.get("SETH_ESCRIBA_TZ", "America/Sao_Paulo"))
 
 MEMORIAS = REPO / "MEMÓRIAS.md"
 DIARIO = REPO / "SETH-DIARIO.md"
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
 MAX_CORPO = 20000  # trava de tamanho por acrescimo
+
+
+def _validar_capability(token: str, tool: str, arguments: dict) -> None:
+    verificar_capability(
+        token,
+        audience="escriba",
+        tool=tool,
+        arguments=arguments,
+        public_key_file=Path(os.environ.get(
+            "AGATA_APPROVAL_PUBLIC_KEY_FILE", str(PUBLIC_KEY_FILE))),
+        nonce_db=Path(os.environ.get("AGATA_APPROVAL_NONCE_DB", str(NONCE_DB))),
+    )
 
 # --- corrida entre chamadas concorrentes (achado 04/09/2026, Camada C) -----
 # ThreadingHTTPServer aceita POST /memoria e POST /diario em paralelo. A
@@ -79,49 +93,94 @@ MAX_CORPO = 20000  # trava de tamanho por acrescimo
 _LOCK_PROCESSO = threading.Lock()
 
 
+def _abrir_diretorio_seguro(caminho: Path) -> int:
+    """Abre o diretório-pai fixado e rejeita caminho indireto ou gravável por terceiros."""
+    absoluto = caminho.absolute()
+    resolvido = caminho.parent.resolve(strict=True)
+    if resolvido != absoluto.parent:
+        raise RuntimeError("diretorio pai nao canonico")
+    flags = os.O_RDONLY | os.O_CLOEXEC | os.O_DIRECTORY | os.O_NOFOLLOW
+    fd = os.open(str(resolvido), flags)
+    st = os.fstat(fd)
+    if not stat.S_ISDIR(st.st_mode) or st.st_uid != os.getuid() or st.st_mode & 0o022:
+        os.close(fd)
+        raise RuntimeError("diretorio pai inseguro")
+    return fd
+
+
+def _ler_alvo_seguro(caminho: Path) -> str:
+    """Lê o alvo como arquivo regular, do owner esperado, sem seguir symlink."""
+    dfd = _abrir_diretorio_seguro(caminho)
+    try:
+        fd = os.open(caminho.name, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=dfd)
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or st.st_nlink != 1:
+            os.close(fd)
+            raise RuntimeError("alvo nao e arquivo regular do owner esperado")
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            return f.read()
+    finally:
+        os.close(dfd)
+
+
 @contextmanager
 def _travar_arquivo(caminho: Path):
-    caminho.parent.mkdir(parents=True, exist_ok=True)
-    trava = caminho.with_name(caminho.name + ".lock")
+    dfd = _abrir_diretorio_seguro(caminho)
+    trava_nome = caminho.name + ".lock"
     flags = os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW | os.O_NONBLOCK
-    fd = os.open(str(trava), flags, 0o600)
+    fd = None
     try:
+        fd = os.open(trava_nome, flags, 0o600, dir_fd=dfd)
         st = os.fstat(fd)
         if not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or st.st_nlink != 1:
             raise RuntimeError("objeto de trava inseguro")
         fcntl.flock(fd, fcntl.LOCK_EX)
-        atual = os.stat(trava, follow_symlinks=False)
+        atual = os.stat(trava_nome, dir_fd=dfd, follow_symlinks=False)
         if (atual.st_dev, atual.st_ino) != (st.st_dev, st.st_ino):
             raise RuntimeError("objeto de trava substituido durante espera")
         # Preserva bootstrap do diário, que espera alvo vazio na primeira vez.
         # O alvo ainda é reaberto pelos leitores: isto NÃO conclui E3/TOCTOU.
-        alvo = os.open(str(caminho), flags, 0o644)
+        alvo = os.open(caminho.name, flags, 0o644, dir_fd=dfd)
         try:
-            if not stat.S_ISREG(os.fstat(alvo).st_mode):
+            alvo_st = os.fstat(alvo)
+            if (not stat.S_ISREG(alvo_st.st_mode) or alvo_st.st_uid != os.getuid()
+                    or alvo_st.st_nlink != 1):
                 raise RuntimeError("alvo nao e arquivo regular")
         finally:
             os.close(alvo)
         yield
     finally:
-        fcntl.flock(fd, fcntl.LOCK_UN)
-        os.close(fd)
+        if fd is not None:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            finally:
+                os.close(fd)
+        os.close(dfd)
 
 
 def _escreve_atomico(caminho: Path, conteudo: str) -> None:
-    d = caminho.parent
-    fd, tmp = tempfile.mkstemp(prefix=f".{caminho.name}.", dir=str(d))
+    dfd = _abrir_diretorio_seguro(caminho)
+    tmp = f".{caminho.name}.{secrets.token_hex(12)}.tmp"
+    fd = None
     try:
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+                     0o600, dir_fd=dfd)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
+            fd = None  # fdopen assumiu o descritor
             f.write(conteudo)
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp, caminho)  # atômico no mesmo filesystem
+        os.replace(tmp, caminho.name, src_dir_fd=dfd, dst_dir_fd=dfd)
     except BaseException:
+        if fd is not None:
+            os.close(fd)
         try:
-            os.unlink(tmp)
+            os.unlink(tmp, dir_fd=dfd)
         except OSError:
             pass
         raise
+    finally:
+        os.close(dfd)
 
 
 def _agora() -> datetime:
@@ -141,7 +200,7 @@ def _acrescenta_memoria(titulo: str, corpo: str) -> dict:
     with _LOCK_PROCESSO, _travar_arquivo(MEMORIAS):
         # relê AGORA, dentro da trava -- "antes" de fora da trava seria a
         # mesma corrida de novo, só que mascarada
-        antes = MEMORIAS.read_text(encoding="utf-8")
+        antes = _ler_alvo_seguro(MEMORIAS)
         linha_marcador = next((l for l in antes.splitlines() if l.startswith(MARCADOR)), None)
         if linha_marcador is None:
             raise RuntimeError("marcador ENTRADAS-NOVAS nao encontrado em MEMORIAS.md")
@@ -177,7 +236,7 @@ def _anota_diario(texto: str) -> dict:
         # dispararia o bootstrap; o teste certo é tamanho zero. Achado
         # testando esta mudança (MEMÓRIAS (472)), bug preexistente, nunca
         # se manifestou porque a versão antiga não dependia de marcador.
-        if DIARIO.stat().st_size == 0:
+        if not _ler_alvo_seguro(DIARIO):
             _escreve_atomico(
                 DIARIO,
                 "# Diário da Seth\n\n"
@@ -189,7 +248,7 @@ def _anota_diario(texto: str) -> dict:
                 "abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->\n")
         # relê AGORA, dentro da trava -- mesmo motivo de _acrescenta_memoria:
         # "antes" lido fora da trava seria a mesma corrida, só mascarada.
-        antes = DIARIO.read_text(encoding="utf-8")
+        antes = _ler_alvo_seguro(DIARIO)
         linha_marcador = next((l for l in antes.splitlines() if l.startswith(MARCADOR)), None)
         if linha_marcador is None:
             raise RuntimeError("marcador ENTRADAS-NOVAS nao encontrado em SETH-DIARIO.md")
@@ -249,10 +308,17 @@ class _H(BaseHTTPRequestHandler):
             return self._j(400, {"error": "corpo nao e' JSON"})
         try:
             if self.path.rstrip("/") == "/memoria":
+                _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
+                                    "memoria_acrescentar",
+                                    {"titulo": data.get("titulo", ""), "corpo": data.get("corpo", "")})
                 return self._j(200, _acrescenta_memoria(data.get("titulo", ""), data.get("corpo", "")))
             if self.path.rstrip("/") == "/diario":
+                _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
+                                    "diario_anotar", {"texto": data.get("texto", "")})
                 return self._j(200, _anota_diario(data.get("texto", "")))
             return self._j(404, {"error": f"rota {self.path} inexistente"})
+        except PermissionError:
+            return self._j(403, {"error": "capability de aprovação ausente, inválida ou já consumida"})
         except ValueError as e:
             return self._j(400, {"error": str(e)})
         except RuntimeError as e:

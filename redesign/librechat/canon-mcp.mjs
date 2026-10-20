@@ -378,6 +378,7 @@ const TOOLS = [
       properties: {
         titulo: { type: "string", description: "título da entrada (vai depois de 'DIÁRIO — <data> · ')" },
         corpo: { type: "string", description: "corpo completo da entrada, incluindo a linha 'Modelo: ...' final" },
+        agata_capability: { type: "string", description: "token interno de aprovação, fornecido pelo LibreChat" },
       },
       required: ["titulo", "corpo"],
     },
@@ -390,19 +391,22 @@ const TOOLS = [
       "Timestamp do relógio da Máquina é acrescentado automaticamente. Não apaga nada.",
     inputSchema: {
       type: "object",
-      properties: { texto: { type: "string", description: "o que anexar" } },
+      properties: {
+        texto: { type: "string", description: "o que anexar" },
+        agata_capability: { type: "string", description: "token interno de aprovação, fornecido pelo LibreChat" },
+      },
       required: ["texto"],
     },
   },
 ];
 
 // ---- escrita APPEND-ONLY (via seth_escriba no host) ---------------------
-async function escriba(rota, payload) {
+async function escriba(rota, payload, capability) {
   let r;
   try {
     r = await fetch(`${ESCRIBA}${rota}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${capability || ""}` },
       body: JSON.stringify(payload),
     });
   } catch (e) {
@@ -415,13 +419,13 @@ async function escriba(rota, payload) {
 
 async function memoriaAcrescentar(a) {
   if (!a.titulo || !a.corpo) throw new Error("titulo e corpo obrigatórios");
-  const j = await escriba("/memoria", { titulo: a.titulo, corpo: a.corpo });
+  const j = await escriba("/memoria", { titulo: a.titulo, corpo: a.corpo }, a.agata_capability);
   return `${j.header}\n\n${j.nota}`;
 }
 
 async function diarioAnotar(a) {
   if (!a.texto) throw new Error("texto obrigatório");
-  const j = await escriba("/diario", { texto: a.texto });
+  const j = await escriba("/diario", { texto: a.texto }, a.agata_capability);
   return `anotado (${j.bytes_add} bytes). ${j.nota}`;
 }
 

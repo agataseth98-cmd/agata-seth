@@ -399,7 +399,8 @@ def enviar_omniroute(pedido_texto, modelo):
     corpo = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         SANITIZADOR_ENDPOINT, data=corpo, method="POST",
-        headers={"Content-Type": "application/json", "X-Agata-Token": _token_interno()},
+        headers={"Content-Type": "application/json", "X-Agata-Token": _token_interno(),
+                 "X-Agata-Data-Classification": "public"},
     )
     with urllib.request.urlopen(req, timeout=180) as resp:
         return json.loads(resp.read().decode("utf-8"))

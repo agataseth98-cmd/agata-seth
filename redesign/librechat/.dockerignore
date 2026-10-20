@@ -1,0 +1,8 @@
+.env
+.env.*
+uploads/
+logs/
+data/
+images/
+node_modules/
+fork/.git/

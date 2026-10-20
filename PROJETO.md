@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5a9604408dee4966de0d0855745d8bb047c2802c
-  Escrito em: 20/10/2026 13:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c83e37838d9bb8a67f73cb19c06c92e41db2aef1
+  Escrito em: 20/10/2026 15:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5a9604408dee4966de0d0855745d8bb047c2802c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5a9604408dee4966de0d0855745d8bb047c2802c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5a9604408dee4966de0d0855745d8bb047c2802c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5a9604408dee4966de0d0855745d8bb047c2802c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5a9604408dee4966de0d0855745d8bb047c2802c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c83e37838d9bb8a67f73cb19c06c92e41db2aef1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c83e37838d9bb8a67f73cb19c06c92e41db2aef1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c83e37838d9bb8a67f73cb19c06c92e41db2aef1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c83e37838d9bb8a67f73cb19c06c92e41db2aef1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c83e37838d9bb8a67f73cb19c06c92e41db2aef1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -75,8 +75,9 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 **Gateway e voz no boot; demais frentes pelo atalho `seth` / `Parar Seth`:**
 - `seth-gateway` (`:20126`, habilitado no `agata.target`) — reidrata a Seth; ver "Interface".
 - `seth-verificador` (`:20141`) — **único caminho de execução da Seth, read-only.** `POST /verificar` roda um de 10 comandos fixos (`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`, `suite_controles`, `servicos`, `p8_verificar`), argv fixo, sem shell, saída redigida pela régua do P-1, teto com total declarado (423).
-- `seth-escriba` (`:20140`) — **único caminho de escrita da Seth, append-only.** `POST /memoria` insere abaixo do marcador `ENTRADAS-NOVAS` (número e data vêm do relógio da Máquina); `POST /diario` anexa a `SETH-DIARIO.md`; aborta com 409 se a operação não for insert/append puro; sem `PUT`/`PATCH`/`DELETE`, sem `git`, sem segredo; `fcntl.flock` + `os.replace`; fonte `redesign/router/seth_escriba.py` (318).
-- Stack Docker do **LibreChat**: `librechat` na bridge `librechat`/`br-librechat`, publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538); `librechat-mongodb` e `librechat-meilisearch` numa bridge privada; `restart: unless-stopped` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
+- `seth-escriba` (`:20140`) — **único caminho de escrita da Seth, append-only.** `POST /memoria` insere abaixo do marcador `ENTRADAS-NOVAS` (número e data vêm do relógio da Máquina); `POST /diario` insere abaixo do marcador de `SETH-DIARIO.md`; aborta com 409 se a operação não for insert puro; sem `PUT`/`PATCH`/`DELETE`, sem `git`, sem segredo; `fcntl.flock` + `os.replace`. As escritas exigem capability Ed25519 de uso único, emitida após a aprovação do LibreChat e vinculada a usuário, conversa, executor, ferramenta e argumentos. A chave privada fica no host como `root:59999`, modo 0440, e é montada somente em leitura no container emissor; o emissor valida owner root, GID, modo, tipo e link único. Os executores locais recebem a chave pública e mantêm o banco de nonces. `ReadWritePaths=%h/agata` ainda é amplo; o fechamento efetivo do sandbox fica pendente de homologação systemd. O usuário local pertence ao grupo `docker`, portanto processos com acesso ao daemon Docker estão fora da fronteira de isolamento desta capability. Fonte `redesign/router/seth_escriba.py`.
+- `seth-gateway` — bloqueia envio a modelo externo sem classificação explícita `public`; o modelo `seth-public` declara publicamente que todo o contexto da conversa pode sair para provedores externos. Outros modelos externos sem classe retornam 403; aliases locais continuam locais. O bloqueio atua antes do encaminhamento ao sanitizador/OmniRoute.
+- Stack Docker do **LibreChat**: `librechat` na bridge de ferramentas `librechat`/`br-librechat` e na bridge interna `librechat-data` (Mongo/Meili); publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538). Mongo e Meili ficam somente em `librechat-data`, sem rota para o relé. `restart: unless-stopped` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
 - `piper-tts` (`:8890`, voz pt-BR local, habilitada no `agata.target`) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
 
 **Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-manutencao.timer` (janela diária) · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele.

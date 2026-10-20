@@ -618,6 +618,21 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ]]
   fi
 fi
 
+# Contraprovas estruturais do fluxo de escrita, classificação externa,
+# resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
+# dispara quando qualquer uma dessas provas ou seus controles muda.
+if [[ -z "$FILTRO" ]]; then
+  if python3 -m unittest scripts.testar_capability scripts.testar_dados_externos scripts.testar_egress_proxy -v \
+      && python3 "$RAIZ/scripts/testar_fork_librechat.py" \
+      && python3 scripts/testar_net02_compose.py \
+      && SETH_REPO="$RAIZ" python3 "$RAIZ/redesign/router/seth_gateway.py" --selftest; then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("security: contraprovas offline de escrita, dados externos, egress e compose")
+  fi
+fi
+
 # --------------------------------------------------------------- veredito --
 echo
 if [ "$FALHOU" -eq 0 ]; then

@@ -57,8 +57,10 @@ import urllib.request
 from fastmcp import FastMCP
 
 REPO = os.path.expanduser("~/agata")
+sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "redesign", "router"))
 from sanitizar import varrer  # noqa: E402  fonte única de PADROES_SEGREDO
+from redesign.mcp.capability import verificar_capability  # noqa: E402
 
 ENV_PATH = os.path.expanduser("~/.config/agata/.env")
 ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/discord-canais-permitidos.txt")
@@ -193,7 +195,7 @@ def ler_mensagens(canal_id: str, limite: int = 20) -> dict:
 
 
 @mcp.tool
-def enviar_mensagem(canal_id: str, texto: str) -> dict:
+def enviar_mensagem(canal_id: str, texto: str, agata_capability: str | None = None) -> dict:
     """Envia uma mensagem de texto a um canal/DM do Discord. ESCRITA.
 
     Varre `texto` contra PADROES_SEGREDO (mesma régua de sanitizar.py) ANTES de
@@ -203,6 +205,12 @@ def enviar_mensagem(canal_id: str, texto: str) -> dict:
 
     Retorna: {enviado: bool, bloqueado_por_segredo: [...] ou None, erro}.
     """
+    try:
+        verificar_capability(agata_capability, audience="discord", tool="enviar_mensagem",
+                             arguments={"canal_id": canal_id, "texto": texto})
+    except PermissionError:
+        return {"enviado": False, "bloqueado_por_segredo": None,
+                "erro": "capability de aprovação ausente, inválida ou já consumida"}
     if not _canal_permitido(canal_id):
         return {
             "enviado": False,
