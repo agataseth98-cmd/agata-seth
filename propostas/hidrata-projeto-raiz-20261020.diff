@@ -1,0 +1,37 @@
+--- a/.githooks/gerar-hidratacao.sh
++++ b/.githooks/gerar-hidratacao.sh
+@@ -3,6 +3,17 @@
+ # REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + uma janela de MEMÓRIAS.md.
+ # Chamado pelo hook pre-commit. Pode ser rodado manualmente também.
+ set -euo pipefail
++
++# A instância ativa vem do ambiente; ausência ou caminho inválido aborta a hidratação.
++if [ -z "${AGATA_PROJETO_RAIZ:-}" ]; then
++  echo "gerar-hidratacao: ABORTADO -- AGATA_PROJETO_RAIZ ausente; não escolho outra instância." >&2
++  exit 1
++fi
++PROJETO_RAIZ="$(realpath -e -- "$AGATA_PROJETO_RAIZ")" || { echo "gerar-hidratacao: ABORTADO -- raiz do projeto inválida." >&2; exit 1; }
++[ -f "$PROJETO_RAIZ/PROJETO.md" ] || { echo "gerar-hidratacao: ABORTADO -- PROJETO.md ausente na raiz escolhida." >&2; exit 1; }
++[ -d "$PROJETO_RAIZ/extras/projeto-detalhe" ] || { echo "gerar-hidratacao: ABORTADO -- extras/projeto-detalhe ausente na raiz escolhida." >&2; exit 1; }
++cd -- "$PROJETO_RAIZ"
++
+ cd "$(dirname "$0")/.."
+ 
+ # --- Guarda de codificacao (achado 04/09/2026, sessao Claude Code na nuvem) ---
+@@ -507,8 +518,14 @@
+     done
+     echo "# PROJETO.md"
+     echo ""
+-    cat PROJETO.md
+-    echo ""
++    cat "$PROJETO_RAIZ/PROJETO.md"
++    echo ""
++    echo "# Detalhes do projeto"
++    while IFS= read -r -d '' _detalhe; do
++      echo "## ${_detalhe#"$PROJETO_RAIZ/"}"
++      cat "$_detalhe"
++      echo ""
++    done < <(find "$PROJETO_RAIZ/extras/projeto-detalhe" -maxdepth 1 -type f -name '*.md' -print0 | sort -z)
+     echo "# Índice de MEMÓRIAS.md"
+     echo ""
+     echo "Não embutido aqui — mesmo motivo do índice de palavras-chave (ver INDICE_CHAVES"
