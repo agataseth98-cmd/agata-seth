@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5770e177139e8a7a0f211ebec11102d81a5d3e12
-  Escrito em: 20/10/2026 08:51 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3fc9f710e8dcfe7c1fc12670a07937cd4db67487
+  Escrito em: 20/10/2026 08:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5770e177139e8a7a0f211ebec11102d81a5d3e12/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5770e177139e8a7a0f211ebec11102d81a5d3e12/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5770e177139e8a7a0f211ebec11102d81a5d3e12/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5770e177139e8a7a0f211ebec11102d81a5d3e12/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5770e177139e8a7a0f211ebec11102d81a5d3e12/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fc9f710e8dcfe7c1fc12670a07937cd4db67487/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fc9f710e8dcfe7c1fc12670a07937cd4db67487/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fc9f710e8dcfe7c1fc12670a07937cd4db67487/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fc9f710e8dcfe7c1fc12670a07937cd4db67487/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fc9f710e8dcfe7c1fc12670a07937cd4db67487/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(775) DIÁRIO — 20/10/2026 · **O HD de backup passou a ser uma pasta: `AgataBkup01/` dentro do disco TI-CSR, e os scripts leem o caminho de `~/.config/agata/hd-backup` (hd-backup-configuravel-20261020, assinado).** O HD AgataBkup01 antigo não está mais disponível. O novo é o disco TI-CSR (GIGABYTE 112 GB, NTFS), que tem outros usos: o Humano vetou formatar ("não vou formatar ele tem outros usos"), então nada no disco foi apagado nem renomeado. `.githooks/post-commit`, `scripts/cifrar_env.sh` e o P-12 de `scripts/perimetro.sh` leem a raiz na 1ª linha de `~/.config/agata/hd-backup` (local, sem segredo); sem o arquivo, vale o caminho antigo. "HD presente" virou `[ -d raiz ]`, porque sob /run/media a pasta some quando o disco é desmontado. `perimetro-sombra-referencia.sh` ficou congelado de propósito (continua apontando para o caminho antigo; só registra divergência, não decide). O backup antigo, que o Humano guardou na área de trabalho ("BKPdoBKP do Agata", 24 GB, com `restic-agata-local`), está sendo copiado por rsync para a pasta nova; a conferência do repo restic e a passada de `QUANDO-O-HD-VOLTAR.md` vêm em entrada própria.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `lsblk`/`findmnt` do disco; resolução testada com e sem o arquivo (TI-CSR presente, AgataBkup01 ausente); `bash -n` nos 3 scripts; `p8_verificar.sh` = PODE APLICAR · Autorização: Humano — "assinado"
+
 (774) DIÁRIO — 18/10/2026 · **A fila rapido aceita pedido com ferramenta (rapido-com-ferramenta-20261018, assinado; AC-01, decisão B1 do pacote do Humano).** A trava que trocava toda escolha rapido do Laya por livre quando havia ferramentas (95% das chamadas) saiu. Medido antes, pelo gateway, 8 pedidos reais com ferramenta em cada fila: rapido 7 chamadas corretas, 1 em texto, 0 malformadas, mediana 0,85 s; livre 7/1/0, mediana 1,1 s; amostra pequena. Heurística de reserva e travas de tamanho e de fila longa inalteradas. Sem revisão do Codex, por ordem do Humano.
 
 (773) DIÁRIO — 18/10/2026 · **Estado do treino do Laya medido, nome curto de ferramenta liberado e PROJETO sem o domingo 03:30 (laya-treino-estado, allow-nome-curto e projeto-laya-janela, de 18/10; assinados).** AC-34: repetida na tela, a Seth acertou o motivo genérico do treino, mas tratou fatos da (722) como atuais; medido, o treino de 18/10 rodou às 12:18 e gerou candidato. Novo comando de leitura `laya_treino` no verificador: exemplos, novos, mínimo, quantos faltam e último recibo da janela; leitura inconclusiva sai "não medido" (três revisões do Codex). AC-54: nome curto de ferramenta de leitura, fora da lista de aprovação automática, parava a resposta pedindo aprovação humana (6 vezes desde 01/10); os nomes curtos das mesmas ferramentas de leitura entram na lista. AC-32: a seção do Laya no PROJETO dizia treino no domingo 03:30; agora janela diária.
