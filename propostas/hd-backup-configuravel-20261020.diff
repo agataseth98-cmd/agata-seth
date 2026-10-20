@@ -1,0 +1,96 @@
+diff --git a/.githooks/post-commit b/.githooks/post-commit
+index 315d3ae..8875e3b 100755
+--- a/.githooks/post-commit
++++ b/.githooks/post-commit
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ # A cada commit: regenera o bundle --all num staging local (sempre — não
+-# depende do HD) E, se o HD externo AgataBkup01 estiver montado agora,
++# depende do HD) E, se o HD externo de backup estiver montado agora,
+ # escreve uma cópia versionada lá também (últimas N gerações, nunca uma
+ # só — commit ruim não deve levar junto a última cópia boa). Se o HD não
+ # estiver montado, deixa um marcador de pendência visível.
+@@ -48,8 +48,14 @@ if ! git bundle create "$BUNDLE_TMP" --all >/dev/null 2>&1; then
+ fi
+ mv -f "$BUNDLE_TMP" "$STAGING/agata-canonico.bundle"
+ 
+-USB="/run/media/$USER/AgataBkup01"
+-if mountpoint -q "$USB" 2>/dev/null; then
++# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
++# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
++# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
++# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
++# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
++USB="$(head -n1 "$HOME/.config/agata/hd-backup" 2>/dev/null)"
++USB="${USB:-/run/media/$USER/AgataBkup01}"
++if [ -d "$USB" ]; then
+   AUTO="$USB/auto-backups"
+   mkdir -p "$AUTO"
+   DEST="$AUTO/agata-canonico-${STAMP}-${SHORT}.bundle"
+@@ -60,9 +66,9 @@ if mountpoint -q "$USB" 2>/dev/null; then
+   echo "post-commit: bundle em $STAGING E em $DEST (HD conectado)"
+ else
+   {
+-    echo "HD AgataBkup01 não estava montado no commit $SHORT ($STAMP)."
++    echo "HD de backup ($USB) não estava montado no commit $SHORT ($STAMP)."
+     echo "Staging local ($STAGING/agata-canonico.bundle) está atualizado até este commit."
+-    echo "Plugue o HD e rode: cp \"$STAGING/agata-canonico.bundle\" \"/run/media/\$USER/AgataBkup01/auto-backups/agata-canonico-${STAMP}-${SHORT}.bundle\""
++    echo "Plugue o HD e rode: cp \"$STAGING/agata-canonico.bundle\" \"$USB/auto-backups/agata-canonico-${STAMP}-${SHORT}.bundle\""
+   } > "$STAGING/PENDENTE-HD-DESCONECTADO"
+   echo "post-commit: bundle só no staging local — HD não conectado (marcador escrito)"
+ fi
+diff --git a/redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md b/redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md
+index 6848f99..a13fbdb 100644
+--- a/redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md
++++ b/redesign/fase7-hd/QUANDO-O-HD-VOLTAR.md
+@@ -14,7 +14,8 @@ Ordem: **0 → 1 → 2 → 3 → 4**. Cada passo diz o que colar de volta.
+ ## 0. Montar e conferir o repo
+ 
+ ```fish
+-set -x RESTIC_REPOSITORY /run/media/orusoua/AgataBkup01/restic-agata-local
++# raiz do HD: ~/.config/agata/hd-backup (desde 20/10/2026, pasta AgataBkup01/ no disco TI-CSR)
++set -x RESTIC_REPOSITORY (head -n1 ~/.config/agata/hd-backup; or echo /run/media/orusoua/AgataBkup01)/restic-agata-local
+ set -x RESTIC_PASSWORD_FILE $HOME/.config/agata/restic.pass
+ restic cat config | head -3          # tem que responder (repo alcancavel)
+ restic snapshots --compact           # o que ja existe -- procure c19275ec (GGUF do rlm, P3-02)
+diff --git a/scripts/cifrar_env.sh b/scripts/cifrar_env.sh
+index 4d995c0..201ddeb 100755
+--- a/scripts/cifrar_env.sh
++++ b/scripts/cifrar_env.sh
+@@ -33,8 +33,14 @@ echo
+ echo "Pronto: $OUT"
+ echo "sha256: $(sha256sum "$OUT" | cut -d' ' -f1)"
+ 
+-USB="/run/media/$USER/AgataBkup01"
+-if mountpoint -q "$USB" 2>/dev/null; then
++# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
++# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
++# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
++# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
++# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
++USB="$(head -n1 "$HOME/.config/agata/hd-backup" 2>/dev/null || true)"
++USB="${USB:-/run/media/$USER/AgataBkup01}"
++if [ -d "$USB" ]; then
+   DEST="$USB/env-$(date +%Y%m%d).gpg"
+   cp "$OUT" "$DEST"
+   echo "Copiado pro HD: $DEST"
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 68d51e6..013c717 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -135,7 +135,14 @@ P12_AVISO_SEM_BACKUP="whisper-base-int8-ov whisper-small-int8-ov"
+ # "USER: unbound variable" ANTES de rodar qualquer controle -- o guardião de
+ # commits falhando por detalhe de ambiente, não por violação real. `id -un`
+ # é a mesma informação, sem depender de env var.
+-P12_REPO="${AGATA_RESTIC_REPO:-/run/media/${USER:-$(id -un)}/AgataBkup01/restic-agata-local}"
++# Raiz do HD de backup: 1ª linha de ~/.config/agata/hd-backup (caminho local, não é
++# segredo); sem o arquivo, o HD AgataBkup01 montado inteiro (o desenho original).
++# Desde 20/10/2026 o HD é uma pasta AgataBkup01/ dentro de um disco de outros usos
++# (TI-CSR), que não pode ser formatado nem renomeado. "Presente" = a pasta existe:
++# sob /run/media (tmpfs do udisks) ela some quando o disco é desmontado.
++P12_HD="$(head -n1 "${HOME:-}/.config/agata/hd-backup" 2>/dev/null || true)"
++P12_HD="${P12_HD:-/run/media/${USER:-$(id -un)}/AgataBkup01}"
++P12_REPO="${AGATA_RESTIC_REPO:-$P12_HD/restic-agata-local}"
+ P12_PASS="$HOME/.config/agata/restic.pass"
+ P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
+ 
