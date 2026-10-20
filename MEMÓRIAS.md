@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 578d0d3a5e583ecf06b70b2c0f9cee3013716943
-  Escrito em: 20/10/2026 09:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c
+  Escrito em: 20/10/2026 09:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/578d0d3a5e583ecf06b70b2c0f9cee3013716943/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/578d0d3a5e583ecf06b70b2c0f9cee3013716943/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/578d0d3a5e583ecf06b70b2c0f9cee3013716943/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/578d0d3a5e583ecf06b70b2c0f9cee3013716943/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/578d0d3a5e583ecf06b70b2c0f9cee3013716943/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4a2b0b7eeb5ca3bf69cdcd98778f35a65e9f0c8c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(777) DIÁRIO — 20/10/2026 · **P-4 conferido uma vez como root: `p4_bind` saiu com exit=0, então as portas de `config/portas-agata.txt` estão no bind esperado, inclusive as de processos de outro usuário (Ollama).** O PARCIAL do P-4 continua em todo commit por desenho (`scripts/perimetro/p04_bind.sh:39`, sem root `ss -p` não atribui processo de outro uid), e isso não é falha. Tirar o PARCIAL dos commits pediria proposta (sudo sem senha para `ss`, ou rebaixar o PARCIAL a aviso). Não recomendado, porque o PARCIAL é verdadeiro. O resultado veio por relato do Humano ("exit=0"): o modelo não viu a saída completa e não leu linha a linha se havia SUSPEITO.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: relato do Humano da corrida com sudo (`source scripts/perimetro.sh; p4_bind`), não medido pelo modelo · Autorização: Humano — "vamos", "exit=0"
+
 (776) DIÁRIO — 20/10/2026 · **Passada de backup no HD novo fechada: o repo restic `d0223c4ffb` voltou inteiro da cópia da área de trabalho, os 5 recursos do P-12 ganharam snapshot de hoje e o P-12 saiu sem SUSPEITO nem AVISO.** Segue a entrada da troca de HD (pasta `AgataBkup01/` no disco TI-CSR). O rsync de "BKPdoBKP do Agata" copiou 25,1 GB (exit 0). O repo copiado é o mesmo da Fase 0 (`restic cat config`, id `d0223c4ffb…`), com 13 snapshots; `restic check --read-data-subset=1/10` e depois `restic check` completo: sem erro. Snapshots novos com as tags do manifesto: e5-small `8ba90d6f`, whisper-base `45b29cb0`, whisper-small `5a77b7c0` e, pelo sudo do Humano (passo 2b do runbook), rlm-qwen3-8b-teste `56038913`. O sudo deixou 3 arquivos do repo como root com modo 0440, ilegíveis para `orusoua` (o snapshot sumia da listagem). O Humano rodou `chown -R`, e isso volta a valer para todo `restic` com sudo neste repo. `semear_cache_p12.py` regravou o cache com 5 recursos cobertos; sem cobertura ficam os 4 modelos públicos do Ollama (qwen3:4b, qwen3.5-9b-64k, qwen3.5:9b, nomic-embed-text), como antes. O staging foi para o HD (bundle das missões, os 2 `.age` e o `.txt` de 16/10, cada um conferido por `cmp`) e o marcador PENDENTE saiu. O post-commit novo já gravou sozinho `agata-canonico-20261020-090359-578d0d3.bundle` no TI no pull das 09:03. Em aberto, só medido: `hash_ir.sh` não reproduz o `ir_sha256_xmlbin` do manifesto nos 3 IR (limite já anotado no próprio script); o snapshot do e5 inclui `model_cache` (345 MB contra 265 MB em 21/09), e os arquivos do modelo não mudam desde 02/09.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `restic cat config`/`snapshots`/`check`; `cmp` staging × HD; `find ! -user orusoua` = 0 depois do chown; `p12_backup_verificavel` exit 0 sem saída · Autorização: Humano — "vamos fazer tudo", "feito"
 
