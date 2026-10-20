@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 131f6c4c0235bf52f7264dd16a7764dd3859c3e8
-  Escrito em: 20/10/2026 15:56 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a96fb7b23fef566919ab3ea31727ea2a5f9078ca
+  Escrito em: 20/10/2026 17:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/131f6c4c0235bf52f7264dd16a7764dd3859c3e8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/131f6c4c0235bf52f7264dd16a7764dd3859c3e8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/131f6c4c0235bf52f7264dd16a7764dd3859c3e8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/131f6c4c0235bf52f7264dd16a7764dd3859c3e8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/131f6c4c0235bf52f7264dd16a7764dd3859c3e8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a96fb7b23fef566919ab3ea31727ea2a5f9078ca/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a96fb7b23fef566919ab3ea31727ea2a5f9078ca/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a96fb7b23fef566919ab3ea31727ea2a5f9078ca/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a96fb7b23fef566919ab3ea31727ea2a5f9078ca/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a96fb7b23fef566919ab3ea31727ea2a5f9078ca/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 427, 514 e 599 são referências no texto; o grupo real 729 já foi desambiguado em (730).**
+
+Vetor: `grep -nE '^\([0-9]+\) '` com nome do arquivo (`grep -nH -E`) em `MEMÓRIAS.md`, `MEMORIAS-MORNO.md` e `memoria/frio/MEMORIAS-FRIO-*.md`; conferência adicional dos cabeçalhos formais `^\([0-9]+\) \S+ — ` em todas essas camadas, no HEAD `a96fb7b`. Os números (427), (514) e (599) aparecem duas vezes no grep literal, sempre em `MEMÓRIAS.md`: uma ocorrência é uma referência numa correção posterior (linhas 4841, 3684 e 2430, respectivamente), e a outra é a única entrada formal correspondente (linhas 4847, 3696 e 2482). Não se renumeram nem se editam essas entradas. O número (729), sim, identifica 14 cabeçalhos formais em `MEMÓRIAS.md` (linhas 218 a 296, de seis em seis); a entrada (730) já atribuiu os identificadores de citação (729a) a (729n), do mais antigo ao mais novo, e enumera os títulos. As camadas morna e fria não acrescentam outro grupo formal repetido.
+
+Numeração futura medida: os PRs 409 e 411, ainda abertos nesta auditoria, trazem respectivamente (786) e (787); este registro recebe (788), e o próximo número livre após ele é (789), preservadas essas duas entradas pendentes. Nenhuma entrada histórica foi alterada.
+
+Modelo: GPT-6 · vetor: `grep` literal e agrupamento independente dos cabeçalhos formais nas camadas de memória, mais conferência dos PRs 409 e 411 · autorização: pedido do Humano, 20/10/2026.
+
 (785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução externa aplicados (`auditoria-seguranca-reducoes-verificaveis-20261020`).** O pacote endurece a capability por chamada, autentica os executores e restringe escrita do Escriba e dados externos/egress. Suíte offline: 58/58; perímetro: 19 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. A eficácia no runtime ainda depende de homologação controlada com privilégios; P-4 permanece parcial sem root.
 Modelo: GPT-6.1-sol (Codex, na Máquina) · vetor: suíte offline e perímetro em checkout descartável; `p8_verificar.sh` confirmou assinatura, hash e aplicabilidade · Autorização: Humano — "feito" (assinatura de auditoria-seguranca-reducoes-verificaveis-20261020)
 
