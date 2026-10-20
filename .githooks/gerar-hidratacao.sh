@@ -398,11 +398,18 @@ janela_memorias() {
 # (causa raiz de ele ter chegado a 97,9 KB). PROJETO diz o que vale hoje; o que
 # aconteceu fica em MEMÓRIAS. Não bloqueia o commit; só avisa no output do hook.
 PROJETO_TETO_BYTES="${PROJETO_TETO_BYTES:-48000}"
+# AC-18 (18/10/2026, decisão B4 do Humano): perto do teto, toda inclusão no PROJETO vem com
+# uma retirada para extras/projeto-detalhe/. O aviso sai quando o arquivo CRESCEU em relação
+# ao HEAD e ficou a menos de PROJETO_FOLGA_BYTES do teto.
+PROJETO_FOLGA_BYTES="${PROJETO_FOLGA_BYTES:-500}"
 checar_teto_projeto() {
-  local tam
+  local tam antes
   tam="$(wc -c < PROJETO.md 2>/dev/null || echo 0)"
+  antes="$(git show HEAD:PROJETO.md 2>/dev/null | wc -c)"
   if [ "$tam" -gt "$PROJETO_TETO_BYTES" ]; then
     echo "aviso: PROJETO.md tem $tam B (teto $PROJETO_TETO_BYTES B) -- história vai para MEMÓRIAS, não para o PROJETO" >&2
+  elif [ "$tam" -gt "$antes" ] && [ $((PROJETO_TETO_BYTES - tam)) -lt "$PROJETO_FOLGA_BYTES" ]; then
+    echo "aviso: PROJETO.md cresceu $((tam - antes)) B e está a $((PROJETO_TETO_BYTES - tam)) B do teto -- toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18)" >&2
   fi
 }
 
