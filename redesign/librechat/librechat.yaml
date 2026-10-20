@@ -260,6 +260,7 @@ endpoints:
 # pf_dora em CPU.
 speech:
   tts:
+    allowedAddresses: ["172.29.7.1:8890"]
     openai:
       url: "http://172.29.7.1:8890/v1/audio/speech"
       apiKey: "loopback-sem-chave"
