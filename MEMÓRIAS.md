@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5fb5679b9bd0e67c02637917a8559daec3f714ce
-  Escrito em: 20/10/2026 10:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a7e439d58995be262adbe2b8eb323264f721db5b
+  Escrito em: 20/10/2026 10:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fb5679b9bd0e67c02637917a8559daec3f714ce/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fb5679b9bd0e67c02637917a8559daec3f714ce/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fb5679b9bd0e67c02637917a8559daec3f714ce/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fb5679b9bd0e67c02637917a8559daec3f714ce/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5fb5679b9bd0e67c02637917a8559daec3f714ce/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7e439d58995be262adbe2b8eb323264f721db5b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7e439d58995be262adbe2b8eb323264f721db5b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7e439d58995be262adbe2b8eb323264f721db5b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7e439d58995be262adbe2b8eb323264f721db5b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a7e439d58995be262adbe2b8eb323264f721db5b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não reduziu o PROJETO. Ele só adicionou um aviso.** O diff assinado (`projeto-retirada-20261018`, aplicado em `2a371ca`) mudou `scripts/perimetro.sh` e acrescentou `PROJETO_FOLGA_BYTES` (padrão 500): o aviso sai quando o PROJETO cresce em relação ao HEAD e fica a menos de 500 bytes do teto. Não tirou nenhum texto do PROJETO. Medido agora: `PROJETO.md` = 47.703 bytes, folga de 297 bytes. A retirada real de conteúdo para `extras/projeto-detalhe/` continua por fazer, e precisa de proposta assinada com a escolha do que sai. As entradas (777)/(778) descreveram a política como feita; esta entrada corrige isso. Não edito o texto delas (append-only).
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git show 2a371ca^2 --stat` e leitura do `.diff` aplicado (sem `+` de retirada de texto); `wc -c PROJETO.md` = 47703 · Autorização: Humano — "faça"
+
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18, decisão B4 do Humano, projeto-retirada-20261018, assinado).** O PROJETO estava a 297 bytes do teto (47.703 de 48.000, medido). Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar.sh projeto-retirada-20261018` = PODE APLICAR; `wc -c PROJETO.md` = 47703 · Autorização: Humano — "feito" (assinatura de projeto-retirada-20261018)
 
