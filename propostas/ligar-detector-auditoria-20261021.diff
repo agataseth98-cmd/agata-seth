@@ -1,0 +1,20 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index dfed190..dee85aa 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -50,6 +50,7 @@ RAIZ = Path(os.environ.get("SETH_REPO", str(_AQUI.parents[1])))
+ sys.path.insert(0, str(_AQUI.parents[1] / "scripts"))
+ import verificar_cabecalho as _cab  # noqa: E402
+ import verificar_citacao_arquivo as _cit  # noqa: E402
++import detector_estado_sem_prova as _det  # noqa: E402
+ 
+ LOG = Path(os.environ.get("AGATA_AUDITORIA_LOG", "~/.cache/agata/auditoria-turno.jsonl")).expanduser()
+ CATALOGO = _AQUI / "afirmacoes_desmentidas.json"
+@@ -769,6 +770,7 @@ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+     out += _negacao_contradita(texto, msgs)
+     out += _estado_desatualizado(texto)
+     out += _citacao_inventada(texto)
++    out += _det.achados(texto)
+     if modo_atual == "conciso":
+         narradas = _narracao(texto)
+         if narradas:
