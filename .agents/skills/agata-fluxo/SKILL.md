@@ -53,3 +53,18 @@ Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identi
 ## Relacionadas
 - `agata-carregar` (abrir sessão), `agata-mudanca-segura` (mudança na Máquina),
   `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-dupla` (detalhe do canal e da vigia).
+
+## 8. Comandos padrão (para o Humano colar; todo modelo entrega neste formato)
+Atualizar a checkout principal sem perder nada. Guarda qualquer arquivo rastreado modificado antes de devolvê-lo ao repositório:
+
+```bash
+bash -c 'R=$HOME/agata; B=$HOME/.agata-backup-staging/alteracoes-$(date +%Y%m%d-%H%M); M=$(git -C "$R" diff --name-only); if [ -n "$M" ]; then mkdir -p "$B" && for f in $M; do mkdir -p "$B/$(dirname "$f")" && cp "$R/$f" "$B/$f"; done && echo "Alterações guardadas em: $B"; git -C "$R" checkout -- $M; fi && git -C "$R" pull --ff-only && echo "Pronto: main atualizado"'
+```
+
+Assinar uma proposta (o Humano cola no próprio terminal, uma vez por proposta):
+
+```bash
+bash scripts/aprovar.sh <nome-da-proposta>
+```
+
+Regra: `<nome-da-proposta>` é o nome do arquivo `.diff` em `propostas/`, sem a extensão. Antes de assinar, confirme que o arquivo existe (`ls propostas/<nome>.diff`); se não existir, atualize a checkout com o comando acima.
