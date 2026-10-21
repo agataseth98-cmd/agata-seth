@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ba2521618e6917a2bc6e975e8f572527944644b7
-  Escrito em: 21/10/2026 10:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 65c5b3a62c120b04b755ee140392e0c67965d86c
+  Escrito em: 21/10/2026 13:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba2521618e6917a2bc6e975e8f572527944644b7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba2521618e6917a2bc6e975e8f572527944644b7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba2521618e6917a2bc6e975e8f572527944644b7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba2521618e6917a2bc6e975e8f572527944644b7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba2521618e6917a2bc6e975e8f572527944644b7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65c5b3a62c120b04b755ee140392e0c67965d86c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65c5b3a62c120b04b755ee140392e0c67965d86c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65c5b3a62c120b04b755ee140392e0c67965d86c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65c5b3a62c120b04b755ee140392e0c67965d86c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65c5b3a62c120b04b755ee140392e0c67965d86c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): achados de afirmação sem prova, confiança numérica e componente removido citado no presente.** Assinado pelo Humano (detector-estado-sem-prova-20261021). Sem modelo: regex, 6 casos fixos derivados da conversa auditada (scripts/testar_detector_estado.py).
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: p8_verificar = PODE APLICAR; testes do detector 6/6 · Autorização: Humano — assinatura de detector-estado-sem-prova-20261021; "pode"
+
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não verificada; só entra como base de regra o que tiver PR, commit ou medição anexada.** Ditado do Humano (21/10/2026), a partir da auditoria do export de conversa. Origem: 176 afirmações de "endereçado/fechado" e 139 de "confirmado" no export, sem prova ao lado; "5 de 7 riscos endereçados" era falso (medido: nenhum risco fechado por completo).
 Aplicação: o relatório de achados (somente leitura, fora do repositório) e o detector de estado sem prova (proposta PR 420, sem assinatura) são as fontes de regra; a conversa não.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: contagem literal do export (grep) e relatório de achados de 523 registros · Autorização: Humano — "autorizo suas propostas"
