@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(797) DIÁRIO — 21/10/2026 · **Escriba passa a poder levar entradas ao histórico por PR de registro (branch próprio), desligado por padrão (SETH_ESCRIBA_GIT=1 liga).** Assinado pelo Humano (escriba-commit-registro-20261021). A gravação local é mantida se o registro falhar. Ativar exige a variável no unit, em proposta à parte.
+  palavras-chave: escriba, passa, poder, levar, entradas, histórico, registro, branch, próprio, desligado, padrão, seth, git, liga, assinado, humano, commit, gravação, local, mantida, falhar, ativar, exige, variável, unit, proposta, parte
 (796) DIÁRIO — 21/10/2026 · **Comandos padrão da skill agata-fluxo (§8) aplicados: atualizar a checkout guardando alterações antes, e assinar proposta.** Assinado pelo Humano (skill-agata-fluxo-comandos-20261021). Todo modelo passa a entregar esses comandos no mesmo formato.
   palavras-chave: comandos, padrão, skill, agata, fluxo, aplicados, atualizar, checkout, guardando, alterações, assinar, proposta, assinado, humano, modelo, passa, entregar, esses, mesmo, formato
 (795) DIÁRIO — 21/10/2026 · **Início de sessão da dupla mecanizado: scripts/dupla/inicio.sh, uma leitura do canal, saída vazia sem novidade.** Assinado pelo Humano (inicio-dupla-20261021). Substitui a leitura manual do canal no começo de cada sessão, para economia de tokens.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: trava, laço, repetição, stream, seth, laco, assinado, fecha, sonda, lido, banco, librechat, ferramenta, codestral, latest, respondeu, certo, repetiu, bloco, estado, gateway, injeta, resumiu, doutrina, frase, caracteres, corridas, mesma, houve, agora, corta, repasse, repete, sequência, sse, forma, válida, diagnóstico, claude, code, proposta, feita, sessão, própria
 (768) DIÁRIO — 18/10/2026 · **Voz (piper-tts) sobe no boot com o agata.target (piper-boot-20261018, assinado).** Na queda de energia de 18/10 a voz, `static` e sem [Install], também não voltou; religada à mão pelo Claude Code. O Humano decidiu que ela sobe no boot. Aplicado o mesmo padrão do seth-gateway: `PartOf=agata.target` e `[Install] WantedBy=agata.target`, com a instalação sem sudo no README de redesign/systemd.
   palavras-chave: voz, piper, tts, sobe, boot, agata, target, assinado, queda, energia, static, install, voltou, religada, mão, claude, code, humano, decidiu, ela, aplicado, mesmo, padrão, seth, gateway, partof, wantedby, instalação, sudo, readme, redesign, systemd
-(767) DIÁRIO — 18/10/2026 · **Medição de unidade que falha sai NÃO MEDIDO só para ela (seth-unidades-erro-por-unidade-20261018, assinado).** Fecha a ressalva do Codex à v2 (765): antes, timeout ou exceção ao medir uma unidade descartava o bloco UNIDADES-MEDIDAS inteiro, com as unidades já medidas junto; agora só aquela sai `NÃO MEDIDO (erro: <tipo>)` e as outras seguem. Selftest cobre exceção genérica e TimeoutExpired ao lado de unidade válida. Proposta feita por sessão própria do Claude Code.
-  palavras-chave: medição, unidade, falha, sai, medido, ela, seth, unidades, erro, assinado, fecha, ressalva, codex, timeout, exceção, medir, descartava, bloco, medidas, inteiro, junto, agora, aquela, tipo, seguem, selftest, cobre, genérica, timeoutexpired, lado, válida, proposta, feita, sessão, própria, claude, code
+(767) DIÁRIO — 18/10/2026 · **Medição de unidade que falha sai NÃO MEDIDO só par …
+  palavras-chave: medição, unidade, falha, sai, medido, par
 (766) DIÁRIO — 18/10/2026 · **Gateway da Seth e LibreChat voltam sozinhos no boo …
   palavras-chave: gateway, seth, librechat, voltam, sozinhos, boo
 (765) DIÁRIO — 18/10/2026 · **Unidades citadas vão medidas à Seth (v2); a v1 ass …
