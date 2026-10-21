@@ -1,0 +1,36 @@
+{
+ "repetidos_conhecidos": [
+  427,
+  514,
+  599,
+  729
+ ],
+ "excecoes_aprovadas": [
+  {
+   "commit": "eda3ece",
+   "motivo": "reorganização por período (Fase 4), permutação física de entradas",
+   "autorizacao": "ditado do Humano (MEMÓRIAS por período)"
+  },
+  {
+   "commit": "453ca28",
+   "motivo": "quente reduzido ao marco zero (Fase 4)",
+   "autorizacao": "ditado do Humano"
+  },
+  {
+   "commit": "1965fee",
+   "motivo": "SETH-DIARIO reordenado (mais recente primeiro), MEMORIAS (472)-(473)",
+   "autorizacao": "MEMÓRIAS (472)-(473)"
+  },
+  {
+   "commit": "30b6e69",
+   "motivo": "expurgo de citação inventada (748)",
+   "autorizacao": "APROVADO-expurgo-citacao-748-20261017 (assinado)"
+  }
+ ],
+ "a_revisar_pelo_humano": [
+  "4a680d7 (edita entrada nova para corrigir numeração: viola append-only estrito)",
+  "061ec71 (corrige formato da entrada (736))"
+ ],
+ "nota": "Checagem 1 vale a partir do marco (commit de criação desta auditoria). Remoções anteriores são dívida histórica, reportada e não contada.",
+ "marco": "f952e37"
+}
