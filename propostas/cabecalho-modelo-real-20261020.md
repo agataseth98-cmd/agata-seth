@@ -16,3 +16,11 @@ Em 20/10/2026 uma sessão no app Codex (modelo real: GPT-6 Luna) escreveu `agata
 
 ## Em aberto
 - Como o próprio sistema confere o cabeçalho (medição mecânica, como o P-7 faz com as citações), se o Humano quiser.
+
+## Formalização (20/10/2026, 21h)
+
+Confirmado pelo Humano: a regra vale para **todos** os modelos que não passam pelo sistema da Seth, inclusive o Codex e o Claude Code.
+
+- Passa pela Seth (gateway e escriba): `agata-seth · <modelo> · t=<n> · <data e hora>`.
+- Não passa pela Seth (Claude Code, Codex, nuvem, app próprio): `agata · <MODELO REAL> · t=<n> · <data e hora>`.
+- Exemplo do erro corrigido: uma sessão do Claude Code usava `agata-seth`, e uma do app Codex escrevia `agata-seth · ministral-14b-latest` com modelo real GPT-6 Luna. Ambos foram corrigidos.
