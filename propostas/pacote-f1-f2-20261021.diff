@@ -1,0 +1,171 @@
+diff --git a/SELOS.chain b/SELOS.chain
+new file mode 100644
+index 0000000..c333042
+--- /dev/null
++++ b/SELOS.chain
+@@ -0,0 +1,11 @@
++298b09bd78d704b15a8bf70929d8d21122d9a89517b9c5837260e7f39c835833
++9ecae251b287a462027dd145826cb56f920fe5aca97f0fa91887f3230fbb5927
++d67340540855c50f5deda699ce75e900ec5f6489f247051ed8c611376a2df0e1
++ac89804ca80179452d619c9286b7ef03279cadf71879358f71146bb2ce1af39a
++6167f1c312b2770a9428041ae3f5127d9f41b1e111fb3dbd4d870bcb65a5dd04
++a551e305b9f604c1155b6d8bbe69cc99391626d24a9e8b6e525a6cead48feaeb
++50e8fdad91c745fac1eabbb6fd2ee124e4778cdd3a9998adeb0ff55bed4dd806
++200151da1bfd88566e848da4ad3fe1841228dc70ffbc5da49ca600d7f077c4cc
++d3e9d3f0e6366ceebdf1c01b069cefd4208f6908a542132fc7da1de7c5877e69
++7ca5c29712175620c5e312d8e340315d8e3ac6830617829705144d04db9be64e
++040c47a8741590baaac4adba0e395ddec2711ba9043539167d3f23f85ac9c0c3
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 6c16719..fc03bb0 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -51,6 +51,9 @@ source "$_PERIMETRO_DIR/perimetro/p10_vault_derivado.sh"
+ source "$_PERIMETRO_DIR/perimetro/p11_silos.sh"
+ source "$_PERIMETRO_DIR/perimetro/p12_backup_verificavel.sh"
+ source "$_PERIMETRO_DIR/perimetro/p14_frio_imutavel.sh"
++source "$_PERIMETRO_DIR/perimetro/p24_quente_orcamento.sh"
++source "$_PERIMETRO_DIR/perimetro/p25_selos_cadeia.sh"
++source "$_PERIMETRO_DIR/perimetro/p26_frio_tag.sh"
+ source "$_PERIMETRO_DIR/perimetro/p15_roster_remoto.sh"
+ source "$_PERIMETRO_DIR/perimetro/p16_testes_dos_controles.sh"
+ source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
+@@ -381,6 +384,21 @@ main() {
+   p14_frio_imutavel; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-24" "Quente acima do orçamento de hidratação (aviso; escalada pendente)" "proposta v8, seção 9"
++  PERIMETRO_ESTADO=""
++  p24_quente_orcamento; _perimetro_veredito "$?"
++  echo
++
++  cabecalho "P-25-SELOS" "Cadeia de SELOS.txt íntegra (SELOS.chain)" "proposta v8, seção 22"
++  PERIMETRO_ESTADO=""
++  p25_selos_cadeia; _perimetro_veredito "$?"
++  echo
++
++  cabecalho "P-26" "Todo chunk frio selado tem tag de git (aviso até backfill)" "proposta v8, seção 9"
++  PERIMETRO_ESTADO=""
++  p26_frio_tag; _perimetro_veredito "$?"
++  echo
++
+   cabecalho "P-15" "Saúde do roster do Conselho Remoto -- < 2 famílias com sucesso em 24h vira AVISO" "MEMÓRIAS (374); scripts/conselho_remoto.py"
+   p15_roster_remoto
+   echo "veredito: AVISO SÓ (nunca falha)"
+diff --git a/scripts/perimetro/p24_quente_orcamento.sh b/scripts/perimetro/p24_quente_orcamento.sh
+new file mode 100644
+index 0000000..a19c608
+--- /dev/null
++++ b/scripts/perimetro/p24_quente_orcamento.sh
+@@ -0,0 +1,13 @@
++#!/usr/bin/env bash
++# P-24 (proposta 21/10/2026, v8): quente (MEMÓRIAS.md) acima do orçamento de hidratação.
++# Estado atual: AVISO (PARCIAL) com o excesso medido. Escalada para FALHA: fase seguinte.
++p24_quente_orcamento() {
++  local orc=25000 tam
++  [ -f MEMÓRIAS.md ] || return 0
++  tam=$(python3 -c "import sys;print(len(open('MEMÓRIAS.md',encoding='utf-8').read()))")
++  if [ "$tam" -gt "$orc" ]; then
++    PERIMETRO_ESTADO="PARCIAL"
++    echo "AVISO (P-24): MEMÓRIAS.md tem $tam caracteres; orçamento de hidratação é $orc. Escalada para FALHA ainda não implementada."
++  fi
++  return 0
++}
+diff --git a/scripts/perimetro/p25_selos_cadeia.sh b/scripts/perimetro/p25_selos_cadeia.sh
+new file mode 100644
+index 0000000..0635b18
+--- /dev/null
++++ b/scripts/perimetro/p25_selos_cadeia.sh
+@@ -0,0 +1,25 @@
++#!/usr/bin/env bash
++# P-25-SELOS (proposta 21/10/2026, v8): cadeia de SELOS.txt.
++# SELOS.chain: c_i = sha256(c_{i-1} + "\n" + linha_i_de_SELOS.txt). Não altera o formato de SELOS.txt.
++# NÃO é o P-25 do registro de sessão (C0), que fica para proposta posterior.
++p25_selos_cadeia() {
++  [ -f SELOS.txt ] || return 0
++  if [ ! -f SELOS.chain ]; then
++    PERIMETRO_ESTADO="PARCIAL"
++    echo "AVISO (P-25-SELOS): SELOS.chain ausente; rodar 'bash scripts/selar.sh --iniciar-cadeia' para começar a cadeia."
++    return 0
++  fi
++  python3 - <<'PY' || return 1
++import hashlib,sys
++linhas=[l.rstrip('\n') for l in open('SELOS.txt',encoding='utf-8') if l.strip()]
++cadeia=[l.split()[0] for l in open('SELOS.chain',encoding='utf-8') if l.strip()]
++if len(cadeia)!=len(linhas):
++    print(f"SUSPEITO (P-25-SELOS): {len(linhas)} selos e {len(cadeia)} elos; cauda divergente."); sys.exit(1)
++c=""
++for i,l in enumerate(linhas):
++    c=hashlib.sha256((c+"\n"+l).encode('utf-8')).hexdigest()
++    if c!=cadeia[i]:
++        print(f"SUSPEITO (P-25-SELOS): elo {i+1} não confere; SELOS.txt foi alterado."); sys.exit(1)
++print(f"OK (P-25-SELOS): cadeia de {len(linhas)} selos íntegra.")
++PY
++}
+diff --git a/scripts/perimetro/p26_frio_tag.sh b/scripts/perimetro/p26_frio_tag.sh
+new file mode 100644
+index 0000000..f306a2b
+--- /dev/null
++++ b/scripts/perimetro/p26_frio_tag.sh
+@@ -0,0 +1,20 @@
++#!/usr/bin/env bash
++# P-26 (proposta 21/10/2026, v8): todo chunk frio selado tem tag de git.
++# Estado atual: 11 chunks sem tag própria -> PARCIAL (aviso) com a lista. Criar tags = backfill aprovado.
++p26_frio_tag() {
++  [ -f SELOS.txt ] || return 0
++  local faltam="" arq base tag
++  while read -r _hash arq _data; do
++    [ -z "$arq" ] && continue
++    case "$arq" in memoria/frio/*|MEMORIAS-FRIO-*) ;; *) continue ;; esac
++    base="${arq%.md}"; base="${base##*/}"; tag="${base}-final"
++    git rev-parse -q --verify "refs/tags/$tag" >/dev/null 2>&1 || faltam="$faltam $tag"
++  done < SELOS.txt
++  if [ -n "$faltam" ]; then
++    PERIMETRO_ESTADO="PARCIAL"
++    echo "AVISO (P-26): chunks frios sem tag:$faltam (backfill pendente, aprovado pelo Humano)."
++  else
++    echo "OK (P-26): todo chunk frio selado tem tag."
++  fi
++  return 0
++}
+diff --git a/scripts/selar.sh b/scripts/selar.sh
+index d313225..1381d85 100755
+--- a/scripts/selar.sh
++++ b/scripts/selar.sh
+@@ -13,9 +13,36 @@ if [ "${1:-}" = "--check" ]; then
+     done < "$SELOS"
+     exit $falha
+ fi
++if [ "${1:-}" = "--iniciar-cadeia" ]; then
++    [ -f "$SELOS" ] || { echo "sem SELOS.txt"; exit 1; }
++    [ -e SELOS.chain ] && { echo "SELOS.chain já existe; não reinicio a cadeia"; exit 1; }
++    python3 - <<'PY'
++import hashlib
++c=""; out=[]
++for l in open("SELOS.txt",encoding="utf-8"):
++    l=l.rstrip("\n")
++    if not l.strip(): continue
++    c=hashlib.sha256((c+"\n"+l).encode("utf-8")).hexdigest(); out.append(c+"\n")
++open("SELOS.chain","w",encoding="utf-8").write("".join(out))
++print(f"cadeia iniciada: {len(out)} elo(s) em SELOS.chain")
++PY
++    exit 0
++fi
+ [ -n "${1:-}" ] || { echo "uso: selar.sh <arquivo> | --check"; exit 1; }
+ [ -f "$1" ] || { echo "arquivo não existe: $1"; exit 1; }
+ hash=$(sha256sum "$1" | cut -d' ' -f1); data=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+ echo "$hash $1 $data" >> "$SELOS"
+ echo "selado: $1"; echo "sha256: $hash"
+-echo "registrado em $SELOS — commite e tag: git tag ${1%.md}-final"
++if [ -e SELOS.chain ]; then
++    ant=$(tail -n1 SELOS.chain 2>/dev/null | awk '{print $1}')
++    novo=$(printf '%s\n%s' "${ant}" "$(tail -n1 "$SELOS")" | python3 -c "import sys,hashlib;print(hashlib.sha256(sys.stdin.read().encode('utf-8')).hexdigest())")
++    echo "$novo" >> SELOS.chain
++    echo "cadeia: elo acrescentado em SELOS.chain"
++else
++    echo "cadeia ainda não iniciada: rode 'bash scripts/selar.sh --iniciar-cadeia' uma vez"
++fi
++tag="${1%.md}-final"; tag="${tag##*/}"
++echo "próximos passos (manuais até automatizar e testar):"
++echo "  1) git add SELOS.txt SELOS.chain $1 && git commit -m 'selo: $1'"
++echo "  2) git tag $tag"
++echo "  3) git push origin $tag"
