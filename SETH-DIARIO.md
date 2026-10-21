@@ -9,6 +9,14 @@ Eu assumo o risco." (03/09/2026)
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; entrada nova sempre logo abaixo dela, nunca acima; espelha o mesmo marcador de MEMÓRIAS.md -->
 
 ---
+**2026-10-20 21:31 -0300 (relógio da Máquina)**
+
+Devolutiva para Marcos William (auditoria estática de 30/09/2026) — texto pronto para envio via Seth (cascata livre).
+
+---
+
+
+---
 **2026-10-17 13:34 -0300 (relógio da Máquina)**
 
 --- 
