@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c8bf9f51bec9958c12bda56b9c3edb251d860b0f
-  Escrito em: 21/10/2026 15:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 90f7b8ca29fa8fa04a0914a9357ad9293f1f8334
+  Escrito em: 21/10/2026 15:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8bf9f51bec9958c12bda56b9c3edb251d860b0f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8bf9f51bec9958c12bda56b9c3edb251d860b0f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8bf9f51bec9958c12bda56b9c3edb251d860b0f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8bf9f51bec9958c12bda56b9c3edb251d860b0f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8bf9f51bec9958c12bda56b9c3edb251d860b0f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90f7b8ca29fa8fa04a0914a9357ad9293f1f8334/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90f7b8ca29fa8fa04a0914a9357ad9293f1f8334/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90f7b8ca29fa8fa04a0914a9357ad9293f1f8334/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90f7b8ca29fa8fa04a0914a9357ad9293f1f8334/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/90f7b8ca29fa8fa04a0914a9357ad9293f1f8334/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(800) DIÁRIO — 21/10/2026 · **A aplicação só junta com CodeQL verde, além de fiscal-p8 e suite-adversarial.** Assinada pelo Humano (aplicar-exige-codeql-20261021). CodeQL em skipping também bloqueia (escolha rígida).
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: p8_verificar = PODE APLICAR · Autorização: Humano — assinatura de aplicar-exige-codeql-20261021; "ok"
+
 (799) DIÁRIO — 21/10/2026 · **Auditoria do escriba deixa de imprimir o padrão de segredo (alerta CodeQL alto).** Assinada pelo Humano (auditoria-escriba-sem-vazamento-20261021). Registra só arquivo e contagem.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: p8_verificar = PODE APLICAR · Autorização: Humano — assinatura de auditoria-escriba-sem-vazamento-20261021; "ok"
 
