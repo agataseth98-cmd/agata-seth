@@ -1,0 +1,20 @@
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index 57fa442..56ddaf0 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -53,3 +53,15 @@ Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identi
+ ## Relacionadas
+ - `agata-carregar` (abrir sessão), `agata-mudanca-segura` (mudança na Máquina),
+   `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-dupla` (detalhe do canal e da vigia).
++
++## 7. Como se checa o fluxo (ordem fixa)
++Para saber se o fluxo está íntegro, em vez de confiar na memória ou no relato, cheque nesta ordem:
++1. **Origem:** `git fetch -q` e `git log -1 origin/main` contra o `main` local. Se diferirem, atualize antes de qualquer conclusão. (Causa mais comum de "não encontrado".)
++2. **Propostas pendentes:** `ls propostas/*.diff` e `ls propostas/APROVADO-*`. Um `.diff` sem `APROVADO-` é pendência do Humano; nunca é "aplicado".
++3. **Assinatura e aplicabilidade:** `bash scripts/p8_verificar.sh <nome>` deve dar `PODE APLICAR`, com hash do `.diff` batendo.
++4. **Aplicação:** `python3 scripts/dupla/aplicar.py <nome> ...` deve dar `APLICADO E JUNTADO`. Depois, confira no `main` que o arquivo esperado existe e que `bash scripts/testar_perimetro.sh` dá `SUITE OK`.
++5. **Canal:** `python3 scripts/dupla/dupla.py status` e `bash scripts/dupla/inicio.sh <agente>`. Mensagem sem resposta não é aceite; é pendência.
++6. **Runtime, quando a mudança toca serviço:** `systemctl --user is-failed <unit>` e saúde do serviço alterado. Mudança de runtime sem medição pós-deploy é "não verificada".
++7. **Registro:** a entrada em `MEMÓRIAS.md` só existe depois do PR juntado; antes disso, o estado é "em andamento".
++
++Relatório de estado sem essas medições é "não medido", ponto.
