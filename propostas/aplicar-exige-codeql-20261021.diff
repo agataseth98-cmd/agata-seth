@@ -1,0 +1,16 @@
+diff --git a/scripts/dupla/aplicar.py b/scripts/dupla/aplicar.py
+index cf2fc6f..48e964c 100755
+--- a/scripts/dupla/aplicar.py
++++ b/scripts/dupla/aplicar.py
+@@ -60,9 +60,9 @@ def main():
+           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
+   num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
+   import json
+-  EXIGIDOS = ("fiscal-p8", "suite-adversarial")
++  EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
+   def ci():
+-      """Espera e devolve True só se os DOIS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
++      """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
+       time.sleep(20); limite = time.time() + 1500  # 25 min: check ausente ou API ruim não prende para sempre
+       while True:
+           if time.time() > limite: return False, {"erro": "timeout esperando os checks"}
