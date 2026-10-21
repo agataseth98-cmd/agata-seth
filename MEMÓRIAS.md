@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1c24dc78f8e032ed30e1af0c019bd2c45d18b009
-  Escrito em: 21/10/2026 14:29 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f952e37c59fc99e7c7b02f128646a43c057436c2
+  Escrito em: 21/10/2026 14:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c24dc78f8e032ed30e1af0c019bd2c45d18b009/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c24dc78f8e032ed30e1af0c019bd2c45d18b009/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c24dc78f8e032ed30e1af0c019bd2c45d18b009/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c24dc78f8e032ed30e1af0c019bd2c45d18b009/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c24dc78f8e032ed30e1af0c019bd2c45d18b009/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f952e37c59fc99e7c7b02f128646a43c057436c2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f952e37c59fc99e7c7b02f128646a43c057436c2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f952e37c59fc99e7c7b02f128646a43c057436c2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f952e37c59fc99e7c7b02f128646a43c057436c2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f952e37c59fc99e7c7b02f128646a43c057436c2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(797) DIÁRIO — 21/10/2026 · **Escriba passa a poder levar entradas ao histórico por PR de registro (branch próprio), desligado por padrão (SETH_ESCRIBA_GIT=1 liga).** Assinado pelo Humano (escriba-commit-registro-20261021). A gravação local é mantida se o registro falhar. Ativar exige a variável no unit, em proposta à parte.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: p8_verificar = PODE APLICAR · Autorização: Humano — assinatura de escriba-commit-registro-20261021; "pode"
+
 (796) DIÁRIO — 21/10/2026 · **Comandos padrão da skill agata-fluxo (§8) aplicados: atualizar a checkout guardando alterações antes, e assinar proposta.** Assinado pelo Humano (skill-agata-fluxo-comandos-20261021). Todo modelo passa a entregar esses comandos no mesmo formato.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: p8_verificar = PODE APLICAR · Autorização: Humano — assinatura de skill-agata-fluxo-comandos-20261021
 
