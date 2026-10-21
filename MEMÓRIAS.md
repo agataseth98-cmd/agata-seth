@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 260b9213d3f534a22b20c26de0c402c284f0e5b2
-  Escrito em: 20/10/2026 21:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99a1e3a80879f7177cabbadef07ef8b678f2d33f
+  Escrito em: 21/10/2026 09:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/260b9213d3f534a22b20c26de0c402c284f0e5b2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/260b9213d3f534a22b20c26de0c402c284f0e5b2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/260b9213d3f534a22b20c26de0c402c284f0e5b2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/260b9213d3f534a22b20c26de0c402c284f0e5b2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/260b9213d3f534a22b20c26de0c402c284f0e5b2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99a1e3a80879f7177cabbadef07ef8b678f2d33f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99a1e3a80879f7177cabbadef07ef8b678f2d33f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99a1e3a80879f7177cabbadef07ef8b678f2d33f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99a1e3a80879f7177cabbadef07ef8b678f2d33f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99a1e3a80879f7177cabbadef07ef8b678f2d33f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano decide quando parar; o modelo que não se julgar apto pede substituição.** Ditado pelo Humano em 20/10/2026, ao final do dia: a sessão segue até o fim do dia por ordem do Humano, não por contagem de tarefas. Se o modelo não se julgar apto a continuar (erro de medição recorrente, afirmação sem prova, perda de contexto), ele diz isso e pede substituição, em vez de seguir com risco.
+Motivo: em 20/10 houve afirmações não medidas em mais de um modelo (cabeçalho de identidade trocado, contagem refeita sem conferir, achado de auditoria dado como atual sem medir). O custo de errar em auditoria externa é maior que o de parar.
+Como aplicar: antes de cada afirmação de estado, medir com a ferramenta do caso (comando, arquivo, PR). Sem medição, dizer "não medido". Ao identificar erro próprio, registrar em entrada nova, sem editar a anterior.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: ditado do Humano em 20/10/2026 (fim do dia) · Autorização: Humano — "até o final do dia… só o humano decide quando é hora de parar… canonize isso"
+
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 427, 514 e 599 são referências no texto; o grupo real 729 já foi desambiguado em (730).**
 
 Vetor: `grep -nE '^\([0-9]+\) '` com nome do arquivo (`grep -nH -E`) em `MEMÓRIAS.md`, `MEMORIAS-MORNO.md` e `memoria/frio/MEMORIAS-FRIO-*.md`; conferência adicional dos cabeçalhos formais `^\([0-9]+\) \S+ — ` em todas essas camadas, no HEAD `a96fb7b`. Os números (427), (514) e (599) aparecem duas vezes no grep literal, sempre em `MEMÓRIAS.md`: uma ocorrência é uma referência numa correção posterior (linhas 4841, 3684 e 2430, respectivamente), e a outra é a única entrada formal correspondente (linhas 4847, 3696 e 2482). Não se renumeram nem se editam essas entradas. O número (729), sim, identifica 14 cabeçalhos formais em `MEMÓRIAS.md` (linhas 218 a 296, de seis em seis); a entrada (730) já atribuiu os identificadores de citação (729a) a (729n), do mais antigo ao mais novo, e enumera os títulos. As camadas morna e fria não acrescentam outro grupo formal repetido.
