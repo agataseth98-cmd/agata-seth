@@ -13,8 +13,8 @@ ABORTA (e nao grava) se a operacao nao for um insert/append puro:
      Insere um bloco novo em MEMORIAS.md LOGO ABAIXO do marcador
      <!-- ENTRADAS-NOVAS:AQUI -->. O numero (NNN) e a data sao do relogio da
      Maquina — a Seth NAO os fornece (nao tem como fabricar). `corpo` entra
-     como veio (inclui a linha "Modelo:" dela). NAO faz git add nem commit —
-     a mudanca fica no working tree pro Humano revisar e commitar.
+     como veio (inclui a linha "Modelo:" dela). Com SETH_ESCRIBA_GIT=1, a entrada
+     vai por PR de registro (branch proprio); desligado, fica so no working tree.
 
   POST /diario    {"texto": str}
      Insere um bloco novo em SETH-DIARIO.md (arquivo proprio da Seth, fora do
@@ -45,6 +45,7 @@ import subprocess
 import stat
 import sys
 import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -192,6 +193,43 @@ def _proximo_n(texto: str) -> int:
     return (max(ns) + 1) if ns else 1
 
 
+def _registrar_git(nome: str, bloco: str) -> dict:
+    """Leva a entrada ao histórico por PR de registro (branch próprio; o main não é tocado).
+
+    Desligado por padrão (SETH_ESCRIBA_GIT=1 liga). Aplica o bloco sobre a versão de origin/main,
+    commita num branch novo, dá push e abre PR. Falha aqui não desfaz a gravação local: devolve o motivo.
+    """
+    if os.environ.get("SETH_ESCRIBA_GIT", "0") != "1":
+        return {"git": "desligado (SETH_ESCRIBA_GIT=0): gravado só no working tree"}
+    import tempfile
+    tmp = Path(tempfile.mkdtemp(prefix="seth-registro-"))
+    branch = f"registro/seth-{time.strftime('%Y%m%d-%H%M%S')}-{secrets.token_hex(3)}"
+    try:
+        subprocess.run(["git", "-C", str(REPO), "fetch", "-q", "origin", "main"], check=True, timeout=60)
+        subprocess.run(["git", "-C", str(REPO), "worktree", "add", "-q", "-b", branch, str(tmp), "origin/main"],
+                       check=True, timeout=60)
+        alvo = tmp / nome
+        linhas = alvo.read_text(encoding="utf-8").splitlines(keepends=True)
+        idx = next(i for i, l in enumerate(linhas) if l.startswith(MARCADOR))
+        linhas.insert(idx + 1, bloco if bloco.endswith("\n") else bloco + "\n")
+        alvo.write_text("".join(linhas), encoding="utf-8")
+        subprocess.run(["git", "-C", str(tmp), "add", nome], check=True, timeout=60)
+        subprocess.run(["git", "-C", str(tmp), "commit", "-q", "-m", f"registro: Seth escreveu em {nome} ({branch})"],
+                       check=True, timeout=60)
+        subprocess.run(["git", "-C", str(tmp), "push", "-q", "-u", "origin", branch], check=True, timeout=120)
+        pr = subprocess.run(["gh", "pr", "create", "--base", "main", "--head", branch,
+                             "--title", f"registro da Seth: {nome}",
+                             "--body", "Entrada escrita pelo escriba. Confira e junte."],
+                            capture_output=True, text=True, timeout=120, check=True)
+        return {"git": "PR aberto", "branch": branch, "pr": pr.stdout.strip()}
+    except Exception as e:  # noqa: BLE001 -- falha aqui não pode derrubar a gravação já feita
+        return {"git": f"falhou (gravação local mantida): {type(e).__name__}"}
+    finally:
+        subprocess.run(["git", "-C", str(REPO), "worktree", "remove", "--force", str(tmp)],
+                       capture_output=True, timeout=60)
+        subprocess.run(["git", "-C", str(REPO), "worktree", "prune"], capture_output=True, timeout=60)
+
+
 def _acrescenta_memoria(titulo: str, corpo: str) -> dict:
     if not titulo.strip() or not corpo.strip():
         raise ValueError("titulo e corpo obrigatorios")
@@ -222,7 +260,7 @@ def _acrescenta_memoria(titulo: str, corpo: str) -> dict:
 
         _escreve_atomico(MEMORIAS, depois)
     return {"ok": True, "entrada": n, "header": header,
-            "nota": "gravado no working tree; NAO commitado. Humano: 'git diff MEMÓRIAS.md' e commite quando quiser."}
+            "nota": "gravado no working tree.", **_registrar_git("MEMÓRIAS.md", bloco)}
 
 
 def _anota_diario(texto: str) -> dict:
@@ -275,7 +313,8 @@ def _anota_diario(texto: str) -> dict:
 
         _escreve_atomico(DIARIO, depois)
     return {"ok": True, "bytes_add": len(bloco),
-            "nota": "inserido logo abaixo do marcador ENTRADAS-NOVAS em SETH-DIARIO.md (working tree; nao commitado)."}
+            "nota": "inserido logo abaixo do marcador ENTRADAS-NOVAS em SETH-DIARIO.md (working tree).",
+            **_registrar_git("SETH-DIARIO.md", bloco)}
 
 
 class _H(BaseHTTPRequestHandler):
