@@ -1,0 +1,15 @@
+diff --git a/scripts/auditoria_escriba.py b/scripts/auditoria_escriba.py
+index 5d1eade..3bb8c0a 100644
+--- a/scripts/auditoria_escriba.py
++++ b/scripts/auditoria_escriba.py
+@@ -63,8 +63,8 @@ def checar() -> dict[str, tuple[bool, str]]:
+             if l.startswith("+") and not l.startswith("+++"):
+                 for pad in secretos():
+                     if pad and pad in l and not ANCORA.search(l):
+-                        achados.append(pad[:20])
+-    r["3_segredo"] = (not achados, f"padrão de segredo em linha adicionada: {achados[:3]}" if achados else "nenhum")
++                        achados.append(arq)  # nunca o texto do padrão: o log não pode vazar segredo (CodeQL)
++    r["3_segredo"] = (not achados, f"{len(achados)} ocorrência(s) de padrão de segredo em {sorted(set(achados))}" if achados else "nenhum")
+     # 4. registro por merge de PR
+     diretos = []
+     for arq in ARQUIVOS:
