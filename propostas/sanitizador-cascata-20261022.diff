@@ -44,10 +44,10 @@ index 48da12b..db82b4b 100644
      up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
      px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
 diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
-index fbd46b3..773212b 100644
+index fbd46b3..ca91ba3 100644
 --- a/redesign/router/sanitizar.py
 +++ b/redesign/router/sanitizar.py
-@@ -124,6 +124,47 @@ def _redigir(trecho: str) -> str:
+@@ -124,6 +124,50 @@ def _redigir(trecho: str) -> str:
      return f"{cabeca}…[{n} chars]"
  
  
@@ -74,7 +74,10 @@ index fbd46b3..773212b 100644
 +    if not os.path.exists(caminho):
 +        raise NomesProjetoAusente(caminho)
 +    with open(caminho, encoding="utf-8") as f:
-+        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
++        nomes = [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
++    if not nomes:  # (22/10/2026, revisão do Codex) lista existente e vazia também falha fechado
++        raise NomesProjetoAusente(f"{caminho} (sem nomes)")
++    return nomes
 +
 +
 +def varrer_pessoal(texto: str, nomes: list[str]) -> list[dict]:
@@ -95,7 +98,7 @@ index fbd46b3..773212b 100644
  def varrer(texto: str) -> list[dict]:
      """Lista de {padrao_rotulo, padrao, trecho_redigido, pos}. Nunca devolve o segredo."""
      achados = []
-@@ -210,15 +251,20 @@ def _campos_texto(payload):
+@@ -210,15 +254,20 @@ def _campos_texto(payload):
      yield from _anda(payload, "", 0)
  
  
@@ -117,7 +120,7 @@ index fbd46b3..773212b 100644
      except _TetoDeVarreduraExcedido as e:
          achados.append({
              "padrao_rotulo": "teto-de-varredura-excedido",
-@@ -314,6 +360,35 @@ def _autoteste() -> int:
+@@ -314,6 +363,46 @@ def _autoteste() -> int:
            f"{'ok' if ok else 'bloqueou à toa'}")
      falhas += 0 if ok else 1
  
@@ -144,6 +147,17 @@ index fbd46b3..773212b 100644
 +    except NomesProjetoAusente:
 +        ok = True
 +    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista ausente bloqueia saída externa]")
++    falhas += 0 if ok else 1
++    # lista existente e vazia também bloqueia (falha fechada)
++    _vazio = os.path.join(os.environ.get("TMPDIR", "/tmp"), "agata-nomes-vazio-teste.txt")
++    open(_vazio, "w", encoding="utf-8").write("# só comentário\n")
++    try:
++        _nomes_projeto(_vazio)
++        ok = False
++    except NomesProjetoAusente:
++        ok = True
++    os.remove(_vazio)
++    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista vazia bloqueia saída externa]")
 +    falhas += 0 if ok else 1
 +    # local não muda: com pessoal=False, e-mail passa
 +    ok = sanitizar_payload({"messages": [{"role": "user", "content": "fulano@exemplo.com.br"}]}) is not None
