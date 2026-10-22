@@ -1,0 +1,34 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 8ace622..6e1b740 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -385,21 +385,6 @@ const TOOLS = [
+       required: ["titulo", "corpo"],
+     },
+   },
+-  {
+-    name: "diario_anotar",
+-    description:
+-      "ANEXA texto ao fim de SETH-DIARIO.md — teu espaço próprio, append-only, fora de MEMÓRIAS e fora do vault derivado. " +
+-      "Para rascunho, raciocínio em voz alta, observações sobre teu próprio funcionamento. Não é canon, não passa por portão. " +
+-      "Timestamp do relógio da Máquina é acrescentado automaticamente. Não apaga nada.",
+-    inputSchema: {
+-      type: "object",
+-      properties: {
+-        texto: { type: "string", description: "o que anexar" },
+-        agata_capability: { type: "string", description: "token interno de aprovação, fornecido pelo LibreChat" },
+-      },
+-      required: ["texto"],
+-    },
+-  },
+ ];
+ 
+ // ---- escrita APPEND-ONLY (via seth_escriba no host) ---------------------
+@@ -459,7 +444,6 @@ async function callTool(name, args) {
+   else if (name === "vault_consultar") text = await vaultConsultar(args);
+   else if (name === "vault_buscar") text = await vaultBuscar(args);
+   else if (name === "memoria_acrescentar") text = await memoriaAcrescentar(args);
+-  else if (name === "diario_anotar") text = await diarioAnotar(args);
+   else if (name === "maquina_verificar") text = args?.listar ? await maquinaListar() : await maquinaVerificar(args);
+   else throw new Error(`tool desconhecida: ${name}`);
+   return { content: [{ type: "text", text }] };
