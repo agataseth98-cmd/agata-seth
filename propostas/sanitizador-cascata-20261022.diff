@@ -1,0 +1,212 @@
+diff --git a/redesign/router/proxy.py b/redesign/router/proxy.py
+index 48da12b..b95c6fe 100644
+--- a/redesign/router/proxy.py
++++ b/redesign/router/proxy.py
+@@ -83,7 +83,9 @@ def validar_egresso_publico(payload: object, classification: str | None) -> None
+     model = payload.get("model", "") if isinstance(payload, dict) else ""
+     if isinstance(model, str) and model.startswith(_LOCAL_MODEL_PREFIXES):
+         return
+-    if classification != "public":
++    # (22/10/2026, P-8 sanitizador-cascata) "sanitizado-cascata" é a cascata seth-livre: só chega
++    # aqui depois de sanitizar_payload (segredo + dados pessoais + nomes de projeto) em do_POST.
++    if classification not in ("public", "sanitizado-cascata"):
+         raise PermissionError("dados sem classificação pública bloqueados antes do OmniRoute")
+ 
+ # User-Agent de saída (MEMÓRIAS (545)). O Cloudflare do Groq e do Cerebras bane o
+@@ -163,8 +165,11 @@ class _Handler(BaseHTTPRequestHandler):
+             except ValueError:
+                 return self._erro(415, "corpo não é JSON -- este proxy só entende OpenAI-compat; nada foi repassado")
+             if isinstance(payload, dict):
++                # (22/10/2026, P-8 sanitizador-cascata) saída a provedor externo também varre dados
++                # pessoais e nomes de projeto; local não sai da Máquina e segue só com a régua de segredo.
++                externo = not str(payload.get("model", "")).startswith(_LOCAL_MODEL_PREFIXES)
+                 try:
+-                    sanitizar.sanitizar_payload(payload)
++                    sanitizar.sanitizar_payload(payload, pessoal=externo)
+                 except sanitizar.SegredoNoPayload as e:
+                     return self._bloqueado(e)
+             else:
+@@ -313,6 +318,12 @@ def _selftest() -> int:
+     # módulo, e o monkeypatch cairia no lugar errado (achado testando).
+     token_teste = "selftest-token-nao-e-segredo-de-verdade"
+     globals()["_token_interno"] = lambda: token_teste
++    # (22/10/2026) saída externa exige a lista de nomes de projeto; o selftest usa uma lista FICTÍCIA
++    # temporária, nunca a real (que fica em ~/.config/agata/ e não entra no repositório).
++    import tempfile as _tf
++    _lista_teste = _tf.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8")
++    _lista_teste.write("ProjetoZeta\n"); _lista_teste.close()
++    sanitizar.NOMES_PROJETO_PATH = _lista_teste.name
+ 
+     up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
+     px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index fbd46b3..4edc31c 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -124,6 +124,43 @@ def _redigir(trecho: str) -> str:
+     return f"{cabeca}…[{n} chars]"
+ 
+ 
++# (22/10/2026, P-8 sanitizador-cascata) Dados pessoais e nomes de projeto, só para saída a
++# provedor EXTERNO (proxy: pessoal=True quando o modelo não é local). Régua SEPARADA da de
++# segredo: e-mail no código quebraria o pré-commit (varredura_segredo.sh).
++PADROES_PESSOAIS = [
++    ("pessoal-email", re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")),
++    ("pessoal-cpf", re.compile(r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b")),
++    ("pessoal-cnpj", re.compile(r"\b\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}\b")),
++    ("pessoal-telefone", re.compile(r"\(\d{2}\)\s?9?\d{4}-?\d{4}\b|\b9\d{4}-\d{4}\b")),
++]
++# Lista PRIVADA de nomes de projeto: uma por linha, fora do repositório. Ausente ou vazia ⇒ só a
++# régua de padrões (e-mail, CPF, CNPJ, telefone) vale. (22/10/2026: freio removido por decisão do Humano.)
++NOMES_PROJETO_PATH = os.path.expanduser("~/.config/agata/nomes-projeto.txt")
++
++
++def _nomes_projeto(caminho: str | None = None) -> list[str]:
++    caminho = caminho or NOMES_PROJETO_PATH
++    if not os.path.exists(caminho):
++        return []
++    with open(caminho, encoding="utf-8") as f:
++        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
++
++
++def varrer_pessoal(texto: str, nomes: list[str]) -> list[dict]:
++    """Como varrer(), para dados pessoais e nomes de projeto. Nome de projeto não aparece no achado."""
++    achados = []
++    for rotulo, rx in PADROES_PESSOAIS:
++        for m in rx.finditer(texto):
++            achados.append({"padrao_rotulo": rotulo, "padrao": rx.pattern,
++                            "trecho_redigido": _redigir(m.group(0)), "pos": m.start()})
++    for nome in nomes:
++        rx = re.compile(r"(?<!\w)" + re.escape(nome) + r"(?!\w)", re.IGNORECASE)
++        for m in rx.finditer(texto):
++            achados.append({"padrao_rotulo": "pessoal-nome-projeto", "padrao": "(lista privada)",
++                            "trecho_redigido": f"[nome de projeto, {len(m.group(0))} chars]", "pos": m.start()})
++    return achados
++
++
+ def varrer(texto: str) -> list[dict]:
+     """Lista de {padrao_rotulo, padrao, trecho_redigido, pos}. Nunca devolve o segredo."""
+     achados = []
+@@ -210,15 +247,20 @@ def _campos_texto(payload):
+     yield from _anda(payload, "", 0)
+ 
+ 
+-def sanitizar_payload(payload: dict) -> dict:
++def sanitizar_payload(payload: dict, pessoal: bool = False, nomes: list[str] | None = None) -> dict:
+     """Falha FECHADA: casou um padrão OU excedeu o teto de varredura ⇒ levanta
+     SegredoNoPayload. Senão, devolve igual. Ver _TetoDeVarreduraExcedido acima
+     — bater o teto vira bloqueio, nunca passagem silenciosa."""
+     achados = []
++    if pessoal and nomes is None:
++        nomes = _nomes_projeto()
+     try:
+         for campo, texto in _campos_texto(payload):
+             for a in varrer(texto):
+                 achados.append({**a, "campo": campo or "(raiz)"})
++            if pessoal:
++                for a in varrer_pessoal(texto, nomes):
++                    achados.append({**a, "campo": campo or "(raiz)"})
+     except _TetoDeVarreduraExcedido as e:
+         achados.append({
+             "padrao_rotulo": "teto-de-varredura-excedido",
+@@ -314,6 +356,31 @@ def _autoteste() -> int:
+           f"{'ok' if ok else 'bloqueou à toa'}")
+     falhas += 0 if ok else 1
+ 
++    # (22/10/2026) dados pessoais e nomes de projeto: só na saída externa
++    nomes_fake = ["ProjetoZeta"]  # nome FICTÍCIO de teste; a lista real fica fora do repositório
++    for esperado, texto in [
++        ("pessoal-email", "escreva para fulano@exemplo.com.br amanhã"),
++        ("pessoal-cpf", "CPF 123.456.789-09 do cliente"),
++        ("pessoal-cnpj", "CNPJ 12.345.678/0001-95 da empresa"),
++        ("pessoal-telefone", "ligue para (11) 98765-4321 depois"),
++        ("pessoal-nome-projeto", "o ProjetoZeta está parado"),
++    ]:
++        rotulos = {a["padrao_rotulo"] for a in varrer_pessoal(texto, nomes_fake)}
++        ok = esperado in rotulos
++        print(f"{'PASS' if ok else 'FALHA'}  pessoal[{esperado}]  -> {sorted(rotulos) or '(nada)'}")
++        falhas += 0 if ok else 1
++    limpo = "a Seth lê a memória e responde em português"
++    ok = not varrer_pessoal(limpo, nomes_fake)
++    print(f"{'PASS' if ok else 'FALHA'}  pessoal[limpo]  -> {'ok' if ok else 'casou à toa'}")
++    falhas += 0 if ok else 1
++    ok = _nomes_projeto("/caminho/que/nao/existe/nomes.txt") == []
++    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista ausente: só a régua de padrões segue]")
++    falhas += 0 if ok else 1
++    # local não muda: com pessoal=False, e-mail passa
++    ok = sanitizar_payload({"messages": [{"role": "user", "content": "fulano@exemplo.com.br"}]}) is not None
++    print(f"{'PASS' if ok else 'FALHA'}  pessoal[local/desligado não bloqueia]")
++    falhas += 0 if ok else 1
++
+     print(f"\n{'AUTOTESTE OK' if not falhas else f'AUTOTESTE FALHOU ({falhas})'}")
+     return 0 if not falhas else 1
+ 
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 83c380e..a5ff31e 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -520,7 +520,9 @@ def _politica_dados_externos(payload: dict, classification: str | None = None) -
+         payload["agata_data_classification"] = "public"
+     classification = payload.pop("agata_data_classification", classification)
+     local = model.startswith(_ROTAS_LOCAIS)
+-    if not local and classification != "public":
++    # (22/10/2026, P-8 sanitizador-cascata) a cascata seth-livre segue ao proxy, que sanitiza
++    # (segredo, dados pessoais, nomes de projeto) antes de qualquer saída. Outros modelos externos continuam exigindo public.
++    if not local and classification != "public" and model != _ROTA_BASE:
+         raise DadosExternosSemClassificacao(
+             "dados sem classificação pública não podem ser enviados a modelos externos"
+         )
+@@ -952,8 +954,10 @@ class _Handler(BaseHTTPRequestHandler):
+                     self._public_only_lane = not rota_local and (
+                         alias_publico or classificacao == "public"
+                     ) and not getattr(self.server, "_selftest_allow_context", False)
+-                    if classificacao == "public" or payload.get("model") == _ROTA_BASE:
++                    if classificacao == "public":
+                         self._data_classification = "public"
++                    elif payload.get("model") == _ROTA_BASE:
++                        self._data_classification = "sanitizado-cascata"
+                 except DadosExternosSemClassificacao as e:
+                     return self._erro(403, str(e))
+                 # roteador por complexidade: só o alvo "seth-livre" do Agent
+@@ -1055,8 +1059,8 @@ class _Handler(BaseHTTPRequestHandler):
+         headers = {k: v for k, v in self.headers.items()
+                    if k.lower() not in _HOP_BY_HOP}
+         headers["X-Agata-Token"] = _token_interno()
+-        if getattr(self, "_data_classification", None) == "public":
+-            headers["X-Agata-Data-Classification"] = "public"
++        if getattr(self, "_data_classification", None) in ("public", "sanitizado-cascata"):
++            headers["X-Agata-Data-Classification"] = self._data_classification
+         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
+         try:
+             up = urllib.request.urlopen(req, timeout=180)
+@@ -2049,23 +2053,26 @@ def _selftest() -> int:
+     _local21 = _politica_dados_externos({"model": "ollama-local/qwen", "messages": []})
+     _deny21 = False
+     try:
+-        _politica_dados_externos({"model": "seth-livre", "messages": []})
++        _politica_dados_externos({"model": "seth-rapido", "messages": []})
+     except DadosExternosSemClassificacao:
+         _deny21 = True
+     _bad21 = False
+     try:
+-        _politica_dados_externos({"model": "seth-livre"}, "internal")
++        _politica_dados_externos({"model": "seth-rapido"}, "internal")
+     except DadosExternosSemClassificacao:
+         _bad21 = True
++    # (22/10/2026) cascata seth-livre passa sem classificação: o proxy sanitiza
++    _casc21 = _politica_dados_externos({"model": _ROTA_BASE, "messages": []})
++    _casc21_ok = _casc21["model"] == _ROTA_BASE
+     ok21 = (_pub21["model"] == _ROTA_BASE and "agata_data_classification" not in _pub21
+-            and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21)
++            and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21 and _casc21_ok)
+     print(f"{'PASS' if ok21 else 'FALHA'}  política de dados: nuvem sem classe/fora de public bloqueia; alias público e local seguem")
+     falhas += 0 if ok21 else 1
+     _upstream_antes = _Dummy.ultimo_corpo
+     _http_21 = 0
+     try:
+         urllib.request.urlopen(urllib.request.Request(
+-            base, data=json.dumps({"model": "seth-livre", "messages": []}).encode(),
++            base, data=json.dumps({"model": "seth-rapido", "messages": []}).encode(),
+             headers={"Content-Type": "application/json"}), timeout=5).read()
+     except urllib.error.HTTPError as e:
+         _http_21 = e.code
