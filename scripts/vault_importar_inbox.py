@@ -54,7 +54,8 @@ from pathlib import Path
 REPO = Path(os.environ.get("AGATA_REPO", os.path.expanduser("~/agata")))
 # IRMÃ de memoria/obsidian/, nunca dentro -- ver docstring do módulo.
 INBOX = REPO / "memoria" / "obsidian-inbox"
-ESCRIBA_URL = os.environ.get("SETH_ESCRIBA_URL", "http://127.0.0.1:20140")
+# (22/10/2026, P-8 fila-inbox) Notas aprovadas pelo Humano entram em MEMÓRIAS por PR, nunca por este script.
+FILA = REPO / "memoria" / "obsidian-fila-revisao"
 
 # Nota pronta = "decide e confere" (PROJETO.md, "Decisor local"). O Obsidian
 # salva sozinho a cada poucos segundos enquanto se digita, e MEMÓRIAS é
@@ -134,26 +135,19 @@ def _pronta(caminho: Path, agora: float) -> tuple[bool, str, str]:
     return True, "", "decisor"
 
 
-def _importar_um(caminho: Path) -> tuple[bool, str]:
-    parsed = _parse_nota(caminho.read_text(encoding="utf-8"))
-    if parsed is None:
-        return False, "nota sem título+corpo reconhecíveis -- não apagada, corrija e rode de novo"
-    titulo, corpo = parsed
-    payload = json.dumps({"titulo": titulo, "corpo": corpo}).encode("utf-8")
-    req = urllib.request.Request(
-        f"{ESCRIBA_URL}/memoria", data=payload,
-        headers={"Content-Type": "application/json"}, method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r:
-            resp = json.loads(r.read())
-    except urllib.error.HTTPError as e:
-        return False, f"seth_escriba recusou (HTTP {e.code}): {e.read().decode(errors='replace')[:200]}"
-    except urllib.error.URLError as e:
-        return False, f"seth_escriba inacessível em {ESCRIBA_URL}: {e}"
-    if not resp.get("ok"):
-        return False, f"resposta inesperada de seth_escriba: {resp}"
-    return True, f"entrada ({resp['entrada']}) criada -- {resp['header']}"
+def _enfileirar(caminho: Path, fila: Path | None = None) -> tuple[bool, str]:
+    """(22/10/2026, P-8 fila-inbox) Copia a nota para a FILA de revisão, sem gravar em MEMÓRIAS.
+    O original só sai do inbox depois de a cópia estar no lugar (gravação atômica)."""
+    fila = fila or FILA
+    texto = caminho.read_text(encoding="utf-8")
+    if _parse_nota(texto) is None:
+        return False, "nota sem título+corpo reconhecíveis -- não enfileirada, corrija e rode de novo"
+    fila.mkdir(parents=True, exist_ok=True)
+    destino = fila / caminho.name
+    tmp = fila / f".{caminho.name}.tmp"
+    tmp.write_text(texto, encoding="utf-8")
+    os.replace(tmp, destino)
+    return True, f"enfileirada para revisão do Humano em {destino} (nada gravado em MEMÓRIAS)"
 
 
 def main() -> int:
@@ -174,17 +168,17 @@ def main() -> int:
             continue
         parsed = _parse_nota(nota.read_text(encoding="utf-8"))
         chars = len(parsed[1]) if parsed else 0
-        ok, msg = _importar_um(nota)
+        ok, msg = _enfileirar(nota)
         if ok:
             print(f"OK     {nota.name}: {msg}")
-            decisor.registrar_avaliacao("inbox", {"evento": "importada", "nota": _id_nota(nota),
+            decisor.registrar_avaliacao("inbox", {"evento": "enfileirada", "nota": _id_nota(nota),
                                                   "chars": chars, "via": via})
             nota.unlink()
         else:
             falhas += 1
             print(f"PULADA {nota.name}: {msg}")
     importadas = len(notas) - falhas - aguardando
-    print(f"\n{importadas} importada(s), {aguardando} aguardando, {falhas} pulada(s), "
+    print(f"\n{importadas} enfileirada(s), {aguardando} aguardando, {falhas} pulada(s), "
           f"{len(notas)} no total")
     return 1 if falhas else 0
 
@@ -209,18 +203,18 @@ def _selftest() -> int:
     # o arquivo inteiro como texto simples (a 1a linha "---" vira titulo)
     r = _parse_nota("---\nalgo: valor\n---\ncorpo\n")
     casos.append(("frontmatter sem titulo -> fallback nao quebra", r is not None and r[0] == "---"))
-    # 7. _importar_um contra seth_escriba inacessível (porta que não existe) -- erro limpo, não crash
+    # 7. _enfileirar: a nota vai para a fila, o conteúdo é idêntico e nada toca MEMÓRIAS
     import tempfile
     with tempfile.TemporaryDirectory() as td:
         p = Path(td) / "nota.md"
         p.write_text("teste\ncorpo de teste\n", encoding="utf-8")
-        global ESCRIBA_URL
-        _url_original = ESCRIBA_URL
-        ESCRIBA_URL = "http://127.0.0.1:1"  # porta reservada, nunca escuta
-        ok_imp, msg = _importar_um(p)
-        casos.append(("seth_escriba inacessível -> falha limpa, nao crash", ok_imp is False and "inacessível" in msg))
-        casos.append(("nota nao apagada quando falha", p.exists()))
-        ESCRIBA_URL = _url_original
+        fila_teste = Path(td) / "fila"
+        ok_enf, msg = _enfileirar(p, fila_teste)
+        casos.append(("nota enfileirada -> ok", ok_enf is True and "nada gravado em MEMÓRIAS" in msg))
+        casos.append(("fila recebeu cópia idêntica", (fila_teste / p.name).read_text(encoding="utf-8") == p.read_text(encoding="utf-8")))
+        ruim = Path(td) / "ruim.md"; ruim.write_text("só uma linha\n", encoding="utf-8")
+        ok_ruim, _ = _enfileirar(ruim, fila_teste)
+        casos.append(("nota sem corpo -> não enfileirada", ok_ruim is False and not (fila_teste / "ruim.md").exists()))
         # 8-10. nota pronta: trava exata (tempo parado) + decisor que só barra
         agora = time.time()
         os.utime(p, (agora, agora))
