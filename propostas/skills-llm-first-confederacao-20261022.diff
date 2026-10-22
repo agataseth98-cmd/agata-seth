@@ -1,0 +1,190 @@
+diff --git a/.agents/skills/agata-aplicar-proposta/SKILL.md b/.agents/skills/agata-aplicar-proposta/SKILL.md
+index 32e03c1..b6c9edb 100644
+--- a/.agents/skills/agata-aplicar-proposta/SKILL.md
++++ b/.agents/skills/agata-aplicar-proposta/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: agata-aplicar-proposta
+-description: Aplicar uma proposta P-8 que o Humano assinou ("feito", "assinei", "aprovei", bash scripts/aprovar.sh <nome>). Verifica assinatura, aplica, move o par, registra em MEMÓRIAS e ONDE_ESTAMOS, comita num branch e abre PR. Também serve pra CRIAR uma proposta nova.
++description: Criar, verificar e aplicar uma proposta P-8. O Humano assina; o modelo nunca assina. Use em mudança protegida, sempre em worktree própria.
+ ---
+ 
+ # Proposta P-8: criar, verificar, aplicar
+@@ -10,24 +10,24 @@ comportamento — só entram com `.diff` assinado pela chave do Humano (PROJETO,
+ Você **nunca** roda `scripts/aprovar.sh` (a chave é do Humano) e **nunca** usa `write`/`edit` em canon.
+ 
+ ## Criar uma proposta
+-1. Branch: `git checkout -b proposta/<nome>` a partir de `main` atualizado (`git pull --ff-only`).
++1. Crie uma worktree e branch próprias a partir de `origin/main`: `git worktree add -b proposta/<nome> <dir> origin/main`. Não atualize nem modifique o checkout compartilhado.
+ 2. Faça a mudança nos arquivos, gere o diff e **desfaça** a mudança na árvore:
+    `git diff <arquivos> > propostas/<nome>.diff && git checkout <arquivos>`
+    (arquivo novo: `git add -N <arq>` antes do `git diff`, depois `git rm --cached` e apague a cópia).
+ 3. `git apply --check propostas/<nome>.diff` — tem de passar.
+ 4. Teste o efeito numa cópia descartável (`git worktree add --detach <dir> HEAD`), nunca só lendo.
+-5. Entrada nova em MEMÓRIAS (ver "Registrar") + ONDE_ESTAMOS; commit; push; PR. O merge é do Humano.
++5. Entrada nova em MEMÓRIAS (ver "Registrar") + ONDE_ESTAMOS; commit; push; PR somente de proposta, direto contra `main`. O autor junta após CI verde; o Humano decide a assinatura. Não aplique nesta etapa.
+ 6. Diga ao Humano o comando exato, **sem ponto no fim**: `bash scripts/aprovar.sh <nome>`
+ 
+ ## Aplicar (depois de "feito")
+-1. `gh pr view <n> --json state` → MERGED; `git checkout main && git pull --ff-only`.
++1. Confirme que a proposta está em `origin/main` (`gh pr view <n> --json state` → MERGED) e crie uma worktree de aplicação baseada no `origin/main` atual. Não atualize o checkout compartilhado.
+ 2. `bash scripts/p8_verificar.sh <nome>` — tem de terminar em `PODE APLICAR`. Qualquer FALHA: pare e
+    mostre a saída ao Humano. Não "conserte" assinatura nem hash.
+ 3. `git checkout -b aplica/<nome>`; `git apply propostas/<nome>.diff`;
+    `git mv propostas/<nome>.diff propostas/aplicadas/`; `mv propostas/APROVADO-<nome> propostas/aplicadas/`.
+ 4. Se a mudança vale fora do repo (unit em `~/.config/systemd/user`, compose em `~/librechat`, config do
+    Goose): backup do runtime, copie, `cmp` runtime × repo, recarregue, e **prove pelo caminho real**.
+-5. Registre (abaixo), `git add` só os arquivos certos, commit, push, PR.
++5. Registre (abaixo), `git add` só os arquivos certos, commit, push e abra PR de aplicação. O Humano junta o PR de aplicação.
+ 
+ ## Registrar em MEMÓRIAS
+ - Entrada nova **logo abaixo** de `<!-- ENTRADAS-NOVAS:AQUI -->`, número = topo + 1, data do commit.
+@@ -39,8 +39,8 @@ Você **nunca** roda `scripts/aprovar.sh` (a chave é do Humano) e **nunca** usa
+ 
+ ## Armadilhas já pagas
+ - **P-8 confere uma proposta por vez contra HEAD.** Duas propostas no mesmo arquivo = dois commits (539).
+-- `git stash` sem `--index` perde o que estava staged; o guarda de âncora do pre-commit bloqueia commit
+-  com REGRAS/PROJETO/MEMÓRIAS sujos fora do index — guarde com `git stash push --keep-index -u` e devolva
+-  com `git stash pop` depois do commit.
++- Não use `git stash` para preparar uma mudança em checkout compartilhado. Trabalhe em worktree própria.
++  Se for indispensável preservar alterações locais, faça backup fora do repositório e confira o hash antes
++  de qualquer atualização; nunca descarte arquivo local sem decisão do Humano.
+ - O hook pode rodar a suíte de controles (P-16, 1-2 min): não mate o commit por timeout.
+ - Um controle que barra o commit (P-4, P-8, P-10) está certo até prova em contrário: leia o SUSPEITO.
+diff --git a/.agents/skills/agata-carregar/SKILL.md b/.agents/skills/agata-carregar/SKILL.md
+index f0d5539..23f2353 100644
+--- a/.agents/skills/agata-carregar/SKILL.md
++++ b/.agents/skills/agata-carregar/SKILL.md
+@@ -8,6 +8,8 @@ de PROJETO.md, seção "O que é". Sem esse campo, escreva Agata. Nunca escreva
+ 
+ # Carregar o {{NOME_SISTEMA}} (na Máquina, com shell)
+ 
++Use só para iniciar ou retomar uma sessão sem estado atual injetado. Ao terminar, volte a `agata-fluxo` para escolher o procedimento da tarefa. Carregar não autoriza nem aplica mudanças.
++
+ Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
+ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
+ 
+@@ -20,7 +22,7 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio,
+ 4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
+ 5. Responda com o bloco de PROTOCOLOS.md, "Carregar e formatos" — 3 linhas, nada antes:
+    ```
+-   {{NOME_SISTEMA}} · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
++   agata-seth · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
+    Última entrada: (<n>) <título> — <1 linha>
+    <quebrado: … | pronto.>
+    ```
+@@ -28,5 +30,5 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio,
+    confirma antes do trabalho começar.
+ 
+ Depois do carregar, toda resposta começa com a linha de turno:
+-`{{NOME_SISTEMA}} · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
++`agata-seth · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
+ Hora nunca é copiada da resposta anterior.
+diff --git a/.agents/skills/agata-conversar-com-seth/SKILL.md b/.agents/skills/agata-conversar-com-seth/SKILL.md
+index a1c779f..30f8b9a 100644
+--- a/.agents/skills/agata-conversar-com-seth/SKILL.md
++++ b/.agents/skills/agata-conversar-com-seth/SKILL.md
+@@ -5,6 +5,8 @@ description: Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou esc
+ 
+ # Conversar com a Seth (ou acompanhar o Humano conversando com ela)
+ 
++Escolha só o caminho que as ferramentas disponíveis permitem: A = chamada isolada sem ferramentas da Seth; B = leitura da conversa; C = escrever na conversa, somente com pedido explícito e automação autenticada disponível; D = avaliação automatizada. Se a ferramenta exigida não estiver disponível, pare nesse caminho e diga o limite. Os nomes de ferramentas de navegador abaixo são exemplos de implementação, não pré-requisitos universais.
++
+ Por quê: em 17/10/2026 o Humano testava a voz e o cabeçalho com a Seth e pediu que o Claude Code acompanhasse e se apresentasse a ela.
+ Três caminhos funcionaram; um quarto (grupo de abas do navegador) falhou por razão que vale registrar. A Skill vale para QUALQUER modelo:
+ o que muda de um modelo para outro é só a ferramenta; o procedimento e os limites são os mesmos.
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+index c535c0a..5cb7e69 100644
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ b/.agents/skills/agata-fluxo-dupla/SKILL.md
+@@ -10,9 +10,8 @@ modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada
+ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/dupla/` (estado fora do repo, em `~/.cache/agata/sincronia/`).
+ 
+ ## 0. Antes de tudo
+-- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: `Agata · <modelo> · t=<n> (contador mecânico) · <hora -03> (relógio da Máquina)`;
+-  hora = `TZ=America/Sao_Paulo date`; t = `python3 scripts/dupla/contar_turnos.py`.
+-  Padrão = mensagens do Humano (o t= que ele acompanha). `--modo respostas TRANSCRITO` conta respostas do modelo (exige transcrito explícito; o Codex usa o dele). Sem fonte: `t=<n> (contado no contexto)`.
++- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em dupla.
++- Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
+ - Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
+ - Texto longo para o canal vai por ARQUIVO: `dupla.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
+ 
+@@ -28,14 +27,13 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
+ - Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `dupla.py ler --agente <eu>` (mostra só o novo).
+ - Mensagens: uma por ENTREGA ou BLOQUEIO, agrupada, com caminho + sha; nunca resposta só de estado; não copiar relatório para o canal.
+ 
+-## 3. Uma mudança protegida, do começo ao merge
+-1. Worktree própria de `origin/main` (`git worktree add -b proposta/<nome> .<agente>/worktrees/<nome> origin/main`). Nunca edite o checkout compartilhado.
+-2. Faça a mudança; gere SÓ o `.diff` dos protegidos (`git add -N <novos>`; `git diff --binary -- <arquivos> > x.diff`; `git checkout` para desfazer); `git apply --check`.
+-3. Teste a mudança aplicada numa cópia descartável (`git worktree add --detach`), com o perímetro (`bash scripts/perimetro.sh`) e a suíte (`bash scripts/testar_perimetro.sh`).
+-4. `propostas/<nome>.diff` em PR de abertura direto contra `main`; junte quando `fiscal-p8` e `suite-adversarial` passarem (merge pinado ao head).
+-5. REVISÃO CRUZADA: autor ≠ revisor. O revisor roda casos que ELE escolheu, antes de olhar o resultado, e responde com parecer em 4 partes quando for mudança estrutural.
+-6. Entregue ao Humano o comando de assinatura (§4). Só depois de `APROVADO-<nome>` em `propostas/`:
+-7. `python3 scripts/dupla/aplicar.py <nome> --registro <texto com {N}> --agente <eu> [--sem-pull]` (worktree própria, verificador da base, aplica, move o par, entrada de MEMÓRIAS, PR, espera os DOIS checks pelo nome, merge pinado). Um PR de aplicação por vez ou em lote único (dois simultâneos conflitam nas âncoras). Se der conflito, feche o PR e rode de novo.
++## 3. Mudança protegida em dupla
++Use `agata-aplicar-proposta` para o ciclo P-8. Esta skill acrescenta a coordenação entre modelos:
++1. Autor e revisor são pessoas/modelos diferentes; não editam o mesmo arquivo ao mesmo tempo.
++2. O revisor escolhe e registra os casos antes de ver os resultados, executa-os e devolve o parecer no formato de quatro partes.
++3. O autor abre a proposta contra `origin/main` e só a junta após os checks exigidos passarem. O Humano assina depois que a proposta estiver em `main`.
++4. A aplicação é um PR separado, em worktree própria; um PR de aplicação por vez. O Humano junta esse PR.
++5. Na divergência ou conflito, pare e reporte evidência; não force merge nem refaça a assinatura.
+ 
+ ## 4. O comando de assinatura (Humano, Fish, uma linha)
+ Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte: confere o hash de CADA proposta antes de assinar qualquer uma, com bandeira `ok` (um `false` dentro do `for` seria sobrescrito) e igualdade positiva (arquivo ausente conta como divergência). Antes de entregar: a proposta TEM que estar em `origin/main` (`ls propostas/`) e o hash vem do arquivo, nunca da memória.
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index fcedf43..37718bf 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -5,8 +5,18 @@ description: Fluxo único de trabalho no sistema Agata para qualquer LLM (Claude
+ 
+ # Fluxo Agata (universal)
+ 
+-Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identifica no cabeçalho como
+-`agata · <modelo real>`; a Seth, que passa pelo gateway, usa `agata-seth · <modelo>`.
++Vale para qualquer modelo da Confederação. Use o cabeçalho exato de `PROTOCOLOS.md`: `agata-seth · <modelo> · t=<n> (<origem da contagem>) · <data e hora local + selo>`. O modelo específico só entra se estiver verificado; caso contrário, diga isso no campo.
++
++## Escolha a skill necessária
++- Sessão nova ou sem bloco de estado: `agata-carregar`.
++- Proposta ou aplicação protegida por P-8: `agata-aplicar-proposta`.
++- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-dupla`.
++- Mudança em serviço, container, rede, energia ou boot: `agata-mudanca-segura`.
++- Leitura ou contato com a Seth, quando solicitado: `agata-conversar-com-seth`.
++
++Use as skills necessárias ao tipo de tarefa. Se ela envolver, por exemplo, runtime e arquivos P-8, use as duas skills correspondentes. Este fluxo define as regras comuns; cada skill especializada define só seu procedimento próprio.
++
++Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-dupla` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
+ 
+ ## 0. Antes de qualquer ação
+ 1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`,
+@@ -22,14 +32,10 @@ Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identi
+ - Trabalho caro em tokens (suíte completa, varreduras longas) vai para o modelo com mais folga; o relato
+   volta pelo canal, sem colar relatório inteiro.
+ 
+-## 2. Mudança protegida (do começo ao merge)
+-1. Escrever a mudança numa worktree própria; gerar só o `.diff` dos protegidos; `git apply --check`.
+-2. Testar a mudança aplicada numa cópia descartável (`scripts/testar_perimetro.sh`, esperado 0 falhas).
+-3. Abrir PR **somente de proposta** contra `origin/main`. Não aplicar.
+-4. Revisão cruzada: o revisor escolhe casos **antes** de olhar o resultado e responde em 4 partes.
+-5. Só o Humano assina (`bash scripts/aprovar.sh <nome>`). Nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo.
+-6. Com assinatura verificada (`bash scripts/p8_verificar.sh <nome>` = `PODE APLICAR`), aplicar com
+-   `python3 scripts/dupla/aplicar.py <nome> --registro <arquivo>` (o registro começa com `({N}) DIÁRIO — ...`).
++## 2. Mudança protegida
++Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-dupla`.
++
++Regras que sempre valem: proposta em worktree própria baseada em `origin/main`; `.diff` verificável e testado; proposta e aplicação são etapas separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Não avance com teste ou assinatura ausente.
+ 
+ ## 3. Registro
+ - Resultado vai para `MEMÓRIAS.md` **só por PR**, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`.
+diff --git a/.agents/skills/agata-mudanca-segura/SKILL.md b/.agents/skills/agata-mudanca-segura/SKILL.md
+index 205205f..051c8cd 100644
+--- a/.agents/skills/agata-mudanca-segura/SKILL.md
++++ b/.agents/skills/agata-mudanca-segura/SKILL.md
+@@ -5,6 +5,8 @@ description: Antes de mudar qualquer coisa que roda (unit systemd, container, fi
+ 
+ # Mudança segura na Máquina
+ 
++Use antes de alterar algo que roda. Se a mudança também mexe em arquivo protegido do repositório, siga `agata-aplicar-proposta`; esta skill cobre o efeito no runtime.
++
+ Por quê: o sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussola/`). Em
+ 24/09/2026 tirar UMA linha de uma unit consertou o Hyprland e, em silêncio, desligou a contenção de
+ suspensão e o fechamento do Obsidian (MEMÓRIAS (536)/(539)/(540)). Nenhum sensor pegou; só o teste real.
