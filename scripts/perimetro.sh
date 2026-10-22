@@ -51,6 +51,9 @@ source "$_PERIMETRO_DIR/perimetro/p10_vault_derivado.sh"
 source "$_PERIMETRO_DIR/perimetro/p11_silos.sh"
 source "$_PERIMETRO_DIR/perimetro/p12_backup_verificavel.sh"
 source "$_PERIMETRO_DIR/perimetro/p14_frio_imutavel.sh"
+source "$_PERIMETRO_DIR/perimetro/p24_quente_orcamento.sh"
+source "$_PERIMETRO_DIR/perimetro/p25_selos_cadeia.sh"
+source "$_PERIMETRO_DIR/perimetro/p26_frio_tag.sh"
 source "$_PERIMETRO_DIR/perimetro/p15_roster_remoto.sh"
 source "$_PERIMETRO_DIR/perimetro/p16_testes_dos_controles.sh"
 source "$_PERIMETRO_DIR/perimetro/p17_skip_cronico.sh"
@@ -379,6 +382,21 @@ main() {
   cabecalho "P-14" "Chunk frio (MEMORIAS-FRIO-*.md), depois de selado, imutável" "MEMÓRIAS por período (Fase 4), MEMÓRIAS (357)"
   PERIMETRO_ESTADO=""
   p14_frio_imutavel; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-24" "Quente acima do orçamento de hidratação (aviso; escalada pendente)" "proposta v8, seção 9"
+  PERIMETRO_ESTADO=""
+  p24_quente_orcamento; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-25-SELOS" "Cadeia de SELOS.txt íntegra (SELOS.chain)" "proposta v8, seção 22"
+  PERIMETRO_ESTADO=""
+  p25_selos_cadeia; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-26" "Todo chunk frio selado tem tag de git (aviso até backfill)" "proposta v8, seção 9"
+  PERIMETRO_ESTADO=""
+  p26_frio_tag; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-15" "Saúde do roster do Conselho Remoto -- < 2 famílias com sucesso em 24h vira AVISO" "MEMÓRIAS (374); scripts/conselho_remoto.py"
