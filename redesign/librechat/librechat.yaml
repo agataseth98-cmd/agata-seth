@@ -284,6 +284,7 @@ mcpServers:
       CANON_PROXY: http://172.29.7.1:27125
       SETH_ESCRIBA: http://172.29.7.1:20140      # sem isto o canon-mcp usa 127.0.0.1 (padrão dele) e a escrita some
       SETH_VERIFICADOR: http://172.29.7.1:20141  # idem pra maquina_verificar
+      AGATA_PROJECT_TOKEN_FILE: /run/a          # token do projeto para escrita (/run/a = montagem read-only do cliente.token); sem isto o canon-mcp procura /run/secrets/... e recusa
     startup: true   # ligado: read-only, ~40 MB, e a espinha da hidratacao da Seth
     chatMenu: true
     serverInstructions: true
