@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(811) DIÁRIO — 22/10/2026 · **canon-mcp sem diario_anotar no chat, com o teste do escriba em memoria_acrescentar (par).**
+  palavras-chave: canon, mcp, diario, anotar, chat, teste, escriba, memoria, acrescentar, par
 (810) DIÁRIO — 22/10/2026 · **Servidor canon do LibreChat recebe AGATA_PROJECT_TOKEN_FILE=/run/a.**
   palavras-chave: servidor, canon, librechat, recebe, agata, project, token, file, run
 (809) DIÁRIO — 22/10/2026 · **Escriba fase A: token por projeto, recusa de segredo antes de gravar, provas HTTP/MCP; token montado em /run/a.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, numeração, entradas, itens, consolidação, retirada, projeto, sudo, auditoria, codex, medido, grep, memórias, edito, append, only
 (782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não reduziu o PROJETO. Ele só adicionou um aviso.** O diff assinado (`projeto-retirada-20261018`, aplicado em `2a371ca`) mudou `scripts/perimetro.sh` e acrescentou `PROJETO_FOLGA_BYTES` (padrão 500): o aviso sai quando o PROJETO cresce em relação ao HEAD e fica a menos de 500 bytes do teto. Não tirou nenhum texto do PROJETO. Medido agora: `PROJETO.md` = 47.703 bytes, folga de 297 bytes. A retirada real de conteúdo para `extras/projeto-detalhe/` continua por fazer, e precisa de proposta assinada com a escolha do que sai. As entradas (777)/(778) descreveram a política como feita; esta entrada corrige isso. Não edito o texto delas (append-only).
   palavras-chave: correção, aplicado, reduziu, projeto, ele, adicionou, aviso, diff, assinado, retirada, mudou, scripts, perimetro, acrescentou, folga, bytes, padrão, sai, cresce, relação, head, fica, teto, tirou, texto, medido, agora, real, conteúdo, extras, detalhe, continua, fazer, precisa, proposta, assinada, escolha, entradas, descreveram, política, feita, entrada, corrige, edito, delas, append, only
-(781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18, decisão B4 do Humano, projeto-retirada-20261018, assinado).** O PROJETO estava a 297 bytes do teto (47.703 de 48.000, medido). Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
-  palavras-chave: política, projeto, cheio, inclusão, vem, retirada, extras, detalhe, decisão, humano, assinado, estava, bytes, teto, medido, verificação, verificar, pode, aplicar, proposta, juntado, verde
+(781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com u …
+  palavras-chave: política, projeto, cheio, inclusão, vem
 (780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, d …
   palavras-chave: consolidação, pula, tema, reprovado
 (779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura …
