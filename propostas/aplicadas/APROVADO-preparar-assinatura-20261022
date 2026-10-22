@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-22 12:15 -0300.
+Motivo: script que prepara a assinatura: checks, merge, pull e verificação
+nome: preparar-assinatura-20261022
+diff-sha256: 033b9f0bf6b8d539ca72b8da133cb78e668301bc89c4fcfbc6c8c69e6fff39fb
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQABWr4lLUIuvkfrUkTqVatK5krajZ+PsJX9F7wErEaHOKZ
+4bZLic/vb9Jtu+X18gWicp2Wi/81CBtoLe5dwmxAs=
+-----END SSH SIGNATURE-----

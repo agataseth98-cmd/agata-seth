@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d42ea71f1df9c7f0d18fdf76b233f0b669c40252
-  Escrito em: 22/10/2026 12:10 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): be1adf80b273173921611bdc4abe03987f176b34
+  Escrito em: 22/10/2026 12:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d42ea71f1df9c7f0d18fdf76b233f0b669c40252/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d42ea71f1df9c7f0d18fdf76b233f0b669c40252/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d42ea71f1df9c7f0d18fdf76b233f0b669c40252/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d42ea71f1df9c7f0d18fdf76b233f0b669c40252/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d42ea71f1df9c7f0d18fdf76b233f0b669c40252/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be1adf80b273173921611bdc4abe03987f176b34/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be1adf80b273173921611bdc4abe03987f176b34/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be1adf80b273173921611bdc4abe03987f176b34/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be1adf80b273173921611bdc4abe03987f176b34/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be1adf80b273173921611bdc4abe03987f176b34/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(805) DIÁRIO — 22/10/2026 · **Script preparar_assinatura.sh: confere checks, mescla o PR, atualiza o main e verifica o .diff; não assina.**
+
+Assinado pelo Humano (`APROVADO-preparar-assinatura-20261022`, PR 455 mesclado). Motivo: a assinatura falhou quatro vezes em 22/10 pela mesma causa (o .diff ainda estava só no PR, e o comando era entregue antes do merge). A regra também está na memória. O script só mescla PR com checks verdes e nunca executa aprovar.sh.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (804) DIÁRIO — 22/10/2026 · **Importador do inbox grava na fila de revisão, não em MEMÓRIAS.**
 
 Assinado pelo Humano (`APROVADO-fila-inbox-revisao-20261022`, PR 452 mesclado). O POST direto ao escriba exigia capability assinada, que o script não enviava (achado do Codex, 22/10, auditoria pré-trabalho). A gravação automática em MEMÓRIAS também não tinha par P-8. Agora a nota vai para `memoria/obsidian-fila-revisao/` e o original sai do inbox só depois da cópia. O timer `agata-vault-inbox` está parado pelo Humano desde 22/10. Medido: autoteste do importador 15/15 OK na worktree.
