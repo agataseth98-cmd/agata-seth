@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3b850e499ced27371f86a0516bdc0256e9ae54e8
-  Escrito em: 22/10/2026 14:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 19c899d9afa8c7963d9571677999ab7cdc956b50
+  Escrito em: 22/10/2026 14:15 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b850e499ced27371f86a0516bdc0256e9ae54e8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b850e499ced27371f86a0516bdc0256e9ae54e8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b850e499ced27371f86a0516bdc0256e9ae54e8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b850e499ced27371f86a0516bdc0256e9ae54e8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b850e499ced27371f86a0516bdc0256e9ae54e8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19c899d9afa8c7963d9571677999ab7cdc956b50/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19c899d9afa8c7963d9571677999ab7cdc956b50/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19c899d9afa8c7963d9571677999ab7cdc956b50/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19c899d9afa8c7963d9571677999ab7cdc956b50/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19c899d9afa8c7963d9571677999ab7cdc956b50/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(807) DIÁRIO — 22/10/2026 · **Saída externa volta a varrer só segredo; 422 passa a registrar a categoria do padrão no log.**
+
+Assinado pelo Humano (`APROVADO-relaxa-pessoal-log-categoria-20261022`, PR 454 mesclado). Motivo: desde 11h23, pedidos ao seth-rapido com e-mail, telefone ou CPF no texto recebiam 422 do sanitizador. Decisão do Humano: relaxar. Só proxy.py muda. O log registra a categoria, nunca o trecho. Medido na proposta: autoteste do proxy e do sanitizador OK.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (806) DIÁRIO — 22/10/2026 · **Devolutiva final para CODE: seção 8 da skill agata-fluxo-dupla.**
 
 Assinado pelo Humano (`APROVADO-devolutiva-code-final-20261022`, PR 461 mesclado). Diff elaborado pelo Codex em worktree própria e revisado pelo Claude. Só texto de skill: diferencia proposta, diff, assinatura, aplicação e merge. Não altera código nem serviço.
