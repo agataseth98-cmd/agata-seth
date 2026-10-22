@@ -625,7 +625,9 @@ fi
 # dispara quando qualquer uma dessas provas ou seus controles muda.
 if [[ -z "$FILTRO" ]]; then
   if python3 -m unittest scripts.testar_capability scripts.testar_dados_externos scripts.testar_egress_proxy -v \
+      && python3 "$RAIZ/scripts/testar_escriba_http.py" \
       && python3 "$RAIZ/scripts/testar_fork_librechat.py" \
+      && node "$RAIZ/scripts/testar_escriba_cliente.mjs" \
       && python3 scripts/testar_net02_compose.py \
       && SETH_REPO="$RAIZ" python3 "$RAIZ/redesign/router/seth_gateway.py" --selftest; then
     OK=$((OK + 1))

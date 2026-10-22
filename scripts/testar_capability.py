@@ -133,6 +133,31 @@ class CapabilityTests(unittest.TestCase):
             self.verify(self.issue(self.args, nonce="bad-key"))
         self.assertEqual(stat.S_IMODE(self.public_key_file.stat().st_mode), 0o666)
 
+    def test_project_token_is_scoped_to_project_and_required(self):
+        projeto = self.root / "projeto-a"
+        projeto.mkdir()
+        token_dir = self.root / ".config" / "agata" / "projetos"
+        token_dir.mkdir(parents=True)
+        token = "token-de-teste-com-mais-de-trinta-dois-caracteres"
+        token_file = token_dir / (hashlib.sha256(str(projeto.resolve()).encode("utf-8")).hexdigest() + ".token")
+        token_file.write_text(token + "\n", encoding="utf-8")
+        token_file.chmod(0o600)
+        with patch.dict(os.environ, {"AGATA_PROJETO_RAIZ": str(projeto)}), \
+             patch.object(seth_escriba.Path, "home", return_value=self.root):
+            seth_escriba._validar_token_projeto(token)
+            with self.assertRaises(PermissionError):
+                seth_escriba._validar_token_projeto("token-errado")
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(PermissionError):
+                seth_escriba._validar_token_projeto(token)
+
+    def test_secret_content_is_refused_without_echo(self):
+        segredo = "ghp_" + "x" * 36
+        with self.assertRaisesRegex(ValueError, "nada foi gravado") as erro:
+            seth_escriba._recusar_segredo(["texto comum", segredo])
+        self.assertNotIn(segredo, str(erro.exception))
+        seth_escriba._recusar_segredo(["texto comum sem credenciais"])
+
     def test_escriba_http_requires_and_consumes_capability(self):
         memories = self.root / "MEMÓRIAS.md"
         diary = self.root / "SETH-DIARIO.md"
@@ -143,19 +168,31 @@ class CapabilityTests(unittest.TestCase):
         now = int(time.time())
         token = self.issue(payload, aud="escriba", tool="memoria_acrescentar", nonce="http",
                            iat=now, exp=now + 60)
+        projeto = self.root / "projeto-a"
+        projeto.mkdir()
+        token_dir = self.root / ".config" / "agata" / "projetos"
+        token_dir.mkdir(parents=True)
+        project_token = "token-de-projeto-ficticio-com-mais-de-32-caracteres"
+        token_file = token_dir / (hashlib.sha256(str(projeto.resolve()).encode("utf-8")).hexdigest() + ".token")
+        token_file.write_text(project_token + "\n", encoding="utf-8")
+        token_file.chmod(0o600)
         with patch.object(seth_escriba, "MEMORIAS", memories), patch.object(seth_escriba, "DIARIO", diary), \
              patch.dict(os.environ, {"AGATA_APPROVAL_PUBLIC_KEY_FILE": str(self.public_key_file),
-                                     "AGATA_APPROVAL_NONCE_DB": str(database)}):
+                                     "AGATA_APPROVAL_NONCE_DB": str(database),
+                                     "AGATA_PROJETO_RAIZ": str(projeto)}), \
+             patch.object(seth_escriba.Path, "home", return_value=self.root):
             server = seth_escriba.ThreadingHTTPServer(("127.0.0.1", 0), seth_escriba._H)
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()
             url = f"http://127.0.0.1:{server.server_port}/memoria"
             body = json.dumps(payload).encode()
 
-            def post(auth=None):
+            def post(auth=None, token_projeto=None):
                 headers = {"Content-Type": "application/json"}
                 if auth:
                     headers["Authorization"] = f"Bearer {auth}"
+                if token_projeto:
+                    headers["X-Agata-Project-Token"] = token_projeto
                 request = urllib.request.Request(url, data=body, headers=headers)
                 try:
                     with urllib.request.urlopen(request, timeout=3) as response:
@@ -168,10 +205,11 @@ class CapabilityTests(unittest.TestCase):
             try:
                 self.assertEqual(post(), 403)
                 self.assertEqual(memories.read_text(encoding="utf-8"), original)
-                self.assertEqual(post(token), 200)
+                self.assertEqual(post(token), 403)
+                self.assertEqual(post(token, project_token), 200)
                 after = memories.read_text(encoding="utf-8")
                 self.assertIn("conteúdo autorizado", after)
-                self.assertEqual(post(token), 403)
+                self.assertEqual(post(token, project_token), 403)
                 self.assertEqual(memories.read_text(encoding="utf-8"), after)
             finally:
                 server.shutdown()

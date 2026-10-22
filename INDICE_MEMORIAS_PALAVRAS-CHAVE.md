@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(809) DIÁRIO — 22/10/2026 · **Escriba fase A: token por projeto, recusa de segredo antes de gravar, provas HTTP/MCP; token montado em /run/a.**
+  palavras-chave: escriba, fase, token, projeto, recusa, segredo, gravar, provas, http, mcp, montado, run
 (808) DIÁRIO — 22/10/2026 · **6 skills do Agata no modelo LLM-first (confederação).**
   palavras-chave: skills, agata, modelo, llm, first, confederação
 (807) DIÁRIO — 22/10/2026 · **Saída externa volta a varrer só segredo; 422 passa a registrar a categoria do padrão no log.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: política, projeto, cheio, inclusão, vem, retirada, extras, detalhe, decisão, humano, assinado, estava, bytes, teto, medido, verificação, verificar, pode, aplicar, proposta, juntado, verde
 (780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, decisão B3 do Humano, consolidacao-pula-reprovado-20261018, assinado).** Antes, o mesmo tema "aprovação assinada P-8" era reprovado todo dia e nada saía. Agora, depois de 3 reprovações o tema é pulado. Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
   palavras-chave: consolidação, pula, tema, reprovado, decisão, humano, consolidacao, assinado, mesmo, aprovação, assinada, era, dia, nada, saía, agora, reprovações, pulado, verificação, verificar, pode, aplicar, proposta, juntado, verde
-(779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura humana (auditoria-controles-20261020).** P-4 agora inclui `laya-roteador` na porta 11436; P-9 vigia a manutenção diária, o oneshot, o Laya e a ponte do LibreChat, e avisa quando timer de usuário não está ativo. PROJETO descreve Laya como roteador ativo, contêineres `unless-stopped` e gateway/voz habilitados no boot. Par assinado movido para `propostas/aplicadas/`. Validação antes de aplicar: suíte 57/57, revisão independente favorável, P-12 OK após snapshot 56038913. Reversão requer outro diff assinado; nenhuma unit foi reiniciada porque a mudança altera controles e documentação, não os serviços ativos.
-  palavras-chave: proposta, auditoria, aplicada, após, assinatura, humana, controles, agora, inclui, laya, roteador, porta, vigia, manutenção, diária, oneshot, ponte, librechat, avisa, timer, usuário, ativo, projeto, descreve, contêineres, unless, stopped, gateway, voz, habilitados, boot, par, assinado, movido, propostas, aplicadas, validação, aplicar, suíte, revisão, independente, favorável, snapshot, reversão, requer, diff, unit, reiniciada, porque, mudança, altera, documentação, serviços, ativos
+(779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura …
+  palavras-chave: proposta, auditoria, aplicada, após, assinatura
 (778) DIÁRIO — 20/10/2026 · **Proposta da auditoria: cobrir o Laya no P-4, a man …
   palavras-chave: proposta, auditoria, cobrir, laya, man
 (777) DIÁRIO — 20/10/2026 · **P-4 conferido uma vez como root: `p4_bind` saiu co …

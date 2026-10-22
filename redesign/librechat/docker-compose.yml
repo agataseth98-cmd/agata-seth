@@ -101,6 +101,7 @@ services:
     environment:
       - CONFIG_PATH=/app/librechat.yaml
       - AGATA_APPROVAL_PRIVATE_PEM_PATH=/run/secrets/agata-approval-private.pem
+      - AGATA_PROJECT_TOKEN_FILE=/run/a
       # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
       # escuta em todas as interfaces DO CONTAINER -- na Maquina so 127.0.0.1:3080
       # e publicado (acima) -- e acha Mongo/Meili pelo nome do servico.
@@ -114,6 +115,7 @@ services:
       - ./logs:/app/api/logs
       - ./data:/app/data
       - ${HOME}/.config/agata/approval-capability-private.pem:/run/secrets/agata-approval-private.pem:ro
+      - ${AGATA_PROJECT_TOKEN_FILE_HOST:?configure token file for this project}:/run/a:ro
       - ./agata-tema.css:/app/client/dist/assets/agata-tema.css:ro
     healthcheck:
       # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber

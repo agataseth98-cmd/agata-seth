@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from "node:fs";
 // canon-mcp.mjs — servidor MCP (stdio, JSON-RPC newline-delimited) read-only
 // sobre o vault do Agata. Bate no proxy read-only :27125 (obsidian-local-rest-api,
 // que ja injeta o bearer e bloqueia escrita). Zero dependencias — so `fetch` do Node.
@@ -20,6 +21,7 @@
 
 const PROXY = (process.env.CANON_PROXY || "http://127.0.0.1:27125").replace(/\/$/, "");
 const ESCRIBA = (process.env.SETH_ESCRIBA || "http://127.0.0.1:20140").replace(/\/$/, "");
+const PROJECT_TOKEN_FILE = process.env.AGATA_PROJECT_TOKEN_FILE || "/run/secrets/agata-project.token";
 const VERIFICADOR = (process.env.SETH_VERIFICADOR || "http://127.0.0.1:20141").replace(/\/$/, "");
 const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
 
@@ -401,12 +403,34 @@ const TOOLS = [
 ];
 
 // ---- escrita APPEND-ONLY (via seth_escriba no host) ---------------------
+function projectToken() {
+  let fd;
+  try {
+    fd = fs.openSync(PROJECT_TOKEN_FILE, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+    const st = fs.fstatSync(fd);
+    if (!st.isFile() || st.uid !== process.getuid() || (st.mode & 0o077) !== 0 || st.nlink !== 1 || st.size > 4096)
+      throw new Error("unsafe token file");
+    const token = fs.readFileSync(fd, "utf8").trim();
+    if (token.length < 32) throw new Error("invalid token");
+    return token;
+  } catch {
+    throw new Error("token do projeto ausente ou inseguro; escrita recusada");
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+}
+
 async function escriba(rota, payload, capability) {
   let r;
+  const tokenProjeto = projectToken();
   try {
     r = await fetch(`${ESCRIBA}${rota}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${capability || ""}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${capability || ""}`,
+        "X-Agata-Project-Token": tokenProjeto,
+      },
       body: JSON.stringify(payload),
     });
   } catch (e) {
