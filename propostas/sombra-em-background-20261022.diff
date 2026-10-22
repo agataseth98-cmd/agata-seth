@@ -1,0 +1,45 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index fc03bb0..cf4a767 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -434,21 +434,28 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+   # dobrar o tempo de cada um dos 31 casos nem rodar contra um clone que
+   # nao tem o arquivo de referencia.
+   _ref_sombra="$_PERIMETRO_DIR/perimetro-sombra-referencia.sh"
++  # (22/10/2026, proposta sombra-em-background) A sombra roda em SEGUNDO PLANO: ela so
++  # registra divergencia e nunca decide o exit code, entao nao precisa travar o commit.
++  # Antes, o commit esperava o monolito inteiro. O registro de divergencia e' o mesmo.
+   if [ -f "$_ref_sombra" ] && [ -z "${AGATA_TESTE_PERIMETRO:-}" ]; then
+-    _saida_sombra="$(bash "$_ref_sombra" 2>&1)"
+-    _resultado_sombra=$?
+     _log_sombra="$HOME/.cache/agata/perimetro-sombra.log"
++    _commit_sombra="$(git rev-parse HEAD 2>/dev/null)"
+     mkdir -p "$(dirname "$_log_sombra")" 2>/dev/null
+-    if [ "$_resultado_sombra" != "$_resultado_modular" ]; then
+-      {
+-        echo "=== DIVERGENCIA $(date -Is 2>/dev/null) commit-em-curso=$(git rev-parse HEAD 2>/dev/null) ==="
+-        echo "modular:   exit=$_resultado_modular"
+-        echo "referencia (pre-extracao, congelada): exit=$_resultado_sombra"
+-        echo "ultimas linhas da referencia:"
+-        echo "$_saida_sombra" | tail -8
+-        echo
+-      } >> "$_log_sombra" 2>/dev/null
+-    fi
++    (
++      _saida_sombra="$(bash "$_ref_sombra" 2>&1)"
++      _resultado_sombra=$?
++      if [ "$_resultado_sombra" != "$_resultado_modular" ]; then
++        {
++          echo "=== DIVERGENCIA $(date -Is 2>/dev/null) commit-em-curso=$_commit_sombra ==="
++          echo "modular:   exit=$_resultado_modular"
++          echo "referencia (pre-extracao, congelada): exit=$_resultado_sombra"
++          echo "ultimas linhas da referencia:"
++          echo "$_saida_sombra" | tail -8
++          echo
++        } >> "$_log_sombra" 2>/dev/null
++      fi
++    ) >/dev/null 2>&1 &
++    disown 2>/dev/null || true
+   fi
+ 
+   exit "$_resultado_modular"
