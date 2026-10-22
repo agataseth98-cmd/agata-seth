@@ -1,0 +1,560 @@
+diff --git a/redesign/librechat/canon-mcp.mjs b/redesign/librechat/canon-mcp.mjs
+index 9df1c53..8ace622 100644
+--- a/redesign/librechat/canon-mcp.mjs
++++ b/redesign/librechat/canon-mcp.mjs
+@@ -1,4 +1,5 @@
+ #!/usr/bin/env node
++import fs from "node:fs";
+ // canon-mcp.mjs — servidor MCP (stdio, JSON-RPC newline-delimited) read-only
+ // sobre o vault do Agata. Bate no proxy read-only :27125 (obsidian-local-rest-api,
+ // que ja injeta o bearer e bloqueia escrita). Zero dependencias — so `fetch` do Node.
+@@ -20,6 +21,7 @@
+ 
+ const PROXY = (process.env.CANON_PROXY || "http://127.0.0.1:27125").replace(/\/$/, "");
+ const ESCRIBA = (process.env.SETH_ESCRIBA || "http://127.0.0.1:20140").replace(/\/$/, "");
++const PROJECT_TOKEN_FILE = process.env.AGATA_PROJECT_TOKEN_FILE || "/run/secrets/agata-project.token";
+ const VERIFICADOR = (process.env.SETH_VERIFICADOR || "http://127.0.0.1:20141").replace(/\/$/, "");
+ const MAX = 40000; // teto de chars por resposta, p/ nao estourar contexto
+ 
+@@ -401,12 +403,34 @@ const TOOLS = [
+ ];
+ 
+ // ---- escrita APPEND-ONLY (via seth_escriba no host) ---------------------
++function projectToken() {
++  let fd;
++  try {
++    fd = fs.openSync(PROJECT_TOKEN_FILE, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
++    const st = fs.fstatSync(fd);
++    if (!st.isFile() || st.uid !== process.getuid() || (st.mode & 0o077) !== 0 || st.nlink !== 1 || st.size > 4096)
++      throw new Error("unsafe token file");
++    const token = fs.readFileSync(fd, "utf8").trim();
++    if (token.length < 32) throw new Error("invalid token");
++    return token;
++  } catch {
++    throw new Error("token do projeto ausente ou inseguro; escrita recusada");
++  } finally {
++    if (fd !== undefined) fs.closeSync(fd);
++  }
++}
++
+ async function escriba(rota, payload, capability) {
+   let r;
++  const tokenProjeto = projectToken();
+   try {
+     r = await fetch(`${ESCRIBA}${rota}`, {
+       method: "POST",
+-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${capability || ""}` },
++      headers: {
++        "Content-Type": "application/json",
++        Authorization: `Bearer ${capability || ""}`,
++        "X-Agata-Project-Token": tokenProjeto,
++      },
+       body: JSON.stringify(payload),
+     });
+   } catch (e) {
+diff --git a/redesign/librechat/docker-compose.yml b/redesign/librechat/docker-compose.yml
+index 9b5dcd4..2e43de9 100644
+--- a/redesign/librechat/docker-compose.yml
++++ b/redesign/librechat/docker-compose.yml
+@@ -101,6 +101,7 @@ services:
+     environment:
+       - CONFIG_PATH=/app/librechat.yaml
+       - AGATA_APPROVAL_PRIVATE_PEM_PATH=/run/secrets/agata-approval-private.pem
++      - AGATA_PROJECT_TOKEN_FILE=/run/a
+       # sobrepõem o .env (que vale pro modo host antigo): dentro da bridge a app
+       # escuta em todas as interfaces DO CONTAINER -- na Maquina so 127.0.0.1:3080
+       # e publicado (acima) -- e acha Mongo/Meili pelo nome do servico.
+@@ -114,6 +115,7 @@ services:
+       - ./logs:/app/api/logs
+       - ./data:/app/data
+       - ${HOME}/.config/agata/approval-capability-private.pem:/run/secrets/agata-approval-private.pem:ro
++      - ${AGATA_PROJECT_TOKEN_FILE_HOST:?configure token file for this project}:/run/a:ro
+       - ./agata-tema.css:/app/client/dist/assets/agata-tema.css:ro
+     healthcheck:
+       # /health é o mesmo endpoint que ~/.local/bin/seth já usa pra saber
+diff --git a/redesign/router/seth_escriba.py b/redesign/router/seth_escriba.py
+index 651a5e2..97c6e64 100644
+--- a/redesign/router/seth_escriba.py
++++ b/redesign/router/seth_escriba.py
+@@ -37,6 +37,8 @@ Env: SETH_ESCRIBA_BIND (default 127.0.0.1:20140), SETH_REPO (default ~/agata),
+ from __future__ import annotations
+ 
+ import fcntl
++import hashlib
++import hmac
+ import json
+ import os
+ import re
+@@ -65,6 +67,71 @@ MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
+ MAX_CORPO = 20000  # trava de tamanho por acrescimo
+ 
+ 
++def _token_projeto_esperado() -> str:
++    raiz = os.environ.get("AGATA_PROJETO_RAIZ")
++    if not raiz:
++        raise PermissionError("projeto ativo ausente")
++    try:
++        projeto = Path(raiz).resolve(strict=True)
++        config = Path.home() / ".config" / "agata" / "projetos"
++        if config.resolve(strict=True) != config.absolute():
++            raise PermissionError("diretório de tokens indireto")
++        dfd = os.open(str(config), os.O_RDONLY | os.O_CLOEXEC | os.O_DIRECTORY | os.O_NOFOLLOW)
++        st_dir = os.fstat(dfd)
++        if st_dir.st_uid != os.getuid() or st_dir.st_mode & 0o022:
++            os.close(dfd)
++            raise PermissionError("diretório de tokens inseguro")
++        ident = hashlib.sha256(str(projeto).encode("utf-8")).hexdigest()
++        try:
++            fd = os.open(f"{ident}.token", os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=dfd)
++            st = os.fstat(fd)
++            if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid()
++                    or st.st_mode & 0o077 or st.st_nlink != 1):
++                os.close(fd)
++                raise PermissionError("token de projeto inseguro")
++            with os.fdopen(fd, "r", encoding="utf-8") as f:
++                valor = f.read().strip()
++        finally:
++            os.close(dfd)
++    except (OSError, RuntimeError):
++        raise PermissionError("token de projeto indisponível") from None
++    if len(valor) < 32:
++        raise PermissionError("token de projeto inválido")
++    return valor
++
++
++def _validar_token_projeto(token: str) -> None:
++    esperado = _token_projeto_esperado()
++    if not token or not hmac.compare_digest(token, esperado):
++        raise PermissionError("token de projeto ausente ou inválido")
++
++
++def _padroes_segredo() -> list[str]:
++    script = REPO / "scripts" / "varredura_segredo.sh"
++    p = subprocess.run(
++        ["bash", "-c", 'source "$1"; printf "%s\\n" "${PADROES_SEGREDO[@]}"', "_", str(script)],
++        capture_output=True, text=True, timeout=5, check=False)
++    if p.returncode or not p.stdout.strip():
++        raise RuntimeError("régua de segredo indisponível; gravação recusada")
++    return p.stdout.splitlines()
++
++
++def _tem_segredo(texto: str) -> bool:
++    for padrao in _padroes_segredo():
++        p = subprocess.run(["grep", "-E", "-q", "--", padrao], input=texto,
++                           capture_output=True, text=True, timeout=5, check=False)
++        if p.returncode == 0:
++            return True
++        if p.returncode != 1:
++            raise RuntimeError("régua de segredo falhou; gravação recusada")
++    return False
++
++
++def _recusar_segredo(textos: list[str]) -> None:
++    if _tem_segredo("\n".join(textos)):
++        raise ValueError("gravação recusada: possível segredo; nada foi gravado")
++
++
+ def _validar_capability(token: str, tool: str, arguments: dict) -> None:
+     verificar_capability(
+         token,
+@@ -308,13 +375,19 @@ class _H(BaseHTTPRequestHandler):
+             return self._j(400, {"error": "corpo nao e' JSON"})
+         try:
+             if self.path.rstrip("/") == "/memoria":
++                titulo, corpo = data.get("titulo", ""), data.get("corpo", "")
++                _validar_token_projeto(self.headers.get("X-Agata-Project-Token", ""))
++                _recusar_segredo([titulo, corpo])
+                 _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
+                                     "memoria_acrescentar",
+-                                    {"titulo": data.get("titulo", ""), "corpo": data.get("corpo", "")})
++                                    {"titulo": titulo, "corpo": corpo})
+                 return self._j(200, _acrescenta_memoria(data.get("titulo", ""), data.get("corpo", "")))
+             if self.path.rstrip("/") == "/diario":
++                texto = data.get("texto", "")
++                _validar_token_projeto(self.headers.get("X-Agata-Project-Token", ""))
++                _recusar_segredo([texto])
+                 _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
+-                                    "diario_anotar", {"texto": data.get("texto", "")})
++                                    "diario_anotar", {"texto": texto})
+                 return self._j(200, _anota_diario(data.get("texto", "")))
+             return self._j(404, {"error": f"rota {self.path} inexistente"})
+         except PermissionError:
+diff --git a/redesign/systemd/seth-escriba.service b/redesign/systemd/seth-escriba.service
+index 4164f18..0e129cd 100644
+--- a/redesign/systemd/seth-escriba.service
++++ b/redesign/systemd/seth-escriba.service
+@@ -8,6 +8,7 @@ Documentation=file:///home/orusoua/agata/redesign/router/seth_escriba.py
+ Type=simple
+ Environment=SETH_ESCRIBA_BIND=127.0.0.1:20140
+ Environment=SETH_REPO=%h/agata
++Environment=AGATA_PROJETO_RAIZ=%h/agata
+ Environment=SETH_ESCRIBA_TZ=America/Sao_Paulo
+ ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_escriba.py
+ Restart=on-failure
+diff --git a/scripts/testar_capability.py b/scripts/testar_capability.py
+index 73176e1..04d59fc 100644
+--- a/scripts/testar_capability.py
++++ b/scripts/testar_capability.py
+@@ -133,6 +133,31 @@ class CapabilityTests(unittest.TestCase):
+             self.verify(self.issue(self.args, nonce="bad-key"))
+         self.assertEqual(stat.S_IMODE(self.public_key_file.stat().st_mode), 0o666)
+ 
++    def test_project_token_is_scoped_to_project_and_required(self):
++        projeto = self.root / "projeto-a"
++        projeto.mkdir()
++        token_dir = self.root / ".config" / "agata" / "projetos"
++        token_dir.mkdir(parents=True)
++        token = "token-de-teste-com-mais-de-trinta-dois-caracteres"
++        token_file = token_dir / (hashlib.sha256(str(projeto.resolve()).encode("utf-8")).hexdigest() + ".token")
++        token_file.write_text(token + "\n", encoding="utf-8")
++        token_file.chmod(0o600)
++        with patch.dict(os.environ, {"AGATA_PROJETO_RAIZ": str(projeto)}), \
++             patch.object(seth_escriba.Path, "home", return_value=self.root):
++            seth_escriba._validar_token_projeto(token)
++            with self.assertRaises(PermissionError):
++                seth_escriba._validar_token_projeto("token-errado")
++        with patch.dict(os.environ, {}, clear=True):
++            with self.assertRaises(PermissionError):
++                seth_escriba._validar_token_projeto(token)
++
++    def test_secret_content_is_refused_without_echo(self):
++        segredo = "ghp_" + "x" * 36
++        with self.assertRaisesRegex(ValueError, "nada foi gravado") as erro:
++            seth_escriba._recusar_segredo(["texto comum", segredo])
++        self.assertNotIn(segredo, str(erro.exception))
++        seth_escriba._recusar_segredo(["texto comum sem credenciais"])
++
+     def test_escriba_http_requires_and_consumes_capability(self):
+         memories = self.root / "MEMÓRIAS.md"
+         diary = self.root / "SETH-DIARIO.md"
+@@ -143,19 +168,31 @@ class CapabilityTests(unittest.TestCase):
+         now = int(time.time())
+         token = self.issue(payload, aud="escriba", tool="memoria_acrescentar", nonce="http",
+                            iat=now, exp=now + 60)
++        projeto = self.root / "projeto-a"
++        projeto.mkdir()
++        token_dir = self.root / ".config" / "agata" / "projetos"
++        token_dir.mkdir(parents=True)
++        project_token = "token-de-projeto-ficticio-com-mais-de-32-caracteres"
++        token_file = token_dir / (hashlib.sha256(str(projeto.resolve()).encode("utf-8")).hexdigest() + ".token")
++        token_file.write_text(project_token + "\n", encoding="utf-8")
++        token_file.chmod(0o600)
+         with patch.object(seth_escriba, "MEMORIAS", memories), patch.object(seth_escriba, "DIARIO", diary), \
+              patch.dict(os.environ, {"AGATA_APPROVAL_PUBLIC_KEY_FILE": str(self.public_key_file),
+-                                     "AGATA_APPROVAL_NONCE_DB": str(database)}):
++                                     "AGATA_APPROVAL_NONCE_DB": str(database),
++                                     "AGATA_PROJETO_RAIZ": str(projeto)}), \
++             patch.object(seth_escriba.Path, "home", return_value=self.root):
+             server = seth_escriba.ThreadingHTTPServer(("127.0.0.1", 0), seth_escriba._H)
+             thread = threading.Thread(target=server.serve_forever, daemon=True)
+             thread.start()
+             url = f"http://127.0.0.1:{server.server_port}/memoria"
+             body = json.dumps(payload).encode()
+ 
+-            def post(auth=None):
++            def post(auth=None, token_projeto=None):
+                 headers = {"Content-Type": "application/json"}
+                 if auth:
+                     headers["Authorization"] = f"Bearer {auth}"
++                if token_projeto:
++                    headers["X-Agata-Project-Token"] = token_projeto
+                 request = urllib.request.Request(url, data=body, headers=headers)
+                 try:
+                     with urllib.request.urlopen(request, timeout=3) as response:
+@@ -168,10 +205,11 @@ class CapabilityTests(unittest.TestCase):
+             try:
+                 self.assertEqual(post(), 403)
+                 self.assertEqual(memories.read_text(encoding="utf-8"), original)
+-                self.assertEqual(post(token), 200)
++                self.assertEqual(post(token), 403)
++                self.assertEqual(post(token, project_token), 200)
+                 after = memories.read_text(encoding="utf-8")
+                 self.assertIn("conteúdo autorizado", after)
+-                self.assertEqual(post(token), 403)
++                self.assertEqual(post(token, project_token), 403)
+                 self.assertEqual(memories.read_text(encoding="utf-8"), after)
+             finally:
+                 server.shutdown()
+diff --git a/scripts/testar_escriba_cliente.mjs b/scripts/testar_escriba_cliente.mjs
+new file mode 100644
+index 0000000..3bf962e
+--- /dev/null
++++ b/scripts/testar_escriba_cliente.mjs
+@@ -0,0 +1,64 @@
++#!/usr/bin/env node
++import assert from "node:assert/strict";
++import { spawn } from "node:child_process";
++import fs from "node:fs";
++import http from "node:http";
++import os from "node:os";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
++const client = path.join(root, "redesign/librechat/canon-mcp.mjs");
++const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agata-escriba-client-"));
++const tokenFile = path.join(tmp, "project.token");
++const fakeToken = "fake-project-token-for-client-test-only-0123456789";
++fs.writeFileSync(tokenFile, `${fakeToken}\n`, { mode: 0o600 });
++let requests = 0;
++const server = http.createServer((req, res) => {
++  requests++;
++  assert.equal(req.headers["x-agata-project-token"], fakeToken);
++  assert.equal(req.headers.authorization, "Bearer fake-capability");
++  req.resume();
++  req.on("end", () => {
++    res.writeHead(200, { "Content-Type": "application/json" });
++    res.end(JSON.stringify({ bytes_add: 6, nota: "fixture" }));
++  });
++});
++
++function call(tokenPath) {
++  return new Promise((resolve, reject) => {
++    const child = spawn(process.execPath, [client], {
++      env: { ...process.env, SETH_ESCRIBA: `http://127.0.0.1:${server.address().port}`,
++        AGATA_PROJECT_TOKEN_FILE: tokenPath },
++      stdio: ["pipe", "pipe", "pipe"],
++    });
++    let stdout = "", stderr = "";
++    child.stdout.setEncoding("utf8").on("data", (v) => { stdout += v; });
++    child.stderr.setEncoding("utf8").on("data", (v) => { stderr += v; });
++    child.on("error", reject);
++    child.on("close", (code) => {
++      try {
++        const line = stdout.trim().split("\n").at(-1);
++        resolve({ code, response: JSON.parse(line), stderr });
++      } catch (error) { reject(error); }
++    });
++    child.stdin.end(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call",
++      params: { name: "diario_anotar", arguments: { texto: "fixture", agata_capability: "fake-capability" } } }) + "\n");
++  });
++}
++
++try {
++  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
++  const good = await call(tokenFile);
++  assert.equal(good.code, 0);
++  assert.equal(good.response.result.content[0].text, "anotado (6 bytes). fixture");
++  assert.equal(requests, 1);
++  const absent = await call(path.join(tmp, "missing.token"));
++  assert.equal(absent.code, 0);
++  assert.match(absent.response.error.message, /token do projeto ausente ou inseguro/);
++  assert.equal(requests, 1, "token ausente não pode abrir conexão com o Escriba");
++  console.log("Escriba MCP project-token forwarding PASS (valid header; missing token fails closed)");
++} finally {
++  await new Promise((resolve) => server.close(resolve));
++  fs.rmSync(tmp, { recursive: true, force: true });
++}
+diff --git a/scripts/testar_escriba_http.py b/scripts/testar_escriba_http.py
+new file mode 100644
+index 0000000..fe86927
+--- /dev/null
++++ b/scripts/testar_escriba_http.py
+@@ -0,0 +1,162 @@
++"""Provas HTTP reais do Escriba, isoladas em diretório temporário e porta efêmera."""
++from __future__ import annotations
++
++import base64
++import hashlib
++import json
++import os
++import stat
++import tempfile
++import threading
++import time
++import urllib.error
++import urllib.request
++from pathlib import Path
++from unittest.mock import patch
++import sys
++
++from cryptography.hazmat.primitives import serialization
++from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++
++from redesign.mcp.capability import canonical_json, digest_arguments
++from redesign.router import seth_escriba as escriba
++
++
++def _signed(private_key, audience: str, tool: str, arguments: dict, jti: str) -> str:
++    now = int(time.time())
++    claims = {
++        "iss": "librechat-agata", "aud": audience, "tool": tool,
++        "sub": "fixture-user", "args_sha256": digest_arguments(arguments),
++        "iat": now, "exp": now + 60, "jti": jti,
++    }
++    encoded = base64.urlsafe_b64encode(canonical_json(claims)).decode().rstrip("=")
++    signature = private_key.sign(encoded.encode("ascii"))
++    return encoded + "." + base64.urlsafe_b64encode(signature).decode().rstrip("=")
++
++
++def _post(url: str, payload: dict, *, project_token: str | None = None,
++          capability: str | None = None) -> tuple[int, dict]:
++    headers = {"Content-Type": "application/json"}
++    if project_token is not None:
++        headers["X-Agata-Project-Token"] = project_token
++    if capability is not None:
++        headers["Authorization"] = f"Bearer {capability}"
++    request = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers)
++    try:
++        with urllib.request.urlopen(request, timeout=3) as response:
++            return response.status, json.loads(response.read())
++    except urllib.error.HTTPError as error:
++        try:
++            return error.code, json.loads(error.read())
++        finally:
++            error.close()
++
++
++def _report(label: str, status: int, condition: bool, detail: str) -> None:
++    result = "PASSOU" if condition else "FALHOU"
++    print(f"{label}: HTTP {status}; {detail}: {result}")
++    if not condition:
++        raise AssertionError(f"{label}: {detail}")
++
++
++def main() -> int:
++    with tempfile.TemporaryDirectory(prefix="agata-escriba-http-") as temporary:
++        root = Path(temporary)
++        project = root / "project"
++        project.mkdir(mode=0o700)
++        config = root / ".config/agata/projetos"
++        config.mkdir(parents=True, mode=0o700)
++        project_token = "fixture-project-token-0123456789-abcdefghijklmnopqrstuvwxyz"
++        token_path = config / (hashlib.sha256(str(project.resolve()).encode()).hexdigest() + ".token")
++        token_path.write_text(project_token + "\n", encoding="utf-8")
++        token_path.chmod(0o600)
++        private_key = Ed25519PrivateKey.generate()
++        public_key_path = root / "approval-public.pem"
++        public_key_path.write_bytes(private_key.public_key().public_bytes(
++            serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
++        public_key_path.chmod(0o644)
++        memories = root / "MEMÓRIAS.md"
++        memories_before = "topo\n<!-- ENTRADAS-NOVAS:AQUI -- fixture -->\n\nfim\n"
++        memories.write_text(memories_before, encoding="utf-8")
++        diary = root / "SETH-DIARIO.md"
++        diary_before = "# diário fixture\n\n<!-- ENTRADAS-NOVAS:AQUI -- fixture -->\n\n"
++        diary.write_text(diary_before, encoding="utf-8")
++        nonce_db = root / ".cache/agata/approval-capabilities/used.sqlite3"
++
++        with patch.object(escriba, "MEMORIAS", memories), patch.object(escriba, "DIARIO", diary), \
++             patch.object(escriba.Path, "home", return_value=root), \
++             patch.dict(os.environ, {
++                 "AGATA_PROJETO_RAIZ": str(project),
++                 "AGATA_APPROVAL_PUBLIC_KEY_FILE": str(public_key_path),
++                 "AGATA_APPROVAL_NONCE_DB": str(nonce_db),
++             }):
++            server = escriba.ThreadingHTTPServer(("127.0.0.1", 0), escriba._H)
++            thread = threading.Thread(target=server.serve_forever, daemon=True)
++            thread.start()
++            base = f"http://127.0.0.1:{server.server_port}"
++            try:
++                before = memories.read_bytes()
++                status, _ = _post(base + "/memoria", {"titulo": "fixture", "corpo": "conteúdo limpo"})
++                _report("sem token", status, status == 403 and memories.read_bytes() == before,
++                        "MEMÓRIAS intacta")
++
++                status, _ = _post(base + "/memoria", {"titulo": "fixture", "corpo": "conteúdo limpo"},
++                                  project_token="x" * len(project_token))
++                _report("token errado", status, status == 403 and memories.read_bytes() == before,
++                        "MEMÓRIAS intacta")
++
++                status, response = _post(base + "/memoria", {
++                    "titulo": "fixture", "corpo": "ghp_" + "x" * 36,
++                }, project_token=project_token)
++                _report("texto com segredo", status,
++                        status == 400 and "nada foi gravado" in response.get("error", "")
++                        and memories.read_bytes() == before,
++                        "segredo recusado e MEMÓRIAS intacta")
++
++                token_path.chmod(0o644)
++                status, _ = _post(base + "/memoria", {"titulo": "fixture", "corpo": "conteúdo limpo"},
++                                  project_token=project_token)
++                _report("token 0644", status, status == 403 and memories.read_bytes() == before,
++                        "token inseguro recusado e MEMÓRIAS intacta")
++                token_path.chmod(0o600)
++
++                with patch.dict(os.environ, {}, clear=True):
++                    status, _ = _post(base + "/memoria", {"titulo": "fixture", "corpo": "conteúdo limpo"},
++                                      project_token=project_token)
++                _report("raiz ausente", status, status == 403 and memories.read_bytes() == before,
++                        "escrita recusada e MEMÓRIAS intacta")
++
++                memory_payload = {"titulo": "regressão fixture", "corpo": "corpo limpo de teste"}
++                memory_cap = _signed(private_key, "escriba", "memoria_acrescentar", memory_payload, "memory-1")
++                status, response = _post(base + "/memoria", memory_payload,
++                                         project_token=project_token, capability=memory_cap)
++                memory_after = memories.read_text(encoding="utf-8")
++                _report("regressão /memoria", status,
++                        status == 200 and response.get("ok") is True
++                        and "corpo limpo de teste" in memory_after
++                        and memory_after.startswith("topo\n<!-- ENTRADAS-NOVAS:AQUI -- fixture -->\n\n")
++                        and memory_after.endswith("\n\nfim\n"),
++                        "gravação e verificação pós-escrita passaram")
++
++                diary_payload = {"texto": "entrada limpa de teste"}
++                diary_cap = _signed(private_key, "escriba", "diario_anotar", diary_payload, "diary-1")
++                status, response = _post(base + "/diario", diary_payload,
++                                         project_token=project_token, capability=diary_cap)
++                diary_after = diary.read_text(encoding="utf-8")
++                _report("regressão /diario", status,
++                        status == 200 and response.get("ok") is True
++                        and "entrada limpa de teste" in diary_after
++                        and diary_after.startswith("# diário fixture\n\n<!-- ENTRADAS-NOVAS:AQUI -- fixture -->\n"),
++                        "gravação e verificação pós-escrita passaram")
++            finally:
++                server.shutdown()
++                server.server_close()
++                thread.join(timeout=3)
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/scripts/testar_net02_compose.py b/scripts/testar_net02_compose.py
+index 1c0c70b..b6fb71c 100644
+--- a/scripts/testar_net02_compose.py
++++ b/scripts/testar_net02_compose.py
+@@ -16,11 +16,15 @@ def main() -> int:
+         key_file = temp_dir / ".config/agata/approval-capability-private.pem"
+         key_file.write_text("test-private-key-fixture", encoding="ascii")
+         key_file.chmod(0o600)
++        project_token_file = temp_dir / ".config/agata/project.token"
++        project_token_file.write_text("fake-project-token-for-compose-test-only", encoding="ascii")
++        project_token_file.chmod(0o600)
+         (temp_dir / ".cache/agata/approval-capabilities").mkdir(parents=True, mode=0o700)
+         compose_copy = temp_dir / "docker-compose.yml"
+         compose_copy.write_text(COMPOSE.read_text(encoding="utf-8"), encoding="utf-8")
+         (temp_dir / ".env").write_text("MEILI_MASTER_KEY=placeholder\n", encoding="utf-8")
+-        env = {**os.environ, "HOME": tmp, "MEILI_MASTER_KEY": "placeholder"}
++        env = {**os.environ, "HOME": tmp, "MEILI_MASTER_KEY": "placeholder",
++               "AGATA_PROJECT_TOKEN_FILE_HOST": str(project_token_file)}
+         result = subprocess.run(
+             ["docker", "compose", "-f", str(compose_copy), "config", "--format", "json"],
+             capture_output=True, text=True, env=env,
+@@ -41,6 +45,9 @@ def main() -> int:
+     mounts = services["librechat"]["volumes"]
+     assert not any("approval-capabilities" in mount.get("source", "") for mount in mounts)
+     assert any("approval-capability-private.pem" in mount.get("source", "") for mount in mounts)
++    assert any(mount.get("target") == "/run/a"
++               and mount.get("read_only") for mount in mounts)
++    assert services["librechat"]["environment"]["AGATA_PROJECT_TOKEN_FILE"] == "/run/a"
+     assert networks["librechat-data"]["internal"] is True
+     assert services["librechat-ponte-host"]["network_mode"] == "host"
+     print("NET-02 compose topology PASS")
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 3f582c7..052c2a6 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -623,7 +623,9 @@ fi
+ # dispara quando qualquer uma dessas provas ou seus controles muda.
+ if [[ -z "$FILTRO" ]]; then
+   if python3 -m unittest scripts.testar_capability scripts.testar_dados_externos scripts.testar_egress_proxy -v \
++      && python3 "$RAIZ/scripts/testar_escriba_http.py" \
+       && python3 "$RAIZ/scripts/testar_fork_librechat.py" \
++      && node "$RAIZ/scripts/testar_escriba_cliente.mjs" \
+       && python3 scripts/testar_net02_compose.py \
+       && SETH_REPO="$RAIZ" python3 "$RAIZ/redesign/router/seth_gateway.py" --selftest; then
+     OK=$((OK + 1))
