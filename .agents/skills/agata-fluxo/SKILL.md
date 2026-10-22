@@ -5,8 +5,18 @@ description: Fluxo único de trabalho no sistema Agata para qualquer LLM (Claude
 
 # Fluxo Agata (universal)
 
-Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identifica no cabeçalho como
-`agata · <modelo real>`; a Seth, que passa pelo gateway, usa `agata-seth · <modelo>`.
+Vale para qualquer modelo da Confederação. Use o cabeçalho exato de `PROTOCOLOS.md`: `agata-seth · <modelo> · t=<n> (<origem da contagem>) · <data e hora local + selo>`. O modelo específico só entra se estiver verificado; caso contrário, diga isso no campo.
+
+## Escolha a skill necessária
+- Sessão nova ou sem bloco de estado: `agata-carregar`.
+- Proposta ou aplicação protegida por P-8: `agata-aplicar-proposta`.
+- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-dupla`.
+- Mudança em serviço, container, rede, energia ou boot: `agata-mudanca-segura`.
+- Leitura ou contato com a Seth, quando solicitado: `agata-conversar-com-seth`.
+
+Use as skills necessárias ao tipo de tarefa. Se ela envolver, por exemplo, runtime e arquivos P-8, use as duas skills correspondentes. Este fluxo define as regras comuns; cada skill especializada define só seu procedimento próprio.
+
+Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-dupla` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
 
 ## 0. Antes de qualquer ação
 1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`,
@@ -22,14 +32,10 @@ Vale para qualquer modelo. Não depende de qual modelo é. Cada modelo se identi
 - Trabalho caro em tokens (suíte completa, varreduras longas) vai para o modelo com mais folga; o relato
   volta pelo canal, sem colar relatório inteiro.
 
-## 2. Mudança protegida (do começo ao merge)
-1. Escrever a mudança numa worktree própria; gerar só o `.diff` dos protegidos; `git apply --check`.
-2. Testar a mudança aplicada numa cópia descartável (`scripts/testar_perimetro.sh`, esperado 0 falhas).
-3. Abrir PR **somente de proposta** contra `origin/main`. Não aplicar.
-4. Revisão cruzada: o revisor escolhe casos **antes** de olhar o resultado e responde em 4 partes.
-5. Só o Humano assina (`bash scripts/aprovar.sh <nome>`). Nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo.
-6. Com assinatura verificada (`bash scripts/p8_verificar.sh <nome>` = `PODE APLICAR`), aplicar com
-   `python3 scripts/dupla/aplicar.py <nome> --registro <arquivo>` (o registro começa com `({N}) DIÁRIO — ...`).
+## 2. Mudança protegida
+Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-dupla`.
+
+Regras que sempre valem: proposta em worktree própria baseada em `origin/main`; `.diff` verificável e testado; proposta e aplicação são etapas separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Não avance com teste ou assinatura ausente.
 
 ## 3. Registro
 - Resultado vai para `MEMÓRIAS.md` **só por PR**, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`.
