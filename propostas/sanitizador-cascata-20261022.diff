@@ -1,5 +1,5 @@
 diff --git a/redesign/router/proxy.py b/redesign/router/proxy.py
-index 48da12b..db82b4b 100644
+index 48da12b..b95c6fe 100644
 --- a/redesign/router/proxy.py
 +++ b/redesign/router/proxy.py
 @@ -83,7 +83,9 @@ def validar_egresso_publico(payload: object, classification: str | None) -> None
@@ -13,7 +13,7 @@ index 48da12b..db82b4b 100644
          raise PermissionError("dados sem classificação pública bloqueados antes do OmniRoute")
  
  # User-Agent de saída (MEMÓRIAS (545)). O Cloudflare do Groq e do Cerebras bane o
-@@ -163,10 +165,15 @@ class _Handler(BaseHTTPRequestHandler):
+@@ -163,8 +165,11 @@ class _Handler(BaseHTTPRequestHandler):
              except ValueError:
                  return self._erro(415, "corpo não é JSON -- este proxy só entende OpenAI-compat; nada foi repassado")
              if isinstance(payload, dict):
@@ -25,12 +25,8 @@ index 48da12b..db82b4b 100644
 +                    sanitizar.sanitizar_payload(payload, pessoal=externo)
                  except sanitizar.SegredoNoPayload as e:
                      return self._bloqueado(e)
-+                except sanitizar.NomesProjetoAusente:
-+                    return self._erro(403, "lista de nomes de projeto ausente (~/.config/agata/nomes-projeto.txt): saída externa bloqueada")
              else:
-                 # JSON válido mas não-objeto (lista, string, número) caía aqui
-                 # e seguia direto pro _passar SEM VARREDURA NENHUMA -- o mesmo
-@@ -313,6 +320,12 @@ def _selftest() -> int:
+@@ -313,6 +318,12 @@ def _selftest() -> int:
      # módulo, e o monkeypatch cairia no lugar errado (achado testando).
      token_teste = "selftest-token-nao-e-segredo-de-verdade"
      globals()["_token_interno"] = lambda: token_teste
@@ -44,10 +40,10 @@ index 48da12b..db82b4b 100644
      up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
      px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
 diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
-index fbd46b3..ca91ba3 100644
+index fbd46b3..4edc31c 100644
 --- a/redesign/router/sanitizar.py
 +++ b/redesign/router/sanitizar.py
-@@ -124,6 +124,50 @@ def _redigir(trecho: str) -> str:
+@@ -124,6 +124,43 @@ def _redigir(trecho: str) -> str:
      return f"{cabeca}…[{n} chars]"
  
  
@@ -60,24 +56,17 @@ index fbd46b3..ca91ba3 100644
 +    ("pessoal-cnpj", re.compile(r"\b\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}\b")),
 +    ("pessoal-telefone", re.compile(r"\(\d{2}\)\s?9?\d{4}-?\d{4}\b|\b9\d{4}-\d{4}\b")),
 +]
-+# Lista PRIVADA de nomes de projeto: uma por linha, fora do repositório. Ausente ⇒ falha fechada
-+# para saída externa (a cascata fica bloqueada até o Humano criar o arquivo).
++# Lista PRIVADA de nomes de projeto: uma por linha, fora do repositório. Ausente ou vazia ⇒ só a
++# régua de padrões (e-mail, CPF, CNPJ, telefone) vale. (22/10/2026: freio removido por decisão do Humano.)
 +NOMES_PROJETO_PATH = os.path.expanduser("~/.config/agata/nomes-projeto.txt")
-+
-+
-+class NomesProjetoAusente(Exception):
-+    """Lista de nomes de projeto não existe: saída externa bloqueada (falha fechada)."""
 +
 +
 +def _nomes_projeto(caminho: str | None = None) -> list[str]:
 +    caminho = caminho or NOMES_PROJETO_PATH
 +    if not os.path.exists(caminho):
-+        raise NomesProjetoAusente(caminho)
++        return []
 +    with open(caminho, encoding="utf-8") as f:
-+        nomes = [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
-+    if not nomes:  # (22/10/2026, revisão do Codex) lista existente e vazia também falha fechado
-+        raise NomesProjetoAusente(f"{caminho} (sem nomes)")
-+    return nomes
++        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
 +
 +
 +def varrer_pessoal(texto: str, nomes: list[str]) -> list[dict]:
@@ -98,7 +87,7 @@ index fbd46b3..ca91ba3 100644
  def varrer(texto: str) -> list[dict]:
      """Lista de {padrao_rotulo, padrao, trecho_redigido, pos}. Nunca devolve o segredo."""
      achados = []
-@@ -210,15 +254,20 @@ def _campos_texto(payload):
+@@ -210,15 +247,20 @@ def _campos_texto(payload):
      yield from _anda(payload, "", 0)
  
  
@@ -109,7 +98,7 @@ index fbd46b3..ca91ba3 100644
      — bater o teto vira bloqueio, nunca passagem silenciosa."""
      achados = []
 +    if pessoal and nomes is None:
-+        nomes = _nomes_projeto()  # NomesProjetoAusente sobe: falha fechada
++        nomes = _nomes_projeto()
      try:
          for campo, texto in _campos_texto(payload):
              for a in varrer(texto):
@@ -120,7 +109,7 @@ index fbd46b3..ca91ba3 100644
      except _TetoDeVarreduraExcedido as e:
          achados.append({
              "padrao_rotulo": "teto-de-varredura-excedido",
-@@ -314,6 +363,46 @@ def _autoteste() -> int:
+@@ -314,6 +356,31 @@ def _autoteste() -> int:
            f"{'ok' if ok else 'bloqueou à toa'}")
      falhas += 0 if ok else 1
  
@@ -141,23 +130,8 @@ index fbd46b3..ca91ba3 100644
 +    ok = not varrer_pessoal(limpo, nomes_fake)
 +    print(f"{'PASS' if ok else 'FALHA'}  pessoal[limpo]  -> {'ok' if ok else 'casou à toa'}")
 +    falhas += 0 if ok else 1
-+    try:
-+        _nomes_projeto("/caminho/que/nao/existe/nomes.txt")
-+        ok = False
-+    except NomesProjetoAusente:
-+        ok = True
-+    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista ausente bloqueia saída externa]")
-+    falhas += 0 if ok else 1
-+    # lista existente e vazia também bloqueia (falha fechada)
-+    _vazio = os.path.join(os.environ.get("TMPDIR", "/tmp"), "agata-nomes-vazio-teste.txt")
-+    open(_vazio, "w", encoding="utf-8").write("# só comentário\n")
-+    try:
-+        _nomes_projeto(_vazio)
-+        ok = False
-+    except NomesProjetoAusente:
-+        ok = True
-+    os.remove(_vazio)
-+    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista vazia bloqueia saída externa]")
++    ok = _nomes_projeto("/caminho/que/nao/existe/nomes.txt") == []
++    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista ausente: só a régua de padrões segue]")
 +    falhas += 0 if ok else 1
 +    # local não muda: com pessoal=False, e-mail passa
 +    ok = sanitizar_payload({"messages": [{"role": "user", "content": "fulano@exemplo.com.br"}]}) is not None
