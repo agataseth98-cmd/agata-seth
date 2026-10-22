@@ -2,6 +2,8 @@
 
 ## O que é isto
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
+
+**22/10 — proposta de suíte de perímetro paralela pronta para revisão.** O diff isola controles em até quatro clones e roda os agregados uma vez. Medida em clone limpo: 58,414 s, 58 verificações, 0 falhas; base serial: 205,047 s. Ainda não aplicada; pré-commit/P-16 sem alteração.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 16/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-16.md` (e até 27/09: `extras/arquivo/onde-estamos-ate-2026-09-27.md`).
