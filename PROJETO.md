@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58383fc2995b77dc7683a20b79a2eb2f4374ce82
-  Escrito em: 21/10/2026 23:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1ed29a509039fc09259af9663edb5aed7c234f69
+  Escrito em: 22/10/2026 09:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -75,7 +75,7 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
 **Gateway e voz no boot; demais frentes pelo atalho `seth` / `Parar Seth`:**
 - `seth-gateway` (`:20126`, habilitado no `agata.target`) — reidrata a Seth; ver "Interface".
 - `seth-verificador` (`:20141`) — **único caminho de execução da Seth, read-only.** `POST /verificar` roda um de 10 comandos fixos (`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`, `suite_controles`, `servicos`, `p8_verificar`), argv fixo, sem shell, saída redigida pela régua do P-1, teto com total declarado (423).
-- `seth-escriba` (`:20140`) — **único caminho de escrita da Seth, append-only.** `POST /memoria` insere abaixo do marcador `ENTRADAS-NOVAS` (número e data vêm do relógio da Máquina); `POST /diario` insere abaixo do marcador de `SETH-DIARIO.md`; aborta com 409 se a operação não for insert puro; sem `PUT`/`PATCH`/`DELETE`, sem `git`, sem segredo; `fcntl.flock` + `os.replace`. As escritas exigem capability Ed25519 de uso único, emitida após a aprovação do LibreChat e vinculada a usuário, conversa, executor, ferramenta e argumentos. A chave privada fica no host como `root:59999`, modo 0440, e é montada somente em leitura no container emissor; o emissor valida owner root, GID, modo, tipo e link único. Os executores locais recebem a chave pública e mantêm o banco de nonces. `ReadWritePaths=%h/agata` ainda é amplo; o fechamento efetivo do sandbox fica pendente de homologação systemd. O usuário local pertence ao grupo `docker`, portanto processos com acesso ao daemon Docker estão fora da fronteira de isolamento desta capability. Fonte `redesign/router/seth_escriba.py`.
+- `seth-escriba` (`:20140`) — escrita append-only; detalhes de autorização, limites e isolamento em `extras/projeto-detalhe/servicos-e-interface.md`.
 - `seth-gateway` — bloqueia envio a modelo externo sem classificação explícita `public`; o modelo `seth-public` declara publicamente que todo o contexto da conversa pode sair para provedores externos. Outros modelos externos sem classe retornam 403; aliases locais continuam locais. O bloqueio atua antes do encaminhamento ao sanitizador/OmniRoute.
 - Stack Docker do **LibreChat**: `librechat` na bridge de ferramentas `librechat`/`br-librechat` e na bridge interna `librechat-data` (Mongo/Meili); publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538). Mongo e Meili ficam somente em `librechat-data`, sem rota para o relé. `restart: unless-stopped` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
 - `piper-tts` (`:8890`, voz pt-BR local, habilitada no `agata.target`) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".

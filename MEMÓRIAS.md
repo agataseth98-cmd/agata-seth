@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 58383fc2995b77dc7683a20b79a2eb2f4374ce82
-  Escrito em: 21/10/2026 23:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1ed29a509039fc09259af9663edb5aed7c234f69
+  Escrito em: 22/10/2026 09:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/58383fc2995b77dc7683a20b79a2eb2f4374ce82/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1ed29a509039fc09259af9663edb5aed7c234f69/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(802) DIÁRIO — 22/10/2026 · **Teto do PROJETO.md: parágrafo do escriba movido para extras, sem perda.**
+
+Assinado pelo Humano (`APROVADO-teto-projeto-detalhe-20261020`, `p8_verificar` = PODE APLICAR). O parágrafo de segurança do escriba (1.101 bytes) foi movido, byte a byte, para `extras/projeto-detalhe/servicos-e-interface.md`; o PROJETO.md ficou com um ponteiro. Revisão cruzada do Codex no canal (22/10, 09:02): OK; conferida pelo Claude na mesma data. Efeito: PROJETO.md fica abaixo do teto de 48.000 bytes. Reversível por `git revert` do merge.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (801) DIÁRIO — 21/10/2026 · **Pacote F1+F2 aplicado junto com a correção P-16 (P-24 e P-26 em SEM_TESTE).**
 
 Assinados pelo Humano: `APROVADO-pacote-f1-f2-20261021` e `APROVADO-pacote-f1-f2-testes-20261021` (PR 444, mesclado). A primeira tentativa de aplicar só o pacote foi barrada pelo P-16: P-24 e P-26 emitem só AVISO e não tinham caso nem justificativa em `scripts/testar_perimetro.sh`. Medidos isolados em 21/10/2026: MEMÓRIAS.md com 1.242.050 caracteres contra orçamento de 25.000; 11 chunks frios sem tag. Governança apenas: não altera hidratação, leitura de modelos nem serviços. Reversível por `git revert` do merge.
