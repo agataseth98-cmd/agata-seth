@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0d849f91115d4800abce1067369201b5f0faf463
-  Escrito em: 22/10/2026 10:51 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c2ad593e733fc9ba44b201c529fb6faeef889b70
+  Escrito em: 22/10/2026 10:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d849f91115d4800abce1067369201b5f0faf463/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d849f91115d4800abce1067369201b5f0faf463/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d849f91115d4800abce1067369201b5f0faf463/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d849f91115d4800abce1067369201b5f0faf463/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d849f91115d4800abce1067369201b5f0faf463/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2ad593e733fc9ba44b201c529fb6faeef889b70/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2ad593e733fc9ba44b201c529fb6faeef889b70/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2ad593e733fc9ba44b201c529fb6faeef889b70/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2ad593e733fc9ba44b201c529fb6faeef889b70/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c2ad593e733fc9ba44b201c529fb6faeef889b70/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(804) DIÁRIO — 22/10/2026 · **Importador do inbox grava na fila de revisão, não em MEMÓRIAS.**
+
+Assinado pelo Humano (`APROVADO-fila-inbox-revisao-20261022`, PR 452 mesclado). O POST direto ao escriba exigia capability assinada, que o script não enviava (achado do Codex, 22/10, auditoria pré-trabalho). A gravação automática em MEMÓRIAS também não tinha par P-8. Agora a nota vai para `memoria/obsidian-fila-revisao/` e o original sai do inbox só depois da cópia. O timer `agata-vault-inbox` está parado pelo Humano desde 22/10. Medido: autoteste do importador 15/15 OK na worktree.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (803) DIÁRIO — 22/10/2026 · **Sanitizador amplia para dados pessoais e nomes de projeto; cascata seth-livre volta COM hidratação (decisão do Humano).**
 
 Assinado pelo Humano (`APROVADO-sanitizador-cascata-20261022`, `p8_verificar` = PODE APLICAR), PR 450. Decisão do Humano, com o risco declarado: o contexto da hidratação, inclusive a janela de memória, pode sair da Máquina pela rota `seth-livre`. A proteção por padrão é: segredo, e-mail, CPF, CNPJ, telefone e nomes da lista privada (`~/.config/agata/nomes-projeto.txt`, quando existir; sem ela vale só a régua de padrões). A revisão do Codex (22/10, 09:54 e 10:17) está registrada no PR e na V9 (seção 27); o Humano decidiu seguir. Pendente, não bloqueia: conflito de governança do `vault_importar_inbox.py` (POST /memoria sem autorização) e CodeQL fora da branch protection.
