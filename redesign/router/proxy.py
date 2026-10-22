@@ -165,11 +165,10 @@ class _Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self._erro(415, "corpo não é JSON -- este proxy só entende OpenAI-compat; nada foi repassado")
             if isinstance(payload, dict):
-                # (22/10/2026, P-8 sanitizador-cascata) saída a provedor externo também varre dados
-                # pessoais e nomes de projeto; local não sai da Máquina e segue só com a régua de segredo.
-                externo = not str(payload.get("model", "")).startswith(_LOCAL_MODEL_PREFIXES)
+                # (22/10/2026, P-8 relaxa-pessoal) decisão do Humano: a saída externa volta a varrer só
+                # segredo; dados pessoais e nomes de projeto deixam de bloquear o pedido.
                 try:
-                    sanitizar.sanitizar_payload(payload, pessoal=externo)
+                    sanitizar.sanitizar_payload(payload)
                 except sanitizar.SegredoNoPayload as e:
                     return self._bloqueado(e)
             else:
@@ -238,6 +237,9 @@ class _Handler(BaseHTTPRequestHandler):
             up.close()
 
     def _bloqueado(self, e: "sanitizar.SegredoNoPayload"):
+        # (22/10/2026, P-8 relaxa-pessoal) registro só com a CATEGORIA do padrão, nunca com o trecho.
+        categorias = sorted({a["padrao_rotulo"] for a in e.achados})
+        print(f"sanitizador: 422 por categoria {', '.join(categorias)}", file=sys.stderr, flush=True)
         detalhe = [
             {"campo": a.get("campo"), "padrao": a["padrao_rotulo"], "trecho": a["trecho_redigido"]}
             for a in e.achados
