@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(812) DIÁRIO — 22/10/2026 · **Proposta para paralelizar a suíte de perímetro por controle.**
+  palavras-chave: proposta, paralelizar, suíte, perímetro, controle
 (811) DIÁRIO — 22/10/2026 · **canon-mcp sem diario_anotar no chat, com o teste do escriba em memoria_acrescentar (par).**
   palavras-chave: canon, mcp, diario, anotar, chat, teste, escriba, memoria, acrescentar, par
 (810) DIÁRIO — 22/10/2026 · **Servidor canon do LibreChat recebe AGATA_PROJECT_TOKEN_FILE=/run/a.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: autostart, nvidia, corrigido, testado, xauthority, dinâmico, sessão, unidade, agora, preserva, display, sudo, execução, real, terminou, result, success, settings, confirmou, offsets, reversão, local, restaurar, config, apply, desktop, codex, bak, zerar
 (783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos dois itens são (780) = AC-09 (consolidação) e (781) = AC-18 (retirada no PROJETO). (777) é o P-4 com sudo; (778) e (779) são da auditoria do Codex.** Medido em `grep -nE '^\((77[5-9]|78[0-2])\) ' MEMÓRIAS.md`. Não edito (782) (append-only).
   palavras-chave: correção, numeração, entradas, itens, consolidação, retirada, projeto, sudo, auditoria, codex, medido, grep, memórias, edito, append, only
-(782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não reduziu o PROJETO. Ele só adicionou um aviso.** O diff assinado (`projeto-retirada-20261018`, aplicado em `2a371ca`) mudou `scripts/perimetro.sh` e acrescentou `PROJETO_FOLGA_BYTES` (padrão 500): o aviso sai quando o PROJETO cresce em relação ao HEAD e fica a menos de 500 bytes do teto. Não tirou nenhum texto do PROJETO. Medido agora: `PROJETO.md` = 47.703 bytes, folga de 297 bytes. A retirada real de conteúdo para `extras/projeto-detalhe/` continua por fazer, e precisa de proposta assinada com a escolha do que sai. As entradas (777)/(778) descreveram a política como feita; esta entrada corrige isso. Não edito o texto delas (append-only).
-  palavras-chave: correção, aplicado, reduziu, projeto, ele, adicionou, aviso, diff, assinado, retirada, mudou, scripts, perimetro, acrescentou, folga, bytes, padrão, sai, cresce, relação, head, fica, teto, tirou, texto, medido, agora, real, conteúdo, extras, detalhe, continua, fazer, precisa, proposta, assinada, escolha, entradas, descreveram, política, feita, entrada, corrige, edito, delas, append, only
+(782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não redu …
+  palavras-chave: correção, aplicado, redu
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com u …
   palavras-chave: política, projeto, cheio, inclusão, vem
 (780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, d …

@@ -1,0 +1,121 @@
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index f0ebad9..a08a20b 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -55,6 +55,77 @@ falhas_detalhe=()
+ 
+ _cor() { [ -t 1 ] && printf '\033[%sm%s\033[0m' "$1" "$2" || printf '%s' "$2"; }
+ 
++# A suíte completa pode rodar cada controle em um processo isolado: cada
++# processo monta seu próprio clone e mantém contadores próprios. Os blocos
++# agregados rodam uma vez no worker sentinela. Um filtro explícito preserva
++# o caminho serial original; o P-16 continua chamando este mesmo comando.
++_paralelizar_suite() {
++  local dir="$1" controle pid total_ok=0 total_falhou=0
++  local -a controles=() tarefas=() pids=()
++  mapfile -t controles < <(awk '/^[[:space:]]*_caso P-[0-9]+ / && !vistos[$2]++ {print $2}' "$0")
++  if [ "${#controles[@]}" -eq 0 ]; then
++    echo "ABORTADO: nao encontrei controles para despachar" >&2
++    return 2
++  fi
++  tarefas=("${controles[@]}" "__AGREGADOS__")
++  mkdir -p "$dir"
++  echo "suite de regressao dos controles -- clone descartavel, repo real intocado"
++  echo "execucao paralela: ate 4 workers, um clone por controle; agregados uma vez"
++  echo
++
++  _rodar_worker() {
++    local tarefa="$1" arquivo status
++    arquivo="$dir/${tarefa}.log"
++    status="$dir/${tarefa}.status"
++    ( export AGATA_TESTE_PERIMETRO_WORKER=1
++      bash "$0" "$tarefa" ) >"$arquivo" 2>&1
++    printf '%s\n' "$?" >"$status"
++  }
++
++  for controle in "${tarefas[@]}"; do
++    while [ "$(jobs -pr | wc -l)" -ge 4 ]; do
++      wait -n || true
++    done
++    _rodar_worker "$controle" &
++    pids+=("$!")
++  done
++  for pid in "${pids[@]}"; do wait "$pid" || true; done
++
++  # Reproduz a saída em ordem estável, independentemente de qual worker
++  # terminou primeiro. A sentinela fica por último para separar os agregados.
++  for controle in "${tarefas[@]}"; do
++    local arquivo="$dir/${controle}.log" status="$dir/${controle}.status" marcador rc
++    echo "--- ${controle} ---"
++    if [ -f "$arquivo" ]; then sed '1,2d; /^__AGATA_RESULT__ /d' "$arquivo"; fi
++    rc=2
++    [ -f "$status" ] && read -r rc < "$status"
++    marcador="$(sed -n 's/^__AGATA_RESULT__ //p' "$arquivo" 2>/dev/null | tail -n1)"
++    if [[ "$marcador" =~ ^([0-9]+)[[:space:]]+([0-9]+)$ ]]; then
++      total_ok=$((total_ok + BASH_REMATCH[1]))
++      total_falhou=$((total_falhou + BASH_REMATCH[2]))
++    else
++      total_falhou=$((total_falhou + 1))
++      echo "FALHA: worker ${controle} terminou sem resultado (status ${rc})"
++    fi
++  done
++  echo
++  if [ "$total_falhou" -eq 0 ]; then
++    echo "$(_cor '0;32' 'SUITE OK') -- $total_ok caso(s), 0 falha(s)"
++    return 0
++  fi
++  echo "$(_cor '1;31' 'SUITE FALHOU') -- $total_ok ok, $total_falhou falha(s)"
++  return 1
++}
++
++if [ -z "$FILTRO" ] && [ "${AGATA_TESTE_PERIMETRO_WORKER:-0}" != 1 ]; then
++  _dir_workers="$(mktemp -d -t agata-suite-paralela.XXXXXX)"
++  # A expansão é protegida para não deixar diretório temporário após saída.
++  _limpar_workers() { rm -rf "$_dir_workers"; }
++  trap _limpar_workers EXIT
++  _paralelizar_suite "$_dir_workers"
++  exit $?
++fi
++
+ # ---------------------------------------------------------------- clone ----
+ CLONE=""
+ _montar_clone() {
+@@ -145,6 +216,9 @@ _acusacoes() {
+ # _caso <controle> <PEGA|PASSA> <nome> -- o setup vem no stdin, rodado no clone
+ _caso() {
+   local ctrl="$1" espera="$2" nome="$3" setup n
++  # O worker de agregados não executa casos individuais nem os conta como
++  # pulados; todos eles pertencem aos workers de controle.
++  [ "$FILTRO" = "__AGREGADOS__" ] && return
+   # FILTRO aceita um controle ("P-8") ou um nivel ("L1"..."L5", item 8 do
+   # plano de mitigacao, MEMORIAS (437)) -- NIVEL[$ctrl] so existe depois que
+   # o array e' declarado mais abaixo, mas por ser funcao bash so' resolve no
+@@ -611,7 +685,7 @@ printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf '# x\n@
+ EOF
+ 
+ # Contraprovas offline dos binds e da lista viva de serviços, sem tocar systemd.
+-if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ]]; then
++if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 || "$FILTRO" == "__AGREGADOS__" ]]; then
+   if python3 "$RAIZ/scripts/testar_cobertura_servicos.py"; then
+     OK=$((OK + 1))
+   else
+@@ -623,7 +697,7 @@ fi
+ # Contraprovas estruturais do fluxo de escrita, classificação externa,
+ # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
+ # dispara quando qualquer uma dessas provas ou seus controles muda.
+-if [[ -z "$FILTRO" ]]; then
++if [[ -z "$FILTRO" || "$FILTRO" == "__AGREGADOS__" ]]; then
+   if python3 -m unittest scripts.testar_capability scripts.testar_dados_externos scripts.testar_egress_proxy -v \
+       && python3 "$RAIZ/scripts/testar_escriba_http.py" \
+       && python3 "$RAIZ/scripts/testar_fork_librechat.py" \
+@@ -639,6 +713,10 @@ fi
+ 
+ # --------------------------------------------------------------- veredito --
+ echo
++if [ "${AGATA_TESTE_PERIMETRO_WORKER:-0}" = 1 ]; then
++  printf '__AGATA_RESULT__ %s %s\n' "$OK" "$FALHOU"
++  [ "$FALHOU" -eq 0 ] && exit 0 || exit 1
++fi
+ if [ "$FALHOU" -eq 0 ]; then
+   echo "$(_cor '0;32' "SUITE OK") -- $OK caso(s), 0 falha(s)${PULADO:+, $PULADO fora do filtro}"
+   exit 0
