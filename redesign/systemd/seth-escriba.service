@@ -8,6 +8,7 @@ Documentation=file:///home/orusoua/agata/redesign/router/seth_escriba.py
 Type=simple
 Environment=SETH_ESCRIBA_BIND=127.0.0.1:20140
 Environment=SETH_REPO=%h/agata
+Environment=AGATA_PROJETO_RAIZ=%h/agata
 Environment=SETH_ESCRIBA_TZ=America/Sao_Paulo
 ExecStart=/usr/bin/python3 %h/agata/redesign/router/seth_escriba.py
 Restart=on-failure

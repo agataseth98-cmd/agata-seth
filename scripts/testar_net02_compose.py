@@ -16,11 +16,15 @@ def main() -> int:
         key_file = temp_dir / ".config/agata/approval-capability-private.pem"
         key_file.write_text("test-private-key-fixture", encoding="ascii")
         key_file.chmod(0o600)
+        project_token_file = temp_dir / ".config/agata/project.token"
+        project_token_file.write_text("fake-project-token-for-compose-test-only", encoding="ascii")
+        project_token_file.chmod(0o600)
         (temp_dir / ".cache/agata/approval-capabilities").mkdir(parents=True, mode=0o700)
         compose_copy = temp_dir / "docker-compose.yml"
         compose_copy.write_text(COMPOSE.read_text(encoding="utf-8"), encoding="utf-8")
         (temp_dir / ".env").write_text("MEILI_MASTER_KEY=placeholder\n", encoding="utf-8")
-        env = {**os.environ, "HOME": tmp, "MEILI_MASTER_KEY": "placeholder"}
+        env = {**os.environ, "HOME": tmp, "MEILI_MASTER_KEY": "placeholder",
+               "AGATA_PROJECT_TOKEN_FILE_HOST": str(project_token_file)}
         result = subprocess.run(
             ["docker", "compose", "-f", str(compose_copy), "config", "--format", "json"],
             capture_output=True, text=True, env=env,
@@ -41,6 +45,9 @@ def main() -> int:
     mounts = services["librechat"]["volumes"]
     assert not any("approval-capabilities" in mount.get("source", "") for mount in mounts)
     assert any("approval-capability-private.pem" in mount.get("source", "") for mount in mounts)
+    assert any(mount.get("target") == "/run/a"
+               and mount.get("read_only") for mount in mounts)
+    assert services["librechat"]["environment"]["AGATA_PROJECT_TOKEN_FILE"] == "/run/a"
     assert networks["librechat-data"]["internal"] is True
     assert services["librechat-ponte-host"]["network_mode"] == "host"
     print("NET-02 compose topology PASS")

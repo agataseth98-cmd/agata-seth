@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-22 14:56 -0300.
+Motivo: escriba fase A: token por projeto, recusa de segredo, provas HTTP/MCP; token em /run/a
+nome: escriba-fase-a-20261022
+diff-sha256: 80d9345c5d9c0e4d3823a74450a8a4e7912462642aca60d2c7df1e7938076ba0
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQBhsPvYUIFr2gpDVitu8HZSY51gRS1mRrmufzVkT8xQqcL
+fEbEitVnxH+1iuwEZK+lhP0arfCurh5MqT0kiieAw=
+-----END SSH SIGNATURE-----

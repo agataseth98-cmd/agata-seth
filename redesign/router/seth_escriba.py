@@ -37,6 +37,8 @@ Env: SETH_ESCRIBA_BIND (default 127.0.0.1:20140), SETH_REPO (default ~/agata),
 from __future__ import annotations
 
 import fcntl
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -64,6 +66,71 @@ MEMORIAS = REPO / "MEMÓRIAS.md"
 DIARIO = REPO / "SETH-DIARIO.md"
 MARCADOR = "<!-- ENTRADAS-NOVAS:AQUI"  # prefixo; a linha inteira tem mais texto
 MAX_CORPO = 20000  # trava de tamanho por acrescimo
+
+
+def _token_projeto_esperado() -> str:
+    raiz = os.environ.get("AGATA_PROJETO_RAIZ")
+    if not raiz:
+        raise PermissionError("projeto ativo ausente")
+    try:
+        projeto = Path(raiz).resolve(strict=True)
+        config = Path.home() / ".config" / "agata" / "projetos"
+        if config.resolve(strict=True) != config.absolute():
+            raise PermissionError("diretório de tokens indireto")
+        dfd = os.open(str(config), os.O_RDONLY | os.O_CLOEXEC | os.O_DIRECTORY | os.O_NOFOLLOW)
+        st_dir = os.fstat(dfd)
+        if st_dir.st_uid != os.getuid() or st_dir.st_mode & 0o022:
+            os.close(dfd)
+            raise PermissionError("diretório de tokens inseguro")
+        ident = hashlib.sha256(str(projeto).encode("utf-8")).hexdigest()
+        try:
+            fd = os.open(f"{ident}.token", os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=dfd)
+            st = os.fstat(fd)
+            if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid()
+                    or st.st_mode & 0o077 or st.st_nlink != 1):
+                os.close(fd)
+                raise PermissionError("token de projeto inseguro")
+            with os.fdopen(fd, "r", encoding="utf-8") as f:
+                valor = f.read().strip()
+        finally:
+            os.close(dfd)
+    except (OSError, RuntimeError):
+        raise PermissionError("token de projeto indisponível") from None
+    if len(valor) < 32:
+        raise PermissionError("token de projeto inválido")
+    return valor
+
+
+def _validar_token_projeto(token: str) -> None:
+    esperado = _token_projeto_esperado()
+    if not token or not hmac.compare_digest(token, esperado):
+        raise PermissionError("token de projeto ausente ou inválido")
+
+
+def _padroes_segredo() -> list[str]:
+    script = REPO / "scripts" / "varredura_segredo.sh"
+    p = subprocess.run(
+        ["bash", "-c", 'source "$1"; printf "%s\\n" "${PADROES_SEGREDO[@]}"', "_", str(script)],
+        capture_output=True, text=True, timeout=5, check=False)
+    if p.returncode or not p.stdout.strip():
+        raise RuntimeError("régua de segredo indisponível; gravação recusada")
+    return p.stdout.splitlines()
+
+
+def _tem_segredo(texto: str) -> bool:
+    for padrao in _padroes_segredo():
+        p = subprocess.run(["grep", "-E", "-q", "--", padrao], input=texto,
+                           capture_output=True, text=True, timeout=5, check=False)
+        if p.returncode == 0:
+            return True
+        if p.returncode != 1:
+            raise RuntimeError("régua de segredo falhou; gravação recusada")
+    return False
+
+
+def _recusar_segredo(textos: list[str]) -> None:
+    if _tem_segredo("\n".join(textos)):
+        raise ValueError("gravação recusada: possível segredo; nada foi gravado")
 
 
 def _validar_capability(token: str, tool: str, arguments: dict) -> None:
@@ -347,13 +414,19 @@ class _H(BaseHTTPRequestHandler):
             return self._j(400, {"error": "corpo nao e' JSON"})
         try:
             if self.path.rstrip("/") == "/memoria":
+                titulo, corpo = data.get("titulo", ""), data.get("corpo", "")
+                _validar_token_projeto(self.headers.get("X-Agata-Project-Token", ""))
+                _recusar_segredo([titulo, corpo])
                 _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
                                     "memoria_acrescentar",
-                                    {"titulo": data.get("titulo", ""), "corpo": data.get("corpo", "")})
+                                    {"titulo": titulo, "corpo": corpo})
                 return self._j(200, _acrescenta_memoria(data.get("titulo", ""), data.get("corpo", "")))
             if self.path.rstrip("/") == "/diario":
+                texto = data.get("texto", "")
+                _validar_token_projeto(self.headers.get("X-Agata-Project-Token", ""))
+                _recusar_segredo([texto])
                 _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
-                                    "diario_anotar", {"texto": data.get("texto", "")})
+                                    "diario_anotar", {"texto": texto})
                 return self._j(200, _anota_diario(data.get("texto", "")))
             return self._j(404, {"error": f"rota {self.path} inexistente"})
         except PermissionError:
