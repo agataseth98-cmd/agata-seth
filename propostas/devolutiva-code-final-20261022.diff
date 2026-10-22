@@ -1,0 +1,14 @@
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+index c535c0a..e5e6bd8 100644
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ b/.agents/skills/agata-fluxo-dupla/SKILL.md
+@@ -50,3 +50,9 @@ Despertar começa por checagem em shell (`git ls-remote origin main`, `ls propos
+ 
+ ## 7. Armadilhas já pagas
+ Crase em texto de argumento executa comando · `pkill -f` com o padrão na própria linha mata o seu shell (use PID) · número de MEMÓRIAS: `aplicar.py` aceita qualquer palavra após o número · comando de assinatura antes de a proposta chegar ao `main` · `fiscal-p8` obrigatório sem testar com o hook ligado (barrava todo PR) · afirmar comportamento de código só pela descrição da unit · hora herdada do cabeçalho anterior.
++
++## 8. Devolutiva final para CODE
++- Toda resposta final de entrega termina com `Devolutiva para CODE` e a Skill mais indicada para a continuação.
++- Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos/PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
++- Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
++- A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
