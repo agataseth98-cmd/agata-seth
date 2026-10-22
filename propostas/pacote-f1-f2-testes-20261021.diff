@@ -1,0 +1,13 @@
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 3f582c7..b757b61 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -203,6 +203,8 @@ declare -A SEM_TESTE=(
+   [P-19]="so' emite linha 'AVISO (P-19): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-6/P-9/P-15/P-18, nao falta de reprodutibilidade: p19_citacao_arquivo() e o verificador que ela chama (scripts/verificar_citacao_arquivo.py) foram testados isolados, fora deste harness -- 5 casos sinteticos (citacao real, citacao fabricada, arquivo inexistente, linha off-by-one, arquivo sem extensao) mais uma corrida contra o documento real da minuta GLM v2, que reproduziu o erro genuino e tambem revelou o falso-positivo ja documentado no docstring do script"
+   [P-16]="e' quem RODA esta suite; testa-lo aqui dentro recursa (a guarda AGATA_TESTE_PERIMETRO existe por isso)"
+   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
++  [P-24]="so' emite linha 'AVISO (P-24): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-18/P-19: p24_quente_orcamento() foi medida isolada na aplicacao do pacote F1+F2 (21/10/2026): MEMORIAS.md com 1242050 caracteres contra orcamento de 25000 -> PARCIAL com a medida; escalada para FALHA e fase seguinte"
++  [P-26]="so' emite linha 'AVISO (P-26): ...', que _acusacoes() nao conta -- mesma barreira estrutural de P-18/P-19: p26_frio_tag() foi medida isolada na aplicacao do pacote F1+F2 (21/10/2026): 11 chunks frios sem tag -> PARCIAL com a lista; o backfill de tags e fase seguinte, aprovada pelo Humano"
+ )
+ 
+ # ---------------------------------------------------------- niveis (item 8) --
