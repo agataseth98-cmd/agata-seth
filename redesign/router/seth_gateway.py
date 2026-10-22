@@ -520,7 +520,9 @@ def _politica_dados_externos(payload: dict, classification: str | None = None) -
         payload["agata_data_classification"] = "public"
     classification = payload.pop("agata_data_classification", classification)
     local = model.startswith(_ROTAS_LOCAIS)
-    if not local and classification != "public":
+    # (22/10/2026, P-8 sanitizador-cascata) a cascata seth-livre segue ao proxy, que sanitiza
+    # (segredo, dados pessoais, nomes de projeto) antes de qualquer saída. Outros modelos externos continuam exigindo public.
+    if not local and classification != "public" and model != _ROTA_BASE:
         raise DadosExternosSemClassificacao(
             "dados sem classificação pública não podem ser enviados a modelos externos"
         )
@@ -952,8 +954,10 @@ class _Handler(BaseHTTPRequestHandler):
                     self._public_only_lane = not rota_local and (
                         alias_publico or classificacao == "public"
                     ) and not getattr(self.server, "_selftest_allow_context", False)
-                    if classificacao == "public" or payload.get("model") == _ROTA_BASE:
+                    if classificacao == "public":
                         self._data_classification = "public"
+                    elif payload.get("model") == _ROTA_BASE:
+                        self._data_classification = "sanitizado-cascata"
                 except DadosExternosSemClassificacao as e:
                     return self._erro(403, str(e))
                 # roteador por complexidade: só o alvo "seth-livre" do Agent
@@ -1055,8 +1059,8 @@ class _Handler(BaseHTTPRequestHandler):
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in _HOP_BY_HOP}
         headers["X-Agata-Token"] = _token_interno()
-        if getattr(self, "_data_classification", None) == "public":
-            headers["X-Agata-Data-Classification"] = "public"
+        if getattr(self, "_data_classification", None) in ("public", "sanitizado-cascata"):
+            headers["X-Agata-Data-Classification"] = self._data_classification
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
             up = urllib.request.urlopen(req, timeout=180)
@@ -2049,23 +2053,26 @@ def _selftest() -> int:
     _local21 = _politica_dados_externos({"model": "ollama-local/qwen", "messages": []})
     _deny21 = False
     try:
-        _politica_dados_externos({"model": "seth-livre", "messages": []})
+        _politica_dados_externos({"model": "seth-rapido", "messages": []})
     except DadosExternosSemClassificacao:
         _deny21 = True
     _bad21 = False
     try:
-        _politica_dados_externos({"model": "seth-livre"}, "internal")
+        _politica_dados_externos({"model": "seth-rapido"}, "internal")
     except DadosExternosSemClassificacao:
         _bad21 = True
+    # (22/10/2026) cascata seth-livre passa sem classificação: o proxy sanitiza
+    _casc21 = _politica_dados_externos({"model": _ROTA_BASE, "messages": []})
+    _casc21_ok = _casc21["model"] == _ROTA_BASE
     ok21 = (_pub21["model"] == _ROTA_BASE and "agata_data_classification" not in _pub21
-            and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21)
+            and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21 and _casc21_ok)
     print(f"{'PASS' if ok21 else 'FALHA'}  política de dados: nuvem sem classe/fora de public bloqueia; alias público e local seguem")
     falhas += 0 if ok21 else 1
     _upstream_antes = _Dummy.ultimo_corpo
     _http_21 = 0
     try:
         urllib.request.urlopen(urllib.request.Request(
-            base, data=json.dumps({"model": "seth-livre", "messages": []}).encode(),
+            base, data=json.dumps({"model": "seth-rapido", "messages": []}).encode(),
             headers={"Content-Type": "application/json"}), timeout=5).read()
     except urllib.error.HTTPError as e:
         _http_21 = e.code

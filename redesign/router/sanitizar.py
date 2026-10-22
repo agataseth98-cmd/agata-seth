@@ -124,6 +124,43 @@ def _redigir(trecho: str) -> str:
     return f"{cabeca}…[{n} chars]"
 
 
+# (22/10/2026, P-8 sanitizador-cascata) Dados pessoais e nomes de projeto, só para saída a
+# provedor EXTERNO (proxy: pessoal=True quando o modelo não é local). Régua SEPARADA da de
+# segredo: e-mail no código quebraria o pré-commit (varredura_segredo.sh).
+PADROES_PESSOAIS = [
+    ("pessoal-email", re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")),
+    ("pessoal-cpf", re.compile(r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b")),
+    ("pessoal-cnpj", re.compile(r"\b\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}\b")),
+    ("pessoal-telefone", re.compile(r"\(\d{2}\)\s?9?\d{4}-?\d{4}\b|\b9\d{4}-\d{4}\b")),
+]
+# Lista PRIVADA de nomes de projeto: uma por linha, fora do repositório. Ausente ou vazia ⇒ só a
+# régua de padrões (e-mail, CPF, CNPJ, telefone) vale. (22/10/2026: freio removido por decisão do Humano.)
+NOMES_PROJETO_PATH = os.path.expanduser("~/.config/agata/nomes-projeto.txt")
+
+
+def _nomes_projeto(caminho: str | None = None) -> list[str]:
+    caminho = caminho or NOMES_PROJETO_PATH
+    if not os.path.exists(caminho):
+        return []
+    with open(caminho, encoding="utf-8") as f:
+        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+
+
+def varrer_pessoal(texto: str, nomes: list[str]) -> list[dict]:
+    """Como varrer(), para dados pessoais e nomes de projeto. Nome de projeto não aparece no achado."""
+    achados = []
+    for rotulo, rx in PADROES_PESSOAIS:
+        for m in rx.finditer(texto):
+            achados.append({"padrao_rotulo": rotulo, "padrao": rx.pattern,
+                            "trecho_redigido": _redigir(m.group(0)), "pos": m.start()})
+    for nome in nomes:
+        rx = re.compile(r"(?<!\w)" + re.escape(nome) + r"(?!\w)", re.IGNORECASE)
+        for m in rx.finditer(texto):
+            achados.append({"padrao_rotulo": "pessoal-nome-projeto", "padrao": "(lista privada)",
+                            "trecho_redigido": f"[nome de projeto, {len(m.group(0))} chars]", "pos": m.start()})
+    return achados
+
+
 def varrer(texto: str) -> list[dict]:
     """Lista de {padrao_rotulo, padrao, trecho_redigido, pos}. Nunca devolve o segredo."""
     achados = []
@@ -210,15 +247,20 @@ def _campos_texto(payload):
     yield from _anda(payload, "", 0)
 
 
-def sanitizar_payload(payload: dict) -> dict:
+def sanitizar_payload(payload: dict, pessoal: bool = False, nomes: list[str] | None = None) -> dict:
     """Falha FECHADA: casou um padrão OU excedeu o teto de varredura ⇒ levanta
     SegredoNoPayload. Senão, devolve igual. Ver _TetoDeVarreduraExcedido acima
     — bater o teto vira bloqueio, nunca passagem silenciosa."""
     achados = []
+    if pessoal and nomes is None:
+        nomes = _nomes_projeto()
     try:
         for campo, texto in _campos_texto(payload):
             for a in varrer(texto):
                 achados.append({**a, "campo": campo or "(raiz)"})
+            if pessoal:
+                for a in varrer_pessoal(texto, nomes):
+                    achados.append({**a, "campo": campo or "(raiz)"})
     except _TetoDeVarreduraExcedido as e:
         achados.append({
             "padrao_rotulo": "teto-de-varredura-excedido",
@@ -312,6 +354,31 @@ def _autoteste() -> int:
     ok = sanitizar_payload(normal) == normal
     print(f"{'PASS' if ok else 'FALHA'}  teto-excedido[controle: payload normal não bloqueia]  -> "
           f"{'ok' if ok else 'bloqueou à toa'}")
+    falhas += 0 if ok else 1
+
+    # (22/10/2026) dados pessoais e nomes de projeto: só na saída externa
+    nomes_fake = ["ProjetoZeta"]  # nome FICTÍCIO de teste; a lista real fica fora do repositório
+    for esperado, texto in [
+        ("pessoal-email", "escreva para fulano@exemplo.com.br amanhã"),
+        ("pessoal-cpf", "CPF 123.456.789-09 do cliente"),
+        ("pessoal-cnpj", "CNPJ 12.345.678/0001-95 da empresa"),
+        ("pessoal-telefone", "ligue para (11) 98765-4321 depois"),
+        ("pessoal-nome-projeto", "o ProjetoZeta está parado"),
+    ]:
+        rotulos = {a["padrao_rotulo"] for a in varrer_pessoal(texto, nomes_fake)}
+        ok = esperado in rotulos
+        print(f"{'PASS' if ok else 'FALHA'}  pessoal[{esperado}]  -> {sorted(rotulos) or '(nada)'}")
+        falhas += 0 if ok else 1
+    limpo = "a Seth lê a memória e responde em português"
+    ok = not varrer_pessoal(limpo, nomes_fake)
+    print(f"{'PASS' if ok else 'FALHA'}  pessoal[limpo]  -> {'ok' if ok else 'casou à toa'}")
+    falhas += 0 if ok else 1
+    ok = _nomes_projeto("/caminho/que/nao/existe/nomes.txt") == []
+    print(f"{'PASS' if ok else 'FALHA'}  pessoal[lista ausente: só a régua de padrões segue]")
+    falhas += 0 if ok else 1
+    # local não muda: com pessoal=False, e-mail passa
+    ok = sanitizar_payload({"messages": [{"role": "user", "content": "fulano@exemplo.com.br"}]}) is not None
+    print(f"{'PASS' if ok else 'FALHA'}  pessoal[local/desligado não bloqueia]")
     falhas += 0 if ok else 1
 
     print(f"\n{'AUTOTESTE OK' if not falhas else f'AUTOTESTE FALHOU ({falhas})'}")
