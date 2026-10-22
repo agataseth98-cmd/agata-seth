@@ -5,6 +5,8 @@ description: Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou esc
 
 # Conversar com a Seth (ou acompanhar o Humano conversando com ela)
 
+Escolha só o caminho que as ferramentas disponíveis permitem: A = chamada isolada sem ferramentas da Seth; B = leitura da conversa; C = escrever na conversa, somente com pedido explícito e automação autenticada disponível; D = avaliação automatizada. Se a ferramenta exigida não estiver disponível, pare nesse caminho e diga o limite. Os nomes de ferramentas de navegador abaixo são exemplos de implementação, não pré-requisitos universais.
+
 Por quê: em 17/10/2026 o Humano testava a voz e o cabeçalho com a Seth e pediu que o Claude Code acompanhasse e se apresentasse a ela.
 Três caminhos funcionaram; um quarto (grupo de abas do navegador) falhou por razão que vale registrar. A Skill vale para QUALQUER modelo:
 o que muda de um modelo para outro é só a ferramenta; o procedimento e os limites são os mesmos.

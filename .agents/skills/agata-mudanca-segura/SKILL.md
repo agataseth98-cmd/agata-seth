@@ -5,6 +5,8 @@ description: Antes de mudar qualquer coisa que roda (unit systemd, container, fi
 
 # Mudança segura na Máquina
 
+Use antes de alterar algo que roda. Se a mudança também mexe em arquivo protegido do repositório, siga `agata-aplicar-proposta`; esta skill cobre o efeito no runtime.
+
 Por quê: o sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussola/`). Em
 24/09/2026 tirar UMA linha de uma unit consertou o Hyprland e, em silêncio, desligou a contenção de
 suspensão e o fechamento do Obsidian (MEMÓRIAS (536)/(539)/(540)). Nenhum sensor pegou; só o teste real.

@@ -8,6 +8,8 @@ de PROJETO.md, seção "O que é". Sem esse campo, escreva Agata. Nunca escreva 
 
 # Carregar o {{NOME_SISTEMA}} (na Máquina, com shell)
 
+Use só para iniciar ou retomar uma sessão sem estado atual injetado. Ao terminar, volte a `agata-fluxo` para escolher o procedimento da tarefa. Carregar não autoriza nem aplica mudanças.
+
 Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
 O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
 
@@ -20,7 +22,7 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
 4. `quebrado:` — itens abertos nas entradas recentes e `propostas/` com `.diff` sem `APROVADO-`.
 5. Responda com o bloco de PROTOCOLOS.md, "Carregar e formatos" — 3 linhas, nada antes:
    ```
-   {{NOME_SISTEMA}} · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
+   agata-seth · modelo: <nome> · sync: <forma> · <dd/mm/aaaa HH:MM -03> (relógio da Máquina)
    Última entrada: (<n>) <título> — <1 linha>
    <quebrado: … | pronto.>
    ```
@@ -28,5 +30,5 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
    confirma antes do trabalho começar.
 
 Depois do carregar, toda resposta começa com a linha de turno:
-`{{NOME_SISTEMA}} · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
+`agata-seth · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
 Hora nunca é copiada da resposta anterior.

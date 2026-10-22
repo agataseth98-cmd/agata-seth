@@ -10,9 +10,8 @@ modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada 
 vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/dupla/` (estado fora do repo, em `~/.cache/agata/sincronia/`).
 
 ## 0. Antes de tudo
-- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: `Agata · <modelo> · t=<n> (contador mecânico) · <hora -03> (relógio da Máquina)`;
-  hora = `TZ=America/Sao_Paulo date`; t = `python3 scripts/dupla/contar_turnos.py`.
-  Padrão = mensagens do Humano (o t= que ele acompanha). `--modo respostas TRANSCRITO` conta respostas do modelo (exige transcrito explícito; o Codex usa o dele). Sem fonte: `t=<n> (contado no contexto)`.
+- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em dupla.
+- Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
 - Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
 - Texto longo para o canal vai por ARQUIVO: `dupla.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
 
@@ -28,14 +27,13 @@ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scrip
 - Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `dupla.py ler --agente <eu>` (mostra só o novo).
 - Mensagens: uma por ENTREGA ou BLOQUEIO, agrupada, com caminho + sha; nunca resposta só de estado; não copiar relatório para o canal.
 
-## 3. Uma mudança protegida, do começo ao merge
-1. Worktree própria de `origin/main` (`git worktree add -b proposta/<nome> .<agente>/worktrees/<nome> origin/main`). Nunca edite o checkout compartilhado.
-2. Faça a mudança; gere SÓ o `.diff` dos protegidos (`git add -N <novos>`; `git diff --binary -- <arquivos> > x.diff`; `git checkout` para desfazer); `git apply --check`.
-3. Teste a mudança aplicada numa cópia descartável (`git worktree add --detach`), com o perímetro (`bash scripts/perimetro.sh`) e a suíte (`bash scripts/testar_perimetro.sh`).
-4. `propostas/<nome>.diff` em PR de abertura direto contra `main`; junte quando `fiscal-p8` e `suite-adversarial` passarem (merge pinado ao head).
-5. REVISÃO CRUZADA: autor ≠ revisor. O revisor roda casos que ELE escolheu, antes de olhar o resultado, e responde com parecer em 4 partes quando for mudança estrutural.
-6. Entregue ao Humano o comando de assinatura (§4). Só depois de `APROVADO-<nome>` em `propostas/`:
-7. `python3 scripts/dupla/aplicar.py <nome> --registro <texto com {N}> --agente <eu> [--sem-pull]` (worktree própria, verificador da base, aplica, move o par, entrada de MEMÓRIAS, PR, espera os DOIS checks pelo nome, merge pinado). Um PR de aplicação por vez ou em lote único (dois simultâneos conflitam nas âncoras). Se der conflito, feche o PR e rode de novo.
+## 3. Mudança protegida em dupla
+Use `agata-aplicar-proposta` para o ciclo P-8. Esta skill acrescenta a coordenação entre modelos:
+1. Autor e revisor são pessoas/modelos diferentes; não editam o mesmo arquivo ao mesmo tempo.
+2. O revisor escolhe e registra os casos antes de ver os resultados, executa-os e devolve o parecer no formato de quatro partes.
+3. O autor abre a proposta contra `origin/main` e só a junta após os checks exigidos passarem. O Humano assina depois que a proposta estiver em `main`.
+4. A aplicação é um PR separado, em worktree própria; um PR de aplicação por vez. O Humano junta esse PR.
+5. Na divergência ou conflito, pare e reporte evidência; não force merge nem refaça a assinatura.
 
 ## 4. O comando de assinatura (Humano, Fish, uma linha)
 Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte: confere o hash de CADA proposta antes de assinar qualquer uma, com bandeira `ok` (um `false` dentro do `for` seria sobrescrito) e igualdade positiva (arquivo ausente conta como divergência). Antes de entregar: a proposta TEM que estar em `origin/main` (`ls propostas/`) e o hash vem do arquivo, nunca da memória.
