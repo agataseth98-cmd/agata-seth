@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
   req.resume();
   req.on("end", () => {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ bytes_add: 6, nota: "fixture" }));
+    res.end(JSON.stringify({ header: "HEADER", nota: "fixture" }));
   });
 });
 
@@ -43,7 +43,7 @@ function call(tokenPath) {
       } catch (error) { reject(error); }
     });
     child.stdin.end(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call",
-      params: { name: "diario_anotar", arguments: { texto: "fixture", agata_capability: "fake-capability" } } }) + "\n");
+      params: { name: "memoria_acrescentar", arguments: { titulo: "fixture", corpo: "fixture", agata_capability: "fake-capability" } } }) + "\n");
   });
 }
 
@@ -51,7 +51,7 @@ try {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const good = await call(tokenFile);
   assert.equal(good.code, 0);
-  assert.equal(good.response.result.content[0].text, "anotado (6 bytes). fixture");
+  assert.equal(good.response.result.content[0].text, "HEADER\n\nfixture");
   assert.equal(requests, 1);
   const absent = await call(path.join(tmp, "missing.token"));
   assert.equal(absent.code, 0);
