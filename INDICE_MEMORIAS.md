@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(810) DIÁRIO — 22/10/2026 · **Servidor canon do LibreChat recebe AGATA_PROJECT_TOKEN_FILE=/run/a.**
 (809) DIÁRIO — 22/10/2026 · **Escriba fase A: token por projeto, recusa de segredo antes de gravar, provas HTTP/MCP; token montado em /run/a.**
 (808) DIÁRIO — 22/10/2026 · **6 skills do Agata no modelo LLM-first (confederação).**
 (807) DIÁRIO — 22/10/2026 · **Saída externa volta a varrer só segredo; 422 passa a registrar a categoria do padrão no log.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos dois itens são (780) = AC-09 (consolidação) e (781) = AC-18 (retirada no PROJETO). (777) é o P-4 com sudo; (778) e (779) são da auditoria do Codex.** Medido em `grep -nE '^\((77[5-9]|78[0-2])\) ' MEMÓRIAS.md`. Não edito (782) (append-only).
 (782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não reduziu o PROJETO. Ele só adicionou um aviso.** O diff assinado (`projeto-retirada-20261018`, aplicado em `2a371ca`) mudou `scripts/perimetro.sh` e acrescentou `PROJETO_FOLGA_BYTES` (padrão 500): o aviso sai quando o PROJETO cresce em relação ao HEAD e fica a menos de 500 bytes do teto. Não tirou nenhum texto do PROJETO. Medido agora: `PROJETO.md` = 47.703 bytes, folga de 297 bytes. A retirada real de conteúdo para `extras/projeto-detalhe/` continua por fazer, e precisa de proposta assinada com a escolha do que sai. As entradas (777)/(778) descreveram a política como feita; esta entrada corrige isso. Não edito o texto delas (append-only).
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18, decisão B4 do Humano, projeto-retirada-20261018, assinado).** O PROJETO estava a 297 bytes do teto (47.703 de 48.000, medido). Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
-(780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, decisão B3 do Humano, consolidacao-pula-reprovado-20261018, assinado).** Antes, o mesmo tema "aprovação assinada P-8" era reprovado todo dia e nada saía. Agora, depois de 3 reprovações o tema é pulado. Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
+(780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, d …
 (779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura …
 (778) DIÁRIO — 20/10/2026 · **Proposta da auditoria: cobrir o Laya no P-4, a man …
 (777) DIÁRIO — 20/10/2026 · **P-4 conferido uma vez como root: `p4_bind` saiu co …

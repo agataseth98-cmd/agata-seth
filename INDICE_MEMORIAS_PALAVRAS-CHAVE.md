@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(810) DIÁRIO — 22/10/2026 · **Servidor canon do LibreChat recebe AGATA_PROJECT_TOKEN_FILE=/run/a.**
+  palavras-chave: servidor, canon, librechat, recebe, agata, project, token, file, run
 (809) DIÁRIO — 22/10/2026 · **Escriba fase A: token por projeto, recusa de segredo antes de gravar, provas HTTP/MCP; token montado em /run/a.**
   palavras-chave: escriba, fase, token, projeto, recusa, segredo, gravar, provas, http, mcp, montado, run
 (808) DIÁRIO — 22/10/2026 · **6 skills do Agata no modelo LLM-first (confederação).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, aplicado, reduziu, projeto, ele, adicionou, aviso, diff, assinado, retirada, mudou, scripts, perimetro, acrescentou, folga, bytes, padrão, sai, cresce, relação, head, fica, teto, tirou, texto, medido, agora, real, conteúdo, extras, detalhe, continua, fazer, precisa, proposta, assinada, escolha, entradas, descreveram, política, feita, entrada, corrige, edito, delas, append, only
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18, decisão B4 do Humano, projeto-retirada-20261018, assinado).** O PROJETO estava a 297 bytes do teto (47.703 de 48.000, medido). Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
   palavras-chave: política, projeto, cheio, inclusão, vem, retirada, extras, detalhe, decisão, humano, assinado, estava, bytes, teto, medido, verificação, verificar, pode, aplicar, proposta, juntado, verde
-(780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, decisão B3 do Humano, consolidacao-pula-reprovado-20261018, assinado).** Antes, o mesmo tema "aprovação assinada P-8" era reprovado todo dia e nada saía. Agora, depois de 3 reprovações o tema é pulado. Verificação: `p8_verificar.sh` = PODE APLICAR; PR da proposta juntado com CI verde.
-  palavras-chave: consolidação, pula, tema, reprovado, decisão, humano, consolidacao, assinado, mesmo, aprovação, assinada, era, dia, nada, saía, agora, reprovações, pulado, verificação, verificar, pode, aplicar, proposta, juntado, verde
+(780) DIÁRIO — 20/10/2026 · **Consolidação pula tema reprovado 3 vezes (AC-09, d …
+  palavras-chave: consolidação, pula, tema, reprovado
 (779) DIÁRIO — 20/10/2026 · **Proposta da auditoria 778 aplicada após assinatura …
   palavras-chave: proposta, auditoria, aplicada, após, assinatura
 (778) DIÁRIO — 20/10/2026 · **Proposta da auditoria: cobrir o Laya no P-4, a man …

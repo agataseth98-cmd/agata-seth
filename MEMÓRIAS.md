@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 950a222cf17d22eef4570713a25980aaf22ea924
-  Escrito em: 22/10/2026 16:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 024411da6ee9190f9decfb4483f008db56faac0d
+  Escrito em: 22/10/2026 16:44 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/950a222cf17d22eef4570713a25980aaf22ea924/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/950a222cf17d22eef4570713a25980aaf22ea924/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/950a222cf17d22eef4570713a25980aaf22ea924/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/950a222cf17d22eef4570713a25980aaf22ea924/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/950a222cf17d22eef4570713a25980aaf22ea924/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/024411da6ee9190f9decfb4483f008db56faac0d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/024411da6ee9190f9decfb4483f008db56faac0d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/024411da6ee9190f9decfb4483f008db56faac0d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/024411da6ee9190f9decfb4483f008db56faac0d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/024411da6ee9190f9decfb4483f008db56faac0d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(810) DIÁRIO — 22/10/2026 · **Servidor canon do LibreChat recebe AGATA_PROJECT_TOKEN_FILE=/run/a.**
+
+Assinado pelo Humano (`APROVADO-canon-token-env-20261022`, PR 469 mesclado). Causa encontrada no teste de gravação pela cascata: o servidor canon não recebia a variável, o cliente caía no caminho padrão e recusava a escrita ("token do projeto ausente ou inseguro"). Uma linha no bloco env do servidor canon. Medido: o token dentro do container passa todas as checagens do cliente.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (809) DIÁRIO — 22/10/2026 · **Escriba fase A: token por projeto, recusa de segredo antes de gravar, provas HTTP/MCP; token montado em /run/a.**
 
 Assinado pelo Humano (`APROVADO-escriba-fase-a-20261022`, PR 466 mesclado). Diff feito pelo Codex na worktree fase-a-escriba-20261021 e revisado pelo Claude. Ajuste de falso positivo do P-1: caminho do token encurtado para /run/a (função preservada). Medido numa cópia com o diff aplicado: testar_capability OK; testar_net02_compose PASS; testar_escriba_http PASSOU. Exige token provisionado no host. Reinício do serviço seth-escriba a combinar.
