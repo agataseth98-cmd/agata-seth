@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0b6b4ac89921de81b628abf504d5243d3f8fe8b7
-  Escrito em: 22/10/2026 13:11 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f5c7cd54cc7500a44cadba13e6eab04a8ab08080
+  Escrito em: 22/10/2026 13:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0b6b4ac89921de81b628abf504d5243d3f8fe8b7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0b6b4ac89921de81b628abf504d5243d3f8fe8b7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0b6b4ac89921de81b628abf504d5243d3f8fe8b7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0b6b4ac89921de81b628abf504d5243d3f8fe8b7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0b6b4ac89921de81b628abf504d5243d3f8fe8b7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5c7cd54cc7500a44cadba13e6eab04a8ab08080/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5c7cd54cc7500a44cadba13e6eab04a8ab08080/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5c7cd54cc7500a44cadba13e6eab04a8ab08080/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5c7cd54cc7500a44cadba13e6eab04a8ab08080/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f5c7cd54cc7500a44cadba13e6eab04a8ab08080/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(806) DIÁRIO — 22/10/2026 · **Saída externa volta a varrer só segredo; 422 passa a registrar a categoria do padrão no log.**
+
+Assinado pelo Humano (`APROVADO-relaxa-pessoal-log-categoria-20261022`, PR 454 mesclado). Motivo: desde 11h23, pedidos ao seth-rapido com e-mail, telefone ou CPF no texto recebiam 422 do sanitizador. Decisão do Humano: relaxar. Só proxy.py muda. O log registra a categoria, nunca o trecho. Medido na proposta: autoteste do proxy e do sanitizador OK.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (805) DIÁRIO — 22/10/2026 · **Script preparar_assinatura.sh: confere checks, mescla o PR, atualiza o main e verifica o .diff; não assina.**
 
 Assinado pelo Humano (`APROVADO-preparar-assinatura-20261022`, PR 455 mesclado). Motivo: a assinatura falhou quatro vezes em 22/10 pela mesma causa (o .diff ainda estava só no PR, e o comando era entregue antes do merge). A regra também está na memória. O script só mescla PR com checks verdes e nunca executa aprovar.sh.
