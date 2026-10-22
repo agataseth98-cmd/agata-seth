@@ -83,7 +83,9 @@ def validar_egresso_publico(payload: object, classification: str | None) -> None
     model = payload.get("model", "") if isinstance(payload, dict) else ""
     if isinstance(model, str) and model.startswith(_LOCAL_MODEL_PREFIXES):
         return
-    if classification != "public":
+    # (22/10/2026, P-8 sanitizador-cascata) "sanitizado-cascata" é a cascata seth-livre: só chega
+    # aqui depois de sanitizar_payload (segredo + dados pessoais + nomes de projeto) em do_POST.
+    if classification not in ("public", "sanitizado-cascata"):
         raise PermissionError("dados sem classificação pública bloqueados antes do OmniRoute")
 
 # User-Agent de saída (MEMÓRIAS (545)). O Cloudflare do Groq e do Cerebras bane o
@@ -163,8 +165,11 @@ class _Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self._erro(415, "corpo não é JSON -- este proxy só entende OpenAI-compat; nada foi repassado")
             if isinstance(payload, dict):
+                # (22/10/2026, P-8 sanitizador-cascata) saída a provedor externo também varre dados
+                # pessoais e nomes de projeto; local não sai da Máquina e segue só com a régua de segredo.
+                externo = not str(payload.get("model", "")).startswith(_LOCAL_MODEL_PREFIXES)
                 try:
-                    sanitizar.sanitizar_payload(payload)
+                    sanitizar.sanitizar_payload(payload, pessoal=externo)
                 except sanitizar.SegredoNoPayload as e:
                     return self._bloqueado(e)
             else:
@@ -313,6 +318,12 @@ def _selftest() -> int:
     # módulo, e o monkeypatch cairia no lugar errado (achado testando).
     token_teste = "selftest-token-nao-e-segredo-de-verdade"
     globals()["_token_interno"] = lambda: token_teste
+    # (22/10/2026) saída externa exige a lista de nomes de projeto; o selftest usa uma lista FICTÍCIA
+    # temporária, nunca a real (que fica em ~/.config/agata/ e não entra no repositório).
+    import tempfile as _tf
+    _lista_teste = _tf.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8")
+    _lista_teste.write("ProjetoZeta\n"); _lista_teste.close()
+    sanitizar.NOMES_PROJETO_PATH = _lista_teste.name
 
     up_srv = ThreadingHTTPServer(("127.0.0.1", up_port), _DummyUpstream)
     px_srv = ThreadingHTTPServer(("127.0.0.1", px_port), _Handler)
