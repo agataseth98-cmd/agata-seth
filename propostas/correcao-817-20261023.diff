@@ -1,0 +1,17 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index c744b6c..3d00c68 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -40,6 +40,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ ---
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
++(819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
++
++A entrada (817) diz "Medido nesta aplicação: pendente do pre-commit". Essa frase ficou defasada. Medido depois, no `main` em 7e3d462: a suíte passou com 58/58 casos e 0 falhas, em 56,298 s (medição do Claude, em clones) e em 55,423 s (medição do Codex). As duas com saída 0. A aplicação da paralelização foi o PR 482, mesclado às 23h42 de 22/10. A suíte sem paralelização levava cerca de 205 s, medido antes na sessão. Esta entrada corrige só a frase de medição; o restante da (817) segue válido.
++
++Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
++
+ (818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
+ 
+ Assinado pelo Humano (`APROVADO-p8-merge-main-20261023`). O P-8 comparava o staged só com o HEAD do branch; num merge de origin/main, o conteúdo que vinha do main era recusado como mudança sem aprovação, embora já tivesse passado pela quarentena ao entrar no main. O ajuste aceita o staged idêntico ao blob do outro pai, só quando esse pai já é ancestral de origin/main. Qualquer outro staged segue o caminho normal (APROVADO-).
