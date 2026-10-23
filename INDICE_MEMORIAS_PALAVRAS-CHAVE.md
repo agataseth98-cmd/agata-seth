@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(813) DIÁRIO — 22/10/2026 · **Pacote 2a aplicado: migrador de história (modo historia) e gerador reprodutível do mapa do PROJETO.**
+  palavras-chave: pacote, aplicado, migrador, história, modo, historia, gerador, reprodutível, mapa, projeto
 (812) DIÁRIO — 22/10/2026 · **Proposta para paralelizar a suíte de perímetro por controle.**
   palavras-chave: proposta, paralelizar, suíte, perímetro, controle
 (811) DIÁRIO — 22/10/2026 · **canon-mcp sem diario_anotar no chat, com o teste do escriba em memoria_acrescentar (par).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: controles, verificáveis, autorização, execução, externa, aplicados, auditoria, seguranca, reducoes, verificaveis, pacote, endurece, capability, chamada, autentica, executores, restringe, escrita, escriba, dados, externos, egress, suíte, offline, perímetro, skip, parcial, falha, eficácia, runtime, depende, homologação, controlada, privilégios, permanece, root
 (784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHORITY` dinâmico da sessão.** A unidade agora preserva `DISPLAY` e `XAUTHORITY` em `sudo`; a execução real terminou com `Result=success`, e `nvidia-settings` confirmou offsets `250`/`1750`. Reversão local: restaurar `~/.config/autostart/apply-nvidia-oc.desktop.codex-bak-20261020` e zerar os offsets.
   palavras-chave: autostart, nvidia, corrigido, testado, xauthority, dinâmico, sessão, unidade, agora, preserva, display, sudo, execução, real, terminou, result, success, settings, confirmou, offsets, reversão, local, restaurar, config, apply, desktop, codex, bak, zerar
-(783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos dois itens são (780) = AC-09 (consolidação) e (781) = AC-18 (retirada no PROJETO). (777) é o P-4 com sudo; (778) e (779) são da auditoria do Codex.** Medido em `grep -nE '^\((77[5-9]|78[0-2])\) ' MEMÓRIAS.md`. Não edito (782) (append-only).
-  palavras-chave: correção, numeração, entradas, itens, consolidação, retirada, projeto, sudo, auditoria, codex, medido, grep, memórias, edito, append, only
+(783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos do …
+  palavras-chave: correção, numeração, entradas
 (782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não redu …
   palavras-chave: correção, aplicado, redu
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com u …
