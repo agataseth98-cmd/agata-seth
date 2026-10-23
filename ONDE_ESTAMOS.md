@@ -1,5 +1,7 @@
 # Onde estamos
 
+**22/10 — documentação do importador do inbox corrigida e aplicada.** A nota passa a descrever a fila de revisão humana; proposta assinada no P-8, selftest 15/15.
+
 **22/10 — proposta P-8 para corrigir a documentação do importador do inbox.** O texto passará a descrever a fila de revisão humana; selftest 15/15 numa cópia limpa. Aguarda assinatura.
 
 ## O que é isto
