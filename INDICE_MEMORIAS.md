@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(823) DIÁRIO — 23/10/2026 · **Cabeçalho com o modelo real: `agata-seth · <modelo real>` só quando a resposta passa pelo gateway ou escriba da Seth; fora desse caminho, `agata · <modelo real>`.** Aplica `cabecalho-modelo-real-20261020`, assinado pelo Humano em 23/10/2026, às 13h23. O diff troca em `PROTOCOLOS.md` o parágrafo de 17/10 ("O nome no cabeçalho é `agata-seth`") pela regra de 20/10: o nome do modelo vem do indicador da interface ou da configuração medida da sessão, nunca da memória nem de outro modelo. Não duplica `cabecalho-agata-seth-20261017`: substitui o parágrafo que aquela proposta criou. Conferido antes da assinatura: `git apply --check` limpo sobre `2fceada`.
 (822) DIÁRIO — 23/10/2026 · **Primeira execução da migração de período (quente para morno e frio), em proposta consolidada.**
 (821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
 (820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (796) DIÁRIO — 21/10/2026 · **Comandos padrão da skill agata-fluxo (§8) aplicados: atualizar a checkout guardando alterações antes, e assinar proposta.** Assinado pelo Humano (skill-agata-fluxo-comandos-20261021). Todo modelo passa a entregar esses comandos no mesmo formato.
 (795) DIÁRIO — 21/10/2026 · **Início de sessão da dupla mecanizado: scripts/dupla/inicio.sh, uma leitura do canal, saída vazia sem novidade.** Assinado pelo Humano (inicio-dupla-20261021). Substitui a leitura manual do canal no começo de cada sessão, para economia de tokens.
 (794) DIÁRIO — 21/10/2026 · **Skill agata-fluxo aplicada (universal, para qualquer LLM e para a Seth).** Assinada pelo Humano (skill-agata-fluxo-20261021). Substitui a divisão ad hoc entre Claude e Codex por um fluxo único: medir, canal, divisão de execução e auditoria, mudança protegida só por proposta, afirmar com prova.
-(793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de estado sem prova (aplicado após assinatura do Humano).** Acrescenta uma linha em `_conteudo` que importa `detector_estado_sem_prova` e soma os achados (estado sem prova, confiança numérica, componente removido no presente). Selftest da auditoria e 6 casos do detector passam.
+(793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de e …
 (792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): ach …
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não …
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, …

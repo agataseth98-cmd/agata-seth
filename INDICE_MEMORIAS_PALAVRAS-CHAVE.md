@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(823) DIÁRIO — 23/10/2026 · **Cabeçalho com o modelo real: `agata-seth · <modelo real>` só quando a resposta passa pelo gateway ou escriba da Seth; fora desse caminho, `agata · <modelo real>`.** Aplica `cabecalho-modelo-real-20261020`, assinado pelo Humano em 23/10/2026, às 13h23. O diff troca em `PROTOCOLOS.md` o parágrafo de 17/10 ("O nome no cabeçalho é `agata-seth`") pela regra de 20/10: o nome do modelo vem do indicador da interface ou da configuração medida da sessão, nunca da memória nem de outro modelo. Não duplica `cabecalho-agata-seth-20261017`: substitui o parágrafo que aquela proposta criou. Conferido antes da assinatura: `git apply --check` limpo sobre `2fceada`.
+  palavras-chave: cabeçalho, modelo, real, agata, seth, resposta, passa, gateway, escriba, fora, desse, caminho, aplica, cabecalho, assinado, humano, diff, troca, protocolos, parágrafo, nome, regra, vem, indicador, interface, configuração, medida, sessão, nunca, memória, nem, duplica, substitui, aquela, proposta, criou, conferido, assinatura, git, apply, check, limpo, fceada
 (822) DIÁRIO — 23/10/2026 · **Primeira execução da migração de período (quente para morno e frio), em proposta consolidada.**
   palavras-chave: primeira, execução, migração, período, quente, morno, frio, proposta, consolidada
 (821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: início, sessão, dupla, mecanizado, scripts, inicio, leitura, canal, saída, vazia, novidade, assinado, humano, substitui, manual, começo, economia, tokens
 (794) DIÁRIO — 21/10/2026 · **Skill agata-fluxo aplicada (universal, para qualquer LLM e para a Seth).** Assinada pelo Humano (skill-agata-fluxo-20261021). Substitui a divisão ad hoc entre Claude e Codex por um fluxo único: medir, canal, divisão de execução e auditoria, mudança protegida só por proposta, afirmar com prova.
   palavras-chave: skill, agata, fluxo, aplicada, universal, llm, seth, assinada, humano, substitui, divisão, hoc, claude, codex, único, medir, canal, execução, auditoria, mudança, protegida, proposta, afirmar, prova
-(793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de estado sem prova (aplicado após assinatura do Humano).** Acrescenta uma linha em `_conteudo` que importa `detector_estado_sem_prova` e soma os achados (estado sem prova, confiança numérica, componente removido no presente). Selftest da auditoria e 6 casos do detector passam.
-  palavras-chave: auditoria, turno, passa, incluir, detector, estado, prova, aplicado, após, assinatura, humano, acrescenta, linha, conteudo, importa, soma, achados, confiança, numérica, componente, removido, presente, selftest, casos, passam
+(793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de e …
+  palavras-chave: auditoria, turno, passa, incluir, detector
 (792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): ach …
   palavras-chave: detector, estado, prova, aplicado, ach
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não …
