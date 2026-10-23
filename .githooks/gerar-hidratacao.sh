@@ -462,7 +462,8 @@ montar_hermes() {
   {
     echo "<!--"
     echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
-    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROTOCOLOS.md + FALHAS.md + PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROTOCOLOS.md + FALHAS.md + mapa de PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+    echo "O mapa de PROJETO.md é gerado por scripts/gerar_mapa_projeto.py; mude o estado em PROJETO.md."
     echo "Para mudar o conteúdo, edite REGRAS.md, PROTOCOLOS.md, FALHAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
     echo "o hook pre-commit regenera este arquivo sozinho."
     if [ -n "$modelo" ]; then
@@ -505,9 +506,7 @@ montar_hermes() {
       sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" "$_camada"
       echo ""
     done
-    echo "# PROJETO.md"
-    echo ""
-    cat PROJETO.md
+    python3 scripts/gerar_mapa_projeto.py
     echo ""
     echo "# Índice de MEMÓRIAS.md"
     echo ""
