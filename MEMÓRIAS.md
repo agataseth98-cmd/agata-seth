@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9b055e34feffdd026f7909df98d0c116c341f8c2
-  Escrito em: 23/10/2026 09:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 65f76aff254bd5f2b267678454b3eabbf88c620a
+  Escrito em: 23/10/2026 10:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b055e34feffdd026f7909df98d0c116c341f8c2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b055e34feffdd026f7909df98d0c116c341f8c2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b055e34feffdd026f7909df98d0c116c341f8c2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b055e34feffdd026f7909df98d0c116c341f8c2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b055e34feffdd026f7909df98d0c116c341f8c2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65f76aff254bd5f2b267678454b3eabbf88c620a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65f76aff254bd5f2b267678454b3eabbf88c620a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65f76aff254bd5f2b267678454b3eabbf88c620a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65f76aff254bd5f2b267678454b3eabbf88c620a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/65f76aff254bd5f2b267678454b3eabbf88c620a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(820) DIÁRIO — 23/10/2026 · **Aplicação da correção da entrada (817).**
+
+Assinado pelo Humano (`APROVADO-correcao-817-20261023`). Esta aplicação inseriu, logo acima, a entrada de correção (819), que corrige a frase "pendente do pre-commit" da entrada (817). Esta entrada só registra a aplicação.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
+(819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
+
+A entrada (817) diz "Medido nesta aplicação: pendente do pre-commit". Essa frase ficou defasada. Medido depois, no `main` em 7e3d462: a suíte passou com 58/58 casos e 0 falhas, em 56,298 s (medição do Claude, em clones) e em 55,423 s (medição do Codex). As duas com saída 0. A aplicação da paralelização foi o PR 482, mesclado às 23h42 de 22/10. A suíte sem paralelização levava cerca de 205 s, medido antes na sessão. Esta entrada corrige só a frase de medição; o restante da (817) segue válido.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
 
 Assinado pelo Humano (`APROVADO-p8-merge-main-20261023`). O P-8 comparava o staged só com o HEAD do branch; num merge de origin/main, o conteúdo que vinha do main era recusado como mudança sem aprovação, embora já tivesse passado pela quarentena ao entrar no main. O ajuste aceita o staged idêntico ao blob do outro pai, só quando esse pai já é ancestral de origin/main. Qualquer outro staged segue o caminho normal (APROVADO-).
