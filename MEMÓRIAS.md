@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 06af2ede94ec2d3d0b5e296dfa2782fb2defe655
-  Escrito em: 23/10/2026 09:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fa069e476889d9c7e8ef60b345b4cbcf390f6b16
+  Escrito em: 23/10/2026 09:40 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/06af2ede94ec2d3d0b5e296dfa2782fb2defe655/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/06af2ede94ec2d3d0b5e296dfa2782fb2defe655/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/06af2ede94ec2d3d0b5e296dfa2782fb2defe655/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/06af2ede94ec2d3d0b5e296dfa2782fb2defe655/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/06af2ede94ec2d3d0b5e296dfa2782fb2defe655/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa069e476889d9c7e8ef60b345b4cbcf390f6b16/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa069e476889d9c7e8ef60b345b4cbcf390f6b16/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa069e476889d9c7e8ef60b345b4cbcf390f6b16/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa069e476889d9c7e8ef60b345b4cbcf390f6b16/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fa069e476889d9c7e8ef60b345b4cbcf390f6b16/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
+
+Assinado pelo Humano (`APROVADO-p8-merge-main-20261023`). O P-8 comparava o staged só com o HEAD do branch; num merge de origin/main, o conteúdo que vinha do main era recusado como mudança sem aprovação, embora já tivesse passado pela quarentena ao entrar no main. O ajuste aceita o staged idêntico ao blob do outro pai, só quando esse pai já é ancestral de origin/main. Qualquer outro staged segue o caminho normal (APROVADO-).
+
+Medido antes da proposta: merge reproduzido do main no branch da proposta da correção da entrada (817) passou com 0 falhas; mudança sem aprovação em PROJETO.md continuou SUSPEITO (rc=1).
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
 
 Assinado pelo Humano (`APROVADO-paralelo-suite-controles-20261022`). A suíte passa a rodar até 4 casos ao mesmo tempo, cada um num clone descartável; o repositório real não é tocado. Os agregados são impressos uma vez, no fim. O filtro serial por `FILTRO` continua igual. A confirmação de isolamento veio do Codex: suíte 58/58 com 0 falhas numa cópia isolada, e até 4 clones coexistindo. Esta aplicação só entrou depois dessa confirmação, como o Humano pediu. Medido nesta aplicação: pendente do pre-commit.

@@ -254,6 +254,17 @@ _p8_arquivo_aprovado() {
       return 1
     fi
   fi
+  # Merge de origin/main (MERGE_HEAD): o staged idêntico ao blob do outro pai
+  # já passou pela quarentena quando entrou no main -- não é mudança nova deste
+  # commit. Só vale se esse pai já for ancestral de origin/main; qualquer outro
+  # pai, ou um staged diferente dele, segue o caminho normal (APROVADO-).
+  local mh=""
+  if [ "$eh_delecao" -eq 0 ] \
+     && mh="$(git rev-parse --verify --quiet "MERGE_HEAD:$f" 2>/dev/null)" \
+     && [ -n "$mh" ] && [ "$mh" = "$staged_blob" ] \
+     && git merge-base --is-ancestor MERGE_HEAD refs/remotes/origin/main 2>/dev/null; then
+    return 0
+  fi
   repo_raiz="$(pwd)"
 
   for diretorio in propostas propostas/aplicadas; do
