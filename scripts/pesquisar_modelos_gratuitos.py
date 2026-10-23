@@ -1,23 +1,31 @@
 #!/usr/bin/env python3
 """Rotina de pesquisa/saúde do pool de modelos gratuitos (MEMÓRIAS (377)).
 
-Roda semanal (agata-pesquisa-modelos.timer). NÃO implementa nada: só sonda e,
+Roda semanal (agata-pesquisa-modelos.timer). NÃO implementa nada: só lê e,
 se algo mudou, escreve UMA proposta em propostas/ pro Humano decidir (P-8).
 Mesma disciplina do flow de consolidação depois de (371).
 
-O que faz, tudo read-only:
-  1. re-testa cada modelo do pool confirmado (config/modelos-gratuitos.md) e do
-     ROSTER de scripts/conselho_remoto.py -- 1 chamada mínima via :20127.
-  2. testa os modelos que o OmniRoute conhece (/api/models) em provedores
-     CONECTADOS mas que não estão no pool.
-  3. dispara o Discovery do próprio OmniRoute (POST /api/discovery/scan) e lê os
-     resultados.
-  4. compara com o último run. Nada mudou -> só loga. Mudou -> escreve
-     propostas/modelos-gratuitos-<data>.md com um rascunho de ROSTER e o
-     lembrete das famílias que dependem de chave do Humano (Mistral, GitHub
-     Models, HuggingFace).
+Dois modos, nunca misturados (roteamento por capacidade, passo 2; V9, seção 35):
 
-Uso: pesquisar_modelos_gratuitos.py [--repo DIR] [--sem-discovery]
+DESCOBERTA (padrão; o timer roda este) -- nenhuma chamada a modelo, nenhuma
+escrita no OmniRoute, zero cota:
+  1. lê os modelos que o OmniRoute conhece (GET /api/models) em provedores
+     CONECTADOS que não estão no pool nem no ROSTER;
+  2. lê os últimos resultados do Discovery (GET /api/discovery/results), sem
+     disparar varredura nova;
+  3. compara com a última descoberta. Mudou -> propostas/modelos-gratuitos-<data>.md
+     com a lista de candidatos ("disponível no catálogo", nunca "funciona").
+
+ENSAIO (`--ensaio`, só à mão, com autorização: gasta cota grátis) -- teste de vida:
+  1. re-testa cada modelo do pool confirmado (config/modelos-gratuitos.md) e do
+     ROSTER de scripts/conselho_remoto.py -- 1 chamada mínima via :20127;
+  2. testa até 12 candidatos fora do pool;
+  3. com `--scan`, dispara antes o Discovery do OmniRoute (POST /api/discovery/scan);
+  4. compara com o último ensaio e, se mudou, escreve a proposta com o rascunho de
+     ROSTER. Um `pong` prova conectividade numa amostra, não qualidade (desenho do
+     roteamento, seção 8). Benchmark de qualidade é outra peça, com corpus próprio.
+
+Uso: pesquisar_modelos_gratuitos.py [--repo DIR] [--ensaio [--scan]] | --selftest
 """
 import json
 import os
@@ -33,7 +41,8 @@ REPO = Path(os.environ.get("AGATA_REPO", os.path.expanduser("~/agata")))
 PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
 OMNIROUTE = os.environ.get("AGATA_OMNIROUTE", "http://127.0.0.1:20128")
 ESTADO_DIR = Path(os.path.expanduser("~/.cache/agata/pesquisa-modelos"))
-ULTIMO = ESTADO_DIR / "ultimo.json"
+ULTIMO = ESTADO_DIR / "ultimo.json"                     # último ENSAIO
+ULTIMA_DESCOBERTA = ESTADO_DIR / "ultima-descoberta.json"
 LOG = ESTADO_DIR / "runs.log"
 POOL_MD = REPO / "config" / "modelos-gratuitos.md"
 CONSELHO = REPO / "scripts" / "conselho_remoto.py"
@@ -146,16 +155,96 @@ def _modelos_omniroute_nao_no_pool(ja_conhecidos):
     return fora
 
 
-def _discovery(fazer):
-    if not fazer:
-        return {"pulado": True}
+def _discovery(varrer):
+    """Lê os resultados do Discovery. `varrer=True` (só no ensaio com --scan) dispara
+    antes uma varredura nova -- escreve no OmniRoute; a descoberta nunca varre."""
     try:
-        _http(f"{OMNIROUTE}/api/discovery/scan", "POST", {}, timeout=20,
-              classification="public")
-        time.sleep(30)
+        if varrer:
+            _http(f"{OMNIROUTE}/api/discovery/scan", "POST", {}, timeout=20,
+                  classification="public")
+            time.sleep(30)
         return _http(f"{OMNIROUTE}/api/discovery/results", timeout=20)
     except Exception as e:  # noqa: BLE001
         return {"erro": f"{type(e).__name__}: {e}"}
+
+
+def _ler_json(caminho):
+    if caminho.is_file():
+        try:
+            return json.loads(caminho.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return {}
+    return {}
+
+
+def descobrir():
+    """Modo DESCOBERTA: só GET, nenhuma chamada a modelo. Devolve o estado comparável."""
+    conhecidos = set(_pool_confirmado()) | set(_roster_conselho())
+    candidatos = sorted(_modelos_omniroute_nao_no_pool(conhecidos))
+    disc = _discovery(False)
+    return {"quando": date.today().isoformat(), "candidatos": candidatos}, disc
+
+
+def _escrever_descoberta(atual, disc):
+    hoje = date.today().isoformat()
+    alvo = REPO / "propostas" / f"modelos-gratuitos-{hoje}.md"
+    linhas = [
+        f"# Descoberta de modelos gratuitos — {hoje}",
+        "",
+        "_Gerada por `scripts/pesquisar_modelos_gratuitos.py` em modo DESCOBERTA: nenhuma",
+        "chamada a modelo, zero cota. NÃO é canon, NÃO implementa nada. Candidato aqui",
+        "quer dizer disponível no catálogo do OmniRoute, nunca 'funciona': para testar,",
+        "rode à mão `--ensaio` (gasta cota). MEMÓRIAS (377)._",
+        "",
+        "## Candidatos fora do pool e do ROSTER (catálogo do OmniRoute)",
+        "",
+    ] + ([f"- `{m}`" for m in atual["candidatos"]] or ["- (nenhum)"]) + [
+        "",
+        "## Últimos resultados do Discovery (leitura, sem varredura nova)",
+        "",
+        "```json",
+        json.dumps(disc, ensure_ascii=False, indent=2)[:2000],
+        "```",
+    ]
+    alvo.parent.mkdir(parents=True, exist_ok=True)
+    alvo.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    return alvo
+
+
+def _selftest():
+    global _http, _pool_confirmado, _roster_conselho
+    chamadas = []
+
+    def falso_http(url, metodo="GET", body=None, timeout=45, classification=None):
+        chamadas.append((metodo, url))
+        if url.endswith("/api/models"):
+            return {"models": [{"fullModel": "a/novo", "available": True},
+                               {"fullModel": "b/pool", "available": True},
+                               {"fullModel": "c/fora", "available": False}]}
+        return {"ok": True}
+
+    orig = (_http, _pool_confirmado, _roster_conselho)
+    _http, _pool_confirmado, _roster_conselho = falso_http, lambda: ["b/pool"], lambda: []
+    try:
+        atual, _ = descobrir()
+        casos = [
+            ("descoberta não chama modelo", not any("/chat/completions" in u for _, u in chamadas)),
+            ("descoberta não escreve no OmniRoute (só GET)", all(m == "GET" for m, _ in chamadas)),
+            ("candidato = disponível e fora do pool", atual["candidatos"] == ["a/novo"]),
+            ("descoberta lê os resultados do Discovery", any(u.endswith("/api/discovery/results")
+                                                            for _, u in chamadas)),
+        ]
+        chamadas.clear()
+        _discovery(True)
+        casos.append(("só o --scan dispara varredura (POST)", ("POST", f"{OMNIROUTE}/api/discovery/scan")
+                      in chamadas))
+    finally:
+        _http, _pool_confirmado, _roster_conselho = orig
+    for nome, ok in casos:
+        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+    falhas = sum(not ok for _, ok in casos)
+    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
+    return 1 if falhas else 0
 
 
 def _log(msg):
@@ -166,10 +255,28 @@ def _log(msg):
 
 def main():
     args = sys.argv[1:]
+    if args == ["--selftest"]:
+        return _selftest()
     if "--repo" in args:
         global REPO
         REPO = Path(args[args.index("--repo") + 1])
-    sem_disc = "--sem-discovery" in args
+
+    if "--ensaio" not in args:
+        if "--scan" in args:
+            print("--scan só vale com --ensaio (a descoberta nunca varre).")
+            return 2
+        atual, disc = descobrir()
+        anterior = _ler_json(ULTIMA_DESCOBERTA)
+        ESTADO_DIR.mkdir(parents=True, exist_ok=True)
+        ULTIMA_DESCOBERTA.write_text(json.dumps(atual, ensure_ascii=False, indent=2), encoding="utf-8")
+        if atual["candidatos"] == anterior.get("candidatos"):
+            _log(f"descoberta: sem mudança. candidatos={atual['candidatos']}")
+            print("descoberta: sem mudança -- nenhuma proposta escrita.")
+            return 0
+        alvo = _escrever_descoberta(atual, disc)
+        _log(f"descoberta: MUDOU -> escreveu {alvo.name}. candidatos={atual['candidatos']}")
+        print(f"escrito: {alvo}")
+        return 0
 
     confirmados = _pool_confirmado()
     roster = _roster_conselho()
@@ -181,7 +288,7 @@ def main():
     for m in extras[:12]:            # teto: não martelar 40 modelos
         novos[m] = _sondar(m)
 
-    disc = _discovery(not sem_disc)
+    disc = _discovery("--scan" in args)
 
     atual = {
         "quando": date.today().isoformat(),
@@ -189,12 +296,7 @@ def main():
         "novos_ok": sorted(m for m, r in novos.items() if r[0] == "OK"),
     }
     ESTADO_DIR.mkdir(parents=True, exist_ok=True)
-    anterior = {}
-    if ULTIMO.is_file():
-        try:
-            anterior = json.loads(ULTIMO.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            anterior = {}
+    anterior = _ler_json(ULTIMO)
 
     mudou = (atual["pool"] != anterior.get("pool")
              or atual["novos_ok"] != anterior.get("novos_ok", []))
