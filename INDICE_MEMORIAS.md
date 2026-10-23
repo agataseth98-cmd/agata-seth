@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(814) DIÁRIO — 22/10/2026 · **Proposta para alinhar a documentação do importador do inbox ao comportamento atual.**
 (813) DIÁRIO — 22/10/2026 · **Pacote 2a aplicado: migrador de história (modo historia) e gerador reprodutível do mapa do PROJETO.**
 (812) DIÁRIO — 22/10/2026 · **Proposta para paralelizar a suíte de perímetro por controle.**
 (811) DIÁRIO — 22/10/2026 · **canon-mcp sem diario_anotar no chat, com o teste do escriba em memoria_acrescentar (par).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restringe os destinos de TTS do LibreChat ao serviço Piper autorizado.** A aplicação move o par assinado para `propostas/aplicadas/` e registra a mudança neste commit.
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`manutencao-fora-da-janela-20261020`). Fonte versionada alterada e par assinado consumido no PR de aplicação; a unidade de runtime será verificada depois do merge.
 (785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução externa aplicados (`auditoria-seguranca-reducoes-verificaveis-20261020`).** O pacote endurece a capability por chamada, autentica os executores e restringe escrita do Escriba e dados externos/egress. Suíte offline: 58/58; perímetro: 19 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. A eficácia no runtime ainda depende de homologação controlada com privilégios; P-4 permanece parcial sem root.
-(784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHORITY` dinâmico da sessão.** A unidade agora preserva `DISPLAY` e `XAUTHORITY` em `sudo`; a execução real terminou com `Result=success`, e `nvidia-settings` confirmou offsets `250`/`1750`. Reversão local: restaurar `~/.config/autostart/apply-nvidia-oc.desktop.codex-bak-20261020` e zerar os offsets.
+(784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHO …
 (783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos do …
 (782) DIÁRIO — 20/10/2026 · **Correção de (777)/(778): o AC-18 aplicado não redu …
 (781) DIÁRIO — 20/10/2026 · **Política do PROJETO cheio: toda inclusão vem com u …
