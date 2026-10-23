@@ -21,12 +21,15 @@ tenta prever passadas futuras. Rodar de novo processa o que ainda resta
 (morno pode continuar acima do teto depois de uma passada, se o histórico
 acumulado for grande -- bootstrap tem essa forma, dia a dia normal não).
 
-Uso: migrar_periodo.py [--aplicar] (sem --aplicar, só relata o que faria)
+Uso: migrar_periodo.py [--aplicar] (sem --aplicar, só relata)
+     migrar_periodo.py historia --origem <arquivo> --destino <caminho-absoluto-fora-do-clone>
 """
 import argparse
 import hashlib
+import os
 import re
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -74,10 +77,116 @@ def dividir(texto: str):
     return bloco_migrado, entradas
 
 
+def hash_arquivo(caminho: Path) -> str:
+    """SHA-256 em fluxo, sem carregar o arquivo inteiro na memória."""
+    h = hashlib.sha256()
+    with caminho.open("rb") as f:
+        for parte in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(parte)
+    return h.hexdigest()
+
+
+def resolver_origem(valor: str) -> Path:
+    caminho = Path(valor).expanduser()
+    if not caminho.is_absolute():
+        caminho = RAIZ / caminho
+    return caminho.resolve(strict=True)
+
+
+def copiar_historia(origem: str, destino: str) -> dict[str, str | int]:
+    """Copia bytes de história para fora do clone, sem alterar a origem/canon.
+
+    O destino tem de ser absoluto, não pode existir e precisa ficar fora de
+    RAIZ. A publicação usa hard-link do temporário verificado para não
+    sobrescrever um destino criado concorrentemente.
+    """
+    src = resolver_origem(origem)
+    if not src.is_file():
+        raise ValueError("origem não é um arquivo regular")
+    dst_arg = Path(destino).expanduser()
+    if not dst_arg.is_absolute():
+        raise ValueError("destino precisa ser caminho absoluto, fora do clone")
+    parent = dst_arg.parent.resolve(strict=False)
+    dst = parent / dst_arg.name
+    raiz = RAIZ.resolve()
+    if dst == src:
+        raise ValueError("origem e destino são o mesmo arquivo")
+    if dst == raiz or raiz in dst.parents:
+        raise ValueError("destino dentro do clone/canon é proibido")
+    if os.path.lexists(dst):
+        raise FileExistsError("destino já existe; história não será sobrescrita")
+
+    parent.mkdir(parents=True, exist_ok=True)
+    origem_sha_antes = hash_arquivo(src)
+    fd, temp_nome = tempfile.mkstemp(prefix=".historia-", dir=parent)
+    temp = Path(temp_nome)
+    try:
+        h_copia = hashlib.sha256()
+        tamanho = 0
+        with src.open("rb") as entrada, os.fdopen(fd, "wb") as saida:
+            for parte in iter(lambda: entrada.read(1024 * 1024), b""):
+                saida.write(parte)
+                h_copia.update(parte)
+                tamanho += len(parte)
+            saida.flush()
+            os.fsync(saida.fileno())
+        origem_sha_depois = hash_arquivo(src)
+        temp_sha = hash_arquivo(temp)
+        if origem_sha_antes != origem_sha_depois:
+            raise RuntimeError("origem mudou durante a cópia; destino não publicado")
+        if h_copia.hexdigest() != origem_sha_antes or temp_sha != origem_sha_antes:
+            raise RuntimeError("hash da cópia diverge da origem; destino não publicado")
+        try:
+            os.link(temp, dst)
+        except FileExistsError:
+            raise FileExistsError("destino apareceu durante a cópia; não sobrescrito")
+        destino_sha = hash_arquivo(dst)
+        if destino_sha != origem_sha_antes:
+            dst.unlink()
+            raise RuntimeError("hash do destino diverge da origem; destino removido")
+        return {
+            "origem_sha256": origem_sha_antes,
+            "destino_sha256": destino_sha,
+            "bytes": tamanho,
+            "origem_intacta": "sim",
+            "destino_fora_canon": "sim",
+            "destino": str(dst),
+        }
+    finally:
+        try:
+            temp.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def executar_historia(origem: str, destino: str) -> None:
+    dados = copiar_historia(origem, destino)
+    print("PASS historia: cópia verificada; original intacto; nenhum arquivo do canon escrito")
+    for chave, valor in dados.items():
+        print(f"{chave}={valor}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--aplicar", action="store_true", help="escreve os arquivos; sem isso só relata")
+    ap.add_argument("modo", nargs="?", choices=("historia",), help="modo seguro de cópia histórica")
+    ap.add_argument("--origem", help="arquivo de origem (relativo ao clone ou absoluto)")
+    ap.add_argument("--destino", help="destino absoluto fora do clone; não sobrescreve")
+    ap.add_argument("--aplicar", action="store_true", help="escreve os arquivos da migração de período; sem isso só relata")
     args = ap.parse_args()
+
+    if args.modo == "historia":
+        if args.aplicar:
+            ap.error("historia copia sem --aplicar")
+        if not args.origem or not args.destino:
+            ap.error("historia exige --origem e --destino")
+        try:
+            executar_historia(args.origem, args.destino)
+        except (OSError, ValueError, RuntimeError) as exc:
+            print(f"FALHA historia: {exc}", file=sys.stderr)
+            raise SystemExit(1)
+        return
+    if args.origem or args.destino:
+        ap.error("--origem/--destino só se aplicam ao modo historia")
 
     caminho_quente = RAIZ / "MEMÓRIAS.md"
     texto_quente = caminho_quente.read_text(encoding="utf-8")
