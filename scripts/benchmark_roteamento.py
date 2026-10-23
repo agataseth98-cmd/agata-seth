@@ -102,7 +102,7 @@ def json_estrito(texto: str) -> bool:
 
 def checar(item: dict, texto: str, chamadas: list[dict]) -> dict:
     c = {}
-    if item["tipo"] == "json":
+    if item.get("requisitos", {}).get("so_json"):  # só onde a pergunta pede APENAS JSON
         c["json_valido"] = json_estrito(texto)
     if item.get("requisitos", {}).get("ferramenta"):
         c["chamou_ferramenta"] = bool(chamadas)
@@ -181,25 +181,46 @@ def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ) -> dict:
                 "finish": (d.get("choices") or [{}])[0].get("finish_reason"), "texto": texto,
                 "chamadas": chamadas, "uso": uso, "checagens": checar(item, texto, chamadas)}
     except Exception as e:  # noqa: BLE001
-        return {"estado": f"erro:{e.__class__.__name__}", "s": round(total, 2), "texto": "", "chamadas": chamadas,
-                "checagens": {}}
+        codigo = getattr(e, "code", None)
+        return {"estado": f"erro:{e.__class__.__name__}" + (f":{codigo}" if codigo else ""),
+                "erro": str(getattr(e, "corpo", "") or e)[:160], "s": round(total, 2), "texto": "",
+                "chamadas": chamadas, "checagens": {}}
 
 
 # --- rede -------------------------------------------------------------------------------
+REPETIR = (429, 502, 503, 504)  # provedor ou fila ocupados: uma nova tentativa, depois de esperar
+ESPERA_REPETIR = 10.0
+
+
+def cabecalhos(token: str, publico: bool) -> dict:
+    """O corpus é sintético: vai como `public` (regra de 20/10, b683e4b, no sanitizador). Item
+    com anexo do canon só vai como público se o Humano liberou o provedor (--liberar)."""
+    h = {"Content-Type": "application/json", "X-Agata-Token": token}
+    if publico:
+        h["X-Agata-Data-Classification"] = "public"
+    return h
+
+
 def _chamador(timeout: float):
     sys.path.insert(0, str(RAIZ / "scripts"))
+    import urllib.error
     import urllib.request
     import queda_por_elo as q  # noqa: E402  (token interno e abridor sem proxy)
 
-    def chamar(corpo):
+    def chamar(corpo, publico=True):
         t0 = time.monotonic()
-        req = urllib.request.Request(q.PROXY + "/v1/chat/completions", method="POST",
-                                     data=json.dumps(corpo, ensure_ascii=False).encode("utf-8"),
-                                     headers={"Content-Type": "application/json",
-                                              "X-Agata-Token": q._token_interno()})
-        with q._SEM_PROXY.open(req, timeout=timeout) as r:
-            d = json.load(r)
-        return d, time.monotonic() - t0
+        for tentativa in range(2):
+            req = urllib.request.Request(q.PROXY + "/v1/chat/completions", method="POST",
+                                         data=json.dumps(corpo, ensure_ascii=False).encode("utf-8"),
+                                         headers=cabecalhos(q._token_interno(), publico))
+            try:
+                with q._SEM_PROXY.open(req, timeout=timeout) as r:
+                    return json.load(r), time.monotonic() - t0
+            except urllib.error.HTTPError as e:
+                e.corpo = e.read().decode("utf-8", "replace")[:160]
+                if e.code not in REPETIR or tentativa:
+                    raise
+                time.sleep(ESPERA_REPETIR)
     return chamar
 
 
@@ -241,7 +262,8 @@ def main(argv: list[str]) -> int:
         if not liberado(i, m, liberar):
             r = {"estado": "pulado_privacidade", "s": 0, "texto": "", "chamadas": [], "checagens": {}}
         else:
-            r = rodar_item(chamar, m, i)
+            publico = not i.get("privado") or any(m.startswith(p) for p in liberar)
+            r = rodar_item(lambda corpo: chamar(corpo, publico), m, i)
             time.sleep(intervalo)
         linhas.append(dict(r, modelo=m, item=i["id"], tipo=i["tipo"], rota_esperada=i.get("rota_esperada")))
         print(f"[{n}/{len(plano)}] {m} {i['id']}: {r['estado']} {r['s']}s {r['checagens']}", flush=True)
@@ -261,7 +283,8 @@ def _selftest() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         raiz = Path(tmp)
         (raiz / "A.md").write_text("conteúdo do anexo")
-        js = {"id": "json-x", "tipo": "json", "pergunta": "só JSON", "requisitos": {"json": True}}
+        js = {"id": "json-x", "tipo": "json", "pergunta": "só JSON", "requisitos": {"json": True, "so_json": True}}
+        jt = {"id": "json-t", "tipo": "json", "pergunta": "explique o JSON", "requisitos": {"json": True}}
         fer = {"id": "fer-x", "tipo": "ferramenta", "pergunta": "meça", "requisitos": {"ferramenta": True}}
         esc = {"id": "fer-e", "tipo": "ferramenta", "pergunta": "anote", "requisitos": {"ferramenta": True, "escrita": True}}
         pct = {"id": "conv-04", "tipo": "conversa", "pergunta": "%?", "requisitos": {}}
@@ -282,12 +305,21 @@ def _selftest() -> int:
         def quebra(corpo):
             raise TimeoutError("lento")
 
+        class Http403(Exception):
+            code = 403
+            corpo = "dados sem classificação pública"
+
+        def recusa(corpo):
+            raise Http403("x")
+
         rj = rodar_item(falso, "a/m", js, raiz)
         rf = rodar_item(falso, "a/m", fer, raiz)
         re_ = rodar_item(falso, "a/m", esc, raiz)
         rp = rodar_item(falso, "a/m", pct, raiz)
         rl = rodar_item(falso, LOCAL + "m", priv, raiz)
         rq = rodar_item(quebra, "a/m", js, raiz)
+        rh = rodar_item(recusa, "a/m", js, raiz)
+        rt = rodar_item(falso, "a/m", jt, raiz)
         linhas = [dict(r, modelo="a/m") for r in (rj, rf, re_, rp, rq)] + \
                  [{"modelo": "a/m", "estado": "pulado_privacidade", "s": 0, "checagens": {}}]
         res = resumir(linhas, "2026-10-23", "f" * 64)["a/m"]
@@ -314,6 +346,11 @@ def _selftest() -> int:
             ("resumo: métricas mecânicas presentes", {"json_valido", "ferramenta_valida", "escreveu_sem_portao",
                                                       "deu_porcentagem", "latencia_p95_s"} <= nomes_med),
             ("medidas passam na conferência do registro", cc.conferir(reg) == []),
+            ("JSON estrito só onde a pergunta pede apenas JSON", "json_valido" not in rt["checagens"]),
+            ("erro HTTP guarda o código e o motivo", rh["estado"] == "erro:Http403:403"
+             and "classificação" in rh["erro"]),
+            ("corpus sintético vai como público; privado não", cabecalhos("t", True).get(
+                "X-Agata-Data-Classification") == "public" and "X-Agata-Data-Classification" not in cabecalhos("t", False)),
             ("percentil", percentil([1, 2, 3, 4], 50) in (2, 3) and percentil([], 95) is None),
         ]
     for nome, ok in casos:

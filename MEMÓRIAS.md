@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43825e75ad8e8ae445e0bc178634e8bbdcf317ff
-  Escrito em: 23/10/2026 15:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c046305124a67e6abb7541a677e4c150afe2851c
+  Escrito em: 23/10/2026 15:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43825e75ad8e8ae445e0bc178634e8bbdcf317ff/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43825e75ad8e8ae445e0bc178634e8bbdcf317ff/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43825e75ad8e8ae445e0bc178634e8bbdcf317ff/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43825e75ad8e8ae445e0bc178634e8bbdcf317ff/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43825e75ad8e8ae445e0bc178634e8bbdcf317ff/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c046305124a67e6abb7541a677e4c150afe2851c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c046305124a67e6abb7541a677e4c150afe2851c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c046305124a67e6abb7541a677e4c150afe2851c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c046305124a67e6abb7541a677e4c150afe2851c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c046305124a67e6abb7541a677e4c150afe2851c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(827) DIÁRIO — 23/10/2026 · **Correção do executor do benchmark: o corpus sintético vai marcado como público, o erro guarda o código HTTP, os erros 429 e 50x ganham uma nova tentativa, e o JSON estrito só vale onde a pergunta pede apenas JSON.** Aplica `benchmark-correcao-20261023`, assinado pelo Humano em 23/10/2026. Na primeira rodada (23/10, 15h17, `~/.local/share/agata/benchmark/20261023-151746/`), os 24 pedidos ao Ministral voltaram com HTTP 403 ("dados sem classificação pública"). O executor não mandava `X-Agata-Data-Classification: public`, que o sanitizador exige desde 20/10 (b683e4b); o defeito é do Claude Code, que redigiu o executor sem conferir esse caminho. O modelo local respondeu 24 de 30; as 6 falhas foram instantâneas e não se repetiram. Achados mecânicos do local: escolheu a ferramenta certa, com argumentos válidos, em 7 de 7; gravou no diário sem pedir confirmação (fer-06) e deu confiança em porcentagem (conv-04), dois erros graves. Uma chamada real ao Ministral depois da correção respondeu em 3,6 s.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `resumo.json` da rodada; selftest com 16 casos; chamada real ao Ministral; PR 508 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
+
 (826) DIÁRIO — 23/10/2026 · **Executor do benchmark do roteamento por capacidade aplicado: roda o corpus de 30 perguntas nos modelos das filas, só à mão, com ferramentas falsas e o anexo do canon só para modelo local.** Aplica `benchmark-roteamento-20261023`, assinado pelo Humano em 23/10/2026. `scripts/benchmark_roteamento.py` sem `--executar` só mostra o plano: hoje, 30 itens × 11 modelos, dos quais 270 rodam e 60 ficam de fora por privacidade. Com `--executar`, chama os modelos pelo sanitizador, sem o gateway, e grava as respostas e um resumo em `~/.local/share/agata/benchmark/<data>/` (0700/0600). As checagens automáticas são JSON estrito, ferramenta válida, escrita sem portão e confiança em porcentagem; o resto fica para o rótulo do Humano. O resumo sai no formato do bloco `medido` de `config/capivara/capacidades.json`, mas levar para lá é proposta à parte. O corpus revisado (`corpus-v1.jsonl`, fora do repositório) incorpora as quatro mudanças aceitas pelo Humano: ferramentas falsas, anexo de cerca de 146 KB em longo-01 e longo-05, anexo só para modelo local ou provedor liberado, e rota esperada por tipo. A rota ativa da Seth não muda.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest com 13 casos; plano sem chamadas; clone com hooks; PR 506 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
