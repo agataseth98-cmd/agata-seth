@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(815) DIÁRIO — 22/10/2026 · **Pacote 2b: mapa do PROJETO na hidratação (em vez do arquivo inteiro).**
+  palavras-chave: pacote, mapa, projeto, hidratação, arquivo, inteiro
 (814) DIÁRIO — 22/10/2026 · **Proposta para alinhar a documentação do importador do inbox ao comportamento atual.**
   palavras-chave: proposta, alinhar, documentação, importador, inbox, comportamento, atual
 (813) DIÁRIO — 22/10/2026 · **Pacote 2a aplicado: migrador de história (modo historia) e gerador reprodutível do mapa do PROJETO.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, voz, allowed, addresses, restringe, destinos, tts, librechat, serviço, piper, autorizado, aplicação, move, par, assinado, propostas, aplicadas, registra, mudança, commit
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`manutencao-fora-da-janela-20261020`). Fonte versionada alterada e par assinado consumido no PR de aplicação; a unidade de runtime será verificada depois do merge.
   palavras-chave: aplicada, condição, janela, manutenção, manutencao, fora, fonte, versionada, alterada, par, assinado, consumido, aplicação, unidade, runtime, será, verificada, merge
-(785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução externa aplicados (`auditoria-seguranca-reducoes-verificaveis-20261020`).** O pacote endurece a capability por chamada, autentica os executores e restringe escrita do Escriba e dados externos/egress. Suíte offline: 58/58; perímetro: 19 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. A eficácia no runtime ainda depende de homologação controlada com privilégios; P-4 permanece parcial sem root.
-  palavras-chave: controles, verificáveis, autorização, execução, externa, aplicados, auditoria, seguranca, reducoes, verificaveis, pacote, endurece, capability, chamada, autentica, executores, restringe, escrita, escriba, dados, externos, egress, suíte, offline, perímetro, skip, parcial, falha, eficácia, runtime, depende, homologação, controlada, privilégios, permanece, root
+(785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução e …
+  palavras-chave: controles, verificáveis, autorização, execução
 (784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHO …
   palavras-chave: autostart, nvidia, corrigido, testado, xautho
 (783) DIÁRIO — 20/10/2026 · **Correção de numeração em (782): as entradas dos do …

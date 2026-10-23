@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 44d65f5dabc43e54d80e73f450d6feb893b5f53a
-  Escrito em: 22/10/2026 21:53 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f400d3f33c4fe3ecc7ed124a31354c50b9020d51
+  Escrito em: 22/10/2026 22:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/44d65f5dabc43e54d80e73f450d6feb893b5f53a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/44d65f5dabc43e54d80e73f450d6feb893b5f53a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/44d65f5dabc43e54d80e73f450d6feb893b5f53a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/44d65f5dabc43e54d80e73f450d6feb893b5f53a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/44d65f5dabc43e54d80e73f450d6feb893b5f53a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f400d3f33c4fe3ecc7ed124a31354c50b9020d51/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f400d3f33c4fe3ecc7ed124a31354c50b9020d51/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f400d3f33c4fe3ecc7ed124a31354c50b9020d51/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f400d3f33c4fe3ecc7ed124a31354c50b9020d51/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f400d3f33c4fe3ecc7ed124a31354c50b9020d51/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(815) DIÁRIO — 22/10/2026 · **Pacote 2b: mapa do PROJETO na hidratação (em vez do arquivo inteiro).**
+
+Assinado pelo Humano (`APROVADO-pacote2b-mapa-hidratacao-20261022`, PR 458 mesclado). Depende do 2a, já aplicado (PR 476). Medido pelo Codex em cópia: hidratação de 124.718 para 88.325 caracteres; tokens reais do modelo local de 40.321 para 28.623; geração repetida dá o mesmo hash.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (814) DIÁRIO — 22/10/2026 · **Proposta para alinhar a documentação do importador do inbox ao comportamento atual.**
 
 O cabeçalho ainda dizia que o script enviava POST para o escriba e gravava em MEMÓRIAS; a implementação atual copia notas para a fila de revisão humana. O diff proposto corrige essa descrição. Em cópia descartável limpa: selftest 15/15. A aplicação depende de assinatura P-8.
