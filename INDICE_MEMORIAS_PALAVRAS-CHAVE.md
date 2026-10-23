@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
+  palavras-chave: paralelização, suíte, regressão, controles
 (816) DIÁRIO — 22/10/2026 · **Correção da documentação do importador do inbox (fila de revisão).**
   palavras-chave: correção, documentação, importador, inbox, fila, revisão
 (815) DIÁRIO — 22/10/2026 · **Pacote 2b: mapa do PROJETO na hidratação (em vez do arquivo inteiro).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: ritmo, trabalho, substituição, humano, decide, parar, modelo, julgar, apto, pede, ditado, final, dia, sessão, segue, fim, ordem, contagem, tarefas, continuar, erro, medição, recorrente, afirmação, prova, perda, contexto, ele, diz, seguir, risco
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 427, 514 e 599 são referências no texto; o grupo real 729 já foi desambiguado em (730).**
   palavras-chave: auditoria, ocorrências, numeração, repetida, referências, texto, grupo, real, desambiguado
-(787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restringe os destinos de TTS do LibreChat ao serviço Piper autorizado.** A aplicação move o par assinado para `propostas/aplicadas/` e registra a mudança neste commit.
-  palavras-chave: proposta, voz, allowed, addresses, restringe, destinos, tts, librechat, serviço, piper, autorizado, aplicação, move, par, assinado, propostas, aplicadas, registra, mudança, commit
+(787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restri …
+  palavras-chave: proposta, voz, allowed, addresses, restri
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`ma …
   palavras-chave: aplicada, condição, janela, manutenção
 (785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução e …

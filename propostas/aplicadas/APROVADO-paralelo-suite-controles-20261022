@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-22 19:50 -0300.
+Motivo: suite de regressao em paralelo por controle, 4 workers, agregados uma vez
+nome: paralelo-suite-controles-20261022
+diff-sha256: 7356a624ed40483a3874df664b389ab28c2ade1a1762728d1e564068efb9537c
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQL0J+PbM44bc4SGjgd6ELASuNMa7z7KfoD7deOlZelwBP7
+qDeL32tOSMShoVWZXKjNF6+FSrgUgisvJzh4uamg8=
+-----END SSH SIGNATURE-----
