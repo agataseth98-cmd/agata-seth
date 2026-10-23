@@ -1,0 +1,23 @@
+diff --git a/config/modelos-gratuitos.md b/config/modelos-gratuitos.md
+index ca646b7..71ae87e 100644
+--- a/config/modelos-gratuitos.md
++++ b/config/modelos-gratuitos.md
+@@ -145,10 +145,16 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
+   - **`seth-rapido`** (trivial: <400 chars, sem `tools`, ≤2 msgs user)
+   - **`seth-livre`** (normal — tudo que não é trivial nem pesado)
+   - **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs)
+-  - **Desde 13/10/2026, roteador-sombra** (PROJETO.md, "Decisor local"): o decisor
++  - ~~**Desde 13/10/2026, roteador-sombra** (PROJETO.md, "Decisor local"): o decisor
+     local (`winnow:e4b`, CPU) escolhe também entre rapido/livre/pesado/**codigo** pelo
+     significado e só registra em `~/.cache/agata/decisor/roteador.jsonl`; a rota de
+-    verdade segue a heurística acima até o Humano aprovar o relatório de divergência.
++    verdade segue a heurística acima até o Humano aprovar o relatório de divergência.~~
++    **[SUPERADO 15/10/2026, MEMÓRIAS (718)/(719)]** O **Laya decide a rota** no caminho
++    da resposta (`laya-multilingual` ajustado, `laya-roteador.service`, `:11436`, CPU),
++    com as travas exatas por cima. Laya fora do ar, lento (> 1,5 s) ou com confiança
++    abaixo do limiar: volta a heurística por tamanho acima. O Jev (`winnow:e4b`) virou
++    a **sombra do Laya**: onde os dois discordam, o caso vai para `avaliar_decisor.py`.
++    Código: `redesign/router/seth_gateway.py`, `_rota_laya` e `_sombra_rota`.
+ - **Goose** (`~/.config/goose/config.yaml`, `model: seth-codigo`, 20/09/2026 —
+   **antes** apontava pra `auto/coding`, um alias que o próprio PROJETO.md já
+   documentava como apodrecido desde (390); nunca tinha sido atualizado pro sistema de
