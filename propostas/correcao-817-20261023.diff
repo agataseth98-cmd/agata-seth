@@ -1,0 +1,17 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index a2f3d4a..c766ab7 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -40,6 +40,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ ---
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
++(818) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
++
++A entrada (817) diz "Medido nesta aplicação: pendente do pre-commit". Essa frase ficou defasada. Medido depois, no `main` em 7e3d462: a suíte passou com 58/58 casos e 0 falhas, em 56,298 s (medição do Claude, em clones) e em 55,423 s (medição do Codex). As duas com saída 0. A aplicação da paralelização foi o PR 482, mesclado às 23h42 de 22/10. A suíte sem paralelização levava cerca de 205 s, medido antes na sessão. Esta entrada corrige só a frase de medição; o restante da (817) segue válido.
++
++Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
++
+ (817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
+ 
+ Assinado pelo Humano (`APROVADO-paralelo-suite-controles-20261022`). A suíte passa a rodar até 4 casos ao mesmo tempo, cada um num clone descartável; o repositório real não é tocado. Os agregados são impressos uma vez, no fim. O filtro serial por `FILTRO` continua igual. A confirmação de isolamento veio do Codex: suíte 58/58 com 0 falhas numa cópia isolada, e até 4 clones coexistindo. Esta aplicação só entrou depois dessa confirmação, como o Humano pediu. Medido nesta aplicação: pendente do pre-commit.
