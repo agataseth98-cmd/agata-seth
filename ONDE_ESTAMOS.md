@@ -1,5 +1,7 @@
 # Onde estamos
 
+**22/10 — proposta P-8 para corrigir a documentação do importador do inbox.** O texto passará a descrever a fila de revisão humana; selftest 15/15 numa cópia limpa. Aguarda assinatura.
+
 ## O que é isto
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 
