@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(822) DIÁRIO — 23/10/2026 · **Primeira execução da migração de período (quente para morno e frio), em proposta consolidada.**
+  palavras-chave: primeira, execução, migração, período, quente, morno, frio, proposta, consolidada
 (821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
   palavras-chave: hidratação, última, entrada, memórias, inteira
 (820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: skill, agata, fluxo, aplicada, universal, llm, seth, assinada, humano, substitui, divisão, hoc, claude, codex, único, medir, canal, execução, auditoria, mudança, protegida, proposta, afirmar, prova
 (793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de estado sem prova (aplicado após assinatura do Humano).** Acrescenta uma linha em `_conteudo` que importa `detector_estado_sem_prova` e soma os achados (estado sem prova, confiança numérica, componente removido no presente). Selftest da auditoria e 6 casos do detector passam.
   palavras-chave: auditoria, turno, passa, incluir, detector, estado, prova, aplicado, após, assinatura, humano, acrescenta, linha, conteudo, importa, soma, achados, confiança, numérica, componente, removido, presente, selftest, casos, passam
-(792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): achados de afirmação sem prova, confiança numérica e componente removido citado no presente.** Assinado pelo Humano (detector-estado-sem-prova-20261021). Sem modelo: regex, 6 casos fixos derivados da conversa auditada (scripts/testar_detector_estado.py).
-  palavras-chave: detector, estado, prova, aplicado, achados, afirmação, confiança, numérica, componente, removido, citado, presente, assinado, humano, modelo, regex, casos, fixos, derivados, conversa, auditada, scripts, testar
+(792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): ach …
+  palavras-chave: detector, estado, prova, aplicado, ach
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não …
   palavras-chave: regra, conversa, seth, matéria, prima
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, …
