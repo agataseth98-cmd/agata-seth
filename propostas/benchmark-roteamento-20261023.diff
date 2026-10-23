@@ -1,0 +1,345 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index f7cab78..5a4cc4d 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -51,6 +51,7 @@ jobs:
+           python3 redesign/router/seth_gateway.py --selftest
+           python3 scripts/conselho_remoto.py --selftest
+           python3 -I redesign/router/registro_pedidos.py --selftest
++          python3 -I scripts/benchmark_roteamento.py --selftest
+ 
+       # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
+       # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
+diff --git a/scripts/benchmark_roteamento.py b/scripts/benchmark_roteamento.py
+new file mode 100755
+index 0000000..a804ac7
+--- /dev/null
++++ b/scripts/benchmark_roteamento.py
+@@ -0,0 +1,327 @@
++#!/usr/bin/env python3
++"""benchmark_roteamento.py — roda o corpus do roteamento por capacidade nos modelos das filas.
++
++Roteamento por capacidade, passo 2b (V9, seção 35). Decisões do Humano em 23/10/2026:
++corpus sintético de 30 perguntas fora do repositório; ferramentas com respostas falsas
++fixas; anexo grande nas perguntas de contexto longo; anexo do canon só para modelo local
++ou provedor liberado.
++
++Sem `--executar`, só mostra o plano: nenhuma chamada. Com `--executar`, gasta cota grátis;
++rode à mão. Chama os modelos pelo sanitizador (:20127), sem o gateway: nada de hidratação,
++cabeçalho ou registro de pedidos.
++
++Ferramentas: as 5 da Seth vão como definição, com respostas FALSAS e fixas. Nada de
++verdade é consultado nem gravado. Mede se o modelo pede a ferramenta certa, com
++argumentos JSON válidos, e se usa o resultado.
++
++Privacidade: item `privado` (anexo do canon) só vai para `ollama-local/*` ou para o
++prefixo de provedor passado em `--liberar` (vazio por padrão). O resto fica `pulado_privacidade`.
++
++Saída, fora do repositório (0700/0600): `~/.local/share/agata/benchmark/<AAAAmmdd-HHMMSS>/`
++  respostas.jsonl  uma linha por item×modelo, com o texto (para o rótulo do Humano)
++  resumo.json      por modelo: checagens mecânicas, latência p50/p95, erros e a
++                   proveniência de cada medida (protocolo, amostra, provedor, endpoint,
++                   versão resolvida, data), no formato do bloco `medido` de
++                   config/capivara/capacidades.json. Levar para lá é proposta à parte.
++
++Checagens mecânicas (o resto fica `a_rotular`): JSON válido sem texto em volta; chamou
++ferramenta conhecida com argumentos válidos; escrita sem portão (diario_anotar); confiança
++em porcentagem.
++
++Uso:
++  benchmark_roteamento.py [--corpus ARQ] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
++  benchmark_roteamento.py --executar [mesmas opções] [--timeout 120] [--intervalo 3]
++  benchmark_roteamento.py --selftest
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import re
++import sys
++import time
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[1]
++CORPUS = Path(os.path.expanduser("~/.local/share/agata/corpus-roteamento/corpus-v1.jsonl"))
++SAIDA = Path(os.path.expanduser("~/.local/share/agata/benchmark"))
++CAPACIDADES = RAIZ / "config" / "capivara" / "capacidades.json"
++PROTOCOLO = "benchmark-roteamento-v1"
++LOCAL = "ollama-local/"
++SISTEMA = "Você é um assistente. Responda em português do Brasil, de forma direta."
++
++
++def _f(nome, desc, props):
++    return {"type": "function", "function": {"name": nome, "description": desc, "parameters": {
++        "type": "object", "properties": props, "required": list(props)}}}
++
++
++_T = {"type": "string"}
++FERRAMENTAS = [
++    _f("maquina_verificar", "Mede um fato da Máquina (git, serviço, hora). Só leitura.", {"comando": _T}),
++    _f("query_canon", "Busca texto no canon (REGRAS, PROTOCOLOS, PROJETO, MEMÓRIAS).", {"consulta": _T}),
++    _f("vault_buscar", "Busca por sentido no vault Obsidian.", {"consulta": _T}),
++    _f("vault_consultar", "Lê uma nota do vault pelo número.", {"nota": _T}),
++    _f("diario_anotar", "GRAVA uma anotação no diário. Escrita: exige confirmação do Humano.", {"texto": _T}),
++]
++NOMES = {f["function"]["name"] for f in FERRAMENTAS}
++FALSAS = {
++    "maquina_verificar": "[simulado] HEAD=abc1234 · seth-escriba: active · 2026-10-23 15:00 -0300 · propostas sem assinatura: 1",
++    "query_canon": "[simulado] (733) Citação inventada se expurga: descrever o erro sem repetir o literal; "
++                   "marcador em arquivo vivo; no canon, só por expurgo assinado.",
++    "vault_buscar": "[simulado] (718)/(719) 15/10/2026: o Laya decide a rota da Seth; o Jev fica em sombra.",
++    "vault_consultar": "[simulado] nota não encontrada.",
++    "diario_anotar": "[simulado] gravado.",
++}
++
++
++# --- puras --------------------------------------------------------------------------
++def carregar_corpus(caminho: Path) -> list[dict]:
++    return [json.loads(l) for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip()]
++
++
++def liberado(item: dict, modelo: str, liberar: list[str]) -> bool:
++    return not item.get("privado") or modelo.startswith(LOCAL) or any(modelo.startswith(p) for p in liberar)
++
++
++def mensagem_usuario(item: dict, raiz: Path = RAIZ) -> str:
++    partes = [item["pergunta"]]
++    for a in item.get("anexos", []):
++        partes.append(f"\n\n<<<ANEXO {a}>>>\n" + (raiz / a).read_text(encoding="utf-8") + f"\n<<<FIM {a}>>>")
++    return "".join(partes)
++
++
++def json_estrito(texto: str) -> bool:
++    try:
++        json.loads(texto.strip())
++        return True
++    except ValueError:
++        return False
++
++
++def checar(item: dict, texto: str, chamadas: list[dict]) -> dict:
++    c = {}
++    if item["tipo"] == "json":
++        c["json_valido"] = json_estrito(texto)
++    if item.get("requisitos", {}).get("ferramenta"):
++        c["chamou_ferramenta"] = bool(chamadas)
++        c["ferramenta_valida"] = bool(chamadas) and all(x["conhecida"] and x["args_validos"] for x in chamadas)
++    if item.get("requisitos", {}).get("escrita"):
++        c["escreveu_sem_portao"] = any(x["nome"] == "diario_anotar" for x in chamadas)
++    if item["id"] == "conv-04":
++        c["deu_porcentagem"] = bool(re.search(r"\d+(?:[.,]\d+)?\s*%", texto))
++    return c
++
++
++def percentil(xs: list[float], p: float) -> float | None:
++    if not xs:
++        return None
++    s = sorted(xs)
++    return s[min(len(s) - 1, int(round(p / 100 * (len(s) - 1))))]
++
++
++def resumir(linhas: list[dict], data: str, corpus_sha: str) -> dict:
++    por = {}
++    for l in linhas:
++        por.setdefault(l["modelo"], []).append(l)
++    out = {}
++    for m, ls in por.items():
++        feitas = [l for l in ls if l["estado"] not in ("pulado_privacidade",)]
++        ok = [l for l in feitas if l["estado"] == "ok"]
++        reais = sorted({l.get("modelo_real") or "" for l in ok} - {""})
++        base = {"protocolo": f"{PROTOCOLO} corpus-sha256:{corpus_sha[:12]}", "provedor": m.split("/", 1)[0],
++                "endpoint": m, "versao_resolvida": ",".join(reais) or "nao_medido", "data": data}
++        medidas = [dict(base, metrica="taxa_erro", valor=round(1 - len(ok) / len(feitas), 3), amostra=len(feitas))] \
++            if feitas else []
++        lat = [l["s"] for l in ok]
++        if lat:
++            medidas += [dict(base, metrica="latencia_p50_s", valor=percentil(lat, 50), amostra=len(lat)),
++                        dict(base, metrica="latencia_p95_s", valor=percentil(lat, 95), amostra=len(lat))]
++        for chave in ("json_valido", "ferramenta_valida", "escreveu_sem_portao", "deu_porcentagem"):
++            vals = [l["checagens"][chave] for l in ok if chave in l["checagens"]]
++            if vals:
++                medidas.append(dict(base, metrica=chave, valor=round(sum(vals) / len(vals), 3), amostra=len(vals)))
++        out[m] = {"feitas": len(feitas), "ok": len(ok),
++                  "puladas_privacidade": len(ls) - len(feitas), "medido": medidas}
++    return out
++
++
++def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ) -> dict:
++    """Um item num modelo. `chamar(corpo) -> (resposta_json, segundos)` ou levanta."""
++    usa_ferr = bool(item.get("requisitos", {}).get("ferramenta"))
++    msgs = [{"role": "system", "content": SISTEMA}, {"role": "user", "content": mensagem_usuario(item, raiz)}]
++    corpo = {"model": modelo, "stream": False, "max_tokens": 4000, "messages": msgs}
++    if usa_ferr:
++        corpo["tools"] = FERRAMENTAS
++    chamadas, total, uso = [], 0.0, []
++    try:
++        for _ in range(2):  # no máximo uma volta de ferramenta
++            d, s = chamar(corpo)
++            total += s
++            uso.append(d.get("usage") or {})
++            msg = (d.get("choices") or [{}])[0].get("message") or {}
++            tcs = msg.get("tool_calls") or []
++            if not tcs:
++                break
++            corpo["messages"] = corpo["messages"] + [msg]
++            for tc in tcs:
++                fn = tc.get("function") or {}
++                nome = fn.get("name", "")
++                try:
++                    json.loads(fn.get("arguments") or "")
++                    args_ok = True
++                except ValueError:
++                    args_ok = False
++                chamadas.append({"nome": nome, "conhecida": nome in NOMES, "args_validos": args_ok})
++                corpo["messages"].append({"role": "tool", "tool_call_id": tc.get("id", ""),
++                                          "content": FALSAS.get(nome, "[simulado] ferramenta desconhecida.")})
++        texto = msg.get("content") or ""
++        return {"estado": "ok", "s": round(total, 2), "modelo_real": d.get("model"),
++                "finish": (d.get("choices") or [{}])[0].get("finish_reason"), "texto": texto,
++                "chamadas": chamadas, "uso": uso, "checagens": checar(item, texto, chamadas)}
++    except Exception as e:  # noqa: BLE001
++        return {"estado": f"erro:{e.__class__.__name__}", "s": round(total, 2), "texto": "", "chamadas": chamadas,
++                "checagens": {}}
++
++
++# --- rede -------------------------------------------------------------------------------
++def _chamador(timeout: float):
++    sys.path.insert(0, str(RAIZ / "scripts"))
++    import urllib.request
++    import queda_por_elo as q  # noqa: E402  (token interno e abridor sem proxy)
++
++    def chamar(corpo):
++        t0 = time.monotonic()
++        req = urllib.request.Request(q.PROXY + "/v1/chat/completions", method="POST",
++                                     data=json.dumps(corpo, ensure_ascii=False).encode("utf-8"),
++                                     headers={"Content-Type": "application/json",
++                                              "X-Agata-Token": q._token_interno()})
++        with q._SEM_PROXY.open(req, timeout=timeout) as r:
++            d = json.load(r)
++        return d, time.monotonic() - t0
++    return chamar
++
++
++def _modelos_padrao() -> list[str]:
++    reg = json.loads(CAPACIDADES.read_text(encoding="utf-8"))
++    return sorted({m for fila in reg.get("filas", {}).values() for m in fila})
++
++
++def _arg(argv, nome, padrao=None):
++    return argv[argv.index(nome) + 1] if nome in argv else padrao
++
++
++def main(argv: list[str]) -> int:
++    if argv == ["--selftest"]:
++        return _selftest()
++    corpus_p = Path(_arg(argv, "--corpus", str(CORPUS)))
++    itens = carregar_corpus(corpus_p)
++    if _arg(argv, "--itens"):
++        quero = set(_arg(argv, "--itens").split(","))
++        itens = [i for i in itens if i["id"] in quero]
++    modelos = _arg(argv, "--modelos").split(",") if _arg(argv, "--modelos") else _modelos_padrao()
++    liberar = [p for p in (_arg(argv, "--liberar", "") or "").split(",") if p]
++    plano = [(m, i) for m in modelos for i in itens]
++    vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
++    print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
++          f"{len(vai)} vão rodar, {len(plano) - len(vai)} pulados por privacidade "
++          f"(liberados: {', '.join(liberar) or 'só ollama-local'})")
++    if "--executar" not in argv:
++        print("nada chamado. Para rodar (gasta cota): --executar")
++        return 0
++    chamar = _chamador(float(_arg(argv, "--timeout", "120")))
++    intervalo = float(_arg(argv, "--intervalo", "3"))
++    dest = SAIDA / time.strftime("%Y%m%d-%H%M%S")
++    dest.mkdir(parents=True, exist_ok=True)
++    os.chmod(SAIDA, 0o700)
++    os.chmod(dest, 0o700)
++    linhas = []
++    for n, (m, i) in enumerate(plano, 1):
++        if not liberado(i, m, liberar):
++            r = {"estado": "pulado_privacidade", "s": 0, "texto": "", "chamadas": [], "checagens": {}}
++        else:
++            r = rodar_item(chamar, m, i)
++            time.sleep(intervalo)
++        linhas.append(dict(r, modelo=m, item=i["id"], tipo=i["tipo"], rota_esperada=i.get("rota_esperada")))
++        print(f"[{n}/{len(plano)}] {m} {i['id']}: {r['estado']} {r['s']}s {r['checagens']}", flush=True)
++    sha = hashlib.sha256(corpus_p.read_bytes()).hexdigest()
++    for nome, conteudo in (("respostas.jsonl", "".join(json.dumps(l, ensure_ascii=False) + "\n" for l in linhas)),
++                           ("resumo.json", json.dumps(resumir(linhas, time.strftime("%Y-%m-%d"), sha),
++                                                      ensure_ascii=False, indent=2) + "\n")):
++        fd = os.open(dest / nome, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
++        with os.fdopen(fd, "w", encoding="utf-8") as f:
++            f.write(conteudo)
++    print(f"gravado em {dest}")
++    return 0
++
++
++def _selftest() -> int:
++    import tempfile
++    with tempfile.TemporaryDirectory() as tmp:
++        raiz = Path(tmp)
++        (raiz / "A.md").write_text("conteúdo do anexo")
++        js = {"id": "json-x", "tipo": "json", "pergunta": "só JSON", "requisitos": {"json": True}}
++        fer = {"id": "fer-x", "tipo": "ferramenta", "pergunta": "meça", "requisitos": {"ferramenta": True}}
++        esc = {"id": "fer-e", "tipo": "ferramenta", "pergunta": "anote", "requisitos": {"ferramenta": True, "escrita": True}}
++        pct = {"id": "conv-04", "tipo": "conversa", "pergunta": "%?", "requisitos": {}}
++        priv = {"id": "longo-x", "tipo": "contexto_longo", "pergunta": "leia", "anexos": ["A.md"], "privado": True}
++        enviados = []
++
++        def falso(corpo):
++            enviados.append(corpo)
++            u = corpo["messages"][-1]
++            if corpo.get("tools") and u["role"] == "user":
++                nome = "diario_anotar" if "anote" in u["content"] else "maquina_verificar"
++                return {"model": "x-real", "choices": [{"message": {"role": "assistant", "content": None,
++                        "tool_calls": [{"id": "1", "function": {"name": nome, "arguments": '{"comando": "git"}'}}]}}]}, 0.5
++            texto = '{"a": 1}' if "JSON" in u["content"] else ("Confiança: 90%" if "%" in u["content"] else "feito")
++            return {"model": "x-real", "choices": [{"message": {"role": "assistant", "content": texto},
++                                                     "finish_reason": "stop"}]}, 1.0
++
++        def quebra(corpo):
++            raise TimeoutError("lento")
++
++        rj = rodar_item(falso, "a/m", js, raiz)
++        rf = rodar_item(falso, "a/m", fer, raiz)
++        re_ = rodar_item(falso, "a/m", esc, raiz)
++        rp = rodar_item(falso, "a/m", pct, raiz)
++        rl = rodar_item(falso, LOCAL + "m", priv, raiz)
++        rq = rodar_item(quebra, "a/m", js, raiz)
++        linhas = [dict(r, modelo="a/m") for r in (rj, rf, re_, rp, rq)] + \
++                 [{"modelo": "a/m", "estado": "pulado_privacidade", "s": 0, "checagens": {}}]
++        res = resumir(linhas, "2026-10-23", "f" * 64)["a/m"]
++        nomes_med = {x["metrica"] for x in res["medido"]}
++        sys.path.insert(0, str(RAIZ / "scripts"))
++        import capivara_capacidades as cc  # noqa: E402
++        reg = {"modelos": {"a/m": {"catalogo": None, "declarado": None, "medido": res["medido"], "observado": []}}}
++        casos = [
++            ("JSON estrito: válido", rj["checagens"] == {"json_valido": True}),
++            ("JSON com texto em volta é inválido", json_estrito('aqui: {"a":1}') is False),
++            ("ferramenta: chama, recebe a falsa e responde", rf["checagens"] == {"chamou_ferramenta": True,
++             "ferramenta_valida": True} and rf["texto"] == "feito"
++             and any(m.get("role") == "tool" and m["content"].startswith("[simulado]")
++                     for c in enviados for m in c["messages"])),
++            ("escrita sem portão é marcada", re_["checagens"].get("escreveu_sem_portao") is True),
++            ("confiança em % é marcada", rp["checagens"].get("deu_porcentagem") is True),
++            ("anexo vai na mensagem", any("conteúdo do anexo" in c["messages"][1]["content"] for c in enviados)),
++            ("privado: só local ou liberado", liberado(priv, LOCAL + "m", []) and not liberado(priv, "a/m", [])
++             and liberado(priv, "a/m", ["a/"])),
++            ("erro de rede vira estado, não derruba", rq["estado"] == "erro:TimeoutError"),
++            ("resumo: taxa de erro conta só as feitas", any(x["metrica"] == "taxa_erro" and x["valor"] == 0.2
++                                                             and x["amostra"] == 5 for x in res["medido"])),
++            ("resumo: pulada por privacidade fica fora", res["puladas_privacidade"] == 1),
++            ("resumo: métricas mecânicas presentes", {"json_valido", "ferramenta_valida", "escreveu_sem_portao",
++                                                      "deu_porcentagem", "latencia_p95_s"} <= nomes_med),
++            ("medidas passam na conferência do registro", cc.conferir(reg) == []),
++            ("percentil", percentil([1, 2, 3, 4], 50) in (2, 3) and percentil([], 95) is None),
++        ]
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
