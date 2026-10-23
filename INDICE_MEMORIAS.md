@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
 (818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
 (817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
 (816) DIÁRIO — 22/10/2026 · **Correção da documentação do importador do inbox (fila de revisão).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): achados de afirmação sem prova, confiança numérica e componente removido citado no presente.** Assinado pelo Humano (detector-estado-sem-prova-20261021). Sem modelo: regex, 6 casos fixos derivados da conversa auditada (scripts/testar_detector_estado.py).
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não verificada; só entra como base de regra o que tiver PR, commit ou medição anexada.** Ditado do Humano (21/10/2026), a partir da auditoria do export de conversa. Origem: 176 afirmações de "endereçado/fechado" e 139 de "confirmado" no export, sem prova ao lado; "5 de 7 riscos endereçados" era falso (medido: nenhum risco fechado por completo).
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, sem treinar pesos. Toda lição entra no canon só com aprovação humana e medição num conjunto fixo de casos.** Ditado do Humano em 20/10/2026 (fim do dia). Desenho completo em `~/Área de trabalho/HARNESS-SETH-aprendizado-sem-treino.md`.
-(789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano decide quando parar; o modelo que não se julgar apto pede substituição.** Ditado pelo Humano em 20/10/2026, ao final do dia: a sessão segue até o fim do dia por ordem do Humano, não por contagem de tarefas. Se o modelo não se julgar apto a continuar (erro de medição recorrente, afirmação sem prova, perda de contexto), ele diz isso e pede substituição, em vez de seguir com risco.
+(789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano deci …
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 4 …
 (787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restri …
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`ma …

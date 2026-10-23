@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
+  palavras-chave: correção, entrada, medição, suíte, paralela
 (818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
   palavras-chave: ajuste, merge, origin, main, mudança, nova
 (817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: regra, conversa, seth, matéria, prima, verificada, entra, base, tiver, commit, medição, anexada, ditado, humano, partir, auditoria, export, origem, afirmações, endereçado, fechado, confirmado, prova, lado, riscos, endereçados, era, falso, medido, risco, completo
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, sem treinar pesos. Toda lição entra no canon só com aprovação humana e medição num conjunto fixo de casos.** Ditado do Humano em 20/10/2026 (fim do dia). Desenho completo em `~/Área de trabalho/HARNESS-SETH-aprendizado-sem-treino.md`.
   palavras-chave: regra, harness, seth, aprende, registros, treinar, pesos, lição, entra, canon, aprovação, humana, medição, conjunto, fixo, casos, ditado, humano, fim, dia, desenho, completo, área, trabalho, aprendizado, treino
-(789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano decide quando parar; o modelo que não se julgar apto pede substituição.** Ditado pelo Humano em 20/10/2026, ao final do dia: a sessão segue até o fim do dia por ordem do Humano, não por contagem de tarefas. Se o modelo não se julgar apto a continuar (erro de medição recorrente, afirmação sem prova, perda de contexto), ele diz isso e pede substituição, em vez de seguir com risco.
-  palavras-chave: ritmo, trabalho, substituição, humano, decide, parar, modelo, julgar, apto, pede, ditado, final, dia, sessão, segue, fim, ordem, contagem, tarefas, continuar, erro, medição, recorrente, afirmação, prova, perda, contexto, ele, diz, seguir, risco
+(789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano deci …
+  palavras-chave: ritmo, trabalho, substituição, humano, deci
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 4 …
   palavras-chave: auditoria, ocorrências, numeração, repetida
 (787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restri …
