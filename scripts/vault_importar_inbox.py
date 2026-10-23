@@ -1,43 +1,26 @@
 #!/usr/bin/env python3
-"""Importa notas do vault Obsidian pra MEMÓRIAS.md -- Fase 4 do plano de
-replicabilidade (propostas/plano-replicabilidade-2026-09-25.md), decisão do
-Humano 25/09/2026: "Obsidian como camada de leitura/escrita do cliente,
-MEMÓRIAS.md como o registro mecânico por baixo".
+"""Move notas do inbox do Obsidian para uma fila de revisão humana.
 
-NÃO escreve em MEMÓRIAS.md diretamente -- chama o MESMO caminho hardened que
-a Seth já usa, `POST /memoria` do `seth_escriba` (append-only, lock, escrita
-atômica, verificação pós-escrita, número e data do relógio da Máquina, nunca
-do chamador). Zero lógica de escrita nova: este script é só um CLIENTE HTTP
-a mais desse serviço, como o `canon-mcp.mjs` já é. "Menor solução que cobre
-o caso" -- REGRAS, Princípios (Elegância e eficiência).
+Decisão do Humano de 22/10/2026 (proposta `fila-inbox-revisao-20261022`):
+este script não grava em MEMÓRIAS.md nem chama `seth_escriba`. Uma nota pronta
+é copiada atomicamente para `memoria/obsidian-fila-revisao/`; só então o
+original é removido de `memoria/obsidian-inbox/`. A entrada no canon ocorre
+depois, por PR e aprovação humana. Se a nota não puder ser enfileirada, ela
+permanece no inbox e o motivo é impresso.
 
-Cada arquivo em `memoria/obsidian-inbox/*.md` é uma nota que o cliente (ou a
-Seth, em nome dele) escreveu direto no vault. Sucesso -> a nota é apagada do
-inbox: o conteúdo dela já mora em MEMÓRIAS.md, e a próxima geração do vault
-derivado (`gerar_obsidian.py`, já roda no post-commit) recria a entrada em
-`entradas/`, no lugar certo -- não há necessidade de manter as duas cópias.
-Falha (seth_escriba fora do ar, nota sem conteúdo aproveitável) -> a nota
-fica no inbox, nada se perde, e o motivo é impresso.
+O script aguarda a nota ficar quieta por `AGATA_INBOX_QUIETO_MIN` minutos
+(padrão: 10) e usa o decisor local apenas para barrar um rascunho incompleto.
+Uma nota intocada por 24 horas é liberada sem consulta ao decisor.
 
-**Por que `memoria/obsidian-inbox/`, IRMÃ de `memoria/obsidian/`, nunca
-dentro dela:** `gerar_obsidian.py` faz `shutil.rmtree(SAIDA)` e reconstrói
-o vault inteiro do zero a cada regeneração (post-commit, todo commit).
-Um inbox vivendo DENTRO de `memoria/obsidian/` seria apagado antes mesmo de
-ser lido -- nota do cliente ainda não importada, perdida no primeiro commit
-seguinte. Achado testando de verdade esta mudança, antes de virar hábito.
+Formato aceito: frontmatter YAML com `titulo:` e corpo; ou, sem frontmatter,
+a primeira linha não vazia como título (removendo um `#` inicial) e o restante
+como corpo. Sem título ou corpo, a nota não é enfileirada.
 
-Formato de uma nota:
-  - Frontmatter YAML simples, com `titulo:` -- tudo depois do frontmatter é o corpo; ou
-  - Sem frontmatter: a 1ª linha não-vazia vira o título (um `#` de heading
-    Markdown na frente é ignorado), o resto -- a partir dela -- vira o corpo.
-Nota sem título OU sem corpo é pulada (nunca gera entrada vazia).
-
-Tipo de entrada: sempre DIÁRIO -- é o único que `seth_escriba` sabe escrever
-(mesma trava que já vale pra Seth: fato coletivo, nunca CORREÇÃO/CONSELHO/MOD
-por este caminho, que exigem julgamento que este script não tem).
+O inbox e a fila ficam fora de `memoria/obsidian/`, que é recriado por
+`gerar_obsidian.py`; assim notas pendentes não são apagadas na regeneração.
 
 Uso: python3 scripts/vault_importar_inbox.py [--selftest]
-Env: AGATA_REPO (default ~/agata), SETH_ESCRIBA_URL (default http://127.0.0.1:20140)
+Env: AGATA_REPO (padrão: ~/agata), AGATA_INBOX_QUIETO_MIN (padrão: 10)
 """
 from __future__ import annotations
 
