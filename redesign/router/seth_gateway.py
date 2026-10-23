@@ -600,6 +600,7 @@ import auditoria_turno  # noqa: E402  (mesmo diretório)
 import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
 import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
 import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
+import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteamento, 23/10/2026; desligado por padrão)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -932,6 +933,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._cab_injetado = None
         self._data_classification = None
         self._public_only_lane = False
+        self._reg = None
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -976,6 +978,13 @@ class _Handler(BaseHTTPRequestHandler):
                         and not _e_chamada_utilitaria(payload)
                         and not auditoria_turno._em_andamento(msgs0).strip()):
                     self._cab_ctx = list(msgs0)
+                # Benchmark do roteamento (23/10/2026): pergunta do Humano + resposta em texto,
+                # redigidas, fora do repositório, 30 dias. Só com SETH_REGISTRO_PEDIDOS=1.
+                if (registro_pedidos.ligado() and not self._public_only_lane
+                        and str(payload.get("model", "")).startswith("seth-")
+                        and not _e_chamada_utilitaria(payload)):
+                    self._reg = {"pergunta": registro_pedidos.ultima_pergunta(msgs0),
+                                 "meta": {"continuacao": auditoria_turno.e_continuacao(msgs0)}}
                 if self._public_only_lane:
                     payload = _preparar_payload_publico(payload)
                 else:
@@ -1180,6 +1189,11 @@ class _Handler(BaseHTTPRequestHandler):
             self.close_connection = True
         finally:
             up.close()
+        reg = getattr(self, "_reg", None)
+        if reg is not None and up.status == 200:
+            resposta = reg.get("resposta", "") if sse else registro_pedidos.resposta_json(buf_pre)
+            registro_pedidos.gravar(reg["pergunta"], resposta,
+                                    dict(reg["meta"], rota=self._rota, modelo=modelo_real))
 
     # Chunks-sentinela de keep-alive que o OmniRoute emite ANTES de escolher/
     # conectar o provedor: `data: {"id":"chatcmpl-keepalive","model":"keepalive",
@@ -1272,6 +1286,8 @@ class _Handler(BaseHTTPRequestHandler):
                 saida = limpa_cabecalho.limpar_sse_linha(saida, self._cab_estados, self._cab_injetado)
             if _trava_laco_ligada():
                 saida, self._laco_cortou = limpa_laco.limpar_sse(saida, self._laco_estados, _trava_laco_repeticoes())
+            if getattr(self, "_reg", None) is not None:
+                registro_pedidos.acumular_sse(saida, self._reg)
             if not saida:
                 continue  # chunk HTTP de tamanho 0 encerraria a resposta
             self.wfile.write(f"{len(saida):X}\r\n".encode())
