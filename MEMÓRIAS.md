@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2c7f90c5eb084966e0d7ba0cd013258842dacf12
-  Escrito em: 23/10/2026 13:41 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 43f50d37ecc8e588297411b8632e54f5e33b7a71
+  Escrito em: 23/10/2026 13:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c7f90c5eb084966e0d7ba0cd013258842dacf12/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c7f90c5eb084966e0d7ba0cd013258842dacf12/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c7f90c5eb084966e0d7ba0cd013258842dacf12/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c7f90c5eb084966e0d7ba0cd013258842dacf12/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c7f90c5eb084966e0d7ba0cd013258842dacf12/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43f50d37ecc8e588297411b8632e54f5e33b7a71/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43f50d37ecc8e588297411b8632e54f5e33b7a71/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43f50d37ecc8e588297411b8632e54f5e33b7a71/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43f50d37ecc8e588297411b8632e54f5e33b7a71/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/43f50d37ecc8e588297411b8632e54f5e33b7a71/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(824) DIÁRIO — 23/10/2026 · **Passo 1 do roteamento por capacidade aplicado: registro de capacidades em quatro camadas, sem mudar a rota. A doc do Laya foi corrigida: ele decide a rota desde 15/10.** As duas propostas foram assinadas pelo Humano em 23/10/2026 e são aplicadas juntas. (1) `capacidades-passo1-20261023`: `scripts/capivara_capacidades.py` grava `config/capivara/capacidades.json`. Cada modelo das filas tem `catalogo` (OmniRoute `/v1/models`), `declarado` (só documentação oficial), `medido` e `observado` (vazios até o passo 2, que exige proveniência completa). O selftest, com 13 casos, entra no CI. O gateway não lê o arquivo, então a rota não muda. A primeira leitura, às 13h41, deu 11 modelos: 8 com catálogo, 2 com documentação e 3 sem fonte. (2) `doc-laya-ativo-20261023`: em `config/modelos-gratuitos.md`, o texto de 13/10 ("roteador-sombra") fica riscado e a descrição do estado desde (718)/(719) é acrescentada: o Laya decide a rota e o Jev é a sombra. O roteamento entrou na V9 por decisão do Humano (V9, seção 35). A assinatura pelo `!` do chat não abre o pedido de senha, porque não há terminal interativo; ela foi feita no terminal do Humano.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: clone com hooks (`scripts/clone_teste.sh`), selftest OK e `--conferir` OK; PRs 499 e 500 com CI verde · Autorização: Humano — "assinei as duas no terminal, aplique"
+
 (823) DIÁRIO — 23/10/2026 · **Cabeçalho com o modelo real: `agata-seth · <modelo real>` só quando a resposta passa pelo gateway ou escriba da Seth; fora desse caminho, `agata · <modelo real>`.** Aplica `cabecalho-modelo-real-20261020`, assinado pelo Humano em 23/10/2026, às 13h23. O diff troca em `PROTOCOLOS.md` o parágrafo de 17/10 ("O nome no cabeçalho é `agata-seth`") pela regra de 20/10: o nome do modelo vem do indicador da interface ou da configuração medida da sessão, nunca da memória nem de outro modelo. Não duplica `cabecalho-agata-seth-20261017`: substitui o parágrafo que aquela proposta criou. Conferido antes da assinatura: `git apply --check` limpo sobre `2fceada`.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `git apply --check propostas/cabecalho-modelo-real-20261020.diff` · Autorização: Humano — "assinei, aplique"
 

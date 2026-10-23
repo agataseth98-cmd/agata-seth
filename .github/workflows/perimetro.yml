@@ -60,6 +60,7 @@ jobs:
           python3 -I scripts/testar_p8_verificar_pr.py
           python3 -I scripts/painel_estado.py --selftest
           python3 -I redesign/router/limpa_emoji.py --selftest
+          python3 -I scripts/capivara_capacidades.py --selftest
           python3 -I scripts/verificar_cofre.py --selftest
           python3 -I scripts/cifrar_recuperacao.py --selftest
           python3 -I scripts/verificar_expurgo.py --selftest
