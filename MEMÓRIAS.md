@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7579374637fc9a1d461e533d9411a55ea5dffe99
-  Escrito em: 22/10/2026 23:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4344bf7f16b3eff1bfdee6b97c05217f71e9abf3
+  Escrito em: 22/10/2026 23:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7579374637fc9a1d461e533d9411a55ea5dffe99/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7579374637fc9a1d461e533d9411a55ea5dffe99/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7579374637fc9a1d461e533d9411a55ea5dffe99/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7579374637fc9a1d461e533d9411a55ea5dffe99/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7579374637fc9a1d461e533d9411a55ea5dffe99/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4344bf7f16b3eff1bfdee6b97c05217f71e9abf3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4344bf7f16b3eff1bfdee6b97c05217f71e9abf3/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4344bf7f16b3eff1bfdee6b97c05217f71e9abf3/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4344bf7f16b3eff1bfdee6b97c05217f71e9abf3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4344bf7f16b3eff1bfdee6b97c05217f71e9abf3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
+
+Assinado pelo Humano (`APROVADO-paralelo-suite-controles-20261022`). A suíte passa a rodar até 4 casos ao mesmo tempo, cada um num clone descartável; o repositório real não é tocado. Os agregados são impressos uma vez, no fim. O filtro serial por `FILTRO` continua igual. A confirmação de isolamento veio do Codex: suíte 58/58 com 0 falhas numa cópia isolada, e até 4 clones coexistindo. Esta aplicação só entrou depois dessa confirmação, como o Humano pediu. Medido nesta aplicação: pendente do pre-commit.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (816) DIÁRIO — 22/10/2026 · **Correção da documentação do importador do inbox (fila de revisão).**
 
 Assinado pelo Humano (`APROVADO-docstring-inbox-revisao-20261022`). A aplicação anterior (PR 478) ficou em conflito depois que o pacote 2b entrou no main; foi fechada e reaplicada a partir do main atual, com o mesmo diff. Conteúdo: a documentação do importador passa a descrever a fila de revisão, e não a gravação direta em MEMÓRIAS. Medido: autoteste do importador 15/15 OK.

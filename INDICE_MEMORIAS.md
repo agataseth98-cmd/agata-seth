@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(817) DIÁRIO — 22/10/2026 · **Paralelização da suíte de regressão dos controles (P-16).**
 (816) DIÁRIO — 22/10/2026 · **Correção da documentação do importador do inbox (fila de revisão).**
 (815) DIÁRIO — 22/10/2026 · **Pacote 2b: mapa do PROJETO na hidratação (em vez do arquivo inteiro).**
 (814) DIÁRIO — 22/10/2026 · **Proposta para alinhar a documentação do importador do inbox ao comportamento atual.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, sem treinar pesos. Toda lição entra no canon só com aprovação humana e medição num conjunto fixo de casos.** Ditado do Humano em 20/10/2026 (fim do dia). Desenho completo em `~/Área de trabalho/HARNESS-SETH-aprendizado-sem-treino.md`.
 (789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano decide quando parar; o modelo que não se julgar apto pede substituição.** Ditado pelo Humano em 20/10/2026, ao final do dia: a sessão segue até o fim do dia por ordem do Humano, não por contagem de tarefas. Se o modelo não se julgar apto a continuar (erro de medição recorrente, afirmação sem prova, perda de contexto), ele diz isso e pede substituição, em vez de seguir com risco.
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 427, 514 e 599 são referências no texto; o grupo real 729 já foi desambiguado em (730).**
-(787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restringe os destinos de TTS do LibreChat ao serviço Piper autorizado.** A aplicação move o par assinado para `propostas/aplicadas/` e registra a mudança neste commit.
+(787) DIÁRIO — 20/10/2026 · **A proposta `voz-allowed-addresses-20261020` restri …
 (786) DIÁRIO — 20/10/2026 · **Aplicada a condição de janela de manutenção** (`ma …
 (785) DIÁRIO — 20/10/2026 · **Controles verificáveis de autorização e execução e …
 (784) DIÁRIO — 20/10/2026 · **Autostart NVIDIA corrigido e testado com o `XAUTHO …
