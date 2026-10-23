@@ -29,7 +29,7 @@ agata-seth · <modelo> · t=<n> (<base: contado no contexto / contador mecânico
 
 Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
 
-**O nome no cabeçalho é `agata-seth`** (decisão do Humano, 17/10/2026): o cabeçalho é o único lugar em que o nome do sistema sai assim; no resto do canon vale o campo "Nome do sistema". Durante a transição, `Agata ·` continua aceito pelos verificadores.
+**Identidade no cabeçalho (decisão do Humano, 20/10/2026):** use `agata-seth · <modelo real>` somente quando a resposta passou pelo gateway/escriba da Seth. Em nuvem ou app próprio fora desse caminho, use `agata · <modelo real>`. O nome do modelo vem do indicador da interface ou da configuração medida da sessão; nunca da memória nem de outro modelo. Preserve o formato de turno e o selo de hora definidos acima.
 
 **Data e hora.**
 - `<data e hora local>` = ISO (`2026-08-14 16:33 -03`) ou regional (`14/08/2026 16:33 -03`). **Fuso é obrigatório** — sem ele a hora não localiza nada entre sessões paralelas.
