@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
+  palavras-chave: hidratação, última, entrada, memórias, inteira
 (820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
   palavras-chave: ajustes, aplicar, registro, opcional, duplicar, memórias, coautor, correto
 (819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: auditoria, turno, passa, incluir, detector, estado, prova, aplicado, após, assinatura, humano, acrescenta, linha, conteudo, importa, soma, achados, confiança, numérica, componente, removido, presente, selftest, casos, passam
 (792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): achados de afirmação sem prova, confiança numérica e componente removido citado no presente.** Assinado pelo Humano (detector-estado-sem-prova-20261021). Sem modelo: regex, 6 casos fixos derivados da conversa auditada (scripts/testar_detector_estado.py).
   palavras-chave: detector, estado, prova, aplicado, achados, afirmação, confiança, numérica, componente, removido, citado, presente, assinado, humano, modelo, regex, casos, fixos, derivados, conversa, auditada, scripts, testar
-(791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não verificada; só entra como base de regra o que tiver PR, commit ou medição anexada.** Ditado do Humano (21/10/2026), a partir da auditoria do export de conversa. Origem: 176 afirmações de "endereçado/fechado" e 139 de "confirmado" no export, sem prova ao lado; "5 de 7 riscos endereçados" era falso (medido: nenhum risco fechado por completo).
-  palavras-chave: regra, conversa, seth, matéria, prima, verificada, entra, base, tiver, commit, medição, anexada, ditado, humano, partir, auditoria, export, origem, afirmações, endereçado, fechado, confirmado, prova, lado, riscos, endereçados, era, falso, medido, risco, completo
+(791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não …
+  palavras-chave: regra, conversa, seth, matéria, prima
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, …
   palavras-chave: regra, harness, seth, aprende, registros
 (789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano deci …

@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8641584393e3676eefbb057292a58aa2e4c8a266
-  Escrito em: 23/10/2026 10:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a28929315f73e25c906f2ffc00a52f8cc2d9ae3d
+  Escrito em: 23/10/2026 11:00 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8641584393e3676eefbb057292a58aa2e4c8a266/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8641584393e3676eefbb057292a58aa2e4c8a266/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8641584393e3676eefbb057292a58aa2e4c8a266/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8641584393e3676eefbb057292a58aa2e4c8a266/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8641584393e3676eefbb057292a58aa2e4c8a266/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a28929315f73e25c906f2ffc00a52f8cc2d9ae3d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a28929315f73e25c906f2ffc00a52f8cc2d9ae3d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a28929315f73e25c906f2ffc00a52f8cc2d9ae3d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a28929315f73e25c906f2ffc00a52f8cc2d9ae3d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a28929315f73e25c906f2ffc00a52f8cc2d9ae3d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
+
+Assinado pelo Humano (`APROVADO-hidratacao-ultima-entrada-20261023`). Decisão do Humano: a hidratação carrega a última entrada de MEMÓRIAS inteira. As anteriores ficam em resumo de uma linha e são consultadas sob demanda pela busca do vault. Medido antes da aplicação: `.hidrata.md` de 91.907 para 66.647 bytes.
+
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina).
+
 (820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
 
 Assinado pelo Humano (`APROVADO-aplicar-ajustes-20261023`). A partir daqui, `--registro` é opcional. Quando o diff já mexe em MEMÓRIAS.md, o script recusa o `--registro`, para não duplicar a entrada. O coautor passa a ser configurável; o padrão para o agente claude é Claude Haiku 5.5.
