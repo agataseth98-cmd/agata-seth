@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
+  palavras-chave: ajustes, aplicar, registro, opcional, duplicar, memórias, coautor, correto
 (819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
   palavras-chave: correção, entrada, medição, suíte, paralela
 (818) DIÁRIO — 23/10/2026 · **Ajuste do P-8: merge de origin/main não é mudança nova.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: detector, estado, prova, aplicado, achados, afirmação, confiança, numérica, componente, removido, citado, presente, assinado, humano, modelo, regex, casos, fixos, derivados, conversa, auditada, scripts, testar
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não verificada; só entra como base de regra o que tiver PR, commit ou medição anexada.** Ditado do Humano (21/10/2026), a partir da auditoria do export de conversa. Origem: 176 afirmações de "endereçado/fechado" e 139 de "confirmado" no export, sem prova ao lado; "5 de 7 riscos endereçados" era falso (medido: nenhum risco fechado por completo).
   palavras-chave: regra, conversa, seth, matéria, prima, verificada, entra, base, tiver, commit, medição, anexada, ditado, humano, partir, auditoria, export, origem, afirmações, endereçado, fechado, confirmado, prova, lado, riscos, endereçados, era, falso, medido, risco, completo
-(790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, sem treinar pesos. Toda lição entra no canon só com aprovação humana e medição num conjunto fixo de casos.** Ditado do Humano em 20/10/2026 (fim do dia). Desenho completo em `~/Área de trabalho/HARNESS-SETH-aprendizado-sem-treino.md`.
-  palavras-chave: regra, harness, seth, aprende, registros, treinar, pesos, lição, entra, canon, aprovação, humana, medição, conjunto, fixo, casos, ditado, humano, fim, dia, desenho, completo, área, trabalho, aprendizado, treino
+(790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, …
+  palavras-chave: regra, harness, seth, aprende, registros
 (789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano deci …
   palavras-chave: ritmo, trabalho, substituição, humano, deci
 (788) DIÁRIO — 20/10/2026 · **Auditoria das ocorrências de numeração repetida: 4 …

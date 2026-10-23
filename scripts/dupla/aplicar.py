@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""aplicar.py <nome>... --registro <arquivo-entrada.txt> [--onde <arquivo-paragrafo.txt>]
+"""aplicar.py <nome>... [--registro <arquivo-entrada.txt>] [--onde <arquivo-paragrafo.txt>] [--coautor "Nome <email>"]
 Aplica propostas P-8 JÁ ASSINADAS pelo Humano: worktree nova de origin/main, copia o APROVADO-, p8_verificar.sh (tem de dar
 PODE APLICAR), git apply, move o par para aplicadas/, insere a entrada de MEMÓRIAS (número = topo+1, o texto traz {N}),
 commit (pre-commit real), push, PR, espera CI, junta, pull. Nunca assina; não faz nada se faltar a assinatura."""
@@ -20,16 +20,21 @@ def proximo_numero(texto):
 
 
 def main():
-  ap = argparse.ArgumentParser(); ap.add_argument("nomes", nargs="+"); ap.add_argument("--registro", required=True)
+  ap = argparse.ArgumentParser(); ap.add_argument("nomes", nargs="+"); ap.add_argument("--registro", default=None, help="entrada de MEMÓRIAS; NÃO usar se o .diff já mexe em MEMÓRIAS.md")
   ap.add_argument("--onde")
+  ap.add_argument("--coautor", default=None, help="linha Co-Authored-By; padrão: Claude Haiku 5.5 para claude, nenhuma para codex")
   ap.add_argument("--agente", default=os.environ.get("DUPLA_AGENTE", "claude"), choices=("claude", "codex"),
                   help="quem aplica: dá o nome da worktree (.<agente>/worktrees) e da autoria")
   ap.add_argument("--sem-pull", action="store_true", help="não atualiza o checkout compartilhado (para trabalhar só em worktree própria)")
   a = ap.parse_args()
+  coautor = a.coautor if a.coautor is not None else ("Claude Haiku 5.5 <noreply@anthropic.com>" if a.agente == "claude" else "")
   if not a.sem_pull:
       sh(R, "git", "pull", "-q", "--ff-only")
   for n in a.nomes:
       if not os.path.exists(f"{R}/propostas/APROVADO-{n}"): sys.exit(f"SEM ASSINATURA: {n} (nada aplicado)")
+      dp = f"{R}/propostas/{n}.diff"
+      if a.registro and os.path.exists(dp) and re.search(r"^\+\+\+ b/MEMÓRIAS\.md$", open(dp, encoding="utf-8").read(), re.M):
+          sys.exit(f"{n} mexe em MEMÓRIAS.md: a entrada já vem no .diff; --registro duplicaria (rode sem --registro)")
   tag = "-".join(a.nomes)[:60]; wt = f"{R}/.{a.agente}/worktrees/aplica-{a.agente}-{int(time.time())}"; br = f"aplica/{tag}"
   sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
   for n in a.nomes:
@@ -46,15 +51,17 @@ def main():
   for n in a.nomes:
       sh(wt, "git", "apply", f"propostas/{n}.diff"); os.makedirs(f"{wt}/propostas/aplicadas", exist_ok=True)
       sh(wt, "git", "mv", f"propostas/{n}.diff", "propostas/aplicadas/"); os.rename(f"{wt}/propostas/APROVADO-{n}", f"{wt}/propostas/aplicadas/APROVADO-{n}")
-  t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
-  ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
-  e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
-  open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
+  if a.registro:
+    t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
+    ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
+    e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
+    open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
   if a.onde:
       o = open(f"{wt}/ONDE_ESTAMOS.md", encoding="utf-8").read(); i = o.index("## Hoje")
       open(f"{wt}/ONDE_ESTAMOS.md", "w", encoding="utf-8").write(o[:i] + open(a.onde, encoding="utf-8").read().rstrip("\n") + "\n\n" + o[i:])
   sh(wt, "git", "add", "-A")
-  sh(wt, "git", "commit", "-qm", f"Aplica {', '.join(a.nomes)} (assinado pelo Humano) e registra\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>")
+  msg = f"Aplica {', '.join(a.nomes)} (assinado pelo Humano)" + (" e registra" if a.registro else "") + (f"\n\nCo-Authored-By: {coautor}" if coautor else "")
+  sh(wt, "git", "commit", "-qm", msg)
   sh(wt, "git", "push", "-q", "-u", "origin", br)
   pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()

@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-23 10:52 -0300.
+Motivo: ajustes do aplicar.py: registro opcional, coautor correto
+nome: aplicar-ajustes-20261023
+diff-sha256: c2d1841a2ab4cbb455f9cf23de65325f15f6928dcd32e9b1229a12f5a78de95e
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQAKC7ZbKpV7RYOFYrsked+f6pvjK/sY5eogWL08MtI8QDW
+aNviCu8ojRAPgrrcLax2riyDlzHloXfL1qIwQoxA0=
+-----END SSH SIGNATURE-----
