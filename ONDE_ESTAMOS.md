@@ -1,37 +1,34 @@
 # Onde estamos
 
-**22/10 — proposta P-8 para corrigir a documentação do importador do inbox.** O texto passará a descrever a fila de revisão humana; selftest 15/15 numa cópia limpa. Aguarda assinatura.
+Atualizado em 23/10/2026.
 
-## O que é isto
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
-
-**22/10 — proposta de suíte de perímetro paralela pronta para revisão.** O diff isola controles em até quatro clones e roda os agregados uma vez. Medida em clone limpo: 58,414 s, 58 verificações, 0 falhas; base serial: 205,047 s. Ainda não aplicada; pré-commit/P-16 sem alteração.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
-Histórico até 16/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-16.md` (e até 27/09: `extras/arquivo/onde-estamos-ate-2026-09-27.md`).
+Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-**20/10 — autostart NVIDIA corrigido.** A execução real passou com `DISPLAY` e `XAUTHORITY` da sessão; offsets conferidos em 250/1750. Cópia de reversão guardada junto ao arquivo de autostart.
+## Hoje, 22 e 23/10
 
-**20/10 — backup em disco novo.** O HD antigo de backup saiu. O backup agora fica numa pasta `AgataBkup01` dentro do disco TI, que tem outros usos e não foi formatado. O caminho fica em `~/.config/agata/hd-backup`. A cópia do backup antigo está em andamento.
+**Já valendo (assinado e aplicado):**
+- A Seth responde pela cascata com a memória completa. Dados pessoais deixaram de bloquear a saída externa; só segredo continua bloqueado.
+- A escrita em MEMÓRIAS pelo LibreChat exige sua aprovação, e foi comprovada uma vez. O diário saiu do chat.
+- O escriba exige token por projeto e recusa segredo antes de gravar.
+- O migrador de história e o gerador do mapa do PROJETO entraram (pacote 2a).
+- O mapa do PROJETO na hidratação (pacote 2b). Medido em cópia: a hidratação caiu de 124 mil para 88 mil caracteres.
+- A suíte de testes roda em paralelo, até 4 casos ao mesmo tempo. Antes levava cerca de 205 segundos; agora, cerca de 56 segundos, medido duas vezes com os 58 casos passando.
 
-**20/10 — backup conferido no disco novo.** O backup antigo voltou inteiro para o disco TI e passou na verificação. Os modelos que precisam de cópia ganharam cópia nova hoje, e o controle de backup está limpo.
+**Esperando você:**
+- Assinar as propostas em conjunto, quando estiverem prontas. Hoje, uma: a correção da entrada 817 do MEMÓRIAS.
+- Lista de nomes de projeto: não é necessária para a Seth funcionar. Só faz sentido se houver nome que não deva sair para a nuvem.
 
-**20/10 — correções da auditoria aplicadas.** P-4 inclui o roteador Laya; P-9 acompanha a manutenção, o Laya e a ponte do LibreChat. O texto do projeto foi atualizado. Suíte completa e revisão cruzada passaram.
+**Com o Codex:**
+- As pastas reports, research_notes e o arquivo sh são do Codex. Serão sanitizadas quando o trabalho dele estiver concluído. Até lá, não são movidas.
+- Propostas antigas: cinco não se aplicam mais ao main e não serão assinadas. Uma (cabecalho-modelo-real) ainda se aplica e será conferida antes de qualquer assinatura.
 
-**20/10 — controles de autorização da Seth aplicados no código.** Suíte offline e perímetro passaram; a eficácia em runtime depende de homologação controlada. P-4 segue parcial sem root.
+**Em espera:**
+- Backfill das 11 tags dos chunks frios: depois de 29/10.
+- Roteamento por capacidade: próxima frente, depois da correção da 817.
 
-## Hoje, 16/10/2026 (atualizado às 20h25)
-**Já está valendo (você assinou, eu apliquei, o GitHub conferiu):**
-- O GitHub exige a sua assinatura em toda mudança que altera comportamento. Testei o conferente com 15 quebras de propósito: ele pega 12 (os outros 3 não mudam nada na prática).
-- Avisos de emoji e de fonte, métricas por rota, e a Seth sem emoji na prosa (o gateway foi reiniciado às 20h20).
-- Painel de estado (`python3 scripts/painel_estado.py`), detector de derivados misturados, marcador da consolidação corrigido.
-- Cofre de chaves: lista de segredos, verificador e uma cópia de recuperação cifrada para o seu pendrive.
-- Janela de manutenção diária 12h15 a 13h15, com o treino do Laya todo dia: o timer está ativo, o primeiro ciclo é amanhã.
-- A primeira Skill do sistema (`agata-fluxo-dupla`), licença Apache-2.0 e PROJETO dentro do teto.
-
-**Com você:** nenhuma assinatura pendente. Testar a restauração do cofre com o pendrive (monta só leitura, pede `sudo`); guardar uma segunda cópia da chave; recriar os contêineres do LibreChat para valer as imagens fixadas; desativar os três timers antigos só depois de ver a janela rodar bem.
-
-**Com o Codex (sem cota desde 19h38):** pesquisa de modelos gratuitos, KV cache, licenças dos componentes, tags dos selos.
-
-**Ainda falta:** canais (todos desligados, só os gratuitos), cofre etapa 3, memória por tema, missões M01 a M10. Limites que continuam: a trava do escriba só protege quem passa por ela; as métricas do decisor não medem qualidade da resposta.
+**Fechado:**
+- Sombra em segundo plano (PR 474).
