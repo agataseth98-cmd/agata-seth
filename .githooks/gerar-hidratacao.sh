@@ -64,6 +64,10 @@ INDICE_CHAVES="INDICE_MEMORIAS_PALAVRAS-CHAVE.md"
 # Uniforme hoje (um .hidrata.md só, sem silo por modelo — Fase 2 ainda não
 # mantem a fronteira de MOD; calibracao por janela do modelo, se preciso.
 JANELA_ORCAMENTO_CHARS=25000
+# Hidratação (decisão do Humano, 23/10/2026): só a ÚLTIMA entrada entra inteira.
+# As anteriores viram resumo de 1 linha (abaixo) e são consultadas sob demanda pela busca.
+# A primeira entrada entra mesmo se estourar o orçamento (regra acima).
+JANELA_ORCAMENTO_HIDRATACAO=1
 INDICE_RECENTES_COMPLETAS=30
 INDICE_TETO_ANTIGAS=80
 # Item B1.1, pedido do Humano 05/09/2026: orçamento À PARTE, só pra um resumo
@@ -320,10 +324,10 @@ resumo_entradas_mais_antigas() {
 
 janela_memorias() {
   local modelo="${1:-}"
-  local budget="$JANELA_ORCAMENTO_CHARS"
+  local budget="$JANELA_ORCAMENTO_HIDRATACAO"
   # `${arr[$k]}` com $k vazio é "subscrito incorreto" sob `set -u` -- só
   # consulta o mapa quando há modelo.
-  [ -n "$modelo" ] && budget="${JANELA_POR_MODELO[$modelo]:-$JANELA_ORCAMENTO_CHARS}"
+  [ -n "$modelo" ] && budget="${JANELA_POR_MODELO[$modelo]:-$JANELA_ORCAMENTO_HIDRATACAO}"
   local mem
   mem="$(filtrar_mod_por_alvo "$modelo")"
   # O marcador vive no preâmbulo, nunca dentro de um bloco MOD -- o filtro
