@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(822) DIÁRIO — 23/10/2026 · **Primeira execução da migração de período (quente para morno e frio), em proposta consolidada.**
 (821) DIÁRIO — 23/10/2026 · **Hidratação com só a última entrada de MEMÓRIAS inteira.**
 (820) DIÁRIO — 23/10/2026 · **Ajustes do aplicar.py: registro opcional, sem duplicar MEMÓRIAS, coautor correto.**
 (819) DIÁRIO — 23/10/2026 · **Correção da entrada (817): a medição da suíte paralela.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (795) DIÁRIO — 21/10/2026 · **Início de sessão da dupla mecanizado: scripts/dupla/inicio.sh, uma leitura do canal, saída vazia sem novidade.** Assinado pelo Humano (inicio-dupla-20261021). Substitui a leitura manual do canal no começo de cada sessão, para economia de tokens.
 (794) DIÁRIO — 21/10/2026 · **Skill agata-fluxo aplicada (universal, para qualquer LLM e para a Seth).** Assinada pelo Humano (skill-agata-fluxo-20261021). Substitui a divisão ad hoc entre Claude e Codex por um fluxo único: medir, canal, divisão de execução e auditoria, mudança protegida só por proposta, afirmar com prova.
 (793) DIÁRIO — 21/10/2026 · **Auditoria de turno passa a incluir o detector de estado sem prova (aplicado após assinatura do Humano).** Acrescenta uma linha em `_conteudo` que importa `detector_estado_sem_prova` e soma os achados (estado sem prova, confiança numérica, componente removido no presente). Selftest da auditoria e 6 casos do detector passam.
-(792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): achados de afirmação sem prova, confiança numérica e componente removido citado no presente.** Assinado pelo Humano (detector-estado-sem-prova-20261021). Sem modelo: regex, 6 casos fixos derivados da conversa auditada (scripts/testar_detector_estado.py).
+(792) DIÁRIO — 21/10/2026 · **Detector de estado sem prova aplicado (M1-M4): ach …
 (791) DIÁRIO — 21/10/2026 · **Regra M7: conversa com a Seth é matéria-prima não …
 (790) DIÁRIO — 21/10/2026 · **Regra: o harness da Seth aprende com os registros, …
 (789) DIÁRIO — 21/10/2026 · **Ritmo de trabalho e substituição: só o Humano deci …

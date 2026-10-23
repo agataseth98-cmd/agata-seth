@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-23 11:46 -0300.
+Motivo: primeira execucao da migracao de periodo, consolidada
+nome: migracao-periodo-20261023
+diff-sha256: 0bbcf8b3041172e50f983e6cc4236e7c3db75ae3bb014706d403cff81f7ba4d1
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQLKudEuMOHEOnpL8xIMEyiGNMvfgAPjx8w+Z2aFdOUnYeT
+ipvnhDgdcs+0T1I5KMFqnfwlLGHvB+6swQYUCxowo=
+-----END SSH SIGNATURE-----

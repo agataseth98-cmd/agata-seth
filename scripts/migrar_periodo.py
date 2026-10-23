@@ -335,6 +335,18 @@ def main():
         with open(RAIZ / "SELOS.txt", "a", encoding="utf-8") as f:
             f.write(f"{hash_frio} memoria/frio/{nome_chunk} {data_iso}\n")
         print(f"selo registrado em SELOS.txt: {hash_frio}")
+        # Cadeia de selos (P-25): mesmo cálculo do selar.sh -- c_i = sha256(c_{i-1} + "\n" + linha_i).
+        # Sem este elo, SELOS.txt fica com um selo a mais que SELOS.chain (cauda divergente).
+        chain = RAIZ / "SELOS.chain"
+        if chain.exists():
+            linha_selo = f"{hash_frio} memoria/frio/{nome_chunk} {data_iso}"
+            ant = chain.read_text(encoding="utf-8").strip().splitlines()[-1].split()[0]
+            novo_elo = hashlib.sha256((ant + "\n" + linha_selo).encode("utf-8")).hexdigest()
+            with open(chain, "a", encoding="utf-8") as g:
+                g.write(novo_elo + "\n")
+            print("cadeia: elo acrescentado em SELOS.chain")
+        else:
+            print("AVISO: SELOS.chain ausente; rodar scripts/selar.sh --iniciar-cadeia antes")
 
     print("\naplicado.")
 
