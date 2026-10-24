@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c714225d6642a6d8f324293f4f98f27489ae5b83
-  Escrito em: 24/10/2026 13:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe
+  Escrito em: 24/10/2026 13:15 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c714225d6642a6d8f324293f4f98f27489ae5b83/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c714225d6642a6d8f324293f4f98f27489ae5b83/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c714225d6642a6d8f324293f4f98f27489ae5b83/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c714225d6642a6d8f324293f4f98f27489ae5b83/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c714225d6642a6d8f324293f4f98f27489ae5b83/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12fd0ed6189e01d9fb4a608b0db8d684a6bac4fe/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(830) DIÁRIO — 24/10/2026 · **Segunda rodada do benchmark, com o cartão de sistema: os três erros graves (gravar sem portão, confiança em porcentagem, ensinar a abrir o `.env`) zeraram nos três modelos. O formato "resultado, evidência" trouxe um risco novo: dois modelos inventaram a evidência. Foram aplicadas duas checagens corrigidas.** Aplica `benchmark-checagens-20261024`, assinado pelo Humano. Agora a moldura ```json passa no JSON estrito, como o Humano decidiu em 23/10, e o pedido de escrita deixa de contar na checagem "ferramenta válida". Rodada `20261024-120228` (Ministral 14b, MoE 30B pelo Ollama e qwen3.5-9b), recontada com as checagens novas: JSON puro 1,0 nos três; ferramenta válida 1,0, 0,833 e 1,0; escrita sem portão 0 nos três. O MoE respondeu 28 de 30, com p50 de 8,9 s. O 9b piorou com o cartão: 24 de 30, 4 respostas vazias, 6 × 504 e p50 de 36,5 s. Evidência inventada, descrita sem repetir o literal: o Ministral apontou uma entrada de MEMÓRIAS que não existe como fonte da regra do segredo (conv-06), e o MoE citou um arquivo do canon que não existe (conv-01). A causa provável é o cartão pedir evidência sempre; o cartão v3, fora do repositório, limita a evidência ao que foi lido ou medido. Próximo passo: a troca na fila (MoE no lugar do 9b), com OK do Humano.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `resumo.json` e `respostas.jsonl` da rodada; recontagem offline com o executor corrigido; selftest com 19 casos; PR 514 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
+
 (829) DIÁRIO — 24/10/2026 · **Cartão de sistema no executor do benchmark (`--cartao`, corpus v2) aplicado. O Humano escolheu o MoE 30B como modelo local pelo Ollama, sob demanda.** Aplica `benchmark-cartao-20261023`, assinado pelo Humano. Com `--cartao ARQ`, todos os modelos recebem o mesmo cartão curto de sistema, como a Seth recebe; o cartão está em `~/.local/share/agata/corpus-roteamento/cartao-v2.txt`, fora do repositório, e o hash dele entra no protocolo de cada medida. Decisão do Humano em 23/10/2026: o MoE Qwen3-30B-A3B entra como modelo local pelo Ollama, sob demanda. Ele foi importado do GGUF que já existia, sem download, como `qwen3-30b-a3b-32k`, com janela de 32k. Medido: carga a frio de 25,4 s, 13,8 tok/s e 7,0 GB de VRAM; descarrega sozinho. No benchmark (225041) foram 26 de 30, com p50 de 4,6 s e p95 de 57 s. A unit `llamacpp-agata` corrigida em (828) está instalada no host (Restart=no, static, inactive). Próximo passo: a segunda rodada com o cartão (Ministral, MoE pelo Ollama, qwen3.5-9b) e só depois a troca na fila, por proposta e com OK do Humano.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest com 17 casos; plano com 84 de 90; `ollama /api/chat` medido; `systemctl --user show llamacpp-agata`; PR 512 com CI verde · Autorização: Humano — "Ollama sob demanda, siga" e "assinei no terminal, aplique"
 
