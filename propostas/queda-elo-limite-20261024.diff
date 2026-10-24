@@ -1,0 +1,47 @@
+diff --git a/scripts/queda_por_elo.py b/scripts/queda_por_elo.py
+index 64d0421..05b8503 100755
+--- a/scripts/queda_por_elo.py
++++ b/scripts/queda_por_elo.py
+@@ -134,7 +134,14 @@ def veredito(r: dict) -> str:
+             return "TOOL_RUIM"
+         ok = t["nome"] == "somar" and isinstance(a, dict) and sorted(a.values()) == [17, 25]
+         return "OK" if ok else "TOOL_RUIM"
+-    return "SO_TEXTO" if r["conteudo"].strip() else "VAZIO"
++    if r["conteudo"].strip():
++        return "SO_TEXTO"
++    # (24/10/2026) Só chunks de keepalive, sem nenhum "model" real e sem finish: o OmniRoute
++    # segurou a conexão e fechou sem resposta. Sem stream, o mesmo pedido volta 429 "cooling
++    # down" (7 modelos do OpenRouter, mesmo padrão ~38 s / ~20 s). É cota, não o modelo.
++    if r["finish"] is None and r["model"] is None:
++        return "LIMITE_PROVAVEL"
++    return "VAZIO"
+ 
+ 
+ VIVO = ("OK", "SO_TEXTO")
+@@ -212,7 +219,11 @@ def analisar(filas: dict, elos: dict, fase_b: dict) -> tuple[list[str], int]:
+             out.append(f"  RISCO: a fila inteira falhou ({b.get('veredito')})")
+             rc = 1
+         for m in mortos:
+-            out.append(f"  morto: {m} ({elos[m]['veredito']}, finish={elos[m].get('finish')})")
++            if elos[m]["veredito"] == "LIMITE_PROVAVEL":
++                out.append(f"  sem resposta: {m} (LIMITE_PROVAVEL -- só keepalive, sem finish; "
++                           "confirme sem stream antes de concluir que o modelo falhou)")
++            else:
++                out.append(f"  morto: {m} ({elos[m]['veredito']}, finish={elos[m].get('finish')})")
+         for m in ordem:
+             if elos.get(m, {}).get("veredito") == "ZERO_CHUNKS":
+                 out.append(f"  ZERO_CHUNKS em {m}: é a assinatura do crash de (635) -- olhar antes de tudo")
+@@ -370,6 +381,13 @@ def _selftest() -> int:
+     caso("HTTP 500 -> HTTP_500", v["p/erro"] == "HTTP_500")
+     caso("argumentos válidos mas conta errada -> TOOL_RUIM", v["p/conta"] == "TOOL_RUIM")
+     caso("ferramenta de nome errado -> TOOL_RUIM", v["p/nome"] == "TOOL_RUIM")
++    so_ka = [b'data: {"id": "chatcmpl-keepalive", "model": "keepalive", "choices": [{"delta": {}, '
++             b'"finish_reason": null}]}'] * 3
++    caso("só chunks de keepalive, sem model nem finish -> LIMITE_PROVAVEL (cota, não modelo)",
++         veredito(ler_stream(so_ka)) == "LIMITE_PROVAVEL")
++    caso("chunk real vazio com finish continua VAZIO",
++         veredito(ler_stream([b'data: {"model": "x", "choices": [{"delta": {"content": ""}, '
++                              b'"finish_reason": "length"}]}'])) == "VAZIO")
+     caso("um intervalo entre cada pedido, nunca rajada",
+          len(pausas) == len(dados["elos"]) + len(dados["fase_b"]) - 1)
+     caso("Fase B: modelo real que atendeu a fila vem do stream",
