@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd
-  Escrito em: 23/10/2026 23:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d761cd4b636ac40a527d85dea015357fc2b240dd
+  Escrito em: 24/10/2026 11:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d518322b1a7bd8deb5cd6537b1fc7b1d4de7fbd/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d761cd4b636ac40a527d85dea015357fc2b240dd/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d761cd4b636ac40a527d85dea015357fc2b240dd/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d761cd4b636ac40a527d85dea015357fc2b240dd/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d761cd4b636ac40a527d85dea015357fc2b240dd/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d761cd4b636ac40a527d85dea015357fc2b240dd/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(829) DIÁRIO — 24/10/2026 · **Cartão de sistema no executor do benchmark (`--cartao`, corpus v2) aplicado. O Humano escolheu o MoE 30B como modelo local pelo Ollama, sob demanda.** Aplica `benchmark-cartao-20261023`, assinado pelo Humano. Com `--cartao ARQ`, todos os modelos recebem o mesmo cartão curto de sistema, como a Seth recebe; o cartão está em `~/.local/share/agata/corpus-roteamento/cartao-v2.txt`, fora do repositório, e o hash dele entra no protocolo de cada medida. Decisão do Humano em 23/10/2026: o MoE Qwen3-30B-A3B entra como modelo local pelo Ollama, sob demanda. Ele foi importado do GGUF que já existia, sem download, como `qwen3-30b-a3b-32k`, com janela de 32k. Medido: carga a frio de 25,4 s, 13,8 tok/s e 7,0 GB de VRAM; descarrega sozinho. No benchmark (225041) foram 26 de 30, com p50 de 4,6 s e p95 de 57 s. A unit `llamacpp-agata` corrigida em (828) está instalada no host (Restart=no, static, inactive). Próximo passo: a segunda rodada com o cartão (Ministral, MoE pelo Ollama, qwen3.5-9b) e só depois a troca na fila, por proposta e com OK do Humano.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest com 17 casos; plano com 84 de 90; `ollama /api/chat` medido; `systemctl --user show llamacpp-agata`; PR 512 com CI verde · Autorização: Humano — "Ollama sob demanda, siga" e "assinei no terminal, aplique"
+
 (828) DIÁRIO — 23/10/2026 · **A unit `llamacpp-agata` passa a ser versionada, com `Restart=no` e sem `[Install]`. O MoE não volta mais sozinho depois de um OOM na GPU. Isso fecha a pendência de (652).** Aplica `llamacpp-agata-unit-20261023`, assinado pelo Humano em 23/10/2026, como conserto 1 do roteamento por capacidade (V9, seção 35). `redesign/systemd/llamacpp-agata.service` repete o `ExecStart` instalado (conferido com diff) e muda só o reinício e o `[Install]`, como o `llamacpp@.service` de (649)/(650); o README de `redesign/systemd/` ganha a linha dela. Instalar no host (`cp` + `daemon-reload`) é passo à parte, com OK do Humano. No benchmark de 23/10, com só respostas rotuladas, o MoE 30B teve o melhor placar entre os quatro modelos medidos: 17 boas, 6 parciais e 3 ruins em 26, com p50 de 5,2 s. Os 504 dos modelos locais vêm do `RATE_LIMIT_MAX_WAIT_MS=45000` do OmniRoute; os 400 do MoE, da janela `-c 8192`.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `systemctl --user cat llamacpp-agata`; `systemd-analyze --user verify`; diff do ExecStart; clone com hooks; PR 510 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
