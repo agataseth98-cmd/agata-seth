@@ -1,0 +1,55 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index 5a4cc4d..88c775b 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -52,6 +52,7 @@ jobs:
+           python3 scripts/conselho_remoto.py --selftest
+           python3 -I redesign/router/registro_pedidos.py --selftest
+           python3 -I scripts/benchmark_roteamento.py --selftest
++          python3 -I scripts/queda_por_elo.py --selftest
+ 
+       # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
+       # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
+diff --git a/scripts/queda_por_elo.py b/scripts/queda_por_elo.py
+index 8c3e26a..64d0421 100755
+--- a/scripts/queda_por_elo.py
++++ b/scripts/queda_por_elo.py
+@@ -145,7 +145,11 @@ def pedir(modelo: str, timeout: float, proxy: str = PROXY) -> dict:
+     req = urllib.request.Request(proxy + "/v1/chat/completions", method="POST",
+                                  data=json.dumps(corpo_padrao(modelo)).encode(),
+                                  headers={"Content-Type": "application/json",
+-                                          "X-Agata-Token": _token_interno()})
++                                          "X-Agata-Token": _token_interno(),
++                                          # (24/10/2026) a carga é sintética: vai como `public`. Desde
++                                          # a regra de 20/10 (b683e4b) o sanitizador recusa com 403 o
++                                          # pedido externo sem classificação, e todo elo remoto saía "morto".
++                                          "X-Agata-Data-Classification": "public"})
+     try:
+         with _SEM_PROXY.open(req, timeout=timeout) as resp:
+             r = ler_stream(resp)
+@@ -257,7 +261,7 @@ def _selftest() -> int:
+     os.environ["AGATA_TOKEN_INTERNO_PATH"] = str(tok)
+     import token_interno as _ti                        # já no sys.path pelo _token_interno abaixo
+     _ti.CAMINHO = tok
+-    registro = {"chat": [], "escrita_api": 0, "sem_token": 0}
++    registro = {"chat": [], "escrita_api": 0, "sem_token": 0, "sem_classificacao": 0}
+     combos = [{"id": "c1", "name": "seth-rapido", "models": [
+                   {"kind": "model", "model": "p/zero"}, {"kind": "model", "model": "p/ok"},
+                   {"kind": "model", "model": "ollama-local/fundo"}]},
+@@ -318,6 +322,8 @@ def _selftest() -> int:
+                 return self._enviar(500, b"{}")
+             if self.headers.get("X-Agata-Token") != "t" * 40:
+                 registro["sem_token"] += 1
++            if self.headers.get("X-Agata-Data-Classification") != "public":
++                registro["sem_classificacao"] += 1
+             registro["chat"].append(corpo["model"])
+             registro["ultimo_corpo"] = corpo
+             if corpo["model"] == "p/erro":
+@@ -375,6 +381,7 @@ def _selftest() -> int:
+     caso("ZERO_CHUNKS sinalizado como assinatura do crash", "assinatura do crash" in txt)
+     caso("nunca escreve no OmniRoute (nenhum POST/PUT/DELETE em /api)", registro["escrita_api"] == 0)
+     caso("todo pedido de chat leva o X-Agata-Token do arquivo próprio", registro["sem_token"] == 0)
++    caso("todo pedido de chat vai classificado como public (carga sintética)", registro["sem_classificacao"] == 0)
+     caso("relatório não guarda o texto do modelo", "conteudo" not in json.dumps(dados) and "42" not in txt)
+     c = registro["ultimo_corpo"]
+     caso("carga com o tamanho da Seth (system >= 8 mil chars, 12 ferramentas, stream)",
