@@ -1,0 +1,42 @@
+diff --git a/redesign/systemd/README.md b/redesign/systemd/README.md
+index 0734ee0..e7daf03 100644
+--- a/redesign/systemd/README.md
++++ b/redesign/systemd/README.md
+@@ -16,6 +16,7 @@ Só `agata.target` está em `default.target.wants/`; os membros só em `agata.ta
+ | `dropin-omniroute.conf` | `omniroute.service.d/agata.conf` | igual ao genérico + `[Service] SuccessExitStatus=143 SIGTERM` — `omniroute` é `Type=simple` e o `ExecStop=omniroute stop` mata o próprio main (sai 143); sem isto o stop normal fica `failed`. |
+ | `dropin-omniroute-resilience.conf` | `omniroute.service.d/resiliencia.conf` | `Environment=RATE_LIMIT_MAX_WAIT_MS=45000` — reproduz o conserto de (363) sem UI, pra um clone que nasce com banco vazio. Achado do laboratório "Ensaio" (MEMÓRIAS 587), lido no código-fonte real do pacote. Nesta Máquina o banco já tem o valor (vence a variável); aplicar aqui não muda nada. |
+ | `dropin-llamacpp.conf` | `llamacpp-agata.service.d/agata.conf` | **só** `PartOf=agata.target` (sem `WantedBy`): o MoE **para** com o `agata down` (libera a VRAM da 4060) mas **não sobe** junto — fica sob demanda (`agata up --moe`). |
++| `llamacpp-agata.service` | `~/.config/systemd/user/llamacpp-agata.service` | **unidade base** do MoE (versionada em 23/10/2026; antes só fora do git). `Restart=no` e **sem** `[Install]`: sob demanda, só à mão, nunca volta sozinho depois de um OOM na GPU (fecha a pendência de (652); mesma regra do `llamacpp@.service`). |
+ | `dropin-ollama-bind.conf` | `/etc/systemd/system/ollama.service.d/agata-bind.conf` (**sudo**, unit de `system`, não `--user`) | 2 variáveis invariantes (bind `127.0.0.1`, flash attention) — framework, igual em qualquer clone. Achado do laboratório "Ensaio" (MEMÓRIAS 567): antes, essas 2 viviam misturadas com hardware num `override.conf` único, só em prosa (`PROJETO.md`), sem template versionado. |
+ | `dropin-ollama-gpu.exemplo.conf` | `/etc/systemd/system/ollama.service.d/agata-gpu.conf` (**sudo**) | **exemplo**, não instala direto — 3 variáveis de hardware (VRAM/GPU desta Máquina), ajustar antes de usar. Nunca versionado com valor real (mesmo tratamento de `CHAVES.env.exemplo`). |
+ | `openvino-whisper.service` · `openvino-embeddings.service` · `obsidian-ro-proxy.service` | `~/.config/systemd/user/<nome>` | **unidades base** (Fase 2/6). Promovidas ao repo em 03/09 (chat 6, otimização B1) — antes só existiam fora do git. Trazem o fix do chat 5 (`After=default.target` removido, `[Install] WantedBy=agata.target`). |
+diff --git a/redesign/systemd/llamacpp-agata.service b/redesign/systemd/llamacpp-agata.service
+new file mode 100644
+index 0000000..19c72f2
+--- /dev/null
++++ b/redesign/systemd/llamacpp-agata.service
+@@ -0,0 +1,24 @@
++# Agata -- MoE Qwen3-30B-A3B no llama.cpp (Fase 3, P3-03), sob demanda, só à mão.
++# Até 23/10/2026 esta unit vivia só em ~/.config/systemd/user/, sem versão, com
++# Restart=on-failure e [Install] WantedBy=default.target -- a mesma classe de risco
++# que (648)/(649) tiraram do llamacpp@.service: um OOM na GPU fazia o modelo voltar
++# sozinho 3 s depois, tomar a VRAM da 4060 (8 GB) e empurrar o Ollama para a CPU.
++# Pendência registrada em (652), fechada aqui: Restart=no e sem [Install], igual ao
++# template llamacpp@.service ao lado. O PartOf=agata.target continua no drop-in
++# dropin-llamacpp.conf (para junto com o `agata down`, não sobe junto).
++#
++# Suba só depois de conferir `nvidia-smi`: com o MoE no ar (~6,2 GB, medido em
++# 23/10/2026), o modelo do Ollama não cabe na GPU ao mesmo tempo.
++#
++# Instala com: cp llamacpp-agata.service ~/.config/systemd/user/ &&
++# systemctl --user daemon-reload  (sem sudo; não rode `enable`: sem [Install], não há o que habilitar).
++[Unit]
++Description=llama.cpp MoE backend (Agata, Fase 3 -- P3-03)
++Documentation=file:///home/orusoua/agata/redesign/router/llamacpp.md
++After=default.target
++
++[Service]
++Type=simple
++ExecStart=/usr/sbin/llama-server -m %h/.cache/agata/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf -ngl 999 --n-cpu-moe 36 --host 127.0.0.1 --port 20129 -c 8192 --alias qwen3-30b-a3b --no-webui
++Restart=no
++Nice=5
