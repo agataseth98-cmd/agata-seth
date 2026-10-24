@@ -52,6 +52,7 @@ jobs:
           python3 scripts/conselho_remoto.py --selftest
           python3 -I redesign/router/registro_pedidos.py --selftest
           python3 -I scripts/benchmark_roteamento.py --selftest
+          python3 -I scripts/queda_por_elo.py --selftest
 
       # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
       # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
