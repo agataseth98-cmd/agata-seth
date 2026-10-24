@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cc7e444df2c788ef24289e08bbc67e964bf98dd0
-  Escrito em: 23/10/2026 22:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59
+  Escrito em: 23/10/2026 22:56 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc7e444df2c788ef24289e08bbc67e964bf98dd0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc7e444df2c788ef24289e08bbc67e964bf98dd0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc7e444df2c788ef24289e08bbc67e964bf98dd0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc7e444df2c788ef24289e08bbc67e964bf98dd0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cc7e444df2c788ef24289e08bbc67e964bf98dd0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3fefee969d0f0b16f74c5dd65a5ec40e0f00cb59/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(828) DIÁRIO — 23/10/2026 · **A unit `llamacpp-agata` passa a ser versionada, com `Restart=no` e sem `[Install]`. O MoE não volta mais sozinho depois de um OOM na GPU. Isso fecha a pendência de (652).** Aplica `llamacpp-agata-unit-20261023`, assinado pelo Humano em 23/10/2026, como conserto 1 do roteamento por capacidade (V9, seção 35). `redesign/systemd/llamacpp-agata.service` repete o `ExecStart` instalado (conferido com diff) e muda só o reinício e o `[Install]`, como o `llamacpp@.service` de (649)/(650); o README de `redesign/systemd/` ganha a linha dela. Instalar no host (`cp` + `daemon-reload`) é passo à parte, com OK do Humano. No benchmark de 23/10, com só respostas rotuladas, o MoE 30B teve o melhor placar entre os quatro modelos medidos: 17 boas, 6 parciais e 3 ruins em 26, com p50 de 5,2 s. Os 504 dos modelos locais vêm do `RATE_LIMIT_MAX_WAIT_MS=45000` do OmniRoute; os 400 do MoE, da janela `-c 8192`.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `systemctl --user cat llamacpp-agata`; `systemd-analyze --user verify`; diff do ExecStart; clone com hooks; PR 510 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
+
 (827) DIÁRIO — 23/10/2026 · **Correção do executor do benchmark: o corpus sintético vai marcado como público, o erro guarda o código HTTP, os erros 429 e 50x ganham uma nova tentativa, e o JSON estrito só vale onde a pergunta pede apenas JSON.** Aplica `benchmark-correcao-20261023`, assinado pelo Humano em 23/10/2026. Na primeira rodada (23/10, 15h17, `~/.local/share/agata/benchmark/20261023-151746/`), os 24 pedidos ao Ministral voltaram com HTTP 403 ("dados sem classificação pública"). O executor não mandava `X-Agata-Data-Classification: public`, que o sanitizador exige desde 20/10 (b683e4b); o defeito é do Claude Code, que redigiu o executor sem conferir esse caminho. O modelo local respondeu 24 de 30; as 6 falhas foram instantâneas e não se repetiram. Achados mecânicos do local: escolheu a ferramenta certa, com argumentos válidos, em 7 de 7; gravou no diário sem pedir confirmação (fer-06) e deu confiança em porcentagem (conv-04), dois erros graves. Uma chamada real ao Ministral depois da correção respondeu em 3,6 s.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `resumo.json` da rodada; selftest com 16 casos; chamada real ao Ministral; PR 508 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 

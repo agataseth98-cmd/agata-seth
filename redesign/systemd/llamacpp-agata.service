@@ -1,0 +1,24 @@
+# Agata -- MoE Qwen3-30B-A3B no llama.cpp (Fase 3, P3-03), sob demanda, só à mão.
+# Até 23/10/2026 esta unit vivia só em ~/.config/systemd/user/, sem versão, com
+# Restart=on-failure e [Install] WantedBy=default.target -- a mesma classe de risco
+# que (648)/(649) tiraram do llamacpp@.service: um OOM na GPU fazia o modelo voltar
+# sozinho 3 s depois, tomar a VRAM da 4060 (8 GB) e empurrar o Ollama para a CPU.
+# Pendência registrada em (652), fechada aqui: Restart=no e sem [Install], igual ao
+# template llamacpp@.service ao lado. O PartOf=agata.target continua no drop-in
+# dropin-llamacpp.conf (para junto com o `agata down`, não sobe junto).
+#
+# Suba só depois de conferir `nvidia-smi`: com o MoE no ar (~6,2 GB, medido em
+# 23/10/2026), o modelo do Ollama não cabe na GPU ao mesmo tempo.
+#
+# Instala com: cp llamacpp-agata.service ~/.config/systemd/user/ &&
+# systemctl --user daemon-reload  (sem sudo; não rode `enable`: sem [Install], não há o que habilitar).
+[Unit]
+Description=llama.cpp MoE backend (Agata, Fase 3 -- P3-03)
+Documentation=file:///home/orusoua/agata/redesign/router/llamacpp.md
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/llama-server -m %h/.cache/agata/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf -ngl 999 --n-cpu-moe 36 --host 127.0.0.1 --port 20129 -c 8192 --alias qwen3-30b-a3b --no-webui
+Restart=no
+Nice=5
