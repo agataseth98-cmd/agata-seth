@@ -1,0 +1,71 @@
+diff --git a/scripts/benchmark_roteamento.py b/scripts/benchmark_roteamento.py
+index 335c04d..270b7b2 100755
+--- a/scripts/benchmark_roteamento.py
++++ b/scripts/benchmark_roteamento.py
+@@ -28,8 +28,12 @@ Checagens mecânicas (o resto fica `a_rotular`): JSON válido sem texto em volta
+ ferramenta conhecida com argumentos válidos; escrita sem portão (diario_anotar); confiança
+ em porcentagem.
+ 
++Cartão de sistema (`--cartao ARQ`, corpus v2, decisão do Humano em 23/10/2026): o mesmo texto curto
++vai como mensagem de sistema para todos os modelos, como a Seth recebe; sem ele, vale a frase neutra.
++O hash do cartão entra no protocolo de cada medida.
++
+ Uso:
+-  benchmark_roteamento.py [--corpus ARQ] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
++  benchmark_roteamento.py [--corpus ARQ] [--cartao ARQ] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
+   benchmark_roteamento.py --executar [mesmas opções] [--timeout 120] [--intervalo 3]
+   benchmark_roteamento.py --selftest
+ """
+@@ -147,10 +151,10 @@ def resumir(linhas: list[dict], data: str, corpus_sha: str) -> dict:
+     return out
+ 
+ 
+-def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ) -> dict:
++def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str = SISTEMA) -> dict:
+     """Um item num modelo. `chamar(corpo) -> (resposta_json, segundos)` ou levanta."""
+     usa_ferr = bool(item.get("requisitos", {}).get("ferramenta"))
+-    msgs = [{"role": "system", "content": SISTEMA}, {"role": "user", "content": mensagem_usuario(item, raiz)}]
++    msgs = [{"role": "system", "content": sistema}, {"role": "user", "content": mensagem_usuario(item, raiz)}]
+     corpo = {"model": modelo, "stream": False, "max_tokens": 4000, "messages": msgs}
+     if usa_ferr:
+         corpo["tools"] = FERRAMENTAS
+@@ -243,6 +247,8 @@ def main(argv: list[str]) -> int:
+         itens = [i for i in itens if i["id"] in quero]
+     modelos = _arg(argv, "--modelos").split(",") if _arg(argv, "--modelos") else _modelos_padrao()
+     liberar = [p for p in (_arg(argv, "--liberar", "") or "").split(",") if p]
++    cartao_p = Path(_arg(argv, "--cartao")) if _arg(argv, "--cartao") else None
++    sistema = cartao_p.read_text(encoding="utf-8").strip() if cartao_p else SISTEMA
+     plano = [(m, i) for m in modelos for i in itens]
+     vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
+     print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
+@@ -263,11 +269,11 @@ def main(argv: list[str]) -> int:
+             r = {"estado": "pulado_privacidade", "s": 0, "texto": "", "chamadas": [], "checagens": {}}
+         else:
+             publico = not i.get("privado") or any(m.startswith(p) for p in liberar)
+-            r = rodar_item(lambda corpo: chamar(corpo, publico), m, i)
++            r = rodar_item(lambda corpo: chamar(corpo, publico), m, i, sistema=sistema)
+             time.sleep(intervalo)
+         linhas.append(dict(r, modelo=m, item=i["id"], tipo=i["tipo"], rota_esperada=i.get("rota_esperada")))
+         print(f"[{n}/{len(plano)}] {m} {i['id']}: {r['estado']} {r['s']}s {r['checagens']}", flush=True)
+-    sha = hashlib.sha256(corpus_p.read_bytes()).hexdigest()
++    sha = hashlib.sha256(corpus_p.read_bytes() + sistema.encode("utf-8")).hexdigest()  # corpus + cartão
+     for nome, conteudo in (("respostas.jsonl", "".join(json.dumps(l, ensure_ascii=False) + "\n" for l in linhas)),
+                            ("resumo.json", json.dumps(resumir(linhas, time.strftime("%Y-%m-%d"), sha),
+                                                       ensure_ascii=False, indent=2) + "\n")):
+@@ -317,6 +323,7 @@ def _selftest() -> int:
+         re_ = rodar_item(falso, "a/m", esc, raiz)
+         rp = rodar_item(falso, "a/m", pct, raiz)
+         rl = rodar_item(falso, LOCAL + "m", priv, raiz)
++        rc = rodar_item(falso, "a/m", js, raiz, sistema="CARTAO-X")
+         rq = rodar_item(quebra, "a/m", js, raiz)
+         rh = rodar_item(recusa, "a/m", js, raiz)
+         rt = rodar_item(falso, "a/m", jt, raiz)
+@@ -351,6 +358,8 @@ def _selftest() -> int:
+              and "classificação" in rh["erro"]),
+             ("corpus sintético vai como público; privado não", cabecalhos("t", True).get(
+                 "X-Agata-Data-Classification") == "public" and "X-Agata-Data-Classification" not in cabecalhos("t", False)),
++            ("cartão de sistema vai como 1ª mensagem", rc["estado"] == "ok"
++             and any(c["messages"][0] == {"role": "system", "content": "CARTAO-X"} for c in enviados)),
+             ("percentil", percentil([1, 2, 3, 4], 50) in (2, 3) and percentil([], 95) is None),
+         ]
+     for nome, ok in casos:
