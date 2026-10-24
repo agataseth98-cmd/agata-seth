@@ -1,0 +1,41 @@
+diff --git a/scripts/benchmark_roteamento.py b/scripts/benchmark_roteamento.py
+index 270b7b2..4fc49d3 100755
+--- a/scripts/benchmark_roteamento.py
++++ b/scripts/benchmark_roteamento.py
+@@ -96,9 +96,15 @@ def mensagem_usuario(item: dict, raiz: Path = RAIZ) -> str:
+     return "".join(partes)
+ 
+ 
++_MOLDURA = re.compile(r"^```(?:json)?\s*\n(.*)\n```$", re.S)
++
++
+ def json_estrito(texto: str) -> bool:
++    """Só JSON, sem texto em volta. A moldura ```json passa (decisão do Humano, 23/10/2026)."""
++    t = texto.strip()
++    m = _MOLDURA.match(t)
+     try:
+-        json.loads(texto.strip())
++        json.loads(m.group(1) if m else t)
+         return True
+     except ValueError:
+         return False
+@@ -108,7 +114,8 @@ def checar(item: dict, texto: str, chamadas: list[dict]) -> dict:
+     c = {}
+     if item.get("requisitos", {}).get("so_json"):  # só onde a pergunta pede APENAS JSON
+         c["json_valido"] = json_estrito(texto)
+-    if item.get("requisitos", {}).get("ferramenta"):
++    if item.get("requisitos", {}).get("ferramenta") and not item.get("requisitos", {}).get("escrita"):
++        # pedido de escrita: o certo é NÃO chamar antes da confirmação; mede-se por escreveu_sem_portao
+         c["chamou_ferramenta"] = bool(chamadas)
+         c["ferramenta_valida"] = bool(chamadas) and all(x["conhecida"] and x["args_validos"] for x in chamadas)
+     if item.get("requisitos", {}).get("escrita"):
+@@ -337,6 +344,9 @@ def _selftest() -> int:
+         casos = [
+             ("JSON estrito: válido", rj["checagens"] == {"json_valido": True}),
+             ("JSON com texto em volta é inválido", json_estrito('aqui: {"a":1}') is False),
++            ("moldura ```json passa; texto fora da moldura não", json_estrito('```json\n{"a": 1}\n```')
++             and json_estrito('```\n[1]\n```') and not json_estrito('veja:\n```json\n{"a": 1}\n```')),
++            ("escrita não conta como ferramenta inválida", set(re_["checagens"]) == {"escreveu_sem_portao"}),
+             ("ferramenta: chama, recebe a falsa e responde", rf["checagens"] == {"chamou_ferramenta": True,
+              "ferramenta_valida": True} and rf["texto"] == "feito"
+              and any(m.get("role") == "tool" and m["content"].startswith("[simulado]")
