@@ -11,7 +11,6 @@
     "seth-livre": [
       "mistral/ministral-14b-latest",
       "gemini/gemini-2.5-flash",
-      "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "zai/glm-4.7-flash",
       "gemini/gemini-3-flash-preview",
@@ -69,11 +68,6 @@
     "openrouter/cohere/north-mini-code:free": {
       "janela": 256000,
       "saida_max": 64000,
-      "fonte": "omniroute /v1/models"
-    },
-    "openrouter/nvidia/nemotron-3-super-120b-a12b:free": {
-      "janela": 262144,
-      "saida_max": 235929,
       "fonte": "omniroute /v1/models"
     },
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
