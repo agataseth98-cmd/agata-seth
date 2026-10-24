@@ -184,16 +184,16 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 |---|---|---|
 | 0 | `mistral/ministral-14b-latest` | **subiu em 14/10 (711)/(712)** — 0,6–0,9 s, tool-call OK; respondeu as 7 novas tentativas de (711) em 0,9–13,5 s |
 | 1 | `gemini/gemini-2.5-flash` | **desceu em 14/10 (711)/(712)**: teto ~20 req/dia; sem cota, pendura a fila até o prazo de 40 s do gateway (710) |
-| 2 | `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | **novo 24/09 (546)** — `:free`, 1,3–3,9 s. OpenRouter free: 20 RPM, 50 RPD |
-| 3 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
-| 4 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |
-| 5 | `gemini/gemini-3-flash-preview` | desceu em (653); mantido no fim por decisão do Humano (13/10/2026), sem travar desde então. *Preview* |
-| 6 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
+| — | ~~`openrouter/nvidia/nemotron-3-super-120b-a12b:free`~~ | **[removido 24/10/2026]** 0/24 no benchmark do roteamento (429 "credentials cooling down" e 404) e VAZIO no `queda_por_elo` com ferramentas. Sai também do `seth-livre-longo` |
+| 2 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
+| 3 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |
+| 4 | `gemini/gemini-3-flash-preview` | desceu em (653); mantido no fim por decisão do Humano (13/10/2026), sem travar desde então. *Preview* |
+| 5 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
 
 ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
 | ordem | modelo | por quê |
 |---|---|---|
-| 0 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | subiu em (654), quando o `gemini-2.5-flash` esgotou a cota diária no topo |
+| 0 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | subiu em (654), quando o `gemini-2.5-flash` esgotou a cota diária no topo. **24/10/2026:** VAZIO no `queda_por_elo` (modo agente, com ferramentas) — todo pedido pesado com ferramenta cai no elo 1; inverter a ordem foi tentado e desfeito no mesmo dia, pelo motivo de (654) |
 | 1 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
 | 2 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
 
