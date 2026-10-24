@@ -1,0 +1,1311 @@
+diff --git a/config/capivara/capacidades.json b/config/capivara/capacidades.json
+index 423905e..18211f4 100644
+--- a/config/capivara/capacidades.json
++++ b/config/capivara/capacidades.json
+@@ -50,7 +50,68 @@
+         "gratis": null
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.458,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 4.86,
++          "amostra": 13
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 36.33,
++          "amostra": 13
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.8,
++          "amostra": 5
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-2.5-flash",
++          "versao_resolvida": "gemini-2.5-flash",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     },
+     "gemini/gemini-3-flash-preview": {
+@@ -73,7 +134,68 @@
+         "gratis": null
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.25,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 4.44,
++          "amostra": 18
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 28.64,
++          "amostra": 18
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 5
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3-flash-preview",
++          "versao_resolvida": "gemini-3-flash-preview",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     },
+     "gemini/gemini-3.1-flash-lite": {
+@@ -96,7 +218,78 @@
+         "gratis": null
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 7.66,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 16.03,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.1-flash-lite",
++          "versao_resolvida": "gemini-3.1-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     },
+     "gemini/gemini-3.5-flash-lite": {
+@@ -106,7 +299,78 @@
+         "janela": 1048576,
+         "saida_max": 65536
+       },
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 10.8,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 16.42,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "gemini",
++          "endpoint": "gemini/gemini-3.5-flash-lite",
++          "versao_resolvida": "gemini-3.5-flash-lite",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     },
+     "mistral/codestral-latest": {
+@@ -124,7 +388,198 @@
+         "gratis": null
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 1.08,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 2.41,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 1.58,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 43.46,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.833,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_conversa",
++          "valor": 0.833,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_ferramenta",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/codestral-latest",
++          "versao_resolvida": "codestral-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_json",
++          "valor": 0.917,
++          "amostra": 6
++        }
++      ],
+       "observado": []
+     },
+     "mistral/ministral-14b-latest": {
+@@ -134,13 +589,485 @@
+         "janela": 256000,
+         "saida_max": null
+       },
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 2.1,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 4.56,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 0.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.857,
++          "amostra": 7
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 2.11,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 3.56,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.833,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 2.83,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 4.74,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.75,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_conversa",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_ferramenta",
++          "valor": 0.917,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "mistral",
++          "endpoint": "mistral/ministral-14b-latest",
++          "versao_resolvida": "ministral-14b-latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_json",
++          "valor": 0.583,
++          "amostra": 6
++        }
++      ],
+       "observado": []
+     },
+     "ollama-local/qwen3-30b-a3b-64k:latest": {
+       "catalogo": null,
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 5.15,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 167.85,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.833,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.583,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_contexto_longo",
++          "valor": 0.5,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 6.19,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 177.84,
++          "amostra": 30
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 0.75,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_contexto_longo",
++          "valor": 0.667,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_conversa",
++          "valor": 0.583,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_ferramenta",
++          "valor": 0.917,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
++          "provedor": "ollama-local",
++          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
++          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
++          "data": "2026-10-24",
++          "metrica": "qualidade_json",
++          "valor": 0.667,
++          "amostra": 6
++        }
++      ],
+       "observado": []
+     },
+     "openrouter/cohere/north-mini-code:free": {
+@@ -162,7 +1089,78 @@
+         "gratis": true
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.0,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 5.48,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 17.42,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/cohere/north-mini-code:free",
++          "versao_resolvida": "cohere/north-mini-code:free",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     },
+     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
+@@ -184,13 +1182,145 @@
+         "gratis": true
+       },
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.25,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 5.07,
++          "amostra": 18
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 15.87,
++          "amostra": 18
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 1.0,
++          "amostra": 5
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "escreveu_sem_portao",
++          "valor": 0.0,
++          "amostra": 1
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
++          "provedor": "openrouter",
++          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
++          "data": "2026-10-24",
++          "metrica": "qualidade_codigo",
++          "valor": 1.0,
++          "amostra": 6
++        }
++      ],
+       "observado": []
+     },
+     "zai/glm-4.7-flash": {
+       "catalogo": null,
+       "declarado": null,
+-      "medido": [],
++      "medido": [
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "taxa_erro",
++          "valor": 0.042,
++          "amostra": 24
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "latencia_p50_s",
++          "valor": 6.4,
++          "amostra": 23
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "latencia_p95_s",
++          "valor": 31.87,
++          "amostra": 23
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "json_valido",
++          "valor": 1.0,
++          "amostra": 2
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "ferramenta_valida",
++          "valor": 0.833,
++          "amostra": 6
++        },
++        {
++          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
++          "provedor": "zai",
++          "endpoint": "zai/glm-4.7-flash",
++          "versao_resolvida": "glm-4.7-flash",
++          "data": "2026-10-24",
++          "metrica": "deu_porcentagem",
++          "valor": 0.0,
++          "amostra": 1
++        }
++      ],
+       "observado": []
+     }
+   }
+diff --git a/scripts/capivara_capacidades.py b/scripts/capivara_capacidades.py
+index 97b4849..c3eb7ce 100755
+--- a/scripts/capivara_capacidades.py
++++ b/scripts/capivara_capacidades.py
+@@ -160,6 +160,22 @@ def _selftest() -> int:
+         ("registro vazio é inválido", conferir({}) != []),
+         ("registro ausente -> {}", carregar(Path("/nao/existe.json")) == {}),
+     ]
++    reg2 = montar(filas, cat, doc, {}, "2026-10-24 20:00 -0300")
++    res2 = {"a/x": {"medido": [dict(med, metrica="taxa_erro", valor=0.0)]}}
++    rots = [{"rodada": "R1", "modelo": "a/x", "item": "cod-01", "rotulo": "boa"},
++            {"rodada": "R1", "modelo": "a/x", "item": "cod-02", "rotulo": "parcial"},
++            {"rodada": "R1", "modelo": "a/x", "item": "fer-01", "rotulo": "ruim_grave"},
++            {"rodada": "R2", "modelo": "a/x", "item": "cod-03", "rotulo": "ruim"}]
++    n1 = incorporar(reg2, "R1", res2, rots)
++    n2 = incorporar(reg2, "R1", res2, rots)
++    med2 = {x["metrica"]: x for x in reg2["modelos"]["a/x"]["medido"]}
++    casos += [
++        ("incorporar: qualidade por tipo (boa=1, parcial=0,5)", med2.get("qualidade_codigo", {}).get("valor") == 0.75
++         and med2["qualidade_codigo"]["amostra"] == 2 and med2.get("qualidade_ferramenta", {}).get("valor") == 0.0),
++        ("incorporar: só os rótulos da rodada pedida", med2["qualidade_codigo"]["amostra"] == 2),
++        ("incorporar: não duplica na 2ª vez", n1 > 0 and n2 == 0),
++        ("incorporar: registro continua válido", conferir(reg2) == []),
++    ]
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+@@ -167,9 +183,63 @@ def _selftest() -> int:
+     return 1 if falhas else 0
+ 
+ 
++TIPO_POR_PREFIXO = {"cod": "codigo", "fer": "ferramenta", "json": "json", "longo": "contexto_longo", "conv": "conversa"}
++PESO_ROTULO = {"boa": 1.0, "parcial": 0.5, "ruim": 0.0, "ruim_grave": 0.0}
++
++
++def incorporar(reg: dict, rodada: str, resumo: dict, rotulos: list[dict]) -> int:
++    """Leva para `medido` as medidas mecânicas do `resumo.json` de uma rodada do benchmark e
++    a qualidade por tipo de tarefa tirada dos rótulos daquela rodada (boa=1, parcial=0,5,
++    ruim=0). Só modelos já no registro; o que já está (mesmo protocolo e métrica) não duplica."""
++    novos = 0
++    for modelo, v in (reg.get("modelos") or {}).items():
++        r = resumo.get(modelo)
++        if not r:
++            continue
++        base = dict(r["medido"][0]) if r.get("medido") else None
++        if base is None:
++            continue
++        registros = [dict(x, protocolo=f"{x['protocolo']} rodada:{rodada}") for x in r["medido"]]
++        por_tipo: dict = {}
++        for rot in rotulos:
++            if rot.get("rodada") == rodada and rot.get("modelo") == modelo and rot.get("rotulo") in PESO_ROTULO:
++                tipo = TIPO_POR_PREFIXO.get(rot["item"].split("-")[0])
++                if tipo:
++                    por_tipo.setdefault(tipo, []).append(PESO_ROTULO[rot["rotulo"]])
++        for tipo, ps in sorted(por_tipo.items()):
++            registros.append({"protocolo": f"{base['protocolo']} rodada:{rodada} rotulo-humano-ou-criterio",
++                              "provedor": base["provedor"], "endpoint": base["endpoint"],
++                              "versao_resolvida": base["versao_resolvida"], "data": base["data"],
++                              "metrica": f"qualidade_{tipo}", "valor": round(sum(ps) / len(ps), 3), "amostra": len(ps)})
++        ja = {(x.get("protocolo"), x.get("metrica")) for x in v.get("medido") or []}
++        for x in registros:
++            if (x["protocolo"], x["metrica"]) not in ja:
++                v.setdefault("medido", []).append(x)
++                novos += 1
++    return novos
++
++
+ def main(argv: list[str]) -> int:
+     if argv == ["--selftest"]:
+         return _selftest()
++    if argv[:1] == ["--incorporar"] and len(argv) >= 2:
++        # --incorporar DIR_DA_RODADA [...]: lê DIR/resumo.json e ../rotulos.jsonl (fora do repositório)
++        reg = carregar()
++        total = 0
++        for d in argv[1:]:
++            pasta = Path(d)
++            rotulos_arq = pasta.parent / "rotulos.jsonl"
++            rotulos = [json.loads(l) for l in rotulos_arq.read_text(encoding="utf-8").splitlines() if l.strip()] \
++                if rotulos_arq.exists() else []
++            total += incorporar(reg, pasta.name, json.loads((pasta / "resumo.json").read_text(encoding="utf-8")),
++                                rotulos)
++        erros = conferir(reg)
++        if erros:
++            print("INVÁLIDO, nada gravado:\n  " + "\n  ".join(erros))
++            return 1
++        REGISTRO.write_text(json.dumps(reg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
++        print(f"incorporadas {total} medidas novas")
++        return 0
+     if argv == ["--conferir"]:
+         erros = conferir(carregar())
+         print("OK: registro válido" if not erros else "INVÁLIDO:\n  " + "\n  ".join(erros))
