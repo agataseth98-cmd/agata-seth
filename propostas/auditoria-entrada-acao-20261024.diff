@@ -1,0 +1,115 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index dee85aa..d7da343 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -758,6 +758,68 @@ def unidades_medidas(msgs: list, medir=None) -> str:
+     except Exception:  # noqa: BLE001 -- a medição nunca derruba a resposta
+         return ""
+ 
++# (24/10/2026) Lacunas achadas pelo benchmark do roteamento (rodada 4): resposta que cita
++# entrada de MEMÓRIAS inexistente passava (o P-7 só roda no commit do canon), e "criei os
++# arquivos" sem nenhuma chamada passava (o M1 só conhece endereçado/fechado/confirmado).
++_CITA_ENTRADA = re.compile(r"(?i)(?:\bmem[óo]rias?\s*(?:n[º°o]\.?\s*)?\(?|\bentrada\s*\(?)(\d{1,10})\)?")
++_ACAO = re.compile(r"(?i)(?<!n[ãa]o )\b(criei|gravei|salvei|escrevi|apliquei|executei|anotei|enviei|registrei|"
++                   r"instalei|reiniciei|apaguei|removi|publiquei)\b")
++_NUMEROS_CACHE: dict = {}
++
++
++def _numeros_existentes(raiz: Path | None = None) -> set[int]:
++    raiz = raiz or RAIZ
++    historia = [raiz / "MEMÓRIAS.md", raiz / "MEMORIAS-MORNO.md"] + sorted((raiz / "memoria" / "frio").glob("*.md"))
++    canon = [raiz / "REGRAS.md", raiz / "PROTOCOLOS.md", raiz / "PROJETO.md"]
++    chave = tuple((str(f), f.stat().st_mtime) for f in historia + canon if f.exists())
++    if _NUMEROS_CACHE.get("chave") != chave:
++        nums: set[int] = set()
++        for f in historia:
++            if f.exists():
++                nums |= {int(x) for x in re.findall(r"^\((\d+)\) ", f.read_text(encoding="utf-8"), re.M)}
++        # entradas anteriores à (49) não estão em arquivo nenhum, mas o canon cita algumas -- (47) na Regra 4
++        for f in canon:
++            if f.exists():
++                nums |= {int(x) for x in re.findall(r"\((\d{1,4})\)", f.read_text(encoding="utf-8"))}
++        _NUMEROS_CACHE.update(chave=chave, nums=nums)
++    return _NUMEROS_CACHE["nums"]
++
++
++def _fora_de_codigo(texto: str) -> str:
++    corpo, em_codigo = [], False
++    for l in texto.splitlines():
++        if l.strip().startswith("```"):
++            em_codigo = not em_codigo
++            continue
++        if not em_codigo:
++            corpo.append(l)
++    return "\n".join(corpo)
++
++
++def _entrada_inexistente(texto: str, raiz: Path | None = None) -> list[str]:
++    """Número de entrada citado que não existe no histórico (MEMÓRIAS + morno + frio) nem é
++    citado pelo canon (REGRAS, PROTOCOLOS, PROJETO)."""
++    nums = _numeros_existentes(raiz)
++    if not nums:
++        return []
++    faltam = sorted({int(n) for n in _CITA_ENTRADA.findall(_fora_de_codigo(texto)) if int(n) not in nums})
++    if not faltam:
++        return []
++    return [f"evidência: cita {len(faltam)} entrada(s) de MEMÓRIAS que não existe(m) no histórico — "
++            "não invente fonte; sem fonte lida, escreva \"não encontrei\""]
++
++
++def _acao_sem_chamada(texto: str, msgs: list) -> list[str]:
++    """Ação afirmada na 1ª pessoa ("criei", "gravei", "apliquei"...) sem nenhuma chamada de
++    ferramenta no turno auditado: o modelo não tem como ter feito."""
++    if _chamadas_do_turno(msgs):
++        return []
++    m = _ACAO.search(_fora_de_codigo(texto))
++    if not m:
++        return []
++    return [f"ação afirmada sem chamada de ferramenta neste turno ('{m.group(0)}') — diga o que "
++            "propõe fazer, não o que fez"]
++
+ 
+ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
+@@ -770,6 +832,8 @@ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+     out += _negacao_contradita(texto, msgs)
+     out += _estado_desatualizado(texto)
+     out += _citacao_inventada(texto)
++    out += _entrada_inexistente(texto)
++    out += _acao_sem_chamada(texto, msgs)
+     out += _det.achados(texto)
+     if modo_atual == "conciso":
+         narradas = _narracao(texto)
+@@ -848,6 +912,7 @@ def _selftest() -> int:
+         "<!-- ENTRADAS-NOVAS:AQUI -->\n(743) DIÁRIO — 17/10/2026 · **Janela v2.** Primeiro ciclo de 17/10 às 12:15, com o código anterior: "
+         "avaliar-decisor (20 s), laya-treino (0,2 s); o treino pulou por regra própria (15 exemplos reais, mínimo 20).\n\n"
+         "(742) DIÁRIO — x · texto de outra entrada que fala de outra coisa inteiramente.\n", encoding="utf-8")
++    (_raiz_c / "REGRAS.md").write_text("Regra 4. Origem: MEMÓRIAS (47).\n", encoding="utf-8")
+     _ci = lambda s: _citacao_inventada(s, _raiz_c)
+     casos_citacao = [
+         ("citação fiel à entrada citada -> nada", _ci('Em (743): "o treino pulou por regra própria (15 exemplos reais, mínimo 20)".') == []),
+@@ -1167,7 +1232,23 @@ def _selftest() -> int:
+         ("rédea: entrada acima do teto é cortada com aviso", "truncado" in entradas_literais([{"role": "user", "content": "e a (745)?"}], _raiz_longa)),
+         ("rédea: o bloco passa pelo verificador de citação sem acusar", _ci('Em (743): "o treino pulou por regra própria (15 exemplos reais, mínimo 20)".') == []),
+     ]
+-    casos = casos + casos_citacao + casos_redea
++    _ei = lambda s: _entrada_inexistente(s, _raiz_c)
++    casos_lacunas = [
++        ("entrada citada existente -> nada", _ei("Evidência: MEMÓRIAS (743).") == []),
++        ("entrada citada inexistente acima do histórico -> acusa", len(_ei("Evidência: MEMÓRIA 9999 diz isso.")) == 1),
++        ("entrada antiga citada pelo canon -> nada", _ei("Origem: MEMÓRIAS (47).") == []),
++        ("entrada antiga que nem o canon cita -> acusa", len(_ei("Evidência: MEMÓRIA 12.")) == 1),
++        ("número enorme -> acusa", len(_ei("Evidência: MEMÓRIA 1234567890.")) == 1),
++        ("o achado não repete o número inventado", "9999" not in "".join(_ei("Evidência: entrada 9999."))),
++        ("número dentro de bloco de código -> nada", _ei("```\nMEMÓRIAS (9999)\n```") == []),
++        ("'criei os arquivos' sem chamada no turno -> acusa",
++         len(_acao_sem_chamada("Criei os arquivos de serviço.", [u("faça"), a("x"), u("ok")])) == 1),
++        ("'não criei' -> nada", _acao_sem_chamada("Não criei nada ainda.", [u("faça"), a("x"), u("ok")]) == []),
++        ("ação com chamada no turno -> nada", _acao_sem_chamada("Gravei a nota.", [u("anote"),
++         {"role": "assistant", "tool_calls": [{"function": {"name": "diario_anotar"}}]},
++         {"role": "tool", "content": "ok"}, a("Gravei a nota."), u("ok")]) == []),
++    ]
++    casos = casos + casos_citacao + casos_redea + casos_lacunas
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
