@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
 Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0a4cc76501efe59ef43de63dbc30de07cf6d908a
-  Escrito em: 24/10/2026 13:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c
+  Escrito em: 24/10/2026 14:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4cc76501efe59ef43de63dbc30de07cf6d908a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4cc76501efe59ef43de63dbc30de07cf6d908a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4cc76501efe59ef43de63dbc30de07cf6d908a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4cc76501efe59ef43de63dbc30de07cf6d908a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0a4cc76501efe59ef43de63dbc30de07cf6d908a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ed89f272c38a94f51d55b3d41a92e1e4ddb7e5c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -56,7 +56,7 @@ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada
 Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/modelos-gratuitos.md` — não este texto.
 - **Seth (conversa e agente):** cascatas grátis do OmniRoute (`strategy: priority`). Remotos primeiro, Ollama no fundo (546)/(547); desde 03/10/2026 sem Groq nas 3 filas do LibreChat e sem `llama-cpp/*` em fila automática nenhuma (648)/(649). Ordem viva por rota: `config/modelos-gratuitos.md`. O Laya escolhe a fila no `seth_gateway`, com fallback pela regra de tamanho quando indisponível, lento ou inseguro; as travas determinísticas prevalecem. O Jev acompanha em sombra. Detalhes em "Decisor local". Goose usa o combo próprio `seth-codigo`.
 - **Local principal: `qwen3.5-9b-64k`** (Ollama, `custom:qwen-local-ctx-override`) — nunca a tag oficial `qwen3.5:9b`, que reproduz o bug de `num_ctx` (121). Convenção: `PARAMETER num_ctx 65536` em Modelfile próprio, tag `-64k`, porque o endpoint OpenAI-compatível do Ollama ignora `num_ctx` por desenho ([`ollama/ollama#16814`](https://github.com/ollama/ollama/issues/16814); (133)-(135)). VRAM de pico em uso real: 89-92% dos 8.188 MiB (log em `~/agata_vram_producao_*.log`). **Regime de auditoria** desde (140): cada resposta é auditada pelo Humano; sai do regime quando o Humano pedir, evento e não prazo (141).
-- **Fundo local da cadeia da Seth:** `ollama-local/qwen3.5-9b-64k:latest`, pela connection `ollama-local` (`:11434`) do OmniRoute; entra só se todos os remotos falharem (402)/(403).
+- **Fundo local da cadeia da Seth:** `ollama-local/qwen3-30b-a3b-64k:latest` (MoE, sob demanda, desde 24/10/2026), pela connection `ollama-local` (`:11434`) do OmniRoute; entra só se todos os remotos falharem (402)/(403).
 - **Locais sob demanda (`llama.cpp`):** `llamacpp-agata` (MoE `Qwen3-30B-A3B-Instruct-2507`, `:20129`, `--n-cpu-moe 36`, ~31 tok/s, `PartOf` sem `WantedBy`) e 4 modelos de 20/09/2026 — `nemotron-3.5-lightning` (geral), `qwen3-coder-30b-a3b` (código), `phi-4-mini` (leve), `gpt-oss-20b` (agentic, quant `ggml-org` MXFP4; o `unsloth` Q4_K_M trava o sampler). Um serviço systemd cada; não cabem todos ao mesmo tempo; com o local principal na GPU, subir outro pode falhar por VRAM — limite de hardware, não bug (611). **Fora de todo caminho automático desde 03/10/2026** (combos e Conselho Remoto, (649)): um que voltou sozinho depois de OOM empurrou o Ollama para a CPU (648). `llamacpp@.service` não tem `Restart` nem `[Install]`: só sobe à mão, depois de conferir `nvidia-smi`. Portas e ressalvas: `config/modelos-gratuitos.md`, `config/portas-agata.txt`.
 - **`gemini-2.5-flash`** (Google API, grátis, ~20 requisições/dia): alívio quando o local falha (140).
 - **Último recurso manual:** `llama3.1:8b` — sem tool-calling, fora da cadeia.

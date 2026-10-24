@@ -1,12 +1,12 @@
 {
   "_como_usar": "Gerado por scripts/capivara_capacidades.py. Não muda rota: o gateway não lê este arquivo. `medido` e `observado` só recebem registros com proveniência completa (metrica, valor, protocolo, amostra, provedor, endpoint, versao_resolvida, data).",
-  "gerado_em": "2026-10-23 13:41 -0300",
+  "gerado_em": "2026-10-24 13:42 -0300",
   "filas": {
     "seth-rapido": [
       "mistral/ministral-14b-latest",
       "gemini/gemini-3.5-flash-lite",
       "gemini/gemini-3.1-flash-lite",
-      "ollama-local/qwen3.5-9b-64k:latest"
+      "ollama-local/qwen3-30b-a3b-64k:latest"
     ],
     "seth-livre": [
       "mistral/ministral-14b-latest",
@@ -15,26 +15,26 @@
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "zai/glm-4.7-flash",
       "gemini/gemini-3-flash-preview",
-      "ollama-local/qwen3.5-9b-64k:latest"
+      "ollama-local/qwen3-30b-a3b-64k:latest"
     ],
     "seth-pesado": [
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "gemini/gemini-2.5-flash",
-      "ollama-local/qwen3.5-9b-64k:latest"
+      "ollama-local/qwen3-30b-a3b-64k:latest"
     ],
     "seth-codigo": [
       "mistral/codestral-latest",
       "gemini/gemini-3-flash-preview",
       "openrouter/cohere/north-mini-code:free",
       "zai/glm-4.7-flash",
-      "ollama-local/qwen3.5-9b-64k:latest"
+      "ollama-local/qwen3-30b-a3b-64k:latest"
     ]
   },
   "modelos": {
     "gemini/gemini-2.5-flash": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-2.5-flash",
         "janela": 1048576,
@@ -57,7 +57,7 @@
     "gemini/gemini-3-flash-preview": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3-flash-preview",
         "janela": 1048576,
@@ -80,7 +80,7 @@
     "gemini/gemini-3.1-flash-lite": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3.1-flash-lite",
         "janela": 1048576,
@@ -113,7 +113,7 @@
     "mistral/codestral-latest": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "mistral",
         "id_resolvido": "codestral-latest",
         "janela": 128000,
@@ -138,7 +138,7 @@
       "medido": [],
       "observado": []
     },
-    "ollama-local/qwen3.5-9b-64k:latest": {
+    "ollama-local/qwen3-30b-a3b-64k:latest": {
       "catalogo": null,
       "declarado": null,
       "medido": [],
@@ -147,7 +147,7 @@
     "openrouter/cohere/north-mini-code:free": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "openrouter",
         "id_resolvido": "cohere/north-mini-code:free",
         "janela": 256000,
@@ -169,7 +169,7 @@
     "openrouter/nvidia/nemotron-3-super-120b-a12b:free": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "openrouter",
         "id_resolvido": "nvidia/nemotron-3-super-120b-a12b:free",
         "janela": 262144,
@@ -191,7 +191,7 @@
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-23 13:41 -0300",
+        "lido_em": "2026-10-24 13:42 -0300",
         "provedor": "openrouter",
         "id_resolvido": "nvidia/nemotron-3-ultra-550b-a55b:free",
         "janela": 1000000,
