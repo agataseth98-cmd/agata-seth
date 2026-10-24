@@ -1,0 +1,235 @@
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index 88c775b..dd3a3cf 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -53,6 +53,7 @@ jobs:
+           python3 -I redesign/router/registro_pedidos.py --selftest
+           python3 -I scripts/benchmark_roteamento.py --selftest
+           python3 -I scripts/queda_por_elo.py --selftest
++          python3 -I redesign/router/sombra_capacidade.py --selftest
+ 
+       # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
+       # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 62a7356..9953a67 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -601,6 +601,7 @@ import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
+ import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
+ import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
+ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteamento, 23/10/2026; desligado por padrão)
++import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
+ import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+ 
+ _PERFIS = {"mtime": None, "dados": {}}
+@@ -970,6 +971,12 @@ class _Handler(BaseHTTPRequestHandler):
+                     if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
+                             payload.get("messages") or []):
+                         _sombra_rota(payload, self._rota, laya)
++                        # passos 3-4 do roteamento por capacidade: só registra a recomendação (sombra)
++                        if sombra_capacidade.ligado():
++                            _pf = _perfis()
++                            sombra_capacidade.registrar(payload, self._rota,
++                                                        {m: capivara_perfis.janela(_pf, m)
++                                                         for m in (_pf.get("modelos") or {})})
+                     payload["model"] = self._rota
+                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
+                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
+diff --git a/redesign/router/sombra_capacidade.py b/redesign/router/sombra_capacidade.py
+new file mode 100644
+index 0000000..41f724e
+--- /dev/null
++++ b/redesign/router/sombra_capacidade.py
+@@ -0,0 +1,192 @@
++#!/usr/bin/env python3
++"""sombra_capacidade.py — roteamento por capacidade, passos 3 e 4, só em SOMBRA.
++
++V9, seção 35; desenho em "Área de trabalho/DESENHO_roteamento_por_capacidade_rascunho.md".
++Não muda rota nenhuma: registra, ao lado da rota que o Laya escolheu, qual modelo o
++registro de capacidades recomendaria. Os dados para comparar vão para
++`~/.cache/agata/decisor/roteador-capacidade.jsonl`, sem o texto do pedido.
++
++Passo 3 (requisitos, mecânico antes de modelo): o Laya é um classificador de 4 classes
++e não devolve requisitos sem novo treino. Por isso os requisitos saem do próprio pedido:
++tokens estimados, ferramentas, código, JSON e dado pessoal (régua do `sanitizar.py`).
++
++Passo 4 (escolha em sombra), com uma política PROVISÓRIA (os pisos são decisão do Humano):
++- candidatos = a fila da classe, na ordem do OmniRoute (`filas` do registro);
++- filtros duros: janela >= tokens estimados; se há dado pessoal, só modelo local;
++- entre os que passam, sobe o de maior `qualidade_<tipo>` medida >= PISO (o tipo vem dos
++  requisitos; empate = menor latência p50); sem medida acima do piso, vale a ordem da fila;
++- nenhum candidato passa -> recomenda o 1º da fila, com o motivo.
++
++Desligado por padrão: só roda com `SETH_SOMBRA_CAPACIDADE=1`. Nunca derruba a resposta.
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++import sys
++import threading
++import time
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++RAIZ = Path(os.environ.get("SETH_REPO", str(AQUI.parents[1])))
++REGISTRO = RAIZ / "config" / "capivara" / "capacidades.json"
++LOG = Path(os.path.expanduser("~/.cache/agata/decisor/roteador-capacidade.jsonl"))
++PISO = 0.7                 # provisório; o piso de qualidade por tarefa é decisão do Humano
++TOKENS_LONGO = 30000
++CHARS_POR_TOKEN = 3.5
++LOCAL = "ollama-local/"
++_RE_CODIGO = re.compile(r"```|\b(def|class|function|import|bash|python|script|stack ?trace|traceback|regex)\b", re.I)
++_RE_JSON = re.compile(r"\bjson\b", re.I)
++_TRAVA = threading.Semaphore(1)
++
++
++def ligado() -> bool:
++    return os.environ.get("SETH_SOMBRA_CAPACIDADE") == "1"
++
++
++def _texto(conteudo) -> str:
++    if isinstance(conteudo, str):
++        return conteudo
++    if isinstance(conteudo, list):
++        return "\n".join(p.get("text", "") for p in conteudo if isinstance(p, dict) and p.get("type") == "text")
++    return ""
++
++
++def requisitos(payload: dict, varrer_pessoal=None) -> dict:
++    msgs = payload.get("messages") or []
++    total = sum(len(_texto(m.get("content"))) for m in msgs if isinstance(m, dict))
++    ultima = next((_texto(m.get("content")) for m in reversed(msgs)
++                   if isinstance(m, dict) and m.get("role") == "user"), "")
++    if varrer_pessoal is None:
++        sys.path.insert(0, str(AQUI))
++        import sanitizar  # noqa: E402
++        varrer_pessoal = lambda t: sanitizar.varrer_pessoal(t, sanitizar._nomes_projeto())  # noqa: E731
++    r = {"tokens_est": int(total / CHARS_POR_TOKEN), "ferramentas": bool(payload.get("tools")),
++         "codigo": bool(_RE_CODIGO.search(ultima)), "json": bool(_RE_JSON.search(ultima)),
++         "privado": bool(varrer_pessoal(ultima))}
++    r["tipo"] = ("codigo" if r["codigo"] else "json" if r["json"]
++                 else "contexto_longo" if r["tokens_est"] > TOKENS_LONGO else "conversa")
++    return r
++
++
++def _ultima(medidas: list, metrica: str):
++    vals = [x for x in medidas or [] if x.get("metrica") == metrica]
++    return vals[-1]["valor"] if vals else None
++
++
++def _janela(info: dict, perfil_janela) -> int | None:
++    cat = info.get("catalogo") or {}
++    return cat.get("janela") or (info.get("declarado") or {}).get("janela") or perfil_janela
++
++
++def recomendar(req: dict, rota: str, registro: dict, janelas: dict | None = None) -> dict:
++    base = rota.removesuffix("-longo")
++    fila = (registro.get("filas") or {}).get(base) or []
++    modelos = registro.get("modelos") or {}
++    janelas = janelas or {}
++    if not fila:
++        return {"recomendado": None, "motivo": f"fila {base} fora do registro"}
++    passa, motivos = [], []
++    for m in fila:
++        info = modelos.get(m) or {}
++        j = _janela(info, janelas.get(m))
++        if j is not None and j < req["tokens_est"]:
++            motivos.append(f"{m}: janela {j} < {req['tokens_est']}")
++            continue
++        if req["privado"] and not m.startswith(LOCAL):
++            motivos.append(f"{m}: dado pessoal, só local")
++            continue
++        passa.append(m)
++    if not passa:
++        return {"recomendado": fila[0], "motivo": "nenhum candidato passa nos filtros; fica o 1º da fila",
++                "descartes": motivos}
++
++    def chave(m):
++        med = (modelos.get(m) or {}).get("medido")
++        q = _ultima(med, f"qualidade_{req['tipo']}")
++        lat = _ultima(med, "latencia_p50_s")
++        if q is not None and q >= PISO:          # medido acima do piso: o melhor sobe
++            return (0, -q, lat if lat is not None else 1e9, fila.index(m))
++        return (1, fila.index(m))                # sem medida ou abaixo do piso: vale a ordem da fila
++    melhor = sorted(passa, key=chave)[0]
++    q = _ultima((modelos.get(melhor) or {}).get("medido"), f"qualidade_{req['tipo']}")
++    return {"recomendado": melhor, "motivo": f"qualidade_{req['tipo']}={q}" if q is not None
++            else "sem medida de qualidade; ordem da fila", "descartes": motivos}
++
++
++def _carregar() -> dict:
++    try:
++        return json.loads(REGISTRO.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return {}
++
++
++def registrar(payload: dict, rota: str, janelas: dict | None = None) -> None:
++    """Dispara a sombra sem esperar; uma por vez. Nunca levanta."""
++    if not ligado() or not _TRAVA.acquire(blocking=False):
++        return
++
++    def _rodar():
++        try:
++            req = requisitos(payload)
++            reg = _carregar()
++            rec = recomendar(req, rota, reg, janelas)
++            fila = (reg.get("filas") or {}).get(rota.removesuffix("-longo")) or []
++            linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota, "primeiro_da_fila": fila[0] if fila else None,
++                     "recomendado": rec.get("recomendado"), "difere": bool(fila) and rec.get("recomendado") != fila[0],
++                     "motivo": rec.get("motivo"), "requisitos": req}
++            LOG.parent.mkdir(parents=True, exist_ok=True)
++            with open(LOG, "a", encoding="utf-8") as f:
++                f.write(json.dumps(linha, ensure_ascii=False) + "\n")
++        except Exception as e:  # noqa: BLE001
++            print(f"sombra_capacidade: não registrou ({e.__class__.__name__})", file=sys.stderr, flush=True)
++        finally:
++            _TRAVA.release()
++    threading.Thread(target=_rodar, daemon=True).start()
++
++
++def _selftest() -> int:
++    nada = lambda t: []  # noqa: E731
++    pessoal = lambda t: [1] if "@" in t else []  # noqa: E731
++    reg = {"filas": {"seth-livre": ["r/a", "r/b", LOCAL + "m"]},
++           "modelos": {"r/a": {"catalogo": {"janela": 128000}, "medido": [
++                           {"metrica": "qualidade_codigo", "valor": 0.6}, {"metrica": "latencia_p50_s", "valor": 2}]},
++                       "r/b": {"catalogo": {"janela": 256000}, "medido": [
++                           {"metrica": "qualidade_codigo", "valor": 0.9}, {"metrica": "latencia_p50_s", "valor": 5},
++                           {"metrica": "qualidade_conversa", "valor": 0.8}]},
++                       LOCAL + "m": {"catalogo": None, "medido": [{"metrica": "qualidade_codigo", "valor": 0.75}]}}}
++    p = lambda txt, tools=True: {"messages": [{"role": "user", "content": txt}], "tools": [1] if tools else []}  # noqa: E731
++    rq = requisitos(p("escreva um script python"), nada)
++    rp = requisitos(p("meu email é a@b.c, resuma"), pessoal)
++    grande = requisitos({"messages": [{"role": "user", "content": "x" * 600000}]}, nada)
++    casos = [
++        ("requisito: código detectado", rq["codigo"] and rq["tipo"] == "codigo" and rq["ferramentas"]),
++        ("requisito: JSON detectado", requisitos(p("devolva só json"), nada)["tipo"] == "json"),
++        ("requisito: dado pessoal marca privado", rp["privado"]),
++        ("requisito: tokens estimados", grande["tokens_est"] == int(600000 / CHARS_POR_TOKEN)),
++        ("escolhe a maior qualidade do tipo acima do piso", recomendar(rq, "seth-livre", reg)["recomendado"] == "r/b"),
++        ("privado: só local", recomendar(rp, "seth-livre", reg, {LOCAL + "m": 65536})["recomendado"] == LOCAL + "m"),
++        ("janela pequena descarta", recomendar(grande, "seth-livre", reg, {LOCAL + "m": 65536})["recomendado"] == "r/b"),
++        ("ninguém passa -> 1º da fila, com motivo",
++         recomendar(dict(grande, privado=True), "seth-livre", reg, {LOCAL + "m": 65536})["recomendado"] == "r/a"),
++        ("abaixo do piso não passa na frente de quem vem antes na fila",
++         recomendar(requisitos(p("oi"), nada), "seth-livre", {"filas": reg["filas"], "modelos": {
++             "r/a": {"medido": [{"metrica": "qualidade_conversa", "valor": 0.5}]}, "r/b": {}}})["recomendado"] == "r/a"),
++        ("fila -longo usa a fila base", recomendar(rq, "seth-livre-longo", reg)["recomendado"] == "r/b"),
++        ("fila fora do registro -> sem recomendação", recomendar(rq, "seth-x", reg)["recomendado"] is None),
++        ("desligado por padrão", os.environ.get("SETH_SOMBRA_CAPACIDADE") == "1" or not ligado()),
++    ]
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    if sys.argv[1:] == ["--selftest"]:
++        sys.exit(_selftest())
++    print(__doc__)
++    sys.exit(2)
