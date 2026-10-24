@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0030e0f1d6825344e67360bda29dbd2436794e63
-  Escrito em: 24/10/2026 17:28 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 62a05e243b6012f18df0371d5252d8846d44261b
+  Escrito em: 24/10/2026 18:44 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0030e0f1d6825344e67360bda29dbd2436794e63/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0030e0f1d6825344e67360bda29dbd2436794e63/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0030e0f1d6825344e67360bda29dbd2436794e63/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0030e0f1d6825344e67360bda29dbd2436794e63/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0030e0f1d6825344e67360bda29dbd2436794e63/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/62a05e243b6012f18df0371d5252d8846d44261b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/62a05e243b6012f18df0371d5252d8846d44261b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/62a05e243b6012f18df0371d5252d8846d44261b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/62a05e243b6012f18df0371d5252d8846d44261b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/62a05e243b6012f18df0371d5252d8846d44261b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(835) DIÁRIO — 24/10/2026 · **O `queda_por_elo` passa a separar limite de uso de modelo morto (`LIMITE_PROVAVEL`). Também: o VAZIO do Nemotron Ultra no modo agente era a cota gratuita do OpenRouter esgotada pelo próprio benchmark, e não falha do modelo.** Aplica `queda-elo-limite-20261024`, assinado pelo Humano. Em 24/10, no teste em modo agente de 11 candidatos ao elo 0 da `seth-pesado`, os 7 modelos do OpenRouter saíram VAZIO com o mesmo padrão (~38 s, ~20 s, 429). Sem stream, o mesmo pedido voltou 429 "All credentials ... are cooling down". A rodada 3 mandou cerca de 120 pedidos ao OpenRouter, contra uma cota de cerca de 50 por dia (546), e essa cota é a mesma da Seth. O Claude Code tinha concluído antes que o Ultra "falha no modo agente"; a conclusão estava errada e foi corrigida ao Humano. Fora do OpenRouter: Mistral Large deu 400 (não está no catálogo da conta), Mistral Medium 3.5 deu 429 (limite da conta gratuita), DeepSeek v4 (`oc/`) deu 400 (indisponível) e Gemini 2.5 Flash-Lite deu 404/429. O controle (Ministral) passou: OK em 0,8 s. Regra de método, em memória: benchmark não gasta a cota `:free` do OpenRouter em dia de uso da Seth. A nova passada nos candidatos do OpenRouter está agendada para depois de 21h05, quando a cota deve zerar (inferência).
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `fortes-agente.log`; comparação com e sem stream na mesma carga; selftest; Ultra real com `LIMITE_PROVAVEL` em 38,3 s; PR 523 com CI verde · Autorização: Humano — "sim, siga com 2 e 3", "faça tudo hj" e "assinei no terminal, aplique"
+
 (834) CORREÇÃO — 24/10/2026 · **Correção de (833): onde ela diz que o `queda_por_elo` foi corrigido em "(829) e seguintes", o certo é (832). A (829) é a entrada do cartão de sistema do benchmark.** O PR 519 citado em (833) está certo; só o número da entrada estava errado. O Claude Code escreveu o número de memória, sem conferir no `grep`, e notou o erro logo depois, com a aplicação já em curso. Não edito o texto de (833), porque MEMÓRIAS é append-only (Regra 4). Medido: `grep` no MEMÓRIAS mostra que (832) começa com "O `queda_por_elo.py` dava falso alarme desde 20/10" e que (829) começa com "Cartão de sistema no executor do benchmark".
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `grep -o -E '^\(8[0-9]{2}\) DIÁRIO' MEMÓRIAS.md` · Autorização: Humano — "pode propor a entrada de correção, siga"
 
