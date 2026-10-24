@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9624a2269c7c422443d9e055be5227736c705c49
-  Escrito em: 24/10/2026 16:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4e23646900d150c72b211d270aaf58f38ecaea79
+  Escrito em: 24/10/2026 16:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9624a2269c7c422443d9e055be5227736c705c49/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9624a2269c7c422443d9e055be5227736c705c49/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9624a2269c7c422443d9e055be5227736c705c49/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9624a2269c7c422443d9e055be5227736c705c49/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9624a2269c7c422443d9e055be5227736c705c49/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e23646900d150c72b211d270aaf58f38ecaea79/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e23646900d150c72b211d270aaf58f38ecaea79/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e23646900d150c72b211d270aaf58f38ecaea79/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e23646900d150c72b211d270aaf58f38ecaea79/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e23646900d150c72b211d270aaf58f38ecaea79/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(834) CORREÇÃO — 24/10/2026 · **Correção de (833): onde ela diz que o `queda_por_elo` foi corrigido em "(829) e seguintes", o certo é (832). A (829) é a entrada do cartão de sistema do benchmark.** O PR 519 citado em (833) está certo; só o número da entrada estava errado. O Claude Code escreveu o número de memória, sem conferir no `grep`, e notou o erro logo depois, com a aplicação já em curso. Não edito o texto de (833), porque MEMÓRIAS é append-only (Regra 4). Medido: `grep` no MEMÓRIAS mostra que (832) começa com "O `queda_por_elo.py` dava falso alarme desde 20/10" e que (829) começa com "Cartão de sistema no executor do benchmark".
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `grep -o -E '^\(8[0-9]{2}\) DIÁRIO' MEMÓRIAS.md` · Autorização: Humano — "pode propor a entrada de correção, siga"
+
 (833) DIÁRIO — 24/10/2026 · **O Nemotron Super saiu da `seth-livre` (e da `-longo`): 0 de 24 no benchmark e VAZIO no teste das filas. A `seth-pesado` chegou a ser invertida e voltou à ordem de antes no mesmo dia, porque a recomendação tinha sido feita sem ler (654).** Aplica `filas-livre-pesado-20261024`, assinado pelo Humano. Com o `queda_por_elo` já corrigido (829 e seguintes; PR 519), o teste das filas mostrou que as 4 funcionam de ponta a ponta e que o MoE local responde em todas. Mortos com ferramentas (VAZIO): Nemotron Super, Nemotron Ultra (elo 0 da `seth-pesado`) e North-Mini-Code (elo 2 da `seth-codigo`). Com o OK do Humano, o Super saiu da `seth-livre`. O `gemini-2.5-flash` foi para o elo 0 da `seth-pesado` e, no mesmo dia, voltou à ordem de antes (Ultra, Gemini, MoE): o Claude Code recomendou a inversão sem ler (654), que tirou esse modelo do topo pela cota diária. O erro foi admitido ao Humano e virou memória de método. As cópias das filas estão em `~/.cache/agata/registros/combos-antes-20261024-161108.json`. Pendente: o elo 0 da `seth-pesado` falha no modo agente, e todo pedido pesado com ferramenta cai no Gemini 2.5 Flash, que tem cota curta.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `queda-por-elo-r4.log`; `GET`/`PUT /api/combos`; `capivara_perfis.py --sincronizar-filas`; leitura de (654) no morno; PR 520 com CI verde · Autorização: Humano — "sim, faça as mudanças 1 e 2", "sim, volte a seth-pesado à ordem de antes" e "assinei no terminal, aplique"
 
