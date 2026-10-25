@@ -1,5 +1,5 @@
 diff --git a/scripts/benchmark_roteamento.py b/scripts/benchmark_roteamento.py
-index 4fc49d3..16eeed2 100755
+index 4fc49d3..2deef0b 100755
 --- a/scripts/benchmark_roteamento.py
 +++ b/scripts/benchmark_roteamento.py
 @@ -33,7 +33,7 @@ vai como mensagem de sistema para todos os modelos, como a Seth recebe; sem ele,
@@ -11,7 +11,7 @@ index 4fc49d3..16eeed2 100755
    benchmark_roteamento.py --executar [mesmas opções] [--timeout 120] [--intervalo 3]
    benchmark_roteamento.py --selftest
  """
-@@ -158,13 +158,24 @@ def resumir(linhas: list[dict], data: str, corpus_sha: str) -> dict:
+@@ -158,16 +158,27 @@ def resumir(linhas: list[dict], data: str, corpus_sha: str) -> dict:
      return out
  
  
@@ -33,12 +33,16 @@ index 4fc49d3..16eeed2 100755
      corpo = {"model": modelo, "stream": False, "max_tokens": 4000, "messages": msgs}
 -    if usa_ferr:
 -        corpo["tools"] = FERRAMENTAS
-+    if usa_ferr:  # com o prompt real, os nomes da produção (o LibreChat acrescenta o sufixo do MCP)
++    if usa_ferr or sufixo:  # com o prompt real, sempre (o LibreChat sempre manda) e com os nomes da produção
 +        corpo["tools"] = [{"type": "function", "function": dict(f["function"], name=f["function"]["name"] + sufixo)}
 +                          for f in FERRAMENTAS]
      chamadas, total, uso = [], 0.0, []
      try:
-         for _ in range(2):  # no máximo uma volta de ferramenta
+-        for _ in range(2):  # no máximo uma volta de ferramenta
++        for _ in range(4 if sufixo else 2):  # prompt real: até 3 voltas (o LibreChat deixa várias); cartão: 1
+             d, s = chamar(corpo)
+             total += s
+             uso.append(d.get("usage") or {})
 @@ -178,7 +189,7 @@ def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str
              corpo["messages"] = corpo["messages"] + [msg]
              for tc in tcs:
