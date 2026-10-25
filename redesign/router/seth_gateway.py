@@ -601,6 +601,7 @@ import limpa_emoji  # noqa: E402  (mesmo diretório; E-2, 16/10/2026)
 import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/10/2026)
 import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
 import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteamento, 23/10/2026; desligado por padrão)
+import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -970,6 +971,12 @@ class _Handler(BaseHTTPRequestHandler):
                     if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
                             payload.get("messages") or []):
                         _sombra_rota(payload, self._rota, laya)
+                        # passos 3-4 do roteamento por capacidade: só registra a recomendação (sombra)
+                        if sombra_capacidade.ligado():
+                            _pf = _perfis()
+                            sombra_capacidade.registrar(payload, self._rota,
+                                                        {m: capivara_perfis.janela(_pf, m)
+                                                         for m in (_pf.get("modelos") or {})})
                     payload["model"] = self._rota
                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
