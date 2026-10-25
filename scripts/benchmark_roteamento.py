@@ -32,8 +32,18 @@ Cartão de sistema (`--cartao ARQ`, corpus v2, decisão do Humano em 23/10/2026)
 vai como mensagem de sistema para todos os modelos, como a Seth recebe; sem ele, vale a frase neutra.
 O hash do cartão entra no protocolo de cada medida.
 
+Pelo gateway (`--via-gateway`, 25/10/2026): o pedido passa pelo seth_gateway, como na produção --
+sem system (o gateway hidrata), em stream, com os nomes de ferramenta reais e o laço de até 3
+voltas. O script sobe uma instância de teste do gateway do próprio repositório (padrão
+127.0.0.1:20199) sem gravação de pedidos nem sombra, com a auditoria do turno gravando na pasta
+da rodada; os registros da Seth não recebem nada. Mede o que o Humano recebe, inclusive o
+resgate do raciocínio (843); o cabeçalho da Máquina sai antes das checagens (fica em `texto_bruto`).
+Só modelo LOCAL: modelo externo pedido pelo nome com `public` cai, por desenho, na faixa pública do
+gateway (sem hidratação nem ferramentas) -- rodada 20261025-114340 inválida por isso. Para os
+remotos, o caminho fiel continua sendo `--prompt-real`.
+
 Uso:
-  benchmark_roteamento.py [--corpus ARQ] [--cartao ARQ | --prompt-real] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
+  benchmark_roteamento.py [--corpus ARQ] [--cartao ARQ | --prompt-real | --via-gateway [--porta 20199]] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
   benchmark_roteamento.py --executar [mesmas opções] [--timeout 120] [--intervalo 3]
   benchmark_roteamento.py --selftest
 """
@@ -171,7 +181,8 @@ def sistema_real(raiz: Path = RAIZ) -> str:
 def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str = SISTEMA, sufixo: str = "") -> dict:
     """Um item num modelo. `chamar(corpo) -> (resposta_json, segundos)` ou levanta."""
     usa_ferr = bool(item.get("requisitos", {}).get("ferramenta"))
-    msgs = [{"role": "system", "content": sistema}, {"role": "user", "content": mensagem_usuario(item, raiz)}]
+    msgs = ([{"role": "system", "content": sistema}] if sistema is not None else []) + [  # None: o gateway hidrata
+        {"role": "user", "content": mensagem_usuario(item, raiz)}]
     corpo = {"model": modelo, "stream": False, "max_tokens": 4000, "messages": msgs}
     if usa_ferr or sufixo:  # com o prompt real, sempre (o LibreChat sempre manda) e com os nomes da produção
         corpo["tools"] = [{"type": "function", "function": dict(f["function"], name=f["function"]["name"] + sufixo)}
@@ -198,8 +209,9 @@ def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str 
                 chamadas.append({"nome": nome, "conhecida": nome in NOMES, "args_validos": args_ok})
                 corpo["messages"].append({"role": "tool", "tool_call_id": tc.get("id", ""),
                                           "content": FALSAS.get(nome, "[simulado] ferramenta desconhecida.")})
-        texto = msg.get("content") or ""
-        return {"estado": "ok", "s": round(total, 2), "modelo_real": d.get("model"),
+        bruto = msg.get("content") or ""
+        texto = sem_cabecalho_maquina(bruto)
+        return {"estado": "ok", **({"texto_bruto": bruto} if bruto != texto else {}), "s": round(total, 2), "modelo_real": d.get("model"),
                 "finish": (d.get("choices") or [{}])[0].get("finish_reason"), "texto": texto,
                 "chamadas": chamadas, "uso": uso, "checagens": checar(item, texto, chamadas)}
     except Exception as e:  # noqa: BLE001
@@ -207,6 +219,46 @@ def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str 
         return {"estado": f"erro:{e.__class__.__name__}" + (f":{codigo}" if codigo else ""),
                 "erro": str(getattr(e, "corpo", "") or e)[:160], "s": round(total, 2), "texto": "",
                 "chamadas": chamadas, "checagens": {}}
+
+
+_CAB_MAQUINA = re.compile(r"\A(?:agata[^\n]*\n(?:[^\n]+\n)*?\n)(?:Correção do turno anterior \(pela Máquina\):[^\n]*\n\n)?")
+
+
+def sem_cabecalho_maquina(texto: str) -> str:
+    """O texto sem o cabeçalho que o gateway escreve na frente (e a linha de correção da Máquina)."""
+    return _CAB_MAQUINA.sub("", texto, count=1) if texto.startswith("agata") else texto
+
+
+def juntar_sse(linhas) -> dict:
+    """Junta um stream SSE de chat no formato da resposta sem stream (content, reasoning, tool_calls)."""
+    texto, raciocinio, tcs, modelo, fim, uso = "", "", {}, None, None, {}
+    for linha in linhas:
+        linha = linha.strip()
+        if not linha.startswith(b"data:") or linha == b"data: [DONE]":
+            continue
+        try:
+            o = json.loads(linha[5:])
+        except ValueError:
+            continue
+        modelo = modelo or o.get("model")
+        uso = o.get("usage") or uso
+        for c in o.get("choices") or []:
+            d = c.get("delta") or {}
+            texto += d.get("content") or ""
+            raciocinio += d.get("reasoning") or d.get("reasoning_content") or ""
+            fim = c.get("finish_reason") or fim
+            for t in d.get("tool_calls") or []:
+                a = tcs.setdefault(t.get("index", 0), {"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+                a["id"] = t.get("id") or a["id"]
+                fn = t.get("function") or {}
+                a["function"]["name"] += fn.get("name") or ""
+                a["function"]["arguments"] += fn.get("arguments") or ""
+    msg = {"role": "assistant", "content": texto}
+    if tcs:
+        msg["tool_calls"] = [tcs[k] for k in sorted(tcs)]
+    if raciocinio:
+        msg["reasoning"] = raciocinio
+    return {"model": modelo, "usage": uso, "choices": [{"message": msg, "finish_reason": fim}]}
 
 
 # --- rede -------------------------------------------------------------------------------
@@ -246,6 +298,61 @@ def _chamador(timeout: float):
     return chamar
 
 
+LOCAIS = ("ollama-local/", "llamacpp-local/", "local/")  # os mesmos prefixos de _ROTAS_LOCAIS do gateway
+
+
+def remotos(modelos: list[str]) -> list[str]:
+    """Os modelos que não são locais: pelo gateway, cairiam na faixa pública."""
+    return [m for m in modelos if not m.startswith(LOCAIS)]
+
+
+def _gateway_teste(porta: int, dest: Path):
+    """Sobe o seth_gateway do repositório numa porta de teste, sem gravação de pedidos nem sombra."""
+    import socket
+    import subprocess
+    env = {k: v for k, v in os.environ.items() if k not in ("SETH_REGISTRO_PEDIDOS", "SETH_SOMBRA_CAPACIDADE")}
+    env.update(SETH_BIND=f"127.0.0.1:{porta}", SETH_REPO=str(RAIZ), SETH_CORRECAO_NA_PERGUNTA="0",
+               AGATA_AUDITORIA_LOG=str(dest / "auditoria-turno.jsonl"))
+    log = open(dest / "gateway.log", "w", encoding="utf-8")
+    proc = subprocess.Popen([sys.executable, str(RAIZ / "redesign" / "router" / "seth_gateway.py")],
+                            env=env, stdout=log, stderr=log)
+    for _ in range(100):
+        try:
+            socket.create_connection(("127.0.0.1", porta), timeout=0.2).close()
+            return proc
+        except OSError:
+            if proc.poll() is not None:
+                break
+            time.sleep(0.1)
+    proc.kill()
+    raise RuntimeError(f"gateway de teste não subiu na porta {porta} (veja {dest / 'gateway.log'})")
+
+
+def _chamador_gateway(timeout: float, porta: int):
+    import urllib.error
+    import urllib.request
+    abridor = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+    def chamar(corpo, publico=True):
+        t0 = time.monotonic()
+        corpo = dict(corpo, stream=True)
+        for tentativa in range(2):
+            h = {"Content-Type": "application/json"}
+            if publico:
+                h["X-Agata-Data-Classification"] = "public"
+            req = urllib.request.Request(f"http://127.0.0.1:{porta}/v1/chat/completions", method="POST",
+                                         data=json.dumps(corpo, ensure_ascii=False).encode("utf-8"), headers=h)
+            try:
+                with abridor.open(req, timeout=timeout) as r:
+                    return juntar_sse(r), time.monotonic() - t0
+            except urllib.error.HTTPError as e:
+                e.corpo = e.read().decode("utf-8", "replace")[:160]
+                if e.code not in REPETIR or tentativa:
+                    raise
+                time.sleep(ESPERA_REPETIR)
+    return chamar
+
+
 def _modelos_padrao() -> list[str]:
     reg = json.loads(CAPACIDADES.read_text(encoding="utf-8"))
     return sorted({m for fila in reg.get("filas", {}).values() for m in fila})
@@ -270,6 +377,13 @@ def main(argv: list[str]) -> int:
     sufixo = ""
     if "--prompt-real" in argv:  # o system de produção (hidratação do gateway), com os nomes de ferramenta reais
         sistema, sufixo = sistema_real(), "_mcp_canon"
+    via_gateway = "--via-gateway" in argv
+    if via_gateway:
+        sistema, sufixo = None, "_mcp_canon"
+        if remotos(modelos):
+            print(f"--via-gateway só mede modelo local; remotos: {', '.join(remotos(modelos))}. Pelo nome, "
+                  "com 'public', o gateway os põe na faixa pública (sem hidratação nem ferramentas). Use --prompt-real.")
+            return 2
     plano = [(m, i) for m in modelos for i in itens]
     vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
     print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
@@ -278,12 +392,32 @@ def main(argv: list[str]) -> int:
     if "--executar" not in argv:
         print("nada chamado. Para rodar (gasta cota): --executar")
         return 0
-    chamar = _chamador(float(_arg(argv, "--timeout", "120")))
     intervalo = float(_arg(argv, "--intervalo", "3"))
     dest = SAIDA / time.strftime("%Y%m%d-%H%M%S")
     dest.mkdir(parents=True, exist_ok=True)
     os.chmod(SAIDA, 0o700)
     os.chmod(dest, 0o700)
+    gw = None
+    if via_gateway:
+        porta = int(_arg(argv, "--porta", "20199"))
+        gw = _gateway_teste(porta, dest)
+        chamar = _chamador_gateway(float(_arg(argv, "--timeout", "300")), porta)
+    else:
+        chamar = _chamador(float(_arg(argv, "--timeout", "120")))
+    try:
+        linhas = _rodar_plano(plano, liberar, chamar, intervalo, sistema, sufixo)
+    finally:
+        if gw is not None:
+            gw.terminate()
+            gw.wait(timeout=10)
+    if via_gateway:
+        sistema = "via-gateway:" + hashlib.sha256((RAIZ / "redesign" / "router" / "seth_gateway.py").read_bytes()).hexdigest()
+
+    _gravar(dest, linhas, corpus_p, sistema)
+    return 0
+
+
+def _rodar_plano(plano, liberar, chamar, intervalo, sistema, sufixo) -> list[dict]:
     linhas = []
     for n, (m, i) in enumerate(plano, 1):
         if not liberado(i, m, liberar):
@@ -294,6 +428,10 @@ def main(argv: list[str]) -> int:
             time.sleep(intervalo)
         linhas.append(dict(r, modelo=m, item=i["id"], tipo=i["tipo"], rota_esperada=i.get("rota_esperada")))
         print(f"[{n}/{len(plano)}] {m} {i['id']}: {r['estado']} {r['s']}s {r['checagens']}", flush=True)
+    return linhas
+
+
+def _gravar(dest: Path, linhas: list[dict], corpus_p: Path, sistema: str) -> None:
     sha = hashlib.sha256(corpus_p.read_bytes() + sistema.encode("utf-8")).hexdigest()  # corpus + cartão
     for nome, conteudo in (("respostas.jsonl", "".join(json.dumps(l, ensure_ascii=False) + "\n" for l in linhas)),
                            ("resumo.json", json.dumps(resumir(linhas, time.strftime("%Y-%m-%d"), sha),
@@ -302,7 +440,6 @@ def main(argv: list[str]) -> int:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(conteudo)
     print(f"gravado em {dest}")
-    return 0
 
 
 def _selftest() -> int:
@@ -310,6 +447,7 @@ def _selftest() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         raiz = Path(tmp)
         (raiz / "A.md").write_text("conteúdo do anexo")
+        (raiz / "c.jsonl").write_text('{"id": "x", "tipo": "conversa", "pergunta": "oi"}\n')
         js = {"id": "json-x", "tipo": "json", "pergunta": "só JSON", "requisitos": {"json": True, "so_json": True}}
         jt = {"id": "json-t", "tipo": "json", "pergunta": "explique o JSON", "requisitos": {"json": True}}
         fer = {"id": "fer-x", "tipo": "ferramenta", "pergunta": "meça", "requisitos": {"ferramenta": True}}
@@ -349,6 +487,16 @@ def _selftest() -> int:
         rq = rodar_item(quebra, "a/m", js, raiz)
         rh = rodar_item(recusa, "a/m", js, raiz)
         rt = rodar_item(falso, "a/m", jt, raiz)
+        rg = rodar_item(falso, "a/m", js, raiz, sistema=None, sufixo="_mcp_canon")
+        rcab = rodar_item(lambda c: ({"model": "x", "choices": [{"message": {"content": "agata · x · t=1\n\n{\"a\": 1}"}}]}, 0.1),
+                          "a/m", js, raiz)
+        sse = juntar_sse([
+            b'data: {"model":"m-real","choices":[{"delta":{"reasoning":"pen"}}]}\n',
+            b'data: {"choices":[{"delta":{"content":"Ol"}}]}\n', b': keepalive\n',
+            b'data: {"choices":[{"delta":{"content":"\xc3\xa1"}}]}\n',
+            b'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"t1","function":{"name":"maquina_verificar_mcp_canon","arguments":"{\\"comando\\""}}]}}]}\n',
+            b'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":":\\"git\\"}"}}]},"finish_reason":"tool_calls"}]}\n',
+            b"data: [DONE]\n"])
         linhas = [dict(r, modelo="a/m") for r in (rj, rf, re_, rp, rq)] + \
                  [{"modelo": "a/m", "estado": "pulado_privacidade", "s": 0, "checagens": {}}]
         res = resumir(linhas, "2026-10-23", "f" * 64)["a/m"]
@@ -389,6 +537,21 @@ def _selftest() -> int:
             ("cartão de sistema vai como 1ª mensagem", rc["estado"] == "ok"
              and any(c["messages"][0] == {"role": "system", "content": "CARTAO-X"} for c in enviados)),
             ("percentil", percentil([1, 2, 3, 4], 50) in (2, 3) and percentil([], 95) is None),
+            ("via gateway: sem system (o gateway hidrata)", rg["estado"] == "ok"
+             and any(c["messages"][0]["role"] == "user" and c is enviados[-1] for c in enviados)),
+            ("stream juntado: texto, raciocínio e ferramenta em pedaços", sse["choices"][0]["message"] == {
+                "role": "assistant", "content": "Olá", "reasoning": "pen",
+                "tool_calls": [{"id": "t1", "type": "function", "function": {"name": "maquina_verificar_mcp_canon",
+                                                                             "arguments": '{"comando":"git"}'}}]}
+             and sse["model"] == "m-real" and sse["choices"][0]["finish_reason"] == "tool_calls"),
+            ("cabeçalho da Máquina e correção saem; o texto do modelo fica",
+             sem_cabecalho_maquina("agata-seth · m · t=1\nhora\n\nCorreção do turno anterior (pela Máquina): x\n\n{\"a\": 1}") == '{"a": 1}'
+             and sem_cabecalho_maquina("agata · m\n\nfeito") == "feito" and sem_cabecalho_maquina("feito") == "feito"),
+            ("via gateway: só modelo local; remoto é recusado", remotos(
+                ["ollama-local/q", "llamacpp-local/m", "mistral/x", "gemini/y"]) == ["mistral/x", "gemini/y"]
+             and main(["--via-gateway", "--modelos", "mistral/x", "--corpus", str(raiz / "c.jsonl")]) == 2),
+            ("texto bruto guardado quando havia cabeçalho", rcab.get("texto_bruto", "").startswith("agata")
+             and rcab["checagens"] == {"json_valido": True}),
         ]
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
