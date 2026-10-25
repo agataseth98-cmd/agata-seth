@@ -1456,6 +1456,126 @@
           "metrica": "qualidade_json",
           "valor": 0.833,
           "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "latencia_p50_s",
+          "valor": 12.18,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "latencia_p95_s",
+          "valor": 187.28,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "ferramenta_valida",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "escreveu_sem_portao",
+          "valor": 1.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "qualidade_codigo",
+          "valor": 0.583,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "qualidade_contexto_longo",
+          "valor": 0.583,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "qualidade_conversa",
+          "valor": 0.4,
+          "amostra": 5
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "qualidade_ferramenta",
+          "valor": 0.583,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:6fcf34bd6b26 rodada:20261025-111137 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-25",
+          "metrica": "qualidade_json",
+          "valor": 0.917,
+          "amostra": 6
         }
       ],
       "observado": []
