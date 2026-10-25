@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0
-  Escrito em: 25/10/2026 16:13 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b81d248cd7427b229e104e821f673847582cd815
+  Escrito em: 25/10/2026 19:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8f7839c6ab5ee67f1b9a2a5d80b1e798803396c0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b81d248cd7427b229e104e821f673847582cd815/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b81d248cd7427b229e104e821f673847582cd815/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b81d248cd7427b229e104e821f673847582cd815/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b81d248cd7427b229e104e821f673847582cd815/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b81d248cd7427b229e104e821f673847582cd815/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(845) DIÁRIO — 25/10/2026 · **Resgate do raciocínio também fora do stream, sem depender do cabeçalho: numa volta que continua um turno já começado, o 9b não devolve mais vazio.** Aplica `resgate-sem-stream-20261025`, assinado pelo Humano. Antes, fora do stream, o resgate da (843) só rodava dentro do bloco do cabeçalho da Máquina, e o cabeçalho é pulado quando o assistente já escreveu texto e chamou a ferramenta. Agora `_resgate_json` age em toda resposta 200 sem stream. O stream não muda. Teste pelo gateway de teste com o 9b forçado, num turno já começado, 4 repetições: antes 1/4, agora 4/4; em stream, o código anterior já dava 4/4. Achados registrados para a promoção, sem mudança agora: (a) a nota de uma rodada só é instável (só 17 dos 30 itens com o mesmo rótulo nas duas rodadas do 9b, e diferença de até 0,34 por tipo), por isso a rodada `20261025-161601` ficou fora do registro; (b) modelos pequenos copiam o exemplo literal da Regra 5 que está na hidratação (9 de 838 respostas), texto da (685) que só muda com o OK do Humano; (c) em stream, a nova tentativa da (695) vem antes do resgate e custa uma geração a mais.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: gateway de teste `:20199` com relé; selftest; clone com hooks; PR 547 com CI verde; rodadas `20261025-111137` e `20261025-161601` · Autorização: Humano — "assinei no terminal, aplique"
+
 (844) DIÁRIO — 25/10/2026 · **Benchmark pelo gateway (só modelo local): pelo caminho real, a reserva local (qwen3.5-9b) dá 0 respostas vazias em 30 (direto eram 5) e a nota de ferramenta sobe de 0,17 para 0,58.** Aplica `benchmark-via-gateway-v2-20261025`, assinado pelo Humano. A v1 foi retirada para `propostas/rejeitadas/`. O novo `--via-gateway` sobe uma instância de teste do `seth_gateway` do repositório (`:20199`), sem gravação de pedidos nem sombra, e manda o pedido sem system, em stream, com os nomes reais das ferramentas. Ele recusa modelo remoto: pedido pelo nome com `public`, um modelo externo cai na faixa pública do gateway, por desenho, sem hidratação nem ferramentas. Por isso a rodada `20261025-114340` dos remotos ficou inválida (`NAO-USAR.txt`); para remotos, vale `--prompt-real`. Notas do 9b, rodada `20261025-111137`, rotuladas pelo critério confirmado: ferramenta 0,58, JSON 0,92, código 0,58, conversa 0,40, contexto longo 0,58. Nenhuma passa do piso 0,7. As citações inventadas que apareceram nas rodadas foram expurgadas nos arquivos, com o marcador. Achado de infraestrutura: em stream pelo OmniRoute, o Gemini 3.1 Flash-Lite levou 32 s para a 1ª palavra (5 a 7 s sem stream) e deu 10 vazias em 24; o Gemini 3.5 Flash-Lite ficou em 3 s.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: rodadas `20261025-111137` e `20261025-114340`; sondas de stream contra não-stream; selftest; clone com hooks; PR 545 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
