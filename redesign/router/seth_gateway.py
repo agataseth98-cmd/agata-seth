@@ -893,6 +893,29 @@ def _resgate_ligado() -> bool:
     return os.environ.get("SETH_RESGATE_RACIOCINIO") != "0"
 
 
+# (25/10/2026, noite) Só modelo LOCAL: os Gemini mandam um raciocínio separado, em inglês ("thought
+# summaries"); 1 de 18 respostas do Gemini 3.5 Flash-Lite terminou só com ele, e o resgate o entregaria
+# ao Humano. O ganho medido é do fundo local. O upstream devolve o nome sem o prefixo do provedor:
+# a lista sai das chaves locais do registro de capacidades, relida quando o arquivo muda.
+_LOCAIS_CACHE: dict = {"mtime": None, "nomes": frozenset()}
+
+
+def _modelo_local(modelo: str | None) -> bool:
+    if not modelo:
+        return False
+    arq = REPO / "config" / "capivara" / "capacidades.json"
+    try:
+        mt = arq.stat().st_mtime
+        if mt != _LOCAIS_CACHE["mtime"]:
+            reg = json.loads(arq.read_text(encoding="utf-8"))
+            _LOCAIS_CACHE["nomes"] = frozenset(k.split("/", 1)[1] for k in (reg.get("modelos") or {})
+                                               if k.startswith(_ROTAS_LOCAIS))
+            _LOCAIS_CACHE["mtime"] = mt
+    except (OSError, ValueError, AttributeError):
+        return False
+    return modelo in _LOCAIS_CACHE["nomes"] or modelo.split("/", 1)[-1] in _LOCAIS_CACHE["nomes"]
+
+
 def _resgate_observar(linha: bytes, estado: dict) -> None:
     """Acumula, de uma linha `data:` do SSE, o raciocínio e se houve texto ou ferramenta."""
     if not linha.startswith(b"data:"):
@@ -920,7 +943,8 @@ def _resgate_observar(linha: bytes, estado: dict) -> None:
 
 def _resgate_chunk(estado: dict, prefixo: str = "") -> bytes | None:
     """O chunk SSE com o raciocínio como texto, ou None se não há o que resgatar."""
-    if estado.get("texto") or estado.get("ferramenta") or not (estado.get("raciocinio") or "").strip():
+    if (estado.get("texto") or estado.get("ferramenta") or not (estado.get("raciocinio") or "").strip()
+            or not _modelo_local(estado.get("model"))):
         return None
     ev = {"id": estado.get("id", "seth-resgate"), "object": "chat.completion.chunk",
           "created": estado.get("created", 0), "model": estado.get("model", ""),
@@ -939,7 +963,8 @@ def _resgate_json(corpo: bytes) -> bytes:
     except (ValueError, KeyError, IndexError, TypeError):
         return corpo
     r = m.get("reasoning") or m.get("reasoning_content") or ""
-    if (m.get("content") or "").strip() or m.get("tool_calls") or not isinstance(r, str) or not r.strip():
+    if ((m.get("content") or "").strip() or m.get("tool_calls") or not isinstance(r, str) or not r.strip()
+            or not _modelo_local(o.get("model"))):
         return corpo
     m["content"] = r.strip()
     return json.dumps(o, ensure_ascii=False).encode("utf-8")
@@ -2280,7 +2305,7 @@ def _selftest() -> int:
     casos_corr.append(("SETH_CORRECAO_NA_PERGUNTA=0 desliga", _correcao_perto_da_pergunta(_u, _l)[-1]["content"] == "c"))
     del os.environ["SETH_CORRECAO_NA_PERGUNTA"]
     _e = {}
-    for _ln in (b'data: {"id":"a","model":"q","choices":[{"delta":{"reasoning":"Resultado: "}}]}',
+    for _ln in (b'data: {"id":"a","model":"qwen3.5-9b-64k:latest","choices":[{"delta":{"reasoning":"Resultado: "}}]}',
                 b'data: {"id":"a","choices":[{"delta":{"reasoning":"ativo."}}]}', b'data: {"choices":[{"delta":{"content":""}}]}'):
         _resgate_observar(_ln, _e)
     _ch = _resgate_chunk(dict(_e), "CAB\n\n")
@@ -2297,7 +2322,14 @@ def _selftest() -> int:
         ("resgate: com chamada de ferramenta -> nada", _resgate_chunk(_e3) is None),
         ("resgate: sem raciocínio -> nada", _resgate_chunk({}) is None),
         ("resgate sem stream: só raciocínio vira content", json.loads(_resgate_json(
-            b'{"choices":[{"message":{"content":"","reasoning":" ativo. "}}]}'))["choices"][0]["message"]["content"] == "ativo."),
+            b'{"model":"qwen3.5-9b-64k:latest","choices":[{"message":{"content":"","reasoning":" ativo. "}}]}'))["choices"][0]["message"]["content"] == "ativo."),
+        ("resgate: modelo remoto (Gemini, raciocínio em inglês) -> nada, no stream e fora dele",
+         _resgate_chunk({"model": "gemini-3.5-flash-lite", "raciocinio": "Checking Service Status"}) is None
+         and _resgate_json(b'{"model":"gemini-3.5-flash-lite","choices":[{"message":{"content":"","reasoning":"r"}}]}')
+         == b'{"model":"gemini-3.5-flash-lite","choices":[{"message":{"content":"","reasoning":"r"}}]}'),
+        ("resgate: lista local sai do registro (com e sem prefixo)", _modelo_local("qwen3.5-9b-64k:latest")
+         and _modelo_local("ollama-local/qwen3.5-9b-64k:latest") and not _modelo_local("codestral-latest")
+         and not _modelo_local(None)),
         ("resgate sem stream: com texto, com ferramenta ou corpo inválido -> intacto",
          _resgate_json(b'{"choices":[{"message":{"content":"x","reasoning":"r"}}]}') == b'{"choices":[{"message":{"content":"x","reasoning":"r"}}]}'
          and _resgate_json(b'{"choices":[{"message":{"content":"","tool_calls":[{}],"reasoning":"r"}}]}')
