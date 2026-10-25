@@ -1,0 +1,133 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 84c2b04..adb9bd1 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -879,6 +879,56 @@ def _aplica_teto(payload: dict, msgs: list) -> str:
+ _PREFIXO_AUDITORIA = "AUDITORIA-TURNO-ANTERIOR: "
+ 
+ 
++# (25/10/2026) Resgate do raciocínio. O qwen3.5-9b (fundo local) com o prompt real chama a
++# ferramenta e, no passo seguinte, escreve a resposta final no campo `reasoning` e deixa
++# `content` vazio (4 de 5 no benchmark de prompt real): o Humano veria resposta vazia. Desligar
++# o raciocínio (reasoning_effort=none) fez o modelo parar de chamar a ferramenta e inventar o
++# estado; `think`/`chat_template_kwargs` não passam pelo OmniRoute. Regra: resposta que termina
++# SEM texto, SEM chamada de ferramenta e COM raciocínio recebe o raciocínio como texto. Se o
++# modelo escreveu texto ou chamou ferramenta, nada muda. Vem DEPOIS da nova tentativa da (695):
++# primeiro tenta a fila acima; o resgate só age na resposta que vai ao cliente. Teste pelo
++# gateway real com o 9b forçado (25/10, 10h31): sem o resgate, 0 caractere na 2ª volta; com
++# ele, a resposta chega. SETH_RESGATE_RACIOCINIO=0 desliga.
++def _resgate_ligado() -> bool:
++    return os.environ.get("SETH_RESGATE_RACIOCINIO") != "0"
++
++
++def _resgate_observar(linha: bytes, estado: dict) -> None:
++    """Acumula, de uma linha `data:` do SSE, o raciocínio e se houve texto ou ferramenta."""
++    if not linha.startswith(b"data:"):
++        return
++    corpo = linha[5:].strip()
++    if not corpo or corpo == b"[DONE]":
++        return
++    try:
++        o = json.loads(corpo)
++        ch = (o.get("choices") or [{}])[0]
++        d = ch.get("delta") or {}
++    except (ValueError, AttributeError, IndexError, TypeError):
++        return
++    if (d.get("content") or "").strip():
++        estado["texto"] = True
++    if d.get("tool_calls"):
++        estado["ferramenta"] = True
++    r = d.get("reasoning") or d.get("reasoning_content") or ""
++    if isinstance(r, str) and r:
++        estado["raciocinio"] = estado.get("raciocinio", "") + r
++    for k in ("id", "model", "created"):
++        if o.get(k) is not None and k not in estado:
++            estado[k] = o[k]
++
++
++def _resgate_chunk(estado: dict, prefixo: str = "") -> bytes | None:
++    """O chunk SSE com o raciocínio como texto, ou None se não há o que resgatar."""
++    if estado.get("texto") or estado.get("ferramenta") or not (estado.get("raciocinio") or "").strip():
++        return None
++    ev = {"id": estado.get("id", "seth-resgate"), "object": "chat.completion.chunk",
++          "created": estado.get("created", 0), "model": estado.get("model", ""),
++          "choices": [{"index": 0, "delta": {"content": prefixo + estado["raciocinio"].strip()}, "finish_reason": None}]}
++    estado["texto"] = True
++    return b"data: " + json.dumps(ev, ensure_ascii=False).encode("utf-8") + b"\n\n"
++
++
+ def _correcao_da_maquina(linha: str) -> str:
+     """(25/10/2026) A Máquina escreve ela mesma a correção, logo abaixo do cabeçalho que já injeta.
+     Medido pelo gateway: pedir ao modelo para corrigir (prefixo na pergunta) fez o Codestral parar de
+@@ -1199,14 +1249,20 @@ class _Handler(BaseHTTPRequestHandler):
+             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
+             self._cab_injetado = cab
+             texto_maquina = cab + _correcao_da_maquina(getattr(self, "_aud", "") or "")
++            self._cab_pendente = ""
+             if sse:
+                 novo = _injetar_sse(buf_pre, texto_maquina)
+                 if novo is not None:
+                     buf_pre = novo
++                else:
++                    self._cab_pendente = texto_maquina  # vai junto se o resgate do raciocínio acontecer
+             else:
+                 try:
+                     o = json.loads(buf_pre)
+                     m = o["choices"][0]["message"]
++                    if (_resgate_ligado() and not (m.get("content") or "").strip() and not m.get("tool_calls")
++                            and (m.get("reasoning") or m.get("reasoning_content") or "").strip()):
++                        m["content"] = (m.get("reasoning") or m.get("reasoning_content")).strip()
+                     if (m.get("content") or "").strip():
+                         m["content"] = texto_maquina + m["content"]
+                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
+@@ -1299,6 +1355,7 @@ class _Handler(BaseHTTPRequestHandler):
+         self._cab_estados = {}
+         self._laco_estados = {}
+         self._laco_cortou = False
++        self._resgate = {}
+         buf = self._escrever_linhas_completas(buf)
+         while not self._laco_cortou:
+             try:
+@@ -1341,6 +1398,17 @@ class _Handler(BaseHTTPRequestHandler):
+             if getattr(self, "_laco_cortou", False):
+                 return b""
+             linha, buf = buf.split(b"\n", 1)
++            if _resgate_ligado():
++                if linha.strip() == b"data: [DONE]":
++                    resg = _resgate_chunk(self._resgate, getattr(self, "_cab_pendente", "") or "")
++                    if resg:
++                        self.wfile.write(f"{len(resg):X}\r\n".encode())
++                        self.wfile.write(resg)
++                        self.wfile.write(b"\r\n")
++                        if getattr(self, "_reg", None) is not None:
++                            registro_pedidos.acumular_sse(resg.split(b"\n")[0], self._reg)
++                else:
++                    _resgate_observar(linha, self._resgate)
+             saida = self._filtrar_linha_sse(linha + b"\n")
+             if _emoji_ligado():
+                 saida = limpa_emoji.limpar_sse_linha(saida, self._emoji_estados)
+@@ -2196,6 +2264,24 @@ def _selftest() -> int:
+     os.environ["SETH_CORRECAO_NA_PERGUNTA"] = "0"
+     casos_corr.append(("SETH_CORRECAO_NA_PERGUNTA=0 desliga", _correcao_perto_da_pergunta(_u, _l)[-1]["content"] == "c"))
+     del os.environ["SETH_CORRECAO_NA_PERGUNTA"]
++    _e = {}
++    for _ln in (b'data: {"id":"a","model":"q","choices":[{"delta":{"reasoning":"Resultado: "}}]}',
++                b'data: {"id":"a","choices":[{"delta":{"reasoning":"ativo."}}]}', b'data: {"choices":[{"delta":{"content":""}}]}'):
++        _resgate_observar(_ln, _e)
++    _ch = _resgate_chunk(dict(_e), "CAB\n\n")
++    _e2 = {}
++    _resgate_observar(b'data: {"choices":[{"delta":{"reasoning":"pensando"}}]}', _e2)
++    _resgate_observar(b'data: {"choices":[{"delta":{"content":"Resposta"}}]}', _e2)
++    _e3 = {}
++    _resgate_observar(b'data: {"choices":[{"delta":{"reasoning":"vou chamar"}}]}', _e3)
++    _resgate_observar(b'data: {"choices":[{"delta":{"tool_calls":[{"index":0}]}}]}', _e3)
++    casos_corr += [
++        ("resgate: só raciocínio vira texto (com o cabeçalho pendente)", _ch is not None and
++         json.loads(_ch[6:].decode())["choices"][0]["delta"]["content"] == "CAB\n\nResultado: ativo."),
++        ("resgate: com texto do modelo -> nada", _resgate_chunk(_e2) is None),
++        ("resgate: com chamada de ferramenta -> nada", _resgate_chunk(_e3) is None),
++        ("resgate: sem raciocínio -> nada", _resgate_chunk({}) is None),
++    ]
+     _l2 = "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x | evidência: cita 1 entrada(s) inexistente"
+     casos_corr += [
+         ("correção da Máquina: linha com o achado, sem o de cabeçalho",
