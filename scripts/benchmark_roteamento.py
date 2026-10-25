@@ -33,7 +33,7 @@ vai como mensagem de sistema para todos os modelos, como a Seth recebe; sem ele,
 O hash do cartão entra no protocolo de cada medida.
 
 Uso:
-  benchmark_roteamento.py [--corpus ARQ] [--cartao ARQ] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
+  benchmark_roteamento.py [--corpus ARQ] [--cartao ARQ | --prompt-real] [--modelos a,b] [--itens id,id] [--liberar prefixo,...]
   benchmark_roteamento.py --executar [mesmas opções] [--timeout 120] [--intervalo 3]
   benchmark_roteamento.py --selftest
 """
@@ -158,16 +158,27 @@ def resumir(linhas: list[dict], data: str, corpus_sha: str) -> dict:
     return out
 
 
-def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str = SISTEMA) -> dict:
+def sistema_real(raiz: Path = RAIZ) -> str:
+    """(25/10/2026) O system que a Seth recebe de verdade: a hidratação do gateway (`_injeta`).
+    O cartão curto escondeu o principal: com o prompt real, o MoE inventava estado (1/9 chamadas)."""
+    sys.path.insert(0, str(raiz / "redesign" / "router"))
+    os.environ.setdefault("SETH_REPO", str(raiz))
+    import seth_gateway  # noqa: E402
+    p = seth_gateway._injeta({"model": "seth-livre", "messages": [{"role": "user", "content": "x"}]})
+    return p["messages"][0]["content"]
+
+
+def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str = SISTEMA, sufixo: str = "") -> dict:
     """Um item num modelo. `chamar(corpo) -> (resposta_json, segundos)` ou levanta."""
     usa_ferr = bool(item.get("requisitos", {}).get("ferramenta"))
     msgs = [{"role": "system", "content": sistema}, {"role": "user", "content": mensagem_usuario(item, raiz)}]
     corpo = {"model": modelo, "stream": False, "max_tokens": 4000, "messages": msgs}
-    if usa_ferr:
-        corpo["tools"] = FERRAMENTAS
+    if usa_ferr or sufixo:  # com o prompt real, sempre (o LibreChat sempre manda) e com os nomes da produção
+        corpo["tools"] = [{"type": "function", "function": dict(f["function"], name=f["function"]["name"] + sufixo)}
+                          for f in FERRAMENTAS]
     chamadas, total, uso = [], 0.0, []
     try:
-        for _ in range(2):  # no máximo uma volta de ferramenta
+        for _ in range(4 if sufixo else 2):  # prompt real: até 3 voltas (o LibreChat deixa várias); cartão: 1
             d, s = chamar(corpo)
             total += s
             uso.append(d.get("usage") or {})
@@ -178,7 +189,7 @@ def rodar_item(chamar, modelo: str, item: dict, raiz: Path = RAIZ, sistema: str 
             corpo["messages"] = corpo["messages"] + [msg]
             for tc in tcs:
                 fn = tc.get("function") or {}
-                nome = fn.get("name", "")
+                nome = fn.get("name", "").removesuffix(sufixo) if sufixo else fn.get("name", "")
                 try:
                     json.loads(fn.get("arguments") or "")
                     args_ok = True
@@ -256,6 +267,9 @@ def main(argv: list[str]) -> int:
     liberar = [p for p in (_arg(argv, "--liberar", "") or "").split(",") if p]
     cartao_p = Path(_arg(argv, "--cartao")) if _arg(argv, "--cartao") else None
     sistema = cartao_p.read_text(encoding="utf-8").strip() if cartao_p else SISTEMA
+    sufixo = ""
+    if "--prompt-real" in argv:  # o system de produção (hidratação do gateway), com os nomes de ferramenta reais
+        sistema, sufixo = sistema_real(), "_mcp_canon"
     plano = [(m, i) for m in modelos for i in itens]
     vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
     print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
@@ -276,7 +290,7 @@ def main(argv: list[str]) -> int:
             r = {"estado": "pulado_privacidade", "s": 0, "texto": "", "chamadas": [], "checagens": {}}
         else:
             publico = not i.get("privado") or any(m.startswith(p) for p in liberar)
-            r = rodar_item(lambda corpo: chamar(corpo, publico), m, i, sistema=sistema)
+            r = rodar_item(lambda corpo: chamar(corpo, publico), m, i, sistema=sistema, sufixo=sufixo)
             time.sleep(intervalo)
         linhas.append(dict(r, modelo=m, item=i["id"], tipo=i["tipo"], rota_esperada=i.get("rota_esperada")))
         print(f"[{n}/{len(plano)}] {m} {i['id']}: {r['estado']} {r['s']}s {r['checagens']}", flush=True)
@@ -331,6 +345,7 @@ def _selftest() -> int:
         rp = rodar_item(falso, "a/m", pct, raiz)
         rl = rodar_item(falso, LOCAL + "m", priv, raiz)
         rc = rodar_item(falso, "a/m", js, raiz, sistema="CARTAO-X")
+        rs = rodar_item(falso, "a/m", fer, raiz, sufixo="_mcp_canon")
         rq = rodar_item(quebra, "a/m", js, raiz)
         rh = rodar_item(recusa, "a/m", js, raiz)
         rt = rodar_item(falso, "a/m", jt, raiz)
@@ -368,6 +383,9 @@ def _selftest() -> int:
              and "classificação" in rh["erro"]),
             ("corpus sintético vai como público; privado não", cabecalhos("t", True).get(
                 "X-Agata-Data-Classification") == "public" and "X-Agata-Data-Classification" not in cabecalhos("t", False)),
+            ("prompt real: ferramentas com o sufixo da produção, chamada reconhecida sem ele",
+             any(t["function"]["name"] == "maquina_verificar_mcp_canon" for c in enviados for t in c.get("tools") or [])
+             and rs["chamadas"] and rs["chamadas"][0]["nome"] in NOMES),
             ("cartão de sistema vai como 1ª mensagem", rc["estado"] == "ok"
              and any(c["messages"][0] == {"role": "system", "content": "CARTAO-X"} for c in enviados)),
             ("percentil", percentil([1, 2, 3, 4], 50) in (2, 3) and percentil([], 95) is None),
